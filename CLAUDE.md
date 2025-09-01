@@ -28,6 +28,7 @@ Keep commit messages clean and professional.
 - **[🏛️ Architecture](./docs/05-architecture.md)** - Frontend/Backend patterns
 - **[🧪 Testing Strategy](./docs/06-testing.md)** - E2E with Playwright MCP
 - **[🚀 Deployment](./docs/07-deployment.md)** - Docker + CI/CD
+- **[🤖 MCP Integration](./docs/09-mcp-integration.md)** - Nx MCP & Playwright MCP usage
 - **[📋 All Commands Reference](./docs/CLAUDE_COMMANDS.md)** - Complete shell command list
 
 ## 🛠️ Technology Stack

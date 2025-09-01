@@ -566,11 +566,16 @@ Use these shortcuts to quickly instruct Claude to create features:
 # Includes API and database tests
 ```
 
-#### **`/test:e2e [scenario]`** - Run E2E tests
+#### **`/test:e2e [scenario]`** - Run E2E tests with Playwright MCP
 ```bash
 # Example: /test:e2e user-registration
-# Uses Playwright MCP for E2E testing
+# Uses Playwright MCP for visual E2E testing
+# Shows browser interactions in real-time
 # Captures screenshots automatically
+
+# With MCP:
+"Use Playwright MCP to run user registration E2E test"
+"Use Playwright MCP to debug failing login test"
 ```
 
 #### **`/test:coverage [threshold]`** - Check coverage
@@ -584,7 +589,37 @@ Use these shortcuts to quickly instruct Claude to create features:
 ```bash
 # Example: /test:visual user-list
 # Takes screenshots and compares
-# Uses Playwright MCP
+# Uses Playwright MCP for visual testing
+
+# With MCP:
+"Use Playwright MCP to capture visual snapshots"
+"Use Playwright MCP to compare UI changes"
+```
+
+## MCP-Enhanced Commands
+
+#### **`/mcp:nx [command]`** - Use Nx through MCP
+```bash
+# Examples:
+/mcp:nx generate component user-card
+/mcp:nx affected:test
+/mcp:nx dep-graph
+
+# Or ask Claude directly:
+"Use Nx MCP to generate a new library"
+"Use Nx MCP to show affected projects"
+```
+
+#### **`/mcp:playwright [action]`** - Use Playwright through MCP
+```bash
+# Examples:
+/mcp:playwright test login.spec.ts
+/mcp:playwright debug checkout-flow
+/mcp:playwright record new-test
+
+# Or ask Claude directly:
+"Use Playwright MCP to create a new test"
+"Use Playwright MCP to debug with browser open"
 ```
 
 ## Environment Commands
