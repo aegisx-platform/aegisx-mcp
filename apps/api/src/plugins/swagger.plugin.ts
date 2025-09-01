@@ -123,7 +123,13 @@ API requests are rate limited to prevent abuse. Rate limit headers are included 
         filter: true,
         showExtensions: true,
         showCommonExtensions: true,
-        tryItOutEnabled: true
+        tryItOutEnabled: true,
+        persistAuthorization: true,
+        defaultModelRendering: 'model',
+        syntaxHighlight: {
+          activate: true,
+          theme: 'monokai'
+        }
       },
       uiHooks: {
         onRequest: function (request, reply, next) {
@@ -136,15 +142,31 @@ API requests are rate limited to prevent abuse. Rate limit headers are included 
       staticCSP: true,
       transformStaticCSP: (header) => header,
       transformSpecification: (swaggerObject, request, reply) => {
-        return swaggerObject;
+        // Fix server URL for Try It Out functionality
+        const modifiedSpec = { ...swaggerObject };
+        if (request.headers.host) {
+          modifiedSpec.servers = [
+            {
+              url: `http://${request.headers.host}`,
+              description: 'Current server'
+            }
+          ];
+        }
+        return modifiedSpec;
       },
       transformSpecificationClone: true
     });
 
 
+    // Add JSON endpoint for programmatic access
+    fastify.get('/api/documentation/json', async (request, reply) => {
+      return fastify.swagger();
+    });
+
     // Log Swagger setup
     fastify.log.info('Swagger OpenAPI documentation configured');
     fastify.log.info('Swagger UI available at: /api-docs');
+    fastify.log.info('OpenAPI JSON available at: /api/documentation/json');
   },
   {
     name: 'swagger-plugin',
