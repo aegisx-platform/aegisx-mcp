@@ -86,6 +86,7 @@ nx run-many --target=serve --projects=api,web,admin
 - [🚀 Quick Commands](./docs/02-quick-commands.md) - Common commands reference
 - [🏗️ Project Setup](./docs/03-project-setup.md) - Detailed setup instructions
 - [🔄 Development Workflow](./docs/04-development-workflow.md) - Development best practices
+- [🎯 API-First Workflow](./docs/04a-api-first-workflow.md) - Recommended development approach
 - [🏛️ Architecture Overview](./docs/05-architecture.md) - System architecture
 
 ### Architecture Guides
@@ -129,9 +130,18 @@ npx knex migrate:rollback
 npx knex migrate:rollback --all && npx knex migrate:latest && npx knex seed:run
 ```
 
-### Generate New Feature
+### Generate New Feature (API-First Approach)
 ```bash
-# Generate full-stack feature
+# Recommended workflow for new features:
+1. /start [feature]           # Start new feature
+2. /feature:api              # Design API contract first
+3. /sync:types               # Generate shared types
+4. /feature:backend --from-spec  # Backend follows spec
+5. /feature:frontend --from-spec # Frontend uses same spec
+6. /align:check --watch      # Continuous alignment validation
+7. /integration:test         # Verify integration
+
+# Or use the generator script
 ./scripts/generate-feature.sh <feature-name>
 ```
 
