@@ -24,12 +24,15 @@
 
 ```bash
 # Required Secrets:
-GITHUB_TOKEN          # Personal Access Token ที่สร้าง
 DATABASE_URL          # postgresql://user:pass@host:5432/dbname
 JWT_SECRET           # Random string อย่างน้อย 32 ตัวอักษร
 REDIS_URL            # redis://localhost:6379
-SNYK_TOKEN           # (Optional) สำหรับ security scanning
-SLACK_WEBHOOK_URL    # (Optional) สำหรับ notifications
+
+# Optional Secrets:
+SNYK_TOKEN           # สำหรับ security scanning
+SLACK_WEBHOOK_URL    # สำหรับ notifications
+
+# Note: GITHUB_TOKEN ไม่ต้อง setup - GitHub Actions มีให้อัตโนมัติ
 ```
 
 ### 1.3 รัน Setup Script

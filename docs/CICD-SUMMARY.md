@@ -119,14 +119,18 @@ npm run release:major  # Force major
 
 ## 🔐 Setup Requirements
 
-### GitHub Secrets:
+### GitHub Secrets ที่ต้อง setup:
 ```
-GITHUB_TOKEN      # For packages
-DATABASE_URL      # PostgreSQL
-JWT_SECRET        # Auth secret
-REDIS_URL         # Cache
-SLACK_WEBHOOK     # Notifications (optional)
+DATABASE_URL      # PostgreSQL connection
+JWT_SECRET        # Auth secret key
+REDIS_URL         # Redis cache
+
+# Optional:
+SLACK_WEBHOOK     # Notifications
+SNYK_TOKEN        # Security scanning
 ```
+
+> 💡 **Note**: `GITHUB_TOKEN` ไม่ต้อง setup - GitHub Actions จัดการให้อัตโนมัติ!
 
 ### First Time:
 ```bash
