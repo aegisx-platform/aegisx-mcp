@@ -96,7 +96,7 @@ nx run-many --target=serve --projects=api,web,admin
 - [RBAC & Authentication](./docs/05b2-rbac-auth.md) - Security implementation
 
 ### Development Progress
-- [Working Template Progress](./docs/08-working-template-progress.md) - Current development status
+- [Project Status](./PROJECT_STATUS.md) - Current development status and session recovery
 
 ## 🧪 Testing
 
