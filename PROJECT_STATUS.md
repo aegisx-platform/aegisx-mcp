@@ -113,6 +113,7 @@ AegisX Starter - Enterprise-ready monorepo with Angular 20, Fastify, PostgreSQL
 6. `devops-assistant` - Infrastructure and deployment
 7. `security-auditor` - Security analysis
 8. `performance-optimizer` - Performance tuning
+9. `alignment-checker` - Frontend-backend alignment validation
 
 ## 📝 Notes
 - Following API-First development approach
