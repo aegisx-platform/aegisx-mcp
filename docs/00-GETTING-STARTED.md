@@ -93,16 +93,78 @@ feat!: change API structure  # 1.0.0 → 2.0.0
 
 ## 🔄 Development Workflow
 
-### A. ทำงาน Feature ปกติ
-```bash
-develop → feature/xxx → PR → develop → main
-        ↑                           ↓
-        └── คุณทำงานที่นี่ ←────────┘
+### 📊 Workflow Chart
+
+```mermaid
+gitGraph
+    commit id: "main (production)"
+    branch develop
+    checkout develop
+    commit id: "develop (staging)"
+    
+    branch feature/user-api
+    checkout feature/user-api
+    commit id: "feat: add user model"
+    commit id: "feat: add user endpoints"
+    commit id: "test: add unit tests"
+    
+    checkout develop
+    merge feature/user-api
+    
+    checkout main
+    merge develop tag: "v1.1.0"
 ```
 
-### B. แก้ Bug Urgent (Hotfix)
-```bash
-main → hotfix/xxx → main + develop
+### 🌿 Branch Types & Purpose
+
+| Branch Type | From | Merge To | Purpose | Example |
+|------------|------|----------|---------|---------|
+| `feature/*` | develop | develop | New features | `feature/payment-api` |
+| `fix/*` | develop | develop | Bug fixes | `fix/login-error` |
+| `hotfix/*` | main | main + develop | Urgent fixes | `hotfix/security-patch` |
+| `release/*` | develop | main + develop | Release prep | `release/1.2.0` |
+
+### 🔄 Standard Flow (Feature Development)
+
+```
+1. Create Feature Branch
+   develop ──┬──> feature/xxx
+             │
+2. Development & Commits
+             ├──> commit: "feat: add API"
+             ├──> commit: "test: add tests"
+             ├──> commit: "docs: update"
+             │
+3. Push & Create PR
+             ├──> Push to GitHub
+             ├──> Create Pull Request
+             ├──> Code Review
+             │
+4. Merge to Develop
+   develop <─┴── Merge PR
+             │
+5. Deploy to Staging
+             └──> Auto deploy (CI/CD)
+             
+6. Release to Production
+   develop ──> main ──> v1.1.0
+                  └──> Auto deploy
+```
+
+### 🚨 Hotfix Flow (Emergency)
+
+```
+1. Critical Bug Found!
+   main ──┬──> hotfix/security-fix
+          │
+2. Fix & Test
+          ├──> commit: "fix: patch vulnerability"
+          │
+3. Merge to main (Production)
+   main <─┤
+          │
+4. Merge to develop
+develop <─┴── Keep in sync
 ```
 
 📖 **อ่านเพิ่มเติม**: [Git Flow & Release Strategy Guide](./GIT-FLOW-RELEASE-GUIDE.md) - คู่มือ Git Flow แบบละเอียด
