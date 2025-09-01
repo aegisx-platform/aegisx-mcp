@@ -7,14 +7,14 @@
 **Current Feature**: Working Template with Full Features  
 **Started**: 2025-08-31  
 **Target**: Create template ที่มี backend/frontend พร้อมใช้งานจริง  
-**Status**: 🟡 Planning Phase → Starting Feature 1
+**Status**: 🟡 In Progress - Feature 3: User Management
 
 ## 📊 Progress Summary
 
 | Feature | Status | Progress | Tested | Committed |
 |---------|--------|----------|---------|-----------|
-| 1. Database Setup | 🔴 Not Started | 0% | ❌ | ❌ |
-| 2. Backend Auth | 🔴 Not Started | 0% | ❌ | ❌ |
+| 1. Database Setup | ✅ Completed | 100% | ✅ | ✅ |
+| 2. Backend Auth | ✅ Completed | 100% | ✅ | ✅ |
 | 3. User Management | 🔴 Not Started | 0% | ❌ | ❌ |
 | 4. Shared Libraries | 🔴 Not Started | 0% | ❌ | ❌ |
 | 5. Web Auth UI | 🔴 Not Started | 0% | ❌ | ❌ |
@@ -26,61 +26,66 @@
 
 ## 🚧 Current Working On
 
-### Feature 1: Database Setup & Migrations
+### Feature 3: Backend User Management API
 **Status**: 🔴 Not Started  
 **Next Steps**: 
-1. Create database schema design
-2. Write migrations for users, roles, permissions
+1. Create user repository
+2. Create user service
+3. Create user controller
 
 ### Session Notes
-- **Last Session**: Created this tracking document
-- **Decisions Made**: Will implement incremental features with testing
+- **Last Session**: Refactored auth module into 3 files (plugin, routes, controller)
+- **Decisions Made**: 
+  - Auth module now uses cleaner separation of concerns
+  - Will update backend architecture docs to include 3-file pattern
 - **Blockers**: None
-- **Next Action**: Start database schema design
+- **Next Action**: Start Feature 3 - User Management API
 
 ## 📋 Detailed Feature Checklist
 
-### Feature 1: Database Setup & Migrations 🗄️
-- [ ] Design database schema
-  - [ ] users table (id, email, username, password, first_name, last_name, is_active)
-  - [ ] roles table (id, name, description)
-  - [ ] permissions table (id, resource, action, description)
-  - [ ] role_permissions junction table
-  - [ ] user_sessions table (for refresh tokens)
-- [ ] Create Knex migration files
-  - [ ] 001_create_roles_and_permissions.ts
-  - [ ] 002_create_users.ts
-  - [ ] 003_create_sessions.ts
-- [ ] Create seed data
-  - [ ] Default roles (admin, user)
-  - [ ] Default permissions
-  - [ ] Admin user (admin@aegisx.local / Admin123!)
-- [ ] Test migrations
-  - [ ] Run migrations up
-  - [ ] Verify tables created correctly
-  - [ ] Run migrations down
-  - [ ] Run seed data
-- [ ] Verify in pgAdmin
-- [ ] **Commit when all tests pass**
+### Feature 1: Database Setup & Migrations 🗄️ ✅
+- [x] Design database schema
+  - [x] users table (id, email, username, password, first_name, last_name, is_active)
+  - [x] roles table (id, name, description)
+  - [x] permissions table (id, resource, action, description)
+  - [x] role_permissions junction table
+  - [x] user_sessions table (for refresh tokens)
+- [x] Create Knex migration files
+  - [x] 001_create_roles_and_permissions.ts
+  - [x] 002_create_users.ts
+  - [x] 003_create_sessions.ts
+- [x] Create seed data
+  - [x] Default roles (admin, user)
+  - [x] Default permissions
+  - [x] Admin user (admin@aegisx.local / Admin123!)
+- [x] Test migrations
+  - [x] Run migrations up
+  - [x] Verify tables created correctly
+  - [x] Run migrations down
+  - [x] Run seed data
+- [x] Verify in pgAdmin
+- [x] **Committed**: "feat: implement Feature 1 - Database Setup"
 
-### Feature 2: Backend Authentication API 🔐
-- [ ] Install dependencies
+### Feature 2: Backend Authentication API 🔐 ✅
+- [x] Install dependencies
   ```bash
   yarn add @fastify/jwt bcrypt @fastify/cookie
   yarn add -D @types/bcrypt
   ```
-- [ ] Create auth plugin
-- [ ] Create auth schemas
-- [ ] Create auth service
-- [ ] Implement endpoints:
-  - [ ] POST /api/auth/register
-  - [ ] POST /api/auth/login
-  - [ ] POST /api/auth/refresh
-  - [ ] POST /api/auth/logout
-  - [ ] GET /api/auth/me
-- [ ] Add auth decorators
-- [ ] Test all endpoints with Postman
-- [ ] **Commit when all tests pass**
+- [x] Create auth plugin
+- [x] Create auth schemas
+- [x] Create auth service
+- [x] Implement endpoints:
+  - [x] POST /api/auth/register
+  - [x] POST /api/auth/login
+  - [x] POST /api/auth/refresh
+  - [x] POST /api/auth/logout
+  - [x] GET /api/auth/me
+- [x] Add auth decorators
+- [x] Test all endpoints with Postman
+- [x] **Committed**: "feat: implement Feature 2 - Backend Authentication API"
+- [x] **Refactored**: Separated auth module into 3 files (plugin, routes, controller)
+- [x] **Committed**: "refactor: reorganize auth module structure for better clarity"
 
 ### Feature 3: Backend User Management API 👥
 - [ ] Create user repository
@@ -203,4 +208,30 @@ lsof -i :4201  # Admin
 
 ---
 
-**Last Updated**: 2025-08-31 - Created tracking document
+**Last Updated**: 2025-09-01 - Completed Features 1 & 2, refactored auth module structure
+
+## 🔄 Recent Session Activities
+
+### Session 2025-09-01
+1. **Completed Feature 1**: Database Setup & Migrations
+   - Created all migrations (users, roles, permissions, sessions)
+   - Set up seed data with default roles and admin user
+   - Tested and verified database structure
+
+2. **Completed Feature 2**: Backend Authentication API
+   - Implemented all auth endpoints (register, login, refresh, logout, me)
+   - Added JWT authentication with refresh tokens
+   - Tested all endpoints successfully
+
+3. **Auth Module Refactoring**:
+   - User feedback: Single file pattern "ไม่สื่อ" (not clear/communicative)
+   - Refactored from single auth.plugin.ts to 3 files:
+     - auth.plugin.ts (setup and registration)
+     - auth.routes.ts (route definitions)
+     - auth.controller.ts (handler functions)
+   - Fixed TypeScript errors (removed description/tags from schemas)
+   - All endpoints tested and working after refactor
+
+4. **Important Architecture Decision**:
+   - Need to update backend architecture docs to include 3-file pattern option
+   - This pattern provides better separation of concerns for clarity
