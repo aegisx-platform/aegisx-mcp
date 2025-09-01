@@ -2,13 +2,21 @@
 
 > **📚 Complete documentation has been split into organized files in the `docs/` directory for better readability.**
 
-## 🚨 Important Git Commit Guidelines
+## 🚨 Important Development Guidelines
 
+### Git Commit Rules
 **DO NOT include the following in git commits**:
 - `🤖 Generated with Claude Code`
 - `Co-Authored-By: Claude <noreply@anthropic.com>`
 
 Keep commit messages clean and professional.
+
+### File Management Rules
+**CRITICAL: File Deletion Policy**
+- **NEVER delete any files without explicit permission**
+- **ALWAYS ask for approval before removing any file**
+- **This includes temporary files, old code, or seemingly unused files**
+- When refactoring or cleaning up, list files to be deleted and wait for confirmation
 
 ## Quick Navigation
 
@@ -16,6 +24,7 @@ Keep commit messages clean and professional.
 - **[🚀 Quick Commands](./docs/02-quick-commands.md)** - Claude command reference (/feature, /status, etc.)
 - **[🏗️ Project Setup](./docs/03-project-setup.md)** - Bootstrap guide
 - **[🔄 Development Workflow](./docs/04-development-workflow.md)** - Step-by-step workflows
+- **[🎯 API-First Workflow](./docs/04a-api-first-workflow.md)** - Recommended development approach
 - **[🏛️ Architecture](./docs/05-architecture.md)** - Frontend/Backend patterns
 - **[🧪 Testing Strategy](./docs/06-testing.md)** - E2E with Playwright MCP
 - **[🚀 Deployment](./docs/07-deployment.md)** - Docker + CI/CD
@@ -80,13 +89,15 @@ claude/
 
 ## 🎯 Development Philosophy
 
-1. **API-First**: Design OpenAPI spec before implementation
+1. **API-First**: Design OpenAPI spec before implementation (See [API-First Workflow Guide](./docs/04a-api-first-workflow.md))
 2. **Feature Modules**: Organized, testable, maintainable code
 3. **E2E Testing**: Visual verification with Playwright MCP
 4. **Progress Tracking**: Always maintain development status
 5. **Quality Gates**: Unit → Integration → E2E → Visual tests
 6. **Signals-First**: Angular state management with Signals
 7. **Type Safety**: Full TypeScript with strict mode
+8. **Contract-Driven**: Frontend and Backend develop from same spec
+9. **Alignment Checks**: Continuous validation of frontend-backend compatibility
 
 ---
 
