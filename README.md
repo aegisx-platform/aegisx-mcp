@@ -1,170 +1,224 @@
-# 🚀 AegisX Starter
+# AegisX Starter - Enterprise-Ready Full Stack Application
 
-Enterprise-ready full-stack monorepo starter with Angular, Fastify, and PostgreSQL.
+> A production-ready monorepo starter template with Angular 19, Fastify, PostgreSQL, and complete authentication system.
 
-## ✨ Features
+## 🚀 Features
 
-### Currently Implemented (v1.0)
-- ✅ **Nx Monorepo** - Powerful build system with caching
-- ✅ **PostgreSQL Database** - With migrations and seeds
-- ✅ **RBAC Schema** - Roles, permissions, and user management ready
-- ✅ **Docker Development** - PostgreSQL, Redis, pgAdmin
-- ✅ **TypeScript** - Full type safety across the stack
-- ✅ **Project Structure** - Scalable architecture
+### ✅ Completed Features
+- **Database Setup**: PostgreSQL with migrations and seed data
+- **Authentication System**: JWT with refresh tokens, RBAC, secure sessions
+- **Monorepo Structure**: Nx workspace with 3 applications (API, Web, Admin)
+- **Developer Experience**: Hot reload, TypeScript, ESLint, Prettier
 
-### Coming Soon (v2.0)
-- 🔨 JWT Authentication with refresh tokens
-- 🔨 User Management API
-- 🔨 Angular Authentication UI
-- 🔨 Admin Dashboard
-- 🔨 Shared UI Components
-- 🔨 WebSocket Support
-- 🔨 File Upload Service
-- 🔨 Email Notifications
+### 🏗️ Architecture
+- **Frontend**: Angular 19 with Signals, Angular Material, TailwindCSS
+- **Backend**: Fastify 4 with plugin architecture
+- **Database**: PostgreSQL 15 with Knex.js migrations
+- **Authentication**: JWT + Refresh Tokens in httpOnly cookies
+- **Authorization**: Role-Based Access Control (RBAC)
 
-## 🏃 Quick Start
-
-### Prerequisites
-- Node.js 18+
-- Docker Desktop
-- Git
-
-### One Command Setup
-```bash
-./quick-start.sh
-```
-
-### Manual Setup
-```bash
-# 1. Install dependencies
-npm install
-
-# 2. Copy environment file
-cp .env.example .env
-
-# 3. Start Docker services
-docker-compose up -d
-
-# 4. Run migrations (wait 5s for DB to be ready)
-npm run db:migrate
-
-# 5. Seed database
-npm run db:seed
-
-# 6. Start development
-npm run dev
-```
-
-## 📁 Project Structure
+## 📦 What's Included
 
 ```
 aegisx-starter/
 ├── apps/
-│   ├── api/              # Fastify backend API
-│   ├── web/              # Angular web application  
-│   └── admin/            # Angular admin panel
-├── libs/
-│   └── shared/           # Shared types and utilities
-├── tools/                # Build tools and scripts
-├── docker-compose.yml    # Local development environment
-└── nx.json              # Nx configuration
+│   ├── api/          # Fastify backend API
+│   ├── web/          # Angular web application
+│   └── admin/        # Angular admin panel
+├── libs/             # Shared libraries
+├── docs/             # Complete documentation
+└── docker-compose.yml
 ```
 
-## 🛠️ Available Scripts
+## 🛠️ Quick Start
+
+### Prerequisites
+- Node.js 18+
+- Docker & Docker Compose
+- Yarn (v1.22+)
+
+### Installation
 
 ```bash
-# Development
-npm run dev              # Start all apps
-npm run dev:api         # Start API only
-npm run dev:web         # Start web only
-npm run dev:admin       # Start admin only
+# Clone the repository
+git clone git@github.com:aegisx-platform/aegisx-starter.git
+cd aegisx-starter
 
-# Database
-npm run db:migrate      # Run migrations
-npm run db:rollback     # Rollback migrations
-npm run db:seed         # Seed database
-npm run db:reset        # Reset database
+# Install dependencies
+yarn install
 
-# Testing
-npm test                # Run all tests
-npm run e2e             # Run E2E tests
+# Set up environment
+cp .env.example .env
 
-# Building
-npm run build           # Build all apps
-npm run build:api       # Build API
-npm run build:web       # Build web app
+# Start PostgreSQL
+docker-compose up -d
+
+# Run database migrations
+npx knex migrate:latest
+
+# Seed database with initial data
+npx knex seed:run
+
+# Start development servers
+nx run-many --target=serve --projects=api,web,admin
 ```
 
-## 🐳 Docker Services
-
-| Service | Port | Description |
-|---------|------|-------------|
-| PostgreSQL | 5432 | Main database |
-| Redis | 6380 | Session store & cache |
-| pgAdmin | 5050 | Database management |
+### Access Applications
+- **API**: http://localhost:3333
+- **Web App**: http://localhost:4200
+- **Admin Panel**: http://localhost:4201
+- **API Documentation**: http://localhost:3333/documentation
 
 ## 🔐 Default Credentials
 
-**Admin User**
-- Email: `admin@aegisx.local`
-- Password: `Admin123!`
+### Admin User
+- **Email**: admin@aegisx.local
+- **Password**: Admin123!
 
-**pgAdmin**
-- Email: `admin@aegisx.local`
-- Password: `admin`
+### Test User
+- **Email**: test4@example.com
+- **Password**: password123
 
-## 📚 Database Schema
+## 📚 Documentation
 
-The starter includes a complete RBAC (Role-Based Access Control) system:
+### Quick Links
+- [📊 Feature Tracking](./docs/01-feature-tracking.md) - Development progress tracker
+- [🚀 Quick Commands](./docs/02-quick-commands.md) - Common commands reference
+- [🏗️ Project Setup](./docs/03-project-setup.md) - Detailed setup instructions
+- [🔄 Development Workflow](./docs/04-development-workflow.md) - Development best practices
+- [🏛️ Architecture Overview](./docs/05-architecture.md) - System architecture
 
-- **users** - User accounts with secure password hashing
-- **roles** - Role definitions (admin, user)
-- **permissions** - Granular permissions
-- **user_sessions** - JWT refresh token management
+### Architecture Guides
+- [Frontend Architecture](./docs/05a-frontend-architecture.md) - Angular patterns & practices
+- [Backend Architecture](./docs/05b-backend-architecture.md) - Fastify patterns & practices
+- [Database Migrations](./docs/05b7-database-migrations.md) - Migration strategies
+- [RBAC & Authentication](./docs/05b2-rbac-auth.md) - Security implementation
 
-## 🔧 Configuration
+### Development Progress
+- [Working Template Progress](./docs/08-working-template-progress.md) - Current development status
 
-### Environment Variables
-See `.env.example` for all available options.
+## 🧪 Testing
 
-### Ports
-- API: `3333`
-- Web: `4200`
-- Admin: `4201`
-- PostgreSQL: `5432`
-- Redis: `6380`
-- pgAdmin: `5050`
+```bash
+# Run unit tests
+nx run-many --target=test --all
+
+# Run e2e tests
+nx e2e e2e
+
+# Test specific project
+nx test api
+nx test web
+nx test admin
+```
+
+## 🔧 Common Tasks
+
+### Database Operations
+```bash
+# Create new migration
+npx knex migrate:make migration_name
+
+# Run migrations
+npx knex migrate:latest
+
+# Rollback migrations
+npx knex migrate:rollback
+
+# Reset database
+npx knex migrate:rollback --all && npx knex migrate:latest && npx knex seed:run
+```
+
+### Generate New Feature
+```bash
+# Generate full-stack feature
+./scripts/generate-feature.sh <feature-name>
+```
+
+### API Testing
+```bash
+# Health check
+curl http://localhost:3333/health
+
+# Login
+curl -X POST http://localhost:3333/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "admin@aegisx.local", "password": "Admin123!"}'
+
+# Get profile (with token)
+curl http://localhost:3333/api/auth/me \
+  -H "Authorization: Bearer <access-token>"
+```
+
+## 📁 Project Structure
+
+### Backend Structure
+```
+apps/api/src/
+├── database/
+│   ├── migrations/     # Database migrations
+│   └── seeds/          # Seed data
+├── modules/
+│   └── auth/           # Authentication module
+│       ├── auth.plugin.ts
+│       ├── auth.routes.ts
+│       ├── auth.controller.ts
+│       └── services/
+├── plugins/            # Shared Fastify plugins
+└── types/             # TypeScript definitions
+```
+
+### Frontend Structure
+```
+apps/web/src/
+├── app/
+│   ├── core/          # Core services, guards
+│   ├── features/      # Feature modules
+│   ├── shared/        # Shared components
+│   └── app.routes.ts  # Main routing
+└── assets/
+```
 
 ## 🚀 Deployment
 
-### Docker
+### Docker Build
 ```bash
-docker build -t aegisx-api apps/api
-docker build -t aegisx-web apps/web
+# Build all applications
+docker-compose -f docker-compose.prod.yml build
+
+# Run in production
+docker-compose -f docker-compose.prod.yml up -d
 ```
 
-### Kubernetes
-Helm charts coming soon!
+### Environment Variables
+See `.env.example` for all available environment variables.
 
-## 📖 Documentation
-
-- [Architecture Guide](docs/05-architecture.md)
-- [Development Workflow](docs/04-development-workflow.md)
-- [API Documentation](docs/05b-backend-architecture.md)
-- [Frontend Guide](docs/05a-frontend-architecture.md)
+Key variables:
+- `DATABASE_URL`: PostgreSQL connection string
+- `JWT_SECRET`: Secret for JWT tokens
+- `SESSION_SECRET`: Secret for sessions
+- `NODE_ENV`: Environment (development/production)
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing`)
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📄 License
+## 📝 License
 
-MIT
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+Built with:
+- [Nx](https://nx.dev) - Smart, extensible build framework
+- [Angular](https://angular.io) - Modern web framework
+- [Fastify](https://www.fastify.io) - Fast and low overhead web framework
+- [PostgreSQL](https://www.postgresql.org) - The world's most advanced open source database
 
 ---
 
-Built with ❤️ by [AegisX Platform](https://github.com/aegisx-platform)
+For more detailed information, please refer to the [documentation](./docs/README.md).
