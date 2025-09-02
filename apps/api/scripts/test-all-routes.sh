@@ -129,8 +129,11 @@ test_endpoint "GET" "/health" 200 "" "GET /api/health - Health check" false
 
 # Test Auth Endpoints
 print_section "Testing Auth Endpoints"
-test_endpoint "POST" "/auth/register" 201 '{"email":"test@example.com","username":"testuser","password":"Test123!","firstName":"Test","lastName":"User"}' "POST /api/auth/register - Register new user" false
-test_endpoint "POST" "/auth/login" 200 '{"email":"test@example.com","password":"Test123!"}' "POST /api/auth/login - Login user" false
+# Generate a unique email for testing
+TIMESTAMP=$(date +%s)
+TEST_EMAIL="test${TIMESTAMP}@example.com"
+test_endpoint "POST" "/auth/register" 201 "{\"email\":\"$TEST_EMAIL\",\"username\":\"testuser${TIMESTAMP}\",\"password\":\"Test123!\",\"firstName\":\"Test\",\"lastName\":\"User\"}" "POST /api/auth/register - Register new user" false
+test_endpoint "POST" "/auth/login" 200 "{\"email\":\"$TEST_EMAIL\",\"password\":\"Test123!\"}" "POST /api/auth/login - Login user" false
 
 # Login as admin for authenticated tests
 print_section "Authenticating as Admin"
