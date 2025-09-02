@@ -1,0 +1,22 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Run API tests before push
+echo "Running API tests..."
+
+# Check if API server is running
+if ! curl -s http://localhost:3333/api/health > /dev/null 2>&1; then
+    echo "⚠️  API server is not running. Skipping API route tests."
+    echo "   To run full tests, start the API server with: yarn nx serve api"
+else
+    echo "✓ API server is running, executing route tests..."
+    cd apps/api && ./scripts/test-all-routes.sh
+    if [ $? -ne 0 ]; then
+        echo "❌ API tests failed. Push aborted."
+        exit 1
+    fi
+fi
+
+# Run unit tests
+echo "Running unit tests..."
+yarn nx affected:test --base=origin/main --head=HEAD

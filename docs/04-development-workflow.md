@@ -286,16 +286,27 @@ apps/[portal]/src/app/features/[feature]/
 7. **Add routes** to main routing module
 
 ## Step 5: Testing
-1. **Unit tests**
+1. **API Route Testing** (Run this first!)
+   ```bash
+   # Start API server
+   yarn nx serve api
+   
+   # In another terminal, run all route tests
+   cd apps/api && ./scripts/test-all-routes.sh
+   
+   # Test specific environment
+   ./scripts/test-all-routes.sh http://staging-api.example.com
+   ```
+2. **Unit tests**
    ```bash
    nx test api --watch
    nx test web --watch
    ```
-2. **Integration tests** for API
+3. **Integration tests** for API
    ```bash
    nx test api-e2e
    ```
-3. **E2E tests with Playwright**
+4. **E2E tests with Playwright**
    ```bash
    # Run headless
    nx e2e web-e2e
@@ -309,7 +320,7 @@ apps/[portal]/src/app/features/[feature]/
    # Update visual snapshots
    nx e2e web-e2e --update-snapshots
    ```
-4. **Visual regression tests**
+5. **Visual regression tests**
    ```bash
    # Run visual tests
    yarn e2e:visual
@@ -318,11 +329,11 @@ apps/[portal]/src/app/features/[feature]/
    /test visual [feature-name]
    /test screenshot [feature-name]-completed
    ```
-5. **Accessibility tests**
+6. **Accessibility tests**
    ```bash
    yarn e2e:a11y
    ```
-6. **Run all tests**
+7. **Run all tests**
    ```bash
    nx run-many --target=test --all
    nx run-many --target=e2e --all

@@ -1,0 +1,149 @@
+name: API Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'apps/api/**'
+      - 'libs/shared/**'
+      - '.github/workflows/api-test.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'apps/api/**'
+      - 'libs/shared/**'
+      - '.github/workflows/api-test.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: aegisx
+          POSTGRES_PASSWORD: aegisx123
+          POSTGRES_DB: aegisx_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'yarn'
+    
+    - name: Install dependencies
+      run: yarn install --frozen-lockfile
+    
+    - name: Setup test environment
+      run: |
+        cp .env.example .env.test
+        cat >> .env.test << EOF
+        DATABASE_URL=postgresql://aegisx:aegisx123@localhost:5432/aegisx_test
+        REDIS_URL=redis://localhost:6379
+        JWT_SECRET=test-jwt-secret
+        SESSION_SECRET=test-session-secret
+        NODE_ENV=test
+        EOF
+    
+    - name: Run database migrations
+      run: |
+        export $(cat .env.test | xargs)
+        yarn nx run api:migrate:latest
+        yarn nx run api:seed:run
+    
+    - name: Run unit tests
+      run: yarn nx test api
+    
+    - name: Build API
+      run: yarn nx build api
+    
+    - name: Start API server
+      run: |
+        export $(cat .env.test | xargs)
+        yarn nx serve api &
+        sleep 10  # Wait for server to start
+    
+    - name: Check API health
+      run: |
+        curl -f http://localhost:3333/api/health || exit 1
+    
+    - name: Run API route tests
+      run: |
+        cd apps/api
+        ./scripts/test-all-routes.sh http://localhost:3333
+    
+    - name: Upload test results
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results
+        path: |
+          apps/api/coverage/
+          apps/api/test-results/
+
+  integration:
+    runs-on: ubuntu-latest
+    needs: test
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: aegisx
+          POSTGRES_PASSWORD: aegisx123
+          POSTGRES_DB: aegisx_integration
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'yarn'
+    
+    - name: Install dependencies
+      run: yarn install --frozen-lockfile
+    
+    - name: Setup integration test environment
+      run: |
+        cp .env.example .env.integration
+        cat >> .env.integration << EOF
+        DATABASE_URL=postgresql://aegisx:aegisx123@localhost:5432/aegisx_integration
+        JWT_SECRET=integration-jwt-secret
+        SESSION_SECRET=integration-session-secret
+        NODE_ENV=test
+        EOF
+    
+    - name: Run integration tests
+      run: |
+        export $(cat .env.integration | xargs)
+        yarn nx run api:test:integration

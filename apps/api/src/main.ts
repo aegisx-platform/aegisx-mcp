@@ -11,6 +11,7 @@ import fastifySensible from '@fastify/sensible';
 
 // Import plugins
 import knexPlugin from './plugins/knex.plugin';
+import redisPlugin from './plugins/redis.plugin';
 import responseHandlerPlugin from './plugins/response-handler.plugin';
 import errorHandlerPlugin from './plugins/error-handler.plugin';
 import schemasPlugin from './plugins/schemas.plugin';
@@ -20,6 +21,7 @@ import authPlugin from './modules/auth/auth.plugin';
 import navigationPlugin from './modules/navigation/navigation.plugin';
 import userProfilePlugin from './modules/user-profile/user-profile.plugin';
 import defaultPlugin from './modules/default/default.plugin';
+import settingsPlugin from './modules/settings/settings.plugin';
 import staticFilesPlugin from './plugins/static-files.plugin';
 import jwtAuthPlugin from './plugins/jwt-auth.plugin';
 import swaggerPlugin from './plugins/swagger.plugin';
@@ -67,6 +69,9 @@ async function bootstrap() {
 
   // 3. Database connection
   await app.register(knexPlugin);
+
+  // 3.5. Redis connection (optional)
+  await app.register(redisPlugin);
 
   // 4. Authentication
   await app.register(fastifyJwt, {
@@ -129,6 +134,9 @@ async function bootstrap() {
   
   // User Profile module
   await app.register(userProfilePlugin);
+  
+  // Settings module
+  await app.register(settingsPlugin);
 
 
   // Start server
