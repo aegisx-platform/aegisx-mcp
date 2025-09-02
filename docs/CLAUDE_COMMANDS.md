@@ -5,6 +5,7 @@
 ## 🚀 Project Setup Commands
 
 ### Initial Setup
+
 ```bash
 # Install dependencies
 yarn install
@@ -23,6 +24,7 @@ npm run db:seed
 ```
 
 ### Docker Environment
+
 ```bash
 # Start all services (databases, cache, etc.)
 docker-compose up -d
@@ -49,6 +51,7 @@ docker-compose down -v
 ## 🏗️ Code Generation Commands
 
 ### Generate New Feature
+
 ```bash
 # Use Claude commands for feature generation:
 /start [feature-name]              # Start new feature
@@ -64,6 +67,7 @@ docker-compose down -v
 ```
 
 ### Nx Generators
+
 ```bash
 # Generate Angular component
 nx g @nx/angular:component <name> --project=frontend
@@ -81,6 +85,7 @@ nx g @nx/angular:lib <name> --directory=libs/frontend
 ## 🔧 Development Commands
 
 ### Start Development Servers
+
 ```bash
 # Start backend API
 nx serve api
@@ -96,6 +101,7 @@ nx serve api --configuration=development
 ```
 
 ### Database Commands
+
 ```bash
 # Run migrations
 nx run api:migrate
@@ -111,6 +117,7 @@ nx run api:seed
 ```
 
 ### Build Commands
+
 ```bash
 # Build all projects
 nx run-many --target=build --all
@@ -129,7 +136,21 @@ nx affected:build
 
 ## 🧪 Testing Commands
 
+### API Tests
+
+```bash
+# Run API route tests (requires running API server)
+cd apps/api && ./scripts/test-all-routes.sh
+
+# Run API tests with automatic server start
+./scripts/test-api-with-push.sh
+
+# Test specific API endpoint
+curl -X GET http://localhost:3333/api/health
+```
+
 ### Unit Tests
+
 ```bash
 # Run all tests
 nx run-many --target=test --all
@@ -147,6 +168,7 @@ nx test api --coverage
 ```
 
 ### E2E Tests
+
 ```bash
 # Run all E2E tests
 nx e2e e2e
@@ -165,6 +187,7 @@ nx e2e e2e --update-snapshots
 ```
 
 ### Linting
+
 ```bash
 # Lint all projects
 nx run-many --target=lint --all
@@ -183,6 +206,7 @@ nx affected:lint
 ## 📊 Analysis Commands
 
 ### Dependency Graph
+
 ```bash
 # View project dependency graph
 nx graph
@@ -195,15 +219,45 @@ nx graph --focus=api
 ```
 
 ### Bundle Analysis
+
 ```bash
 # Analyze frontend bundle size
 nx build frontend --stats-json
 webpack-bundle-analyzer dist/apps/frontend/stats.json
 ```
 
+## 🪝 Git Hooks Commands
+
+### Skip Hooks (Emergency)
+
+```bash
+# Skip pre-commit hook
+git commit -m "message" --no-verify
+
+# Skip pre-push hook
+git push --no-verify
+
+# Run API tests before push (optional)
+./scripts/test-api-with-push.sh
+```
+
+### Hook Management
+
+```bash
+# Re-install hooks
+npx husky install
+
+# Run pre-commit checks manually
+npx lint-staged
+
+# Run pre-push checks manually
+yarn nx affected:lint && yarn nx affected:test
+```
+
 ## 🚢 Deployment Commands
 
 ### Docker Build
+
 ```bash
 # Build Docker images
 docker build -t aegisx-api:latest -f apps/api/Dockerfile .
@@ -219,6 +273,7 @@ docker push ghcr.io/yourorg/aegisx-frontend:latest
 ```
 
 ### Production Deployment
+
 ```bash
 # Deploy with docker-compose
 docker-compose -f docker-compose.prod.yml up -d
@@ -234,6 +289,7 @@ kubectl get services -n aegisx
 ## 🛠️ Utility Commands
 
 ### Clean & Reset
+
 ```bash
 # Clean build artifacts
 nx run-many --target=clean --all
@@ -249,6 +305,7 @@ yarn install
 ```
 
 ### Format Code
+
 ```bash
 # Format all files
 nx format:write
@@ -261,6 +318,7 @@ prettier --write "apps/**/*.ts"
 ```
 
 ### Update Dependencies
+
 ```bash
 # Check for updates
 yarn outdated
@@ -276,6 +334,7 @@ nx migrate --run-migrations
 ## 📝 Git Commands
 
 ### Conventional Commits
+
 ```bash
 # Feature
 git commit -m "feat: add user authentication"
@@ -305,6 +364,7 @@ git commit -m "chore: update dependencies"
 ## 🔍 Troubleshooting Commands
 
 ### Debug Backend
+
 ```bash
 # Start with debug mode
 nx serve api --inspect
@@ -317,6 +377,7 @@ docker exec -it aegisx-postgres psql -U postgres -d aegisx
 ```
 
 ### Debug Frontend
+
 ```bash
 # Start with source maps
 nx serve frontend --source-map
@@ -329,6 +390,7 @@ nx serve frontend --configuration=production
 ```
 
 ### Health Checks
+
 ```bash
 # Check API health
 curl http://localhost:3000/health
@@ -369,6 +431,7 @@ When working with Claude Code, you can use these commands:
 ## 📚 Quick Command Sequences
 
 ### Start Fresh Development
+
 ```bash
 yarn install
 cp .env.example .env
@@ -379,6 +442,7 @@ nx run-many --target=serve --projects=api,web
 ```
 
 ### Create and Test New Feature (API-First)
+
 ```bash
 /start my-feature
 /feature:api my-feature
@@ -390,6 +454,7 @@ nx run-many --target=serve --projects=api,web
 ```
 
 ### Prepare for Production
+
 ```bash
 nx run-many --target=lint --all
 nx run-many --target=test --all

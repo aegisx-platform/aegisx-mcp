@@ -1,20 +1,35 @@
 
-# Run API tests before push
-echo "Running API tests..."
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
 
-# Check if API server is running
-if ! curl -s http://localhost:3333/api/health > /dev/null 2>&1; then
-    echo "⚠️  API server is not running. Skipping API route tests."
-    echo "   To run full tests, start the API server with: yarn nx serve api"
-else
-    echo "✓ API server is running, executing route tests..."
-    cd apps/api && ./scripts/test-all-routes.sh
-    if [ $? -ne 0 ]; then
-        echo "❌ API tests failed. Push aborted."
-        exit 1
-    fi
+# Quick validation before push
+echo "Running pre-push checks..."
+
+# 1. Type checking for affected projects
+echo "📝 Type checking..."
+yarn nx affected --target=typecheck --base=origin/develop --head=HEAD --parallel=3
+if [ $? -ne 0 ]; then
+    echo "❌ Type checking failed. Please fix TypeScript errors before pushing."
+    exit 1
 fi
 
-# Run unit tests
-echo "Running unit tests..."
-yarn nx affected:test --base=origin/main --head=HEAD
+# 2. Linting for affected projects
+echo "🔍 Linting..."
+yarn nx affected:lint --base=origin/develop --head=HEAD --parallel=3
+if [ $? -ne 0 ]; then
+    echo "❌ Linting failed. Please fix linting errors before pushing."
+    exit 1
+fi
+
+# 3. Unit tests for affected projects (excluding e2e)
+echo "🧪 Running unit tests..."
+yarn nx affected:test --base=origin/develop --head=HEAD --exclude=e2e --parallel=3
+if [ $? -ne 0 ]; then
+    echo "❌ Unit tests failed. Please fix failing tests before pushing."
+    exit 1
+fi
+
+echo "✅ All pre-push checks passed!"
+
+# Note: Integration and E2E tests will run in GitHub Actions
+echo "ℹ️  Integration and E2E tests will run in CI/CD pipeline."
