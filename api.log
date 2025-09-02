@@ -658,3 +658,380 @@
 {"level":30,"time":1756805843775,"pid":45257,"hostname":"Sathits-Laptop.local","msg":"Server listening at http://192.168.215.0:3333"}
 {"level":30,"time":1756805843775,"pid":45257,"hostname":"Sathits-Laptop.local","msg":"Server listening at http://192.168.155.0:3333"}
 {"level":30,"time":1756805843775,"pid":45257,"hostname":"Sathits-Laptop.local","msg":"Server listening at http://192.168.163.0:3333"}
+{"level":30,"time":1756805856300,"pid":45257,"hostname":"Sathits-Laptop.local","reqId":"req-1","req":{"method":"GET","url":"/api/health","host":"localhost:3333","remoteAddress":"127.0.0.1","remotePort":64578},"msg":"incoming request"}
+{"level":30,"time":1756805856310,"pid":45257,"hostname":"Sathits-Laptop.local","reqId":"req-1","res":{"statusCode":200},"responseTime":10.291749954223633,"msg":"request completed"}
+{"level":30,"time":1756805856332,"pid":45257,"hostname":"Sathits-Laptop.local","reqId":"req-2","req":{"method":"GET","url":"/api/info","host":"127.0.0.1:3333","remoteAddress":"127.0.0.1","remotePort":64579},"msg":"incoming request"}
+{"level":30,"time":1756805856336,"pid":45257,"hostname":"Sathits-Laptop.local","reqId":"req-2","res":{"statusCode":200},"responseTime":4.273332953453064,"msg":"request completed"}
+{"level":30,"time":1756805856380,"pid":45257,"hostname":"Sathits-Laptop.local","reqId":"req-3","req":{"method":"GET","url":"/api/status","host":"127.0.0.1:3333","remoteAddress":"127.0.0.1","remotePort":64580},"msg":"incoming request"}
+{"level":30,"time":1756805856392,"pid":45257,"hostname":"Sathits-Laptop.local","reqId":"req-3","res":{"statusCode":200},"responseTime":11.630457997322083,"msg":"request completed"}
+{"level":30,"time":1756805856417,"pid":45257,"hostname":"Sathits-Laptop.local","reqId":"req-4","req":{"method":"GET","url":"/api/health","host":"127.0.0.1:3333","remoteAddress":"127.0.0.1","remotePort":64581},"msg":"incoming request"}
+{"level":30,"time":1756805856417,"pid":45257,"hostname":"Sathits-Laptop.local","reqId":"req-4","res":{"statusCode":200},"responseTime":0.38279199600219727,"msg":"request completed"}
+{"level":30,"time":1756805856461,"pid":45257,"hostname":"Sathits-Laptop.local","reqId":"req-5","req":{"method":"POST","url":"/api/auth/register","host":"127.0.0.1:3333","remoteAddress":"127.0.0.1","remotePort":64582},"msg":"incoming request"}
+{"level":30,"time":1756805856579,"pid":45257,"hostname":"Sathits-Laptop.local","reqId":"req-5","res":{"statusCode":201},"responseTime":118.0390830039978,"msg":"request completed"}
+{"level":30,"time":1756805856597,"pid":45257,"hostname":"Sathits-Laptop.local","reqId":"req-6","req":{"method":"POST","url":"/api/auth/login","host":"127.0.0.1:3333","remoteAddress":"127.0.0.1","remotePort":64583},"msg":"incoming request"}
+{"level":30,"time":1756805856680,"pid":45257,"hostname":"Sathits-Laptop.local","reqId":"req-6","res":{"statusCode":200},"responseTime":83.64266699552536,"msg":"request completed"}
+{"level":30,"time":1756805856699,"pid":45257,"hostname":"Sathits-Laptop.local","reqId":"req-7","req":{"method":"POST","url":"/api/auth/login","host":"127.0.0.1:3333","remoteAddress":"127.0.0.1","remotePort":64585},"msg":"incoming request"}
+{"level":30,"time":1756805856780,"pid":45257,"hostname":"Sathits-Laptop.local","reqId":"req-7","res":{"statusCode":200},"responseTime":80.57320898771286,"msg":"request completed"}
+{"level":30,"time":1756805856800,"pid":45257,"hostname":"Sathits-Laptop.local","reqId":"req-8","req":{"method":"POST","url":"/api/auth/refresh","host":"127.0.0.1:3333","remoteAddress":"127.0.0.1","remotePort":64586},"msg":"incoming request"}
+{"level":50,"time":1756805856801,"pid":45257,"hostname":"Sathits-Laptop.local","error":{},"request":{"method":"POST","url":"/api/auth/refresh","headers":{"host":"127.0.0.1:3333","user-agent":"curl/8.7.1","accept":"*/*","content-type":"application/json","content-length":"19"},"params":{},"query":{}}}
+{"level":30,"time":1756805856801,"pid":45257,"hostname":"Sathits-Laptop.local","reqId":"req-8","res":{"statusCode":401},"responseTime":1.0622090101242065,"msg":"request completed"}
+[ [32mwatch[39m ] build succeeded, watching for changes...
+[1m[31mDebugger listening on ws://localhost:9229/175bd813-a551-469a-bb77-0bdbf2bfbffa[39m[22m
+[1m[31mDebugger listening on ws://localhost:9229/175bd813-a551-469a-bb77-0bdbf2bfbffa[39m[22m
+[1m[31mFor help, see: https://nodejs.org/en/docs/inspector[39m[22m
+[1m[31m[39m[22m
+[dotenv@17.2.1] injecting env (0) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+{"level":30,"time":1756805878917,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Database connected successfully"}
+{"level":30,"time":1756805878928,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"JWT Auth plugin registered successfully"}
+{"level":20,"time":1756805878928,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: api-meta"}
+{"level":20,"time":1756805878929,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: pagination-meta"}
+{"level":20,"time":1756805878929,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: api-error-response"}
+{"level":20,"time":1756805878929,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: validation-error-response"}
+{"level":20,"time":1756805878929,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: unauthorized-response"}
+{"level":20,"time":1756805878929,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: forbidden-response"}
+{"level":20,"time":1756805878929,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: not-found-response"}
+{"level":20,"time":1756805878929,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: conflict-response"}
+{"level":20,"time":1756805878929,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: server-error-response"}
+{"level":20,"time":1756805878929,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: pagination-query"}
+{"level":20,"time":1756805878929,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: search-query"}
+{"level":20,"time":1756805878929,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: uuid-param"}
+{"level":20,"time":1756805878929,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: numeric-id-param"}
+{"level":20,"time":1756805878929,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: validationErrorResponse"}
+{"level":20,"time":1756805878929,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: unauthorizedResponse"}
+{"level":20,"time":1756805878929,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: forbiddenResponse"}
+{"level":20,"time":1756805878929,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: notFoundResponse"}
+{"level":20,"time":1756805878929,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: conflictResponse"}
+{"level":20,"time":1756805878929,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: serverErrorResponse"}
+{"level":30,"time":1756805878929,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Schema registry initialized with base schemas"}
+{"level":30,"time":1756805878929,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Schema enforcement plugin activated - all routes must have complete schemas"}
+{"level":30,"time":1756805879007,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Swagger OpenAPI documentation configured"}
+{"level":30,"time":1756805879007,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Swagger UI available at: /api-docs"}
+{"level":30,"time":1756805879007,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"OpenAPI JSON available at: /api/documentation/json"}
+{"level":30,"time":1756805879008,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Static files plugin registered successfully"}
+{"level":20,"time":1756805879008,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-api-info"}
+{"level":20,"time":1756805879008,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-system-status"}
+{"level":20,"time":1756805879008,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-health-check"}
+{"level":20,"time":1756805879008,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-ping-response"}
+{"level":20,"time":1756805879008,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-api-info-response"}
+{"level":20,"time":1756805879008,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-system-status-response"}
+{"level":20,"time":1756805879008,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-health-check-response"}
+{"level":20,"time":1756805879008,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-ping-response-data"}
+{"level":20,"time":1756805879008,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-apiInfoResponse"}
+{"level":20,"time":1756805879008,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-apiStatusResponse"}
+{"level":20,"time":1756805879008,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-healthResponse"}
+{"level":20,"time":1756805879008,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-pingResponse"}
+{"level":30,"time":1756805879009,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Default plugin registered successfully"}
+{"level":20,"time":1756805879009,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-auth-user"}
+{"level":20,"time":1756805879009,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-register-request"}
+{"level":20,"time":1756805879009,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-login-request"}
+{"level":20,"time":1756805879009,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-refresh-request"}
+{"level":20,"time":1756805879009,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-auth-response"}
+{"level":20,"time":1756805879009,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-register-response"}
+{"level":20,"time":1756805879009,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-refresh-response"}
+{"level":20,"time":1756805879009,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-profile-response"}
+{"level":20,"time":1756805879009,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-logout-response"}
+{"level":20,"time":1756805879009,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-authUser"}
+{"level":20,"time":1756805879010,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-registerRequest"}
+{"level":20,"time":1756805879010,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-loginRequest"}
+{"level":20,"time":1756805879010,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-refreshRequest"}
+{"level":20,"time":1756805879010,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-authResponse"}
+{"level":20,"time":1756805879010,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-registerResponse"}
+{"level":20,"time":1756805879010,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-refreshResponse"}
+{"level":20,"time":1756805879010,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-profileResponse"}
+{"level":20,"time":1756805879010,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-logoutResponse"}
+{"level":20,"time":1756805879010,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: navigation-navigation-badge"}
+{"level":20,"time":1756805879010,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: navigation-navigation-item"}
+{"level":20,"time":1756805879011,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: navigation-navigation-data"}
+{"level":20,"time":1756805879011,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: navigation-navigation-response"}
+{"level":20,"time":1756805879011,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: navigation-get-navigation-query"}
+{"level":20,"time":1756805879011,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: navigation-get-user-navigation-query"}
+{"level":30,"time":1756805879011,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Navigation routes registered successfully"}
+{"level":30,"time":1756805879012,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Navigation plugin registered successfully"}
+{"level":20,"time":1756805879012,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-user-profile"}
+{"level":20,"time":1756805879012,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-user-role"}
+{"level":20,"time":1756805879012,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-user-preferences"}
+{"level":20,"time":1756805879012,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-notification-preferences"}
+{"level":20,"time":1756805879012,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-navigation-preferences"}
+{"level":20,"time":1756805879012,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-user-profile-update-request"}
+{"level":20,"time":1756805879012,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-user-preferences-update-request"}
+{"level":20,"time":1756805879012,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-user-profile-response"}
+{"level":20,"time":1756805879012,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-avatar-upload-response"}
+{"level":20,"time":1756805879012,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-avatar-delete-response"}
+{"level":20,"time":1756805879012,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-avatar-upload-data"}
+{"level":20,"time":1756805879012,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-avatar-delete-data"}
+{"level":20,"time":1756805879012,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-userProfileResponse"}
+{"level":20,"time":1756805879012,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-userProfileUpdateRequest"}
+{"level":20,"time":1756805879012,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-userPreferencesUpdateRequest"}
+{"level":20,"time":1756805879012,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-avatarUploadResponse"}
+{"level":20,"time":1756805879012,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-avatarDeleteResponse"}
+{"level":30,"time":1756805879024,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"User Profile plugin registered successfully"}
+{"level":20,"time":1756805879024,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-setting"}
+{"level":20,"time":1756805879024,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-create-setting"}
+{"level":20,"time":1756805879024,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-update-setting"}
+{"level":20,"time":1756805879024,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-update-setting-value"}
+{"level":20,"time":1756805879024,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-user-setting"}
+{"level":20,"time":1756805879024,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-update-user-setting"}
+{"level":20,"time":1756805879024,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-setting-history"}
+{"level":20,"time":1756805879024,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-get-settings-query"}
+{"level":20,"time":1756805879024,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-get-setting-history-query"}
+{"level":20,"time":1756805879024,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-grouped-settings"}
+{"level":20,"time":1756805879024,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-bulk-update-settings"}
+{"level":20,"time":1756805879024,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-setting-response"}
+{"level":20,"time":1756805879024,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-settings-list-response"}
+{"level":20,"time":1756805879024,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-grouped-settings-response"}
+{"level":20,"time":1756805879024,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-setting-history-response"}
+{"level":20,"time":1756805879024,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-bulk-update-response"}
+{"level":30,"time":1756805879026,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Settings plugin registered successfully"}
+{"level":20,"time":1756805879376,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Navigation cache hit: navigation:default:false"}
+🚀 API is running on http://localhost:3333
+📚 Environment: development
+{"level":30,"time":1756805879376,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Navigation module initialized successfully"}
+{"level":20,"time":1756805879376,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Navigation health check passed. Found 1 navigation types"}
+{"level":30,"time":1756805879378,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Server listening at http://127.0.0.1:3333"}
+{"level":30,"time":1756805879378,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Server listening at http://10.3.42.206:3333"}
+{"level":30,"time":1756805879378,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Server listening at http://198.19.2.2:3333"}
+{"level":30,"time":1756805879378,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Server listening at http://192.168.139.3:3333"}
+{"level":30,"time":1756805879378,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Server listening at http://192.168.194.0:3333"}
+{"level":30,"time":1756805879378,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Server listening at http://192.168.215.0:3333"}
+{"level":30,"time":1756805879378,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Server listening at http://192.168.155.0:3333"}
+{"level":30,"time":1756805879378,"pid":45830,"hostname":"Sathits-Laptop.local","msg":"Server listening at http://192.168.163.0:3333"}
+[ [32mwatch[39m ] build succeeded, watching for changes...
+[1m[31mDebugger listening on ws://localhost:9229/b46c570b-8f93-4fe2-b2b1-60db73238de5[39m[22m
+[1m[31mDebugger listening on ws://localhost:9229/b46c570b-8f93-4fe2-b2b1-60db73238de5[39m[22m
+[1m[31mFor help, see: https://nodejs.org/en/docs/inspector[39m[22m
+[1m[31m[39m[22m
+[dotenv@17.2.1] injecting env (0) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+{"level":30,"time":1756805963716,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Database connected successfully"}
+{"level":30,"time":1756805963724,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"JWT Auth plugin registered successfully"}
+{"level":20,"time":1756805963724,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: api-meta"}
+{"level":20,"time":1756805963724,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: pagination-meta"}
+{"level":20,"time":1756805963724,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: api-error-response"}
+{"level":20,"time":1756805963724,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: validation-error-response"}
+{"level":20,"time":1756805963724,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: unauthorized-response"}
+{"level":20,"time":1756805963724,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: forbidden-response"}
+{"level":20,"time":1756805963724,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: not-found-response"}
+{"level":20,"time":1756805963724,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: conflict-response"}
+{"level":20,"time":1756805963724,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: server-error-response"}
+{"level":20,"time":1756805963725,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: pagination-query"}
+{"level":20,"time":1756805963725,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: search-query"}
+{"level":20,"time":1756805963725,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: uuid-param"}
+{"level":20,"time":1756805963725,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: numeric-id-param"}
+{"level":20,"time":1756805963725,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: validationErrorResponse"}
+{"level":20,"time":1756805963725,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: unauthorizedResponse"}
+{"level":20,"time":1756805963725,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: forbiddenResponse"}
+{"level":20,"time":1756805963725,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: notFoundResponse"}
+{"level":20,"time":1756805963725,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: conflictResponse"}
+{"level":20,"time":1756805963725,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: serverErrorResponse"}
+{"level":30,"time":1756805963725,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Schema registry initialized with base schemas"}
+{"level":30,"time":1756805963725,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Schema enforcement plugin activated - all routes must have complete schemas"}
+{"level":30,"time":1756805963786,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Swagger OpenAPI documentation configured"}
+{"level":30,"time":1756805963786,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Swagger UI available at: /api-docs"}
+{"level":30,"time":1756805963786,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"OpenAPI JSON available at: /api/documentation/json"}
+{"level":30,"time":1756805963787,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Static files plugin registered successfully"}
+{"level":20,"time":1756805963787,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-api-info"}
+{"level":20,"time":1756805963787,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-system-status"}
+{"level":20,"time":1756805963787,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-health-check"}
+{"level":20,"time":1756805963787,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-ping-response"}
+{"level":20,"time":1756805963787,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-api-info-response"}
+{"level":20,"time":1756805963787,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-system-status-response"}
+{"level":20,"time":1756805963787,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-health-check-response"}
+{"level":20,"time":1756805963787,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-ping-response-data"}
+{"level":20,"time":1756805963787,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-apiInfoResponse"}
+{"level":20,"time":1756805963787,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-apiStatusResponse"}
+{"level":20,"time":1756805963787,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-healthResponse"}
+{"level":20,"time":1756805963787,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-pingResponse"}
+{"level":30,"time":1756805963788,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Default plugin registered successfully"}
+{"level":20,"time":1756805963788,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-auth-user"}
+{"level":20,"time":1756805963788,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-register-request"}
+{"level":20,"time":1756805963788,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-login-request"}
+{"level":20,"time":1756805963788,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-refresh-request"}
+{"level":20,"time":1756805963788,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-auth-response"}
+{"level":20,"time":1756805963788,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-register-response"}
+{"level":20,"time":1756805963788,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-refresh-response"}
+{"level":20,"time":1756805963788,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-profile-response"}
+{"level":20,"time":1756805963788,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-logout-response"}
+{"level":20,"time":1756805963788,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-authUser"}
+{"level":20,"time":1756805963788,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-registerRequest"}
+{"level":20,"time":1756805963788,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-loginRequest"}
+{"level":20,"time":1756805963788,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-refreshRequest"}
+{"level":20,"time":1756805963788,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-authResponse"}
+{"level":20,"time":1756805963788,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-registerResponse"}
+{"level":20,"time":1756805963788,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-refreshResponse"}
+{"level":20,"time":1756805963788,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-profileResponse"}
+{"level":20,"time":1756805963788,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-logoutResponse"}
+{"level":20,"time":1756805963789,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: navigation-navigation-badge"}
+{"level":20,"time":1756805963789,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: navigation-navigation-item"}
+{"level":20,"time":1756805963789,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: navigation-navigation-data"}
+{"level":20,"time":1756805963789,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: navigation-navigation-response"}
+{"level":20,"time":1756805963789,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: navigation-get-navigation-query"}
+{"level":20,"time":1756805963789,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: navigation-get-user-navigation-query"}
+{"level":30,"time":1756805963790,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Navigation routes registered successfully"}
+{"level":30,"time":1756805963790,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Navigation plugin registered successfully"}
+{"level":20,"time":1756805963790,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-user-profile"}
+{"level":20,"time":1756805963790,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-user-role"}
+{"level":20,"time":1756805963790,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-user-preferences"}
+{"level":20,"time":1756805963790,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-notification-preferences"}
+{"level":20,"time":1756805963790,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-navigation-preferences"}
+{"level":20,"time":1756805963790,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-user-profile-update-request"}
+{"level":20,"time":1756805963790,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-user-preferences-update-request"}
+{"level":20,"time":1756805963791,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-user-profile-response"}
+{"level":20,"time":1756805963791,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-avatar-upload-response"}
+{"level":20,"time":1756805963791,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-avatar-delete-response"}
+{"level":20,"time":1756805963791,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-avatar-upload-data"}
+{"level":20,"time":1756805963791,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-avatar-delete-data"}
+{"level":20,"time":1756805963791,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-userProfileResponse"}
+{"level":20,"time":1756805963791,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-userProfileUpdateRequest"}
+{"level":20,"time":1756805963791,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-userPreferencesUpdateRequest"}
+{"level":20,"time":1756805963791,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-avatarUploadResponse"}
+{"level":20,"time":1756805963791,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-avatarDeleteResponse"}
+{"level":30,"time":1756805963802,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"User Profile plugin registered successfully"}
+{"level":20,"time":1756805963802,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-setting"}
+{"level":20,"time":1756805963802,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-create-setting"}
+{"level":20,"time":1756805963802,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-update-setting"}
+{"level":20,"time":1756805963802,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-update-setting-value"}
+{"level":20,"time":1756805963802,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-user-setting"}
+{"level":20,"time":1756805963802,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-update-user-setting"}
+{"level":20,"time":1756805963802,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-setting-history"}
+{"level":20,"time":1756805963802,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-get-settings-query"}
+{"level":20,"time":1756805963802,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-get-setting-history-query"}
+{"level":20,"time":1756805963802,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-grouped-settings"}
+{"level":20,"time":1756805963802,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-bulk-update-settings"}
+{"level":20,"time":1756805963802,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-setting-response"}
+{"level":20,"time":1756805963802,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-settings-list-response"}
+{"level":20,"time":1756805963802,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-grouped-settings-response"}
+{"level":20,"time":1756805963802,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-setting-history-response"}
+{"level":20,"time":1756805963802,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-bulk-update-response"}
+{"level":30,"time":1756805963804,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Settings plugin registered successfully"}
+{"level":20,"time":1756805964151,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Navigation cache hit: navigation:default:false"}
+🚀 API is running on http://localhost:3333
+📚 Environment: development
+{"level":30,"time":1756805964151,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Navigation module initialized successfully"}
+{"level":20,"time":1756805964151,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Navigation health check passed. Found 1 navigation types"}
+{"level":30,"time":1756805964153,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Server listening at http://127.0.0.1:3333"}
+{"level":30,"time":1756805964153,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Server listening at http://10.3.42.206:3333"}
+{"level":30,"time":1756805964153,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Server listening at http://198.19.2.2:3333"}
+{"level":30,"time":1756805964153,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Server listening at http://192.168.139.3:3333"}
+{"level":30,"time":1756805964153,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Server listening at http://192.168.194.0:3333"}
+{"level":30,"time":1756805964153,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Server listening at http://192.168.215.0:3333"}
+{"level":30,"time":1756805964153,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Server listening at http://192.168.155.0:3333"}
+{"level":30,"time":1756805964153,"pid":46837,"hostname":"Sathits-Laptop.local","msg":"Server listening at http://192.168.163.0:3333"}
+[ [32mwatch[39m ] build succeeded, watching for changes...
+[1m[31mDebugger listening on ws://localhost:9229/abeb22e8-7c50-45fe-8862-97d430211aef[39m[22m
+[1m[31mDebugger listening on ws://localhost:9229/abeb22e8-7c50-45fe-8862-97d430211aef[39m[22m
+[1m[31mFor help, see: https://nodejs.org/en/docs/inspector[39m[22m
+[1m[31m[39m[22m
+[dotenv@17.2.1] injecting env (0) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+{"level":30,"time":1756805981085,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Database connected successfully"}
+{"level":30,"time":1756805981093,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"JWT Auth plugin registered successfully"}
+{"level":20,"time":1756805981094,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: api-meta"}
+{"level":20,"time":1756805981094,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: pagination-meta"}
+{"level":20,"time":1756805981094,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: api-error-response"}
+{"level":20,"time":1756805981094,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: validation-error-response"}
+{"level":20,"time":1756805981094,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: unauthorized-response"}
+{"level":20,"time":1756805981094,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: forbidden-response"}
+{"level":20,"time":1756805981094,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: not-found-response"}
+{"level":20,"time":1756805981094,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: conflict-response"}
+{"level":20,"time":1756805981094,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: server-error-response"}
+{"level":20,"time":1756805981094,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: pagination-query"}
+{"level":20,"time":1756805981094,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: search-query"}
+{"level":20,"time":1756805981094,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: uuid-param"}
+{"level":20,"time":1756805981094,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: numeric-id-param"}
+{"level":20,"time":1756805981094,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: validationErrorResponse"}
+{"level":20,"time":1756805981094,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: unauthorizedResponse"}
+{"level":20,"time":1756805981094,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: forbiddenResponse"}
+{"level":20,"time":1756805981094,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: notFoundResponse"}
+{"level":20,"time":1756805981094,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: conflictResponse"}
+{"level":20,"time":1756805981094,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: serverErrorResponse"}
+{"level":30,"time":1756805981094,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Schema registry initialized with base schemas"}
+{"level":30,"time":1756805981094,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Schema enforcement plugin activated - all routes must have complete schemas"}
+{"level":30,"time":1756805981152,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Swagger OpenAPI documentation configured"}
+{"level":30,"time":1756805981152,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Swagger UI available at: /api-docs"}
+{"level":30,"time":1756805981152,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"OpenAPI JSON available at: /api/documentation/json"}
+{"level":30,"time":1756805981152,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Static files plugin registered successfully"}
+{"level":20,"time":1756805981152,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-api-info"}
+{"level":20,"time":1756805981152,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-system-status"}
+{"level":20,"time":1756805981152,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-health-check"}
+{"level":20,"time":1756805981152,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-ping-response"}
+{"level":20,"time":1756805981152,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-api-info-response"}
+{"level":20,"time":1756805981152,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-system-status-response"}
+{"level":20,"time":1756805981152,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-health-check-response"}
+{"level":20,"time":1756805981152,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-ping-response-data"}
+{"level":20,"time":1756805981152,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-apiInfoResponse"}
+{"level":20,"time":1756805981153,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-apiStatusResponse"}
+{"level":20,"time":1756805981153,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-healthResponse"}
+{"level":20,"time":1756805981153,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: default-pingResponse"}
+{"level":30,"time":1756805981153,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Default plugin registered successfully"}
+{"level":20,"time":1756805981153,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-auth-user"}
+{"level":20,"time":1756805981153,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-register-request"}
+{"level":20,"time":1756805981153,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-login-request"}
+{"level":20,"time":1756805981153,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-refresh-request"}
+{"level":20,"time":1756805981154,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-auth-response"}
+{"level":20,"time":1756805981154,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-register-response"}
+{"level":20,"time":1756805981154,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-refresh-response"}
+{"level":20,"time":1756805981154,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-profile-response"}
+{"level":20,"time":1756805981154,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-logout-response"}
+{"level":20,"time":1756805981154,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-authUser"}
+{"level":20,"time":1756805981154,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-registerRequest"}
+{"level":20,"time":1756805981154,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-loginRequest"}
+{"level":20,"time":1756805981154,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-refreshRequest"}
+{"level":20,"time":1756805981154,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-authResponse"}
+{"level":20,"time":1756805981154,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-registerResponse"}
+{"level":20,"time":1756805981154,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-refreshResponse"}
+{"level":20,"time":1756805981154,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-profileResponse"}
+{"level":20,"time":1756805981154,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: auth-logoutResponse"}
+{"level":20,"time":1756805981155,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: navigation-navigation-badge"}
+{"level":20,"time":1756805981155,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: navigation-navigation-item"}
+{"level":20,"time":1756805981155,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: navigation-navigation-data"}
+{"level":20,"time":1756805981155,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: navigation-navigation-response"}
+{"level":20,"time":1756805981155,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: navigation-get-navigation-query"}
+{"level":20,"time":1756805981155,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: navigation-get-user-navigation-query"}
+{"level":30,"time":1756805981156,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Navigation routes registered successfully"}
+{"level":30,"time":1756805981156,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Navigation plugin registered successfully"}
+{"level":20,"time":1756805981156,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-user-profile"}
+{"level":20,"time":1756805981156,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-user-role"}
+{"level":20,"time":1756805981156,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-user-preferences"}
+{"level":20,"time":1756805981156,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-notification-preferences"}
+{"level":20,"time":1756805981156,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-navigation-preferences"}
+{"level":20,"time":1756805981157,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-user-profile-update-request"}
+{"level":20,"time":1756805981157,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-user-preferences-update-request"}
+{"level":20,"time":1756805981157,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-user-profile-response"}
+{"level":20,"time":1756805981157,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-avatar-upload-response"}
+{"level":20,"time":1756805981157,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-avatar-delete-response"}
+{"level":20,"time":1756805981157,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-avatar-upload-data"}
+{"level":20,"time":1756805981157,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-avatar-delete-data"}
+{"level":20,"time":1756805981157,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-userProfileResponse"}
+{"level":20,"time":1756805981157,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-userProfileUpdateRequest"}
+{"level":20,"time":1756805981157,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-userPreferencesUpdateRequest"}
+{"level":20,"time":1756805981157,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-avatarUploadResponse"}
+{"level":20,"time":1756805981157,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: user-profile-avatarDeleteResponse"}
+{"level":30,"time":1756805981167,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"User Profile plugin registered successfully"}
+{"level":20,"time":1756805981167,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-setting"}
+{"level":20,"time":1756805981167,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-create-setting"}
+{"level":20,"time":1756805981167,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-update-setting"}
+{"level":20,"time":1756805981167,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-update-setting-value"}
+{"level":20,"time":1756805981167,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-user-setting"}
+{"level":20,"time":1756805981167,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-update-user-setting"}
+{"level":20,"time":1756805981167,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-setting-history"}
+{"level":20,"time":1756805981167,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-get-settings-query"}
+{"level":20,"time":1756805981167,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-get-setting-history-query"}
+{"level":20,"time":1756805981167,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-grouped-settings"}
+{"level":20,"time":1756805981167,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-bulk-update-settings"}
+{"level":20,"time":1756805981167,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-setting-response"}
+{"level":20,"time":1756805981167,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-settings-list-response"}
+{"level":20,"time":1756805981167,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-grouped-settings-response"}
+{"level":20,"time":1756805981167,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-setting-history-response"}
+{"level":20,"time":1756805981167,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Registered schema: settings-settings-bulk-update-response"}
+{"level":30,"time":1756805981169,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Settings plugin registered successfully"}
+🚀 API is running on http://localhost:3333
+📚 Environment: development
+{"level":20,"time":1756805981509,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Navigation cache hit: navigation:default:false"}
+{"level":30,"time":1756805981509,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Navigation module initialized successfully"}
+{"level":20,"time":1756805981509,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Navigation health check passed. Found 1 navigation types"}
+{"level":30,"time":1756805981511,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Server listening at http://127.0.0.1:3333"}
+{"level":30,"time":1756805981511,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Server listening at http://10.3.42.206:3333"}
+{"level":30,"time":1756805981511,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Server listening at http://198.19.2.2:3333"}
+{"level":30,"time":1756805981511,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Server listening at http://192.168.139.3:3333"}
+{"level":30,"time":1756805981511,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Server listening at http://192.168.194.0:3333"}
+{"level":30,"time":1756805981511,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Server listening at http://192.168.215.0:3333"}
+{"level":30,"time":1756805981511,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Server listening at http://192.168.155.0:3333"}
+{"level":30,"time":1756805981511,"pid":46976,"hostname":"Sathits-Laptop.local","msg":"Server listening at http://192.168.163.0:3333"}

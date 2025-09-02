@@ -3,12 +3,12 @@ import { RegisterRequest, LoginRequest, RefreshRequest } from './auth.types';
 
 export const authController = {
   async register(request: FastifyRequest, reply: FastifyReply) {
-    const user = await this.authService.register(request.body as RegisterRequest);
+    const user = await request.server.authService.register(request.body as RegisterRequest);
     return reply.created(user, 'User registered successfully');
   },
 
   async login(request: FastifyRequest, reply: FastifyReply) {
-    const result = await this.authService.login(
+    const result = await request.server.authService.login(
       request.body as LoginRequest,
       request.headers['user-agent'],
       request.ip
@@ -37,7 +37,7 @@ export const authController = {
       throw new Error('REFRESH_TOKEN_NOT_FOUND');
     }
 
-    const result = await this.authService.refreshToken(refreshToken);
+    const result = await request.server.authService.refreshToken(refreshToken);
     
     return reply.success({
       accessToken: result.accessToken
@@ -48,7 +48,7 @@ export const authController = {
     const refreshToken = request.cookies.refreshToken;
     
     if (refreshToken) {
-      await this.authService.logout(refreshToken);
+      await request.server.authService.logout(refreshToken);
     }
 
     reply.clearCookie('refreshToken');
@@ -58,7 +58,7 @@ export const authController = {
 
   async me(request: FastifyRequest, reply: FastifyReply) {
     const userId = request.user.id;
-    const profile = await this.authService.getProfile(userId);
+    const profile = await request.server.authService.getProfile(userId);
     
     return reply.success(profile, 'Profile retrieved successfully');
   }

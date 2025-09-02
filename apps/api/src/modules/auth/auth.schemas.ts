@@ -67,7 +67,8 @@ export const RefreshRequestSchema = Type.Object({
 export const AuthResponseSchema = ApiSuccessResponseSchema(
   Type.Object({
     user: AuthUserSchema,
-    accessToken: Type.String()
+    accessToken: Type.String(),
+    refreshToken: Type.String()
   })
 );
 
