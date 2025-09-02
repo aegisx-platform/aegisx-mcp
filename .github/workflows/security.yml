@@ -15,7 +15,7 @@ jobs:
   dependency-scan:
     name: Dependency Security Scan
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -27,7 +27,7 @@ jobs:
           cache: 'yarn'
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --frozen-lockfile --ignore-scripts
 
       - name: Run npm audit
         run: npm audit --audit-level=moderate
@@ -51,11 +51,11 @@ jobs:
     name: Container Security Scan
     runs-on: ubuntu-latest
     if: github.event_name != 'schedule'
-    
+
     strategy:
       matrix:
         app: [api, web, admin]
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -92,12 +92,12 @@ jobs:
       actions: read
       contents: read
       security-events: write
-    
+
     strategy:
       fail-fast: false
       matrix:
         language: ['javascript', 'typescript']
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -114,7 +114,7 @@ jobs:
           cache: 'yarn'
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --frozen-lockfile --ignore-scripts
 
       - name: Build project
         run: yarn build

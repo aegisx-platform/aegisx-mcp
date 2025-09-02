@@ -18,7 +18,7 @@ jobs:
     outputs:
       should_release: ${{ steps.check.outputs.should_release }}
       version_bump: ${{ steps.check.outputs.version_bump }}
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,7 +30,7 @@ jobs:
         run: |
           # Get commits since last tag
           LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          
+
           if [ -z "$LAST_TAG" ]; then
             echo "No tags found, checking all commits"
             COMMITS=$(git log --pretty=format:"%s" --no-merges)
@@ -38,12 +38,12 @@ jobs:
             echo "Last tag: $LAST_TAG"
             COMMITS=$(git log ${LAST_TAG}..HEAD --pretty=format:"%s" --no-merges)
           fi
-          
+
           # Check for conventional commits
           HAS_BREAKING=false
           HAS_FEAT=false
           HAS_FIX=false
-          
+
           while IFS= read -r commit; do
             echo "Checking: $commit"
             if [[ "$commit" =~ ^.*BREAKING[[:space:]]CHANGE:|^.*!: ]]; then
@@ -54,7 +54,7 @@ jobs:
               HAS_FIX=true
             fi
           done <<< "$COMMITS"
-          
+
           # Determine version bump
           if [ "$HAS_BREAKING" = true ]; then
             VERSION_BUMP="major"
@@ -69,7 +69,7 @@ jobs:
             VERSION_BUMP="none"
             SHOULD_RELEASE=false
           fi
-          
+
           echo "should_release=$SHOULD_RELEASE" >> $GITHUB_OUTPUT
           echo "version_bump=$VERSION_BUMP" >> $GITHUB_OUTPUT
           echo "Version bump: $VERSION_BUMP"
@@ -79,7 +79,7 @@ jobs:
     needs: check-conventional-commits
     if: needs.check-conventional-commits.outputs.should_release == 'true'
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -94,7 +94,7 @@ jobs:
           cache: 'yarn'
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --frozen-lockfile --ignore-scripts
 
       - name: Configure Git
         run: |
@@ -111,28 +111,28 @@ jobs:
         run: |
           # Use standard-version for automatic versioning and changelog
           npx standard-version --release-as ${{ needs.check-conventional-commits.outputs.version_bump }} --no-verify
-          
+
           # Get the new version
           NEW_VERSION=$(node -p "require('./package.json').version")
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
-          
+
           # Extract latest changelog entry
           sed -n '/^## \[/,/^## \[/p' CHANGELOG.md | sed '$d' > LATEST_CHANGELOG.md
-          
+
           echo "Generated version: $NEW_VERSION"
 
       - name: Update workspace versions
         run: |
           # Update all workspace package.json files
           NEW_VERSION=${{ steps.version.outputs.new_version }}
-          
+
           # Update apps
           for app in api web admin; do
             if [ -f "apps/$app/package.json" ]; then
               jq ".version = \"$NEW_VERSION\"" "apps/$app/package.json" > tmp.json && mv tmp.json "apps/$app/package.json"
             fi
           done
-          
+
           # Update libs if any
           if [ -d "libs" ]; then
             find libs -name "package.json" -type f | while read -r pkg; do
