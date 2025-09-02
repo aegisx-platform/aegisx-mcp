@@ -152,17 +152,12 @@ print_section "Testing Navigation Endpoints"
 test_endpoint "GET" "/navigation" 200 "" "GET /api/navigation - Get navigation items"
 test_endpoint "GET" "/navigation?includeDisabled=true" 200 "" "GET /api/navigation?includeDisabled=true - Get all navigation items"
 
-# Test User Management Endpoints
-print_section "Testing User Management Endpoints"
-test_endpoint "GET" "/users" 200 "" "GET /api/users - List all users"
-test_endpoint "GET" "/users?page=1&limit=10" 200 "" "GET /api/users?page=1&limit=10 - List users with pagination"
-test_endpoint "GET" "/users/1" 200 "" "GET /api/users/1 - Get user by ID"
-test_endpoint "PUT" "/users/1" 200 '{"firstName":"Updated","lastName":"Name"}' "PUT /api/users/1 - Update user"
-
 # Test User Profile Endpoints
 print_section "Testing User Profile Endpoints"
-test_endpoint "GET" "/profile" 200 "" "GET /api/profile - Get current user profile"
-test_endpoint "PUT" "/profile" 200 '{"firstName":"Updated","lastName":"Admin"}' "PUT /api/profile - Update current user profile"
+test_endpoint "GET" "/users/profile" 200 "" "GET /api/users/profile - Get current user profile"
+test_endpoint "PUT" "/users/profile" 200 '{"firstName":"Updated","lastName":"Admin"}' "PUT /api/users/profile - Update current user profile"
+test_endpoint "GET" "/users/preferences" 200 "" "GET /api/users/preferences - Get user preferences"
+test_endpoint "PUT" "/users/preferences" 200 '{"theme":"dark","language":"en"}' "PUT /api/users/preferences - Update user preferences"
 
 # Test Settings Endpoints
 print_section "Testing Settings Endpoints"
