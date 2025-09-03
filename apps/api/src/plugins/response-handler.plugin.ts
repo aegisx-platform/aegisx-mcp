@@ -53,6 +53,7 @@ export const createPaginatedResponse = <T>(
   limit: number,
   total: number,
   message?: string,
+  meta?: Record<string, unknown>,
 ): ApiResponse<T[]> => ({
   success: true,
   data,
@@ -62,6 +63,17 @@ export const createPaginatedResponse = <T>(
     limit,
     total,
     totalPages: Math.ceil(total / limit),
+  },
+  meta: {
+    timestamp: new Date().toISOString(),
+    version: 'v1',
+    requestId: 'req-' + Math.random().toString(36).substr(2, 9),
+    environment: ['development', 'staging', 'production'].includes(
+      process.env.NODE_ENV || '',
+    )
+      ? (process.env.NODE_ENV as 'development' | 'staging' | 'production')
+      : 'development',
+    ...meta,
   },
 });
 

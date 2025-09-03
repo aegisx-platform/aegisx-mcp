@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import knex, { Knex } from 'knex';
 import * as dotenv from 'dotenv';
+import * as path from 'path';
 import { build } from '../../test-helpers/app-helper';
 import { TestUserFactory, TestDataFactory } from './factories';
 
@@ -45,11 +46,11 @@ const testDbConfig = {
     max: 5,
   },
   migrations: {
-    directory: './apps/api/src/database/migrations',
+    directory: path.join(__dirname, '../../database/migrations'),
     extension: 'ts',
   },
   seeds: {
-    directory: './apps/api/src/database/seeds',
+    directory: path.join(__dirname, '../../database/seeds'),
     extension: 'ts',
   },
 };

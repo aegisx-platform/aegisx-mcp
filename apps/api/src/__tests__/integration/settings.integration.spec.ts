@@ -129,6 +129,13 @@ describe('Settings API Integration Tests', () => {
           '/api/settings?accessLevel=public',
         );
 
+        console.log('Response status:', response.status);
+        if (response.status !== 200) {
+          console.log('Error response body:', JSON.stringify(response.body, null, 2));
+        } else {
+          console.log('Success response body:', JSON.stringify(response.body, null, 2));
+        }
+
         expectResponse(response).hasStatus(200).isSuccess().hasArrayData();
 
         expect(response.body.data).toHaveLength(1);

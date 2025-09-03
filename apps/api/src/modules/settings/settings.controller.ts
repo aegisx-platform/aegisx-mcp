@@ -21,17 +21,13 @@ export const settingsController = {
         userId,
       );
 
-      return reply.send({
-        success: true,
-        data: result.settings,
-        message: 'Settings retrieved successfully',
-        pagination: {
-          total: result.total,
-          page: result.page,
-          limit: result.limit,
-          pages: Math.ceil(result.total / result.limit),
-        },
-      });
+      return reply.paginated(
+        result.settings,
+        result.page,
+        result.limit,
+        result.total,
+        'Settings retrieved successfully',
+      );
     } catch (error) {
       request.server.log.error('Settings GET error: ' + error);
       throw error;
@@ -49,11 +45,7 @@ export const settingsController = {
       userId,
     );
 
-    return reply.send({
-      success: true,
-      data: grouped,
-      message: 'Grouped settings retrieved successfully',
-    });
+    return reply.success(grouped, 'Grouped settings retrieved successfully');
   },
 
   async getSettingByKey(
@@ -77,11 +69,7 @@ export const settingsController = {
       return reply.notFound('Setting not found');
     }
 
-    return reply.send({
-      success: true,
-      data: setting,
-      message: 'Setting retrieved successfully',
-    });
+    return reply.success(setting, 'Setting retrieved successfully');
   },
 
   async getSettingValue(
@@ -105,11 +93,7 @@ export const settingsController = {
       return reply.notFound('Setting not found');
     }
 
-    return reply.send({
-      success: true,
-      data: { value },
-      message: 'Setting value retrieved successfully',
-    });
+    return reply.success({ value }, 'Setting value retrieved successfully');
   },
 
   async getSettingById(
@@ -123,11 +107,7 @@ export const settingsController = {
       return reply.notFound('Setting not found');
     }
 
-    return reply.send({
-      success: true,
-      data: setting,
-      message: 'Setting retrieved successfully',
-    });
+    return reply.success(setting, 'Setting retrieved successfully');
   },
 
   async createSetting(
@@ -139,11 +119,7 @@ export const settingsController = {
       request.user.id,
     );
 
-    return reply.status(201).send({
-      success: true,
-      data: setting,
-      message: 'Setting created successfully',
-    });
+    return reply.created(setting, 'Setting created successfully');
   },
 
   async updateSetting(
@@ -157,11 +133,7 @@ export const settingsController = {
       request.user.id,
     );
 
-    return reply.send({
-      success: true,
-      data: setting,
-      message: 'Setting updated successfully',
-    });
+    return reply.success(setting, 'Setting updated successfully');
   },
 
   async updateSettingValue(
@@ -180,11 +152,7 @@ export const settingsController = {
       request,
     );
 
-    return reply.send({
-      success: true,
-      data: setting,
-      message: 'Setting value updated successfully',
-    });
+    return reply.success(setting, 'Setting value updated successfully');
   },
 
   async deleteSetting(
@@ -194,10 +162,7 @@ export const settingsController = {
     const { id } = request.params;
     await request.server.settingsService.deleteSetting(id, request.user.id);
 
-    return reply.send({
-      success: true,
-      message: 'Setting deleted successfully',
-    });
+    return reply.success(null, 'Setting deleted successfully');
   },
 
   async bulkUpdateSettings(
@@ -214,11 +179,7 @@ export const settingsController = {
       request.user.id,
     );
 
-    return reply.send({
-      success: true,
-      data: result,
-      message: 'Bulk update completed',
-    });
+    return reply.success(result, 'Bulk update completed');
   },
 
   async getSettingHistory(
@@ -229,17 +190,13 @@ export const settingsController = {
       request.query,
     );
 
-    return reply.send({
-      success: true,
-      data: result.history,
-      message: 'Setting history retrieved successfully',
-      pagination: {
-        total: result.total,
-        page: result.page,
-        limit: result.limit,
-        pages: Math.ceil(result.total / result.limit),
-      },
-    });
+    return reply.paginated(
+      result.history,
+      result.page,
+      result.limit,
+      result.total,
+      'Setting history retrieved successfully',
+    );
   },
 
   async getUserSettings(request: FastifyRequest, reply: FastifyReply) {
@@ -247,11 +204,7 @@ export const settingsController = {
       request.user.id,
     );
 
-    return reply.send({
-      success: true,
-      data: settings,
-      message: 'User settings retrieved successfully',
-    });
+    return reply.success(settings, 'User settings retrieved successfully');
   },
 
   async updateUserSetting(
@@ -270,11 +223,7 @@ export const settingsController = {
       value,
     );
 
-    return reply.send({
-      success: true,
-      data: userSetting,
-      message: 'User setting updated successfully',
-    });
+    return reply.success(userSetting, 'User setting updated successfully');
   },
 
   async deleteUserSetting(
@@ -288,9 +237,6 @@ export const settingsController = {
       settingId,
     );
 
-    return reply.send({
-      success: true,
-      message: 'User setting deleted successfully',
-    });
+    return reply.success(null, 'User setting deleted successfully');
   },
 };

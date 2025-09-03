@@ -7,6 +7,7 @@ import fastifyCors from '@fastify/cors';
 
 // Import plugins
 import knexPlugin from '../plugins/knex.plugin';
+import redisPlugin from '../plugins/redis.plugin';
 import responseHandlerPlugin from '../plugins/response-handler.plugin';
 import errorHandlerPlugin from '../plugins/error-handler.plugin';
 import schemasPlugin from '../plugins/schemas.plugin';
@@ -16,6 +17,8 @@ import authStrategiesPlugin from '../modules/auth/strategies/auth.strategies';
 import authPlugin from '../modules/auth/auth.plugin';
 import navigationPlugin from '../modules/navigation/navigation.plugin';
 import userProfilePlugin from '../modules/user-profile/user-profile.plugin';
+import settingsPlugin from '../modules/settings/settings.plugin';
+import swaggerPlugin from '../plugins/swagger.plugin';
 
 /**
  * Build a Fastify app instance for testing
@@ -42,6 +45,9 @@ export async function build(
 
   // 3. Database connection
   await app.register(knexPlugin);
+  
+  // 3.5. Redis connection (optional for caching)
+  await app.register(redisPlugin);
 
   // 4. Authentication
   await app.register(fastifyJwt, {
@@ -78,6 +84,9 @@ export async function build(
 
   // 10. Schema enforcement (ensures all routes have schemas)
   await app.register(schemaEnforcementPlugin);
+  
+  // 10.5. Swagger (needed for schema tags)
+  await app.register(swaggerPlugin);
 
   // 11. Auth strategies
   await app.register(authStrategiesPlugin);
@@ -86,6 +95,7 @@ export async function build(
   await app.register(authPlugin);
   await app.register(navigationPlugin);
   await app.register(userProfilePlugin);
+  await app.register(settingsPlugin);
 
   // Health check
   app.get('/health', async () => {
