@@ -127,6 +127,43 @@ export class AuthRepository {
           updated_at: new Date(),
         });
 
+        // Create user preferences with default values
+        await trx('user_preferences').insert({
+          user_id: user.id,
+          theme: 'default',
+          scheme: 'light',
+          layout: 'classic',
+          language: 'en',
+          timezone: 'UTC',
+          date_format: 'MM/DD/YYYY',
+          time_format: '12h',
+          navigation_collapsed: false,
+          navigation_type: 'default',
+          navigation_position: 'left',
+          notifications_email: true,
+          notifications_push: false,
+          notifications_desktop: true,
+          notifications_sound: true,
+          notifications_security: true,
+          notifications_updates: true,
+          notifications_marketing: false,
+          notifications_reminders: true,
+          profile_visibility: 'public',
+          activity_tracking: true,
+          analytics_opt_out: false,
+          data_sharing: false,
+          high_contrast: false,
+          font_size: 'medium',
+          reduced_motion: false,
+          screen_reader: false,
+          animations: true,
+          lazy_loading: true,
+          caching: true,
+          compression: true,
+          created_at: new Date(),
+          updated_at: new Date(),
+        });
+
         await trx.commit();
         console.log('[AUTH_REPOSITORY] User created successfully:', user.id);
 

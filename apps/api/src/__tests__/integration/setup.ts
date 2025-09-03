@@ -45,11 +45,11 @@ const testDbConfig = {
     max: 5,
   },
   migrations: {
-    directory: './apps/api/src/database/migrations',
+    directory: './src/database/migrations',
     extension: 'ts',
   },
   seeds: {
-    directory: './apps/api/src/database/seeds',
+    directory: './src/database/seeds',
     extension: 'ts',
   },
 };

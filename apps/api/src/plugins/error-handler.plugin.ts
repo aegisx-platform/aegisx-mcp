@@ -6,7 +6,8 @@ async function errorHandlerPlugin(
   _opts: FastifyPluginOptions,
 ) {
   fastify.setErrorHandler(async (error: FastifyError, request, reply) => {
-    const { statusCode = 500, message, code } = error;
+    const { statusCode = 500, message } = error;
+    // Don't destructure 'code' as it's the Fastify error code, not our custom code
 
     // Log the error
     fastify.log.error({
@@ -22,22 +23,48 @@ async function errorHandlerPlugin(
 
     // Validation errors
     if (error.validation) {
-      return reply.error(
-        'VALIDATION_ERROR',
-        'Invalid request data',
-        400,
-        error.validation,
-      );
+      // Format validation errors properly
+      const details = error.validation.map((err: any) => ({
+        field:
+          err.instancePath.replace(/^\//, '') ||
+          err.params?.missingProperty ||
+          'unknown',
+        message: err.message || 'Validation failed',
+        code: err.keyword?.toUpperCase() || 'INVALID',
+        value: err.params?.value,
+      }));
+
+      const response = {
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Invalid request data',
+          details,
+          statusCode: 400,
+        },
+        meta: {
+          timestamp: new Date().toISOString(),
+          version: 'v1',
+          requestId: request.id,
+          environment: ['development', 'staging', 'production'].includes(
+            process.env.NODE_ENV || '',
+          )
+            ? (process.env.NODE_ENV as 'development' | 'staging' | 'production')
+            : 'development',
+        },
+      };
+
+      return reply.code(400).send(response);
     }
 
     // JWT errors
-    if (code === 'FST_JWT_NO_AUTHORIZATION_IN_HEADER') {
+    if (error.code === 'FST_JWT_NO_AUTHORIZATION_IN_HEADER') {
       return reply.unauthorized('No authorization header found');
     }
-    if (code === 'FST_JWT_AUTHORIZATION_TOKEN_EXPIRED') {
+    if (error.code === 'FST_JWT_AUTHORIZATION_TOKEN_EXPIRED') {
       return reply.unauthorized('Token expired');
     }
-    if (code === 'FST_JWT_AUTHORIZATION_TOKEN_INVALID') {
+    if (error.code === 'FST_JWT_AUTHORIZATION_TOKEN_INVALID') {
       return reply.unauthorized('Invalid token');
     }
     if (error.message === 'INVALID_TOKEN') {
@@ -73,7 +100,8 @@ async function errorHandlerPlugin(
     }
     if (
       errorCode === 'USERNAME_ALREADY_EXISTS' ||
-      error.message === 'USERNAME_ALREADY_EXISTS'
+      error.message === 'USERNAME_ALREADY_EXISTS' ||
+      error.message === 'Username already exists'
     ) {
       return reply.error(
         'USERNAME_ALREADY_EXISTS',
@@ -102,6 +130,18 @@ async function errorHandlerPlugin(
         'REFRESH_TOKEN_NOT_FOUND',
         'Refresh token not found or expired',
         401,
+      );
+    }
+
+    // Check for specific error codes from thrown errors
+    if (errorCode === 'EMAIL_ALREADY_EXISTS') {
+      return reply.error('EMAIL_ALREADY_EXISTS', 'Email already exists', 409);
+    }
+    if (errorCode === 'USERNAME_ALREADY_EXISTS') {
+      return reply.error(
+        'USERNAME_ALREADY_EXISTS',
+        'Username already exists',
+        409,
       );
     }
 
