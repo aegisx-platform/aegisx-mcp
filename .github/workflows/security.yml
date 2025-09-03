@@ -34,7 +34,8 @@ jobs:
       - name: Install dependencies
         run: |
           yarn install --frozen-lockfile --ignore-scripts
-          yarn run prepare || true
+          # Skip prepare script in CI to avoid husky errors
+          echo "Skipping prepare script in CI"
 
       - name: Run npm audit
         run: |
@@ -118,7 +119,8 @@ jobs:
       - name: Install dependencies
         run: |
           yarn install --frozen-lockfile --ignore-scripts
-          yarn run prepare || true
+          # Skip prepare script in CI to avoid husky errors
+          echo "Skipping prepare script in CI"
 
       - name: Check licenses
         run: |

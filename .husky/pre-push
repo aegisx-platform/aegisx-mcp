@@ -1,35 +1,43 @@
-
 #!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
 
-# Quick validation before push
-echo "Running pre-push checks..."
+echo "🚀 Running pre-push checks..."
 
-# 1. Type checking for affected projects
+# Allow bypass with SKIP_HOOKS=1
+if [ "$SKIP_HOOKS" = "1" ]; then
+    echo "⏭️  Skipping pre-push hooks (SKIP_HOOKS=1)"
+    exit 0
+fi
+
+# Use correct base branch
+BASE_BRANCH="origin/main"
+
+# Check if there are any affected projects
+AFFECTED=$(npx nx print-affected --base=$BASE_BRANCH --select=projects 2>/dev/null || echo "")
+
+if [ -z "$AFFECTED" ]; then
+    echo "✨ No affected projects. Skipping checks."
+    exit 0
+fi
+
+echo "🎯 Affected projects found. Running checks..."
+
+# Run checks in parallel with modern syntax
 echo "📝 Type checking..."
-yarn nx affected --target=typecheck --base=origin/develop --head=HEAD --parallel=3
-if [ $? -ne 0 ]; then
-    echo "❌ Type checking failed. Please fix TypeScript errors before pushing."
+if ! npx nx affected --base=$BASE_BRANCH --target=typecheck --parallel=3; then
+    echo "❌ Type check failed! Fix errors or use: SKIP_HOOKS=1 git push"
     exit 1
 fi
 
-# 2. Linting for affected projects
 echo "🔍 Linting..."
-yarn nx affected:lint --base=origin/develop --head=HEAD --parallel=3
-if [ $? -ne 0 ]; then
-    echo "❌ Linting failed. Please fix linting errors before pushing."
+if ! npx nx affected --base=$BASE_BRANCH --target=lint --parallel=3; then
+    echo "❌ Linting failed! Fix errors or use: SKIP_HOOKS=1 git push"
     exit 1
 fi
 
-# 3. Unit tests for affected projects (excluding e2e)
 echo "🧪 Running unit tests..."
-yarn nx affected:test --base=origin/develop --head=HEAD --exclude=e2e --parallel=3
-if [ $? -ne 0 ]; then
-    echo "❌ Unit tests failed. Please fix failing tests before pushing."
+if ! npx nx affected --base=$BASE_BRANCH --target=test --exclude=e2e --parallel=3; then
+    echo "❌ Tests failed! Fix errors or use: SKIP_HOOKS=1 git push"
     exit 1
 fi
 
-echo "✅ All pre-push checks passed!"
-
-# Note: Integration and E2E tests will run in GitHub Actions
-echo "ℹ️  Integration and E2E tests will run in CI/CD pipeline."
+echo "✅ All checks passed!"

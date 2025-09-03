@@ -50,7 +50,9 @@
     "version:minor": "npm version minor && git push origin main --tags",
     "version:major": "npm version major && git push origin main --tags",
     "changelog": "scripts/generate-changelog.sh",
-    "security:fix": "npm audit fix"
+    "security:fix": "npm audit fix",
+    "hooks:skip": "echo \"Use SKIP_HOOKS=1 git push to skip pre-push hooks\"",
+    "hooks:test": "npm run lint-staged && .husky/pre-push"
   },
   "private": true,
   "dependencies": {
@@ -100,6 +102,8 @@
     "@angular/compiler-cli": "~20.1.0",
     "@angular/language-service": "~20.1.0",
     "@axe-core/playwright": "^4.10.2",
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
     "@eslint/js": "^9.8.0",
     "@nx/angular": "^21.4.1",
     "@nx/esbuild": "21.4.1",
