@@ -13,19 +13,31 @@ import {
   type GroupedSettings,
   type BulkUpdateSettings,
 } from './settings.schemas';
-import { FastifyRequest } from 'fastify';
+import { FastifyRequest, FastifyInstance } from 'fastify';
 import { SettingsRepository } from './settings.repository';
+import { PerformanceMonitor } from './settings.performance';
+import { RedisCacheService } from '../../services/redis-cache.service';
 
 export class SettingsService {
   private static CACHE_PREFIX = 'settings:';
   private static CACHE_TTL = 3600; // 1 hour
   private repository: SettingsRepository;
+  private logger: any;
+  private cache?: RedisCacheService;
 
   constructor(
     private db: Knex,
     private redis?: Redis,
+    logger?: any,
+    fastify?: FastifyInstance,
   ) {
     this.repository = new SettingsRepository(db);
+    this.logger = logger || console;
+    
+    // Initialize cache service if fastify instance is provided
+    if (fastify && redis) {
+      this.cache = new RedisCacheService(fastify, 'settings');
+    }
   }
 
   /**
@@ -40,36 +52,42 @@ export class SettingsService {
     page: number;
     limit: number;
   }> {
-    const { page = 1, limit = 20 } = query;
+    return PerformanceMonitor.trackQuery(
+      'getSettings',
+      async () => {
+        const { page = 1, limit = 20 } = query;
 
-    // Get settings from repository
-    const { settings, total } = await this.repository.findSettings(query);
+        // Get settings from repository
+        const { settings, total } = await this.repository.findSettings(query);
 
-    // Transform database fields to camelCase
-    const transformedSettings = settings.map((s) =>
-      this.repository.transformSetting(s),
-    );
+        // Transform database fields to camelCase
+        const transformedSettings = settings.map((s) =>
+          this.repository.transformSetting(s),
+        );
 
-    // If user ID provided, merge user overrides
-    if (userId) {
-      const userSettings = await this.getUserSettings(userId);
-      const userSettingsMap = new Map(
-        userSettings.map((us) => [us.settingId, us.value]),
-      );
+        // If user ID provided, merge user overrides
+        if (userId) {
+          const userSettings = await this.getUserSettings(userId);
+          const userSettingsMap = new Map(
+            userSettings.map((us) => [us.settingId, us.value]),
+          );
 
-      transformedSettings.forEach((setting) => {
-        if (userSettingsMap.has(setting.id)) {
-          setting.value = userSettingsMap.get(setting.id);
+          transformedSettings.forEach((setting) => {
+            if (userSettingsMap.has(setting.id)) {
+              setting.value = userSettingsMap.get(setting.id);
+            }
+          });
         }
-      });
-    }
 
-    return {
-      settings: transformedSettings,
-      total,
-      page,
-      limit,
-    };
+        return {
+          settings: transformedSettings,
+          total,
+          page,
+          limit,
+        };
+      },
+      this.logger
+    );
   }
 
   /**
@@ -79,15 +97,41 @@ export class SettingsService {
     namespace = 'default',
     userId?: string,
   ): Promise<GroupedSettings[]> {
-    const cacheKey = `${SettingsService.CACHE_PREFIX}grouped:${namespace}:${userId || 'public'}`;
+    return PerformanceMonitor.trackQuery(
+      'getGroupedSettings',
+      async () => {
+        const cacheKey = `grouped:${namespace}:${userId || 'public'}`;
 
-    // Check cache
-    if (this.redis) {
-      const cached = await this.redis.get(cacheKey);
-      if (cached) {
-        return JSON.parse(cached);
-      }
-    }
+        // Try enhanced cache first
+        if (this.cache) {
+          return this.cache.getOrSet(
+            cacheKey,
+            async () => {
+              // Factory function to get data if not cached
+              return this.computeGroupedSettings(namespace, userId);
+            },
+            {
+              ttl: SettingsService.CACHE_TTL,
+              tags: ['settings', `namespace:${namespace}`],
+              compress: true,
+            }
+          );
+        }
+        
+        // Fallback to direct computation if no cache
+        return this.computeGroupedSettings(namespace, userId);
+      },
+      this.logger
+    );
+  }
+  
+  /**
+   * Compute grouped settings (extracted for reuse)
+   */
+  private async computeGroupedSettings(
+    namespace: string,
+    userId?: string
+  ): Promise<GroupedSettings[]> {
 
     const settings = await this.repository.findGroupedSettings(namespace);
 
@@ -139,15 +183,6 @@ export class SettingsService {
 
       return acc;
     }, [] as GroupedSettings[]);
-
-    // Cache the result
-    if (this.redis) {
-      await this.redis.setex(
-        cacheKey,
-        SettingsService.CACHE_TTL,
-        JSON.stringify(grouped),
-      );
-    }
 
     return grouped;
   }
@@ -599,6 +634,25 @@ export class SettingsService {
     key?: string,
     userId?: string,
   ): Promise<void> {
+    // Use enhanced cache service if available
+    if (this.cache) {
+      if (namespace && key && userId) {
+        // Clear specific user setting cache
+        await this.cache.del(`${namespace}:${key}:${userId}`);
+      } else if (namespace && key) {
+        // Clear all caches for a specific setting
+        await this.cache.delPattern(`${namespace}:${key}:*`);
+      } else if (namespace) {
+        // Clear all caches for a namespace
+        await this.cache.invalidateByTags([`namespace:${namespace}`]);
+      } else {
+        // Clear all settings cache
+        await this.cache.invalidateByTags(['settings']);
+      }
+      return;
+    }
+    
+    // Fallback to direct Redis operations
     if (!this.redis) return;
 
     if (namespace && key && userId) {

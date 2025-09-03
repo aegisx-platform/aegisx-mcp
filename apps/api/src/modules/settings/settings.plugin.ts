@@ -2,6 +2,7 @@ import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import fp from 'fastify-plugin';
 import { settingsRoutes } from './settings.routes';
 import { SettingsService } from './settings.service';
+import { SettingsCacheService } from './settings-cache.service';
 
 async function settingsPlugin(
   fastify: FastifyInstance,
@@ -11,11 +12,35 @@ async function settingsPlugin(
   // TODO: Fix schema registry registration - temporarily commented out for testing
   // fastify.schemaRegistry.registerModuleSchemas('settings', settingsSchemas);
 
-  // Initialize settings service
-  const settingsService = new SettingsService(fastify.knex, fastify.redis);
+  // Initialize settings service with performance monitoring logger and cache
+  const settingsService = new SettingsService(
+    fastify.knex,
+    fastify.redis,
+    fastify.log,
+    fastify
+  );
 
-  // Decorate fastify instance with settings service
+  // Initialize cache service and start cache warming
+  const cacheService = new SettingsCacheService(fastify);
+  
+  // Register cache service with monitoring if available
+  if (fastify.registerCacheService && settingsService['cache']) {
+    fastify.registerCacheService('settings', settingsService['cache']);
+  }
+  
+  // Start cache warming every 30 minutes
+  if (process.env.NODE_ENV === 'production') {
+    cacheService.startCacheWarming(30);
+  }
+
+  // Decorate fastify instance with services
   fastify.decorate('settingsService', settingsService);
+  fastify.decorate('settingsCacheService', cacheService);
+  
+  // Gracefully stop cache warming on shutdown
+  fastify.addHook('onClose', async () => {
+    cacheService.stopCacheWarming();
+  });
 
   // Register settings routes with /api/settings prefix
   await fastify.register(settingsRoutes, { prefix: '/api/settings' });
@@ -38,5 +63,6 @@ export default fp(settingsPlugin, {
 declare module 'fastify' {
   interface FastifyInstance {
     settingsService: SettingsService;
+    settingsCacheService: SettingsCacheService;
   }
 }

@@ -8,6 +8,7 @@ import {
   type GetSettingsQuery,
   type GetSettingHistoryQuery,
 } from './settings.schemas';
+import { SettingsQueryOptimizer } from './settings.performance';
 
 export interface DBSetting {
   id: string;
@@ -86,11 +87,17 @@ export class SettingsRepository {
     if (!includeHidden) qb = qb.where('is_hidden', false);
 
     if (search) {
-      qb = qb.where(function () {
-        this.where('key', 'ilike', `%${search}%`)
-          .orWhere('label', 'ilike', `%${search}%`)
-          .orWhere('description', 'ilike', `%${search}%`);
-      });
+      // Use full-text search for better performance on large datasets
+      if (search.length > 2) {
+        qb = SettingsQueryOptimizer.getOptimizedSearchQuery(this.knex)(qb, search);
+      } else {
+        // Fallback to ILIKE for short searches
+        qb = qb.where(function () {
+          this.where('key', 'ilike', `%${search}%`)
+            .orWhere('label', 'ilike', `%${search}%`)
+            .orWhere('description', 'ilike', `%${search}%`);
+        });
+      }
     }
 
     // Get total count
@@ -108,15 +115,24 @@ export class SettingsRepository {
   }
 
   /**
-   * Find settings grouped by category and group
+   * Find settings grouped by category and group (optimized)
    */
   async findGroupedSettings(namespace = 'default'): Promise<DBSetting[]> {
-    return this.knex('app_settings')
-      .where('namespace', namespace)
-      .where('is_hidden', false)
-      .orderBy('category')
-      .orderBy('group')
-      .orderBy('sort_order');
+    // Use the optimized query that leverages the filter combo index
+    const settings = await SettingsQueryOptimizer.getGroupedSettingsOptimized(
+      this.knex,
+      namespace
+    );
+    
+    // Transform the grouped result back to flat array
+    const flatSettings: DBSetting[] = [];
+    Object.values(settings).forEach(categories => {
+      Object.values(categories).forEach((groupSettings: any[]) => {
+        flatSettings.push(...groupSettings);
+      });
+    });
+    
+    return flatSettings;
   }
 
   /**
@@ -262,10 +278,13 @@ export class SettingsRepository {
   }
 
   /**
-   * Get user settings
+   * Get user settings (optimized with covering index)
    */
   async findUserSettings(userId: string): Promise<DBUserSetting[]> {
-    return this.knex('app_user_settings').where('user_id', userId);
+    // This query now uses the covering index idx_user_settings_lookup
+    return this.knex('app_user_settings')
+      .where('user_id', userId)
+      .select('id', 'user_id', 'setting_id', 'value', 'created_at', 'updated_at');
   }
 
   /**
