@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
-import { SettingsService } from './settings.service';
+import { settingsController } from './settings.controller';
 import {
   GetSettingsQuerySchema,
   GetSettingHistoryQuerySchema,
@@ -13,13 +13,13 @@ import {
   SettingsListResponseSchema,
   GroupedSettingsResponseSchema,
   SettingHistoryResponseSchema,
-  BulkUpdateResponseSchema
+  BulkUpdateResponseSchema,
 } from './settings.schemas';
 import { SchemaRefs } from '../../schemas/registry';
 
 export async function settingsRoutes(fastify: FastifyInstance) {
   const server = fastify.withTypeProvider<TypeBoxTypeProvider>();
-  const service = new SettingsService(fastify.knex, fastify.redis);
+  const controller = settingsController;
 
   // Get all settings (with optional user overrides)
   server.get(
@@ -28,38 +28,19 @@ export async function settingsRoutes(fastify: FastifyInstance) {
       schema: {
         tags: ['Settings'],
         summary: 'Get all settings',
-        description: 'Get all settings with filtering and pagination. Authenticated users get their personal overrides.',
+        description:
+          'Get all settings with filtering and pagination. Authenticated users get their personal overrides.',
         querystring: GetSettingsQuerySchema,
         response: {
           200: SettingsListResponseSchema,
           400: SchemaRefs.ValidationError,
           401: SchemaRefs.Unauthorized,
-          500: SchemaRefs.ServerError
-        }
+          500: SchemaRefs.ServerError,
+        },
       },
       // Optional authentication - user gets personalized settings if authenticated
     },
-    async (request, reply) => {
-      try {
-        const userId = request.user?.id;
-        const result = await service.getSettings(request.query, userId);
-
-        return reply.send({
-          success: true,
-          data: result.settings,
-          message: 'Settings retrieved successfully',
-          pagination: {
-            total: result.total,
-            page: result.page,
-            limit: result.limit,
-            pages: Math.ceil(result.total / result.limit)
-          }
-        });
-      } catch (error) {
-        fastify.log.error('Settings GET error: ' + error);
-        throw error;
-      }
-    }
+    controller.getSettings,
   );
 
   // Get grouped settings
@@ -69,32 +50,23 @@ export async function settingsRoutes(fastify: FastifyInstance) {
       schema: {
         tags: ['Settings'],
         summary: 'Get settings grouped by category',
-        description: 'Get settings organized by category and group for UI display',
+        description:
+          'Get settings organized by category and group for UI display',
         querystring: {
           type: 'object',
           properties: {
-            namespace: { type: 'string', default: 'default' }
-          }
+            namespace: { type: 'string', default: 'default' },
+          },
         },
         response: {
           200: GroupedSettingsResponseSchema,
           401: SchemaRefs.Unauthorized,
-          500: SchemaRefs.ServerError
-        }
+          500: SchemaRefs.ServerError,
+        },
       },
       // Optional authentication - user gets personalized settings if authenticated
     },
-    async (request, reply) => {
-      const { namespace } = request.query as { namespace?: string };
-      const userId = request.user?.id;
-      const grouped = await service.getGroupedSettings(namespace, userId);
-
-      return reply.send({
-        success: true,
-        data: grouped,
-        message: 'Grouped settings retrieved successfully'
-      });
-    }
+    controller.getGroupedSettings,
   );
 
   // Get setting by key
@@ -108,41 +80,25 @@ export async function settingsRoutes(fastify: FastifyInstance) {
         params: {
           type: 'object',
           properties: {
-            key: { type: 'string' }
+            key: { type: 'string' },
           },
-          required: ['key']
+          required: ['key'],
         },
         querystring: {
           type: 'object',
           properties: {
-            namespace: { type: 'string', default: 'default' }
-          }
+            namespace: { type: 'string', default: 'default' },
+          },
         },
         response: {
           200: SettingResponseSchema,
           404: SchemaRefs.NotFound,
-          500: SchemaRefs.ServerError
-        }
+          500: SchemaRefs.ServerError,
+        },
       },
       // Optional authentication - user gets personalized settings if authenticated
     },
-    async (request, reply) => {
-      const { key } = request.params as { key: string };
-      const { namespace } = request.query as { namespace?: string };
-      const userId = request.user?.id;
-      
-      const setting = await service.getSettingByKey(key, namespace, userId);
-      
-      if (!setting) {
-        return reply.notFound('Setting not found');
-      }
-
-      return reply.send({
-        success: true,
-        data: setting,
-        message: 'Setting retrieved successfully'
-      });
-    }
+    controller.getSettingByKey,
   );
 
   // Get setting value only
@@ -156,53 +112,37 @@ export async function settingsRoutes(fastify: FastifyInstance) {
         params: {
           type: 'object',
           properties: {
-            key: { type: 'string' }
+            key: { type: 'string' },
           },
-          required: ['key']
+          required: ['key'],
         },
         querystring: {
           type: 'object',
           properties: {
-            namespace: { type: 'string', default: 'default' }
-          }
+            namespace: { type: 'string', default: 'default' },
+          },
         },
         response: {
           200: {
             type: 'object',
             properties: {
               success: { type: 'boolean' },
-              data: { 
+              data: {
                 type: 'object',
                 properties: {
-                  value: {}
-                }
+                  value: {},
+                },
               },
-              message: { type: 'string' }
-            }
+              message: { type: 'string' },
+            },
           },
           404: SchemaRefs.NotFound,
-          500: SchemaRefs.ServerError
-        }
+          500: SchemaRefs.ServerError,
+        },
       },
       // Optional authentication - user gets personalized settings if authenticated
     },
-    async (request, reply) => {
-      const { key } = request.params as { key: string };
-      const { namespace } = request.query as { namespace?: string };
-      const userId = request.user?.id;
-      
-      const value = await service.getSettingValue(key, namespace, userId);
-      
-      if (value === null) {
-        return reply.notFound('Setting not found');
-      }
-
-      return reply.send({
-        success: true,
-        data: { value },
-        message: 'Setting value retrieved successfully'
-      });
-    }
+    controller.getSettingValue,
   );
 
   // Get setting by ID (admin only)
@@ -219,25 +159,12 @@ export async function settingsRoutes(fastify: FastifyInstance) {
           401: SchemaRefs.Unauthorized,
           403: SchemaRefs.Forbidden,
           404: SchemaRefs.NotFound,
-          500: SchemaRefs.ServerError
-        }
+          500: SchemaRefs.ServerError,
+        },
       },
-      preValidation: [fastify.authenticate, fastify.verifyRole(['admin'])]
+      preValidation: [fastify.authenticate, fastify.verifyRole(['admin'])],
     },
-    async (request, reply) => {
-      const { id } = request.params as { id: string };
-      const setting = await service.getSettingById(id);
-      
-      if (!setting) {
-        return reply.notFound('Setting not found');
-      }
-
-      return reply.send({
-        success: true,
-        data: setting,
-        message: 'Setting retrieved successfully'
-      });
-    }
+    controller.getSettingById,
   );
 
   // Create new setting (admin only)
@@ -255,20 +182,12 @@ export async function settingsRoutes(fastify: FastifyInstance) {
           401: SchemaRefs.Unauthorized,
           403: SchemaRefs.Forbidden,
           409: SchemaRefs.Conflict,
-          500: SchemaRefs.ServerError
-        }
+          500: SchemaRefs.ServerError,
+        },
       },
-      preValidation: [fastify.authenticate, fastify.verifyRole(['admin'])]
+      preValidation: [fastify.authenticate, fastify.verifyRole(['admin'])],
     },
-    async (request, reply) => {
-      const setting = await service.createSetting(request.body, request.user.id);
-      
-      return reply.status(201).send({
-        success: true,
-        data: setting,
-        message: 'Setting created successfully'
-      });
-    }
+    controller.createSetting,
   );
 
   // Update setting (admin only)
@@ -287,21 +206,12 @@ export async function settingsRoutes(fastify: FastifyInstance) {
           401: SchemaRefs.Unauthorized,
           403: SchemaRefs.Forbidden,
           404: SchemaRefs.NotFound,
-          500: SchemaRefs.ServerError
-        }
+          500: SchemaRefs.ServerError,
+        },
       },
-      preValidation: [fastify.authenticate, fastify.verifyRole(['admin'])]
+      preValidation: [fastify.authenticate, fastify.verifyRole(['admin'])],
     },
-    async (request, reply) => {
-      const { id } = request.params as { id: string };
-      const setting = await service.updateSetting(id, request.body, request.user.id);
-      
-      return reply.send({
-        success: true,
-        data: setting,
-        message: 'Setting updated successfully'
-      });
-    }
+    controller.updateSetting,
   );
 
   // Update setting value only
@@ -320,22 +230,12 @@ export async function settingsRoutes(fastify: FastifyInstance) {
           401: SchemaRefs.Unauthorized,
           403: SchemaRefs.Forbidden,
           404: SchemaRefs.NotFound,
-          500: SchemaRefs.ServerError
-        }
+          500: SchemaRefs.ServerError,
+        },
       },
-      preValidation: [fastify.authenticate, fastify.verifyRole(['admin'])]
+      preValidation: [fastify.authenticate, fastify.verifyRole(['admin'])],
     },
-    async (request, reply) => {
-      const { id } = request.params as { id: string };
-      const { value } = request.body;
-      const setting = await service.updateSettingValue(id, value, request.user.id, request);
-      
-      return reply.send({
-        success: true,
-        data: setting,
-        message: 'Setting value updated successfully'
-      });
-    }
+    controller.updateSettingValue,
   );
 
   // Delete setting (admin only)
@@ -352,26 +252,18 @@ export async function settingsRoutes(fastify: FastifyInstance) {
             type: 'object',
             properties: {
               success: { type: 'boolean' },
-              message: { type: 'string' }
-            }
+              message: { type: 'string' },
+            },
           },
           401: SchemaRefs.Unauthorized,
           403: SchemaRefs.Forbidden,
           404: SchemaRefs.NotFound,
-          500: SchemaRefs.ServerError
-        }
+          500: SchemaRefs.ServerError,
+        },
       },
-      preValidation: [fastify.authenticate, fastify.verifyRole(['admin'])]
+      preValidation: [fastify.authenticate, fastify.verifyRole(['admin'])],
     },
-    async (request, reply) => {
-      const { id } = request.params as { id: string };
-      await service.deleteSetting(id, request.user.id);
-      
-      return reply.send({
-        success: true,
-        message: 'Setting deleted successfully'
-      });
-    }
+    controller.deleteSetting,
   );
 
   // Bulk update settings
@@ -386,33 +278,20 @@ export async function settingsRoutes(fastify: FastifyInstance) {
         querystring: {
           type: 'object',
           properties: {
-            namespace: { type: 'string', default: 'default' }
-          }
+            namespace: { type: 'string', default: 'default' },
+          },
         },
         response: {
           200: BulkUpdateResponseSchema,
           400: SchemaRefs.ValidationError,
           401: SchemaRefs.Unauthorized,
           403: SchemaRefs.Forbidden,
-          500: SchemaRefs.ServerError
-        }
+          500: SchemaRefs.ServerError,
+        },
       },
-      preValidation: [fastify.authenticate, fastify.verifyRole(['admin'])]
+      preValidation: [fastify.authenticate, fastify.verifyRole(['admin'])],
     },
-    async (request, reply) => {
-      const { namespace } = request.query as { namespace?: string };
-      const result = await service.bulkUpdateSettings(
-        request.body,
-        namespace,
-        request.user.id
-      );
-      
-      return reply.send({
-        success: true,
-        data: result,
-        message: 'Bulk update completed'
-      });
-    }
+    controller.bulkUpdateSettings,
   );
 
   // Get setting history
@@ -429,26 +308,12 @@ export async function settingsRoutes(fastify: FastifyInstance) {
           400: SchemaRefs.ValidationError,
           401: SchemaRefs.Unauthorized,
           403: SchemaRefs.Forbidden,
-          500: SchemaRefs.ServerError
-        }
+          500: SchemaRefs.ServerError,
+        },
       },
-      preValidation: [fastify.authenticate, fastify.verifyRole(['admin'])]
+      preValidation: [fastify.authenticate, fastify.verifyRole(['admin'])],
     },
-    async (request, reply) => {
-      const result = await service.getSettingHistory(request.query);
-      
-      return reply.send({
-        success: true,
-        data: result.history,
-        message: 'Setting history retrieved successfully',
-        pagination: {
-          total: result.total,
-          page: result.page,
-          limit: result.limit,
-          pages: Math.ceil(result.total / result.limit)
-        }
-      });
-    }
+    controller.getSettingHistory,
   );
 
   // User-specific settings routes
@@ -466,24 +331,16 @@ export async function settingsRoutes(fastify: FastifyInstance) {
             properties: {
               success: { type: 'boolean' },
               data: { type: 'array' },
-              message: { type: 'string' }
-            }
+              message: { type: 'string' },
+            },
           },
           401: SchemaRefs.Unauthorized,
-          500: SchemaRefs.ServerError
-        }
+          500: SchemaRefs.ServerError,
+        },
       },
-      preValidation: [fastify.authenticate]
+      preValidation: [fastify.authenticate],
     },
-    async (request, reply) => {
-      const settings = await service.getUserSettings(request.user.id);
-      
-      return reply.send({
-        success: true,
-        data: settings,
-        message: 'User settings retrieved successfully'
-      });
-    }
+    controller.getUserSettings,
   );
 
   // Update user setting
@@ -497,9 +354,9 @@ export async function settingsRoutes(fastify: FastifyInstance) {
         params: {
           type: 'object',
           properties: {
-            settingId: { type: 'string', format: 'uuid' }
+            settingId: { type: 'string', format: 'uuid' },
           },
-          required: ['settingId']
+          required: ['settingId'],
         },
         body: UpdateUserSettingSchema,
         response: {
@@ -508,33 +365,18 @@ export async function settingsRoutes(fastify: FastifyInstance) {
             properties: {
               success: { type: 'boolean' },
               data: { type: 'object' },
-              message: { type: 'string' }
-            }
+              message: { type: 'string' },
+            },
           },
           400: SchemaRefs.ValidationError,
           401: SchemaRefs.Unauthorized,
           404: SchemaRefs.NotFound,
-          500: SchemaRefs.ServerError
-        }
+          500: SchemaRefs.ServerError,
+        },
       },
-      preValidation: [fastify.authenticate]
+      preValidation: [fastify.authenticate],
     },
-    async (request, reply) => {
-      const { settingId } = request.params as { settingId: string };
-      const { value } = request.body;
-      
-      const userSetting = await service.updateUserSetting(
-        request.user.id,
-        settingId,
-        value
-      );
-      
-      return reply.send({
-        success: true,
-        data: userSetting,
-        message: 'User setting updated successfully'
-      });
-    }
+    controller.updateUserSetting,
   );
 
   // Delete user setting
@@ -544,38 +386,30 @@ export async function settingsRoutes(fastify: FastifyInstance) {
       schema: {
         tags: ['Settings'],
         summary: 'Delete user setting',
-        description: 'Remove user-specific setting override (revert to default)',
+        description:
+          'Remove user-specific setting override (revert to default)',
         params: {
           type: 'object',
           properties: {
-            settingId: { type: 'string', format: 'uuid' }
+            settingId: { type: 'string', format: 'uuid' },
           },
-          required: ['settingId']
+          required: ['settingId'],
         },
         response: {
           200: {
             type: 'object',
             properties: {
               success: { type: 'boolean' },
-              message: { type: 'string' }
-            }
+              message: { type: 'string' },
+            },
           },
           401: SchemaRefs.Unauthorized,
           404: SchemaRefs.NotFound,
-          500: SchemaRefs.ServerError
-        }
+          500: SchemaRefs.ServerError,
+        },
       },
-      preValidation: [fastify.authenticate]
+      preValidation: [fastify.authenticate],
     },
-    async (request, reply) => {
-      const { settingId } = request.params as { settingId: string };
-      
-      await service.deleteUserSetting(request.user.id, settingId);
-      
-      return reply.send({
-        success: true,
-        message: 'User setting deleted successfully'
-      });
-    }
+    controller.deleteUserSetting,
   );
 }

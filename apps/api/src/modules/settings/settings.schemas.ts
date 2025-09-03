@@ -10,40 +10,50 @@ export const DataTypeEnum = Type.Union([
   Type.Literal('array'),
   Type.Literal('date'),
   Type.Literal('email'),
-  Type.Literal('url')
+  Type.Literal('url'),
 ]);
 
 export const AccessLevelEnum = Type.Union([
   Type.Literal('public'),
   Type.Literal('user'),
   Type.Literal('admin'),
-  Type.Literal('system')
+  Type.Literal('system'),
 ]);
 
 // Validation Rules Schema
-export const ValidationRulesSchema = Type.Object({
-  required: Type.Optional(Type.Boolean()),
-  minLength: Type.Optional(Type.Number()),
-  maxLength: Type.Optional(Type.Number()),
-  min: Type.Optional(Type.Number()),
-  max: Type.Optional(Type.Number()),
-  pattern: Type.Optional(Type.String()),
-  enum: Type.Optional(Type.Array(Type.Any()))
-}, { additionalProperties: true });
+export const ValidationRulesSchema = Type.Object(
+  {
+    required: Type.Optional(Type.Boolean()),
+    minLength: Type.Optional(Type.Number()),
+    maxLength: Type.Optional(Type.Number()),
+    min: Type.Optional(Type.Number()),
+    max: Type.Optional(Type.Number()),
+    pattern: Type.Optional(Type.String()),
+    enum: Type.Optional(Type.Array(Type.Any())),
+  },
+  { additionalProperties: true },
+);
 
 // UI Schema
-export const UISchemaSchema = Type.Object({
-  component: Type.String(),
-  placeholder: Type.Optional(Type.String()),
-  options: Type.Optional(Type.Array(Type.Object({
-    value: Type.Any(),
-    label: Type.String()
-  }))),
-  rows: Type.Optional(Type.Number()),
-  suffix: Type.Optional(Type.String()),
-  prefix: Type.Optional(Type.String()),
-  hint: Type.Optional(Type.String())
-}, { additionalProperties: true });
+export const UISchemaSchema = Type.Object(
+  {
+    component: Type.String(),
+    placeholder: Type.Optional(Type.String()),
+    options: Type.Optional(
+      Type.Array(
+        Type.Object({
+          value: Type.Any(),
+          label: Type.String(),
+        }),
+      ),
+    ),
+    rows: Type.Optional(Type.Number()),
+    suffix: Type.Optional(Type.String()),
+    prefix: Type.Optional(Type.String()),
+    hint: Type.Optional(Type.String()),
+  },
+  { additionalProperties: true },
+);
 
 // Main Setting Schema
 export const SettingSchema = Type.Object({
@@ -67,13 +77,15 @@ export const SettingSchema = Type.Object({
   createdBy: Type.Optional(Type.String({ format: 'uuid' })),
   updatedBy: Type.Optional(Type.String({ format: 'uuid' })),
   createdAt: Type.String({ format: 'date-time' }),
-  updatedAt: Type.String({ format: 'date-time' })
+  updatedAt: Type.String({ format: 'date-time' }),
 });
 
 // Create/Update DTOs
 export const CreateSettingSchema = Type.Object({
   key: Type.String({ minLength: 1, maxLength: 255 }),
-  namespace: Type.Optional(Type.String({ minLength: 1, maxLength: 100, default: 'default' })),
+  namespace: Type.Optional(
+    Type.String({ minLength: 1, maxLength: 100, default: 'default' }),
+  ),
   category: Type.String({ minLength: 1, maxLength: 100 }),
   value: Type.Any(),
   defaultValue: Type.Any(),
@@ -87,13 +99,13 @@ export const CreateSettingSchema = Type.Object({
   validationRules: Type.Optional(ValidationRulesSchema),
   uiSchema: Type.Optional(UISchemaSchema),
   sortOrder: Type.Optional(Type.Number({ default: 0 })),
-  group: Type.Optional(Type.String({ maxLength: 100 }))
+  group: Type.Optional(Type.String({ maxLength: 100 })),
 });
 
 export const UpdateSettingSchema = Type.Partial(CreateSettingSchema);
 
 export const UpdateSettingValueSchema = Type.Object({
-  value: Type.Any()
+  value: Type.Any(),
 });
 
 // User Settings Override
@@ -103,11 +115,11 @@ export const UserSettingSchema = Type.Object({
   settingId: Type.String({ format: 'uuid' }),
   value: Type.Any(),
   createdAt: Type.String({ format: 'date-time' }),
-  updatedAt: Type.String({ format: 'date-time' })
+  updatedAt: Type.String({ format: 'date-time' }),
 });
 
 export const UpdateUserSettingSchema = Type.Object({
-  value: Type.Any()
+  value: Type.Any(),
 });
 
 // Settings History
@@ -121,7 +133,7 @@ export const SettingHistorySchema = Type.Object({
   changedBy: Type.Optional(Type.String({ format: 'uuid' })),
   changedAt: Type.String({ format: 'date-time' }),
   ipAddress: Type.Optional(Type.String()),
-  userAgent: Type.Optional(Type.String())
+  userAgent: Type.Optional(Type.String()),
 });
 
 // Query Params
@@ -134,14 +146,18 @@ export const GetSettingsQuerySchema = Type.Object({
   search: Type.Optional(Type.String()),
   page: Type.Optional(Type.Integer({ minimum: 1, default: 1 })),
   limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 100, default: 20 })),
-  sortBy: Type.Optional(Type.Union([
-    Type.Literal('key'),
-    Type.Literal('category'),
-    Type.Literal('sortOrder'),
-    Type.Literal('createdAt'),
-    Type.Literal('updatedAt')
-  ])),
-  sortOrder: Type.Optional(Type.Union([Type.Literal('asc'), Type.Literal('desc')]))
+  sortBy: Type.Optional(
+    Type.Union([
+      Type.Literal('key'),
+      Type.Literal('category'),
+      Type.Literal('sortOrder'),
+      Type.Literal('createdAt'),
+      Type.Literal('updatedAt'),
+    ]),
+  ),
+  sortOrder: Type.Optional(
+    Type.Union([Type.Literal('asc'), Type.Literal('desc')]),
+  ),
 });
 
 export const GetSettingHistoryQuerySchema = Type.Object({
@@ -151,62 +167,70 @@ export const GetSettingHistoryQuerySchema = Type.Object({
   startDate: Type.Optional(Type.String({ format: 'date-time' })),
   endDate: Type.Optional(Type.String({ format: 'date-time' })),
   page: Type.Optional(Type.Integer({ minimum: 1, default: 1 })),
-  limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 100, default: 20 }))
+  limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 100, default: 20 })),
 });
 
 // Grouped Settings Response
 export const GroupedSettingsSchema = Type.Object({
   category: Type.String(),
-  groups: Type.Array(Type.Object({
-    name: Type.Optional(Type.String()),
-    settings: Type.Array(SettingSchema)
-  }))
+  groups: Type.Array(
+    Type.Object({
+      name: Type.Optional(Type.String()),
+      settings: Type.Array(SettingSchema),
+    }),
+  ),
 });
 
 // Bulk Operations
-export const BulkUpdateSettingsSchema = Type.Array(Type.Object({
-  key: Type.String(),
-  value: Type.Any()
-}));
+export const BulkUpdateSettingsSchema = Type.Array(
+  Type.Object({
+    key: Type.String(),
+    value: Type.Any(),
+  }),
+);
 
 // Response Schemas
 export const SettingResponseSchema = Type.Object({
-  success: Type.Boolean(),
+  success: Type.Literal(true),
   data: SettingSchema,
-  message: Type.String()
+  message: Type.String(),
 });
 
 export const SettingsListResponseSchema = Type.Object({
-  success: Type.Boolean(),
+  success: Type.Literal(true),
   data: Type.Array(SettingSchema),
   message: Type.String(),
-  pagination: PaginationMetaSchema
+  pagination: PaginationMetaSchema,
 });
 
 export const GroupedSettingsResponseSchema = Type.Object({
-  success: Type.Boolean(),
+  success: Type.Literal(true),
   data: Type.Array(GroupedSettingsSchema),
-  message: Type.String()
+  message: Type.String(),
 });
 
 export const SettingHistoryResponseSchema = Type.Object({
-  success: Type.Boolean(),
+  success: Type.Literal(true),
   data: Type.Array(SettingHistorySchema),
   message: Type.String(),
-  pagination: PaginationMetaSchema
+  pagination: PaginationMetaSchema,
 });
 
 export const BulkUpdateResponseSchema = Type.Object({
-  success: Type.Boolean(),
+  success: Type.Literal(true),
   data: Type.Object({
     updated: Type.Number(),
     failed: Type.Number(),
-    errors: Type.Optional(Type.Array(Type.Object({
-      key: Type.String(),
-      error: Type.String()
-    })))
+    errors: Type.Optional(
+      Type.Array(
+        Type.Object({
+          key: Type.String(),
+          error: Type.String(),
+        }),
+      ),
+    ),
   }),
-  message: Type.String()
+  message: Type.String(),
 });
 
 // Type exports
@@ -218,7 +242,9 @@ export type UserSetting = Static<typeof UserSettingSchema>;
 export type UpdateUserSetting = Static<typeof UpdateUserSettingSchema>;
 export type SettingHistory = Static<typeof SettingHistorySchema>;
 export type GetSettingsQuery = Static<typeof GetSettingsQuerySchema>;
-export type GetSettingHistoryQuery = Static<typeof GetSettingHistoryQuerySchema>;
+export type GetSettingHistoryQuery = Static<
+  typeof GetSettingHistoryQuerySchema
+>;
 export type GroupedSettings = Static<typeof GroupedSettingsSchema>;
 export type BulkUpdateSettings = Static<typeof BulkUpdateSettingsSchema>;
 
@@ -232,19 +258,19 @@ export const settingsSchemas = {
   'settings-user-setting': UserSettingSchema,
   'settings-update-user-setting': UpdateUserSettingSchema,
   'settings-setting-history': SettingHistorySchema,
-  
+
   // Query schemas
   'settings-get-settings-query': GetSettingsQuerySchema,
   'settings-get-setting-history-query': GetSettingHistoryQuerySchema,
-  
+
   // Grouped schemas
   'settings-grouped-settings': GroupedSettingsSchema,
   'settings-bulk-update-settings': BulkUpdateSettingsSchema,
-  
+
   // Response schemas
   'settings-setting-response': SettingResponseSchema,
   'settings-settings-list-response': SettingsListResponseSchema,
   'settings-grouped-settings-response': GroupedSettingsResponseSchema,
   'settings-setting-history-response': SettingHistoryResponseSchema,
-  'settings-bulk-update-response': BulkUpdateResponseSchema
+  'settings-bulk-update-response': BulkUpdateResponseSchema,
 };

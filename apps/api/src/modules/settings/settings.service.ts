@@ -14,15 +14,19 @@ import {
   type BulkUpdateSettings,
 } from './settings.schemas';
 import { FastifyRequest } from 'fastify';
+import { SettingsRepository } from './settings.repository';
 
 export class SettingsService {
   private static CACHE_PREFIX = 'settings:';
   private static CACHE_TTL = 3600; // 1 hour
+  private repository: SettingsRepository;
 
   constructor(
     private db: Knex,
     private redis?: Redis,
-  ) {}
+  ) {
+    this.repository = new SettingsRepository(db);
+  }
 
   /**
    * Get all settings with filtering and pagination
@@ -36,48 +40,15 @@ export class SettingsService {
     page: number;
     limit: number;
   }> {
-    const {
-      namespace = 'default',
-      category,
-      group,
-      accessLevel,
-      includeHidden = false,
-      search,
-      page = 1,
-      limit = 20,
-      sortBy = 'sort_order',
-      sortOrder = 'asc',
-    } = query;
+    const { page = 1, limit = 20 } = query;
 
-    let qb = this.db('app_settings').where('namespace', namespace);
-
-    // Apply filters
-    if (category) qb = qb.where('category', category);
-    if (group) qb = qb.where('group', group);
-    if (accessLevel) qb = qb.where('access_level', accessLevel);
-    if (!includeHidden) qb = qb.where('is_hidden', false);
-
-    if (search) {
-      qb = qb.where(function () {
-        this.where('key', 'ilike', `%${search}%`)
-          .orWhere('label', 'ilike', `%${search}%`)
-          .orWhere('description', 'ilike', `%${search}%`);
-      });
-    }
-
-    // Get total count
-    const [{ count }] = await qb.clone().count('* as count');
-    const total = parseInt(count as string, 10);
-
-    // Apply pagination and sorting
-    const offset = (page - 1) * limit;
-    const settings = await qb
-      .orderBy(sortBy, sortOrder as 'asc' | 'desc')
-      .limit(limit)
-      .offset(offset);
+    // Get settings from repository
+    const { settings, total } = await this.repository.findSettings(query);
 
     // Transform database fields to camelCase
-    const transformedSettings = settings.map((s) => this.transformSetting(s));
+    const transformedSettings = settings.map((s) =>
+      this.repository.transformSetting(s),
+    );
 
     // If user ID provided, merge user overrides
     if (userId) {
@@ -118,14 +89,12 @@ export class SettingsService {
       }
     }
 
-    const settings = await this.db('app_settings')
-      .where('namespace', namespace)
-      .where('is_hidden', false)
-      .orderBy('category', 'asc')
-      .orderBy('sort_order', 'asc');
+    const settings = await this.repository.findGroupedSettings(namespace);
 
     // Transform and apply user overrides
-    const transformedSettings = settings.map((s) => this.transformSetting(s));
+    const transformedSettings = settings.map((s) =>
+      this.repository.transformSetting(s),
+    );
 
     if (userId) {
       const userSettings = await this.getUserSettings(userId);
@@ -201,23 +170,20 @@ export class SettingsService {
       }
     }
 
-    const setting = await this.db('app_settings')
-      .where('key', key)
-      .where('namespace', namespace)
-      .first();
+    const setting = await this.repository.findSettingByKey(key, namespace);
 
     if (!setting) {
       return null;
     }
 
-    const transformedSetting = this.transformSetting(setting);
+    const transformedSetting = this.repository.transformSetting(setting);
 
     // Apply user override if user ID provided
     if (userId) {
-      const userSetting = await this.db('app_user_settings')
-        .where('user_id', userId)
-        .where('setting_id', setting.id)
-        .first();
+      const userSetting = await this.repository.findUserSetting(
+        userId,
+        setting.id,
+      );
 
       if (userSetting) {
         transformedSetting.value = userSetting.value;
@@ -240,8 +206,8 @@ export class SettingsService {
    * Get a single setting by ID
    */
   async getSettingById(id: string): Promise<Setting | null> {
-    const setting = await this.db('app_settings').where('id', id).first();
-    return setting ? this.transformSetting(setting) : null;
+    const setting = await this.repository.findSettingById(id);
+    return setting ? this.repository.transformSetting(setting) : null;
   }
 
   /**
@@ -264,10 +230,10 @@ export class SettingsService {
     createdBy?: string,
   ): Promise<Setting> {
     // Check if setting already exists
-    const existing = await this.db('app_settings')
-      .where('key', data.key)
-      .where('namespace', data.namespace || 'default')
-      .first();
+    const existing = await this.repository.settingExists(
+      data.key,
+      data.namespace || 'default',
+    );
 
     if (existing) {
       const error = new Error(
@@ -278,34 +244,15 @@ export class SettingsService {
       throw error;
     }
 
-    const [created] = await this.db('app_settings')
-      .insert({
-        key: data.key,
-        namespace: data.namespace || 'default',
-        category: data.category,
-        value: JSON.stringify(data.value),
-        default_value: JSON.stringify(data.defaultValue),
-        label: data.label,
-        description: data.description,
-        data_type: data.dataType,
-        access_level: data.accessLevel || 'admin',
-        is_encrypted: data.isEncrypted || false,
-        is_readonly: data.isReadonly || false,
-        is_hidden: data.isHidden || false,
-        validation_rules: data.validationRules
-          ? JSON.stringify(data.validationRules)
-          : null,
-        ui_schema: data.uiSchema ? JSON.stringify(data.uiSchema) : null,
-        sort_order: data.sortOrder || 0,
-        group: data.group,
-        created_by: createdBy,
-      })
-      .returning('*');
+    const created = await this.repository.createSetting({
+      ...data,
+      created_by: createdBy,
+    });
 
     // Clear cache
     await this.clearCache();
 
-    return this.transformSetting(created);
+    return this.repository.transformSetting(created);
   }
 
   /**
@@ -325,39 +272,14 @@ export class SettingsService {
       throw new Error('Cannot update value of readonly setting');
     }
 
-    const updateData: any = {
+    const updated = await this.repository.updateSetting(id, {
+      ...data,
       updated_by: updatedBy,
-      updated_at: new Date(),
-    };
+    });
 
-    // Map fields to database columns
-    if (data.key !== undefined) updateData.key = data.key;
-    if (data.namespace !== undefined) updateData.namespace = data.namespace;
-    if (data.category !== undefined) updateData.category = data.category;
-    if (data.value !== undefined) updateData.value = JSON.stringify(data.value);
-    if (data.defaultValue !== undefined)
-      updateData.default_value = JSON.stringify(data.defaultValue);
-    if (data.label !== undefined) updateData.label = data.label;
-    if (data.description !== undefined)
-      updateData.description = data.description;
-    if (data.dataType !== undefined) updateData.data_type = data.dataType;
-    if (data.accessLevel !== undefined)
-      updateData.access_level = data.accessLevel;
-    if (data.isEncrypted !== undefined)
-      updateData.is_encrypted = data.isEncrypted;
-    if (data.isReadonly !== undefined) updateData.is_readonly = data.isReadonly;
-    if (data.isHidden !== undefined) updateData.is_hidden = data.isHidden;
-    if (data.validationRules !== undefined)
-      updateData.validation_rules = JSON.stringify(data.validationRules);
-    if (data.uiSchema !== undefined)
-      updateData.ui_schema = JSON.stringify(data.uiSchema);
-    if (data.sortOrder !== undefined) updateData.sort_order = data.sortOrder;
-    if (data.group !== undefined) updateData.group = data.group;
-
-    const [updated] = await this.db('app_settings')
-      .where('id', id)
-      .update(updateData)
-      .returning('*');
+    if (!updated) {
+      throw new Error('Failed to update setting');
+    }
 
     // Log change to history
     if (data.value !== undefined && existing.value !== data.value) {
@@ -373,7 +295,7 @@ export class SettingsService {
     // Clear cache
     await this.clearCache();
 
-    return this.transformSetting(updated);
+    return this.repository.transformSetting(updated);
   }
 
   /**
@@ -403,14 +325,15 @@ export class SettingsService {
       );
     }
 
-    const [updated] = await this.db('app_settings')
-      .where('id', id)
-      .update({
-        value: JSON.stringify(value),
-        updated_by: updatedBy,
-        updated_at: new Date(),
-      })
-      .returning('*');
+    const updated = await this.repository.updateSettingValue(
+      id,
+      value,
+      updatedBy,
+    );
+
+    if (!updated) {
+      throw new Error('Failed to update setting value');
+    }
 
     // Log change to history
     await this.logSettingChange(
@@ -426,7 +349,7 @@ export class SettingsService {
     // Clear cache
     await this.clearCache();
 
-    return this.transformSetting(updated);
+    return this.repository.transformSetting(updated);
   }
 
   /**
@@ -445,7 +368,7 @@ export class SettingsService {
     // Log deletion to history
     await this.logSettingChange(id, existing.value, null, 'delete', deletedBy);
 
-    await this.db('app_settings').where('id', id).delete();
+    await this.repository.deleteSetting(id);
 
     // Clear cache
     await this.clearCache();
@@ -455,19 +378,8 @@ export class SettingsService {
    * Get user settings
    */
   async getUserSettings(userId: string): Promise<UserSetting[]> {
-    const settings = await this.db('app_user_settings').where(
-      'user_id',
-      userId,
-    );
-
-    return settings.map((s) => ({
-      id: s.id,
-      userId: s.user_id,
-      settingId: s.setting_id,
-      value: s.value,
-      createdAt: s.created_at,
-      updatedAt: s.updated_at,
-    }));
+    const settings = await this.repository.findUserSettings(userId);
+    return settings.map((s) => this.repository.transformUserSetting(s));
   }
 
   /**
@@ -492,43 +404,17 @@ export class SettingsService {
       );
     }
 
-    // Check if user setting exists
-    const existing = await this.db('app_user_settings')
-      .where('user_id', userId)
-      .where('setting_id', settingId)
-      .first();
-
-    let result;
-    if (existing) {
-      [result] = await this.db('app_user_settings')
-        .where('user_id', userId)
-        .where('setting_id', settingId)
-        .update({
-          value: JSON.stringify(value),
-          updated_at: new Date(),
-        })
-        .returning('*');
-    } else {
-      [result] = await this.db('app_user_settings')
-        .insert({
-          user_id: userId,
-          setting_id: settingId,
-          value: JSON.stringify(value),
-        })
-        .returning('*');
-    }
+    // Upsert user setting
+    const result = await this.repository.upsertUserSetting(
+      userId,
+      settingId,
+      value,
+    );
 
     // Clear cache
     await this.clearCache(setting.namespace, setting.key, userId);
 
-    return {
-      id: result.id,
-      userId: result.user_id,
-      settingId: result.setting_id,
-      value: result.value,
-      createdAt: result.created_at,
-      updatedAt: result.updated_at,
-    };
+    return this.repository.transformUserSetting(result);
   }
 
   /**
@@ -540,10 +426,7 @@ export class SettingsService {
       throw new Error('Setting not found');
     }
 
-    await this.db('app_user_settings')
-      .where('user_id', userId)
-      .where('setting_id', settingId)
-      .delete();
+    await this.repository.deleteUserSetting(userId, settingId);
 
     // Clear cache
     await this.clearCache(setting.namespace, setting.key, userId);
@@ -601,78 +484,14 @@ export class SettingsService {
     page: number;
     limit: number;
   }> {
-    const {
-      settingId,
-      action,
-      changedBy,
-      startDate,
-      endDate,
-      page = 1,
-      limit = 20,
-    } = query;
-
-    let qb = this.db('app_settings_history');
-
-    if (settingId) qb = qb.where('setting_id', settingId);
-    if (action) qb = qb.where('action', action);
-    if (changedBy) qb = qb.where('changed_by', changedBy);
-    if (startDate) qb = qb.where('changed_at', '>=', startDate);
-    if (endDate) qb = qb.where('changed_at', '<=', endDate);
-
-    const [{ count }] = await qb.clone().count('* as count');
-    const total = parseInt(count as string, 10);
-
-    const offset = (page - 1) * limit;
-    const history = await qb
-      .orderBy('changed_at', 'desc')
-      .limit(limit)
-      .offset(offset);
+    const { page = 1, limit = 20 } = query;
+    const { history, total } = await this.repository.findSettingHistory(query);
 
     return {
-      history: history.map((h) => ({
-        id: h.id,
-        settingId: h.setting_id,
-        oldValue: h.old_value,
-        newValue: h.new_value,
-        action: h.action,
-        reason: h.reason,
-        changedBy: h.changed_by,
-        changedAt: h.changed_at,
-        ipAddress: h.ip_address,
-        userAgent: h.user_agent,
-      })),
+      history: history.map((h) => this.repository.transformSettingHistory(h)),
       total,
       page,
       limit,
-    };
-  }
-
-  /**
-   * Helper: Transform database record to Setting type
-   */
-  private transformSetting(record: any): Setting {
-    return {
-      id: record.id,
-      key: record.key,
-      namespace: record.namespace,
-      category: record.category,
-      value: record.value,
-      defaultValue: record.default_value,
-      label: record.label,
-      description: record.description,
-      dataType: record.data_type,
-      accessLevel: record.access_level,
-      isEncrypted: record.is_encrypted,
-      isReadonly: record.is_readonly,
-      isHidden: record.is_hidden,
-      validationRules: record.validation_rules,
-      uiSchema: record.ui_schema,
-      sortOrder: record.sort_order,
-      group: record.group,
-      createdBy: record.created_by,
-      updatedBy: record.updated_by,
-      createdAt: record.created_at,
-      updatedAt: record.updated_at,
     };
   }
 
@@ -760,10 +579,10 @@ export class SettingsService {
     reason?: string,
     request?: FastifyRequest,
   ): Promise<void> {
-    await this.db('app_settings_history').insert({
+    await this.repository.createSettingHistory({
       setting_id: settingId,
-      old_value: oldValue !== undefined ? JSON.stringify(oldValue) : null,
-      new_value: newValue !== undefined ? JSON.stringify(newValue) : null,
+      old_value: oldValue,
+      new_value: newValue,
       action,
       reason,
       changed_by: changedBy,
