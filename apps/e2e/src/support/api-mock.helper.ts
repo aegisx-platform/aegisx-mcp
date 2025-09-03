@@ -36,7 +36,7 @@ export class ApiMockHelper {
 
     await this.page.route(request.url, async (route: Route) => {
       const req = route.request();
-      
+
       // Check if method matches
       if (request.method && req.method() !== request.method) {
         await route.continue();
@@ -52,9 +52,10 @@ export class ApiMockHelper {
       await route.fulfill({
         status: request.response.status || 200,
         contentType: request.response.contentType || 'application/json',
-        body: typeof request.response.body === 'string' 
-          ? request.response.body 
-          : JSON.stringify(request.response.body),
+        body:
+          typeof request.response.body === 'string'
+            ? request.response.body
+            : JSON.stringify(request.response.body),
         headers: request.response.headers,
       });
     });
@@ -344,9 +345,11 @@ export class ApiMockHelper {
    * Mock network timeout
    */
   async mockNetworkTimeout(): Promise<void> {
-    await this.page.route('**/*', async (route) => {
+    await this.page.route('**/*', async (_route) => {
       // Never fulfill the request to simulate timeout
-      await new Promise(() => {}); // Infinite promise
+      await new Promise(() => {
+        // Intentionally empty to simulate timeout
+      }); // Infinite promise
     });
   }
 
@@ -375,11 +378,13 @@ export class ApiMockHelper {
     await this.page.route(new RegExp('/api/users'), async (route) => {
       const url = new URL(route.request().url());
       const page = parseInt(url.searchParams.get('page') || '1');
-      const limit = parseInt(url.searchParams.get('limit') || pageSize.toString());
-      
+      const limit = parseInt(
+        url.searchParams.get('limit') || pageSize.toString(),
+      );
+
       const startIndex = (page - 1) * limit;
-      const endIndex = startIndex + limit;
-      
+      const _endIndex = startIndex + limit;
+
       const items = Array.from({ length: limit }, (_, i) => ({
         id: (startIndex + i + 1).toString(),
         email: `user${startIndex + i + 1}@test.com`,
@@ -409,11 +414,11 @@ export class ApiMockHelper {
     await this.page.route('**/api/**', async (route) => {
       const request = route.request();
       console.log(`API Request: ${request.method()} ${request.url()}`);
-      
+
       if (request.method() !== 'GET') {
         console.log(`Request body: ${request.postData()}`);
       }
-      
+
       await route.continue();
     });
   }
@@ -423,22 +428,22 @@ export class ApiMockHelper {
    */
   async mockWebSocket(): Promise<void> {
     await this.page.evaluateOnNewDocument(() => {
-      const originalWebSocket = window.WebSocket;
-      
+      const _originalWebSocket = window.WebSocket;
+
       class MockWebSocket extends EventTarget {
         readyState = 1; // OPEN
         url: string;
-        
+
         constructor(url: string) {
           super();
           this.url = url;
-          
+
           // Simulate connection
           setTimeout(() => {
             this.dispatchEvent(new Event('open'));
           }, 100);
         }
-        
+
         send(data: string) {
           console.log('WebSocket send:', data);
           // Echo back
@@ -446,13 +451,13 @@ export class ApiMockHelper {
             this.dispatchEvent(new MessageEvent('message', { data }));
           }, 100);
         }
-        
+
         close() {
           this.readyState = 3; // CLOSED
           this.dispatchEvent(new Event('close'));
         }
       }
-      
+
       (window as any).WebSocket = MockWebSocket;
     });
   }
@@ -468,21 +473,28 @@ export class ApiMockHelper {
       errors: () => this.mockApiErrors(),
       validation: () => this.mockValidationErrors(),
       timeout: () => this.mockNetworkTimeout(),
-      pagination: (total?: number, size?: number) => this.mockPagination(total, size),
+      pagination: (total?: number, size?: number) =>
+        this.mockPagination(total, size),
     };
   }
 
   /**
    * Wait for API request to complete
    */
-  async waitForApiRequest(urlPattern: string | RegExp, timeout = 10000): Promise<Request> {
+  async waitForApiRequest(
+    urlPattern: string | RegExp,
+    timeout = 10000,
+  ): Promise<Request> {
     return await this.page.waitForRequest(urlPattern, { timeout });
   }
 
   /**
    * Wait for API response
    */
-  async waitForApiResponse(urlPattern: string | RegExp, timeout = 10000): Promise<any> {
+  async waitForApiResponse(
+    urlPattern: string | RegExp,
+    timeout = 10000,
+  ): Promise<any> {
     const response = await this.page.waitForResponse(urlPattern, { timeout });
     return await response.json();
   }

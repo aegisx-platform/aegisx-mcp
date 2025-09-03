@@ -32,7 +32,10 @@ export abstract class BasePage {
   /**
    * Take a screenshot
    */
-  async screenshot(name: string, options?: { fullPage?: boolean }): Promise<void> {
+  async screenshot(
+    name: string,
+    options?: { fullPage?: boolean },
+  ): Promise<void> {
     await this.page.screenshot({
       path: `screenshots/${name}.png`,
       fullPage: options?.fullPage ?? false,
@@ -42,7 +45,10 @@ export abstract class BasePage {
   /**
    * Wait for an element to be visible
    */
-  async waitForElement(selector: string, timeout = TEST_TIMEOUTS.medium): Promise<Locator> {
+  async waitForElement(
+    selector: string,
+    timeout = TEST_TIMEOUTS.medium,
+  ): Promise<Locator> {
     const element = this.page.locator(selector);
     await element.waitFor({ state: 'visible', timeout });
     return element;
@@ -51,7 +57,10 @@ export abstract class BasePage {
   /**
    * Wait for an element to be hidden
    */
-  async waitForElementHidden(selector: string, timeout = TEST_TIMEOUTS.medium): Promise<void> {
+  async waitForElementHidden(
+    selector: string,
+    timeout = TEST_TIMEOUTS.medium,
+  ): Promise<void> {
     const element = this.page.locator(selector);
     await element.waitFor({ state: 'hidden', timeout });
   }
@@ -61,9 +70,9 @@ export abstract class BasePage {
    */
   async elementExists(selector: string): Promise<boolean> {
     try {
-      await this.page.locator(selector).waitFor({ 
-        state: 'attached', 
-        timeout: 2000 
+      await this.page.locator(selector).waitFor({
+        state: 'attached',
+        timeout: 2000,
       });
       return true;
     } catch {
@@ -74,7 +83,10 @@ export abstract class BasePage {
   /**
    * Click element with retry logic
    */
-  async clickElement(selector: string, options?: { force?: boolean; timeout?: number }): Promise<void> {
+  async clickElement(
+    selector: string,
+    options?: { force?: boolean; timeout?: number },
+  ): Promise<void> {
     const element = this.page.locator(selector);
     await element.click({
       force: options?.force ?? false,
@@ -85,13 +97,17 @@ export abstract class BasePage {
   /**
    * Fill input field
    */
-  async fillInput(selector: string, value: string, options?: { clear?: boolean }): Promise<void> {
+  async fillInput(
+    selector: string,
+    value: string,
+    options?: { clear?: boolean },
+  ): Promise<void> {
     const element = this.page.locator(selector);
-    
+
     if (options?.clear !== false) {
       await element.clear();
     }
-    
+
     await element.fill(value);
   }
 
@@ -119,13 +135,16 @@ export abstract class BasePage {
    */
   async getElementText(selector: string): Promise<string> {
     const element = this.page.locator(selector);
-    return await element.textContent() ?? '';
+    return (await element.textContent()) ?? '';
   }
 
   /**
    * Get element attribute value
    */
-  async getElementAttribute(selector: string, attribute: string): Promise<string | null> {
+  async getElementAttribute(
+    selector: string,
+    attribute: string,
+  ): Promise<string | null> {
     const element = this.page.locator(selector);
     return await element.getAttribute(attribute);
   }
@@ -150,7 +169,9 @@ export abstract class BasePage {
    * Wait for navigation to complete
    */
   async waitForNavigation(): Promise<void> {
-    await this.page.waitForLoadState('networkidle', { timeout: TEST_TIMEOUTS.navigation });
+    await this.page.waitForLoadState('networkidle', {
+      timeout: TEST_TIMEOUTS.navigation,
+    });
   }
 
   /**
@@ -195,22 +216,34 @@ export abstract class BasePage {
   /**
    * Verify element text
    */
-  async verifyElementText(selector: string, expectedText: string | RegExp): Promise<void> {
+  async verifyElementText(
+    selector: string,
+    expectedText: string | RegExp,
+  ): Promise<void> {
     await expect(this.page.locator(selector)).toHaveText(expectedText);
   }
 
   /**
    * Verify element contains text
    */
-  async verifyElementContainsText(selector: string, expectedText: string): Promise<void> {
+  async verifyElementContainsText(
+    selector: string,
+    expectedText: string,
+  ): Promise<void> {
     await expect(this.page.locator(selector)).toContainText(expectedText);
   }
 
   /**
    * Wait for element to have specific text
    */
-  async waitForElementText(selector: string, expectedText: string, timeout = TEST_TIMEOUTS.medium): Promise<void> {
-    await expect(this.page.locator(selector)).toHaveText(expectedText, { timeout });
+  async waitForElementText(
+    selector: string,
+    expectedText: string,
+    timeout = TEST_TIMEOUTS.medium,
+  ): Promise<void> {
+    await expect(this.page.locator(selector)).toHaveText(expectedText, {
+      timeout,
+    });
   }
 
   /**
@@ -258,7 +291,7 @@ export abstract class BasePage {
   /**
    * Evaluate JavaScript in page context
    */
-  async evaluateJs<T>(script: string | Function, arg?: any): Promise<T> {
+  async evaluateJs<T>(script: string | (() => T), arg?: any): Promise<T> {
     return await this.page.evaluate(script, arg);
   }
 
@@ -273,7 +306,7 @@ export abstract class BasePage {
    * Mock API response
    */
   async mockApiResponse(url: string | RegExp, response: any): Promise<void> {
-    await this.page.route(url, route => {
+    await this.page.route(url, (route) => {
       route.fulfill({
         contentType: 'application/json',
         body: JSON.stringify(response),
@@ -284,7 +317,10 @@ export abstract class BasePage {
   /**
    * Intercept network request
    */
-  async interceptRequest(url: string | RegExp, handler: (request: any) => void): Promise<void> {
+  async interceptRequest(
+    url: string | RegExp,
+    handler: (request: any) => void,
+  ): Promise<void> {
     await this.page.route(url, handler);
   }
 }
