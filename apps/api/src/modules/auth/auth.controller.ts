@@ -17,7 +17,7 @@ export const authController = {
     (reply as any).setCookie('refreshToken', result.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: process.env.NODE_ENV === 'test' ? 'strict' : 'lax',
       path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
@@ -50,7 +50,7 @@ export const authController = {
     (reply as any).setCookie('refreshToken', result.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: process.env.NODE_ENV === 'test' ? 'strict' : 'lax',
       path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
@@ -61,8 +61,19 @@ export const authController = {
         user: result.user,
         accessToken: result.accessToken,
         refreshToken: result.refreshToken,
+        expiresIn: process.env.JWT_EXPIRES_IN || '15m',
       },
       message: 'Login successful',
+      meta: {
+        timestamp: new Date().toISOString(),
+        version: 'v1',
+        requestId: request.id,
+        environment: ['development', 'staging', 'production'].includes(
+          process.env.NODE_ENV || '',
+        )
+          ? (process.env.NODE_ENV as 'development' | 'staging' | 'production')
+          : 'development',
+      },
     });
   },
 
@@ -83,6 +94,16 @@ export const authController = {
         accessToken: result.accessToken,
       },
       message: 'Token refreshed successfully',
+      meta: {
+        timestamp: new Date().toISOString(),
+        version: 'v1',
+        requestId: request.id,
+        environment: ['development', 'staging', 'production'].includes(
+          process.env.NODE_ENV || '',
+        )
+          ? (process.env.NODE_ENV as 'development' | 'staging' | 'production')
+          : 'development',
+      },
     });
   },
 
@@ -99,6 +120,16 @@ export const authController = {
       success: true,
       data: {},
       message: 'Logged out successfully',
+      meta: {
+        timestamp: new Date().toISOString(),
+        version: 'v1',
+        requestId: request.id,
+        environment: ['development', 'staging', 'production'].includes(
+          process.env.NODE_ENV || '',
+        )
+          ? (process.env.NODE_ENV as 'development' | 'staging' | 'production')
+          : 'development',
+      },
     });
   },
 

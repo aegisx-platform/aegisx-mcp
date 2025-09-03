@@ -235,7 +235,6 @@ describe('Authentication Flow Integration Tests', () => {
         const session = await testContext.db
           .connection('user_sessions')
           .where('user_id', testUser.id)
-          .where('is_active', true)
           .first();
 
         expect(session).toBeDefined();

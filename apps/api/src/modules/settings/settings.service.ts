@@ -11,7 +11,7 @@ import {
   type GetSettingsQuery,
   type GetSettingHistoryQuery,
   type GroupedSettings,
-  type BulkUpdateSettings
+  type BulkUpdateSettings,
 } from './settings.schemas';
 import { FastifyRequest } from 'fastify';
 
@@ -21,13 +21,16 @@ export class SettingsService {
 
   constructor(
     private db: Knex,
-    private redis?: Redis
+    private redis?: Redis,
   ) {}
 
   /**
    * Get all settings with filtering and pagination
    */
-  async getSettings(query: GetSettingsQuery, userId?: string): Promise<{
+  async getSettings(
+    query: GetSettingsQuery,
+    userId?: string,
+  ): Promise<{
     settings: Setting[];
     total: number;
     page: number;
@@ -43,7 +46,7 @@ export class SettingsService {
       page = 1,
       limit = 20,
       sortBy = 'sort_order',
-      sortOrder = 'asc'
+      sortOrder = 'asc',
     } = query;
 
     let qb = this.db('app_settings').where('namespace', namespace);
@@ -55,7 +58,7 @@ export class SettingsService {
     if (!includeHidden) qb = qb.where('is_hidden', false);
 
     if (search) {
-      qb = qb.where(function() {
+      qb = qb.where(function () {
         this.where('key', 'ilike', `%${search}%`)
           .orWhere('label', 'ilike', `%${search}%`)
           .orWhere('description', 'ilike', `%${search}%`);
@@ -74,16 +77,16 @@ export class SettingsService {
       .offset(offset);
 
     // Transform database fields to camelCase
-    const transformedSettings = settings.map(s => this.transformSetting(s));
+    const transformedSettings = settings.map((s) => this.transformSetting(s));
 
     // If user ID provided, merge user overrides
     if (userId) {
       const userSettings = await this.getUserSettings(userId);
       const userSettingsMap = new Map(
-        userSettings.map(us => [us.settingId, us.value])
+        userSettings.map((us) => [us.settingId, us.value]),
       );
 
-      transformedSettings.forEach(setting => {
+      transformedSettings.forEach((setting) => {
         if (userSettingsMap.has(setting.id)) {
           setting.value = userSettingsMap.get(setting.id);
         }
@@ -94,7 +97,7 @@ export class SettingsService {
       settings: transformedSettings,
       total,
       page,
-      limit
+      limit,
     };
   }
 
@@ -102,11 +105,11 @@ export class SettingsService {
    * Get settings grouped by category and group
    */
   async getGroupedSettings(
-    namespace: string = 'default',
-    userId?: string
+    namespace = 'default',
+    userId?: string,
   ): Promise<GroupedSettings[]> {
     const cacheKey = `${SettingsService.CACHE_PREFIX}grouped:${namespace}:${userId || 'public'}`;
-    
+
     // Check cache
     if (this.redis) {
       const cached = await this.redis.get(cacheKey);
@@ -122,15 +125,15 @@ export class SettingsService {
       .orderBy('sort_order', 'asc');
 
     // Transform and apply user overrides
-    let transformedSettings = settings.map(s => this.transformSetting(s));
+    const transformedSettings = settings.map((s) => this.transformSetting(s));
 
     if (userId) {
       const userSettings = await this.getUserSettings(userId);
       const userSettingsMap = new Map(
-        userSettings.map(us => [us.settingId, us.value])
+        userSettings.map((us) => [us.settingId, us.value]),
       );
 
-      transformedSettings.forEach(setting => {
+      transformedSettings.forEach((setting) => {
         if (userSettingsMap.has(setting.id)) {
           setting.value = userSettingsMap.get(setting.id);
         }
@@ -139,34 +142,42 @@ export class SettingsService {
 
     // Group by category and then by group
     const grouped = transformedSettings.reduce((acc, setting) => {
-      const categoryGroup = acc.find(g => g.category === setting.category);
-      
+      const categoryGroup = acc.find((g) => g.category === setting.category);
+
       if (!categoryGroup) {
         acc.push({
           category: setting.category,
-          groups: [{
-            name: setting.group || 'default',
-            settings: [setting]
-          }]
+          groups: [
+            {
+              name: setting.group || 'default',
+              settings: [setting],
+            },
+          ],
         });
       } else {
-        const group = categoryGroup.groups.find(g => g.name === (setting.group || 'default'));
+        const group = categoryGroup.groups.find(
+          (g) => g.name === (setting.group || 'default'),
+        );
         if (!group) {
           categoryGroup.groups.push({
             name: setting.group || 'default',
-            settings: [setting]
+            settings: [setting],
           });
         } else {
           group.settings.push(setting);
         }
       }
-      
+
       return acc;
     }, [] as GroupedSettings[]);
 
     // Cache the result
     if (this.redis) {
-      await this.redis.setex(cacheKey, SettingsService.CACHE_TTL, JSON.stringify(grouped));
+      await this.redis.setex(
+        cacheKey,
+        SettingsService.CACHE_TTL,
+        JSON.stringify(grouped),
+      );
     }
 
     return grouped;
@@ -177,11 +188,11 @@ export class SettingsService {
    */
   async getSettingByKey(
     key: string,
-    namespace: string = 'default',
-    userId?: string
+    namespace = 'default',
+    userId?: string,
   ): Promise<Setting | null> {
     const cacheKey = `${SettingsService.CACHE_PREFIX}${namespace}:${key}:${userId || 'public'}`;
-    
+
     // Check cache
     if (this.redis) {
       const cached = await this.redis.get(cacheKey);
@@ -199,7 +210,7 @@ export class SettingsService {
       return null;
     }
 
-    let transformedSetting = this.transformSetting(setting);
+    const transformedSetting = this.transformSetting(setting);
 
     // Apply user override if user ID provided
     if (userId) {
@@ -215,7 +226,11 @@ export class SettingsService {
 
     // Cache the result
     if (this.redis) {
-      await this.redis.setex(cacheKey, SettingsService.CACHE_TTL, JSON.stringify(transformedSetting));
+      await this.redis.setex(
+        cacheKey,
+        SettingsService.CACHE_TTL,
+        JSON.stringify(transformedSetting),
+      );
     }
 
     return transformedSetting;
@@ -234,8 +249,8 @@ export class SettingsService {
    */
   async getSettingValue(
     key: string,
-    namespace: string = 'default',
-    userId?: string
+    namespace = 'default',
+    userId?: string,
   ): Promise<any> {
     const setting = await this.getSettingByKey(key, namespace, userId);
     return setting ? setting.value : null;
@@ -244,7 +259,10 @@ export class SettingsService {
   /**
    * Create a new setting
    */
-  async createSetting(data: CreateSetting, createdBy?: string): Promise<Setting> {
+  async createSetting(
+    data: CreateSetting,
+    createdBy?: string,
+  ): Promise<Setting> {
     // Check if setting already exists
     const existing = await this.db('app_settings')
       .where('key', data.key)
@@ -252,7 +270,12 @@ export class SettingsService {
       .first();
 
     if (existing) {
-      throw new Error( 'Setting with this key already exists in the namespace');
+      const error = new Error(
+        'Setting with this key already exists in the namespace',
+      );
+      (error as any).statusCode = 409;
+      (error as any).code = 'SETTING_ALREADY_EXISTS';
+      throw error;
     }
 
     const [created] = await this.db('app_settings')
@@ -269,11 +292,13 @@ export class SettingsService {
         is_encrypted: data.isEncrypted || false,
         is_readonly: data.isReadonly || false,
         is_hidden: data.isHidden || false,
-        validation_rules: data.validationRules ? JSON.stringify(data.validationRules) : null,
+        validation_rules: data.validationRules
+          ? JSON.stringify(data.validationRules)
+          : null,
         ui_schema: data.uiSchema ? JSON.stringify(data.uiSchema) : null,
         sort_order: data.sortOrder || 0,
         group: data.group,
-        created_by: createdBy
+        created_by: createdBy,
       })
       .returning('*');
 
@@ -289,20 +314,20 @@ export class SettingsService {
   async updateSetting(
     id: string,
     data: UpdateSetting,
-    updatedBy?: string
+    updatedBy?: string,
   ): Promise<Setting> {
     const existing = await this.getSettingById(id);
     if (!existing) {
-      throw new Error( 'Setting not found');
+      throw new Error('Setting not found');
     }
 
     if (existing.isReadonly && data.value !== undefined) {
-      throw new Error( 'Cannot update value of readonly setting');
+      throw new Error('Cannot update value of readonly setting');
     }
 
     const updateData: any = {
       updated_by: updatedBy,
-      updated_at: new Date()
+      updated_at: new Date(),
     };
 
     // Map fields to database columns
@@ -310,16 +335,22 @@ export class SettingsService {
     if (data.namespace !== undefined) updateData.namespace = data.namespace;
     if (data.category !== undefined) updateData.category = data.category;
     if (data.value !== undefined) updateData.value = JSON.stringify(data.value);
-    if (data.defaultValue !== undefined) updateData.default_value = JSON.stringify(data.defaultValue);
+    if (data.defaultValue !== undefined)
+      updateData.default_value = JSON.stringify(data.defaultValue);
     if (data.label !== undefined) updateData.label = data.label;
-    if (data.description !== undefined) updateData.description = data.description;
+    if (data.description !== undefined)
+      updateData.description = data.description;
     if (data.dataType !== undefined) updateData.data_type = data.dataType;
-    if (data.accessLevel !== undefined) updateData.access_level = data.accessLevel;
-    if (data.isEncrypted !== undefined) updateData.is_encrypted = data.isEncrypted;
+    if (data.accessLevel !== undefined)
+      updateData.access_level = data.accessLevel;
+    if (data.isEncrypted !== undefined)
+      updateData.is_encrypted = data.isEncrypted;
     if (data.isReadonly !== undefined) updateData.is_readonly = data.isReadonly;
     if (data.isHidden !== undefined) updateData.is_hidden = data.isHidden;
-    if (data.validationRules !== undefined) updateData.validation_rules = JSON.stringify(data.validationRules);
-    if (data.uiSchema !== undefined) updateData.ui_schema = JSON.stringify(data.uiSchema);
+    if (data.validationRules !== undefined)
+      updateData.validation_rules = JSON.stringify(data.validationRules);
+    if (data.uiSchema !== undefined)
+      updateData.ui_schema = JSON.stringify(data.uiSchema);
     if (data.sortOrder !== undefined) updateData.sort_order = data.sortOrder;
     if (data.group !== undefined) updateData.group = data.group;
 
@@ -335,7 +366,7 @@ export class SettingsService {
         existing.value,
         data.value,
         'update',
-        updatedBy
+        updatedBy,
       );
     }
 
@@ -352,20 +383,24 @@ export class SettingsService {
     id: string,
     value: any,
     updatedBy?: string,
-    request?: FastifyRequest
+    request?: FastifyRequest,
   ): Promise<Setting> {
     const existing = await this.getSettingById(id);
     if (!existing) {
-      throw new Error( 'Setting not found');
+      throw new Error('Setting not found');
     }
 
     if (existing.isReadonly) {
-      throw new Error( 'Cannot update readonly setting');
+      throw new Error('Cannot update readonly setting');
     }
 
     // Validate value against validation rules
     if (existing.validationRules) {
-      this.validateSettingValue(value, existing.validationRules, existing.dataType);
+      this.validateSettingValue(
+        value,
+        existing.validationRules,
+        existing.dataType,
+      );
     }
 
     const [updated] = await this.db('app_settings')
@@ -373,7 +408,7 @@ export class SettingsService {
       .update({
         value: JSON.stringify(value),
         updated_by: updatedBy,
-        updated_at: new Date()
+        updated_at: new Date(),
       })
       .returning('*');
 
@@ -385,7 +420,7 @@ export class SettingsService {
       'update',
       updatedBy,
       null,
-      request
+      request,
     );
 
     // Clear cache
@@ -400,21 +435,15 @@ export class SettingsService {
   async deleteSetting(id: string, deletedBy?: string): Promise<void> {
     const existing = await this.getSettingById(id);
     if (!existing) {
-      throw new Error( 'Setting not found');
+      throw new Error('Setting not found');
     }
 
     if (existing.isReadonly) {
-      throw new Error( 'Cannot delete readonly setting');
+      throw new Error('Cannot delete readonly setting');
     }
 
     // Log deletion to history
-    await this.logSettingChange(
-      id,
-      existing.value,
-      null,
-      'delete',
-      deletedBy
-    );
+    await this.logSettingChange(id, existing.value, null, 'delete', deletedBy);
 
     await this.db('app_settings').where('id', id).delete();
 
@@ -426,16 +455,18 @@ export class SettingsService {
    * Get user settings
    */
   async getUserSettings(userId: string): Promise<UserSetting[]> {
-    const settings = await this.db('app_user_settings')
-      .where('user_id', userId);
+    const settings = await this.db('app_user_settings').where(
+      'user_id',
+      userId,
+    );
 
-    return settings.map(s => ({
+    return settings.map((s) => ({
       id: s.id,
       userId: s.user_id,
       settingId: s.setting_id,
       value: s.value,
       createdAt: s.created_at,
-      updatedAt: s.updated_at
+      updatedAt: s.updated_at,
     }));
   }
 
@@ -445,16 +476,20 @@ export class SettingsService {
   async updateUserSetting(
     userId: string,
     settingId: string,
-    value: any
+    value: any,
   ): Promise<UserSetting> {
     const setting = await this.getSettingById(settingId);
     if (!setting) {
-      throw new Error( 'Setting not found');
+      throw new Error('Setting not found');
     }
 
     // Validate value against setting rules
     if (setting.validationRules) {
-      this.validateSettingValue(value, setting.validationRules, setting.dataType);
+      this.validateSettingValue(
+        value,
+        setting.validationRules,
+        setting.dataType,
+      );
     }
 
     // Check if user setting exists
@@ -470,7 +505,7 @@ export class SettingsService {
         .where('setting_id', settingId)
         .update({
           value: JSON.stringify(value),
-          updated_at: new Date()
+          updated_at: new Date(),
         })
         .returning('*');
     } else {
@@ -478,7 +513,7 @@ export class SettingsService {
         .insert({
           user_id: userId,
           setting_id: settingId,
-          value: JSON.stringify(value)
+          value: JSON.stringify(value),
         })
         .returning('*');
     }
@@ -492,7 +527,7 @@ export class SettingsService {
       settingId: result.setting_id,
       value: result.value,
       createdAt: result.created_at,
-      updatedAt: result.updated_at
+      updatedAt: result.updated_at,
     };
   }
 
@@ -502,7 +537,7 @@ export class SettingsService {
   async deleteUserSetting(userId: string, settingId: string): Promise<void> {
     const setting = await this.getSettingById(settingId);
     if (!setting) {
-      throw new Error( 'Setting not found');
+      throw new Error('Setting not found');
     }
 
     await this.db('app_user_settings')
@@ -519,8 +554,8 @@ export class SettingsService {
    */
   async bulkUpdateSettings(
     updates: BulkUpdateSettings,
-    namespace: string = 'default',
-    updatedBy?: string
+    namespace = 'default',
+    updatedBy?: string,
   ): Promise<{
     updated: number;
     failed: number;
@@ -553,7 +588,7 @@ export class SettingsService {
     return {
       updated,
       failed,
-      errors: errors.length > 0 ? errors : undefined
+      errors: errors.length > 0 ? errors : undefined,
     };
   }
 
@@ -573,7 +608,7 @@ export class SettingsService {
       startDate,
       endDate,
       page = 1,
-      limit = 20
+      limit = 20,
     } = query;
 
     let qb = this.db('app_settings_history');
@@ -594,7 +629,7 @@ export class SettingsService {
       .offset(offset);
 
     return {
-      history: history.map(h => ({
+      history: history.map((h) => ({
         id: h.id,
         settingId: h.setting_id,
         oldValue: h.old_value,
@@ -604,11 +639,11 @@ export class SettingsService {
         changedBy: h.changed_by,
         changedAt: h.changed_at,
         ipAddress: h.ip_address,
-        userAgent: h.user_agent
+        userAgent: h.user_agent,
       })),
       total,
       page,
-      limit
+      limit,
     };
   }
 
@@ -637,7 +672,7 @@ export class SettingsService {
       createdBy: record.created_by,
       updatedBy: record.updated_by,
       createdAt: record.created_at,
-      updatedAt: record.updated_at
+      updatedAt: record.updated_at,
     };
   }
 
@@ -649,62 +684,67 @@ export class SettingsService {
     switch (dataType) {
       case 'string':
         if (typeof value !== 'string') {
-          throw new Error( 'Value must be a string');
+          throw new Error('Value must be a string');
         }
         if (rules.minLength && value.length < rules.minLength) {
-          throw new Error( `Value must be at least ${rules.minLength} characters`);
+          throw new Error(
+            `Value must be at least ${rules.minLength} characters`,
+          );
         }
         if (rules.maxLength && value.length > rules.maxLength) {
-          throw new Error( `Value must be at most ${rules.maxLength} characters`);
+          throw new Error(
+            `Value must be at most ${rules.maxLength} characters`,
+          );
         }
         if (rules.pattern && !new RegExp(rules.pattern).test(value)) {
-          throw new Error( 'Value does not match required pattern');
+          throw new Error('Value does not match required pattern');
         }
         break;
 
       case 'number':
         if (typeof value !== 'number') {
-          throw new Error( 'Value must be a number');
+          throw new Error('Value must be a number');
         }
         if (rules.min !== undefined && value < rules.min) {
-          throw new Error( `Value must be at least ${rules.min}`);
+          throw new Error(`Value must be at least ${rules.min}`);
         }
         if (rules.max !== undefined && value > rules.max) {
-          throw new Error( `Value must be at most ${rules.max}`);
+          throw new Error(`Value must be at most ${rules.max}`);
         }
         break;
 
       case 'boolean':
         if (typeof value !== 'boolean') {
-          throw new Error( 'Value must be a boolean');
+          throw new Error('Value must be a boolean');
         }
         break;
 
       case 'array':
         if (!Array.isArray(value)) {
-          throw new Error( 'Value must be an array');
+          throw new Error('Value must be an array');
         }
         break;
 
-      case 'email':
+      case 'email': {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(value)) {
-          throw new Error( 'Value must be a valid email address');
+          throw new Error('Value must be a valid email address');
         }
         break;
+      }
 
       case 'url':
         try {
           new URL(value);
         } catch {
-          throw new Error( 'Value must be a valid URL');
+          throw new Error('Value must be a valid URL');
         }
         break;
     }
 
     // Enum validation
     if (rules.enum && !rules.enum.includes(value)) {
-      throw new Error( `Value must be one of: ${rules.enum.join(', ')}`);
+      throw new Error(`Value must be one of: ${rules.enum.join(', ')}`);
     }
   }
 
@@ -718,7 +758,7 @@ export class SettingsService {
     action: string,
     changedBy?: string,
     reason?: string,
-    request?: FastifyRequest
+    request?: FastifyRequest,
   ): Promise<void> {
     await this.db('app_settings_history').insert({
       setting_id: settingId,
@@ -728,19 +768,25 @@ export class SettingsService {
       reason,
       changed_by: changedBy,
       ip_address: request?.ip,
-      user_agent: request?.headers['user-agent']
+      user_agent: request?.headers['user-agent'],
     });
   }
 
   /**
    * Helper: Clear cache
    */
-  private async clearCache(namespace?: string, key?: string, userId?: string): Promise<void> {
+  private async clearCache(
+    namespace?: string,
+    key?: string,
+    userId?: string,
+  ): Promise<void> {
     if (!this.redis) return;
 
     if (namespace && key && userId) {
       // Clear specific user setting cache
-      await this.redis.del(`${SettingsService.CACHE_PREFIX}${namespace}:${key}:${userId}`);
+      await this.redis.del(
+        `${SettingsService.CACHE_PREFIX}${namespace}:${key}:${userId}`,
+      );
     } else if (namespace && key) {
       // Clear all caches for a specific setting
       const pattern = `${SettingsService.CACHE_PREFIX}${namespace}:${key}:*`;

@@ -49,8 +49,7 @@ export const RegisterRequestSchema = Type.Object({
 
 export const LoginRequestSchema = Type.Object({
   email: Type.String({
-    format: 'email',
-    description: 'User email address',
+    description: 'User email address or username',
   }),
   password: Type.String({
     description: 'User password',
@@ -71,6 +70,7 @@ export const AuthResponseSchema = ApiSuccessResponseSchema(
     user: AuthUserSchema,
     accessToken: Type.String(),
     refreshToken: Type.String(),
+    expiresIn: Type.String(),
   }),
 );
 
@@ -91,10 +91,7 @@ export const RefreshResponseSchema = ApiSuccessResponseSchema(
 
 export const ProfileResponseSchema = ApiSuccessResponseSchema(AuthUserSchema);
 
-export const LogoutResponseSchema = Type.Object({
-  success: Type.Literal(true),
-  message: Type.String(),
-});
+export const LogoutResponseSchema = ApiSuccessResponseSchema(Type.Object({}));
 
 // TypeScript Types
 export type AuthUser = Static<typeof AuthUserSchema>;

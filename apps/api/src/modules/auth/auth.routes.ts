@@ -68,7 +68,20 @@ export default async function authRoutes(fastify: FastifyInstance) {
     handler: authController.refresh,
   });
 
-  // TODO: Implement profile and logout endpoints
+  // POST /api/auth/logout
+  typedFastify.route({
+    method: 'POST',
+    url: '/api/auth/logout',
+    schema: {
+      response: {
+        200: SchemaRefs.module('auth', 'logoutResponse'),
+        401: SchemaRefs.Unauthorized,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    handler: authController.logout,
+  });
+
+  // TODO: Implement profile endpoint
   // GET /api/auth/profile - Requires authController.profile implementation
-  // POST /api/auth/logout - Requires authController.logout implementation
 }

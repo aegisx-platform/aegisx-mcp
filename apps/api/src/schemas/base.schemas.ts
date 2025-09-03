@@ -111,6 +111,7 @@ export const ConflictResponseSchema = Type.Object({
       Type.Literal('EMAIL_ALREADY_EXISTS'),
       Type.Literal('USERNAME_ALREADY_EXISTS'),
       Type.Literal('RESOURCE_ALREADY_EXISTS'),
+      Type.Literal('SETTING_ALREADY_EXISTS'),
     ]),
     message: Type.String(),
     statusCode: Type.Literal(409),

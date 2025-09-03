@@ -102,8 +102,33 @@ export class AuthService {
   async login(input: LoginInput, userAgent?: string, ipAddress?: string) {
     const { email, password } = input;
 
-    // Find user
-    const user = await this.authRepository.findUserByEmail(email);
+    // Find user by email or username
+    let user;
+    if (email.includes('@')) {
+      // It's an email
+      user = await this.authRepository.findUserByEmail(email);
+    } else {
+      // It's a username
+      const userResult = await this.app
+        .knex('users')
+        .where('username', email)
+        .first();
+      if (userResult) {
+        const roleResult = await this.app
+          .knex('user_roles')
+          .join('roles', 'user_roles.role_id', 'roles.id')
+          .where('user_roles.user_id', userResult.id)
+          .select('roles.name')
+          .first();
+
+        user = {
+          ...userResult,
+          isActive: userResult.is_active,
+          role: roleResult?.name || 'user',
+        };
+      }
+    }
+
     if (!user || !user.password) {
       const error = new Error('Invalid credentials');
       (error as any).statusCode = 401;
@@ -153,6 +178,12 @@ export class AuthService {
       user_agent: userAgent,
       ip_address: ipAddress,
     });
+
+    // Update last login timestamp
+    await this.app
+      .knex('users')
+      .where('id', user.id)
+      .update({ last_login_at: new Date() });
 
     // Remove password from response
     const { password: _, ...userWithoutPassword } = user;

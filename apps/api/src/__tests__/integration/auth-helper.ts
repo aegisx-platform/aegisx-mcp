@@ -28,11 +28,22 @@ export class AuthHelper {
   ) {}
 
   /**
+   * Generate a valid UUID v4
+   */
+  private generateUUID(): string {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === 'x' ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  }
+
+  /**
    * Create a test user directly in database
    */
   async createTestUser(userData: Partial<TestUser> = {}): Promise<TestUser> {
     const defaultUser: TestUser = {
-      id: `test-user-${Date.now()}`,
+      id: userData.id || this.generateUUID(),
       email: `test${Date.now()}@example.com`,
       username: `testuser${Date.now()}`,
       password: 'testpass123',
@@ -61,7 +72,7 @@ export class AuthHelper {
     } else {
       const [newRole] = await this.db('roles')
         .insert({
-          id: `role-${defaultUser.role}`,
+          id: this.generateUUID(),
           name: defaultUser.role,
           description: `${defaultUser.role} role`,
           created_at: new Date(),
@@ -80,13 +91,20 @@ export class AuthHelper {
         password: hashedPassword,
         first_name: defaultUser.firstName,
         last_name: defaultUser.lastName,
-        role_id: roleId,
         email_verified: defaultUser.emailVerified,
         status: defaultUser.status,
         created_at: new Date(),
         updated_at: new Date(),
       })
       .returning(['id', 'email', 'username', 'first_name', 'last_name']);
+
+    // Create user-role relationship
+    await this.db('user_roles').insert({
+      user_id: defaultUser.id,
+      role_id: roleId,
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
 
     // Create user preferences
     await this.db('user_preferences').insert({
@@ -195,7 +213,7 @@ export class AuthHelper {
     } else {
       const [newRole] = await this.db('roles')
         .insert({
-          id: `role-${roleName}`,
+          id: this.generateUUID(),
           name: roleName,
           description: `${roleName} role`,
           created_at: new Date(),
@@ -214,7 +232,7 @@ export class AuthHelper {
         if (!permissionRecord) {
           const [newPermission] = await this.db('permissions')
             .insert({
-              id: `perm-${permission.replace(/\./g, '-')}`,
+              id: this.generateUUID(),
               name: permission,
               description: `Permission: ${permission}`,
               created_at: new Date(),

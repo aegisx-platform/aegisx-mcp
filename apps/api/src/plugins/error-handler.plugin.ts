@@ -114,7 +114,8 @@ async function errorHandlerPlugin(
     }
     if (
       errorCode === 'INVALID_CREDENTIALS' ||
-      error.message === 'INVALID_CREDENTIALS'
+      error.message === 'INVALID_CREDENTIALS' ||
+      error.message === 'Invalid credentials'
     ) {
       return reply.error(
         'INVALID_CREDENTIALS',
@@ -132,17 +133,12 @@ async function errorHandlerPlugin(
         401,
       );
     }
-
-    // Check for specific error codes from thrown errors
-    if (errorCode === 'EMAIL_ALREADY_EXISTS') {
-      return reply.error('EMAIL_ALREADY_EXISTS', 'Email already exists', 409);
-    }
-    if (errorCode === 'USERNAME_ALREADY_EXISTS') {
-      return reply.error(
-        'USERNAME_ALREADY_EXISTS',
-        'Username already exists',
-        409,
-      );
+    if (
+      errorCode === 'ACCOUNT_DISABLED' ||
+      error.message === 'ACCOUNT_DISABLED' ||
+      error.message === 'Account is disabled'
+    ) {
+      return reply.error('ACCOUNT_DISABLED', 'Account is disabled', 403);
     }
 
     // If we reach here, no specific error was handled, proceed to generic handler
