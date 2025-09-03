@@ -47,6 +47,8 @@ export default [
           caughtErrorsIgnorePattern: '^_',
         },
       ],
+      // Disable no-inferrable-types rule
+      '@typescript-eslint/no-inferrable-types': 'off',
     },
   },
 ];
