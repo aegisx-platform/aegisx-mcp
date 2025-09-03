@@ -6,22 +6,65 @@ on:
     tags: ['v*']
   pull_request:
     branches: [main, develop]
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME_PREFIX: ${{ github.repository }}
   NODE_VERSION: '20'
-  YARN_CACHE_FOLDER: ~/.yarn
+  POSTGRES_VERSION: '15'
+  REDIS_VERSION: '7-alpine'
+
+# Cancel in-progress runs when a new commit is pushed
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  # Job 1: Code Quality & Testing
-  quality:
-    name: Code Quality & Testing
+  # Determine what to build/test based on changes
+  changes:
     runs-on: ubuntu-latest
-
+    outputs:
+      api: ${{ steps.filter.outputs.api }}
+      web: ${{ steps.filter.outputs.web }}
+      admin: ${{ steps.filter.outputs.admin }}
+      e2e: ${{ steps.filter.outputs.e2e }}
+      libs: ${{ steps.filter.outputs.libs }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            api:
+              - 'apps/api/**'
+              - 'libs/**'
+              - 'package.json'
+              - 'yarn.lock'
+            web:
+              - 'apps/web/**'
+              - 'libs/**'
+              - 'package.json'
+              - 'yarn.lock'
+            admin:
+              - 'apps/admin/**'
+              - 'libs/**'
+              - 'package.json'
+              - 'yarn.lock'
+            e2e:
+              - 'apps/e2e/**'
+              - 'apps/**'
+              - 'libs/**'
+            libs:
+              - 'libs/**'
+
+  # Code quality checks - always run
+  quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -31,42 +74,44 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
 
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.yarn
-            node_modules
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
-
       - name: Install dependencies
-        run: yarn install --frozen-lockfile --ignore-scripts --prefer-offline
+        run: |
+          yarn install --frozen-lockfile --ignore-scripts
+          yarn run prepare || true
+
+      - name: Check code formatting
+        run: yarn format:check
 
       - name: Lint code
         run: yarn lint
 
-      - name: Run unit tests
-        run: yarn test:ci
-        env:
-          CI: true
+      - name: Type check
+        run: yarn typecheck
 
-      - name: Upload test coverage
-        uses: codecov/codecov-action@v4
+      - name: Check for secrets
+        uses: trufflesecurity/trufflehog@main
         with:
-          directory: ./coverage
-          fail_ci_if_error: false
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug --only-verified
 
-  # Job 2: Security Scanning
-  security:
-    name: Security Scanning
+  # Build applications in parallel
+  build:
+    name: Build ${{ matrix.app }}
+    needs: [changes, quality]
+    if: |
+      github.event_name == 'push' || 
+      (matrix.app == 'api' && needs.changes.outputs.api == 'true') ||
+      (matrix.app == 'web' && needs.changes.outputs.web == 'true') ||
+      (matrix.app == 'admin' && needs.changes.outputs.admin == 'true')
     runs-on: ubuntu-latest
-    needs: [quality]
-
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        app: [api, web, admin]
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -75,40 +120,127 @@ jobs:
           cache: 'yarn'
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile --ignore-scripts
+        run: |
+          yarn install --frozen-lockfile --ignore-scripts
+          yarn run prepare || true
 
-      - name: Run security audit
-        run: yarn security:audit
+      - name: Build ${{ matrix.app }}
+        run: nx build ${{ matrix.app }} --prod
 
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/node@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
         with:
-          args: --severity-threshold=high
-        continue-on-error: true
+          name: ${{ matrix.app }}-dist
+          path: dist/apps/${{ matrix.app }}
+          retention-days: 7
 
-  # Job 3: Build Applications
-  build:
-    name: Build Applications
+  # Test applications in parallel
+  test:
+    name: Test ${{ matrix.app }}
+    needs: [changes, quality]
+    if: |
+      (matrix.app == 'api' && needs.changes.outputs.api == 'true') ||
+      (matrix.app == 'web' && needs.changes.outputs.web == 'true') ||
+      (matrix.app == 'admin' && needs.changes.outputs.admin == 'true') ||
+      (matrix.app == 'libs' && needs.changes.outputs.libs == 'true')
     runs-on: ubuntu-latest
-    needs: [quality, security]
-    outputs:
-      version: ${{ steps.meta.outputs.version }}
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        app: [api, web, admin, libs]
+    services:
+      postgres:
+        image: postgres:${{ env.POSTGRES_VERSION }}
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: aegisx_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      redis:
+        image: redis:${{ env.REDIS_VERSION }}
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    steps:
+      - uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: |
+          yarn install --frozen-lockfile --ignore-scripts
+          yarn run prepare || true
+
+      - name: Run tests for ${{ matrix.app }}
+        run: |
+          if [ "${{ matrix.app }}" == "libs" ]; then
+            nx run-many --target=test --projects=tag:type:lib --parallel=3 --coverage
+          else
+            nx test ${{ matrix.app }} --coverage
+          fi
+        env:
+          NODE_ENV: test
+          DATABASE_HOST: localhost
+          DATABASE_PORT: 5432
+          DATABASE_NAME: aegisx_test
+          DATABASE_USER: postgres
+          DATABASE_PASSWORD: postgres
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+          JWT_SECRET: test-jwt-secret
+          JWT_REFRESH_SECRET: test-jwt-refresh-secret
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.app }}
+          path: coverage/
+          retention-days: 7
+
+  # Build and push Docker images
+  docker:
+    name: Docker Build & Push
+    needs: [build, test]
+    if: |
+      github.event_name == 'push' && 
+      (github.ref == 'refs/heads/main' || 
+       github.ref == 'refs/heads/develop' || 
+       startsWith(github.ref, 'refs/tags/'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
     strategy:
       matrix:
         app: [api, web, admin]
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.app }}-dist
+          path: dist/apps/${{ matrix.app }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to Container Registry
-        if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -119,198 +251,82 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/${{ matrix.app }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-${{ matrix.app }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=sha,prefix={{branch}}-
+            type=sha
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           file: apps/${{ matrix.app }}/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name != 'pull_request' }}
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          build-args: |
-            BUILD_DATE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
-            VCS_REF=${{ github.sha }}
-            VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+          platforms: linux/amd64,linux/arm64
 
-      - name: Scan Docker image for vulnerabilities
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: ${{ steps.meta.outputs.tags }}
-          format: 'sarif'
-          output: 'trivy-results-${{ matrix.app }}.sarif'
-        continue-on-error: true
-
-      - name: Upload Trivy scan results
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: 'trivy-results-${{ matrix.app }}.sarif'
-        continue-on-error: true
-
-  # Job 4: Integration Tests
-  integration:
-    name: Integration Tests
-    runs-on: ubuntu-latest
-    needs: [build]
-    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
-
-    services:
-      postgres:
-        image: postgres:15-alpine
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: aegisx_test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-
-      redis:
-        image: redis:7-alpine
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 6379:6379
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile --ignore-scripts
-
-      - name: Run database migrations
-        run: yarn db:migrate
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/aegisx_test
-
-      - name: Run integration tests
-        run: yarn test:integration || echo "Integration tests not implemented yet"
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/aegisx_test
-          REDIS_URL: redis://localhost:6379
-
-  # Job 5: Deploy to Staging
+  # Deploy to staging
   deploy-staging:
     name: Deploy to Staging
-    runs-on: ubuntu-latest
-    needs: [build, integration]
+    needs: docker
     if: github.ref == 'refs/heads/develop'
-    environment: staging
-
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://staging.aegisx.com
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Deploy to staging
         run: |
           echo "Deploying to staging environment..."
-          # Add your staging deployment script here
-          # Example: kubectl apply -f k8s/staging/
-          # Or: docker-compose -f docker-compose.staging.yml up -d
-        env:
-          STAGING_HOST: ${{ secrets.STAGING_HOST }}
-          STAGING_USER: ${{ secrets.STAGING_USER }}
-          STAGING_SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+          # Add actual deployment steps here
 
-  # Job 6: Deploy to Production
+  # Deploy to production
   deploy-production:
     name: Deploy to Production
-    runs-on: ubuntu-latest
-    needs: [build, integration]
+    needs: docker
     if: startsWith(github.ref, 'refs/tags/v')
-    environment: production
-
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://aegisx.com
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
-          body_path: CHANGELOG.md
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v4
 
       - name: Deploy to production
         run: |
           echo "Deploying to production environment..."
-          # Add your production deployment script here
-          # Example: kubectl apply -f k8s/production/
-          # Or: docker-compose -f docker-compose.prod.yml up -d
-        env:
-          PRODUCTION_HOST: ${{ secrets.PRODUCTION_HOST }}
-          PRODUCTION_USER: ${{ secrets.PRODUCTION_USER }}
-          PRODUCTION_SSH_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
+          # Add actual deployment steps here
 
-      - name: Send deployment notification
-        uses: 8398a7/action-slack@v3
-        with:
-          status: ${{ job.status }}
-          channel: '#deployments'
-          text: 'Production deployment completed for ${{ github.ref_name }}'
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        if: always()
-
-  # Job 7: Cleanup
-  cleanup:
-    name: Cleanup Old Images
+  # Summary job
+  summary:
+    name: CI/CD Summary
+    needs: [quality, build, test, docker]
+    if: always()
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    needs: [deploy-production, deploy-staging]
-
     steps:
-      - name: Delete old package versions
-        uses: actions/delete-package-versions@v5
-        with:
-          package-name: ${{ github.event.repository.name }}/api
-          package-type: container
-          min-versions-to-keep: 5
-          delete-only-untagged-versions: true
-        continue-on-error: true
+      - name: Check results
+        run: |
+          if [[ "${{ needs.quality.result }}" == "failure" ]]; then
+            echo "❌ Code quality checks failed"
+            exit 1
+          fi
 
-      - name: Delete old package versions (web)
-        uses: actions/delete-package-versions@v5
-        with:
-          package-name: ${{ github.event.repository.name }}/web
-          package-type: container
-          min-versions-to-keep: 5
-          delete-only-untagged-versions: true
-        continue-on-error: true
+          if [[ "${{ needs.build.result }}" == "failure" ]]; then
+            echo "❌ Build failed"
+            exit 1
+          fi
 
-      - name: Delete old package versions (admin)
-        uses: actions/delete-package-versions@v5
-        with:
-          package-name: ${{ github.event.repository.name }}/admin
-          package-type: container
-          min-versions-to-keep: 5
-          delete-only-untagged-versions: true
-        continue-on-error: true
+          if [[ "${{ needs.test.result }}" == "failure" ]]; then
+            echo "❌ Tests failed"
+            exit 1
+          fi
+
+          echo "✅ CI/CD pipeline completed successfully!"

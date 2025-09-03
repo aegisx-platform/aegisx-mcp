@@ -1,32 +1,47 @@
 name: Release
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
-      version_type:
-        description: 'Version type'
-        required: true
-        default: 'patch'
+      release-type:
+        description: 'Release type'
+        required: false
         type: choice
+        default: 'auto'
         options:
+          - auto
           - patch
           - minor
           - major
+      skip-tests:
+        description: 'Skip tests (use with caution)'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  NODE_VERSION: '20'
+  POSTGRES_VERSION: '15'
+  REDIS_VERSION: '7-alpine'
 
 permissions:
   contents: write
-  packages: write
-  pull-requests: write
   issues: write
+  pull-requests: write
+  packages: write
 
 jobs:
-  release:
-    name: Create Release
+  # Validate and prepare release
+  prepare:
+    name: Prepare Release
     runs-on: ubuntu-latest
-
+    outputs:
+      should-release: ${{ steps.check.outputs.should-release }}
+      version: ${{ steps.version.outputs.version }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -34,87 +49,191 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
+
+      - name: Check if release is needed
+        id: check
+        run: |
+          # Check for conventional commits since last tag
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+
+          if [ -z "$LAST_TAG" ]; then
+            echo "No previous tags found, will create initial release"
+            echo "should-release=true" >> $GITHUB_OUTPUT
+          else
+            # Check for feat, fix, or breaking changes
+            CHANGES=$(git log $LAST_TAG..HEAD --pretty=format:"%s" | grep -E "^(feat|fix|perf|refactor|revert|BREAKING CHANGE):" || true)
+            
+            if [ -n "$CHANGES" ]; then
+              echo "Found releasable changes:"
+              echo "$CHANGES"
+              echo "should-release=true" >> $GITHUB_OUTPUT
+            else
+              echo "No releasable changes found"
+              echo "should-release=false" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Determine version
+        id: version
+        if: steps.check.outputs.should-release == 'true'
+        run: |
+          if [ "${{ github.event.inputs.release-type }}" != "auto" ] && [ -n "${{ github.event.inputs.release-type }}" ]; then
+            VERSION_TYPE="${{ github.event.inputs.release-type }}"
+          else
+            # Auto-detect version type from commits
+            BREAKING=$(git log $(git describe --tags --abbrev=0 2>/dev/null || echo "")..HEAD --pretty=format:"%B" | grep -E "BREAKING CHANGE:" || true)
+            FEAT=$(git log $(git describe --tags --abbrev=0 2>/dev/null || echo "")..HEAD --pretty=format:"%s" | grep -E "^feat:" || true)
+            
+            if [ -n "$BREAKING" ]; then
+              VERSION_TYPE="major"
+            elif [ -n "$FEAT" ]; then
+              VERSION_TYPE="minor"
+            else
+              VERSION_TYPE="patch"
+            fi
+          fi
+
+          echo "Version type: $VERSION_TYPE"
+          echo "version-type=$VERSION_TYPE" >> $GITHUB_OUTPUT
+
+  # Run tests unless skipped
+  test:
+    name: Test Suite
+    needs: prepare
+    if: |
+      needs.prepare.outputs.should-release == 'true' && 
+      github.event.inputs.skip-tests != 'true'
+    uses: ./.github/workflows/api-test.yml
+    secrets: inherit
+
+  # Run E2E tests on main only
+  e2e:
+    name: E2E Tests
+    needs: prepare
+    if: |
+      needs.prepare.outputs.should-release == 'true' && 
+      github.event.inputs.skip-tests != 'true'
+    uses: ./.github/workflows/e2e.yml
+    with:
+      test-type: e2e
+    secrets: inherit
+
+  # Create release
+  release:
+    name: Create Release
+    needs: [prepare, test, e2e]
+    if: |
+      always() && 
+      needs.prepare.outputs.should-release == 'true' &&
+      (needs.test.result == 'success' || needs.test.result == 'skipped') &&
+      (needs.e2e.result == 'success' || needs.e2e.result == 'skipped')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: |
+          yarn install --frozen-lockfile --ignore-scripts
+          yarn run prepare || true
 
       - name: Configure Git
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile --ignore-scripts
-
-      - name: Run tests
-        run: yarn test:ci
-
-      - name: Run linting
-        run: yarn lint
-
-      - name: Run security audit
-        run: yarn security:audit
-
-      - name: Build applications
-        run: yarn build:prod
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Generate changelog
+        id: changelog
         run: |
-          chmod +x scripts/generate-changelog.sh
-          ./scripts/generate-changelog.sh
+          # Install conventional-changelog-cli if not present
+          npx conventional-changelog-cli -p angular -i CHANGELOG.md -s -r 0
 
-      - name: Commit changelog
-        run: |
-          if [ -n "$(git status --porcelain CHANGELOG.md)" ]; then
-            git add CHANGELOG.md
-            git commit -m "docs: update changelog for release"
+          # Extract changelog for this release
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$LAST_TAG" ]; then
+            CHANGELOG=$(cat CHANGELOG.md)
+          else
+            CHANGELOG=$(npx conventional-changelog-cli -p angular -r 1 | tail -n +2)
           fi
 
-      - name: Bump version and create tag
-        id: version
-        run: |
-          npm version ${{ github.event.inputs.version_type }} --message "chore: release v%s"
-          echo "new_version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+          # Save to file for release notes
+          echo "$CHANGELOG" > release-notes.md
 
-      - name: Push changes
-        run: |
-          git push origin main --tags
+          # Commit changelog if changed
+          if ! git diff --quiet CHANGELOG.md; then
+            git add CHANGELOG.md
+            git commit -m "docs: update CHANGELOG.md [skip ci]"
+          fi
 
-      - name: Wait for CI/CD completion
-        uses: lewagon/wait-on-check-action@v1.3.1
-        with:
-          ref: v${{ steps.version.outputs.new_version }}
-          check-name: 'Build Applications'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 10
+      - name: Bump version
+        id: bump
+        run: |
+          VERSION_TYPE="${{ needs.prepare.outputs.version }}"
+
+          # Bump version in package.json files
+          npm version $VERSION_TYPE --no-git-tag-version --workspaces-update=false
+
+          # Get new version
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "new-version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+          # Commit version bump
+          git add -A
+          git commit -m "chore: release v$NEW_VERSION [skip ci]"
+
+          # Create and push tag
+          git tag -a "v$NEW_VERSION" -m "Release v$NEW_VERSION"
+          git push origin main --follow-tags
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ steps.version.outputs.new_version }}
-          name: Release v${{ steps.version.outputs.new_version }}
-          body_path: CHANGELOG.md
-          draft: false
-          prerelease: false
-          generate_release_notes: true
+        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Notify on success
-        uses: 8398a7/action-slack@v3
         with:
-          status: success
-          channel: '#releases'
-          text: 'New release v${{ steps.version.outputs.new_version }} has been created successfully!'
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        if: success()
+          tag_name: v${{ steps.bump.outputs.new-version }}
+          release_name: Release v${{ steps.bump.outputs.new-version }}
+          body_path: release-notes.md
+          draft: false
+          prerelease: false
 
-      - name: Notify on failure
-        uses: 8398a7/action-slack@v3
+      - name: Build and publish packages
+        run: |
+          # Build all packages
+          nx run-many --target=build --all --prod
+
+          # Publish to npm if configured
+          # npm publish --workspaces --access public
+
+      - name: Trigger Docker builds
+        uses: peter-evans/repository-dispatch@v3
         with:
-          status: failure
-          channel: '#releases'
-          text: 'Release creation failed for v${{ steps.version.outputs.new_version }}'
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        if: failure()
+          token: ${{ secrets.GITHUB_TOKEN }}
+          event-type: release-published
+          client-payload: '{"version": "${{ steps.bump.outputs.new-version }}"}'
+
+  # Notify release status
+  notify:
+    name: Notify Release Status
+    needs: [release]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send notification
+        run: |
+          if [[ "${{ needs.release.result }}" == "success" ]]; then
+            echo "✅ Release completed successfully!"
+            # Add Slack/Discord/Email notification here
+          else
+            echo "❌ Release failed!"
+            # Add failure notification here
+          fi

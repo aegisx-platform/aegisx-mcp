@@ -1,0 +1,121 @@
+name: 'Setup Test Environment'
+description: 'Sets up PostgreSQL, Redis, Node.js, and application for testing'
+inputs:
+  node-version:
+    description: 'Node.js version'
+    required: false
+    default: '20'
+  postgres-version:
+    description: 'PostgreSQL version'
+    required: false
+    default: '15'
+  redis-version:
+    description: 'Redis version'
+    required: false
+    default: '7-alpine'
+  working-directory:
+    description: 'Working directory'
+    required: false
+    default: '.'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: 'yarn'
+
+    - name: Install dependencies
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        yarn install --frozen-lockfile --ignore-scripts
+        yarn run prepare || true
+
+    - name: Wait for PostgreSQL
+      shell: bash
+      run: |
+        echo "Waiting for PostgreSQL to be ready..."
+        for i in {1..30}; do
+          if pg_isready -h localhost -p 5432 -U postgres; then
+            echo "PostgreSQL is ready!"
+            break
+          fi
+          echo "Waiting for PostgreSQL... ($i/30)"
+          sleep 2
+        done
+
+    - name: Wait for Redis
+      shell: bash
+      run: |
+        echo "Waiting for Redis to be ready..."
+        for i in {1..30}; do
+          if redis-cli -h localhost -p 6379 ping > /dev/null 2>&1; then
+            echo "Redis is ready!"
+            break
+          fi
+          echo "Waiting for Redis... ($i/30)"
+          sleep 2
+        done
+
+    - name: Setup test database
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        NODE_ENV: test
+        DATABASE_HOST: localhost
+        DATABASE_PORT: 5432
+        DATABASE_NAME: aegisx_test
+        DATABASE_USER: postgres
+        DATABASE_PASSWORD: postgres
+      run: |
+        echo "Creating test database..."
+        PGPASSWORD=postgres psql -h localhost -U postgres -c "CREATE DATABASE aegisx_test;" || true
+
+        echo "Running migrations..."
+        npx knex migrate:latest
+
+        echo "Running seeds..."
+        npx knex seed:run
+
+    - name: Build applications
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        echo "Building applications..."
+        npx nx run-many --target=build --projects=api,web --parallel=3
+
+    - name: Start API server
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        NODE_ENV: test
+        DATABASE_HOST: localhost
+        DATABASE_PORT: 5432
+        DATABASE_NAME: aegisx_test
+        DATABASE_USER: postgres
+        DATABASE_PASSWORD: postgres
+        REDIS_HOST: localhost
+        REDIS_PORT: 6379
+        JWT_SECRET: test-jwt-secret-key-for-ci
+        JWT_REFRESH_SECRET: test-jwt-refresh-secret-key-for-ci
+        API_PREFIX: api
+        PORT: 3333
+      run: |
+        echo "Starting API server..."
+        npx nx serve api &
+
+        echo "Waiting for API server to be ready..."
+        for i in {1..60}; do
+          if curl -f http://localhost:3333/api/health > /dev/null 2>&1; then
+            echo "API server is ready!"
+            break
+          fi
+          echo "Waiting for API server... ($i/60)"
+          sleep 2
+        done
+
+        # Verify API is responding
+        curl -f http://localhost:3333/api/health || exit 1
