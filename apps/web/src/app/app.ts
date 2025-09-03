@@ -234,7 +234,7 @@ export class App implements OnInit {
     });
 
     // Check current theme
-    const currentScheme = this.configService.config.scheme;
+    const currentScheme = this.configService.config().scheme;
     this.isDarkMode.set(currentScheme === 'dark');
   }
 

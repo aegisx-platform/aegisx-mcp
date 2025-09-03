@@ -7,6 +7,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatRadioModule } from '@angular/material/radio';
+import { MatDividerModule } from '@angular/material/divider';
 import { AegisxCardComponent } from '@aegisx/ui';
 
 interface ThemePreset {
@@ -29,6 +30,7 @@ interface ThemePreset {
     MatButtonModule,
     MatIconModule,
     MatRadioModule,
+    MatDividerModule,
     AegisxCardComponent,
   ],
   template: `

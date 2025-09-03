@@ -5,7 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatTabsModule } from '@angular/material/tabs';
-import { AegisxCardComponent, AegisxAlertComponent } from '@aegisx/ui';
+import { AegisxCardComponent } from '@aegisx/ui';
 import {
   ChartWidgetComponent,
   StatsCardComponent,
@@ -30,7 +30,6 @@ import {
     MatGridListModule,
     MatTabsModule,
     AegisxCardComponent,
-    AegisxAlertComponent,
     ChartWidgetComponent,
     StatsCardComponent,
     ActivityTimelineComponent,

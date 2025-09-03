@@ -11,7 +11,7 @@ export interface ChartData {
   datasets: {
     label: string;
     data: number[];
-    backgroundColor?: string;
+    backgroundColor?: string | string[];
     borderColor?: string;
   }[];
 }

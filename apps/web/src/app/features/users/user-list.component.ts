@@ -16,6 +16,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDividerModule } from '@angular/material/divider';
 import { AegisxCardComponent } from '@aegisx/ui';
 import { UserService } from './user.service';
 import { UserFormDialogComponent } from './user-form-dialog.component';
@@ -41,6 +42,7 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
     MatDialogModule,
     MatSnackBarModule,
     MatProgressSpinnerModule,
+    MatDividerModule,
     AegisxCardComponent,
   ],
   template: `

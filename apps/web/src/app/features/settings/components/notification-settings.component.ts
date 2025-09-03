@@ -1,6 +1,6 @@
 import { Component, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -22,6 +22,7 @@ interface NotificationCategory {
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     MatSlideToggleModule,
     MatButtonModule,
     MatIconModule,
