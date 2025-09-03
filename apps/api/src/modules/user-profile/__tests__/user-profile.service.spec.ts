@@ -6,7 +6,7 @@ import {
   UserPreferences,
   UserProfileUpdateRequest,
   UserPreferencesUpdateRequest,
-  AvatarUploadResult
+  AvatarUploadResult,
 } from '../user-profile.types';
 
 // Mock dependencies
@@ -19,19 +19,19 @@ const mockRepository = {
   updateUserAvatar: jest.fn(),
   getUserAvatarFile: jest.fn(),
   deleteUserAvatar: jest.fn(),
-  deleteOldAvatarFiles: jest.fn()
+  deleteOldAvatarFiles: jest.fn(),
 } as any;
 
 const mockAvatarService = {
   processAvatarUpload: jest.fn(),
   deleteAvatarFiles: jest.fn(),
-  cleanupOrphanedFiles: jest.fn()
+  cleanupOrphanedFiles: jest.fn(),
 } as any;
 
 const mockLogger = {
   info: jest.fn(),
   warn: jest.fn(),
-  error: jest.fn()
+  error: jest.fn(),
 };
 
 describe('UserProfileService', () => {
@@ -39,11 +39,11 @@ describe('UserProfileService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     service = new UserProfileService({
       repository: mockRepository,
       avatarService: mockAvatarService,
-      logger: mockLogger as any
+      logger: mockLogger as any,
     });
   });
 
@@ -58,17 +58,17 @@ describe('UserProfileService', () => {
       role: {
         id: 'role-1',
         name: 'User',
-        permissions: ['read']
+        permissions: ['read'],
       },
       preferences: {
         theme: 'default',
-        language: 'en'
+        language: 'en',
       },
       createdAt: '2024-01-01T00:00:00Z',
       updatedAt: '2024-01-01T00:00:00Z',
       status: 'active',
       emailVerified: true,
-      twoFactorEnabled: false
+      twoFactorEnabled: false,
     };
 
     it('should return user profile when found', async () => {
@@ -77,8 +77,13 @@ describe('UserProfileService', () => {
       const result = await service.getUserProfile(userId);
 
       expect(result).toEqual(mockProfile);
-      expect(mockRepository.findUserWithProfileById).toHaveBeenCalledWith(userId);
-      expect(mockLogger.info).toHaveBeenCalledWith({ userId }, 'User profile retrieved successfully');
+      expect(mockRepository.findUserWithProfileById).toHaveBeenCalledWith(
+        userId,
+      );
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        { userId },
+        'User profile retrieved successfully',
+      );
     });
 
     it('should return null when profile not found', async () => {
@@ -87,15 +92,23 @@ describe('UserProfileService', () => {
       const result = await service.getUserProfile(userId);
 
       expect(result).toBeNull();
-      expect(mockLogger.warn).toHaveBeenCalledWith({ userId }, 'User profile not found');
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        { userId },
+        'User profile not found',
+      );
     });
 
     it('should handle errors gracefully', async () => {
       const error = new Error('Database error');
       mockRepository.findUserWithProfileById.mockRejectedValue(error);
 
-      await expect(service.getUserProfile(userId)).rejects.toThrow('Database error');
-      expect(mockLogger.error).toHaveBeenCalledWith({ error, userId }, 'Error retrieving user profile');
+      await expect(service.getUserProfile(userId)).rejects.toThrow(
+        'Database error',
+      );
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        { error, userId },
+        'Error retrieving user profile',
+      );
     });
   });
 
@@ -106,8 +119,8 @@ describe('UserProfileService', () => {
       firstName: 'Jane',
       lastName: 'Doe',
       preferences: {
-        theme: 'dark'
-      }
+        theme: 'dark',
+      },
     };
 
     const mockUpdatedProfile: UserProfile = {
@@ -119,23 +132,25 @@ describe('UserProfileService', () => {
       role: {
         id: 'role-1',
         name: 'User',
-        permissions: ['read']
+        permissions: ['read'],
       },
       preferences: {
         theme: 'dark',
-        language: 'en'
+        language: 'en',
       },
       createdAt: '2024-01-01T00:00:00Z',
       updatedAt: '2024-01-01T00:00:00Z',
       status: 'active',
       emailVerified: true,
-      twoFactorEnabled: false
+      twoFactorEnabled: false,
     };
 
     it('should update profile successfully', async () => {
       mockRepository.updateUserProfile.mockResolvedValue(true);
       mockRepository.updateUserPreferences.mockResolvedValue(true);
-      mockRepository.findUserWithProfileById.mockResolvedValue(mockUpdatedProfile);
+      mockRepository.findUserWithProfileById.mockResolvedValue(
+        mockUpdatedProfile,
+      );
 
       const result = await service.updateUserProfile(userId, updates);
 
@@ -143,12 +158,15 @@ describe('UserProfileService', () => {
       expect(mockRepository.updateUserProfile).toHaveBeenCalledWith(userId, {
         name: 'Jane Doe',
         first_name: 'Jane',
-        last_name: 'Doe'
+        last_name: 'Doe',
       });
-      expect(mockRepository.updateUserPreferences).toHaveBeenCalledWith(userId, updates.preferences);
+      expect(mockRepository.updateUserPreferences).toHaveBeenCalledWith(
+        userId,
+        updates.preferences,
+      );
       expect(mockLogger.info).toHaveBeenCalledWith(
         { userId, updates: ['name', 'first_name', 'last_name'] },
-        'User profile updated successfully'
+        'User profile updated successfully',
       );
     });
 
@@ -156,7 +174,9 @@ describe('UserProfileService', () => {
       mockRepository.updateUserProfile.mockResolvedValue(true);
       mockRepository.findUserWithProfileById.mockResolvedValue(null);
 
-      await expect(service.updateUserProfile(userId, updates)).rejects.toThrow('USER_NOT_FOUND');
+      await expect(service.updateUserProfile(userId, updates)).rejects.toThrow(
+        'USER_NOT_FOUND',
+      );
     });
   });
 
@@ -167,7 +187,7 @@ describe('UserProfileService', () => {
       scheme: 'dark',
       layout: 'compact',
       language: 'en',
-      timezone: 'UTC'
+      timezone: 'UTC',
     };
 
     it('should return user preferences when found', async () => {
@@ -176,7 +196,10 @@ describe('UserProfileService', () => {
       const result = await service.getUserPreferences(userId);
 
       expect(result).toEqual(mockPreferences);
-      expect(mockLogger.info).toHaveBeenCalledWith({ userId }, 'User preferences retrieved successfully');
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        { userId },
+        'User preferences retrieved successfully',
+      );
     });
 
     it('should create and return default preferences when none exist', async () => {
@@ -185,15 +208,23 @@ describe('UserProfileService', () => {
 
       const result = await service.getUserPreferences(userId);
 
-      expect(result).toEqual(expect.objectContaining({
-        theme: 'default',
-        scheme: 'light',
-        layout: 'classic',
-        language: 'en',
-        timezone: 'UTC'
-      }));
-      expect(mockRepository.updateUserPreferences).toHaveBeenCalledWith(userId, expect.any(Object));
-      expect(mockLogger.info).toHaveBeenCalledWith({ userId }, 'Created default user preferences');
+      expect(result).toEqual(
+        expect.objectContaining({
+          theme: 'default',
+          scheme: 'light',
+          layout: 'classic',
+          language: 'en',
+          timezone: 'UTC',
+        }),
+      );
+      expect(mockRepository.updateUserPreferences).toHaveBeenCalledWith(
+        userId,
+        expect.any(Object),
+      );
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        { userId },
+        'Created default user preferences',
+      );
     });
   });
 
@@ -202,46 +233,57 @@ describe('UserProfileService', () => {
     const updates: UserPreferencesUpdateRequest = {
       theme: 'dark',
       language: 'en',
-      timezone: 'America/New_York'
+      timezone: 'America/New_York',
     };
 
     const mockUpdatedPreferences: UserPreferences = {
       theme: 'dark',
       language: 'en',
-      timezone: 'America/New_York'
+      timezone: 'America/New_York',
     };
 
     it('should update preferences successfully', async () => {
       mockRepository.updateUserPreferences.mockResolvedValue(true);
-      mockRepository.getUserPreferences.mockResolvedValue(mockUpdatedPreferences);
+      mockRepository.getUserPreferences.mockResolvedValue(
+        mockUpdatedPreferences,
+      );
 
       const result = await service.updateUserPreferences(userId, updates);
 
       expect(result).toEqual(mockUpdatedPreferences);
-      expect(mockRepository.updateUserPreferences).toHaveBeenCalledWith(userId, updates);
+      expect(mockRepository.updateUserPreferences).toHaveBeenCalledWith(
+        userId,
+        updates,
+      );
       expect(mockLogger.info).toHaveBeenCalledWith(
         { userId, updatedFields: ['theme', 'language', 'timezone'] },
-        'User preferences updated successfully'
+        'User preferences updated successfully',
       );
     });
 
     it('should validate timezone', async () => {
-      const invalidUpdates = { ...updates, timezone: '' };
+      const invalidUpdates = { ...updates, timezone: 'a'.repeat(101) }; // Too long, > 100 chars
 
-      await expect(service.updateUserPreferences(userId, invalidUpdates)).rejects.toThrow('INVALID_TIMEZONE');
+      await expect(
+        service.updateUserPreferences(userId, invalidUpdates),
+      ).rejects.toThrow('INVALID_TIMEZONE');
     });
 
     it('should validate language code', async () => {
       const invalidUpdates = { ...updates, language: 'invalid' };
 
-      await expect(service.updateUserPreferences(userId, invalidUpdates)).rejects.toThrow('INVALID_LANGUAGE_CODE');
+      await expect(
+        service.updateUserPreferences(userId, invalidUpdates),
+      ).rejects.toThrow('INVALID_LANGUAGE_CODE');
     });
 
     it('should throw error when preferences not found after update', async () => {
       mockRepository.updateUserPreferences.mockResolvedValue(true);
       mockRepository.getUserPreferences.mockResolvedValue(null);
 
-      await expect(service.updateUserPreferences(userId, updates)).rejects.toThrow('PREFERENCES_NOT_FOUND');
+      await expect(
+        service.updateUserPreferences(userId, updates),
+      ).rejects.toThrow('PREFERENCES_NOT_FOUND');
     });
   });
 
@@ -250,16 +292,19 @@ describe('UserProfileService', () => {
     const mockFile = {
       filename: 'avatar.jpg',
       mimetype: 'image/jpeg',
-      toBuffer: jest.fn().mockResolvedValue(Buffer.from('fake-image-data'))
+      toBuffer: jest.fn().mockResolvedValue(Buffer.from('fake-image-data')),
     } as any;
 
     const mockUploadResult: AvatarUploadResult = {
       avatar: 'http://localhost:3000/api/uploads/avatars/user-123_avatar.jpg',
       thumbnails: {
-        small: 'http://localhost:3000/api/uploads/avatars/user-123_avatar_small.jpg',
-        medium: 'http://localhost:3000/api/uploads/avatars/user-123_avatar_medium.jpg',
-        large: 'http://localhost:3000/api/uploads/avatars/user-123_avatar_large.jpg'
-      }
+        small:
+          'http://localhost:3000/api/uploads/avatars/user-123_avatar_small.jpg',
+        medium:
+          'http://localhost:3000/api/uploads/avatars/user-123_avatar_medium.jpg',
+        large:
+          'http://localhost:3000/api/uploads/avatars/user-123_avatar_large.jpg',
+      },
     };
 
     it('should upload avatar successfully', async () => {
@@ -274,16 +319,22 @@ describe('UserProfileService', () => {
         storagePath: mockUploadResult.avatar,
         thumbnails: mockUploadResult.thumbnails,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       });
       mockRepository.updateUserAvatar.mockResolvedValue(true);
 
       const result = await service.uploadUserAvatar(userId, mockFile);
 
       expect(result).toEqual(mockUploadResult);
-      expect(mockAvatarService.processAvatarUpload).toHaveBeenCalledWith(mockFile, userId);
+      expect(mockAvatarService.processAvatarUpload).toHaveBeenCalledWith(
+        mockFile,
+        userId,
+      );
       expect(mockRepository.createAvatarFile).toHaveBeenCalled();
-      expect(mockRepository.updateUserAvatar).toHaveBeenCalledWith(userId, mockUploadResult.avatar);
+      expect(mockRepository.updateUserAvatar).toHaveBeenCalledWith(
+        userId,
+        mockUploadResult.avatar,
+      );
     });
 
     it('should handle unsupported media type error', async () => {
@@ -291,7 +342,9 @@ describe('UserProfileService', () => {
       mockRepository.getUserAvatarFile.mockResolvedValue(null);
       mockAvatarService.processAvatarUpload.mockRejectedValue(error);
 
-      await expect(service.uploadUserAvatar(userId, mockFile)).rejects.toThrow('UNSUPPORTED_MEDIA_TYPE');
+      await expect(service.uploadUserAvatar(userId, mockFile)).rejects.toThrow(
+        'UNSUPPORTED_MEDIA_TYPE',
+      );
     });
 
     it('should handle file too large error', async () => {
@@ -299,7 +352,9 @@ describe('UserProfileService', () => {
       mockRepository.getUserAvatarFile.mockResolvedValue(null);
       mockAvatarService.processAvatarUpload.mockRejectedValue(error);
 
-      await expect(service.uploadUserAvatar(userId, mockFile)).rejects.toThrow('FILE_TOO_LARGE');
+      await expect(service.uploadUserAvatar(userId, mockFile)).rejects.toThrow(
+        'FILE_TOO_LARGE',
+      );
     });
   });
 
@@ -315,10 +370,10 @@ describe('UserProfileService', () => {
       thumbnails: {
         small: 'small.jpg',
         medium: 'medium.jpg',
-        large: 'large.jpg'
+        large: 'large.jpg',
       },
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     it('should delete avatar successfully', async () => {
@@ -328,18 +383,22 @@ describe('UserProfileService', () => {
 
       await service.deleteUserAvatar(userId);
 
-      expect(mockAvatarService.deleteAvatarFiles).toHaveBeenCalledWith(mockAvatarFile);
+      expect(mockAvatarService.deleteAvatarFiles).toHaveBeenCalledWith(
+        mockAvatarFile,
+      );
       expect(mockRepository.deleteUserAvatar).toHaveBeenCalledWith(userId);
       expect(mockLogger.info).toHaveBeenCalledWith(
         { userId, avatarId: mockAvatarFile.id },
-        'User avatar deleted successfully'
+        'User avatar deleted successfully',
       );
     });
 
     it('should throw error when avatar not found', async () => {
       mockRepository.getUserAvatarFile.mockResolvedValue(null);
 
-      await expect(service.deleteUserAvatar(userId)).rejects.toThrow('AVATAR_NOT_FOUND');
+      await expect(service.deleteUserAvatar(userId)).rejects.toThrow(
+        'AVATAR_NOT_FOUND',
+      );
     });
   });
 });
