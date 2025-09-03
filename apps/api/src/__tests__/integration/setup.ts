@@ -42,8 +42,11 @@ const testDbConfig = {
       'postgres',
   },
   pool: {
-    min: 1,
-    max: 5,
+    min: 0,
+    max: 10,
+    acquireTimeoutMillis: 60000,
+    idleTimeoutMillis: 600,
+    reapIntervalMillis: 1000,
   },
   migrations: {
     directory: path.join(__dirname, '../../database/migrations'),
@@ -157,8 +160,23 @@ export async function setupTestContext(
   };
 
   const cleanup = async () => {
-    await app.close();
-    await db.connection.destroy();
+    // Close Fastify app first
+    try {
+      await app.close();
+    } catch (error) {
+      console.warn('Error closing Fastify app:', error);
+    }
+
+    // Clean database and destroy connection
+    try {
+      await db.cleanup();
+      await db.connection.destroy();
+    } catch (error) {
+      console.warn('Error closing database connection:', error);
+    }
+
+    // Give connections time to fully close
+    await new Promise((resolve) => setTimeout(resolve, 100));
   };
 
   return {

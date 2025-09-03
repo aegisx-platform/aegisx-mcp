@@ -5,12 +5,15 @@
 ## 🚀 Features
 
 ### ✅ Completed Features
+
 - **Database Setup**: PostgreSQL with migrations and seed data
 - **Authentication System**: JWT with refresh tokens, RBAC, secure sessions
 - **Monorepo Structure**: Nx workspace with 3 applications (API, Web, Admin)
+- **Monitoring & Logging**: Winston logging, Prometheus metrics, Health checks
 - **Developer Experience**: Hot reload, TypeScript, ESLint, Prettier
 
 ### 🏗️ Architecture
+
 - **Frontend**: Angular 19 with Signals, Angular Material, TailwindCSS
 - **Backend**: Fastify 4 with plugin architecture
 - **Database**: PostgreSQL 15 with Knex.js migrations
@@ -33,6 +36,7 @@ aegisx-starter/
 ## 🛠️ Quick Start
 
 ### Prerequisites
+
 - Node.js 18+
 - Docker & Docker Compose
 - Yarn (v1.22+)
@@ -61,30 +65,45 @@ npx knex seed:run
 
 # Start development servers
 nx run-many --target=serve --projects=api,web,admin
+
+# Optional: Start monitoring stack
+yarn monitoring:start
 ```
 
 ### Access Applications
+
 - **API**: http://localhost:3333
 - **Web App**: http://localhost:4200
 - **Admin Panel**: http://localhost:4201
 - **API Documentation**: http://localhost:3333/documentation
 
+### Monitoring & Observability
+
+- **Health Check**: http://localhost:3333/health/ready
+- **Metrics**: http://localhost:3333/metrics
+- **Prometheus**: http://localhost:9090
+- **Grafana**: http://localhost:3030 (admin/aegisx123)
+
 ## 🔐 Default Credentials
 
 ### Admin User
+
 - **Email**: admin@aegisx.local
 - **Password**: Admin123!
 
 ### Test User
+
 - **Email**: test4@example.com
 - **Password**: password123
 
 ## 📚 Documentation
 
 ### 🚀 Start Here
+
 - **[📖 Getting Started Guide](./docs/00-GETTING-STARTED.md)** - **MUST READ! Git workflow, rules, and quick start**
 
 ### Quick Links
+
 - [📊 Feature Tracking](./docs/01-feature-tracking.md) - Development progress tracker
 - [🚀 Quick Commands](./docs/02-quick-commands.md) - Common commands reference
 - [🏗️ Project Setup](./docs/03-project-setup.md) - Detailed setup instructions
@@ -93,15 +112,18 @@ nx run-many --target=serve --projects=api,web,admin
 - [🏛️ Architecture Overview](./docs/05-architecture.md) - System architecture
 
 ### Architecture Guides
+
 - [Frontend Architecture](./docs/05a-frontend-architecture.md) - Angular patterns & practices
 - [Backend Architecture](./docs/05b-backend-architecture.md) - Fastify patterns & practices
 - [Database Migrations](./docs/05b7-database-migrations.md) - Migration strategies
 - [RBAC & Authentication](./docs/05b2-rbac-auth.md) - Security implementation
 
 ### Development Progress
+
 - [Project Status](./PROJECT_STATUS.md) - Current development status and session recovery
 
 ### CI/CD & DevOps Documentation
+
 - [Git Flow & Release Strategy](./docs/GIT-FLOW-RELEASE-GUIDE.md) - Branch management and release process
 - [Automated Versioning Guide](./docs/AUTOMATED-VERSIONING-GUIDE.md) - Semantic versioning with conventional commits
 - [Monorepo Docker Management](./docs/MONOREPO-DOCKER-GUIDE.md) - Docker strategies for monorepo apps
@@ -126,6 +148,7 @@ nx test admin
 ## 🔧 Common Tasks
 
 ### Database Operations
+
 ```bash
 # Create new migration
 npx knex migrate:make migration_name
@@ -141,6 +164,7 @@ npx knex migrate:rollback --all && npx knex migrate:latest && npx knex seed:run
 ```
 
 ### Generate New Feature (API-First Approach)
+
 ```bash
 # Recommended workflow for new features:
 1. /start [feature]           # Start new feature
@@ -153,6 +177,7 @@ npx knex migrate:rollback --all && npx knex migrate:latest && npx knex seed:run
 ```
 
 ### API Testing
+
 ```bash
 # Health check
 curl http://localhost:3333/health
@@ -170,6 +195,7 @@ curl http://localhost:3333/api/auth/me \
 ## 📁 Project Structure
 
 ### Backend Structure
+
 ```
 apps/api/src/
 ├── database/
@@ -186,6 +212,7 @@ apps/api/src/
 ```
 
 ### Frontend Structure
+
 ```
 apps/web/src/
 ├── app/
@@ -199,6 +226,7 @@ apps/web/src/
 ## 🚀 Deployment
 
 ### Docker Build
+
 ```bash
 # Build all applications
 docker-compose -f docker-compose.prod.yml build
@@ -208,9 +236,11 @@ docker-compose -f docker-compose.prod.yml up -d
 ```
 
 ### Environment Variables
+
 See `.env.example` for all available environment variables.
 
 Key variables:
+
 - `DATABASE_URL`: PostgreSQL connection string
 - `JWT_SECRET`: Secret for JWT tokens
 - `SESSION_SECRET`: Secret for sessions
@@ -231,6 +261,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 🙏 Acknowledgments
 
 Built with:
+
 - [Nx](https://nx.dev) - Smart, extensible build framework
 - [Angular](https://angular.io) - Modern web framework
 - [Fastify](https://www.fastify.io) - Fast and low overhead web framework

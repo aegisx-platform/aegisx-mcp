@@ -10,7 +10,7 @@ describe('Navigation API Integration', () => {
     // Set test environment
     process.env.NODE_ENV = 'test';
     process.env.DB_NAME = 'aegisx_test';
-    
+
     app = await build({ logger: false });
 
     try {
@@ -23,8 +23,8 @@ describe('Navigation API Integration', () => {
           username: 'testuser',
           password: 'testpass123',
           firstName: 'Test',
-          lastName: 'User'
-        }
+          lastName: 'User',
+        },
       });
 
       const loginResponse = await app.inject({
@@ -32,18 +32,18 @@ describe('Navigation API Integration', () => {
         url: '/api/auth/login',
         payload: {
           email: 'test@example.com',
-          password: 'testpass123'
-        }
+          password: 'testpass123',
+        },
       });
 
       if (loginResponse.statusCode === 200) {
         validToken = JSON.parse(loginResponse.body).data.accessToken;
       } else {
         // Create a mock token for testing if registration/login fails
-        validToken = app.jwt.sign({ 
-          id: 'test-user-id', 
+        validToken = app.jwt.sign({
+          id: 'test-user-id',
           email: 'test@example.com',
-          roles: ['user'] 
+          role: 'user',
         });
       }
 
@@ -56,8 +56,8 @@ describe('Navigation API Integration', () => {
           username: 'admin',
           password: 'adminpass123',
           firstName: 'Admin',
-          lastName: 'User'
-        }
+          lastName: 'User',
+        },
       });
 
       // Login as admin
@@ -66,32 +66,32 @@ describe('Navigation API Integration', () => {
         url: '/api/auth/login',
         payload: {
           email: 'admin@example.com',
-          password: 'adminpass123'
-        }
+          password: 'adminpass123',
+        },
       });
 
       if (adminLoginResponse.statusCode === 200) {
         adminToken = JSON.parse(adminLoginResponse.body).data.accessToken;
       } else {
         // Create a mock token for testing if registration/login fails
-        adminToken = app.jwt.sign({ 
-          id: 'admin-user-id', 
+        adminToken = app.jwt.sign({
+          id: 'admin-user-id',
           email: 'admin@example.com',
-          roles: ['admin'] 
+          roles: ['admin'],
         });
       }
     } catch (error) {
       // Fallback to mock tokens if auth setup fails
-      validToken = app.jwt.sign({ 
-        id: 'test-user-id', 
+      validToken = app.jwt.sign({
+        id: 'test-user-id',
         email: 'test@example.com',
-        roles: ['user'] 
+        roles: ['user'],
       });
-      
-      adminToken = app.jwt.sign({ 
-        id: 'admin-user-id', 
+
+      adminToken = app.jwt.sign({
+        id: 'admin-user-id',
         email: 'admin@example.com',
-        roles: ['admin'] 
+        roles: ['admin'],
       });
     }
   });
@@ -105,7 +105,7 @@ describe('Navigation API Integration', () => {
       it('should reject requests without authentication', async () => {
         const response = await app.inject({
           method: 'GET',
-          url: '/api/navigation'
+          url: '/api/navigation',
         });
 
         expect(response.statusCode).toBe(401);
@@ -119,8 +119,8 @@ describe('Navigation API Integration', () => {
           method: 'GET',
           url: '/api/navigation',
           headers: {
-            authorization: 'Bearer invalid-token'
-          }
+            authorization: 'Bearer invalid-token',
+          },
         });
 
         expect(response.statusCode).toBe(401);
@@ -133,13 +133,13 @@ describe('Navigation API Integration', () => {
           method: 'GET',
           url: '/api/navigation',
           headers: {
-            authorization: `Bearer ${validToken}`
-          }
+            authorization: `Bearer ${validToken}`,
+          },
         });
 
         expect(response.statusCode).toBe(200);
         const body = JSON.parse(response.body);
-        
+
         expect(body.success).toBe(true);
         expect(body.data).toBeDefined();
         expect(body.data.default).toBeDefined();
@@ -156,13 +156,13 @@ describe('Navigation API Integration', () => {
           method: 'GET',
           url: '/api/navigation?type=compact',
           headers: {
-            authorization: `Bearer ${validToken}`
-          }
+            authorization: `Bearer ${validToken}`,
+          },
         });
 
         expect(response.statusCode).toBe(200);
         const body = JSON.parse(response.body);
-        
+
         expect(body.success).toBe(true);
         expect(body.data.compact).toBeDefined();
         expect(body.data.default).toBeUndefined();
@@ -175,8 +175,8 @@ describe('Navigation API Integration', () => {
           method: 'GET',
           url: '/api/navigation?includeDisabled=true',
           headers: {
-            authorization: `Bearer ${validToken}`
-          }
+            authorization: `Bearer ${validToken}`,
+          },
         });
 
         expect(response.statusCode).toBe(200);
@@ -189,8 +189,8 @@ describe('Navigation API Integration', () => {
           method: 'GET',
           url: '/api/navigation?type=invalid',
           headers: {
-            authorization: `Bearer ${validToken}`
-          }
+            authorization: `Bearer ${validToken}`,
+          },
         });
 
         expect(response.statusCode).toBe(400);
@@ -204,7 +204,7 @@ describe('Navigation API Integration', () => {
           { param: 'includeDisabled=true', expected: true },
           { param: 'includeDisabled=false', expected: false },
           { param: 'includeDisabled=1', expected: true },
-          { param: 'includeDisabled=0', expected: false }
+          { param: 'includeDisabled=0', expected: false },
         ];
 
         for (const testCase of testCases) {
@@ -212,8 +212,8 @@ describe('Navigation API Integration', () => {
             method: 'GET',
             url: `/api/navigation?${testCase.param}`,
             headers: {
-              authorization: `Bearer ${validToken}`
-            }
+              authorization: `Bearer ${validToken}`,
+            },
           });
 
           expect(response.statusCode).toBe(200);
@@ -229,31 +229,41 @@ describe('Navigation API Integration', () => {
           method: 'GET',
           url: '/api/navigation?type=default',
           headers: {
-            authorization: `Bearer ${validToken}`
-          }
+            authorization: `Bearer ${validToken}`,
+          },
         });
 
         expect(response.statusCode).toBe(200);
         const body = JSON.parse(response.body);
-        
+
         if (body.data.default && body.data.default.length > 0) {
           const firstItem = body.data.default[0];
-          
+
           // Verify required fields
           expect(firstItem.id).toBeDefined();
           expect(firstItem.title).toBeDefined();
           expect(firstItem.type).toBeDefined();
-          expect(['item', 'group', 'collapsible', 'divider', 'spacer']).toContain(firstItem.type);
-          
+          expect([
+            'item',
+            'group',
+            'collapsible',
+            'divider',
+            'spacer',
+          ]).toContain(firstItem.type);
+
           // Verify optional fields are properly included/excluded
           if (firstItem.target) {
-            expect(['_self', '_blank', '_parent', '_top']).toContain(firstItem.target);
+            expect(['_self', '_blank', '_parent', '_top']).toContain(
+              firstItem.target,
+            );
           }
-          
+
           if (firstItem.badge) {
-            expect(firstItem.badge.title || firstItem.badge.variant).toBeDefined();
+            expect(
+              firstItem.badge.title || firstItem.badge.variant,
+            ).toBeDefined();
           }
-          
+
           if (firstItem.children) {
             expect(Array.isArray(firstItem.children)).toBe(true);
           }
@@ -265,22 +275,22 @@ describe('Navigation API Integration', () => {
           method: 'GET',
           url: '/api/navigation?type=default',
           headers: {
-            authorization: `Bearer ${validToken}`
-          }
+            authorization: `Bearer ${validToken}`,
+          },
         });
 
         expect(response.statusCode).toBe(200);
         const body = JSON.parse(response.body);
-        
+
         // Look for a collapsible item that should have children
         const collapsibleItem = body.data.default?.find(
-          (item: any) => item.type === 'collapsible'
+          (item: any) => item.type === 'collapsible',
         );
-        
+
         if (collapsibleItem) {
           expect(collapsibleItem.children).toBeDefined();
           expect(Array.isArray(collapsibleItem.children)).toBe(true);
-          
+
           if (collapsibleItem.children.length > 0) {
             const child = collapsibleItem.children[0];
             expect(child.id).toBeDefined();
@@ -297,7 +307,7 @@ describe('Navigation API Integration', () => {
       it('should reject requests without authentication', async () => {
         const response = await app.inject({
           method: 'GET',
-          url: '/api/navigation/user'
+          url: '/api/navigation/user',
         });
 
         expect(response.statusCode).toBe(401);
@@ -313,13 +323,13 @@ describe('Navigation API Integration', () => {
           method: 'GET',
           url: '/api/navigation/user',
           headers: {
-            authorization: `Bearer ${validToken}`
-          }
+            authorization: `Bearer ${validToken}`,
+          },
         });
 
         expect(response.statusCode).toBe(200);
         const body = JSON.parse(response.body);
-        
+
         expect(body.success).toBe(true);
         expect(body.data).toBeDefined();
         expect(body.meta).toBeDefined();
@@ -332,16 +342,16 @@ describe('Navigation API Integration', () => {
           method: 'GET',
           url: '/api/navigation/user',
           headers: {
-            authorization: `Bearer ${validToken}`
-          }
+            authorization: `Bearer ${validToken}`,
+          },
         });
 
         const adminResponse = await app.inject({
           method: 'GET',
           url: '/api/navigation/user',
           headers: {
-            authorization: `Bearer ${adminToken}`
-          }
+            authorization: `Bearer ${adminToken}`,
+          },
         });
 
         expect(userResponse.statusCode).toBe(200);
@@ -361,13 +371,13 @@ describe('Navigation API Integration', () => {
           method: 'GET',
           url: '/api/navigation/user?type=mobile',
           headers: {
-            authorization: `Bearer ${validToken}`
-          }
+            authorization: `Bearer ${validToken}`,
+          },
         });
 
         expect(response.statusCode).toBe(200);
         const body = JSON.parse(response.body);
-        
+
         expect(body.success).toBe(true);
         expect(body.data.mobile).toBeDefined();
         expect(body.data.default).toBeUndefined();
@@ -378,8 +388,8 @@ describe('Navigation API Integration', () => {
           method: 'GET',
           url: '/api/navigation/user?type=invalid',
           headers: {
-            authorization: `Bearer ${validToken}`
-          }
+            authorization: `Bearer ${validToken}`,
+          },
         });
 
         expect(response.statusCode).toBe(400);
@@ -395,13 +405,13 @@ describe('Navigation API Integration', () => {
           method: 'GET',
           url: '/api/navigation/user?type=default',
           headers: {
-            authorization: `Bearer ${validToken}`
-          }
+            authorization: `Bearer ${validToken}`,
+          },
         });
 
         expect(response.statusCode).toBe(200);
         const body = JSON.parse(response.body);
-        
+
         // Check that items requiring high-level permissions are not included
         // This depends on the permission setup in seeds
         const allItems = body.data.default || [];
@@ -416,12 +426,14 @@ describe('Navigation API Integration', () => {
         };
 
         const flatItems = flattenItems(allItems);
-        
+
         // Items should not include those requiring system-level permissions
-        const systemItems = flatItems.filter((item: any) => 
-          item.permissions && item.permissions.some((p: string) => p.startsWith('system.'))
+        const systemItems = flatItems.filter(
+          (item: any) =>
+            item.permissions &&
+            item.permissions.some((p: string) => p.startsWith('system.')),
         );
-        
+
         expect(systemItems.length).toBe(0);
       });
     });
@@ -431,12 +443,12 @@ describe('Navigation API Integration', () => {
     it('should return health status', async () => {
       const response = await app.inject({
         method: 'GET',
-        url: '/api/navigation/health'
+        url: '/api/navigation/health',
       });
 
       expect(response.statusCode).toBe(200);
       const body = JSON.parse(response.body);
-      
+
       expect(body.success).toBe(true);
       expect(body.data.module).toBe('navigation');
       expect(body.data.status).toBe('healthy');
@@ -454,8 +466,8 @@ describe('Navigation API Integration', () => {
         method: 'GET',
         url: '/api/navigation/nonexistent',
         headers: {
-          authorization: `Bearer ${validToken}`
-        }
+          authorization: `Bearer ${validToken}`,
+        },
       });
 
       expect(response.statusCode).toBe(404);
@@ -464,12 +476,12 @@ describe('Navigation API Integration', () => {
     it('should return proper error structure', async () => {
       const response = await app.inject({
         method: 'GET',
-        url: '/api/navigation'
+        url: '/api/navigation',
       });
 
       expect(response.statusCode).toBe(401);
       const body = JSON.parse(response.body);
-      
+
       expect(body.success).toBe(false);
       expect(body.error).toBeDefined();
       expect(body.error.code).toBeDefined();
@@ -483,35 +495,48 @@ describe('Navigation API Integration', () => {
         method: 'GET',
         url: '/api/navigation?type=default',
         headers: {
-          authorization: `Bearer ${validToken}`
-        }
+          authorization: `Bearer ${validToken}`,
+        },
       });
 
       expect(response.statusCode).toBe(200);
       const body = JSON.parse(response.body);
-      
+
       // Validate top-level response structure
       expect(body.success).toBe(true);
       expect(body.data).toBeDefined();
       expect(body.meta).toBeDefined();
-      expect(body.meta.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/);
+      expect(body.meta.timestamp).toMatch(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/,
+      );
       expect(body.meta.version).toBe('1.0');
-      
+
       // Validate navigation structure
       if (body.data.default) {
         expect(Array.isArray(body.data.default)).toBe(true);
-        
+
         body.data.default.forEach((item: any) => {
           expect(typeof item.id).toBe('string');
           expect(typeof item.title).toBe('string');
-          expect(['item', 'group', 'collapsible', 'divider', 'spacer']).toContain(item.type);
-          
+          expect([
+            'item',
+            'group',
+            'collapsible',
+            'divider',
+            'spacer',
+          ]).toContain(item.type);
+
           if (item.badge) {
-            expect(['default', 'primary', 'secondary', 'success', 'warning', 'error']).toContain(
-              item.badge.variant || 'default'
-            );
+            expect([
+              'default',
+              'primary',
+              'secondary',
+              'success',
+              'warning',
+              'error',
+            ]).toContain(item.badge.variant || 'default');
           }
-          
+
           if (item.permissions) {
             expect(Array.isArray(item.permissions)).toBe(true);
             item.permissions.forEach((permission: any) => {
@@ -529,25 +554,25 @@ describe('Navigation API Integration', () => {
         method: 'GET',
         url: '/api/navigation?type=default',
         headers: {
-          authorization: `Bearer ${validToken}`
-        }
+          authorization: `Bearer ${validToken}`,
+        },
       });
 
       const response2 = await app.inject({
         method: 'GET',
         url: '/api/navigation?type=default',
         headers: {
-          authorization: `Bearer ${validToken}`
-        }
+          authorization: `Bearer ${validToken}`,
+        },
       });
 
       expect(response1.statusCode).toBe(200);
       expect(response2.statusCode).toBe(200);
-      
+
       // Both responses should be successful and have similar structure
       const body1 = JSON.parse(response1.body);
       const body2 = JSON.parse(response2.body);
-      
+
       expect(body1.success).toBe(true);
       expect(body2.success).toBe(true);
       expect(body1.data).toBeDefined();

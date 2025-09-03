@@ -46,6 +46,10 @@
     "docker:build": "docker-compose -f docker-compose.prod.yml build",
     "docker:build:no-cache": "docker-compose -f docker-compose.prod.yml build --no-cache",
     "setup": "npm run docker:up && sleep 5 && npm run db:migrate && npm run db:seed",
+    "monitoring:start": "docker-compose -f docker-compose.monitoring.yml up -d",
+    "monitoring:stop": "docker-compose -f docker-compose.monitoring.yml down",
+    "monitoring:restart": "npm run monitoring:stop && npm run monitoring:start",
+    "monitoring:logs": "docker-compose -f docker-compose.monitoring.yml logs -f",
     "version:patch": "npm version patch && git push origin main --tags",
     "version:minor": "npm version minor && git push origin main --tags",
     "version:major": "npm version major && git push origin main --tags",
@@ -88,6 +92,7 @@
     "@types/bcrypt": "^6.0.0",
     "@types/pg": "^8.15.5",
     "@types/uuid": "^10.0.0",
+    "@types/winston": "^2.4.4",
     "bcrypt": "^6.0.0",
     "fastify": "^5.5.0",
     "fastify-plugin": "^5.0.1",
@@ -98,6 +103,9 @@
     "rxjs": "~7.8.0",
     "sharp": "^0.34.3",
     "uuid": "^11.1.0",
+    "winston": "^3.18.0",
+    "winston-daily-rotate-file": "^5.0.0",
+    "prom-client": "^15.1.5",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {

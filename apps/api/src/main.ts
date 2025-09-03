@@ -11,6 +11,9 @@ import fastifyRateLimit from '@fastify/rate-limit';
 // Import plugins
 import knexPlugin from './plugins/knex.plugin';
 import redisPlugin from './plugins/redis.plugin';
+import loggingPlugin from './plugins/logging.plugin';
+import monitoringPlugin from './plugins/monitoring.plugin';
+import healthCheckPlugin from './plugins/health-check.plugin';
 import responseHandlerPlugin from './plugins/response-handler.plugin';
 import errorHandlerPlugin from './plugins/error-handler.plugin';
 import schemasPlugin from './plugins/schemas.plugin';
@@ -21,6 +24,7 @@ import navigationPlugin from './modules/navigation/navigation.plugin';
 import userProfilePlugin from './modules/user-profile/user-profile.plugin';
 import defaultPlugin from './modules/default/default.plugin';
 import settingsPlugin from './modules/settings/settings.plugin';
+import { monitoringPlugin } from './modules/monitoring';
 import staticFilesPlugin from './plugins/static-files.plugin';
 import jwtAuthPlugin from './plugins/jwt-auth.plugin';
 import swaggerPlugin from './plugins/swagger.plugin';
@@ -30,13 +34,16 @@ dotenv.config();
 
 async function bootstrap() {
   const app = Fastify({
-    logger: {
-      level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-    },
+    // Disable default logger - we'll use Winston instead
+    logger: false,
   });
 
-  // 1. Essential utilities and sensible defaults
-  // await app.register(fastifySensible); // Removed - using custom response format
+  // 1. Logging (must be first to capture all logs)
+  await app.register(loggingPlugin, {
+    enableRequestLogging: true,
+    enableFileRotation: process.env.NODE_ENV === 'production',
+    logDirectory: process.env.LOG_DIRECTORY || 'logs',
+  });
 
   // 2. Infrastructure plugins
   await app.register(fastifyCors, {
@@ -81,6 +88,20 @@ async function bootstrap() {
 
   // 3.5. Redis connection (optional)
   await app.register(redisPlugin);
+
+  // 3.6. Monitoring (after infrastructure)
+  await app.register(monitoringPlugin, {
+    enableDefaultMetrics: true,
+    enableResourceMonitoring: true,
+    metricsPrefix: 'aegisx_api_',
+  });
+
+  // 3.7. Health checks (after monitoring for dependencies)
+  await app.register(healthCheckPlugin, {
+    enableDetailedChecks: process.env.NODE_ENV !== 'production',
+    databaseTimeout: 5000,
+    redisTimeout: 3000,
+  });
 
   // 4. Authentication
   await app.register(fastifyJwt, {
@@ -146,6 +167,9 @@ async function bootstrap() {
 
   // Settings module
   await app.register(settingsPlugin);
+
+  // Monitoring module (client error logging)
+  await app.register(monitoringPlugin);
 
   // Start server
   const port = process.env.PORT || 3333;

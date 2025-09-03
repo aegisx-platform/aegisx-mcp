@@ -224,16 +224,20 @@ export class AuthHelper {
 
       // Add permissions to role
       for (const permission of permissions) {
+        // Parse permission format (e.g., "navigation.read" -> resource: "navigation", action: "read")
+        const [resource, action] = permission.split('.');
+
         // Create permission if it doesn't exist
         let permissionRecord = await this.db('permissions')
-          .where({ name: permission })
+          .where({ resource, action })
           .first();
 
         if (!permissionRecord) {
           const [newPermission] = await this.db('permissions')
             .insert({
               id: this.generateUUID(),
-              name: permission,
+              resource: resource || permission,
+              action: action || 'access',
               description: `Permission: ${permission}`,
               created_at: new Date(),
               updated_at: new Date(),

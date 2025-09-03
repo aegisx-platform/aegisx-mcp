@@ -183,14 +183,18 @@ export class TestUserFactory {
 
     // Add permissions
     for (const permission of permissions) {
+      // Parse permission format (e.g., "navigation.read" -> resource: "navigation", action: "read")
+      const [resource, action] = permission.split('.');
+
       let permissionRecord = await this.db('permissions')
-        .where({ name: permission })
+        .where({ resource, action })
         .first();
 
       if (!permissionRecord) {
         const [newPermission] = await this.db('permissions')
           .insert({
-            name: permission,
+            resource: resource || permission,
+            action: action || 'access',
             description: `Permission: ${permission}`,
             created_at: new Date(),
             updated_at: new Date(),
@@ -245,16 +249,17 @@ export class NavigationItemFactory {
     const timestamp = Date.now();
     const itemData = {
       id: options.id,
+      key: options.id || `test-item-${timestamp}`, // key is required and unique
       title: options.title || `Test Item ${timestamp}`,
       type: options.type || 'item',
       link: options.link || `/test-${timestamp}`,
       icon: options.icon || 'heroicons-outline:home',
       parent_id: options.parentId || null,
-      order: options.order || 0,
-      enabled: options.enabled ?? true,
+      sort_order: options.order || 0,
+      disabled: !(options.enabled ?? true),
       target: '_self',
       exact_match: false,
-      is_hidden: false,
+      hidden: false,
       created_at: new Date(),
       updated_at: new Date(),
     };
@@ -272,14 +277,18 @@ export class NavigationItemFactory {
     // Add permissions if provided
     if (options.permissions && options.permissions.length > 0) {
       for (const permission of options.permissions) {
+        // Parse permission format (e.g., "navigation.read" -> resource: "navigation", action: "read")
+        const [resource, action] = permission.split('.');
+
         let permissionRecord = await this.db('permissions')
-          .where({ name: permission })
+          .where({ resource, action })
           .first();
 
         if (!permissionRecord) {
           const [newPermission] = await this.db('permissions')
             .insert({
-              name: permission,
+              resource: resource || permission,
+              action: action || 'access',
               description: `Permission: ${permission}`,
               created_at: new Date(),
               updated_at: new Date(),
@@ -290,11 +299,11 @@ export class NavigationItemFactory {
 
         await this.db('navigation_permissions')
           .insert({
-            navigation_id: item.id,
+            navigation_item_id: item.id,
             permission_id: permissionRecord.id,
             created_at: new Date(),
           })
-          .onConflict(['navigation_id', 'permission_id'])
+          .onConflict(['navigation_item_id', 'permission_id'])
           .ignore();
       }
     }
@@ -462,8 +471,9 @@ export class TestDataFactory {
    * Create test navigation structure
    */
   async createNavigationStructure(): Promise<any[]> {
+    const dashboardId = uuidv4();
     const dashboard = await this.navigation.create({
-      id: 'dashboard',
+      id: dashboardId,
       title: 'Dashboard',
       type: 'item',
       icon: 'heroicons-outline:home',
@@ -473,7 +483,6 @@ export class TestDataFactory {
 
     const appsGroup = await this.navigation.createGroup('Apps', [
       {
-        id: 'users',
         title: 'Users',
         type: 'item',
         icon: 'heroicons-outline:users',
@@ -482,7 +491,6 @@ export class TestDataFactory {
         order: 0,
       },
       {
-        id: 'settings',
         title: 'Settings',
         type: 'item',
         icon: 'heroicons-outline:cog-6-tooth',
@@ -494,7 +502,6 @@ export class TestDataFactory {
 
     const adminGroup = await this.navigation.createGroup('Administration', [
       {
-        id: 'admin-users',
         title: 'User Management',
         type: 'item',
         icon: 'heroicons-outline:user-group',
@@ -503,7 +510,6 @@ export class TestDataFactory {
         order: 0,
       },
       {
-        id: 'admin-roles',
         title: 'Role Management',
         type: 'item',
         icon: 'heroicons-outline:shield-check',

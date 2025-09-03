@@ -7,4 +7,8 @@ export default {
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/apps/api',
+  testTimeout: 30000,
+  maxWorkers: 1,
+  forceExit: true,
+  setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
 };

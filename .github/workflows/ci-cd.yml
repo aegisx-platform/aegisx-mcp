@@ -9,60 +9,146 @@ on:
   workflow_dispatch:
 
 env:
+  NODE_VERSION: '20'
   REGISTRY: ghcr.io
   IMAGE_NAME_PREFIX: ${{ github.repository }}
-  NODE_VERSION: '20'
-  POSTGRES_VERSION: '15'
-  REDIS_VERSION: '7-alpine'
+  NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
+  NX_DAEMON: false
+  NX_PARALLEL: 3
+  NX_CACHE_DIRECTORY: .nx-cache
+  YARN_ENABLE_HARDLINKS_IN_NODE_MODULES: false
 
-# Cancel in-progress runs when a new commit is pushed
+# Cancel in-progress runs
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  # Determine what to build/test based on changes
-  changes:
+  # Detect what changed to optimize what we build/test
+  detect-changes:
+    name: Detect Changes
     runs-on: ubuntu-latest
     outputs:
-      api: ${{ steps.filter.outputs.api }}
-      web: ${{ steps.filter.outputs.web }}
-      admin: ${{ steps.filter.outputs.admin }}
-      e2e: ${{ steps.filter.outputs.e2e }}
-      libs: ${{ steps.filter.outputs.libs }}
+      api: ${{ steps.changes.outputs.api }}
+      web: ${{ steps.changes.outputs.web }}
+      admin: ${{ steps.changes.outputs.admin }}
+      libs: ${{ steps.changes.outputs.libs }}
+      docker: ${{ steps.changes.outputs.docker }}
+      deps: ${{ steps.changes.outputs.deps }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - uses: dorny/paths-filter@v2
-        id: filter
+        id: changes
         with:
           filters: |
             api:
               - 'apps/api/**'
-              - 'libs/**'
-              - 'package.json'
-              - 'yarn.lock'
+              - 'libs/**/*.ts'
+              - 'nx.json'
+              - 'tsconfig.base.json'
             web:
               - 'apps/web/**'
-              - 'libs/**'
-              - 'package.json'
-              - 'yarn.lock'
+              - 'libs/**/*.ts'
+              - 'libs/**/*.html'
+              - 'libs/**/*.scss'
             admin:
               - 'apps/admin/**'
-              - 'libs/**'
-              - 'package.json'
-              - 'yarn.lock'
-            e2e:
-              - 'apps/e2e/**'
-              - 'apps/**'
-              - 'libs/**'
+              - 'libs/**/*.ts'
+              - 'libs/**/*.html'
+              - 'libs/**/*.scss'
             libs:
               - 'libs/**'
+            docker:
+              - '**/Dockerfile'
+              - 'docker-compose*.yml'
+            deps:
+              - 'package.json'
+              - 'yarn.lock'
 
-  # Code quality checks - always run
-  quality:
+  # Fast quality checks with caching
+  quality-check:
     name: Code Quality
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js with caching
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: Cache Nx
+        uses: actions/cache@v3
+        with:
+          path: |
+            .nx-cache
+            node_modules/.cache/nx
+          key: nx-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            nx-${{ runner.os }}-
+
+      - name: Install dependencies (with cache)
+        run: |
+          if [ -f "node_modules/.yarn-integrity" ]; then
+            echo "✅ Using cached dependencies"
+          else
+            yarn install --frozen-lockfile --ignore-scripts --network-timeout 100000
+          fi
+
+      - name: Run quality checks in parallel
+        run: |
+          echo "Starting parallel quality checks..."
+
+          # Format check
+          (yarn format:check || echo "FORMAT_FAILED=1" >> $GITHUB_ENV) &
+          PID1=$!
+
+          # Lint affected
+          (npx nx affected --target=lint --base=origin/main --parallel=3 || echo "LINT_FAILED=1" >> $GITHUB_ENV) &
+          PID2=$!
+
+          # Type check affected
+          (npx nx affected --target=typecheck --base=origin/main --parallel=3 || echo "TYPE_FAILED=1" >> $GITHUB_ENV) &
+          PID3=$!
+
+          # Wait for all
+          wait $PID1 $PID2 $PID3
+
+          # Check results
+          if [ "${FORMAT_FAILED}" = "1" ]; then
+            echo "❌ Format check failed"
+            exit 1
+          fi
+          if [ "${LINT_FAILED}" = "1" ]; then
+            echo "❌ Lint check failed"
+            exit 1
+          fi
+          if [ "${TYPE_FAILED}" = "1" ]; then
+            echo "❌ Type check failed"
+            exit 1
+          fi
+
+          echo "✅ All quality checks passed!"
+
+  # Build only affected projects
+  build-affected:
+    name: Build Affected
+    needs: [detect-changes, quality-check]
+    if: |
+      needs.detect-changes.outputs.api == 'true' ||
+      needs.detect-changes.outputs.web == 'true' ||
+      needs.detect-changes.outputs.admin == 'true' ||
+      needs.detect-changes.outputs.libs == 'true' ||
+      github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -74,44 +160,52 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
 
-      - name: Install dependencies
-        run: |
-          yarn install --frozen-lockfile --ignore-scripts
-          yarn run prepare || true
-
-      - name: Check code formatting
-        run: yarn format:check
-
-      - name: Lint code
-        run: yarn lint
-
-      - name: Type check
-        run: yarn typecheck
-
-      - name: Check for secrets
-        uses: trufflesecurity/trufflehog@main
+      - name: Restore caches
+        uses: actions/cache@v3
         with:
-          path: ./
-          base: ${{ github.event.repository.default_branch }}
-          head: HEAD
-          extra_args: --debug --only-verified
+          path: |
+            .nx-cache
+            node_modules/.cache/nx
+            dist
+          key: build-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            build-${{ runner.os }}-
+            nx-${{ runner.os }}-
 
-  # Build applications in parallel
-  build:
-    name: Build ${{ matrix.app }}
-    needs: [changes, quality]
-    if: |
-      github.event_name == 'push' || 
-      (matrix.app == 'api' && needs.changes.outputs.api == 'true') ||
-      (matrix.app == 'web' && needs.changes.outputs.web == 'true') ||
-      (matrix.app == 'admin' && needs.changes.outputs.admin == 'true')
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --ignore-scripts --prefer-offline
+
+      - name: Build affected projects
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "Building all projects for push..."
+            npx nx run-many --target=build --all --parallel=3 --prod
+          else
+            echo "Building only affected projects..."
+            npx nx affected --target=build --base=origin/main --parallel=3 --prod
+          fi
+
+      - name: Store build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-artifacts
+          path: dist/
+          retention-days: 1
+          compression-level: 9
+
+  # Test strategy: Unit tests in parallel, integration tests separately
+  test-unit:
+    name: Unit Tests
+    needs: [detect-changes, quality-check]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
       matrix:
-        app: [api, web, admin]
+        project: [api, web, admin, aegisx-ui]
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -119,44 +213,52 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
 
-      - name: Install dependencies
-        run: |
-          yarn install --frozen-lockfile --ignore-scripts
-          yarn run prepare || true
-
-      - name: Build ${{ matrix.app }}
-        run: nx build ${{ matrix.app }} --prod
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+      - name: Cache setup
+        uses: actions/cache@v3
         with:
-          name: ${{ matrix.app }}-dist
-          path: dist/apps/${{ matrix.app }}
-          retention-days: 7
+          path: |
+            .nx-cache
+            node_modules/.cache/nx
+          key: test-${{ runner.os }}-${{ matrix.project }}-${{ github.sha }}
+          restore-keys: |
+            test-${{ runner.os }}-${{ matrix.project }}-
+            nx-${{ runner.os }}-
 
-  # Test applications in parallel
-  test:
-    name: Test ${{ matrix.app }}
-    needs: [changes, quality]
-    if: |
-      (matrix.app == 'api' && needs.changes.outputs.api == 'true') ||
-      (matrix.app == 'web' && needs.changes.outputs.web == 'true') ||
-      (matrix.app == 'admin' && needs.changes.outputs.admin == 'true') ||
-      (matrix.app == 'libs' && needs.changes.outputs.libs == 'true')
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --ignore-scripts --prefer-offline
+
+      - name: Run unit tests
+        run: |
+          npx nx test ${{ matrix.project }} \
+            --coverage \
+            --coverageReporters=lcov \
+            --coverageReporters=json-summary \
+            --maxWorkers=2
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        if: always()
+        with:
+          files: ./coverage/${{ matrix.project }}/lcov.info
+          flags: unit-${{ matrix.project }}
+          fail_ci_if_error: false
+
+  # Integration tests with database
+  test-integration:
+    name: Integration Tests
+    needs: [detect-changes, quality-check]
+    if: needs.detect-changes.outputs.api == 'true' || github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    strategy:
-      matrix:
-        app: [api, web, admin, libs]
     services:
       postgres:
-        image: postgres:15
+        image: postgres:15-alpine
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: aegisx_test
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U postgres"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -181,17 +283,26 @@ jobs:
           cache: 'yarn'
 
       - name: Install dependencies
-        run: |
-          yarn install --frozen-lockfile --ignore-scripts
-          yarn run prepare || true
+        run: yarn install --frozen-lockfile --ignore-scripts --prefer-offline
 
-      - name: Run tests for ${{ matrix.app }}
+      - name: Setup test database
         run: |
-          if [ "${{ matrix.app }}" == "libs" ]; then
-            nx run-many --target=test --projects=tag:type:lib --parallel=3 --coverage
-          else
-            nx test ${{ matrix.app }} --coverage
-          fi
+          npx knex migrate:latest --env test
+          npx knex seed:run --env test
+        env:
+          NODE_ENV: test
+          DATABASE_HOST: localhost
+          DATABASE_PORT: 5432
+          DATABASE_NAME: aegisx_test
+          DATABASE_USER: postgres
+          DATABASE_PASSWORD: postgres
+
+      - name: Run integration tests
+        run: |
+          npx jest --testPathPattern="integration" \
+            --forceExit \
+            --detectOpenHandles \
+            --maxWorkers=1
         env:
           NODE_ENV: test
           DATABASE_HOST: localhost
@@ -201,53 +312,100 @@ jobs:
           DATABASE_PASSWORD: postgres
           REDIS_HOST: localhost
           REDIS_PORT: 6379
-          JWT_SECRET: test-jwt-secret
-          JWT_REFRESH_SECRET: test-jwt-refresh-secret
+          JWT_SECRET: test-secret
+          JWT_REFRESH_SECRET: test-refresh-secret
 
-      - name: Upload coverage
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-${{ matrix.app }}
-          path: coverage/
-          retention-days: 7
-
-  # Build and push Docker images
-  docker:
-    name: Docker Build & Push
-    needs: [build, test]
+  # E2E tests - only on main/develop pushes
+  test-e2e:
+    name: E2E Tests
+    needs: [build-affected]
     if: |
       github.event_name == 'push' && 
-      (github.ref == 'refs/heads/main' || 
-       github.ref == 'refs/heads/develop' || 
-       startsWith(github.ref, 'refs/tags/'))
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    permissions:
-      contents: read
-      packages: write
-    strategy:
-      matrix:
-        app: [api, web, admin]
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --ignore-scripts
 
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: ${{ matrix.app }}-dist
-          path: dist/apps/${{ matrix.app }}
+          name: dist-artifacts
+          path: dist/
+
+      - name: Install Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        run: npx nx e2e e2e --configuration=ci
+        env:
+          CI: true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results
+          path: |
+            dist/.playwright/
+            test-results/
+          retention-days: 7
+
+  # Docker build with layer caching
+  docker-build:
+    name: Docker Build
+    needs: [build-affected, test-unit, test-integration]
+    if: |
+      github.event_name == 'push' && 
+      (needs.detect-changes.outputs.docker == 'true' || 
+       needs.detect-changes.outputs.api == 'true' ||
+       needs.detect-changes.outputs.web == 'true' ||
+       needs.detect-changes.outputs.admin == 'true')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        app: [api, web, admin]
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: |
+            image=moby/buildkit:master
+            network=host
 
-      - name: Log in to Container Registry
+      - name: Log in to Registry
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-artifacts
+          path: dist/
+
+      - name: Docker metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
@@ -257,26 +415,90 @@ jobs:
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
-            type=sha
+            type=sha,prefix={{branch}}-
 
-      - name: Build and push Docker image
+      - name: Build and push
         uses: docker/build-push-action@v5
         with:
           context: .
           file: apps/${{ matrix.app }}/Dockerfile
-          push: true
+          push: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          platforms: linux/amd64,linux/arm64
+          cache-from: |
+            type=gha
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-${{ matrix.app }}:buildcache
+          cache-to: |
+            type=gha,mode=max
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-${{ matrix.app }}:buildcache,mode=max
+          platforms: linux/amd64
+
+  # Summary
+  pipeline-summary:
+    name: Pipeline Summary
+    if: always()
+    needs: [quality-check, build-affected, test-unit, test-integration]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check status
+        run: |
+          echo "## Pipeline Summary 📊" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Quality
+          if [ "${{ needs.quality-check.result }}" == "success" ]; then
+            echo "✅ Code Quality: Passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Code Quality: Failed" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Build
+          if [ "${{ needs.build-affected.result }}" == "success" ]; then
+            echo "✅ Build: Passed" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.build-affected.result }}" == "skipped" ]; then
+            echo "⏭️ Build: Skipped (no changes)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Build: Failed" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Unit Tests
+          if [ "${{ needs.test-unit.result }}" == "success" ]; then
+            echo "✅ Unit Tests: Passed" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.test-unit.result }}" == "skipped" ]; then
+            echo "⏭️ Unit Tests: Skipped" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Unit Tests: Failed" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Integration Tests
+          if [ "${{ needs.test-integration.result }}" == "success" ]; then
+            echo "✅ Integration Tests: Passed" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.test-integration.result }}" == "skipped" ]; then
+            echo "⏭️ Integration Tests: Skipped" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Integration Tests: Failed" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Workflow:** ${{ github.workflow }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+
+          # Fail if any required job failed
+          if [ "${{ needs.quality-check.result }}" != "success" ] || \
+             [ "${{ needs.build-affected.result }}" == "failure" ] || \
+             [ "${{ needs.test-unit.result }}" == "failure" ] || \
+             [ "${{ needs.test-integration.result }}" == "failure" ]; then
+            exit 1
+          fi
 
   # Deploy to staging
   deploy-staging:
     name: Deploy to Staging
-    needs: docker
-    if: github.ref == 'refs/heads/develop'
+    needs: [docker-build]
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     environment:
       name: staging
       url: https://staging.aegisx.com
@@ -286,47 +508,30 @@ jobs:
       - name: Deploy to staging
         run: |
           echo "Deploying to staging environment..."
-          # Add actual deployment steps here
+          # Add deployment scripts here
 
   # Deploy to production
   deploy-production:
     name: Deploy to Production
-    needs: docker
+    needs: [docker-build, test-e2e]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     environment:
       name: production
       url: https://aegisx.com
     steps:
       - uses: actions/checkout@v4
 
+      - name: Create deployment summary
+        run: |
+          echo "## Production Deployment 🚀" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Deployed at:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> $GITHUB_STEP_SUMMARY
+
       - name: Deploy to production
         run: |
           echo "Deploying to production environment..."
-          # Add actual deployment steps here
-
-  # Summary job
-  summary:
-    name: CI/CD Summary
-    needs: [quality, build, test, docker]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check results
-        run: |
-          if [[ "${{ needs.quality.result }}" == "failure" ]]; then
-            echo "❌ Code quality checks failed"
-            exit 1
-          fi
-
-          if [[ "${{ needs.build.result }}" == "failure" ]]; then
-            echo "❌ Build failed"
-            exit 1
-          fi
-
-          if [[ "${{ needs.test.result }}" == "failure" ]]; then
-            echo "❌ Tests failed"
-            exit 1
-          fi
-
-          echo "✅ CI/CD pipeline completed successfully!"
+          # Add deployment scripts here

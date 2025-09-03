@@ -46,8 +46,8 @@ describe('Authentication Flow Integration Tests', () => {
     describe('POST /api/auth/register', () => {
       it('should register a new user successfully', async () => {
         const userData = createRegisterRequestData({
-          email: 'newuser@example.com',
-          username: 'newuser',
+          email: 'authtest-newuser@example.com',
+          username: 'authtest-newuser',
           password: 'securepass123',
         });
 
@@ -82,8 +82,8 @@ describe('Authentication Flow Integration Tests', () => {
 
       it('should create user preferences on registration', async () => {
         const userData = createRegisterRequestData({
-          email: 'userprefs@example.com',
-          username: 'userprefs',
+          email: 'authtest-userprefs@example.com',
+          username: 'authtest-userprefs',
         });
 
         const response = await requestHelper.post('/api/auth/register', {
@@ -108,8 +108,8 @@ describe('Authentication Flow Integration Tests', () => {
 
       it('should reject registration with duplicate email', async () => {
         const userData = createRegisterRequestData({
-          email: 'duplicate@example.com',
-          username: 'user1',
+          email: 'authtest-duplicate@example.com',
+          username: 'authtest-user1',
         });
 
         // Register first user
@@ -119,8 +119,8 @@ describe('Authentication Flow Integration Tests', () => {
 
         // Try to register with same email
         const duplicateData = createRegisterRequestData({
-          email: 'duplicate@example.com',
-          username: 'user2',
+          email: 'authtest-duplicate@example.com',
+          username: 'authtest-user2',
         });
 
         const response = await requestHelper.post('/api/auth/register', {
@@ -132,8 +132,8 @@ describe('Authentication Flow Integration Tests', () => {
 
       it('should reject registration with duplicate username', async () => {
         const userData = createRegisterRequestData({
-          email: 'user1@example.com',
-          username: 'duplicateuser',
+          email: 'authtest-user1@example.com',
+          username: 'authtest-duplicateuser',
         });
 
         // Register first user
@@ -143,8 +143,8 @@ describe('Authentication Flow Integration Tests', () => {
 
         // Try to register with same username
         const duplicateData = createRegisterRequestData({
-          email: 'user2@example.com',
-          username: 'duplicateuser',
+          email: 'authtest-user2@example.com',
+          username: 'authtest-duplicateuser',
         });
 
         const response = await requestHelper.post('/api/auth/register', {
@@ -174,8 +174,8 @@ describe('Authentication Flow Integration Tests', () => {
 
       it('should hash password before storing', async () => {
         const userData = createRegisterRequestData({
-          email: 'hashtest@example.com',
-          username: 'hashtest',
+          email: 'authtest-hashtest@example.com',
+          username: 'authtest-hashtest',
           password: 'plainpassword123',
         });
 
@@ -203,8 +203,8 @@ describe('Authentication Flow Integration Tests', () => {
     beforeEach(async () => {
       // Create a test user for login tests
       testUser = await authHelper.createTestUser({
-        email: 'logintest@example.com',
-        username: 'loginuser',
+        email: 'authtest-logintest@example.com',
+        username: 'authtest-loginuser',
         password: 'testpassword123',
       });
     });
@@ -692,8 +692,8 @@ describe('Authentication Flow Integration Tests', () => {
           requestHelper.post('/api/auth/register', {
             body: {
               ...baseData,
-              email: `concurrent${index}@example.com`,
-              username: `concurrent${index}`,
+              email: `authtest-concurrent${index}@example.com`,
+              username: `authtest-concurrent${index}`,
             },
           }),
         );
