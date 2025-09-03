@@ -1,7 +1,6 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import fp from 'fastify-plugin';
 import { settingsRoutes } from './settings.routes';
-import { settingsSchemas } from './settings.schemas';
 import { SettingsService } from './settings.service';
 
 async function settingsPlugin(

@@ -42,13 +42,12 @@ export class SettingsService {
   }> {
     const { page = 1, limit = 20 } = query;
 
-    try {
-      // Get settings from repository
-      const { settings, total } = await this.repository.findSettings(query);
+    // Get settings from repository
+    const { settings, total } = await this.repository.findSettings(query);
 
-      // Transform database fields to camelCase
-      const transformedSettings = settings.map((s) =>
-        this.repository.transformSetting(s),
+    // Transform database fields to camelCase
+    const transformedSettings = settings.map((s) =>
+      this.repository.transformSetting(s),
     );
 
     // If user ID provided, merge user overrides
@@ -65,15 +64,12 @@ export class SettingsService {
       });
     }
 
-      return {
-        settings: transformedSettings,
-        total,
-        page,
-        limit,
-      };
-    } catch (error) {
-      throw error;
-    }
+    return {
+      settings: transformedSettings,
+      total,
+      page,
+      limit,
+    };
   }
 
   /**
