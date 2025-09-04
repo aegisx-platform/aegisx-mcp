@@ -744,6 +744,33 @@ nx run-many --target=typecheck --all       # Must pass
 # Open http://localhost:4200 → Test CRUD → All operations work?
 ```
 
+### 🔥 **Additional Critical Checks (เพิ่มเติม)**
+
+```bash
+# ✅ 11. Dependencies & Versions
+yarn install --check-files                 # All packages installed?
+grep -r "localhost:3335" .                 # No hardcoded wrong ports?
+
+# ✅ 12. Authentication & CORS
+curl -H "Authorization: Bearer invalid-token" http://localhost:3333/api/{MODULE}  # Returns 401?
+curl -X OPTIONS -H "Origin: http://localhost:4200" http://localhost:3333/api/{MODULE}  # CORS OK?
+
+# ✅ 13. Database Constraints
+psql $DATABASE_URL -c "SELECT * FROM information_schema.table_constraints WHERE table_name = '{MODULE}s';"
+
+# ✅ 14. Error Handling
+curl -X POST "http://localhost:3333/api/{MODULE}" -d '{"invalid":"data"}'  # Returns 400?
+curl -X GET "http://localhost:3333/api/{MODULE}/999999"                   # Returns 404?
+
+# ✅ 15. Browser Console
+# Open DevTools → Console → No red errors?
+# Network tab → All API calls return expected status codes?
+
+# ✅ 16. Performance Check
+# Page loads < 3 seconds?
+# API responses < 500ms?
+```
+
 ## 🚨 **STOP Development If Any Fails**
 
 ### ❌ **Critical Failures:**
@@ -754,10 +781,18 @@ nx run-many --target=typecheck --all       # Must pass
 - Missing `/api` prefix → **Fix service URLs**
 - Build/typecheck fails → **Fix TypeScript errors**
 - Manual CRUD doesn't work → **Debug integration**
+- **Dependencies missing** → **Run yarn install**
+- **Hardcoded wrong ports** → **Fix all localhost:3335 references**
+- **Auth returns 200 for invalid token** → **Fix authentication middleware**
+- **CORS errors in browser** → **Fix CORS configuration**
+- **DB constraints missing** → **Add foreign keys, unique constraints**
+- **No error handling** → **Add proper 400/404/500 responses**
+- **Console errors in browser** → **Fix JavaScript/TypeScript errors**
+- **Slow performance (>3s page load)** → **Optimize queries, add indexes**
 
 ### ✅ **Ready to Commit When:**
 
-- All 10 checklist items ✅
+- All 16 checklist items ✅
 - Manual testing works end-to-end
 - No console errors in browser
 - No TypeScript compilation errors
