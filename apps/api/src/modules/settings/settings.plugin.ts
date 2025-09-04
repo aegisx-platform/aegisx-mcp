@@ -3,14 +3,14 @@ import fp from 'fastify-plugin';
 import { settingsRoutes } from './settings.routes';
 import { SettingsService } from './settings.service';
 import { SettingsCacheService } from './settings-cache.service';
+import { settingsSchemas } from './settings.schemas';
 
 async function settingsPlugin(
   fastify: FastifyInstance,
   _opts: FastifyPluginOptions,
 ) {
   // Register module schemas using the schema registry
-  // TODO: Fix schema registry registration - temporarily commented out for testing
-  // fastify.schemaRegistry.registerModuleSchemas('settings', settingsSchemas);
+  fastify.schemaRegistry.registerModuleSchemas('settings', settingsSchemas);
 
   // Initialize settings service with performance monitoring logger and cache
   const settingsService = new SettingsService(
