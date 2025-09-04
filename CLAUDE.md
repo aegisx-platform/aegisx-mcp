@@ -55,6 +55,12 @@ Keep commit messages clean and professional.
 - **Use base schemas from `/src/schemas/base.schemas.ts`**
 - **Register schemas via schema registry**
 
+### Universal Development Standard (MANDATORY)
+
+**🚨 MUST follow Universal Full-Stack Standard for ALL feature development - NO EXCEPTIONS**
+
+See **[Universal Full-Stack Standard](./docs/development/universal-fullstack-standard.md)** for complete database-first development workflow that must be followed for every feature to prevent integration bugs.
+
 ### Quality Assurance Workflow (MANDATORY)
 
 **🚨 MUST run QA Checklist after every code change - NO EXCEPTIONS**
