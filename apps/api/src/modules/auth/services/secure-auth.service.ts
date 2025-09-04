@@ -38,7 +38,7 @@ export class SecureAuthService {
    */
   async generateSecureTokens(
     user: any,
-    request: FastifyRequest
+    request: FastifyRequest,
   ): Promise<TokenPair> {
     // Generate security tokens
     const jti = this.generateJTI();
@@ -59,18 +59,12 @@ export class SecureAuthService {
 
     // Generate access token with comprehensive claims
     const accessToken = this.app.jwt.sign({
-      // Standard claims
-      sub: user.id,
-      iss: process.env.JWT_ISSUER || 'aegisx-api',
-      aud: ['aegisx-web', 'aegisx-admin'],
-      exp: Math.floor(Date.now() / 1000) + (15 * 60), // 15 minutes
-      iat: Math.floor(Date.now() / 1000),
-      nbf: Math.floor(Date.now() / 1000),
-      jti,
-      
-      // Custom claims
+      // User claims required by JWTPayload interface
+      id: user.id,
       email: user.email,
       role: user.role || 'user',
+
+      // Custom claims
       permissions: user.permissions || [],
       sessionId,
       fingerprint: fingerprintHash,
@@ -98,11 +92,11 @@ export class SecureAuthService {
   async verifySecureToken(
     token: string,
     fingerprint?: string,
-    checkRevocation = true
+    checkRevocation = true,
   ): Promise<SecureTokenPayload> {
     try {
       // Verify JWT signature and claims
-      const decoded = await this.app.jwt.verify(token) as SecureTokenPayload;
+      const decoded = (await this.app.jwt.verify(token)) as SecureTokenPayload;
 
       // Check token version
       if (decoded.v !== this.TOKEN_VERSION) {
@@ -112,10 +106,12 @@ export class SecureAuthService {
       // Verify fingerprint if provided
       if (fingerprint && decoded.fingerprint) {
         const fingerprintHash = this.hashFingerprint(fingerprint);
-        if (!timingSafeEqual(
-          Buffer.from(fingerprintHash),
-          Buffer.from(decoded.fingerprint)
-        )) {
+        if (
+          !timingSafeEqual(
+            Buffer.from(fingerprintHash),
+            Buffer.from(decoded.fingerprint),
+          )
+        ) {
           throw new Error('Token fingerprint mismatch');
         }
       }
@@ -148,18 +144,19 @@ export class SecureAuthService {
    */
   async refreshAccessToken(
     refreshToken: string,
-    fingerprint?: string
+    fingerprint?: string,
   ): Promise<TokenPair> {
     try {
       // Find session by refresh token
-      const sessions = await this.app.knex('user_sessions')
+      const sessions = await this.app
+        .knex('user_sessions')
         .where('is_active', true)
         .where('expires_at', '>', new Date());
 
       let validSession = null;
       for (const session of sessions) {
         const storedHash = await this.getRefreshTokenHash(session.id);
-        if (storedHash && await bcrypt.compare(refreshToken, storedHash)) {
+        if (storedHash && (await bcrypt.compare(refreshToken, storedHash))) {
           validSession = session;
           break;
         }
@@ -182,7 +179,9 @@ export class SecureAuthService {
       }
 
       // Generate new tokens with rotation
-      return this.generateSecureTokens(user, { ip: validSession.ip_address } as any);
+      return this.generateSecureTokens(user, {
+        ip: validSession.ip_address,
+      } as any);
     } catch (error: any) {
       this.app.log.error({ msg: 'Token refresh failed', error });
       const authError = new Error('Invalid refresh token');
@@ -196,14 +195,10 @@ export class SecureAuthService {
    */
   async revokeToken(jti: string, expiresAt: number): Promise<void> {
     if (!this.app.redis) return;
-    
+
     const ttl = Math.ceil((expiresAt - Date.now()) / 1000);
     if (ttl > 0) {
-      await this.app.redis.setex(
-        `${this.BLACKLIST_PREFIX}${jti}`,
-        ttl,
-        '1'
-      );
+      await this.app.redis.setex(`${this.BLACKLIST_PREFIX}${jti}`, ttl, '1');
     }
   }
 
@@ -212,7 +207,7 @@ export class SecureAuthService {
    */
   async isTokenRevoked(jti: string): Promise<boolean> {
     if (!this.app.redis) return false;
-    
+
     const result = await this.app.redis.get(`${this.BLACKLIST_PREFIX}${jti}`);
     return result === '1';
   }
@@ -222,7 +217,8 @@ export class SecureAuthService {
    */
   async revokeAllUserTokens(userId: string): Promise<void> {
     // Get all active sessions
-    const sessions = await this.app.knex('user_sessions')
+    const sessions = await this.app
+      .knex('user_sessions')
       .where('user_id', userId)
       .where('is_active', true)
       .select('id', 'jti');
@@ -235,7 +231,8 @@ export class SecureAuthService {
     }
 
     // Deactivate all sessions
-    await this.app.knex('user_sessions')
+    await this.app
+      .knex('user_sessions')
       .where('user_id', userId)
       .update({ is_active: false });
   }
@@ -245,10 +242,10 @@ export class SecureAuthService {
    */
   validateCSRFToken(requestToken: string, sessionToken: string): boolean {
     if (!requestToken || !sessionToken) return false;
-    
+
     return timingSafeEqual(
       Buffer.from(requestToken),
-      Buffer.from(sessionToken)
+      Buffer.from(sessionToken),
     );
   }
 
@@ -280,7 +277,8 @@ export class SecureAuthService {
   }
 
   private async createSecureSession(data: any): Promise<string> {
-    const [session] = await this.app.knex('user_sessions')
+    const [session] = await this.app
+      .knex('user_sessions')
       .insert({
         user_id: data.userId,
         jti: data.jti,
@@ -298,7 +296,8 @@ export class SecureAuthService {
   }
 
   private async getSession(sessionId: string): Promise<any> {
-    return this.app.knex('user_sessions')
+    return this.app
+      .knex('user_sessions')
       .where('id', sessionId)
       .where('is_active', true)
       .where('expires_at', '>', new Date())
@@ -307,11 +306,12 @@ export class SecureAuthService {
 
   private async storeRefreshToken(
     sessionId: string,
-    hashedToken: string
+    hashedToken: string,
   ): Promise<void> {
     if (!this.app.redis) {
       // Fallback to database
-      await this.app.knex('user_sessions')
+      await this.app
+        .knex('user_sessions')
         .where('id', sessionId)
         .update({ refresh_token_hash: hashedToken });
     } else {
@@ -319,24 +319,26 @@ export class SecureAuthService {
       await this.app.redis.setex(
         `${this.SESSION_PREFIX}refresh:${sessionId}`,
         7 * 24 * 60 * 60, // 7 days
-        hashedToken
+        hashedToken,
       );
     }
   }
 
   private async getRefreshTokenHash(sessionId: string): Promise<string | null> {
     if (!this.app.redis) {
-      const session = await this.app.knex('user_sessions')
+      const session = await this.app
+        .knex('user_sessions')
         .where('id', sessionId)
         .first();
       return session?.refresh_token_hash || null;
     }
-    
+
     return this.app.redis.get(`${this.SESSION_PREFIX}refresh:${sessionId}`);
   }
 
   private async getSessionJTI(sessionId: string): Promise<string | null> {
-    const session = await this.app.knex('user_sessions')
+    const session = await this.app
+      .knex('user_sessions')
       .where('id', sessionId)
       .first();
     return session?.jti || null;

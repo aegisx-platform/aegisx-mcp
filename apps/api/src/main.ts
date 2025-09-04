@@ -24,7 +24,7 @@ import navigationPlugin from './modules/navigation/navigation.plugin';
 import userProfilePlugin from './modules/user-profile/user-profile.plugin';
 import defaultPlugin from './modules/default/default.plugin';
 import settingsPlugin from './modules/settings/settings.plugin';
-import { monitoringPlugin } from './modules/monitoring';
+import { monitoringPlugin as monitoringModulePlugin } from './modules/monitoring';
 import staticFilesPlugin from './plugins/static-files.plugin';
 import jwtAuthPlugin from './plugins/jwt-auth.plugin';
 import swaggerPlugin from './plugins/swagger.plugin';
@@ -169,7 +169,7 @@ async function bootstrap() {
   await app.register(settingsPlugin);
 
   // Monitoring module (client error logging)
-  await app.register(monitoringPlugin);
+  await app.register(monitoringModulePlugin);
 
   // Start server
   const port = process.env.PORT || 3333;
