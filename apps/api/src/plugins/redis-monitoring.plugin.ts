@@ -155,8 +155,8 @@ const redisMonitoringPlugin: FastifyPluginAsync<
 };
 
 export default fp(redisMonitoringPlugin, {
-  name: 'redis-monitoring',
-  dependencies: ['redis'],
+  name: 'redis-monitoring-plugin',
+  dependencies: ['redis-plugin'],
 });
 
 // TypeScript declarations

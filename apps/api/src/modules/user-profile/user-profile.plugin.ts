@@ -58,5 +58,5 @@ async function userProfilePlugin(
 
 export default fp(userProfilePlugin, {
   name: 'user-profile',
-  dependencies: ['knex', 'jwt-auth']
+  dependencies: ['knex-plugin', 'jwt-auth-plugin']
 });

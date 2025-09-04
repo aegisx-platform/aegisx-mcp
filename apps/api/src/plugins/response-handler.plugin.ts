@@ -207,7 +207,7 @@ async function responseHandlerPlugin(
 }
 
 export default fp(responseHandlerPlugin, {
-  name: 'response-handler',
+  name: 'response-handler-plugin',
 });
 
 // TypeScript declarations

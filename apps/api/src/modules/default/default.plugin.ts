@@ -29,7 +29,7 @@ export default fp(
   },
   {
     name: 'default-plugin',
-    dependencies: ['knex', 'response-handler', 'schemas-plugin']
+    dependencies: ['knex-plugin', 'response-handler-plugin', 'schemas-plugin']
   }
 );
 

@@ -51,9 +51,9 @@ async function settingsPlugin(
 export default fp(settingsPlugin, {
   name: 'settings-plugin',
   dependencies: [
-    'knex',
-    'redis',
-    'response-handler',
+    'knex-plugin',
+    'redis-plugin',
+    'response-handler-plugin',
     'schemas-plugin',
     'auth-strategies-plugin',
   ],

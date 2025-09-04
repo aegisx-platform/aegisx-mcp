@@ -29,7 +29,7 @@ export default fp(
   },
   {
     name: 'auth-plugin',
-    dependencies: ['knex', 'response-handler', 'auth-strategies-plugin'],
+    dependencies: ['knex-plugin', 'response-handler-plugin', 'auth-strategies-plugin'],
   },
 );
 

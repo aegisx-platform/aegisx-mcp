@@ -61,7 +61,7 @@ async function navigationPlugin(
 
 export default fp(navigationPlugin, {
   name: 'navigation-plugin',
-  dependencies: ['knex', 'response-handler', 'auth-strategies-plugin']
+  dependencies: ['knex-plugin', 'response-handler-plugin', 'auth-strategies-plugin']
 });
 
 // TypeScript declarations

@@ -186,6 +186,6 @@ async function errorHandlerPlugin(
 }
 
 export default fp(errorHandlerPlugin, {
-  name: 'error-handler',
-  dependencies: ['response-handler'],
+  name: 'error-handler-plugin',
+  dependencies: ['response-handler-plugin'],
 });
