@@ -155,7 +155,26 @@ nx serve admin  # http://localhost:4201
 - 🎯 E2E test suite execution
 - 🎯 Remaining module integration tests (optional)
 
-## 📝 Recent Updates (2025-09-04 Session - Phase 3.2b Complete)
+## 📝 Recent Updates (2025-09-04 Session - Phase 3.2c)
+
+### Auth Routes Swagger Grouping Fixed ✅
+
+**Status**: ✅ Complete  
+**Commit**: ed8a10a
+
+**Issues Fixed**:
+
+- ✅ Added Swagger tags to all `/api/auth/*` routes for proper grouping
+- ✅ Added descriptive summaries to each auth endpoint
+- ✅ Added security declarations for authenticated endpoints
+- ✅ Enabled missing `/api/auth/me` endpoint route
+
+**Technical Details**:
+
+- All auth routes now tagged with `['Authentication']`
+- Added proper OpenAPI metadata for better API documentation
+- Logout and Me endpoints marked with `security: [{ bearerAuth: [] }]`
+- Profile endpoint implemented using existing `authController.me` method
 
 ### API Server Startup Issues Fixed ✅
 
@@ -180,6 +199,7 @@ nx serve admin  # http://localhost:4201
 - Verified API health endpoints returning correct status
 
 **E2E Test Status**:
+
 - ✅ Tests can now execute (API server running)
 - 🔄 Authentication setup needs fixing (login form not found)
 - ✅ Some dashboard tests passing without authentication
@@ -236,7 +256,7 @@ nx serve admin  # http://localhost:4201
    - ~~Rate limiting implementation check~~ ✅
    - ~~Input validation audit~~ ✅
 6. **Phase 3.2**: E2E Test Suite (Clone 2) ✅ Created
-7. **Phase 3.2b**: Execute E2E test suites after fixing server issues ✅ Server Fixed & Running  
+7. **Phase 3.2b**: Execute E2E test suites after fixing server issues ✅ Server Fixed & Running
 8. **Phase 3.2c**: Fix E2E authentication setup and run full test suite 👈 CURRENT
 9. **Phase 3.3**: Frontend integration with Settings API
 10. **Phase 3.4**: Production deployment preparation
