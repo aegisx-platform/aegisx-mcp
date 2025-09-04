@@ -6,9 +6,59 @@
 
 **ใช้ได้กับ:** Auth, Users, Settings, Navigation, Dashboard, Reports, Products, Orders, หรือ feature อื่นๆ ทั้งหมด
 
-## 📋 Phase 1: API Specification (ออกแบบก่อน)
+## 📋 Phase 1: Database Schema (ฐานข้อมูลก่อน)
 
-### 1.1 Read Existing OpenAPI Spec
+### 1.1 Database Migration & Schema FIRST
+
+**🚨 MANDATORY: Database schema ต้องเสร็จก่อน API spec**
+
+```bash
+# 1. สร้าง migration (ถ้าต้องการ table ใหม่)
+npx knex migrate:make create_{MODULE}_table
+
+# 2. เขียน migration
+# database/migrations/xxx_create_{MODULE}_table.ts
+export async function up(knex: Knex): Promise<void> {
+  return knex.schema.createTable('{MODULE}s', (table) => {
+    table.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));
+    table.string('name').notNullable();
+    table.text('description');
+    table.boolean('is_active').defaultTo(true);
+    table.timestamps(true, true);
+
+    // Indexes for performance
+    table.index(['is_active']);
+    table.index(['created_at']);
+  });
+}
+
+# 3. รัน migration
+npx knex migrate:latest
+
+# 4. อัพเดต seeds (ถ้าจำเป็น)
+npx knex seed:make {MODULE}_seed
+
+# 5. รัน seeds
+npx knex seed:run
+```
+
+### 1.2 Verify Database Schema
+
+```bash
+# เช็คว่า table ถูกสร้างแล้ว
+psql $DATABASE_URL -c "\d {MODULE}s"
+
+# เช็ค columns และ types
+psql $DATABASE_URL -c "\d+ {MODULE}s"
+
+# ทดสอบ insert/select บน table ใหม่
+psql $DATABASE_URL -c "INSERT INTO {MODULE}s (name, description) VALUES ('test', 'test description')"
+psql $DATABASE_URL -c "SELECT * FROM {MODULE}s LIMIT 1"
+```
+
+## 📋 Phase 2: API Specification (ออกแบบตาม Database)
+
+### 2.1 Read Existing OpenAPI Spec
 
 ```bash
 # ดู endpoints ทั้งหมด
@@ -41,9 +91,9 @@ cat apps/api/src/modules/{MODULE}/{MODULE}.schemas.ts
 - `apps/api/src/modules/{MODULE}/{MODULE}.schemas.ts`
 - URL pattern: `/api/{MODULE}/{ACTION}`
 
-## 📋 Phase 2: Backend Verification (ทดสอบ API)
+## 📋 Phase 3: Backend Verification (ทดสอบ API)
 
-### 2.1 Test Endpoints Work
+### 3.1 Test Endpoints Work
 
 ```bash
 # ทดสอบ GET endpoint
@@ -59,7 +109,7 @@ curl -X POST "http://localhost:3333/api/{MODULE}" \
 # ควรได้ HTTP 200/201 + expected response
 ```
 
-### 2.2 Test Error Cases
+### 3.2 Test Error Cases
 
 ```bash
 # ทดสอบ validation errors
@@ -74,9 +124,9 @@ curl -X GET "http://localhost:3333/api/{MODULE}/protected-endpoint"
 # ควรได้ HTTP 401
 ```
 
-## 📋 Phase 3: Frontend Implementation (เขียน Frontend)
+## 📋 Phase 4: Frontend Implementation (เขียน Frontend)
 
-### 3.1 Check Environment Configuration
+### 4.1 Check Environment Configuration
 
 ```bash
 # ต้องเป็น port 3333
@@ -84,7 +134,7 @@ grep "apiUrl" apps/web/src/environments/environment.ts
 # ต้องได้: 'http://localhost:3333'
 ```
 
-### 3.2 Create TypeScript Interfaces (ตรงกับ API Schema)
+### 4.2 Create TypeScript Interfaces (ตรงกับ API Schema)
 
 ```typescript
 // ต้องตรงกับ {MODULE}.schemas.ts
@@ -113,7 +163,7 @@ interface {MODULE}ListResponse {
 }
 ```
 
-### 3.3 Implement Service with Correct URLs
+### 4.3 Implement Service with Correct URLs
 
 ```typescript
 // Pattern สำหรับทุก module
@@ -643,3 +693,71 @@ curl -X GET "http://localhost:3333/api/{MODULE}" \
 6. **End-to-End**: ทดสอบ user flow จริงก่อน commit
 
 **🎯 เป้าหมาย: Zero integration bugs ด้วยการใช้มาตรฐานเดียวกันทุก feature**
+
+---
+
+## ⚡ **Quick Checklist (ป้องกันตกหล่น)**
+
+### 🔥 **Pre-Development (ก่อนเริ่มเขียนโค้ด)**
+
+```bash
+# ✅ 1. Database Schema
+./scripts/check-database.sh {MODULE}  # เช็ค table exists
+psql $DATABASE_URL -c "\d+ {MODULE}s"  # ดู columns
+
+# ✅ 2. API Running
+curl -s http://localhost:3333/api/health  # API must respond 200
+
+# ✅ 3. OpenAPI Spec
+curl -s "http://localhost:3333/api-docs/json" | jq '.paths' | grep "/api/{MODULE}"
+
+# ✅ 4. Environment Check
+grep "3333" apps/web/src/environments/environment.ts  # Must be port 3333
+```
+
+### 🚀 **During Development (ระหว่างเขียนโค้ด)**
+
+```bash
+# ✅ 5. Backend Structure
+ls apps/api/src/modules/{MODULE}/{MODULE}.plugin.ts    # Plugin exists?
+ls apps/api/src/modules/{MODULE}/{MODULE}.schemas.ts   # Schemas exists?
+
+# ✅ 6. Test API Endpoints
+curl -X GET "http://localhost:3333/api/{MODULE}"  # GET works?
+curl -X POST "http://localhost:3333/api/{MODULE}" -H "Content-Type: application/json" -d '{}'  # POST fails correctly?
+
+# ✅ 7. Frontend Service URLs
+grep -n "/api/{MODULE}" apps/web/src/app/services/{MODULE}.service.ts  # Has /api prefix?
+```
+
+### ✨ **Pre-Commit (ก่อน commit)**
+
+```bash
+# ✅ 8. Build & Types
+nx run-many --target=build --all           # Must pass
+nx run-many --target=typecheck --all       # Must pass
+
+# ✅ 9. Alignment Check
+./scripts/api-alignment-check.sh           # Run comprehensive check
+
+# ✅ 10. Manual Test
+# Open http://localhost:4200 → Test CRUD → All operations work?
+```
+
+## 🚨 **STOP Development If Any Fails**
+
+### ❌ **Critical Failures:**
+
+- Database table doesn't exist → **Fix migration first**
+- API server not running → **Start API server**
+- Port mismatch (3335 ≠ 3333) → **Fix environment.ts**
+- Missing `/api` prefix → **Fix service URLs**
+- Build/typecheck fails → **Fix TypeScript errors**
+- Manual CRUD doesn't work → **Debug integration**
+
+### ✅ **Ready to Commit When:**
+
+- All 10 checklist items ✅
+- Manual testing works end-to-end
+- No console errors in browser
+- No TypeScript compilation errors
