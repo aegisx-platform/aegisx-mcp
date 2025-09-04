@@ -4,6 +4,30 @@
 
 ## 🚨 Important Development Guidelines
 
+### 🚨 CRITICAL: Standard Development Policy
+
+**NEVER make changes without explicit user approval**
+
+- **DO NOT add/modify standards without asking first**
+- **DO NOT extend checklists or create new verification steps**
+- **DO NOT write code or configs based on assumptions**
+- **ALWAYS ask user before adding new requirements**
+
+**When encountering gaps in standards:**
+
+1. **STOP development**
+2. **Ask user:** "Found [issue]. Should we create standard for this?"
+3. **Wait for explicit approval and direction**
+4. **Create standard only as instructed by user**
+
+**Examples of what requires user approval:**
+
+- Adding new checklist items
+- Creating new verification scripts
+- Extending existing standards
+- Adding new phase/step requirements
+- Modifying workflow processes
+
 ### Git Commit Rules
 
 **DO NOT include the following in git commits**:
