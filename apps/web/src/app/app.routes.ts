@@ -24,6 +24,14 @@ export const appRoutes: Route[] = [
     canActivate: [AuthGuard],
   },
   {
+    path: 'dashboards/project',
+    loadComponent: () =>
+      import('./pages/dashboard/project-dashboard.page').then(
+        (m) => m.ProjectDashboardPage
+      ),
+    canActivate: [AuthGuard],
+  },
+  {
     path: 'users',
     canActivate: [AuthGuard],
     children: [
@@ -84,6 +92,42 @@ export const appRoutes: Route[] = [
           ),
       },
     ],
+  },
+  {
+    path: 'test-fuse',
+    loadComponent: () =>
+      import('./pages/test-fuse/test-fuse.component').then(
+        (m) => m.TestFuseComponent,
+      ),
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'icon-test',
+    loadComponent: () =>
+      import('./icon-test.component').then(
+        (m) => m.IconTestComponent
+      ),
+  },
+  {
+    path: 'test-navigation',
+    loadComponent: () =>
+      import('./test-navigation.component').then(
+        (m) => m.TestNavigationComponent
+      ),
+  },
+  {
+    path: 'debug-icons',
+    loadComponent: () =>
+      import('./debug-icons.component').then(
+        (m) => m.DebugIconsComponent
+      ),
+  },
+  {
+    path: 'demo/navigation',
+    loadComponent: () =>
+      import('./demo/navigation-demo.component').then(
+        (m) => m.NavigationDemoComponent
+      ),
   },
   {
     path: '**',

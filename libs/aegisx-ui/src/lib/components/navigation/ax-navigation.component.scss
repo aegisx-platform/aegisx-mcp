@@ -1,0 +1,420 @@
+// AegisX Navigation Component Styles
+// Clean, modern navigation with smooth transitions
+
+// Variables
+:root {
+  --ax-navigation-width-expanded: 256px;
+  --ax-navigation-width-collapsed: 64px;
+  --ax-navigation-transition-duration: 300ms;
+  --ax-navigation-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// Host Element
+.ax-navigation-host {
+  display: block;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  height: 100%;
+  z-index: 50;
+  
+  &--collapsed {
+    width: var(--ax-navigation-width-collapsed);
+  }
+  
+  &--expanded {
+    width: var(--ax-navigation-width-expanded);
+  }
+  
+  &--left {
+    left: 0;
+  }
+  
+  &--right {
+    left: auto;
+    right: 0;
+  }
+}
+
+// Main Navigation Container
+.ax-navigation {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background-color: var(--ax-navigation-bg, #1e293b);
+  color: var(--ax-navigation-color, #ffffff);
+  transition: all var(--ax-navigation-transition-duration) var(--ax-navigation-transition-timing);
+  overflow: hidden;
+  
+  // Navigation Modes
+  &--side {
+    position: relative;
+    height: 100%;
+  }
+  
+  &--over {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    z-index: 999;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    
+    &[data-position="left"] {
+      left: 0;
+    }
+    
+    &[data-position="right"] {
+      right: 0;
+    }
+  }
+  
+  &--push {
+    position: relative;
+  }
+  
+  // States
+  &--collapsed {
+    width: var(--ax-navigation-width-collapsed);
+    
+    .ax-navigation__content {
+      padding-top: 1rem;
+    }
+  }
+  
+  &--expanded {
+    width: var(--ax-navigation-width-expanded);
+  }
+}
+
+// Header
+.ax-navigation__header {
+  flex: 0 0 auto;
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  transition: all var(--ax-navigation-transition-duration) var(--ax-navigation-transition-timing);
+  
+  .ax-navigation--collapsed & {
+    display: none;
+    height: 0;
+    padding: 0;
+    border: none;
+  }
+}
+
+// Content
+.ax-navigation__content {
+  flex: 1 1 auto;
+  padding: 0.75rem 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+  }
+}
+
+// Footer
+.ax-navigation__footer {
+  flex: 0 0 auto;
+  padding: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  transition: all var(--ax-navigation-transition-duration) var(--ax-navigation-transition-timing);
+  
+  .ax-navigation--collapsed & {
+    display: none;
+    height: 0;
+    padding: 0;
+    border: none;
+  }
+}
+
+// Divider
+.ax-navigation__divider {
+  margin: 0.75rem 0;
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+// Group
+.ax-navigation__group {
+  position: relative;
+  
+  // Add bottom padding in collapsed mode for separator space
+  .ax-navigation--collapsed & {
+    &:not(:last-child) {
+      padding-bottom: 1rem;
+      margin-bottom: 1rem;
+      position: relative;
+      
+      // Add separator line
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0.75rem;
+        right: 0.75rem;
+        height: 1px;
+        background-color: rgba(255, 255, 255, 0.12);
+      }
+    }
+  }
+}
+
+.ax-navigation__group-title {
+  padding: 0.625rem 1rem;
+  margin: 0 0.75rem 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(59, 130, 246, 0.7);
+  transition: all var(--ax-navigation-transition-duration) var(--ax-navigation-transition-timing);
+  
+  // First group title
+  .ax-navigation__group:first-child & {
+    margin-top: 0;
+  }
+  
+  // Non-first group titles
+  .ax-navigation__group:not(:first-child) & {
+    margin-top: 1.5rem;
+  }
+  
+  // Hide in collapsed mode
+  .ax-navigation--collapsed & {
+    display: none;
+  }
+}
+
+// Navigation Item
+.ax-navigation__item {
+  position: relative;
+  margin-bottom: 0.25rem;
+  
+  &--active {
+    > .ax-navigation__item-wrapper {
+      background-color: rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+      
+      .ax-navigation__item-icon {
+        color: #60a5fa;
+      }
+    }
+  }
+  
+  &--disabled {
+    > .ax-navigation__item-wrapper {
+      opacity: 0.5;
+      cursor: not-allowed;
+      
+      &:hover {
+        background-color: transparent;
+      }
+    }
+  }
+}
+
+// Item Wrapper
+.ax-navigation__item-wrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  margin: 0 0.75rem 0.25rem;
+  border: none;
+  border-radius: 0.375rem;
+  background-color: transparent;
+  color: rgba(255, 255, 255, 0.8);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 200ms ease-in-out;
+  outline: none;
+  
+  &:hover:not(:disabled) {
+    background-color: rgba(255, 255, 255, 0.12);
+  }
+  
+  &:focus-visible {
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+  }
+  
+  // Collapsed state
+  .ax-navigation--collapsed & {
+    padding: 0.75rem;
+    margin: 0.25rem 0.5rem;
+    justify-content: center;
+    width: calc(100% - 1rem);
+  }
+}
+
+// Item Icon
+.ax-navigation__item-icon {
+  flex: 0 0 auto;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-right: 1rem;
+  color: currentColor;
+  transition: all 200ms ease-in-out;
+  
+  .ax-navigation--collapsed & {
+    margin-right: 0;
+  }
+}
+
+// Item Title
+.ax-navigation__item-title {
+  flex: 1 1 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: opacity 200ms ease-in-out;
+  
+  .ax-navigation--collapsed & {
+    display: none;
+  }
+}
+
+// Item Badge
+.ax-navigation__item-badge {
+  flex: 0 0 auto;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  margin-left: auto;
+  padding: 0 0.375rem;
+  border-radius: 0.625rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+  text-align: center;
+  white-space: nowrap;
+  
+  &[data-type="primary"] {
+    background-color: #3b82f6;
+    color: #ffffff;
+  }
+  
+  &[data-type="accent"] {
+    background-color: #8b5cf6;
+    color: #ffffff;
+  }
+  
+  &[data-type="warn"] {
+    background-color: #ef4444;
+    color: #ffffff;
+  }
+  
+  &[data-type="success"] {
+    background-color: #10b981;
+    color: #ffffff;
+  }
+  
+  &[data-type="info"] {
+    background-color: #06b6d4;
+    color: #ffffff;
+  }
+}
+
+// Item Arrow
+.ax-navigation__item-arrow {
+  flex: 0 0 auto;
+  margin-left: 0.5rem;
+  color: rgba(255, 255, 255, 0.5);
+  transition: transform 200ms ease;
+  
+  &--rotated {
+    transform: rotate(90deg);
+  }
+}
+
+// Item External Link
+.ax-navigation__item-external {
+  flex: 0 0 auto;
+  margin-left: 0.5rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+// Item Children
+.ax-navigation__item-children {
+  overflow: hidden;
+  
+  .ax-navigation__item {
+    margin-bottom: 0.125rem;
+  }
+  
+  .ax-navigation__item-wrapper {
+    font-size: 0.8125rem;
+  }
+}
+
+// Overlay
+.ax-navigation__overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 998;
+  cursor: pointer;
+}
+
+// Responsive
+@media (max-width: 1024px) {
+  .ax-navigation {
+    &--side {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      z-index: 999;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+      transform: translateX(-100%);
+      
+      &[data-position="left"] {
+        left: 0;
+      }
+      
+      &[data-position="right"] {
+        right: 0;
+        transform: translateX(100%);
+      }
+    }
+  }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  .ax-navigation {
+    --ax-navigation-bg: #0f172a;
+    --ax-navigation-color: #f1f5f9;
+  }
+}
+
+// Custom scrollbar for Firefox
+@supports (scrollbar-width: thin) {
+  .ax-navigation__content {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  }
+}

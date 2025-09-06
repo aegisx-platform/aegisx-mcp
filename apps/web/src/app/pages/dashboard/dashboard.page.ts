@@ -37,16 +37,31 @@ import {
     QuickActionsComponent,
   ],
   template: `
-    <div class="dashboard-container container mx-auto px-4 py-8">
+    <div class="w-full h-full overflow-y-auto">
       <!-- Page Header -->
-      <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">
-          Dashboard
-        </h1>
-        <p class="text-gray-600 dark:text-gray-400 mt-2">
-          Real-time overview of your application performance and activities
-        </p>
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-6 sm:p-8 bg-white dark:bg-gray-900">
+        <div>
+          <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+            Analytics Dashboard
+          </h1>
+          <p class="text-gray-600 dark:text-gray-400 mt-1">
+            Real-time overview of your application performance and activities
+          </p>
+        </div>
+        <div class="flex items-center mt-4 sm:mt-0 space-x-3">
+          <button mat-stroked-button>
+            <mat-icon class="mr-2">calendar_today</mat-icon>
+            Last 30 days
+          </button>
+          <button mat-flat-button color="primary">
+            <mat-icon class="mr-2">file_download</mat-icon>
+            Export
+          </button>
+        </div>
       </div>
+      
+      <!-- Main Content -->
+      <div class="p-6 sm:p-8">
 
       <!-- Stats Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

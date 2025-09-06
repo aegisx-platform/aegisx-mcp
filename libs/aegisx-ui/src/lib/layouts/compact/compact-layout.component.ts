@@ -5,7 +5,6 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { NavbarComponent } from '../components/navbar/navbar.component';
 import { ToolbarComponent } from '../components/toolbar/toolbar.component';
 import { AegisxNavigationService } from '../../services/navigation/navigation.service';
 import { AegisxMediaWatcherService } from '../../services/media-watcher/media-watcher.service';
@@ -24,7 +23,6 @@ import { AegisxNavigationItem } from '../../types/navigation.types';
     MatButtonModule,
     MatIconModule,
     MatTooltipModule,
-    NavbarComponent,
     ToolbarComponent,
     AegisxLoadingBarComponent
   ],

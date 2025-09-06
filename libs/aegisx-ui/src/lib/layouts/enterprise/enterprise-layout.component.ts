@@ -5,7 +5,6 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
-import { ToolbarComponent } from '../components/toolbar/toolbar.component';
 import { AegisxNavigationService } from '../../services/navigation/navigation.service';
 import { AegisxMediaWatcherService } from '../../services/media-watcher/media-watcher.service';
 import { AegisxLoadingBarComponent } from '../../components/loading-bar/loading-bar.component';
@@ -23,7 +22,6 @@ import { UserMenuComponent } from '../../components/user-menu/user-menu.componen
     MatButtonModule,
     MatIconModule,
     MatMenuModule,
-    ToolbarComponent,
     AegisxLoadingBarComponent,
     UserMenuComponent
   ],

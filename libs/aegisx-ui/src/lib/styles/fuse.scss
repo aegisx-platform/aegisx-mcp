@@ -1,0 +1,82 @@
+// -----------------------------------------------------------------------------------------------------
+// @ Import Fuse Main Styles
+// -----------------------------------------------------------------------------------------------------
+
+// Import Fuse navigation component styles
+@import '../@fuse/components/navigation/vertical/vertical.component.scss';
+@import '../@fuse/components/navigation/vertical/styles/appearances/default.scss';
+@import '../@fuse/components/navigation/vertical/styles/appearances/compact.scss';
+@import '../@fuse/components/navigation/vertical/styles/appearances/dense.scss';
+@import '../@fuse/components/navigation/vertical/styles/appearances/thin.scss';
+
+// Import Fuse loading bar styles
+@import '../@fuse/components/loading-bar/loading-bar.component.scss';
+
+// Import Fuse card styles
+@import '../@fuse/components/card/card.component.scss';
+
+// Import Fuse alert styles
+@import '../@fuse/components/alert/alert.component.scss';
+
+// Import Fuse drawer styles
+@import '../@fuse/components/drawer/drawer.component.scss';
+
+// Import highlight.js styles
+@import '../@fuse/styles/overrides/highlightjs.scss';
+
+// Import perfect scrollbar styles
+@import '../@fuse/styles/overrides/perfect-scrollbar.scss';
+
+// Import Angular Material overrides
+@import '../@fuse/styles/overrides/angular-material.scss';
+
+// Import Fuse utility classes
+@import '../@fuse/styles/tailwind.scss';
+
+// -----------------------------------------------------------------------------------------------------
+// @ Fuse Vertical Navigation Overlays
+// -----------------------------------------------------------------------------------------------------
+
+.fuse-vertical-navigation-overlay {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 170;
+    opacity: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+
+    &.fuse-vertical-navigation-overlay-transparent {
+        background-color: transparent;
+    }
+}
+
+.fuse-vertical-navigation-aside-overlay {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 169;
+    opacity: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+// -----------------------------------------------------------------------------------------------------
+// @ Fuse Loading Bar
+// -----------------------------------------------------------------------------------------------------
+
+fuse-loading-bar {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 6px;
+    z-index: 999;
+
+    .mat-progress-bar {
+        height: 6px !important;
+    }
+}

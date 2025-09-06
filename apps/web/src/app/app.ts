@@ -1,6 +1,7 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { filter } from 'rxjs/operators';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatBadgeModule } from '@angular/material/badge';
@@ -8,10 +9,8 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import {
-  ClassicLayoutComponent,
-  AegisxNavigationService,
-  AegisxConfigService,
-  AegisxNavigationItem,
+  FuseCompactLayoutComponent,
+  FuseNavigationItem,
 } from '@aegisx/ui';
 import { AuthService } from './core/auth.service';
 
@@ -34,443 +33,454 @@ interface Notification {
     MatMenuModule,
     MatDividerModule,
     MatTooltipModule,
-    ClassicLayoutComponent,
+    FuseCompactLayoutComponent,
   ],
   selector: 'ax-root',
   template: `
-    <ax-classic-layout>
+    @if (shouldShowLayout()) {
+      <ax-fuse-compact-layout
+        [navigation]="navigation"
+        [appName]="'AegisX Platform'"
+        [appVersion]="'v2.0'"
+        [isDarkMode]="isDarkMode()"
+      >
+        <!-- Navigation Header -->
+      <ng-template #navigationHeader>
+        <div class="flex h-20 items-center p-6 pb-0">
+          <span class="text-2xl font-bold text-white">AegisX</span>
+          <span
+            class="ml-2 text-xs px-2 py-1 bg-primary-600 text-white rounded"
+          >
+            v2.0
+          </span>
+        </div>
+      </ng-template>
+
       <!-- Toolbar Title -->
-      <div toolbar-title class="flex items-center">
+      <ng-template #toolbarTitle>
         <span class="text-xl font-bold">AegisX Platform</span>
-        <span
-          class="ml-2 text-xs px-2 py-1 bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300 rounded"
-        >
-          v2.0
-        </span>
-      </div>
+      </ng-template>
 
       <!-- Toolbar Actions -->
-      <div toolbar-actions class="flex items-center space-x-2">
-        <!-- Search Button -->
+      <ng-template #toolbarActions>
+        <!-- Theme Toggle -->
         <button
           mat-icon-button
-          matTooltip="Search"
-          class="hidden sm:inline-flex"
+          matTooltip="Toggle theme"
+          (click)="toggleTheme()"
+          class="mr-1"
         >
-          <mat-icon>search</mat-icon>
+          <mat-icon>
+            {{ isDarkMode() ? 'light_mode' : 'dark_mode' }}
+          </mat-icon>
         </button>
 
         <!-- Notifications -->
         <button
           mat-icon-button
-          matTooltip="Notifications"
-          [matBadge]="notificationCount()"
+          [matBadge]="notifications().length"
           matBadgeColor="warn"
-          [matBadgeHidden]="notificationCount() === 0"
+          matBadgeSize="small"
           [matMenuTriggerFor]="notificationMenu"
+          class="mr-1"
         >
           <mat-icon>notifications</mat-icon>
         </button>
+
+        <mat-menu #notificationMenu="matMenu" class="w-80">
+          <div class="p-4 border-b">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-semibold">Notifications</h3>
+              <button mat-button color="primary" class="min-w-0">
+                Mark all as read
+              </button>
+            </div>
+          </div>
+
+          @for (notification of notifications(); track notification.id) {
+            <button mat-menu-item class="h-auto py-3 hover:bg-gray-50 dark:hover:bg-gray-700">
+              <div class="flex items-start w-full">
+                <mat-icon [class]="getNotificationClass(notification.type)">
+                  {{ notification.icon }}
+                </mat-icon>
+                <div class="ml-3 flex-1">
+                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    {{ notification.title }}
+                  </p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {{ notification.time }}
+                  </p>
+                </div>
+              </div>
+            </button>
+          } @empty {
+            <div class="p-4 text-center text-gray-500 dark:text-gray-400">
+              No notifications
+            </div>
+          }
+
+          <div class="p-2 border-t">
+            <button mat-button color="primary" class="w-full">
+              View all notifications
+            </button>
+          </div>
+        </mat-menu>
 
         <!-- User Menu -->
         <button
           mat-icon-button
           [matMenuTriggerFor]="userMenu"
           class="ml-2"
-          [attr.aria-label]="'User menu for ' + authService.userDisplayName()"
-          matTooltip="User menu"
         >
-          <mat-icon>account_circle</mat-icon>
+          <mat-icon class="icon-size-6">account_circle</mat-icon>
         </button>
 
-        <!-- Settings -->
-        <button mat-icon-button matTooltip="Settings" routerLink="/settings">
-          <mat-icon>settings</mat-icon>
-        </button>
-      </div>
-
-      <!-- Main Content -->
-      <router-outlet></router-outlet>
-    </ax-classic-layout>
-
-    <!-- Notification Menu -->
-    <mat-menu #notificationMenu="matMenu" class="notification-menu">
-      <div class="px-4 py-2 border-b dark:border-gray-700">
-        <p class="font-semibold">Notifications</p>
-      </div>
-      <div class="max-h-80 overflow-y-auto">
-        @if (notifications().length === 0) {
-          <div class="px-4 py-8 text-center text-gray-500">
-            <mat-icon class="text-4xl">inbox</mat-icon>
-            <p class="mt-2">No new notifications</p>
-          </div>
-        } @else {
-          @for (notification of notifications(); track notification.id) {
-            <button mat-menu-item class="notification-item">
-              <mat-icon [ngClass]="getNotificationClass(notification.type)">{{
-                notification.icon
-              }}</mat-icon>
-              <div class="ml-3 flex-1">
-                <p class="text-sm font-medium">{{ notification.title }}</p>
-                <p class="text-xs text-gray-500">{{ notification.time }}</p>
+        <mat-menu #userMenu="matMenu" class="w-64">
+          <div class="p-4 border-b">
+            <div class="flex items-center">
+              <div class="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                <mat-icon class="text-gray-600 dark:text-gray-300 icon-size-6">person</mat-icon>
               </div>
-            </button>
-          }
-        }
-      </div>
-      <mat-divider></mat-divider>
-      <button mat-menu-item routerLink="/notifications" class="text-center">
-        <span class="text-primary">View All Notifications</span>
-      </button>
-    </mat-menu>
+              <div class="ml-3">
+                <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                  {{ currentUser()?.name || 'Guest User' }}
+                </p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  {{ currentUser()?.email || 'guest@example.com' }}
+                </p>
+              </div>
+            </div>
+          </div>
 
-    <!-- User Menu -->
-    <mat-menu #userMenu="matMenu">
-      <div class="px-4 py-3 border-b dark:border-gray-700">
-        @if (authService.currentUser(); as user) {
-          <p class="text-sm font-medium">{{ authService.userDisplayName() }}</p>
-          <p class="text-xs text-gray-500">{{ user.email }}</p>
-        } @else {
-          <p class="text-sm font-medium">Guest User</p>
-          <p class="text-xs text-gray-500">Not logged in</p>
-        }
-      </div>
-      <button mat-menu-item routerLink="/profile">
-        <mat-icon>person</mat-icon>
-        <span>My Profile</span>
-      </button>
-      <button mat-menu-item routerLink="/account">
-        <mat-icon>manage_accounts</mat-icon>
-        <span>Account Settings</span>
-      </button>
-      <mat-divider></mat-divider>
-      <button mat-menu-item (click)="toggleTheme()">
-        <mat-icon>{{ isDarkMode() ? 'light_mode' : 'dark_mode' }}</mat-icon>
-        <span>{{ isDarkMode() ? 'Light Mode' : 'Dark Mode' }}</span>
-      </button>
-      <button mat-menu-item routerLink="/help">
-        <mat-icon>help</mat-icon>
-        <span>Help & Support</span>
-      </button>
-      <mat-divider></mat-divider>
-      <button mat-menu-item (click)="logout()" class="text-red-600">
-        <mat-icon class="text-red-600">logout</mat-icon>
-        <span>Logout</span>
-      </button>
-    </mat-menu>
+          <button mat-menu-item routerLink="/profile">
+            <mat-icon>person</mat-icon>
+            <span>Profile</span>
+          </button>
+          <button mat-menu-item routerLink="/settings">
+            <mat-icon>settings</mat-icon>
+            <span>Settings</span>
+          </button>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Sign out</span>
+          </button>
+        </mat-menu>
+      </ng-template>
+
+      <!-- Footer Content -->
+      <ng-template #footerContent>
+        <span class="text-secondary font-medium">
+          AegisX Platform &copy; {{ currentYear }} - Enterprise Ready Solution
+        </span>
+      </ng-template>
+      </ax-fuse-compact-layout>
+    } @else {
+      <router-outlet></router-outlet>
+    }
   `,
-  styles: [
-    `
-      :host {
-        display: block;
-        height: 100vh;
-      }
-
-      .notification-menu {
-        width: 320px;
-      }
-
-      .notification-item {
-        min-height: 64px;
-        padding: 12px 16px;
-      }
-
-      ::ng-deep .mat-mdc-menu-panel {
-        max-width: 320px;
-      }
-
-      .text-warn {
-        @apply text-orange-600 dark:text-orange-400;
-      }
-      .text-error {
-        @apply text-red-600 dark:text-red-400;
-      }
-      .text-success {
-        @apply text-green-600 dark:text-green-400;
-      }
-      .text-info {
-        @apply text-blue-600 dark:text-blue-400;
-      }
-    `,
-  ],
 })
-export class App implements OnInit {
-  private navigationService = inject(AegisxNavigationService);
-  private configService = inject(AegisxConfigService);
-  protected authService = inject(AuthService);
+export class AppComponent implements OnInit {
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
-  protected title = 'AegisX Platform';
-
-  // Signals
-  notifications = signal<Notification[]>([
-    {
-      id: 1,
-      title: 'New user registered',
-      time: '5 minutes ago',
-      icon: 'person_add',
-      type: 'info',
-    },
-    {
-      id: 2,
-      title: 'System backup completed',
-      time: '1 hour ago',
-      icon: 'backup',
-      type: 'success',
-    },
-    {
-      id: 3,
-      title: 'API rate limit warning',
-      time: '2 hours ago',
-      icon: 'warning',
-      type: 'warning',
-    },
-  ]);
-
-  notificationCount = signal(3);
   isDarkMode = signal(false);
+  shouldShowLayout = signal(true);
+  currentUser = computed(() => {
+    const user = this.authService.currentUser();
+    if (user) {
+      return {
+        name: this.authService.userDisplayName(),
+        email: user.email,
+        avatar: null, // You can add avatar support later
+      };
+    }
+    return null;
+  });
+  notifications = signal<Notification[]>([]);
+  currentYear = new Date().getFullYear();
 
-  ngOnInit(): void {
-    // Set up navigation
-    const navigationItems = this.getNavigationItems();
-    this.navigationService.setNavigation({
-      default: navigationItems,
-      compact: navigationItems,
-      horizontal: navigationItems,
-      mobile: navigationItems,
-    });
+  // Fuse Navigation Items
+  navigation: FuseNavigationItem[] = [
+    {
+      id: 'main',
+      title: 'Main',
+      type: 'group',
+      children: [
+        {
+          id: 'dashboard',
+          title: 'Analytics Dashboard',
+          type: 'basic',
+          icon: 'heroicons_outline:chart-pie',
+          link: '/dashboard',
+          badge: {
+            title: 'New',
+            classes: 'px-2 bg-primary-600 text-white rounded-full',
+          },
+        },
+        {
+          id: 'dashboard.project',
+          title: 'Project Dashboard',
+          type: 'basic',
+          icon: 'heroicons_outline:briefcase',
+          link: '/dashboards/project',
+        },
+      ],
+    },
+    {
+      id: 'management',
+      title: 'Management',
+      type: 'group',
+      children: [
+        {
+          id: 'users',
+          title: 'User Management',
+          type: 'basic',
+          icon: 'heroicons_outline:users',
+          link: '/users',
+        },
+        {
+          id: 'products',
+          title: 'Products',
+          type: 'collapsable',
+          icon: 'heroicons_outline:shopping-bag',
+          children: [
+            {
+              id: 'products.list',
+              title: 'Product List',
+              type: 'basic',
+              link: '/products',
+            },
+            {
+              id: 'products.categories',
+              title: 'Categories',
+              type: 'basic',
+              link: '/products/categories',
+            },
+          ],
+        },
+        {
+          id: 'orders',
+          title: 'Orders',
+          type: 'basic',
+          icon: 'heroicons_outline:shopping-cart',
+          link: '/orders',
+          badge: {
+            title: '5',
+            classes: 'px-2 bg-warn-600 text-white rounded-full',
+          },
+        },
+      ],
+    },
+    {
+      id: 'settings',
+      title: 'Settings',
+      type: 'group',
+      children: [
+        {
+          id: 'settings',
+          title: 'Settings',
+          type: 'basic',
+          icon: 'heroicons_outline:cog-6-tooth',
+          link: '/settings',
+        },
+        {
+          id: 'test-fuse',
+          title: 'Test Fuse Navigation',
+          type: 'basic',
+          icon: 'heroicons_outline:beaker',
+          link: '/test-fuse',
+          badge: {
+            title: 'NEW',
+            classes: 'px-2 bg-green-600 text-white rounded',
+          },
+        },
+        {
+          id: 'docs',
+          title: 'Documentation',
+          type: 'basic',
+          icon: 'heroicons_outline:book-open',
+          link: '/docs',
+          externalLink: true,
+          target: '_blank',
+        },
+      ],
+    },
+    {
+      id: 'divider-1',
+      type: 'divider',
+    },
+    {
+      id: 'navigation-features',
+      title: 'Navigation Features',
+      subtitle: 'Collapsable levels & badge styles',
+      type: 'group',
+      children: [
+        {
+          id: 'level.0',
+          title: 'Level 0',
+          icon: 'heroicons_outline:check-circle',
+          type: 'collapsable',
+          children: [
+            {
+              id: 'level.0.1',
+              title: 'Level 1',
+              type: 'collapsable',
+              children: [
+                {
+                  id: 'level.0.1.2',
+                  title: 'Level 2',
+                  type: 'collapsable',
+                  children: [
+                    {
+                      id: 'level.0.1.2.3',
+                      title: 'Level 3',
+                      type: 'collapsable',
+                      children: [
+                        {
+                          id: 'level.0.1.2.3.4',
+                          title: 'Level 4',
+                          type: 'collapsable',
+                          children: [
+                            {
+                              id: 'level.0.1.2.3.4.5',
+                              title: 'Level 5',
+                              type: 'basic',
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          id: 'level.0.alt',
+          title: 'With badges',
+          icon: 'heroicons_outline:tag',
+          type: 'collapsable',
+          badge: {
+            title: '3',
+            classes: 'px-2 bg-primary-600 text-white rounded-full',
+          },
+          children: [
+            {
+              id: 'level.0.alt.1',
+              title: 'Option with badge',
+              type: 'basic',
+              badge: {
+                title: 'Updated',
+                classes: 'px-2 bg-warn-600 text-white rounded-full',
+              },
+            },
+            {
+              id: 'level.0.alt.2',
+              title: 'Option with badge',
+              type: 'basic',
+              badge: {
+                title: '8',
+                classes: 'px-2 bg-error-600 text-white rounded-full',
+              },
+            },
+            {
+              id: 'level.0.alt.3',
+              title: 'Option with badge',
+              type: 'basic',
+              badge: {
+                title: 'New',
+                classes: 'px-2 bg-success-600 text-white rounded-full',
+              },
+            },
+          ],
+        },
+      ],
+    },
+  ];
 
-    // Configure theme
-    this.configService.updateConfig({
-      theme: 'default',
-      scheme: 'auto',
-      layout: 'classic',
-    });
+  ngOnInit() {
+    // Load theme preference
+    const savedTheme = localStorage.getItem('theme');
+    this.isDarkMode.set(savedTheme === 'dark');
+    this.applyTheme();
 
-    // Check current theme
-    const currentScheme = this.configService.config().scheme;
-    this.isDarkMode.set(currentScheme === 'dark');
+    // Check routes to determine if layout should be shown
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe((event: NavigationEnd) => {
+        // Hide layout for auth routes
+        const authRoutes = ['/login', '/register', '/forgot-password', '/reset-password'];
+        const shouldHideLayout = authRoutes.some(route => event.url.startsWith(route));
+        this.shouldShowLayout.set(!shouldHideLayout);
+      });
+
+    // Check initial route
+    const currentUrl = this.router.url;
+    const authRoutes = ['/login', '/register', '/forgot-password', '/reset-password'];
+    const shouldHideLayout = authRoutes.some(route => currentUrl.startsWith(route));
+    this.shouldShowLayout.set(!shouldHideLayout);
+
+    // Current user is now loaded from AuthService via computed signal
+
+    // Load sample notifications
+    this.notifications.set([
+      {
+        id: 1,
+        title: 'New order received',
+        time: '5 minutes ago',
+        icon: 'shopping_cart',
+        type: 'success',
+      },
+      {
+        id: 2,
+        title: 'Server maintenance scheduled',
+        time: '2 hours ago',
+        icon: 'warning',
+        type: 'warning',
+      },
+      {
+        id: 3,
+        title: 'New user registration',
+        time: '3 hours ago',
+        icon: 'person_add',
+        type: 'info',
+      },
+    ]);
+  }
+
+  toggleTheme() {
+    this.isDarkMode.update((value) => !value);
+    this.applyTheme();
+  }
+
+  private applyTheme() {
+    const theme = this.isDarkMode() ? 'dark' : 'light';
+    document.documentElement.classList.remove('light', 'dark');
+    document.documentElement.classList.add(theme);
+    localStorage.setItem('theme', theme);
   }
 
   getNotificationClass(type: string): string {
-    const classes: Record<string, string> = {
-      info: 'text-info',
-      warning: 'text-warn',
-      error: 'text-error',
-      success: 'text-success',
+    const classes = {
+      info: 'text-blue-500',
+      warning: 'text-amber-500',
+      error: 'text-red-500',
+      success: 'text-green-500',
     };
-    return classes[type] || '';
+    return classes[type as keyof typeof classes] || 'text-gray-500';
   }
 
-  toggleTheme(): void {
-    const newScheme = this.isDarkMode() ? 'light' : 'dark';
-    this.isDarkMode.set(!this.isDarkMode());
-    this.configService.updateConfig({ scheme: newScheme });
-  }
-
-  logout(): void {
+  logout() {
     this.authService.logout().subscribe({
       next: () => {
         console.log('Logged out successfully');
       },
       error: (error) => {
-        console.error('Logout failed:', error);
-        // Even if logout fails on server, user will be redirected to login
-      },
+        console.error('Logout error:', error);
+        // AuthService will still clear data and navigate
+      }
     });
-  }
-
-  private getNavigationItems(): AegisxNavigationItem[] {
-    return [
-      {
-        id: 'dashboard',
-        title: 'Dashboard',
-        type: 'basic',
-        icon: 'heroicons_outline:home',
-        link: '/dashboard',
-        badge: {
-          title: 'New',
-          classes: 'px-2 bg-primary-600 text-white rounded-full',
-        },
-      },
-      {
-        id: 'management',
-        title: 'Management',
-        type: 'group',
-        children: [
-          {
-            id: 'users',
-            title: 'Users',
-            type: 'basic',
-            icon: 'heroicons_outline:users',
-            link: '/users',
-          },
-          {
-            id: 'roles',
-            title: 'Roles & Permissions',
-            type: 'basic',
-            icon: 'heroicons_outline:shield-check',
-            link: '/roles',
-          },
-          {
-            id: 'teams',
-            title: 'Teams',
-            type: 'basic',
-            icon: 'heroicons_outline:user-group',
-            link: '/teams',
-          },
-        ],
-      },
-      {
-        id: 'analytics',
-        title: 'Analytics',
-        type: 'collapsable',
-        icon: 'heroicons_outline:chart-bar',
-        children: [
-          {
-            id: 'analytics.overview',
-            title: 'Overview',
-            type: 'basic',
-            link: '/analytics/overview',
-          },
-          {
-            id: 'analytics.reports',
-            title: 'Reports',
-            type: 'basic',
-            link: '/analytics/reports',
-            badge: {
-              title: '3',
-              classes: 'px-2 bg-warn-600 text-white rounded-full',
-            },
-          },
-          {
-            id: 'analytics.realtime',
-            title: 'Real-time',
-            type: 'basic',
-            link: '/analytics/realtime',
-          },
-        ],
-      },
-      {
-        id: 'communication',
-        title: 'Communication',
-        type: 'collapsable',
-        icon: 'heroicons_outline:chat-alt-2',
-        children: [
-          {
-            id: 'messages',
-            title: 'Messages',
-            type: 'basic',
-            link: '/messages',
-            badge: {
-              title: '12',
-              classes: 'px-2 bg-accent-600 text-white rounded-full',
-            },
-          },
-          {
-            id: 'notifications',
-            title: 'Notifications',
-            type: 'basic',
-            link: '/notifications',
-          },
-          {
-            id: 'announcements',
-            title: 'Announcements',
-            type: 'basic',
-            link: '/announcements',
-          },
-        ],
-      },
-      {
-        id: 'content',
-        title: 'Content',
-        type: 'collapsable',
-        icon: 'heroicons_outline:document-text',
-        children: [
-          {
-            id: 'pages',
-            title: 'Pages',
-            type: 'basic',
-            link: '/pages',
-          },
-          {
-            id: 'media',
-            title: 'Media Library',
-            type: 'basic',
-            link: '/media',
-          },
-          {
-            id: 'files',
-            title: 'File Manager',
-            type: 'basic',
-            link: '/files',
-          },
-        ],
-      },
-      {
-        id: 'divider-1',
-        title: '',
-        type: 'divider',
-      },
-      {
-        id: 'system',
-        title: 'System',
-        type: 'group',
-        children: [
-          {
-            id: 'settings',
-            title: 'Settings',
-            type: 'basic',
-            icon: 'heroicons_outline:cog',
-            link: '/settings',
-          },
-          {
-            id: 'audit',
-            title: 'Audit Logs',
-            type: 'basic',
-            icon: 'heroicons_outline:clipboard-list',
-            link: '/audit',
-          },
-          {
-            id: 'api',
-            title: 'API Management',
-            type: 'basic',
-            icon: 'heroicons_outline:code',
-            link: '/api',
-          },
-        ],
-      },
-      {
-        id: 'help',
-        title: 'Help & Support',
-        type: 'group',
-        children: [
-          {
-            id: 'help.documentation',
-            title: 'Documentation',
-            type: 'basic',
-            icon: 'heroicons_outline:book-open',
-            link: '/docs',
-            externalLink: true,
-            target: '_blank',
-          },
-          {
-            id: 'help.api',
-            title: 'API Reference',
-            type: 'basic',
-            icon: 'heroicons_outline:code',
-            link: 'http://localhost:3333/api-docs',
-            externalLink: true,
-            target: '_blank',
-          },
-          {
-            id: 'help.support',
-            title: 'Support Center',
-            type: 'basic',
-            icon: 'heroicons_outline:support',
-            link: '/support',
-          },
-        ],
-      },
-    ];
   }
 }

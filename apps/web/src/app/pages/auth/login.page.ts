@@ -15,6 +15,16 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../core/auth.service';
+import { ErrorStateMatcher } from '@angular/material/core';
+import { FormControl, FormGroupDirective, NgForm } from '@angular/forms';
+
+/** Error when invalid control is dirty, touched, or submitted. */
+export class MyErrorStateMatcher implements ErrorStateMatcher {
+  isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
+    const isSubmitted = form && form.submitted;
+    return !!(control && control.invalid && (control.dirty || control.touched || isSubmitted));
+  }
+}
 
 @Component({
   selector: 'app-login',
@@ -49,7 +59,7 @@ import { AuthService } from '../../core/auth.service';
 
         <!-- Login Form -->
         <mat-card class="p-6">
-          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
+          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
             
             <!-- Error Message -->
             @if (errorMessage()) {
@@ -71,6 +81,7 @@ import { AuthService } from '../../core/auth.service';
             }
 
             <!-- Email Field -->
+            <div class="mb-4">
             <mat-form-field appearance="outline" class="w-full">
               <mat-label>Email address</mat-label>
               <input 
@@ -83,15 +94,17 @@ import { AuthService } from '../../core/auth.service';
                 required
               >
               <mat-icon matSuffix>email</mat-icon>
-              @if (loginForm.get('email')?.hasError('required') && loginForm.get('email')?.touched) {
-                <mat-error>Email is required</mat-error>
-              }
-              @if (loginForm.get('email')?.hasError('email') && loginForm.get('email')?.touched) {
-                <mat-error>Please enter a valid email address</mat-error>
-              }
+              <mat-error *ngIf="loginForm.get('email')?.hasError('required') && loginForm.get('email')?.touched">
+                Email is required
+              </mat-error>
+              <mat-error *ngIf="loginForm.get('email')?.hasError('email') && loginForm.get('email')?.touched">
+                Please enter a valid email address
+              </mat-error>
             </mat-form-field>
+            </div>
 
             <!-- Password Field -->
+            <div class="mb-4">
             <mat-form-field appearance="outline" class="w-full">
               <mat-label>Password</mat-label>
               <input 
@@ -112,22 +125,26 @@ import { AuthService } from '../../core/auth.service';
               >
                 <mat-icon>{{ hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
               </button>
-              @if (loginForm.get('password')?.hasError('required') && loginForm.get('password')?.touched) {
-                <mat-error>Password is required</mat-error>
-              }
-              @if (loginForm.get('password')?.hasError('minlength') && loginForm.get('password')?.touched) {
-                <mat-error>Password must be at least 6 characters</mat-error>
-              }
+              <mat-error *ngIf="loginForm.get('password')?.hasError('required') && loginForm.get('password')?.touched">
+                Password is required
+              </mat-error>
+              <mat-error *ngIf="loginForm.get('password')?.hasError('minlength') && loginForm.get('password')?.touched">
+                Password must be at least 6 characters
+              </mat-error>
             </mat-form-field>
+            </div>
 
             <!-- Remember Me Checkbox -->
+            <div class="mb-4">
             <div class="flex items-center">
               <mat-checkbox formControlName="rememberMe" class="text-sm">
                 Remember me
               </mat-checkbox>
             </div>
+            </div>
 
             <!-- Submit Button -->
+            <div class="mb-4">
             <button
               mat-raised-button
               color="primary"
@@ -140,6 +157,7 @@ import { AuthService } from '../../core/auth.service';
               }
               {{ isLoading() ? 'Signing in...' : 'Sign in' }}
             </button>
+            </div>
 
             <!-- Forgot Password Link -->
             <div class="text-center">
@@ -169,7 +187,7 @@ import { AuthService } from '../../core/auth.service';
           <h4 class="text-sm font-medium text-blue-800 mb-2">Demo Credentials</h4>
           <div class="text-xs text-blue-700 space-y-1">
             <div><strong>Admin:</strong> admin@aegisx.local / Admin123!</div>
-            <div><strong>Demo:</strong> demo@aegisx.com / Demo123!</div>
+            <div><strong>Demo:</strong> demo@aegisx.local / Demo123!</div>
           </div>
         </div>
       </div>
@@ -189,7 +207,25 @@ import { AuthService } from '../../core/auth.service';
       }
 
       .mat-mdc-form-field {
-        margin-bottom: 1rem;
+        margin-bottom: 0.5rem;
+        display: block;
+      }
+      
+      /* Add space for error messages */
+      ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+        position: static !important;
+        margin-top: 0.25rem;
+        min-height: 1.25rem;
+      }
+      
+      /* Ensure error messages don't overlap */
+      ::ng-deep .mat-mdc-form-field-error-wrapper {
+        padding: 0.25rem 0;
+      }
+      
+      /* Fix form field bottom spacing */
+      ::ng-deep .mat-mdc-text-field-wrapper {
+        margin-bottom: 0 !important;
       }
 
       .mat-mdc-raised-button {
@@ -198,6 +234,24 @@ import { AuthService } from '../../core/auth.service';
 
       .mat-spinner {
         color: white !important;
+      }
+      
+      /* Fix for Material form field outline appearance */
+      ::ng-deep .mat-mdc-form-field-outline {
+        color: rgba(0, 0, 0, 0.12) !important;
+      }
+      
+      ::ng-deep .mat-mdc-form-field.mat-focused .mat-mdc-form-field-outline {
+        color: #2196f3 !important;
+      }
+      
+      ::ng-deep .mat-mdc-form-field.mat-form-field-invalid .mat-mdc-form-field-outline {
+        color: #f44336 !important;
+      }
+      
+      /* Only show error state when field is touched */
+      ::ng-deep .mat-mdc-form-field:not(.mat-form-field-invalid) .mat-mdc-form-field-outline {
+        color: rgba(0, 0, 0, 0.12) !important;
       }
     `,
   ],
@@ -229,6 +283,8 @@ export class LoginPage {
         email: rememberedEmail,
         rememberMe: true,
       });
+      // Don't mark as touched when loading remembered email
+      this.loginForm.get('email')?.markAsUntouched();
     }
   }
 
