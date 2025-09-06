@@ -37,11 +37,15 @@ import {
     QuickActionsComponent,
   ],
   template: `
-    <div class="w-full h-full overflow-y-auto">
+    <div class="w-full h-full overflow-y-auto overflow-x-hidden">
       <!-- Page Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-6 sm:p-8 bg-white dark:bg-gray-900">
+      <div
+        class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-6 sm:px-8 sm:py-6 bg-white dark:bg-gray-900"
+      >
         <div>
-          <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+          <h1
+            class="text-2xl md:text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100"
+          >
             Analytics Dashboard
           </h1>
           <p class="text-gray-600 dark:text-gray-400 mt-1">
@@ -59,171 +63,174 @@ import {
           </button>
         </div>
       </div>
-      
+
       <!-- Main Content -->
       <div class="p-6 sm:p-8">
-
-      <!-- Stats Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        @for (stat of statsData(); track stat.title) {
-          <ax-stats-card
-            [data]="stat"
-            [showSparkline]="true"
-            [actionLabel]="'View Details'"
-          ></ax-stats-card>
-        }
-      </div>
-
-      <!-- Tab Section for Charts and Analytics -->
-      <mat-tab-group class="mb-8">
-        <mat-tab label="Overview">
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-            <ax-chart-widget
-              title="Revenue Trends"
-              subtitle="Last 12 months"
-              [data]="revenueChartData"
-              [chartType]="'line'"
-              [height]="350"
-            ></ax-chart-widget>
-
-            <ax-chart-widget
-              title="User Distribution"
-              subtitle="By region"
-              [data]="userDistributionData"
-              [chartType]="'doughnut'"
-              [height]="350"
-            ></ax-chart-widget>
-          </div>
-        </mat-tab>
-
-        <mat-tab label="Performance">
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-            <ax-chart-widget
-              title="API Response Times"
-              subtitle="Average response time (ms)"
-              [data]="apiPerformanceData"
-              [chartType]="'bar'"
-              [height]="350"
-            ></ax-chart-widget>
-
-            <ax-progress-widget
-              title="System Resources"
-              subtitle="Current usage"
-              [items]="systemResourcesData"
-              [showTotal]="false"
-            ></ax-progress-widget>
-          </div>
-        </mat-tab>
-
-        <mat-tab label="Analytics">
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-            <ax-chart-widget
-              title="Traffic Sources"
-              subtitle="Last 30 days"
-              [data]="trafficSourcesData"
-              [chartType]="'pie'"
-              [height]="300"
-            ></ax-chart-widget>
-
-            <ax-chart-widget
-              title="Conversion Funnel"
-              subtitle="User journey"
-              [data]="conversionFunnelData"
-              [chartType]="'bar'"
-              [height]="300"
-            ></ax-chart-widget>
-
-            <ax-progress-widget
-              title="Goals Progress"
-              subtitle="Q4 2024"
-              [items]="goalsProgressData"
-              [actionLabel]="'Update Goals'"
-            ></ax-progress-widget>
-          </div>
-        </mat-tab>
-      </mat-tab-group>
-
-      <!-- Main Content Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Activity Timeline (2 columns) -->
-        <div class="lg:col-span-2">
-          <ax-activity-timeline
-            [activities]="activities"
-            [itemsPerPage]="6"
-          ></ax-activity-timeline>
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          @for (stat of statsData(); track stat.title) {
+            <ax-stats-card
+              [data]="stat"
+              [showSparkline]="true"
+              [actionLabel]="'View Details'"
+            ></ax-stats-card>
+          }
         </div>
 
-        <!-- Quick Actions (1 column) -->
-        <div>
-          <ax-quick-actions
-            [actions]="quickActionsData"
-            [columns]="2"
-            [showAllButton]="true"
-            [moreActionsAvailable]="true"
-            (actionClick)="handleQuickAction($event)"
-          ></ax-quick-actions>
+        <!-- Tab Section for Charts and Analytics -->
+        <mat-tab-group class="mb-8">
+          <mat-tab label="Overview">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ax-chart-widget
+                title="Revenue Trends"
+                subtitle="Last 12 months"
+                [data]="revenueChartData"
+                [chartType]="'line'"
+                [height]="350"
+              ></ax-chart-widget>
+
+              <ax-chart-widget
+                title="User Distribution"
+                subtitle="By region"
+                [data]="userDistributionData"
+                [chartType]="'doughnut'"
+                [height]="350"
+              ></ax-chart-widget>
+            </div>
+          </mat-tab>
+
+          <mat-tab label="Performance">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ax-chart-widget
+                title="API Response Times"
+                subtitle="Average response time (ms)"
+                [data]="apiPerformanceData"
+                [chartType]="'bar'"
+                [height]="350"
+              ></ax-chart-widget>
+
+              <ax-progress-widget
+                title="System Resources"
+                subtitle="Current usage"
+                [items]="systemResourcesData"
+                [showTotal]="false"
+              ></ax-progress-widget>
+            </div>
+          </mat-tab>
+
+          <mat-tab label="Analytics">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+              <ax-chart-widget
+                title="Traffic Sources"
+                subtitle="Last 30 days"
+                [data]="trafficSourcesData"
+                [chartType]="'pie'"
+                [height]="300"
+              ></ax-chart-widget>
+
+              <ax-chart-widget
+                title="Conversion Funnel"
+                subtitle="User journey"
+                [data]="conversionFunnelData"
+                [chartType]="'bar'"
+                [height]="300"
+              ></ax-chart-widget>
+
+              <ax-progress-widget
+                title="Goals Progress"
+                subtitle="Q4 2024"
+                [items]="goalsProgressData"
+                [actionLabel]="'Update Goals'"
+              ></ax-progress-widget>
+            </div>
+          </mat-tab>
+        </mat-tab-group>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- Activity Timeline (2 columns) -->
+          <div class="lg:col-span-2">
+            <ax-activity-timeline
+              [activities]="activities"
+              [itemsPerPage]="6"
+            ></ax-activity-timeline>
+          </div>
+
+          <!-- Quick Actions (1 column) -->
+          <div>
+            <ax-quick-actions
+              [actions]="quickActionsData"
+              [columns]="2"
+              [showAllButton]="true"
+              [moreActionsAvailable]="true"
+              (actionClick)="handleQuickAction($event)"
+            ></ax-quick-actions>
+          </div>
         </div>
-      </div>
 
-      <!-- Additional Widgets Row -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
-        <!-- Project Progress -->
-        <ax-progress-widget
-          title="Active Projects"
-          subtitle="Current sprint progress"
-          [items]="projectProgressData"
-          [actionLabel]="'View All Projects'"
-        ></ax-progress-widget>
+        <!-- Additional Widgets Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+          <!-- Project Progress -->
+          <ax-progress-widget
+            title="Active Projects"
+            subtitle="Current sprint progress"
+            [items]="projectProgressData"
+            [actionLabel]="'View All Projects'"
+          ></ax-progress-widget>
 
-        <!-- Team Performance -->
-        <ax-chart-widget
-          title="Team Velocity"
-          subtitle="Story points per sprint"
-          [data]="teamVelocityData"
-          [chartType]="'area'"
-          [height]="250"
-        ></ax-chart-widget>
+          <!-- Team Performance -->
+          <ax-chart-widget
+            title="Team Velocity"
+            subtitle="Story points per sprint"
+            [data]="teamVelocityData"
+            [chartType]="'area'"
+            [height]="250"
+          ></ax-chart-widget>
 
-        <!-- Notifications Summary -->
-        <ax-card
-          title="Notifications"
-          subtitle="Recent alerts"
-          icon="notifications"
-          [appearance]="'elevated'"
-        >
-          <div class="space-y-3">
-            @for (notification of recentNotifications; track notification.id) {
-              <div
-                class="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
-              >
-                <mat-icon
-                  class="text-xl mt-0.5"
-                  [ngClass]="{
-                    'text-red-600': notification.type === 'error',
-                    'text-yellow-600': notification.type === 'warning',
-                    'text-blue-600': notification.type === 'info',
-                    'text-green-600': notification.type === 'success',
-                  }"
-                  >{{ notification.icon }}</mat-icon
+          <!-- Notifications Summary -->
+          <ax-card
+            title="Notifications"
+            subtitle="Recent alerts"
+            icon="notifications"
+            [appearance]="'elevated'"
+          >
+            <div class="space-y-3">
+              @for (
+                notification of recentNotifications;
+                track notification.id
+              ) {
+                <div
+                  class="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
                 >
-                <div class="flex-1">
-                  <p
-                    class="text-sm font-medium text-gray-900 dark:text-gray-100"
+                  <mat-icon
+                    class="text-xl mt-0.5"
+                    [ngClass]="{
+                      'text-red-600': notification.type === 'error',
+                      'text-yellow-600': notification.type === 'warning',
+                      'text-blue-600': notification.type === 'info',
+                      'text-green-600': notification.type === 'success',
+                    }"
+                    >{{ notification.icon }}</mat-icon
                   >
-                    {{ notification.title }}
-                  </p>
-                  <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                    {{ notification.time }}
-                  </p>
+                  <div class="flex-1">
+                    <p
+                      class="text-sm font-medium text-gray-900 dark:text-gray-100"
+                    >
+                      {{ notification.title }}
+                    </p>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                      {{ notification.time }}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            }
-          </div>
-          <div card-actions>
-            <button mat-button color="primary">View All</button>
-            <button mat-button>Mark as Read</button>
-          </div>
-        </ax-card>
+              }
+            </div>
+            <div card-actions>
+              <button mat-button color="primary">View All</button>
+              <button mat-button>Mark as Read</button>
+            </div>
+          </ax-card>
+        </div>
       </div>
     </div>
   `,

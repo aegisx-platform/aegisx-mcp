@@ -1,76 +1,97 @@
 <!-- Loading bar -->
 <fuse-loading-bar></fuse-loading-bar>
 
+<!-- Navigation Overlay for mobile -->
+@if (isScreenSmall && isNavigationExpanded()) {
+  <div
+    class="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+    (click)="toggleNavigation('mainNavigation')"
+  ></div>
+}
+
 <!-- Navigation -->
 <ax-navigation
-    class="dark bg-gray-900 print:hidden transition-all duration-300 ease-in-out"
-    [class.w-16]="!isNavigationExpanded()"
-    [class.w-64]="isNavigationExpanded()"
-    [items]="axNavigation"
-    [config]="navigationConfig()"
-    [showHeader]="true"
-    [showFooter]="false"
-    (stateChange)="onNavigationStateChange($event)"
-    (itemClick)="onNavigationItemClick($event)"
+  class="dark bg-gray-900 print:hidden transition-all duration-300 ease-in-out fixed top-0 left-0 h-full z-50"
+  [class.w-16]="!isNavigationExpanded() && !isScreenSmall"
+  [class.w-64]="isNavigationExpanded() || isScreenSmall"
+  [class.w-0]="!isNavigationExpanded() && isScreenSmall"
+  [items]="axNavigation"
+  [config]="navigationConfig()"
+  [showHeader]="true"
+  [showFooter]="false"
+  (stateChange)="onNavigationStateChange($event)"
+  (itemClick)="onNavigationItemClick($event)"
 >
-    <!-- Navigation header -->
-    <div navigation-header class="flex h-20 items-center justify-center px-4">
-        <span class="text-2xl font-bold text-white">{{ appName.split(' ')[0] }}</span>
-        @if (appVersion) {
-            <span class="ml-2 text-xs px-2 py-1 bg-primary-600 text-white rounded">
-                {{ appVersion }}
-            </span>
-        }
-    </div>
+  <!-- Navigation header from parent -->
+  <div navigation-header class="flex h-20 items-center justify-center px-4">
+    @if (navigationHeader) {
+      <ng-container *ngTemplateOutlet="navigationHeader"></ng-container>
+    } @else {
+      <span class="text-2xl font-bold text-white">{{
+        appName.split(' ')[0]
+      }}</span>
+      @if (appVersion) {
+        <span class="ml-2 text-xs px-2 py-1 bg-primary-600 text-white rounded">
+          {{ appVersion }}
+        </span>
+      }
+    }
+  </div>
 </ax-navigation>
 
 <!-- Main Content Wrapper -->
-<div class="flex min-w-0 flex-auto flex-col transition-all duration-300 ease-in-out"
-     [class.ml-16]="!isScreenSmall && !isNavigationExpanded()"
-     [class.ml-64]="!isScreenSmall && isNavigationExpanded()"
-     [class.dark]="isDarkMode">
-    
-    <!-- Header/Toolbar -->
-    <div class="bg-card relative flex h-16 flex-0 items-center px-4 md:px-6 print:hidden shadow-md">
-        <!-- Navigation toggle button -->
-        <button 
-            mat-icon-button 
-            (click)="toggleNavigation('mainNavigation')"
-            class="mr-2"
-        >
-            <mat-icon>{{ isNavigationExpanded() ? 'menu_open' : 'menu' }}</mat-icon>
-        </button>
-        
-        <!-- Toolbar Title -->
-        <div class="flex items-center">
-            @if (toolbarTitle) {
-                <ng-container *ngTemplateOutlet="toolbarTitle"></ng-container>
-            }
-        </div>
+<div
+  class="flex min-w-0 flex-auto flex-col transition-all duration-300 ease-in-out"
+  [class.ml-0]="isScreenSmall"
+  [class.ml-16]="!isScreenSmall && !isNavigationExpanded()"
+  [class.ml-64]="!isScreenSmall && isNavigationExpanded()"
+  [class.dark]="isDarkMode"
+>
+  <!-- Header/Toolbar -->
+  <div
+    class="bg-card relative flex h-16 flex-0 items-center px-4 md:px-6 print:hidden shadow-md"
+  >
+    <!-- Navigation toggle button -->
+    <button
+      mat-icon-button
+      (click)="toggleNavigation('mainNavigation')"
+      class="mr-2"
+    >
+      <mat-icon>{{ isNavigationExpanded() ? 'menu_open' : 'menu' }}</mat-icon>
+    </button>
 
-        <!-- Toolbar Actions -->
-        <div class="ml-auto flex items-center">
-            @if (toolbarActions) {
-                <ng-container *ngTemplateOutlet="toolbarActions"></ng-container>
-            }
-        </div>
+    <!-- Toolbar Title -->
+    <div class="flex items-center">
+      @if (toolbarTitle) {
+        <ng-container *ngTemplateOutlet="toolbarTitle"></ng-container>
+      }
     </div>
 
-    <!-- Main Content Area -->
-    <div class="flex flex-auto flex-col overflow-hidden">
-        <router-outlet></router-outlet>
+    <!-- Toolbar Actions -->
+    <div class="ml-auto flex items-center">
+      @if (toolbarActions) {
+        <ng-container *ngTemplateOutlet="toolbarActions"></ng-container>
+      }
     </div>
+  </div>
 
-    <!-- Footer -->
-    @if (showFooter) {
-        <div class="bg-card relative flex h-14 flex-0 items-center justify-start px-4 md:px-6 print:hidden border-t">
-            @if (footerContent) {
-                <ng-container *ngTemplateOutlet="footerContent"></ng-container>
-            } @else {
-                <span class="text-secondary font-medium">
-                    {{ appName }} &copy; {{ currentYear }}
-                </span>
-            }
-        </div>
-    }
+  <!-- Main Content Area -->
+  <div class="flex flex-auto flex-col overflow-hidden">
+    <router-outlet></router-outlet>
+  </div>
+
+  <!-- Footer -->
+  @if (showFooter) {
+    <div
+      class="bg-card relative flex h-14 flex-0 items-center justify-start px-4 md:px-6 print:hidden border-t"
+    >
+      @if (footerContent) {
+        <ng-container *ngTemplateOutlet="footerContent"></ng-container>
+      } @else {
+        <span class="text-secondary font-medium">
+          {{ appName }} &copy; {{ currentYear }}
+        </span>
+      }
+    </div>
+  }
 </div>

@@ -9,14 +9,16 @@ import {
   TemplateRef,
   inject,
   signal,
-  computed,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { AxNavigationComponent } from '../../components/ax-navigation.component';
-import { AxNavigationItem, AxNavigationConfig } from '../../types/ax-navigation.types';
+import {
+  AxNavigationItem,
+  AxNavigationConfig,
+} from '../../types/ax-navigation.types';
 import { FuseNavigationItem } from '../../types/fuse-navigation.types';
 import { convertFuseToAxNavigation } from '../../utils';
 import { FuseLoadingBarComponent } from '../../components/fuse-loading-bar.component';
@@ -41,7 +43,7 @@ export class FuseCompactLayoutComponent implements OnInit, OnDestroy {
   @Input() set navigation(value: FuseNavigationItem[]) {
     this._axNavigation.set(convertFuseToAxNavigation(value));
   }
-  
+
   private _axNavigation = signal<AxNavigationItem[]>([]);
   get axNavigation() {
     return this._axNavigation();
@@ -51,11 +53,11 @@ export class FuseCompactLayoutComponent implements OnInit, OnDestroy {
   @Input() appVersion = 'v2.0';
   @Input() isDarkMode = false;
   @Output() navigationToggled = new EventEmitter<void>();
-  
-  @ContentChild('toolbarTitle') toolbarTitle!: TemplateRef<any>;
-  @ContentChild('toolbarActions') toolbarActions!: TemplateRef<any>;
-  @ContentChild('navigationHeader') navigationHeader!: TemplateRef<any>;
-  @ContentChild('footerContent') footerContent!: TemplateRef<any>;
+
+  @ContentChild('toolbarTitle') toolbarTitle!: TemplateRef<unknown>;
+  @ContentChild('toolbarActions') toolbarActions!: TemplateRef<unknown>;
+  @ContentChild('navigationHeader') navigationHeader!: TemplateRef<unknown>;
+  @ContentChild('footerContent') footerContent!: TemplateRef<unknown>;
 
   currentYear = new Date().getFullYear();
   isScreenSmall = false;
@@ -66,7 +68,7 @@ export class FuseCompactLayoutComponent implements OnInit, OnDestroy {
     position: 'left',
     showToggleButton: true,
     autoCollapse: true,
-    breakpoint: 'lg'
+    breakpoint: 'lg',
   });
 
   private _unsubscribeAll = new Subject<void>();
@@ -76,7 +78,25 @@ export class FuseCompactLayoutComponent implements OnInit, OnDestroy {
     this._mediaWatcher.onMediaChange$
       .pipe(takeUntil(this._unsubscribeAll))
       .subscribe(({ matchingAliases }: { matchingAliases: string[] }) => {
+        const wasScreenSmall = this.isScreenSmall;
         this.isScreenSmall = !matchingAliases.includes('md');
+
+        // If transitioning to small screen, collapse navigation
+        if (!wasScreenSmall && this.isScreenSmall) {
+          this.isNavigationExpanded.set(false);
+          this.navigationConfig.update((config) => ({
+            ...config,
+            state: 'collapsed',
+          }));
+        }
+        // If transitioning to large screen, expand navigation
+        else if (wasScreenSmall && !this.isScreenSmall) {
+          this.isNavigationExpanded.set(true);
+          this.navigationConfig.update((config) => ({
+            ...config,
+            state: 'expanded',
+          }));
+        }
       });
   }
 
@@ -85,15 +105,15 @@ export class FuseCompactLayoutComponent implements OnInit, OnDestroy {
     this._unsubscribeAll.complete();
   }
 
-  toggleNavigation(navigationId: string): void {
+  toggleNavigation(_navigationId: string): void {
     this.navigationToggled.emit();
     const currentState = this.isNavigationExpanded();
     this.isNavigationExpanded.set(!currentState);
-    
+
     // Update navigation config
-    this.navigationConfig.update(config => ({
+    this.navigationConfig.update((config) => ({
       ...config,
-      state: !currentState ? 'expanded' : 'collapsed'
+      state: !currentState ? 'expanded' : 'collapsed',
     }));
   }
 
@@ -104,5 +124,14 @@ export class FuseCompactLayoutComponent implements OnInit, OnDestroy {
   onNavigationItemClick(item: AxNavigationItem): void {
     // Handle navigation item click if needed
     console.log('Navigation item clicked:', item);
+
+    // Close navigation on mobile after clicking an item
+    if (this.isScreenSmall && item.type === 'item' && item.link) {
+      this.isNavigationExpanded.set(false);
+      this.navigationConfig.update((config) => ({
+        ...config,
+        state: 'collapsed',
+      }));
+    }
   }
 }
