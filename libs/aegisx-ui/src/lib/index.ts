@@ -1,7 +1,6 @@
 // Main module export
 export * from './aegisx-ui.module';
 
-
 // Services
 export * from './services/config/config.service';
 export * from './services/navigation/navigation.service';
@@ -40,16 +39,14 @@ export * from './utils';
 // Directives
 export * from './directives';
 
-// Fuse Legacy Components (to be replaced with Ax versions)
-export * from './layouts/fuse-classic/fuse-classic-layout.component';
-export * from './layouts/fuse-compact/fuse-compact-layout.component';
-export * from './layouts/fuse-classic/simple-vertical-navigation.component';
-export * from './services/fuse-media-watcher.service';
-export * from './components/fuse-loading-bar.component';
-export * from './components/fuse-fullscreen.component';
-export * from './providers/fuse.provider';
-
 // Ax Components
+export * from './layouts/ax-classic/ax-classic-layout.component';
+export * from './layouts/ax-compact/ax-compact-layout.component';
+export * from './layouts/ax-classic/simple-vertical-navigation.component';
+export * from './services/ax-media-watcher.service';
+export * from './components/ax-loading-bar.component';
+export * from './components/ax-fullscreen.component';
+export * from './providers/ax.provider';
 export * from './components/ax-navigation.component';
 export * from './components/ax-navigation-icon.component';
 export * from './types/ax-navigation.types';

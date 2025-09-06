@@ -8,7 +8,11 @@ import {
 import { provideRouter } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { AegisxConfigService, AegisxNavigationService, provideFuse } from '@aegisx/ui';
+import {
+  AegisxConfigService,
+  AegisxNavigationService,
+  provideAx,
+} from '@aegisx/ui';
 import { appRoutes } from './app.routes';
 import { provideGlobalErrorHandler } from './core/error-handler.service';
 import { httpErrorInterceptorProvider } from './core/http-error.interceptor';
@@ -60,9 +64,9 @@ export const appConfig: ApplicationConfig = {
       multi: true,
     },
 
-    // Fuse providers
-    ...provideFuse({
-      fuse: {
+    // Ax providers
+    ...provideAx({
+      ax: {
         layout: 'classic',
         scheme: 'light',
         screens: {

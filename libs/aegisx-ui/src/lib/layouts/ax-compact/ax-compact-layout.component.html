@@ -1,5 +1,5 @@
 <!-- Loading bar -->
-<fuse-loading-bar></fuse-loading-bar>
+<ax-loading-bar></ax-loading-bar>
 
 <!-- Navigation Overlay for mobile -->
 @if (isScreenSmall && isNavigationExpanded()) {
@@ -43,7 +43,7 @@
 
 <!-- Main Content Wrapper -->
 <div
-  class="flex min-w-0 flex-auto flex-col transition-all duration-300 ease-in-out"
+  class="flex min-w-0 flex-auto flex-col transition-all duration-300 ease-in-out h-screen"
   [class.ml-0]="isScreenSmall"
   [class.ml-16]="!isScreenSmall && !isNavigationExpanded()"
   [class.ml-64]="!isScreenSmall && isNavigationExpanded()"
@@ -78,7 +78,7 @@
   </div>
 
   <!-- Main Content Area -->
-  <div class="flex flex-auto flex-col overflow-hidden">
+  <div class="flex-1 overflow-y-auto overflow-x-hidden">
     <router-outlet></router-outlet>
   </div>
 

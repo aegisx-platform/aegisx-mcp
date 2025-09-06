@@ -8,7 +8,7 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { FuseCompactLayoutComponent, FuseNavigationItem } from '@aegisx/ui';
+import { AxCompactLayoutComponent, AxNavigationItem } from '@aegisx/ui';
 import { AuthService } from './core/auth.service';
 
 interface Notification {
@@ -30,12 +30,12 @@ interface Notification {
     MatMenuModule,
     MatDividerModule,
     MatTooltipModule,
-    FuseCompactLayoutComponent,
+    AxCompactLayoutComponent,
   ],
   selector: 'ax-root',
   template: `
     @if (shouldShowLayout()) {
-      <ax-fuse-compact-layout
+      <ax-compact-layout
         [navigation]="navigation"
         [appName]="'AegisX Platform'"
         [appVersion]="'v2.0'"
@@ -178,7 +178,7 @@ interface Notification {
             AegisX Platform &copy; {{ currentYear }} - Enterprise Ready Solution
           </span>
         </ng-template>
-      </ax-fuse-compact-layout>
+      </ax-compact-layout>
     } @else {
       <router-outlet></router-outlet>
     }
@@ -204,8 +204,8 @@ export class AppComponent implements OnInit {
   notifications = signal<Notification[]>([]);
   currentYear = new Date().getFullYear();
 
-  // Fuse Navigation Items
-  navigation: FuseNavigationItem[] = [
+  // Navigation Items
+  navigation: AxNavigationItem[] = [
     {
       id: 'main',
       title: 'Main',
@@ -214,7 +214,7 @@ export class AppComponent implements OnInit {
         {
           id: 'dashboard',
           title: 'Analytics Dashboard',
-          type: 'basic',
+          type: 'item',
           icon: 'heroicons_outline:home',
           link: '/dashboard',
           // badge: {
@@ -225,7 +225,7 @@ export class AppComponent implements OnInit {
         {
           id: 'dashboard.project',
           title: 'Project Dashboard',
-          type: 'basic',
+          type: 'item',
           icon: 'heroicons_outline:briefcase',
           link: '/dashboards/project',
         },
@@ -239,26 +239,26 @@ export class AppComponent implements OnInit {
         {
           id: 'users',
           title: 'User Management',
-          type: 'basic',
+          type: 'item',
           icon: 'heroicons_outline:users',
           link: '/users',
         },
         {
           id: 'products',
           title: 'Products',
-          type: 'collapsable',
+          type: 'collapsible',
           icon: 'heroicons_outline:shopping-bag',
           children: [
             {
               id: 'products.list',
               title: 'Product List',
-              type: 'basic',
+              type: 'item',
               link: '/products',
             },
             {
               id: 'products.categories',
               title: 'Categories',
-              type: 'basic',
+              type: 'item',
               link: '/products/categories',
             },
           ],
@@ -266,7 +266,7 @@ export class AppComponent implements OnInit {
         {
           id: 'orders',
           title: 'Orders',
-          type: 'basic',
+          type: 'item',
           icon: 'heroicons_outline:shopping-cart',
           link: '/orders',
           // badge: {
@@ -284,16 +284,16 @@ export class AppComponent implements OnInit {
         {
           id: 'settings',
           title: 'Settings',
-          type: 'basic',
+          type: 'item',
           icon: 'heroicons_outline:cog-6-tooth',
           link: '/settings',
         },
         {
-          id: 'test-fuse',
-          title: 'Test Fuse Navigation',
-          type: 'basic',
+          id: 'test-ax',
+          title: 'Test Ax Navigation',
+          type: 'item',
           icon: 'heroicons_outline:beaker',
-          link: '/test-fuse',
+          link: '/test-ax',
           // badge: {
           //   title: 'NEW',
           //   classes: 'px-2 bg-green-600 text-white rounded',
@@ -302,7 +302,7 @@ export class AppComponent implements OnInit {
         {
           id: 'docs',
           title: 'Documentation',
-          type: 'basic',
+          type: 'item',
           icon: 'heroicons_outline:book-open',
           link: '/docs',
           externalLink: true,
@@ -328,27 +328,27 @@ export class AppComponent implements OnInit {
     //         {
     //           id: 'level.0.1',
     //           title: 'Level 1',
-    //           type: 'collapsable',
+    //           type: 'collapsible',
     //           children: [
     //             {
     //               id: 'level.0.1.2',
     //               title: 'Level 2',
-    //               type: 'collapsable',
+    //               type: 'collapsible',
     //               children: [
     //                 {
     //                   id: 'level.0.1.2.3',
     //                   title: 'Level 3',
-    //                   type: 'collapsable',
+    //                   type: 'collapsible',
     //                   children: [
     //                     {
     //                       id: 'level.0.1.2.3.4',
     //                       title: 'Level 4',
-    //                       type: 'collapsable',
+    //                       type: 'collapsible',
     //                       children: [
     //                         {
     //                           id: 'level.0.1.2.3.4.5',
     //                           title: 'Level 5',
-    //                           type: 'basic',
+    //                           type: 'item',
     //                         },
     //                       ],
     //                     },
@@ -373,7 +373,7 @@ export class AppComponent implements OnInit {
     //         {
     //           id: 'level.0.alt.1',
     //           title: 'Option with badge',
-    //           type: 'basic',
+    //           type: 'item',
     //           badge: {
     //             title: 'Updated',
     //             classes: 'px-2 bg-warn-600 text-white rounded-full',
@@ -382,7 +382,7 @@ export class AppComponent implements OnInit {
     //         {
     //           id: 'level.0.alt.2',
     //           title: 'Option with badge',
-    //           type: 'basic',
+    //           type: 'item',
     //           badge: {
     //             title: '8',
     //             classes: 'px-2 bg-error-600 text-white rounded-full',
@@ -391,7 +391,7 @@ export class AppComponent implements OnInit {
     //         {
     //           id: 'level.0.alt.3',
     //           title: 'Option with badge',
-    //           type: 'basic',
+    //           type: 'item',
     //           badge: {
     //             title: 'New',
     //             classes: 'px-2 bg-success-600 text-white rounded-full',

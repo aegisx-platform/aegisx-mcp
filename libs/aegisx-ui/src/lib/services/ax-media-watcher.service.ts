@@ -3,7 +3,7 @@ import { BreakpointObserver } from '@angular/cdk/layout';
 import { Observable, map } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
-export class FuseMediaWatcherService {
+export class AxMediaWatcherService {
   onMediaChange$: Observable<{ matchingAliases: string[] }>;
 
   constructor(private breakpointObserver: BreakpointObserver) {

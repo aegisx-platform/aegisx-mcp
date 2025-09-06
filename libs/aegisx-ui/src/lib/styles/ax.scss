@@ -1,24 +1,24 @@
 // -----------------------------------------------------------------------------------------------------
-// @ Import Fuse Main Styles
+// @ Import Ax Main Styles
 // -----------------------------------------------------------------------------------------------------
 
-// Import Fuse navigation component styles
+// Import Ax navigation component styles
 @import './vendor/fuse/vertical.component.scss';
 @import './vendor/fuse/default.scss';
 @import './vendor/fuse/compact.scss';
 @import './vendor/fuse/dense.scss';
 @import './vendor/fuse/thin.scss';
 
-// Import Fuse loading bar styles
+// Import Ax loading bar styles
 @import './vendor/fuse/loading-bar.component.scss';
 
-// Import Fuse card styles
+// Import Ax card styles
 @import './vendor/fuse/card.component.scss';
 
-// Import Fuse alert styles
+// Import Ax alert styles
 @import './vendor/fuse/alert.component.scss';
 
-// Import Fuse drawer styles
+// Import Ax drawer styles
 @import './vendor/fuse/drawer.component.scss';
 
 // Import highlight.js styles
@@ -30,53 +30,53 @@
 // Import Angular Material overrides
 @import './vendor/fuse/overrides/angular-material.scss';
 
-// Import Fuse utility classes
+// Import Ax utility classes
 @import './vendor/fuse/tailwind.scss';
 
 // -----------------------------------------------------------------------------------------------------
-// @ Fuse Vertical Navigation Overlays
+// @ Ax Vertical Navigation Overlays
 // -----------------------------------------------------------------------------------------------------
 
-.fuse-vertical-navigation-overlay {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 170;
-    opacity: 0;
-    background-color: rgba(0, 0, 0, 0.6);
+.ax-vertical-navigation-overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 170;
+  opacity: 0;
+  background-color: rgba(0, 0, 0, 0.6);
 
-    &.fuse-vertical-navigation-overlay-transparent {
-        background-color: transparent;
-    }
+  &.ax-vertical-navigation-overlay-transparent {
+    background-color: transparent;
+  }
 }
 
-.fuse-vertical-navigation-aside-overlay {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 169;
-    opacity: 0;
-    background-color: rgba(0, 0, 0, 0.3);
+.ax-vertical-navigation-aside-overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 169;
+  opacity: 0;
+  background-color: rgba(0, 0, 0, 0.3);
 }
 
 // -----------------------------------------------------------------------------------------------------
-// @ Fuse Loading Bar
+// @ Ax Loading Bar
 // -----------------------------------------------------------------------------------------------------
 
-fuse-loading-bar {
-    position: fixed !important;
-    top: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    height: 6px;
-    z-index: 999;
+ax-loading-bar {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 6px;
+  z-index: 999;
 
-    .mat-progress-bar {
-        height: 6px !important;
-    }
+  .mat-progress-bar {
+    height: 6px !important;
+  }
 }

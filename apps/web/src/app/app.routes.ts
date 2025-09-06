@@ -27,7 +27,7 @@ export const appRoutes: Route[] = [
     path: 'dashboards/project',
     loadComponent: () =>
       import('./pages/dashboard/project-dashboard.page').then(
-        (m) => m.ProjectDashboardPage
+        (m) => m.ProjectDashboardPage,
       ),
     canActivate: [AuthGuard],
   },
@@ -94,39 +94,35 @@ export const appRoutes: Route[] = [
     ],
   },
   {
-    path: 'test-fuse',
+    path: 'test-ax',
     loadComponent: () =>
-      import('./pages/test-fuse/test-fuse.component').then(
-        (m) => m.TestFuseComponent,
+      import('./pages/test-ax/test-ax.component').then(
+        (m) => m.TestAxComponent,
       ),
     canActivate: [AuthGuard],
   },
   {
     path: 'icon-test',
     loadComponent: () =>
-      import('./icon-test.component').then(
-        (m) => m.IconTestComponent
-      ),
+      import('./icon-test.component').then((m) => m.IconTestComponent),
   },
   {
     path: 'test-navigation',
     loadComponent: () =>
       import('./test-navigation.component').then(
-        (m) => m.TestNavigationComponent
+        (m) => m.TestNavigationComponent,
       ),
   },
   {
     path: 'debug-icons',
     loadComponent: () =>
-      import('./debug-icons.component').then(
-        (m) => m.DebugIconsComponent
-      ),
+      import('./debug-icons.component').then((m) => m.DebugIconsComponent),
   },
   {
     path: 'demo/navigation',
     loadComponent: () =>
       import('./demo/navigation-demo.component').then(
-        (m) => m.NavigationDemoComponent
+        (m) => m.NavigationDemoComponent,
       ),
   },
   {

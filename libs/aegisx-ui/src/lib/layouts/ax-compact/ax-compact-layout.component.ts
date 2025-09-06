@@ -19,14 +19,12 @@ import {
   AxNavigationItem,
   AxNavigationConfig,
 } from '../../types/ax-navigation.types';
-import { FuseNavigationItem } from '../../types/fuse-navigation.types';
-import { convertFuseToAxNavigation } from '../../utils';
-import { FuseLoadingBarComponent } from '../../components/fuse-loading-bar.component';
-import { FuseMediaWatcherService } from '../../services/fuse-media-watcher.service';
+import { AxLoadingBarComponent } from '../../components/ax-loading-bar.component';
+import { AxMediaWatcherService } from '../../services/ax-media-watcher.service';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
-  selector: 'ax-fuse-compact-layout',
+  selector: 'ax-compact-layout',
   standalone: true,
   imports: [
     CommonModule,
@@ -34,14 +32,14 @@ import { Subject, takeUntil } from 'rxjs';
     MatIconModule,
     MatButtonModule,
     AxNavigationComponent,
-    FuseLoadingBarComponent,
+    AxLoadingBarComponent,
   ],
-  templateUrl: './fuse-compact-layout.component.html',
-  styleUrls: ['./fuse-compact-layout.component.scss'],
+  templateUrl: './ax-compact-layout.component.html',
+  styleUrls: ['./ax-compact-layout.component.scss'],
 })
-export class FuseCompactLayoutComponent implements OnInit, OnDestroy {
-  @Input() set navigation(value: FuseNavigationItem[]) {
-    this._axNavigation.set(convertFuseToAxNavigation(value));
+export class AxCompactLayoutComponent implements OnInit, OnDestroy {
+  @Input() set navigation(value: AxNavigationItem[]) {
+    this._axNavigation.set(value);
   }
 
   private _axNavigation = signal<AxNavigationItem[]>([]);
@@ -72,7 +70,7 @@ export class FuseCompactLayoutComponent implements OnInit, OnDestroy {
   });
 
   private _unsubscribeAll = new Subject<void>();
-  private _mediaWatcher = inject(FuseMediaWatcherService);
+  private _mediaWatcher = inject(AxMediaWatcherService);
 
   ngOnInit(): void {
     // Check initial screen size immediately
