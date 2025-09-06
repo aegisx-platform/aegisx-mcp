@@ -313,7 +313,6 @@ export class AppComponent implements OnInit {
     {
       id: 'navigation-features',
       title: 'Navigation Features',
-      subtitle: 'Collapsable levels & badge styles',
       type: 'group',
       children: [
         {
