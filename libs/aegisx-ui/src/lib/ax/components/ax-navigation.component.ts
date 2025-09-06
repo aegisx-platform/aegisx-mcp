@@ -11,8 +11,8 @@ import {
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { animate, style, transition, trigger } from '@angular/animations';
-import { AxNavigationItem, AxNavigationConfig } from './navigation.types';
-import { NavigationIconComponent } from '../navigation-icon.component';
+import { AxNavigationItem, AxNavigationConfig } from '../types/ax-navigation.types';
+import { NavigationIconComponent } from './ax-navigation-icon.component';
 
 @Component({
   selector: 'ax-navigation',

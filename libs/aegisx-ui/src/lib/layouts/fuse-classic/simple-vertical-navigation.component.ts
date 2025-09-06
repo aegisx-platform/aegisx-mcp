@@ -19,7 +19,7 @@ import { FuseScrollbarDirective } from '../../directives/fuse-scrollbar.directiv
 import { Subject, takeUntil } from 'rxjs';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { IconService } from '../../services/icon.service';
-import { NavigationIconComponent } from '../../components/navigation-icon.component';
+import { NavigationIconComponent } from '../../ax/components/ax-navigation-icon.component';
 
 @Component({
     selector: 'ax-simple-vertical-navigation',

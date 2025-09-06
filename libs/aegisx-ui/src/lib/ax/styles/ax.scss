@@ -1,0 +1,32 @@
+/**
+ * Ax UI Library Styles
+ * 
+ * This file imports all Ax-specific styles.
+ * We also reuse Fuse styles where appropriate.
+ */
+
+// -----------------------------------------------------------------------------------------------------
+// @ Import Ax Component Styles
+// -----------------------------------------------------------------------------------------------------
+
+// When we create new Ax components with custom styles, import them here
+// Example:
+// @import 'components/ax-button';
+// @import 'components/ax-card';
+
+// -----------------------------------------------------------------------------------------------------
+// @ Ax Global Styles
+// -----------------------------------------------------------------------------------------------------
+
+// Ax prefix for all our custom classes
+.ax {
+  // Global Ax styles here
+}
+
+// -----------------------------------------------------------------------------------------------------
+// @ Reuse Fuse Styles
+// -----------------------------------------------------------------------------------------------------
+
+// We intentionally reuse Fuse's well-designed CSS
+// Our Ax components can use both .ax-* and .fuse-* classes
+// This is imported in the main styles/index.scss

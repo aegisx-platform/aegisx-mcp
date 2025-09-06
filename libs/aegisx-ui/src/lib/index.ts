@@ -1,6 +1,9 @@
 // Main module export
 export * from './aegisx-ui.module';
 
+// Ax UI Library Exports
+export * from './ax';
+
 // Services
 export * from './services/config/config.service';
 export * from './services/navigation/navigation.service';
@@ -15,9 +18,6 @@ export * from './components/user-menu/user-menu.component';
 export * from './components/card/card.component';
 export * from './components/alert/alert.component';
 export * from './components/drawer/drawer.component';
-export * from './components/navigation-icon.component';
-export * from './components/navigation/ax-navigation.component';
-export * from './components/navigation/navigation.types';
 
 // Layouts
 export * from './layouts/layout-wrapper/layout-wrapper.component';
