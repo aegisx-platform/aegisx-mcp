@@ -16,7 +16,7 @@ export async function usersRoutes(
 
   // List all users (admin/manager only)
   typedFastify.get(
-    '/users',
+    '/api/users',
     {
       preValidation: [
         fastify.authenticate,
@@ -41,7 +41,7 @@ export async function usersRoutes(
 
   // Get user by ID (admin/manager only)
   typedFastify.get(
-    '/users/:id',
+    '/api/users/:id',
     {
       preValidation: [
         fastify.authenticate,
@@ -67,7 +67,7 @@ export async function usersRoutes(
 
   // Create user (admin only)
   typedFastify.post(
-    '/users',
+    '/api/users',
     {
       preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
       schema: {
@@ -92,7 +92,7 @@ export async function usersRoutes(
 
   // Update user (admin only)
   typedFastify.put(
-    '/users/:id',
+    '/api/users/:id',
     {
       preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
       schema: {
@@ -119,7 +119,7 @@ export async function usersRoutes(
 
   // Change user password (admin only)
   typedFastify.put(
-    '/users/:id/password',
+    '/api/users/:id/password',
     {
       preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
       schema: {
@@ -145,7 +145,7 @@ export async function usersRoutes(
 
   // Delete user (admin only)
   typedFastify.delete(
-    '/users/:id',
+    '/api/users/:id',
     {
       preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
       schema: {
