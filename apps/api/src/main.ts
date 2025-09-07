@@ -1,3 +1,4 @@
+import 'reflect-metadata'; // Required for tsyringe
 import Fastify from 'fastify';
 import * as dotenv from 'dotenv';
 import fastifyAuth from '@fastify/auth';
