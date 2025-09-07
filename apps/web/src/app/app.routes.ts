@@ -126,6 +126,22 @@ export const appRoutes: Route[] = [
       ),
   },
   {
+    path: 'material-demo',
+    loadComponent: () =>
+      import('./pages/material-demo/material-demo.component').then(
+        (m) => m.MaterialDemoComponent,
+      ),
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'test-material',
+    loadComponent: () =>
+      import('./pages/material-demo/test-material.component').then(
+        (m) => m.TestMaterialComponent,
+      ),
+    canActivate: [AuthGuard],
+  },
+  {
     path: '**',
     redirectTo: 'dashboard',
   },

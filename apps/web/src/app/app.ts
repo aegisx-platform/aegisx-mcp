@@ -300,6 +300,13 @@ export class AppComponent implements OnInit {
           // },
         },
         {
+          id: 'material-demo',
+          title: 'Material Components Demo',
+          type: 'item',
+          icon: 'heroicons_outline:cube',
+          link: '/material-demo',
+        },
+        {
           id: 'docs',
           title: 'Documentation',
           type: 'item',
