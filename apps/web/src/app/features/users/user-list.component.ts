@@ -111,12 +111,21 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
             </mat-select>
           </mat-form-field>
 
-          <div class="flex items-center space-x-2">
-            <button mat-stroked-button (click)="resetFilters()">
+          <div class="flex items-start space-x-2">
+            <button
+              mat-stroked-button
+              (click)="resetFilters()"
+              class="h-[56px]"
+            >
               <mat-icon>clear</mat-icon>
               <span>Reset</span>
             </button>
-            <button mat-stroked-button color="primary" (click)="exportUsers()">
+            <button
+              mat-stroked-button
+              color="primary"
+              (click)="exportUsers()"
+              class="h-[56px]"
+            >
               <mat-icon>download</mat-icon>
               <span>Export</span>
             </button>

@@ -11,9 +11,10 @@ export async function seed(knex: Knex): Promise<void> {
   await knex('roles').del();
 
   // Insert roles
-  const [adminRole, userRole] = await knex('roles')
+  const [adminRole, managerRole, userRole] = await knex('roles')
     .insert([
       { name: 'admin', description: 'Administrator with full access' },
+      { name: 'manager', description: 'Manager with user management access' },
       { name: 'user', description: 'Regular user with limited access' },
     ])
     .returning(['id', 'name']);
@@ -23,23 +24,43 @@ export async function seed(knex: Knex): Promise<void> {
     .insert([
       // User management permissions
       { resource: 'users', action: 'create', description: 'Create new users' },
-      { resource: 'users', action: 'read', description: 'View user information' },
-      { resource: 'users', action: 'update', description: 'Update user information' },
+      {
+        resource: 'users',
+        action: 'read',
+        description: 'View user information',
+      },
+      {
+        resource: 'users',
+        action: 'update',
+        description: 'Update user information',
+      },
       { resource: 'users', action: 'delete', description: 'Delete users' },
-      
+
       // Role management permissions
       { resource: 'roles', action: 'create', description: 'Create new roles' },
       { resource: 'roles', action: 'read', description: 'View roles' },
       { resource: 'roles', action: 'update', description: 'Update roles' },
       { resource: 'roles', action: 'delete', description: 'Delete roles' },
-      
+
       // Permission management permissions
-      { resource: 'permissions', action: 'read', description: 'View permissions' },
-      { resource: 'permissions', action: 'assign', description: 'Assign permissions to roles' },
-      
+      {
+        resource: 'permissions',
+        action: 'read',
+        description: 'View permissions',
+      },
+      {
+        resource: 'permissions',
+        action: 'assign',
+        description: 'Assign permissions to roles',
+      },
+
       // Profile permissions (for regular users)
       { resource: 'profile', action: 'read', description: 'View own profile' },
-      { resource: 'profile', action: 'update', description: 'Update own profile' },
+      {
+        resource: 'profile',
+        action: 'update',
+        description: 'Update own profile',
+      },
     ])
     .returning(['id', 'resource', 'action']);
 
@@ -49,6 +70,15 @@ export async function seed(knex: Knex): Promise<void> {
     permission_id: perm.id,
   }));
   await knex('role_permissions').insert(adminPermissions);
+
+  // Assign user management permissions to manager role
+  const managerPermissions = permissions
+    .filter((perm) => perm.resource === 'users' || perm.resource === 'profile')
+    .map((perm) => ({
+      role_id: managerRole.id,
+      permission_id: perm.id,
+    }));
+  await knex('role_permissions').insert(managerPermissions);
 
   // Assign limited permissions to user role
   const userPermissions = permissions

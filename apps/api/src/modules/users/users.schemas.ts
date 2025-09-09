@@ -1,4 +1,5 @@
 import { Type, Static } from '@sinclair/typebox';
+import { ApiSuccessResponseSchema } from '../../schemas/base.schemas';
 
 // User entity schema (matches database)
 const UserEntitySchema = Type.Object({
@@ -18,6 +19,7 @@ const UserWithRoleSchema = Type.Intersect([
   UserEntitySchema,
   Type.Object({
     role: Type.String(), // Role name from joined table
+    roleId: Type.String({ format: 'uuid' }), // Role ID from joined table
   }),
 ]);
 
@@ -36,21 +38,13 @@ const ListUsersQuerySchema = Type.Object({
   ),
 });
 
-// List users response
-const ListUsersResponseSchema = Type.Object({
-  data: Type.Array(UserWithRoleSchema),
-  pagination: Type.Object({
-    page: Type.Number(),
-    limit: Type.Number(),
-    total: Type.Number(),
-    totalPages: Type.Number(),
-  }),
-});
+// List users response - Using standard success response with array data
+const ListUsersResponseSchema = ApiSuccessResponseSchema(
+  Type.Array(UserWithRoleSchema),
+);
 
-// Get user response
-const GetUserResponseSchema = Type.Object({
-  data: UserWithRoleSchema,
-});
+// Get user response - Using standard success response
+const GetUserResponseSchema = ApiSuccessResponseSchema(UserWithRoleSchema);
 
 // Create user request
 const CreateUserRequestSchema = Type.Object({
@@ -63,10 +57,8 @@ const CreateUserRequestSchema = Type.Object({
   isActive: Type.Optional(Type.Boolean({ default: true })),
 });
 
-// Create user response
-const CreateUserResponseSchema = Type.Object({
-  data: UserWithRoleSchema,
-});
+// Create user response - Using standard success response
+const CreateUserResponseSchema = ApiSuccessResponseSchema(UserWithRoleSchema);
 
 // Update user request
 const UpdateUserRequestSchema = Type.Object({
@@ -78,30 +70,28 @@ const UpdateUserRequestSchema = Type.Object({
   isActive: Type.Optional(Type.Boolean()),
 });
 
-// Update user response
-const UpdateUserResponseSchema = Type.Object({
-  data: UserWithRoleSchema,
-});
+// Update user response - Using standard success response
+const UpdateUserResponseSchema = ApiSuccessResponseSchema(UserWithRoleSchema);
 
-// Delete user response
-const DeleteUserResponseSchema = Type.Object({
-  data: Type.Object({
+// Delete user response - Using standard success response
+const DeleteUserResponseSchema = ApiSuccessResponseSchema(
+  Type.Object({
     id: Type.String({ format: 'uuid' }),
     message: Type.String(),
   }),
-});
+);
 
 // Change password request (for admin to reset user password)
 const ChangeUserPasswordRequestSchema = Type.Object({
   newPassword: Type.String({ minLength: 8 }),
 });
 
-// Success message response
-const SuccessMessageResponseSchema = Type.Object({
-  data: Type.Object({
+// Success message response - Using standard success response
+const SuccessMessageResponseSchema = ApiSuccessResponseSchema(
+  Type.Object({
     message: Type.String(),
   }),
-});
+);
 
 // Export schemas for registration
 export const usersSchemas = {

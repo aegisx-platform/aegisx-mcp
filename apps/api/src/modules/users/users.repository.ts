@@ -19,7 +19,7 @@ export class UsersRepository {
       search,
       role,
       status,
-      sortBy = 'createdAt',
+      sortBy = 'created_at',
       sortOrder = 'desc',
     } = options;
     const offset = (page - 1) * limit;
@@ -76,7 +76,7 @@ export class UsersRepository {
       .offset(offset);
 
     return {
-      users: users.map(this.mapToUserWithRole),
+      users: users.map((user) => this.mapToUserWithRole(user)),
       total,
     };
   }

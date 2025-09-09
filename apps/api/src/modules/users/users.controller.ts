@@ -14,8 +14,31 @@ export class UsersController {
     request: FastifyRequest<{ Querystring: ListUsersQuery }>,
     reply: FastifyReply,
   ) {
-    const result = await this.usersService.listUsers(request.query);
-    return reply.success(result);
+    try {
+      request.log.info({ query: request.query }, 'Listing users with query');
+      const result = await this.usersService.listUsers(request.query);
+      request.log.info({ resultCount: result.users.length }, 'Users retrieved');
+
+      // Return paginated response according to standard
+      return reply.paginated(
+        result.users,
+        result.pagination.page,
+        result.pagination.limit,
+        result.pagination.total,
+      );
+    } catch (error) {
+      request.log.error(
+        {
+          error,
+          errorMessage:
+            error instanceof Error ? error.message : 'Unknown error',
+          errorStack: error instanceof Error ? error.stack : undefined,
+          query: request.query,
+        },
+        'Error listing users',
+      );
+      throw error;
+    }
   }
 
   async getUser(
@@ -23,7 +46,7 @@ export class UsersController {
     reply: FastifyReply,
   ) {
     const user = await this.usersService.getUserById(request.params.id);
-    return reply.success({ data: user });
+    return reply.success(user);
   }
 
   async createUser(
@@ -31,7 +54,7 @@ export class UsersController {
     reply: FastifyReply,
   ) {
     const user = await this.usersService.createUser(request.body);
-    return reply.code(201).success({ data: user });
+    return reply.code(201).success(user);
   }
 
   async updateUser(
@@ -45,7 +68,7 @@ export class UsersController {
       request.params.id,
       request.body,
     );
-    return reply.success({ data: user });
+    return reply.success(user);
   }
 
   async changeUserPassword(
@@ -60,7 +83,7 @@ export class UsersController {
       request.body.newPassword,
     );
     return reply.success({
-      data: { message: 'Password changed successfully' },
+      message: 'Password changed successfully',
     });
   }
 
@@ -71,10 +94,8 @@ export class UsersController {
     const currentUserId = request.user.id;
     await this.usersService.deleteUser(request.params.id, currentUserId);
     return reply.success({
-      data: {
-        id: request.params.id,
-        message: 'User deleted successfully',
-      },
+      id: request.params.id,
+      message: 'User deleted successfully',
     });
   }
 }

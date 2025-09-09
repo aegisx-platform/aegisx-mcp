@@ -35,6 +35,9 @@ export async function usersRoutes(
           500: SchemaRefs.ServerError,
         },
       },
+      onError: (request, _reply, error) => {
+        request.log.error({ err: error }, 'Error in users list endpoint');
+      },
     },
     controller.listUsers.bind(controller),
   );

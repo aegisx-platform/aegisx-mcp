@@ -109,15 +109,18 @@ export class UserService {
       if (params?.role) httpParams = httpParams.set('role', params.role);
       if (params?.status) httpParams = httpParams.set('status', params.status);
 
-      // Direct HTTP call
+      // Direct HTTP call - Standard paginated response
       const response = await this.http
         .get<ApiResponse<User[]>>(this.baseUrl, { params: httpParams })
         .toPromise();
 
       if (response?.success && response.data) {
         this.usersSignal.set(response.data);
+
         if (response.pagination) {
           this.totalUsersSignal.set(response.pagination.total);
+          this.currentPageSignal.set(response.pagination.page);
+          this.pageSizeSignal.set(response.pagination.limit);
         }
       }
     } catch (error: any) {

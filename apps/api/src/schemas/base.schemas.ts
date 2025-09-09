@@ -24,7 +24,7 @@ export const PaginationMetaSchema = Type.Object({
   page: Type.Number({ minimum: 1 }),
   limit: Type.Number({ minimum: 1, maximum: 100 }),
   total: Type.Number({ minimum: 0 }),
-  pages: Type.Number({ minimum: 0 }),
+  totalPages: Type.Number({ minimum: 0 }),
 });
 
 // Standard API Success Response
@@ -37,6 +37,7 @@ export const ApiSuccessResponseSchema = <
     success: Type.Literal(true),
     data: dataSchema,
     message: Type.Optional(Type.String()),
+    pagination: Type.Optional(PaginationMetaSchema),
     meta: Type.Optional(ApiMetaSchema),
   });
 
@@ -172,6 +173,7 @@ export type ApiSuccessResponse<T> = {
   success: true;
   data: T;
   message?: string;
+  pagination?: PaginationMeta;
   meta?: ApiMeta;
 };
 export type ApiErrorResponse = Static<typeof ApiErrorResponseSchema>;
