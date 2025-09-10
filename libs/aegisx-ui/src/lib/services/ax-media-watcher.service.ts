@@ -1,12 +1,13 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { Observable, map } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class AxMediaWatcherService {
+  private breakpointObserver = inject(BreakpointObserver);
   onMediaChange$: Observable<{ matchingAliases: string[] }>;
 
-  constructor(private breakpointObserver: BreakpointObserver) {
+  constructor() {
     // Define custom breakpoints matching Tailwind's defaults
     const breakpoints = {
       sm: '(min-width: 640px)',

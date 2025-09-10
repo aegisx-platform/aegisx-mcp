@@ -1,11 +1,18 @@
-import { Directive, ElementRef, Input } from '@angular/core';
+import { Directive, ElementRef, Input, inject } from '@angular/core';
+
+export interface AxScrollbarOptions {
+  theme?: string;
+  suppressScrollX?: boolean;
+  suppressScrollY?: boolean;
+}
 
 @Directive({
   selector: '[axScrollbar]',
   standalone: true,
 })
 export class AxScrollbarDirective {
-  @Input() axScrollbarOptions: any = {};
+  private elementRef = inject(ElementRef);
+  @Input() axScrollbarOptions: AxScrollbarOptions = {};
 
-  constructor(private elementRef: ElementRef) {}
+  // Empty constructor as we use inject() pattern
 }

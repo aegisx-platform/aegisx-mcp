@@ -1,11 +1,14 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class IconService {
+  private matIconRegistry = inject(MatIconRegistry);
+  private domSanitizer = inject(DomSanitizer);
+
   // Map heroicons names to Material Icons
   private iconMap: Record<string, string> = {
     'heroicons_outline:home': 'home',
@@ -39,37 +42,34 @@ export class IconService {
 
   // Fallback Unicode symbols if Material Icons don't load
   private unicodeFallback: Record<string, string> = {
-    'home': '🏠',
-    'pie_chart': '📊',
-    'work': '💼',
-    'widgets': '🔲',
-    'people': '👥',
-    'shopping_bag': '🛍️',
-    'shopping_cart': '🛒',
-    'settings': '⚙️',
-    'science': '🧪',
-    'menu_book': '📖',
-    'check_circle': '✅',
-    'label': '🏷️',
-    'chevron_right': '›',
-    'description': '📄',
-    'dns': '🖥️',
-    'security': '🛡️',
-    'notifications': '🔔',
-    'logout': '🚪',
-    'person': '👤',
-    'account_circle': '👤',
-    'search': '🔍',
-    'menu': '☰',
-    'close': '✕',
-    'light_mode': '☀️',
-    'dark_mode': '🌙',
+    home: '🏠',
+    pie_chart: '📊',
+    work: '💼',
+    widgets: '🔲',
+    people: '👥',
+    shopping_bag: '🛍️',
+    shopping_cart: '🛒',
+    settings: '⚙️',
+    science: '🧪',
+    menu_book: '📖',
+    check_circle: '✅',
+    label: '🏷️',
+    chevron_right: '›',
+    description: '📄',
+    dns: '🖥️',
+    security: '🛡️',
+    notifications: '🔔',
+    logout: '🚪',
+    person: '👤',
+    account_circle: '👤',
+    search: '🔍',
+    menu: '☰',
+    close: '✕',
+    light_mode: '☀️',
+    dark_mode: '🌙',
   };
 
-  constructor(
-    private matIconRegistry: MatIconRegistry,
-    private domSanitizer: DomSanitizer
-  ) {
+  constructor() {
     this.registerMaterialIcons();
   }
 

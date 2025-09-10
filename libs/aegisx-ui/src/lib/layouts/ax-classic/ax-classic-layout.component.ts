@@ -87,7 +87,7 @@ export class AxClassicLayoutComponent implements OnInit, OnDestroy {
    *
    * @param name
    */
-  toggleNavigation(name: string): void {
+  toggleNavigation(_name: string): void {
     // Simple toggle for now
     this.navigationToggled.emit();
   }

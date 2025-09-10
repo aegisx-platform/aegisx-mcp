@@ -1,8 +1,34 @@
 {
   "recommendations": [
+    // Nx & Angular Development
     "nrwl.angular-console",
+    "angular.ng-template",
+    "ms-vscode.vscode-typescript-next",
+
+    // Code Quality & Formatting
     "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "bradlc.vscode-tailwindcss",
+
+    // Testing
     "firsttris.vscode-jest-runner",
-    "dbaeumer.vscode-eslint"
-  ]
+    "ms-playwright.playwright",
+
+    // Accessibility
+    "deque-systems.vscode-axe-linter",
+    "webhint.vscode-webhint",
+
+    // Productivity
+    "ms-vscode.vscode-json",
+    "redhat.vscode-yaml",
+    "formulahendry.auto-rename-tag",
+    "christian-kohler.path-intellisense",
+
+    // Git
+    "eamodio.gitlens",
+
+    // Docker & Containers
+    "ms-vscode-remote.remote-containers"
+  ],
+  "unwantedRecommendations": ["ms-vscode.vscode-typescript", "hookyqr.beautify"]
 }

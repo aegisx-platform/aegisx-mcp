@@ -126,6 +126,12 @@ import { NavigationIconComponent } from '../../components/ax-navigation-icon.com
           <div
             class="fuse-vertical-navigation-item-wrapper"
             (click)="toggleCollapsable(item)"
+            (keydown.enter)="toggleCollapsable(item)"
+            (keydown.space)="toggleCollapsable(item)"
+            tabindex="0"
+            role="button"
+            [attr.aria-expanded]="item.id && expandedItems.has(item.id)"
+            [attr.aria-label]="'Toggle ' + item.title"
             matRipple
           >
             @if (item.icon) {
@@ -174,7 +180,11 @@ import { NavigationIconComponent } from '../../components/ax-navigation-icon.com
     @if (mode === 'over' && opened) {
       <div
         class="fuse-vertical-navigation-overlay"
-        (click)="close.emit()"
+        (click)="navigationClose.emit()"
+        (keydown.escape)="navigationClose.emit()"
+        tabindex="0"
+        role="button"
+        aria-label="Close navigation overlay"
       ></div>
     }
   `,
@@ -543,7 +553,7 @@ export class SimpleVerticalNavigationComponent implements OnInit, OnDestroy {
     return this.mode;
   }
 
-  @Output() close = new EventEmitter<void>();
+  @Output() navigationClose = new EventEmitter<void>();
 
   expandedItems = new Set<string>();
   isScreenSmall = false;
