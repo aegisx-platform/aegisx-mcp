@@ -169,7 +169,7 @@ jobs:
 
       - name: ⚡ Install dependencies
         run: |
-          yarn install --frozen-lockfile --network-timeout 100000
+          yarn install --frozen-lockfile --network-timeout 600000
           yarn add -D @semantic-release/changelog @semantic-release/git
 
       - name: 🚀 Semantic Release
@@ -217,7 +217,7 @@ jobs:
             ${{ runner.os }}-yarn-
 
       - name: ⚡ Install dependencies
-        run: yarn install --frozen-lockfile --ignore-scripts --network-timeout 100000
+        run: yarn install --frozen-lockfile --ignore-scripts --network-timeout 600000
 
       - name: 🔨 Build application
         run: |

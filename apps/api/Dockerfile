@@ -38,7 +38,7 @@ COPY --chown=aegisx:nodejs apps/api/tsconfig*.json apps/api/
 RUN mkdir -p /app/node_modules && chown -R aegisx:nodejs /app/node_modules
 
 # Install dependencies with cache optimization and security settings
-RUN yarn install --frozen-lockfile --network-timeout 300000 \
+RUN yarn install --frozen-lockfile --network-timeout 600000 \
     --prefer-offline --production=false \
     --cache-folder /tmp/yarn-cache \
     && rm -rf /tmp/yarn-cache
@@ -57,7 +57,7 @@ RUN NODE_ENV=production npx nx build api --configuration=production \
 
 # Create production node_modules (remove dev dependencies)
 RUN yarn install --frozen-lockfile --production=true \
-    --ignore-scripts --prefer-offline \
+    --network-timeout 600000 --ignore-scripts --prefer-offline \
     && yarn cache clean
 
 # Stage 4: Production runtime with minimal footprint
