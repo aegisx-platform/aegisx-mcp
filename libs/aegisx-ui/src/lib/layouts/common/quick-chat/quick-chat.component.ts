@@ -7,13 +7,13 @@ import {
   ElementRef,
   HostBinding,
   HostListener,
-  Inject,
   NgZone,
   OnDestroy,
   OnInit,
   Renderer2,
   ViewChild,
   ViewEncapsulation,
+  inject,
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -49,21 +49,16 @@ export class QuickChatComponent implements OnInit, AfterViewInit, OnDestroy {
   opened: boolean = false;
   selectedChat: Chat;
   private _mutationObserver: MutationObserver;
-  private _scrollStrategy: ScrollStrategy = this._scrollStrategyOptions.block();
   private _overlay: HTMLElement;
   private _unsubscribeAll: Subject<any> = new Subject<any>();
 
-  /**
-   * Constructor
-   */
-  constructor(
-    @Inject(DOCUMENT) private _document: Document,
-    private _elementRef: ElementRef,
-    private _renderer2: Renderer2,
-    private _ngZone: NgZone,
-    private _quickChatService: QuickChatService,
-    private _scrollStrategyOptions: ScrollStrategyOptions,
-  ) {}
+  private _document = inject(DOCUMENT);
+  private _elementRef = inject(ElementRef);
+  private _renderer2 = inject(Renderer2);
+  private _ngZone = inject(NgZone);
+  private _quickChatService = inject(QuickChatService);
+  private _scrollStrategyOptions = inject(ScrollStrategyOptions);
+  private _scrollStrategy: ScrollStrategy = this._scrollStrategyOptions.block();
 
   // -----------------------------------------------------------------------------------------------------
   // @ Decorated methods

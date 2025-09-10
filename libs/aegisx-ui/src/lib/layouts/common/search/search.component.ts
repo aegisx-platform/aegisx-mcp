@@ -77,14 +77,9 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
   private _matAutocomplete: MatAutocomplete;
   private _unsubscribeAll: Subject<any> = new Subject<any>();
 
-  /**
-   * Constructor
-   */
-  constructor(
-    private _elementRef: ElementRef,
-    private _httpClient: HttpClient,
-    private _renderer2: Renderer2,
-  ) {}
+  private _elementRef = inject(ElementRef);
+  private _httpClient = inject(HttpClient);
+  private _renderer2 = inject(Renderer2);
 
   // -----------------------------------------------------------------------------------------------------
   // @ Accessors
