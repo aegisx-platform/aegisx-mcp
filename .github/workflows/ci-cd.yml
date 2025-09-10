@@ -360,12 +360,13 @@ jobs:
             test-results/
           retention-days: 7
 
-  # Docker build with layer caching
+  # Docker build for develop/main branches
   docker-build:
-    name: Docker Build
+    name: Docker Build (Branch)
     needs: [build-affected, test-unit, test-integration]
     if: |
       github.event_name == 'push' && 
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') &&
       (needs.detect-changes.outputs.docker == 'true' || 
        needs.detect-changes.outputs.api == 'true' ||
        needs.detect-changes.outputs.web == 'true' ||
@@ -392,7 +393,6 @@ jobs:
             network=host
 
       - name: Log in to Registry
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -411,10 +411,10 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-${{ matrix.app }}
           tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
+            type=ref,event=branch,prefix=staging-,enable={{is_default_branch}}
+            type=ref,event=branch,enable={{is_default_branch}}
+            type=raw,value=staging-latest,enable=${{ github.ref == 'refs/heads/develop' }}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
             type=sha,prefix={{branch}}-
 
       - name: Build and push
@@ -422,7 +422,7 @@ jobs:
         with:
           context: .
           file: apps/${{ matrix.app }}/Dockerfile
-          push: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' }}
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: |
@@ -432,6 +432,87 @@ jobs:
             type=gha,mode=max
             type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-${{ matrix.app }}:buildcache,mode=max
           platforms: linux/amd64
+
+  # Docker build for release tags (bypasses tests)
+  docker-build-release:
+    name: Docker Build (Release)
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      matrix:
+        app: [api, web, admin]
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --ignore-scripts --prefer-offline
+
+      - name: Build application
+        run: |
+          echo "🏗️ Building ${{ matrix.app }} for release ${{ github.ref_name }}"
+          npx nx build ${{ matrix.app }} --configuration=production \
+            --optimization --extractLicenses --namedChunks=false \
+            --outputHashing=all --prod
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: |
+            image=moby/buildkit:master
+            network=host
+
+      - name: Log in to Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-${{ matrix.app }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/${{ matrix.app }}/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: |
+            type=gha
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-${{ matrix.app }}:buildcache
+          cache-to: |
+            type=gha,mode=max
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-${{ matrix.app }}:buildcache,mode=max
+          platforms: linux/amd64
+
+      - name: Success summary
+        run: |
+          echo "🎉 Successfully built and pushed ${{ matrix.app }} images"
+          echo "📦 Available tags: ${{ steps.meta.outputs.tags }}"
+          echo "🏷️ Release: ${{ github.ref_name }}"
 
   # Summary
   pipeline-summary:
@@ -507,13 +588,17 @@ jobs:
 
       - name: Deploy to staging
         run: |
-          echo "Deploying to staging environment..."
+          echo "Deploying staging images..."
+          echo "Images available:"
+          echo "  - ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-api:staging-latest"
+          echo "  - ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-web:staging-latest"
+          echo "  - ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-admin:staging-latest"
           # Add deployment scripts here
 
   # Deploy to production
   deploy-production:
     name: Deploy to Production
-    needs: [docker-build, test-e2e]
+    needs: [docker-build-release]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -529,9 +614,21 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Version:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
           echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Images:**" >> $GITHUB_STEP_SUMMARY
+          echo "  - \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-api:${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "  - \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-web:${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "  - \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-admin:${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
           echo "**Deployed at:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> $GITHUB_STEP_SUMMARY
 
       - name: Deploy to production
         run: |
-          echo "Deploying to production environment..."
+          echo "Deploying production images..."
+          echo "Version: ${{ github.ref_name }}"
+          echo "Images available:"
+          echo "  - ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-api:${{ github.ref_name }}"
+          echo "  - ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-web:${{ github.ref_name }}"
+          echo "  - ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-admin:${{ github.ref_name }}"
+          echo "  - ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-api:latest"
+          echo "  - ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-web:latest"
+          echo "  - ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-admin:latest"
           # Add deployment scripts here
