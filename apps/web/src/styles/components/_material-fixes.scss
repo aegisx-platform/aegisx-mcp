@@ -321,6 +321,34 @@ textarea.mat-mdc-input-element {
   margin-right: 0.5rem;
 }
 
+/* Fix floating label position when prefix icon is present in form utility classes */
+/* Override Angular Material's label positioning with higher specificity and correct positioning */
+
+/* Use margin-left instead of transform to ensure proper icon spacing */
+.form-xs
+  .mat-form-field-appearance-outline.mat-mdc-form-field-has-icon-prefix
+  .mat-mdc-floating-label:not(.mdc-floating-label--float-above) {
+  left: 30px !important; /* Move right by 16px icon + 6px margin + 8px buffer = 30px */
+}
+
+.form-compact
+  .mat-form-field-appearance-outline.mat-mdc-form-field-has-icon-prefix
+  .mat-mdc-floating-label:not(.mdc-floating-label--float-above) {
+  left: 32px !important; /* Move right by 18px icon + 8px margin + 6px buffer = 32px */
+}
+
+.form-standard
+  .mat-form-field-appearance-outline.mat-mdc-form-field-has-icon-prefix
+  .mat-mdc-floating-label:not(.mdc-floating-label--float-above) {
+  left: 36px !important; /* Move right by 20px icon + 10px margin + 6px buffer = 36px */
+}
+
+.form-lg
+  .mat-form-field-appearance-outline.mat-mdc-form-field-has-icon-prefix
+  .mat-mdc-floating-label:not(.mdc-floating-label--float-above) {
+  left: 42px !important; /* Move right by 24px icon + 12px margin + 6px buffer = 42px */
+}
+
 /* ==========================================================================
    Border Colors and Focus States
    ========================================================================== */
