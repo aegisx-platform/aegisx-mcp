@@ -1,6 +1,6 @@
 # Multi-stage production-optimized Dockerfile for AegisX Admin Application
 # Stage 1: Base builder with security hardening
-FROM node:20.18.1-alpine3.20 AS base
+FROM node:20.19.0-alpine3.20 AS base
 
 # Install security updates and build dependencies
 RUN apk update && apk upgrade --no-cache && \

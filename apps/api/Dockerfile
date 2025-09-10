@@ -1,6 +1,6 @@
 # Multi-stage production-optimized Dockerfile for AegisX API
 # Stage 1: Base builder with security hardening
-FROM node:20.18.1-alpine3.20 AS base
+FROM node:20.19.0-alpine3.20 AS base
 
 # Install security updates and essential build tools
 RUN apk update && apk upgrade --no-cache && \
@@ -54,7 +54,7 @@ RUN yarn install --frozen-lockfile --production=true \
     && yarn cache clean
 
 # Stage 4: Production runtime with minimal footprint
-FROM node:20.18.1-alpine3.20 AS production
+FROM node:20.19.0-alpine3.20 AS production
 
 # Install only essential runtime packages and security updates
 RUN apk update && apk upgrade --no-cache && \
