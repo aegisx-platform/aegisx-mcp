@@ -27,7 +27,6 @@ COPY --chown=aegisx:nodejs package*.json yarn.lock ./
 COPY --chown=aegisx:nodejs nx.json tsconfig.base.json ./
 
 # Copy project-specific configurations
-COPY --chown=aegisx:nodejs apps/api/package*.json apps/api/ 2>/dev/null || true
 COPY --chown=aegisx:nodejs apps/api/project.json apps/api/
 COPY --chown=aegisx:nodejs apps/api/tsconfig*.json apps/api/
 
@@ -42,8 +41,7 @@ FROM dependencies AS builder
 
 # Copy source code and libraries
 COPY --chown=aegisx:nodejs apps/api/src apps/api/src/
-COPY --chown=aegisx:nodejs libs/ libs/ 2>/dev/null || true
-COPY --chown=aegisx:nodejs schemas/ schemas/ 2>/dev/null || true
+COPY --chown=aegisx:nodejs libs/ libs/
 
 # Build the application with production optimizations
 RUN NODE_ENV=production npx nx build api --configuration=production \

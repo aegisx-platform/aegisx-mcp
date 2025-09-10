@@ -26,7 +26,6 @@ COPY --chown=aegisx:nodejs package*.json yarn.lock ./
 COPY --chown=aegisx:nodejs nx.json tsconfig.base.json ./
 
 # Copy project configurations
-COPY --chown=aegisx:nodejs apps/admin/package*.json apps/admin/ 2>/dev/null || true
 COPY --chown=aegisx:nodejs apps/admin/project.json apps/admin/
 COPY --chown=aegisx:nodejs apps/admin/tsconfig*.json apps/admin/
 
@@ -41,7 +40,7 @@ FROM dependencies AS builder
 # Copy source code and libraries
 COPY --chown=aegisx:nodejs apps/admin/src apps/admin/src/
 COPY --chown=aegisx:nodejs apps/admin/public apps/admin/public/
-COPY --chown=aegisx:nodejs libs/ libs/ 2>/dev/null || true
+COPY --chown=aegisx:nodejs libs/ libs/
 
 # Build Angular application with production optimizations
 RUN NODE_ENV=production npx nx build admin --configuration=production \
