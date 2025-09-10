@@ -459,6 +459,7 @@ jobs:
 
       - name: Build application
         run: |
+          echo "🏗️ Building ${{ matrix.app }} for release ${{ github.ref_name }}"
           npx nx build ${{ matrix.app }} --configuration=production \
             --optimization --extractLicenses --namedChunks=false \
             --outputHashing=all --prod
@@ -506,6 +507,12 @@ jobs:
             type=gha,mode=max
             type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-${{ matrix.app }}:buildcache,mode=max
           platforms: linux/amd64
+
+      - name: Success summary
+        run: |
+          echo "🎉 Successfully built and pushed ${{ matrix.app }} images"
+          echo "📦 Available tags: ${{ steps.meta.outputs.tags }}"
+          echo "🏷️ Release: ${{ github.ref_name }}"
 
   # Summary
   pipeline-summary:
