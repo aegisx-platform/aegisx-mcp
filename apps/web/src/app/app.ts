@@ -44,7 +44,11 @@ interface Notification {
         <!-- Navigation Header -->
         <ng-template #navigationHeader>
           <div class="flex   items-center   pb-0">
-            <span class="text-2xl font-bold text-white">AegisX</span>
+            <span
+              style="letter-spacing: 3px;"
+              class="text-2xl font-bold  text-white"
+              >AEGIS<span class="text-green-500">X</span></span
+            >
             <span
               class="ml-2 text-xs px-2 py-1 bg-primary-600 text-white rounded"
             >

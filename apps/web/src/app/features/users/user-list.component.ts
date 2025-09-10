@@ -64,7 +64,7 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
       </div>
 
       <!-- Filters Card -->
-      <ax-card [appearance]="'outlined'" class="mb-6">
+      <ax-card [appearance]="'outlined'" class="mb-3 form-compact">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <mat-form-field appearance="outline" class="w-full">
             <mat-label>Search</mat-label>

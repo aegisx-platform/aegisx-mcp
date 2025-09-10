@@ -661,6 +661,7 @@ textarea.mat-mdc-input-element {
 @import 'styles/components/material-fixes';
 @import 'styles/components/form-utilities';
 
+
 /* Dark mode support for Material inputs */
 .dark {
   .mat-mdc-form-field-appearance-fill .mat-mdc-form-field-flex {

@@ -22,6 +22,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
       method: 'POST',
       url: '/api/auth/register',
       schema: {
+        tags: ['Authentication'],
         body: bodySchema,
         response: {
           201: responseSchema,
@@ -43,6 +44,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
     method: 'POST',
     url: '/api/auth/login',
     schema: {
+      tags: ['Authentication'],
       body: SchemaRefs.module('auth', 'loginRequest'),
       response: {
         200: SchemaRefs.module('auth', 'authResponse'),
@@ -58,6 +60,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
     method: 'POST',
     url: '/api/auth/refresh',
     schema: {
+      tags: ['Authentication'],
       body: SchemaRefs.module('auth', 'refreshRequest'),
       response: {
         200: SchemaRefs.module('auth', 'refreshResponse'),
@@ -73,6 +76,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
     method: 'POST',
     url: '/api/auth/logout',
     schema: {
+      tags: ['Authentication'],
       response: {
         200: SchemaRefs.module('auth', 'logoutResponse'),
         401: SchemaRefs.Unauthorized,

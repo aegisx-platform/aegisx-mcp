@@ -119,6 +119,502 @@ interface PeriodicElement {
           Angular Material Components Demo
         </h1>
 
+        <!-- Form Utility Classes Demo Section -->
+        <section class="demo-section">
+          <h2 class="text-2xl font-semibold mb-6">Form Utility Classes Demo</h2>
+          <p class="text-gray-600 mb-6">
+            Demo of custom utility classes for consistent form field and button
+            sizing across the application. Each utility class provides different
+            sizes for form fields, buttons, and icon buttons.
+          </p>
+
+          <!-- Extra Small (.form-xs) -->
+          <div class="demo-item">
+            <h3 class="text-xl font-medium mb-4">
+              Extra Small (.form-xs) - 40px form fields, 32px buttons
+            </h3>
+            <div class="form-xs">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <mat-form-field appearance="outline">
+                  <mat-label>Name</mat-label>
+                  <input matInput placeholder="Enter your name" />
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Email</mat-label>
+                  <input matInput placeholder="Enter your email" type="email" />
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Department</mat-label>
+                  <mat-select>
+                    <mat-option value="it">IT</mat-option>
+                    <mat-option value="hr">HR</mat-option>
+                    <mat-option value="finance">Finance</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+              <div class="flex gap-2">
+                <button mat-raised-button color="primary">Save</button>
+                <button mat-stroked-button>Cancel</button>
+                <button mat-button>Reset</button>
+                <button mat-icon-button color="accent">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Compact (.form-compact) -->
+          <div class="demo-item">
+            <h3 class="text-xl font-medium mb-4">
+              Compact (.form-compact) - 48px form fields, 40px buttons
+            </h3>
+            <div class="form-compact">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <mat-form-field appearance="outline">
+                  <mat-label>Name</mat-label>
+                  <input matInput placeholder="Enter your name" />
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Email</mat-label>
+                  <input matInput placeholder="Enter your email" type="email" />
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Department</mat-label>
+                  <mat-select>
+                    <mat-option value="it">IT</mat-option>
+                    <mat-option value="hr">HR</mat-option>
+                    <mat-option value="finance">Finance</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+              <div class="flex gap-2">
+                <button mat-raised-button color="primary">Save</button>
+                <button mat-stroked-button>Cancel</button>
+                <button mat-button>Reset</button>
+                <button mat-icon-button color="accent">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Standard (.form-standard) -->
+          <div class="demo-item">
+            <h3 class="text-xl font-medium mb-4">
+              Standard (.form-standard) - 56px form fields, 48px buttons
+              (Material Design default)
+            </h3>
+            <div class="form-standard">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <mat-form-field appearance="outline">
+                  <mat-label>Name</mat-label>
+                  <input matInput placeholder="Enter your name" />
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Email</mat-label>
+                  <input matInput placeholder="Enter your email" type="email" />
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Department</mat-label>
+                  <mat-select>
+                    <mat-option value="it">IT</mat-option>
+                    <mat-option value="hr">HR</mat-option>
+                    <mat-option value="finance">Finance</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+              <div class="flex gap-2">
+                <button mat-raised-button color="primary">Save</button>
+                <button mat-stroked-button>Cancel</button>
+                <button mat-button>Reset</button>
+                <button mat-icon-button color="accent">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Large (.form-lg) -->
+          <div class="demo-item">
+            <h3 class="text-xl font-medium mb-4">
+              Large (.form-lg) - 64px form fields, 56px buttons
+            </h3>
+            <div class="form-lg">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <mat-form-field appearance="outline">
+                  <mat-label>Name</mat-label>
+                  <input matInput placeholder="Enter your name" />
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Email</mat-label>
+                  <input matInput placeholder="Enter your email" type="email" />
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Department</mat-label>
+                  <mat-select>
+                    <mat-option value="it">IT</mat-option>
+                    <mat-option value="hr">HR</mat-option>
+                    <mat-option value="finance">Finance</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+              <div class="flex gap-2">
+                <button mat-raised-button color="primary">Save</button>
+                <button mat-stroked-button>Cancel</button>
+                <button mat-button>Reset</button>
+                <button mat-icon-button color="accent">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Code Examples with Preview/Code Toggle -->
+          <div class="demo-item">
+            <h3 class="text-xl font-medium mb-4">Interactive Code Examples</h3>
+
+            <!-- Basic Form Example -->
+            <div class="mb-8">
+              <h4 class="text-lg font-medium mb-4">
+                Basic Form (.form-compact)
+              </h4>
+
+              <!-- Toggle Buttons -->
+              <div class="flex border-b border-gray-200 mb-4">
+                <button
+                  (click)="setActiveTab('basic', 'preview')"
+                  [class]="getTabClass('basic', 'preview')"
+                  class="px-4 py-2 text-sm font-medium border-b-2 transition-colors"
+                >
+                  <mat-icon class="text-base mr-1">visibility</mat-icon>
+                  Preview
+                </button>
+                <button
+                  (click)="setActiveTab('basic', 'code')"
+                  [class]="getTabClass('basic', 'code')"
+                  class="px-4 py-2 text-sm font-medium border-b-2 transition-colors ml-1"
+                >
+                  <mat-icon class="text-base mr-1">code</mat-icon>
+                  Code
+                </button>
+                <div class="flex-1"></div>
+                <button
+                  mat-icon-button
+                  size="small"
+                  (click)="copyToClipboard('form-compact-html')"
+                  matTooltip="Copy code"
+                  class="self-center"
+                >
+                  <mat-icon class="text-base">content_copy</mat-icon>
+                </button>
+              </div>
+
+              <!-- Content -->
+              <div class="border border-gray-200 rounded-lg overflow-hidden">
+                <!-- Preview -->
+                <div
+                  *ngIf="activeTab['basic'] === 'preview'"
+                  class="bg-white p-6"
+                >
+                  <div class="form-compact max-w-md">
+                    <div class="space-y-4">
+                      <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Full Name</mat-label>
+                        <input matInput placeholder="Enter your full name" />
+                      </mat-form-field>
+                      <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Email</mat-label>
+                        <input
+                          matInput
+                          placeholder="Enter your email"
+                          type="email"
+                        />
+                      </mat-form-field>
+                      <div class="flex gap-2">
+                        <button mat-raised-button color="primary">
+                          Submit
+                        </button>
+                        <button mat-outlined-button>Cancel</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Code -->
+                <div *ngIf="activeTab['basic'] === 'code'" class="bg-gray-50">
+                  <pre
+                    class="p-6 text-sm overflow-x-auto"
+                  ><code class="language-html">&lt;div class="form-compact"&gt;
+  &lt;div class="space-y-4"&gt;
+    &lt;mat-form-field appearance="outline"&gt;
+      &lt;mat-label&gt;Full Name&lt;/mat-label&gt;
+      &lt;input matInput placeholder="Enter your full name" /&gt;
+    &lt;/mat-form-field&gt;
+    
+    &lt;mat-form-field appearance="outline"&gt;
+      &lt;mat-label&gt;Email&lt;/mat-label&gt;
+      &lt;input matInput placeholder="Enter your email" type="email" /&gt;
+    &lt;/mat-form-field&gt;
+    
+    &lt;div class="flex gap-2"&gt;
+      &lt;button mat-raised-button color="primary"&gt;Submit&lt;/button&gt;
+      &lt;button mat-outlined-button&gt;Cancel&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                </div>
+              </div>
+            </div>
+
+            <!-- Layout Example -->
+            <div class="mb-8">
+              <h4 class="text-lg font-medium mb-4">
+                Grid Layout (.form-compact .grid)
+              </h4>
+
+              <!-- Toggle Buttons -->
+              <div class="flex border-b border-gray-200 mb-4">
+                <button
+                  (click)="setActiveTab('layout', 'preview')"
+                  [class]="getTabClass('layout', 'preview')"
+                  class="px-4 py-2 text-sm font-medium border-b-2 transition-colors"
+                >
+                  <mat-icon class="text-base mr-1">visibility</mat-icon>
+                  Preview
+                </button>
+                <button
+                  (click)="setActiveTab('layout', 'code')"
+                  [class]="getTabClass('layout', 'code')"
+                  class="px-4 py-2 text-sm font-medium border-b-2 transition-colors ml-1"
+                >
+                  <mat-icon class="text-base mr-1">code</mat-icon>
+                  Code
+                </button>
+                <div class="flex-1"></div>
+                <button
+                  mat-icon-button
+                  size="small"
+                  (click)="copyToClipboard('layout-grid')"
+                  matTooltip="Copy code"
+                  class="self-center"
+                >
+                  <mat-icon class="text-base">content_copy</mat-icon>
+                </button>
+              </div>
+
+              <!-- Content -->
+              <div class="border border-gray-200 rounded-lg overflow-hidden">
+                <!-- Preview -->
+                <div
+                  *ngIf="activeTab['layout'] === 'preview'"
+                  class="bg-white p-6"
+                >
+                  <div class="form-compact grid max-w-2xl">
+                    <mat-form-field appearance="outline">
+                      <mat-label>First Name</mat-label>
+                      <input matInput placeholder="First name" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                      <mat-label>Last Name</mat-label>
+                      <input matInput placeholder="Last name" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                      <mat-label>Email</mat-label>
+                      <input
+                        matInput
+                        placeholder="Email address"
+                        type="email"
+                      />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                      <mat-label>Phone</mat-label>
+                      <input matInput placeholder="Phone number" type="tel" />
+                    </mat-form-field>
+                  </div>
+                </div>
+
+                <!-- Code -->
+                <div *ngIf="activeTab['layout'] === 'code'" class="bg-gray-50">
+                  <pre
+                    class="p-6 text-sm overflow-x-auto"
+                  ><code class="language-html">&lt;div class="form-compact grid"&gt;
+  &lt;mat-form-field appearance="outline"&gt;
+    &lt;mat-label&gt;First Name&lt;/mat-label&gt;
+    &lt;input matInput placeholder="First name" /&gt;
+  &lt;/mat-form-field&gt;
+  
+  &lt;mat-form-field appearance="outline"&gt;
+    &lt;mat-label&gt;Last Name&lt;/mat-label&gt;
+    &lt;input matInput placeholder="Last name" /&gt;
+  &lt;/mat-form-field&gt;
+  
+  &lt;mat-form-field appearance="outline"&gt;
+    &lt;mat-label&gt;Email&lt;/mat-label&gt;
+    &lt;input matInput placeholder="Email address" type="email" /&gt;
+  &lt;/mat-form-field&gt;
+  
+  &lt;mat-form-field appearance="outline"&gt;
+    &lt;mat-label&gt;Phone&lt;/mat-label&gt;
+    &lt;input matInput placeholder="Phone number" type="tel" /&gt;
+  &lt;/mat-form-field&gt;
+&lt;/div&gt;</code></pre>
+                </div>
+              </div>
+            </div>
+
+            <!-- Size Comparison -->
+            <div class="mb-8">
+              <h4 class="text-lg font-medium mb-4">Size Comparison</h4>
+
+              <!-- Toggle Buttons -->
+              <div class="flex border-b border-gray-200 mb-4">
+                <button
+                  (click)="setActiveTab('sizes', 'preview')"
+                  [class]="getTabClass('sizes', 'preview')"
+                  class="px-4 py-2 text-sm font-medium border-b-2 transition-colors"
+                >
+                  <mat-icon class="text-base mr-1">visibility</mat-icon>
+                  Preview
+                </button>
+                <button
+                  (click)="setActiveTab('sizes', 'code')"
+                  [class]="getTabClass('sizes', 'code')"
+                  class="px-4 py-2 text-sm font-medium border-b-2 transition-colors ml-1"
+                >
+                  <mat-icon class="text-base mr-1">code</mat-icon>
+                  Code
+                </button>
+                <div class="flex-1"></div>
+                <button
+                  mat-icon-button
+                  size="small"
+                  (click)="copyToClipboard('all-sizes-html')"
+                  matTooltip="Copy code"
+                  class="self-center"
+                >
+                  <mat-icon class="text-base">content_copy</mat-icon>
+                </button>
+              </div>
+
+              <!-- Content -->
+              <div class="border border-gray-200 rounded-lg overflow-hidden">
+                <!-- Preview -->
+                <div
+                  *ngIf="activeTab['sizes'] === 'preview'"
+                  class="bg-white p-6"
+                >
+                  <div class="space-y-6">
+                    <div>
+                      <h5 class="text-sm font-medium text-red-600 mb-2">
+                        Extra Small (.form-xs)
+                      </h5>
+                      <div class="form-xs flex gap-2">
+                        <mat-form-field appearance="outline" class="flex-1">
+                          <mat-label>Name</mat-label>
+                          <input matInput placeholder="Enter name" />
+                        </mat-form-field>
+                        <button mat-raised-button color="primary">Save</button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h5 class="text-sm font-medium text-blue-600 mb-2">
+                        Compact (.form-compact)
+                      </h5>
+                      <div class="form-compact flex gap-2">
+                        <mat-form-field appearance="outline" class="flex-1">
+                          <mat-label>Name</mat-label>
+                          <input matInput placeholder="Enter name" />
+                        </mat-form-field>
+                        <button mat-raised-button color="primary">Save</button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h5 class="text-sm font-medium text-green-600 mb-2">
+                        Standard (.form-standard)
+                      </h5>
+                      <div class="form-standard flex gap-2">
+                        <mat-form-field appearance="outline" class="flex-1">
+                          <mat-label>Name</mat-label>
+                          <input matInput placeholder="Enter name" />
+                        </mat-form-field>
+                        <button mat-raised-button color="primary">Save</button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h5 class="text-sm font-medium text-orange-600 mb-2">
+                        Large (.form-lg)
+                      </h5>
+                      <div class="form-lg flex gap-2">
+                        <mat-form-field appearance="outline" class="flex-1">
+                          <mat-label>Name</mat-label>
+                          <input matInput placeholder="Enter name" />
+                        </mat-form-field>
+                        <button mat-raised-button color="primary">Save</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Code -->
+                <div *ngIf="activeTab['sizes'] === 'code'" class="bg-gray-50">
+                  <pre
+                    class="p-6 text-sm overflow-x-auto"
+                  ><code class="language-html">&lt;!-- Extra Small --&gt;
+&lt;div class="form-xs flex gap-2"&gt;
+  &lt;mat-form-field appearance="outline"&gt;
+    &lt;mat-label&gt;Name&lt;/mat-label&gt;
+    &lt;input matInput placeholder="Enter name" /&gt;
+  &lt;/mat-form-field&gt;
+  &lt;button mat-raised-button color="primary"&gt;Save&lt;/button&gt;
+&lt;/div&gt;
+
+&lt;!-- Compact --&gt;
+&lt;div class="form-compact flex gap-2"&gt;
+  &lt;mat-form-field appearance="outline"&gt;
+    &lt;mat-label&gt;Name&lt;/mat-label&gt;
+    &lt;input matInput placeholder="Enter name" /&gt;
+  &lt;/mat-form-field&gt;
+  &lt;button mat-raised-button color="primary"&gt;Save&lt;/button&gt;
+&lt;/div&gt;
+
+&lt;!-- Standard (Material default) --&gt;
+&lt;div class="form-standard flex gap-2"&gt;
+  &lt;mat-form-field appearance="outline"&gt;
+    &lt;mat-label&gt;Name&lt;/mat-label&gt;
+    &lt;input matInput placeholder="Enter name" /&gt;
+  &lt;/mat-form-field&gt;
+  &lt;button mat-raised-button color="primary"&gt;Save&lt;/button&gt;
+&lt;/div&gt;
+
+&lt;!-- Large --&gt;
+&lt;div class="form-lg flex gap-2"&gt;
+  &lt;mat-form-field appearance="outline"&gt;
+    &lt;mat-label&gt;Name&lt;/mat-label&gt;
+    &lt;input matInput placeholder="Enter name" /&gt;
+  &lt;/mat-form-field&gt;
+  &lt;button mat-raised-button color="primary"&gt;Save&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <!-- Form Controls Section -->
         <section class="demo-section">
           <h2 class="text-2xl font-semibold mb-6">Form Controls</h2>
@@ -866,12 +1362,28 @@ export class MaterialDemoComponent {
   // Other
   panelOpenState = false;
 
+  // Tab state for Preview/Code toggle
+  activeTab: Record<string, 'preview' | 'code'> = {
+    basic: 'preview',
+    layout: 'preview',
+    sizes: 'preview',
+  };
+
   constructor() {
     this.filteredStates = this.stateCtrl.valueChanges.pipe(
       startWith(''),
       map((value) => this._filterStates(value || '')),
     );
 
+    // Initialize tree data
+    this.initializeData();
+  }
+
+  ngAfterViewInit(): void {
+    // No longer needed - Material handles floating labels correctly now
+  }
+
+  private initializeData(): void {
     this.dataSourceTree.data = [
       {
         name: 'Fruit',
@@ -927,5 +1439,156 @@ export class MaterialDemoComponent {
 
   drop(event: CdkDragDrop<string[]>) {
     moveItemInArray(this.dragItems, event.previousIndex, event.currentIndex);
+  }
+
+  getTypeScriptExample(): string {
+    return `import { Component } from '@angular/core';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+
+@Component({
+  selector: 'app-my-form',
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+  ],
+  template: '<div class="form-compact">...</div>',
+})
+export class MyFormComponent {
+  nameControl = new FormControl('');
+  
+  save() {
+    console.log('Name:', this.nameControl.value);
+  }
+}`;
+  }
+
+  setActiveTab(section: string, tab: 'preview' | 'code'): void {
+    this.activeTab[section] = tab;
+  }
+
+  getTabClass(section: string, tab: 'preview' | 'code'): string {
+    const isActive = this.activeTab[section] === tab;
+    return isActive
+      ? 'text-blue-600 border-blue-600 bg-blue-50'
+      : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300';
+  }
+
+  copyToClipboard(codeType: string): void {
+    const codeSnippets: Record<string, string> = {
+      'form-compact-html': `<div class="form-compact">
+  <mat-form-field appearance="outline">
+    <mat-label>Name</mat-label>
+    <input matInput placeholder="Enter name" />
+  </mat-form-field>
+  <button mat-raised-button color="primary">Save</button>
+</div>`,
+      'all-sizes-html': `<!-- Extra Small -->
+<div class="form-xs">...</div>
+
+<!-- Compact -->
+<div class="form-compact">...</div>
+
+<!-- Standard (Material default) -->
+<div class="form-standard">...</div>
+
+<!-- Large -->
+<div class="form-lg">...</div>`,
+      'layout-html': `<!-- Flex Layout -->
+<div class="form-compact flex">
+  <mat-form-field appearance="outline">...</mat-form-field>
+  <button mat-raised-button>Action</button>
+</div>
+
+<!-- Grid Layout -->
+<div class="form-standard grid">
+  <mat-form-field appearance="outline">...</mat-form-field>
+  <mat-form-field appearance="outline">...</mat-form-field>
+  <mat-form-field appearance="outline">...</mat-form-field>
+</div>
+
+<!-- Responsive Grid -->
+<div class="form-compact grid-responsive">...</div>`,
+      'layout-grid': `<div class="form-compact grid">
+  <mat-form-field appearance="outline">
+    <mat-label>First Name</mat-label>
+    <input matInput placeholder="First name" />
+  </mat-form-field>
+  
+  <mat-form-field appearance="outline">
+    <mat-label>Last Name</mat-label>
+    <input matInput placeholder="Last name" />
+  </mat-form-field>
+  
+  <mat-form-field appearance="outline">
+    <mat-label>Email</mat-label>
+    <input matInput placeholder="Email address" type="email" />
+  </mat-form-field>
+  
+  <mat-form-field appearance="outline">
+    <mat-label>Phone</mat-label>
+    <input matInput placeholder="Phone number" type="tel" />
+  </mat-form-field>
+</div>`,
+      'scss-import': `// In your component SCSS file
+@import 'styles/components/form-utilities';
+
+// Or use globally in styles.scss
+@import 'apps/web/src/styles/components/form-utilities';`,
+      'custom-scss': `// Customize form utility classes
+.my-custom-form {
+  @extend .form-compact;
+  
+  // Add your custom styles
+  .mat-mdc-form-field {
+    margin-bottom: 1rem;
+  }
+}`,
+      'typescript-component': `import { Component } from '@angular/core';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+
+@Component({
+  selector: 'app-my-form',
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+  ],
+  template: '<div class="form-compact"><mat-form-field appearance="outline"><mat-label>Name</mat-label><input matInput [formControl]="nameControl" /></mat-form-field><button mat-raised-button (click)="save()">Save</button></div>',
+})
+export class MyFormComponent {
+  nameControl = new FormControl('');
+  
+  save() {
+    console.log('Name:', this.nameControl.value);
+  }
+}`,
+    };
+
+    const code = codeSnippets[codeType];
+    if (code) {
+      navigator.clipboard
+        .writeText(code)
+        .then(() => {
+          this.snackBar.open('Code copied to clipboard!', 'Close', {
+            duration: 2000,
+          });
+        })
+        .catch(() => {
+          this.snackBar.open('Failed to copy code', 'Close', {
+            duration: 2000,
+          });
+        });
+    }
   }
 }
