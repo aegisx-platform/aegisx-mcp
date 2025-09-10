@@ -55,7 +55,7 @@ RUN apk update && apk upgrade --no-cache && \
     apk add --no-cache \
     tini=~0.19 \
     wget=~1.24 \
-    fail2ban=~1.0 \
+    fail2ban \
     && rm -rf /var/cache/apk/* /tmp/* \
     && rm -f /var/log/nginx/access.log /var/log/nginx/error.log
 

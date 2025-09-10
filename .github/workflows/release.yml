@@ -303,15 +303,12 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           platforms: linux/amd64,linux/arm64
-          cache-from: |
-            type=registry,ref=ghcr.io/${{ steps.meta.outputs.repo_name }}-${{ matrix.app }}:buildcache
           cache-to: |
             type=registry,ref=ghcr.io/${{ steps.meta.outputs.repo_name }}-${{ matrix.app }}:buildcache,mode=max
           build-args: |
             APP_VERSION=${{ needs.release.outputs.VERSION || github.sha }}
             BUILD_DATE=${{ github.event.head_commit.timestamp }}
             COMMIT_SHA=${{ github.sha }}
-          no-cache-filter: ''
 
       - name: 🔍 Test Docker image
         run: |
