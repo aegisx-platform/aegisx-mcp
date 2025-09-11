@@ -24,7 +24,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'yarn'
 
       - name: Install dependencies
@@ -45,7 +45,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     needs: release
     runs-on: self-hosted
-    timeout-minutes: 10
+    timeout-minutes: 25
     permissions:
       packages: write
       contents: read
@@ -76,19 +76,15 @@ jobs:
           tags: |
             ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-api:latest
             ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-api:${{ needs.release.outputs.VERSION }}
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          build-args: |
-            APP_VERSION=${{ needs.release.outputs.VERSION }}
-            NODE_ENV=production
-            CI=true
 
   build_web:
     if: github.ref == 'refs/heads/main'
     needs: release
     runs-on: self-hosted
-    timeout-minutes: 10
+    timeout-minutes: 25
     permissions:
       packages: write
       contents: read
@@ -119,19 +115,15 @@ jobs:
           tags: |
             ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-web:latest
             ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-web:${{ needs.release.outputs.VERSION }}
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          build-args: |
-            APP_VERSION=${{ needs.release.outputs.VERSION }}
-            NODE_ENV=production
-            CI=true
 
   build_admin:
     if: github.ref == 'refs/heads/main'
     needs: release
     runs-on: self-hosted
-    timeout-minutes: 10
+    timeout-minutes: 25
     permissions:
       packages: write
       contents: read
@@ -162,19 +154,15 @@ jobs:
           tags: |
             ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-admin:latest
             ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-admin:${{ needs.release.outputs.VERSION }}
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          build-args: |
-            APP_VERSION=${{ needs.release.outputs.VERSION }}
-            NODE_ENV=production
-            CI=true
 
   # Staging builds (develop branch)
   build_staging_api:
     if: github.ref == 'refs/heads/develop'
     runs-on: self-hosted
-    timeout-minutes: 8
+    timeout-minutes: 20
     permissions:
       contents: read
       packages: write
@@ -205,18 +193,14 @@ jobs:
           file: apps/api/Dockerfile
           push: true
           tags: ghcr.io/${{ steps.vars.outputs.REPO_NAME }}-api:staging-${{ steps.vars.outputs.SHORT_SHA }}
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          build-args: |
-            APP_VERSION=${{ steps.vars.outputs.SHORT_SHA }}
-            NODE_ENV=production
-            CI=true
 
   build_staging_web:
     if: github.ref == 'refs/heads/develop'
     runs-on: self-hosted
-    timeout-minutes: 8
+    timeout-minutes: 20
     permissions:
       contents: read
       packages: write
@@ -247,18 +231,14 @@ jobs:
           file: apps/web/Dockerfile
           push: true
           tags: ghcr.io/${{ steps.vars.outputs.REPO_NAME }}-web:staging-${{ steps.vars.outputs.SHORT_SHA }}
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          build-args: |
-            APP_VERSION=${{ steps.vars.outputs.SHORT_SHA }}
-            NODE_ENV=production
-            CI=true
 
   build_staging_admin:
     if: github.ref == 'refs/heads/develop'
     runs-on: self-hosted
-    timeout-minutes: 8
+    timeout-minutes: 20
     permissions:
       contents: read
       packages: write
@@ -289,10 +269,6 @@ jobs:
           file: apps/admin/Dockerfile
           push: true
           tags: ghcr.io/${{ steps.vars.outputs.REPO_NAME }}-admin:staging-${{ steps.vars.outputs.SHORT_SHA }}
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          build-args: |
-            APP_VERSION=${{ steps.vars.outputs.SHORT_SHA }}
-            NODE_ENV=production
-            CI=true
