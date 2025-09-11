@@ -18,7 +18,7 @@ COPY libs/ libs/
 RUN pnpm install --frozen-lockfile
 
 # Build the app
-RUN pnpm nx build web --configuration=production
+RUN NODE_OPTIONS="--max-old-space-size=4096" pnpm nx build web --configuration=production
 
 # Production stage
 FROM nginx:alpine

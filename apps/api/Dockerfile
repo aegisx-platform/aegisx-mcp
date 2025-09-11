@@ -17,7 +17,7 @@ COPY apps/api/ apps/api/
 RUN pnpm install --frozen-lockfile
 
 # Build the API
-RUN pnpm nx build api
+RUN NODE_OPTIONS="--max-old-space-size=2048" pnpm nx build api
 
 # Expose port
 EXPOSE 3000
