@@ -39,8 +39,10 @@ COPY --chown=aegisx:nodejs apps/web/postcss.config.js apps/web/
 RUN mkdir -p /app/node_modules && chown -R aegisx:nodejs /app/node_modules
 
 # Install dependencies with cache optimization
+ENV YARN_IGNORE_ENGINES=true YARN_SILENT=1
 RUN yarn install --frozen-lockfile --network-timeout 600000 \
     --prefer-offline --cache-folder /tmp/yarn-cache \
+    --silent \
     && rm -rf /tmp/yarn-cache
 
 # Stage 3: Build stage
