@@ -88,6 +88,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
         500: SchemaRefs.ServerError,
       },
     },
+    preHandler: [fastify.authenticateJWT],
     handler: authController.logout,
   });
 
@@ -105,6 +106,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
         500: SchemaRefs.ServerError,
       },
     },
+    preHandler: [fastify.authenticateJWT],
     handler: authController.me,
   });
 }
