@@ -134,9 +134,13 @@ jobs:
           file: apps/${{ matrix.app }}/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
-          platforms: ${{ needs.setup.outputs.is_production == 'true' && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+          cache-from: |
+            type=gha
+            type=registry,ref=ghcr.io/${{ steps.meta.outputs.repo_name }}-${{ matrix.app }}:cache
+          cache-to: |
+            type=gha,mode=max
+            type=registry,ref=ghcr.io/${{ steps.meta.outputs.repo_name }}-${{ matrix.app }}:cache,mode=max
           build-args: |
             APP_VERSION=${{ needs.release.outputs.VERSION || github.sha }}
             CI=true
