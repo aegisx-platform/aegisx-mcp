@@ -81,7 +81,7 @@ jobs:
           tags: |
             ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-api:latest
             ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-api:${{ needs.release.outputs.VERSION }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -120,7 +120,7 @@ jobs:
           tags: |
             ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-web:latest
             ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-web:${{ needs.release.outputs.VERSION }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -159,7 +159,7 @@ jobs:
           tags: |
             ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-admin:latest
             ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-admin:${{ needs.release.outputs.VERSION }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -200,7 +200,7 @@ jobs:
           tags: |
             ghcr.io/${{ steps.vars.outputs.REPO_NAME }}-api:staging
             ghcr.io/${{ steps.vars.outputs.REPO_NAME }}-api:staging-${{ steps.vars.outputs.SHORT_SHA }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -240,7 +240,7 @@ jobs:
           tags: |
             ghcr.io/${{ steps.vars.outputs.REPO_NAME }}-web:staging
             ghcr.io/${{ steps.vars.outputs.REPO_NAME }}-web:staging-${{ steps.vars.outputs.SHORT_SHA }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -280,6 +280,6 @@ jobs:
           tags: |
             ghcr.io/${{ steps.vars.outputs.REPO_NAME }}-admin:staging
             ghcr.io/${{ steps.vars.outputs.REPO_NAME }}-admin:staging-${{ steps.vars.outputs.SHORT_SHA }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max
