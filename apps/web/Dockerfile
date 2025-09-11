@@ -54,7 +54,7 @@ COPY --chown=aegisx:nodejs apps/web/public apps/web/public/
 COPY --chown=aegisx:nodejs libs/ libs/
 
 # Build Angular application with production optimizations (disable Nx daemon for Docker)
-RUN NODE_ENV=production NX_DAEMON=false npx nx build web --configuration=production
+RUN NODE_ENV=production NX_DAEMON=false npx nx build web --configuration=production --skip-nx-cache
 
 # Stage 4: Production runtime with hardened Nginx
 FROM nginx:1.26.2-alpine3.20 AS production
