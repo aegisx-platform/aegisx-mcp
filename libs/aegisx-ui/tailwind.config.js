@@ -53,6 +53,23 @@ module.exports = {
           900: '#B71C1C',
           DEFAULT: '#F44336',
         },
+        // Card colors for Fuse components
+        card: 'rgb(255, 255, 255)',
+        'card-foreground': 'rgb(0, 0, 0)',
+      },
+      backgroundColor: {
+        card: 'rgb(255, 255, 255)',
+      },
+      textColor: {
+        'card-foreground': 'rgb(0, 0, 0)',
+      },
+      width: {
+        128: '32rem',
+        256: '64rem',
+      },
+      maxWidth: {
+        128: '32rem',
+        256: '64rem',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
@@ -95,7 +112,7 @@ module.exports = {
   },
   plugins: [
     // Custom plugin for Aegisx theme utilities
-    function ({ addUtilities, theme }) {
+    function ({ addUtilities, _theme }) {
       addUtilities({
         '.ax-card': {
           '@apply bg-white dark:bg-gray-800 rounded-lg shadow-md': {},

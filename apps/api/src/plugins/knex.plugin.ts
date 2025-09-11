@@ -45,7 +45,7 @@ async function knexPlugin(fastify: FastifyInstance, _opts: FastifyPluginOptions)
 }
 
 export default fp(knexPlugin, {
-  name: 'knex'
+  name: 'knex-plugin'
 });
 
 // TypeScript declarations

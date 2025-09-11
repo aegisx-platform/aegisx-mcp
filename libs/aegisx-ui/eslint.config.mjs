@@ -22,6 +22,7 @@ export default [
   {
     files: ['**/*.ts'],
     rules: {
+      // Angular selector rules
       '@angular-eslint/directive-selector': [
         'error',
         {
@@ -38,11 +39,34 @@ export default [
           style: 'kebab-case',
         },
       ],
+      // Angular best practices
+      '@angular-eslint/prefer-inject': 'error',
+      '@angular-eslint/no-empty-lifecycle-method': 'error',
+      '@angular-eslint/no-output-native': 'error',
+      // TypeScript quality rules
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
+      '@typescript-eslint/no-empty-function': ['error', {
+        allow: ['constructors']
+      }],
     },
   },
   {
     files: ['**/*.html'],
-    // Override or add rules here
-    rules: {},
+    rules: {
+      // Accessibility rules
+      '@angular-eslint/template/click-events-have-key-events': 'error',
+      '@angular-eslint/template/interactive-supports-focus': 'error',
+      '@angular-eslint/template/alt-text': 'error',
+      '@angular-eslint/template/valid-aria': 'error',
+      '@angular-eslint/template/label-has-associated-control': 'warn',
+    },
   },
 ];

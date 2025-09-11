@@ -1,0 +1,353 @@
+openapi: 3.0.3
+info:
+  title: AegisX Navigation API
+  description: API for managing application navigation structure and menu items
+  version: 1.0.0
+  contact:
+    name: AegisX Platform Team
+    url: https://github.com/aegisx-platform
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3000/api
+    description: Development server
+  - url: https://api.aegisx.com
+    description: Production server
+
+security:
+  - bearerAuth: []
+
+paths:
+  /navigation:
+    get:
+      tags:
+        - Navigation
+      summary: Get navigation structure
+      description: Retrieve the complete navigation structure including default, compact, horizontal, and mobile navigation arrays
+      operationId: getNavigation
+      parameters:
+        - name: type
+          in: query
+          description: Type of navigation to retrieve
+          required: false
+          schema:
+            type: string
+            enum: [default, compact, horizontal, mobile]
+            default: default
+        - name: includeDisabled
+          in: query
+          description: Include disabled navigation items
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Navigation structure retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/NavigationResponse'
+              examples:
+                complete_navigation:
+                  summary: Complete navigation structure
+                  value:
+                    success: true
+                    data:
+                      default:
+                        - id: 'dashboard'
+                          title: 'Dashboard'
+                          type: 'item'
+                          icon: 'heroicons_outline:chart-pie'
+                          link: '/dashboard'
+                          permissions: ['dashboard.view']
+                        - id: 'users'
+                          title: 'User Management'
+                          type: 'collapsible'
+                          icon: 'heroicons_outline:users'
+                          permissions: ['users.view']
+                          children:
+                            - id: 'users-list'
+                              title: 'Users List'
+                              type: 'item'
+                              link: '/users'
+                              permissions: ['users.view']
+                            - id: 'users-roles'
+                              title: 'Roles & Permissions'
+                              type: 'item'
+                              link: '/users/roles'
+                              permissions: ['roles.view']
+                      compact:
+                        - id: 'dashboard'
+                          title: 'Dashboard'
+                          type: 'item'
+                          icon: 'heroicons_outline:chart-pie'
+                          link: '/dashboard'
+                          permissions: ['dashboard.view']
+                      horizontal:
+                        - id: 'dashboard'
+                          title: 'Dashboard'
+                          type: 'item'
+                          link: '/dashboard'
+                          permissions: ['dashboard.view']
+                      mobile:
+                        - id: 'dashboard'
+                          title: 'Dashboard'
+                          type: 'item'
+                          icon: 'heroicons_outline:chart-pie'
+                          link: '/dashboard'
+                          permissions: ['dashboard.view']
+                    meta:
+                      timestamp: '2024-01-01T00:00:00Z'
+                      version: '1.0'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /navigation/user:
+    get:
+      tags:
+        - Navigation
+      summary: Get user-specific navigation
+      description: Retrieve navigation structure filtered by user permissions and preferences
+      operationId: getUserNavigation
+      parameters:
+        - name: type
+          in: query
+          description: Type of navigation to retrieve
+          required: false
+          schema:
+            type: string
+            enum: [default, compact, horizontal, mobile]
+            default: default
+      responses:
+        '200':
+          description: User navigation structure retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/NavigationResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ApiResponse:
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
+          description: Indicates if the request was successful
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+
+    ApiMeta:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp of the response
+        version:
+          type: string
+          description: API version
+        requestId:
+          type: string
+          description: Unique request identifier
+
+    NavigationResponse:
+      type: object
+      properties:
+        default:
+          type: array
+          items:
+            $ref: '#/components/schemas/NavigationItem'
+          description: Default navigation structure
+        compact:
+          type: array
+          items:
+            $ref: '#/components/schemas/NavigationItem'
+          description: Compact navigation structure
+        horizontal:
+          type: array
+          items:
+            $ref: '#/components/schemas/NavigationItem'
+          description: Horizontal navigation structure
+        mobile:
+          type: array
+          items:
+            $ref: '#/components/schemas/NavigationItem'
+          description: Mobile navigation structure
+
+    NavigationItem:
+      type: object
+      required:
+        - id
+        - title
+        - type
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the navigation item
+          example: 'dashboard'
+        title:
+          type: string
+          description: Display title for the navigation item
+          example: 'Dashboard'
+        type:
+          type: string
+          enum: [item, group, collapsible, divider, spacer]
+          description: Type of navigation item
+          example: 'item'
+        icon:
+          type: string
+          description: Icon identifier (Heroicons, Material, etc.)
+          example: 'heroicons_outline:chart-pie'
+        link:
+          type: string
+          description: Navigation link/route
+          example: '/dashboard'
+        target:
+          type: string
+          enum: [_self, _blank, _parent, _top]
+          description: Link target
+          default: '_self'
+        disabled:
+          type: boolean
+          description: Whether the navigation item is disabled
+          default: false
+        hidden:
+          type: boolean
+          description: Whether the navigation item is hidden
+          default: false
+        badge:
+          $ref: '#/components/schemas/NavigationBadge'
+        permissions:
+          type: array
+          items:
+            type: string
+          description: Required permissions to view this navigation item
+          example: ['dashboard.view']
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/NavigationItem'
+          description: Child navigation items (for collapsible/group types)
+        meta:
+          type: object
+          additionalProperties: true
+          description: Additional metadata for the navigation item
+
+    NavigationBadge:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Badge text
+          example: 'New'
+        classes:
+          type: string
+          description: CSS classes for styling
+          example: 'px-2 py-0.5 text-xs font-medium bg-red-100 text-red-800 rounded-full'
+        variant:
+          type: string
+          enum: [default, primary, secondary, success, warning, error]
+          description: Badge variant
+          default: 'default'
+
+    ApiError:
+      type: object
+      required:
+        - success
+        - error
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              description: Error code identifier
+              example: 'UNAUTHORIZED'
+            message:
+              type: string
+              description: Human-readable error message
+              example: 'Authentication required'
+            details:
+              type: object
+              additionalProperties: true
+              description: Additional error details
+            field:
+              type: string
+              description: Field that caused the error (for validation errors)
+
+  responses:
+    UnauthorizedError:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          example:
+            success: false
+            error:
+              code: 'UNAUTHORIZED'
+              message: 'Authentication required'
+
+    ForbiddenError:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          example:
+            success: false
+            error:
+              code: 'FORBIDDEN'
+              message: 'Insufficient permissions'
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          example:
+            success: false
+            error:
+              code: 'INTERNAL_SERVER_ERROR'
+              message: 'An unexpected error occurred'
+
+tags:
+  - name: Navigation
+    description: Navigation structure management

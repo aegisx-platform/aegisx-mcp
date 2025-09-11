@@ -22,7 +22,13 @@ export interface NavigationItemFactoryOptions {
   icon?: string;
   badge?: {
     title?: string;
-    variant?: 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'error';
+    variant?:
+      | 'default'
+      | 'primary'
+      | 'secondary'
+      | 'success'
+      | 'warning'
+      | 'error';
   };
   permissions?: string[];
   parentId?: string;
@@ -83,8 +89,8 @@ export class TestUserFactory {
 
     // Hash password
     const hashedPassword = await bcrypt.hash(
-      userData.password, 
-      parseInt(process.env.BCRYPT_ROUNDS || '10')
+      userData.password,
+      parseInt(process.env.BCRYPT_ROUNDS || '10'),
     );
 
     // Get or create role
@@ -98,24 +104,31 @@ export class TestUserFactory {
     } else {
       const [newRole] = await this.db('roles')
         .insert({
-          id: `role-${userData.role}-${timestamp}`,
           name: userData.role,
           description: `${userData.role} role`,
           created_at: new Date(),
           updated_at: new Date(),
         })
-        .returning('id');
+        .returning('*');
       roleId = newRole.id;
     }
 
-    // Insert user
+    // Insert user (remove role from userData to avoid conflict)
+    const { role, ...userDataWithoutRole } = userData;
     const [user] = await this.db('users')
       .insert({
-        ...userData,
+        ...userDataWithoutRole,
         password: hashedPassword,
-        role_id: roleId,
       })
       .returning('*');
+
+    // Assign role to user
+    await this.db('user_roles').insert({
+      user_id: user.id,
+      role_id: roleId,
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
 
     // Create default preferences
     await this.createPreferences(user.id);
@@ -126,7 +139,10 @@ export class TestUserFactory {
     };
   }
 
-  async createMany(count: number, options: UserFactoryOptions = {}): Promise<any[]> {
+  async createMany(
+    count: number,
+    options: UserFactoryOptions = {},
+  ): Promise<any[]> {
     const users = [];
     for (let i = 0; i < count; i++) {
       const user = await this.create({
@@ -148,30 +164,37 @@ export class TestUserFactory {
     });
   }
 
-  async createWithRole(roleName: string, permissions: string[] = [], options: UserFactoryOptions = {}): Promise<any> {
+  async createWithRole(
+    roleName: string,
+    permissions: string[] = [],
+    options: UserFactoryOptions = {},
+  ): Promise<any> {
     // Create role with permissions
     const timestamp = Date.now();
-    const roleId = `role-${roleName}-${timestamp}`;
-
-    await this.db('roles').insert({
-      id: roleId,
-      name: roleName,
-      description: `${roleName} role`,
-      created_at: new Date(),
-      updated_at: new Date(),
-    });
+    const [role] = await this.db('roles')
+      .insert({
+        name: roleName,
+        description: `${roleName} role`,
+        created_at: new Date(),
+        updated_at: new Date(),
+      })
+      .returning('*');
+    const roleId = role.id;
 
     // Add permissions
     for (const permission of permissions) {
+      // Parse permission format (e.g., "navigation.read" -> resource: "navigation", action: "read")
+      const [resource, action] = permission.split('.');
+
       let permissionRecord = await this.db('permissions')
-        .where({ name: permission })
+        .where({ resource, action })
         .first();
 
       if (!permissionRecord) {
         const [newPermission] = await this.db('permissions')
           .insert({
-            id: `perm-${permission.replace(/\./g, '-')}-${timestamp}`,
-            name: permission,
+            resource: resource || permission,
+            action: action || 'access',
             description: `Permission: ${permission}`,
             created_at: new Date(),
             updated_at: new Date(),
@@ -225,17 +248,18 @@ export class NavigationItemFactory {
   async create(options: NavigationItemFactoryOptions = {}): Promise<any> {
     const timestamp = Date.now();
     const itemData = {
-      id: options.id || `nav-item-${timestamp}`,
+      id: options.id,
+      key: options.id || `test-item-${timestamp}`, // key is required and unique
       title: options.title || `Test Item ${timestamp}`,
       type: options.type || 'item',
       link: options.link || `/test-${timestamp}`,
       icon: options.icon || 'heroicons-outline:home',
       parent_id: options.parentId || null,
-      order: options.order || 0,
-      enabled: options.enabled ?? true,
+      sort_order: options.order || 0,
+      disabled: !(options.enabled ?? true),
       target: '_self',
       exact_match: false,
-      is_hidden: false,
+      hidden: false,
       created_at: new Date(),
       updated_at: new Date(),
     };
@@ -253,15 +277,18 @@ export class NavigationItemFactory {
     // Add permissions if provided
     if (options.permissions && options.permissions.length > 0) {
       for (const permission of options.permissions) {
+        // Parse permission format (e.g., "navigation.read" -> resource: "navigation", action: "read")
+        const [resource, action] = permission.split('.');
+
         let permissionRecord = await this.db('permissions')
-          .where({ name: permission })
+          .where({ resource, action })
           .first();
 
         if (!permissionRecord) {
           const [newPermission] = await this.db('permissions')
             .insert({
-              id: `perm-${permission.replace(/\./g, '-')}-${timestamp}`,
-              name: permission,
+              resource: resource || permission,
+              action: action || 'access',
               description: `Permission: ${permission}`,
               created_at: new Date(),
               updated_at: new Date(),
@@ -272,11 +299,11 @@ export class NavigationItemFactory {
 
         await this.db('navigation_permissions')
           .insert({
-            navigation_id: item.id,
+            navigation_item_id: item.id,
             permission_id: permissionRecord.id,
             created_at: new Date(),
           })
-          .onConflict(['navigation_id', 'permission_id'])
+          .onConflict(['navigation_item_id', 'permission_id'])
           .ignore();
       }
     }
@@ -284,7 +311,10 @@ export class NavigationItemFactory {
     return item;
   }
 
-  async createMany(count: number, options: NavigationItemFactoryOptions = {}): Promise<any[]> {
+  async createMany(
+    count: number,
+    options: NavigationItemFactoryOptions = {},
+  ): Promise<any[]> {
     const items = [];
     for (let i = 0; i < count; i++) {
       const item = await this.create({
@@ -297,7 +327,10 @@ export class NavigationItemFactory {
     return items;
   }
 
-  async createGroup(title: string, children: NavigationItemFactoryOptions[] = []): Promise<any> {
+  async createGroup(
+    title: string,
+    children: NavigationItemFactoryOptions[] = [],
+  ): Promise<any> {
     const group = await this.create({
       title,
       type: 'group',
@@ -345,7 +378,10 @@ export class SessionFactory {
     return session;
   }
 
-  async createForUser(userId: string, options: Omit<SessionFactoryOptions, 'userId'> = {}): Promise<any> {
+  async createForUser(
+    userId: string,
+    options: Omit<SessionFactoryOptions, 'userId'> = {},
+  ): Promise<any> {
     return this.create({
       ...options,
       userId,
@@ -384,7 +420,10 @@ export class SettingsFactory {
     return settings;
   }
 
-  async createForUser(userId: string, options: Omit<SettingsFactoryOptions, 'userId'> = {}): Promise<any> {
+  async createForUser(
+    userId: string,
+    options: Omit<SettingsFactoryOptions, 'userId'> = {},
+  ): Promise<any> {
     return this.create({
       ...options,
       userId,
@@ -415,7 +454,7 @@ export class TestDataFactory {
   }> {
     const user = await this.user.create(options);
     const session = await this.session.createForUser(user.id);
-    
+
     // Preferences are created automatically by UserFactory
     const preferences = await this.db('user_preferences')
       .where({ user_id: user.id })
@@ -432,8 +471,9 @@ export class TestDataFactory {
    * Create test navigation structure
    */
   async createNavigationStructure(): Promise<any[]> {
+    const dashboardId = uuidv4();
     const dashboard = await this.navigation.create({
-      id: 'dashboard',
+      id: dashboardId,
       title: 'Dashboard',
       type: 'item',
       icon: 'heroicons-outline:home',
@@ -443,7 +483,6 @@ export class TestDataFactory {
 
     const appsGroup = await this.navigation.createGroup('Apps', [
       {
-        id: 'users',
         title: 'Users',
         type: 'item',
         icon: 'heroicons-outline:users',
@@ -452,7 +491,6 @@ export class TestDataFactory {
         order: 0,
       },
       {
-        id: 'settings',
         title: 'Settings',
         type: 'item',
         icon: 'heroicons-outline:cog-6-tooth',
@@ -464,7 +502,6 @@ export class TestDataFactory {
 
     const adminGroup = await this.navigation.createGroup('Administration', [
       {
-        id: 'admin-users',
         title: 'User Management',
         type: 'item',
         icon: 'heroicons-outline:user-group',
@@ -473,7 +510,6 @@ export class TestDataFactory {
         order: 0,
       },
       {
-        id: 'admin-roles',
         title: 'Role Management',
         type: 'item',
         icon: 'heroicons-outline:shield-check',
@@ -494,5 +530,4 @@ export class TestDataFactory {
   }
 }
 
-// Export individual factories for convenience
-export { TestUserFactory, NavigationItemFactory, SessionFactory, SettingsFactory };
+// Individual factories are already exported above

@@ -143,7 +143,7 @@ export default defineConfig({
   webServer: [
     {
       command: 'nx serve api',
-      url: 'http://localhost:3000/health',
+      url: 'http://localhost:3333/api/health',
       reuseExistingServer: !process.env.CI,
       timeout: 120 * 1000,
     },

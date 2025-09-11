@@ -1,0 +1,76 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # AegisX API logs
+  - job_name: aegisx-api
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: aegisx-api
+          service: api
+          __path__: /var/log/aegisx/application-*.log
+
+  # AegisX API error logs
+  - job_name: aegisx-api-errors
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: aegisx-api-errors
+          service: api
+          level: error
+          __path__: /var/log/aegisx/error-*.log
+
+  # AegisX API request logs
+  - job_name: aegisx-api-requests
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: aegisx-api-requests
+          service: api
+          type: requests
+          __path__: /var/log/aegisx/requests-*.log
+
+  # System logs (if available)
+  - job_name: syslog
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: syslog
+          __path__: /var/log/syslog
+
+pipeline_stages:
+  # Parse JSON logs
+  - json:
+      expressions:
+        timestamp: timestamp
+        level: level
+        message: message
+        correlationId: correlationId
+        method: method
+        url: url
+        statusCode: statusCode
+        responseTime: responseTime
+
+  # Set timestamp
+  - timestamp:
+      source: timestamp
+      format: RFC3339
+
+  # Add labels
+  - labels:
+      level:
+      correlationId:
+      method:
+      statusCode:

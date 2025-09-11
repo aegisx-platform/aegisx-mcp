@@ -9,7 +9,10 @@
     "@angular/router": "^20.1.0",
     "@angular/animations": "^20.1.0",
     "rxjs": "^7.8.0",
-    "lodash-es": "^4.17.21"
+    "lodash-es": "^4.17.21",
+    "@nx/angular": "^21.4.1",
+    "@angular/platform-browser": "~20.1.0",
+    "@angular/forms": "~20.1.0"
   },
   "sideEffects": false
 }

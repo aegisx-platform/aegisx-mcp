@@ -1,11 +1,11 @@
 {
   "config": {
-    "configFile": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter/apps/e2e/playwright.config.ts",
-    "rootDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter/apps/e2e/src/specs",
+    "configFile": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-start-2/apps/e2e/playwright.clone2.config.ts",
+    "rootDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-start-2/apps/e2e/src/specs",
     "forbidOnly": false,
     "fullyParallel": true,
-    "globalSetup": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter/apps/e2e/src/support/global-setup.ts",
-    "globalTeardown": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter/apps/e2e/src/support/global-teardown.ts",
+    "globalSetup": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-start-2/apps/e2e/src/support/global-setup.ts",
+    "globalTeardown": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-start-2/apps/e2e/src/support/global-teardown.ts",
     "globalTimeout": 0,
     "grep": {},
     "grepInvert": null,
@@ -43,13 +43,13 @@
     "quiet": false,
     "projects": [
       {
-        "outputDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter/apps/e2e/test-results",
+        "outputDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-start-2/apps/e2e/test-results",
         "repeatEach": 1,
         "retries": 0,
         "metadata": {},
         "id": "setup",
         "name": "setup",
-        "testDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter/apps/e2e/src/specs",
+        "testDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-start-2/apps/e2e/src/specs",
         "testIgnore": [],
         "testMatch": [
           "/.*\\.setup\\.ts/"
@@ -57,13 +57,13 @@
         "timeout": 30000
       },
       {
-        "outputDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter/apps/e2e/test-results",
+        "outputDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-start-2/apps/e2e/test-results",
         "repeatEach": 1,
         "retries": 0,
         "metadata": {},
         "id": "chromium",
         "name": "chromium",
-        "testDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter/apps/e2e/src/specs",
+        "testDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-start-2/apps/e2e/src/specs",
         "testIgnore": [],
         "testMatch": [
           "**/*.@(spec|test).?(c|m)[jt]s?(x)"
@@ -71,13 +71,13 @@
         "timeout": 30000
       },
       {
-        "outputDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter/apps/e2e/test-results",
+        "outputDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-start-2/apps/e2e/test-results",
         "repeatEach": 1,
         "retries": 0,
         "metadata": {},
         "id": "firefox",
         "name": "firefox",
-        "testDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter/apps/e2e/src/specs",
+        "testDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-start-2/apps/e2e/src/specs",
         "testIgnore": [],
         "testMatch": [
           "**/*.@(spec|test).?(c|m)[jt]s?(x)"
@@ -85,13 +85,13 @@
         "timeout": 30000
       },
       {
-        "outputDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter/apps/e2e/test-results",
+        "outputDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-start-2/apps/e2e/test-results",
         "repeatEach": 1,
         "retries": 0,
         "metadata": {},
         "id": "webkit",
         "name": "webkit",
-        "testDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter/apps/e2e/src/specs",
+        "testDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-start-2/apps/e2e/src/specs",
         "testIgnore": [],
         "testMatch": [
           "**/*.@(spec|test).?(c|m)[jt]s?(x)"
@@ -99,13 +99,13 @@
         "timeout": 30000
       },
       {
-        "outputDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter/apps/e2e/test-results",
+        "outputDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-start-2/apps/e2e/test-results",
         "repeatEach": 1,
         "retries": 0,
         "metadata": {},
         "id": "Mobile Chrome",
         "name": "Mobile Chrome",
-        "testDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter/apps/e2e/src/specs",
+        "testDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-start-2/apps/e2e/src/specs",
         "testIgnore": [],
         "testMatch": [
           "**/*.@(spec|test).?(c|m)[jt]s?(x)"
@@ -113,13 +113,13 @@
         "timeout": 30000
       },
       {
-        "outputDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter/apps/e2e/test-results",
+        "outputDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-start-2/apps/e2e/test-results",
         "repeatEach": 1,
         "retries": 0,
         "metadata": {},
         "id": "Mobile Safari",
         "name": "Mobile Safari",
-        "testDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter/apps/e2e/src/specs",
+        "testDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-start-2/apps/e2e/src/specs",
         "testIgnore": [],
         "testMatch": [
           "**/*.@(spec|test).?(c|m)[jt]s?(x)"
@@ -127,13 +127,13 @@
         "timeout": 30000
       },
       {
-        "outputDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter/apps/e2e/test-results",
+        "outputDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-start-2/apps/e2e/test-results",
         "repeatEach": 1,
         "retries": 0,
         "metadata": {},
         "id": "unauthenticated",
         "name": "unauthenticated",
-        "testDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter/apps/e2e/src/specs",
+        "testDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-start-2/apps/e2e/src/specs",
         "testIgnore": [],
         "testMatch": [
           "**/*.@(spec|test).?(c|m)[jt]s?(x)"
@@ -141,13 +141,13 @@
         "timeout": 30000
       },
       {
-        "outputDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter/apps/e2e/test-results",
+        "outputDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-start-2/apps/e2e/test-results",
         "repeatEach": 1,
         "retries": 0,
         "metadata": {},
         "id": "visual-regression",
         "name": "visual-regression",
-        "testDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter/apps/e2e/src/specs",
+        "testDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-start-2/apps/e2e/src/specs",
         "testIgnore": [],
         "testMatch": [
           "/.*visual\\.spec\\.ts/"
@@ -155,13 +155,13 @@
         "timeout": 30000
       },
       {
-        "outputDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter/apps/e2e/test-results",
+        "outputDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-start-2/apps/e2e/test-results",
         "repeatEach": 1,
         "retries": 0,
         "metadata": {},
         "id": "accessibility",
         "name": "accessibility",
-        "testDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter/apps/e2e/src/specs",
+        "testDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-start-2/apps/e2e/src/specs",
         "testIgnore": [],
         "testMatch": [
           "/.*a11y\\.spec\\.ts/"
@@ -169,13 +169,13 @@
         "timeout": 30000
       },
       {
-        "outputDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter/apps/e2e/test-results",
+        "outputDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-start-2/apps/e2e/test-results",
         "repeatEach": 1,
         "retries": 0,
         "metadata": {},
         "id": "performance",
         "name": "performance",
-        "testDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter/apps/e2e/src/specs",
+        "testDir": "/Users/sathitseethaphon/projects/aegisx-platform/aegisx-start-2/apps/e2e/src/specs",
         "testIgnore": [],
         "testMatch": [
           "/.*performance\\.spec\\.ts/"
@@ -198,8 +198,8 @@
     }
   ],
   "stats": {
-    "startTime": "2025-09-01T17:30:11.641Z",
-    "duration": 2497.9379999999996,
+    "startTime": "2025-09-04T03:54:18.239Z",
+    "duration": 1414.52,
     "expected": 0,
     "skipped": 0,
     "unexpected": 0,

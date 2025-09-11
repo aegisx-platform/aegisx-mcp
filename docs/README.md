@@ -1,96 +1,115 @@
-# Enterprise Monorepo Documentation
+# AegisX Documentation
 
-Full-stack enterprise application with Angular 19+, Fastify 4+, and Nx monorepo architecture.
+> Enterprise-ready full-stack application documentation with Angular 19+, Fastify 4+, PostgreSQL, and Nx monorepo.
 
-## 📚 Documentation Index
+## 🚀 Quick Navigation
 
-### 📊 [Feature Development Tracking](./01-feature-tracking.md)
-Complete system for tracking feature development progress, status management, and session documentation.
+### 📖 [Getting Started](./getting-started/)
 
-### 🚀 [Quick Commands for Claude](./02-quick-commands.md)
-Comprehensive command reference for Claude to efficiently create features, components, and workflows.
+Everything you need to bootstrap and run the project for the first time.
 
-### 🏗️ [Project Setup & Bootstrap](./03-project-setup.md)
-Step-by-step guide to bootstrap the entire monorepo from scratch with test validation.
+- **[Getting Started Guide](./getting-started/getting-started.md)** - Git workflow, rules, and first steps
+- **[Project Setup](./getting-started/project-setup.md)** - Complete bootstrap guide with validation
 
-### 🔄 [Development Workflow](./04-development-workflow.md)
-Complete workflow for feature development from API design to production deployment.
+### 🛠️ [Development](./development/)
 
-### 🏛️ [Architecture Patterns](./05-architecture.md)
-Architecture overview with links to detailed frontend and backend patterns.
+Workflows, commands, and development standards for efficient coding.
 
-### 🧪 [Testing Strategy](./06-testing.md)
-Comprehensive testing strategy including unit tests, E2E tests with Playwright MCP, and visual regression.
+- **[QA Checklist](./development/qa-checklist.md)** - 🚨 Mandatory quality assurance steps (do this every time!)
+- **[Feature Tracking System](./development/feature-tracking.md)** - Progress tracking and session documentation
+- **[Quick Commands](./development/quick-commands.md)** - Claude command reference (/feature, /status, etc.)
+- **[Development Workflow](./development/development-workflow.md)** - Step-by-step feature development
+- **[API-First Workflow](./development/api-first-workflow.md)** - Recommended development approach
+- **[MCP Integration](./development/mcp-integration.md)** - Nx MCP & Playwright MCP usage
 
-### 🚀 [Deployment & Infrastructure](./07-deployment.md)
-Docker configuration, CI/CD pipelines, security requirements, and production deployment.
+### 🏗️ [Architecture](./architecture/)
+
+System design patterns and architectural guidelines.
+
+- **[Architecture Overview](./architecture/architecture-overview.md)** - High-level system design
+- **[Frontend Architecture](./architecture/frontend-architecture.md)** - Angular patterns and standards
+- **[Backend Architecture](./architecture/backend-architecture.md)** - Fastify patterns and standards
+- **Frontend Patterns**: [Signals](./architecture/frontend/), [UI Design](./architecture/frontend/), [Forms](./architecture/frontend/)
+- **Backend Patterns**: [Plugins](./architecture/backend/), [RBAC](./architecture/backend/), [CRUD](./architecture/backend/)
+
+### 🧪 [Testing](./testing/)
+
+Comprehensive testing strategy and tools.
+
+- **[Testing Strategy](./testing/testing-strategy.md)** - Unit, integration, and E2E testing
+- **[API Testing](./testing/api-testing.md)** - Backend API testing patterns
+- **[Integration Tests](./testing/integration-tests.md)** - Full application testing
+- **[Manual Test Commands](./testing/manual-test-commands.md)** - Manual testing procedures
+
+### 🚀 [Infrastructure](./infrastructure/)
+
+Deployment, CI/CD, and production operations.
+
+- **[Deployment Guide](./infrastructure/deployment.md)** - Docker and production deployment
+- **[CI/CD Setup](./infrastructure/ci-cd-setup.md)** - GitHub Actions and automation
+- **[Git Flow & Release](./infrastructure/git-flow-release-guide.md)** - Branch strategy and releases
+- **[Docker Guide](./infrastructure/monorepo-docker-guide.md)** - Containerization for monorepo
+- **[Automated Versioning](./infrastructure/automated-versioning-guide.md)** - Release management
+
+### 📡 [API Documentation](./api/)
+
+API specifications and response standards.
+
+- **[API Response Standard](./api/api-response-standard.md)** - Unified response format
+- **[TypeBox Schema Standard](./api/typebox-schema-standard.md)** - Schema validation patterns
+- **[Response Patterns](./api/response-patterns-examples.md)** - Implementation examples
+
+### 📚 [References](./references/)
+
+Quick reference guides and standards.
+
+- **[Claude Commands](./references/claude-commands.md)** - Complete command reference
+- **[Fastify Plugin Standards](./references/fastify-plugin-standards.md)** - Plugin development guide
+- **[Library Standards](./references/library-standards.md)** - Code standards and conventions
+
+### 📊 [Reports & Audits](./reports/)
+
+Performance reports, security audits, and analysis.
+
+- **[Performance Report](./reports/performance-report.md)** - System performance analysis
+- **[Security Audit](./reports/jwt-security-audit.md)** - JWT and authentication security
+- **[Redis Caching Guide](./reports/redis-caching-guide.md)** - Caching implementation
+- **[UI Test Report](./reports/ui-test-report.md)** - Frontend testing results
 
 ## 🛠️ Technology Stack
 
 - **Frontend**: Angular 19+ with Signals, Angular Material + TailwindCSS
-- **Backend**: Fastify 4+ with TypeScript
-- **Database**: PostgreSQL 15+ with Knex.js
-- **Monorepo**: Nx with Yarn workspaces
-- **Testing**: Jest + Playwright + MCP
-- **Infrastructure**: Docker + GitHub Actions + GitHub Container Registry
+- **Backend**: Fastify 4+ with plugin architecture and TypeBox validation
+- **Database**: PostgreSQL 15+ with Knex.js migrations
+- **Testing**: Jest unit tests + Playwright E2E + Visual regression
+- **Infrastructure**: Docker + GitHub Actions + Monitoring stack
+- **Monorepo**: Nx workspace with optimized build caching
 
-## 🏃‍♂️ Quick Start
+## 📋 Development Guidelines
 
-```bash
-# 1. Bootstrap project
-/bootstrap
+### ⚠️ Critical Rules
 
-# 2. Start development
-docker-compose up -d postgres redis
-yarn dev:api
-yarn dev:web
-yarn dev:admin
+- **ALWAYS** use TypeBox schemas for API validation
+- **ALWAYS** follow API-First development workflow
+- **ALWAYS** check existing schemas before writing tests
+- **USE** yarn (never npm) for package management
+- **ASK** before deleting any files
 
-# 3. Create a feature
-/feature user-management
+### 🎯 Recommended Workflow
 
-# 4. Test everything
-/test e2e user-management
-/test visual user-management
-```
+1. **Start**: Read [CLAUDE.md](../CLAUDE.md) for development guidelines
+2. **Status**: Check [PROJECT_STATUS.md](../PROJECT_STATUS.md) for current progress
+3. **Plan**: Use [API-First Workflow](./development/api-first-workflow.md) for new features
+4. **Build**: Follow [Development Workflow](./development/development-workflow.md)
+5. **Test**: Implement [Testing Strategy](./testing/testing-strategy.md)
+6. **Deploy**: Use [Infrastructure](./infrastructure/) guides
 
-## 📋 Feature Commands
+## 🔗 Quick Links
 
-| Command | Description |
-|---------|-------------|
-| `/feature [name]` | Create complete full-stack feature |
-| `/feature:backend [name]` | Backend only |
-| `/feature:frontend [name]` | Frontend only |
-| `/api [resource]` | Create API endpoints |
-| `/component [name] [type]` | Create Angular component |
-| `/test e2e [feature]` | Run E2E tests with Playwright |
-| `/test visual [page]` | Visual regression testing |
-
-## 🎯 Development Approach
-
-### API-First Development
-1. Design OpenAPI specification
-2. Generate types for frontend/backend
-3. Implement backend with tests
-4. Build frontend with real API
-5. E2E testing with Playwright MCP
-
-### Feature Module Pattern
-- **Backend**: Controller → Service → Repository
-- **Frontend**: Smart Components + Presentational Components
-- **Testing**: Unit → Integration → E2E → Visual
-
-## 📊 Project Status
-
-Track all development with the Feature Tracking System:
-- Requirements gathering and documentation
-- Design decisions and API contracts
-- Implementation progress with checklists
-- E2E testing with visual verification
-- Session management and recovery
-
-Use `/start [feature-name]` to begin any new feature development.
+- **[Main Development Hub](../CLAUDE.md)** - Development guidelines and navigation
+- **[Project Status](../PROJECT_STATUS.md)** - Current progress and session recovery
+- **[GitHub Repository README](../README.md)** - Project overview and quick start
 
 ---
 
-*Generated from comprehensive CLAUDE.md documentation*
+> 💡 **Tip**: Use Claude commands like `/feature`, `/test`, `/align:check` for efficient development. See [Quick Commands](./development/quick-commands.md) for the complete reference.

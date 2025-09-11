@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigation Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            display: flex;
+            height: 100vh;
+            background: #f5f5f5;
+        }
+        
+        /* Navigation Container */
+        .navigation {
+            background: #1e293b;
+            color: white;
+            transition: width 300ms ease-in-out;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .navigation.collapsed {
+            width: 64px;
+        }
+        
+        .navigation.expanded {
+            width: 256px;
+        }
+        
+        /* Navigation Header */
+        .navigation-header {
+            padding: 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            transition: all 300ms ease-in-out;
+        }
+        
+        .navigation.collapsed .navigation-header {
+            display: none;
+            height: 0;
+            padding: 0;
+            border: none;
+        }
+        
+        /* Navigation Content */
+        .navigation-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 0;
+        }
+        
+        .navigation.collapsed .navigation-content {
+            padding-top: 16px;
+        }
+        
+        /* Navigation Items */
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            margin: 0 12px 4px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 200ms ease-in-out;
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .navigation.collapsed .nav-item {
+            padding: 12px;
+            margin: 4px 8px;
+            justify-content: center;
+        }
+        
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+        
+        .nav-item.active {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+        }
+        
+        /* Icons */
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+            margin-right: 16px;
+        }
+        
+        .navigation.collapsed .nav-icon {
+            margin: 0;
+        }
+        
+        /* Text */
+        .nav-text {
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+            transition: opacity 200ms ease-in-out;
+        }
+        
+        .navigation.collapsed .nav-text {
+            display: none;
+        }
+        
+        /* Group Title */
+        .nav-group-title {
+            padding: 10px 16px;
+            margin: 24px 12px 0;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: rgba(59, 130, 246, 0.7);
+        }
+        
+        .navigation.collapsed .nav-group-title {
+            display: none;
+        }
+        
+        /* Group Separator */
+        .navigation.collapsed .nav-group:not(:last-child)::after {
+            content: '';
+            display: block;
+            margin: 8px 12px;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.12);
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            transition: margin-left 300ms ease-in-out;
+        }
+        
+        /* Header */
+        .header {
+            background: white;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .toggle-btn {
+            background: none;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+        }
+        
+        .toggle-btn:hover {
+            background: #f5f5f5;
+        }
+        
+        /* Content */
+        .content {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+        }
+        
+        .demo-section {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+        }
+        
+        h2 {
+            margin-bottom: 16px;
+            font-size: 24px;
+        }
+        
+        h3 {
+            margin-bottom: 12px;
+            font-size: 18px;
+        }
+        
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+        
+        .icon-demo {
+            text-align: center;
+            padding: 16px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+        
+        .icon-demo svg {
+            margin-bottom: 8px;
+        }
+        
+        .icon-name {
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navigation collapsed" id="navigation">
+        <div class="navigation-header">
+            <h1 style="font-size: 24px;">AegisX</h1>
+            <span style="font-size: 12px; opacity: 0.8;">v1.0.0</span>
+        </div>
+        
+        <div class="navigation-content">
+            <!-- Dashboard Group -->
+            <div class="nav-group">
+                <div class="nav-group-title">Main</div>
+                <a href="#" class="nav-item active">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z M20.488 9.164A9.004 9.004 0 0112.02 3.05v6.114h8.468z"/>
+                    </svg>
+                    <span class="nav-text">Analytics</span>
+                </a>
+            </div>
+            
+            <!-- Management Group -->
+            <div class="nav-group">
+                <div class="nav-group-title">Management</div>
+                <a href="#" class="nav-item">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                    <span class="nav-text">Users</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                    <span class="nav-text">Projects</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <span class="nav-text">Settings</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <header class="header">
+            <button class="toggle-btn" onclick="toggleNavigation()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+            <h2>Navigation Test Demo</h2>
+        </header>
+        
+        <div class="content">
+            <div class="demo-section">
+                <h3>Navigation States</h3>
+                <p>Click the menu button to toggle between collapsed (64px) and expanded (256px) states.</p>
+                <ul style="margin-top: 12px; padding-left: 24px;">
+                    <li><strong>Collapsed:</strong> Shows only icons, hides header and text</li>
+                    <li><strong>Expanded:</strong> Shows full navigation with header, icons, and text</li>
+                </ul>
+            </div>
+            
+            <div class="demo-section">
+                <h3>Icon Library</h3>
+                <div class="icon-grid">
+                    <div class="icon-demo">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                        </svg>
+                        <div class="icon-name">home</div>
+                    </div>
+                    <div class="icon-demo">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z M20.488 9.164A9.004 9.004 0 0112.02 3.05v6.114h8.468z"/>
+                        </svg>
+                        <div class="icon-name">chart-pie</div>
+                    </div>
+                    <div class="icon-demo">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                        </svg>
+                        <div class="icon-name">users</div>
+                    </div>
+                    <div class="icon-demo">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                        </svg>
+                        <div class="icon-name">briefcase</div>
+                    </div>
+                    <div class="icon-demo">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        <div class="icon-name">cog-6-tooth</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function toggleNavigation() {
+            const nav = document.getElementById('navigation');
+            if (nav.classList.contains('collapsed')) {
+                nav.classList.remove('collapsed');
+                nav.classList.add('expanded');
+            } else {
+                nav.classList.remove('expanded');
+                nav.classList.add('collapsed');
+            }
+        }
+    </script>
+</body>
+</html>

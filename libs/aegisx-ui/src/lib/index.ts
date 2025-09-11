@@ -6,6 +6,7 @@ export * from './services/config/config.service';
 export * from './services/navigation/navigation.service';
 export * from './services/loading/loading.service';
 export * from './services/media-watcher/media-watcher.service';
+export * from './services/icon.service';
 
 // Components
 export * from './components/navigation/navigation.component';
@@ -37,3 +38,15 @@ export * from './utils';
 
 // Directives
 export * from './directives';
+
+// Ax Components
+export * from './layouts/ax-classic/ax-classic-layout.component';
+export * from './layouts/ax-compact/ax-compact-layout.component';
+export * from './layouts/ax-classic/simple-vertical-navigation.component';
+export * from './services/ax-media-watcher.service';
+export * from './components/ax-loading-bar.component';
+export * from './components/ax-fullscreen.component';
+export * from './providers/ax.provider';
+export * from './components/ax-navigation.component';
+export * from './components/ax-navigation-icon.component';
+export * from './types/ax-navigation.types';

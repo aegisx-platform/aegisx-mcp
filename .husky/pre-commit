@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+
+# Allow bypass
+if [ "$SKIP_HOOKS" = "1" ]; then
+    echo "⏭️  Skipping pre-commit hooks"
+    exit 0
+fi
+
+# Quick lint-staged (prettier + eslint fix on staged files only)
+npx lint-staged --quiet

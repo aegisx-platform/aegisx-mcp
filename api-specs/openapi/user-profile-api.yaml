@@ -1,0 +1,674 @@
+openapi: 3.0.3
+info:
+  title: AegisX User Profile API
+  description: API for managing user profiles, avatars, and personal information
+  version: 1.0.0
+  contact:
+    name: AegisX Platform Team
+    url: https://github.com/aegisx-platform
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3000/api
+    description: Development server
+  - url: https://api.aegisx.com
+    description: Production server
+
+security:
+  - bearerAuth: []
+
+paths:
+  /users/profile:
+    get:
+      tags:
+        - User Profile
+      summary: Get current user profile
+      description: Retrieve the current authenticated user's profile information
+      operationId: getUserProfile
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UserProfile'
+              examples:
+                user_profile:
+                  summary: Complete user profile
+                  value:
+                    success: true
+                    data:
+                      id: 'usr_123456789'
+                      email: 'john.doe@example.com'
+                      name: 'John Doe'
+                      firstName: 'John'
+                      lastName: 'Doe'
+                      avatar: 'https://api.aegisx.com/avatars/usr_123456789.jpg'
+                      role:
+                        id: 'role_admin'
+                        name: 'Administrator'
+                        permissions:
+                          [
+                            'users.view',
+                            'users.create',
+                            'users.update',
+                            'users.delete',
+                          ]
+                      preferences:
+                        theme: 'default'
+                        scheme: 'light'
+                        layout: 'classic'
+                        language: 'en'
+                        timezone: 'UTC'
+                        notifications:
+                          email: true
+                          push: false
+                          desktop: true
+                      createdAt: '2024-01-01T00:00:00Z'
+                      updatedAt: '2024-01-15T10:30:00Z'
+                      lastLoginAt: '2024-01-15T09:00:00Z'
+                      status: 'active'
+                    meta:
+                      timestamp: '2024-01-15T10:35:00Z'
+                      version: '1.0'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      tags:
+        - User Profile
+      summary: Update current user profile
+      description: Update the current authenticated user's profile information
+      operationId: updateUserProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProfileUpdateRequest'
+            examples:
+              profile_update:
+                summary: Profile update request
+                value:
+                  name: 'John Smith'
+                  firstName: 'John'
+                  lastName: 'Smith'
+                  preferences:
+                    theme: 'dark'
+                    language: 'en'
+                    timezone: 'America/New_York'
+                    notifications:
+                      email: true
+                      push: true
+                      desktop: false
+      responses:
+        '200':
+          description: User profile updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UserProfile'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /users/avatar:
+    post:
+      tags:
+        - User Profile
+      summary: Upload user avatar
+      description: Upload and set a new avatar image for the current user
+      operationId: uploadUserAvatar
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Avatar image file (JPEG, PNG, WebP)
+            encoding:
+              file:
+                contentType: image/jpeg, image/png, image/webp
+      responses:
+        '200':
+          description: Avatar uploaded successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          avatar:
+                            type: string
+                            format: uri
+                            description: URL of the uploaded avatar
+                            example: 'https://api.aegisx.com/avatars/usr_123456789.jpg'
+                          thumbnails:
+                            type: object
+                            properties:
+                              small:
+                                type: string
+                                format: uri
+                                example: 'https://api.aegisx.com/avatars/usr_123456789_small.jpg'
+                              medium:
+                                type: string
+                                format: uri
+                                example: 'https://api.aegisx.com/avatars/usr_123456789_medium.jpg'
+                              large:
+                                type: string
+                                format: uri
+                                example: 'https://api.aegisx.com/avatars/usr_123456789_large.jpg'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '413':
+          description: File too large
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              example:
+                success: false
+                error:
+                  code: 'FILE_TOO_LARGE'
+                  message: 'File size exceeds maximum limit of 5MB'
+        '415':
+          description: Unsupported media type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              example:
+                success: false
+                error:
+                  code: 'UNSUPPORTED_MEDIA_TYPE'
+                  message: 'Only JPEG, PNG, and WebP images are supported'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags:
+        - User Profile
+      summary: Delete user avatar
+      description: Remove the current user's avatar image
+      operationId: deleteUserAvatar
+      responses:
+        '200':
+          description: Avatar deleted successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          message:
+                            type: string
+                            example: 'Avatar deleted successfully'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Avatar not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              example:
+                success: false
+                error:
+                  code: 'AVATAR_NOT_FOUND'
+                  message: 'No avatar found for the current user'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /users/preferences:
+    get:
+      tags:
+        - User Profile
+      summary: Get user preferences
+      description: Retrieve the current user's preferences and settings
+      operationId: getUserPreferences
+      responses:
+        '200':
+          description: User preferences retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UserPreferences'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      tags:
+        - User Profile
+      summary: Update user preferences
+      description: Update the current user's preferences and settings
+      operationId: updateUserPreferences
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPreferencesUpdateRequest'
+      responses:
+        '200':
+          description: User preferences updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UserPreferences'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ApiResponse:
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
+          description: Indicates if the request was successful
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+
+    ApiMeta:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp of the response
+        version:
+          type: string
+          description: API version
+        requestId:
+          type: string
+          description: Unique request identifier
+
+    UserProfile:
+      type: object
+      required:
+        - id
+        - email
+        - name
+        - role
+        - status
+      properties:
+        id:
+          type: string
+          description: Unique user identifier
+          example: 'usr_123456789'
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: 'john.doe@example.com'
+        name:
+          type: string
+          description: User's full name
+          example: 'John Doe'
+        firstName:
+          type: string
+          description: User's first name
+          example: 'John'
+        lastName:
+          type: string
+          description: User's last name
+          example: 'Doe'
+        avatar:
+          type: string
+          format: uri
+          nullable: true
+          description: URL of the user's avatar image
+          example: 'https://api.aegisx.com/avatars/usr_123456789.jpg'
+        role:
+          $ref: '#/components/schemas/UserRole'
+        preferences:
+          $ref: '#/components/schemas/UserPreferences'
+        createdAt:
+          type: string
+          format: date-time
+          description: User creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last profile update timestamp
+        lastLoginAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Last login timestamp
+        status:
+          type: string
+          enum: [active, inactive, suspended, pending]
+          description: User account status
+          example: 'active'
+        emailVerified:
+          type: boolean
+          description: Whether the user's email is verified
+          default: false
+        twoFactorEnabled:
+          type: boolean
+          description: Whether two-factor authentication is enabled
+          default: false
+
+    UserRole:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          description: Role identifier
+          example: 'role_admin'
+        name:
+          type: string
+          description: Role display name
+          example: 'Administrator'
+        permissions:
+          type: array
+          items:
+            type: string
+          description: List of permissions granted by this role
+          example:
+            ['users.view', 'users.create', 'users.update', 'users.delete']
+
+    UserPreferences:
+      type: object
+      properties:
+        theme:
+          type: string
+          enum: [default, dark, light, auto]
+          description: UI theme preference
+          default: 'default'
+        scheme:
+          type: string
+          enum: [light, dark, auto]
+          description: Color scheme preference
+          default: 'light'
+        layout:
+          type: string
+          enum: [classic, compact, enterprise, empty]
+          description: Layout preference
+          default: 'classic'
+        language:
+          type: string
+          description: Language preference (ISO 639-1 code)
+          example: 'en'
+          default: 'en'
+        timezone:
+          type: string
+          description: Timezone preference (IANA timezone)
+          example: 'UTC'
+          default: 'UTC'
+        dateFormat:
+          type: string
+          enum: [MM/DD/YYYY, DD/MM/YYYY, YYYY-MM-DD]
+          description: Date format preference
+          default: 'MM/DD/YYYY'
+        timeFormat:
+          type: string
+          enum: [12h, 24h]
+          description: Time format preference
+          default: '12h'
+        notifications:
+          $ref: '#/components/schemas/NotificationPreferences'
+        navigation:
+          $ref: '#/components/schemas/NavigationPreferences'
+
+    NotificationPreferences:
+      type: object
+      properties:
+        email:
+          type: boolean
+          description: Enable email notifications
+          default: true
+        push:
+          type: boolean
+          description: Enable push notifications
+          default: false
+        desktop:
+          type: boolean
+          description: Enable desktop notifications
+          default: true
+        sound:
+          type: boolean
+          description: Enable notification sounds
+          default: true
+
+    NavigationPreferences:
+      type: object
+      properties:
+        collapsed:
+          type: boolean
+          description: Whether navigation is collapsed by default
+          default: false
+        type:
+          type: string
+          enum: [default, compact, horizontal]
+          description: Preferred navigation type
+          default: 'default'
+        position:
+          type: string
+          enum: [left, right, top]
+          description: Navigation position
+          default: 'left'
+
+    UserProfileUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: User's full name
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: User's first name
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: User's last name
+        preferences:
+          $ref: '#/components/schemas/UserPreferences'
+
+    UserPreferencesUpdateRequest:
+      type: object
+      properties:
+        theme:
+          type: string
+          enum: [default, dark, light, auto]
+        scheme:
+          type: string
+          enum: [light, dark, auto]
+        layout:
+          type: string
+          enum: [classic, compact, enterprise, empty]
+        language:
+          type: string
+          pattern: '^[a-z]{2}$'
+        timezone:
+          type: string
+        dateFormat:
+          type: string
+          enum: [MM/DD/YYYY, DD/MM/YYYY, YYYY-MM-DD]
+        timeFormat:
+          type: string
+          enum: [12h, 24h]
+        notifications:
+          $ref: '#/components/schemas/NotificationPreferences'
+        navigation:
+          $ref: '#/components/schemas/NavigationPreferences'
+
+    ApiError:
+      type: object
+      required:
+        - success
+        - error
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              description: Error code identifier
+              example: 'VALIDATION_ERROR'
+            message:
+              type: string
+              description: Human-readable error message
+              example: 'Validation failed'
+            details:
+              type: object
+              additionalProperties: true
+              description: Additional error details
+            field:
+              type: string
+              description: Field that caused the error (for validation errors)
+
+    ValidationError:
+      type: object
+      required:
+        - success
+        - error
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              example: 'VALIDATION_ERROR'
+            message:
+              type: string
+              example: 'Validation failed'
+            details:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                    example: 'name'
+                  message:
+                    type: string
+                    example: 'Name is required'
+                  code:
+                    type: string
+                    example: 'REQUIRED'
+
+  responses:
+    UnauthorizedError:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          example:
+            success: false
+            error:
+              code: 'UNAUTHORIZED'
+              message: 'Authentication required'
+
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationError'
+          example:
+            success: false
+            error:
+              code: 'VALIDATION_ERROR'
+              message: 'Validation failed'
+              details:
+                - field: 'name'
+                  message: 'Name is required'
+                  code: 'REQUIRED'
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          example:
+            success: false
+            error:
+              code: 'INTERNAL_SERVER_ERROR'
+              message: 'An unexpected error occurred'
+
+tags:
+  - name: User Profile
+    description: User profile and preferences management

@@ -1,0 +1,714 @@
+/* You can add global styles to this file, and also import other style files */
+
+/* Import Tailwind CSS */
+@tailwind base;
+
+/* Fuse Base Styles Layer */
+@layer base {
+  * {
+    /* Text rendering */
+    text-rendering: optimizeLegibility;
+    -o-text-rendering: optimizeLegibility;
+    -ms-text-rendering: optimizeLegibility;
+    -moz-text-rendering: optimizeLegibility;
+    -webkit-text-rendering: optimizeLegibility;
+    -webkit-tap-highlight-color: transparent;
+
+    /* Remove the focus ring */
+    &:focus {
+      outline: none !important;
+    }
+  }
+
+  /* HTML and Body default styles */
+  html,
+  body {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 100%;
+    -webkit-font-smoothing: auto;
+    -moz-osx-font-smoothing: auto;
+  }
+
+  /* Font size */
+  html {
+    font-size: 16px;
+  }
+
+  body {
+    font-size: 0.875rem;
+    font-feature-settings: 'salt';
+  }
+
+  /* Better spacing and border for horizontal rule */
+  hr {
+    margin: 32px 0;
+    border-bottom-width: 1px;
+  }
+
+  /* Make images and videos to take up all the available space */
+  img {
+    width: 100%;
+    vertical-align: top;
+  }
+
+  /* Fix: Disabled placeholder color is too faded on Safari */
+  input[disabled] {
+    opacity: 1;
+    -webkit-text-fill-color: currentColor;
+  }
+
+  /* Set the background and foreground colors */
+  body,
+  .dark,
+  .light {
+    @apply text-default bg-default #{'!important'};
+  }
+
+  /* Set the border color - exclude Material components including notch */
+  body
+    *:not(.mdc-notched-outline__leading):not(.mdc-notched-outline__notch):not(
+      .mdc-notched-outline__trailing
+    ):not(.mat-mdc-form-field *):not(.mdc-notched-outline),
+  body *:not(.mat-mdc-form-field *):not(.mdc-notched-outline *)::before,
+  body *:not(.mat-mdc-form-field *):not(.mdc-notched-outline *)::after {
+    --tw-border-opacity: 1 !important;
+    border-color: rgba(var(--fuse-border-rgb), var(--tw-border-opacity));
+
+    .dark & {
+      --tw-border-opacity: 0.12 !important;
+    }
+  }
+
+  /* Style scrollbars on platforms other than MacOS and iOS */
+  @media only screen and (min-width: 960px) {
+    body:not(.os-mac) {
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+        background-color: rgba(0, 0, 0, 0);
+      }
+
+      ::-webkit-scrollbar:hover {
+        width: 8px;
+        height: 8px;
+        background-color: rgba(0, 0, 0, 0.06);
+      }
+
+      ::-webkit-scrollbar-thumb {
+        border: 2px solid transparent;
+        border-radius: 20px;
+        box-shadow: inset 0 0 0 20px rgba(0, 0, 0, 0.24);
+      }
+
+      ::-webkit-scrollbar-thumb:active {
+        border-radius: 20px;
+        box-shadow: inset 0 0 0 20px rgba(0, 0, 0, 0.37);
+      }
+
+      &.dark {
+        ::-webkit-scrollbar-thumb {
+          box-shadow: inset 0 0 0 20px rgba(255, 255, 255, 0.24);
+        }
+
+        ::-webkit-scrollbar-thumb:active {
+          box-shadow: inset 0 0 0 20px rgba(255, 255, 255, 0.37);
+        }
+      }
+    }
+  }
+
+  /* Set the foreground color for disabled elements */
+  [disabled] {
+    @apply text-disabled #{'!important'};
+  }
+
+  /* Print styles */
+  @media print {
+    /* Make the base font size smaller for print so everything is scaled nicely */
+    html {
+      font-size: 12px !important;
+    }
+
+    body,
+    .dark,
+    .light {
+      background: none !important;
+    }
+  }
+}
+
+@tailwind components;
+@tailwind utilities;
+
+/* Import Angular Material Theme BEFORE any custom styles */
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+/* Import Material Theme Configuration */
+@import 'styles/material-theme-config';
+
+/* Fix Material outline input border issue with Tailwind */
+/* The issue is Tailwind sets border-style: solid globally, causing the notch to show borders */
+.mdc-notched-outline__notch {
+  border-right: none !important;
+  border-left: none !important;
+}
+
+/* Import Material Icons */
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+/* Material Icons Base Styles */
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Import Perfect Scrollbar */
+@import 'perfect-scrollbar/css/perfect-scrollbar.css';
+
+/* CSS Variables for Fuse theme colors */
+:root {
+  /* Light theme colors */
+  --fuse-bg-card: #ffffff;
+  --fuse-bg-card-rgb: 255, 255, 255;
+  --fuse-bg-default: #f1f5f9;
+  --fuse-bg-default-rgb: 241, 245, 249;
+  --fuse-text-default: #1e293b;
+  --fuse-text-secondary: #64748b;
+  --fuse-text-hint: #94a3b8;
+  --fuse-text-disabled: #94a3b8;
+  --fuse-border: #e2e8f0;
+  --fuse-border-rgb: 226, 232, 240;
+  --fuse-divider: #e2e8f0;
+  /* Additional Fuse colors */
+  --fuse-icon: #64748b;
+  --fuse-mat-icon: #64748b;
+  --fuse-hover: rgba(148, 163, 184, 0.12);
+}
+
+.dark {
+  /* Dark theme colors */
+  --fuse-bg-card: #1e293b;
+  --fuse-bg-card-rgb: 30, 41, 59;
+  --fuse-bg-default: #0f172a;
+  --fuse-bg-default-rgb: 15, 23, 42;
+  --fuse-text-default: #ffffff;
+  --fuse-text-secondary: #94a3b8;
+  --fuse-text-hint: #64748b;
+  --fuse-text-disabled: #475569;
+  --fuse-border: rgba(241, 245, 249, 0.12);
+  --fuse-border-rgb: 241, 245, 249;
+  --fuse-divider: rgba(241, 245, 249, 0.12);
+  /* Additional Fuse colors */
+  --fuse-icon: #f1f5f9;
+  --fuse-mat-icon: #94a3b8;
+  --fuse-hover: rgba(255, 255, 255, 0.05);
+}
+
+/* Define Fuse utility classes */
+@layer utilities {
+  .bg-card {
+    background-color: var(--fuse-bg-card);
+  }
+
+  .bg-default {
+    background-color: var(--fuse-bg-default);
+  }
+
+  .text-default {
+    color: var(--fuse-text-default);
+  }
+
+  .text-secondary {
+    color: var(--fuse-text-secondary);
+  }
+
+  .text-hint {
+    color: var(--fuse-text-hint);
+  }
+
+  .text-disabled {
+    color: var(--fuse-text-disabled);
+  }
+
+  .text-card-foreground {
+    color: var(--fuse-text-default);
+  }
+
+  .border-color {
+    border-color: var(--fuse-border);
+  }
+
+  .hover\:bg-hover:hover {
+    background-color: var(--fuse-hover);
+  }
+
+  /* Icon sizes matching Fuse */
+  .icon-size-4 {
+    font-size: 1rem !important;
+    width: 1rem !important;
+    height: 1rem !important;
+    min-width: 1rem !important;
+    min-height: 1rem !important;
+  }
+
+  .icon-size-5 {
+    font-size: 1.25rem !important;
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+    min-width: 1.25rem !important;
+    min-height: 1.25rem !important;
+  }
+
+  .icon-size-6 {
+    font-size: 1.5rem !important;
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+    min-width: 1.5rem !important;
+    min-height: 1.5rem !important;
+  }
+
+  /* Additional utilities */
+  .flex-0 {
+    flex: 0 0 auto;
+  }
+
+  .flex-auto {
+    flex: 1 1 auto;
+  }
+
+  .min-w-0 {
+    min-width: 0;
+  }
+}
+
+/* Global Styles */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+}
+
+/* Angular Material Form Field Fixes */
+.mat-mdc-form-field {
+  width: 100%;
+}
+
+/* Fix Material Design 3 Input Styles */
+.mat-mdc-text-field-wrapper {
+  background-color: transparent !important;
+}
+
+/* Override Fuse/Ax border styles for Material components */
+.mat-mdc-form-field,
+.mat-mdc-form-field *,
+.mat-mdc-text-field-wrapper,
+.mat-mdc-text-field-wrapper *,
+.mdc-text-field,
+.mdc-text-field *,
+.mdc-notched-outline,
+.mdc-notched-outline *,
+.mdc-line-ripple {
+  --tw-border-opacity: initial !important;
+}
+
+/* Remove any conflicting border from Material inputs */
+.mat-mdc-input-element {
+  border: none !important;
+  outline: none !important;
+}
+
+.mat-mdc-form-field-flex {
+  align-items: baseline !important;
+  padding: 0 !important;
+}
+
+/* Outline appearance */
+.mat-mdc-form-field-appearance-outline .mat-mdc-form-field-wrapper {
+  padding: 0;
+}
+
+.mat-mdc-form-field-appearance-outline .mat-mdc-form-field-flex {
+  padding: 0 1rem !important;
+  margin-top: 0 !important;
+  min-height: 48px !important;
+  height: 48px !important;
+}
+
+.mat-mdc-form-field-appearance-outline .mat-mdc-text-field-wrapper {
+  padding: 0;
+  border: none !important;
+}
+
+.mat-mdc-form-field-appearance-outline .mat-mdc-notched-outline {
+  top: 0;
+}
+
+/* Fix notched outline border rendering */
+.mat-mdc-form-field-appearance-outline .mdc-notched-outline {
+  display: flex;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.mat-mdc-form-field-appearance-outline .mdc-notched-outline__leading {
+  border-radius: 4px 0 0 4px;
+  border: 1px solid;
+  border-right: none;
+}
+
+.mat-mdc-form-field-appearance-outline .mdc-notched-outline__trailing {
+  border-radius: 0 4px 4px 0;
+  border: 1px solid;
+  border-left: none;
+  flex-grow: 1;
+}
+
+.mat-mdc-form-field-appearance-outline .mdc-notched-outline__notch {
+  flex: 0 0 auto;
+  border-left: none;
+  border-right: none;
+  max-width: calc(100% - 12px);
+}
+
+/* Hide the default border */
+.mat-mdc-form-field-appearance-outline .mdc-notched-outline__notch {
+  border-top: 1px solid;
+  border-bottom: 1px solid;
+}
+
+/* When floating */
+.mat-mdc-form-field-appearance-outline
+  .mat-mdc-floating-label.mdc-floating-label--float-above
+  ~ .mdc-notched-outline
+  .mdc-notched-outline__notch {
+  border-top: none;
+}
+
+.mat-mdc-form-field-appearance-outline .mat-mdc-form-field-infix {
+  padding: 0.75rem 0;
+  border: none !important;
+}
+
+.mat-mdc-form-field-appearance-outline .mat-mdc-floating-label {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: all 200ms cubic-bezier(0, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.mat-mdc-form-field-appearance-outline.mat-focused .mat-mdc-floating-label,
+.mat-mdc-form-field-appearance-outline.mat-form-field-should-float
+  .mat-mdc-floating-label {
+  transform: translateY(-1.75rem) scale(0.75);
+  background-color: white;
+  padding: 0 0.25rem;
+}
+
+/* Fill appearance */
+.mat-mdc-form-field-appearance-fill .mat-mdc-form-field-wrapper {
+  padding-bottom: 0;
+}
+
+.mat-mdc-form-field-appearance-fill .mat-mdc-form-field-flex {
+  position: relative;
+  background-color: rgba(0, 0, 0, 0.04);
+  border-radius: 4px 4px 0 0;
+  padding: 0.75rem 0.75rem 0 0.75rem !important;
+  min-height: 56px;
+}
+
+.mat-mdc-form-field-appearance-fill .mat-mdc-form-field-infix {
+  padding: 0.75rem 0 0.5rem 0;
+  border: none;
+}
+
+.mat-mdc-form-field-appearance-fill .mat-mdc-floating-label {
+  position: absolute;
+  left: 0.75rem;
+  transition: all 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.mat-mdc-form-field-appearance-fill.mat-focused .mat-mdc-floating-label,
+.mat-mdc-form-field-appearance-fill.mat-form-field-should-float
+  .mat-mdc-floating-label {
+  transform: translateY(-0.5rem) scale(0.75);
+  transform-origin: left center;
+}
+
+.mat-mdc-form-field-appearance-fill .mat-mdc-form-field-underline {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: rgba(0, 0, 0, 0.42);
+}
+
+.mat-mdc-form-field-appearance-fill .mat-mdc-form-field-ripple {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #3f51b5;
+  transform: scaleX(0);
+  transition: transform 180ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mat-mdc-form-field-appearance-fill.mat-focused .mat-mdc-form-field-ripple {
+  transform: scaleX(1);
+}
+
+/* Input element styles */
+.mat-mdc-input-element {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: rgba(0, 0, 0, 0.87);
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  max-width: 100%;
+  vertical-align: bottom;
+  text-align: inherit;
+  caret-color: #3f51b5;
+}
+
+/* Label and placeholder */
+.mat-mdc-form-field-label {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0.009375em;
+}
+
+.mat-mdc-form-field.mat-focused .mat-mdc-form-field-label {
+  color: #3f51b5;
+}
+
+/* Error state */
+.mat-mdc-form-field-invalid .mat-mdc-form-field-label {
+  color: #f44336;
+}
+
+/* Fix form field subscript positioning */
+.mat-mdc-form-field-subscript-wrapper {
+  position: relative;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+
+.mat-mdc-form-field-error {
+  font-size: 0.75rem;
+  line-height: 1.2;
+  margin-top: 0.25rem;
+  color: #f44336;
+}
+
+/* Hint */
+.mat-mdc-form-field-hint {
+  font-size: 0.75rem;
+  line-height: 1.2;
+  margin-top: 0.25rem;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+/* Textarea specific */
+textarea.mat-mdc-input-element {
+  resize: vertical;
+  overflow: auto;
+  min-height: 75px;
+}
+
+/* Select specific */
+.mat-mdc-select {
+  display: inline-flex;
+  width: 100%;
+  outline: none;
+}
+
+.mat-mdc-select-trigger {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.mat-mdc-select-value {
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mat-mdc-select-arrow-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+}
+
+/* Datepicker specific */
+.mat-mdc-form-field-icon-suffix,
+.mat-mdc-form-field-icon-prefix {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mat-mdc-form-field-icon-suffix {
+  margin-left: 0.5rem;
+}
+
+.mat-mdc-form-field-icon-prefix {
+  margin-right: 0.5rem;
+}
+
+/* Ensure proper outline colors for Material form fields */
+.mat-mdc-form-field-appearance-outline:not(.mat-form-field-invalid)
+  .mdc-notched-outline
+  .mdc-notched-outline__leading,
+.mat-mdc-form-field-appearance-outline:not(.mat-form-field-invalid)
+  .mdc-notched-outline
+  .mdc-notched-outline__notch,
+.mat-mdc-form-field-appearance-outline:not(.mat-form-field-invalid)
+  .mdc-notched-outline
+  .mdc-notched-outline__trailing {
+  border-color: rgba(0, 0, 0, 0.38) !important;
+}
+
+.mat-mdc-form-field-appearance-outline.mat-focused:not(.mat-form-field-invalid)
+  .mdc-notched-outline
+  .mdc-notched-outline__leading,
+.mat-mdc-form-field-appearance-outline.mat-focused:not(.mat-form-field-invalid)
+  .mdc-notched-outline
+  .mdc-notched-outline__notch,
+.mat-mdc-form-field-appearance-outline.mat-focused:not(.mat-form-field-invalid)
+  .mdc-notched-outline
+  .mdc-notched-outline__trailing {
+  border-color: #3f51b5 !important;
+  border-width: 2px !important;
+}
+
+/* Fix for form field with errors */
+.mat-mdc-form-field-appearance-outline.mat-form-field-invalid
+  .mdc-notched-outline
+  .mdc-notched-outline__leading,
+.mat-mdc-form-field-appearance-outline.mat-form-field-invalid
+  .mdc-notched-outline
+  .mdc-notched-outline__notch,
+.mat-mdc-form-field-appearance-outline.mat-form-field-invalid
+  .mdc-notched-outline
+  .mdc-notched-outline__trailing {
+  border-color: #f44336 !important;
+}
+
+/* Remove default Material backgrounds */
+.mat-mdc-text-field-wrapper.mdc-text-field--outlined .mat-mdc-form-field-infix {
+  background-color: transparent;
+}
+
+.mat-mdc-text-field-wrapper.mdc-text-field--filled {
+  background-color: transparent;
+}
+
+/* Ensure proper stacking */
+.mat-mdc-form-field-wrapper {
+  position: relative;
+}
+
+/* Fix for dense form fields */
+.mat-mdc-form-field-appearance-outline.mat-mdc-form-field-dense
+  .mat-mdc-form-field-flex {
+  min-height: 48px;
+}
+
+.mat-mdc-form-field-appearance-fill.mat-mdc-form-field-dense
+  .mat-mdc-form-field-flex {
+  min-height: 48px;
+}
+
+/* Import Component Styles */
+@import 'styles/components/material-fixes';
+@import 'styles/components/form-utilities';
+
+
+/* Dark mode support for Material inputs */
+.dark {
+  .mat-mdc-form-field-appearance-fill .mat-mdc-form-field-flex {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  .mat-mdc-input-element {
+    color: rgba(255, 255, 255, 0.87);
+    caret-color: #9fa8da;
+  }
+
+  .mat-mdc-form-field-label {
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .mat-mdc-form-field.mat-focused .mat-mdc-form-field-label {
+    color: #9fa8da;
+  }
+
+  .mat-mdc-form-field-appearance-outline.mat-focused .mat-mdc-floating-label,
+  .mat-mdc-form-field-appearance-outline.mat-form-field-should-float
+    .mat-mdc-floating-label {
+    background-color: #303030;
+  }
+
+  .mat-mdc-form-field-appearance-fill .mat-mdc-form-field-underline {
+    background-color: rgba(255, 255, 255, 0.42);
+  }
+
+  .mat-mdc-form-field-hint {
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .mat-mdc-form-field-appearance-outline:not(.mat-form-field-invalid)
+    .mdc-notched-outline
+    .mdc-notched-outline__leading,
+  .mat-mdc-form-field-appearance-outline:not(.mat-form-field-invalid)
+    .mdc-notched-outline
+    .mdc-notched-outline__notch,
+  .mat-mdc-form-field-appearance-outline:not(.mat-form-field-invalid)
+    .mdc-notched-outline
+    .mdc-notched-outline__trailing {
+    border-color: rgba(255, 255, 255, 0.38) !important;
+  }
+}
+
+/* Fix for dark mode backgrounds */
+.dark {
+  color-scheme: dark;
+}

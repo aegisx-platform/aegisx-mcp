@@ -30,7 +30,7 @@ async function jwtAuthPlugin(
 }
 
 export default fp(jwtAuthPlugin, {
-  name: 'jwt-auth'
+  name: 'jwt-auth-plugin'
 });
 
 // TypeScript declarations

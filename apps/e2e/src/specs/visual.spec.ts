@@ -15,7 +15,7 @@ test.describe('Visual Regression Tests', () => {
   let navigationPage: NavigationPage;
   let profilePage: ProfilePage;
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page: _page }) => {
     authHelper = new AuthHelper(page);
     visualHelper = new VisualHelper(page);
     dashboardPage = new DashboardPage(page);
@@ -25,20 +25,22 @@ test.describe('Visual Regression Tests', () => {
   });
 
   test.describe('Login Page Visual Tests', () => {
-    test('should match login page baseline', async ({ page }) => {
+    test('should match login page baseline', async ({ page: _page }) => {
       await loginPage.goto();
       await visualHelper.preparePage();
-      
+
       await visualHelper.compareScreenshot('login-page-baseline', {
         fullPage: true,
         animations: 'disabled',
       });
     });
 
-    test('should test login page responsive design', async ({ page }) => {
+    test('should test login page responsive design', async ({
+      page: _page,
+    }) => {
       await loginPage.goto();
       await visualHelper.preparePage();
-      
+
       // Test across different viewports
       await visualHelper.testResponsiveDesign('login-page', {
         viewports: [
@@ -49,28 +51,42 @@ test.describe('Visual Regression Tests', () => {
       });
     });
 
-    test('should test login page theme variations', async ({ page }) => {
+    test('should test login page theme variations', async ({ page: _page }) => {
       await loginPage.goto();
       await visualHelper.preparePage();
-      
+
       await visualHelper.testThemeVariations('login-page', ['light', 'dark']);
     });
 
-    test('should test login form interaction states', async ({ page }) => {
+    test('should test login form interaction states', async ({
+      page: _page,
+    }) => {
       await loginPage.goto();
       await visualHelper.preparePage();
-      
+
       // Test form field focus states
       const interactions = [
-        { name: 'email-focus', selector: 'input[type="email"]', action: 'focus' as const },
-        { name: 'password-focus', selector: 'input[type="password"]', action: 'focus' as const },
-        { name: 'submit-hover', selector: 'button[type="submit"]', action: 'hover' as const },
+        {
+          name: 'email-focus',
+          selector: 'input[type="email"]',
+          action: 'focus' as const,
+        },
+        {
+          name: 'password-focus',
+          selector: 'input[type="password"]',
+          action: 'focus' as const,
+        },
+        {
+          name: 'submit-hover',
+          selector: 'button[type="submit"]',
+          action: 'hover' as const,
+        },
       ];
 
       await visualHelper.testInteractionStates('login-form', interactions);
     });
 
-    test('should test login error states', async ({ page }) => {
+    test('should test login error states', async ({ page: _page }) => {
       await loginPage.goto();
       await visualHelper.preparePage();
 
@@ -98,35 +114,37 @@ test.describe('Visual Regression Tests', () => {
   });
 
   test.describe('Dashboard Visual Tests', () => {
-    test.beforeEach(async ({ page }) => {
+    test.beforeEach(async ({ page: _page }) => {
       await authHelper.loginAsAdmin();
     });
 
-    test('should match dashboard baseline', async ({ page }) => {
+    test('should match dashboard baseline', async ({ page: _page }) => {
       await dashboardPage.goto();
       await visualHelper.preparePage();
-      
+
       await visualHelper.compareScreenshot('dashboard-baseline', {
         fullPage: true,
         animations: 'disabled',
       });
     });
 
-    test('should test dashboard responsive layouts', async ({ page }) => {
+    test('should test dashboard responsive layouts', async ({
+      page: _page,
+    }) => {
       await dashboardPage.goto();
       await visualHelper.preparePage();
-      
+
       await visualHelper.testResponsiveDesign('dashboard');
     });
 
-    test('should test dashboard theme variations', async ({ page }) => {
+    test('should test dashboard theme variations', async ({ page: _page }) => {
       await dashboardPage.goto();
       await visualHelper.preparePage();
-      
+
       await visualHelper.testThemeVariations('dashboard', ['light', 'dark']);
     });
 
-    test('should test dashboard loading states', async ({ page }) => {
+    test('should test dashboard loading states', async ({ page: _page }) => {
       await visualHelper.testLoadingStates('dashboard', [
         {
           name: 'page-load',
@@ -138,7 +156,7 @@ test.describe('Visual Regression Tests', () => {
       ]);
     });
 
-    test('should test dashboard widget states', async ({ page }) => {
+    test('should test dashboard widget states', async ({ page: _page }) => {
       await dashboardPage.goto();
       await visualHelper.preparePage();
 
@@ -153,8 +171,8 @@ test.describe('Visual Regression Tests', () => {
         try {
           await visualHelper.compareElementScreenshot(
             selector,
-            `dashboard-widget-${selector.replace(/[\[\]"=\-]/g, '')}`,
-            { animations: 'disabled' }
+            `dashboard-widget-${selector.replace(/[["=-]]/g, '')}`,
+            { animations: 'disabled' },
           );
         } catch {
           // Widget might not exist, skip
@@ -164,36 +182,38 @@ test.describe('Visual Regression Tests', () => {
   });
 
   test.describe('Navigation Visual Tests', () => {
-    test.beforeEach(async ({ page }) => {
+    test.beforeEach(async ({ page: _page }) => {
       await authHelper.loginAsAdmin();
     });
 
-    test('should test navigation expanded state', async ({ page }) => {
+    test('should test navigation expanded state', async ({ page: _page }) => {
       await dashboardPage.goto();
       await navigationPage.expand();
       await visualHelper.preparePage();
-      
+
       await visualHelper.compareScreenshot('navigation-expanded', {
         fullPage: true,
         animations: 'disabled',
       });
     });
 
-    test('should test navigation collapsed state', async ({ page }) => {
+    test('should test navigation collapsed state', async ({ page: _page }) => {
       await dashboardPage.goto();
       await navigationPage.collapse();
       await visualHelper.preparePage();
-      
+
       await visualHelper.compareScreenshot('navigation-collapsed', {
         fullPage: true,
         animations: 'disabled',
       });
     });
 
-    test('should test navigation responsive behavior', async ({ page }) => {
+    test('should test navigation responsive behavior', async ({
+      page: _page,
+    }) => {
       await dashboardPage.goto();
       await visualHelper.preparePage();
-      
+
       // Test navigation at different screen sizes
       const viewports = Object.entries(TEST_VIEWPORTS).map(([name, size]) => ({
         name,
@@ -201,9 +221,12 @@ test.describe('Visual Regression Tests', () => {
       }));
 
       for (const viewport of viewports) {
-        await page.setViewportSize({ width: viewport.width, height: viewport.height });
+        await page.setViewportSize({
+          width: viewport.width,
+          height: viewport.height,
+        });
         await page.waitForTimeout(500);
-        
+
         await visualHelper.compareScreenshot(`navigation-${viewport.name}`, {
           fullPage: true,
           animations: 'disabled',
@@ -211,14 +234,16 @@ test.describe('Visual Regression Tests', () => {
       }
     });
 
-    test('should test navigation interaction states', async ({ page }) => {
+    test('should test navigation interaction states', async ({
+      page: _page,
+    }) => {
       await dashboardPage.goto();
       await visualHelper.preparePage();
 
       // Test navigation item hover states
       const navItems = page.locator('.nav-item, .nav-link');
       const count = await navItems.count();
-      
+
       if (count > 0) {
         await navItems.first().hover();
         await visualHelper.compareScreenshot('navigation-item-hover', {
@@ -227,30 +252,30 @@ test.describe('Visual Regression Tests', () => {
       }
     });
 
-    test('should test navigation theme variations', async ({ page }) => {
+    test('should test navigation theme variations', async ({ page: _page }) => {
       await dashboardPage.goto();
       await visualHelper.preparePage();
-      
+
       await visualHelper.testThemeVariations('navigation', ['light', 'dark']);
     });
   });
 
   test.describe('Profile Page Visual Tests', () => {
-    test.beforeEach(async ({ page }) => {
+    test.beforeEach(async ({ page: _page }) => {
       await authHelper.loginAsAdmin();
     });
 
-    test('should test profile page baseline', async ({ page }) => {
+    test('should test profile page baseline', async ({ page: _page }) => {
       await profilePage.goto();
       await visualHelper.preparePage();
-      
+
       await visualHelper.compareScreenshot('profile-page-baseline', {
         fullPage: true,
         animations: 'disabled',
       });
     });
 
-    test('should test profile form states', async ({ page }) => {
+    test('should test profile form states', async ({ page: _page }) => {
       await profilePage.goto();
       await visualHelper.preparePage();
 
@@ -263,34 +288,34 @@ test.describe('Visual Regression Tests', () => {
       // Test edit mode
       await profilePage.enterEditMode();
       await page.waitForTimeout(500);
-      
+
       await visualHelper.compareScreenshot('profile-edit-mode', {
         fullPage: true,
         animations: 'disabled',
       });
     });
 
-    test('should test profile responsive design', async ({ page }) => {
+    test('should test profile responsive design', async ({ page: _page }) => {
       await profilePage.goto();
       await visualHelper.preparePage();
-      
+
       await visualHelper.testResponsiveDesign('profile-page');
     });
 
-    test('should test profile theme variations', async ({ page }) => {
+    test('should test profile theme variations', async ({ page: _page }) => {
       await profilePage.goto();
       await visualHelper.preparePage();
-      
+
       await visualHelper.testThemeVariations('profile-page', ['light', 'dark']);
     });
   });
 
   test.describe('Component Visual Tests', () => {
-    test.beforeEach(async ({ page }) => {
+    test.beforeEach(async ({ page: _page }) => {
       await authHelper.loginAsAdmin();
     });
 
-    test('should test button component states', async ({ page }) => {
+    test('should test button component states', async ({ page: _page }) => {
       await dashboardPage.goto();
       await visualHelper.preparePage();
 
@@ -306,31 +331,31 @@ test.describe('Visual Regression Tests', () => {
         try {
           const buttons = page.locator(selector);
           const count = await buttons.count();
-          
+
           if (count > 0) {
             const button = buttons.first();
-            
+
             // Normal state
             await visualHelper.compareElementScreenshot(
               selector,
-              `button-${selector.replace(/[\[\]"=\-.:]/g, '')}-normal`,
-              { animations: 'disabled' }
+              `button-${selector.replace(/[["=\-.:]]/g, '')}-normal`,
+              { animations: 'disabled' },
             );
-            
+
             // Hover state
             await button.hover();
             await visualHelper.compareElementScreenshot(
               selector,
-              `button-${selector.replace(/[\[\]"=\-.:]/g, '')}-hover`,
-              { animations: 'disabled' }
+              `button-${selector.replace(/[["=\-.:]]/g, '')}-hover`,
+              { animations: 'disabled' },
             );
-            
+
             // Focus state
             await button.focus();
             await visualHelper.compareElementScreenshot(
               selector,
-              `button-${selector.replace(/[\[\]"=\-.:]/g, '')}-focus`,
-              { animations: 'disabled' }
+              `button-${selector.replace(/[["=\-.:]]/g, '')}-focus`,
+              { animations: 'disabled' },
             );
           }
         } catch {
@@ -339,7 +364,7 @@ test.describe('Visual Regression Tests', () => {
       }
     });
 
-    test('should test form component states', async ({ page }) => {
+    test('should test form component states', async ({ page: _page }) => {
       await loginPage.goto();
       await visualHelper.preparePage();
 
@@ -354,29 +379,29 @@ test.describe('Visual Regression Tests', () => {
         try {
           const input = page.locator(selector);
           const count = await input.count();
-          
+
           if (count > 0) {
             // Empty state
             await visualHelper.compareElementScreenshot(
               selector,
-              `input-${selector.replace(/[\[\]"=\-.:]/g, '')}-empty`,
-              { animations: 'disabled' }
+              `input-${selector.replace(/[["=\-.:]]/g, '')}-empty`,
+              { animations: 'disabled' },
             );
-            
+
             // Filled state
             await input.fill('Sample text');
             await visualHelper.compareElementScreenshot(
               selector,
-              `input-${selector.replace(/[\[\]"=\-.:]/g, '')}-filled`,
-              { animations: 'disabled' }
+              `input-${selector.replace(/[["=\-.:]]/g, '')}-filled`,
+              { animations: 'disabled' },
             );
-            
+
             // Focus state
             await input.focus();
             await visualHelper.compareElementScreenshot(
               selector,
-              `input-${selector.replace(/[\[\]"=\-.:]/g, '')}-focus`,
-              { animations: 'disabled' }
+              `input-${selector.replace(/[["=\-.:]]/g, '')}-focus`,
+              { animations: 'disabled' },
             );
           }
         } catch {
@@ -385,7 +410,7 @@ test.describe('Visual Regression Tests', () => {
       }
     });
 
-    test('should test card component variations', async ({ page }) => {
+    test('should test card component variations', async ({ page: _page }) => {
       await dashboardPage.goto();
       await visualHelper.preparePage();
 
@@ -401,15 +426,15 @@ test.describe('Visual Regression Tests', () => {
         try {
           const cards = page.locator(selector);
           const count = await cards.count();
-          
+
           if (count > 0) {
             // Test first few cards
             const cardsToTest = Math.min(count, 3);
             for (let i = 0; i < cardsToTest; i++) {
               await visualHelper.compareElementScreenshot(
                 `${selector}:nth-child(${i + 1})`,
-                `card-${selector.replace(/[\[\]"=\-.:]/g, '')}-${i}`,
-                { animations: 'disabled' }
+                `card-${selector.replace(/[["=\-.:]]/g, '')}-${i}`,
+                { animations: 'disabled' },
               );
             }
           }
@@ -421,14 +446,14 @@ test.describe('Visual Regression Tests', () => {
   });
 
   test.describe('Error State Visual Tests', () => {
-    test.beforeEach(async ({ page }) => {
+    test.beforeEach(async ({ page: _page }) => {
       await authHelper.loginAsAdmin();
     });
 
-    test('should test 404 error page', async ({ page }) => {
+    test('should test 404 error page', async ({ page: _page }) => {
       await page.goto('/non-existent-page');
       await visualHelper.preparePage();
-      
+
       // Should show 404 page or redirect
       await visualHelper.compareScreenshot('404-error-page', {
         fullPage: true,
@@ -436,13 +461,13 @@ test.describe('Visual Regression Tests', () => {
       });
     });
 
-    test('should test network error states', async ({ page }) => {
+    test('should test network error states', async ({ page: _page }) => {
       // Mock network failures
-      await page.route('**/api/**', route => route.abort());
-      
+      await page.route('**/api/**', (route) => route.abort());
+
       await dashboardPage.goto();
       await page.waitForTimeout(2000); // Wait for potential error states
-      
+
       await visualHelper.compareScreenshot('network-error-state', {
         fullPage: true,
         animations: 'disabled',
@@ -451,18 +476,18 @@ test.describe('Visual Regression Tests', () => {
   });
 
   test.describe('Print Styles Visual Tests', () => {
-    test.beforeEach(async ({ page }) => {
+    test.beforeEach(async ({ page: _page }) => {
       await authHelper.loginAsAdmin();
     });
 
-    test('should test print styles', async ({ page }) => {
+    test('should test print styles', async ({ page: _page }) => {
       await dashboardPage.goto();
       await visualHelper.preparePage();
-      
+
       // Emulate print media
       await page.emulateMedia({ media: 'print' });
       await page.waitForTimeout(500);
-      
+
       await visualHelper.compareScreenshot('dashboard-print-style', {
         fullPage: true,
         animations: 'disabled',
@@ -471,22 +496,22 @@ test.describe('Visual Regression Tests', () => {
   });
 
   test.describe('High Contrast Mode Visual Tests', () => {
-    test.beforeEach(async ({ page }) => {
+    test.beforeEach(async ({ page: _page }) => {
       await authHelper.loginAsAdmin();
     });
 
-    test('should test high contrast mode', async ({ page }) => {
+    test('should test high contrast mode', async ({ page: _page }) => {
       await dashboardPage.goto();
-      
+
       // Emulate high contrast mode
-      await page.emulateMedia({ 
+      await page.emulateMedia({
         colorScheme: 'dark',
         reducedMotion: 'reduce',
         forcedColors: 'active',
       });
-      
+
       await visualHelper.preparePage();
-      
+
       await visualHelper.compareScreenshot('dashboard-high-contrast', {
         fullPage: true,
         animations: 'disabled',
@@ -495,17 +520,17 @@ test.describe('Visual Regression Tests', () => {
   });
 
   test.describe('Reduced Motion Visual Tests', () => {
-    test.beforeEach(async ({ page }) => {
+    test.beforeEach(async ({ page: _page }) => {
       await authHelper.loginAsAdmin();
     });
 
-    test('should test reduced motion preferences', async ({ page }) => {
+    test('should test reduced motion preferences', async ({ page: _page }) => {
       await dashboardPage.goto();
-      
+
       // Emulate reduced motion preference
       await page.emulateMedia({ reducedMotion: 'reduce' });
       await visualHelper.preparePage();
-      
+
       await visualHelper.compareScreenshot('dashboard-reduced-motion', {
         fullPage: true,
         animations: 'disabled',

@@ -14,7 +14,7 @@ export interface AuthenticatedRequestOptions extends RequestOptions {
 }
 
 export class RequestHelper {
-  private request: supertest.SuperTest<supertest.Test>;
+  private request: any;
 
   constructor(private app: FastifyInstance) {
     // Convert Fastify instance to HTTP server for supertest
@@ -24,24 +24,30 @@ export class RequestHelper {
   /**
    * Make a GET request
    */
-  async get(url: string, options: RequestOptions = {}): Promise<supertest.Response> {
+  async get(
+    url: string,
+    options: RequestOptions = {},
+  ): Promise<supertest.Response> {
     let req = this.request.get(url);
-    
+
     if (options.headers) {
       req = req.set(options.headers);
     }
-    
+
     if (options.query) {
       req = req.query(options.query);
     }
-    
+
     return req;
   }
 
   /**
    * Make an authenticated GET request
    */
-  async getAuth(url: string, options: AuthenticatedRequestOptions): Promise<supertest.Response> {
+  async getAuth(
+    url: string,
+    options: AuthenticatedRequestOptions,
+  ): Promise<supertest.Response> {
     return this.get(url, {
       ...options,
       headers: {
@@ -54,28 +60,57 @@ export class RequestHelper {
   /**
    * Make a POST request
    */
-  async post(url: string, options: RequestOptions = {}): Promise<supertest.Response> {
+  async post(
+    url: string,
+    options: RequestOptions = {},
+  ): Promise<supertest.Response> {
     let req = this.request.post(url);
-    
+
     if (options.headers) {
       req = req.set(options.headers);
     }
-    
+
     if (options.body) {
       req = req.send(options.body);
     }
-    
+
     if (options.query) {
       req = req.query(options.query);
     }
-    
-    return req;
+
+    const response = await req;
+
+    // Debug logging for registration endpoint
+    if (url.includes('/register')) {
+      process.stdout.write('\n=== POST REQUEST DEBUG ===\n');
+      process.stdout.write('URL: ' + url + '\n');
+      process.stdout.write('Full request URL: ' + req.url + '\n');
+      process.stdout.write(
+        'Request headers: ' + JSON.stringify(req.header, null, 2) + '\n',
+      );
+      process.stdout.write(
+        'Request body: ' + JSON.stringify(options.body, null, 2) + '\n',
+      );
+      process.stdout.write('Response status: ' + response.status + '\n');
+      process.stdout.write(
+        'Response headers: ' + JSON.stringify(response.headers, null, 2) + '\n',
+      );
+      process.stdout.write(
+        'Response body: ' + JSON.stringify(response.body, null, 2) + '\n',
+      );
+      process.stdout.write('=== END DEBUG ===\n\n');
+    }
+
+    return response;
   }
 
   /**
    * Make an authenticated POST request
    */
-  async postAuth(url: string, options: AuthenticatedRequestOptions): Promise<supertest.Response> {
+  async postAuth(
+    url: string,
+    options: AuthenticatedRequestOptions,
+  ): Promise<supertest.Response> {
     return this.post(url, {
       ...options,
       headers: {
@@ -89,28 +124,34 @@ export class RequestHelper {
   /**
    * Make a PUT request
    */
-  async put(url: string, options: RequestOptions = {}): Promise<supertest.Response> {
+  async put(
+    url: string,
+    options: RequestOptions = {},
+  ): Promise<supertest.Response> {
     let req = this.request.put(url);
-    
+
     if (options.headers) {
       req = req.set(options.headers);
     }
-    
+
     if (options.body) {
       req = req.send(options.body);
     }
-    
+
     if (options.query) {
       req = req.query(options.query);
     }
-    
+
     return req;
   }
 
   /**
    * Make an authenticated PUT request
    */
-  async putAuth(url: string, options: AuthenticatedRequestOptions): Promise<supertest.Response> {
+  async putAuth(
+    url: string,
+    options: AuthenticatedRequestOptions,
+  ): Promise<supertest.Response> {
     return this.put(url, {
       ...options,
       headers: {
@@ -124,28 +165,34 @@ export class RequestHelper {
   /**
    * Make a PATCH request
    */
-  async patch(url: string, options: RequestOptions = {}): Promise<supertest.Response> {
+  async patch(
+    url: string,
+    options: RequestOptions = {},
+  ): Promise<supertest.Response> {
     let req = this.request.patch(url);
-    
+
     if (options.headers) {
       req = req.set(options.headers);
     }
-    
+
     if (options.body) {
       req = req.send(options.body);
     }
-    
+
     if (options.query) {
       req = req.query(options.query);
     }
-    
+
     return req;
   }
 
   /**
    * Make an authenticated PATCH request
    */
-  async patchAuth(url: string, options: AuthenticatedRequestOptions): Promise<supertest.Response> {
+  async patchAuth(
+    url: string,
+    options: AuthenticatedRequestOptions,
+  ): Promise<supertest.Response> {
     return this.patch(url, {
       ...options,
       headers: {
@@ -159,24 +206,30 @@ export class RequestHelper {
   /**
    * Make a DELETE request
    */
-  async delete(url: string, options: RequestOptions = {}): Promise<supertest.Response> {
+  async delete(
+    url: string,
+    options: RequestOptions = {},
+  ): Promise<supertest.Response> {
     let req = this.request.delete(url);
-    
+
     if (options.headers) {
       req = req.set(options.headers);
     }
-    
+
     if (options.query) {
       req = req.query(options.query);
     }
-    
+
     return req;
   }
 
   /**
    * Make an authenticated DELETE request
    */
-  async deleteAuth(url: string, options: AuthenticatedRequestOptions): Promise<supertest.Response> {
+  async deleteAuth(
+    url: string,
+    options: AuthenticatedRequestOptions,
+  ): Promise<supertest.Response> {
     return this.delete(url, {
       ...options,
       headers: {
@@ -190,29 +243,29 @@ export class RequestHelper {
    * Upload file using multipart/form-data
    */
   async uploadFile(
-    url: string, 
-    fieldName: string, 
-    filePath: string, 
-    options: AuthenticatedRequestOptions = { token: '' }
+    url: string,
+    fieldName: string,
+    filePath: string,
+    options: AuthenticatedRequestOptions = { token: '' },
   ): Promise<supertest.Response> {
     let req = this.request.post(url);
-    
+
     if (options.token) {
       req = req.set('Authorization', `Bearer ${options.token}`);
     }
-    
+
     if (options.headers) {
       req = req.set(options.headers);
     }
-    
+
     req = req.attach(fieldName, filePath);
-    
+
     if (options.body) {
       for (const [key, value] of Object.entries(options.body)) {
-        req = req.field(key, value);
+        req = req.field(key, String(value));
       }
     }
-    
+
     return req;
   }
 
@@ -224,26 +277,26 @@ export class RequestHelper {
     fieldName: string,
     buffer: Buffer,
     filename: string,
-    options: AuthenticatedRequestOptions = { token: '' }
+    options: AuthenticatedRequestOptions = { token: '' },
   ): Promise<supertest.Response> {
     let req = this.request.post(url);
-    
+
     if (options.token) {
       req = req.set('Authorization', `Bearer ${options.token}`);
     }
-    
+
     if (options.headers) {
       req = req.set(options.headers);
     }
-    
+
     req = req.attach(fieldName, buffer, filename);
-    
+
     if (options.body) {
       for (const [key, value] of Object.entries(options.body)) {
-        req = req.field(key, value);
+        req = req.field(key, String(value));
       }
     }
-    
+
     return req;
   }
 
@@ -254,10 +307,10 @@ export class RequestHelper {
     method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
     url: string,
     cookies: Record<string, string>,
-    options: RequestOptions = {}
+    options: RequestOptions = {},
   ): Promise<supertest.Response> {
     let req: supertest.Test;
-    
+
     switch (method) {
       case 'GET':
         req = this.request.get(url);
@@ -275,25 +328,25 @@ export class RequestHelper {
         req = this.request.delete(url);
         break;
     }
-    
+
     // Set cookies
     const cookieString = Object.entries(cookies)
       .map(([key, value]) => `${key}=${value}`)
       .join('; ');
     req = req.set('Cookie', cookieString);
-    
+
     if (options.headers) {
       req = req.set(options.headers);
     }
-    
+
     if (options.body) {
       req = req.send(options.body);
     }
-    
+
     if (options.query) {
       req = req.query(options.query);
     }
-    
+
     return req;
   }
 
@@ -303,7 +356,7 @@ export class RequestHelper {
   extractCookies(response: supertest.Response): Record<string, string> {
     const cookies: Record<string, string> = {};
     const setCookieHeader = response.headers['set-cookie'];
-    
+
     if (setCookieHeader) {
       for (const cookie of setCookieHeader) {
         const [keyValue] = cookie.split(';');
@@ -313,7 +366,7 @@ export class RequestHelper {
         }
       }
     }
-    
+
     return cookies;
   }
 
@@ -324,7 +377,7 @@ export class RequestHelper {
     method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
     url: string,
     options: RequestOptions = {},
-    maxRedirects: number = 5
+    maxRedirects = 5,
   ): Promise<supertest.Response[]> {
     const responses: supertest.Response[] = [];
     let currentUrl = url;
@@ -354,7 +407,11 @@ export class RequestHelper {
       responses.push(response);
 
       // Check if response is a redirect
-      if (response.status >= 300 && response.status < 400 && response.headers.location) {
+      if (
+        response.status >= 300 &&
+        response.status < 400 &&
+        response.headers.location
+      ) {
         currentUrl = response.headers.location;
         redirectCount++;
         // Only GET requests should be used for subsequent redirects
@@ -376,10 +433,12 @@ export class RequestHelper {
     url: string,
     expectedStatus: number | number[],
     options: RequestOptions = {},
-    config: { maxAttempts?: number; intervalMs?: number } = {}
+    config: { maxAttempts?: number; intervalMs?: number } = {},
   ): Promise<supertest.Response> {
     const { maxAttempts = 30, intervalMs = 1000 } = config;
-    const expectedStatuses = Array.isArray(expectedStatus) ? expectedStatus : [expectedStatus];
+    const expectedStatuses = Array.isArray(expectedStatus)
+      ? expectedStatus
+      : [expectedStatus];
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       let response: supertest.Response;
@@ -407,11 +466,13 @@ export class RequestHelper {
       }
 
       if (attempt < maxAttempts) {
-        await new Promise(resolve => setTimeout(resolve, intervalMs));
+        await new Promise((resolve) => setTimeout(resolve, intervalMs));
       }
     }
 
-    throw new Error(`Expected status ${expectedStatus} not received after ${maxAttempts} attempts`);
+    throw new Error(
+      `Expected status ${expectedStatus} not received after ${maxAttempts} attempts`,
+    );
   }
 }
 

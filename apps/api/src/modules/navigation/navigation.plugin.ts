@@ -11,14 +11,14 @@ import navigationRoutes from './navigation.routes';
  */
 async function navigationPlugin(
   fastify: FastifyInstance,
-  _opts: FastifyPluginOptions
+  _opts: FastifyPluginOptions,
 ) {
   // Register module schemas using the schema registry
   fastify.schemaRegistry.registerModuleSchemas('navigation', navigationSchemas);
 
   // Initialize navigation service
   const navigationService = new NavigationService(fastify);
-  
+
   // Decorate fastify instance with navigation service
   fastify.decorate('navigationService', navigationService);
 
@@ -32,7 +32,9 @@ async function navigationPlugin(
       await navigationService.invalidateCache();
       fastify.log.info('Navigation cache cleared on server shutdown');
     } catch (error) {
-      fastify.log.warn(`Failed to clear navigation cache on shutdown: ${error}`);
+      fastify.log.warn(
+        `Failed to clear navigation cache on shutdown: ${error}`,
+      );
     }
   });
 
@@ -40,15 +42,17 @@ async function navigationPlugin(
   fastify.addHook('onReady', async () => {
     try {
       // Verify database connection and basic functionality
-      const healthCheck = await navigationService.getNavigation({ 
+      const healthCheck = await navigationService.getNavigation({
         type: 'default',
-        includeDisabled: false 
+        includeDisabled: false,
       });
-      
+
       fastify.log.info('Navigation module initialized successfully');
-      fastify.log.debug(`Navigation health check passed. Found ${
-        Object.keys(healthCheck).length
-      } navigation types`);
+      fastify.log.debug(
+        `Navigation health check passed. Found ${
+          Object.keys(healthCheck).length
+        } navigation types`,
+      );
     } catch (error) {
       fastify.log.error(`Navigation module initialization failed: ${error}`);
       // Don't throw here to prevent server startup failure
@@ -61,7 +65,12 @@ async function navigationPlugin(
 
 export default fp(navigationPlugin, {
   name: 'navigation-plugin',
-  dependencies: ['knex', 'response-handler', 'auth-strategies-plugin']
+  dependencies: [
+    'knex-plugin',
+    'response-handler-plugin',
+    'auth-strategies-plugin',
+    'schemas-plugin',
+  ],
 });
 
 // TypeScript declarations

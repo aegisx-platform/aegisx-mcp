@@ -16,75 +16,82 @@ export const AuthUserSchema = Type.Object({
   isActive: Type.Boolean(),
   role: Type.String(),
   createdAt: Type.String({ format: 'date-time' }),
-  updatedAt: Type.String({ format: 'date-time' })
+  updatedAt: Type.String({ format: 'date-time' }),
 });
 
 // Request Schemas
 export const RegisterRequestSchema = Type.Object({
-  email: Type.String({ 
+  email: Type.String({
     format: 'email',
-    description: 'User email address'
+    description: 'User email address',
   }),
-  username: Type.String({ 
-    minLength: 3, 
+  username: Type.String({
+    minLength: 3,
     maxLength: 50,
     pattern: '^[a-zA-Z0-9_-]+$',
-    description: 'Username (alphanumeric, underscore, hyphen only)'
+    description: 'Username (alphanumeric, underscore, hyphen only)',
   }),
-  password: Type.String({ 
+  password: Type.String({
     minLength: 8,
-    description: 'Password (minimum 8 characters)'
+    description: 'Password (minimum 8 characters)',
   }),
   firstName: Type.String({
     minLength: 1,
     maxLength: 100,
-    description: 'First name'
+    description: 'First name',
   }),
   lastName: Type.String({
     minLength: 1,
     maxLength: 100,
-    description: 'Last name'
-  })
+    description: 'Last name',
+  }),
 });
 
 export const LoginRequestSchema = Type.Object({
-  email: Type.String({ 
-    format: 'email',
-    description: 'User email address'
+  email: Type.String({
+    description: 'User email address or username',
   }),
   password: Type.String({
-    description: 'User password'
-  })
+    description: 'User password',
+  }),
 });
 
 export const RefreshRequestSchema = Type.Object({
-  refreshToken: Type.Optional(Type.String({
-    description: 'Refresh token (optional if sent via cookie)'
-  }))
+  refreshToken: Type.Optional(
+    Type.String({
+      description: 'Refresh token (optional if sent via cookie)',
+    }),
+  ),
 });
 
 // Response Schemas
 export const AuthResponseSchema = ApiSuccessResponseSchema(
   Type.Object({
     user: AuthUserSchema,
-    accessToken: Type.String()
-  })
+    accessToken: Type.String(),
+    refreshToken: Type.String(),
+    expiresIn: Type.String(),
+  }),
 );
 
-export const RegisterResponseSchema = ApiSuccessResponseSchema(AuthUserSchema);
+export const RegisterResponseSchema = ApiSuccessResponseSchema(
+  Type.Object({
+    user: AuthUserSchema,
+    accessToken: Type.String(),
+    refreshToken: Type.String(),
+    expiresIn: Type.String(),
+  }),
+);
 
 export const RefreshResponseSchema = ApiSuccessResponseSchema(
   Type.Object({
-    accessToken: Type.String()
-  })
+    accessToken: Type.String(),
+  }),
 );
 
 export const ProfileResponseSchema = ApiSuccessResponseSchema(AuthUserSchema);
 
-export const LogoutResponseSchema = Type.Object({
-  success: Type.Literal(true),
-  message: Type.String()
-});
+export const LogoutResponseSchema = ApiSuccessResponseSchema(Type.Object({}));
 
 // TypeScript Types
 export type AuthUser = Static<typeof AuthUserSchema>;
@@ -108,15 +115,15 @@ export const authSchemas = {
   'refresh-response': RefreshResponseSchema,
   'profile-response': ProfileResponseSchema,
   'logout-response': LogoutResponseSchema,
-  
+
   // Legacy compatibility
-  'authUser': AuthUserSchema,
-  'registerRequest': RegisterRequestSchema,
-  'loginRequest': LoginRequestSchema,
-  'refreshRequest': RefreshRequestSchema,
-  'authResponse': AuthResponseSchema,
-  'registerResponse': RegisterResponseSchema,
-  'refreshResponse': RefreshResponseSchema,
-  'profileResponse': ProfileResponseSchema,
-  'logoutResponse': LogoutResponseSchema
+  authUser: AuthUserSchema,
+  registerRequest: RegisterRequestSchema,
+  loginRequest: LoginRequestSchema,
+  refreshRequest: RefreshRequestSchema,
+  authResponse: AuthResponseSchema,
+  registerResponse: RegisterResponseSchema,
+  refreshResponse: RefreshResponseSchema,
+  profileResponse: ProfileResponseSchema,
+  logoutResponse: LogoutResponseSchema,
 };

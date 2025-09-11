@@ -1,6 +1,7 @@
 import '@fastify/jwt';
 import { Knex } from 'knex';
 import { Redis } from 'ioredis';
+import { JWTPayload } from './jwt.types';
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -11,11 +12,7 @@ declare module 'fastify' {
 
 declare module '@fastify/jwt' {
   interface FastifyJWT {
-    payload: {
-      id: string;
-      email: string;
-      role: string;
-    };
+    payload: JWTPayload;
     user: {
       id: string;
       email: string;

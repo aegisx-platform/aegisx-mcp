@@ -1,58 +1,91 @@
-# Multi-stage Dockerfile for AegisX Web Application
-# Stage 1: Build the Angular application
-FROM node:20-alpine AS builder
+# Multi-stage production-optimized Dockerfile for AegisX Web Application
+# Stage 1: Base builder with security hardening
+FROM node:20.19.0-alpine3.20 AS base
 
-# Install security updates and required packages
-RUN apk update && apk upgrade && \
+# Install security updates and build dependencies
+RUN apk update && apk upgrade --no-cache && \
     apk add --no-cache \
-    python3 \
-    make \
-    g++ \
-    && rm -rf /var/cache/apk/*
+    python3=~3.12 \
+    make=~4.4 \
+    g++=~13.2 \
+    && rm -rf /var/cache/apk/* \
+    && npm config set audit-level moderate
 
-# Set working directory
+# Create non-root build user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S aegisx -u 1001 -G nodejs
+
 WORKDIR /app
 
-# Copy package files for dependency installation
-COPY package*.json yarn.lock ./
-COPY nx.json tsconfig.base.json ./
+# Ensure proper ownership of /app directory for non-root user
+RUN chown -R aegisx:nodejs /app
 
-# Copy project-specific configurations
-COPY apps/web/package*.json apps/web/ 2>/dev/null || true
-COPY apps/web/project.json apps/web/
-COPY apps/web/tsconfig*.json apps/web/
+USER aegisx
 
-# Install all dependencies
-RUN yarn install --frozen-lockfile --network-timeout 100000
+# Stage 2: Dependencies with optimized caching
+FROM base AS dependencies
 
-# Copy source code
-COPY apps/web/src apps/web/src/
-COPY apps/web/public apps/web/public/
-COPY libs/ libs/ 2>/dev/null || true
+# Copy package files for dependency installation (optimize Docker layer caching)
+COPY --chown=aegisx:nodejs package*.json yarn.lock ./
+COPY --chown=aegisx:nodejs nx.json tsconfig.base.json ./
 
-# Build the Angular application for production
-RUN npx nx build web --configuration=production
+# Copy project configurations
+COPY --chown=aegisx:nodejs apps/web/project.json apps/web/
+COPY --chown=aegisx:nodejs apps/web/tsconfig*.json apps/web/
+COPY --chown=aegisx:nodejs apps/web/tailwind.config.js apps/web/
+COPY --chown=aegisx:nodejs apps/web/postcss.config.js apps/web/
 
-# Stage 2: Production runtime with Nginx
-FROM nginx:1.25-alpine AS runtime
+# Ensure node_modules directory has proper permissions
+RUN mkdir -p /app/node_modules && chown -R aegisx:nodejs /app/node_modules
 
-# Install security updates
-RUN apk update && apk upgrade && rm -rf /var/cache/apk/*
+# Install dependencies with cache optimization
+RUN yarn install --frozen-lockfile --network-timeout 600000 \
+    --prefer-offline --cache-folder /tmp/yarn-cache \
+    && rm -rf /tmp/yarn-cache
 
-# Create non-root user for Nginx
+# Stage 3: Build stage
+FROM dependencies AS builder
+
+# Copy source code and libraries
+COPY --chown=aegisx:nodejs apps/web/src apps/web/src/
+COPY --chown=aegisx:nodejs apps/web/public apps/web/public/
+COPY --chown=aegisx:nodejs libs/ libs/
+
+# Build Angular application with production optimizations (disable Nx daemon for Docker)
+RUN NODE_ENV=production NX_DAEMON=false npx nx build web --configuration=production \
+    --optimization --extractLicenses --namedChunks=false \
+    --outputHashing=all --buildOptimizer --aot
+
+# Stage 4: Production runtime with hardened Nginx
+FROM nginx:1.26.2-alpine3.20 AS production
+
+# Install security updates and essential tools
+RUN apk update && apk upgrade --no-cache && \
+    apk add --no-cache \
+    tini=~0.19 \
+    wget=~1.24 \
+    && rm -rf /var/cache/apk/* /tmp/* \
+    && rm -f /var/log/nginx/access.log /var/log/nginx/error.log
+
+# Create non-root user for enhanced security
 RUN addgroup -g 1001 -S aegisx && \
     adduser -S aegisx -u 1001 -G aegisx
 
-# Copy built application from builder stage
-COPY --from=builder /app/dist/apps/web /usr/share/nginx/html
-
-# Copy custom Nginx configuration
-COPY apps/web/nginx.conf /etc/nginx/nginx.conf
-
-# Create necessary directories and set permissions
-RUN mkdir -p /var/cache/nginx /var/log/nginx /var/run && \
+# Create necessary directories with proper permissions
+RUN mkdir -p /var/cache/nginx /var/log/nginx /var/run /usr/share/nginx/html && \
     chown -R aegisx:aegisx /var/cache/nginx /var/log/nginx /var/run /usr/share/nginx/html && \
-    chmod -R 755 /var/cache/nginx /var/log/nginx /var/run
+    chmod 755 /var/cache/nginx /var/log/nginx /var/run && \
+    chmod 750 /usr/share/nginx/html
+
+# Copy built application from builder stage with correct ownership
+COPY --from=builder --chown=aegisx:aegisx /app/dist/apps/web /usr/share/nginx/html
+
+# Copy optimized Nginx configuration
+COPY --chown=root:root apps/web/nginx.conf /etc/nginx/nginx.conf
+
+# Security: Remove default nginx files and set proper permissions
+RUN rm -f /etc/nginx/conf.d/default.conf && \
+    chmod 644 /etc/nginx/nginx.conf
 
 # Switch to non-root user
 USER aegisx
@@ -60,9 +93,17 @@ USER aegisx
 # Expose port
 EXPOSE 8080
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:8080/ || exit 1
+# Enhanced health check with better error handling
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider --timeout=5 http://localhost:8080/health || exit 1
 
-# Start Nginx
+# Set environment variables for production
+ENV NGINX_ENVSUBST_TEMPLATE_DIR=/etc/nginx/templates \
+    NGINX_ENVSUBST_TEMPLATE_SUFFIX=.template \
+    TZ=UTC
+
+# Use tini as init system for proper signal handling
+ENTRYPOINT ["/sbin/tini", "--"]
+
+# Start Nginx in foreground mode
 CMD ["nginx", "-g", "daemon off;"]

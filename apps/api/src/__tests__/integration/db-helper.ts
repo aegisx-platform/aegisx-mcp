@@ -10,7 +10,7 @@ export class DatabaseHelper {
     // Order matters due to foreign key constraints
     const tables = [
       'user_sessions',
-      'user_preferences', 
+      'user_preferences',
       'role_permissions',
       'navigation_items',
       'audit_logs',
@@ -35,7 +35,7 @@ export class DatabaseHelper {
       SELECT sequence_name FROM information_schema.sequences 
       WHERE sequence_schema = 'public'
     `);
-    
+
     for (const seq of sequences.rows) {
       await this.db.raw(`ALTER SEQUENCE ${seq.sequence_name} RESTART WITH 1`);
     }
@@ -46,8 +46,10 @@ export class DatabaseHelper {
    */
   async truncateTables(tableNames: string[]): Promise<void> {
     if (tableNames.length === 0) return;
-    
-    await this.db.raw(`TRUNCATE TABLE ${tableNames.join(', ')} RESTART IDENTITY CASCADE`);
+
+    await this.db.raw(
+      `TRUNCATE TABLE ${tableNames.join(', ')} RESTART IDENTITY CASCADE`,
+    );
   }
 
   /**
@@ -103,7 +105,9 @@ export class DatabaseHelper {
   /**
    * Create transaction for test isolation
    */
-  async transaction<T>(callback: (trx: Knex.Transaction) => Promise<T>): Promise<T> {
+  async transaction<T>(
+    callback: (trx: Knex.Transaction) => Promise<T>,
+  ): Promise<T> {
     return await this.db.transaction(callback);
   }
 
@@ -117,7 +121,7 @@ export class DatabaseHelper {
   /**
    * Get table schema information
    */
-  async getTableInfo(tableName: string): Promise<any[]> {
+  async getTableInfo(tableName: string): Promise<Record<string, any>> {
     return await this.db(tableName).columnInfo();
   }
 
@@ -187,7 +191,10 @@ export class DatabaseHelper {
   /**
    * Wait for database to be ready (with retry logic)
    */
-  async waitForDatabase(maxAttempts: number = 30, delayMs: number = 1000): Promise<void> {
+  async waitForDatabase(
+    maxAttempts = 30,
+    delayMs = 1000,
+  ): Promise<void> {
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
         const isHealthy = await this.healthCheck();
@@ -195,11 +202,13 @@ export class DatabaseHelper {
           return;
         }
       } catch (error) {
-        console.log(`Database connection attempt ${attempt}/${maxAttempts} failed`);
+        console.log(
+          `Database connection attempt ${attempt}/${maxAttempts} failed`,
+        );
       }
 
       if (attempt < maxAttempts) {
-        await new Promise(resolve => setTimeout(resolve, delayMs));
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
       }
     }
 

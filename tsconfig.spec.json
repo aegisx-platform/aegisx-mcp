@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "types": ["jest", "node"]
+  },
+  "include": [
+    "jest.preset.js",
+    "apps/**/*.spec.ts",
+    "apps/**/*.d.ts",
+    "libs/**/*.spec.ts",
+    "libs/**/*.d.ts"
+  ]
+}

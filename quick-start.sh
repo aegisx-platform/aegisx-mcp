@@ -9,7 +9,7 @@ command -v docker >/dev/null 2>&1 || { echo "❌ Docker is required"; exit 1; }
 
 # Setup
 echo "📦 Installing dependencies..."
-npm install
+yarn install
 
 echo "🔧 Setting up environment..."
 cp .env.example .env
@@ -21,14 +21,14 @@ echo "⏳ Waiting for database..."
 sleep 10
 
 echo "🗄️ Running migrations..."
-npm run db:migrate
-npm run db:seed
+yarn db:migrate
+yarn db:seed
 
 echo "
 ✅ Setup Complete!
 
 🚀 Start development:
-   npm run dev
+   nx run-many --target=serve --projects=api,web
 
 📡 Services:
    API:     http://localhost:3333/health

@@ -42,27 +42,27 @@ API requests are rate limited to prevent abuse. Rate limit headers are included 
           contact: {
             name: 'AegisX Platform Team',
             url: 'https://github.com/aegisx-platform',
-            email: 'support@aegisx.com'
+            email: 'support@aegisx.com',
           },
           license: {
             name: 'MIT',
-            url: 'https://opensource.org/licenses/MIT'
+            url: 'https://opensource.org/licenses/MIT',
           },
-          termsOfService: 'https://aegisx.com/terms'
+          termsOfService: 'https://aegisx.com/terms',
         },
         servers: [
           {
             url: 'http://localhost:3333',
-            description: 'Development server'
+            description: 'Development server',
           },
           {
             url: 'https://staging-api.aegisx.com',
-            description: 'Staging server'
+            description: 'Staging server',
           },
           {
             url: 'https://api.aegisx.com',
-            description: 'Production server'
-          }
+            description: 'Production server',
+          },
         ],
         components: {
           securitySchemes: {
@@ -70,44 +70,48 @@ API requests are rate limited to prevent abuse. Rate limit headers are included 
               type: 'http',
               scheme: 'bearer',
               bearerFormat: 'JWT',
-              description: 'JWT Bearer token authentication'
-            }
-          }
+              description: 'JWT Bearer token authentication',
+            },
+          },
         },
         security: [
           {
-            bearerAuth: []
-          }
+            bearerAuth: [],
+          },
         ],
         tags: [
           {
+            name: 'Documentation',
+            description: 'OpenAPI specification and documentation endpoints',
+          },
+          {
             name: 'System',
-            description: 'System information and health check endpoints'
+            description: 'System information and health check endpoints',
           },
           {
             name: 'Authentication',
-            description: 'Authentication and session management endpoints'
+            description: 'Authentication and session management endpoints',
           },
           {
             name: 'Navigation',
-            description: 'Navigation structure and menu management'
+            description: 'Navigation structure and menu management',
           },
           {
             name: 'User Profile',
-            description: 'User profile and preferences management'
+            description: 'User profile and preferences management',
           },
           {
             name: 'Settings',
-            description: 'Application settings and configuration'
+            description: 'Application settings and configuration',
           },
           {
             name: 'Theme',
-            description: 'Theme and appearance settings'
-          }
-        ]
+            description: 'Theme and appearance settings',
+          },
+        ],
       },
       hideUntagged: false,
-      stripBasePath: false
+      stripBasePath: false,
     });
 
     // Register Swagger UI
@@ -128,8 +132,8 @@ API requests are rate limited to prevent abuse. Rate limit headers are included 
         defaultModelRendering: 'model',
         syntaxHighlight: {
           activate: true,
-          theme: 'monokai'
-        }
+          theme: 'monokai',
+        },
       },
       uiHooks: {
         onRequest: function (request, reply, next) {
@@ -137,7 +141,7 @@ API requests are rate limited to prevent abuse. Rate limit headers are included 
         },
         preHandler: function (request, reply, next) {
           next();
-        }
+        },
       },
       staticCSP: true,
       transformStaticCSP: (header) => header,
@@ -148,20 +152,34 @@ API requests are rate limited to prevent abuse. Rate limit headers are included 
           modifiedSpec.servers = [
             {
               url: `http://${request.headers.host}`,
-              description: 'Current server'
-            }
+              description: 'Current server',
+            },
           ];
         }
         return modifiedSpec;
       },
-      transformSpecificationClone: true
+      transformSpecificationClone: true,
     });
-
 
     // Add JSON endpoint for programmatic access
-    fastify.get('/api/documentation/json', async (request, reply) => {
-      return fastify.swagger();
-    });
+    fastify.get(
+      '/api/documentation/json',
+      {
+        schema: {
+          tags: ['Documentation'],
+          description: 'Get OpenAPI specification in JSON format',
+          response: {
+            200: {
+              type: 'object',
+              description: 'OpenAPI 3.0.3 specification',
+            },
+          },
+        },
+      },
+      async (request, reply) => {
+        return fastify.swagger();
+      },
+    );
 
     // Log Swagger setup
     fastify.log.info('Swagger OpenAPI documentation configured');
@@ -170,6 +188,6 @@ API requests are rate limited to prevent abuse. Rate limit headers are included 
   },
   {
     name: 'swagger-plugin',
-    dependencies: ['schemas-plugin', 'schema-enforcement-plugin']
-  }
+    dependencies: ['schemas-plugin'],
+  },
 );

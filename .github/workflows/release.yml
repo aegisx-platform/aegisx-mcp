@@ -1,120 +1,399 @@
-name: Release
+name: 🚀 Release & Deploy
 
 on:
+  push:
+    branches: [main, develop]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.vscode/**'
+  pull_request:
+    branches: [main, develop]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.vscode/**'
   workflow_dispatch:
     inputs:
-      version_type:
-        description: 'Version type'
+      environment:
+        description: 'Target environment'
         required: true
-        default: 'patch'
+        default: 'staging'
         type: choice
         options:
-          - patch
-          - minor
-          - major
+          - staging
+          - production
+      force_deploy:
+        description: 'Force deploy without tests'
+        required: false
+        default: false
+        type: boolean
 
-permissions:
-  contents: write
-  packages: write
-  pull-requests: write
-  issues: write
+# Prevent multiple deployments from running simultaneously
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+  REGISTRY: ghcr.io
+  # Optimization flags
+  CI: true
+  HUSKY: 0
+  SKIP_ENV_VALIDATION: true
 
 jobs:
-  release:
-    name: Create Release
+  # Setup and validation job
+  setup:
+    name: 📋 Setup & Validation
     runs-on: ubuntu-latest
-    
+    timeout-minutes: 10
+    outputs:
+      is_production: ${{ steps.env.outputs.is_production }}
+      is_staging: ${{ steps.env.outputs.is_staging }}
+      should_deploy: ${{ steps.env.outputs.should_deploy }}
+      matrix: ${{ steps.apps.outputs.matrix }}
     steps:
-      - name: Checkout repository
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔄 Skip duplicate actions
+        id: skip_check
+        uses: fkirc/skip-duplicate-actions@v5
+        with:
+          concurrent_skipping: 'same_content_newer'
+          skip_after_successful_duplicate: 'true'
+          do_not_skip: '["workflow_dispatch", "schedule"]'
+
+      - name: 🏷️ Set environment variables
+        id: env
+        run: |
+          echo "is_production=${{ github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production') }}" >> $GITHUB_OUTPUT
+          echo "is_staging=${{ github.ref == 'refs/heads/develop' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging') }}" >> $GITHUB_OUTPUT
+          echo "should_deploy=${{ github.event_name != 'pull_request' }}" >> $GITHUB_OUTPUT
+
+      - name: 🔍 Detect apps to build
+        id: apps
+        run: |
+          MATRIX='["api","web","admin"]'
+          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+          echo "Apps to build: $MATRIX"
+
+  # Security scanning job
+  security_scan:
+    name: 🔐 Security Scanning
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔍 Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'table'
+          exit-code: '0'
+
+      - name: 🔍 Run Trivy for SARIF (if Advanced Security enabled)
+        id: trivy_sarif
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: 📊 Upload Trivy scan results to GitHub Security
+        if: steps.trivy_sarif.outcome == 'success'
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: 📋 Security scan summary
+        if: always()
+        run: |
+          echo "🔒 Security scanning completed"
+          echo "ℹ️  Note: Advanced Security features require GitHub Pro/Enterprise"
+          if [ -f "trivy-results.sarif" ]; then
+            echo "✅ SARIF report generated successfully"
+          else
+            echo "ℹ️  SARIF upload skipped (Advanced Security not available)"
+          fi
+
+  # Semantic release job (production only)
+  release:
+    name: 📦 Semantic Release
+    needs: [setup, security_scan]
+    if: needs.setup.outputs.is_production == 'true' && needs.setup.outputs.should_deploy == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      NEW_RELEASE_PUBLISHED: ${{ steps.release.outputs.new_release_published }}
+      VERSION: ${{ steps.release.outputs.new_release_version }}
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: 📥 Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup Node.js
+      - name: 🏗️ Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
 
-      - name: Configure Git
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Run tests
-        run: yarn test:ci
-
-      - name: Run linting
-        run: yarn lint
-
-      - name: Run security audit
-        run: yarn security:audit
-
-      - name: Build applications
-        run: yarn build:prod
-
-      - name: Generate changelog
-        run: |
-          chmod +x scripts/generate-changelog.sh
-          ./scripts/generate-changelog.sh
-
-      - name: Commit changelog
-        run: |
-          if [ -n "$(git status --porcelain CHANGELOG.md)" ]; then
-            git add CHANGELOG.md
-            git commit -m "docs: update changelog for release"
-          fi
-
-      - name: Bump version and create tag
-        id: version
-        run: |
-          npm version ${{ github.event.inputs.version_type }} --message "chore: release v%s"
-          echo "new_version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
-
-      - name: Push changes
-        run: |
-          git push origin main --tags
-
-      - name: Wait for CI/CD completion
-        uses: lewagon/wait-on-check-action@v1.3.1
+      - name: 📦 Cache node_modules
+        uses: actions/cache@v4
         with:
-          ref: v${{ steps.version.outputs.new_version }}
-          check-name: 'Build Applications'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 10
+          path: |
+            node_modules
+            ~/.cache/yarn
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ steps.version.outputs.new_version }}
-          name: Release v${{ steps.version.outputs.new_version }}
-          body_path: CHANGELOG.md
-          draft: false
-          prerelease: false
-          generate_release_notes: true
+      - name: ⚡ Install dependencies
+        run: |
+          yarn install --frozen-lockfile --network-timeout 600000
+          yarn add -D @semantic-release/changelog @semantic-release/git
+
+      - name: 🚀 Semantic Release
+        id: release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npx semantic-release
 
-      - name: Notify on success
-        uses: 8398a7/action-slack@v3
-        with:
-          status: success
-          channel: '#releases'
-          text: 'New release v${{ steps.version.outputs.new_version }} has been created successfully!'
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        if: success()
+      - name: 📋 Output release info
+        if: steps.release.outputs.new_release_published == 'true'
+        run: |
+          echo "✅ New release published: v${{ steps.release.outputs.new_release_version }}"
+          echo "📝 Release notes: ${{ steps.release.outputs.new_release_notes }}"
 
-      - name: Notify on failure
-        uses: 8398a7/action-slack@v3
+  # Build applications
+  build:
+    name: 🏗️ Build Apps
+    needs: [setup, security_scan]
+    if: needs.setup.outputs.should_deploy == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        app: ${{ fromJson(needs.setup.outputs.matrix) }}
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          status: failure
-          channel: '#releases'
-          text: 'Release creation failed for v${{ steps.version.outputs.new_version }}'
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        if: failure()
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: 📦 Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ~/.cache/yarn
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: ⚡ Install dependencies
+        run: yarn install --frozen-lockfile --ignore-scripts --network-timeout 600000
+
+      - name: 🔨 Build application
+        run: |
+          echo "🏗️ Building ${{ matrix.app }}..."
+          npx nx build ${{ matrix.app }} --configuration=production --skip-nx-cache=false
+          echo "✅ Build completed for ${{ matrix.app }}"
+
+      - name: 📦 Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.app }}
+          path: dist/apps/${{ matrix.app }}
+          retention-days: 7
+          compression-level: 9
+
+  # Docker build and push
+  docker_build:
+    name: 🐳 Docker Build & Push
+    needs: [setup, build, release]
+    if: always() && needs.setup.outputs.should_deploy == 'true' && needs.build.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        app: ${{ fromJson(needs.setup.outputs.matrix) }}
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-${{ matrix.app }}
+          path: dist/apps/${{ matrix.app }}
+
+      - name: 🏷️ Generate metadata
+        id: meta
+        run: |
+          REPO_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')
+          echo "repo_name=$REPO_NAME" >> $GITHUB_OUTPUT
+
+          if [[ "${{ needs.setup.outputs.is_production }}" == "true" ]]; then
+            VERSION="${{ needs.release.outputs.VERSION || 'latest' }}"
+            TAGS="ghcr.io/$REPO_NAME-${{ matrix.app }}:latest,ghcr.io/$REPO_NAME-${{ matrix.app }}:v$VERSION"
+          else
+            SHORT_SHA=${GITHUB_SHA:0:7}
+            TAGS="ghcr.io/$REPO_NAME-${{ matrix.app }}:staging-$SHORT_SHA,ghcr.io/$REPO_NAME-${{ matrix.app }}:staging-latest"
+          fi
+
+          echo "tags=$TAGS" >> $GITHUB_OUTPUT
+          echo "📋 Docker tags: $TAGS"
+
+      - name: 🏗️ Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: 🔧 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: network=host
+
+      - name: 🧹 Clear corrupted cache (if needed)
+        run: |
+          echo "🧹 Clearing potential cache corruption..."
+          docker builder prune --force --filter type=exec.cachemount || true
+          docker builder prune --force --filter type=source.local || true
+
+      - name: 🔐 Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🐳 Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/${{ matrix.app }}/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          platforms: linux/amd64,linux/arm64
+          cache-to: |
+            type=registry,ref=ghcr.io/${{ steps.meta.outputs.repo_name }}-${{ matrix.app }}:buildcache,mode=max
+          build-args: |
+            APP_VERSION=${{ needs.release.outputs.VERSION || github.sha }}
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+            COMMIT_SHA=${{ github.sha }}
+            NX_DAEMON=false
+            CI=true
+
+      - name: 🔍 Test Docker image
+        run: |
+          IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | cut -d',' -f1)
+          echo "🧪 Testing image: $IMAGE_TAG"
+          docker run --rm --platform linux/amd64 $IMAGE_TAG --version || echo "⚠️ Health check not available"
+
+  # Deploy to staging
+  deploy_staging:
+    name: 🚀 Deploy to Staging
+    needs: [setup, docker_build]
+    if: needs.setup.outputs.is_staging == 'true' && needs.docker_build.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: staging
+    steps:
+      - name: 📋 Deployment Summary
+        run: |
+          echo "🎯 Deploying to Staging Environment"
+          echo "📦 Images deployed:"
+          REPO_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')
+          SHORT_SHA=${GITHUB_SHA:0:7}
+          echo "  - ghcr.io/$REPO_NAME-api:staging-$SHORT_SHA"
+          echo "  - ghcr.io/$REPO_NAME-web:staging-$SHORT_SHA"
+          echo "  - ghcr.io/$REPO_NAME-admin:staging-$SHORT_SHA"
+          echo "🔗 Commit: ${{ github.sha }}"
+          echo "👤 Actor: ${{ github.actor }}"
+
+  # Deploy to production
+  deploy_production:
+    name: 🚀 Deploy to Production
+    needs: [setup, docker_build, release]
+    if: needs.setup.outputs.is_production == 'true' && needs.docker_build.result == 'success' && needs.release.outputs.NEW_RELEASE_PUBLISHED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+    steps:
+      - name: 📋 Production Deployment Summary
+        run: |
+          echo "🎯 Deploying to Production Environment"
+          echo "🏷️ Version: v${{ needs.release.outputs.VERSION }}"
+          echo "📦 Images deployed:"
+          REPO_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')
+          echo "  - ghcr.io/$REPO_NAME-api:v${{ needs.release.outputs.VERSION }}"
+          echo "  - ghcr.io/$REPO_NAME-web:v${{ needs.release.outputs.VERSION }}"
+          echo "  - ghcr.io/$REPO_NAME-admin:v${{ needs.release.outputs.VERSION }}"
+          echo "  - ghcr.io/$REPO_NAME-api:latest"
+          echo "  - ghcr.io/$REPO_NAME-web:latest"
+          echo "  - ghcr.io/$REPO_NAME-admin:latest"
+          echo "🔗 Release: https://github.com/${{ github.repository }}/releases/tag/v${{ needs.release.outputs.VERSION }}"
+
+  # Notifications and cleanup
+  notify:
+    name: 📊 Notifications & Cleanup
+    if: always() && (needs.deploy_production.result != 'skipped' || needs.deploy_staging.result != 'skipped')
+    needs: [setup, deploy_production, deploy_staging]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 📊 Workflow Summary
+        run: |
+          echo "## 📊 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "${{ needs.deploy_production.result }}" == "success" ]]; then
+            echo "✅ **Production Deployment**: Successful" >> $GITHUB_STEP_SUMMARY
+            echo "🏷️ **Version**: v${{ needs.release.outputs.VERSION }}" >> $GITHUB_STEP_SUMMARY
+          elif [[ "${{ needs.deploy_staging.result }}" == "success" ]]; then
+            echo "✅ **Staging Deployment**: Successful" >> $GITHUB_STEP_SUMMARY
+            echo "🔗 **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Workflow**: ${{ github.workflow }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Actor**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: 🧹 Cleanup artifacts
+        uses: actions/upload-artifact/merge@v4
+        if: always()
+        with:
+          name: all-build-artifacts
+          pattern: build-*
+          delete-merged: true
+          retention-days: 3

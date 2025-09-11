@@ -36,71 +36,92 @@ describe('Cross-Module Integration Tests', () => {
     requestHelper = new RequestHelper(app);
 
     // Create test users with comprehensive permissions
-    const adminResult = await authHelper.createUserWithRole('admin', [
-      'admin.read',
-      'admin.write',
-      'users.read',
-      'users.write',
-      'navigation.read',
-      'navigation.write',
-      'profile.read',
-      'profile.write',
-      'reports.read',
-      'settings.read',
-      'settings.write'
-    ], {
-      email: 'admin@example.com',
-      username: 'admin',
-      firstName: 'Super',
-      lastName: 'Admin'
-    });
+    const adminResult = await authHelper.createUserWithRole(
+      'admin',
+      [
+        'admin.read',
+        'admin.write',
+        'users.read',
+        'users.write',
+        'navigation.read',
+        'navigation.write',
+        'profile.read',
+        'profile.write',
+        'reports.read',
+        'settings.read',
+        'settings.write',
+      ],
+      {
+        email: 'crosstest-admin@example.com',
+        username: 'crosstest-admin',
+        firstName: 'Super',
+        lastName: 'Admin',
+      },
+    );
     adminUser = adminResult;
-    const adminTokens = await authHelper.loginUser(adminUser.email, adminUser.password);
+    const adminTokens = await authHelper.loginUser(
+      adminUser.email,
+      adminUser.password,
+    );
     adminToken = adminTokens.accessToken;
 
-    const managerResult = await authHelper.createUserWithRole('manager', [
-      'users.read',
-      'navigation.read',
-      'profile.read',
-      'profile.write',
-      'reports.read',
-      'team.read',
-      'team.write'
-    ], {
-      email: 'manager@example.com',
-      username: 'manager',
-      firstName: 'Team',
-      lastName: 'Manager'
-    });
+    const managerResult = await authHelper.createUserWithRole(
+      'manager',
+      [
+        'users.read',
+        'navigation.read',
+        'profile.read',
+        'profile.write',
+        'reports.read',
+        'team.read',
+        'team.write',
+      ],
+      {
+        email: 'crosstest-manager@example.com',
+        username: 'crosstest-manager',
+        firstName: 'Team',
+        lastName: 'Manager',
+      },
+    );
     managerUser = managerResult;
-    const managerTokens = await authHelper.loginUser(managerUser.email, managerUser.password);
+    const managerTokens = await authHelper.loginUser(
+      managerUser.email,
+      managerUser.password,
+    );
     managerToken = managerTokens.accessToken;
 
-    const regularResult = await authHelper.createUserWithRole('user', [
-      'profile.read',
-      'profile.write',
-      'navigation.read',
-      'basic.read'
-    ], {
-      email: 'user@example.com',
-      username: 'user',
-      firstName: 'Regular',
-      lastName: 'User'
-    });
+    const regularResult = await authHelper.createUserWithRole(
+      'user',
+      ['profile.read', 'profile.write', 'navigation.read', 'basic.read'],
+      {
+        email: 'crosstest-user@example.com',
+        username: 'crosstest-user',
+        firstName: 'Regular',
+        lastName: 'User',
+      },
+    );
     regularUser = regularResult;
-    const regularTokens = await authHelper.loginUser(regularUser.email, regularUser.password);
+    const regularTokens = await authHelper.loginUser(
+      regularUser.email,
+      regularUser.password,
+    );
     regularToken = regularTokens.accessToken;
 
-    const limitedResult = await authHelper.createUserWithRole('limited', [
-      'profile.read'
-    ], {
-      email: 'limited@example.com',
-      username: 'limited',
-      firstName: 'Limited',
-      lastName: 'User'
-    });
+    const limitedResult = await authHelper.createUserWithRole(
+      'limited',
+      ['profile.read'],
+      {
+        email: 'crosstest-limited@example.com',
+        username: 'crosstest-limited',
+        firstName: 'Limited',
+        lastName: 'User',
+      },
+    );
     limitedUser = limitedResult;
-    const limitedTokens = await authHelper.loginUser(limitedUser.email, limitedUser.password);
+    const limitedTokens = await authHelper.loginUser(
+      limitedUser.email,
+      limitedUser.password,
+    );
     limitedToken = limitedTokens.accessToken;
 
     // Create comprehensive test navigation structure
@@ -113,7 +134,8 @@ describe('Cross-Module Integration Tests', () => {
 
   beforeEach(async () => {
     // Reset any changes made during individual tests
-    await testContext.db.connection('user_preferences')
+    await testContext.db
+      .connection('user_preferences')
       .where('user_id', regularUser.id)
       .update({
         theme: 'default',
@@ -130,20 +152,21 @@ describe('Cross-Module Integration Tests', () => {
       const loginResponse = await requestHelper.post('/api/auth/login', {
         body: {
           email: regularUser.email,
-          password: regularUser.password
-        }
+          password: regularUser.password,
+        },
       });
 
-      expectResponse(loginResponse)
-        .hasStatus(200)
-        .isSuccess();
+      expectResponse(loginResponse).hasStatus(200).isSuccess();
 
       const { accessToken } = loginResponse.body.data;
 
       // Step 2: Get Profile
-      const profileResponse = await requestHelper.getAuth('/api/users/profile', {
-        token: accessToken
-      });
+      const profileResponse = await requestHelper.getAuth(
+        '/api/users/profile',
+        {
+          token: accessToken,
+        },
+      );
 
       expectResponse(profileResponse)
         .hasStatus(200)
@@ -155,10 +178,15 @@ describe('Cross-Module Integration Tests', () => {
         });
 
       // Step 3: Get Navigation based on user role and preferences
-      const navigationResponse = await requestHelper.getAuth('/api/navigation/user', {
-        token: accessToken,
-        query: { type: profileResponse.body.data.preferences.navigation.type }
-      });
+      const navigationResponse = await requestHelper.getAuth(
+        '/api/navigation/user',
+        {
+          token: accessToken,
+          query: {
+            type: profileResponse.body.data.preferences.navigation.type,
+          },
+        },
+      );
 
       expectResponse(navigationResponse)
         .hasStatus(200)
@@ -176,25 +204,29 @@ describe('Cross-Module Integration Tests', () => {
 
     it('should reflect preference changes in navigation display', async () => {
       // Update user preferences to compact layout
-      const prefsUpdate = await requestHelper.putAuth('/api/users/preferences', {
-        token: regularToken,
-        body: {
-          navigation: {
-            type: 'compact',
-            collapsed: true
-          }
-        }
-      });
+      const prefsUpdate = await requestHelper.putAuth(
+        '/api/users/preferences',
+        {
+          token: regularToken,
+          body: {
+            navigation: {
+              type: 'compact',
+              collapsed: true,
+            },
+          },
+        },
+      );
 
-      expectResponse(prefsUpdate)
-        .hasStatus(200)
-        .isSuccess();
+      expectResponse(prefsUpdate).hasStatus(200).isSuccess();
 
       // Get navigation with updated preferences
-      const navigationResponse = await requestHelper.getAuth('/api/navigation/user', {
-        token: regularToken,
-        query: { type: 'compact' }
-      });
+      const navigationResponse = await requestHelper.getAuth(
+        '/api/navigation/user',
+        {
+          token: regularToken,
+          query: { type: 'compact' },
+        },
+      );
 
       expectResponse(navigationResponse)
         .hasStatus(200)
@@ -210,52 +242,61 @@ describe('Cross-Module Integration Tests', () => {
     it('should enforce consistent permissions across all modules', async () => {
       // Test that limited user cannot access restricted resources
       const restrictedEndpoints = [
-        '/api/users/profile',  // Should work (has profile.read)
+        '/api/users/profile', // Should work (has profile.read)
         '/api/users/preferences', // Should fail (no profile.write for preferences endpoint)
-        '/api/navigation/user',    // Should fail (no navigation.read)
+        '/api/navigation/user', // Should fail (no navigation.read)
       ];
 
       // Test profile access (should work)
-      const profileResponse = await requestHelper.getAuth('/api/users/profile', {
-        token: limitedToken
-      });
-      expectResponse(profileResponse)
-        .hasStatus(200)
-        .isSuccess();
+      const profileResponse = await requestHelper.getAuth(
+        '/api/users/profile',
+        {
+          token: limitedToken,
+        },
+      );
+      expectResponse(profileResponse).hasStatus(200).isSuccess();
 
       // Test preferences access (should work for GET)
-      const prefsResponse = await requestHelper.getAuth('/api/users/preferences', {
-        token: limitedToken
-      });
-      expectResponse(prefsResponse)
-        .hasStatus(200)
-        .isSuccess();
+      const prefsResponse = await requestHelper.getAuth(
+        '/api/users/preferences',
+        {
+          token: limitedToken,
+        },
+      );
+      expectResponse(prefsResponse).hasStatus(200).isSuccess();
 
       // Test navigation access (should fail due to lack of navigation.read)
       const navResponse = await requestHelper.getAuth('/api/navigation/user', {
-        token: limitedToken
+        token: limitedToken,
       });
-      expectResponse(navResponse)
-        .hasStatus(403)
-        .isForbidden();
+      expectResponse(navResponse).hasStatus(403).isForbidden();
     });
 
     it('should show different navigation items based on role permissions', async () => {
       // Get navigation for different user roles
-      const adminNavResponse = await requestHelper.getAuth('/api/navigation/user', {
-        token: adminToken,
-        query: { type: 'default' }
-      });
+      const adminNavResponse = await requestHelper.getAuth(
+        '/api/navigation/user',
+        {
+          token: adminToken,
+          query: { type: 'default' },
+        },
+      );
 
-      const managerNavResponse = await requestHelper.getAuth('/api/navigation/user', {
-        token: managerToken,
-        query: { type: 'default' }
-      });
+      const managerNavResponse = await requestHelper.getAuth(
+        '/api/navigation/user',
+        {
+          token: managerToken,
+          query: { type: 'default' },
+        },
+      );
 
-      const regularNavResponse = await requestHelper.getAuth('/api/navigation/user', {
-        token: regularToken,
-        query: { type: 'default' }
-      });
+      const regularNavResponse = await requestHelper.getAuth(
+        '/api/navigation/user',
+        {
+          token: regularToken,
+          query: { type: 'default' },
+        },
+      );
 
       expectResponse(adminNavResponse).hasStatus(200).isSuccess();
       expectResponse(managerNavResponse).hasStatus(200).isSuccess();
@@ -285,7 +326,7 @@ describe('Cross-Module Integration Tests', () => {
       expect(managerItems.length).toBeGreaterThanOrEqual(regularItems.length);
 
       // Regular user should not see admin-specific items
-      const hasAdminItems = regularItems.some(item => item.includes('admin'));
+      const hasAdminItems = regularItems.some((item) => item.includes('admin'));
       expect(hasAdminItems).toBe(false);
     });
 
@@ -294,20 +335,26 @@ describe('Cross-Module Integration Tests', () => {
       const loginResponse = await requestHelper.post('/api/auth/login', {
         body: {
           email: managerUser.email,
-          password: managerUser.password
-        }
+          password: managerUser.password,
+        },
       });
 
       const { accessToken, refreshToken } = loginResponse.body.data;
 
       // Use token across different modules
-      const profileResponse = await requestHelper.getAuth('/api/users/profile', {
-        token: accessToken
-      });
+      const profileResponse = await requestHelper.getAuth(
+        '/api/users/profile',
+        {
+          token: accessToken,
+        },
+      );
 
-      const navigationResponse = await requestHelper.getAuth('/api/navigation/user', {
-        token: accessToken
-      });
+      const navigationResponse = await requestHelper.getAuth(
+        '/api/navigation/user',
+        {
+          token: accessToken,
+        },
+      );
 
       expectResponse(profileResponse).hasStatus(200).isSuccess();
       expectResponse(navigationResponse).hasStatus(200).isSuccess();
@@ -318,21 +365,25 @@ describe('Cross-Module Integration Tests', () => {
 
       // Logout should invalidate token across all modules
       const logoutResponse = await requestHelper.postAuth('/api/auth/logout', {
-        token: accessToken
+        token: accessToken,
       });
 
-      expectResponse(logoutResponse)
-        .hasStatus(200)
-        .isSuccess();
+      expectResponse(logoutResponse).hasStatus(200).isSuccess();
 
       // Token should now be invalid for all modules
-      const profileAfterLogout = await requestHelper.getAuth('/api/users/profile', {
-        token: accessToken
-      });
+      const profileAfterLogout = await requestHelper.getAuth(
+        '/api/users/profile',
+        {
+          token: accessToken,
+        },
+      );
 
-      const navAfterLogout = await requestHelper.getAuth('/api/navigation/user', {
-        token: accessToken
-      });
+      const navAfterLogout = await requestHelper.getAuth(
+        '/api/navigation/user',
+        {
+          token: accessToken,
+        },
+      );
 
       expectResponse(profileAfterLogout).isUnauthorized();
       expectResponse(navAfterLogout).isUnauthorized();
@@ -344,22 +395,23 @@ describe('Cross-Module Integration Tests', () => {
       // Update profile data
       const profileUpdate = {
         firstName: 'UpdatedFirst',
-        lastName: 'UpdatedLast'
+        lastName: 'UpdatedLast',
       };
 
       const updateResponse = await requestHelper.putAuth('/api/users/profile', {
         token: regularToken,
-        body: profileUpdate
+        body: profileUpdate,
       });
 
-      expectResponse(updateResponse)
-        .hasStatus(200)
-        .isSuccess();
+      expectResponse(updateResponse).hasStatus(200).isSuccess();
 
       // Verify the change is reflected when getting profile
-      const getProfileResponse = await requestHelper.getAuth('/api/users/profile', {
-        token: regularToken
-      });
+      const getProfileResponse = await requestHelper.getAuth(
+        '/api/users/profile',
+        {
+          token: regularToken,
+        },
+      );
 
       expectResponse(getProfileResponse)
         .hasStatus(200)
@@ -371,7 +423,8 @@ describe('Cross-Module Integration Tests', () => {
         });
 
       // Verify the change is also reflected in the database
-      const dbUser = await testContext.db.connection('users')
+      const dbUser = await testContext.db
+        .connection('users')
         .where('id', regularUser.id)
         .first();
 
@@ -386,23 +439,27 @@ describe('Cross-Module Integration Tests', () => {
         navigation: {
           type: 'horizontal',
           collapsed: false,
-          position: 'top'
-        }
+          position: 'top',
+        },
       };
 
-      const updateResponse = await requestHelper.putAuth('/api/users/preferences', {
-        token: regularToken,
-        body: prefsUpdate
-      });
+      const updateResponse = await requestHelper.putAuth(
+        '/api/users/preferences',
+        {
+          token: regularToken,
+          body: prefsUpdate,
+        },
+      );
 
-      expectResponse(updateResponse)
-        .hasStatus(200)
-        .isSuccess();
+      expectResponse(updateResponse).hasStatus(200).isSuccess();
 
       // Get updated profile to see preference changes
-      const profileResponse = await requestHelper.getAuth('/api/users/profile', {
-        token: regularToken
-      });
+      const profileResponse = await requestHelper.getAuth(
+        '/api/users/profile',
+        {
+          token: regularToken,
+        },
+      );
 
       expectResponse(profileResponse)
         .hasStatus(200)
@@ -414,10 +471,13 @@ describe('Cross-Module Integration Tests', () => {
         });
 
       // Navigation should reflect the new preferences
-      const navigationResponse = await requestHelper.getAuth('/api/navigation/user', {
-        token: regularToken,
-        query: { type: 'horizontal' }
-      });
+      const navigationResponse = await requestHelper.getAuth(
+        '/api/navigation/user',
+        {
+          token: regularToken,
+          query: { type: 'horizontal' },
+        },
+      );
 
       expectResponse(navigationResponse)
         .hasStatus(200)
@@ -433,39 +493,44 @@ describe('Cross-Module Integration Tests', () => {
     it('should handle authentication failures consistently across modules', async () => {
       const expiredToken = authHelper.generateToken(
         { id: regularUser.id, email: regularUser.email },
-        { expiresIn: '-1h' }
+        { expiresIn: '-1h' },
       );
 
       const endpoints = [
         '/api/users/profile',
         '/api/users/preferences',
-        '/api/navigation/user'
+        '/api/navigation/user',
       ];
 
       for (const endpoint of endpoints) {
         const response = await requestHelper.getAuth(endpoint, {
-          token: expiredToken
+          token: expiredToken,
         });
 
-        expectResponse(response)
-          .isUnauthorized()
-          .isError('TOKEN_EXPIRED');
+        expectResponse(response).isUnauthorized().isError('TOKEN_EXPIRED');
       }
     });
 
     it('should handle permission errors consistently', async () => {
       // Create a user with very limited permissions
-      const veryLimitedUser = await authHelper.createUserWithRole('viewer', [], {
-        email: 'viewer@example.com',
-        username: 'viewer'
-      });
-      const viewerTokens = await authHelper.loginUser(veryLimitedUser.email, veryLimitedUser.password);
+      const veryLimitedUser = await authHelper.createUserWithRole(
+        'viewer',
+        [],
+        {
+          email: 'crosstest-viewer@example.com',
+          username: 'crosstest-viewer',
+        },
+      );
+      const viewerTokens = await authHelper.loginUser(
+        veryLimitedUser.email,
+        veryLimitedUser.password,
+      );
       const viewerToken = viewerTokens.accessToken;
 
       // Test endpoints that should fail
       const protectedEndpoints = [
         { url: '/api/users/preferences', method: 'PUT' as const },
-        { url: '/api/navigation/user', method: 'GET' as const }
+        { url: '/api/navigation/user', method: 'GET' as const },
       ];
 
       for (const endpoint of protectedEndpoints) {
@@ -473,11 +538,11 @@ describe('Cross-Module Integration Tests', () => {
         if (endpoint.method === 'PUT') {
           response = await requestHelper.putAuth(endpoint.url, {
             token: viewerToken,
-            body: { theme: 'dark' }
+            body: { theme: 'dark' },
           });
         } else {
           response = await requestHelper.getAuth(endpoint.url, {
-            token: viewerToken
+            token: viewerToken,
           });
         }
 
@@ -489,12 +554,12 @@ describe('Cross-Module Integration Tests', () => {
       const invalidRequests = [
         { url: '/api/users/profile', token: 'invalid' },
         { url: '/api/navigation/user', token: 'invalid' },
-        { url: '/api/users/preferences', token: 'invalid' }
+        { url: '/api/users/preferences', token: 'invalid' },
       ];
 
       for (const request of invalidRequests) {
         const response = await requestHelper.getAuth(request.url, {
-          token: request.token
+          token: request.token,
         });
 
         expectResponse(response)
@@ -520,7 +585,7 @@ describe('Cross-Module Integration Tests', () => {
         requestHelper.getAuth('/api/users/profile', { token: adminToken }),
         requestHelper.getAuth('/api/navigation/user', { token: adminToken }),
         requestHelper.getAuth('/api/users/preferences', { token: adminToken }),
-        requestHelper.getAuth('/api/navigation', { token: adminToken })
+        requestHelper.getAuth('/api/navigation', { token: adminToken }),
       ];
 
       const responses = await Promise.all(requests);
@@ -528,7 +593,7 @@ describe('Cross-Module Integration Tests', () => {
       const totalTime = Date.now() - startTime;
 
       // All requests should succeed
-      responses.forEach(response => {
+      responses.forEach((response) => {
         expect([200, 201]).toContain(response.status);
       });
 
@@ -540,12 +605,12 @@ describe('Cross-Module Integration Tests', () => {
       // Get navigation twice to test caching
       const nav1 = await requestHelper.getAuth('/api/navigation', {
         token: adminToken,
-        query: { type: 'default' }
+        query: { type: 'default' },
       });
 
       const nav2 = await requestHelper.getAuth('/api/navigation', {
         token: adminToken,
-        query: { type: 'default' }
+        query: { type: 'default' },
       });
 
       expectResponse(nav1).hasStatus(200).isSuccess();
@@ -562,26 +627,24 @@ describe('Cross-Module Integration Tests', () => {
     it('should support complete user onboarding workflow', async () => {
       // 1. Register new user
       const userData = {
-        email: 'newworkflow@example.com',
-        username: 'workflowuser',
+        email: 'crosstest-newworkflow@example.com',
+        username: 'crosstest-workflowuser',
         password: 'securepass123',
         firstName: 'Workflow',
-        lastName: 'User'
+        lastName: 'User',
       };
 
       const registerResponse = await requestHelper.post('/api/auth/register', {
-        body: userData
+        body: userData,
       });
 
-      expectResponse(registerResponse)
-        .hasStatus(201)
-        .isSuccess();
+      expectResponse(registerResponse).hasStatus(201).isSuccess();
 
       const { accessToken } = registerResponse.body.data;
 
       // 2. Get initial profile
       const initialProfile = await requestHelper.getAuth('/api/users/profile', {
-        token: accessToken
+        token: accessToken,
       });
 
       expectResponse(initialProfile)
@@ -599,24 +662,28 @@ describe('Cross-Module Integration Tests', () => {
         layout: 'compact',
         navigation: {
           type: 'compact',
-          position: 'left'
-        }
+          position: 'left',
+        },
       };
 
-      const prefsResponse = await requestHelper.putAuth('/api/users/preferences', {
-        token: accessToken,
-        body: customPrefs
-      });
+      const prefsResponse = await requestHelper.putAuth(
+        '/api/users/preferences',
+        {
+          token: accessToken,
+          body: customPrefs,
+        },
+      );
 
-      expectResponse(prefsResponse)
-        .hasStatus(200)
-        .isSuccess();
+      expectResponse(prefsResponse).hasStatus(200).isSuccess();
 
       // 4. Get personalized navigation
-      const personalizedNav = await requestHelper.getAuth('/api/navigation/user', {
-        token: accessToken,
-        query: { type: 'compact' }
-      });
+      const personalizedNav = await requestHelper.getAuth(
+        '/api/navigation/user',
+        {
+          token: accessToken,
+          query: { type: 'compact' },
+        },
+      );
 
       expectResponse(personalizedNav)
         .hasStatus(200)
@@ -628,12 +695,12 @@ describe('Cross-Module Integration Tests', () => {
       // 5. Update profile information
       const profileUpdate = {
         firstName: 'Updated Workflow',
-        lastName: 'Power User'
+        lastName: 'Power User',
       };
 
       const updateResponse = await requestHelper.putAuth('/api/users/profile', {
         token: accessToken,
-        body: profileUpdate
+        body: profileUpdate,
       });
 
       expectResponse(updateResponse)
@@ -646,7 +713,7 @@ describe('Cross-Module Integration Tests', () => {
 
       // 6. Verify all changes persist
       const finalProfile = await requestHelper.getAuth('/api/users/profile', {
-        token: accessToken
+        token: accessToken,
       });
 
       expectResponse(finalProfile)
@@ -662,10 +729,10 @@ describe('Cross-Module Integration Tests', () => {
     it('should handle admin user management workflow', async () => {
       // Admin views all users (if such endpoint exists)
       // This test assumes there might be admin endpoints for user management
-      
+
       // For now, test that admin has the necessary permissions
       const adminProfile = await requestHelper.getAuth('/api/users/profile', {
-        token: adminToken
+        token: adminToken,
       });
 
       expectResponse(adminProfile)
@@ -680,23 +747,21 @@ describe('Cross-Module Integration Tests', () => {
 
       // Admin should see full navigation including admin sections
       const adminNav = await requestHelper.getAuth('/api/navigation/user', {
-        token: adminToken
+        token: adminToken,
       });
 
-      expectResponse(adminNav)
-        .hasStatus(200)
-        .isSuccess();
+      expectResponse(adminNav).hasStatus(200).isSuccess();
 
       // Test that admin can access all functionality
       const adminFunctionality = [
         '/api/users/profile',
         '/api/navigation/user',
-        '/api/users/preferences'
+        '/api/users/preferences',
       ];
 
       for (const endpoint of adminFunctionality) {
         const response = await requestHelper.getAuth(endpoint, {
-          token: adminToken
+          token: adminToken,
         });
         expectResponse(response).hasStatus(200).isSuccess();
       }

@@ -92,5 +92,5 @@ async function staticFilesPlugin(
 }
 
 export default fp(staticFilesPlugin, {
-  name: 'static-files'
+  name: 'static-files-plugin'
 });

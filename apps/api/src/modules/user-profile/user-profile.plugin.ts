@@ -13,40 +13,43 @@ export interface UserProfilePluginOptions extends FastifyPluginOptions {
 
 async function userProfilePlugin(
   fastify: FastifyInstance,
-  options: UserProfilePluginOptions
+  options: UserProfilePluginOptions,
 ) {
   // Register module schemas using the schema registry
-  fastify.schemaRegistry.registerModuleSchemas('user-profile', userProfileSchemas);
+  fastify.schemaRegistry.registerModuleSchemas(
+    'user-profile',
+    userProfileSchemas,
+  );
 
   // Register multipart support for file uploads
   await fastify.register(require('@fastify/multipart'), {
     limits: {
       fileSize: 5 * 1024 * 1024, // 5MB
-      files: 1
-    }
+      files: 1,
+    },
   });
 
   // Initialize dependencies
   const repository = new UserProfileRepository(fastify.knex);
-  
+
   const avatarService = new AvatarService({
-    logger: fastify.log
+    logger: fastify.log,
   });
-  
+
   const service = new UserProfileService({
     repository,
     avatarService,
-    logger: fastify.log
+    logger: fastify.log,
   });
-  
+
   const controller = new UserProfileController({
-    userProfileService: service
+    userProfileService: service,
   });
 
   // Register routes
   await fastify.register(userProfileRoutes, {
     controller,
-    prefix: options.prefix || '/api'
+    prefix: options.prefix || '/api',
   });
 
   // Decorate fastify instance with services (optional, for testing or other modules)
@@ -58,5 +61,5 @@ async function userProfilePlugin(
 
 export default fp(userProfilePlugin, {
   name: 'user-profile',
-  dependencies: ['knex', 'jwt-auth']
+  dependencies: ['knex-plugin', 'jwt-auth-plugin', 'schemas-plugin'],
 });

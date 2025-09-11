@@ -29,28 +29,23 @@ export const SystemStatusSchema = Type.Object({
   ], { description: 'Overall system status', example: 'healthy' }),
   services: Type.Object({
     database: Type.Object({
-      status: Type.Union([Type.Literal('connected'), Type.Literal('disconnected')]),
-      latency: Type.Optional(Type.Number({ description: 'Database latency in ms' }))
+      status: Type.Union([Type.Literal('connected'), Type.Literal('disconnected'), Type.Literal('error')]),
+      responseTime: Type.Optional(Type.Number({ description: 'Database response time in ms' }))
     }),
-    redis: Type.Object({
-      status: Type.Union([Type.Literal('connected'), Type.Literal('disconnected')]),
-      latency: Type.Optional(Type.Number({ description: 'Redis latency in ms' }))
-    }),
-    auth: Type.Object({
-      status: Type.Union([Type.Literal('operational'), Type.Literal('down')]),
-      provider: Type.String({ description: 'Authentication provider' })
-    })
+    redis: Type.Optional(Type.Object({
+      status: Type.Union([Type.Literal('connected'), Type.Literal('disconnected'), Type.Literal('error')]),
+      responseTime: Type.Optional(Type.Number({ description: 'Redis response time in ms' }))
+    }))
   }),
   memory: Type.Object({
-    used: Type.Number({ description: 'Used memory in MB' }),
-    total: Type.Number({ description: 'Total memory in MB' }),
+    used: Type.Number({ description: 'Used memory in bytes' }),
+    total: Type.Number({ description: 'Total memory in bytes' }),
+    free: Type.Number({ description: 'Free memory in bytes' }),
     percentage: Type.Number({ description: 'Memory usage percentage' })
   }),
-  cpu: Type.Object({
-    usage: Type.Number({ description: 'CPU usage percentage' }),
-    cores: Type.Number({ description: 'Number of CPU cores' })
-  }),
-  timestamp: Type.String({ format: 'date-time' })
+  timestamp: Type.String({ format: 'date-time' }),
+  uptime: Type.Number({ description: 'Server uptime in seconds' }),
+  version: Type.String({ description: 'API version' })
 });
 
 // Health Check Schema

@@ -1,0 +1,33 @@
+{
+  "environment": "production",
+  "created": "2025-09-03T20:18:57Z",
+  "version": "1.0.0",
+  "description": "AegisX production environment configuration",
+  "settings": {
+    "deployment": {
+      "strategy": "blue-green",
+      "healthCheckTimeout": 60,
+      "rollbackEnabled": true
+    },
+    "scaling": {
+      "apiReplicas": 3,
+      "webReplicas": 2,
+      "autoScaling": true
+    },
+    "security": {
+      "tlsEnabled": true,
+      "rateLimiting": "strict",
+      "corsOrigins": ["https://yourdomain.com"]
+    },
+    "monitoring": {
+      "metricsRetention": "30d",
+      "logLevel": "info",
+      "alertingEnabled": true
+    },
+    "backup": {
+      "schedule": "0 2 * * *",
+      "retention": "30",
+      "enabled": true
+    }
+  }
+}

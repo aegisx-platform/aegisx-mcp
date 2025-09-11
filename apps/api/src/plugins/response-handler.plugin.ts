@@ -28,12 +28,22 @@ export interface Pagination {
 export const createSuccessResponse = <T>(
   data: T,
   message?: string,
-  meta?: Record<string, unknown>
+  meta?: Record<string, unknown>,
 ): ApiResponse<T> => ({
   success: true,
   data,
   message,
-  meta
+  meta: {
+    timestamp: new Date().toISOString(),
+    version: 'v1',
+    requestId: 'req-' + Math.random().toString(36).substr(2, 9),
+    environment: ['development', 'staging', 'production'].includes(
+      process.env.NODE_ENV || '',
+    )
+      ? (process.env.NODE_ENV as 'development' | 'staging' | 'production')
+      : 'development',
+    ...meta,
+  },
 });
 
 // Paginated responses
@@ -42,7 +52,8 @@ export const createPaginatedResponse = <T>(
   page: number,
   limit: number,
   total: number,
-  message?: string
+  message?: string,
+  meta?: Record<string, unknown>,
 ): ApiResponse<T[]> => ({
   success: true,
   data,
@@ -51,8 +62,19 @@ export const createPaginatedResponse = <T>(
     page,
     limit,
     total,
-    totalPages: Math.ceil(total / limit)
-  }
+    totalPages: Math.ceil(total / limit),
+  },
+  meta: {
+    timestamp: new Date().toISOString(),
+    version: 'v1',
+    requestId: 'req-' + Math.random().toString(36).substr(2, 9),
+    environment: ['development', 'staging', 'production'].includes(
+      process.env.NODE_ENV || '',
+    )
+      ? (process.env.NODE_ENV as 'development' | 'staging' | 'production')
+      : 'development',
+    ...meta,
+  },
 });
 
 // Error responses
@@ -60,80 +82,157 @@ export const createErrorResponse = (
   code: string,
   message: string,
   details?: unknown,
-  statusCode?: number
+  statusCode?: number,
 ): ApiResponse => ({
   success: false,
   error: {
     code,
     message,
     details,
-    statusCode
-  }
+    statusCode,
+  },
 });
 
-async function responseHandlerPlugin(fastify: FastifyInstance, _opts: FastifyPluginOptions) {
+async function responseHandlerPlugin(
+  fastify: FastifyInstance,
+  _opts: FastifyPluginOptions,
+) {
+  // Helper to create response with metadata
+  const createResponseWithMeta = (
+    response: ApiResponse,
+    requestId?: string,
+  ) => {
+    response.meta = {
+      timestamp: new Date().toISOString(),
+      version: 'v1',
+      requestId: requestId || 'req-' + Math.random().toString(36).substr(2, 9),
+      environment: ['development', 'staging', 'production'].includes(
+        process.env.NODE_ENV || '',
+      )
+        ? (process.env.NODE_ENV as 'development' | 'staging' | 'production')
+        : 'development',
+    };
+    return response;
+  };
+
   // Decorate reply with helper methods
-  fastify.decorateReply('success', function<T>(data: T, message?: string) {
+  fastify.decorateReply('success', function <T>(data: T, message?: string) {
     return this.send(createSuccessResponse(data, message));
   });
 
-  fastify.decorateReply('paginated', function<T>(
-    data: T[],
-    page: number,
-    limit: number,
-    total: number,
-    message?: string
-  ) {
-    return this.send(createPaginatedResponse(data, page, limit, total, message));
+  fastify.decorateReply('paginated', function <
+    T,
+  >(data: T[], page: number, limit: number, total: number, message?: string) {
+    return this.send(
+      createPaginatedResponse(data, page, limit, total, message),
+    );
   });
 
-  fastify.decorateReply('error', function(
-    code: string,
-    message: string,
-    statusCode = 400,
-    details?: unknown
-  ) {
-    return this.code(statusCode).send(createErrorResponse(code, message, details, statusCode));
-  });
-
-  fastify.decorateReply('created', function<T>(data: T, message?: string) {
+  fastify.decorateReply('created', function <T>(data: T, message?: string) {
     return this.code(201).send(createSuccessResponse(data, message));
   });
 
-  // Don't override notFound if it already exists (from fastify-sensible)
-  if (!fastify.hasReplyDecorator('notFound')) {
-    fastify.decorateReply('notFound', function(message = 'Resource not found') {
-      return this.code(404).send(createErrorResponse('NOT_FOUND', message, undefined, 404));
-    });
-  }
+  fastify.decorateReply(
+    'error',
+    function (
+      code: string,
+      message: string,
+      statusCode = 400,
+      details?: unknown,
+    ) {
+      const errorResponse = createErrorResponse(
+        code,
+        message,
+        details,
+        statusCode,
+      );
+      return this.code(statusCode).send(errorResponse);
+    },
+  );
 
-  // Don't override decorators if they already exist (from fastify-sensible)
-  if (!fastify.hasReplyDecorator('unauthorized')) {
-    fastify.decorateReply('unauthorized', function(message = 'Authentication required') {
-      return this.code(401).send(createErrorResponse('UNAUTHORIZED', message, undefined, 401));
-    });
-  }
+  // ✅ Fastify-sensible style API with our response format
+  fastify.decorateReply('badRequest', function (message = 'Bad Request') {
+    const response = createResponseWithMeta(
+      createErrorResponse('BAD_REQUEST', message, undefined, 400),
+      this.request.id,
+    );
+    return this.code(400).send(response);
+  });
 
-  if (!fastify.hasReplyDecorator('forbidden')) {
-    fastify.decorateReply('forbidden', function(message = 'Insufficient permissions') {
-      return this.code(403).send(createErrorResponse('FORBIDDEN', message, undefined, 403));
-    });
-  }
+  fastify.decorateReply(
+    'unauthorized',
+    function (message = 'Authentication required') {
+      const response = createResponseWithMeta(
+        createErrorResponse('UNAUTHORIZED', message, undefined, 401),
+        this.request.id,
+      );
+      return this.code(401).send(response);
+    },
+  );
+
+  fastify.decorateReply('forbidden', function (message = 'Access denied') {
+    const response = createResponseWithMeta(
+      createErrorResponse('FORBIDDEN', message, undefined, 403),
+      this.request.id,
+    );
+    return this.code(403).send(response);
+  });
+
+  fastify.decorateReply('notFound', function (message = 'Resource not found') {
+    const response = createResponseWithMeta(
+      createErrorResponse('NOT_FOUND', message, undefined, 404),
+      this.request.id,
+    );
+    return this.code(404).send(response);
+  });
+
+  fastify.decorateReply('conflict', function (message = 'Resource conflict') {
+    const response = createResponseWithMeta(
+      createErrorResponse('CONFLICT', message, undefined, 409),
+      this.request.id,
+    );
+    return this.code(409).send(response);
+  });
+
+  fastify.decorateReply(
+    'internalServerError',
+    function (message = 'Internal server error') {
+      const response = createResponseWithMeta(
+        createErrorResponse('INTERNAL_SERVER_ERROR', message, undefined, 500),
+        this.request.id,
+      );
+      return this.code(500).send(response);
+    },
+  );
 }
 
 export default fp(responseHandlerPlugin, {
-  name: 'response-handler'
+  name: 'response-handler-plugin',
 });
 
 // TypeScript declarations
 declare module 'fastify' {
   interface FastifyReply {
     success<T>(data: T, message?: string): FastifyReply;
-    paginated<T>(data: T[], page: number, limit: number, total: number, message?: string): FastifyReply;
-    error(code: string, message: string, statusCode?: number, details?: unknown): FastifyReply;
     created<T>(data: T, message?: string): FastifyReply;
-    notFound(message?: string): FastifyReply;
+    paginated<T>(
+      data: T[],
+      page: number,
+      limit: number,
+      total: number,
+      message?: string,
+    ): FastifyReply;
+    error(
+      code: string,
+      message: string,
+      statusCode?: number,
+      details?: unknown,
+    ): FastifyReply;
+    badRequest(message?: string): FastifyReply;
     unauthorized(message?: string): FastifyReply;
     forbidden(message?: string): FastifyReply;
+    notFound(message?: string): FastifyReply;
+    conflict(message?: string): FastifyReply;
+    internalServerError(message?: string): FastifyReply;
   }
 }

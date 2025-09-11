@@ -52,7 +52,9 @@ export class ResponseAssertions {
   hasHeader(headerName: string, expectedValue?: string): this {
     expect(this.response.headers).toHaveProperty(headerName.toLowerCase());
     if (expectedValue !== undefined) {
-      expect(this.response.headers[headerName.toLowerCase()]).toBe(expectedValue);
+      expect(this.response.headers[headerName.toLowerCase()]).toBe(
+        expectedValue,
+      );
     }
     return this;
   }
@@ -61,7 +63,9 @@ export class ResponseAssertions {
    * Assert response content type
    */
   hasContentType(expectedType: string): this {
-    expect(this.response.headers['content-type']).toMatch(new RegExp(expectedType));
+    expect(this.response.headers['content-type']).toMatch(
+      new RegExp(expectedType),
+    );
     return this;
   }
 
@@ -96,9 +100,12 @@ export class ResponseAssertions {
 
   /**
    * Assert error response structure
+   * Uses custom format {success: false, error: {code: "...", message: "..."}}
    */
   isError(expectedCode?: string, expectedMessage?: string): this {
     const body = this.getBody();
+
+    // Custom format: {success: false, error: {code: "...", message: "..."}}
     expect(body.success).toBe(false);
     expect(body.error).toBeDefined();
     expect(body.error.code).toBeDefined();
@@ -206,12 +213,20 @@ export class ResponseAssertions {
   /**
    * Assert meta information
    */
-  hasMeta(expectedMeta: Partial<{ timestamp: string; version: string; [key: string]: any }>): this {
+  hasMeta(
+    expectedMeta: Partial<{
+      timestamp: string;
+      version: string;
+      [key: string]: any;
+    }>,
+  ): this {
     const body = this.getBody();
     expect(body.meta).toBeDefined();
 
     if (expectedMeta.timestamp) {
-      expect(body.meta.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/);
+      expect(body.meta.timestamp).toMatch(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/,
+      );
     }
 
     if (expectedMeta.version) {
@@ -219,7 +234,7 @@ export class ResponseAssertions {
     }
 
     // Check other meta properties
-    Object.keys(expectedMeta).forEach(key => {
+    Object.keys(expectedMeta).forEach((key) => {
       if (key !== 'timestamp' && key !== 'version') {
         expect(body.meta[key]).toEqual(expectedMeta[key]);
       }
@@ -255,7 +270,7 @@ export class ResponseAssertions {
     expect(body.success).toBe(false);
     expect(body.error).toBeDefined();
     expect(body.error.code).toBe('VALIDATION_ERROR');
-    
+
     if (body.error.field) {
       expect(body.error.field).toBe(field);
     }
@@ -338,7 +353,9 @@ export class ResponseAssertions {
 /**
  * Create response assertions from supertest response
  */
-export function expectResponse(response: supertest.Response): ResponseAssertions {
+export function expectResponse(
+  response: supertest.Response,
+): ResponseAssertions {
   return new ResponseAssertions(response);
 }
 
@@ -350,40 +367,28 @@ export const commonAssertions = {
    * Assert successful GET response
    */
   successfulGet: (response: supertest.Response) => {
-    return expectResponse(response)
-      .hasStatus(200)
-      .isJson()
-      .isSuccess();
+    return expectResponse(response).hasStatus(200).isJson().isSuccess();
   },
 
   /**
    * Assert successful POST response (created)
    */
   successfulCreate: (response: supertest.Response) => {
-    return expectResponse(response)
-      .hasStatus(201)
-      .isJson()
-      .isSuccess();
+    return expectResponse(response).hasStatus(201).isJson().isSuccess();
   },
 
   /**
    * Assert successful PUT/PATCH response
    */
   successfulUpdate: (response: supertest.Response) => {
-    return expectResponse(response)
-      .hasStatus(200)
-      .isJson()
-      .isSuccess();
+    return expectResponse(response).hasStatus(200).isJson().isSuccess();
   },
 
   /**
    * Assert successful DELETE response
    */
   successfulDelete: (response: supertest.Response) => {
-    return expectResponse(response)
-      .hasStatus(200)
-      .isJson()
-      .isSuccess();
+    return expectResponse(response).hasStatus(200).isJson().isSuccess();
   },
 
   /**
@@ -394,7 +399,7 @@ export const commonAssertions = {
       .hasStatus(400)
       .isJson()
       .isError('VALIDATION_ERROR');
-    
+
     if (field) {
       assertion.hasValidationError(field);
     }
@@ -406,24 +411,21 @@ export const commonAssertions = {
    * Assert authentication required
    */
   authRequired: (response: supertest.Response) => {
-    return expectResponse(response)
-      .isUnauthorized();
+    return expectResponse(response).isUnauthorized();
   },
 
   /**
    * Assert insufficient permissions
    */
   forbidden: (response: supertest.Response) => {
-    return expectResponse(response)
-      .isForbidden();
+    return expectResponse(response).isForbidden();
   },
 
   /**
    * Assert resource not found
    */
   notFound: (response: supertest.Response) => {
-    return expectResponse(response)
-      .isNotFound();
+    return expectResponse(response).isNotFound();
   },
 };
 
@@ -436,9 +438,13 @@ export function isErrorResponse(body: any): body is ApiResponse {
   return body && body.success === false && body.error !== undefined;
 }
 
-export function isPaginatedResponse<T>(body: any): body is PaginatedResponse<T> {
-  return isSuccessResponse(body) && 
-         Array.isArray(body.data) && 
-         body.meta && 
-         body.meta.pagination !== undefined;
+export function isPaginatedResponse<T>(
+  body: any,
+): body is PaginatedResponse<T> {
+  return (
+    isSuccessResponse(body) &&
+    Array.isArray(body.data) &&
+    body.meta &&
+    body.meta.pagination !== undefined
+  );
 }

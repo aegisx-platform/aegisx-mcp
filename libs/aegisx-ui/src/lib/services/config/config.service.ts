@@ -1,5 +1,15 @@
-import { Injectable, InjectionToken, computed, inject, signal } from '@angular/core';
-import { AegisxConfig, DEFAULT_CONFIG } from '../../types/config.types';
+import {
+  Injectable,
+  InjectionToken,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
+import {
+  AegisxConfig,
+  DEFAULT_CONFIG,
+  AegisxLayoutType,
+} from '../../types/config.types';
 import { merge, cloneDeep } from 'lodash-es';
 
 // Injection token for initial config
@@ -9,10 +19,10 @@ export const AEGISX_CONFIG = new InjectionToken<AegisxConfig>('AEGISX_CONFIG');
 export class AegisxConfigService {
   // Private writable signal for config
   private _config = signal<AegisxConfig>(DEFAULT_CONFIG);
-  
+
   // Public readonly signals
   readonly config = this._config.asReadonly();
-  
+
   // Computed signals for common config values
   readonly theme = computed(() => this.config().theme);
   readonly scheme = computed(() => this.config().scheme);
@@ -21,8 +31,10 @@ export class AegisxConfigService {
   readonly isDarkMode = computed(() => this.scheme() === 'dark');
   readonly isLightMode = computed(() => this.scheme() === 'light');
   readonly navigationSize = computed(() => this.config().navigation.size);
-  readonly navigationPosition = computed(() => this.config().navigation.position);
-  
+  readonly navigationPosition = computed(
+    () => this.config().navigation.position,
+  );
+
   constructor() {
     // Try to get initial config from injection token
     try {
@@ -30,18 +42,18 @@ export class AegisxConfigService {
       if (initialConfig) {
         this._config.set(merge({}, DEFAULT_CONFIG, initialConfig));
       }
-    } catch (e) {
+    } catch (_e) {
       // Ignore injection errors in constructor
     }
-    
+
     // Load config from localStorage
     this._loadFromStorage();
-    
+
     // Auto-save config changes to localStorage
     // Note: In a real app, you might want to debounce this
     this._autoSaveToStorage();
   }
-  
+
   /**
    * Set the entire config
    */
@@ -49,28 +61,28 @@ export class AegisxConfigService {
     const newConfig = merge({}, this._config(), config);
     this._config.set(newConfig);
   }
-  
+
   /**
    * Update specific config properties
    */
   updateConfig(updates: Partial<AegisxConfig>): void {
-    this._config.update(config => merge({}, config, updates));
+    this._config.update((config) => merge({}, config, updates));
   }
-  
+
   /**
    * Set theme
    */
   setTheme(theme: string): void {
     this.updateConfig({ theme });
   }
-  
+
   /**
    * Set scheme (light/dark/auto)
    */
   setScheme(scheme: 'light' | 'dark' | 'auto'): void {
     this.updateConfig({ scheme });
   }
-  
+
   /**
    * Toggle between light and dark scheme
    */
@@ -79,21 +91,21 @@ export class AegisxConfigService {
     const newScheme = currentScheme === 'light' ? 'dark' : 'light';
     this.setScheme(newScheme);
   }
-  
+
   /**
    * Set layout
    */
-  setLayout(layout: string): void {
-    this.updateConfig({ layout: layout as any });
+  setLayout(layout: AegisxLayoutType): void {
+    this.updateConfig({ layout });
   }
-  
+
   /**
    * Set language
    */
   setLanguage(language: string): void {
     this.updateConfig({ language });
   }
-  
+
   /**
    * Reset to default config
    */
@@ -101,7 +113,7 @@ export class AegisxConfigService {
     this._config.set(cloneDeep(DEFAULT_CONFIG));
     this._removeFromStorage();
   }
-  
+
   /**
    * Load config from localStorage
    */
@@ -116,7 +128,7 @@ export class AegisxConfigService {
       console.error('Error loading config from localStorage:', e);
     }
   }
-  
+
   /**
    * Save config to localStorage
    */
@@ -127,7 +139,7 @@ export class AegisxConfigService {
       console.error('Error saving config to localStorage:', e);
     }
   }
-  
+
   /**
    * Remove config from localStorage
    */
@@ -138,7 +150,7 @@ export class AegisxConfigService {
       console.error('Error removing config from localStorage:', e);
     }
   }
-  
+
   /**
    * Auto-save config changes to localStorage
    */

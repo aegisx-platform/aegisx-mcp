@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Navigation Responsive Test</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 20px;
+        font-family: Arial, sans-serif;
+      }
+      .test-container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .iframe-wrapper {
+        margin-bottom: 40px;
+      }
+      iframe {
+        border: 2px solid #333;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      h2 {
+        margin-bottom: 10px;
+      }
+      .info {
+        margin-bottom: 10px;
+        color: #666;
+      }
+      .grid {
+        display: grid;
+        gap: 40px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="test-container">
+      <h1>Navigation Responsive Behavior Test</h1>
+
+      <div class="grid">
+        <!-- Mobile View -->
+        <div class="iframe-wrapper">
+          <h2>Mobile View (375px - iPhone SE)</h2>
+          <p class="info">
+            Navigation should start collapsed, toggle with menu button, show
+            overlay when open
+          </p>
+          <iframe
+            src="http://localhost:4200"
+            width="375"
+            height="667"
+            title="Mobile View"
+          ></iframe>
+        </div>
+
+        <!-- Tablet View -->
+        <div class="iframe-wrapper">
+          <h2>Tablet View (768px - iPad Mini)</h2>
+          <p class="info">
+            Navigation should be visible, toggle between collapsed (64px) and
+            expanded (256px)
+          </p>
+          <iframe
+            src="http://localhost:4200"
+            width="768"
+            height="600"
+            title="Tablet View"
+          ></iframe>
+        </div>
+
+        <!-- Desktop View -->
+        <div class="iframe-wrapper">
+          <h2>Desktop View (1200px)</h2>
+          <p class="info">
+            Navigation should be visible, toggle between collapsed (64px) and
+            expanded (256px)
+          </p>
+          <iframe
+            src="http://localhost:4200"
+            width="1200"
+            height="600"
+            title="Desktop View"
+          ></iframe>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

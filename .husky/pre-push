@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+
+echo "🚀 Running pre-push checks..."
+
+# Allow bypass
+if [ "$SKIP_HOOKS" = "1" ]; then
+    echo "⏭️  Skipping pre-push hooks"
+    exit 0
+fi
+
+# Only lint affected files - FAST!
+echo "🔍 Linting affected files..."
+npx nx affected --base=origin/develop --target=lint --parallel=3 --quiet
+
+# That's it! Tests run in CI/CD
+echo "✅ Pre-push check passed!"
+echo "💡 Full test suite will run in GitHub Actions"

@@ -24,15 +24,26 @@ export interface AuthTokens {
 export class AuthHelper {
   constructor(
     private app: FastifyInstance,
-    private db: Knex
+    private db: Knex,
   ) {}
+
+  /**
+   * Generate a valid UUID v4
+   */
+  private generateUUID(): string {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === 'x' ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  }
 
   /**
    * Create a test user directly in database
    */
   async createTestUser(userData: Partial<TestUser> = {}): Promise<TestUser> {
     const defaultUser: TestUser = {
-      id: `test-user-${Date.now()}`,
+      id: userData.id || this.generateUUID(),
       email: `test${Date.now()}@example.com`,
       username: `testuser${Date.now()}`,
       password: 'testpass123',
@@ -46,8 +57,8 @@ export class AuthHelper {
 
     // Hash password
     const hashedPassword = await bcrypt.hash(
-      defaultUser.password, 
-      parseInt(process.env.BCRYPT_ROUNDS || '10')
+      defaultUser.password,
+      parseInt(process.env.BCRYPT_ROUNDS || '10'),
     );
 
     // Get or create role
@@ -61,7 +72,7 @@ export class AuthHelper {
     } else {
       const [newRole] = await this.db('roles')
         .insert({
-          id: `role-${defaultUser.role}`,
+          id: this.generateUUID(),
           name: defaultUser.role,
           description: `${defaultUser.role} role`,
           created_at: new Date(),
@@ -80,13 +91,20 @@ export class AuthHelper {
         password: hashedPassword,
         first_name: defaultUser.firstName,
         last_name: defaultUser.lastName,
-        role_id: roleId,
         email_verified: defaultUser.emailVerified,
         status: defaultUser.status,
         created_at: new Date(),
         updated_at: new Date(),
       })
       .returning(['id', 'email', 'username', 'first_name', 'last_name']);
+
+    // Create user-role relationship
+    await this.db('user_roles').insert({
+      user_id: defaultUser.id,
+      role_id: roleId,
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
 
     // Create user preferences
     await this.db('user_preferences').insert({
@@ -149,7 +167,7 @@ export class AuthHelper {
   }> {
     const user = await this.createTestUser(userData);
     const tokens = await this.loginUser(user.email, user.password);
-    
+
     return { user, tokens };
   }
 
@@ -180,9 +198,9 @@ export class AuthHelper {
    * Create user with specific role and permissions
    */
   async createUserWithRole(
-    roleName: string, 
+    roleName: string,
     permissions: string[] = [],
-    userData: Partial<TestUser> = {}
+    userData: Partial<TestUser> = {},
   ): Promise<TestUser> {
     // Create role with permissions if it doesn't exist
     const existingRole = await this.db('roles')
@@ -195,7 +213,7 @@ export class AuthHelper {
     } else {
       const [newRole] = await this.db('roles')
         .insert({
-          id: `role-${roleName}`,
+          id: this.generateUUID(),
           name: roleName,
           description: `${roleName} role`,
           created_at: new Date(),
@@ -206,16 +224,20 @@ export class AuthHelper {
 
       // Add permissions to role
       for (const permission of permissions) {
+        // Parse permission format (e.g., "navigation.read" -> resource: "navigation", action: "read")
+        const [resource, action] = permission.split('.');
+
         // Create permission if it doesn't exist
         let permissionRecord = await this.db('permissions')
-          .where({ name: permission })
+          .where({ resource, action })
           .first();
 
         if (!permissionRecord) {
           const [newPermission] = await this.db('permissions')
             .insert({
-              id: `perm-${permission.replace(/\./g, '-')}`,
-              name: permission,
+              id: this.generateUUID(),
+              resource: resource || permission,
+              action: action || 'access',
               description: `Permission: ${permission}`,
               created_at: new Date(),
               updated_at: new Date(),
@@ -304,9 +326,20 @@ export class AuthHelper {
    * Clean up test users
    */
   async cleanupTestUsers(): Promise<void> {
-    await this.db('user_sessions').where('user_id', 'like', 'test-user-%').del();
-    await this.db('user_preferences').where('user_id', 'like', 'test-user-%').del();
-    await this.db('users').where('id', 'like', 'test-user-%').del();
+    // Since user IDs are UUIDs, we need to track test users by email or username patterns
+    const testUsers = await this.db('users')
+      .where('email', 'like', 'test%')
+      .orWhere('username', 'like', 'test%')
+      .select('id');
+
+    if (testUsers.length > 0) {
+      const userIds = testUsers.map((u) => u.id);
+
+      // Delete in correct order due to foreign key constraints
+      await this.db('user_sessions').whereIn('user_id', userIds).del();
+      await this.db('user_preferences').whereIn('user_id', userIds).del();
+      await this.db('users').whereIn('id', userIds).del();
+    }
   }
 }
 
@@ -320,7 +353,9 @@ export function authHeaders(token: string): { authorization: string } {
 /**
  * Helper function to create test user data
  */
-export function createTestUserData(overrides: Partial<TestUser> = {}): Partial<TestUser> {
+export function createTestUserData(
+  overrides: Partial<TestUser> = {},
+): Partial<TestUser> {
   const timestamp = Date.now();
   return {
     email: `test${timestamp}@example.com`,
@@ -331,6 +366,29 @@ export function createTestUserData(overrides: Partial<TestUser> = {}): Partial<T
     role: 'user',
     emailVerified: true,
     status: 'active',
+    ...overrides,
+  };
+}
+
+/**
+ * Helper function to create register request data (API schema compatible)
+ */
+export function createRegisterRequestData(
+  overrides: Partial<{
+    email: string;
+    username: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+  }> = {},
+) {
+  const timestamp = Date.now();
+  return {
+    email: `test${timestamp}@example.com`,
+    username: `testuser${timestamp}`,
+    password: 'testpass123',
+    firstName: 'Test',
+    lastName: 'User',
     ...overrides,
   };
 }

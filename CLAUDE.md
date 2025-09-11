@@ -4,51 +4,142 @@
 
 ## 🚨 Important Development Guidelines
 
+### 🚨 CRITICAL: Standard Development Policy
+
+**NEVER make changes without explicit user approval**
+
+- **DO NOT add/modify standards without asking first**
+- **DO NOT extend checklists or create new verification steps**
+- **DO NOT write code or configs based on assumptions**
+- **ALWAYS ask user before adding new requirements**
+
+**When encountering gaps in standards:**
+
+1. **STOP development**
+2. **Ask user:** "Found [issue]. Should we create standard for this?"
+3. **Wait for explicit approval and direction**
+4. **Create standard only as instructed by user**
+
+**Examples of what requires user approval:**
+
+- Adding new checklist items
+- Creating new verification scripts
+- Extending existing standards
+- Adding new phase/step requirements
+- Modifying workflow processes
+
 ### Git Commit Rules
+
 **DO NOT include the following in git commits**:
+
 - `🤖 Generated with Claude Code`
 - `Co-Authored-By: Claude <noreply@anthropic.com>`
 
 Keep commit messages clean and professional.
 
 ### File Management Rules
+
 **CRITICAL: File Deletion Policy**
+
 - **NEVER delete any files without explicit permission**
 - **ALWAYS ask for approval before removing any file**
 - **This includes temporary files, old code, or seemingly unused files**
 - When refactoring or cleaning up, list files to be deleted and wait for confirmation
 
 ### Schema Standards (MANDATORY)
+
 **🚨 ALL API routes MUST use TypeBox schemas - NO EXCEPTIONS**
+
 - **See [TypeBox Schema Standard](./docs/05c-typebox-schema-standard.md) for implementation**
 - **TypeBox provides both runtime validation and TypeScript types**
 - **Use base schemas from `/src/schemas/base.schemas.ts`**
 - **Register schemas via schema registry**
 
+### Universal Development Standard (MANDATORY)
+
+**🚨 MUST follow Universal Full-Stack Standard for ALL feature development - NO EXCEPTIONS**
+
+See **[Universal Full-Stack Standard](./docs/development/universal-fullstack-standard.md)** for complete database-first development workflow that must be followed for every feature to prevent integration bugs.
+
+### Quality Assurance Workflow (MANDATORY)
+
+**🚨 MUST run QA Checklist after every code change - NO EXCEPTIONS**
+
+See **[QA Checklist](./docs/development/qa-checklist.md)** for complete quality assurance steps that must be performed before every commit.
+
+### Testing Workflow (MANDATORY)
+
+**🚨 ALWAYS follow this workflow when writing tests - NO EXCEPTIONS**
+
+**Before writing ANY test:**
+
+1. **📋 Check existing schemas** - Review `*.schemas.ts` files for the module you're testing
+2. **🔍 Verify request/response formats** - Ensure test data matches schema exactly
+3. **🏗️ Check test app helper** - Ensure all required plugins are registered in test environment
+4. **📊 Compare with main app** - Verify test setup mirrors production plugin registration order
+
+**Test Data Rules:**
+
+- **NEVER guess request formats** - Always use schema definitions
+- **Match schemas exactly** - Include only fields defined in request schemas
+- **Use schema-based factories** - Create separate functions for API-valid test data
+- **Check plugin registration** - Ensure test app includes ALL plugins the route needs
+
+**Example Test Workflow:**
+
+```typescript
+// 1. Check schema first
+import { RegisterRequestSchema } from '../auth.schemas';
+
+// 2. Create API-compatible test data
+function createRegisterRequestData() {
+  return {
+    email: 'test@example.com',
+    username: 'testuser',
+    password: 'testpass123',
+    firstName: 'Test',
+    lastName: 'User',
+    // ❌ Don't include: role, status, emailVerified (not in schema)
+  };
+}
+
+// 3. Verify test app helper includes ALL required plugins
+```
+
+**ผิดแล้วต้องแก้ทันที - ห้ามเดา!**
+
+## 🔴 IMPORTANT: This project uses YARN, not NPM
+
+**Always use `yarn` commands, never use `npm install` or `npm` commands for dependencies**
+
 ## Quick Navigation
 
 ### 🚀 Start Here
-- **[📖 Getting Started](./docs/00-GETTING-STARTED.md)** - **อ่านก่อนเริ่มงาน! Git workflow & rules**
+
+- **[📖 Getting Started](./docs/getting-started/getting-started.md)** - **อ่านก่อนเริ่มงาน! Git workflow & rules**
 
 ### Development Resources
+
 - **[🚨 Current Project Status](./PROJECT_STATUS.md)** - Session recovery & current progress
-- **[📊 Feature Tracking System](./docs/01-feature-tracking.md)** - Track development progress
-- **[🚀 Quick Commands](./docs/02-quick-commands.md)** - Claude command reference (/feature, /status, etc.)
-- **[🏗️ Project Setup](./docs/03-project-setup.md)** - Bootstrap guide
-- **[🔄 Development Workflow](./docs/04-development-workflow.md)** - Step-by-step workflows
-- **[🎯 API-First Workflow](./docs/04a-api-first-workflow.md)** - Recommended development approach
-- **[🏛️ Architecture](./docs/05-architecture.md)** - Frontend/Backend patterns
-- **[🧪 Testing Strategy](./docs/06-testing.md)** - E2E with Playwright MCP
-- **[🚀 Deployment](./docs/07-deployment.md)** - Docker + CI/CD
-- **[🤖 MCP Integration](./docs/09-mcp-integration.md)** - Nx MCP & Playwright MCP usage
-- **[📋 All Commands Reference](./docs/CLAUDE_COMMANDS.md)** - Complete shell command list
+- **[📚 Complete Documentation](./docs/)** - Organized documentation hub
+- **[📊 Feature Tracking System](./docs/development/feature-tracking.md)** - Track development progress
+- **[🚀 Quick Commands](./docs/development/quick-commands.md)** - Claude command reference (/feature, /status, etc.)
+- **[🏗️ Project Setup](./docs/getting-started/project-setup.md)** - Bootstrap guide
+- **[🔄 Development Workflow](./docs/development/development-workflow.md)** - Step-by-step workflows
+- **[🎯 API-First Workflow](./docs/development/api-first-workflow.md)** - Recommended development approach
+- **[🏛️ Architecture](./docs/architecture/architecture-overview.md)** - Frontend/Backend patterns
+- **[🧪 Testing Strategy](./docs/testing/testing-strategy.md)** - E2E with Playwright MCP
+- **[🚀 Deployment](./docs/infrastructure/deployment.md)** - Docker + CI/CD
+- **[🤖 MCP Integration](./docs/development/mcp-integration.md)** - Nx MCP & Playwright MCP usage
+- **[📋 All Commands Reference](./docs/references/claude-commands.md)** - Complete shell command list
 
 ### CI/CD & DevOps
-- **[🔄 Git Flow & Release](./docs/GIT-FLOW-RELEASE-GUIDE.md)** - Branch strategy & release process
-- **[📦 Automated Versioning](./docs/AUTOMATED-VERSIONING-GUIDE.md)** - Conventional commits & changelog
-- **[🐳 Monorepo Docker Guide](./docs/MONOREPO-DOCKER-GUIDE.md)** - Docker management for monorepo
-- **[🚀 CI/CD Quick Start](./docs/QUICK-START-CICD.md)** - GitHub Actions setup & usage
-- **[📚 CI/CD Complete Setup](./docs/CI-CD-SETUP.md)** - Detailed CI/CD documentation
+
+- **[🔄 Git Flow & Release](./docs/infrastructure/git-flow-release-guide.md)** - Branch strategy & release process
+- **[📦 Automated Versioning](./docs/infrastructure/automated-versioning-guide.md)** - Conventional commits & changelog
+- **[🐳 Monorepo Docker Guide](./docs/infrastructure/monorepo-docker-guide.md)** - Docker management for monorepo
+- **[🚀 CI/CD Quick Start](./docs/infrastructure/quick-start-cicd.md)** - GitHub Actions setup & usage
+- **[📚 CI/CD Complete Setup](./docs/infrastructure/ci-cd-setup.md)** - Detailed CI/CD documentation
 
 ## 🛠️ Technology Stack
 
@@ -62,7 +153,7 @@ Keep commit messages clean and professional.
 ## 🏃‍♂️ Quick Start Commands
 
 ```bash
-# Install dependencies
+# Install dependencies (⚠️ USE YARN, NOT NPM!)
 yarn install
 
 # Set up environment
@@ -83,16 +174,15 @@ nx run-many --target=serve --projects=api,web
 
 ## 📋 Most Used Commands
 
-| Command | Description | Actual Command |
-|---------|-------------|----------------|
-| **Install** | Install dependencies | `yarn install` |
-| **DB Setup** | Run migrations & seeds | `npm run db:migrate && npm run db:seed` |
-| **Develop** | Start dev servers | `nx run-many --target=serve --projects=api,web` |
-| **Test** | Run all tests | `nx run-many --target=test --all` |
-| **E2E** | Run E2E tests | `nx e2e e2e` |
-| **Build** | Build for production | `nx run-many --target=build --all` |
-| **Docker** | Start services | `docker-compose up -d` |
-
+| Command      | Description                      | Actual Command                                  |
+| ------------ | -------------------------------- | ----------------------------------------------- |
+| **Install**  | Install dependencies (USE YARN!) | `yarn install`                                  |
+| **DB Setup** | Run migrations & seeds           | `yarn db:migrate && yarn db:seed`               |
+| **Develop**  | Start dev servers                | `nx run-many --target=serve --projects=api,web` |
+| **Test**     | Run all tests                    | `nx run-many --target=test --all`               |
+| **E2E**      | Run E2E tests                    | `nx e2e e2e`                                    |
+| **Build**    | Build for production             | `nx run-many --target=build --all`              |
+| **Docker**   | Start services                   | `docker-compose up -d`                          |
 
 ## 🚀 Project Structure
 
@@ -126,4 +216,4 @@ aegisx-starter/
 
 ---
 
-*For complete documentation, see individual files in the `docs/` directory.*
+_For complete documentation, see individual files in the `docs/` directory._

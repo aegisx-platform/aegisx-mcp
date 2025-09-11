@@ -22,9 +22,9 @@ import { MatDividerModule } from '@angular/material/divider';
       [matMenuTriggerFor]="userMenu"
       class="ax-user-menu-trigger"
     >
-      @if (user()?.avatar) {
+      @if (user().avatar) {
         <img 
-          [src]="user()?.avatar" 
+          [src]="user().avatar" 
           alt="User avatar"
           class="ax-user-avatar"
         />
@@ -36,9 +36,9 @@ import { MatDividerModule } from '@angular/material/divider';
     <mat-menu #userMenu="matMenu" class="ax-user-menu">
       <div class="ax-user-info" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" tabindex="-1">
         <div class="ax-user-avatar-large">
-          @if (user()?.avatar) {
+          @if (user().avatar) {
             <img 
-              [src]="user()?.avatar" 
+              [src]="user().avatar" 
               alt="User avatar"
             />
           } @else {
@@ -46,8 +46,8 @@ import { MatDividerModule } from '@angular/material/divider';
           }
         </div>
         <div class="ax-user-details">
-          <div class="ax-user-name">{{ user()?.name || 'Guest' }}</div>
-          <div class="ax-user-email">{{ user()?.email || '' }}</div>
+          <div class="ax-user-name">{{ user().name || 'Guest' }}</div>
+          <div class="ax-user-email">{{ user().email || '' }}</div>
         </div>
       </div>
       

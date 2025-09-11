@@ -1,0 +1,75 @@
+// Material Theme Configuration
+//
+// Angular Material v20+ uses prebuilt themes. You can choose from:
+// 1. indigo-pink.css (default - blue primary, pink accent)
+// 2. deeppurple-amber.css (deep purple primary, amber accent)
+// 3. pink-bluegrey.css (pink primary, blue-grey accent)
+// 4. purple-green.css (purple primary, green accent)
+//
+// To change theme, modify the import in styles.scss:
+// @import '@angular/material/prebuilt-themes/[theme-name].css';
+
+// Custom CSS Variables for Material theme colors
+:root {
+  // Indigo Pink theme colors
+  --mat-primary: #3f51b5;
+  --mat-primary-lighter: #c5cae9;
+  --mat-primary-darker: #303f9f;
+
+  --mat-accent: #ff4081;
+  --mat-accent-lighter: #ff80ab;
+  --mat-accent-darker: #f50057;
+
+  --mat-warn: #f44336;
+  --mat-warn-lighter: #ffcdd2;
+  --mat-warn-darker: #d32f2f;
+
+  // Text colors
+  --mat-text-primary: rgba(0, 0, 0, 0.87);
+  --mat-text-secondary: rgba(0, 0, 0, 0.54);
+  --mat-text-disabled: rgba(0, 0, 0, 0.38);
+  --mat-text-hint: rgba(0, 0, 0, 0.38);
+}
+
+// Dark theme colors
+.dark {
+  --mat-primary: #7986cb;
+  --mat-primary-lighter: #e8eaf6;
+  --mat-primary-darker: #5c6bc0;
+
+  --mat-accent: #ff80ab;
+  --mat-accent-lighter: #ffc1e3;
+  --mat-accent-darker: #ff5983;
+
+  --mat-warn: #ff5252;
+  --mat-warn-lighter: #ffebee;
+  --mat-warn-darker: #e53935;
+
+  // Text colors for dark theme
+  --mat-text-primary: rgba(255, 255, 255, 0.87);
+  --mat-text-secondary: rgba(255, 255, 255, 0.54);
+  --mat-text-disabled: rgba(255, 255, 255, 0.38);
+  --mat-text-hint: rgba(255, 255, 255, 0.38);
+}
+
+// Material component color overrides
+.mat-mdc-button.mat-primary {
+  --mdc-filled-button-container-color: var(--mat-primary);
+  --mdc-filled-button-label-text-color: white;
+  --mdc-text-button-label-text-color: var(--mat-primary);
+  --mdc-outlined-button-label-text-color: var(--mat-primary);
+}
+
+.mat-mdc-button.mat-accent {
+  --mdc-filled-button-container-color: var(--mat-accent);
+  --mdc-filled-button-label-text-color: white;
+  --mdc-text-button-label-text-color: var(--mat-accent);
+  --mdc-outlined-button-label-text-color: var(--mat-accent);
+}
+
+.mat-mdc-button.mat-warn {
+  --mdc-filled-button-container-color: var(--mat-warn);
+  --mdc-filled-button-label-text-color: white;
+  --mdc-text-button-label-text-color: var(--mat-warn);
+  --mdc-outlined-button-label-text-color: var(--mat-warn);
+}

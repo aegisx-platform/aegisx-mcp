@@ -1,0 +1,697 @@
+openapi: 3.0.3
+info:
+  title: AegisX Auth Extensions API
+  description: Extended authentication API for logout, token refresh, and user session management
+  version: 1.0.0
+  contact:
+    name: AegisX Platform Team
+    url: https://github.com/aegisx-platform
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3000/api
+    description: Development server
+  - url: https://api.aegisx.com
+    description: Production server
+
+paths:
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Logout user
+      description: Logout the current authenticated user and invalidate their session/tokens
+      operationId: logoutUser
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                allDevices:
+                  type: boolean
+                  description: Logout from all devices/sessions
+                  default: false
+                  example: false
+            examples:
+              current_device:
+                summary: Logout from current device only
+                value:
+                  allDevices: false
+              all_devices:
+                summary: Logout from all devices
+                value:
+                  allDevices: true
+      responses:
+        '200':
+          description: User logged out successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          message:
+                            type: string
+                            example: 'Successfully logged out'
+                          loggedOutDevices:
+                            type: integer
+                            description: Number of devices/sessions logged out
+                            example: 1
+              examples:
+                single_device_logout:
+                  summary: Single device logout
+                  value:
+                    success: true
+                    data:
+                      message: 'Successfully logged out'
+                      loggedOutDevices: 1
+                    meta:
+                      timestamp: '2024-01-15T10:35:00Z'
+                      version: '1.0'
+                all_devices_logout:
+                  summary: All devices logout
+                  value:
+                    success: true
+                    data:
+                      message: 'Successfully logged out from all devices'
+                      loggedOutDevices: 3
+                    meta:
+                      timestamp: '2024-01-15T10:35:00Z'
+                      version: '1.0'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access token
+      description: Refresh the access token using a valid refresh token
+      operationId: refreshToken
+      security:
+        - refreshToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
+                  description: Valid refresh token
+                  example: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...'
+            examples:
+              refresh_request:
+                summary: Token refresh request
+                value:
+                  refreshToken: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AuthTokens'
+              examples:
+                token_refresh:
+                  summary: New tokens issued
+                  value:
+                    success: true
+                    data:
+                      accessToken: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.new_access_token'
+                      refreshToken: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.new_refresh_token'
+                      tokenType: 'Bearer'
+                      expiresIn: 3600
+                      refreshExpiresIn: 86400
+                      scope: 'read write'
+                    meta:
+                      timestamp: '2024-01-15T10:35:00Z'
+                      version: '1.0'
+        '400':
+          description: Invalid refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              example:
+                success: false
+                error:
+                  code: 'INVALID_REFRESH_TOKEN'
+                  message: 'The provided refresh token is invalid or expired'
+        '401':
+          description: Refresh token expired or revoked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              example:
+                success: false
+                error:
+                  code: 'REFRESH_TOKEN_EXPIRED'
+                  message: 'Refresh token has expired. Please login again'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /auth/me:
+    get:
+      tags:
+        - Authentication
+      summary: Get current authenticated user
+      description: Retrieve information about the currently authenticated user
+      operationId: getCurrentUser
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current user information retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AuthenticatedUser'
+              examples:
+                authenticated_user:
+                  summary: Current user information
+                  value:
+                    success: true
+                    data:
+                      id: 'usr_123456789'
+                      email: 'john.doe@example.com'
+                      name: 'John Doe'
+                      firstName: 'John'
+                      lastName: 'Doe'
+                      avatar: 'https://api.aegisx.com/avatars/usr_123456789.jpg'
+                      role:
+                        id: 'role_admin'
+                        name: 'Administrator'
+                        permissions:
+                          [
+                            'users.view',
+                            'users.create',
+                            'users.update',
+                            'users.delete',
+                          ]
+                      status: 'active'
+                      emailVerified: true
+                      twoFactorEnabled: false
+                      lastLoginAt: '2024-01-15T09:00:00Z'
+                      createdAt: '2024-01-01T00:00:00Z'
+                      session:
+                        id: 'sess_987654321'
+                        deviceInfo:
+                          userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)'
+                          ip: '192.168.1.1'
+                          location: 'San Francisco, CA, US'
+                        createdAt: '2024-01-15T09:00:00Z'
+                        expiresAt: '2024-01-15T15:00:00Z'
+                    meta:
+                      timestamp: '2024-01-15T10:35:00Z'
+                      version: '1.0'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /auth/sessions:
+    get:
+      tags:
+        - Authentication
+        - Sessions
+      summary: Get user sessions
+      description: Retrieve all active sessions for the current user
+      operationId: getUserSessions
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User sessions retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/UserSession'
+              examples:
+                user_sessions:
+                  summary: Active user sessions
+                  value:
+                    success: true
+                    data:
+                      - id: 'sess_987654321'
+                        current: true
+                        deviceInfo:
+                          userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)'
+                          ip: '192.168.1.1'
+                          location: 'San Francisco, CA, US'
+                          device: 'Desktop'
+                          os: 'macOS'
+                          browser: 'Chrome'
+                        createdAt: '2024-01-15T09:00:00Z'
+                        lastActiveAt: '2024-01-15T10:30:00Z'
+                        expiresAt: '2024-01-15T15:00:00Z'
+                      - id: 'sess_876543210'
+                        current: false
+                        deviceInfo:
+                          userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)'
+                          ip: '192.168.1.2'
+                          location: 'San Francisco, CA, US'
+                          device: 'Mobile'
+                          os: 'iOS'
+                          browser: 'Safari'
+                        createdAt: '2024-01-14T14:00:00Z'
+                        lastActiveAt: '2024-01-14T18:00:00Z'
+                        expiresAt: '2024-01-16T14:00:00Z'
+                    meta:
+                      timestamp: '2024-01-15T10:35:00Z'
+                      version: '1.0'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /auth/sessions/{sessionId}:
+    delete:
+      tags:
+        - Authentication
+        - Sessions
+      summary: Revoke user session
+      description: Revoke a specific user session by ID
+      operationId: revokeUserSession
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          description: Session ID to revoke
+          schema:
+            type: string
+            example: 'sess_876543210'
+      responses:
+        '200':
+          description: Session revoked successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          message:
+                            type: string
+                            example: 'Session revoked successfully'
+                          sessionId:
+                            type: string
+                            example: 'sess_876543210'
+        '400':
+          description: Cannot revoke current session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              example:
+                success: false
+                error:
+                  code: 'CANNOT_REVOKE_CURRENT_SESSION'
+                  message: 'Cannot revoke the current session. Use logout instead'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              example:
+                success: false
+                error:
+                  code: 'SESSION_NOT_FOUND'
+                  message: 'Session not found or already revoked'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /auth/verify-token:
+    post:
+      tags:
+        - Authentication
+      summary: Verify access token
+      description: Verify if an access token is valid and not expired
+      operationId: verifyToken
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Token is valid
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          valid:
+                            type: boolean
+                            example: true
+                          expiresAt:
+                            type: string
+                            format: date-time
+                            example: '2024-01-15T15:00:00Z'
+                          userId:
+                            type: string
+                            example: 'usr_123456789'
+                          sessionId:
+                            type: string
+                            example: 'sess_987654321'
+        '401':
+          description: Token is invalid or expired
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          valid:
+                            type: boolean
+                            example: false
+                          reason:
+                            type: string
+                            enum: [expired, invalid, revoked]
+                            example: 'expired'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+    refreshToken:
+      type: apiKey
+      in: header
+      name: X-Refresh-Token
+
+  schemas:
+    ApiResponse:
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
+          description: Indicates if the request was successful
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+
+    ApiMeta:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp of the response
+        version:
+          type: string
+          description: API version
+        requestId:
+          type: string
+          description: Unique request identifier
+
+    AuthTokens:
+      type: object
+      required:
+        - accessToken
+        - refreshToken
+        - tokenType
+        - expiresIn
+      properties:
+        accessToken:
+          type: string
+          description: JWT access token
+          example: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...'
+        refreshToken:
+          type: string
+          description: JWT refresh token
+          example: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...'
+        tokenType:
+          type: string
+          enum: [Bearer]
+          description: Token type
+          example: 'Bearer'
+        expiresIn:
+          type: integer
+          description: Access token expiration time in seconds
+          example: 3600
+        refreshExpiresIn:
+          type: integer
+          description: Refresh token expiration time in seconds
+          example: 86400
+        scope:
+          type: string
+          description: Token scope/permissions
+          example: 'read write'
+
+    AuthenticatedUser:
+      type: object
+      required:
+        - id
+        - email
+        - name
+        - role
+        - status
+      properties:
+        id:
+          type: string
+          description: Unique user identifier
+          example: 'usr_123456789'
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: 'john.doe@example.com'
+        name:
+          type: string
+          description: User's full name
+          example: 'John Doe'
+        firstName:
+          type: string
+          description: User's first name
+          example: 'John'
+        lastName:
+          type: string
+          description: User's last name
+          example: 'Doe'
+        avatar:
+          type: string
+          format: uri
+          nullable: true
+          description: URL of the user's avatar image
+          example: 'https://api.aegisx.com/avatars/usr_123456789.jpg'
+        role:
+          $ref: '#/components/schemas/UserRole'
+        status:
+          type: string
+          enum: [active, inactive, suspended, pending]
+          description: User account status
+          example: 'active'
+        emailVerified:
+          type: boolean
+          description: Whether the user's email is verified
+          default: false
+        twoFactorEnabled:
+          type: boolean
+          description: Whether two-factor authentication is enabled
+          default: false
+        lastLoginAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Last login timestamp
+        createdAt:
+          type: string
+          format: date-time
+          description: User creation timestamp
+        session:
+          $ref: '#/components/schemas/UserSession'
+
+    UserRole:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          description: Role identifier
+          example: 'role_admin'
+        name:
+          type: string
+          description: Role display name
+          example: 'Administrator'
+        permissions:
+          type: array
+          items:
+            type: string
+          description: List of permissions granted by this role
+          example:
+            ['users.view', 'users.create', 'users.update', 'users.delete']
+
+    UserSession:
+      type: object
+      required:
+        - id
+        - deviceInfo
+        - createdAt
+        - lastActiveAt
+      properties:
+        id:
+          type: string
+          description: Session identifier
+          example: 'sess_987654321'
+        current:
+          type: boolean
+          description: Whether this is the current session
+          default: false
+        deviceInfo:
+          $ref: '#/components/schemas/DeviceInfo'
+        createdAt:
+          type: string
+          format: date-time
+          description: Session creation timestamp
+        lastActiveAt:
+          type: string
+          format: date-time
+          description: Last activity timestamp
+        expiresAt:
+          type: string
+          format: date-time
+          description: Session expiration timestamp
+
+    DeviceInfo:
+      type: object
+      properties:
+        userAgent:
+          type: string
+          description: Full user agent string
+          example: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
+        ip:
+          type: string
+          description: IP address
+          example: '192.168.1.1'
+        location:
+          type: string
+          description: Approximate location
+          example: 'San Francisco, CA, US'
+        device:
+          type: string
+          enum: [Desktop, Mobile, Tablet, Unknown]
+          description: Device type
+          example: 'Desktop'
+        os:
+          type: string
+          description: Operating system
+          example: 'macOS'
+        browser:
+          type: string
+          description: Browser name
+          example: 'Chrome'
+
+    ApiError:
+      type: object
+      required:
+        - success
+        - error
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              description: Error code identifier
+            message:
+              type: string
+              description: Human-readable error message
+            details:
+              type: object
+              additionalProperties: true
+              description: Additional error details
+            field:
+              type: string
+              description: Field that caused the error
+
+  responses:
+    UnauthorizedError:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          example:
+            success: false
+            error:
+              code: 'UNAUTHORIZED'
+              message: 'Authentication required'
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          example:
+            success: false
+            error:
+              code: 'INTERNAL_SERVER_ERROR'
+              message: 'An unexpected error occurred'
+
+tags:
+  - name: Authentication
+    description: Authentication and session management
+  - name: Sessions
+    description: User session management
