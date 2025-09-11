@@ -31,7 +31,7 @@ jobs:
   # Setup job
   setup:
     name: 📋 Setup
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     timeout-minutes: 5
     outputs:
       is_production: ${{ steps.env.outputs.is_production }}
@@ -48,7 +48,7 @@ jobs:
     name: 📦 Release
     needs: [setup]
     if: needs.setup.outputs.is_production == 'true' && needs.setup.outputs.should_deploy == 'true'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     timeout-minutes: 10
     outputs:
       NEW_RELEASE_PUBLISHED: ${{ steps.release.outputs.new_release_published }}
@@ -85,7 +85,7 @@ jobs:
     name: 🐳 Build ${{ matrix.app }}
     needs: [setup, release]
     if: always() && needs.setup.outputs.should_deploy == 'true'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     timeout-minutes: 30
     strategy:
       fail-fast: false
@@ -146,7 +146,7 @@ jobs:
     name: 🚀 Deploy Ready
     needs: [setup, docker_build, release]
     if: always() && needs.docker_build.result == 'success'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     timeout-minutes: 2
     steps:
       - name: 📋 Deployment Summary
