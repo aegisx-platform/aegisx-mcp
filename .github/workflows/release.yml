@@ -78,12 +78,11 @@ jobs:
           context: .
           file: apps/api/Dockerfile
           push: true
+          no-cache: true
           tags: |
             ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-api:latest
             ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-api:${{ needs.release.outputs.VERSION }}
           platforms: linux/amd64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
   build_web:
     if: github.ref == 'refs/heads/main'
