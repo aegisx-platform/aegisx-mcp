@@ -61,6 +61,17 @@ Keep commit messages clean and professional.
 
 See **[Universal Full-Stack Standard](./docs/development/universal-fullstack-standard.md)** for complete database-first development workflow that must be followed for every feature to prevent integration bugs.
 
+### Feature Development Standard (MANDATORY)
+
+**🚨 MUST follow Feature Development Standard for EVERY feature - NO EXCEPTIONS**
+
+- **See [Feature Development Standard](./docs/development/feature-development-standard.md)** for complete feature lifecycle from planning to completion
+- **ALWAYS create feature documentation before coding** using templates from `docs/features/templates/`
+- **Reserve resources** in [Resource Registry](./docs/features/RESOURCE_REGISTRY.md) before starting development
+- **Follow [Multi-Feature Workflow](./docs/development/multi-feature-workflow.md)** when multiple features are being developed simultaneously
+- **Update progress daily** in feature PROGRESS.md files
+- **Check [Feature Status Dashboard](./docs/features/README.md)** for coordination with other developers
+
 ### Quality Assurance Workflow (MANDATORY)
 
 **🚨 MUST run QA Checklist after every code change - NO EXCEPTIONS**
@@ -122,6 +133,10 @@ function createRegisterRequestData() {
 
 - **[🚨 Current Project Status](./PROJECT_STATUS.md)** - Session recovery & current progress
 - **[📚 Complete Documentation](./docs/)** - Organized documentation hub
+- **[📊 Feature Status Dashboard](./docs/features/README.md)** - Central feature development tracking
+- **[📋 Feature Development Standard](./docs/development/feature-development-standard.md)** - **MANDATORY** feature lifecycle
+- **[🤝 Multi-Feature Workflow](./docs/development/multi-feature-workflow.md)** - Parallel development coordination
+- **[📝 Resource Registry](./docs/features/RESOURCE_REGISTRY.md)** - Reserve resources to prevent conflicts
 - **[📊 Feature Tracking System](./docs/development/feature-tracking.md)** - Track development progress
 - **[🚀 Quick Commands](./docs/development/quick-commands.md)** - Claude command reference (/feature, /status, etc.)
 - **[🏗️ Project Setup](./docs/getting-started/project-setup.md)** - Bootstrap guide
