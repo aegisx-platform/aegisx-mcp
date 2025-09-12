@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/aegisx-platform/aegisx-starter/compare/v1.0.2...v1.0.3) (2025-09-12)
+
+
+### Bug Fixes
+
+* force Docker image pulls and ensure clean nginx configs ([7056b6d](https://github.com/aegisx-platform/aegisx-starter/commit/7056b6d553598209d9344f18c1aea7ad33607bad))
+
 ## [1.0.2](https://github.com/aegisx-platform/aegisx-starter/compare/v1.0.1...v1.0.2) (2025-09-12)
 
 
