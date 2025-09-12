@@ -35,9 +35,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Disable Husky hooks in CI
+        run: git config --global core.hooksPath /dev/null
+
       - name: Run semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HUSKY_SKIP_HOOKS: 1
         run: pnpm semantic-release
 
       - name: Get version from package.json
