@@ -1,3 +1,10 @@
+## [1.0.10](https://github.com/aegisx-platform/aegisx-starter/compare/v1.0.9...v1.0.10) (2025-09-12)
+
+
+### Bug Fixes
+
+* force complete Docker cache clear to resolve nginx validation issues ([34cf95e](https://github.com/aegisx-platform/aegisx-starter/commit/34cf95e9d000d51b33a4af0723f986326c673a00))
+
 ## [1.0.9](https://github.com/aegisx-platform/aegisx-starter/compare/v1.0.8...v1.0.9) (2025-09-12)
 
 

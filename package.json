@@ -1,6 +1,6 @@
 {
   "name": "@aegisx/source",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "license": "MIT",
   "packageManager": "pnpm@10.15.1",
   "engines": {
