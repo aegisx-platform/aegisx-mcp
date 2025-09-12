@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/aegisx-platform/aegisx-starter/compare/v1.0.0...v1.0.1) (2025-09-12)
+
+
+### Bug Fixes
+
+* remove invalid must-revalidate from nginx gzip_proxied directive ([afc433b](https://github.com/aegisx-platform/aegisx-starter/commit/afc433b796e450d02a3498a495d220851615f4fd))
+
 # 1.0.0 (2025-09-12)
 
 
