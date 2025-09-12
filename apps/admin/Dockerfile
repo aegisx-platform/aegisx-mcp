@@ -1,68 +1,37 @@
-# Multi-stage Dockerfile for AegisX Admin Application
-# Stage 1: Build the Angular application
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
-# Install security updates and required packages
-RUN apk update && apk upgrade && \
-    apk add --no-cache \
-    python3 \
-    make \
-    g++ \
-    && rm -rf /var/cache/apk/*
-
-# Set working directory
 WORKDIR /app
 
-# Copy package files for dependency installation
-COPY package*.json yarn.lock ./
+# Enable corepack and prepare pnpm
+RUN corepack enable && corepack prepare pnpm@10 --activate
+
+# Copy package files
+COPY package.json pnpm-lock.yaml ./
 COPY nx.json tsconfig.base.json ./
 
-# Copy project-specific configurations
-COPY apps/admin/package*.json apps/admin/ 2>/dev/null || true
-COPY apps/admin/project.json apps/admin/
-COPY apps/admin/tsconfig*.json apps/admin/
-
-# Install all dependencies
-RUN yarn install --frozen-lockfile --network-timeout 100000
-
 # Copy source code
-COPY apps/admin/src apps/admin/src/
-COPY apps/admin/public apps/admin/public/
-COPY libs/ libs/ 2>/dev/null || true
+COPY apps/admin/ apps/admin/
+COPY libs/ libs/
 
-# Build the Angular application for production
-RUN npx nx build admin --configuration=production
+# Install dependencies
+RUN pnpm install --frozen-lockfile
 
-# Stage 2: Production runtime with Nginx
-FROM nginx:1.25-alpine AS runtime
+# Approve builds to prevent interactive prompts
+RUN pnpm approve-builds || true
 
-# Install security updates
-RUN apk update && apk upgrade && rm -rf /var/cache/apk/*
+# Build with memory optimization
+RUN NODE_OPTIONS="--max-old-space-size=3072" pnpm nx build admin --configuration=production
 
-# Create non-root user for Nginx
-RUN addgroup -g 1001 -S aegisx && \
-    adduser -S aegisx -u 1001 -G aegisx
+FROM nginx:alpine
 
-# Copy built application from builder stage
+# Copy built application
 COPY --from=builder /app/dist/apps/admin /usr/share/nginx/html
 
-# Copy custom Nginx configuration
+# Copy nginx configuration
 COPY apps/admin/nginx.conf /etc/nginx/nginx.conf
-
-# Create necessary directories and set permissions
-RUN mkdir -p /var/cache/nginx /var/log/nginx /var/run && \
-    chown -R aegisx:aegisx /var/cache/nginx /var/log/nginx /var/run /usr/share/nginx/html && \
-    chmod -R 755 /var/cache/nginx /var/log/nginx /var/run
-
-# Switch to non-root user
-USER aegisx
 
 # Expose port
 EXPOSE 8080
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:8080/ || exit 1
-
-# Start Nginx
+# Start nginx
 CMD ["nginx", "-g", "daemon off;"]
