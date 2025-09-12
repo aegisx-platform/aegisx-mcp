@@ -234,7 +234,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
           // Show detailed errors if any
           if (result.errors && result.errors.length > 0) {
-            result.errors.forEach((error) => {
+            result.errors.forEach((error: { key: string; error: string }) => {
               this.snackBar.open(`${error.key}: ${error.error}`, 'Close', {
                 duration: 5000,
                 panelClass: ['error-snackbar'],

@@ -34,7 +34,7 @@ export class SettingsService {
   private readonly baseUrl = '/api/settings';
 
   // Set to true to use demo service instead of real API
-  private readonly useDemoMode = true;
+  private readonly useDemoMode = false;
 
   // Signal-based state management
   private _state = signal<SettingsState>({
@@ -188,7 +188,7 @@ export class SettingsService {
     }
 
     return this.http
-      .put<BulkUpdateResponse>(`${this.baseUrl}/bulk`, updates)
+      .post<BulkUpdateResponse>(`${this.baseUrl}/bulk-update`, updates)
       .pipe(
         map((response) => response.data),
         tap(() => {

@@ -233,8 +233,9 @@ export async function seed(knex: Knex): Promise<void> {
       {
         key: 'settings',
         title: 'Settings',
-        type: 'collapsible',
+        type: 'item',
         icon: 'heroicons_outline:cog-6-tooth',
+        link: '/settings',
         sort_order: 3,
         show_in_compact: false,
       },

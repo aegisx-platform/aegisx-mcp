@@ -98,7 +98,7 @@ import { SettingsService } from '../settings.service';
                           />
                           @if (setting.uiSchema?.suffix) {
                             <mat-icon matSuffix>{{
-                              setting.uiSchema.suffix
+                              setting.uiSchema?.suffix
                             }}</mat-icon>
                           }
                           @if (setting.description) {
@@ -143,7 +143,7 @@ import { SettingsService } from '../settings.service';
                           />
                           @if (setting.uiSchema?.suffix) {
                             <mat-icon matSuffix>{{
-                              setting.uiSchema.suffix
+                              setting.uiSchema?.suffix
                             }}</mat-icon>
                           }
                           @if (setting.description) {
@@ -158,7 +158,7 @@ import { SettingsService } from '../settings.service';
                       <!-- Select Dropdown -->
                       @if (
                         setting.uiSchema?.component === 'select' &&
-                        setting.uiSchema.options
+                        setting.uiSchema?.options
                       ) {
                         <mat-form-field appearance="outline" class="w-full">
                           <mat-label>{{ setting.label }}</mat-label>
@@ -167,7 +167,7 @@ import { SettingsService } from '../settings.service';
                             [disabled]="setting.isReadonly"
                           >
                             @for (
-                              option of setting.uiSchema.options;
+                              option of setting.uiSchema?.options ?? [];
                               track option.value
                             ) {
                               <mat-option [value]="option.value">{{
@@ -177,7 +177,7 @@ import { SettingsService } from '../settings.service';
                           </mat-select>
                           @if (setting.uiSchema?.suffix) {
                             <mat-icon matSuffix>{{
-                              setting.uiSchema.suffix
+                              setting.uiSchema?.suffix
                             }}</mat-icon>
                           }
                           @if (setting.description) {
