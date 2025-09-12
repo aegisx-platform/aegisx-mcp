@@ -1,0 +1,146 @@
+name: 🚀 Release & Build (Cost-Optimized)
+
+on:
+  push:
+    branches: [main, develop]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+  REGISTRY: ghcr.io
+  CI: true
+  HUSKY: 0
+
+jobs:
+  # Setup job
+  setup:
+    name: 📋 Setup
+    runs-on: self-hosted
+    timeout-minutes: 5
+    outputs:
+      is_production: ${{ steps.env.outputs.is_production }}
+      should_deploy: ${{ steps.env.outputs.should_deploy }}
+    steps:
+      - name: 🏷️ Set environment variables
+        id: env
+        run: |
+          echo "is_production=${{ github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production') }}" >> $GITHUB_OUTPUT
+          echo "should_deploy=${{ github.event_name != 'pull_request' }}" >> $GITHUB_OUTPUT
+
+  # Semantic release (production only)
+  release:
+    name: 📦 Release
+    needs: [setup]
+    if: needs.setup.outputs.is_production == 'true' && needs.setup.outputs.should_deploy == 'true'
+    runs-on: self-hosted
+    timeout-minutes: 10
+    outputs:
+      NEW_RELEASE_PUBLISHED: ${{ steps.release.outputs.new_release_published }}
+      VERSION: ${{ steps.release.outputs.new_release_version }}
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: ⚡ Install dependencies
+        run: |
+          yarn install --frozen-lockfile --production=false
+          yarn add -D @semantic-release/changelog @semantic-release/git
+
+      - name: 🚀 Semantic Release
+        id: release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release
+
+  # Build all Docker images
+  docker_build:
+    name: 🐳 Build ${{ matrix.app }}
+    needs: [setup, release]
+    if: always() && needs.setup.outputs.should_deploy == 'true'
+    runs-on: self-hosted
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        app: ['api', 'web', 'admin']
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🏷️ Generate metadata
+        id: meta
+        run: |
+          REPO_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')
+
+          if [[ "${{ needs.setup.outputs.is_production }}" == "true" ]]; then
+            VERSION="${{ needs.release.outputs.VERSION || 'latest' }}"
+            TAGS="ghcr.io/$REPO_NAME-${{ matrix.app }}:latest,ghcr.io/$REPO_NAME-${{ matrix.app }}:v$VERSION"
+          else
+            SHORT_SHA=${GITHUB_SHA:0:7}
+            TAGS="ghcr.io/$REPO_NAME-${{ matrix.app }}:staging-$SHORT_SHA"
+          fi
+
+          echo "tags=$TAGS" >> $GITHUB_OUTPUT
+          echo "📋 Docker tags for ${{ matrix.app }}: $TAGS"
+
+      - name: 🏗️ Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: 🔧 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🔐 Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🐳 Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/${{ matrix.app }}/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          platforms: linux/amd64
+          cache-from: |
+            type=gha
+            type=registry,ref=ghcr.io/${{ steps.meta.outputs.repo_name }}-${{ matrix.app }}:cache
+          cache-to: |
+            type=gha,mode=max
+            type=registry,ref=ghcr.io/${{ steps.meta.outputs.repo_name }}-${{ matrix.app }}:cache,mode=max
+          build-args: |
+            APP_VERSION=${{ needs.release.outputs.VERSION || github.sha }}
+            CI=true

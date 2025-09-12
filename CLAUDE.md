@@ -108,9 +108,9 @@ function createRegisterRequestData() {
 
 **ผิดแล้วต้องแก้ทันที - ห้ามเดา!**
 
-## 🔴 IMPORTANT: This project uses YARN, not NPM
+## 🔴 IMPORTANT: This project uses PNPM, not NPM or Yarn
 
-**Always use `yarn` commands, never use `npm install` or `npm` commands for dependencies**
+**Always use `pnpm` commands, never use `npm` or `yarn` commands for dependencies**
 
 ## Quick Navigation
 
@@ -153,8 +153,8 @@ function createRegisterRequestData() {
 ## 🏃‍♂️ Quick Start Commands
 
 ```bash
-# Install dependencies (⚠️ USE YARN, NOT NPM!)
-yarn install
+# Install dependencies (⚠️ USE PNPM, NOT NPM OR YARN!)
+pnpm install
 
 # Set up environment
 cp .env.example .env
@@ -176,8 +176,8 @@ nx run-many --target=serve --projects=api,web
 
 | Command      | Description                      | Actual Command                                  |
 | ------------ | -------------------------------- | ----------------------------------------------- |
-| **Install**  | Install dependencies (USE YARN!) | `yarn install`                                  |
-| **DB Setup** | Run migrations & seeds           | `yarn db:migrate && yarn db:seed`               |
+| **Install**  | Install dependencies (USE YARN!) | `pnpm install`                                  |
+| **DB Setup** | Run migrations & seeds           | `pnpm db:migrate && pnpm db:seed`               |
 | **Develop**  | Start dev servers                | `nx run-many --target=serve --projects=api,web` |
 | **Test**     | Run all tests                    | `nx run-many --target=test --all`               |
 | **E2E**      | Run E2E tests                    | `nx e2e e2e`                                    |

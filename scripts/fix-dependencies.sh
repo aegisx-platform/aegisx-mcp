@@ -37,7 +37,7 @@ DEPS=(
 
 for dep in "${DEPS[@]}"; do
   echo -n "  - Installing $dep... "
-  if npm install "$dep" --save --save-exact > /dev/null 2>&1; then
+  if pnpm install "$dep" --save --save-exact > /dev/null 2>&1; then
     echo -e "${GREEN}✅${NC}"
   else
     echo -e "${YELLOW}⚠️  Skipped${NC}"
@@ -55,7 +55,7 @@ DEV_DEPS=(
 
 for dep in "${DEV_DEPS[@]}"; do
   echo -n "  - Installing $dep... "
-  if npm install "$dep" --save-dev --save-exact > /dev/null 2>&1; then
+  if pnpm install "$dep" --save-dev --save-exact > /dev/null 2>&1; then
     echo -e "${GREEN}✅${NC}"
   else
     echo -e "${YELLOW}⚠️  Skipped${NC}"
@@ -64,7 +64,7 @@ done
 
 # 5. Fix peer dependencies
 echo -n "Resolving peer dependencies... "
-npm install --legacy-peer-deps > /dev/null 2>&1
+pnpm install --legacy-peer-deps > /dev/null 2>&1
 echo -e "${GREEN}✅ Done${NC}"
 
 # 6. Verify installation

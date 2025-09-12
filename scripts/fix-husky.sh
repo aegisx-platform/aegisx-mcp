@@ -4,7 +4,7 @@ echo "🔧 Fixing Husky configuration..."
 
 # 1. Install missing dependencies
 echo "📦 Installing missing commitlint dependencies..."
-npm install --save-dev @commitlint/cli @commitlint/config-conventional
+pnpm install --save-dev @commitlint/cli @commitlint/config-conventional
 
 # 2. Fix pre-commit hook (remove deprecated husky.sh)
 echo "✏️  Updating pre-commit hook..."

@@ -89,9 +89,9 @@ fi
 # Install dependencies if package.json was updated
 if [ -f package.json ] && [ -f yarn.lock ]; then
     echo "📦 Installing monitoring dependencies..."
-    yarn install
+    ppnpm install
 elif [ -f package.json ]; then
-    echo -e "${YELLOW}⚠️  Please run 'yarn install' to install monitoring dependencies${NC}"
+    echo -e "${YELLOW}⚠️  Please run 'ppnpm install' to install monitoring dependencies${NC}"
 fi
 
 echo ""

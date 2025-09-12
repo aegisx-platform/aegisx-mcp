@@ -119,6 +119,14 @@ export const appRoutes: Route[] = [
       import('./debug-icons.component').then((m) => m.DebugIconsComponent),
   },
   {
+    path: 'debug-navigation',
+    loadComponent: () =>
+      import('./debug-navigation.component').then(
+        (m) => m.DebugNavigationComponent,
+      ),
+    canActivate: [AuthGuard],
+  },
+  {
     path: 'demo/navigation',
     loadComponent: () =>
       import('./demo/navigation-demo.component').then(

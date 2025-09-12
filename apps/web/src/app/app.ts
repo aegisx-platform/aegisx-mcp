@@ -10,6 +10,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AxCompactLayoutComponent, AxNavigationItem } from '@aegisx/ui';
 import { AuthService } from './core/auth.service';
+import { NavigationService } from './core/navigation.service';
 
 interface Notification {
   id: number;
@@ -36,7 +37,7 @@ interface Notification {
   template: `
     @if (shouldShowLayout()) {
       <ax-compact-layout
-        [navigation]="navigation"
+        [navigation]="navigation()"
         [appName]="'AegisX Platform'"
         [appVersion]="'v2.0'"
         [isDarkMode]="isDarkMode()"
@@ -191,6 +192,7 @@ interface Notification {
 export class AppComponent implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private navigationService = inject(NavigationService);
 
   isDarkMode = signal(false);
   shouldShowLayout = signal(true);
@@ -208,211 +210,8 @@ export class AppComponent implements OnInit {
   notifications = signal<Notification[]>([]);
   currentYear = new Date().getFullYear();
 
-  // Navigation Items
-  navigation: AxNavigationItem[] = [
-    {
-      id: 'main',
-      title: 'Main',
-      type: 'group',
-      children: [
-        {
-          id: 'dashboard',
-          title: 'Analytics Dashboard',
-          type: 'item',
-          icon: 'heroicons_outline:home',
-          link: '/dashboard',
-          // badge: {
-          //   title: 'New',
-          //   classes: 'px-2 bg-primary-600 text-white rounded-full',
-          // },
-        },
-        {
-          id: 'dashboard.project',
-          title: 'Project Dashboard',
-          type: 'item',
-          icon: 'heroicons_outline:briefcase',
-          link: '/dashboards/project',
-        },
-      ],
-    },
-    {
-      id: 'management',
-      title: 'Management',
-      type: 'group',
-      children: [
-        {
-          id: 'users',
-          title: 'User Management',
-          type: 'item',
-          icon: 'heroicons_outline:users',
-          link: '/users',
-        },
-        {
-          id: 'products',
-          title: 'Products',
-          type: 'collapsible',
-          icon: 'heroicons_outline:shopping-bag',
-          children: [
-            {
-              id: 'products.list',
-              title: 'Product List',
-              type: 'item',
-              link: '/products',
-            },
-            {
-              id: 'products.categories',
-              title: 'Categories',
-              type: 'item',
-              link: '/products/categories',
-            },
-          ],
-        },
-        {
-          id: 'orders',
-          title: 'Orders',
-          type: 'item',
-          icon: 'heroicons_outline:shopping-cart',
-          link: '/orders',
-          // badge: {
-          //   title: '5',
-          //   classes: 'px-2 bg-warn-600 text-white rounded-full',
-          // },
-        },
-      ],
-    },
-    {
-      id: 'settings',
-      title: 'Settings',
-      type: 'group',
-      children: [
-        {
-          id: 'settings',
-          title: 'Settings',
-          type: 'item',
-          icon: 'heroicons_outline:cog-6-tooth',
-          link: '/settings',
-        },
-        {
-          id: 'test-ax',
-          title: 'Test Ax Navigation',
-          type: 'item',
-          icon: 'heroicons_outline:beaker',
-          link: '/test-ax',
-          // badge: {
-          //   title: 'NEW',
-          //   classes: 'px-2 bg-green-600 text-white rounded',
-          // },
-        },
-        {
-          id: 'material-demo',
-          title: 'Material Components Demo',
-          type: 'item',
-          icon: 'heroicons_outline:cube',
-          link: '/material-demo',
-        },
-        {
-          id: 'docs',
-          title: 'Documentation',
-          type: 'item',
-          icon: 'heroicons_outline:book-open',
-          link: '/docs',
-          externalLink: true,
-          target: '_blank',
-        },
-      ],
-    },
-    // {
-    //   id: 'divider-1',
-    //   type: 'divider',
-    // },
-    // {
-    //   id: 'navigation-features',
-    //   title: 'Navigation Features',
-    //   type: 'group',
-    //   children: [
-    //     {
-    //       id: 'level.0',
-    //       title: 'Level 0',
-    //       icon: 'heroicons_outline:check-circle',
-    //       type: 'collapsable',
-    //       children: [
-    //         {
-    //           id: 'level.0.1',
-    //           title: 'Level 1',
-    //           type: 'collapsible',
-    //           children: [
-    //             {
-    //               id: 'level.0.1.2',
-    //               title: 'Level 2',
-    //               type: 'collapsible',
-    //               children: [
-    //                 {
-    //                   id: 'level.0.1.2.3',
-    //                   title: 'Level 3',
-    //                   type: 'collapsible',
-    //                   children: [
-    //                     {
-    //                       id: 'level.0.1.2.3.4',
-    //                       title: 'Level 4',
-    //                       type: 'collapsible',
-    //                       children: [
-    //                         {
-    //                           id: 'level.0.1.2.3.4.5',
-    //                           title: 'Level 5',
-    //                           type: 'item',
-    //                         },
-    //                       ],
-    //                     },
-    //                   ],
-    //                 },
-    //               ],
-    //             },
-    //           ],
-    //         },
-    //       ],
-    //     },
-    //     {
-    //       id: 'level.0.alt',
-    //       title: 'With badges',
-    //       icon: 'heroicons_outline:tag',
-    //       type: 'collapsable',
-    //       badge: {
-    //         title: '3',
-    //         classes: 'px-2 bg-primary-600 text-white rounded-full',
-    //       },
-    //       children: [
-    //         {
-    //           id: 'level.0.alt.1',
-    //           title: 'Option with badge',
-    //           type: 'item',
-    //           badge: {
-    //             title: 'Updated',
-    //             classes: 'px-2 bg-warn-600 text-white rounded-full',
-    //           },
-    //         },
-    //         {
-    //           id: 'level.0.alt.2',
-    //           title: 'Option with badge',
-    //           type: 'item',
-    //           badge: {
-    //             title: '8',
-    //             classes: 'px-2 bg-error-600 text-white rounded-full',
-    //           },
-    //         },
-    //         {
-    //           id: 'level.0.alt.3',
-    //           title: 'Option with badge',
-    //           type: 'item',
-    //           badge: {
-    //             title: 'New',
-    //             classes: 'px-2 bg-success-600 text-white rounded-full',
-    //           },
-    //         },
-    //       ],
-    //     },
-    //   ],
-    // },
-  ];
+  // Navigation Items (now from NavigationService)
+  navigation = computed(() => this.navigationService.navigationItems());
 
   ngOnInit() {
     // Load theme preference

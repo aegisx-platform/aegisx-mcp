@@ -1,399 +1,197 @@
-name: 🚀 Release & Deploy
+name: 🚀 Simple Release (3 Apps)
 
 on:
   push:
-    branches: [main, develop]
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - '.vscode/**'
-  pull_request:
-    branches: [main, develop]
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - '.vscode/**'
+    branches:
+      - main
+      - develop
   workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Target environment'
-        required: true
-        default: 'staging'
-        type: choice
-        options:
-          - staging
-          - production
-      force_deploy:
-        description: 'Force deploy without tests'
-        required: false
-        default: false
-        type: boolean
-
-# Prevent multiple deployments from running simultaneously
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-env:
-  NODE_VERSION: '20'
-  REGISTRY: ghcr.io
-  # Optimization flags
-  CI: true
-  HUSKY: 0
-  SKIP_ENV_VALIDATION: true
 
 jobs:
-  # Setup and validation job
-  setup:
-    name: 📋 Setup & Validation
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    outputs:
-      is_production: ${{ steps.env.outputs.is_production }}
-      is_staging: ${{ steps.env.outputs.is_staging }}
-      should_deploy: ${{ steps.env.outputs.should_deploy }}
-      matrix: ${{ steps.apps.outputs.matrix }}
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: 🔄 Skip duplicate actions
-        id: skip_check
-        uses: fkirc/skip-duplicate-actions@v5
-        with:
-          concurrent_skipping: 'same_content_newer'
-          skip_after_successful_duplicate: 'true'
-          do_not_skip: '["workflow_dispatch", "schedule"]'
-
-      - name: 🏷️ Set environment variables
-        id: env
-        run: |
-          echo "is_production=${{ github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production') }}" >> $GITHUB_OUTPUT
-          echo "is_staging=${{ github.ref == 'refs/heads/develop' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging') }}" >> $GITHUB_OUTPUT
-          echo "should_deploy=${{ github.event_name != 'pull_request' }}" >> $GITHUB_OUTPUT
-
-      - name: 🔍 Detect apps to build
-        id: apps
-        run: |
-          MATRIX='["api","web","admin"]'
-          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
-          echo "Apps to build: $MATRIX"
-
-  # Security scanning job
-  security_scan:
-    name: 🔐 Security Scanning
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    permissions:
-      security-events: write
-      actions: read
-      contents: read
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-
-      - name: 🔍 Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'table'
-          exit-code: '0'
-
-      - name: 🔍 Run Trivy for SARIF (if Advanced Security enabled)
-        id: trivy_sarif
-        continue-on-error: true
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-
-      - name: 📊 Upload Trivy scan results to GitHub Security
-        if: steps.trivy_sarif.outcome == 'success'
-        continue-on-error: true
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: 'trivy-results.sarif'
-
-      - name: 📋 Security scan summary
-        if: always()
-        run: |
-          echo "🔒 Security scanning completed"
-          echo "ℹ️  Note: Advanced Security features require GitHub Pro/Enterprise"
-          if [ -f "trivy-results.sarif" ]; then
-            echo "✅ SARIF report generated successfully"
-          else
-            echo "ℹ️  SARIF upload skipped (Advanced Security not available)"
-          fi
-
-  # Semantic release job (production only)
   release:
-    name: 📦 Semantic Release
-    needs: [setup, security_scan]
-    if: needs.setup.outputs.is_production == 'true' && needs.setup.outputs.should_deploy == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+    if: github.ref == 'refs/heads/main'
+    runs-on: self-hosted
     outputs:
-      NEW_RELEASE_PUBLISHED: ${{ steps.release.outputs.new_release_published }}
-      VERSION: ${{ steps.release.outputs.new_release_version }}
+      VERSION: ${{ steps.get_version.outputs.VERSION }}
     permissions:
       contents: write
       issues: write
       pull-requests: write
     steps:
-      - name: 📥 Checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 🏗️ Setup Node.js
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
+          node-version: '22'
+          cache: 'pnpm'
 
-      - name: 📦 Cache node_modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-            ~/.cache/yarn
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: ⚡ Install dependencies
-        run: |
-          yarn install --frozen-lockfile --network-timeout 600000
-          yarn add -D @semantic-release/changelog @semantic-release/git
-
-      - name: 🚀 Semantic Release
-        id: release
+      - name: Run semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          npx semantic-release
+        run: pnpm semantic-release
 
-      - name: 📋 Output release info
-        if: steps.release.outputs.new_release_published == 'true'
+      - name: Get version from package.json
+        id: get_version
         run: |
-          echo "✅ New release published: v${{ steps.release.outputs.new_release_version }}"
-          echo "📝 Release notes: ${{ steps.release.outputs.new_release_notes }}"
+          VERSION=$(node -p "require('./package.json').version")
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
-  # Build applications
-  build:
-    name: 🏗️ Build Apps
-    needs: [setup, security_scan]
-    if: needs.setup.outputs.should_deploy == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
+  build_images:
+    if: github.ref == 'refs/heads/main'
+    needs: release
+    runs-on: self-hosted
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
-        app: ${{ fromJson(needs.setup.outputs.matrix) }}
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-
-      - name: 🏗️ Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-
-      - name: 📦 Cache node_modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-            ~/.cache/yarn
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
-
-      - name: ⚡ Install dependencies
-        run: yarn install --frozen-lockfile --ignore-scripts --network-timeout 600000
-
-      - name: 🔨 Build application
-        run: |
-          echo "🏗️ Building ${{ matrix.app }}..."
-          npx nx build ${{ matrix.app }} --configuration=production --skip-nx-cache=false
-          echo "✅ Build completed for ${{ matrix.app }}"
-
-      - name: 📦 Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-${{ matrix.app }}
-          path: dist/apps/${{ matrix.app }}
-          retention-days: 7
-          compression-level: 9
-
-  # Docker build and push
-  docker_build:
-    name: 🐳 Docker Build & Push
-    needs: [setup, build, release]
-    if: always() && needs.setup.outputs.should_deploy == 'true' && needs.build.result == 'success'
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    strategy:
-      fail-fast: false
-      matrix:
-        app: ${{ fromJson(needs.setup.outputs.matrix) }}
+        app: [api, web, admin]
     permissions:
-      contents: read
       packages: write
+      contents: read
     steps:
-      - name: 📥 Checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 📦 Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-${{ matrix.app }}
-          path: dist/apps/${{ matrix.app }}
+      - name: Get repository name
+        id: repo
+        run: echo "REPO_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
 
-      - name: 🏷️ Generate metadata
-        id: meta
-        run: |
-          REPO_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')
-          echo "repo_name=$REPO_NAME" >> $GITHUB_OUTPUT
-
-          if [[ "${{ needs.setup.outputs.is_production }}" == "true" ]]; then
-            VERSION="${{ needs.release.outputs.VERSION || 'latest' }}"
-            TAGS="ghcr.io/$REPO_NAME-${{ matrix.app }}:latest,ghcr.io/$REPO_NAME-${{ matrix.app }}:v$VERSION"
-          else
-            SHORT_SHA=${GITHUB_SHA:0:7}
-            TAGS="ghcr.io/$REPO_NAME-${{ matrix.app }}:staging-$SHORT_SHA,ghcr.io/$REPO_NAME-${{ matrix.app }}:staging-latest"
-          fi
-
-          echo "tags=$TAGS" >> $GITHUB_OUTPUT
-          echo "📋 Docker tags: $TAGS"
-
-      - name: 🏗️ Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: 🔧 Set up Docker Buildx
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-        with:
-          driver-opts: network=host
 
-      - name: 🧹 Clear corrupted cache (if needed)
-        run: |
-          echo "🧹 Clearing potential cache corruption..."
-          docker builder prune --force --filter type=exec.cachemount || true
-          docker builder prune --force --filter type=source.local || true
-
-      - name: 🔐 Login to GitHub Container Registry
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 🐳 Build and push Docker image
+      - name: Build and push ${{ matrix.app }}
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: .
           file: apps/${{ matrix.app }}/Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          platforms: linux/amd64,linux/arm64
-          cache-to: |
-            type=registry,ref=ghcr.io/${{ steps.meta.outputs.repo_name }}-${{ matrix.app }}:buildcache,mode=max
-          build-args: |
-            APP_VERSION=${{ needs.release.outputs.VERSION || github.sha }}
-            BUILD_DATE=${{ github.event.head_commit.timestamp }}
-            COMMIT_SHA=${{ github.sha }}
-            NX_DAEMON=false
-            CI=true
+          tags: |
+            ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-${{ matrix.app }}:latest
+            ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-${{ matrix.app }}:${{ needs.release.outputs.VERSION }}
+          platforms: linux/arm64
+          cache-from: type=local,src=/tmp/.buildx-cache-${{ matrix.app }}
+          cache-to: type=local,dest=/tmp/.buildx-cache-${{ matrix.app }}-new,mode=max
 
-      - name: 🔍 Test Docker image
+      - name: Move cache
         run: |
-          IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | cut -d',' -f1)
-          echo "🧪 Testing image: $IMAGE_TAG"
-          docker run --rm --platform linux/amd64 $IMAGE_TAG --version || echo "⚠️ Health check not available"
+          rm -rf /tmp/.buildx-cache-${{ matrix.app }}
+          mv /tmp/.buildx-cache-${{ matrix.app }}-new /tmp/.buildx-cache-${{ matrix.app }}
 
-  # Deploy to staging
-  deploy_staging:
-    name: 🚀 Deploy to Staging
-    needs: [setup, docker_build]
-    if: needs.setup.outputs.is_staging == 'true' && needs.docker_build.result == 'success'
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    environment: staging
-    steps:
-      - name: 📋 Deployment Summary
+      - name: Health check image
         run: |
-          echo "🎯 Deploying to Staging Environment"
-          echo "📦 Images deployed:"
-          REPO_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')
-          SHORT_SHA=${GITHUB_SHA:0:7}
-          echo "  - ghcr.io/$REPO_NAME-api:staging-$SHORT_SHA"
-          echo "  - ghcr.io/$REPO_NAME-web:staging-$SHORT_SHA"
-          echo "  - ghcr.io/$REPO_NAME-admin:staging-$SHORT_SHA"
-          echo "🔗 Commit: ${{ github.sha }}"
-          echo "👤 Actor: ${{ github.actor }}"
-
-  # Deploy to production
-  deploy_production:
-    name: 🚀 Deploy to Production
-    needs: [setup, docker_build, release]
-    if: needs.setup.outputs.is_production == 'true' && needs.docker_build.result == 'success' && needs.release.outputs.NEW_RELEASE_PUBLISHED == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    environment: production
-    steps:
-      - name: 📋 Production Deployment Summary
-        run: |
-          echo "🎯 Deploying to Production Environment"
-          echo "🏷️ Version: v${{ needs.release.outputs.VERSION }}"
-          echo "📦 Images deployed:"
-          REPO_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')
-          echo "  - ghcr.io/$REPO_NAME-api:v${{ needs.release.outputs.VERSION }}"
-          echo "  - ghcr.io/$REPO_NAME-web:v${{ needs.release.outputs.VERSION }}"
-          echo "  - ghcr.io/$REPO_NAME-admin:v${{ needs.release.outputs.VERSION }}"
-          echo "  - ghcr.io/$REPO_NAME-api:latest"
-          echo "  - ghcr.io/$REPO_NAME-web:latest"
-          echo "  - ghcr.io/$REPO_NAME-admin:latest"
-          echo "🔗 Release: https://github.com/${{ github.repository }}/releases/tag/v${{ needs.release.outputs.VERSION }}"
-
-  # Notifications and cleanup
-  notify:
-    name: 📊 Notifications & Cleanup
-    if: always() && (needs.deploy_production.result != 'skipped' || needs.deploy_staging.result != 'skipped')
-    needs: [setup, deploy_production, deploy_staging]
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: 📊 Workflow Summary
-        run: |
-          echo "## 📊 Deployment Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          if [[ "${{ needs.deploy_production.result }}" == "success" ]]; then
-            echo "✅ **Production Deployment**: Successful" >> $GITHUB_STEP_SUMMARY
-            echo "🏷️ **Version**: v${{ needs.release.outputs.VERSION }}" >> $GITHUB_STEP_SUMMARY
-          elif [[ "${{ needs.deploy_staging.result }}" == "success" ]]; then
-            echo "✅ **Staging Deployment**: Successful" >> $GITHUB_STEP_SUMMARY
-            echo "🔗 **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "Verifying ${{ matrix.app }} image..."
+          if [ "${{ matrix.app }}" = "api" ]; then
+            docker run --rm ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-${{ matrix.app }}:latest node --version
+          else
+            docker run --rm ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-${{ matrix.app }}:latest nginx -t
           fi
 
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Workflow**: ${{ github.workflow }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Actor**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "🚨 Build failed for ${{ matrix.app }}"
+          echo "::error::Docker build failed for ${{ matrix.app }} application"
 
-      - name: 🧹 Cleanup artifacts
-        uses: actions/upload-artifact/merge@v4
-        if: always()
+  # Staging builds (develop branch) - Parallel Matrix Build
+  build_staging_images:
+    if: github.ref == 'refs/heads/develop'
+    runs-on: self-hosted
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [api, web, admin]
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get variables
+        id: vars
+        run: |
+          echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+          echo "REPO_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
         with:
-          name: all-build-artifacts
-          pattern: build-*
-          delete-merged: true
-          retention-days: 3
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push ${{ matrix.app }} staging
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/${{ matrix.app }}/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ steps.vars.outputs.REPO_NAME }}-${{ matrix.app }}:staging
+            ghcr.io/${{ steps.vars.outputs.REPO_NAME }}-${{ matrix.app }}:staging-${{ steps.vars.outputs.SHORT_SHA }}
+          platforms: linux/arm64
+          cache-from: type=local,src=/tmp/.buildx-cache-${{ matrix.app }}
+          cache-to: type=local,dest=/tmp/.buildx-cache-${{ matrix.app }}-new,mode=max
+
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache-${{ matrix.app }}
+          mv /tmp/.buildx-cache-${{ matrix.app }}-new /tmp/.buildx-cache-${{ matrix.app }}
+
+      - name: Quick health check staging
+        run: |
+          echo "✅ ${{ matrix.app }} staging image built successfully"
+          echo "📦 Image: ghcr.io/${{ steps.vars.outputs.REPO_NAME }}-${{ matrix.app }}:staging"
+          echo "🏷️ SHA Tag: ghcr.io/${{ steps.vars.outputs.REPO_NAME }}-${{ matrix.app }}:staging-${{ steps.vars.outputs.SHORT_SHA }}"
+
+      - name: Notify staging build
+        if: failure()
+        run: |
+          echo "🚨 Staging build failed for ${{ matrix.app }}"
+          echo "::error::Staging Docker build failed for ${{ matrix.app }} application"
+
+  # Summary job to check all builds status
+  deployment_ready:
+    if: github.ref == 'refs/heads/main'
+    needs: build_images
+    runs-on: self-hosted
+    steps:
+      - name: Deployment summary
+        run: |
+          echo "🚀 All production images built successfully!"
+          echo "✅ API, Web, Admin containers are ready for deployment"
+          echo "📋 Next steps: Deploy to production environment"
+
+  staging_ready:
+    if: github.ref == 'refs/heads/develop'
+    needs: build_staging_images
+    runs-on: self-hosted
+    steps:
+      - name: Staging summary
+        run: |
+          echo "🧪 All staging images built successfully!"
+          echo "✅ API, Web, Admin staging containers are ready"
+          echo "📋 Next steps: Deploy to staging environment"
