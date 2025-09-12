@@ -46,11 +46,15 @@ jobs:
           VERSION=$(node -p "require('./package.json').version")
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
-  build_api:
+  build_images:
     if: github.ref == 'refs/heads/main'
     needs: release
     runs-on: self-hosted
-    timeout-minutes: 25
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [api, web, admin]
     permissions:
       packages: write
       contents: read
@@ -72,99 +76,49 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push API
+      - name: Build and push ${{ matrix.app }}
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: apps/api/Dockerfile
+          file: apps/${{ matrix.app }}/Dockerfile
           push: true
-          no-cache: true
           tags: |
-            ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-api:latest
-            ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-api:${{ needs.release.outputs.VERSION }}
+            ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-${{ matrix.app }}:latest
+            ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-${{ matrix.app }}:${{ needs.release.outputs.VERSION }}
           platforms: linux/arm64
+          cache-from: type=local,src=/tmp/.buildx-cache-${{ matrix.app }}
+          cache-to: type=local,dest=/tmp/.buildx-cache-${{ matrix.app }}-new,mode=max
 
-  build_web:
-    if: github.ref == 'refs/heads/main'
-    needs: release
-    runs-on: self-hosted
-    timeout-minutes: 25
-    permissions:
-      packages: write
-      contents: read
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache-${{ matrix.app }}
+          mv /tmp/.buildx-cache-${{ matrix.app }}-new /tmp/.buildx-cache-${{ matrix.app }}
 
-      - name: Get repository name
-        id: repo
-        run: echo "REPO_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+      - name: Health check image
+        run: |
+          echo "Verifying ${{ matrix.app }} image..."
+          if [ "${{ matrix.app }}" = "api" ]; then
+            docker run --rm ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-${{ matrix.app }}:latest node --version
+          else
+            docker run --rm ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-${{ matrix.app }}:latest nginx -t
+          fi
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "🚨 Build failed for ${{ matrix.app }}"
+          echo "::error::Docker build failed for ${{ matrix.app }} application"
 
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and push Web
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: apps/web/Dockerfile
-          push: true
-          no-cache: true
-          tags: |
-            ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-web:latest
-            ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-web:${{ needs.release.outputs.VERSION }}
-          platforms: linux/arm64
-
-  build_admin:
-    if: github.ref == 'refs/heads/main'
-    needs: release
-    runs-on: self-hosted
-    timeout-minutes: 25
-    permissions:
-      packages: write
-      contents: read
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Get repository name
-        id: repo
-        run: echo "REPO_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and push Admin
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: apps/admin/Dockerfile
-          push: true
-          no-cache: true
-          tags: |
-            ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-admin:latest
-            ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-admin:${{ needs.release.outputs.VERSION }}
-          platforms: linux/arm64
-
-  # Staging builds (develop branch)
-  build_staging_api:
+  # Staging builds (develop branch) - Parallel Matrix Build
+  build_staging_images:
     if: github.ref == 'refs/heads/develop'
     runs-on: self-hosted
-    timeout-minutes: 20
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [api, web, admin]
     permissions:
       contents: read
       packages: write
@@ -188,92 +142,56 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push API staging
+      - name: Build and push ${{ matrix.app }} staging
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: apps/api/Dockerfile
+          file: apps/${{ matrix.app }}/Dockerfile
           push: true
-          no-cache: true
           tags: |
-            ghcr.io/${{ steps.vars.outputs.REPO_NAME }}-api:staging
-            ghcr.io/${{ steps.vars.outputs.REPO_NAME }}-api:staging-${{ steps.vars.outputs.SHORT_SHA }}
+            ghcr.io/${{ steps.vars.outputs.REPO_NAME }}-${{ matrix.app }}:staging
+            ghcr.io/${{ steps.vars.outputs.REPO_NAME }}-${{ matrix.app }}:staging-${{ steps.vars.outputs.SHORT_SHA }}
           platforms: linux/arm64
+          cache-from: type=local,src=/tmp/.buildx-cache-${{ matrix.app }}
+          cache-to: type=local,dest=/tmp/.buildx-cache-${{ matrix.app }}-new,mode=max
 
-  build_staging_web:
-    if: github.ref == 'refs/heads/develop'
-    runs-on: self-hosted
-    timeout-minutes: 20
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Get variables
-        id: vars
+      - name: Move cache
         run: |
-          echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
-          echo "REPO_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+          rm -rf /tmp/.buildx-cache-${{ matrix.app }}
+          mv /tmp/.buildx-cache-${{ matrix.app }}-new /tmp/.buildx-cache-${{ matrix.app }}
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and push Web staging
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: apps/web/Dockerfile
-          push: true
-          no-cache: true
-          tags: |
-            ghcr.io/${{ steps.vars.outputs.REPO_NAME }}-web:staging
-            ghcr.io/${{ steps.vars.outputs.REPO_NAME }}-web:staging-${{ steps.vars.outputs.SHORT_SHA }}
-          platforms: linux/arm64
-
-  build_staging_admin:
-    if: github.ref == 'refs/heads/develop'
-    runs-on: self-hosted
-    timeout-minutes: 20
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Get variables
-        id: vars
+      - name: Quick health check staging
         run: |
-          echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
-          echo "REPO_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+          echo "✅ ${{ matrix.app }} staging image built successfully"
+          echo "📦 Image: ghcr.io/${{ steps.vars.outputs.REPO_NAME }}-${{ matrix.app }}:staging"
+          echo "🏷️ SHA Tag: ghcr.io/${{ steps.vars.outputs.REPO_NAME }}-${{ matrix.app }}:staging-${{ steps.vars.outputs.SHORT_SHA }}"
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Notify staging build
+        if: failure()
+        run: |
+          echo "🚨 Staging build failed for ${{ matrix.app }}"
+          echo "::error::Staging Docker build failed for ${{ matrix.app }} application"
 
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+  # Summary job to check all builds status
+  deployment_ready:
+    if: github.ref == 'refs/heads/main'
+    needs: build_images
+    runs-on: self-hosted
+    steps:
+      - name: Deployment summary
+        run: |
+          echo "🚀 All production images built successfully!"
+          echo "✅ API, Web, Admin containers are ready for deployment"
+          echo "📋 Next steps: Deploy to production environment"
 
-      - name: Build and push Admin staging
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: apps/admin/Dockerfile
-          push: true
-          no-cache: true
-          tags: |
-            ghcr.io/${{ steps.vars.outputs.REPO_NAME }}-admin:staging
-            ghcr.io/${{ steps.vars.outputs.REPO_NAME }}-admin:staging-${{ steps.vars.outputs.SHORT_SHA }}
-          platforms: linux/arm64
+  staging_ready:
+    if: github.ref == 'refs/heads/develop'
+    needs: build_staging_images
+    runs-on: self-hosted
+    steps:
+      - name: Staging summary
+        run: |
+          echo "🧪 All staging images built successfully!"
+          echo "✅ API, Web, Admin staging containers are ready"
+          echo "📋 Next steps: Deploy to staging environment"

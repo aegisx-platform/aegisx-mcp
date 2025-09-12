@@ -20,20 +20,8 @@ RUN pnpm install --frozen-lockfile
 # Approve build scripts for required packages
 RUN pnpm approve-builds || true
 
-# Debug environment before build
-RUN echo "Node version: $(node --version)" && \
-    echo "NPM version: $(npm --version)" && \
-    echo "PNPM version: $(pnpm --version)" && \
-    echo "Available memory: $(free -h)" && \
-    echo "Current directory: $(pwd)" && \
-    echo "Files in current directory:" && ls -la
-
-# Build the API with memory optimization and error handling
-RUN set -e && \
-    echo "Starting API build..." && \
-    NODE_OPTIONS="--max-old-space-size=2048" pnpm nx build api --configuration=production && \
-    echo "API build completed successfully" && \
-    ls -la dist/apps/api/
+# Build the API with memory optimization
+RUN NODE_OPTIONS="--max-old-space-size=2048" pnpm nx build api --configuration=production
 
 # Expose port
 EXPOSE 3000
