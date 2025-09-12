@@ -94,6 +94,7 @@ jobs:
           file: apps/${{ matrix.app }}/Dockerfile
           push: true
           no-cache: true
+          pull: true
           tags: |
             ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-${{ matrix.app }}:latest
             ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-${{ matrix.app }}:${{ needs.release.outputs.VERSION }}
@@ -154,6 +155,7 @@ jobs:
           file: apps/${{ matrix.app }}/Dockerfile
           push: true
           no-cache: true
+          pull: true
           tags: |
             ghcr.io/${{ steps.vars.outputs.REPO_NAME }}-${{ matrix.app }}:staging
             ghcr.io/${{ steps.vars.outputs.REPO_NAME }}-${{ matrix.app }}:staging-${{ steps.vars.outputs.SHORT_SHA }}
