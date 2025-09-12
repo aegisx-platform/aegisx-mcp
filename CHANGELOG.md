@@ -1,3 +1,10 @@
+## [1.0.8](https://github.com/aegisx-platform/aegisx-starter/compare/v1.0.7...v1.0.8) (2025-09-12)
+
+
+### Bug Fixes
+
+* remove must-revalidate from ssl setup script nginx config template ([d39f422](https://github.com/aegisx-platform/aegisx-starter/commit/d39f4220cbc3bfa1b702334ecb86e98f9aef9fca))
+
 ## [1.0.7](https://github.com/aegisx-platform/aegisx-starter/compare/v1.0.6...v1.0.7) (2025-09-12)
 
 
