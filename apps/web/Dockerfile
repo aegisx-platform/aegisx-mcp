@@ -17,8 +17,11 @@ COPY libs/ libs/
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
-# Build the app
-RUN pnpm nx build web --configuration=production
+# Approve build scripts for required packages
+RUN pnpm approve-builds || true
+
+# Build the app with memory optimization
+RUN NODE_OPTIONS="--max-old-space-size=3072" pnpm nx build web --configuration=production
 
 # Production stage
 FROM nginx:alpine

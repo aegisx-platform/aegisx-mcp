@@ -20,8 +20,8 @@ RUN pnpm install --frozen-lockfile
 # Approve build scripts for required packages
 RUN pnpm approve-builds || true
 
-# Build the API
-RUN pnpm nx build api --configuration=production
+# Build the API with memory optimization
+RUN NODE_OPTIONS="--max-old-space-size=2048" pnpm nx build api --configuration=production
 
 # Expose port
 EXPOSE 3000
