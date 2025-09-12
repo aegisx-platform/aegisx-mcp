@@ -82,7 +82,7 @@ jobs:
           tags: |
             ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-api:latest
             ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-api:${{ needs.release.outputs.VERSION }}
-          platforms: linux/amd64
+          platforms: linux/arm64
 
   build_web:
     if: github.ref == 'refs/heads/main'
@@ -116,12 +116,11 @@ jobs:
           context: .
           file: apps/web/Dockerfile
           push: true
+          no-cache: true
           tags: |
             ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-web:latest
             ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-web:${{ needs.release.outputs.VERSION }}
-          platforms: linux/amd64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          platforms: linux/arm64
 
   build_admin:
     if: github.ref == 'refs/heads/main'
@@ -155,12 +154,11 @@ jobs:
           context: .
           file: apps/admin/Dockerfile
           push: true
+          no-cache: true
           tags: |
             ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-admin:latest
             ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-admin:${{ needs.release.outputs.VERSION }}
-          platforms: linux/amd64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          platforms: linux/arm64
 
   # Staging builds (develop branch)
   build_staging_api:
@@ -196,12 +194,11 @@ jobs:
           context: .
           file: apps/api/Dockerfile
           push: true
+          no-cache: true
           tags: |
             ghcr.io/${{ steps.vars.outputs.REPO_NAME }}-api:staging
             ghcr.io/${{ steps.vars.outputs.REPO_NAME }}-api:staging-${{ steps.vars.outputs.SHORT_SHA }}
-          platforms: linux/amd64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          platforms: linux/arm64
 
   build_staging_web:
     if: github.ref == 'refs/heads/develop'
@@ -236,12 +233,11 @@ jobs:
           context: .
           file: apps/web/Dockerfile
           push: true
+          no-cache: true
           tags: |
             ghcr.io/${{ steps.vars.outputs.REPO_NAME }}-web:staging
             ghcr.io/${{ steps.vars.outputs.REPO_NAME }}-web:staging-${{ steps.vars.outputs.SHORT_SHA }}
-          platforms: linux/amd64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          platforms: linux/arm64
 
   build_staging_admin:
     if: github.ref == 'refs/heads/develop'
@@ -276,9 +272,8 @@ jobs:
           context: .
           file: apps/admin/Dockerfile
           push: true
+          no-cache: true
           tags: |
             ghcr.io/${{ steps.vars.outputs.REPO_NAME }}-admin:staging
             ghcr.io/${{ steps.vars.outputs.REPO_NAME }}-admin:staging-${{ steps.vars.outputs.SHORT_SHA }}
-          platforms: linux/amd64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          platforms: linux/arm64
