@@ -296,14 +296,11 @@ describe('UserProfileService', () => {
     } as any;
 
     const mockUploadResult: AvatarUploadResult = {
-      avatar: 'http://localhost:3000/api/uploads/avatars/user-123_avatar.jpg',
+      avatar: '/api/uploads/avatars/user-123_avatar.jpg',
       thumbnails: {
-        small:
-          'http://localhost:3000/api/uploads/avatars/user-123_avatar_small.jpg',
-        medium:
-          'http://localhost:3000/api/uploads/avatars/user-123_avatar_medium.jpg',
-        large:
-          'http://localhost:3000/api/uploads/avatars/user-123_avatar_large.jpg',
+        small: '/api/uploads/avatars/user-123_avatar_small.jpg',
+        medium: '/api/uploads/avatars/user-123_avatar_medium.jpg',
+        large: '/api/uploads/avatars/user-123_avatar_large.jpg',
       },
     };
 
@@ -366,7 +363,7 @@ describe('UserProfileService', () => {
       originalFilename: 'avatar.jpg',
       mimeType: 'image/jpeg',
       fileSize: 1024,
-      storagePath: 'http://localhost:3000/api/uploads/avatars/avatar.jpg',
+      storagePath: '/api/uploads/avatars/avatar.jpg',
       thumbnails: {
         small: 'small.jpg',
         medium: 'medium.jpg',

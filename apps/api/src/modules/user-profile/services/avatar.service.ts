@@ -19,19 +19,23 @@ export class AvatarService {
   private readonly thumbnailSizes = {
     small: 64,
     medium: 128,
-    large: 256
+    large: 256,
   };
 
   constructor(
     private deps: AvatarServiceDependencies,
     uploadDir?: string,
-    baseUrl?: string
+    baseUrl?: string,
   ) {
-    this.uploadDir = uploadDir || path.join(process.cwd(), 'uploads', 'avatars');
-    this.baseUrl = baseUrl || process.env.API_BASE_URL || 'http://localhost:3000';
+    this.uploadDir =
+      uploadDir || path.join(process.cwd(), 'uploads', 'avatars');
+    this.baseUrl = baseUrl || process.env.API_BASE_URL || '';
   }
 
-  async processAvatarUpload(file: MultipartFile, userId: string): Promise<AvatarUploadResult> {
+  async processAvatarUpload(
+    file: MultipartFile,
+    userId: string,
+  ): Promise<AvatarUploadResult> {
     // Validate file
     this.validateFile(file);
 
@@ -41,16 +45,19 @@ export class AvatarService {
     // Generate unique filename
     const fileExtension = this.getFileExtension(file.mimetype);
     const baseFilename = `${userId}_${uuidv4()}`;
-    
+
     // Process and save original image
-    const originalPath = path.join(this.uploadDir, `${baseFilename}.${fileExtension}`);
+    const originalPath = path.join(
+      this.uploadDir,
+      `${baseFilename}.${fileExtension}`,
+    );
     const buffer = await file.toBuffer();
-    
+
     // Optimize and save the main image
     const optimizedBuffer = await sharp(buffer)
       .resize(512, 512, {
         fit: 'cover',
-        position: 'center'
+        position: 'center',
       })
       .jpeg({ quality: 90 })
       .toBuffer();
@@ -58,53 +65,72 @@ export class AvatarService {
     await fs.writeFile(originalPath, optimizedBuffer);
 
     // Generate thumbnails
-    const thumbnails = await this.generateThumbnails(buffer, baseFilename, fileExtension);
+    const thumbnails = await this.generateThumbnails(
+      buffer,
+      baseFilename,
+      fileExtension,
+    );
 
     // Build URLs
     const avatar = this.buildUrl(`${baseFilename}.${fileExtension}`);
     const thumbnailUrls = {
       small: this.buildUrl(thumbnails.small),
       medium: this.buildUrl(thumbnails.medium),
-      large: this.buildUrl(thumbnails.large)
+      large: this.buildUrl(thumbnails.large),
     };
 
-    this.deps.logger.info({
-      userId,
-      originalFilename: file.filename,
-      fileSize: buffer.length,
-      mimeType: file.mimetype
-    }, 'Avatar uploaded and processed successfully');
+    this.deps.logger.info(
+      {
+        userId,
+        originalFilename: file.filename,
+        fileSize: buffer.length,
+        mimeType: file.mimetype,
+      },
+      'Avatar uploaded and processed successfully',
+    );
 
     return {
       avatar,
-      thumbnails: thumbnailUrls
+      thumbnails: thumbnailUrls,
     };
   }
 
   async deleteAvatarFiles(avatarFile: AvatarFile): Promise<void> {
     try {
       // Delete main file
-      const mainFilePath = path.join(this.uploadDir, path.basename(avatarFile.storagePath));
+      const mainFilePath = path.join(
+        this.uploadDir,
+        path.basename(avatarFile.storagePath),
+      );
       await this.deleteFileIfExists(mainFilePath);
 
       // Delete thumbnails
       if (avatarFile.thumbnails) {
         for (const thumbnailUrl of Object.values(avatarFile.thumbnails)) {
-          const thumbnailPath = path.join(this.uploadDir, path.basename(new URL(thumbnailUrl).pathname));
+          const thumbnailPath = path.join(
+            this.uploadDir,
+            path.basename(new URL(thumbnailUrl).pathname),
+          );
           await this.deleteFileIfExists(thumbnailPath);
         }
       }
 
-      this.deps.logger.info({
-        userId: avatarFile.userId,
-        avatarId: avatarFile.id
-      }, 'Avatar files deleted successfully');
+      this.deps.logger.info(
+        {
+          userId: avatarFile.userId,
+          avatarId: avatarFile.id,
+        },
+        'Avatar files deleted successfully',
+      );
     } catch (error) {
-      this.deps.logger.error({
-        error,
-        userId: avatarFile.userId,
-        avatarId: avatarFile.id
-      }, 'Error deleting avatar files');
+      this.deps.logger.error(
+        {
+          error,
+          userId: avatarFile.userId,
+          avatarId: avatarFile.id,
+        },
+        'Error deleting avatar files',
+      );
       throw error;
     }
   }
@@ -112,7 +138,9 @@ export class AvatarService {
   async cleanupOrphanedFiles(): Promise<void> {
     // This could be implemented as a background job
     // For now, we'll just log that cleanup is needed
-    this.deps.logger.info('Avatar cleanup requested - implement as background job');
+    this.deps.logger.info(
+      'Avatar cleanup requested - implement as background job',
+    );
   }
 
   private validateFile(file: MultipartFile): void {
@@ -122,7 +150,10 @@ export class AvatarService {
     }
 
     // Check file size (if available)
-    if (file.file.readableLength && file.file.readableLength > this.maxFileSize) {
+    if (
+      file.file.readableLength &&
+      file.file.readableLength > this.maxFileSize
+    ) {
       throw new Error('FILE_TOO_LARGE');
     }
   }
@@ -132,19 +163,22 @@ export class AvatarService {
       await fs.access(this.uploadDir);
     } catch {
       await fs.mkdir(this.uploadDir, { recursive: true });
-      this.deps.logger.info({ uploadDir: this.uploadDir }, 'Created avatar upload directory');
+      this.deps.logger.info(
+        { uploadDir: this.uploadDir },
+        'Created avatar upload directory',
+      );
     }
   }
 
   private async generateThumbnails(
-    buffer: Buffer, 
-    baseFilename: string, 
-    extension: string
+    buffer: Buffer,
+    baseFilename: string,
+    extension: string,
   ): Promise<{ small: string; medium: string; large: string }> {
     const thumbnails: { small: string; medium: string; large: string } = {
       small: '',
       medium: '',
-      large: ''
+      large: '',
     };
 
     for (const [size, pixels] of Object.entries(this.thumbnailSizes)) {
@@ -154,7 +188,7 @@ export class AvatarService {
       const thumbnailBuffer = await sharp(buffer)
         .resize(pixels, pixels, {
           fit: 'cover',
-          position: 'center'
+          position: 'center',
         })
         .jpeg({ quality: 80 })
         .toBuffer();
@@ -170,14 +204,18 @@ export class AvatarService {
     const extensions: Record<string, string> = {
       'image/jpeg': 'jpg',
       'image/png': 'png',
-      'image/webp': 'webp'
+      'image/webp': 'webp',
     };
 
     return extensions[mimeType] || 'jpg';
   }
 
   private buildUrl(filename: string): string {
-    return `${this.baseUrl}/api/uploads/avatars/${filename}`;
+    // Use relative URL for Angular proxy compatibility
+    if (this.baseUrl) {
+      return `${this.baseUrl}/api/uploads/avatars/${filename}`;
+    }
+    return `/api/uploads/avatars/${filename}`;
   }
 
   private async deleteFileIfExists(filePath: string): Promise<void> {
