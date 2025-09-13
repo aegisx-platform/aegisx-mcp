@@ -45,14 +45,23 @@ export default fp(
         );
       }
 
-      // Ensure POST/PUT/PATCH routes have body schemas
+      // Ensure POST/PUT/PATCH routes have body schemas (except multipart/form-data uploads)
       const methodArray = Array.isArray(routeOptions.method)
         ? routeOptions.method
         : [routeOptions.method];
       const hasPostPutPatch = methodArray.some((method) =>
         ['POST', 'PUT', 'PATCH'].includes(method),
       );
-      if (hasPostPutPatch && !routeOptions.schema.body) {
+
+      // Cast schema to any for additional properties (tags, description, summary, consumes)
+      const extendedSchema = routeOptions.schema as any;
+
+      // Check if route accepts multipart/form-data
+      const isMultipartUpload = extendedSchema?.consumes?.includes(
+        'multipart/form-data',
+      );
+
+      if (hasPostPutPatch && !routeOptions.schema.body && !isMultipartUpload) {
         throw new Error(
           `Route ${routeOptions.method} ${routeOptions.url} must have body schema`,
         );
@@ -64,9 +73,6 @@ export default fp(
           `Route ${routeOptions.method} ${routeOptions.url} must have params schema`,
         );
       }
-
-      // Cast schema to any for additional properties (tags, description, summary)
-      const extendedSchema = routeOptions.schema as any;
 
       // Ensure all routes have tags for Swagger organization
       if (!extendedSchema.tags || extendedSchema.tags.length === 0) {
