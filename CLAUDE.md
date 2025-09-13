@@ -238,7 +238,7 @@ pnpm install
 cp .env.example .env
 
 # Start databases
-docker-compose up -d postgres redis
+pnpm run docker:up
 
 # Run migrations
 npm run db:migrate
@@ -252,15 +252,16 @@ nx run-many --target=serve --projects=api,web
 
 ## 📋 Most Used Commands
 
-| Command      | Description                      | Actual Command                                  |
-| ------------ | -------------------------------- | ----------------------------------------------- |
-| **Install**  | Install dependencies (USE YARN!) | `pnpm install`                                  |
-| **DB Setup** | Run migrations & seeds           | `pnpm db:migrate && pnpm db:seed`               |
-| **Develop**  | Start dev servers                | `nx run-many --target=serve --projects=api,web` |
-| **Test**     | Run all tests                    | `nx run-many --target=test --all`               |
-| **E2E**      | Run E2E tests                    | `nx e2e e2e`                                    |
-| **Build**    | Build for production             | `nx run-many --target=build --all`              |
-| **Docker**   | Start services                   | `docker-compose up -d`                          |
+| Command       | Description                      | Actual Command                                  |
+| ------------- | -------------------------------- | ----------------------------------------------- |
+| **Install**   | Install dependencies (USE PNPM!) | `pnpm install`                                  |
+| **DB Setup**  | Run migrations & seeds           | `pnpm db:migrate && pnpm db:seed`               |
+| **Develop**   | Start dev servers                | `nx run-many --target=serve --projects=api,web` |
+| **Test**      | Run all tests                    | `nx run-many --target=test --all`               |
+| **E2E**       | Run E2E tests                    | `nx e2e e2e`                                    |
+| **Build**     | Build for production             | `nx run-many --target=build --all`              |
+| **Docker**    | Start services                   | `pnpm run docker:up`                            |
+| **Docker PS** | Show current instance containers | `pnpm run docker:ps`                            |
 
 ## 🚀 Feature Development Commands
 
@@ -272,6 +273,15 @@ nx run-many --target=serve --projects=api,web
 | **Complete**  | Mark feature complete    | `./scripts/feature-toolkit.sh complete [name]`              |
 | **Dashboard** | Show all features        | `./scripts/feature-toolkit.sh dashboard`                    |
 | **Conflicts** | Check resource conflicts | `./scripts/feature-toolkit.sh conflicts [name]`             |
+
+## 🐳 Multi-Instance Docker Commands
+
+| Command    | Description                   | Actual Command          |
+| ---------- | ----------------------------- | ----------------------- |
+| **Up**     | Start instance services       | `pnpm run docker:up`    |
+| **Down**   | Stop instance services        | `pnpm run docker:down`  |
+| **Status** | Show instance containers      | `pnpm run docker:ps`    |
+| **Reset**  | Reset instance (down+up+data) | `pnpm run docker:reset` |
 
 ### Quick Aliases (add to ~/.bashrc or ~/.zshrc)
 

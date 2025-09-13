@@ -9,23 +9,20 @@
 git clone <repository-url>
 cd aegisx-starter
 
-# Install dependencies
-yarn install
+# Install dependencies (⚠️ USE PNPM!)
+pnpm install
 
-# Copy environment file
-cp .env.example .env
+# One-command setup (recommended)
+pnpm setup
 
-# Start databases
-docker-compose up -d
-
-# Run migrations
-npm run db:migrate
-
-# Seed database
-npm run db:seed
+# OR manual setup:
+# pnpm run setup:env        # Generate instance config
+# pnpm run docker:up        # Start services
+# pnpm run db:migrate       # Run migrations
+# pnpm run db:seed          # Seed database
 
 # Start development
-nx run-many --target=serve --projects=api,web
+pnpm dev
 ```
 
 ### **Project Structure**

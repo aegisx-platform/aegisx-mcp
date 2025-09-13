@@ -57,10 +57,12 @@ npm run test:integration
 
 ```bash
 # 7. Start development environment
-docker-compose up -d
-nx serve api    # Port 3333
-nx serve web    # Port 4200
-nx serve admin  # Port 4201 (ถ้าจำเป็น)
+pnpm run docker:up  # Auto-detects instance file
+pnpm dev            # Start API + Web
+# OR manual:
+# pnpm run dev:api    # API only
+# pnpm run dev:web    # Web only
+# pnpm run dev:admin  # Admin only
 
 # 8. Manual smoke testing
 # - ทดสอบ feature ที่เพิ่ง implement

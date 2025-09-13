@@ -48,6 +48,7 @@
     "docker:up": "if [ -f docker-compose.instance.yml ]; then docker-compose -f docker-compose.instance.yml up -d; else docker-compose up -d; fi",
     "docker:down": "if [ -f docker-compose.instance.yml ]; then docker-compose -f docker-compose.instance.yml down; else docker-compose down; fi",
     "docker:reset": "if [ -f docker-compose.instance.yml ]; then docker-compose -f docker-compose.instance.yml down -v && docker-compose -f docker-compose.instance.yml up -d; else docker-compose down -v && docker-compose up -d; fi",
+    "docker:ps": "if [ -f docker-compose.instance.yml ]; then docker-compose -f docker-compose.instance.yml ps; else docker-compose ps; fi",
     "docker:build": "docker-compose -f docker-compose.prod.yml build",
     "docker:build:no-cache": "docker-compose -f docker-compose.prod.yml build --no-cache",
     "setup": "./scripts/setup-env.sh && pnpm run docker:up && sleep 5 && pnpm run db:migrate && pnpm run db:seed",

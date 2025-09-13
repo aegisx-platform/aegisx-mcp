@@ -28,18 +28,18 @@ feature/* → Development (ที่คุณจะทำงาน)
 git clone <repo-url>
 cd aegisx-starter
 
-# Install dependencies
-yarn install
+# Install dependencies (⚠️ USE PNPM!)
+pnpm install
 
-# Setup environment
-cp .env.example .env
+# One-command setup (recommended)
+pnpm setup
 
-# Start databases
-docker-compose up -d
-
-# Run migrations
-npx knex migrate:latest
-npx knex seed:run
+# OR manual setup:
+# cp .env.example .env
+# pnpm run setup:env        # Generate instance config
+# pnpm run docker:up        # Start services
+# pnpm run db:migrate       # Run migrations
+# pnpm run db:seed          # Seed database
 ```
 
 ### Step 2: เริ่มงาน Feature ใหม่

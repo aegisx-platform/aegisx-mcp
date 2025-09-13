@@ -72,7 +72,10 @@ docker-compose -f docker-compose.instance.yml down
 # OR use npm scripts
 pnpm run docker:down
 
-# View running containers
+# View running containers (current instance only)
+pnpm run docker:ps
+
+# View all AegisX containers (all instances)
 docker ps --filter "name=aegisx"
 
 # Remove specific containers

@@ -30,11 +30,12 @@ SLACK_WEBHOOK_URL    # สำหรับ notifications (ถ้าใช้ Slac
 # Production Deployment Secrets (ถ้า deploy จาก GitHub Actions):
 STAGING_HOST         # Staging server host
 STAGING_SSH_KEY      # SSH key for staging
-PRODUCTION_HOST      # Production server host  
+PRODUCTION_HOST      # Production server host
 PRODUCTION_SSH_KEY   # SSH key for production
 ```
 
-**Note:** 
+**Note:**
+
 - `GITHUB_TOKEN` - ไม่ต้อง setup, GitHub Actions มีให้อัตโนมัติ
 - `DATABASE_URL`, `JWT_SECRET`, `REDIS_URL` - เป็น environment variables ที่ set ตอน deploy บน server จริง ไม่ใช่ GitHub secrets
 
@@ -51,7 +52,7 @@ PRODUCTION_SSH_KEY   # SSH key for production
 
 ```bash
 # Start databases
-docker-compose up -d postgres redis
+pnpm run docker:up  # Auto-detects instance configuration
 
 # Development (ไม่ใช้ Docker)
 nx serve api    # Backend on http://localhost:3333
@@ -62,11 +63,11 @@ nx serve admin  # Admin on http://localhost:4201
 ### 2.2 Development with Docker
 
 ```bash
-# Build และรันทั้งหมดใน Docker
-docker-compose up --build
+# Build และรันทั้งหมดใน Docker (production compose file)
+docker-compose -f docker-compose.prod.yml up --build
 
-# หรือรันเฉพาะบาง service
-docker-compose up api web
+# Development services
+pnpm run docker:up
 ```
 
 ## 🔨 Step 3: Build & Test Locally
@@ -129,6 +130,7 @@ git push origin feature/my-feature
 ```
 
 **อะไรจะเกิดขึ้น:**
+
 1. GitHub Actions จะรัน CI pipeline
 2. Lint code ✓
 3. Run tests ✓
@@ -146,6 +148,7 @@ git push origin develop
 ```
 
 **อะไรจะเกิดขึ้น:**
+
 1. CI pipeline รันเหมือนเดิม
 2. Build Docker images
 3. Push to ghcr.io with tag `staging`
@@ -166,6 +169,7 @@ git push origin main --tags
 ```
 
 **อะไรจะเกิดขึ้น:**
+
 1. CI/CD pipeline รันทั้งหมด
 2. Build production images
 3. Tag with version `v1.2.3`
@@ -230,22 +234,26 @@ docker-compose -f docker-compose.prod.yml up -d api
 ### Development → Production Flow:
 
 1. **Local Development**
+
    ```bash
    nx serve api  # Develop locally
    ```
 
 2. **Test & Build**
+
    ```bash
    nx test api
    nx build api --prod
    ```
 
 3. **Push to GitHub**
+
    ```bash
    git push origin feature/xxx  # Triggers CI
    ```
 
 4. **Merge to develop**
+
    ```bash
    # Auto deploy to staging
    ```
@@ -259,6 +267,7 @@ docker-compose -f docker-compose.prod.yml up -d api
 ## 🆘 Troubleshooting
 
 ### Docker build fails
+
 ```bash
 # Clear Docker cache
 docker system prune -a
@@ -268,6 +277,7 @@ docker build --no-cache -f apps/api/Dockerfile .
 ```
 
 ### CI/CD fails
+
 ```bash
 # Check GitHub Actions logs
 # Go to Actions tab in GitHub
@@ -277,6 +287,7 @@ act  # Use act tool to run GitHub Actions locally
 ```
 
 ### Permission denied
+
 ```bash
 # Make scripts executable
 chmod +x scripts/*.sh
@@ -285,6 +296,7 @@ chmod +x scripts/*.sh
 ## 📝 Environment Variables
 
 ### Development (.env)
+
 ```env
 NODE_ENV=development
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/aegisx_db
@@ -293,6 +305,7 @@ REDIS_URL=redis://localhost:6379
 ```
 
 ### Production (.env.production)
+
 ```env
 NODE_ENV=production
 DATABASE_URL=postgresql://user:pass@db.example.com:5432/aegisx_prod
@@ -304,6 +317,7 @@ API_URL=https://api.aegisx.com
 ## 🎉 That's it!
 
 ตอนนี้คุณพร้อมใช้งาน CI/CD pipeline แล้ว:
+
 - ✅ Push code → Auto test
 - ✅ Merge to develop → Auto deploy staging
 - ✅ Create release → Deploy production
