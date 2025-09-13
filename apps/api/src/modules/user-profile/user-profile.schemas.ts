@@ -6,50 +6,50 @@ export const ThemeEnum = Type.Union([
   Type.Literal('default'),
   Type.Literal('dark'),
   Type.Literal('light'),
-  Type.Literal('auto')
+  Type.Literal('auto'),
 ]);
 
 export const SchemeEnum = Type.Union([
   Type.Literal('light'),
   Type.Literal('dark'),
-  Type.Literal('auto')
+  Type.Literal('auto'),
 ]);
 
 export const LayoutEnum = Type.Union([
   Type.Literal('classic'),
   Type.Literal('compact'),
   Type.Literal('enterprise'),
-  Type.Literal('empty')
+  Type.Literal('empty'),
 ]);
 
 export const DateFormatEnum = Type.Union([
   Type.Literal('MM/DD/YYYY'),
   Type.Literal('DD/MM/YYYY'),
-  Type.Literal('YYYY-MM-DD')
+  Type.Literal('YYYY-MM-DD'),
 ]);
 
 export const TimeFormatEnum = Type.Union([
   Type.Literal('12h'),
-  Type.Literal('24h')
+  Type.Literal('24h'),
 ]);
 
 export const NavigationTypeEnum = Type.Union([
   Type.Literal('default'),
   Type.Literal('compact'),
-  Type.Literal('horizontal')
+  Type.Literal('horizontal'),
 ]);
 
 export const NavigationPositionEnum = Type.Union([
   Type.Literal('left'),
   Type.Literal('right'),
-  Type.Literal('top')
+  Type.Literal('top'),
 ]);
 
 export const UserStatusEnum = Type.Union([
   Type.Literal('active'),
   Type.Literal('inactive'),
   Type.Literal('suspended'),
-  Type.Literal('pending')
+  Type.Literal('pending'),
 ]);
 
 // Sub-schemas
@@ -57,31 +57,36 @@ export const NotificationPreferencesSchema = Type.Object({
   email: Type.Boolean({ description: 'Email notifications enabled' }),
   push: Type.Boolean({ description: 'Push notifications enabled' }),
   desktop: Type.Boolean({ description: 'Desktop notifications enabled' }),
-  sound: Type.Boolean({ description: 'Sound notifications enabled' })
+  sound: Type.Boolean({ description: 'Sound notifications enabled' }),
 });
 
 export const NavigationPreferencesSchema = Type.Object({
   collapsed: Type.Boolean({ description: 'Navigation collapsed state' }),
   type: NavigationTypeEnum,
-  position: NavigationPositionEnum
+  position: NavigationPositionEnum,
 });
 
 export const UserPreferencesSchema = Type.Object({
   theme: ThemeEnum,
   scheme: SchemeEnum,
   layout: LayoutEnum,
-  language: Type.String({ pattern: '^[a-z]{2}$', description: 'Two-letter language code' }),
+  language: Type.String({
+    pattern: '^[a-z]{2}$',
+    description: 'Two-letter language code',
+  }),
   timezone: Type.String({ description: 'User timezone' }),
   dateFormat: DateFormatEnum,
   timeFormat: TimeFormatEnum,
   notifications: NotificationPreferencesSchema,
-  navigation: NavigationPreferencesSchema
+  navigation: NavigationPreferencesSchema,
 });
 
 export const UserRoleSchema = Type.Object({
   id: Type.String({ format: 'uuid' }),
   name: Type.String({ description: 'Role name' }),
-  permissions: Type.Array(Type.String(), { description: 'List of permission codes' })
+  permissions: Type.Array(Type.String(), {
+    description: 'List of permission codes',
+  }),
 });
 
 // Main schemas
@@ -99,7 +104,7 @@ export const UserProfileSchema = Type.Object({
   lastLoginAt: Type.Union([Type.String({ format: 'date-time' }), Type.Null()]),
   status: UserStatusEnum,
   emailVerified: Type.Boolean(),
-  twoFactorEnabled: Type.Boolean()
+  twoFactorEnabled: Type.Boolean(),
 });
 
 // Request schemas
@@ -107,40 +112,59 @@ export const UserProfileUpdateRequestSchema = Type.Object({
   name: Type.Optional(Type.String({ minLength: 1, maxLength: 100 })),
   firstName: Type.Optional(Type.String({ minLength: 1, maxLength: 50 })),
   lastName: Type.Optional(Type.String({ minLength: 1, maxLength: 50 })),
-  preferences: Type.Optional(Type.Partial(UserPreferencesSchema))
+  preferences: Type.Optional(Type.Partial(UserPreferencesSchema)),
 });
 
-export const UserPreferencesUpdateRequestSchema = Type.Partial(UserPreferencesSchema);
+export const UserPreferencesUpdateRequestSchema = Type.Partial(
+  UserPreferencesSchema,
+);
 
 // Response schemas
-export const UserProfileResponseSchema = ApiSuccessResponseSchema(UserProfileSchema);
+export const UserProfileResponseSchema =
+  ApiSuccessResponseSchema(UserProfileSchema);
+export const UserPreferencesResponseSchema = ApiSuccessResponseSchema(
+  UserPreferencesSchema,
+);
 
 export const AvatarUploadDataSchema = Type.Object({
   avatar: Type.String({ format: 'uri', description: 'Avatar URL' }),
   thumbnails: Type.Object({
     small: Type.String({ format: 'uri' }),
     medium: Type.String({ format: 'uri' }),
-    large: Type.String({ format: 'uri' })
-  })
+    large: Type.String({ format: 'uri' }),
+  }),
 });
 
-export const AvatarUploadResponseSchema = ApiSuccessResponseSchema(AvatarUploadDataSchema);
+export const AvatarUploadResponseSchema = ApiSuccessResponseSchema(
+  AvatarUploadDataSchema,
+);
 
 export const AvatarDeleteDataSchema = Type.Object({
-  message: Type.String({ description: 'Success message' })
+  message: Type.String({ description: 'Success message' }),
 });
 
-export const AvatarDeleteResponseSchema = ApiSuccessResponseSchema(AvatarDeleteDataSchema);
+export const AvatarDeleteResponseSchema = ApiSuccessResponseSchema(
+  AvatarDeleteDataSchema,
+);
 
 // TypeScript types
-export type NotificationPreferences = Static<typeof NotificationPreferencesSchema>;
+export type NotificationPreferences = Static<
+  typeof NotificationPreferencesSchema
+>;
 export type NavigationPreferences = Static<typeof NavigationPreferencesSchema>;
 export type UserPreferences = Static<typeof UserPreferencesSchema>;
 export type UserRole = Static<typeof UserRoleSchema>;
 export type UserProfile = Static<typeof UserProfileSchema>;
-export type UserProfileUpdateRequest = Static<typeof UserProfileUpdateRequestSchema>;
-export type UserPreferencesUpdateRequest = Static<typeof UserPreferencesUpdateRequestSchema>;
+export type UserProfileUpdateRequest = Static<
+  typeof UserProfileUpdateRequestSchema
+>;
+export type UserPreferencesUpdateRequest = Static<
+  typeof UserPreferencesUpdateRequestSchema
+>;
 export type UserProfileResponse = Static<typeof UserProfileResponseSchema>;
+export type UserPreferencesResponse = Static<
+  typeof UserPreferencesResponseSchema
+>;
 export type AvatarUploadData = Static<typeof AvatarUploadDataSchema>;
 export type AvatarUploadResponse = Static<typeof AvatarUploadResponseSchema>;
 export type AvatarDeleteData = Static<typeof AvatarDeleteDataSchema>;
@@ -154,22 +178,23 @@ export const userProfileSchemas = {
   'user-preferences': UserPreferencesSchema,
   'notification-preferences': NotificationPreferencesSchema,
   'navigation-preferences': NavigationPreferencesSchema,
-  
+
   // Request schemas
   'user-profile-update-request': UserProfileUpdateRequestSchema,
   'user-preferences-update-request': UserPreferencesUpdateRequestSchema,
-  
+
   // Response schemas
   'user-profile-response': UserProfileResponseSchema,
+  'user-preferences-response': UserPreferencesResponseSchema,
   'avatar-upload-response': AvatarUploadResponseSchema,
   'avatar-delete-response': AvatarDeleteResponseSchema,
   'avatar-upload-data': AvatarUploadDataSchema,
   'avatar-delete-data': AvatarDeleteDataSchema,
-  
+
   // Legacy compatibility
-  'userProfileResponse': UserProfileResponseSchema,
-  'userProfileUpdateRequest': UserProfileUpdateRequestSchema,
-  'userPreferencesUpdateRequest': UserPreferencesUpdateRequestSchema,
-  'avatarUploadResponse': AvatarUploadResponseSchema,
-  'avatarDeleteResponse': AvatarDeleteResponseSchema
+  userProfileResponse: UserProfileResponseSchema,
+  userProfileUpdateRequest: UserProfileUpdateRequestSchema,
+  userPreferencesUpdateRequest: UserPreferencesUpdateRequestSchema,
+  avatarUploadResponse: AvatarUploadResponseSchema,
+  avatarDeleteResponse: AvatarDeleteResponseSchema,
 };

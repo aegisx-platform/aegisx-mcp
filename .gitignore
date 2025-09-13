@@ -58,4 +58,7 @@ docker-compose.instance.yml
 .playwright-mcp/
 
 # Logs
+*.log
 api.log
+web.log
+e2e.log
