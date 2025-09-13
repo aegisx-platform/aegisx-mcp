@@ -116,6 +116,7 @@ export async function userProfileRoutes(
         summary: 'Upload a new avatar image',
         security: [{ bearerAuth: [] }],
         consumes: ['multipart/form-data'],
+        body: SchemaRefs.module('user-profile', 'avatar-upload-request'),
         response: {
           200: SchemaRefs.module('user-profile', 'avatar-upload-response'),
           400: SchemaRefs.ValidationError,

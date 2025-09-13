@@ -126,6 +126,11 @@ export const UserPreferencesResponseSchema = ApiSuccessResponseSchema(
   UserPreferencesSchema,
 );
 
+// Avatar upload schemas
+export const AvatarUploadRequestSchema = Type.Object({
+  avatar: Type.Any({ description: 'Avatar image file (multipart/form-data)' }),
+});
+
 export const AvatarUploadDataSchema = Type.Object({
   avatar: Type.String({ format: 'uri', description: 'Avatar URL' }),
   thumbnails: Type.Object({
@@ -165,6 +170,7 @@ export type UserProfileResponse = Static<typeof UserProfileResponseSchema>;
 export type UserPreferencesResponse = Static<
   typeof UserPreferencesResponseSchema
 >;
+export type AvatarUploadRequest = Static<typeof AvatarUploadRequestSchema>;
 export type AvatarUploadData = Static<typeof AvatarUploadDataSchema>;
 export type AvatarUploadResponse = Static<typeof AvatarUploadResponseSchema>;
 export type AvatarDeleteData = Static<typeof AvatarDeleteDataSchema>;
@@ -182,6 +188,7 @@ export const userProfileSchemas = {
   // Request schemas
   'user-profile-update-request': UserProfileUpdateRequestSchema,
   'user-preferences-update-request': UserPreferencesUpdateRequestSchema,
+  'avatar-upload-request': AvatarUploadRequestSchema,
 
   // Response schemas
   'user-profile-response': UserProfileResponseSchema,
