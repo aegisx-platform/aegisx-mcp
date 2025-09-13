@@ -1,7 +1,12 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpParams,
+  HttpEventType,
+  HttpRequest,
+} from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, filter } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
 export interface User {
@@ -95,6 +100,7 @@ export interface UserProfile {
   emailVerified: boolean;
   createdAt: string;
   updatedAt: string;
+  preferences?: UserPreferences;
 }
 
 export interface UpdateProfileRequest {
@@ -102,6 +108,36 @@ export interface UpdateProfileRequest {
   lastName?: string;
   username?: string;
   bio?: string;
+}
+
+export interface UserPreferences {
+  theme: 'default' | 'dark' | 'light' | 'auto';
+  scheme: 'light' | 'dark' | 'auto';
+  layout: 'classic' | 'compact' | 'enterprise' | 'empty';
+  language: string;
+  timezone: string;
+  dateFormat: 'MM/DD/YYYY' | 'DD/MM/YYYY' | 'YYYY-MM-DD';
+  timeFormat: '12h' | '24h';
+  notifications: {
+    email: boolean;
+    push: boolean;
+    desktop: boolean;
+    sound: boolean;
+  };
+  navigation: {
+    collapsed: boolean;
+    type: 'default' | 'compact' | 'horizontal';
+    position: 'left' | 'right' | 'top';
+  };
+}
+
+export interface AvatarUploadResponse {
+  avatar: string;
+  thumbnails: {
+    small: string;
+    medium: string;
+    large: string;
+  };
 }
 
 interface ApiResponse<T> {
@@ -457,7 +493,7 @@ export class UserService {
   // ===== PROFILE METHODS =====
 
   getProfile() {
-    return this.http.get<ApiResponse<UserProfile>>(`/api/profile`).pipe(
+    return this.http.get<ApiResponse<UserProfile>>(`/api/users/profile`).pipe(
       map((response) => {
         if (response.success && response.data) {
           return response.data;
@@ -468,13 +504,102 @@ export class UserService {
   }
 
   updateProfile(data: UpdateProfileRequest) {
-    return this.http.put<ApiResponse<UserProfile>>(`/api/profile`, data).pipe(
-      map((response) => {
-        if (response.success && response.data) {
-          return response.data;
+    return this.http
+      .put<ApiResponse<UserProfile>>(`/api/users/profile`, data)
+      .pipe(
+        map((response) => {
+          if (response.success && response.data) {
+            return response.data;
+          }
+          throw new Error(response.error || 'Failed to update profile');
+        }),
+      );
+  }
+
+  // ===== AVATAR METHODS =====
+
+  uploadAvatar(
+    formData: FormData,
+    progressCallback?: (progress: number) => void,
+  ): Observable<ApiResponse<AvatarUploadResponse>> {
+    const req = new HttpRequest('POST', `/api/profile/avatar`, formData, {
+      reportProgress: true,
+    });
+
+    return this.http.request<ApiResponse<AvatarUploadResponse>>(req).pipe(
+      map((event) => {
+        if (event.type === HttpEventType.UploadProgress) {
+          // Calculate upload progress percentage
+          const progress = event.total
+            ? Math.round((100 * event.loaded) / event.total)
+            : 0;
+
+          if (progressCallback) {
+            progressCallback(progress);
+          }
+
+          // Return a dummy response for progress events
+          return {
+            success: false,
+            data: undefined,
+          } as ApiResponse<AvatarUploadResponse>;
+        } else if (event.type === HttpEventType.Response) {
+          // This is the actual response
+          const response = event.body as ApiResponse<AvatarUploadResponse>;
+          if (response.success && response.data) {
+            return response;
+          }
+          throw new Error(response.error || 'Failed to upload avatar');
         }
-        throw new Error(response.error || 'Failed to update profile');
+
+        // Return dummy response for other event types
+        return {
+          success: false,
+          data: undefined,
+        } as ApiResponse<AvatarUploadResponse>;
       }),
+      filter((response) => response.success || response.data !== undefined),
     );
+  }
+
+  deleteAvatar(): Observable<ApiResponse<{ message: string }>> {
+    return this.http
+      .delete<ApiResponse<{ message: string }>>(`/api/profile/avatar`)
+      .pipe(
+        map((response) => {
+          if (response.success) {
+            return response;
+          }
+          throw new Error(response.error || 'Failed to delete avatar');
+        }),
+      );
+  }
+
+  // ===== PREFERENCES METHODS =====
+
+  getPreferences() {
+    return this.http
+      .get<ApiResponse<UserPreferences>>(`/api/profile/preferences`)
+      .pipe(
+        map((response) => {
+          if (response.success && response.data) {
+            return response.data;
+          }
+          throw new Error(response.error || 'Failed to get preferences');
+        }),
+      );
+  }
+
+  updatePreferences(data: Partial<UserPreferences>) {
+    return this.http
+      .put<ApiResponse<UserPreferences>>(`/api/profile/preferences`, data)
+      .pipe(
+        map((response) => {
+          if (response.success && response.data) {
+            return response.data;
+          }
+          throw new Error(response.error || 'Failed to update preferences');
+        }),
+      );
   }
 }

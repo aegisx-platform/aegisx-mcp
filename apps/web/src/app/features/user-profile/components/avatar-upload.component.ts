@@ -293,46 +293,35 @@ export class AvatarUploadComponent implements OnInit, OnChanges {
     const formData = new FormData();
     formData.append('avatar', file);
 
-    // Simulate upload progress for now
-    // TODO: Replace with actual UserService.uploadAvatar() method
-    this.simulateUpload(file);
-  }
+    // Call actual API
+    this.userService
+      .uploadAvatar(formData, (progress) => {
+        this.uploadProgressValue.set(progress);
+      })
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.isUploading.set(false);
+            this.currentAvatarUrl.set(response.data.avatar);
+            this.avatarChange.emit(response.data.avatar);
 
-  private simulateUpload(file: File) {
-    // Create preview URL for immediate feedback
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const preview = e.target?.result as string;
-      this.currentAvatarUrl.set(preview);
-      this.avatarChange.emit(preview);
-    };
-    reader.readAsDataURL(file);
+            const result: AvatarUploadResult = {
+              success: true,
+              avatarUrl: response.data.avatar,
+            };
 
-    // Simulate progress
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += Math.random() * 20;
-      if (progress >= 100) {
-        progress = 100;
-        clearInterval(interval);
-
-        // Simulate completion
-        setTimeout(() => {
+            this.uploadComplete.emit(result);
+            this.showSuccess('Profile picture updated successfully!');
+          }
+        },
+        error: (error) => {
           this.isUploading.set(false);
-          this.uploadProgressValue.set(100);
-
-          const result: AvatarUploadResult = {
-            success: true,
-            avatarUrl: this.currentAvatarUrl()!,
-          };
-
-          this.uploadComplete.emit(result);
-          this.showSuccess('Profile picture updated successfully!');
-        }, 500);
-      }
-
-      this.uploadProgressValue.set(Math.floor(progress));
-    }, 200);
+          this.uploadProgressValue.set(0);
+          const errorMessage = error.message || 'Failed to upload avatar';
+          this.showError(errorMessage);
+          this.uploadError.emit(errorMessage);
+        },
+      });
   }
 
   private showError(message: string) {
