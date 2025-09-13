@@ -238,7 +238,7 @@ pnpm install
 cp .env.example .env
 
 # Start databases
-docker-compose up -d postgres redis
+pnpm run docker:up
 
 # Run migrations
 npm run db:migrate
@@ -254,13 +254,13 @@ nx run-many --target=serve --projects=api,web
 
 | Command      | Description                      | Actual Command                                  |
 | ------------ | -------------------------------- | ----------------------------------------------- |
-| **Install**  | Install dependencies (USE YARN!) | `pnpm install`                                  |
+| **Install**  | Install dependencies (USE PNPM!) | `pnpm install`                                  |
 | **DB Setup** | Run migrations & seeds           | `pnpm db:migrate && pnpm db:seed`               |
 | **Develop**  | Start dev servers                | `nx run-many --target=serve --projects=api,web` |
 | **Test**     | Run all tests                    | `nx run-many --target=test --all`               |
 | **E2E**      | Run E2E tests                    | `nx e2e e2e`                                    |
 | **Build**    | Build for production             | `nx run-many --target=build --all`              |
-| **Docker**   | Start services                   | `docker-compose up -d`                          |
+| **Docker**   | Start services                   | `pnpm run docker:up`                            |
 
 ## 🚀 Feature Development Commands
 
