@@ -123,6 +123,69 @@ function createRegisterRequestData() {
 
 **Always use `pnpm` commands, never use `npm` or `yarn` commands for dependencies**
 
+## 🏗️ Multi-Instance Development Setup
+
+**When working on multiple features simultaneously (cloned repos):**
+
+### 📋 Quick Setup (One Command)
+
+```bash
+# Auto-configure ports and containers based on folder name
+pnpm setup
+# This runs: setup-env.sh + docker-compose up + migrations + seeds
+```
+
+### 🔧 Manual Setup Steps
+
+```bash
+# 1. Configure instance-specific environment
+pnpm run setup:env
+
+# 2. Start services with unique ports/containers
+pnpm run docker:up
+
+# 3. Initialize database
+pnpm run db:migrate && pnpm run db:seed
+```
+
+### 📊 Port Assignment Strategy
+
+- **Main repo (aegisx-starter)**: Default ports (5432, 6380, 3333, 4200)
+- **Feature repos (aegisx-starter-{name})**: Auto-assigned unique ports
+- **Examples**:
+  - `aegisx-starter-mpv` → PostgreSQL: 5433, Redis: 6381, API: 3334
+  - `aegisx-starter-rbac` → PostgreSQL: 5434, Redis: 6382, API: 3335
+
+### 🛠️ Instance Management Commands
+
+```bash
+# View all instances and their ports
+./scripts/port-manager.sh list
+
+# Check for port conflicts
+./scripts/port-manager.sh conflicts
+
+# Stop specific instance
+./scripts/port-manager.sh stop aegisx-starter-mpv
+
+# Stop all instances
+./scripts/port-manager.sh stop-all
+
+# Show running services
+./scripts/port-manager.sh running
+
+# Clean up unused containers/volumes
+./scripts/port-manager.sh cleanup
+```
+
+### 🎯 Benefits
+
+- ✅ **Isolated environments** - Each feature has its own database
+- ✅ **No port conflicts** - Auto-assigned unique ports
+- ✅ **Parallel development** - Work on multiple features simultaneously
+- ✅ **Easy switching** - Stop/start instances as needed
+- ✅ **Consistent naming** - Folder name determines configuration
+
 ## Quick Navigation
 
 ### 🚀 Start Here

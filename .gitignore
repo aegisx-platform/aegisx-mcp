@@ -48,6 +48,11 @@ Thumbs.db
 .angular
 
 .env
+.env.local
+
+# Multi-instance development files
+docker-compose.override.yml
+docker-compose.instance.yml
 
 # Playwright MCP generated files
 .playwright-mcp/
