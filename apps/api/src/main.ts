@@ -30,6 +30,7 @@ import { usersPlugin } from './modules/users';
 import staticFilesPlugin from './plugins/static-files.plugin';
 import jwtAuthPlugin from './plugins/jwt-auth.plugin';
 import swaggerPlugin from './plugins/swagger.plugin';
+import websocketPlugin from './shared/websocket/websocket.plugin';
 
 // Load environment variables
 dotenv.config();
@@ -177,6 +178,9 @@ async function bootstrap() {
 
   // Monitoring module (client error logging)
   await app.register(monitoringModulePlugin);
+
+  // WebSocket support
+  await app.register(websocketPlugin);
 
   // Start server
   const port = process.env.PORT || 3333;

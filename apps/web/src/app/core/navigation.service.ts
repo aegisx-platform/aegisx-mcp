@@ -138,6 +138,13 @@ export class NavigationService {
           link: '/material-demo',
         },
         {
+          id: 'test-rbac-websocket',
+          title: 'RBAC WebSocket Test',
+          type: 'item',
+          icon: 'heroicons_outline:wifi',
+          link: '/test-rbac-websocket',
+        },
+        {
           id: 'docs',
           title: 'Documentation',
           type: 'item',

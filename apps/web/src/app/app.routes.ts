@@ -150,6 +150,13 @@ export const appRoutes: Route[] = [
     canActivate: [AuthGuard],
   },
   {
+    path: 'test-rbac-websocket',
+    loadComponent: () =>
+      import('./test-rbac-websocket.component').then(
+        (m) => m.TestRbacWebsocketComponent,
+      ),
+  },
+  {
     path: '**',
     redirectTo: 'dashboard',
   },

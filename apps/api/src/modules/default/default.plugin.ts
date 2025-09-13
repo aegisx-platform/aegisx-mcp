@@ -5,6 +5,7 @@ import { defaultSchemas } from './default.schemas';
 import { defaultRoutes } from './default.routes';
 import { DefaultService } from './default.service';
 import { DefaultController } from './default.controller';
+import testWebSocketRoutes from './test-websocket.routes';
 
 export default fp(
   async function defaultPlugin(fastify: FastifyInstance, opts: FastifyPluginOptions) {
@@ -21,6 +22,9 @@ export default fp(
     await fastify.register(defaultRoutes, {
       controller: defaultController
     });
+
+    // Register test WebSocket routes
+    await fastify.register(testWebSocketRoutes);
 
     // Decorate fastify instance (optional, for testing)
     fastify.decorate('defaultService', defaultService);

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test - AegisX</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .connected { background-color: #d4edda; color: #155724; }
+        .disconnected { background-color: #f8d7da; color: #721c24; }
+        .reconnecting { background-color: #fff3cd; color: #856404; }
+        button { margin: 5px; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-warning { background-color: #ffc107; color: black; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        #messages { 
+            border: 1px solid #ddd; 
+            height: 300px; 
+            overflow-y: auto; 
+            padding: 10px; 
+            background-color: #f8f9fa;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔌 WebSocket Test - AegisX</h1>
+        
+        <div id="status" class="status disconnected">
+            Status: Disconnected
+        </div>
+
+        <div class="controls">
+            <button id="connect" class="btn-primary">Connect</button>
+            <button id="disconnect" class="btn-danger">Disconnect</button>
+            <button id="ping" class="btn-warning">Ping</button>
+            <button id="subscribe" class="btn-success">Subscribe to RBAC</button>
+        </div>
+        
+        <div class="controls">
+            <h4>API Tests:</h4>
+            <button id="testEvent" class="btn-warning">Test Simple Event</button>
+            <button id="testRole" class="btn-success">Test Role Creation</button>
+            <button id="testBulk" class="btn-warning">Test Bulk Operation</button>
+            <button id="testStats" class="btn-primary">Get WebSocket Stats</button>
+            <button id="clear" class="btn-secondary">Clear Messages</button>
+        </div>
+
+        <h3>Messages:</h3>
+        <div id="messages"></div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <script>
+        let socket = null;
+        const statusEl = document.getElementById('status');
+        const messagesEl = document.getElementById('messages');
+
+        function log(message, type = 'info') {
+            const time = new Date().toLocaleTimeString();
+            const color = type === 'error' ? 'red' : type === 'success' ? 'green' : type === 'warning' ? 'orange' : 'black';
+            messagesEl.innerHTML += `<div style="color: ${color};">[${time}] ${message}</div>`;
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+
+        function updateStatus(status, className) {
+            statusEl.textContent = `Status: ${status}`;
+            statusEl.className = `status ${className}`;
+        }
+
+        // Connect button
+        document.getElementById('connect').addEventListener('click', () => {
+            if (socket) {
+                log('Already connected or connecting...', 'warning');
+                return;
+            }
+
+            log('Connecting to WebSocket server...', 'info');
+            updateStatus('Connecting...', 'reconnecting');
+
+            // Connect to the correct port and path
+            socket = io('http://localhost:3380', {
+                path: '/api/ws/',
+                transports: ['websocket', 'polling'],
+                auth: {
+                    token: 'test-token-123' // Mock token for testing
+                }
+            });
+
+            // Connection events
+            socket.on('connect', () => {
+                log('✅ Connected to WebSocket server!', 'success');
+                updateStatus('Connected', 'connected');
+            });
+
+            socket.on('disconnect', (reason) => {
+                log(`❌ Disconnected: ${reason}`, 'error');
+                updateStatus('Disconnected', 'disconnected');
+            });
+
+            socket.on('connect_error', (error) => {
+                log(`❌ Connection error: ${error.message}`, 'error');
+                updateStatus('Connection Error', 'disconnected');
+            });
+
+            // Server messages
+            socket.on('connection:established', (data) => {
+                log(`🎉 Connection established: ${JSON.stringify(data)}`, 'success');
+            });
+
+            socket.on('subscribe:confirmed', (data) => {
+                log(`📡 Subscription confirmed: ${JSON.stringify(data)}`, 'success');
+            });
+
+            socket.on('auth:authenticated', (data) => {
+                log(`🔐 Authenticated: ${JSON.stringify(data)}`, 'success');
+            });
+
+            socket.on('auth:error', (data) => {
+                log(`🔐❌ Auth error: ${JSON.stringify(data)}`, 'error');
+            });
+
+            socket.on('pong', (data) => {
+                log(`🏓 Pong received: ${JSON.stringify(data)}`, 'success');
+            });
+
+            // Listen for RBAC events
+            socket.on('rbac.role.created', (data) => {
+                log(`🆕 RBAC Role Created: ${JSON.stringify(data)}`, 'success');
+            });
+
+            socket.on('rbac.role.updated', (data) => {
+                log(`📝 RBAC Role Updated: ${JSON.stringify(data)}`, 'success');
+            });
+
+            socket.on('rbac.role.deleted', (data) => {
+                log(`🗑️ RBAC Role Deleted: ${JSON.stringify(data)}`, 'success');
+            });
+
+            // Listen for permission events
+            socket.on('rbac.permission.assigned', (data) => {
+                log(`🔑 Permission Assigned: ${JSON.stringify(data)}`, 'success');
+            });
+
+            socket.on('rbac.hierarchy.changed', (data) => {
+                log(`🏗️ Hierarchy Changed: ${JSON.stringify(data)}`, 'success');
+            });
+
+            // Listen for bulk operation events
+            socket.on('rbac.role.bulk_started', (data) => {
+                log(`🚀 Bulk Operation Started: ${JSON.stringify(data)}`, 'success');
+            });
+
+            socket.on('rbac.role.bulk_progress', (data) => {
+                log(`📊 Bulk Progress: ${data.progress?.percentage || 0}% (${data.progress?.completed || 0}/${data.progress?.total || 0})`, 'info');
+            });
+
+            socket.on('rbac.role.bulk_completed', (data) => {
+                log(`✅ Bulk Operation Completed: ${data.results?.successful || 0} successful, ${data.results?.failed || 0} failed`, 'success');
+            });
+
+            // Listen for any other events
+            socket.onAny((eventName, ...args) => {
+                if (!eventName.startsWith('rbac.') && !['connect', 'disconnect', 'connection:established', 'subscribe:confirmed', 'auth:authenticated', 'auth:error', 'pong'].includes(eventName)) {
+                    log(`📨 Event: ${eventName} - ${JSON.stringify(args)}`, 'info');
+                }
+            });
+        });
+
+        // Disconnect button
+        document.getElementById('disconnect').addEventListener('click', () => {
+            if (socket) {
+                socket.disconnect();
+                socket = null;
+                log('Disconnected by user', 'warning');
+            }
+        });
+
+        // Ping button
+        document.getElementById('ping').addEventListener('click', () => {
+            if (socket && socket.connected) {
+                socket.emit('ping');
+                log('🏓 Ping sent', 'info');
+            } else {
+                log('Not connected!', 'error');
+            }
+        });
+
+        // Subscribe button
+        document.getElementById('subscribe').addEventListener('click', () => {
+            if (socket && socket.connected) {
+                socket.emit('subscribe:features', {
+                    features: ['rbac'],
+                    entities: ['role', 'permission', 'user_role']
+                });
+                log('📡 Subscribed to RBAC features', 'info');
+            } else {
+                log('Not connected!', 'error');
+            }
+        });
+
+        // Test event button (to simulate backend event)
+        document.getElementById('testEvent').addEventListener('click', async () => {
+            try {
+                log('🚀 Sending test event to API...', 'info');
+                
+                const response = await fetch('http://localhost:3380/test/websocket/emit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        feature: 'rbac',
+                        entity: 'role', 
+                        action: 'created',
+                        data: {
+                            id: 'test-role-' + Date.now(),
+                            name: 'Test Role from WebSocket',
+                            description: 'This role was created via WebSocket test'
+                        }
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    log(`✅ API Response: ${result.data.message}`, 'success');
+                    log(`📡 Event: ${result.data.event}`, 'info');
+                } else {
+                    log(`❌ API Error: ${result.error?.message || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Failed to call API: ${error.message}`, 'error');
+            }
+        });
+
+        // Test role creation
+        document.getElementById('testRole').addEventListener('click', async () => {
+            try {
+                log('🚀 Creating test role via API...', 'info');
+                
+                const response = await fetch('http://localhost:3380/test/rbac/role', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: 'Test Role ' + Date.now(),
+                        description: 'Role created for WebSocket testing',
+                        category: 'Test'
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    log(`✅ Role created: ${result.data.role.name}`, 'success');
+                    log(`📡 Events emitted: ${result.data.events.join(', ')}`, 'info');
+                } else {
+                    log(`❌ Failed to create role: ${result.error?.message || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Failed to call API: ${error.message}`, 'error');
+            }
+        });
+
+        // Test bulk operation
+        document.getElementById('testBulk').addEventListener('click', async () => {
+            try {
+                log('🚀 Starting bulk operation test...', 'info');
+                
+                const response = await fetch('http://localhost:3380/test/rbac/bulk-operation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        operationType: 'update',
+                        itemCount: 3
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    log(`✅ Bulk operation started: ${result.data.operationId}`, 'success');
+                    log(`📊 Total items: ${result.data.totalItems}`, 'info');
+                    log(`📡 Watch for progress events...`, 'info');
+                } else {
+                    log(`❌ Failed to start bulk operation: ${result.error?.message || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Failed to call API: ${error.message}`, 'error');
+            }
+        });
+
+        // Test WebSocket stats
+        document.getElementById('testStats').addEventListener('click', async () => {
+            try {
+                log('🚀 Getting WebSocket stats...', 'info');
+                
+                const response = await fetch('http://localhost:3380/test/websocket/stats');
+                const result = await response.json();
+                
+                if (result.success) {
+                    log(`✅ WebSocket Available: ${result.data.websocketAvailable}`, result.data.websocketAvailable ? 'success' : 'warning');
+                    if (result.data.stats) {
+                        log(`📊 Stats: ${JSON.stringify(result.data.stats)}`, 'info');
+                    }
+                } else {
+                    log(`❌ Failed to get stats: ${result.error?.message || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Failed to call API: ${error.message}`, 'error');
+            }
+        });
+
+        // Clear messages button
+        document.getElementById('clear').addEventListener('click', () => {
+            messagesEl.innerHTML = '';
+        });
+
+        // Initial log
+        log('WebSocket test page loaded. Click "Connect" to start testing.', 'info');
+    </script>
+</body>
+</html>
