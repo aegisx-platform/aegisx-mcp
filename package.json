@@ -10,9 +10,9 @@
   "scripts": {
     "dev": "nx run-many --target=serve --projects=api,web --parallel",
     "dev:all": "nx run-many --target=serve --projects=api,web,admin --parallel",
-    "dev:api": "nx serve api",
-    "dev:web": "nx serve web",
-    "dev:admin": "nx serve admin",
+    "dev:api": "nx serve api --port=${API_PORT:-3333}",
+    "dev:web": "nx serve web --port=${WEB_PORT:-4200}",
+    "dev:admin": "nx serve admin --port=${ADMIN_PORT:-4201}",
     "build": "nx run-many --target=build --all",
     "build:prod": "nx run-many --target=build --all --configuration=production",
     "test": "nx run-many --target=test --all",
