@@ -169,6 +169,7 @@ export class NavigationService {
   private _loading = signal<boolean>(false);
   private _error = signal<string | null>(null);
   private _dataSource = signal<'api' | 'fallback'>('fallback');
+  private _loadedOnce = signal<boolean>(false); // Prevent duplicate loading
 
   // Public readonly signals
   readonly navigationItems = this._navigationItems.asReadonly();
@@ -196,6 +197,16 @@ export class NavigationService {
   loadNavigation(
     type: 'default' | 'compact' | 'horizontal' | 'mobile' = 'default',
   ): Observable<AxNavigationItem[]> {
+    // Don't load if already loaded and not explicitly refreshing
+    if (
+      this._loadedOnce() &&
+      this._dataSource() === 'api' &&
+      !this._loading()
+    ) {
+      console.log('✅ Navigation already loaded, skipping duplicate call');
+      return of(this._navigationItems());
+    }
+
     this._loading.set(true);
     this._error.set(null);
 
@@ -207,6 +218,7 @@ export class NavigationService {
           );
           this._navigationItems.set(convertedItems);
           this._dataSource.set('api');
+          this._loadedOnce.set(true);
           this._loading.set(false);
           console.log('✅ Navigation loaded from API', {
             count: convertedItems.length,
@@ -241,6 +253,8 @@ export class NavigationService {
     type: 'default' | 'compact' | 'horizontal' | 'mobile' = 'default',
   ): Observable<AxNavigationItem[]> {
     console.log('🔄 Refreshing navigation data from API...');
+    // Force refresh by clearing loaded flag
+    this._loadedOnce.set(false);
     return this.loadNavigation(type);
   }
 
