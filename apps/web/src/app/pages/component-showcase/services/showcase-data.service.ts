@@ -24,7 +24,7 @@ export interface ComponentCategory {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ShowcaseDataService {
   private componentData: Map<string, ComponentCategory> = new Map();
@@ -49,10 +49,10 @@ export class ShowcaseDataService {
 
   getComponentCounts(): Record<string, number> {
     const counts: Record<string, number> = {};
-    
-    for (const [key, category] of this.componentData) {
+
+    this.componentData.forEach((category, key) => {
       counts[key] = category.components.length;
-    }
+    });
 
     return counts;
   }
@@ -67,8 +67,10 @@ export class ShowcaseDataService {
 
     if (!searchTerm) return results;
 
-    const categoriesToSearch = categoryId 
-      ? [this.componentData.get(categoryId)].filter(Boolean) as ComponentCategory[]
+    const categoriesToSearch = categoryId
+      ? ([this.componentData.get(categoryId)].filter(
+          Boolean,
+        ) as ComponentCategory[])
       : Array.from(this.componentData.values());
 
     for (const category of categoriesToSearch) {
@@ -82,11 +84,14 @@ export class ShowcaseDataService {
     return results;
   }
 
-  private matchesSearchCriteria(component: ComponentExample, searchTerm: string): boolean {
+  private matchesSearchCriteria(
+    component: ComponentExample,
+    searchTerm: string,
+  ): boolean {
     return (
       component.name.toLowerCase().includes(searchTerm) ||
       component.description.toLowerCase().includes(searchTerm) ||
-      component.tags.some(tag => tag.toLowerCase().includes(searchTerm)) ||
+      component.tags.some((tag) => tag.toLowerCase().includes(searchTerm)) ||
       component.category.toLowerCase().includes(searchTerm)
     );
   }
@@ -97,7 +102,8 @@ export class ShowcaseDataService {
       {
         id: 'mat-form-field',
         name: 'Form Field',
-        description: 'Container for form controls with labels, hints, and error messages',
+        description:
+          'Container for form controls with labels, hints, and error messages',
         category: 'Form Controls',
         tags: ['forms', 'input', 'validation'],
         complexity: 'medium',
@@ -109,7 +115,7 @@ export class ShowcaseDataService {
   <mat-label>Email</mat-label>
   <input matInput type="email" placeholder="Enter your email">
   <mat-hint>We'll never share your email</mat-hint>
-</mat-form-field>`
+</mat-form-field>`,
       },
       {
         id: 'mat-input',
@@ -121,7 +127,7 @@ export class ShowcaseDataService {
         source: '@angular/material/input',
         liveDemo: true,
         responsive: true,
-        accessibility: true
+        accessibility: true,
       },
       {
         id: 'mat-select',
@@ -133,7 +139,7 @@ export class ShowcaseDataService {
         source: '@angular/material/select',
         liveDemo: true,
         responsive: true,
-        accessibility: true
+        accessibility: true,
       },
       {
         id: 'mat-autocomplete',
@@ -145,18 +151,19 @@ export class ShowcaseDataService {
         source: '@angular/material/autocomplete',
         liveDemo: true,
         responsive: true,
-        accessibility: true
+        accessibility: true,
       },
       {
         id: 'mat-checkbox',
         name: 'Checkbox',
-        description: 'Boolean selection checkbox with indeterminate state support',
+        description:
+          'Boolean selection checkbox with indeterminate state support',
         category: 'Form Controls',
         tags: ['forms', 'boolean', 'selection'],
         complexity: 'low',
         source: '@angular/material/checkbox',
         liveDemo: true,
-        accessibility: true
+        accessibility: true,
       },
       {
         id: 'mat-radio',
@@ -167,7 +174,7 @@ export class ShowcaseDataService {
         complexity: 'low',
         source: '@angular/material/radio',
         liveDemo: true,
-        accessibility: true
+        accessibility: true,
       },
       {
         id: 'mat-slider',
@@ -178,7 +185,7 @@ export class ShowcaseDataService {
         complexity: 'medium',
         source: '@angular/material/slider',
         liveDemo: true,
-        accessibility: true
+        accessibility: true,
       },
       {
         id: 'mat-slide-toggle',
@@ -189,7 +196,7 @@ export class ShowcaseDataService {
         complexity: 'low',
         source: '@angular/material/slide-toggle',
         liveDemo: true,
-        accessibility: true
+        accessibility: true,
       },
       {
         id: 'mat-datepicker',
@@ -201,7 +208,7 @@ export class ShowcaseDataService {
         source: '@angular/material/datepicker',
         liveDemo: true,
         responsive: true,
-        accessibility: true
+        accessibility: true,
       },
 
       // Navigation
@@ -215,7 +222,7 @@ export class ShowcaseDataService {
         source: '@angular/material/toolbar',
         liveDemo: true,
         responsive: true,
-        accessibility: true
+        accessibility: true,
       },
       {
         id: 'mat-sidenav',
@@ -227,7 +234,7 @@ export class ShowcaseDataService {
         source: '@angular/material/sidenav',
         liveDemo: true,
         responsive: true,
-        accessibility: true
+        accessibility: true,
       },
       {
         id: 'mat-tabs',
@@ -239,7 +246,7 @@ export class ShowcaseDataService {
         source: '@angular/material/tabs',
         liveDemo: true,
         responsive: true,
-        accessibility: true
+        accessibility: true,
       },
       {
         id: 'mat-menu',
@@ -250,7 +257,7 @@ export class ShowcaseDataService {
         complexity: 'medium',
         source: '@angular/material/menu',
         liveDemo: true,
-        accessibility: true
+        accessibility: true,
       },
 
       // Layout
@@ -264,7 +271,7 @@ export class ShowcaseDataService {
         source: '@angular/material/card',
         liveDemo: true,
         responsive: true,
-        accessibility: true
+        accessibility: true,
       },
       {
         id: 'mat-expansion-panel',
@@ -276,7 +283,7 @@ export class ShowcaseDataService {
         source: '@angular/material/expansion',
         liveDemo: true,
         responsive: true,
-        accessibility: true
+        accessibility: true,
       },
       {
         id: 'mat-stepper',
@@ -288,7 +295,7 @@ export class ShowcaseDataService {
         source: '@angular/material/stepper',
         liveDemo: true,
         responsive: true,
-        accessibility: true
+        accessibility: true,
       },
       {
         id: 'mat-list',
@@ -300,7 +307,7 @@ export class ShowcaseDataService {
         source: '@angular/material/list',
         liveDemo: true,
         responsive: true,
-        accessibility: true
+        accessibility: true,
       },
       {
         id: 'mat-grid-list',
@@ -312,7 +319,7 @@ export class ShowcaseDataService {
         source: '@angular/material/grid-list',
         liveDemo: true,
         responsive: true,
-        accessibility: true
+        accessibility: true,
       },
       {
         id: 'mat-divider',
@@ -322,7 +329,7 @@ export class ShowcaseDataService {
         tags: ['layout', 'separator', 'divider'],
         complexity: 'low',
         source: '@angular/material/divider',
-        liveDemo: true
+        liveDemo: true,
       },
 
       // Buttons & Indicators
@@ -335,7 +342,7 @@ export class ShowcaseDataService {
         complexity: 'low',
         source: '@angular/material/button',
         liveDemo: true,
-        accessibility: true
+        accessibility: true,
       },
       {
         id: 'mat-fab',
@@ -346,7 +353,7 @@ export class ShowcaseDataService {
         complexity: 'medium',
         source: '@angular/material/button',
         liveDemo: true,
-        accessibility: true
+        accessibility: true,
       },
       {
         id: 'mat-icon-button',
@@ -357,19 +364,20 @@ export class ShowcaseDataService {
         complexity: 'low',
         source: '@angular/material/button',
         liveDemo: true,
-        accessibility: true
+        accessibility: true,
       },
       {
         id: 'mat-chip',
         name: 'Chips',
-        description: 'Compact elements representing input, attributes, or actions',
+        description:
+          'Compact elements representing input, attributes, or actions',
         category: 'Buttons & Indicators',
         tags: ['chips', 'tags', 'selection'],
         complexity: 'medium',
         source: '@angular/material/chips',
         liveDemo: true,
         responsive: true,
-        accessibility: true
+        accessibility: true,
       },
       {
         id: 'mat-badge',
@@ -379,18 +387,19 @@ export class ShowcaseDataService {
         tags: ['badge', 'indicator', 'notification'],
         complexity: 'low',
         source: '@angular/material/badge',
-        liveDemo: true
+        liveDemo: true,
       },
       {
         id: 'mat-progress-bar',
         name: 'Progress Bar',
-        description: 'Linear progress indicator with determinate and indeterminate modes',
+        description:
+          'Linear progress indicator with determinate and indeterminate modes',
         category: 'Buttons & Indicators',
         tags: ['progress', 'loading', 'indicator'],
         complexity: 'low',
         source: '@angular/material/progress-bar',
         liveDemo: true,
-        accessibility: true
+        accessibility: true,
       },
       {
         id: 'mat-progress-spinner',
@@ -401,21 +410,22 @@ export class ShowcaseDataService {
         complexity: 'low',
         source: '@angular/material/progress-spinner',
         liveDemo: true,
-        accessibility: true
+        accessibility: true,
       },
 
       // Data Display
       {
         id: 'mat-table',
         name: 'Table',
-        description: 'Feature-rich data table with sorting, filtering, and pagination',
+        description:
+          'Feature-rich data table with sorting, filtering, and pagination',
         category: 'Data Display',
         tags: ['table', 'data', 'sorting', 'filtering'],
         complexity: 'high',
         source: '@angular/material/table',
         liveDemo: true,
         responsive: true,
-        accessibility: true
+        accessibility: true,
       },
       {
         id: 'mat-paginator',
@@ -427,7 +437,7 @@ export class ShowcaseDataService {
         source: '@angular/material/paginator',
         liveDemo: true,
         responsive: true,
-        accessibility: true
+        accessibility: true,
       },
       {
         id: 'mat-sort',
@@ -438,7 +448,7 @@ export class ShowcaseDataService {
         complexity: 'medium',
         source: '@angular/material/sort',
         liveDemo: true,
-        accessibility: true
+        accessibility: true,
       },
       {
         id: 'mat-tree',
@@ -449,7 +459,7 @@ export class ShowcaseDataService {
         complexity: 'high',
         source: '@angular/material/tree',
         liveDemo: true,
-        accessibility: true
+        accessibility: true,
       },
 
       // Overlays & Modals
@@ -463,7 +473,7 @@ export class ShowcaseDataService {
         source: '@angular/material/dialog',
         liveDemo: true,
         responsive: true,
-        accessibility: true
+        accessibility: true,
       },
       {
         id: 'mat-bottom-sheet',
@@ -475,7 +485,7 @@ export class ShowcaseDataService {
         source: '@angular/material/bottom-sheet',
         liveDemo: true,
         responsive: true,
-        accessibility: true
+        accessibility: true,
       },
       {
         id: 'mat-snack-bar',
@@ -486,7 +496,7 @@ export class ShowcaseDataService {
         complexity: 'medium',
         source: '@angular/material/snack-bar',
         liveDemo: true,
-        accessibility: true
+        accessibility: true,
       },
       {
         id: 'mat-tooltip',
@@ -497,8 +507,8 @@ export class ShowcaseDataService {
         complexity: 'low',
         source: '@angular/material/tooltip',
         liveDemo: true,
-        accessibility: true
-      }
+        accessibility: true,
+      },
     ];
 
     this.componentData.set('material', {
@@ -506,7 +516,7 @@ export class ShowcaseDataService {
       name: 'Material Design Components',
       description: 'Comprehensive Angular Material component library',
       icon: 'palette',
-      components: materialComponents
+      components: materialComponents,
     });
   }
 
@@ -522,7 +532,7 @@ export class ShowcaseDataService {
         complexity: 'high',
         source: '@aegisx/ui/layout',
         liveDemo: true,
-        responsive: true
+        responsive: true,
       },
       {
         id: 'aegisx-compact-layout',
@@ -533,7 +543,7 @@ export class ShowcaseDataService {
         complexity: 'high',
         source: '@aegisx/ui/layout',
         liveDemo: true,
-        responsive: true
+        responsive: true,
       },
       {
         id: 'aegisx-enterprise-layout',
@@ -544,7 +554,7 @@ export class ShowcaseDataService {
         complexity: 'high',
         source: '@aegisx/ui/layout',
         liveDemo: true,
-        responsive: true
+        responsive: true,
       },
 
       // Navigation Components
@@ -558,7 +568,7 @@ export class ShowcaseDataService {
         source: '@aegisx/ui/navigation',
         liveDemo: true,
         responsive: true,
-        accessibility: true
+        accessibility: true,
       },
       {
         id: 'aegisx-breadcrumb',
@@ -570,7 +580,7 @@ export class ShowcaseDataService {
         source: '@aegisx/ui/navigation',
         liveDemo: true,
         responsive: true,
-        accessibility: true
+        accessibility: true,
       },
 
       // Content Components
@@ -583,7 +593,7 @@ export class ShowcaseDataService {
         complexity: 'medium',
         source: '@aegisx/ui/card',
         liveDemo: true,
-        responsive: true
+        responsive: true,
       },
       {
         id: 'aegisx-alert',
@@ -594,7 +604,7 @@ export class ShowcaseDataService {
         complexity: 'low',
         source: '@aegisx/ui/alert',
         liveDemo: true,
-        accessibility: true
+        accessibility: true,
       },
       {
         id: 'aegisx-drawer',
@@ -606,7 +616,7 @@ export class ShowcaseDataService {
         source: '@aegisx/ui/drawer',
         liveDemo: true,
         responsive: true,
-        accessibility: true
+        accessibility: true,
       },
 
       // Interactive Components
@@ -618,7 +628,7 @@ export class ShowcaseDataService {
         tags: ['loading', 'animation', 'overlay'],
         complexity: 'medium',
         source: '@aegisx/ui/loading',
-        liveDemo: true
+        liveDemo: true,
       },
       {
         id: 'aegisx-user-menu',
@@ -629,7 +639,7 @@ export class ShowcaseDataService {
         complexity: 'medium',
         source: '@aegisx/ui/user',
         liveDemo: true,
-        accessibility: true
+        accessibility: true,
       },
       {
         id: 'aegisx-fullscreen',
@@ -639,8 +649,8 @@ export class ShowcaseDataService {
         tags: ['fullscreen', 'toggle', 'viewport'],
         complexity: 'low',
         source: '@aegisx/ui/fullscreen',
-        liveDemo: true
-      }
+        liveDemo: true,
+      },
     ];
 
     this.componentData.set('aegisx', {
@@ -648,7 +658,7 @@ export class ShowcaseDataService {
       name: 'AegisX UI Components',
       description: 'Custom AegisX UI library components',
       icon: 'architecture',
-      components: aegisxComponents
+      components: aegisxComponents,
     });
   }
 
@@ -664,7 +674,7 @@ export class ShowcaseDataService {
         complexity: 'low',
         source: 'apps/web/components/widgets',
         liveDemo: true,
-        responsive: true
+        responsive: true,
       },
       {
         id: 'chart-widget',
@@ -675,7 +685,7 @@ export class ShowcaseDataService {
         complexity: 'high',
         source: 'apps/web/components/widgets',
         liveDemo: true,
-        responsive: true
+        responsive: true,
       },
       {
         id: 'progress-widget',
@@ -685,7 +695,7 @@ export class ShowcaseDataService {
         tags: ['dashboard', 'progress', 'tracking'],
         complexity: 'medium',
         source: 'apps/web/components/widgets',
-        liveDemo: true
+        liveDemo: true,
       },
       {
         id: 'quick-actions',
@@ -696,7 +706,7 @@ export class ShowcaseDataService {
         complexity: 'medium',
         source: 'apps/web/components/widgets',
         liveDemo: true,
-        responsive: true
+        responsive: true,
       },
       {
         id: 'activity-timeline',
@@ -707,7 +717,7 @@ export class ShowcaseDataService {
         complexity: 'high',
         source: 'apps/web/components/widgets',
         liveDemo: true,
-        responsive: true
+        responsive: true,
       },
 
       // Feature Components
@@ -721,7 +731,7 @@ export class ShowcaseDataService {
         source: 'apps/web/features/users',
         liveDemo: true,
         responsive: true,
-        accessibility: true
+        accessibility: true,
       },
       {
         id: 'user-detail',
@@ -732,8 +742,8 @@ export class ShowcaseDataService {
         complexity: 'high',
         source: 'apps/web/features/users',
         liveDemo: true,
-        responsive: true
-      }
+        responsive: true,
+      },
     ];
 
     this.componentData.set('widgets', {
@@ -741,7 +751,7 @@ export class ShowcaseDataService {
       name: 'Application Widgets',
       description: 'Dashboard widgets and application-specific components',
       icon: 'dashboard',
-      components: widgets
+      components: widgets,
     });
   }
 
@@ -757,30 +767,32 @@ export class ShowcaseDataService {
         source: 'showcase/demos',
         liveDemo: true,
         responsive: true,
-        accessibility: true
+        accessibility: true,
       },
       {
         id: 'data-dashboard-demo',
         name: 'Data Management Dashboard',
-        description: 'Complex dashboard with charts, tables, and real-time updates',
+        description:
+          'Complex dashboard with charts, tables, and real-time updates',
         category: 'Dashboard Examples',
         tags: ['dashboard', 'data', 'charts', 'realtime'],
         complexity: 'high',
         source: 'showcase/demos',
         liveDemo: true,
-        responsive: true
+        responsive: true,
       },
       {
         id: 'settings-panel-demo',
         name: 'Settings Panel',
-        description: 'Comprehensive settings interface with tabs and preferences',
+        description:
+          'Comprehensive settings interface with tabs and preferences',
         category: 'UI Patterns',
         tags: ['settings', 'preferences', 'tabs'],
         complexity: 'medium',
         source: 'showcase/demos',
         liveDemo: true,
         responsive: true,
-        accessibility: true
+        accessibility: true,
       },
       {
         id: 'e-commerce-demo',
@@ -791,8 +803,8 @@ export class ShowcaseDataService {
         complexity: 'high',
         source: 'showcase/demos',
         liveDemo: true,
-        responsive: true
-      }
+        responsive: true,
+      },
     ];
 
     this.componentData.set('demos', {
@@ -800,7 +812,7 @@ export class ShowcaseDataService {
       name: 'Interactive Demos',
       description: 'Real-world usage examples and complex interactions',
       icon: 'play_circle',
-      components: demos
+      components: demos,
     });
   }
 }

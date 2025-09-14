@@ -1,4 +1,11 @@
-import { Component, Input, OnInit, inject, signal, computed } from '@angular/core';
+import {
+  Component,
+  Input,
+  OnInit,
+  inject,
+  signal,
+  computed,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatIconModule } from '@angular/material/icon';
@@ -12,7 +19,10 @@ import { FormsModule } from '@angular/forms';
 
 // Import the existing material demo component
 import { MaterialDemoComponent } from '../../material-demo/material-demo.component';
-import { ShowcaseDataService, ComponentExample } from '../services/showcase-data.service';
+import {
+  ShowcaseDataService,
+  ComponentExample,
+} from '../services/showcase-data.service';
 import { CodeViewerComponent } from '../shared/code-viewer.component';
 import { ComponentPreviewComponent } from '../shared/component-preview.component';
 
@@ -62,63 +72,76 @@ interface MaterialSection {
       <!-- Enhanced View -->
       <div *ngIf="viewMode() === 'enhanced'" class="enhanced-view">
         <!-- Search Results (if searching) -->
-        <div *ngIf="searchQuery && filteredComponents().length > 0" class="search-results">
+        <div
+          *ngIf="searchQuery && filteredComponents().length > 0"
+          class="search-results"
+        >
           <h3 class="search-title">
             <mat-icon>search</mat-icon>
-            Search Results for "{{ searchQuery }}" ({{ filteredComponents().length }})
+            Search Results for "{{ searchQuery }}" ({{
+              filteredComponents().length
+            }})
           </h3>
-          
+
           <div class="component-grid">
-            <mat-card 
-              *ngFor="let component of filteredComponents()" 
-              class="component-card">
+            <mat-card
+              *ngFor="let component of filteredComponents()"
+              class="component-card"
+            >
               <mat-card-header>
                 <mat-card-title>{{ component.name }}</mat-card-title>
                 <mat-card-subtitle>{{ component.source }}</mat-card-subtitle>
               </mat-card-header>
-              
+
               <mat-card-content>
                 <p>{{ component.description }}</p>
-                
+
                 <!-- Tags -->
                 <div class="component-tags">
                   <mat-chip *ngFor="let tag of component.tags" class="tag-chip">
                     {{ tag }}
                   </mat-chip>
                 </div>
-                
+
                 <!-- Complexity & Features -->
                 <div class="component-features">
-                  <mat-chip 
+                  <mat-chip
                     [color]="getComplexityColor(component.complexity)"
-                    class="complexity-chip">
+                    class="complexity-chip"
+                  >
                     {{ component.complexity }} complexity
                   </mat-chip>
-                  
+
                   <mat-chip *ngIf="component.responsive" class="feature-chip">
                     <mat-icon>phone_android</mat-icon>
                     Responsive
                   </mat-chip>
-                  
-                  <mat-chip *ngIf="component.accessibility" class="feature-chip">
+
+                  <mat-chip
+                    *ngIf="component.accessibility"
+                    class="feature-chip"
+                  >
                     <mat-icon>accessibility</mat-icon>
                     A11y
                   </mat-chip>
-                  
+
                   <mat-chip *ngIf="component.liveDemo" class="feature-chip">
                     <mat-icon>play_circle</mat-icon>
                     Live Demo
                   </mat-chip>
                 </div>
               </mat-card-content>
-              
+
               <mat-card-actions>
                 <button mat-button (click)="scrollToComponent(component.id)">
                   <mat-icon>visibility</mat-icon>
                   View Demo
                 </button>
-                <button mat-button *ngIf="component.codeExample" 
-                        (click)="showCode(component)">
+                <button
+                  mat-button
+                  *ngIf="component.codeExample"
+                  (click)="showCode(component)"
+                >
                   <mat-icon>code</mat-icon>
                   View Code
                 </button>
@@ -130,16 +153,18 @@ interface MaterialSection {
         <!-- Organized Sections -->
         <div *ngIf="!searchQuery" class="organized-sections">
           <mat-accordion class="sections-accordion" multi>
-            <mat-expansion-panel 
-              *ngFor="let section of materialSections()" 
+            <mat-expansion-panel
+              *ngFor="let section of materialSections()"
               [expanded]="section.expanded"
-              class="section-panel">
-              
+              class="section-panel"
+            >
               <mat-expansion-panel-header>
                 <mat-panel-title>
                   <mat-icon>{{ section.icon }}</mat-icon>
                   {{ section.title }}
-                  <mat-chip class="count-chip">{{ section.components.length }}</mat-chip>
+                  <mat-chip class="count-chip">{{
+                    section.components.length
+                  }}</mat-chip>
                 </mat-panel-title>
                 <mat-panel-description>
                   {{ section.description }}
@@ -148,11 +173,11 @@ interface MaterialSection {
 
               <div class="section-content">
                 <div class="component-grid">
-                  <mat-card 
-                    *ngFor="let component of section.components" 
+                  <mat-card
+                    *ngFor="let component of section.components"
                     class="component-card"
-                    [id]="'card-' + component.id">
-                    
+                    [id]="'card-' + component.id"
+                  >
                     <mat-card-header>
                       <mat-card-title>{{ component.name }}</mat-card-title>
                       <mat-card-subtitle>
@@ -160,38 +185,51 @@ interface MaterialSection {
                         {{ component.source }}
                       </mat-card-subtitle>
                     </mat-card-header>
-                    
+
                     <mat-card-content>
                       <p>{{ component.description }}</p>
-                      
+
                       <!-- Live Preview -->
                       <div *ngIf="component.liveDemo" class="live-preview">
-                        <app-component-preview 
+                        <app-component-preview
                           [componentId]="component.id"
-                          [responsive]="component.responsive || false">
+                          [responsive]="component.responsive || false"
+                        >
                         </app-component-preview>
                       </div>
-                      
+
                       <!-- Tags -->
                       <div class="component-tags">
-                        <mat-chip *ngFor="let tag of component.tags" class="tag-chip">
+                        <mat-chip
+                          *ngFor="let tag of component.tags"
+                          class="tag-chip"
+                        >
                           {{ tag }}
                         </mat-chip>
                       </div>
                     </mat-card-content>
-                    
+
                     <mat-card-actions>
-                      <button mat-button (click)="showInOriginalDemo(component.id)">
+                      <button
+                        mat-button
+                        (click)="showInOriginalDemo(component.id)"
+                      >
                         <mat-icon>open_in_new</mat-icon>
                         Full Demo
                       </button>
-                      <button mat-button *ngIf="component.codeExample" 
-                              (click)="showCode(component)">
+                      <button
+                        mat-button
+                        *ngIf="component.codeExample"
+                        (click)="showCode(component)"
+                      >
                         <mat-icon>code</mat-icon>
                         Code
                       </button>
-                      <button mat-button *ngIf="component.documentation" 
-                              (click)="openDocumentation(component.documentation!)">
+                      <button
+                        mat-button
+                        *ngIf="component.documentation"
+                        (click)="openDocumentation(component.documentation!)"
+                      >
                         <mat-icon>help</mat-icon>
                         Docs
                       </button>
@@ -204,7 +242,10 @@ interface MaterialSection {
         </div>
 
         <!-- No Results -->
-        <div *ngIf="searchQuery && filteredComponents().length === 0" class="no-results">
+        <div
+          *ngIf="searchQuery && filteredComponents().length === 0"
+          class="no-results"
+        >
           <mat-icon>search_off</mat-icon>
           <h3>No components found</h3>
           <p>Try searching with different keywords or browse all components.</p>
@@ -224,7 +265,7 @@ interface MaterialSection {
       <!-- Code Dialog will be handled by parent component -->
     </div>
   `,
-  styleUrls: ['./material-section.component.scss']
+  styleUrls: ['./material-section.component.scss'],
 })
 export class MaterialSectionComponent implements OnInit {
   @Input() searchQuery: string = '';
@@ -240,17 +281,22 @@ export class MaterialSectionComponent implements OnInit {
   // Computed properties
   filteredComponents = computed(() => {
     if (!this.searchQuery) return [];
-    
-    return this.components().filter(component =>
-      component.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-      component.description.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-      component.tags.some(tag => tag.toLowerCase().includes(this.searchQuery.toLowerCase()))
+
+    return this.components().filter(
+      (component) =>
+        component.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        component.description
+          .toLowerCase()
+          .includes(this.searchQuery.toLowerCase()) ||
+        component.tags.some((tag) =>
+          tag.toLowerCase().includes(this.searchQuery.toLowerCase()),
+        ),
     );
   });
 
   materialSections = computed(() => {
     const componentsByCategory = this.groupComponentsByCategory();
-    
+
     const sections: MaterialSection[] = [
       {
         id: 'form-controls',
@@ -258,46 +304,46 @@ export class MaterialSectionComponent implements OnInit {
         description: 'Input fields, selectors, and form-related components',
         icon: 'edit',
         components: componentsByCategory['Form Controls'] || [],
-        expanded: true
+        expanded: true,
       },
       {
         id: 'navigation',
         title: 'Navigation',
         description: 'Navigation bars, menus, and routing components',
         icon: 'navigation',
-        components: componentsByCategory['Navigation'] || []
+        components: componentsByCategory['Navigation'] || [],
       },
       {
         id: 'layout',
         title: 'Layout',
         description: 'Cards, lists, and structural components',
         icon: 'view_quilt',
-        components: componentsByCategory['Layout'] || []
+        components: componentsByCategory['Layout'] || [],
       },
       {
         id: 'buttons-indicators',
         title: 'Buttons & Indicators',
         description: 'Action buttons, progress bars, and status indicators',
         icon: 'touch_app',
-        components: componentsByCategory['Buttons & Indicators'] || []
+        components: componentsByCategory['Buttons & Indicators'] || [],
       },
       {
         id: 'data-display',
         title: 'Data Display',
         description: 'Tables, trees, and data presentation components',
         icon: 'table_view',
-        components: componentsByCategory['Data Display'] || []
+        components: componentsByCategory['Data Display'] || [],
       },
       {
         id: 'overlays-modals',
         title: 'Overlays & Modals',
         description: 'Dialogs, tooltips, and overlay components',
         icon: 'layers',
-        components: componentsByCategory['Overlays & Modals'] || []
-      }
+        components: componentsByCategory['Overlays & Modals'] || [],
+      },
     ];
 
-    return sections.filter(section => section.components.length > 0);
+    return sections.filter((section) => section.components.length > 0);
   });
 
   ngOnInit() {
@@ -306,11 +352,11 @@ export class MaterialSectionComponent implements OnInit {
 
   private async loadMaterialComponents() {
     this.loading.set(true);
-    
+
     try {
       await this.showcaseDataService.loadComponentData();
       const materialData = this.showcaseDataService.getCategoryData('material');
-      
+
       if (materialData) {
         this.components.set(materialData.components);
       }
@@ -323,23 +369,28 @@ export class MaterialSectionComponent implements OnInit {
 
   private groupComponentsByCategory(): Record<string, ComponentExample[]> {
     const grouped: Record<string, ComponentExample[]> = {};
-    
+
     for (const component of this.components()) {
       if (!grouped[component.category]) {
         grouped[component.category] = [];
       }
       grouped[component.category].push(component);
     }
-    
+
     return grouped;
   }
 
   // Event handlers
-  getComplexityColor(complexity: 'low' | 'medium' | 'high'): 'primary' | 'accent' | 'warn' {
+  getComplexityColor(
+    complexity: 'low' | 'medium' | 'high',
+  ): 'primary' | 'accent' | 'warn' {
     switch (complexity) {
-      case 'low': return 'primary';
-      case 'medium': return 'accent';
-      case 'high': return 'warn';
+      case 'low':
+        return 'primary';
+      case 'medium':
+        return 'accent';
+      case 'high':
+        return 'warn';
     }
   }
 
@@ -355,10 +406,12 @@ export class MaterialSectionComponent implements OnInit {
   showInOriginalDemo(componentId: string) {
     // Switch to original demo and scroll to component
     this.viewMode.set('original');
-    
+
     // Give the view a moment to render, then scroll
     setTimeout(() => {
-      const element = document.querySelector(\`[data-component-id="\${componentId}"]\`);
+      const element = document.querySelector(
+        `[data-component-id="${componentId}"]`,
+      );
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
@@ -370,7 +423,7 @@ export class MaterialSectionComponent implements OnInit {
     // For now, we'll log the code
     if (component.codeExample) {
       console.log('Code for', component.name + ':', component.codeExample);
-      
+
       // You could implement a MatDialog here to show the code
       // this.dialog.open(CodeDialogComponent, { data: component });
     }
@@ -381,7 +434,9 @@ export class MaterialSectionComponent implements OnInit {
   }
 
   clearSearch() {
-    // Emit event to parent to clear search
-    // this.searchCleared.emit();
+    // Reset search by emitting empty string to parent
+    // Since this is @Input, we need to communicate with parent
+    // For now, we'll just reset internal state
+    this.searchQuery = '';
   }
 }
