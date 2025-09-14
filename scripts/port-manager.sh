@@ -32,7 +32,7 @@ show_instances() {
     echo -e "${BLUE}FOLDER${NC}\t\t${BLUE}POSTGRES${NC}\t${BLUE}REDIS${NC}\t${BLUE}API${NC}\t${BLUE}WEB${NC}\t${BLUE}ADMIN${NC}\t${BLUE}PGADMIN${NC}\t${BLUE}STATUS${NC}"
     echo "----------------------------------------------------------------------------------------------------"
     
-    while IFS=: read -r folder postgres redis api web admin pgadmin; do
+    while IFS=: read -r folder postgres redis api web admin timestamp; do
         if [ -n "$folder" ]; then
             # Check if containers are running
             if docker ps --format "table {{.Names}}" | grep -q "aegisx.*${folder#aegisx-starter-}"; then
@@ -42,7 +42,7 @@ show_instances() {
             fi
             
             printf "%-20s\t%s\t%s\t%s\t%s\t%s\t%s\t%b\n" \
-                "$folder" "$postgres" "$redis" "$api" "$web" "$admin" "$pgladmin" "$status"
+                "$folder" "$postgres" "$redis" "$api" "$web" "$admin" "$status"
         fi
     done < "$REGISTRY_FILE"
 }
@@ -60,10 +60,10 @@ check_conflicts() {
     conflicts=0
     
     # Build port usage map
-    while IFS=: read -r folder postgres redis api web admin pgadmin; do
+    while IFS=: read -r folder postgres redis api web admin timestamp; do
         if [ -n "$folder" ]; then
             # Check each port
-            for port in $postgres $redis $api $web $admin $pgladmin; do
+            for port in $postgres $redis $api $web $admin; do
                 if [ -n "${port_usage[$port]}" ]; then
                     print_error "Port conflict: $port used by both ${port_usage[$port]} and $folder"
                     conflicts=1
@@ -100,11 +100,11 @@ stop_instance() {
     
     # Extract suffix for container names
     if [ "$folder_name" = "aegisx-starter" ]; then
-        containers="aegisx_postgres aegisx_redis aegisx_pgadmin"
+        containers="aegisx_postgres aegisx_redis"
     else
         suffix=${folder_name#aegisx-starter-}
         suffix=${suffix#-}
-        containers="aegisx_${suffix}_postgres aegisx_${suffix}_redis aegisx_${suffix}_pgadmin"
+        containers="aegisx_${suffix}_postgres aegisx_${suffix}_redis"
     fi
     
     # Stop containers
@@ -127,7 +127,7 @@ stop_all() {
         return
     fi
     
-    while IFS=: read -r folder postgres redis api web admin pgadmin; do
+    while IFS=: read -r folder postgres redis api web admin timestamp; do
         if [ -n "$folder" ]; then
             stop_instance "$folder"
         fi
@@ -183,7 +183,7 @@ show_running() {
     echo "============="
     
     if [ -f "$REGISTRY_FILE" ]; then
-        while IFS=: read -r folder postgres redis api web admin pgadmin; do
+        while IFS=: read -r folder postgres redis api web admin timestamp; do
             if [ -n "$folder" ]; then
                 echo "$folder:"
                 echo "  PostgreSQL: $postgres"
@@ -191,7 +191,6 @@ show_running() {
                 echo "  API: $api"
                 echo "  Web: $web"
                 echo "  Admin: $admin"
-                echo "  PgAdmin: $pgladmin"
                 echo ""
             fi
         done < "$REGISTRY_FILE"

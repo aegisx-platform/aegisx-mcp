@@ -225,12 +225,12 @@ pnpm setup
 
 ## 🎯 **Common Port Assignments**
 
-| Folder                | PostgreSQL | Redis | API  | Web  | Admin | PgAdmin |
-| --------------------- | ---------- | ----- | ---- | ---- | ----- | ------- |
-| `aegisx-starter`      | 5432       | 6380  | 3333 | 4200 | 4201  | 5050    |
-| `aegisx-starter-mpv`  | 5433       | 6381  | 3334 | 4201 | 4202  | 5051    |
-| `aegisx-starter-rbac` | 5434       | 6382  | 3335 | 4202 | 4203  | 5052    |
-| `aegisx-starter-auth` | 5435       | 6383  | 3336 | 4203 | 4204  | 5053    |
+| Folder                | PostgreSQL | Redis | API  | Web  | Admin |
+| --------------------- | ---------- | ----- | ---- | ---- | ----- |
+| `aegisx-starter`      | 5432       | 6379  | 3333 | 4200 | 4201  |
+| `aegisx-starter-mpv`  | 5433       | 6381  | 3334 | 4201 | 4202  |
+| `aegisx-starter-rbac` | 5434       | 6382  | 3335 | 4202 | 4203  |
+| `aegisx-starter-auth` | 5435       | 6383  | 3336 | 4203 | 4204  |
 
 _Ports calculated using hash algorithm for consistency_
 

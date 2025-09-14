@@ -37,7 +37,7 @@ The project is already set up with:
 3. **Database Ready** - PostgreSQL with migrations
 4. **Authentication** - JWT with refresh tokens
 5. **Development Tools** - ESLint, Prettier, TypeScript
-6. **Docker Environment** - PostgreSQL + Redis + PgAdmin
+6. **Docker Environment** - PostgreSQL + Redis
 
 ### **Login Credentials (After Seeding)**
 

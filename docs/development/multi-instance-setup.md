@@ -87,7 +87,6 @@ pnpm dev
 # API: http://localhost:3334
 # Web: http://localhost:4201
 # Admin: http://localhost:4202
-# PgAdmin: http://localhost:5051
 ```
 
 ## 📁 **Generated Files**
@@ -157,17 +156,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: aegisx_mpv_pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@aegisx.local
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - '5051:80'
-    depends_on:
-      - postgres
 
 volumes:
   mpv_postgres_data:
@@ -278,8 +266,8 @@ lsof -i :5433
 ./scripts/port-manager.sh stop-all
 
 # Remove old default containers that block ports
-docker stop aegisx_postgres aegisx_redis aegisx_pgadmin 2>/dev/null || true
-docker rm aegisx_postgres aegisx_redis aegisx_pgadmin 2>/dev/null || true
+docker stop aegisx_postgres aegisx_redis 2>/dev/null || true
+docker rm aegisx_postgres aegisx_redis 2>/dev/null || true
 ```
 
 ### **Container Name Conflicts**

@@ -32,25 +32,6 @@ services:
     networks:
       - app_network
 
-  # pgAdmin (Optional - for database management)
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: app_pgadmin
-    restart: unless-stopped
-    ports:
-      - '5050:80'
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@example.com}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
-      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - app_network
 
   # Redis (Optional - for session/cache)
   redis:
@@ -162,7 +143,6 @@ services:
 volumes:
   postgres_data:
     driver: local
-  pgadmin_data:
     driver: local
   redis_data:
     driver: local
@@ -249,7 +229,7 @@ docker-compose up -d
 
 # Start specific services
 docker-compose up -d postgres redis
-docker-compose up -d postgres pgadmin
+docker-compose up -d postgres
 
 # View logs
 docker-compose logs -f api

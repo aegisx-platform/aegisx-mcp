@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# Multi-Instance Environment Setup Script
-# Auto-configures ports and container names based on folder name
+# AegisX Multi-Instance Environment Setup Script
+# Generates instance-specific configuration for parallel development
 
 set -e
 
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
-BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Helper functions
@@ -18,96 +18,100 @@ print_status() {
 }
 
 print_success() {
-    echo -e "${GREEN}✅ $1${NC}"
+    echo -e "${GREEN}$1${NC}"
 }
 
 print_warning() {
-    echo -e "${YELLOW}⚠️ $1${NC}"
+    echo -e "${YELLOW}$1${NC}"
 }
 
 print_error() {
-    echo -e "${RED}❌ $1${NC}"
+    echo -e "${RED}$1${NC}"
 }
 
-# Get current folder name
-CURRENT_DIR=$(pwd)
-FOLDER_NAME=$(basename "$CURRENT_DIR")
+# Simple hash function for consistent port assignment
+simple_hash() {
+    local input="$1"
+    local hash=0
+    for (( i=0; i<${#input}; i++ )); do
+        char=$(printf "%d" "'${input:$i:1}")
+        hash=$((hash + char))
+    done
+    echo $((hash % 100))
+}
 
-print_status "🏗️ Setting up environment for folder: $FOLDER_NAME"
+# Get current directory name
+CURRENT_DIR=$(basename "$(pwd)")
+FOLDER_NAME="$CURRENT_DIR"
 
-# Extract suffix from folder name
+print_status "🚀 Setting up AegisX Multi-Instance Environment"
+echo "📂 Current folder: $FOLDER_NAME"
+
+# Determine instance configuration
 if [[ "$FOLDER_NAME" == "aegisx-starter" ]]; then
-    # Main repo - use default ports
-    SUFFIX=""
+    # Main repository - use default ports
     INSTANCE_NAME="main"
-    print_status "📁 Detected main repository"
-else
-    # Feature repo - extract suffix
-    SUFFIX=${FOLDER_NAME#aegisx-starter}
-    SUFFIX=${SUFFIX#-}  # Remove leading dash if present
-    INSTANCE_NAME=$SUFFIX
-    print_status "📁 Detected feature repository: $SUFFIX"
-fi
-
-# Calculate ports based on folder suffix
-if [ -z "$SUFFIX" ]; then
-    # Main repo ports
     POSTGRES_PORT=5432
-    REDIS_PORT=6380
+    REDIS_PORT=6379
     API_PORT=3333
     WEB_PORT=4200
     ADMIN_PORT=4201
-    PGADMIN_PORT=5050
     
-    # Container names
-    POSTGRES_CONTAINER="aegisx_postgres"
-    REDIS_CONTAINER="aegisx_redis"
-    PGADMIN_CONTAINER="aegisx_pgadmin"
-    
-    # Volume names
-    POSTGRES_VOLUME="postgres_data"
-    REDIS_VOLUME="redis_data"
+    print_status "📍 Detected main repository - using default ports"
 else
-    # Feature repo ports - use hash for consistent port assignment
-    # Get first 2 characters of MD5 hash and convert to decimal
-    HASH=$(echo -n "$SUFFIX" | md5sum | cut -c1-2)
-    OFFSET=$((0x$HASH % 50 + 1))  # 1-50 range to avoid conflicts
-    
-    POSTGRES_PORT=$((5432 + OFFSET))
-    REDIS_PORT=$((6380 + OFFSET))
-    API_PORT=$((3333 + OFFSET))
-    WEB_PORT=$((4200 + OFFSET))
-    ADMIN_PORT=$((4201 + OFFSET))
-    PGADMIN_PORT=$((5050 + OFFSET))
-    
-    # Container names with suffix
-    POSTGRES_CONTAINER="aegisx_${SUFFIX}_postgres"
-    REDIS_CONTAINER="aegisx_${SUFFIX}_redis" 
-    PGADMIN_CONTAINER="aegisx_${SUFFIX}_pgadmin"
-    
-    # Volume names with suffix
-    POSTGRES_VOLUME="${SUFFIX}_postgres_data"
-    REDIS_VOLUME="${SUFFIX}_redis_data"
+    # Feature repository - extract suffix and calculate unique ports
+    if [[ "$FOLDER_NAME" =~ ^aegisx-starter-(.+)$ ]]; then
+        SUFFIX="${BASH_REMATCH[1]}"
+        INSTANCE_NAME=$(echo "$SUFFIX" | tr '-' '_')
+        
+        print_status "📍 Detected feature repository: $FOLDER_NAME"
+        print_status "🔧 Instance suffix: $SUFFIX"
+        
+        # Calculate hash-based port offsets
+        HASH=$(simple_hash "$SUFFIX")
+        print_status "🧮 Calculated hash: $HASH"
+        
+        # Assign unique ports based on hash
+        POSTGRES_PORT=$((5432 + HASH + 1))
+        REDIS_PORT=$((6379 + HASH + 2))
+        API_PORT=$((3333 + HASH + 1))
+        WEB_PORT=$((4200 + HASH))
+        ADMIN_PORT=$((4201 + HASH))
+    else
+        print_warning "⚠️  Folder name doesn't match expected pattern 'aegisx-starter-{suffix}'"
+        print_warning "Using default ports with fallback suffix"
+        SUFFIX="custom"
+        INSTANCE_NAME="custom"
+        POSTGRES_PORT=5432
+        REDIS_PORT=6379
+        API_PORT=3333
+        WEB_PORT=4200
+        ADMIN_PORT=4201
+    fi
 fi
 
-print_status "🔧 Port assignments:"
+# Generate container names and volume names
+POSTGRES_CONTAINER="aegisx_${INSTANCE_NAME}_postgres"
+REDIS_CONTAINER="aegisx_${INSTANCE_NAME}_redis"
+POSTGRES_VOLUME="${INSTANCE_NAME}_postgres_data"
+REDIS_VOLUME="${INSTANCE_NAME}_redis_data"
+
+print_status "🎯 Port assignments:"
 echo "  PostgreSQL: $POSTGRES_PORT"
-echo "  Redis: $REDIS_PORT" 
+echo "  Redis: $REDIS_PORT"
 echo "  API: $API_PORT"
 echo "  Web: $WEB_PORT"
 echo "  Admin: $ADMIN_PORT"
-echo "  PgAdmin: $PGADMIN_PORT"
 
-print_status "📦 Container names:"
+print_status "🐳 Container names:"
 echo "  PostgreSQL: $POSTGRES_CONTAINER"
 echo "  Redis: $REDIS_CONTAINER"
-echo "  PgAdmin: $PGADMIN_CONTAINER"
 
 # Check for and handle old conflicting containers
 print_status "🧹 Checking for conflicting containers..."
 
 # Check if old default containers exist and are running
-OLD_CONTAINERS=(aegisx_postgres aegisx_redis aegisx_pgadmin)
+OLD_CONTAINERS=(aegisx_postgres aegisx_redis)
 FOUND_CONFLICTS=false
 
 for container in "${OLD_CONTAINERS[@]}"; do
@@ -123,8 +127,8 @@ done
 if [ "$FOUND_CONFLICTS" = true ]; then
     print_warning "Conflicting containers detected. These may block ports needed for this instance."
     echo "To avoid port conflicts, we recommend stopping old containers:"
-    echo "  docker stop aegisx_postgres aegisx_redis aegisx_pgadmin 2>/dev/null || true"
-    echo "  docker rm aegisx_postgres aegisx_redis aegisx_pgadmin 2>/dev/null || true"
+    echo "  docker stop aegisx_postgres aegisx_redis 2>/dev/null || true"
+    echo "  docker rm aegisx_postgres aegisx_redis 2>/dev/null || true"
     echo ""
     echo "Or use the port manager script: ./scripts/port-manager.sh stop-all"
     echo ""
@@ -134,64 +138,41 @@ fi
 print_status "📄 Generating .env.local..."
 
 cat > .env.local << EOF
-# Auto-generated environment for instance: $INSTANCE_NAME
+# Instance configuration for: $INSTANCE_NAME
 # Generated on: $(date)
 # Folder: $FOLDER_NAME
 
-# Instance Configuration
 INSTANCE_NAME=$INSTANCE_NAME
-INSTANCE_SUFFIX=$SUFFIX
+FOLDER_NAME=$FOLDER_NAME
 
-# Application Ports
-PORT=$API_PORT
-API_PORT=$API_PORT
-WEB_PORT=$WEB_PORT
-ADMIN_PORT=$ADMIN_PORT
-
-# Database Configuration  
-DATABASE_HOST=localhost
-DATABASE_PORT=$POSTGRES_PORT
-DATABASE_NAME=aegisx_db
-DATABASE_USER=postgres
-DATABASE_PASSWORD=postgres
-DATABASE_URL=postgresql://\${DATABASE_USER}:\${DATABASE_PASSWORD}@\${DATABASE_HOST}:\${DATABASE_PORT}/\${DATABASE_NAME}
-
-# Alternative naming for Docker Compose compatibility
+# Database Configuration
+DATABASE_URL=postgresql://postgres:postgres@localhost:$POSTGRES_PORT/aegisx_db
 POSTGRES_HOST=localhost
 POSTGRES_PORT=$POSTGRES_PORT
-POSTGRES_DB=aegisx_db
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
+POSTGRES_DATABASE=aegisx_db
 
-# Redis Configuration
+# Redis Configuration  
+REDIS_URL=redis://localhost:$REDIS_PORT
 REDIS_HOST=localhost
 REDIS_PORT=$REDIS_PORT
-REDIS_PASSWORD=
-REDIS_URL=redis://\${REDIS_HOST}:\${REDIS_PORT}
 
-# Container Configuration
-POSTGRES_CONTAINER=$POSTGRES_CONTAINER
-REDIS_CONTAINER=$REDIS_CONTAINER
-PGADMIN_CONTAINER=$PGADMIN_CONTAINER
-POSTGRES_VOLUME=$POSTGRES_VOLUME
-REDIS_VOLUME=$REDIS_VOLUME
+# API Configuration
+API_PORT=$API_PORT
+API_URL=http://localhost:$API_PORT
 
-# PgAdmin Configuration
-PGADMIN_PORT=$PGADMIN_PORT
-PGADMIN_DEFAULT_EMAIL=admin@aegisx.local
-PGADMIN_DEFAULT_PASSWORD=admin
-
-# JWT Configuration (inherit from .env)
-JWT_SECRET=your-super-secret-jwt-key-change-this-in-production-$SUFFIX
-JWT_EXPIRES_IN=15m
-REFRESH_TOKEN_EXPIRES_IN=7d
-
-# Session Configuration
-SESSION_SECRET=your-super-secret-session-key-change-this-in-production-$SUFFIX
-
-# Frontend URLs
+# Frontend Configuration
+WEB_PORT=$WEB_PORT
+ADMIN_PORT=$ADMIN_PORT
 WEB_URL=http://localhost:$WEB_PORT
 ADMIN_URL=http://localhost:$ADMIN_PORT
+
+# Docker Configuration
+POSTGRES_CONTAINER=$POSTGRES_CONTAINER
+REDIS_CONTAINER=$REDIS_CONTAINER
+POSTGRES_VOLUME=$POSTGRES_VOLUME
+REDIS_VOLUME=$REDIS_VOLUME
 EOF
 
 print_success ".env.local created with instance-specific configuration"
@@ -236,16 +217,6 @@ services:
       timeout: 5s
       retries: 5
 
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: $PGADMIN_CONTAINER
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@aegisx.local
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - '$PGADMIN_PORT:80'
-    depends_on:
-      - postgres
 
 volumes:
   $POSTGRES_VOLUME:
@@ -257,64 +228,53 @@ print_success "docker-compose.instance.yml created with instance-specific ports 
 # Check for port conflicts
 print_status "🔍 Checking for port conflicts..."
 
-check_port() {
-    local port=$1
-    local service=$2
-    
-    if lsof -Pi :$port -sTCP:LISTEN -t >/dev/null 2>&1; then
-        print_warning "Port $port ($service) is already in use"
-        return 1
-    else
-        print_success "Port $port ($service) is available"
-        return 0
+PORTS_TO_CHECK=($POSTGRES_PORT $REDIS_PORT $API_PORT $WEB_PORT $ADMIN_PORT)
+CONFLICTS_FOUND=false
+
+for port in "${PORTS_TO_CHECK[@]}"; do
+    if lsof -ti:$port >/dev/null 2>&1; then
+        print_warning "Port $port is already in use"
+        CONFLICTS_FOUND=true
     fi
-}
+done
 
-CONFLICTS=0
-check_port $POSTGRES_PORT "PostgreSQL" || CONFLICTS=1
-check_port $REDIS_PORT "Redis" || CONFLICTS=1
-check_port $API_PORT "API" || CONFLICTS=1
-check_port $WEB_PORT "Web" || CONFLICTS=1
-check_port $ADMIN_PORT "Admin" || CONFLICTS=1
-check_port $PGLADMIN_PORT "PgAdmin" || CONFLICTS=1
-
-if [ $CONFLICTS -eq 1 ]; then
-    print_warning "Some ports are in use. You may need to stop other instances or choose different ports."
-    echo ""
-    print_status "To check what's using the ports:"
-    echo "  lsof -i :$POSTGRES_PORT"
-    echo "  lsof -i :$REDIS_PORT"
-    echo ""
-    print_status "To stop other AegisX instances:"
-    echo "  docker-compose down"
-    echo ""
+if [ "$CONFLICTS_FOUND" = true ]; then
+    print_warning "Some ports are already in use. You may need to:"
+    echo "  1. Stop conflicting services: ./scripts/port-manager.sh stop-all"
+    echo "  2. Use different folder suffix for unique ports"
+    echo "  3. Manually stop processes using these ports"
+else
+    print_success "All assigned ports are available"
 fi
 
 # Update port registry
-REGISTRY_FILE="$HOME/.aegisx-port-registry"
-print_status "📋 Updating port registry..."
+print_status "📊 Updating port registry..."
 
-# Remove existing entry for this folder
-if [ -f "$REGISTRY_FILE" ]; then
-    grep -v "^$FOLDER_NAME:" "$REGISTRY_FILE" > "${REGISTRY_FILE}.tmp" || true
-    mv "${REGISTRY_FILE}.tmp" "$REGISTRY_FILE"
+PORT_REGISTRY_FILE="$HOME/.aegisx-port-registry"
+REGISTRY_ENTRY="$INSTANCE_NAME:$POSTGRES_PORT:$REDIS_PORT:$API_PORT:$WEB_PORT:$ADMIN_PORT:$(date +'%Y-%m-%d_%H:%M')"
+
+# Remove existing entry for this instance
+if [ -f "$PORT_REGISTRY_FILE" ]; then
+    grep -v "^$INSTANCE_NAME:" "$PORT_REGISTRY_FILE" > "${PORT_REGISTRY_FILE}.tmp" || true
+    mv "${PORT_REGISTRY_FILE}.tmp" "$PORT_REGISTRY_FILE"
 fi
 
-# Add current entry
-echo "$FOLDER_NAME:$POSTGRES_PORT:$REDIS_PORT:$API_PORT:$WEB_PORT:$ADMIN_PORT:$PGADMIN_PORT" >> "$REGISTRY_FILE"
+# Add new entry
+echo "$REGISTRY_ENTRY" >> "$PORT_REGISTRY_FILE"
 
 print_success "Environment setup completed!"
 echo ""
 print_status "🚀 Next steps:"
 echo "1. Start services: pnpm run docker:up"
 echo "2. Run migrations: pnpm db:migrate"
-echo "3. Seed database: pnpm db:seed"  
-echo "4. Start development: pnpm dev"
+echo "3. Seed database: pnpm db:seed"
+echo "4. Start development:"
+echo "   - All apps: pnpm dev"
+echo "   - Web only: pnpm dev:web"
+echo "   - Admin only: pnpm dev:admin"
+echo "   - API only: pnpm dev:api"
 echo ""
-print_status "🔗 Access URLs:"
+print_status "🔗 Your applications will be available at:"
+echo "  Web App: http://localhost:$WEB_PORT"
+echo "  Admin App: http://localhost:$ADMIN_PORT"
 echo "  API: http://localhost:$API_PORT"
-echo "  Web: http://localhost:$WEB_PORT"
-echo "  Admin: http://localhost:$ADMIN_PORT"
-echo "  PgAdmin: http://localhost:$PGADMIN_PORT"
-echo ""
-print_status "📋 View all instances: cat $REGISTRY_FILE"
