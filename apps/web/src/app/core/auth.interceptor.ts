@@ -1,48 +1,72 @@
-import { Injectable, inject } from '@angular/core';
+import { inject } from '@angular/core';
 import {
   HttpInterceptorFn,
   HttpRequest,
   HttpHandlerFn,
   HttpEvent,
   HttpErrorResponse,
+  HttpClient,
 } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { Observable, throwError } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
-import { AuthService } from './auth.service';
+import { environment } from '../../environments/environment';
 
 export const authInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
   next: HttpHandlerFn,
 ): Observable<HttpEvent<unknown>> => {
-  const authService = inject(AuthService);
+  // Get token directly from localStorage instead of injecting AuthService
+  const token = localStorage.getItem('accessToken');
 
-  // Add auth headers if user is authenticated
-  const authHeaders = authService.getAuthHeaders();
-  const authReq =
-    Object.keys(authHeaders).length > 0
-      ? req.clone({
-          setHeaders: authHeaders,
-        })
-      : req;
+  // Add auth headers if token exists
+  const authReq = token
+    ? req.clone({
+        setHeaders: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+    : req;
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
       // Handle 401 errors by trying to refresh token
       if (error.status === 401 && !req.url.includes('/auth/')) {
-        return authService.refreshToken().pipe(
-          switchMap(() => {
-            // Retry the original request with new token
-            const retryHeaders = authService.getAuthHeaders();
-            const retryReq = req.clone({
-              setHeaders: retryHeaders,
-            });
-            return next(retryReq);
-          }),
-          catchError(() => {
-            // Refresh failed, redirect to login
-            return throwError(() => error);
-          }),
-        );
+        const router = inject(Router);
+        const http = inject(HttpClient);
+
+        // Try to refresh token
+        return http
+          .post<any>(
+            `${environment.apiUrl}/api/auth/refresh`,
+            {},
+            {
+              withCredentials: true,
+            },
+          )
+          .pipe(
+            switchMap((response) => {
+              if (response.success && response.data) {
+                // Store new token
+                localStorage.setItem('accessToken', response.data.accessToken);
+
+                // Retry the original request with new token
+                const retryReq = req.clone({
+                  setHeaders: {
+                    Authorization: `Bearer ${response.data.accessToken}`,
+                  },
+                });
+                return next(retryReq);
+              }
+              throw error;
+            }),
+            catchError(() => {
+              // Refresh failed, clear storage and redirect to login
+              localStorage.removeItem('accessToken');
+              router.navigate(['/login']);
+              return throwError(() => error);
+            }),
+          );
       }
 
       return throwError(() => error);

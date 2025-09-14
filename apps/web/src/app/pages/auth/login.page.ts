@@ -20,9 +20,16 @@ import { FormControl, FormGroupDirective, NgForm } from '@angular/forms';
 
 /** Error when invalid control is dirty, touched, or submitted. */
 export class MyErrorStateMatcher implements ErrorStateMatcher {
-  isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
+  isErrorState(
+    control: FormControl | null,
+    form: FormGroupDirective | NgForm | null,
+  ): boolean {
     const isSubmitted = form && form.submitted;
-    return !!(control && control.invalid && (control.dirty || control.touched || isSubmitted));
+    return !!(
+      control &&
+      control.invalid &&
+      (control.dirty || control.touched || isSubmitted)
+    );
   }
 }
 
@@ -64,7 +71,7 @@ export class MyErrorStateMatcher implements ErrorStateMatcher {
             <!-- Error Message -->
             @if (errorMessage()) {
               <div 
-                class="rounded-md bg-red-50 p-4 border border-red-200"
+                class="rounded-md bg-red-50 p-4 border border-red-200 mb-6"
                 data-testid="login-error"
                 role="alert"
                 aria-live="polite"
@@ -210,22 +217,34 @@ export class MyErrorStateMatcher implements ErrorStateMatcher {
         margin-bottom: 0.5rem;
         display: block;
       }
-      
-      /* Add space for error messages */
+
+      /* Add proper space for error messages */
       ::ng-deep .mat-mdc-form-field-subscript-wrapper {
         position: static !important;
-        margin-top: 0.25rem;
-        min-height: 1.25rem;
+        margin-top: 0.5rem !important;
+        min-height: 1.5rem !important;
+        padding-bottom: 0.5rem !important;
       }
-      
+
       /* Ensure error messages don't overlap */
       ::ng-deep .mat-mdc-form-field-error-wrapper {
         padding: 0.25rem 0;
+        display: block !important;
       }
-      
+
       /* Fix form field bottom spacing */
       ::ng-deep .mat-mdc-text-field-wrapper {
         margin-bottom: 0 !important;
+      }
+
+      /* Add explicit spacing between form fields */
+      .mb-4 {
+        margin-bottom: 1.5rem !important;
+      }
+
+      /* Ensure mat-form-field has enough bottom space */
+      ::ng-deep .mat-mdc-form-field {
+        margin-bottom: 0.75rem !important;
       }
 
       .mat-mdc-raised-button {
@@ -235,22 +254,26 @@ export class MyErrorStateMatcher implements ErrorStateMatcher {
       .mat-spinner {
         color: white !important;
       }
-      
+
       /* Fix for Material form field outline appearance */
       ::ng-deep .mat-mdc-form-field-outline {
         color: rgba(0, 0, 0, 0.12) !important;
       }
-      
+
       ::ng-deep .mat-mdc-form-field.mat-focused .mat-mdc-form-field-outline {
         color: #2196f3 !important;
       }
-      
-      ::ng-deep .mat-mdc-form-field.mat-form-field-invalid .mat-mdc-form-field-outline {
+
+      ::ng-deep
+        .mat-mdc-form-field.mat-form-field-invalid
+        .mat-mdc-form-field-outline {
         color: #f44336 !important;
       }
-      
+
       /* Only show error state when field is touched */
-      ::ng-deep .mat-mdc-form-field:not(.mat-form-field-invalid) .mat-mdc-form-field-outline {
+      ::ng-deep
+        .mat-mdc-form-field:not(.mat-form-field-invalid)
+        .mat-mdc-form-field-outline {
         color: rgba(0, 0, 0, 0.12) !important;
       }
     `,

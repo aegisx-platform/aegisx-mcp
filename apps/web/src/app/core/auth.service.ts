@@ -1,7 +1,7 @@
-import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, BehaviorSubject, tap, catchError, throwError } from 'rxjs';
+import { Observable, catchError, tap, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface User {
@@ -11,6 +11,8 @@ export interface User {
   lastName: string;
   role?: string;
   permissions?: string[];
+  avatar?: string;
+  bio?: string;
 }
 
 export interface LoginRequest {
@@ -162,35 +164,60 @@ export class AuthService {
   }
 
   private loadUserProfile(): void {
-    // TODO: Implement when profile endpoint is ready
-    // For now, we'll try to decode basic info from token
     const token = this._accessToken();
+    console.log('Loading user profile with token', token);
     if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const user: User = {
-          id: payload.userId || payload.sub,
-          email: payload.email || 'user@example.com',
-          firstName: payload.firstName || 'User',
-          lastName: payload.lastName || 'Name',
-          role: payload.role || 'user',
-          permissions: payload.permissions || [],
-        };
-        this._currentUser.set(user);
-        this._isAuthenticated.set(true);
-      } catch (error) {
-        console.warn('Could not decode user from token, using defaults');
-        // Set default user for development
-        this._currentUser.set({
-          id: '1',
-          email: 'admin@aegisx.local',
-          firstName: 'Admin',
-          lastName: 'User',
-          role: 'admin',
-          permissions: ['*.*'],
-        });
-        this._isAuthenticated.set(true);
-      }
+      // Load full profile from API
+      this.http.get<any>(`${environment.apiUrl}/api/profile`).subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            const profile = response.data;
+            console.log('Loaded user profile from API', profile);
+            const user: User = {
+              id: profile.id,
+              email: profile.email,
+              firstName: profile.firstName || '',
+              lastName: profile.lastName || '',
+              role: profile.role?.name || 'user',
+              permissions: profile.role?.permissions || [],
+              avatar: profile.avatar,
+              bio: profile.bio,
+            };
+            this._currentUser.set(user);
+            this._isAuthenticated.set(true);
+          }
+        },
+        error: (error) => {
+          console.error('Error loading user profile', error);
+          console.warn('Could not load user profile, using token data', error);
+          // Fallback to token data
+          try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const user: User = {
+              id: payload.userId || payload.sub,
+              email: payload.email || 'user@example.com',
+              firstName: payload.firstName || 'User',
+              lastName: payload.lastName || 'Name',
+              role: payload.role || 'user',
+              permissions: payload.permissions || [],
+            };
+            this._currentUser.set(user);
+            this._isAuthenticated.set(true);
+          } catch (tokenError) {
+            console.warn('Could not decode token, using defaults');
+            // Set default user for development
+            this._currentUser.set({
+              id: '1',
+              email: 'admin@aegisx.local',
+              firstName: 'Admin',
+              lastName: 'User',
+              role: 'admin',
+              permissions: ['*.*'],
+            });
+            this._isAuthenticated.set(true);
+          }
+        },
+      });
     }
   }
 
@@ -256,5 +283,10 @@ export class AuthService {
   getAuthHeaders(): { [key: string]: string } {
     const token = this._accessToken();
     return token ? { Authorization: `Bearer ${token}` } : {};
+  }
+
+  // Method to refresh user profile data (call after profile updates)
+  refreshUserProfile(): void {
+    this.loadUserProfile();
   }
 }

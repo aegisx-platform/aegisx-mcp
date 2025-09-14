@@ -1,14 +1,14 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
-import { Router, RouterModule, NavigationEnd } from '@angular/router';
+import { AxCompactLayoutComponent } from '@aegisx/ui';
 import { CommonModule } from '@angular/common';
-import { filter } from 'rxjs/operators';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { MatBadgeModule } from '@angular/material/badge';
-import { MatMenuModule } from '@angular/material/menu';
+import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { AxCompactLayoutComponent, AxNavigationItem } from '@aegisx/ui';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { AuthService } from './core/auth.service';
 import { NavigationService } from './core/navigation.service';
 
@@ -135,19 +135,26 @@ interface Notification {
 
           <!-- User Menu -->
           <button mat-icon-button [matMenuTriggerFor]="userMenu" class="ml-2">
-            <mat-icon class="icon-size-6">account_circle</mat-icon>
+            <img
+              [src]="
+                currentUser()?.avatar || '/assets/images/avatars/default.png'
+              "
+              [alt]="currentUser()?.name || 'User'"
+              class="border-2 border-white shadow-sm"
+            />
           </button>
 
           <mat-menu #userMenu="matMenu" class="w-64">
             <div class="p-4 border-b">
               <div class="flex items-center">
-                <div
-                  class="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center"
-                >
-                  <mat-icon class="text-gray-600 dark:text-gray-300 icon-size-6"
-                    >person</mat-icon
-                  >
-                </div>
+                <img
+                  [src]="
+                    currentUser()?.avatar ||
+                    '/assets/images/avatars/default.png'
+                  "
+                  [alt]="currentUser()?.name || 'User'"
+                  class="w-12 h-12 rounded-full object-cover"
+                />
                 <div class="ml-3">
                   <p
                     class="text-sm font-medium text-gray-900 dark:text-gray-100"
@@ -188,6 +195,31 @@ interface Notification {
       <router-outlet></router-outlet>
     }
   `,
+  styles: [
+    `
+      /* Force navigation bar avatar image to be perfectly round */
+      button[mat-icon-button] img {
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+        min-height: 32px !important;
+        max-width: 32px !important;
+        max-height: 32px !important;
+        border-radius: 50% !important;
+        clip-path: circle(50%) !important;
+        object-fit: cover !important;
+        display: block !important;
+        flex-shrink: 0 !important;
+        overflow: hidden !important;
+      }
+
+      /* Additional fallback */
+      .mat-mdc-icon-button img {
+        border-radius: 50% !important;
+        clip-path: circle(50%) !important;
+      }
+    `,
+  ],
 })
 export class AppComponent implements OnInit {
   private authService = inject(AuthService);
@@ -198,11 +230,12 @@ export class AppComponent implements OnInit {
   shouldShowLayout = signal(true);
   currentUser = computed(() => {
     const user = this.authService.currentUser();
+    console.log('Current User:', user);
     if (user) {
       return {
         name: this.authService.userDisplayName(),
         email: user.email,
-        avatar: null, // You can add avatar support later
+        avatar: (user as any).avatar || null, // Get avatar from user data
       };
     }
     return null;
