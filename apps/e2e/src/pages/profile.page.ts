@@ -14,12 +14,15 @@ export class ProfilePage extends BasePage {
     profileHeader: '[data-testid="profile-header"], .profile-header',
     profileContent: '[data-testid="profile-content"], .profile-content',
     
-    // Avatar section
-    avatarSection: '[data-testid="avatar-section"], .avatar-section',
-    avatar: '[data-testid="avatar"], .avatar, .profile-avatar',
+    // Avatar section (enhanced for actual implementation)
+    avatarSection: '[data-testid="avatar-section"], .avatar-section, ax-avatar-upload',
+    avatar: '[data-testid="avatar"], .avatar, .profile-avatar, ax-avatar-upload img',
     avatarUpload: '[data-testid="avatar-upload"], input[type="file"]',
-    avatarUploadButton: '[data-testid="avatar-upload-btn"], .avatar-upload-btn',
+    avatarUploadButton: '[data-testid="avatar-upload-btn"], .avatar-upload-btn, ax-avatar-upload button',
     avatarPreview: '[data-testid="avatar-preview"], .avatar-preview',
+    avatarComponent: 'ax-avatar-upload',
+    avatarImage: 'ax-avatar-upload img, ax-avatar-upload .avatar-image',
+    avatarPlaceholder: 'ax-avatar-upload .avatar-placeholder, ax-avatar-upload mat-icon',
     
     // Profile form
     profileForm: '[data-testid="profile-form"], .profile-form, form',
@@ -440,5 +443,100 @@ export class ProfilePage extends BasePage {
   async takeProfileFormScreenshot(name = 'profile-form'): Promise<void> {
     await this.enterEditMode();
     await this.screenshot(name, { fullPage: true });
+  }
+
+  /**
+   * Avatar-specific methods
+   */
+
+  /**
+   * Get avatar component
+   */
+  async getAvatarComponent() {
+    return this.page.locator(this.selectors.avatarComponent);
+  }
+
+  /**
+   * Check if avatar is displayed
+   */
+  async isAvatarDisplayed(): Promise<boolean> {
+    const avatarComponent = await this.getAvatarComponent();
+    if (!(await avatarComponent.isVisible())) {
+      return false;
+    }
+
+    // Check if image is displayed
+    const avatarImage = avatarComponent.locator('img');
+    return await avatarImage.isVisible();
+  }
+
+  /**
+   * Get avatar source URL
+   */
+  async getAvatarSrc(): Promise<string | null> {
+    const avatarComponent = await this.getAvatarComponent();
+    const avatarImage = avatarComponent.locator('img');
+    
+    if (await avatarImage.isVisible()) {
+      return await avatarImage.getAttribute('src');
+    }
+    
+    return null;
+  }
+
+  /**
+   * Verify avatar is circular
+   */
+  async verifyAvatarIsCircular(): Promise<void> {
+    const avatarComponent = await this.getAvatarComponent();
+    const avatarImage = avatarComponent.locator('img');
+    
+    await expect(avatarImage).toBeVisible();
+    
+    // Check for circular styling
+    const borderRadius = await avatarImage.evaluate(el => 
+      getComputedStyle(el).borderRadius
+    );
+    
+    // Should be either 50% or a large enough value to make it circular
+    const isCircular = borderRadius === '50%' || 
+                      borderRadius.includes('9999px') || 
+                      borderRadius.includes('999px');
+    
+    expect(isCircular).toBeTruthy();
+  }
+
+  /**
+   * Verify avatar has fallback behavior
+   */
+  async verifyAvatarFallback(): Promise<void> {
+    const avatarComponent = await this.getAvatarComponent();
+    
+    // Should show either image or placeholder
+    const hasImage = await avatarComponent.locator('img').isVisible();
+    const hasPlaceholder = await avatarComponent.locator(this.selectors.avatarPlaceholder).isVisible();
+    
+    expect(hasImage || hasPlaceholder).toBeTruthy();
+  }
+
+  /**
+   * Take avatar screenshot
+   */
+  async takeAvatarScreenshot(name = 'profile-avatar'): Promise<void> {
+    const avatarComponent = await this.getAvatarComponent();
+    await expect(avatarComponent).toHaveScreenshot(`${name}.png`);
+  }
+
+  /**
+   * Verify profile info section
+   */
+  async verifyProfileInfoSection(): Promise<void> {
+    // Check that profile info component exists
+    const profileInfo = this.page.locator('ax-profile-info');
+    await expect(profileInfo).toBeVisible();
+
+    // Verify avatar component exists within profile info
+    const avatarInProfile = profileInfo.locator('ax-avatar-upload');
+    await expect(avatarInProfile).toBeVisible();
   }
 }

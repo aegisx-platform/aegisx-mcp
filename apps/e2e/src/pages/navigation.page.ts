@@ -48,6 +48,11 @@ export class NavigationPage extends BasePage {
     
     // User navigation
     userNav: '[data-testid="user-nav"], .user-nav, .profile-nav',
+    userMenuButton: 'button[mat-icon-button][matMenuTriggerFor="userMenu"]',
+    userMenu: 'mat-menu',
+    userAvatar: 'button[mat-icon-button] img',
+    userMenuAvatar: 'mat-menu img',
+    navigationBar: '.toolbar, .mat-toolbar, .navigation-header, .app-header',
     userInfo: '[data-testid="user-info"], .user-info, .profile-info',
   };
 
@@ -410,5 +415,165 @@ export class NavigationPage extends BasePage {
     // Collapsed state
     await this.collapse();
     await this.screenshot('navigation-collapsed');
+  }
+
+  /**
+   * Avatar-specific methods for navigation bar
+   */
+
+  /**
+   * Get user menu button
+   */
+  async getUserMenuButton() {
+    return this.page.locator(this.selectors.userMenuButton).first();
+  }
+
+  /**
+   * Get navigation bar avatar
+   */
+  async getNavigationAvatar() {
+    const userMenuButton = await this.getUserMenuButton();
+    return userMenuButton.locator('img');
+  }
+
+  /**
+   * Click user menu to open dropdown
+   */
+  async openUserMenu(): Promise<void> {
+    const userMenuButton = await this.getUserMenuButton();
+    await userMenuButton.click();
+    
+    // Wait for menu to appear
+    const userMenu = this.page.locator(this.selectors.userMenu);
+    await expect(userMenu).toBeVisible();
+  }
+
+  /**
+   * Close user menu
+   */
+  async closeUserMenu(): Promise<void> {
+    await this.page.keyboard.press('Escape');
+    
+    // Wait for menu to disappear
+    const userMenu = this.page.locator(this.selectors.userMenu);
+    await expect(userMenu).toBeHidden();
+  }
+
+  /**
+   * Get user menu dropdown avatar
+   */
+  async getUserMenuAvatar() {
+    const userMenu = this.page.locator(this.selectors.userMenu);
+    return userMenu.locator('img');
+  }
+
+  /**
+   * Verify navigation avatar is displayed
+   */
+  async verifyNavigationAvatarDisplayed(): Promise<void> {
+    const userMenuButton = await this.getUserMenuButton();
+    await expect(userMenuButton).toBeVisible();
+
+    const avatar = await this.getNavigationAvatar();
+    await expect(avatar).toBeVisible();
+  }
+
+  /**
+   * Verify navigation avatar styling
+   */
+  async verifyNavigationAvatarStyling(): Promise<void> {
+    const avatar = await this.getNavigationAvatar();
+    
+    // Should be circular
+    await expect(avatar).toHaveCSS('border-radius', '50%');
+    
+    // Should have correct dimensions
+    await expect(avatar).toHaveCSS('width', '32px');
+    await expect(avatar).toHaveCSS('height', '32px');
+    
+    // Should have object-fit cover
+    await expect(avatar).toHaveCSS('object-fit', 'cover');
+  }
+
+  /**
+   * Get navigation avatar src
+   */
+  async getNavigationAvatarSrc(): Promise<string | null> {
+    const avatar = await this.getNavigationAvatar();
+    return await avatar.getAttribute('src');
+  }
+
+  /**
+   * Verify user menu avatar matches navigation avatar
+   */
+  async verifyUserMenuAvatarMatches(): Promise<void> {
+    // Get navigation avatar src
+    const navAvatarSrc = await this.getNavigationAvatarSrc();
+    
+    // Open user menu
+    await this.openUserMenu();
+    
+    // Get user menu avatar src
+    const menuAvatar = await this.getUserMenuAvatar();
+    const menuAvatarSrc = await menuAvatar.getAttribute('src');
+    
+    // Should match
+    expect(navAvatarSrc).toEqual(menuAvatarSrc);
+    
+    // Close menu
+    await this.closeUserMenu();
+  }
+
+  /**
+   * Verify avatar accessibility
+   */
+  async verifyAvatarAccessibility(): Promise<void> {
+    const userMenuButton = await this.getUserMenuButton();
+    const avatar = await this.getNavigationAvatar();
+    
+    // Button should have proper attributes
+    await expect(userMenuButton).toHaveAttribute('role', 'button');
+    
+    // Avatar should have alt text
+    const altText = await avatar.getAttribute('alt');
+    expect(altText).toBeTruthy();
+    expect(altText).toContain('User'); // Should contain descriptive text
+  }
+
+  /**
+   * Test avatar fallback behavior
+   */
+  async testAvatarFallback(): Promise<void> {
+    const avatar = await this.getNavigationAvatar();
+    const avatarSrc = await avatar.getAttribute('src');
+    
+    // Should have a src attribute
+    expect(avatarSrc).toBeTruthy();
+    
+    // If not the expected avatar, should be fallback
+    const isExpectedAvatar = avatarSrc?.includes('uploads/avatars/');
+    const isDefaultAvatar = avatarSrc?.includes('/assets/images/avatars/default.png');
+    
+    expect(isExpectedAvatar || isDefaultAvatar).toBeTruthy();
+  }
+
+  /**
+   * Take avatar screenshot in navigation
+   */
+  async takeNavigationAvatarScreenshot(name = 'navigation-avatar'): Promise<void> {
+    const navigationBar = this.page.locator(this.selectors.navigationBar);
+    await expect(navigationBar).toHaveScreenshot(`${name}.png`);
+  }
+
+  /**
+   * Take user menu avatar screenshot
+   */
+  async takeUserMenuAvatarScreenshot(name = 'user-menu-avatar'): Promise<void> {
+    await this.openUserMenu();
+    
+    const userMenu = this.page.locator(this.selectors.userMenu);
+    await expect(userMenu).toHaveScreenshot(`${name}.png`);
+    
+    await this.closeUserMenu();
   }
 }

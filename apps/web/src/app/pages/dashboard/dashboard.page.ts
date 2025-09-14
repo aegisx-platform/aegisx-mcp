@@ -1,22 +1,22 @@
-import { Component, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatGridListModule } from '@angular/material/grid-list';
-import { MatTabsModule } from '@angular/material/tabs';
 import { AegisxCardComponent } from '@aegisx/ui';
+import { CommonModule } from '@angular/common';
+import { Component, signal } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatGridListModule } from '@angular/material/grid-list';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTabsModule } from '@angular/material/tabs';
 import {
-  ChartWidgetComponent,
-  StatsCardComponent,
-  ActivityTimelineComponent,
-  ProgressWidgetComponent,
-  QuickActionsComponent,
-  ChartData,
-  StatsCardData,
   ActivityItem,
+  ActivityTimelineComponent,
+  ChartData,
+  ChartWidgetComponent,
   ProgressItem,
+  ProgressWidgetComponent,
   QuickAction,
+  QuickActionsComponent,
+  StatsCardComponent,
+  StatsCardData,
 } from './widgets';
 
 @Component({
@@ -474,7 +474,7 @@ export class DashboardPage {
       time: '5 minutes ago',
       icon: 'person_add',
       color: 'primary',
-      user: { name: 'John Doe', avatar: 'assets/avatars/user1.jpg' },
+      user: { name: 'John Doe', avatar: 'assets/images/avatars/male.png' },
     },
     {
       id: 2,

@@ -227,7 +227,7 @@ export class TestRbacWebsocketComponent implements OnInit, OnDestroy {
 
   connect() {
     this.logEvent('ACTION', 'Connecting to WebSocket...');
-    this.websocketService.connect();
+    this.websocketService.connect('dummy-token');
   }
 
   disconnect() {
@@ -266,7 +266,7 @@ export class TestRbacWebsocketComponent implements OnInit, OnDestroy {
         this.logEvent('API_ERROR', `Failed to create role`, result.error);
       }
     } catch (error) {
-      this.logEvent('API_ERROR', `Network error creating role`, { error: error.message });
+      this.logEvent('API_ERROR', `Network error creating role`, { error: error instanceof Error ? error.message : String(error) });
     }
   }
 
