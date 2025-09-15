@@ -1,0 +1,495 @@
+.component-preview {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  .preview-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+
+    .device-controls {
+      .device-toggle {
+        ::ng-deep .mat-button-toggle {
+          border: none;
+
+          .mat-button-toggle-label-content {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+
+            .device-label {
+              @media (max-width: 768px) {
+                display: none;
+              }
+            }
+          }
+
+          &.mat-button-toggle-checked {
+            background-color: var(--mat-primary-color);
+            color: white;
+          }
+        }
+      }
+    }
+
+    .action-controls {
+      display: flex;
+      gap: 0.25rem;
+
+      button {
+        mat-icon {
+          font-size: 1.25rem;
+          width: 1.25rem;
+          height: 1.25rem;
+        }
+      }
+    }
+  }
+
+  .preview-loading {
+    height: 2px;
+  }
+
+  .preview-container {
+    position: relative;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(0, 0, 0, 0.02) 10px,
+      rgba(0, 0, 0, 0.02) 20px
+    );
+    transition: all 0.3s ease;
+    overflow: auto;
+
+    &.fullscreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1000;
+      width: 100% !important;
+      height: 100% !important;
+      background: #fff;
+    }
+
+    .device-frame {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      padding: 2rem;
+
+      &[data-device='Mobile'] {
+        .device-screen {
+          border: 8px solid #333;
+          border-radius: 25px;
+          background-color: #333;
+          padding: 4px;
+
+          &::before {
+            content: '';
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 6px;
+            background-color: #333;
+            border-radius: 3px;
+          }
+        }
+      }
+
+      &[data-device='Tablet'] {
+        .device-screen {
+          border: 12px solid #333;
+          border-radius: 15px;
+          background-color: #333;
+          padding: 4px;
+        }
+      }
+
+      .device-screen {
+        position: relative;
+        background-color: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+    }
+
+    .desktop-preview {
+      width: 100%;
+      height: 100%;
+      background-color: #fff;
+    }
+
+    .preview-content {
+      padding: 1.5rem;
+      height: 100%;
+      overflow: auto;
+
+      // Ensure content uses available space
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 200px;
+    }
+
+    .demo-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      width: 100%;
+      min-height: 150px;
+      padding: 2rem;
+
+      &.desktop {
+        min-height: 200px;
+      }
+
+      .placeholder-icon {
+        font-size: 3rem;
+        width: 3rem;
+        height: 3rem;
+        margin-bottom: 1rem;
+        color: #ccc;
+      }
+
+      h3 {
+        margin: 0 0 0.5rem;
+        color: #666;
+        font-size: 1.25rem;
+        font-weight: 400;
+      }
+
+      p {
+        margin: 0 0 0.5rem;
+        color: #999;
+        font-size: 0.875rem;
+      }
+
+      small {
+        color: #bbb;
+        font-size: 0.75rem;
+      }
+
+      // Component-specific demo styles
+      .button-demo {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+
+        button {
+          margin: 0;
+        }
+      }
+
+      .form-demo {
+        width: 100%;
+        max-width: 400px;
+
+        .form-row {
+          display: flex;
+          gap: 1rem;
+
+          @media (max-width: 480px) {
+            flex-direction: column;
+            gap: 0.5rem;
+          }
+        }
+
+        mat-form-field {
+          flex: 1;
+          width: 100%;
+        }
+      }
+
+      .card-demo {
+        width: 100%;
+        max-width: 350px;
+
+        mat-card {
+          width: 100%;
+        }
+      }
+    }
+
+    .resize-handle {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 20px;
+      height: 20px;
+      background-color: rgba(0, 0, 0, 0.1);
+      cursor: nw-resize;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-top-left-radius: 8px;
+
+      mat-icon {
+        font-size: 14px;
+        width: 14px;
+        height: 14px;
+        color: #666;
+        transform: rotate(90deg);
+      }
+
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.2);
+      }
+    }
+  }
+
+  .preview-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    background-color: #f0f0f0;
+    border-top: 1px solid #e0e0e0;
+    font-size: 0.75rem;
+    color: #666;
+
+    .dimensions {
+      font-family: 'Courier New', monospace;
+      font-weight: 500;
+    }
+
+    .device-info {
+      font-weight: 500;
+      color: var(--mat-primary-color);
+    }
+  }
+}
+
+// Dark theme support
+:host-context(.dark-theme) .component-preview {
+  border-color: #444;
+  background-color: #2d2d2d;
+
+  .preview-controls {
+    background-color: #3d3d3d;
+    border-bottom-color: #444;
+  }
+
+  .preview-container {
+    .desktop-preview,
+    .device-frame .device-screen {
+      background-color: #2d2d2d;
+    }
+
+    .preview-content {
+      color: #fff;
+    }
+
+    .demo-placeholder {
+      h3 {
+        color: #ccc;
+      }
+
+      p {
+        color: #999;
+      }
+
+      small {
+        color: #666;
+      }
+
+      .placeholder-icon {
+        color: #666;
+      }
+    }
+  }
+
+  .preview-info {
+    background-color: #3d3d3d;
+    border-top-color: #444;
+    color: #ccc;
+  }
+}
+
+// Mobile responsiveness
+@media (max-width: 768px) {
+  .component-preview {
+    .preview-controls {
+      padding: 0.5rem 0.75rem;
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: stretch;
+
+      .device-controls,
+      .action-controls {
+        display: flex;
+        justify-content: center;
+      }
+
+      .device-controls .device-toggle {
+        ::ng-deep .mat-button-toggle .mat-button-toggle-label-content {
+          padding: 0.5rem;
+        }
+      }
+    }
+
+    .preview-container {
+      .device-frame {
+        padding: 1rem;
+      }
+
+      .preview-content {
+        padding: 1rem;
+      }
+
+      .demo-placeholder {
+        padding: 1rem;
+        min-height: 120px;
+
+        .placeholder-icon {
+          font-size: 2rem;
+          width: 2rem;
+          height: 2rem;
+        }
+
+        h3 {
+          font-size: 1rem;
+        }
+
+        .button-demo {
+          flex-direction: column;
+          gap: 0.5rem;
+
+          button {
+            width: 100%;
+            max-width: 200px;
+          }
+        }
+      }
+    }
+
+    .preview-info {
+      padding: 0.5rem 0.75rem;
+      flex-direction: column;
+      gap: 0.25rem;
+      text-align: center;
+    }
+  }
+}
+
+// Print styles
+@media print {
+  .component-preview {
+    border: 1px solid #000;
+    background-color: #fff;
+    box-shadow: none;
+
+    .preview-controls,
+    .preview-info {
+      display: none;
+    }
+
+    .preview-container {
+      .desktop-preview,
+      .device-frame .device-screen {
+        background-color: #fff;
+      }
+
+      .resize-handle {
+        display: none;
+      }
+    }
+  }
+}
+
+// Accessibility improvements
+.component-preview {
+  &:focus-within {
+    outline: 2px solid var(--mat-primary-color);
+    outline-offset: 2px;
+  }
+
+  .preview-container:focus {
+    outline: none;
+  }
+}
+
+// Animation for device switching
+.preview-container {
+  .device-frame .device-screen,
+  .desktop-preview {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// Loading skeleton
+.component-preview.loading {
+  .preview-content {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+  }
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+// High contrast mode
+@media (prefers-contrast: high) {
+  .component-preview {
+    border: 2px solid #000;
+
+    .preview-controls {
+      background-color: #fff;
+      border-bottom: 2px solid #000;
+    }
+
+    .preview-info {
+      background-color: #fff;
+      border-top: 2px solid #000;
+      color: #000;
+    }
+
+    .preview-container {
+      .device-frame[data-device='Mobile'] .device-screen,
+      .device-frame[data-device='Tablet'] .device-screen {
+        border-color: #000;
+        background-color: #000;
+      }
+    }
+  }
+}

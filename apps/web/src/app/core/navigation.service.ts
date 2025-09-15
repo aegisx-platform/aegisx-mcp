@@ -2,6 +2,7 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, BehaviorSubject, catchError, map, tap } from 'rxjs';
 import { AxNavigationItem } from '@aegisx/ui';
+import { environment } from '../../environments/environment';
 
 interface ApiNavigationItem {
   id: string;
@@ -144,6 +145,21 @@ export class NavigationService {
           icon: 'heroicons_outline:cube',
           link: '/material-demo',
         },
+        ...(environment.features?.enableComponentShowcase
+          ? [
+              {
+                id: 'component-showcase',
+                title: 'Component Showcase',
+                type: 'item' as const,
+                icon: 'heroicons_outline:squares-2x2',
+                link: '/component-showcase',
+                badge: {
+                  content: 'New',
+                  type: 'accent' as const,
+                },
+              },
+            ]
+          : []),
         {
           id: 'test-rbac-websocket',
           title: 'RBAC WebSocket Test',

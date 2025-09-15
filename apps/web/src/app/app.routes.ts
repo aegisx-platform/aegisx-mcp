@@ -1,5 +1,6 @@
 import { Route } from '@angular/router';
 import { AuthGuard, GuestGuard } from './core/auth.guard';
+import { showcaseGuard } from './pages/component-showcase/guards/showcase.guard';
 
 export const appRoutes: Route[] = [
   {
@@ -148,6 +149,14 @@ export const appRoutes: Route[] = [
         (m) => m.MaterialDemoComponent,
       ),
     canActivate: [AuthGuard],
+  },
+  {
+    path: 'component-showcase',
+    loadComponent: () =>
+      import('./pages/component-showcase/component-showcase.component').then(
+        (m) => m.ComponentShowcaseComponent,
+      ),
+    canActivate: [AuthGuard, showcaseGuard],
   },
   {
     path: 'test-material',
