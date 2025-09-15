@@ -1,3 +1,18 @@
+# [1.1.0](https://github.com/aegisx-platform/aegisx-starter/compare/v1.0.12...v1.1.0) (2025-09-15)
+
+
+### Bug Fixes
+
+* resolve component showcase compilation errors and restore SCSS files ([22a2859](https://github.com/aegisx-platform/aegisx-starter/commit/22a2859fed998fe7b158bc2c2996d721584ce2ba))
+
+
+### Features
+
+* implement comprehensive component showcase with Material Design and AegisX UI components ([dfc5784](https://github.com/aegisx-platform/aegisx-starter/commit/dfc5784cd873f3fad418820be130b0c4977286fa))
+* initialize component-showcase feature planning ([22baf00](https://github.com/aegisx-platform/aegisx-starter/commit/22baf001db7fa9aeb1aa132d7792ea75a82dc085))
+* merge component-showcase feature ([ed969b3](https://github.com/aegisx-platform/aegisx-starter/commit/ed969b3d834056ab17ec98b6e078fafd2b2e6cbc))
+* **protection:** add comprehensive semantic-release protection system ([b5d8cb0](https://github.com/aegisx-platform/aegisx-starter/commit/b5d8cb037aa02ef1f49a22fd4c40a19bfada2f38))
+
 ## [1.0.12](https://github.com/aegisx-platform/aegisx-starter/compare/v1.0.11...v1.0.12) (2025-09-15)
 
 
