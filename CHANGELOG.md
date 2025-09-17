@@ -1,3 +1,16 @@
+# [1.2.0](https://github.com/aegisx-platform/aegisx-starter/compare/v1.1.1...v1.2.0) (2025-09-17)
+
+
+### Bug Fixes
+
+* resolve merge conflicts in CHANGELOG.md and package.json ([087cc99](https://github.com/aegisx-platform/aegisx-starter/commit/087cc9916d77ce2cc8ea9aaf7ea99f6eecd3134a))
+
+
+### Features
+
+* add comprehensive RBAC management system with complete frontend and backend implementation ([f737f32](https://github.com/aegisx-platform/aegisx-starter/commit/f737f32d34b906feb451a52b5c1503ecaf7068d9))
+* update semantic-release config to use pnpm ([c5d4f62](https://github.com/aegisx-platform/aegisx-starter/commit/c5d4f6283c049ffdf368ee45b817e86f06d76834))
+
 ## [1.1.1](https://github.com/aegisx-platform/aegisx-starter/compare/v1.1.0...v1.1.1) (2025-09-17)
 
 ### Bug Fixes
