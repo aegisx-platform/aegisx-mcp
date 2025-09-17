@@ -49,7 +49,7 @@ interface ShowcaseTab {
     InteractiveDemosComponent,
   ],
   template: `
-    <div class="component-showcase">
+    <div class="component-showcase p-6">
       <!-- Controls Bar (แทน Header) -->
       <div class="showcase-controls">
         <!-- Search -->

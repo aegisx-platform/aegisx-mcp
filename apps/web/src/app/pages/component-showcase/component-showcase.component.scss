@@ -8,11 +8,12 @@
   .showcase-controls {
     display: flex;
     align-items: center;
-    padding: 1rem 1.5rem;
+    padding: 1rem 1.5rem; // เก็บ horizontal padding
     background: #f8f9fa;
     border-bottom: 1px solid #e0e0e0;
     gap: 1rem;
     flex-shrink: 0;
+    margin: -1.5rem -1.5rem 1.5rem -1.5rem; // ขยายไปขอบแต่ใส่ padding ข้างใน
 
     .search-field {
       flex: 1;
@@ -143,6 +144,7 @@
     text-align: center;
     font-size: 0.875rem;
     color: #666;
+    margin: 1.5rem -1.5rem -1.5rem -1.5rem; // ขยายไปขอบ
 
     p {
       margin: 0;
