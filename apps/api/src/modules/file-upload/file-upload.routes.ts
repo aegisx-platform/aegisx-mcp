@@ -1,6 +1,5 @@
 import { FastifyInstance } from 'fastify';
 import {
-  FileUploadSchema,
   FileUpdateSchema,
   ImageProcessingSchema,
   SignedUrlRequestSchema,
@@ -41,7 +40,7 @@ export async function fileUploadRoutes(
       description:
         'Upload a single file with optional metadata and processing options',
       consumes: ['multipart/form-data'],
-      body: FileUploadSchema,
+      // Don't validate body for multipart uploads - handled by @fastify/multipart
       response: {
         201: FileUploadResponseSchema,
         400: StandardRouteResponses[400],
@@ -65,7 +64,7 @@ export async function fileUploadRoutes(
       description:
         'Upload multiple files in a single request with shared metadata',
       consumes: ['multipart/form-data'],
-      body: FileUploadSchema,
+      // Don't validate body for multipart uploads - handled by @fastify/multipart
       response: {
         201: MultipleFileUploadResponseSchema,
         207: MultipleFileUploadResponseSchema, // Multi-status
