@@ -1,4 +1,10 @@
-# 1.0.0 (2025-09-15)
+## [1.1.1](https://github.com/aegisx-platform/aegisx-starter/compare/v1.1.0...v1.1.1) (2025-09-17)
+
+### Bug Fixes
+
+- **release:** improve semantic-release configuration for reliable versioning ([d18b1d0](https://github.com/aegisx-platform/aegisx-starter/commit/d18b1d0d4cbcb7e5634bb4b57d29589ca1568594))
+
+# [1.1.0](https://github.com/aegisx-platform/aegisx-starter/compare/v1.0.12...v1.1.0) (2025-09-15)
 
 ### Bug Fixes
 
