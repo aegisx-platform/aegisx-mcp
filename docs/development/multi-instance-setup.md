@@ -444,7 +444,40 @@ You've successfully set up multi-instance development when:
 - ✅ Database changes in one instance don't affect others
 - ✅ No port conflicts or container name collisions
 - ✅ Can switch between features seamlessly
+- ✅ **Proxy configuration works automatically** - Angular apps connect to correct API
+- ✅ **Environment-based ports** - All services use ports from .env.local
+
+## 🔧 **Final Configuration Summary**
+
+### **For aegisx-starter-1 instance:**
+
+| Service        | Port | URL                     | Environment Variable |
+| -------------- | ---- | ----------------------- | -------------------- |
+| **API**        | 3383 | <http://localhost:3383> | `API_PORT=3383`      |
+| **Web**        | 4249 | <http://localhost:4249> | `WEB_PORT=4249`      |
+| **Admin**      | 4250 | <http://localhost:4250> | `ADMIN_PORT=4250`    |
+| **PostgreSQL** | 5482 | localhost:5482          | `POSTGRES_PORT=5482` |
+| **Redis**      | 6430 | localhost:6430          | `REDIS_PORT=6430`    |
+
+### **Proxy Routing:**
+
+- **Web App** (`localhost:4249`) → `/api/*` → **API** (`localhost:3383`)
+- **Admin App** (`localhost:4250`) → `/api/*` → **API** (`localhost:3383`)
+- **WebSocket** (`/ws`) → **API** (`localhost:3383`) for real-time features
+
+### **Commands That Work:**
+
+```bash
+# Start all services with correct ports
+pnpm dev           # API (3383) + Web (4249)
+pnpm dev:all       # API (3383) + Web (4249) + Admin (4250)
+
+# Start individual services
+pnpm dev:api       # API on port 3383
+pnpm dev:web       # Web on port 4249 (proxy to 3383)
+pnpm dev:admin     # Admin on port 4250 (proxy to 3383)
+```
 
 ---
 
-**🚀 Ready to develop multiple features in parallel!**
+**🚀 Ready to develop multiple features in parallel with full multi-instance support!**
