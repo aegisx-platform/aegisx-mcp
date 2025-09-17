@@ -11,6 +11,7 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import {
   AegisxConfigService,
   AegisxNavigationService,
+  IconService,
   provideAx,
 } from '@aegisx/ui';
 import { appRoutes } from './app.routes';
@@ -18,7 +19,6 @@ import { provideGlobalErrorHandler } from './core/error-handler.service';
 import { httpErrorInterceptorProvider } from './core/http-error.interceptor';
 import { authInterceptor } from './core/auth.interceptor';
 import { MonitoringService } from './core/monitoring.service';
-import { IconsService } from './core/icons.service';
 
 // Factory function to initialize monitoring service
 function initializeMonitoring() {
@@ -32,7 +32,7 @@ function initializeMonitoring() {
 // Factory function to initialize icons
 function initializeIcons() {
   return () => {
-    const iconsService = inject(IconsService);
+    const iconService = inject(IconService);
     // Icons are registered in the constructor
     return Promise.resolve();
   };
@@ -87,6 +87,6 @@ export const appConfig: ApplicationConfig = {
 
     AegisxConfigService,
     AegisxNavigationService,
-    IconsService,
+    IconService,
   ],
 };

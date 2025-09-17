@@ -143,6 +143,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Material Icons CSS (font loaded by aegisx-ui IconService) */
+.mat-icon {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Material Icons', 'Material Icons Outlined' !important;
+  font-feature-settings: 'liga' 1;
+  font-display: swap;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 /* Import Angular Material Theme BEFORE any custom styles */
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
 
@@ -156,24 +168,38 @@
   border-left: none !important;
 }
 
-/* Import Material Icons */
-@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+/* Material Icons fonts now loaded by aegisx-ui IconService */
 
-/* Material Icons Base Styles */
-.material-icons {
-  font-family: 'Material Icons';
-  font-weight: normal;
-  font-style: normal;
-  font-size: 24px;
-  line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
-  display: inline-block;
-  white-space: nowrap;
-  word-wrap: normal;
-  direction: ltr;
-  -webkit-font-feature-settings: 'liga';
-  -webkit-font-smoothing: antialiased;
+/* Material Dialog Global Fixes */
+.mat-mdc-dialog-container {
+  --mdc-dialog-container-elevation: 0 8px 16px rgba(0, 0, 0, 0.12);
+  border-radius: 12px !important;
+}
+
+.mat-mdc-dialog-title {
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  line-height: 1.5 !important;
+  padding: 24px 24px 0 24px !important;
+  margin: 0 !important;
+}
+
+.mat-mdc-dialog-content {
+  padding: 20px 24px !important;
+  margin: 0 !important;
+}
+
+.mat-mdc-dialog-actions {
+  padding: 8px 24px 24px 24px !important;
+  margin: 0 !important;
+  min-height: auto !important;
+}
+
+/* Fix dialog icons */
+.mat-mdc-dialog-title mat-icon,
+.mat-mdc-dialog-content mat-icon,
+.mat-mdc-dialog-actions mat-icon {
+  font-family: 'Material Icons', 'Material Icons Outlined' !important;
 }
 
 /* Import Perfect Scrollbar */

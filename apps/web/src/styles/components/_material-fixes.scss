@@ -451,3 +451,27 @@ table {
 .mat-column-select {
   overflow: initial;
 }
+
+/* ==========================================================================
+   Dialog Alignment Fixes
+   ========================================================================== */
+
+/* Fix dialog title and close button vertical alignment */
+.mat-mdc-dialog-container .mat-mdc-dialog-title,
+.mat-dialog-container .mat-dialog-title {
+  height: auto !important;
+  line-height: 1 !important;
+  min-height: 56px !important;
+  padding: 20px 24px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* Fix close button alignment in dialog header */
+.mat-mdc-dialog-container button[mat-dialog-close],
+.mat-dialog-container button[mat-dialog-close],
+.mat-mdc-dialog-container .mat-mdc-dialog-close,
+.mat-dialog-container .mat-dialog-close {
+  align-self: center !important;
+  margin: 0 !important;
+}

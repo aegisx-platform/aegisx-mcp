@@ -3,5 +3,12 @@
   "dest": "../dist/aegisx-ui-new",
   "lib": {
     "entryFile": "src/index.ts"
-  }
+  },
+  "assets": [
+    {
+      "glob": "**/*",
+      "input": "src/lib/styles",
+      "output": "styles"
+    }
+  ]
 }

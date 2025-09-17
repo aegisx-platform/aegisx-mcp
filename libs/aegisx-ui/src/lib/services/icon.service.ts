@@ -38,6 +38,8 @@ export class IconService {
     'heroicons_outline:x': 'close',
     'heroicons_outline:sun': 'light_mode',
     'heroicons_outline:moon': 'dark_mode',
+    'heroicons_outline:squares-2x2': 'apps',
+    'heroicons_outline:wifi': 'wifi',
   };
 
   // Fallback Unicode symbols if Material Icons don't load
@@ -67,6 +69,8 @@ export class IconService {
     close: '✕',
     light_mode: '☀️',
     dark_mode: '🌙',
+    apps: '⊞',
+    wifi: '📶',
   };
 
   constructor() {
@@ -75,11 +79,21 @@ export class IconService {
 
   private registerMaterialIcons(): void {
     // Register Material Icons font
-    const link = document.createElement('link');
-    link.href = 'https://fonts.googleapis.com/icon?family=Material+Icons';
-    link.rel = 'stylesheet';
+    const materialIconsLink = document.createElement('link');
+    materialIconsLink.href =
+      'https://fonts.googleapis.com/icon?family=Material+Icons';
+    materialIconsLink.rel = 'stylesheet';
     if (!document.querySelector('link[href*="Material+Icons"]')) {
-      document.head.appendChild(link);
+      document.head.appendChild(materialIconsLink);
+    }
+
+    // Register Material Icons Outlined font
+    const materialIconsOutlinedLink = document.createElement('link');
+    materialIconsOutlinedLink.href =
+      'https://fonts.googleapis.com/icon?family=Material+Icons+Outlined';
+    materialIconsOutlinedLink.rel = 'stylesheet';
+    if (!document.querySelector('link[href*="Material+Icons+Outlined"]')) {
+      document.head.appendChild(materialIconsOutlinedLink);
     }
   }
 

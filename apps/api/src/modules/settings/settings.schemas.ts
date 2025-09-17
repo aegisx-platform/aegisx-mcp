@@ -145,7 +145,9 @@ export const GetSettingsQuerySchema = Type.Object({
   includeHidden: Type.Optional(Type.Boolean({ default: false })),
   search: Type.Optional(Type.String()),
   page: Type.Optional(Type.Integer({ minimum: 1, default: 1 })),
-  limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 100, default: 20 })),
+  limit: Type.Optional(
+    Type.Integer({ minimum: 1, maximum: 1000, default: 20 }),
+  ),
   sortBy: Type.Optional(
     Type.Union([
       Type.Literal('key'),
@@ -167,7 +169,9 @@ export const GetSettingHistoryQuerySchema = Type.Object({
   startDate: Type.Optional(Type.String({ format: 'date-time' })),
   endDate: Type.Optional(Type.String({ format: 'date-time' })),
   page: Type.Optional(Type.Integer({ minimum: 1, default: 1 })),
-  limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 100, default: 20 })),
+  limit: Type.Optional(
+    Type.Integer({ minimum: 1, maximum: 1000, default: 20 }),
+  ),
 });
 
 // Grouped Settings Response

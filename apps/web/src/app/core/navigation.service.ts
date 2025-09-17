@@ -1,7 +1,7 @@
-import { Injectable, inject, signal, computed } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, of, BehaviorSubject, catchError, map, tap } from 'rxjs';
 import { AxNavigationItem } from '@aegisx/ui';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { Observable, catchError, map, of } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 interface ApiNavigationItem {
@@ -84,31 +84,15 @@ export class NavigationService {
           link: '/users',
         },
         {
-          id: 'products',
-          title: 'Products',
-          type: 'collapsible',
-          icon: 'heroicons_outline:shopping-bag',
-          children: [
-            {
-              id: 'products.list',
-              title: 'Product List',
-              type: 'item',
-              link: '/products',
-            },
-            {
-              id: 'products.categories',
-              title: 'Categories',
-              type: 'item',
-              link: '/products/categories',
-            },
-          ],
-        },
-        {
-          id: 'orders',
-          title: 'Orders',
+          id: 'rbac',
+          title: 'RBAC Management',
           type: 'item',
-          icon: 'heroicons_outline:shopping-cart',
-          link: '/orders',
+          icon: 'heroicons_outline:shield-check',
+          link: '/rbac',
+          badge: {
+            content: 'Admin',
+            type: 'accent',
+          },
         },
       ],
     },
@@ -225,41 +209,54 @@ export class NavigationService {
 
     this._loading.set(true);
     this._error.set(null);
-
-    return this.http.get<NavigationResponse>(this.apiUrl).pipe(
-      map((response) => {
-        if (response.success && response.data && response.data[type]) {
-          const convertedItems = this.convertApiItemsToNavigationItems(
-            response.data[type],
-          );
-          this._navigationItems.set(convertedItems);
-          this._dataSource.set('api');
-          this._loadedOnce.set(true);
-          this._loading.set(false);
-          console.log('✅ Navigation loaded from API', {
-            count: convertedItems.length,
-            type: type,
-            source: 'api',
-          });
-          return convertedItems;
-        } else {
-          throw new Error(
-            `Invalid API response structure or missing ${type} navigation`,
-          );
-        }
-      }),
-      catchError((error) => {
-        console.warn(
-          '⚠️ Failed to load navigation from API, using fallback',
-          error,
-        );
-        this._navigationItems.set(this.defaultNavigation);
-        this._dataSource.set('fallback');
-        this._error.set(error.message || 'Failed to load navigation from API');
+    this._navigationItems.set(this.defaultNavigation); // Reset to default while loading
+    return of(this.defaultNavigation).pipe(
+      map((items) => {
         this._loading.set(false);
-        return of(this.defaultNavigation);
+        this._dataSource.set('fallback');
+        this._loadedOnce.set(true);
+        console.log('✅ Navigation loaded from fallback', {
+          count: items.length,
+          type: type,
+          source: 'fallback',
+        });
+        return items;
       }),
     );
+    // return this.http.get<NavigationResponse>(this.apiUrl).pipe(
+    //   map((response) => {
+    //     if (response.success && response.data && response.data[type]) {
+    //       const convertedItems = this.convertApiItemsToNavigationItems(
+    //         response.data[type],
+    //       );
+    //       this._navigationItems.set(convertedItems);
+    //       this._dataSource.set('api');
+    //       this._loadedOnce.set(true);
+    //       this._loading.set(false);
+    //       console.log('✅ Navigation loaded from API', {
+    //         count: convertedItems.length,
+    //         type: type,
+    //         source: 'api',
+    //       });
+    //       return convertedItems;
+    //     } else {
+    //       throw new Error(
+    //         `Invalid API response structure or missing ${type} navigation`,
+    //       );
+    //     }
+    //   }),
+    //   catchError((error) => {
+    //     console.warn(
+    //       '⚠️ Failed to load navigation from API, using fallback',
+    //       error,
+    //     );
+    //     this._navigationItems.set(this.defaultNavigation);
+    //     this._dataSource.set('fallback');
+    //     this._error.set(error.message || 'Failed to load navigation from API');
+    //     this._loading.set(false);
+    //     return of(this.defaultNavigation);
+    //   }),
+    // );
   }
 
   /**

@@ -26,7 +26,7 @@ const UserWithRoleSchema = Type.Intersect([
 // List users query parameters
 const ListUsersQuerySchema = Type.Object({
   page: Type.Optional(Type.Number({ minimum: 1, default: 1 })),
-  limit: Type.Optional(Type.Number({ minimum: 1, maximum: 100, default: 10 })),
+  limit: Type.Optional(Type.Number({ minimum: 1, maximum: 1000, default: 10 })),
   search: Type.Optional(Type.String()),
   role: Type.Optional(Type.String()),
   status: Type.Optional(
@@ -89,13 +89,13 @@ const ChangeUserPasswordRequestSchema = Type.Object({
 // Self password change request (for user to change their own password)
 const SelfPasswordChangeRequestSchema = Type.Object({
   currentPassword: Type.String({ minLength: 1 }),
-  newPassword: Type.String({ 
+  newPassword: Type.String({
     minLength: 8,
-    description: 'Must be at least 8 characters long'
+    description: 'Must be at least 8 characters long',
   }),
-  confirmPassword: Type.String({ 
+  confirmPassword: Type.String({
     minLength: 8,
-    description: 'Must match new password'
+    description: 'Must match new password',
   }),
 });
 

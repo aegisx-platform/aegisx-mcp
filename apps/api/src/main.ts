@@ -28,6 +28,7 @@ import navigationPlugin from './modules/navigation/navigation.plugin';
 import settingsPlugin from './modules/settings/settings.plugin';
 import userProfilePlugin from './modules/user-profile/user-profile.plugin';
 import { usersPlugin } from './modules/users';
+import rbacPlugin from './modules/rbac/rbac.plugin';
 import jwtAuthPlugin from './plugins/jwt-auth.plugin';
 import staticFilesPlugin from './plugins/static-files.plugin';
 import swaggerPlugin from './plugins/swagger.plugin';
@@ -191,6 +192,9 @@ async function bootstrap() {
 
   // Settings module
   await app.register(settingsPlugin);
+
+  // RBAC module (after users and settings)
+  await app.register(rbacPlugin);
 
   // Monitoring module (client error logging)
   await app.register(monitoringModulePlugin);

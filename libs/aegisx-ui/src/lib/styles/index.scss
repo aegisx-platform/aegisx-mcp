@@ -12,3 +12,6 @@
 // Import themes
 @import './themes/default';
 @import './themes/dark';
+
+// Export Material Icons CSS that's now loaded by IconService
+// This ensures Material Icons CSS is available when this file is imported

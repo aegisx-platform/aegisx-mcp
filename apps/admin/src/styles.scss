@@ -1,1 +1,70 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* Import Tailwind CSS */
+@tailwind base;
+
+/* Fuse Base Styles Layer */
+@layer base {
+  * {
+    /* Text rendering */
+    text-rendering: optimizeLegibility;
+    -o-text-rendering: optimizeLegibility;
+    -ms-text-rendering: optimizeLegibility;
+    -moz-text-rendering: optimizeLegibility;
+    -webkit-text-rendering: optimizeLegibility;
+    -webkit-tap-highlight-color: transparent;
+
+    /* Remove the focus ring */
+    &:focus {
+      outline: none !important;
+    }
+  }
+
+  /* HTML and Body default styles */
+  html,
+  body {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 100%;
+    -webkit-font-smoothing: auto;
+    -moz-osx-font-smoothing: auto;
+  }
+
+  /* Font size */
+  html {
+    font-size: 16px;
+  }
+
+  body {
+    font-size: 0.875rem;
+    font-feature-settings: 'salt';
+  }
+}
+
+@tailwind components;
+@tailwind utilities;
+
+/* Material Icons CSS (font loaded by aegisx-ui IconService) */
+.mat-icon {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Material Icons', 'Material Icons Outlined' !important;
+  font-feature-settings: 'liga' 1;
+  font-display: swap;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Import Angular Material Theme */
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+/* Global Styles */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+}

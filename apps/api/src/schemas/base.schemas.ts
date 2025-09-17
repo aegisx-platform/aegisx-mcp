@@ -22,7 +22,7 @@ export const ApiMetaSchema = Type.Object({
 // Pagination schema for list endpoints
 export const PaginationMetaSchema = Type.Object({
   page: Type.Number({ minimum: 1 }),
-  limit: Type.Number({ minimum: 1, maximum: 100 }),
+  limit: Type.Number({ minimum: 1, maximum: 1000 }),
   total: Type.Number({ minimum: 0 }),
   totalPages: Type.Number({ minimum: 0 }),
 });
@@ -40,6 +40,40 @@ export const ApiSuccessResponseSchema = <
     pagination: Type.Optional(PaginationMetaSchema),
     meta: Type.Optional(ApiMetaSchema),
   });
+
+// Paginated Response Schema (with full pagination meta)
+export const PaginatedResponseSchema = <
+  T extends import('@sinclair/typebox').TSchema,
+>(
+  itemSchema: T,
+) =>
+  Type.Object({
+    success: Type.Literal(true),
+    data: Type.Array(itemSchema),
+    pagination: Type.Object({
+      page: Type.Number({ minimum: 1 }),
+      limit: Type.Number({ minimum: 1, maximum: 1000 }),
+      total: Type.Number({ minimum: 0 }),
+      totalPages: Type.Number({ minimum: 0 }),
+      hasNext: Type.Boolean(),
+      hasPrev: Type.Boolean(),
+    }),
+    meta: Type.Optional(ApiMetaSchema),
+  });
+
+// Success Message Schema (for simple operations like delete)
+export const SuccessMessageSchema = Type.Object({
+  success: Type.Literal(true),
+  message: Type.String(),
+  data: Type.Optional(
+    Type.Object({
+      id: Type.Optional(Type.String()),
+      deleted: Type.Optional(Type.Boolean()),
+      updated: Type.Optional(Type.Boolean()),
+    }),
+  ),
+  meta: Type.Optional(ApiMetaSchema),
+});
 
 // Standard API Error Response
 export const ApiErrorResponseSchema = Type.Object({
@@ -133,7 +167,7 @@ export const ServerErrorResponseSchema = Type.Object({
 // Common query parameters
 export const PaginationQuerySchema = Type.Object({
   page: Type.Optional(Type.Number({ minimum: 1, default: 1 })),
-  limit: Type.Optional(Type.Number({ minimum: 1, maximum: 100, default: 20 })),
+  limit: Type.Optional(Type.Number({ minimum: 1, maximum: 1000, default: 20 })),
   sort: Type.Optional(Type.String()),
   order: Type.Optional(
     Type.Union([Type.Literal('asc'), Type.Literal('desc')], { default: 'asc' }),

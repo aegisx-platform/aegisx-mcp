@@ -15,6 +15,7 @@ export * from './components/user-menu/user-menu.component';
 export * from './components/card/card.component';
 export * from './components/alert/alert.component';
 export * from './components/drawer/drawer.component';
+export * from './components/breadcrumb/breadcrumb.component';
 
 // Layouts
 export * from './layouts/layout-wrapper/layout-wrapper.component';

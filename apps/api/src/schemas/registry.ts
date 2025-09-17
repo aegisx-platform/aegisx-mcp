@@ -4,6 +4,7 @@ import {
   ApiMetaSchema,
   PaginationMetaSchema,
   ApiErrorResponseSchema,
+  SuccessMessageSchema,
   ValidationErrorResponseSchema,
   UnauthorizedResponseSchema,
   ForbiddenResponseSchema,
@@ -13,7 +14,7 @@ import {
   PaginationQuerySchema,
   SearchQuerySchema,
   UuidParamSchema,
-  NumericIdParamSchema
+  NumericIdParamSchema,
 } from './base.schemas';
 
 /**
@@ -38,6 +39,7 @@ export class SchemaRegistry {
       'api-meta': ApiMetaSchema,
       'pagination-meta': PaginationMetaSchema,
       'api-error-response': ApiErrorResponseSchema,
+      'success-message': SuccessMessageSchema,
       'validation-error-response': ValidationErrorResponseSchema,
       'unauthorized-response': UnauthorizedResponseSchema,
       'forbidden-response': ForbiddenResponseSchema,
@@ -50,12 +52,12 @@ export class SchemaRegistry {
       'numeric-id-param': NumericIdParamSchema,
 
       // Legacy compatibility (old naming convention)
-      'validationErrorResponse': ValidationErrorResponseSchema,
-      'unauthorizedResponse': UnauthorizedResponseSchema,
-      'forbiddenResponse': ForbiddenResponseSchema,
-      'notFoundResponse': NotFoundResponseSchema,
-      'conflictResponse': ConflictResponseSchema,
-      'serverErrorResponse': ServerErrorResponseSchema
+      validationErrorResponse: ValidationErrorResponseSchema,
+      unauthorizedResponse: UnauthorizedResponseSchema,
+      forbiddenResponse: ForbiddenResponseSchema,
+      notFoundResponse: NotFoundResponseSchema,
+      conflictResponse: ConflictResponseSchema,
+      serverErrorResponse: ServerErrorResponseSchema,
     };
 
     Object.entries(baseSchemas).forEach(([id, schema]) => {
@@ -68,19 +70,23 @@ export class SchemaRegistry {
    */
   private registerSchema(id: string, schema: any): void {
     if (this.registeredSchemas.has(id)) {
-      this.fastify.log.warn(`Schema with ID '${id}' is already registered. Skipping...`);
+      this.fastify.log.warn(
+        `Schema with ID '${id}' is already registered. Skipping...`,
+      );
       return;
     }
 
     try {
       this.fastify.addSchema({
         $id: id,
-        ...schema
+        ...schema,
       });
       this.registeredSchemas.add(id);
       this.fastify.log.debug(`Registered schema: ${id}`);
     } catch (error) {
-      this.fastify.log.error(`Failed to register schema '${id}': ${error instanceof Error ? error.message : String(error)}`);
+      this.fastify.log.error(
+        `Failed to register schema '${id}': ${error instanceof Error ? error.message : String(error)}`,
+      );
       throw error;
     }
   }
@@ -102,7 +108,10 @@ export class SchemaRegistry {
   /**
    * Register module-specific schemas
    */
-  registerModuleSchemas(moduleName: string, schemas: Record<string, any>): void {
+  registerModuleSchemas(
+    moduleName: string,
+    schemas: Record<string, any>,
+  ): void {
     Object.entries(schemas).forEach(([name, schema]) => {
       const schemaId = `${moduleName}-${name}`;
       this.registerSchema(schemaId, schema);
@@ -124,6 +133,7 @@ export function createSchemaRegistry(fastify: FastifyInstance): SchemaRegistry {
  */
 export const SchemaRefs = {
   // Response schemas
+  SuccessMessage: { $ref: 'success-message#' },
   ValidationError: { $ref: 'validation-error-response#' },
   Unauthorized: { $ref: 'unauthorized-response#' },
   Forbidden: { $ref: 'forbidden-response#' },
@@ -140,7 +150,9 @@ export const SchemaRefs = {
   NumericIdParam: { $ref: 'numeric-id-param#' },
 
   // Helper function to create module schema references
-  module: (moduleName: string, schemaName: string) => ({ $ref: `${moduleName}-${schemaName}#` })
+  module: (moduleName: string, schemaName: string) => ({
+    $ref: `${moduleName}-${schemaName}#`,
+  }),
 };
 
 /**
@@ -155,14 +167,14 @@ export const CommonRouteSchemas = {
         success: { type: 'boolean', const: true },
         data: dataRef,
         message: { type: 'string' },
-        meta: SchemaRefs.module('api', 'meta')
+        meta: SchemaRefs.module('api', 'meta'),
       },
-      required: ['success', 'data']
+      required: ['success', 'data'],
     },
     400: SchemaRefs.ValidationError,
     401: SchemaRefs.Unauthorized,
     403: SchemaRefs.Forbidden,
-    500: SchemaRefs.ServerError
+    500: SchemaRefs.ServerError,
   }),
 
   updated: (dataRef: any) => ({
@@ -172,26 +184,26 @@ export const CommonRouteSchemas = {
         success: { type: 'boolean', const: true },
         data: dataRef,
         message: { type: 'string' },
-        meta: SchemaRefs.module('api', 'meta')
+        meta: SchemaRefs.module('api', 'meta'),
       },
-      required: ['success', 'data']
+      required: ['success', 'data'],
     },
     400: SchemaRefs.ValidationError,
     401: SchemaRefs.Unauthorized,
     403: SchemaRefs.Forbidden,
     404: SchemaRefs.NotFound,
     409: SchemaRefs.Conflict,
-    500: SchemaRefs.ServerError
+    500: SchemaRefs.ServerError,
   }),
 
   deleted: {
     204: {
-      type: 'null'
+      type: 'null',
     },
     401: SchemaRefs.Unauthorized,
     403: SchemaRefs.Forbidden,
     404: SchemaRefs.NotFound,
-    500: SchemaRefs.ServerError
+    500: SchemaRefs.ServerError,
   },
 
   list: (itemRef: any) => ({
@@ -204,19 +216,19 @@ export const CommonRouteSchemas = {
           properties: {
             items: {
               type: 'array',
-              items: itemRef
+              items: itemRef,
             },
-            pagination: SchemaRefs.module('pagination', 'meta')
+            pagination: SchemaRefs.module('pagination', 'meta'),
           },
-          required: ['items', 'pagination']
+          required: ['items', 'pagination'],
         },
-        meta: SchemaRefs.module('api', 'meta')
+        meta: SchemaRefs.module('api', 'meta'),
       },
-      required: ['success', 'data']
+      required: ['success', 'data'],
     },
     400: SchemaRefs.ValidationError,
     401: SchemaRefs.Unauthorized,
     403: SchemaRefs.Forbidden,
-    500: SchemaRefs.ServerError
-  })
+    500: SchemaRefs.ServerError,
+  }),
 };

@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:3333', // API port
+  apiUrl: '', // Use relative path for proxy in development
   features: {
     enableComponentShowcase: true, // Enable component showcase in development
   },

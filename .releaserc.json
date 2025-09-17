@@ -1,5 +1,5 @@
 {
-  "repositoryUrl": "https://github.com/aegisx-platform/aegisx-starter.git",
+  "repositoryUrl": "git@github.com:aegisx-platform/aegisx-starter.git",
   "branches": [
     "main",
     {
@@ -28,7 +28,12 @@
     [
       "@semantic-release/github",
       {
-        "assets": []
+        "assets": [
+          {
+            "path": "dist/**",
+            "name": "dist-${nextRelease.version}.zip"
+          }
+        ]
       }
     ]
   ]

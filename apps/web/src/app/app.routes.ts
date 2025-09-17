@@ -69,6 +69,19 @@ export const appRoutes: Route[] = [
     canActivate: [AuthGuard],
   },
   {
+    path: 'rbac',
+    loadChildren: () =>
+      import('./modules/rbac-management/rbac-management.module').then(
+        (m) => m.RbacManagementModule,
+      ),
+    canActivate: [AuthGuard],
+    data: {
+      title: 'RBAC Management',
+      description: 'Role-Based Access Control Management System',
+      requiredPermissions: ['rbac.read', 'admin.*'],
+    },
+  },
+  {
     path: 'components',
     canActivate: [AuthGuard],
     children: [
