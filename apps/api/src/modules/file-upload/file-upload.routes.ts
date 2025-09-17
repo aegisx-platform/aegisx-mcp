@@ -14,6 +14,7 @@ import {
   ImageProcessingResponseSchema,
   DeleteFileResponseSchema,
   FileUploadErrorSchema,
+  FileStatsResponseSchema,
 } from './file-upload.schemas';
 import { StandardRouteResponses } from '../../schemas/base.schemas';
 import { FileUploadController } from './file-upload.controller';
@@ -86,33 +87,7 @@ export async function fileUploadRoutes(
       summary: 'Get user file statistics',
       description: 'Get comprehensive statistics about user uploaded files',
       response: {
-        200: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean', const: true },
-            data: {
-              type: 'object',
-              properties: {
-                totalFiles: { type: 'number' },
-                totalSize: { type: 'number' },
-                publicFiles: { type: 'number' },
-                temporaryFiles: { type: 'number' },
-                categories: {
-                  type: 'object',
-                  additionalProperties: { type: 'number' },
-                },
-              },
-            },
-            meta: {
-              type: 'object',
-              properties: {
-                requestId: { type: 'string' },
-                timestamp: { type: 'string' },
-                version: { type: 'string' },
-              },
-            },
-          },
-        },
+        200: FileStatsResponseSchema,
         401: StandardRouteResponses[401],
         500: StandardRouteResponses[500],
       },
@@ -129,33 +104,7 @@ export async function fileUploadRoutes(
       summary: 'Get user file statistics (alternative endpoint)',
       description: 'Get comprehensive statistics about user uploaded files',
       response: {
-        200: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean', const: true },
-            data: {
-              type: 'object',
-              properties: {
-                totalFiles: { type: 'number' },
-                totalSize: { type: 'number' },
-                publicFiles: { type: 'number' },
-                temporaryFiles: { type: 'number' },
-                categories: {
-                  type: 'object',
-                  additionalProperties: { type: 'number' },
-                },
-              },
-            },
-            meta: {
-              type: 'object',
-              properties: {
-                requestId: { type: 'string' },
-                timestamp: { type: 'string' },
-                version: { type: 'string' },
-              },
-            },
-          },
-        },
+        200: FileStatsResponseSchema,
         401: StandardRouteResponses[401],
         500: StandardRouteResponses[500],
       },

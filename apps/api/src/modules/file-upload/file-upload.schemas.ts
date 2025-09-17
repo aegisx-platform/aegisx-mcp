@@ -472,6 +472,40 @@ export const DeleteFileResponseSchema = ApiSuccessResponseSchema(
 );
 
 // =============================================
+// File Statistics Schemas
+// =============================================
+
+export const FileStatsDataSchema = Type.Object({
+  totalFiles: Type.Number({
+    description: 'Total number of files uploaded by user',
+  }),
+  totalSize: Type.Number({
+    description: 'Total size of all files in bytes',
+  }),
+  publicFiles: Type.Number({
+    description: 'Number of public files',
+  }),
+  temporaryFiles: Type.Number({
+    description: 'Number of temporary files',
+  }),
+  categories: Type.Record(Type.String(), Type.Number(), {
+    description: 'File count by category',
+  }),
+});
+
+export const FileStatsResponseSchema = Type.Object({
+  success: Type.Literal(true),
+  data: FileStatsDataSchema,
+  meta: Type.Optional(
+    Type.Object({
+      requestId: Type.String(),
+      timestamp: Type.String({ format: 'date-time' }),
+      version: Type.String(),
+    }),
+  ),
+});
+
+// =============================================
 // Path Parameter Schemas
 // =============================================
 
@@ -494,6 +528,8 @@ export type FileListQuery = Static<typeof FileListQuerySchema>;
 export type DownloadQuery = Static<typeof DownloadQuerySchema>;
 export type UploadedFile = Static<typeof UploadedFileSchema>;
 export type FileIdParam = Static<typeof FileIdParamSchema>;
+export type FileStatsData = Static<typeof FileStatsDataSchema>;
+export type FileStatsResponse = Static<typeof FileStatsResponseSchema>;
 
 // =============================================
 // File Upload Specific Error Schemas
