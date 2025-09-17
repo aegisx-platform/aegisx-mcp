@@ -92,12 +92,27 @@ export class FileUploadController {
     } catch (error: any) {
       request.log.error(error, 'Failed to upload file');
 
-      return reply.code(500).send({
+      // Handle specific Fastify multipart errors
+      let statusCode = 500;
+      let errorCode = 'UPLOAD_FAILED';
+      let errorMessage = error.message || 'Failed to upload file';
+
+      if (error.code === 'FST_FILES_LIMIT') {
+        statusCode = 413;
+        errorCode = 'FILE_LIMIT_EXCEEDED';
+        errorMessage = 'Too many files. Only 1 file allowed for single upload.';
+      } else if (error.code === 'FST_FILE_TOO_LARGE') {
+        statusCode = 413;
+        errorCode = 'FILE_TOO_LARGE';
+        errorMessage = 'File size exceeds 100MB limit.';
+      }
+
+      return reply.code(statusCode).send({
         success: false,
         error: {
-          code: 'UPLOAD_FAILED',
-          message: error.message || 'Failed to upload file',
-          statusCode: 500,
+          code: errorCode,
+          message: errorMessage,
+          statusCode: statusCode,
         },
         meta: {
           requestId: request.id,
@@ -191,11 +206,27 @@ export class FileUploadController {
     } catch (error: any) {
       request.log.error(error, 'Failed to upload multiple files');
 
-      return reply.code(500).send({
+      // Handle specific Fastify multipart errors
+      let statusCode = 500;
+      let errorCode = 'UPLOAD_FAILED';
+      let errorMessage = error.message || 'Failed to upload files';
+
+      if (error.code === 'FST_FILES_LIMIT') {
+        statusCode = 413;
+        errorCode = 'FILE_LIMIT_EXCEEDED';
+        errorMessage = 'Too many files. Maximum 10 files allowed.';
+      } else if (error.code === 'FST_FILE_TOO_LARGE') {
+        statusCode = 413;
+        errorCode = 'FILE_TOO_LARGE';
+        errorMessage = 'File size exceeds 100MB limit.';
+      }
+
+      return reply.code(statusCode).send({
         success: false,
         error: {
-          code: 'UPLOAD_FAILED',
-          message: error.message || 'Failed to upload files',
+          code: errorCode,
+          message: errorMessage,
+          statusCode: statusCode,
         },
         meta: {
           requestId: request.id,
