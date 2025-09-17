@@ -38,6 +38,7 @@ export class FileUploadController {
           error: {
             code: 'NO_FILE_PROVIDED',
             message: 'No file provided in request',
+            statusCode: 400,
           },
           meta: {
             requestId: request.id,
@@ -62,6 +63,7 @@ export class FileUploadController {
           error: {
             code: 'UNAUTHORIZED',
             message: 'User authentication required',
+            statusCode: 401,
           },
           meta: {
             requestId: request.id,
@@ -95,6 +97,7 @@ export class FileUploadController {
         error: {
           code: 'UPLOAD_FAILED',
           message: error.message || 'Failed to upload file',
+          statusCode: 500,
         },
         meta: {
           requestId: request.id,
@@ -128,6 +131,7 @@ export class FileUploadController {
           error: {
             code: 'NO_FILES_PROVIDED',
             message: 'No files provided in request',
+            statusCode: 400,
           },
           meta: {
             requestId: request.id,
@@ -152,6 +156,7 @@ export class FileUploadController {
           error: {
             code: 'UNAUTHORIZED',
             message: 'User authentication required',
+            statusCode: 401,
           },
           meta: {
             requestId: request.id,
@@ -222,6 +227,7 @@ export class FileUploadController {
           error: {
             code: 'FILE_NOT_FOUND',
             message: 'File not found',
+            statusCode: 404,
           },
           meta: {
             requestId: request.id,
@@ -248,6 +254,7 @@ export class FileUploadController {
         error: {
           code: 'FETCH_FAILED',
           message: error.message || 'Failed to get file',
+          statusCode: 500,
         },
         meta: {
           requestId: request.id,
@@ -275,6 +282,7 @@ export class FileUploadController {
           error: {
             code: 'UNAUTHORIZED',
             message: 'User authentication required',
+            statusCode: 401,
           },
           meta: {
             requestId: request.id,
@@ -337,6 +345,7 @@ export class FileUploadController {
         error: {
           code: 'LIST_FAILED',
           message: error.message || 'Failed to list files',
+          statusCode: 500,
         },
         meta: {
           requestId: request.id,
@@ -370,6 +379,7 @@ export class FileUploadController {
           error: {
             code: 'FILE_NOT_FOUND',
             message: 'File not found',
+            statusCode: 404,
           },
           meta: {
             requestId: request.id,
@@ -386,6 +396,7 @@ export class FileUploadController {
         error: {
           code: 'NOT_IMPLEMENTED',
           message: 'File download not yet implemented',
+          statusCode: 501,
         },
         meta: {
           requestId: request.id,
@@ -401,6 +412,7 @@ export class FileUploadController {
         error: {
           code: 'DOWNLOAD_FAILED',
           message: error.message || 'Failed to download file',
+          statusCode: 500,
         },
         meta: {
           requestId: request.id,
@@ -431,6 +443,7 @@ export class FileUploadController {
           error: {
             code: 'UNAUTHORIZED',
             message: 'User authentication required',
+            statusCode: 401,
           },
           meta: {
             requestId: request.id,
@@ -452,6 +465,7 @@ export class FileUploadController {
           error: {
             code: 'FILE_NOT_FOUND',
             message: 'File not found or access denied',
+            statusCode: 404,
           },
           meta: {
             requestId: request.id,
@@ -478,6 +492,7 @@ export class FileUploadController {
         error: {
           code: 'UPDATE_FAILED',
           message: error.message || 'Failed to update file',
+          statusCode: 500,
         },
         meta: {
           requestId: request.id,
@@ -507,6 +522,7 @@ export class FileUploadController {
           error: {
             code: 'UNAUTHORIZED',
             message: 'User authentication required',
+            statusCode: 401,
           },
           meta: {
             requestId: request.id,
@@ -524,6 +540,7 @@ export class FileUploadController {
           error: {
             code: 'FILE_NOT_FOUND',
             message: 'File not found or access denied',
+            statusCode: 404,
           },
           meta: {
             requestId: request.id,
@@ -554,6 +571,7 @@ export class FileUploadController {
         error: {
           code: 'DELETE_FAILED',
           message: error.message || 'Failed to delete file',
+          statusCode: 500,
         },
         meta: {
           requestId: request.id,
@@ -584,6 +602,7 @@ export class FileUploadController {
           error: {
             code: 'UNAUTHORIZED',
             message: 'User authentication required',
+            statusCode: 401,
           },
           meta: {
             requestId: request.id,
@@ -622,6 +641,7 @@ export class FileUploadController {
         error: {
           code: 'PROCESSING_FAILED',
           message: error.message || 'Failed to process image',
+          statusCode: 500,
         },
         meta: {
           requestId: request.id,
@@ -652,6 +672,7 @@ export class FileUploadController {
           error: {
             code: 'UNAUTHORIZED',
             message: 'User authentication required',
+            statusCode: 401,
           },
           meta: {
             requestId: request.id,
@@ -686,6 +707,7 @@ export class FileUploadController {
         error: {
           code: 'SIGNED_URL_FAILED',
           message: error.message || 'Failed to generate signed URL',
+          statusCode: 500,
         },
         meta: {
           requestId: request.id,
@@ -709,6 +731,7 @@ export class FileUploadController {
           error: {
             code: 'UNAUTHORIZED',
             message: 'User authentication required',
+            statusCode: 401,
           },
           meta: {
             requestId: request.id,
@@ -737,6 +760,7 @@ export class FileUploadController {
         error: {
           code: 'STATS_FAILED',
           message: error.message || 'Failed to get user statistics',
+          statusCode: 500,
         },
         meta: {
           requestId: request.id,
