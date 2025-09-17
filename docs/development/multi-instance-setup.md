@@ -301,6 +301,12 @@ pnpm run setup:env
 # Check generated configuration
 cat .env.local
 cat docker-compose.instance.yml
+
+# Test environment loading (with debug)
+DEBUG_ENV=true pnpm dev:api --version
+
+# Manual test of environment script
+DEBUG_ENV=true ./scripts/load-env.sh bash -c 'echo "API: $API_PORT, Web: $WEB_PORT"'
 ```
 
 ### **Docker Compose Instance File Not Found**
@@ -322,6 +328,41 @@ docker ps --filter "name=aegisx" --format "table {{.Names}}\t{{.Ports}}"
 ```
 
 **Note**: Each instance uses a completely separate Docker Compose file with unique ports - no conflicts!
+
+## 🔧 **Environment Variable Loading**
+
+The system uses a custom `load-env.sh` script to properly load environment variables from `.env.local` and `.env` files into npm scripts:
+
+### **How It Works**
+
+```bash
+# npm scripts automatically use load-env.sh wrapper
+pnpm dev:api     # → ./scripts/load-env.sh nx serve api --port=${API_PORT:-3333}
+pnpm dev:web     # → ./scripts/load-env.sh nx serve web --port=${WEB_PORT:-4200}
+pnpm dev:admin   # → ./scripts/load-env.sh nx serve admin --port=${ADMIN_PORT:-4201}
+```
+
+### **Manual Usage**
+
+```bash
+# Load environment and run any command
+./scripts/load-env.sh nx serve api --port=${API_PORT:-3333}
+
+# Test environment loading
+DEBUG_ENV=true ./scripts/load-env.sh bash -c 'echo "Ports: API=$API_PORT, Web=$WEB_PORT"'
+
+# Check if environment is loaded correctly
+./scripts/load-env.sh env | grep -E "(API_PORT|WEB_PORT|ADMIN_PORT)"
+```
+
+### **Environment File Hierarchy**
+
+The script loads environment files in this order:
+
+1. **`.env`** - Base configuration (committed to git)
+2. **`.env.local`** - Instance-specific overrides (git-ignored, auto-generated)
+
+Later files override earlier ones, so `.env.local` takes precedence.
 
 ## 📚 **Advanced Usage**
 
