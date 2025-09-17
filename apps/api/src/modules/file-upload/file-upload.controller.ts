@@ -34,6 +34,7 @@ export class FileUploadController {
       const data = await request.file();
       if (!data) {
         return reply.code(400).send({
+          success: false,
           error: {
             code: 'NO_FILE_PROVIDED',
             message: 'No file provided in request',
@@ -57,6 +58,7 @@ export class FileUploadController {
       const userId = request.user?.id;
       if (!userId) {
         return reply.code(401).send({
+          success: false,
           error: {
             code: 'UNAUTHORIZED',
             message: 'User authentication required',
@@ -76,6 +78,7 @@ export class FileUploadController {
       );
 
       return reply.code(201).send({
+        success: true,
         data: result.file,
         meta: {
           requestId: request.id,
@@ -88,6 +91,7 @@ export class FileUploadController {
       request.log.error(error, 'Failed to upload file');
 
       return reply.code(500).send({
+        success: false,
         error: {
           code: 'UPLOAD_FAILED',
           message: error.message || 'Failed to upload file',
@@ -120,6 +124,7 @@ export class FileUploadController {
 
       if (fileArray.length === 0) {
         return reply.code(400).send({
+          success: false,
           error: {
             code: 'NO_FILES_PROVIDED',
             message: 'No files provided in request',
@@ -143,6 +148,7 @@ export class FileUploadController {
       const userId = request.user?.id;
       if (!userId) {
         return reply.code(401).send({
+          success: false,
           error: {
             code: 'UNAUTHORIZED',
             message: 'User authentication required',
@@ -169,6 +175,7 @@ export class FileUploadController {
             : 207;
 
       return reply.code(statusCode).send({
+        success: true,
         data: result,
         meta: {
           requestId: request.id,
@@ -180,6 +187,7 @@ export class FileUploadController {
       request.log.error(error, 'Failed to upload multiple files');
 
       return reply.code(500).send({
+        success: false,
         error: {
           code: 'UPLOAD_FAILED',
           message: error.message || 'Failed to upload files',
@@ -210,6 +218,7 @@ export class FileUploadController {
 
       if (!file) {
         return reply.code(404).send({
+          success: false,
           error: {
             code: 'FILE_NOT_FOUND',
             message: 'File not found',
@@ -223,6 +232,7 @@ export class FileUploadController {
       }
 
       return reply.send({
+        success: true,
         data: file,
         meta: {
           requestId: request.id,
@@ -234,6 +244,7 @@ export class FileUploadController {
       request.log.error(error, 'Failed to get file');
 
       return reply.code(500).send({
+        success: false,
         error: {
           code: 'FETCH_FAILED',
           message: error.message || 'Failed to get file',
@@ -260,6 +271,7 @@ export class FileUploadController {
       const userId = request.user?.id;
       if (!userId) {
         return reply.code(401).send({
+          success: false,
           error: {
             code: 'UNAUTHORIZED',
             message: 'User authentication required',
@@ -294,6 +306,7 @@ export class FileUploadController {
       );
 
       return reply.send({
+        success: true,
         data: result.data,
         pagination: result.pagination,
         meta: {
@@ -306,6 +319,7 @@ export class FileUploadController {
       request.log.error(error, 'Failed to list files');
 
       return reply.code(500).send({
+        success: false,
         error: {
           code: 'LIST_FAILED',
           message: error.message || 'Failed to list files',
@@ -338,6 +352,7 @@ export class FileUploadController {
 
       if (!file) {
         return reply.code(404).send({
+          success: false,
           error: {
             code: 'FILE_NOT_FOUND',
             message: 'File not found',
@@ -353,6 +368,7 @@ export class FileUploadController {
       // TODO: Implement actual file streaming from storage
       // For now, return a redirect or error
       return reply.code(501).send({
+        success: false,
         error: {
           code: 'NOT_IMPLEMENTED',
           message: 'File download not yet implemented',
@@ -367,6 +383,7 @@ export class FileUploadController {
       request.log.error(error, 'Failed to download file');
 
       return reply.code(500).send({
+        success: false,
         error: {
           code: 'DOWNLOAD_FAILED',
           message: error.message || 'Failed to download file',
@@ -396,6 +413,7 @@ export class FileUploadController {
 
       if (!userId) {
         return reply.code(401).send({
+          success: false,
           error: {
             code: 'UNAUTHORIZED',
             message: 'User authentication required',
@@ -416,6 +434,7 @@ export class FileUploadController {
 
       if (!updatedFile) {
         return reply.code(404).send({
+          success: false,
           error: {
             code: 'FILE_NOT_FOUND',
             message: 'File not found or access denied',
@@ -429,6 +448,7 @@ export class FileUploadController {
       }
 
       return reply.send({
+        success: true,
         data: updatedFile,
         meta: {
           requestId: request.id,
@@ -440,6 +460,7 @@ export class FileUploadController {
       request.log.error(error, 'Failed to update file');
 
       return reply.code(500).send({
+        success: false,
         error: {
           code: 'UPDATE_FAILED',
           message: error.message || 'Failed to update file',
@@ -468,6 +489,7 @@ export class FileUploadController {
 
       if (!userId) {
         return reply.code(401).send({
+          success: false,
           error: {
             code: 'UNAUTHORIZED',
             message: 'User authentication required',
@@ -484,6 +506,7 @@ export class FileUploadController {
 
       if (!deleted) {
         return reply.code(404).send({
+          success: false,
           error: {
             code: 'FILE_NOT_FOUND',
             message: 'File not found or access denied',
@@ -497,6 +520,7 @@ export class FileUploadController {
       }
 
       return reply.send({
+        success: true,
         data: {
           id,
           deleted: true,
@@ -512,6 +536,7 @@ export class FileUploadController {
       request.log.error(error, 'Failed to delete file');
 
       return reply.code(500).send({
+        success: false,
         error: {
           code: 'DELETE_FAILED',
           message: error.message || 'Failed to delete file',
@@ -541,6 +566,7 @@ export class FileUploadController {
 
       if (!userId) {
         return reply.code(401).send({
+          success: false,
           error: {
             code: 'UNAUTHORIZED',
             message: 'User authentication required',
@@ -560,6 +586,7 @@ export class FileUploadController {
       );
 
       return reply.send({
+        success: true,
         data: result,
         meta: {
           requestId: request.id,
@@ -577,6 +604,7 @@ export class FileUploadController {
           : 500;
 
       return reply.code(statusCode).send({
+        success: false,
         error: {
           code: 'PROCESSING_FAILED',
           message: error.message || 'Failed to process image',
@@ -606,6 +634,7 @@ export class FileUploadController {
 
       if (!userId) {
         return reply.code(401).send({
+          success: false,
           error: {
             code: 'UNAUTHORIZED',
             message: 'User authentication required',
@@ -625,6 +654,7 @@ export class FileUploadController {
       );
 
       return reply.send({
+        success: true,
         data: result,
         meta: {
           requestId: request.id,
@@ -638,6 +668,7 @@ export class FileUploadController {
       const statusCode = error.message.includes('not found') ? 404 : 500;
 
       return reply.code(statusCode).send({
+        success: false,
         error: {
           code: 'SIGNED_URL_FAILED',
           message: error.message || 'Failed to generate signed URL',
@@ -660,6 +691,7 @@ export class FileUploadController {
 
       if (!userId) {
         return reply.code(401).send({
+          success: false,
           error: {
             code: 'UNAUTHORIZED',
             message: 'User authentication required',
@@ -675,6 +707,7 @@ export class FileUploadController {
       const stats = await this.deps.fileUploadService.getUserStats(userId);
 
       return reply.send({
+        success: true,
         data: stats,
         meta: {
           requestId: request.id,
@@ -686,6 +719,7 @@ export class FileUploadController {
       request.log.error(error, 'Failed to get user stats');
 
       return reply.code(500).send({
+        success: false,
         error: {
           code: 'STATS_FAILED',
           message: error.message || 'Failed to get user statistics',

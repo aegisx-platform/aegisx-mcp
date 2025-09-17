@@ -324,11 +324,22 @@ export const UploadedFileSchema = Type.Object({
 });
 
 // ✅ FIXED: Using base schema standards
-export const FileUploadResponseSchema =
-  ApiSuccessResponseSchema(UploadedFileSchema);
+export const FileUploadResponseSchema = Type.Object({
+  success: Type.Literal(true),
+  data: UploadedFileSchema,
+  meta: Type.Optional(
+    Type.Object({
+      requestId: Type.String(),
+      timestamp: Type.String({ format: 'date-time' }),
+      version: Type.String(),
+      warnings: Type.Optional(Type.Array(Type.String())),
+    }),
+  ),
+});
 
-export const MultipleFileUploadResponseSchema = ApiSuccessResponseSchema(
-  Type.Object({
+export const MultipleFileUploadResponseSchema = Type.Object({
+  success: Type.Literal(true),
+  data: Type.Object({
     uploaded: Type.Array(UploadedFileSchema, {
       description: 'Successfully uploaded files',
     }),
@@ -368,7 +379,14 @@ export const MultipleFileUploadResponseSchema = ApiSuccessResponseSchema(
       },
     ),
   }),
-);
+  meta: Type.Optional(
+    Type.Object({
+      requestId: Type.String(),
+      timestamp: Type.String({ format: 'date-time' }),
+      version: Type.String(),
+    }),
+  ),
+});
 
 export const ChunkedUploadResponseSchema = ApiSuccessResponseSchema(
   Type.Object({
@@ -482,6 +500,7 @@ export type FileIdParam = Static<typeof FileIdParamSchema>;
 // =============================================
 
 export const FileUploadErrorSchema = Type.Object({
+  success: Type.Literal(false),
   error: Type.Object({
     code: Type.Union([
       Type.Literal('FILE_TOO_LARGE'),
@@ -498,6 +517,13 @@ export const FileUploadErrorSchema = Type.Object({
     message: Type.String(),
     details: Type.Optional(Type.Record(Type.String(), Type.Any())),
   }),
+  meta: Type.Optional(
+    Type.Object({
+      requestId: Type.String(),
+      timestamp: Type.String({ format: 'date-time' }),
+      version: Type.String(),
+    }),
+  ),
 });
 
 export type FileUploadError = Static<typeof FileUploadErrorSchema>;
