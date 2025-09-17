@@ -23,6 +23,7 @@ import { activityLoggingPlugin } from './plugins/activity-logging';
 import authPlugin from './modules/auth/auth.plugin';
 import authStrategiesPlugin from './modules/auth/strategies/auth.strategies';
 import defaultPlugin from './modules/default/default.plugin';
+import fileUploadPlugin from './modules/file-upload/file-upload.plugin';
 import { monitoringPlugin as monitoringModulePlugin } from './modules/monitoring';
 import navigationPlugin from './modules/navigation/navigation.plugin';
 import settingsPlugin from './modules/settings/settings.plugin';
@@ -195,6 +196,9 @@ async function bootstrap() {
 
   // RBAC module (after users and settings)
   await app.register(rbacPlugin);
+
+  // File Upload module
+  await app.register(fileUploadPlugin);
 
   // Monitoring module (client error logging)
   await app.register(monitoringModulePlugin);

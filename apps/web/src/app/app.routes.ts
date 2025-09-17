@@ -82,6 +82,22 @@ export const appRoutes: Route[] = [
     },
   },
   {
+    path: 'file-upload',
+    loadComponent: () =>
+      import('./pages/file-upload/file-upload.page').then(
+        (m) => m.FileUploadPage,
+      ),
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'file-upload-demo',
+    loadComponent: () =>
+      import('./pages/file-upload/file-upload-demo.page').then(
+        (m) => m.FileUploadDemoPage,
+      ),
+    canActivate: [AuthGuard],
+  },
+  {
     path: 'components',
     canActivate: [AuthGuard],
     children: [
