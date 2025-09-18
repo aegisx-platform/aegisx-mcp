@@ -301,6 +301,12 @@ pnpm run setup:env
 # Check generated configuration
 cat .env.local
 cat docker-compose.instance.yml
+
+# Test environment loading (with debug)
+DEBUG_ENV=true pnpm dev:api --version
+
+# Manual test of environment script
+DEBUG_ENV=true ./scripts/load-env.sh bash -c 'echo "API: $API_PORT, Web: $WEB_PORT"'
 ```
 
 ### **Docker Compose Instance File Not Found**
@@ -322,6 +328,41 @@ docker ps --filter "name=aegisx" --format "table {{.Names}}\t{{.Ports}}"
 ```
 
 **Note**: Each instance uses a completely separate Docker Compose file with unique ports - no conflicts!
+
+## 🔧 **Environment Variable Loading**
+
+The system uses a custom `load-env.sh` script to properly load environment variables from `.env.local` and `.env` files into npm scripts:
+
+### **How It Works**
+
+```bash
+# npm scripts automatically use load-env.sh wrapper
+pnpm dev:api     # → ./scripts/load-env.sh nx serve api --port=${API_PORT:-3333}
+pnpm dev:web     # → ./scripts/load-env.sh nx serve web --port=${WEB_PORT:-4200}
+pnpm dev:admin   # → ./scripts/load-env.sh nx serve admin --port=${ADMIN_PORT:-4201}
+```
+
+### **Manual Usage**
+
+```bash
+# Load environment and run any command
+./scripts/load-env.sh nx serve api --port=${API_PORT:-3333}
+
+# Test environment loading
+DEBUG_ENV=true ./scripts/load-env.sh bash -c 'echo "Ports: API=$API_PORT, Web=$WEB_PORT"'
+
+# Check if environment is loaded correctly
+./scripts/load-env.sh env | grep -E "(API_PORT|WEB_PORT|ADMIN_PORT)"
+```
+
+### **Environment File Hierarchy**
+
+The script loads environment files in this order:
+
+1. **`.env`** - Base configuration (committed to git)
+2. **`.env.local`** - Instance-specific overrides (git-ignored, auto-generated)
+
+Later files override earlier ones, so `.env.local` takes precedence.
 
 ## 📚 **Advanced Usage**
 
@@ -403,7 +444,40 @@ You've successfully set up multi-instance development when:
 - ✅ Database changes in one instance don't affect others
 - ✅ No port conflicts or container name collisions
 - ✅ Can switch between features seamlessly
+- ✅ **Proxy configuration works automatically** - Angular apps connect to correct API
+- ✅ **Environment-based ports** - All services use ports from .env.local
+
+## 🔧 **Final Configuration Summary**
+
+### **For aegisx-starter-1 instance:**
+
+| Service        | Port | URL                     | Environment Variable |
+| -------------- | ---- | ----------------------- | -------------------- |
+| **API**        | 3383 | <http://localhost:3383> | `API_PORT=3383`      |
+| **Web**        | 4249 | <http://localhost:4249> | `WEB_PORT=4249`      |
+| **Admin**      | 4250 | <http://localhost:4250> | `ADMIN_PORT=4250`    |
+| **PostgreSQL** | 5482 | localhost:5482          | `POSTGRES_PORT=5482` |
+| **Redis**      | 6430 | localhost:6430          | `REDIS_PORT=6430`    |
+
+### **Proxy Routing:**
+
+- **Web App** (`localhost:4249`) → `/api/*` → **API** (`localhost:3383`)
+- **Admin App** (`localhost:4250`) → `/api/*` → **API** (`localhost:3383`)
+- **WebSocket** (`/ws`) → **API** (`localhost:3383`) for real-time features
+
+### **Commands That Work:**
+
+```bash
+# Start all services with correct ports
+pnpm dev           # API (3383) + Web (4249)
+pnpm dev:all       # API (3383) + Web (4249) + Admin (4250)
+
+# Start individual services
+pnpm dev:api       # API on port 3383
+pnpm dev:web       # Web on port 4249 (proxy to 3383)
+pnpm dev:admin     # Admin on port 4250 (proxy to 3383)
+```
 
 ---
 
-**🚀 Ready to develop multiple features in parallel!**
+**🚀 Ready to develop multiple features in parallel with full multi-instance support!**

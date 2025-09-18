@@ -1,7 +1,15 @@
 import type { Knex } from 'knex';
 import * as dotenv from 'dotenv';
 
+// Load .env first (base configuration)
 dotenv.config();
+
+// Load environment-specific configuration for development only
+// In production, environment variables are injected directly into container
+if (process.env.NODE_ENV !== 'production') {
+  // Load .env.local for development (instance-specific overrides)
+  dotenv.config({ path: '.env.local', override: true });
+}
 
 const config: { [key: string]: Knex.Config } = {
   development: {
@@ -46,13 +54,16 @@ const config: { [key: string]: Knex.Config } = {
   },
   production: {
     client: 'postgresql',
-    connection: {
-      host: process.env.POSTGRES_HOST || process.env.DATABASE_HOST,
+    connection: process.env.DATABASE_URL || {
+      host:
+        process.env.POSTGRES_HOST || process.env.DATABASE_HOST || 'postgres',
       port: parseInt(
         process.env.POSTGRES_PORT || process.env.DATABASE_PORT || '5432',
       ),
-      database: process.env.POSTGRES_DB || process.env.DATABASE_NAME,
-      user: process.env.POSTGRES_USER || process.env.DATABASE_USER,
+      database:
+        process.env.POSTGRES_DB || process.env.DATABASE_NAME || 'aegisx_db',
+      user:
+        process.env.POSTGRES_USER || process.env.DATABASE_USER || 'postgres',
       password: process.env.POSTGRES_PASSWORD || process.env.DATABASE_PASSWORD,
       ssl:
         process.env.NODE_ENV === 'production'
