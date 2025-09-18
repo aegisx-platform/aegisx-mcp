@@ -32,12 +32,16 @@ async function userProfilePlugin(
     userProfileSchemas,
   );
 
-  // Register multipart support for file uploads
+  // Register multipart support for file uploads (shared across modules)
   await fastify.register(require('@fastify/multipart'), {
     limits: {
-      fileSize: 5 * 1024 * 1024, // 5MB
-      files: 1,
+      fileSize: 100 * 1024 * 1024, // 100MB per file
+      files: 10, // Allow up to 10 files for file-upload module
+      fieldSize: 1024 * 1024, // 1MB for form fields
+      fields: 10, // Maximum number of non-file fields
     },
+    throwFileSizeLimit: true,
+    addToBody: false, // Don't add files to request.body
   });
 
   // Initialize dependencies
@@ -61,7 +65,7 @@ async function userProfilePlugin(
   });
 
   const activityController = new UserActivityController(activityService);
-  
+
   const deleteAccountController = new DeleteAccountController(
     fastify.usersService,
     activityService,
@@ -85,5 +89,10 @@ async function userProfilePlugin(
 
 export default fp(userProfilePlugin, {
   name: 'user-profile',
-  dependencies: ['knex-plugin', 'jwt-auth-plugin', 'schemas-plugin', 'users-plugin'],
+  dependencies: [
+    'knex-plugin',
+    'jwt-auth-plugin',
+    'schemas-plugin',
+    'users-plugin',
+  ],
 });

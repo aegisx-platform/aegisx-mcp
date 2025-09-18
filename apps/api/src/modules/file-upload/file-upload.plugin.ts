@@ -11,17 +11,8 @@ import { fileUploadRoutes } from './file-upload.routes';
  * Registers file upload functionality with dependency injection
  */
 async function fileUploadPlugin(fastify: FastifyInstance) {
-  // Register multipart support with higher limits for file uploads
-  await fastify.register(require('@fastify/multipart'), {
-    limits: {
-      fileSize: 100 * 1024 * 1024, // 100MB per file
-      files: 10, // Allow up to 10 files
-      fieldSize: 1024 * 1024, // 1MB for other form fields
-      fields: 10, // Maximum number of non-file fields
-    },
-    throwFileSizeLimit: true,
-    addToBody: false, // Don't add files to request.body
-  });
+  // Multipart support should already be registered by user-profile plugin
+  // We'll configure limits per-route in the route handlers
 
   // Initialize storage adapter
   const storageAdapter = new LocalStorageAdapter(
