@@ -1,4 +1,4 @@
-import { Knex } from 'knex';
+import Knex from 'knex';
 import {
   type Setting,
   type CreateSetting,
@@ -57,7 +57,7 @@ export interface DBSettingHistory {
 }
 
 export class SettingsRepository {
-  constructor(private knex: Knex) {}
+  constructor(private knex: any) {}
 
   /**
    * Get all settings with filtering and pagination

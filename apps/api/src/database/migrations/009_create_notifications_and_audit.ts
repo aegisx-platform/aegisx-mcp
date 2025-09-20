@@ -1,6 +1,6 @@
-import { Knex } from 'knex';
+import Knex from 'knex';
 
-export async function up(knex: Knex): Promise<void> {
+export async function up(knex: any): Promise<void> {
   // Create notifications table for in-app notifications
   await knex.schema.createTable('notifications', (table) => {
     table.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));
@@ -160,7 +160,7 @@ export async function up(knex: Knex): Promise<void> {
   });
 }
 
-export async function down(knex: Knex): Promise<void> {
+export async function down(knex: any): Promise<void> {
   await knex.schema.dropTableIfExists('api_keys');
   await knex.schema.dropTableIfExists('password_reset_tokens');
   await knex.schema.dropTableIfExists('email_verification_tokens');

@@ -1,4 +1,4 @@
-import { Knex } from 'knex';
+import Knex from 'knex';
 import * as bcrypt from 'bcrypt';
 
 export interface User {
@@ -38,7 +38,7 @@ export interface UserSession {
 }
 
 export class AuthRepository {
-  constructor(private knex: Knex) {}
+  constructor(private knex: any) {}
 
   async findUserByEmail(email: string): Promise<User | null> {
     const user = await this.knex('users')

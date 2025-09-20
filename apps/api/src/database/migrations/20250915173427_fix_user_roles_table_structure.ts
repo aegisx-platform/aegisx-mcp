@@ -1,6 +1,6 @@
-import type { Knex } from 'knex';
+import Knex from 'knex';
 
-export async function up(knex: Knex): Promise<void> {
+export async function up(knex: any): Promise<void> {
   // Add missing columns to user_roles table if they don't exist
   const hasIdColumn = await knex.schema.hasColumn('user_roles', 'id');
   const hasIsActiveColumn = await knex.schema.hasColumn(
@@ -105,7 +105,7 @@ export async function up(knex: Knex): Promise<void> {
   }
 }
 
-export async function down(knex: Knex): Promise<void> {
+export async function down(knex: any): Promise<void> {
   // Remove the columns we added (be careful with this in production)
   await knex.schema.alterTable('user_roles', (table) => {
     table.dropColumn('expires_at');

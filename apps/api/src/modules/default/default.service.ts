@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import { Knex } from 'knex';
+import Knex from 'knex';
 import * as os from 'os';
 
 export interface ApiInfo {
@@ -49,7 +49,7 @@ export interface HealthStatus {
 export class DefaultService {
   private startTime: number;
 
-  constructor(private knex: Knex, private fastify?: FastifyInstance) {
+  constructor(private knex: any, private fastify?: FastifyInstance) {
     this.startTime = Date.now();
   }
 

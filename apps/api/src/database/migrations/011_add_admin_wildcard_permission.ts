@@ -1,6 +1,6 @@
-import { Knex } from 'knex';
+import Knex from 'knex';
 
-export async function up(knex: Knex): Promise<void> {
+export async function up(knex: any): Promise<void> {
   // Check if roles table exists first
   const hasRolesTable = await knex.schema.hasTable('roles');
   if (!hasRolesTable) {
@@ -50,7 +50,7 @@ export async function up(knex: Knex): Promise<void> {
   }
 }
 
-export async function down(knex: Knex): Promise<void> {
+export async function down(knex: any): Promise<void> {
   // Remove wildcard permission
   const permission = await knex('permissions')
     .where('resource', '*')

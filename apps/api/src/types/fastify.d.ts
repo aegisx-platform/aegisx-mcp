@@ -1,11 +1,11 @@
 import '@fastify/jwt';
-import { Knex } from 'knex';
+import Knex from 'knex';
 import { Redis } from 'ioredis';
 import { JWTPayload } from './jwt.types';
 
 declare module 'fastify' {
   interface FastifyInstance {
-    knex: Knex;
+    knex: any;
     redis?: Redis;
   }
 }

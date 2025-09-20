@@ -1,7 +1,7 @@
-import { Knex } from 'knex';
+import Knex from 'knex';
 
 export class DatabaseHelper {
-  constructor(private db: Knex) {}
+  constructor(private db: any) {}
 
   /**
    * Clean all test data from database
@@ -106,7 +106,7 @@ export class DatabaseHelper {
    * Create transaction for test isolation
    */
   async transaction<T>(
-    callback: (trx: Knex.Transaction) => Promise<T>,
+    callback: (trx: any) => Promise<T>,
   ): Promise<T> {
     return await this.db.transaction(callback);
   }
@@ -135,21 +135,21 @@ export class DatabaseHelper {
   /**
    * Start a database transaction for test isolation
    */
-  async startTransaction(): Promise<Knex.Transaction> {
+  async startTransaction(): Promise<any> {
     return await this.db.transaction();
   }
 
   /**
    * Commit transaction
    */
-  async commitTransaction(trx: Knex.Transaction): Promise<void> {
+  async commitTransaction(trx: any): Promise<void> {
     await trx.commit();
   }
 
   /**
    * Rollback transaction
    */
-  async rollbackTransaction(trx: Knex.Transaction): Promise<void> {
+  async rollbackTransaction(trx: any): Promise<void> {
     await trx.rollback();
   }
 

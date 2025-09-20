@@ -1,4 +1,4 @@
-import { Knex } from 'knex';
+import Knex from 'knex';
 import { 
   ActivityLog, 
   CreateActivityLog, 
@@ -20,7 +20,7 @@ export interface PaginationResult<T> {
 }
 
 export class UserActivityRepository {
-  constructor(private knex: Knex) {}
+  constructor(private knex: any) {}
 
   /**
    * Create a new activity log entry

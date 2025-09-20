@@ -1,6 +1,6 @@
-import type { Knex } from 'knex';
+import Knex from 'knex';
 
-export async function up(knex: Knex): Promise<void> {
+export async function up(knex: any): Promise<void> {
   // Create user_roles junction table if not exists
   const hasUserRoles = await knex.schema.hasTable('user_roles');
   if (!hasUserRoles) {
@@ -181,7 +181,7 @@ export async function up(knex: Knex): Promise<void> {
   }
 }
 
-export async function down(knex: Knex): Promise<void> {
+export async function down(knex: any): Promise<void> {
   // Remove enhanced columns from permissions table
   await knex.schema.alterTable('permissions', (table) => {
     table.dropColumn('conditions');

@@ -1,9 +1,9 @@
-import { Knex } from 'knex';
+import Knex from 'knex';
 import { FastifyInstance } from 'fastify';
 import { UploadedFile, FileListQuery } from './file-upload.schemas';
 
 export interface FileUploadRepositoryDependencies {
-  db: Knex;
+  db: any;
   logger: FastifyInstance['log'];
 }
 

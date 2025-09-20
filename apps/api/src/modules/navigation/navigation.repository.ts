@@ -1,4 +1,4 @@
-import { Knex } from 'knex';
+import Knex from 'knex';
 import {
   NavigationItemEntity,
   UserNavigationPreferenceEntity,
@@ -11,7 +11,7 @@ import {
  * NavigationRepository - Handles database operations for navigation system
  */
 export class NavigationRepository {
-  constructor(private readonly knex: Knex) {}
+  constructor(private readonly knex: any) {}
 
   /**
    * Get all navigation items with their permissions

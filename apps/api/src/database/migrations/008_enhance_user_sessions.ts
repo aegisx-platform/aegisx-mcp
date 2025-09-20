@@ -1,6 +1,6 @@
-import { Knex } from 'knex';
+import Knex from 'knex';
 
-export async function up(knex: Knex): Promise<void> {
+export async function up(knex: any): Promise<void> {
   // Enhance user_sessions table with device info and location tracking
   await knex.schema.alterTable('user_sessions', (table) => {
     // Device information fields
@@ -95,7 +95,7 @@ export async function up(knex: Knex): Promise<void> {
   });
 }
 
-export async function down(knex: Knex): Promise<void> {
+export async function down(knex: any): Promise<void> {
   // Drop tables in reverse order
   await knex.schema.dropTableIfExists('session_security_events');
   await knex.schema.dropTableIfExists('session_activity');

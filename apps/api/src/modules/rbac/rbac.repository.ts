@@ -1,4 +1,4 @@
-import { Knex } from 'knex';
+import Knex from 'knex';
 import {
   Role,
   Permission,
@@ -22,7 +22,7 @@ import {
 } from '../../shared/pagination.utils';
 
 export class RbacRepository {
-  constructor(public db: Knex) {}
+  constructor(public db: any) {}
 
   // ===== ROLE METHODS =====
 

@@ -1,6 +1,6 @@
-import { Knex } from 'knex';
+import Knex from 'knex';
 
-export async function up(knex: Knex): Promise<void> {
+export async function up(knex: any): Promise<void> {
   // Add performance indexes for Settings API
   // Note: Using regular CREATE INDEX without CONCURRENTLY to work within transactions
 
@@ -58,7 +58,7 @@ export async function up(knex: Knex): Promise<void> {
   `);
 }
 
-export async function down(knex: Knex): Promise<void> {
+export async function down(knex: any): Promise<void> {
   // Drop indexes in reverse order
   await knex.raw('DROP INDEX IF EXISTS idx_settings_history_user');
   await knex.raw('DROP INDEX IF EXISTS idx_settings_history_time_range');

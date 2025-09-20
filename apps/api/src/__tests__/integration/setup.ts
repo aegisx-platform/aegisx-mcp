@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import knex, { Knex } from 'knex';
+import knex from 'knex';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 import { build } from '../../test-helpers/app-helper';
@@ -9,7 +9,7 @@ import { TestUserFactory, TestDataFactory } from './factories';
 dotenv.config({ path: '.env.test' });
 
 interface TestDatabase {
-  connection: Knex;
+  connection: any;
   migrate: () => Promise<void>;
   seed: () => Promise<void>;
   cleanup: () => Promise<void>;
