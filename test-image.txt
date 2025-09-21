@@ -1,0 +1,9 @@
+This is a text file that should be viewable inline in browser.
+Smart View should detect this as text/plain MIME type and show it inline.
+
+Content:
+- This file has text/plain MIME type
+- Should be viewable inline
+- Not forced to download
+
+Testing Smart View functionality with viewable content.

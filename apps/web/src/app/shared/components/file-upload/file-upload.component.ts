@@ -283,9 +283,13 @@ import {
         <button
           mat-button
           (click)="clearFiles()"
-          [disabled]="selectedFiles().length === 0 || isUploading()"
+          [disabled]="
+            (selectedFiles().length === 0 &&
+              validUploadedFiles().length === 0) ||
+            isUploading()
+          "
         >
-          Clear All
+          {{ selectedFiles().length > 0 ? 'Clear Selected' : 'Clear All' }}
         </button>
         <button
           mat-raised-button
@@ -305,12 +309,12 @@ import {
     <!-- Uploaded Files Display -->
     <mat-card
       class="uploaded-files-container mt-4"
-      *ngIf="uploadedFiles().length > 0"
+      *ngIf="validUploadedFiles().length > 0"
     >
       <mat-card-header>
         <mat-card-title>
           <mat-icon>cloud_done</mat-icon>
-          Uploaded Files ({{ uploadedFiles().length }})
+          Uploaded Files ({{ validUploadedFiles().length }})
         </mat-card-title>
         <mat-card-subtitle>
           Successfully uploaded files with actions
@@ -320,7 +324,10 @@ import {
       <mat-card-content>
         <div class="uploaded-files-grid">
           <ng-container
-            *ngFor="let file of uploadedFiles(); trackBy: trackByUploadedFile"
+            *ngFor="
+              let file of validUploadedFiles();
+              trackBy: trackByUploadedFile
+            "
           >
             <div *ngIf="file" class="uploaded-file-item">
               <!-- File Thumbnail/Preview -->
@@ -848,6 +855,10 @@ export class FileUploadComponent implements OnInit, OnDestroy {
       .flatMap((result) => result.errors);
   });
 
+  readonly validUploadedFiles = computed(() => {
+    return this._uploadedFiles().filter((file) => file && file.id);
+  });
+
   readonly validFiles = computed(() => {
     return this._validationResults()
       .filter((result) => result.valid)
@@ -1008,6 +1019,7 @@ export class FileUploadComponent implements OnInit, OnDestroy {
     this._selectedFiles.set([]);
     this._uploadProgress.set([]);
     this._validationResults.set([]);
+    this._uploadedFiles.set([]);
     this.fileUploadService.clearUploadProgress();
   }
 
@@ -1018,77 +1030,106 @@ export class FileUploadComponent implements OnInit, OnDestroy {
     const options: FileUploadOptions = this.optionsForm.value;
 
     try {
-      if (validFiles.length === 1) {
-        this.fileUploadService.uploadFile(validFiles[0], options).subscribe({
-          next: (response) => {
-            const uploadedFiles = [response.data];
-            this._uploadedFiles.update((files) => [...files, ...uploadedFiles]);
-            this.uploadComplete.emit(uploadedFiles);
-            this.snackBar.open('File uploaded successfully!', 'Close', {
-              duration: 3000,
-            });
-            // Clear the upload state after successful upload
-            this.clearFiles();
-          },
-          error: (error) => {
-            this.uploadError.emit(error.message);
-            this.snackBar.open(error.message, 'Close', { duration: 5000 });
-          },
-        });
-      } else {
-        this.fileUploadService
-          .uploadMultipleFiles(validFiles, options)
-          .subscribe({
-            next: (response) => {
-              const uploadedFiles = response.data.uploaded;
-
-              // Combine uploaded files with their previews from progress
-              const uploadedFilesWithPreviews = uploadedFiles.map(
-                (uploadedFile) => {
-                  const progressItem = this._uploadProgress().find(
-                    (p) => p.file.name === uploadedFile.originalName,
-                  );
-                  return {
-                    ...uploadedFile,
-                    preview: progressItem?.preview,
-                  };
-                },
-              );
-
-              this._uploadedFiles.update((files) => [
-                ...files,
-                ...uploadedFilesWithPreviews,
-              ]);
-              this.uploadComplete.emit(uploadedFiles);
-
-              if (response.data.failed.length > 0) {
-                this.snackBar.open(
-                  `${response.data.uploaded.length} files uploaded, ${response.data.failed.length} failed`,
-                  'Close',
-                  { duration: 5000 },
-                );
-              } else {
-                this.snackBar.open(
-                  'All files uploaded successfully!',
-                  'Close',
-                  { duration: 3000 },
-                );
-              }
-
-              // Clear the upload state after successful upload
-              this.clearFiles();
-            },
-            error: (error) => {
-              this.uploadError.emit(error.message);
-              this.snackBar.open(error.message, 'Close', { duration: 5000 });
-            },
-          });
-      }
+      // Use sequential single file uploads for better performance
+      await this.uploadFilesSequentially(validFiles, options);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Upload failed';
       this.uploadError.emit(message);
       this.snackBar.open(message, 'Close', { duration: 5000 });
     }
+  }
+
+  private async uploadFilesSequentially(
+    validFiles: File[],
+    options: FileUploadOptions,
+  ): Promise<void> {
+    let successCount = 0;
+    let failCount = 0;
+    const uploadedFiles: UploadedFile[] = [];
+
+    for (let i = 0; i < validFiles.length; i++) {
+      const file = validFiles[i];
+
+      try {
+        // Upload single file
+        const response = await new Promise<{ data: UploadedFile }>(
+          (resolve, reject) => {
+            this.fileUploadService.uploadFile(file, options).subscribe({
+              next: (response) => {
+                if (response.data) {
+                  resolve(response);
+                } else {
+                  reject(new Error('No data in response'));
+                }
+              },
+              error: (error) => reject(error),
+            });
+          },
+        );
+
+        // Track successful upload
+        successCount++;
+        const uploadedFile = response.data;
+
+        // Add preview from progress if available
+        const progressItem = this._uploadProgress().find(
+          (p) => p.file.name === uploadedFile.originalName,
+        );
+        const uploadedFileWithPreview = {
+          ...uploadedFile,
+          preview: progressItem?.preview,
+        };
+
+        uploadedFiles.push(uploadedFile);
+        this._uploadedFiles.update((files) => [
+          ...files,
+          uploadedFileWithPreview,
+        ]);
+
+        // Show progress update
+        this.snackBar.open(
+          `File ${i + 1}/${validFiles.length} uploaded: ${file.name}`,
+          'Close',
+          { duration: 2000 },
+        );
+      } catch (error) {
+        failCount++;
+        console.error(`Failed to upload ${file.name}:`, error);
+
+        // Show error for individual file
+        this.snackBar.open(
+          `Failed to upload ${file.name}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          'Close',
+          { duration: 3000 },
+        );
+      }
+    }
+
+    // Emit completion event with all successfully uploaded files
+    if (uploadedFiles.length > 0) {
+      this.uploadComplete.emit(uploadedFiles);
+    }
+
+    // Show final summary
+    if (failCount === 0) {
+      this.snackBar.open(
+        `All ${successCount} files uploaded successfully!`,
+        'Close',
+        { duration: 3000 },
+      );
+    } else {
+      this.snackBar.open(
+        `${successCount} files uploaded, ${failCount} failed`,
+        'Close',
+        { duration: 5000 },
+      );
+    }
+
+    // Clear selected files and progress after completion
+    this._selectedFiles.set([]);
+    this._uploadProgress.set([]);
+    this._validationResults.set([]);
+    this.fileUploadService.clearUploadProgress();
   }
 
   isUploading(): boolean {
