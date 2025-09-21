@@ -310,15 +310,67 @@ export class TestRbacWebsocketComponent implements OnInit, OnDestroy {
     return this.connectionStatus().status === 'connected';
   }
 
-  connect() {
+  async connect() {
     this.logEvent('ACTION', 'Connecting to WebSocket...');
 
     // Add debugging
     console.log('🔌 Manual connect triggered');
     console.log('🔌 Current status:', this.connectionStatus());
 
-    // TODO: Get actual token from auth service
-    this.websocketService.connect('dummy-token');
+    try {
+      // Get a real authentication token
+      const loginResponse = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: `wstest${Date.now()}@example.com`,
+          password: 'password123',
+          username: `wstest${Date.now()}`,
+          firstName: 'WebSocket',
+          lastName: 'Test',
+        }),
+      });
+
+      let token = null;
+      if (loginResponse.status === 409) {
+        // User exists, try to login
+        const existingLogin = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: 'wstest@example.com',
+            password: 'password123',
+          }),
+        });
+
+        if (existingLogin.ok) {
+          const data = await existingLogin.json();
+          token = data.data?.accessToken;
+        }
+      } else if (loginResponse.ok) {
+        const data = await loginResponse.json();
+        token = data.data?.accessToken;
+      }
+
+      if (token) {
+        this.logEvent(
+          'AUTH',
+          `Got authentication token: ${token.substring(0, 20)}...`,
+        );
+        this.websocketService.connect(token);
+      } else {
+        this.logEvent(
+          'AUTH_ERROR',
+          'Failed to get authentication token - using test token',
+        );
+        // Use a test token that backend will accept
+        this.websocketService.connect('test-token-websocket-connection');
+      }
+    } catch (error) {
+      this.logEvent('AUTH_ERROR', `Authentication error: ${error}`, { error });
+      // Fallback to dummy token for testing
+      this.websocketService.connect('dummy-token-for-testing');
+    }
   }
 
   disconnect() {
@@ -337,7 +389,9 @@ export class TestRbacWebsocketComponent implements OnInit, OnDestroy {
     this.logEvent('ACTION', 'Checking WebSocket health...');
 
     try {
-      const response = await fetch('/api/websocket/health');
+      const response = await fetch(
+        'http://localhost:3333/api/websocket/health',
+      );
       const result = await response.json();
 
       if (result.success) {

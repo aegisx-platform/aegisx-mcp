@@ -33,7 +33,7 @@ import rbacPlugin from './modules/rbac/rbac.plugin';
 import jwtAuthPlugin from './plugins/jwt-auth.plugin';
 import staticFilesPlugin from './plugins/static-files.plugin';
 import swaggerPlugin from './plugins/swagger.plugin';
-// import websocketPlugin from './shared/websocket/websocket.plugin'; // ปิดชั่วคราวเพื่อทดสอบ
+import websocketPlugin from './shared/websocket/websocket.plugin';
 
 // Load environment variables
 dotenv.config();
@@ -234,7 +234,7 @@ async function bootstrap() {
   await app.register(monitoringModulePlugin);
 
   // WebSocket support
-  // await app.register(websocketPlugin); // ปิดชั่วคราวเพื่อทดสอบ signed URLs
+  await app.register(websocketPlugin);
 
   // Start server
   const port = process.env.PORT || 3333;
