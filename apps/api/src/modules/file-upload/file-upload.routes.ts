@@ -5,6 +5,8 @@ import {
   SignedUrlRequestSchema,
   FileListQuerySchema,
   DownloadQuerySchema,
+  ThumbnailQuerySchema,
+  ViewQuerySchema,
   FileIdParamSchema,
   FileUploadResponseSchema,
   MultipleFileUploadResponseSchema,
@@ -17,6 +19,7 @@ import {
 } from './file-upload.schemas';
 import { StandardRouteResponses } from '../../schemas/base.schemas';
 import { FileUploadController } from './file-upload.controller';
+import { createOptionalAuthHandler } from '../../shared/helpers/optional-auth.helper';
 
 export interface FileUploadRoutesOptions {
   controller: FileUploadController;
@@ -113,12 +116,13 @@ export async function fileUploadRoutes(
     handler: controller.getUserStats.bind(controller),
   });
 
-  // List user files
+  // List user files (optional authentication - public files visible to all, private files require auth)
   fastify.get('/', {
     schema: {
       tags: ['File Management'],
-      summary: 'List user files',
-      description: 'Get paginated list of user files with filtering options',
+      summary: 'List files',
+      description:
+        'Get paginated list of files with filtering options. Public files are visible to all users, private files require authentication.',
       querystring: FileListQuerySchema,
       response: {
         200: FileListResponseSchema,
@@ -127,7 +131,7 @@ export async function fileUploadRoutes(
       },
       security: [{ bearerAuth: [] }],
     },
-    preHandler: [fastify.authenticate],
+    preHandler: createOptionalAuthHandler(fastify),
     handler: controller.listFiles.bind(controller),
   });
 
@@ -150,12 +154,13 @@ export async function fileUploadRoutes(
     handler: controller.getFile.bind(controller),
   });
 
-  // Download file
+  // Download file (optional authentication - public files accessible without auth, private files require token)
   fastify.get('/:id/download', {
     schema: {
       tags: ['File Access'],
       summary: 'Download file',
-      description: 'Download file content or specific variant',
+      description:
+        'Download file content or specific variant. Public files can be accessed without authentication, private files require valid token.',
       params: FileIdParamSchema,
       querystring: DownloadQuerySchema,
       response: {
@@ -165,13 +170,65 @@ export async function fileUploadRoutes(
           format: 'binary',
         },
         401: FileUploadErrorSchema,
-        404: StandardRouteResponses[404],
+        404: FileUploadErrorSchema,
         500: FileUploadErrorSchema,
       },
       security: [{ bearerAuth: [] }],
     },
-    preHandler: [fastify.authenticate],
+    // Optional authentication - try to authenticate but don't fail if no token
+    preHandler: createOptionalAuthHandler(fastify),
     handler: controller.downloadFile.bind(controller),
+  });
+
+  // View file inline (optional authentication - public files accessible without auth, private files require token)
+  fastify.get('/:id/view', {
+    // schema: {
+    //   tags: ['File Access'],
+    //   summary: 'View file inline',
+    //   description: 'View file content inline in browser. Public files can be accessed without authentication, private files require valid token.',
+    //   params: FileIdParamSchema,
+    //   querystring: ViewQuerySchema,
+    //   response: {
+    //     200: {
+    //       description: 'File content displayed inline',
+    //       type: 'string',
+    //       format: 'binary',
+    //     },
+    //     401: FileUploadErrorSchema,
+    //     404: FileUploadErrorSchema,
+    //     500: FileUploadErrorSchema,
+    //   },
+    //   security: [{ bearerAuth: [] }],
+    // },
+    // Optional authentication - try to authenticate but don't fail if no token
+    preHandler: createOptionalAuthHandler(fastify),
+    handler: controller.viewFile.bind(controller),
+  });
+
+  // Get custom thumbnail (optional authentication - public files accessible without auth, private files require token)
+  fastify.get('/:id/thumbnail', {
+    schema: {
+      tags: ['File Access'],
+      summary: 'Get custom thumbnail',
+      description:
+        'Generate or retrieve cached thumbnail with custom size and quality. Public files can be accessed without authentication, private files require valid token.',
+      params: FileIdParamSchema,
+      querystring: ThumbnailQuerySchema,
+      response: {
+        200: {
+          description: 'Thumbnail image',
+          type: 'string',
+          format: 'binary',
+        },
+        401: FileUploadErrorSchema,
+        404: FileUploadErrorSchema,
+        500: FileUploadErrorSchema,
+      },
+      security: [{ bearerAuth: [] }],
+    },
+    // Optional authentication - try to authenticate but don't fail if no token
+    preHandler: createOptionalAuthHandler(fastify),
+    handler: controller.getThumbnail.bind(controller),
   });
 
   // Update file metadata
@@ -235,12 +292,13 @@ export async function fileUploadRoutes(
     handler: controller.processImage.bind(controller),
   });
 
-  // Generate signed URL
-  fastify.post('/:id/signed-url', {
+  // Generate signed URLs (view, download, thumbnail)
+  fastify.post('/:id/signed-urls', {
     schema: {
       tags: ['File Access'],
-      summary: 'Generate signed URL',
-      description: 'Generate a time-limited signed URL for secure file access',
+      summary: 'Generate signed URLs',
+      description:
+        'Generate time-limited signed URLs for view, download, and thumbnail access',
       params: FileIdParamSchema,
       body: SignedUrlRequestSchema,
       response: {
@@ -252,7 +310,7 @@ export async function fileUploadRoutes(
       security: [{ bearerAuth: [] }],
     },
     preHandler: [fastify.authenticate],
-    handler: controller.generateSignedUrl.bind(controller),
+    handler: controller.generateSignedUrls.bind(controller),
   });
 
   // TODO: Add chunked upload endpoints

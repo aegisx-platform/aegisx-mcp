@@ -38,10 +38,20 @@ export class LocalStorageAdapter implements IStorageAdapter {
     private deps: LocalStorageAdapterDependencies,
     private config: StorageConfig,
   ) {
-    this.basePath = config.basePath || path.join(process.cwd(), 'uploads');
+    // Ensure basePath is always absolute
+    const configBasePath = config.basePath || 'uploads';
+    this.basePath = path.isAbsolute(configBasePath)
+      ? configBasePath
+      : path.join(process.cwd(), configBasePath);
+
     this.publicUrlBase = config.publicUrlBase || '/api/files';
     this.maxFileSize = config.maxFileSize || 100 * 1024 * 1024; // 100MB default
     this.allowedMimeTypes = config.allowedMimeTypes || ['*/*'];
+
+    // Log the resolved basePath for debugging
+    this.deps.logger.info(
+      `LocalStorageAdapter initialized with basePath: ${this.basePath}`,
+    );
 
     // Ensure base directory exists
     this.ensureBaseDirectory();

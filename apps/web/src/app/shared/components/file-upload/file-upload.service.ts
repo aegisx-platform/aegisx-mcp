@@ -2,6 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpParams, HttpEventType } from '@angular/common/http';
 import { Observable, map, catchError, throwError, BehaviorSubject } from 'rxjs';
 import { AuthService } from '../../../core/auth.service';
+import { ApiConfigService } from '../../../core/api-config.service';
 import {
   FileUploadOptions,
   FileUpdateRequest,
@@ -9,6 +10,8 @@ import {
   SignedUrlRequest,
   FileListQuery,
   DownloadQuery,
+  ThumbnailQuery,
+  ViewQuery,
   UploadedFile,
   FileUploadResponse,
   MultipleFileUploadResponse,
@@ -28,6 +31,7 @@ import {
 export class FileUploadService {
   private http = inject(HttpClient);
   private authService = inject(AuthService);
+  private apiConfig = inject(ApiConfigService);
 
   private readonly apiUrl = '/files';
 
@@ -350,6 +354,8 @@ export class FileUploadService {
 
   /**
    * Get file download URL
+   * Returns relative URL for HttpClient requests (handled by BaseUrlInterceptor)
+   * Note: For direct browser access, use file.downloadUrl from API response instead
    */
   getDownloadUrl(id: string, query: DownloadQuery = {}): string {
     let params = new HttpParams();
@@ -392,6 +398,118 @@ export class FileUploadService {
    */
   getCurrentProgress(): FileUploadProgress[] {
     return this.uploadProgressSubject.value;
+  }
+
+  /**
+   * Get file view URL for inline display
+   */
+  getViewUrl(fileId: string, options?: ViewQuery): string {
+    // Build the full URL using current location
+    const baseUrl = this.apiConfig.getApiBaseUrl() || '';
+    let fullUrl: string;
+
+    if (baseUrl && baseUrl.startsWith('http')) {
+      // Absolute URL
+      fullUrl = `${baseUrl}${this.apiUrl}/${fileId}/view`;
+    } else {
+      // Relative URL - build from current location
+      const protocol = window.location.protocol;
+      const host = window.location.host;
+      const apiPath = baseUrl || '/api';
+      fullUrl = `${protocol}//${host}${apiPath}${this.apiUrl}/${fileId}/view`;
+    }
+
+    const url = new URL(fullUrl);
+
+    if (options?.variant) {
+      url.searchParams.set('variant', options.variant);
+    }
+    if (options?.cache !== undefined) {
+      url.searchParams.set('cache', options.cache.toString());
+    }
+
+    return url.toString();
+  }
+
+  /**
+   * Get thumbnail URL with custom sizing
+   */
+  getThumbnailUrl(fileId: string, options?: ThumbnailQuery): string {
+    // Build the full URL using current location
+    const baseUrl = this.apiConfig.getApiBaseUrl() || '';
+    let fullUrl: string;
+
+    if (baseUrl && baseUrl.startsWith('http')) {
+      // Absolute URL
+      fullUrl = `${baseUrl}${this.apiUrl}/${fileId}/thumbnail`;
+    } else {
+      // Relative URL - build from current location
+      const protocol = window.location.protocol;
+      const host = window.location.host;
+      const apiPath = baseUrl || '/api';
+      fullUrl = `${protocol}//${host}${apiPath}${this.apiUrl}/${fileId}/thumbnail`;
+    }
+
+    const url = new URL(fullUrl);
+
+    if (options?.size) {
+      url.searchParams.set('size', options.size);
+    }
+    if (options?.quality !== undefined) {
+      url.searchParams.set('quality', options.quality.toString());
+    }
+    if (options?.format) {
+      url.searchParams.set('format', options.format);
+    }
+
+    return url.toString();
+  }
+
+  /**
+   * View file inline (returns blob for programmatic use)
+   */
+  viewFile(fileId: string, options?: ViewQuery): Observable<Blob> {
+    let params = new HttpParams();
+
+    if (options?.variant) {
+      params = params.set('variant', options.variant);
+    }
+    if (options?.cache !== undefined) {
+      params = params.set('cache', options.cache.toString());
+    }
+
+    return this.http
+      .get(`${this.apiUrl}/${fileId}/view`, {
+        params,
+        responseType: 'blob',
+        headers: this.getAuthHeaders(),
+      })
+      .pipe(catchError(this.handleError.bind(this)));
+  }
+
+  /**
+   * Get thumbnail blob for programmatic use
+   */
+  getThumbnail(fileId: string, options?: ThumbnailQuery): Observable<Blob> {
+    let params = new HttpParams();
+
+    if (options?.size) {
+      params = params.set('size', options.size);
+    }
+    if (options?.quality !== undefined) {
+      params = params.set('quality', options.quality.toString());
+    }
+    if (options?.format) {
+      params = params.set('format', options.format);
+    }
+
+    return this.http
+      .get(`${this.apiUrl}/${fileId}/thumbnail`, {
+        params,
+        responseType: 'blob',
+        headers: this.getAuthHeaders(),
+      })
+      .pipe(catchError(this.handleError.bind(this)));
   }
 
   /**

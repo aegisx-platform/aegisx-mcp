@@ -3,6 +3,7 @@ import {
   ApiSuccessResponseSchema,
   PaginationMetaSchema,
   StandardRouteResponses,
+  ApiMetaSchema,
 } from '../../schemas/base.schemas';
 
 // =============================================
@@ -38,6 +39,26 @@ export const FileUploadSchema = Type.Object({
     Type.Record(Type.String(), Type.Any(), {
       description: 'Additional metadata for the file',
     }),
+  ),
+  // Thumbnail generation options
+  generateThumbnails: Type.Optional(
+    Type.Boolean({
+      default: false,
+      description: 'Whether to generate thumbnails for image files',
+    }),
+  ),
+  thumbnailSizes: Type.Optional(
+    Type.Array(
+      Type.String({
+        pattern: '^\\d+x\\d+$',
+        description: 'Size format: 150x150',
+      }),
+      {
+        description:
+          'Thumbnail sizes to generate (e.g., ["150x150", "300x300"])',
+        default: ['150x150', '300x300'],
+      },
+    ),
   ),
 });
 
@@ -162,20 +183,7 @@ export const ImageProcessingSchema = Type.Object({
   ),
 });
 
-export const SignedUrlRequestSchema = Type.Object({
-  expiresIn: Type.Number({
-    minimum: 1,
-    maximum: 3600, // Max 1 hour
-    description: 'Expiration time in seconds',
-  }),
-  permissions: Type.Array(
-    Type.Union([Type.Literal('read'), Type.Literal('download')]),
-    {
-      minItems: 1,
-      description: 'Granted permissions for the signed URL',
-    },
-  ),
-});
+// ⚠️ REMOVED: Conflicting SignedUrlRequestSchema - see updated version below at line 715
 
 // =============================================
 // Query Parameter Schemas
@@ -241,6 +249,13 @@ export const FileListQuerySchema = Type.Object({
       description: 'Search in filename',
     }),
   ),
+  includeSignedUrls: Type.Optional(
+    Type.Boolean({
+      default: true,
+      description:
+        'Include pre-generated signed URLs for each file (default: true)',
+    }),
+  ),
 });
 
 export const DownloadQuerySchema = Type.Object({
@@ -253,6 +268,47 @@ export const DownloadQuerySchema = Type.Object({
   inline: Type.Optional(
     Type.Boolean({
       description: 'Whether to display inline or force download',
+    }),
+  ),
+});
+
+export const ThumbnailQuerySchema = Type.Object({
+  size: Type.Optional(
+    Type.String({
+      pattern: '^\\d+x\\d+$',
+      description: 'Thumbnail size in format "150x150"',
+      default: '150x150',
+    }),
+  ),
+  quality: Type.Optional(
+    Type.Number({
+      minimum: 1,
+      maximum: 100,
+      description: 'Image quality (1-100)',
+      default: 80,
+    }),
+  ),
+  format: Type.Optional(
+    Type.Union(
+      [Type.Literal('jpg'), Type.Literal('png'), Type.Literal('webp')],
+      {
+        description: 'Image format for thumbnail',
+        default: 'jpg',
+      },
+    ),
+  ),
+});
+
+export const ViewQuerySchema = Type.Object({
+  variant: Type.Optional(
+    Type.String({
+      description: 'View specific variant (thumbnail, small, medium, large)',
+    }),
+  ),
+  cache: Type.Optional(
+    Type.Boolean({
+      description: 'Whether to use cached version',
+      default: true,
     }),
   ),
 });
@@ -271,6 +327,9 @@ export const UploadedFileSchema = Type.Object({
   }),
   filename: Type.String({
     description: 'Sanitized filename stored on disk',
+  }),
+  filepath: Type.String({
+    description: 'Full storage path for internal use',
   }),
   mimeType: Type.String({
     description: 'MIME type of the file',
@@ -313,6 +372,10 @@ export const UploadedFileSchema = Type.Object({
       description: 'File processing status',
     },
   ),
+  uploadedBy: Type.String({
+    format: 'uuid',
+    description: 'ID of the user who uploaded the file',
+  }),
   uploadedAt: Type.String({
     format: 'date-time',
     description: 'When the file was uploaded',
@@ -413,25 +476,7 @@ export const ChunkedUploadResponseSchema = ApiSuccessResponseSchema(
   }),
 );
 
-// ✅ FIXED: Using standard pagination with base schema
-export const FileListResponseSchema = ApiSuccessResponseSchema(
-  Type.Array(UploadedFileSchema),
-);
-
-export const SignedUrlResponseSchema = ApiSuccessResponseSchema(
-  Type.Object({
-    url: Type.String({
-      description: 'Signed URL for secure access',
-    }),
-    expiresAt: Type.String({
-      format: 'date-time',
-      description: 'When the URL expires',
-    }),
-    permissions: Type.Array(Type.String(), {
-      description: 'Granted permissions',
-    }),
-  }),
-);
+// ✅ FIXED: Using standard pagination with base schema (will reference EnhancedFileResponseSchema after its definition)
 
 export const ImageProcessingResponseSchema = ApiSuccessResponseSchema(
   Type.Object({
@@ -523,9 +568,10 @@ export const FileIdParamSchema = Type.Object({
 export type FileUploadRequest = Static<typeof FileUploadSchema>;
 export type FileUpdateRequest = Static<typeof FileUpdateSchema>;
 export type ImageProcessingRequest = Static<typeof ImageProcessingSchema>;
-export type SignedUrlRequest = Static<typeof SignedUrlRequestSchema>;
 export type FileListQuery = Static<typeof FileListQuerySchema>;
 export type DownloadQuery = Static<typeof DownloadQuerySchema>;
+export type ThumbnailQuery = Static<typeof ThumbnailQuerySchema>;
+export type ViewQuery = Static<typeof ViewQuerySchema>;
 export type UploadedFile = Static<typeof UploadedFileSchema>;
 export type FileIdParam = Static<typeof FileIdParamSchema>;
 export type FileStatsData = Static<typeof FileStatsDataSchema>;
@@ -549,6 +595,21 @@ export const FileUploadErrorSchema = Type.Object({
       Type.Literal('FILE_NOT_FOUND'),
       Type.Literal('ACCESS_DENIED'),
       Type.Literal('QUOTA_EXCEEDED'),
+      Type.Literal('DOWNLOAD_FAILED'),
+      Type.Literal('NO_FILE_PROVIDED'),
+      Type.Literal('NO_FILES_PROVIDED'),
+      Type.Literal('UNAUTHORIZED'),
+      Type.Literal('FETCH_FAILED'),
+      Type.Literal('LIST_FAILED'),
+      Type.Literal('UPDATE_FAILED'),
+      Type.Literal('DELETE_FAILED'),
+      Type.Literal('SIGNED_URL_FAILED'),
+      Type.Literal('STATS_FAILED'),
+      Type.Literal('UPLOAD_FAILED'),
+      Type.Literal('FILE_LIMIT_EXCEEDED'),
+      Type.Literal('UPLOAD_TIMEOUT'),
+      Type.Literal('FILE_READ_TIMEOUT'),
+      Type.Literal('INVALID_TOKEN'),
     ]),
     message: Type.String(),
     details: Type.Optional(Type.Record(Type.String(), Type.Any())),
@@ -599,3 +660,202 @@ export const FILE_UPLOAD_LIMITS = {
     'general',
   ],
 } as const;
+
+// =============================================================================
+// SIGNED URL SCHEMAS
+// =============================================================================
+
+/**
+ * Thumbnail options for signed URL generation
+ */
+export const ThumbnailOptionsSchema = Type.Object({
+  size: Type.Optional(
+    Type.String({
+      pattern: '^\\d+x\\d+$',
+      default: '150x150',
+      description: 'Thumbnail size in format "WIDTHxHEIGHT"',
+      examples: ['64x64', '150x150', '300x300', '512x512'],
+    }),
+  ),
+  format: Type.Optional(
+    Type.Union(
+      [Type.Literal('jpg'), Type.Literal('png'), Type.Literal('webp')],
+      {
+        default: 'webp',
+        description: 'Output image format',
+      },
+    ),
+  ),
+  quality: Type.Optional(
+    Type.Integer({
+      minimum: 1,
+      maximum: 100,
+      default: 80,
+      description: 'Image quality (1-100, higher is better quality)',
+    }),
+  ),
+});
+
+/**
+ * Request schema for generating signed URLs
+ */
+export const SignedUrlRequestSchema = Type.Object(
+  {
+    expiresIn: Type.Optional(
+      Type.Integer({
+        minimum: 300, // 5 minutes minimum
+        maximum: 86400, // 24 hours maximum
+        default: 3600, // 1 hour default
+        description: 'Expiry time in seconds (300-86400)',
+      }),
+    ),
+    thumbnailOptions: Type.Optional(ThumbnailOptionsSchema),
+  },
+  {
+    title: 'SignedUrlRequest',
+    description: 'Request payload for generating signed URLs',
+  },
+);
+
+/**
+ * Signed URL collection
+ */
+export const SignedUrlsSchema = Type.Object({
+  view: Type.String({
+    format: 'uri',
+    description: 'Signed URL for viewing the file inline',
+  }),
+  download: Type.String({
+    format: 'uri',
+    description: 'Signed URL for downloading the file',
+  }),
+  thumbnail: Type.String({
+    format: 'uri',
+    description: 'Signed URL for accessing the thumbnail',
+  }),
+});
+
+/**
+ * Storage metadata for signed URLs
+ */
+export const StorageMetadataSchema = Type.Object({
+  storageType: Type.Union(
+    [
+      Type.Literal('local'),
+      Type.Literal('s3'),
+      Type.Literal('minio'),
+      Type.Literal('gcs'),
+      Type.Literal('azure'),
+    ],
+    {
+      description: 'Storage provider type',
+    },
+  ),
+  region: Type.Optional(
+    Type.String({
+      description: 'Storage region (for cloud providers)',
+    }),
+  ),
+  bucket: Type.Optional(
+    Type.String({
+      description: 'Storage bucket name (for cloud providers)',
+    }),
+  ),
+  endpoint: Type.Optional(
+    Type.String({
+      format: 'uri',
+      description: 'Storage endpoint URL',
+    }),
+  ),
+});
+
+/**
+ * Response schema for signed URL generation
+ */
+export const SignedUrlResponseSchema = Type.Object(
+  {
+    success: Type.Literal(true),
+    data: Type.Object({
+      token: Type.Optional(
+        Type.String({
+          description:
+            'JWT token for local storage authentication (not present for cloud presigned URLs)',
+        }),
+      ),
+      expiresAt: Type.String({
+        format: 'date-time',
+        description: 'When the signed URLs expire',
+      }),
+      urls: SignedUrlsSchema,
+      metadata: StorageMetadataSchema,
+    }),
+    meta: ApiMetaSchema,
+  },
+  {
+    title: 'SignedUrlResponse',
+    description: 'Response containing signed URLs for file access',
+  },
+);
+
+/**
+ * Enhanced file response with signed URLs
+ */
+export const EnhancedFileResponseSchema = Type.Object(
+  {
+    ...FileUploadResponseSchema.properties.data.properties,
+    signedUrls: Type.Optional(
+      Type.Object(
+        {
+          view: Type.String({ format: 'uri' }),
+          download: Type.String({ format: 'uri' }),
+          thumbnail: Type.String({ format: 'uri' }),
+          expiresAt: Type.String({ format: 'date-time' }),
+        },
+        {
+          description: 'Pre-generated signed URLs for immediate use',
+        },
+      ),
+    ),
+  },
+  {
+    title: 'EnhancedFileResponse',
+    description: 'File metadata with optional signed URLs',
+  },
+);
+
+/**
+ * Enhanced file list response with signed URLs
+ */
+export const EnhancedFileListResponseSchema = Type.Object(
+  {
+    success: Type.Literal(true),
+    data: Type.Array(EnhancedFileResponseSchema),
+    pagination: PaginationMetaSchema,
+    meta: ApiMetaSchema,
+  },
+  {
+    title: 'EnhancedFileListResponse',
+    description: 'File list with pre-generated signed URLs',
+  },
+);
+
+/**
+ * File list response schema (uses EnhancedFileResponseSchema)
+ */
+export const FileListResponseSchema = ApiSuccessResponseSchema(
+  Type.Array(EnhancedFileResponseSchema),
+);
+
+// =============================================================================
+// TYPE EXPORTS FOR SIGNED URLS
+// =============================================================================
+
+export type ThumbnailOptions = Static<typeof ThumbnailOptionsSchema>;
+export type SignedUrlRequest = Static<typeof SignedUrlRequestSchema>;
+export type SignedUrls = Static<typeof SignedUrlsSchema>;
+export type StorageMetadata = Static<typeof StorageMetadataSchema>;
+export type SignedUrlResponse = Static<typeof SignedUrlResponseSchema>;
+export type EnhancedFileResponse = Static<typeof EnhancedFileResponseSchema>;
+export type EnhancedFileListResponse = Static<
+  typeof EnhancedFileListResponseSchema
+>;

@@ -1,6 +1,7 @@
 import fp from 'fastify-plugin';
 import { FastifyInstance } from 'fastify';
-import { LocalStorageAdapter } from '../../shared/storage/adapters/local-storage.adapter';
+import { StorageAdapterFactory } from '../../shared/factories/storage-adapter.factory';
+import { StorageType } from '../../shared/interfaces/storage-adapter.interface';
 import { FileUploadRepository } from './file-upload.repository';
 import { FileUploadService } from './file-upload.service';
 import { FileUploadController } from './file-upload.controller';
@@ -14,41 +15,18 @@ async function fileUploadPlugin(fastify: FastifyInstance) {
   // Multipart support should already be registered by user-profile plugin
   // We'll configure limits per-route in the route handlers
 
-  // Initialize storage adapter
-  const storageAdapter = new LocalStorageAdapter(
-    { logger: fastify.log },
-    {
-      adapterType: 'local',
-      basePath: process.env.UPLOAD_PATH || 'uploads',
-      publicUrlBase: '/api/files',
-      maxFileSize: 100 * 1024 * 1024, // 100MB
-      allowedMimeTypes: [
-        // Images
-        'image/jpeg',
-        'image/png',
-        'image/webp',
-        'image/gif',
-        'image/svg+xml',
-        // Documents
-        'application/pdf',
-        'text/plain',
-        'text/csv',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'application/vnd.ms-excel',
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        // Archives
-        'application/zip',
-        'application/x-zip-compressed',
-        // Media
-        'video/mp4',
-        'video/webm',
-        'audio/mp3',
-        'audio/wav',
-        'audio/ogg',
-      ],
+  // Initialize storage adapter using factory
+  const storageAdapterFactory = StorageAdapterFactory.getInstance(fastify);
+  const storageAdapter = await storageAdapterFactory.create({
+    type: StorageType.LOCAL,
+    options: {
+      jwtSecret: process.env.JWT_SECRET || 'fallback-secret-for-development',
+      baseUrl: process.env.BASE_URL || 'http://localhost:3333',
+      uploadPath: process.env.UPLOAD_PATH || 'uploads',
+      defaultExpirySeconds: 3600,
+      maxExpirySeconds: 86400,
     },
-  );
+  });
 
   // Initialize dependencies
   const repository = new FileUploadRepository({

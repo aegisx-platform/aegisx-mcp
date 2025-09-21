@@ -108,6 +108,39 @@ import {
               />
             </mat-form-field>
           </div>
+
+          <!-- Thumbnail Generation Options -->
+          <div
+            class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"
+            *ngIf="showThumbnailOptions()"
+          >
+            <div class="thumbnail-options">
+              <mat-checkbox formControlName="generateThumbnails">
+                Generate thumbnails for images
+              </mat-checkbox>
+              <p class="text-sm text-gray-500 mt-1">
+                Automatically create thumbnail variants during upload
+              </p>
+            </div>
+
+            <mat-form-field
+              appearance="outline"
+              *ngIf="optionsForm.get('generateThumbnails')?.value"
+            >
+              <mat-label>Thumbnail Sizes</mat-label>
+              <mat-select formControlName="thumbnailSizes" multiple>
+                <mat-option
+                  *ngFor="let size of availableThumbnailSizes"
+                  [value]="size"
+                >
+                  {{ size }}
+                </mat-option>
+              </mat-select>
+              <mat-hint
+                >Select one or more thumbnail sizes to generate</mat-hint
+              >
+            </mat-form-field>
+          </div>
         </form>
 
         <!-- Drag and Drop Area -->
@@ -300,6 +333,117 @@ import {
           }}
         </button>
       </mat-card-actions>
+    </mat-card>
+
+    <!-- Uploaded Files Display -->
+    <mat-card
+      class="uploaded-files-container mt-4"
+      *ngIf="uploadedFiles().length > 0"
+    >
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>cloud_done</mat-icon>
+          Uploaded Files ({{ uploadedFiles().length }})
+        </mat-card-title>
+        <mat-card-subtitle>
+          Successfully uploaded files with actions
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="uploaded-files-grid">
+          <ng-container
+            *ngFor="let file of uploadedFiles(); trackBy: trackByUploadedFile"
+          >
+            <div *ngIf="file" class="uploaded-file-item">
+              <!-- File Thumbnail/Preview -->
+              <div class="uploaded-file-preview">
+                <img
+                  *ngIf="isImageFile(file.mimeType) && file?.id"
+                  [src]="getThumbnailUrl(file.id)"
+                  [alt]="file.originalName"
+                  class="thumbnail-image"
+                  (error)="onThumbnailError($event, file)"
+                />
+                <div
+                  *ngIf="!isImageFile(file.mimeType)"
+                  class="file-icon-large"
+                >
+                  <mat-icon>{{
+                    getFileIconByMimeType(file.mimeType)
+                  }}</mat-icon>
+                </div>
+              </div>
+
+              <!-- File Info -->
+              <div class="uploaded-file-info">
+                <h4 class="file-name" [title]="file.originalName">
+                  {{ file.originalName }}
+                </h4>
+                <p class="file-details">
+                  {{ formatFileSize(file.fileSize) }} • {{ file.fileType }}
+                </p>
+                <p class="upload-date">
+                  Uploaded {{ formatUploadDate(file.uploadedAt) }}
+                </p>
+
+                <!-- File Status -->
+                <div class="file-status">
+                  <mat-chip
+                    [color]="file.isPublic ? 'primary' : 'accent'"
+                    [disabled]="false"
+                  >
+                    {{ file.isPublic ? 'Public' : 'Private' }}
+                  </mat-chip>
+                  <mat-chip
+                    *ngIf="file.isTemporary"
+                    color="warn"
+                    [disabled]="false"
+                  >
+                    Temporary
+                  </mat-chip>
+                </div>
+              </div>
+
+              <!-- File Actions -->
+              <div class="uploaded-file-actions">
+                <button
+                  mat-icon-button
+                  color="primary"
+                  (click)="viewFile(file)"
+                  title="View file"
+                >
+                  <mat-icon>visibility</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  color="accent"
+                  (click)="downloadFile(file)"
+                  title="Download file"
+                >
+                  <mat-icon>download</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  *ngIf="isImageFile(file.mimeType)"
+                  (click)="showCustomThumbnailOptions(file)"
+                  title="Custom thumbnail"
+                >
+                  <mat-icon>photo_size_select_large</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  color="warn"
+                  (click)="deleteUploadedFile(file)"
+                  title="Delete file"
+                >
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </mat-card-content>
     </mat-card>
   `,
   styles: [
@@ -537,6 +681,151 @@ import {
         background-color: #303030;
         border-color: #666;
       }
+
+      /* Uploaded Files Styles */
+      .uploaded-files-container {
+        margin-top: 1rem;
+      }
+
+      .uploaded-files-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+
+      .uploaded-file-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background-color: #ffffff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: box-shadow 0.3s ease;
+      }
+
+      .uploaded-file-item:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      .uploaded-file-preview {
+        flex-shrink: 0;
+        width: 60px;
+        height: 60px;
+        margin-right: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        overflow: hidden;
+        background-color: #f5f5f5;
+      }
+
+      .thumbnail-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 6px;
+      }
+
+      .file-icon-large {
+        font-size: 2rem;
+        color: #666;
+      }
+
+      .file-icon-large mat-icon {
+        font-size: 2rem;
+        width: 2rem;
+        height: 2rem;
+      }
+
+      .uploaded-file-info {
+        flex-grow: 1;
+        min-width: 0;
+      }
+
+      .uploaded-file-info .file-name {
+        margin: 0 0 0.25rem 0;
+        font-weight: 500;
+        font-size: 0.95rem;
+        color: #333;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .uploaded-file-info .file-details {
+        margin: 0 0 0.25rem 0;
+        font-size: 0.85rem;
+        color: #666;
+      }
+
+      .uploaded-file-info .upload-date {
+        margin: 0 0 0.5rem 0;
+        font-size: 0.8rem;
+        color: #888;
+      }
+
+      .file-status {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .file-status mat-chip {
+        font-size: 0.7rem;
+        height: 20px;
+        line-height: 20px;
+      }
+
+      .uploaded-file-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        margin-left: 0.5rem;
+      }
+
+      .uploaded-file-actions button {
+        width: 36px;
+        height: 36px;
+        line-height: 36px;
+      }
+
+      .uploaded-file-actions mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+
+      /* Dark theme for uploaded files */
+      :host-context(.dark) .uploaded-file-item {
+        background-color: #424242;
+        border-color: #666;
+        color: #ffffff;
+      }
+
+      :host-context(.dark) .uploaded-file-preview {
+        background-color: #303030;
+      }
+
+      :host-context(.dark) .uploaded-file-info .file-name {
+        color: #ffffff;
+      }
+
+      :host-context(.dark) .uploaded-file-info .file-details {
+        color: #cccccc;
+      }
+
+      :host-context(.dark) .uploaded-file-info .upload-date {
+        color: #aaaaaa;
+      }
+
+      .thumbnail-options {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+      }
     `,
   ],
 })
@@ -568,11 +857,13 @@ export class FileUploadComponent implements OnInit, OnDestroy {
   private _selectedFiles = signal<File[]>([]);
   private _uploadProgress = signal<FileUploadProgress[]>([]);
   private _validationResults = signal<FileValidationResult[]>([]);
+  private _uploadedFiles = signal<UploadedFile[]>([]);
 
   // Readonly signals
   readonly isDragOver = this._isDragOver.asReadonly();
   readonly selectedFiles = this._selectedFiles.asReadonly();
   readonly uploadProgress = this._uploadProgress.asReadonly();
+  readonly uploadedFiles = this._uploadedFiles.asReadonly();
 
   // Form for upload options
   optionsForm: FormGroup = this.fb.group({
@@ -580,9 +871,20 @@ export class FileUploadComponent implements OnInit, OnDestroy {
     isPublic: [false],
     isTemporary: [false],
     expiresIn: [24],
+    generateThumbnails: [false],
+    thumbnailSizes: [['150x150', '300x300']],
   });
 
   readonly availableCategories = FILE_UPLOAD_LIMITS.ALLOWED_CATEGORIES;
+  readonly availableThumbnailSizes = [
+    '50x50',
+    '100x100',
+    '150x150',
+    '200x200',
+    '300x300',
+    '500x500',
+    '800x800',
+  ];
 
   // Computed properties
   readonly validationErrors = computed(() => {
@@ -624,6 +926,11 @@ export class FileUploadComponent implements OnInit, OnDestroy {
         .join(', ') + (this.acceptedTypes.length > 3 ? '...' : '')
     );
   });
+
+  showThumbnailOptions(): boolean {
+    // Show thumbnail options only when there are image files in acceptedTypes
+    return this.acceptedTypes.some((type) => type.startsWith('image/'));
+  }
 
   ngOnInit() {
     // Subscribe to upload progress
@@ -764,7 +1071,9 @@ export class FileUploadComponent implements OnInit, OnDestroy {
       if (validFiles.length === 1) {
         this.fileUploadService.uploadFile(validFiles[0], options).subscribe({
           next: (response) => {
-            this.uploadComplete.emit([response.data]);
+            const uploadedFiles = [response.data];
+            this._uploadedFiles.update((files) => [...files, ...uploadedFiles]);
+            this.uploadComplete.emit(uploadedFiles);
             this.snackBar.open('File uploaded successfully!', 'Close', {
               duration: 3000,
             });
@@ -781,7 +1090,12 @@ export class FileUploadComponent implements OnInit, OnDestroy {
           .uploadMultipleFiles(validFiles, options)
           .subscribe({
             next: (response) => {
-              this.uploadComplete.emit(response.data.uploaded);
+              const uploadedFiles = response.data.uploaded;
+              this._uploadedFiles.update((files) => [
+                ...files,
+                ...uploadedFiles,
+              ]);
+              this.uploadComplete.emit(uploadedFiles);
 
               if (response.data.failed.length > 0) {
                 this.snackBar.open(
@@ -840,6 +1154,112 @@ export class FileUploadComponent implements OnInit, OnDestroy {
       default:
         return 'insert_drive_file';
     }
+  }
+
+  // Uploaded Files Management Methods
+  trackByUploadedFile(index: number, item: UploadedFile): string {
+    return item?.id || `index-${index}`;
+  }
+
+  getThumbnailUrl(fileId: string): string {
+    return this.fileUploadService.getThumbnailUrl(fileId, {
+      size: '150x150',
+      format: 'jpg',
+      quality: 80,
+    });
+  }
+
+  isImageFile(mimeType: string): boolean {
+    return mimeType.startsWith('image/');
+  }
+
+  getFileIconByMimeType(mimeType: string): string {
+    if (mimeType.startsWith('image/')) return 'image';
+    if (mimeType.startsWith('video/')) return 'videocam';
+    if (mimeType.startsWith('audio/')) return 'audiotrack';
+    if (mimeType.includes('pdf')) return 'picture_as_pdf';
+    if (mimeType.includes('word') || mimeType.includes('document'))
+      return 'description';
+    if (mimeType.includes('spreadsheet') || mimeType.includes('excel'))
+      return 'table_chart';
+    if (mimeType.includes('zip') || mimeType.includes('compressed'))
+      return 'archive';
+    return 'insert_drive_file';
+  }
+
+  formatUploadDate(uploadedAt: string): string {
+    const date = new Date(uploadedAt);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffMins < 1) return 'just now';
+    if (diffMins < 60) return `${diffMins} min ago`;
+    if (diffHours < 24)
+      return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+
+    return date.toLocaleDateString();
+  }
+
+  onThumbnailError(event: any, file: UploadedFile): void {
+    // Fallback to view URL if thumbnail fails
+    if (!file?.id) return;
+    const img = event.target as HTMLImageElement;
+    img.src = this.fileUploadService.getViewUrl(file.id);
+  }
+
+  viewFile(file: UploadedFile): void {
+    if (!file?.id) return;
+    const viewUrl = this.fileUploadService.getViewUrl(file.id);
+    window.open(viewUrl, '_blank');
+  }
+
+  downloadFile(file: UploadedFile): void {
+    // Use the downloadUrl from the file object
+    if (file.downloadUrl) {
+      const link = document.createElement('a');
+      link.href = file.downloadUrl;
+      link.download = file.originalName;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      this.snackBar.open('Download URL not available', 'Close', {
+        duration: 3000,
+      });
+    }
+  }
+
+  showCustomThumbnailOptions(file: UploadedFile): void {
+    if (!file?.id) return;
+    // TODO: Open dialog for custom thumbnail size selection
+    // For now, show different thumbnail sizes in console
+    console.log('Available thumbnail sizes for', file.originalName, ':');
+    this.availableThumbnailSizes.forEach((size) => {
+      const url = this.fileUploadService.getThumbnailUrl(file.id, { size });
+      console.log(`${size}: ${url}`);
+    });
+
+    this.snackBar.open('Thumbnail options logged to console', 'Close', {
+      duration: 3000,
+    });
+  }
+
+  deleteUploadedFile(file: UploadedFile): void {
+    if (!file?.id) return;
+    // Remove from local state immediately for better UX
+    this._uploadedFiles.update((files) =>
+      files.filter((f) => f?.id !== file.id),
+    );
+
+    // TODO: Call delete API endpoint
+    this.snackBar.open(`${file.originalName} removed`, 'Close', {
+      duration: 3000,
+    });
   }
 
   trackByFile(index: number, item: FileUploadProgress): string {

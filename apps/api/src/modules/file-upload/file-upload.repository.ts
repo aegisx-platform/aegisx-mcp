@@ -8,6 +8,7 @@ export interface FileUploadRepositoryDependencies {
 }
 
 export interface CreateFileData {
+  id?: string; // Optional file ID for consistent storage paths
   originalName: string;
   filename: string;
   filepath: string;
@@ -84,28 +85,35 @@ export class FileUploadRepository {
    */
   async createFile(data: CreateFileData): Promise<UploadedFile> {
     try {
+      const insertData: any = {
+        original_name: data.originalName,
+        filename: data.filename,
+        filepath: data.filepath,
+        mime_type: data.mimeType,
+        file_size: data.fileSize,
+        file_hash: data.fileHash,
+        storage_adapter: data.storageAdapter,
+        storage_bucket: data.storageBucket,
+        storage_key: data.storageKey,
+        file_category: data.fileCategory,
+        file_type: data.fileType,
+        metadata: JSON.stringify(data.metadata || {}),
+        uploaded_by: data.uploadedBy,
+        is_public: data.isPublic,
+        is_temporary: data.isTemporary,
+        expires_at: data.expiresAt,
+        processing_status: data.processingStatus,
+        variants: JSON.stringify(data.variants || {}),
+      };
+
+      // Add custom ID if provided
+      if (data.id) {
+        insertData.id = data.id;
+      }
+
       const [file] = await this.deps
         .db(this.tableName)
-        .insert({
-          original_name: data.originalName,
-          filename: data.filename,
-          filepath: data.filepath,
-          mime_type: data.mimeType,
-          file_size: data.fileSize,
-          file_hash: data.fileHash,
-          storage_adapter: data.storageAdapter,
-          storage_bucket: data.storageBucket,
-          storage_key: data.storageKey,
-          file_category: data.fileCategory,
-          file_type: data.fileType,
-          metadata: JSON.stringify(data.metadata || {}),
-          uploaded_by: data.uploadedBy,
-          is_public: data.isPublic,
-          is_temporary: data.isTemporary,
-          expires_at: data.expiresAt,
-          processing_status: data.processingStatus,
-          variants: JSON.stringify(data.variants || {}),
-        })
+        .insert(insertData)
         .returning('*');
 
       this.deps.logger.info(`File record created: ${file.id}`);
@@ -127,13 +135,39 @@ export class FileUploadRepository {
         .whereNull('deleted_at');
 
       // If userId is provided, check ownership or public access
+      // If no userId (anonymous), only allow public files
       if (userId) {
         query.where((builder) => {
           builder.where('uploaded_by', userId).orWhere('is_public', true);
         });
+      } else {
+        // Anonymous access - only public files
+        query.where('is_public', true);
       }
 
       const file = await query.first();
+
+      if (!file) {
+        return null;
+      }
+
+      return this.mapDatabaseFileToSchema(file);
+    } catch (error) {
+      this.deps.logger.error(error, `Failed to find file: ${id}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Find file by ID without access control (for signed URLs)
+   */
+  async findByIdRaw(id: string): Promise<UploadedFile | null> {
+    try {
+      const file = await this.deps
+        .db(this.tableName)
+        .where('id', id)
+        .whereNull('deleted_at')
+        .first();
 
       if (!file) {
         return null;
@@ -473,11 +507,20 @@ export class FileUploadRepository {
   /**
    * Map database record to schema format
    */
-  private mapDatabaseFileToSchema(file: any): UploadedFile {
+  private mapDatabaseFileToSchema(file: any, baseUrl?: string): UploadedFile {
+    // Create absolute URL for downloadUrl to work with img src and direct browser access
+    const downloadPath = `/api/files/${file.id}/download`;
+
+    // Use provided baseUrl or fall back to environment variable
+    const resolvedBaseUrl =
+      baseUrl || process.env.API_BASE_URL || 'http://localhost:4200';
+    const downloadUrl = `${resolvedBaseUrl}${downloadPath}`;
+
     return {
       id: file.id,
       originalName: file.original_name,
       filename: file.filename,
+      filepath: file.filepath, // Add filepath for internal use
       mimeType: file.mime_type,
       fileSize: file.file_size,
       fileCategory: file.file_category,
@@ -485,10 +528,11 @@ export class FileUploadRepository {
       isPublic: file.is_public,
       isTemporary: file.is_temporary,
       expiresAt: file.expires_at ? file.expires_at.toISOString() : null,
-      downloadUrl: `/api/files/${file.id}/download`,
+      downloadUrl,
       metadata: file.metadata || null,
       variants: file.variants || null,
       processingStatus: file.processing_status,
+      uploadedBy: file.uploaded_by,
       uploadedAt: file.created_at.toISOString(),
       updatedAt: file.updated_at.toISOString(),
     };

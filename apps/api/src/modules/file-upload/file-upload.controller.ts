@@ -8,6 +8,8 @@ import {
   SignedUrlRequest,
   FileListQuery,
   DownloadQuery,
+  ThumbnailQuery,
+  ViewQuery,
   FileIdParam,
 } from './file-upload.schemas';
 
@@ -38,7 +40,6 @@ export class FileUploadController {
           error: {
             code: 'NO_FILE_PROVIDED',
             message: 'No file provided in request',
-            statusCode: 400,
           },
           meta: {
             requestId: request.id,
@@ -63,7 +64,6 @@ export class FileUploadController {
           error: {
             code: 'UNAUTHORIZED',
             message: 'User authentication required',
-            statusCode: 401,
           },
           meta: {
             requestId: request.id,
@@ -146,7 +146,6 @@ export class FileUploadController {
           error: {
             code: 'NO_FILES_PROVIDED',
             message: 'No files provided in request',
-            statusCode: 400,
           },
           meta: {
             requestId: request.id,
@@ -171,7 +170,6 @@ export class FileUploadController {
           error: {
             code: 'UNAUTHORIZED',
             message: 'User authentication required',
-            statusCode: 401,
           },
           meta: {
             requestId: request.id,
@@ -283,7 +281,6 @@ export class FileUploadController {
           error: {
             code: 'FILE_NOT_FOUND',
             message: 'File not found',
-            statusCode: 404,
           },
           meta: {
             requestId: request.id,
@@ -310,7 +307,6 @@ export class FileUploadController {
         error: {
           code: 'FETCH_FAILED',
           message: error.message || 'Failed to get file',
-          statusCode: 500,
         },
         meta: {
           requestId: request.id,
@@ -332,24 +328,11 @@ export class FileUploadController {
   ) {
     try {
       const userId = request.user?.id;
-      if (!userId) {
-        return reply.code(401).send({
-          success: false,
-          error: {
-            code: 'UNAUTHORIZED',
-            message: 'User authentication required',
-            statusCode: 401,
-          },
-          meta: {
-            requestId: request.id,
-            timestamp: new Date().toISOString(),
-            version: '1.0',
-          },
-        });
-      }
+      // Optional authentication: if userId is provided, filter by user + public files
+      // If no userId, show only public files
 
       const filters = {
-        uploadedBy: userId,
+        uploadedBy: userId, // This will be undefined for anonymous users
         category: request.query.category,
         type: request.query.type,
         isPublic: request.query.isPublic,
@@ -383,9 +366,55 @@ export class FileUploadController {
         pagination,
       );
 
+      // Generate signed URLs for all files in the list (industry standard)
+      let enhancedFiles = result.data;
+
+      try {
+        // Check if the client wants signed URLs included (default: true for convenience)
+        const includeSignedUrls =
+          (request.query as any)?.includeSignedUrls !== 'false';
+
+        if (includeSignedUrls && result.data.length > 0) {
+          const signedUrlsMap =
+            await this.deps.fileUploadService.generateSignedUrlsForFiles(
+              result.data,
+              {
+                expiresIn: 3600, // 1 hour default
+                thumbnailOptions: {
+                  size: '150x150',
+                  format: 'webp',
+                  quality: 80,
+                },
+              },
+            );
+
+          // Enhance each file with signed URLs
+          enhancedFiles = result.data.map((file) => {
+            const signedUrls = signedUrlsMap.get(file.id);
+
+            if (signedUrls) {
+              return {
+                ...file,
+                signedUrls: {
+                  view: signedUrls.urls.view,
+                  download: signedUrls.urls.download,
+                  thumbnail: signedUrls.urls.thumbnail,
+                  expiresAt: signedUrls.expiresAt.toISOString(),
+                },
+              };
+            }
+
+            return file;
+          });
+        }
+      } catch (error) {
+        // If signed URL generation fails, continue without them but log the error
+        request.log.warn(error, 'Failed to generate signed URLs for file list');
+      }
+
       return reply.send({
         success: true,
-        data: result.data,
+        data: enhancedFiles,
         pagination: result.pagination,
         meta: {
           requestId: request.id,
@@ -401,7 +430,6 @@ export class FileUploadController {
         error: {
           code: 'LIST_FAILED',
           message: error.message || 'Failed to list files',
-          statusCode: 500,
         },
         meta: {
           requestId: request.id,
@@ -426,8 +454,14 @@ export class FileUploadController {
       const { id } = request.params;
       const { variant, inline } = request.query;
       const userId = request.user?.id;
+      const signedUrlToken = (request as any).signedUrlToken;
 
-      const file = await this.deps.fileUploadService.getFile(id, userId);
+      // For private files, validate either user authentication or signed URL token
+      const file = await this.deps.fileUploadService.getFile(
+        id,
+        userId,
+        !!signedUrlToken,
+      );
 
       if (!file) {
         return reply.code(404).send({
@@ -435,7 +469,6 @@ export class FileUploadController {
           error: {
             code: 'FILE_NOT_FOUND',
             message: 'File not found',
-            statusCode: 404,
           },
           meta: {
             requestId: request.id,
@@ -445,21 +478,90 @@ export class FileUploadController {
         });
       }
 
-      // TODO: Implement actual file streaming from storage
-      // For now, return a redirect or error
-      return reply.code(501).send({
-        success: false,
-        error: {
-          code: 'NOT_IMPLEMENTED',
-          message: 'File download not yet implemented',
-          statusCode: 501,
+      // Check access permissions
+      if (!file.isPublic && !userId && !signedUrlToken) {
+        return reply.code(401).send({
+          success: false,
+          error: {
+            code: 'ACCESS_DENIED',
+            message:
+              'This file requires authentication or a valid signed URL token',
+          },
+          meta: {
+            requestId: request.id,
+            timestamp: new Date().toISOString(),
+            version: '1.0',
+          },
+        });
+      }
+
+      // If signed URL token is provided, validate it
+      if (signedUrlToken) {
+        const isValidToken =
+          await this.deps.fileUploadService.verifySignedUrlToken(
+            signedUrlToken,
+            'download',
+            file.filepath,
+          );
+
+        if (!isValidToken) {
+          return reply.code(401).send({
+            success: false,
+            error: {
+              code: 'INVALID_TOKEN',
+              message: 'Invalid or expired signed URL token',
+            },
+            meta: {
+              requestId: request.id,
+              timestamp: new Date().toISOString(),
+              version: '1.0',
+            },
+          });
+        }
+      }
+
+      // Download file from storage
+      const downloadResult = await this.deps.fileUploadService.downloadFile(
+        id,
+        {
+          variant,
+          userId,
+          bypassAccessControl: !!signedUrlToken,
         },
-        meta: {
-          requestId: request.id,
-          timestamp: new Date().toISOString(),
-          version: '1.0',
-        },
+      );
+
+      // Set response headers
+      reply.type(file.mimeType);
+      reply.header('Content-Length', file.fileSize.toString());
+
+      // For download route, default to attachment (force download)
+      // Only use inline if explicitly requested via query parameter
+      const shouldInline = inline === true;
+
+      if (shouldInline) {
+        reply.header(
+          'Content-Disposition',
+          `inline; filename="${file.originalName}"`,
+        );
+      } else {
+        reply.header(
+          'Content-Disposition',
+          `attachment; filename="${file.originalName}"`,
+        );
+      }
+
+      // Log file access
+      await this.deps.fileUploadService.logFileAccess({
+        fileId: id,
+        userId,
+        action: 'download',
+        userAgent: request.headers['user-agent'],
+        ipAddress: request.ip,
+        requestHeaders: request.headers,
       });
+
+      // Send file buffer
+      return reply.send(downloadResult.buffer);
     } catch (error: any) {
       request.log.error(error, 'Failed to download file');
 
@@ -468,7 +570,332 @@ export class FileUploadController {
         error: {
           code: 'DOWNLOAD_FAILED',
           message: error.message || 'Failed to download file',
-          statusCode: 500,
+          details:
+            process.env.NODE_ENV === 'development'
+              ? { stack: error.stack }
+              : undefined,
+        },
+        meta: {
+          requestId: request.id,
+          timestamp: new Date().toISOString(),
+          version: '1.0',
+        },
+      });
+    }
+  }
+
+  /**
+   * View file inline
+   */
+  async viewFile(
+    request: FastifyRequest<{
+      Params: FileIdParam;
+      Querystring: ViewQuery;
+    }>,
+    reply: FastifyReply,
+  ) {
+    try {
+      const { id } = request.params;
+      const { variant, cache } = request.query;
+      const userId = request.user?.id;
+      const signedUrlToken = (request as any).signedUrlToken;
+
+      const file = await this.deps.fileUploadService.getFile(
+        id,
+        userId,
+        !!signedUrlToken,
+      );
+
+      if (!file) {
+        return reply.code(404).send({
+          success: false,
+          error: {
+            code: 'FILE_NOT_FOUND',
+            message: 'File not found',
+          },
+          meta: {
+            requestId: request.id,
+            timestamp: new Date().toISOString(),
+            version: '1.0',
+          },
+        });
+      }
+
+      // Check access permissions
+      if (!file.isPublic && !userId && !signedUrlToken) {
+        return reply.code(401).send({
+          success: false,
+          error: {
+            code: 'ACCESS_DENIED',
+            message:
+              'This file requires authentication or a valid signed URL token',
+          },
+          meta: {
+            requestId: request.id,
+            timestamp: new Date().toISOString(),
+            version: '1.0',
+          },
+        });
+      }
+
+      // If signed URL token is provided, validate it
+      if (signedUrlToken) {
+        const isValidToken =
+          await this.deps.fileUploadService.verifySignedUrlToken(
+            signedUrlToken,
+            'view',
+            file.filepath,
+          );
+
+        if (!isValidToken) {
+          return reply.code(401).send({
+            success: false,
+            error: {
+              code: 'INVALID_TOKEN',
+              message: 'Invalid or expired signed URL token',
+            },
+            meta: {
+              requestId: request.id,
+              timestamp: new Date().toISOString(),
+              version: '1.0',
+            },
+          });
+        }
+      }
+
+      // Download file from storage (same as download but force inline)
+      const downloadResult = await this.deps.fileUploadService.downloadFile(
+        id,
+        {
+          variant,
+          userId,
+          bypassAccessControl: !!signedUrlToken,
+        },
+      );
+
+      // Set response headers for inline viewing
+      reply.type(file.mimeType);
+      reply.header('Content-Length', file.fileSize.toString());
+
+      // Force inline display regardless of file type
+      reply.header(
+        'Content-Disposition',
+        `inline; filename="${file.originalName}"`,
+      );
+
+      // Set cache headers if requested
+      if (cache !== false) {
+        reply.header('Cache-Control', 'public, max-age=3600'); // 1 hour cache
+      }
+
+      // Log file access
+      await this.deps.fileUploadService.logFileAccess({
+        fileId: id,
+        userId,
+        action: 'view',
+        userAgent: request.headers['user-agent'],
+        ipAddress: request.ip,
+        requestHeaders: request.headers,
+      });
+
+      // Send file buffer
+      return reply.send(downloadResult.buffer);
+    } catch (error: any) {
+      request.log.error(error, 'Failed to view file');
+
+      return reply.code(500).send({
+        success: false,
+        error: {
+          code: 'VIEW_FAILED',
+          message: error.message || 'Failed to view file',
+          details:
+            process.env.NODE_ENV === 'development'
+              ? { stack: error.stack }
+              : undefined,
+        },
+        meta: {
+          requestId: request.id,
+          timestamp: new Date().toISOString(),
+          version: '1.0',
+        },
+      });
+    }
+  }
+
+  /**
+   * Get custom thumbnail
+   */
+  async getThumbnail(
+    request: FastifyRequest<{
+      Params: FileIdParam;
+      Querystring: ThumbnailQuery;
+    }>,
+    reply: FastifyReply,
+  ) {
+    try {
+      const { id } = request.params;
+      const { size = '150x150', quality = 80, format = 'jpg' } = request.query;
+      const userId = request.user?.id;
+      const signedUrlToken = (request as any).signedUrlToken;
+
+      const file = await this.deps.fileUploadService.getFile(
+        id,
+        userId,
+        !!signedUrlToken,
+      );
+
+      if (!file) {
+        return reply.code(404).send({
+          success: false,
+          error: {
+            code: 'FILE_NOT_FOUND',
+            message: 'File not found',
+          },
+          meta: {
+            requestId: request.id,
+            timestamp: new Date().toISOString(),
+            version: '1.0',
+          },
+        });
+      }
+
+      // Check access permissions
+      if (!file.isPublic && !userId && !signedUrlToken) {
+        return reply.code(401).send({
+          success: false,
+          error: {
+            code: 'ACCESS_DENIED',
+            message:
+              'This file requires authentication or a valid signed URL token',
+          },
+          meta: {
+            requestId: request.id,
+            timestamp: new Date().toISOString(),
+            version: '1.0',
+          },
+        });
+      }
+
+      // If signed URL token is provided, validate it
+      if (signedUrlToken) {
+        const isValidToken =
+          await this.deps.fileUploadService.verifySignedUrlToken(
+            signedUrlToken,
+            'thumbnail',
+            file.filepath,
+          );
+
+        if (!isValidToken) {
+          return reply.code(401).send({
+            success: false,
+            error: {
+              code: 'INVALID_TOKEN',
+              message: 'Invalid or expired signed URL token',
+            },
+            meta: {
+              requestId: request.id,
+              timestamp: new Date().toISOString(),
+              version: '1.0',
+            },
+          });
+        }
+      }
+
+      // Check if it's an image file
+      if (!file.mimeType.startsWith('image/')) {
+        return reply.code(400).send({
+          success: false,
+          error: {
+            code: 'NOT_AN_IMAGE',
+            message: 'Thumbnails can only be generated for image files',
+          },
+          meta: {
+            requestId: request.id,
+            timestamp: new Date().toISOString(),
+            version: '1.0',
+          },
+        });
+      }
+
+      // Parse size (e.g., "150x150" -> [150, 150])
+      const [width, height] = size.split('x').map(Number);
+
+      if (!width || !height || width <= 0 || height <= 0) {
+        return reply.code(400).send({
+          success: false,
+          error: {
+            code: 'INVALID_SIZE',
+            message: 'Invalid size format. Use format like "150x150"',
+          },
+          meta: {
+            requestId: request.id,
+            timestamp: new Date().toISOString(),
+            version: '1.0',
+          },
+        });
+      }
+
+      // Generate thumbnail with requested size and format
+      const thumbnailResult =
+        await this.deps.fileUploadService.generateThumbnail(id, {
+          width,
+          height,
+          quality,
+          format,
+          userId: signedUrlToken ? undefined : userId, // ไม่ใช้ userId เมื่อมี signed URL token
+        });
+
+      // Set thumbnail response headers
+      const thumbnailMimeType =
+        format === 'png'
+          ? 'image/png'
+          : format === 'webp'
+            ? 'image/webp'
+            : 'image/jpeg';
+
+      reply.type(thumbnailMimeType);
+      reply.header(
+        'Content-Disposition',
+        `inline; filename="${file.originalName}_${size}.${format}"`,
+      );
+      reply.header('Cache-Control', 'public, max-age=86400'); // 24 hours cache for thumbnails
+
+      // Log thumbnail access
+      await this.deps.fileUploadService.logFileAccess({
+        fileId: id,
+        userId,
+        action: 'thumbnail',
+        userAgent: request.headers['user-agent'],
+        ipAddress: request.ip,
+        requestHeaders: request.headers,
+        httpStatus: 200,
+      });
+
+      // Send thumbnail stream
+      reply.header('Content-Length', thumbnailResult.size.toString());
+      return reply.send(thumbnailResult.stream);
+    } catch (error: any) {
+      request.log.error(error, 'Failed to get thumbnail');
+
+      // Map error codes from service to schema-compliant codes
+      let errorCode = 'PROCESSING_FAILED'; // default
+      if (error.code === 'FILE_NOT_FOUND') {
+        errorCode = 'FILE_NOT_FOUND';
+      } else if (error.code === 'INVALID_FILE_TYPE') {
+        errorCode = 'INVALID_FILE_TYPE';
+      } else if (error.code === 'PROCESSING_FAILED') {
+        errorCode = 'PROCESSING_FAILED';
+      }
+
+      return reply.code(500).send({
+        success: false,
+        error: {
+          code: errorCode,
+          message: error.message || 'Failed to generate thumbnail',
+          details:
+            process.env.NODE_ENV === 'development'
+              ? { stack: error.stack }
+              : undefined,
         },
         meta: {
           requestId: request.id,
@@ -499,7 +926,6 @@ export class FileUploadController {
           error: {
             code: 'UNAUTHORIZED',
             message: 'User authentication required',
-            statusCode: 401,
           },
           meta: {
             requestId: request.id,
@@ -521,7 +947,6 @@ export class FileUploadController {
           error: {
             code: 'FILE_NOT_FOUND',
             message: 'File not found or access denied',
-            statusCode: 404,
           },
           meta: {
             requestId: request.id,
@@ -548,7 +973,6 @@ export class FileUploadController {
         error: {
           code: 'UPDATE_FAILED',
           message: error.message || 'Failed to update file',
-          statusCode: 500,
         },
         meta: {
           requestId: request.id,
@@ -578,7 +1002,6 @@ export class FileUploadController {
           error: {
             code: 'UNAUTHORIZED',
             message: 'User authentication required',
-            statusCode: 401,
           },
           meta: {
             requestId: request.id,
@@ -596,7 +1019,6 @@ export class FileUploadController {
           error: {
             code: 'FILE_NOT_FOUND',
             message: 'File not found or access denied',
-            statusCode: 404,
           },
           meta: {
             requestId: request.id,
@@ -627,7 +1049,6 @@ export class FileUploadController {
         error: {
           code: 'DELETE_FAILED',
           message: error.message || 'Failed to delete file',
-          statusCode: 500,
         },
         meta: {
           requestId: request.id,
@@ -658,7 +1079,6 @@ export class FileUploadController {
           error: {
             code: 'UNAUTHORIZED',
             message: 'User authentication required',
-            statusCode: 401,
           },
           meta: {
             requestId: request.id,
@@ -697,7 +1117,6 @@ export class FileUploadController {
         error: {
           code: 'PROCESSING_FAILED',
           message: error.message || 'Failed to process image',
-          statusCode: 500,
         },
         meta: {
           requestId: request.id,
@@ -709,7 +1128,7 @@ export class FileUploadController {
   }
 
   /**
-   * Generate signed URL
+   * Generate signed URL (legacy)
    */
   async generateSignedUrl(
     request: FastifyRequest<{
@@ -728,7 +1147,6 @@ export class FileUploadController {
           error: {
             code: 'UNAUTHORIZED',
             message: 'User authentication required',
-            statusCode: 401,
           },
           meta: {
             requestId: request.id,
@@ -763,12 +1181,165 @@ export class FileUploadController {
         error: {
           code: 'SIGNED_URL_FAILED',
           message: error.message || 'Failed to generate signed URL',
-          statusCode: 500,
         },
         meta: {
           requestId: request.id,
           timestamp: new Date().toISOString(),
           version: '1.0',
+        },
+      });
+    }
+  }
+
+  /**
+   * Generate signed URLs (view, download, thumbnail)
+   */
+  async generateSignedUrls(
+    request: FastifyRequest<{
+      Params: FileIdParam;
+      Body: SignedUrlRequest;
+    }>,
+    reply: FastifyReply,
+  ) {
+    try {
+      const { id } = request.params;
+      const userId = request.user?.id;
+
+      if (!userId) {
+        return reply.code(401).send({
+          success: false,
+          error: {
+            code: 'UNAUTHORIZED',
+            message: 'User authentication required',
+          },
+          meta: {
+            requestId: request.id,
+            timestamp: new Date().toISOString(),
+            version: '1.0',
+          },
+        });
+      }
+
+      const result = await this.deps.fileUploadService.generateSignedUrls(
+        id,
+        request.body,
+        userId,
+      );
+
+      return reply.send({
+        success: true,
+        data: result,
+        meta: {
+          requestId: request.id,
+          timestamp: new Date().toISOString(),
+          version: '1.0',
+        },
+      });
+    } catch (error: any) {
+      request.log.error(error, 'Failed to generate signed URLs');
+
+      const statusCode = error.message.includes('not found') ? 404 : 500;
+
+      return reply.code(statusCode).send({
+        success: false,
+        error: {
+          code: 'SIGNED_URL_FAILED',
+          message: error.message || 'Failed to generate signed URLs',
+          statusCode: statusCode,
+        },
+        meta: {
+          requestId: request.id,
+          timestamp: new Date().toISOString(),
+          version: '1.0',
+        },
+      });
+    }
+  }
+
+  /**
+   * Test upload without authentication (for development testing)
+   */
+  async testUploadFile(
+    request: FastifyRequest<{
+      Body: FileUploadRequest;
+    }>,
+    reply: FastifyReply,
+  ) {
+    try {
+      const data = await request.file();
+      if (!data) {
+        return reply.code(400).send({
+          success: false,
+          error: {
+            code: 'NO_FILE_PROVIDED',
+            message: 'No file provided in request',
+          },
+          meta: {
+            requestId: request.id,
+            timestamp: new Date().toISOString(),
+            version: '1.0',
+          },
+        });
+      }
+
+      const uploadRequest: FileUploadRequest = {
+        category: request.body?.category || 'test',
+        isPublic: true, // Force public for test uploads
+        isTemporary: request.body?.isTemporary || true,
+        expiresIn: request.body?.expiresIn,
+        metadata: request.body?.metadata,
+      };
+
+      // Use admin user ID for testing (from seeded data)
+      const testUserId = 'dec7e996-28fd-4e68-a32b-b839d9f4150c';
+
+      const result = await this.deps.fileUploadService.uploadFile(
+        data,
+        uploadRequest,
+        testUserId,
+      );
+
+      return reply.code(201).send({
+        success: true,
+        data: result.file,
+        meta: {
+          requestId: request.id,
+          timestamp: new Date().toISOString(),
+          version: '1.0',
+          warnings: result.warnings,
+          testMode: true,
+        },
+      });
+    } catch (error: any) {
+      request.log.error(error, 'Failed to upload test file');
+
+      // Handle specific Fastify multipart errors
+      let statusCode = 500;
+      let errorCode = 'UPLOAD_FAILED';
+      let errorMessage = error.message || 'Failed to upload file';
+
+      if (error.code === 'FST_FILES_LIMIT') {
+        statusCode = 413;
+        errorCode = 'FILE_LIMIT_EXCEEDED';
+        errorMessage = 'Too many files. Only 1 file allowed for single upload.';
+      } else if (error.code === 'FST_FILE_TOO_LARGE') {
+        statusCode = 413;
+        errorCode = 'FILE_TOO_LARGE';
+        errorMessage = 'File size exceeds 100MB limit.';
+      }
+
+      return reply.code(statusCode).send({
+        success: false,
+        error: {
+          code: errorCode,
+          message: errorMessage,
+          statusCode: statusCode,
+        },
+        meta: {
+          requestId: request.id,
+          timestamp: new Date().toISOString(),
+          version: '1.0',
+          testMode: true,
         },
       });
     }
@@ -787,7 +1358,6 @@ export class FileUploadController {
           error: {
             code: 'UNAUTHORIZED',
             message: 'User authentication required',
-            statusCode: 401,
           },
           meta: {
             requestId: request.id,
@@ -816,7 +1386,6 @@ export class FileUploadController {
         error: {
           code: 'STATS_FAILED',
           message: error.message || 'Failed to get user statistics',
-          statusCode: 500,
         },
         meta: {
           requestId: request.id,

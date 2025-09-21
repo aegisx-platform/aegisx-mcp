@@ -7,6 +7,9 @@ export interface FileUploadOptions {
   isTemporary?: boolean;
   expiresIn?: number;
   metadata?: Record<string, unknown>;
+  // Thumbnail generation options (aligned with backend schema)
+  generateThumbnails?: boolean;
+  thumbnailSizes?: string[]; // Format: ['150x150', '300x300']
 }
 
 export interface FileUpdateRequest {
@@ -54,6 +57,17 @@ export interface FileListQuery {
 export interface DownloadQuery {
   variant?: string;
   inline?: boolean;
+}
+
+export interface ThumbnailQuery {
+  size?: string; // Format: '150x150'
+  quality?: number; // 1-100
+  format?: 'jpg' | 'png' | 'webp';
+}
+
+export interface ViewQuery {
+  variant?: string;
+  cache?: boolean;
 }
 
 export interface UploadedFile {

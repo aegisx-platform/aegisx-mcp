@@ -33,7 +33,7 @@ import rbacPlugin from './modules/rbac/rbac.plugin';
 import jwtAuthPlugin from './plugins/jwt-auth.plugin';
 import staticFilesPlugin from './plugins/static-files.plugin';
 import swaggerPlugin from './plugins/swagger.plugin';
-import websocketPlugin from './shared/websocket/websocket.plugin';
+// import websocketPlugin from './shared/websocket/websocket.plugin'; // ปิดชั่วคราวเพื่อทดสอบ
 
 // Load environment variables
 dotenv.config();
@@ -61,6 +61,25 @@ async function bootstrap() {
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   });
 
+  // Dynamic CSP configuration based on environment
+  const apiBaseUrl = process.env.API_BASE_URL || 'http://localhost:4200';
+  const webUrl = process.env.WEB_URL || 'http://localhost:4200';
+  const apiUrl = process.env.API_URL || 'http://localhost:3333';
+
+  // Parse URLs to extract hosts and origins for CSP
+  const getOriginFromUrl = (url: string) => {
+    try {
+      const urlObj = new URL(url);
+      return urlObj.origin;
+    } catch {
+      return url; // fallback for invalid URLs
+    }
+  };
+
+  const apiOrigin = getOriginFromUrl(apiUrl);
+  const webOrigin = getOriginFromUrl(webUrl);
+  const baseOrigin = getOriginFromUrl(apiBaseUrl);
+
   await app.register(fastifyHelmet, {
     contentSecurityPolicy: {
       directives: {
@@ -72,12 +91,23 @@ async function bootstrap() {
           "'unsafe-eval'",
           'https://cdn.jsdelivr.net',
         ],
-        imgSrc: ["'self'", 'data:', 'https:', 'blob:'],
+        imgSrc: [
+          "'self'",
+          'data:',
+          'https:',
+          'blob:',
+          // Allow images from all configured origins
+          webOrigin,
+          baseOrigin,
+          ...(webOrigin !== baseOrigin ? [baseOrigin] : []),
+        ],
         fontSrc: ["'self'", 'https:', 'data:'],
         connectSrc: [
           "'self'",
-          'http://localhost:3333',
-          'http://127.0.0.1:3333',
+          // Allow connections to all configured API endpoints
+          apiOrigin,
+          webOrigin,
+          ...(apiOrigin !== webOrigin ? [webOrigin] : []),
         ],
         workerSrc: ["'self'", 'blob:'],
       },
@@ -204,7 +234,7 @@ async function bootstrap() {
   await app.register(monitoringModulePlugin);
 
   // WebSocket support
-  await app.register(websocketPlugin);
+  // await app.register(websocketPlugin); // ปิดชั่วคราวเพื่อทดสอบ signed URLs
 
   // Start server
   const port = process.env.PORT || 3333;

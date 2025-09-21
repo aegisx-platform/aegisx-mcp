@@ -31,9 +31,15 @@ async function websocketPlugin(
   fastify.decorate('websocketManager', websocketManager);
   fastify.decorate('eventService', eventService);
 
-  // Add hook to set request context for EventService
-  fastify.addHook('onRequest', async (request) => {
-    eventService.setRequestContext(request);
+  // Add hook to set request context for EventService (only for WebSocket endpoints)
+  fastify.addHook('preHandler', async (request) => {
+    // Only set context for WebSocket endpoints
+    if (
+      request.url.startsWith('/api/websocket/') ||
+      request.url.startsWith('/api/ws/')
+    ) {
+      eventService.setRequestContext(request);
+    }
   });
 
   // Add WebSocket health check endpoint (separate from Socket.IO path)

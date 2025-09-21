@@ -8,6 +8,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { FileUploadComponent } from './file-upload.component';
 import { FileManagementComponent } from './file-management.component';
+import { FileUploadService } from './file-upload.service';
 import { UploadedFile } from './file-upload.types';
 
 @Component({
@@ -374,6 +375,7 @@ import { UploadedFile } from './file-upload.types';
 })
 export class FileUploadDemoComponent {
   private snackBar = inject(MatSnackBar);
+  private fileUploadService = inject(FileUploadService);
 
   // Signals for demo state
   private _recentUploads = signal<UploadedFile[]>([]);
@@ -518,7 +520,8 @@ export interface FileUploadOptions {
   }
 
   viewFile(file: UploadedFile) {
-    window.open(file.downloadUrl, '_blank');
+    // Use downloadUrl from API response (already absolute URL)
+    window.open(file.downloadUrl + '?inline=true', '_blank');
   }
 
   formatFileSize(bytes: number): string {

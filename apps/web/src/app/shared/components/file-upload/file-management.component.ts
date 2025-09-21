@@ -247,7 +247,7 @@ import {
                 <div class="file-preview-cell">
                   <img
                     *ngIf="file.fileType === 'image'"
-                    [src]="file.downloadUrl"
+                    [src]="getThumbnailUrl(file.id)"
                     [alt]="file.originalName"
                     class="file-thumbnail"
                     loading="lazy"
@@ -407,7 +407,7 @@ import {
               <div class="card-preview">
                 <img
                   *ngIf="file.fileType === 'image'"
-                  [src]="file.downloadUrl"
+                  [src]="getThumbnailUrl(file.id)"
                   [alt]="file.originalName"
                   class="grid-thumbnail"
                   loading="lazy"
@@ -940,6 +940,9 @@ export class FileManagementComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+    // Cleanup blob URLs to prevent memory leaks
+    this.thumbnailUrls.forEach((url) => URL.revokeObjectURL(url));
+    this.thumbnailUrls.clear();
   }
 
   private setupFilterSubscription() {
@@ -1063,23 +1066,20 @@ export class FileManagementComponent implements OnInit, OnDestroy {
   }
 
   downloadFile(file: UploadedFile) {
-    const url = this.fileUploadService.getDownloadUrl(file.id, {
-      inline: false,
-    });
-    window.open(url, '_blank');
+    // Use downloadUrl from API response (already absolute URL)
+    window.open(file.downloadUrl + '?inline=false', '_blank');
   }
 
   viewFile(file: UploadedFile) {
-    const url = this.fileUploadService.getDownloadUrl(file.id, {
-      inline: true,
-    });
-    window.open(url, '_blank');
+    // Use view URL for inline display
+    const viewUrl = this.fileUploadService.getViewUrl(file.id, { cache: true });
+    window.open(viewUrl, '_blank');
     this.fileSelected.emit(file);
   }
 
   copyLink(file: UploadedFile) {
-    const url = this.fileUploadService.getDownloadUrl(file.id);
-    navigator.clipboard.writeText(url).then(() => {
+    // Use downloadUrl from API response (already absolute URL)
+    navigator.clipboard.writeText(file.downloadUrl).then(() => {
       this.snackBar.open('Link copied to clipboard', 'Close', {
         duration: 2000,
       });
@@ -1196,4 +1196,29 @@ export class FileManagementComponent implements OnInit, OnDestroy {
   trackByFileId(index: number, file: UploadedFile): string {
     return file.id;
   }
+
+  getThumbnailUrl(fileId: string): string {
+    // Create blob URL for authenticated thumbnail access
+    this.fileUploadService
+      .getThumbnail(fileId, {
+        size: '150x150',
+        quality: 80,
+        format: 'webp',
+      })
+      .subscribe({
+        next: (blob) => {
+          const url = URL.createObjectURL(blob);
+          // Store blob URL for cleanup later
+          this.thumbnailUrls.set(fileId, url);
+        },
+        error: (error) => {
+          console.error('Failed to load thumbnail:', error);
+        },
+      });
+
+    // Return cached blob URL if available
+    return this.thumbnailUrls.get(fileId) || '';
+  }
+
+  private thumbnailUrls = new Map<string, string>();
 }

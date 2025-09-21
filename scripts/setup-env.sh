@@ -161,6 +161,7 @@ REDIS_PORT=$REDIS_PORT
 # API Configuration
 API_PORT=$API_PORT
 API_URL=http://localhost:$API_PORT
+API_BASE_URL=http://localhost:$WEB_PORT
 
 # Frontend Configuration
 WEB_PORT=$WEB_PORT
