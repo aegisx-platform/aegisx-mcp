@@ -4,4 +4,9 @@ export const environment = {
   features: {
     enableComponentShowcase: false, // Disable component showcase in production by default
   },
+  websocket: {
+    forceSecure: true, // Force WSS in production
+    timeout: 30000,
+    reconnectionAttempts: 10,
+  },
 };

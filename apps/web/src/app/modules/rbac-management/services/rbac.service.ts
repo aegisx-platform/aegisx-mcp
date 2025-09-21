@@ -2,7 +2,6 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { environment } from '../../../../environments/environment';
 import {
   Role,
   Permission,
@@ -33,7 +32,7 @@ import {
 })
 export class RbacService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = `${environment.apiUrl}/api/rbac`;
+  private readonly baseUrl = '/rbac';
 
   // ===== ROLE METHODS =====
 
@@ -438,9 +437,7 @@ export class RbacService {
       .append('limit', limit.toString());
 
     return this.http
-      .get<
-        PaginatedResponse<User>
-      >(`${environment.apiUrl}/api/users`, { params })
+      .get<PaginatedResponse<User>>('/users', { params })
       .pipe(catchError(this.handleError));
   }
 
@@ -449,7 +446,7 @@ export class RbacService {
    */
   getUserById(id: string): Observable<ApiResponse<User>> {
     return this.http
-      .get<ApiResponse<User>>(`${environment.apiUrl}/api/users/${id}`)
+      .get<ApiResponse<User>>(`/users/${id}`)
       .pipe(catchError(this.handleError));
   }
 

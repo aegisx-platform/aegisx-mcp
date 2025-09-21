@@ -4,4 +4,12 @@ export const environment = {
   features: {
     enableComponentShowcase: true, // Enable component showcase in development
   },
+  websocket: {
+    path: '/api/ws/',
+    timeout: 20000,
+    reconnectionAttempts: 5,
+    forceSecure: false,
+    transports: ['polling'], // Start with polling only for debugging
+    upgrade: true,
+  },
 };

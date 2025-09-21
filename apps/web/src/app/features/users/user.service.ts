@@ -7,7 +7,6 @@ import {
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { environment } from '../../../environments/environment';
 
 export interface User {
   id: string;
@@ -183,7 +182,7 @@ interface ApiResponse<T> {
 })
 export class UserService {
   private http = inject(HttpClient);
-  private baseUrl = `${environment.apiUrl}/api/users`;
+  private baseUrl = '/users';
 
   // Signals for state management
   private usersSignal = signal<User[]>([]);
@@ -529,16 +528,14 @@ export class UserService {
   }
 
   updateProfile(data: UpdateProfileRequest) {
-    return this.http
-      .put<ApiResponse<UserProfile>>(`/api/profile`, data)
-      .pipe(
-        map((response) => {
-          if (response.success && response.data) {
-            return response.data;
-          }
-          throw new Error(response.error || 'Failed to update profile');
-        }),
-      );
+    return this.http.put<ApiResponse<UserProfile>>(`/api/profile`, data).pipe(
+      map((response) => {
+        if (response.success && response.data) {
+          return response.data;
+        }
+        throw new Error(response.error || 'Failed to update profile');
+      }),
+    );
   }
 
   // ===== AVATAR METHODS =====
@@ -629,7 +626,9 @@ export class UserService {
   }
 
   // Delete account method
-  async deleteAccount(data: DeleteAccountRequest): Promise<DeleteAccountResponse> {
+  async deleteAccount(
+    data: DeleteAccountRequest,
+  ): Promise<DeleteAccountResponse> {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
 

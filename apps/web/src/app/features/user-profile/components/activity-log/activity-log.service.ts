@@ -2,7 +2,6 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
-import { environment } from '../../../../../environments/environment';
 import {
   ActivityLog,
   ActivityLogResponse,
@@ -16,7 +15,7 @@ import {
 })
 export class ActivityLogService {
   private http = inject(HttpClient);
-  private baseUrl = `${environment.apiUrl}/api/profile/activity`;
+  private baseUrl = '/profile/activity';
 
   // Signals for state management
   private activitiesSignal = signal<ActivityLog[]>([]);

@@ -2,7 +2,6 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, catchError, tap, throwError } from 'rxjs';
-import { environment } from '../../environments/environment';
 
 export interface User {
   id: string;
@@ -100,7 +99,7 @@ export class AuthService {
   login(credentials: LoginRequest): Observable<AuthResponse> {
     this._isLoading.set(true);
     return this.http
-      .post<AuthResponse>(`${environment.apiUrl}/api/auth/login`, credentials, {
+      .post<AuthResponse>('/auth/login', credentials, {
         withCredentials: true, // Include cookies for refresh token
       })
       .pipe(
@@ -119,23 +118,21 @@ export class AuthService {
   }
 
   register(userData: RegisterRequest): Observable<AuthResponse> {
-    return this.http
-      .post<AuthResponse>(`${environment.apiUrl}/api/auth/register`, userData)
-      .pipe(
-        tap((response) => {
-          if (response.success && response.data) {
-            this.setAuthData(response.data);
-            this.router.navigate(['/dashboard']);
-          }
-        }),
-        catchError(this.handleAuthError.bind(this)),
-      );
+    return this.http.post<AuthResponse>('/auth/register', userData).pipe(
+      tap((response) => {
+        if (response.success && response.data) {
+          this.setAuthData(response.data);
+          this.router.navigate(['/dashboard']);
+        }
+      }),
+      catchError(this.handleAuthError.bind(this)),
+    );
   }
 
   logout(): Observable<any> {
     return this.http
       .post(
-        `${environment.apiUrl}/api/auth/logout`,
+        '/auth/logout',
         {},
         {
           withCredentials: true,
@@ -158,7 +155,7 @@ export class AuthService {
   refreshToken(): Observable<any> {
     return this.http
       .post<AuthResponse>(
-        `${environment.apiUrl}/api/auth/refresh`,
+        '/auth/refresh',
         {},
         {
           withCredentials: true,
@@ -182,7 +179,7 @@ export class AuthService {
     const token = this._accessToken();
     if (token) {
       // Load full profile from API
-      this.http.get<any>(`${environment.apiUrl}/api/profile`).subscribe({
+      this.http.get<any>('/profile').subscribe({
         next: (response) => {
           this._isLoading.set(false);
           if (response.success && response.data) {

@@ -11,9 +11,10 @@ async function websocketPlugin(
   // Create Socket.IO server
   const io = new Server(fastify.server, {
     cors: {
-      origin: process.env.NODE_ENV === 'production' 
-        ? ['https://yourdomain.com', 'https://admin.yourdomain.com']
-        : true,
+      origin:
+        process.env.NODE_ENV === 'production'
+          ? ['https://yourdomain.com', 'https://admin.yourdomain.com']
+          : true,
       credentials: true,
     },
     path: '/api/ws/',
@@ -22,7 +23,7 @@ async function websocketPlugin(
 
   // Create WebSocket manager
   const websocketManager = new WebSocketManager(fastify, io);
-  
+
   // Create event service
   const eventService = new EventService(websocketManager);
 
@@ -35,8 +36,8 @@ async function websocketPlugin(
     eventService.setRequestContext(request);
   });
 
-  // Add WebSocket health check endpoint
-  fastify.get('/api/ws/health', async () => {
+  // Add WebSocket health check endpoint (separate from Socket.IO path)
+  fastify.get('/api/websocket/health', async () => {
     const stats = websocketManager.getStats();
     return {
       success: true,
@@ -48,8 +49,8 @@ async function websocketPlugin(
     };
   });
 
-  // Add WebSocket stats endpoint
-  fastify.get('/api/ws/stats', async () => {
+  // Add WebSocket stats endpoint (separate from Socket.IO path)
+  fastify.get('/api/websocket/stats', async () => {
     const stats = websocketManager.getStats();
     return {
       success: true,

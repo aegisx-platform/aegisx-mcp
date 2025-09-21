@@ -1,7 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpParams, HttpEventType } from '@angular/common/http';
 import { Observable, map, catchError, throwError, BehaviorSubject } from 'rxjs';
-import { environment } from '../../../../environments/environment';
 import { AuthService } from '../../../core/auth.service';
 import {
   FileUploadOptions,
@@ -30,7 +29,7 @@ export class FileUploadService {
   private http = inject(HttpClient);
   private authService = inject(AuthService);
 
-  private readonly apiUrl = `${environment.apiUrl}/api/files`;
+  private readonly apiUrl = '/files';
 
   // Upload progress tracking
   private uploadProgressSubject = new BehaviorSubject<FileUploadProgress[]>([]);

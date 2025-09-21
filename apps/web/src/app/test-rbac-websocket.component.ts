@@ -79,6 +79,14 @@ import { Subject, takeUntil } from 'rxjs';
             >
               Subscribe to RBAC
             </button>
+            <button
+              mat-raised-button
+              color="accent"
+              (click)="checkHealth()"
+              style="margin-left: 10px;"
+            >
+              Check Health
+            </button>
           </div>
         </mat-card-content>
       </mat-card>
@@ -261,18 +269,8 @@ export class TestRbacWebsocketComponent implements OnInit, OnDestroy {
     data?: any;
   }> = [];
 
-  ngOnInit() {
-    this.logEvent('INIT', 'Component initialized');
-
-    // Subscribe to WebSocket connection status changes
-    this.websocketService
-      .getConnectionStatusObservable()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((status) => {
-        this.logEvent('CONNECTION', `Status changed to: ${status.status}`);
-      });
-
-    // Subscribe to RBAC state changes using effects
+  constructor() {
+    // Move effects to constructor (injection context)
     effect(() => {
       const roles = this.rbacStateManager.items();
       this.logEvent('STATE', `Roles updated: ${roles.length} total`);
@@ -284,6 +282,18 @@ export class TestRbacWebsocketComponent implements OnInit, OnDestroy {
         this.logEvent('ERROR', `State error: ${error}`, { error });
       }
     });
+  }
+
+  ngOnInit() {
+    this.logEvent('INIT', 'Component initialized');
+
+    // Subscribe to WebSocket connection status changes
+    this.websocketService
+      .getConnectionStatusObservable()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((status) => {
+        this.logEvent('CONNECTION', `Status changed to: ${status.status}`);
+      });
 
     // Auto-connect on init
     if (!this.isConnected()) {
@@ -302,6 +312,11 @@ export class TestRbacWebsocketComponent implements OnInit, OnDestroy {
 
   connect() {
     this.logEvent('ACTION', 'Connecting to WebSocket...');
+
+    // Add debugging
+    console.log('🔌 Manual connect triggered');
+    console.log('🔌 Current status:', this.connectionStatus());
+
     // TODO: Get actual token from auth service
     this.websocketService.connect('dummy-token');
   }
@@ -318,12 +333,35 @@ export class TestRbacWebsocketComponent implements OnInit, OnDestroy {
     });
   }
 
+  async checkHealth() {
+    this.logEvent('ACTION', 'Checking WebSocket health...');
+
+    try {
+      const response = await fetch('/api/websocket/health');
+      const result = await response.json();
+
+      if (result.success) {
+        this.logEvent(
+          'HEALTH_SUCCESS',
+          'WebSocket health check passed',
+          result.data,
+        );
+      } else {
+        this.logEvent('HEALTH_ERROR', 'WebSocket health check failed', result);
+      }
+    } catch (error) {
+      this.logEvent('HEALTH_ERROR', 'Network error during health check', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  }
+
   async testCreateRole() {
     const roleName = `Test Role ${Date.now()}`;
     this.logEvent('ACTION', `Creating role via API: ${roleName}`);
 
     try {
-      const response = await fetch('http://localhost:3380/test/rbac/role', {
+      const response = await fetch('/api/test/rbac/role', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -378,11 +416,15 @@ export class TestRbacWebsocketComponent implements OnInit, OnDestroy {
         return '#f44336';
       case 'API_ERROR':
         return '#f44336';
+      case 'HEALTH_ERROR':
+        return '#f44336';
       case 'CONNECTION':
         return '#2196f3';
       case 'STATE':
         return '#4caf50';
       case 'API_SUCCESS':
+        return '#4caf50';
+      case 'HEALTH_SUCCESS':
         return '#4caf50';
       case 'ACTION':
         return '#ff9800';
@@ -397,11 +439,15 @@ export class TestRbacWebsocketComponent implements OnInit, OnDestroy {
         return '#ffebee';
       case 'API_ERROR':
         return '#ffebee';
+      case 'HEALTH_ERROR':
+        return '#ffebee';
       case 'CONNECTION':
         return '#e3f2fd';
       case 'STATE':
         return '#e8f5e8';
       case 'API_SUCCESS':
+        return '#e8f5e8';
+      case 'HEALTH_SUCCESS':
         return '#e8f5e8';
       case 'ACTION':
         return '#fff3e0';

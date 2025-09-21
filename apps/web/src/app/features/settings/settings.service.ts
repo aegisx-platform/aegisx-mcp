@@ -31,7 +31,7 @@ import {
 export class SettingsService {
   private http = inject(HttpClient);
   private demoService = inject(SettingsDemoService);
-  private readonly baseUrl = '/api/settings';
+  private readonly baseUrl = '/settings';
 
   // Set to true to use demo service instead of real API
   private readonly useDemoMode = false;

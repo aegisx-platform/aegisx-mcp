@@ -4,21 +4,30 @@ import { Type } from '@sinclair/typebox';
 
 // TypeBox Schema for WebSocket messages
 export const WebSocketMessageSchema = Type.Object({
-  feature: Type.String({ description: 'Feature identifier (e.g., rbac, users)' }),
-  entity: Type.String({ description: 'Entity type (e.g., role, user, permission)' }),
-  action: Type.String({ description: 'Action performed (created, updated, deleted, etc.)' }),
+  feature: Type.String({
+    description: 'Feature identifier (e.g., rbac, users)',
+  }),
+  entity: Type.String({
+    description: 'Entity type (e.g., role, user, permission)',
+  }),
+  action: Type.String({
+    description: 'Action performed (created, updated, deleted, etc.)',
+  }),
   data: Type.Any({ description: 'Event payload' }),
   meta: Type.Object({
     timestamp: Type.String({ format: 'date-time' }),
     userId: Type.String(),
     sessionId: Type.String(),
     featureVersion: Type.Optional(Type.String({ default: 'v1' })),
-    priority: Type.Union([
-      Type.Literal('low'),
-      Type.Literal('normal'),
-      Type.Literal('high'),
-      Type.Literal('critical')
-    ], { default: 'normal' })
+    priority: Type.Union(
+      [
+        Type.Literal('low'),
+        Type.Literal('normal'),
+        Type.Literal('high'),
+        Type.Literal('critical'),
+      ],
+      { default: 'normal' },
+    ),
   }),
 });
 
@@ -39,13 +48,16 @@ export interface WebSocketMessage {
 export class WebSocketManager {
   private io: Server;
   private fastify: FastifyInstance;
-  
-  private connectedClients = new Map<string, {
-    socket: Socket;
-    userId?: string;
-    subscriptions: Set<string>;
-    joinedAt: Date;
-  }>();
+
+  private connectedClients = new Map<
+    string,
+    {
+      socket: Socket;
+      userId?: string;
+      subscriptions: Set<string>;
+      joinedAt: Date;
+    }
+  >();
 
   private roomSubscriptions = new Map<string, Set<string>>();
 
@@ -59,11 +71,17 @@ export class WebSocketManager {
   private setupEventHandlers() {
     this.io.on('connection', (socket: Socket) => {
       this.handleConnection(socket);
-      
+
       socket.on('disconnect', () => this.handleDisconnect(socket));
-      socket.on('auth:authenticate', (data) => this.handleAuthentication(data, socket));
-      socket.on('subscribe:features', (data) => this.handleFeatureSubscription(data, socket));
-      socket.on('unsubscribe:features', (data) => this.handleFeatureUnsubscription(data, socket));
+      socket.on('auth:authenticate', (data) =>
+        this.handleAuthentication(data, socket),
+      );
+      socket.on('subscribe:features', (data) =>
+        this.handleFeatureSubscription(data, socket),
+      );
+      socket.on('unsubscribe:features', (data) =>
+        this.handleFeatureUnsubscription(data, socket),
+      );
       socket.on('ping', () => this.handlePing(socket));
     });
   }
@@ -73,16 +91,42 @@ export class WebSocketManager {
    */
   private handleConnection(client: Socket) {
     console.log(`🔗 Client connected: ${client.id}`);
-    
+
+    // Extract token from auth handshake if provided
+    const token = client.handshake.auth?.token;
+    let userId: string | undefined;
+
+    if (token) {
+      try {
+        // TODO: Validate JWT token using fastify.jwt.verify
+        // For now, accept any token and extract user info
+        userId = 'user_123'; // Extract from JWT
+        console.log(`✅ User ${userId} authenticated on connection`);
+      } catch (error) {
+        console.error(
+          `❌ Token validation failed for client ${client.id}:`,
+          error,
+        );
+      }
+    }
+
     this.connectedClients.set(client.id, {
       socket: client,
+      userId,
       subscriptions: new Set(),
       joinedAt: new Date(),
     });
 
+    // Join user-specific room if authenticated
+    if (userId) {
+      client.join(`user:${userId}`);
+    }
+
     // Send welcome message
     client.emit('connection:established', {
       clientId: client.id,
+      userId,
+      authenticated: !!userId,
       timestamp: new Date().toISOString(),
       server: 'AegisX WebSocket Server',
       version: '1.0.0',
@@ -94,11 +138,11 @@ export class WebSocketManager {
    */
   private handleDisconnect(client: Socket) {
     console.log(`🔌 Client disconnected: ${client.id}`);
-    
+
     const clientInfo = this.connectedClients.get(client.id);
     if (clientInfo) {
       // Remove from all room subscriptions
-      clientInfo.subscriptions.forEach(room => {
+      clientInfo.subscriptions.forEach((room) => {
         const roomClients = this.roomSubscriptions.get(room);
         if (roomClients) {
           roomClients.delete(client.id);
@@ -120,20 +164,20 @@ export class WebSocketManager {
       // TODO: Validate JWT token using fastify.jwt.verify
       // For now, accept any token and extract user info
       const userId = 'user_123'; // Extract from JWT
-      
+
       const clientInfo = this.connectedClients.get(client.id);
       if (clientInfo) {
         clientInfo.userId = userId;
-        
+
         // Join user-specific room
         client.join(`user:${userId}`);
-        
+
         client.emit('auth:authenticated', {
           success: true,
           userId,
           timestamp: new Date().toISOString(),
         });
-        
+
         console.log(`✅ User ${userId} authenticated on client ${client.id}`);
       }
     } catch (error) {
@@ -142,7 +186,7 @@ export class WebSocketManager {
         error: 'Authentication failed',
         timestamp: new Date().toISOString(),
       });
-      
+
       console.error(`❌ Authentication failed for client ${client.id}:`, error);
     }
   }
@@ -150,7 +194,10 @@ export class WebSocketManager {
   /**
    * Handle feature subscription
    */
-  private handleFeatureSubscription(data: { features: string[], entities?: string[] }, client: Socket) {
+  private handleFeatureSubscription(
+    data: { features: string[]; entities?: string[] },
+    client: Socket,
+  ) {
     const clientInfo = this.connectedClients.get(client.id);
     if (!clientInfo) return;
 
@@ -158,12 +205,12 @@ export class WebSocketManager {
     const rooms: string[] = [];
 
     // Subscribe to feature-level events
-    features.forEach(feature => {
+    features.forEach((feature) => {
       const featureRoom = `feature:${feature}`;
       rooms.push(featureRoom);
       client.join(featureRoom);
       clientInfo.subscriptions.add(featureRoom);
-      
+
       // Add to room tracking
       if (!this.roomSubscriptions.has(featureRoom)) {
         this.roomSubscriptions.set(featureRoom, new Set());
@@ -172,12 +219,12 @@ export class WebSocketManager {
 
       // Subscribe to specific entities if provided
       if (entities) {
-        entities.forEach(entity => {
+        entities.forEach((entity) => {
           const entityRoom = `feature:${feature}:entity:${entity}`;
           rooms.push(entityRoom);
           client.join(entityRoom);
           clientInfo.subscriptions.add(entityRoom);
-          
+
           if (!this.roomSubscriptions.has(entityRoom)) {
             this.roomSubscriptions.set(entityRoom, new Set());
           }
@@ -199,19 +246,22 @@ export class WebSocketManager {
   /**
    * Handle unsubscription
    */
-  private handleFeatureUnsubscription(data: { features: string[], entities?: string[] }, client: Socket) {
+  private handleFeatureUnsubscription(
+    data: { features: string[]; entities?: string[] },
+    client: Socket,
+  ) {
     const clientInfo = this.connectedClients.get(client.id);
     if (!clientInfo) return;
 
     const { features, entities } = data;
     const rooms: string[] = [];
 
-    features.forEach(feature => {
+    features.forEach((feature) => {
       const featureRoom = `feature:${feature}`;
       rooms.push(featureRoom);
       client.leave(featureRoom);
       clientInfo.subscriptions.delete(featureRoom);
-      
+
       const roomClients = this.roomSubscriptions.get(featureRoom);
       if (roomClients) {
         roomClients.delete(client.id);
@@ -221,12 +271,12 @@ export class WebSocketManager {
       }
 
       if (entities) {
-        entities.forEach(entity => {
+        entities.forEach((entity) => {
           const entityRoom = `feature:${feature}:entity:${entity}`;
           rooms.push(entityRoom);
           client.leave(entityRoom);
           clientInfo.subscriptions.delete(entityRoom);
-          
+
           const entityRoomClients = this.roomSubscriptions.get(entityRoom);
           if (entityRoomClients) {
             entityRoomClients.delete(client.id);
@@ -251,7 +301,13 @@ export class WebSocketManager {
   /**
    * Emit event to specific feature subscribers
    */
-  emitToFeature(feature: string, entity: string, action: string, data: any, priority: 'low' | 'normal' | 'high' | 'critical' = 'normal') {
+  emitToFeature(
+    feature: string,
+    entity: string,
+    action: string,
+    data: any,
+    priority: 'low' | 'normal' | 'high' | 'critical' = 'normal',
+  ) {
     const message: WebSocketMessage = {
       feature,
       entity,
@@ -272,11 +328,13 @@ export class WebSocketManager {
 
     // Emit to feature subscribers
     this.io.to(featureRoom).emit(eventName, message);
-    
+
     // Emit to specific entity subscribers
     this.io.to(entityRoom).emit(eventName, message);
 
-    console.log(`📡 Emitted ${eventName} to rooms: ${featureRoom}, ${entityRoom}`);
+    console.log(
+      `📡 Emitted ${eventName} to rooms: ${featureRoom}, ${entityRoom}`,
+    );
   }
 
   /**
@@ -303,10 +361,12 @@ export class WebSocketManager {
     return {
       connectedClients: this.connectedClients.size,
       activeRooms: this.roomSubscriptions.size,
-      roomDetails: Array.from(this.roomSubscriptions.entries()).map(([room, clients]) => ({
-        room,
-        clientCount: clients.size,
-      })),
+      roomDetails: Array.from(this.roomSubscriptions.entries()).map(
+        ([room, clients]) => ({
+          room,
+          clientCount: clients.size,
+        }),
+      ),
     };
   }
 
@@ -322,11 +382,19 @@ export class WebSocketManager {
   /**
    * Emit lock events
    */
-  emitLockAcquired(feature: string, entity: string, data: { id: string; userId: string; lockType?: string }) {
+  emitLockAcquired(
+    feature: string,
+    entity: string,
+    data: { id: string; userId: string; lockType?: string },
+  ) {
     this.emitToFeature(feature, entity, 'lock_acquired', data, 'normal');
   }
 
-  emitLockReleased(feature: string, entity: string, data: { id: string; userId: string }) {
+  emitLockReleased(
+    feature: string,
+    entity: string,
+    data: { id: string; userId: string },
+  ) {
     this.emitToFeature(feature, entity, 'lock_released', data, 'normal');
   }
 
@@ -340,15 +408,27 @@ export class WebSocketManager {
   /**
    * Emit bulk operation events
    */
-  emitBulkStarted(feature: string, entity: string, data: { operationId: string; total: number; operation: string }) {
+  emitBulkStarted(
+    feature: string,
+    entity: string,
+    data: { operationId: string; total: number; operation: string },
+  ) {
     this.emitToFeature(feature, entity, 'bulk_started', data, 'normal');
   }
 
-  emitBulkProgress(feature: string, entity: string, data: { operationId: string; progress: any }) {
+  emitBulkProgress(
+    feature: string,
+    entity: string,
+    data: { operationId: string; progress: any },
+  ) {
     this.emitToFeature(feature, entity, 'bulk_progress', data, 'normal');
   }
 
-  emitBulkCompleted(feature: string, entity: string, data: { operationId: string; results: any }) {
+  emitBulkCompleted(
+    feature: string,
+    entity: string,
+    data: { operationId: string; results: any },
+  ) {
     this.emitToFeature(feature, entity, 'bulk_completed', data, 'normal');
   }
 }
