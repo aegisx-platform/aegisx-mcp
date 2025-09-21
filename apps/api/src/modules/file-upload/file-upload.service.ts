@@ -73,18 +73,8 @@ export class FileUploadService {
       userId,
     );
 
-    // Generate thumbnails for images only if explicitly requested
-    if (this.isImageFile(file.mimetype) && uploadRequest.generateThumbnails) {
-      const thumbnailSizes = uploadRequest.thumbnailSizes || [
-        '150x150',
-        '300x300',
-      ];
-      await this.generateRequestedThumbnails(
-        result.file,
-        await file.toBuffer(),
-        thumbnailSizes,
-      );
-    }
+    // Note: Thumbnails are generated dynamically via /thumbnail endpoint
+    // No pre-generation needed during upload
 
     return result;
   }
@@ -660,114 +650,6 @@ export class FileUploadService {
       fileType,
       metadata,
     };
-  }
-
-  /**
-   * Generate thumbnails with requested sizes
-   */
-  private async generateRequestedThumbnails(
-    file: UploadedFile,
-    buffer: Buffer,
-    thumbnailSizes: string[],
-  ): Promise<void> {
-    if (!this.isImageFile(file.mimeType)) return;
-
-    const VARIANT_TIMEOUT = 30000; // 30 seconds timeout for variant generation
-
-    try {
-      const variantPromise = this.processRequestedThumbnails(
-        file,
-        buffer,
-        thumbnailSizes,
-      );
-      const timeoutPromise = new Promise<void>((_, reject) => {
-        setTimeout(() => {
-          reject(new Error(`Thumbnail generation timeout for ${file.id}`));
-        }, VARIANT_TIMEOUT);
-      });
-
-      await Promise.race([variantPromise, timeoutPromise]);
-    } catch (error) {
-      this.deps.logger.error(
-        error,
-        `Failed to generate thumbnails for ${file.id}`,
-      );
-    }
-  }
-
-  /**
-   * Process requested thumbnail sizes
-   */
-  private async processRequestedThumbnails(
-    file: UploadedFile,
-    buffer: Buffer,
-    thumbnailSizes: string[],
-  ): Promise<void> {
-    const variants: Record<string, any> = {};
-
-    // Convert size strings to objects (e.g., "150x150" -> {width: 150, height: 150})
-    const sizes = thumbnailSizes.map((sizeStr) => {
-      const [width, height] = sizeStr.split('x').map(Number);
-      return {
-        name: `${width}x${height}`,
-        width,
-        height,
-      };
-    });
-
-    // Process variants concurrently
-    const variantPromises = sizes.map(async (size) => {
-      try {
-        const resizedBuffer = await sharp(buffer)
-          .resize(size.width, size.height, {
-            fit: 'inside',
-            withoutEnlargement: true,
-          })
-          .jpeg({ quality: 80 })
-          .toBuffer();
-
-        const variantKey = `${path.parse(file.filename).name}_${size.name}.jpg`;
-        const storageKey = this.generateStorageKey(
-          variantKey,
-          'image',
-          file.fileCategory,
-        );
-
-        // Upload variant to storage
-        await this.deps.storageAdapter.uploadFile(resizedBuffer, storageKey, {
-          mimeType: 'image/jpeg',
-          originalName: variantKey,
-          originalFileId: file.id,
-          variantType: size.name,
-          width: size.width,
-          height: size.height,
-        });
-
-        variants[size.name] = {
-          filename: variantKey,
-          filepath: storageKey,
-          width: size.width,
-          height: size.height,
-          fileSize: resizedBuffer.length,
-        };
-
-        this.deps.logger.info(
-          `Generated thumbnail ${size.name} for file ${file.id}`,
-        );
-      } catch (error) {
-        this.deps.logger.error(
-          error,
-          `Failed to generate thumbnail ${size.name} for file ${file.id}`,
-        );
-      }
-    });
-
-    await Promise.all(variantPromises);
-
-    // Update file record with generated variants
-    if (Object.keys(variants).length > 0) {
-      await this.deps.fileRepository.updateFile(file.id, { variants });
-    }
   }
 
   /**
@@ -1378,6 +1260,35 @@ export class FileUploadService {
     } catch (error) {
       this.deps.logger.error(error, 'Failed to verify signed URL token');
       return false;
+    }
+  }
+
+  /**
+   * Get storage adapter statistics and configuration
+   */
+  async getStorageStats(): Promise<any> {
+    try {
+      // Check if storage adapter has getStorageStats method
+      if ('getStorageStats' in this.deps.storageAdapter) {
+        return await (this.deps.storageAdapter as any).getStorageStats();
+      }
+
+      // Fallback: basic adapter info
+      return {
+        type: this.deps.storageAdapter.getStorageType(),
+        health: await this.deps.storageAdapter.healthCheck(),
+        configuration:
+          'getConfiguration' in this.deps.storageAdapter
+            ? (this.deps.storageAdapter as any).getConfiguration()
+            : {},
+        providerInfo:
+          'getProviderInfo' in this.deps.storageAdapter
+            ? (this.deps.storageAdapter as any).getProviderInfo()
+            : {},
+      };
+    } catch (error) {
+      this.deps.logger.error(error, 'Failed to get storage stats');
+      throw new Error(`Failed to get storage statistics: ${error.message}`);
     }
   }
 }

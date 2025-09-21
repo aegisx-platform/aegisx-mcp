@@ -108,39 +108,6 @@ import {
               />
             </mat-form-field>
           </div>
-
-          <!-- Thumbnail Generation Options -->
-          <div
-            class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"
-            *ngIf="showThumbnailOptions()"
-          >
-            <div class="thumbnail-options">
-              <mat-checkbox formControlName="generateThumbnails">
-                Generate thumbnails for images
-              </mat-checkbox>
-              <p class="text-sm text-gray-500 mt-1">
-                Automatically create thumbnail variants during upload
-              </p>
-            </div>
-
-            <mat-form-field
-              appearance="outline"
-              *ngIf="optionsForm.get('generateThumbnails')?.value"
-            >
-              <mat-label>Thumbnail Sizes</mat-label>
-              <mat-select formControlName="thumbnailSizes" multiple>
-                <mat-option
-                  *ngFor="let size of availableThumbnailSizes"
-                  [value]="size"
-                >
-                  {{ size }}
-                </mat-option>
-              </mat-select>
-              <mat-hint
-                >Select one or more thumbnail sizes to generate</mat-hint
-              >
-            </mat-form-field>
-          </div>
         </form>
 
         <!-- Drag and Drop Area -->
@@ -871,20 +838,9 @@ export class FileUploadComponent implements OnInit, OnDestroy {
     isPublic: [false],
     isTemporary: [false],
     expiresIn: [24],
-    generateThumbnails: [false],
-    thumbnailSizes: [['150x150', '300x300']],
   });
 
   readonly availableCategories = FILE_UPLOAD_LIMITS.ALLOWED_CATEGORIES;
-  readonly availableThumbnailSizes = [
-    '50x50',
-    '100x100',
-    '150x150',
-    '200x200',
-    '300x300',
-    '500x500',
-    '800x800',
-  ];
 
   // Computed properties
   readonly validationErrors = computed(() => {
@@ -926,11 +882,6 @@ export class FileUploadComponent implements OnInit, OnDestroy {
         .join(', ') + (this.acceptedTypes.length > 3 ? '...' : '')
     );
   });
-
-  showThumbnailOptions(): boolean {
-    // Show thumbnail options only when there are image files in acceptedTypes
-    return this.acceptedTypes.some((type) => type.startsWith('image/'));
-  }
 
   ngOnInit() {
     // Subscribe to upload progress
@@ -1218,28 +1169,34 @@ export class FileUploadComponent implements OnInit, OnDestroy {
   }
 
   downloadFile(file: UploadedFile): void {
-    // Use the downloadUrl from the file object
-    if (file.downloadUrl) {
+    // Use signed download URL if available
+    if (file.signedUrls?.download) {
       const link = document.createElement('a');
-      link.href = file.downloadUrl;
+      link.href = file.signedUrls.download;
       link.download = file.originalName;
       link.target = '_blank';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     } else {
-      this.snackBar.open('Download URL not available', 'Close', {
-        duration: 3000,
-      });
+      // Fallback: Generate download URL via service
+      const downloadUrl = this.fileUploadService.getDownloadUrl(file.id);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = file.originalName;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   }
 
   showCustomThumbnailOptions(file: UploadedFile): void {
     if (!file?.id) return;
-    // TODO: Open dialog for custom thumbnail size selection
-    // For now, show different thumbnail sizes in console
+    // Show different thumbnail sizes in console
+    const commonSizes = ['64x64', '150x150', '300x300', '500x500'];
     console.log('Available thumbnail sizes for', file.originalName, ':');
-    this.availableThumbnailSizes.forEach((size) => {
+    commonSizes.forEach((size) => {
       const url = this.fileUploadService.getThumbnailUrl(file.id, { size });
       console.log(`${size}: ${url}`);
     });

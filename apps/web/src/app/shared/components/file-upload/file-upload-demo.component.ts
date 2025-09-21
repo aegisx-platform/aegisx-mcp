@@ -144,7 +144,7 @@ import { UploadedFile } from './file-upload.types';
               <mat-card-content>
                 <div class="avatar-display">
                   <img
-                    [src]="currentAvatar()!.downloadUrl"
+                    [src]="currentAvatar()!.signedUrls?.view || ''"
                     [alt]="currentAvatar()!.originalName"
                     class="avatar-image"
                   />
@@ -520,8 +520,14 @@ export interface FileUploadOptions {
   }
 
   viewFile(file: UploadedFile) {
-    // Use downloadUrl from API response (already absolute URL)
-    window.open(file.downloadUrl + '?inline=true', '_blank');
+    // Use signed view URL if available
+    if (file.signedUrls?.view) {
+      window.open(file.signedUrls.view, '_blank');
+    } else {
+      // Fallback: Generate view URL via service
+      const viewUrl = this.fileUploadService.getViewUrl(file.id);
+      window.open(viewUrl + '?inline=true', '_blank');
+    }
   }
 
   formatFileSize(bytes: number): string {

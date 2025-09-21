@@ -40,26 +40,8 @@ export const FileUploadSchema = Type.Object({
       description: 'Additional metadata for the file',
     }),
   ),
-  // Thumbnail generation options
-  generateThumbnails: Type.Optional(
-    Type.Boolean({
-      default: false,
-      description: 'Whether to generate thumbnails for image files',
-    }),
-  ),
-  thumbnailSizes: Type.Optional(
-    Type.Array(
-      Type.String({
-        pattern: '^\\d+x\\d+$',
-        description: 'Size format: 150x150',
-      }),
-      {
-        description:
-          'Thumbnail sizes to generate (e.g., ["150x150", "300x300"])',
-        default: ['150x150', '300x300'],
-      },
-    ),
-  ),
+  // Note: Thumbnails are generated dynamically via /thumbnail endpoint
+  // No need for pre-generation options
 });
 
 export const FileUpdateSchema = Type.Object({
@@ -311,6 +293,16 @@ export const ViewQuerySchema = Type.Object({
       default: true,
     }),
   ),
+  force: Type.Optional(
+    Type.Union(
+      [Type.Literal('view'), Type.Literal('download'), Type.Literal('auto')],
+      {
+        description:
+          'Force behavior: "view" = force inline, "download" = force download, "auto" = smart detection based on MIME type',
+        default: 'auto',
+      },
+    ),
+  ),
 });
 
 // =============================================
@@ -352,9 +344,7 @@ export const UploadedFileSchema = Type.Object({
   expiresAt: Type.Union([Type.String({ format: 'date-time' }), Type.Null()], {
     description: 'File expiration date (for temporary files)',
   }),
-  downloadUrl: Type.String({
-    description: 'URL to download the file',
-  }),
+  // Note: downloadUrl removed - use signedUrls.download instead for authenticated access
   metadata: Type.Union([Type.Record(Type.String(), Type.Any()), Type.Null()], {
     description: 'Additional file metadata',
   }),
@@ -660,6 +650,72 @@ export const FILE_UPLOAD_LIMITS = {
     'general',
   ],
 } as const;
+
+// File viewing constants for Smart View functionality
+export const VIEWABLE_MIME_TYPES = {
+  // Images - can be displayed inline in browsers
+  IMAGES: [
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
+    'image/webp',
+    'image/gif',
+    'image/svg+xml',
+    'image/bmp',
+    'image/tiff',
+  ],
+  // Text files - can be displayed as text
+  TEXT: [
+    'text/plain',
+    'text/html',
+    'text/css',
+    'text/javascript',
+    'text/csv',
+    'text/xml',
+    'application/json',
+    'application/xml',
+  ],
+  // Documents - can be displayed in browser
+  DOCUMENTS: ['application/pdf'],
+  // Audio files - can be played in browser
+  AUDIO: [
+    'audio/mpeg',
+    'audio/mp3',
+    'audio/wav',
+    'audio/ogg',
+    'audio/webm',
+    'audio/m4a',
+  ],
+  // Video files - can be played in browser
+  VIDEO: [
+    'video/mp4',
+    'video/webm',
+    'video/ogg',
+    'video/avi',
+    'video/mov',
+    'video/quicktime',
+  ],
+} as const;
+
+// Flattened list of all viewable MIME types
+export const ALL_VIEWABLE_MIME_TYPES = [
+  ...VIEWABLE_MIME_TYPES.IMAGES,
+  ...VIEWABLE_MIME_TYPES.TEXT,
+  ...VIEWABLE_MIME_TYPES.DOCUMENTS,
+  ...VIEWABLE_MIME_TYPES.AUDIO,
+  ...VIEWABLE_MIME_TYPES.VIDEO,
+] as const;
+
+/**
+ * Check if a MIME type can be viewed inline in browser
+ */
+export function isViewableMimeType(mimeType: string): boolean {
+  return (
+    ALL_VIEWABLE_MIME_TYPES.includes(mimeType as any) ||
+    mimeType.startsWith('text/') ||
+    mimeType.startsWith('image/')
+  );
+}
 
 // =============================================================================
 // SIGNED URL SCHEMAS

@@ -339,14 +339,14 @@ export class FileUploadService {
   }
 
   /**
-   * Generate signed URL for secure access
+   * Generate signed URLs for secure access
    */
   generateSignedUrl(
     id: string,
     request: SignedUrlRequest,
   ): Observable<SignedUrlResponse> {
     return this.http
-      .post<SignedUrlResponse>(`${this.apiUrl}/${id}/signed-url`, request, {
+      .post<SignedUrlResponse>(`${this.apiUrl}/${id}/signed-urls`, request, {
         headers: this.getAuthHeaders(),
       })
       .pipe(catchError(this.handleError));
@@ -355,7 +355,7 @@ export class FileUploadService {
   /**
    * Get file download URL
    * Returns relative URL for HttpClient requests (handled by BaseUrlInterceptor)
-   * Note: For direct browser access, use file.downloadUrl from API response instead
+   * Note: For direct browser access, use file.signedUrls.download from API response instead
    */
   getDownloadUrl(id: string, query: DownloadQuery = {}): string {
     let params = new HttpParams();

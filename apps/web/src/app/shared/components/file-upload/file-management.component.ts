@@ -28,7 +28,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
-import { Subscription, debounceTime, distinctUntilChanged } from 'rxjs';
+import { Subscription, debounceTime, distinctUntilChanged, skip } from 'rxjs';
 
 import { FileUploadService } from './file-upload.service';
 import { ConfirmDialogComponent } from '../confirm-dialog.component';
@@ -36,6 +36,7 @@ import {
   UploadedFile,
   FileListQuery,
   FILE_UPLOAD_LIMITS,
+  isViewableMimeType,
 } from './file-upload.types';
 
 @Component({
@@ -247,7 +248,7 @@ import {
                 <div class="file-preview-cell">
                   <img
                     *ngIf="file.fileType === 'image'"
-                    [src]="getThumbnailUrl(file.id)"
+                    [src]="getDisplayThumbnailUrl(file)"
                     [alt]="file.originalName"
                     class="file-thumbnail"
                     loading="lazy"
@@ -407,7 +408,7 @@ import {
               <div class="card-preview">
                 <img
                   *ngIf="file.fileType === 'image'"
-                  [src]="getThumbnailUrl(file.id)"
+                  [src]="getDisplayThumbnailUrl(file)"
                   [alt]="file.originalName"
                   class="grid-thumbnail"
                   loading="lazy"
@@ -940,18 +941,22 @@ export class FileManagementComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
-    // Cleanup blob URLs to prevent memory leaks
-    this.thumbnailUrls.forEach((url) => URL.revokeObjectURL(url));
-    this.thumbnailUrls.clear();
   }
 
   private setupFilterSubscription() {
     this.subscription.add(
       this.filterForm.valueChanges
-        .pipe(debounceTime(300), distinctUntilChanged())
-        .subscribe(() => {
-          this._currentPage.set(0);
-          this.loadFiles();
+        .pipe(
+          skip(1), // Skip initial value เพื่อป้องกัน immediate trigger
+          debounceTime(300),
+          distinctUntilChanged(),
+        )
+        .subscribe((value) => {
+          // ป้องกัน infinite loop โดยตรวจสอบว่า loading อยู่หรือไม่
+          if (!this._isLoading()) {
+            this._currentPage.set(0);
+            this.loadFiles();
+          }
         }),
     );
   }
@@ -1013,14 +1018,22 @@ export class FileManagementComponent implements OnInit, OnDestroy {
   }
 
   clearFilters() {
-    this.filterForm.reset({
-      search: '',
-      category: '',
-      type: '',
-      isPublic: '',
-      sort: 'uploadedAt',
-      order: 'desc',
-    });
+    // Reset form โดยไม่ trigger valueChanges เพื่อป้องกัน infinite loop
+    this.filterForm.reset(
+      {
+        search: '',
+        category: '',
+        type: '',
+        isPublic: '',
+        sort: 'uploadedAt',
+        order: 'desc',
+      },
+      { emitEvent: false },
+    );
+
+    // เรียก loadFiles() โดยตรงแทน
+    this._currentPage.set(0);
+    this.loadFiles();
   }
 
   toggleView(mode: 'table' | 'grid') {
@@ -1034,10 +1047,18 @@ export class FileManagementComponent implements OnInit, OnDestroy {
   }
 
   onSortChange(sort: Sort) {
-    this.filterForm.patchValue({
-      sort: sort.active || 'uploadedAt',
-      order: sort.direction || 'desc',
-    });
+    // ปรับปรุง form โดยไม่ trigger valueChanges เพื่อป้องกัน infinite loop
+    this.filterForm.patchValue(
+      {
+        sort: sort.active || 'uploadedAt',
+        order: sort.direction || 'desc',
+      },
+      { emitEvent: false },
+    ); // เพิ่ม emitEvent: false เพื่อไม่ให้ trigger valueChanges
+
+    // เรียก loadFiles() โดยตรงแทน
+    this._currentPage.set(0);
+    this.loadFiles();
   }
 
   toggleSelection(file: UploadedFile) {
@@ -1066,24 +1087,118 @@ export class FileManagementComponent implements OnInit, OnDestroy {
   }
 
   downloadFile(file: UploadedFile) {
-    // Use downloadUrl from API response (already absolute URL)
-    window.open(file.downloadUrl + '?inline=false', '_blank');
+    // Use signed download URL if available, otherwise fallback to regular download
+    if (file.signedUrls?.download) {
+      window.open(file.signedUrls.download, '_blank');
+    } else {
+      // Generate signed URL for download
+      this.subscription.add(
+        this.fileUploadService
+          .generateSignedUrl(file.id, { expiresIn: 3600 })
+          .subscribe({
+            next: (response) => {
+              window.open(response.data.urls.download, '_blank');
+            },
+            error: (error) => {
+              this.snackBar.open(
+                'Failed to generate download link: ' + error.message,
+                'Close',
+                {
+                  duration: 5000,
+                },
+              );
+            },
+          }),
+      );
+    }
   }
 
   viewFile(file: UploadedFile) {
-    // Use view URL for inline display
-    const viewUrl = this.fileUploadService.getViewUrl(file.id, { cache: true });
-    window.open(viewUrl, '_blank');
+    // Smart View Logic: Check if file is viewable, otherwise force download
+    const isViewable = isViewableMimeType(file.mimeType);
+
+    if (!isViewable) {
+      // File cannot be viewed inline, show message and offer download instead
+      this.snackBar.open(
+        `This file type (${file.mimeType}) cannot be previewed. Click Download to save the file.`,
+        'Close',
+        { duration: 5000 },
+      );
+      // Automatically trigger download for non-viewable files
+      this.downloadFile(file);
+      return;
+    }
+
+    // Use signed view URL if available, otherwise fallback to regular view
+    if (file.signedUrls?.view) {
+      window.open(file.signedUrls.view, '_blank');
+    } else {
+      // Generate signed URL for view
+      this.subscription.add(
+        this.fileUploadService
+          .generateSignedUrl(file.id, { expiresIn: 3600 })
+          .subscribe({
+            next: (response) => {
+              window.open(response.data.urls.view, '_blank');
+            },
+            error: (error) => {
+              this.snackBar.open(
+                'Failed to generate view link: ' + error.message,
+                'Close',
+                {
+                  duration: 5000,
+                },
+              );
+            },
+          }),
+      );
+    }
     this.fileSelected.emit(file);
   }
 
   copyLink(file: UploadedFile) {
-    // Use downloadUrl from API response (already absolute URL)
-    navigator.clipboard.writeText(file.downloadUrl).then(() => {
-      this.snackBar.open('Link copied to clipboard', 'Close', {
-        duration: 2000,
+    // Use signed download URL if available, otherwise generate one
+    if (file.signedUrls?.download) {
+      navigator.clipboard.writeText(file.signedUrls.download).then(() => {
+        this.snackBar.open(
+          'Signed download link copied to clipboard',
+          'Close',
+          {
+            duration: 2000,
+          },
+        );
       });
-    });
+    } else {
+      // Generate signed URL for sharing
+      this.subscription.add(
+        this.fileUploadService
+          .generateSignedUrl(file.id, { expiresIn: 86400 })
+          .subscribe({
+            next: (response) => {
+              navigator.clipboard
+                .writeText(response.data.urls.download)
+                .then(() => {
+                  this.snackBar.open(
+                    'Signed download link copied to clipboard',
+                    'Close',
+                    {
+                      duration: 2000,
+                    },
+                  );
+                });
+            },
+            error: (error) => {
+              this.snackBar.open(
+                'Failed to generate shareable link: ' + error.message,
+                'Close',
+                {
+                  duration: 5000,
+                },
+              );
+            },
+          }),
+      );
+    }
   }
 
   deleteFile(file: UploadedFile) {
@@ -1197,28 +1312,16 @@ export class FileManagementComponent implements OnInit, OnDestroy {
     return file.id;
   }
 
-  getThumbnailUrl(fileId: string): string {
-    // Create blob URL for authenticated thumbnail access
-    this.fileUploadService
-      .getThumbnail(fileId, {
-        size: '150x150',
-        quality: 80,
-        format: 'webp',
-      })
-      .subscribe({
-        next: (blob) => {
-          const url = URL.createObjectURL(blob);
-          // Store blob URL for cleanup later
-          this.thumbnailUrls.set(fileId, url);
-        },
-        error: (error) => {
-          console.error('Failed to load thumbnail:', error);
-        },
-      });
+  /**
+   * Get display thumbnail URL (uses signed URLs directly)
+   */
+  getDisplayThumbnailUrl(file: UploadedFile): string {
+    // Use signed thumbnail URL directly - CORS is configured to allow this
+    if (file.signedUrls?.thumbnail) {
+      return file.signedUrls.thumbnail;
+    }
 
-    // Return cached blob URL if available
-    return this.thumbnailUrls.get(fileId) || '';
+    // If no signed URL, return empty (should not happen in current implementation)
+    return '';
   }
-
-  private thumbnailUrls = new Map<string, string>();
 }

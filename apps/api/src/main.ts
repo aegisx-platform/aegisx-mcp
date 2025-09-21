@@ -52,11 +52,11 @@ async function bootstrap() {
   });
 
   // 2. Infrastructure plugins
+  const corsOrigins =
+    process.env.CORS_ORIGIN?.split(',').map((origin) => origin.trim()) || [];
+
   await app.register(fastifyCors, {
-    origin:
-      process.env.NODE_ENV === 'production'
-        ? ['https://yourdomain.com', 'https://admin.yourdomain.com']
-        : true,
+    origin: corsOrigins.length > 0 ? corsOrigins : true,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   });

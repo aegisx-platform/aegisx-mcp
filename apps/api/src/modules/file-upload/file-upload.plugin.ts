@@ -21,7 +21,10 @@ async function fileUploadPlugin(fastify: FastifyInstance) {
     type: StorageType.LOCAL,
     options: {
       jwtSecret: process.env.JWT_SECRET || 'fallback-secret-for-development',
-      baseUrl: process.env.BASE_URL || 'http://localhost:3333',
+      baseUrl:
+        process.env.API_BASE_URL ||
+        process.env.WEB_URL ||
+        'http://localhost:4200',
       uploadPath: process.env.UPLOAD_PATH || 'uploads',
       defaultExpirySeconds: 3600,
       maxExpirySeconds: 86400,

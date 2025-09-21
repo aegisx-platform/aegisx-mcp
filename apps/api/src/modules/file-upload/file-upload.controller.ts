@@ -11,6 +11,7 @@ import {
   ThumbnailQuery,
   ViewQuery,
   FileIdParam,
+  isViewableMimeType,
 } from './file-upload.schemas';
 
 export interface FileUploadControllerDependencies {
@@ -596,7 +597,7 @@ export class FileUploadController {
   ) {
     try {
       const { id } = request.params;
-      const { variant, cache } = request.query;
+      const { variant, cache, force = 'auto' } = request.query;
       const userId = request.user?.id;
       const signedUrlToken = (request as any).signedUrlToken;
 
@@ -673,15 +674,41 @@ export class FileUploadController {
         },
       );
 
-      // Set response headers for inline viewing
+      // Set response headers
       reply.type(file.mimeType);
       reply.header('Content-Length', file.fileSize.toString());
 
-      // Force inline display regardless of file type
-      reply.header(
-        'Content-Disposition',
-        `inline; filename="${file.originalName}"`,
-      );
+      // Smart View Logic: Determine whether to display inline or force download
+      let shouldDisplayInline = false;
+
+      switch (force) {
+        case 'view':
+          // Force inline view regardless of MIME type
+          shouldDisplayInline = true;
+          break;
+        case 'download':
+          // Force download regardless of MIME type
+          shouldDisplayInline = false;
+          break;
+        case 'auto':
+        default:
+          // Auto-detect based on MIME type
+          shouldDisplayInline = isViewableMimeType(file.mimeType);
+          break;
+      }
+
+      // Set Content-Disposition header based on decision
+      if (shouldDisplayInline) {
+        reply.header(
+          'Content-Disposition',
+          `inline; filename="${file.originalName}"`,
+        );
+      } else {
+        reply.header(
+          'Content-Disposition',
+          `attachment; filename="${file.originalName}"`,
+        );
+      }
 
       // Set cache headers if requested
       if (cache !== false) {
@@ -1386,6 +1413,43 @@ export class FileUploadController {
         error: {
           code: 'STATS_FAILED',
           message: error.message || 'Failed to get user statistics',
+        },
+        meta: {
+          requestId: request.id,
+          timestamp: new Date().toISOString(),
+          version: '1.0',
+        },
+      });
+    }
+  }
+
+  /**
+   * Get storage configuration and statistics (admin only)
+   */
+  async getStorageConfiguration(
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ): Promise<void> {
+    try {
+      const storageStats = await this.deps.fileUploadService.getStorageStats();
+
+      return reply.send({
+        success: true,
+        data: storageStats,
+        meta: {
+          requestId: request.id,
+          timestamp: new Date().toISOString(),
+          version: '1.0',
+        },
+      });
+    } catch (error: any) {
+      request.log.error(error, 'Failed to get storage configuration');
+
+      return reply.code(500).send({
+        success: false,
+        error: {
+          code: 'STORAGE_CONFIG_FAILED',
+          message: error.message || 'Failed to get storage configuration',
         },
         meta: {
           requestId: request.id,

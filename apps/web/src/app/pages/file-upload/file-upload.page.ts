@@ -128,6 +128,8 @@ import {
   ],
 })
 export class FileUploadPage {
+  @ViewChild(FileManagementComponent) fileManagement!: FileManagementComponent;
+
   // Track uploaded files count for badge
   private _uploadedFilesCount = signal(0);
   readonly uploadedFilesCount = this._uploadedFilesCount.asReadonly();
@@ -135,6 +137,11 @@ export class FileUploadPage {
   onUploadComplete(files: UploadedFile[]): void {
     console.log('Files uploaded successfully:', files);
     this._uploadedFilesCount.update((count) => count + files.length);
+
+    // Refresh file management list to show newly uploaded files
+    if (this.fileManagement) {
+      this.fileManagement.refreshFiles();
+    }
   }
 
   onUploadError(error: string): void {
@@ -147,5 +154,7 @@ export class FileUploadPage {
     this._uploadedFilesCount.update((count) =>
       Math.max(0, count - files.length),
     );
+
+    // File management already refreshes after deletion, so no need to call refreshFiles() here
   }
 }

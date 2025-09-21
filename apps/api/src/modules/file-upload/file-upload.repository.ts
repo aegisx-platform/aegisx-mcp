@@ -508,13 +508,7 @@ export class FileUploadRepository {
    * Map database record to schema format
    */
   private mapDatabaseFileToSchema(file: any, baseUrl?: string): UploadedFile {
-    // Create absolute URL for downloadUrl to work with img src and direct browser access
-    const downloadPath = `/api/files/${file.id}/download`;
-
-    // Use provided baseUrl or fall back to environment variable
-    const resolvedBaseUrl =
-      baseUrl || process.env.API_BASE_URL || 'http://localhost:4200';
-    const downloadUrl = `${resolvedBaseUrl}${downloadPath}`;
+    // Note: downloadUrl removed - use signedUrls.download instead for authenticated access
 
     return {
       id: file.id,
@@ -528,7 +522,6 @@ export class FileUploadRepository {
       isPublic: file.is_public,
       isTemporary: file.is_temporary,
       expiresAt: file.expires_at ? file.expires_at.toISOString() : null,
-      downloadUrl,
       metadata: file.metadata || null,
       variants: file.variants || null,
       processingStatus: file.processing_status,

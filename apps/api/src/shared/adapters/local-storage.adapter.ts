@@ -22,6 +22,21 @@ export interface LocalStorageConfig {
   defaultExpirySeconds: number;
   maxExpirySeconds: number;
   uploadPath?: string; // Root upload directory
+
+  // Additional storage configuration options
+  maxFileSize?: number; // Maximum file size in bytes
+  allowedMimeTypes?: string[]; // Allowed MIME types for uploads
+  enableCompression?: boolean; // Enable file compression
+  enableThumbnails?: boolean; // Enable thumbnail generation
+  thumbnailSizes?: number[]; // Thumbnail sizes to generate
+  enableEncryption?: boolean; // Enable file encryption at rest
+  cleanupTempFiles?: boolean; // Auto-cleanup temporary files
+  tempFileExpiryHours?: number; // Hours before temp files are deleted
+  enableVersioning?: boolean; // Enable file versioning
+  maxVersions?: number; // Maximum versions to keep per file
+  enableAuditLog?: boolean; // Enable file access audit logging
+  compressionLevel?: number; // Compression level (1-9)
+  encryptionAlgorithm?: string; // Encryption algorithm to use
 }
 
 /**
@@ -38,11 +53,118 @@ export class LocalStorageAdapter implements IStorageAdapter {
     private fastify?: FastifyInstance,
   ) {
     this.config = {
+      // Default basic settings
       defaultExpirySeconds: 3600, // 1 hour
       maxExpirySeconds: 86400, // 24 hours
       uploadPath: 'uploads', // Default upload directory
+
+      // Default advanced settings
+      maxFileSize: 100 * 1024 * 1024, // 100MB default
+      allowedMimeTypes: [
+        'image/*',
+        'text/*',
+        'application/pdf',
+        'application/zip',
+        'application/json',
+        'application/xml',
+      ], // Common safe MIME types
+      enableCompression: false, // Disabled by default
+      enableThumbnails: true, // Enabled by default for images
+      thumbnailSizes: [150, 300, 600], // Small, medium, large thumbnails
+      enableEncryption: false, // Disabled by default (performance)
+      cleanupTempFiles: true, // Enabled by default
+      tempFileExpiryHours: 24, // 24 hours default
+      enableVersioning: false, // Disabled by default (storage space)
+      maxVersions: 5, // Maximum 5 versions per file
+      enableAuditLog: true, // Enabled by default for security
+      compressionLevel: 6, // Balanced compression (1-9)
+      encryptionAlgorithm: 'aes-256-gcm', // Strong encryption if enabled
+
+      // Override with provided config
       ...config,
     };
+
+    // Validate configuration
+    this.validateBasicConfiguration();
+  }
+
+  /**
+   * Validate storage configuration (private validation used in constructor)
+   */
+  private validateBasicConfiguration(): void {
+    // Validate required fields
+    if (!this.config.jwtSecret) {
+      throw new ConfigurationError(
+        'JWT secret is required for LocalStorageAdapter',
+        StorageType.LOCAL,
+      );
+    }
+
+    if (!this.config.baseUrl) {
+      throw new ConfigurationError(
+        'Base URL is required for LocalStorageAdapter',
+        StorageType.LOCAL,
+      );
+    }
+
+    // Validate numeric ranges
+    if (this.config.maxFileSize && this.config.maxFileSize <= 0) {
+      throw new ConfigurationError(
+        'Max file size must be positive',
+        StorageType.LOCAL,
+      );
+    }
+
+    if (
+      this.config.compressionLevel &&
+      (this.config.compressionLevel < 1 || this.config.compressionLevel > 9)
+    ) {
+      throw new ConfigurationError(
+        'Compression level must be between 1-9',
+        StorageType.LOCAL,
+      );
+    }
+
+    if (this.config.maxVersions && this.config.maxVersions <= 0) {
+      throw new ConfigurationError(
+        'Max versions must be positive',
+        StorageType.LOCAL,
+      );
+    }
+
+    if (
+      this.config.tempFileExpiryHours &&
+      this.config.tempFileExpiryHours <= 0
+    ) {
+      throw new ConfigurationError(
+        'Temp file expiry hours must be positive',
+        StorageType.LOCAL,
+      );
+    }
+
+    // Validate thumbnail sizes
+    if (this.config.thumbnailSizes) {
+      for (const size of this.config.thumbnailSizes) {
+        if (size <= 0 || size > 2000) {
+          throw new ConfigurationError(
+            'Thumbnail sizes must be between 1-2000 pixels',
+            StorageType.LOCAL,
+          );
+        }
+      }
+    }
+
+    // Validate MIME types format
+    if (this.config.allowedMimeTypes) {
+      for (const mimeType of this.config.allowedMimeTypes) {
+        if (!mimeType.includes('/')) {
+          throw new ConfigurationError(
+            `Invalid MIME type format: ${mimeType}`,
+            StorageType.LOCAL,
+          );
+        }
+      }
+    }
   }
 
   async generateViewUrl(
@@ -277,6 +399,100 @@ export class LocalStorageAdapter implements IStorageAdapter {
       type: StorageType.LOCAL,
       version: '1.0.0',
       endpoint: this.config.baseUrl,
+    };
+  }
+
+  /**
+   * Get current storage configuration (safe - no secrets)
+   */
+  getConfiguration(): Partial<LocalStorageConfig> {
+    return {
+      baseUrl: this.config.baseUrl,
+      defaultExpirySeconds: this.config.defaultExpirySeconds,
+      maxExpirySeconds: this.config.maxExpirySeconds,
+      uploadPath: this.config.uploadPath,
+      maxFileSize: this.config.maxFileSize,
+      allowedMimeTypes: this.config.allowedMimeTypes,
+      enableCompression: this.config.enableCompression,
+      enableThumbnails: this.config.enableThumbnails,
+      thumbnailSizes: this.config.thumbnailSizes,
+      enableEncryption: this.config.enableEncryption,
+      cleanupTempFiles: this.config.cleanupTempFiles,
+      tempFileExpiryHours: this.config.tempFileExpiryHours,
+      enableVersioning: this.config.enableVersioning,
+      maxVersions: this.config.maxVersions,
+      enableAuditLog: this.config.enableAuditLog,
+      compressionLevel: this.config.compressionLevel,
+      encryptionAlgorithm: this.config.encryptionAlgorithm,
+      // Exclude sensitive data like jwtSecret
+    };
+  }
+
+  /**
+   * Update configuration (runtime configuration changes)
+   */
+  updateConfiguration(updates: Partial<LocalStorageConfig>): void {
+    // Create new config with updates
+    const newConfig = {
+      ...this.config,
+      ...updates,
+    };
+
+    // Validate new configuration
+    const oldConfig = this.config;
+    this.config = newConfig;
+
+    try {
+      this.validateBasicConfiguration();
+    } catch (error) {
+      // Rollback on validation failure
+      this.config = oldConfig;
+      throw error;
+    }
+
+    if (this.fastify) {
+      this.fastify.log.info('Storage configuration updated successfully');
+    }
+  }
+
+  /**
+   * Get storage statistics and health info
+   */
+  async getStorageStats(): Promise<{
+    type: StorageType;
+    configuration: Partial<LocalStorageConfig>;
+    health: boolean;
+    uploadPath: string;
+    diskSpace?: {
+      total: number;
+      used: number;
+      available: number;
+    };
+  }> {
+    const health = await this.healthCheck();
+    const uploadPath = this.config.uploadPath || 'uploads';
+
+    let diskSpace;
+    try {
+      // Try to get disk space info (Node.js 19+ has fs.statfs)
+      const stats = await fs.promises.statfs?.(uploadPath);
+      if (stats) {
+        diskSpace = {
+          total: stats.bavail * stats.bsize,
+          used: (stats.blocks - stats.bavail) * stats.bsize,
+          available: stats.bavail * stats.bsize,
+        };
+      }
+    } catch {
+      // Ignore errors - disk space info is optional
+    }
+
+    return {
+      type: this.getStorageType(),
+      configuration: this.getConfiguration(),
+      health,
+      uploadPath: path.resolve(uploadPath),
+      diskSpace,
     };
   }
 

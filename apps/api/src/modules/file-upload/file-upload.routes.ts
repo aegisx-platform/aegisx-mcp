@@ -18,6 +18,7 @@ import {
   FileStatsResponseSchema,
 } from './file-upload.schemas';
 import { StandardRouteResponses } from '../../schemas/base.schemas';
+import { Type } from '@sinclair/typebox';
 import { FileUploadController } from './file-upload.controller';
 import { createOptionalAuthHandler } from '../../shared/helpers/optional-auth.helper';
 
@@ -114,6 +115,41 @@ export async function fileUploadRoutes(
     },
     preHandler: [fastify.authenticate],
     handler: controller.getUserStats.bind(controller),
+  });
+
+  // Get storage configuration and stats (admin only)
+  fastify.get('/storage/config', {
+    schema: {
+      tags: ['Storage Management'],
+      summary: 'Get storage configuration',
+      description:
+        'Get current storage adapter configuration and statistics (admin access required)',
+      response: {
+        200: Type.Object({
+          success: Type.Boolean(),
+          data: Type.Object({
+            type: Type.String(),
+            configuration: Type.Any(),
+            health: Type.Boolean(),
+            uploadPath: Type.String(),
+            diskSpace: Type.Optional(
+              Type.Object({
+                total: Type.Number(),
+                used: Type.Number(),
+                available: Type.Number(),
+              }),
+            ),
+          }),
+          meta: Type.Any(),
+        }),
+        401: StandardRouteResponses[401],
+        403: StandardRouteResponses[403],
+        500: StandardRouteResponses[500],
+      },
+      security: [{ bearerAuth: [] }],
+    },
+    preHandler: [fastify.authenticate], // TODO: Add admin role check
+    handler: controller.getStorageConfiguration.bind(controller),
   });
 
   // List user files (optional authentication - public files visible to all, private files require auth)

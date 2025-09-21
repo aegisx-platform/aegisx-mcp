@@ -7,9 +7,8 @@ export interface FileUploadOptions {
   isTemporary?: boolean;
   expiresIn?: number;
   metadata?: Record<string, unknown>;
-  // Thumbnail generation options (aligned with backend schema)
-  generateThumbnails?: boolean;
-  thumbnailSizes?: string[]; // Format: ['150x150', '300x300']
+  // Note: Thumbnails are generated dynamically via API endpoints
+  // No need for pre-generation options
 }
 
 export interface FileUpdateRequest {
@@ -38,8 +37,12 @@ export interface ImageProcessingOptions {
 }
 
 export interface SignedUrlRequest {
-  expiresIn: number;
-  permissions: ('read' | 'download')[];
+  expiresIn?: number;
+  thumbnailOptions?: {
+    size?: string;
+    quality?: number;
+    format?: 'jpg' | 'png' | 'webp';
+  };
 }
 
 export interface FileListQuery {
@@ -68,6 +71,7 @@ export interface ThumbnailQuery {
 export interface ViewQuery {
   variant?: string;
   cache?: boolean;
+  force?: 'view' | 'download' | 'auto';
 }
 
 export interface UploadedFile {
@@ -81,12 +85,19 @@ export interface UploadedFile {
   isPublic: boolean;
   isTemporary: boolean;
   expiresAt: string | null;
-  downloadUrl: string;
+  // Note: downloadUrl removed - use signedUrls.download instead for authenticated access
   metadata: Record<string, unknown> | null;
   variants: Record<string, unknown> | null;
   processingStatus: 'uploaded' | 'processing' | 'completed' | 'failed';
   uploadedAt: string;
   updatedAt: string;
+  // Signed URLs (included when requested from API)
+  signedUrls?: {
+    view: string;
+    download: string;
+    thumbnail: string;
+    expiresAt: string;
+  };
 }
 
 // ✅ FIXED: Aligned with base schema standards
@@ -144,9 +155,17 @@ export interface FileListResponse {
 export interface SignedUrlResponse {
   success: true;
   data: {
-    url: string;
+    token: string;
+    urls: {
+      view: string;
+      download: string;
+      thumbnail: string;
+    };
     expiresAt: string;
-    permissions: string[];
+    metadata: {
+      storageType: string;
+      endpoint: string;
+    };
   };
   message?: string;
 }
@@ -200,6 +219,72 @@ export interface FileStatistics {
   quotaUsed: number;
   quotaLimit: number;
   quotaPercentage: number;
+}
+
+// File viewing constants for Smart View functionality (aligned with backend)
+export const VIEWABLE_MIME_TYPES = {
+  // Images - can be displayed inline in browsers
+  IMAGES: [
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
+    'image/webp',
+    'image/gif',
+    'image/svg+xml',
+    'image/bmp',
+    'image/tiff',
+  ],
+  // Text files - can be displayed as text
+  TEXT: [
+    'text/plain',
+    'text/html',
+    'text/css',
+    'text/javascript',
+    'text/csv',
+    'text/xml',
+    'application/json',
+    'application/xml',
+  ],
+  // Documents - can be displayed in browser
+  DOCUMENTS: ['application/pdf'],
+  // Audio files - can be played in browser
+  AUDIO: [
+    'audio/mpeg',
+    'audio/mp3',
+    'audio/wav',
+    'audio/ogg',
+    'audio/webm',
+    'audio/m4a',
+  ],
+  // Video files - can be played in browser
+  VIDEO: [
+    'video/mp4',
+    'video/webm',
+    'video/ogg',
+    'video/avi',
+    'video/mov',
+    'video/quicktime',
+  ],
+} as const;
+
+// Flattened list of all viewable MIME types
+export const ALL_VIEWABLE_MIME_TYPES = [
+  ...VIEWABLE_MIME_TYPES.IMAGES,
+  ...VIEWABLE_MIME_TYPES.TEXT,
+  ...VIEWABLE_MIME_TYPES.DOCUMENTS,
+  ...VIEWABLE_MIME_TYPES.AUDIO,
+  ...VIEWABLE_MIME_TYPES.VIDEO,
+] as const;
+
+/**
+ * Check if a MIME type can be viewed inline in browser
+ */
+export function isViewableMimeType(mimeType: string): boolean {
+  return (
+    ALL_VIEWABLE_MIME_TYPES.includes(mimeType as any) ||
+    mimeType.startsWith('text/') ||
+    mimeType.startsWith('image/')
+  );
 }
 
 // Constants from backend validation
