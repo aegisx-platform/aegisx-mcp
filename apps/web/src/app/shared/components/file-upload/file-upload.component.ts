@@ -33,6 +33,7 @@ import {
   FileUploadProgress,
   FileValidationResult,
   UploadedFile,
+  FileUploadResponse,
   FILE_UPLOAD_LIMITS,
 } from './file-upload.types';
 
@@ -1052,15 +1053,15 @@ export class FileUploadComponent implements OnInit, OnDestroy {
 
       try {
         // Upload single file
-        const response = await new Promise<{ data: UploadedFile }>(
+        const response = await new Promise<FileUploadResponse>(
           (resolve, reject) => {
             this.fileUploadService.uploadFile(file, options).subscribe({
               next: (response) => {
-                if (response.data) {
+                // Check if this is a complete response with data
+                if (response && response.data && response.data.id) {
                   resolve(response);
-                } else {
-                  reject(new Error('No data in response'));
                 }
+                // Ignore intermediate progress events (empty responses)
               },
               error: (error) => reject(error),
             });
