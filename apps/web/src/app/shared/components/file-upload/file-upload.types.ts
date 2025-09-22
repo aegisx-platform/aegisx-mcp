@@ -6,6 +6,7 @@ export interface FileUploadOptions {
   isPublic?: boolean;
   isTemporary?: boolean;
   expiresIn?: number;
+  allowDuplicates?: boolean;
   metadata?: Record<string, unknown>;
   // Note: Thumbnails are generated dynamically via API endpoints
   // No need for pre-generation options
@@ -101,9 +102,22 @@ export interface UploadedFile {
 }
 
 // ✅ FIXED: Aligned with base schema standards
+export interface DuplicateSuggestion {
+  file: UploadedFile;
+  similarity: number;
+  reason: string;
+}
+
 export interface FileUploadResponse {
   success: true;
   data: UploadedFile;
+  meta?: {
+    requestId: string;
+    timestamp: string;
+    version: string;
+    warnings?: string[];
+    duplicates?: DuplicateSuggestion[];
+  };
   message?: string;
 }
 

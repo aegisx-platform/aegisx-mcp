@@ -93,6 +93,9 @@ import {
               <mat-checkbox formControlName="isTemporary">
                 Temporary file
               </mat-checkbox>
+              <mat-checkbox formControlName="allowDuplicates">
+                Allow duplicates
+              </mat-checkbox>
             </div>
 
             <mat-form-field
@@ -844,6 +847,7 @@ export class FileUploadComponent implements OnInit, OnDestroy {
     category: [this.category || ''],
     isPublic: [false],
     isTemporary: [false],
+    allowDuplicates: [true], // Default to allow duplicates
     expiresIn: [24],
   });
 

@@ -109,17 +109,29 @@ export class FileUploadService {
       // Generate file hash for duplicate detection
       const fileHash = this.generateFileHash(buffer);
 
-      // Check for duplicates if not temporary
+      // Check for duplicates (for reference and optional blocking)
+      let duplicates: Array<{ file: any; similarity: number; reason: string }> =
+        [];
       if (!uploadRequest.isTemporary) {
         const existingFiles = await this.deps.fileRepository.findByHash(
           fileHash,
           userId,
         );
+
         if (existingFiles.length > 0) {
-          const warnings = [
-            `Duplicate file detected. Similar files: ${existingFiles.map((f) => f.originalName).join(', ')}`,
-          ];
-          return { file: existingFiles[0], warnings };
+          duplicates = existingFiles.map((file) => ({
+            file,
+            similarity: 1.0,
+            reason: 'Identical file content (SHA256 hash match)',
+          }));
+
+          // If duplicates not allowed, return existing file
+          if (!uploadRequest.allowDuplicates) {
+            const warnings = [
+              `Duplicate file detected. Similar files: ${existingFiles.map((f) => f.originalName).join(', ')}`,
+            ];
+            return { file: existingFiles[0], warnings, duplicates };
+          }
         }
       }
 
@@ -224,7 +236,19 @@ export class FileUploadService {
 
       this.deps.logger.info(`File uploaded successfully: ${savedFile.id}`);
 
-      return { file: savedFile };
+      // Return file with duplicate suggestions (if any)
+      const result: { file: any; warnings?: string[]; duplicates?: any[] } = {
+        file: savedFile,
+      };
+
+      if (duplicates.length > 0) {
+        result.duplicates = duplicates;
+        result.warnings = [
+          `Found ${duplicates.length} similar file(s) in your library`,
+        ];
+      }
+
+      return result;
     } catch (error) {
       this.deps.logger.error(error, `Failed to upload file: ${file.filename}`);
       throw error;

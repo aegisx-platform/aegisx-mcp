@@ -35,6 +35,12 @@ export const FileUploadSchema = Type.Object({
       description: 'Expiration time in hours (for temporary files)',
     }),
   ),
+  allowDuplicates: Type.Optional(
+    Type.Boolean({
+      description: 'Allow uploading duplicate files (same content)',
+      default: false,
+    }),
+  ),
   metadata: Type.Optional(
     Type.Record(Type.String(), Type.Any(), {
       description: 'Additional metadata for the file',
@@ -377,6 +383,18 @@ export const UploadedFileSchema = Type.Object({
 });
 
 // ✅ FIXED: Using base schema standards
+export const DuplicateSuggestionSchema = Type.Object({
+  file: UploadedFileSchema,
+  similarity: Type.Number({
+    minimum: 0,
+    maximum: 1,
+    description: 'Similarity score (1.0 = identical)',
+  }),
+  reason: Type.String({
+    description: 'Why this file is considered similar (hash, size+name, etc.)',
+  }),
+});
+
 export const FileUploadResponseSchema = Type.Object({
   success: Type.Literal(true),
   data: UploadedFileSchema,
@@ -386,6 +404,11 @@ export const FileUploadResponseSchema = Type.Object({
       timestamp: Type.String({ format: 'date-time' }),
       version: Type.String(),
       warnings: Type.Optional(Type.Array(Type.String())),
+      duplicates: Type.Optional(
+        Type.Array(DuplicateSuggestionSchema, {
+          description: 'Similar files found (for user reference)',
+        }),
+      ),
     }),
   ),
 });

@@ -55,6 +55,7 @@ export class FileUploadController {
         isPublic: request.body?.isPublic,
         isTemporary: request.body?.isTemporary,
         expiresIn: request.body?.expiresIn,
+        allowDuplicates: request.body?.allowDuplicates,
         metadata: request.body?.metadata,
       };
 
@@ -88,6 +89,7 @@ export class FileUploadController {
           timestamp: new Date().toISOString(),
           version: '1.0',
           warnings: result.warnings,
+          duplicates: result.duplicates,
         },
       });
     } catch (error: any) {
