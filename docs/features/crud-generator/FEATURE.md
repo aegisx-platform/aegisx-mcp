@@ -83,6 +83,7 @@
 
 ### Depends On
 
+- [ ] **Feature: Real-time Event System** - For generation progress updates and WebSocket notifications
 - [ ] Feature: Universal Full-Stack Standard - Generator must follow established patterns
 - [ ] Library: Handlebars - ^4.7.8 for template processing
 - [ ] Library: pg - Existing PostgreSQL driver for schema introspection
@@ -169,3 +170,5 @@
 
 - 2025-09-22 Self-Review: Feature documentation completed, ready to proceed with implementation
 - 2025-09-22 Action Items: Start with database schema reader, then template system
+- 2025-09-22 Analysis Complete: WebSocket system analysis completed, Event System dependency identified
+- 2025-09-22 Status Update: Feature paused pending Real-time Event System foundation
