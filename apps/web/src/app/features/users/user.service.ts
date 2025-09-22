@@ -328,7 +328,7 @@ export class UserService {
   async getRoles(): Promise<Role[]> {
     try {
       const response = await this.http
-        .get<ApiResponse<Role[]>>(`/api/roles`)
+        .get<ApiResponse<Role[]>>(`/roles`)
         .toPromise();
 
       if (response?.success && response.data) {
@@ -495,7 +495,7 @@ export class UserService {
 
     try {
       const response = await this.http
-        .post<ApiResponse<{ message: string }>>(`/api/profile/password`, data)
+        .post<ApiResponse<{ message: string }>>(`/profile/password`, data)
         .toPromise();
 
       if (response?.success) {
@@ -517,7 +517,7 @@ export class UserService {
   // ===== PROFILE METHODS =====
 
   getProfile() {
-    return this.http.get<ApiResponse<UserProfile>>(`/api/profile`).pipe(
+    return this.http.get<ApiResponse<UserProfile>>(`/profile`).pipe(
       map((response) => {
         if (response.success && response.data) {
           return response.data;
@@ -528,7 +528,7 @@ export class UserService {
   }
 
   updateProfile(data: UpdateProfileRequest) {
-    return this.http.put<ApiResponse<UserProfile>>(`/api/profile`, data).pipe(
+    return this.http.put<ApiResponse<UserProfile>>(`/profile`, data).pipe(
       map((response) => {
         if (response.success && response.data) {
           return response.data;
@@ -544,7 +544,7 @@ export class UserService {
     formData: FormData,
     progressCallback?: (progress: number) => void,
   ): Observable<ApiResponse<AvatarUploadResponse>> {
-    const req = new HttpRequest('POST', `/api/profile/avatar`, formData, {
+    const req = new HttpRequest('POST', `/profile/avatar`, formData, {
       reportProgress: true,
     });
 
@@ -586,7 +586,7 @@ export class UserService {
 
   deleteAvatar(): Observable<ApiResponse<{ message: string }>> {
     return this.http
-      .delete<ApiResponse<{ message: string }>>(`/api/profile/avatar`)
+      .delete<ApiResponse<{ message: string }>>(`/profile/avatar`)
       .pipe(
         map((response) => {
           if (response.success) {
@@ -601,7 +601,7 @@ export class UserService {
 
   getPreferences() {
     return this.http
-      .get<ApiResponse<UserPreferences>>(`/api/profile/preferences`)
+      .get<ApiResponse<UserPreferences>>(`/profile/preferences`)
       .pipe(
         map((response) => {
           if (response.success && response.data) {
@@ -614,7 +614,7 @@ export class UserService {
 
   updatePreferences(data: Partial<UserPreferences>) {
     return this.http
-      .put<ApiResponse<UserPreferences>>(`/api/profile/preferences`, data)
+      .put<ApiResponse<UserPreferences>>(`/profile/preferences`, data)
       .pipe(
         map((response) => {
           if (response.success && response.data) {
@@ -634,7 +634,7 @@ export class UserService {
 
     try {
       const response = await this.http
-        .delete<DeleteAccountResponse>(`/api/profile/delete`, {
+        .delete<DeleteAccountResponse>(`/profile/delete`, {
           body: data,
         })
         .toPromise();
