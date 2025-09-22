@@ -1,5 +1,21 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { MultipartFile } from '@fastify/multipart';
+
+// Extend FastifyRequest for @aegisx/fastify-multipart
+declare module 'fastify' {
+  interface FastifyRequest {
+    parseMultipart(): Promise<{
+      files: Array<{
+        filename: string;
+        mimetype: string;
+        encoding: string;
+        size: number;
+        toBuffer(): Promise<Buffer>;
+        createReadStream(): NodeJS.ReadableStream;
+      }>;
+      fields: Record<string, string>;
+    }>;
+  }
+}
 import { FileUploadService } from './file-upload.service';
 import {
   FileUploadRequest,
@@ -11,6 +27,7 @@ import {
   ThumbnailQuery,
   ViewQuery,
   FileIdParam,
+  DeleteQuery,
   isViewableMimeType,
 } from './file-upload.schemas';
 
@@ -25,6 +42,33 @@ export class FileUploadController {
   constructor(private deps: FileUploadControllerDependencies) {}
 
   /**
+   * Parse string boolean values from multipart form data
+   */
+  private parseBoolean(value: unknown): boolean | undefined {
+    if (value === undefined || value === null) return undefined;
+    if (typeof value === 'boolean') return value;
+    if (typeof value === 'string') {
+      const lowercased = value.toLowerCase();
+      if (lowercased === 'true') return true;
+      if (lowercased === 'false') return false;
+    }
+    return undefined;
+  }
+
+  /**
+   * Parse metadata JSON string from multipart form data
+   */
+  private parseMetadata(value: string): Record<string, any> | undefined {
+    if (!value || value === 'string') return undefined;
+    try {
+      return JSON.parse(value);
+    } catch (error) {
+      // If not valid JSON, return undefined instead of throwing error
+      return undefined;
+    }
+  }
+
+  /**
    * Upload single file
    */
   async uploadSingleFile(
@@ -34,8 +78,10 @@ export class FileUploadController {
     reply: FastifyReply,
   ) {
     try {
-      const data = await request.file();
-      if (!data) {
+      // Use @aegisx/fastify-multipart clean API
+      const { files, fields } = await request.parseMultipart();
+
+      if (!files || files.length === 0) {
         return reply.code(400).send({
           success: false,
           error: {
@@ -50,13 +96,26 @@ export class FileUploadController {
         });
       }
 
+      const data = files[0]; // Get first file for single upload
+
+      // Fields are now clean strings
+      request.log.info(
+        `Fields allowDuplicates: ${fields.allowDuplicates} (type: ${typeof fields.allowDuplicates})`,
+      );
+      request.log.info(`All fields: ${Object.keys(fields).join(', ')}`);
+
+      const parsedAllowDuplicates = this.parseBoolean(fields.allowDuplicates);
+      request.log.info(`Parsed allowDuplicates: ${parsedAllowDuplicates}`);
+
       const uploadRequest: FileUploadRequest = {
-        category: request.body?.category,
-        isPublic: request.body?.isPublic,
-        isTemporary: request.body?.isTemporary,
-        expiresIn: request.body?.expiresIn,
-        allowDuplicates: request.body?.allowDuplicates,
-        metadata: request.body?.metadata,
+        category: fields.category,
+        isPublic: this.parseBoolean(fields.isPublic),
+        isTemporary: this.parseBoolean(fields.isTemporary),
+        expiresIn: fields.expiresIn ? Number(fields.expiresIn) : undefined,
+        allowDuplicates: parsedAllowDuplicates,
+        metadata: fields.metadata
+          ? this.parseMetadata(fields.metadata)
+          : undefined,
       };
 
       const userId = request.user?.id;
@@ -75,15 +134,42 @@ export class FileUploadController {
         });
       }
 
+      // Convert @aegisx/fastify-multipart file to expected format with toBuffer method
+      const fileData = {
+        filename: data.filename,
+        mimetype: data.mimetype,
+        encoding: data.encoding,
+        file: data.createReadStream(), // Use createReadStream instead
+        toBuffer: () => data.toBuffer(), // Pass through the toBuffer method
+      };
+
       const result = await this.deps.fileUploadService.uploadFile(
-        data,
+        fileData as any, // Type compatibility
         uploadRequest,
         userId,
       );
 
+      // Generate signed URLs for immediate use
+      const signedUrlsResult =
+        await this.deps.fileUploadService.generateSignedUrls(
+          result.file.id,
+          {
+            expiresIn: 3600, // 1 hour
+          },
+          userId,
+        );
+
+      // Log debug info instead of sending in response
+      request.log.info(
+        `Debug - receivedAllowDuplicates: ${request.body?.allowDuplicates}, parsedAllowDuplicates: ${parsedAllowDuplicates}, requestBodyKeys: ${Object.keys(request.body || {}).join(',')}`,
+      );
+
       return reply.code(201).send({
         success: true,
-        data: result.file,
+        data: {
+          ...result.file,
+          signedUrls: signedUrlsResult.urls,
+        },
         meta: {
           requestId: request.id,
           timestamp: new Date().toISOString(),
@@ -138,7 +224,7 @@ export class FileUploadController {
     try {
       request.log.info('Starting to process multipart files...');
       const files = request.files();
-      const fileArray: MultipartFile[] = [];
+      const fileArray: any[] = [];
       let fileCount = 0;
 
       for await (const file of files) {
@@ -175,9 +261,12 @@ export class FileUploadController {
 
       const uploadRequest: FileUploadRequest = {
         category: request.body?.category,
-        isPublic: request.body?.isPublic,
-        isTemporary: request.body?.isTemporary,
-        expiresIn: request.body?.expiresIn,
+        isPublic: this.parseBoolean(request.body?.isPublic),
+        isTemporary: this.parseBoolean(request.body?.isTemporary),
+        expiresIn: request.body?.expiresIn
+          ? Number(request.body.expiresIn)
+          : undefined,
+        allowDuplicates: this.parseBoolean(request.body?.allowDuplicates),
         metadata: request.body?.metadata,
       };
 
@@ -208,6 +297,27 @@ export class FileUploadController {
         userId,
       );
 
+      // Generate signed URLs for uploaded files
+      const uploadedWithUrls = await Promise.all(
+        result.uploaded.map(async (file) => {
+          try {
+            const signedUrlsResult =
+              await this.deps.fileUploadService.generateSignedUrls(
+                file.id,
+                { expiresIn: 3600 },
+                userId,
+              );
+            return {
+              ...file,
+              signedUrls: signedUrlsResult.urls,
+            };
+          } catch (_error) {
+            // If signed URL generation fails, return file without URLs
+            return file;
+          }
+        }),
+      );
+
       const uploadEndTime = Date.now();
       const uploadDuration = uploadEndTime - uploadStartTime;
 
@@ -224,7 +334,10 @@ export class FileUploadController {
 
       return reply.code(statusCode).send({
         success: true,
-        data: result,
+        data: {
+          ...result,
+          uploaded: uploadedWithUrls,
+        },
         meta: {
           requestId: request.id,
           timestamp: new Date().toISOString(),
@@ -1033,6 +1146,7 @@ export class FileUploadController {
   async deleteFile(
     request: FastifyRequest<{
       Params: FileIdParam;
+      Querystring: DeleteQuery;
     }>,
     reply: FastifyReply,
   ) {
@@ -1056,7 +1170,7 @@ export class FileUploadController {
       }
 
       // Check if this is a force delete (admin only)
-      const force = request.query?.force === 'true';
+      const force = request.query.force || false;
       const deleted = await this.deps.fileUploadService.deleteFile(
         id,
         userId,

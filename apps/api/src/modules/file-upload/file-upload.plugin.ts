@@ -12,8 +12,8 @@ import { fileUploadRoutes } from './file-upload.routes';
  * Registers file upload functionality with dependency injection
  */
 async function fileUploadPlugin(fastify: FastifyInstance) {
-  // Multipart support should already be registered by user-profile plugin
-  // We'll configure limits per-route in the route handlers
+  // Multipart support is provided by user-profile plugin
+  // We can use the existing multipart configuration
 
   // Initialize storage adapter using factory
   const storageAdapterFactory = StorageAdapterFactory.getInstance(fastify);
@@ -61,7 +61,12 @@ async function fileUploadPlugin(fastify: FastifyInstance) {
 
 export default fp(fileUploadPlugin, {
   name: 'file-upload',
-  dependencies: ['knex-plugin', 'jwt-auth-plugin', 'schemas-plugin'],
+  dependencies: [
+    'knex-plugin',
+    'jwt-auth-plugin',
+    'schemas-plugin',
+    'multipart-plugin',
+  ],
 });
 
 export { fileUploadPlugin };

@@ -32,17 +32,7 @@ async function userProfilePlugin(
     userProfileSchemas,
   );
 
-  // Register multipart support for file uploads (shared across modules)
-  await fastify.register(require('@fastify/multipart'), {
-    limits: {
-      fileSize: 100 * 1024 * 1024, // 100MB per file
-      files: 10, // Allow up to 10 files for file-upload module
-      fieldSize: 10 * 1024 * 1024, // 10MB for form fields (increased for multiple file metadata)
-      fields: 20, // Maximum number of non-file fields (increased for multiple files)
-    },
-    throwFileSizeLimit: true,
-    addToBody: false, // Don't add files to request.body
-  });
+  // Multipart support is provided by global multipart plugin
 
   // Initialize dependencies
   const repository = new UserProfileRepository(fastify.knex);
@@ -94,5 +84,6 @@ export default fp(userProfilePlugin, {
     'jwt-auth-plugin',
     'schemas-plugin',
     'users-plugin',
+    'multipart-plugin',
   ],
 });

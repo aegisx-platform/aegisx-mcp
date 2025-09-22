@@ -19,6 +19,7 @@ import redisPlugin from './plugins/redis.plugin';
 import responseHandlerPlugin from './plugins/response-handler.plugin';
 import schemasPlugin from './plugins/schemas.plugin';
 // import schemaEnforcementPlugin from './plugins/schema-enforcement.plugin';
+import multipartPlugin from './plugins/multipart.plugin';
 import { activityLoggingPlugin } from './plugins/activity-logging';
 import authPlugin from './modules/auth/auth.plugin';
 import authStrategiesPlugin from './modules/auth/strategies/auth.strategies';
@@ -177,14 +178,22 @@ async function bootstrap() {
   // 9. Common schemas
   await app.register(schemasPlugin);
 
-  // 10. Schema enforcement (ensures all routes have schemas)
+  // 10. Multipart support (global)
+  await app.register(multipartPlugin, {
+    maxFileSize: 100 * 1024 * 1024, // 100MB
+    maxFiles: 10,
+    maxFieldSize: 10 * 1024 * 1024, // 10MB
+    maxFields: 20,
+  });
+
+  // 11. Schema enforcement (ensures all routes have schemas)
   // TODO: Re-enable after fixing all route schemas
   // await app.register(schemaEnforcementPlugin);
 
-  // 11. Auth strategies
+  // 12. Auth strategies
   await app.register(authStrategiesPlugin);
 
-  // 11.5. Activity logging (after auth but before feature modules)
+  // 12.5. Activity logging (after auth but before feature modules)
   await app.register(activityLoggingPlugin, {
     config: {
       enabled: process.env.ACTIVITY_LOGGING_ENABLED !== 'false',
@@ -199,13 +208,13 @@ async function bootstrap() {
     },
   });
 
-  // 12. Swagger documentation (before routes so it can capture them)
+  // 13. Swagger documentation (before routes so it can capture them)
   await app.register(swaggerPlugin);
 
-  // 13. Static files (before feature modules)
+  // 14. Static files (before feature modules)
   await app.register(staticFilesPlugin);
 
-  // 14. Feature modules
+  // 15. Feature modules
   // Default/System module (info, status, health endpoints)
   await app.register(defaultPlugin);
 

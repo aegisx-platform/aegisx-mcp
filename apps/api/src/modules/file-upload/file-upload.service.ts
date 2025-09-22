@@ -126,12 +126,24 @@ export class FileUploadService {
             reason: 'Identical file content (SHA256 hash match)',
           }));
 
+          // Debug log to see allowDuplicates value
+          this.deps.logger.info(
+            `Duplicate check: allowDuplicates=${uploadRequest.allowDuplicates}, existingFiles=${existingFiles.length}`,
+          );
+
           // If duplicates not allowed, return existing file
           if (!uploadRequest.allowDuplicates) {
             const warnings = [
               `Duplicate file detected. Similar files: ${existingFiles.map((f) => f.originalName).join(', ')}`,
             ];
+            this.deps.logger.info(
+              'Returning existing file due to allowDuplicates=false',
+            );
             return { file: existingFiles[0], warnings, duplicates };
+          } else {
+            this.deps.logger.info(
+              'Creating new file despite duplicates due to allowDuplicates=true',
+            );
           }
         }
       }

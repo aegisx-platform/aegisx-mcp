@@ -121,6 +121,49 @@ Keep commit messages clean and professional.
 - **Use base schemas from `/src/schemas/base.schemas.ts`**
 - **Register schemas via schema registry**
 
+### Type Safety Policy (MANDATORY)
+
+**🚨 NEVER use `any` or type assertions without proper schemas - NO EXCEPTIONS**
+
+**Full Type Flow Required:**
+
+1. **Schema Definition**: Create TypeBox schema in `*.schemas.ts`
+2. **Type Export**: Export `Static<typeof Schema>` type
+3. **Route Registration**: Use schema in routes with proper imports
+4. **Controller Typing**: Use exported types in FastifyRequest generics
+5. **OpenAPI Documentation**: Schemas automatically generate OpenAPI spec
+
+**Example Flow:**
+
+```typescript
+// 1. Schema definition
+export const DeleteQuerySchema = Type.Object({
+  force: Type.Optional(Type.Boolean())
+});
+
+// 2. Type export
+export type DeleteQuery = Static<typeof DeleteQuerySchema>;
+
+// 3. Route registration
+querystring: DeleteQuerySchema,
+
+// 4. Controller typing
+request: FastifyRequest<{
+  Params: FileIdParam;
+  Querystring: DeleteQuery;
+}>
+
+// 5. Type-safe access
+const force = request.query.force || false;
+```
+
+**Forbidden Patterns:**
+
+- `request.query as any`
+- `request.query as { field?: string }`
+- Modifying TypeScript types without updating schemas
+- Type assertions without schema validation
+
 ### Universal Development Standard (MANDATORY)
 
 **🚨 MUST follow Universal Full-Stack Standard for ALL feature development - NO EXCEPTIONS**

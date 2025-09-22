@@ -1001,8 +1001,14 @@ export class FileUploadComponent implements OnInit, OnDestroy {
   }
 
   removeFile(fileProgress: FileUploadProgress): void {
-    if (fileProgress.status === 'uploading') return;
+    if (fileProgress.status === 'uploading') {
+      this.snackBar.open('Cannot remove file while uploading', 'Close', {
+        duration: 2000,
+      });
+      return;
+    }
 
+    // Remove from selected files, upload progress, and validation results
     const selectedFiles = this._selectedFiles().filter(
       (f) => f !== fileProgress.file,
     );
@@ -1016,16 +1022,48 @@ export class FileUploadComponent implements OnInit, OnDestroy {
     this._selectedFiles.set(selectedFiles);
     this._uploadProgress.set(uploadProgress);
     this._validationResults.set(validationResults);
+
+    // Show confirmation message
+    this.snackBar.open(
+      `Removed ${fileProgress.file.name} from selection`,
+      'Close',
+      { duration: 2000 },
+    );
   }
 
   clearFiles(): void {
-    if (this.isUploading()) return;
+    if (this.isUploading()) {
+      this.snackBar.open('Cannot clear files while uploading', 'Close', {
+        duration: 2000,
+      });
+      return;
+    }
+
+    const selectedCount = this._selectedFiles().length;
+    const uploadedCount = this.validUploadedFiles().length;
 
     this._selectedFiles.set([]);
     this._uploadProgress.set([]);
     this._validationResults.set([]);
     this._uploadedFiles.set([]);
     this.fileUploadService.clearUploadProgress();
+
+    // Show appropriate message based on what was cleared
+    if (selectedCount > 0 && uploadedCount > 0) {
+      this.snackBar.open(
+        `Cleared ${selectedCount} selected files and ${uploadedCount} uploaded files`,
+        'Close',
+        { duration: 3000 },
+      );
+    } else if (selectedCount > 0) {
+      this.snackBar.open(`Cleared ${selectedCount} selected files`, 'Close', {
+        duration: 2000,
+      });
+    } else if (uploadedCount > 0) {
+      this.snackBar.open(`Cleared ${uploadedCount} uploaded files`, 'Close', {
+        duration: 2000,
+      });
+    }
   }
 
   async startUpload(): Promise<void> {
@@ -1033,6 +1071,7 @@ export class FileUploadComponent implements OnInit, OnDestroy {
     if (validFiles.length === 0) return;
 
     const options: FileUploadOptions = this.optionsForm.value;
+    console.log('Upload options:', options);
 
     try {
       // Use sequential single file uploads for better performance
@@ -1076,13 +1115,13 @@ export class FileUploadComponent implements OnInit, OnDestroy {
         successCount++;
         const uploadedFile = response.data;
 
-        // Add preview from progress if available
+        // Add preview from progress if available, prioritize signed URLs over local preview
         const progressItem = this._uploadProgress().find(
           (p) => p.file.name === uploadedFile.originalName,
         );
         const uploadedFileWithPreview = {
           ...uploadedFile,
-          preview: progressItem?.preview,
+          preview: uploadedFile.signedUrls?.thumbnail || progressItem?.preview,
         };
 
         uploadedFiles.push(uploadedFile);
@@ -1262,17 +1301,33 @@ export class FileUploadComponent implements OnInit, OnDestroy {
     }
   }
 
-  deleteUploadedFile(file: UploadedFile): void {
+  async deleteUploadedFile(file: UploadedFile): Promise<void> {
     if (!file?.id) return;
-    // Remove from local state immediately for better UX
-    this._uploadedFiles.update((files) =>
-      files.filter((f) => f?.id !== file.id),
-    );
 
-    // TODO: Call delete API endpoint
-    this.snackBar.open(`${file.originalName} removed`, 'Close', {
-      duration: 3000,
-    });
+    const fileName = file.originalName;
+
+    try {
+      // Remove from local state immediately for better UX
+      this._uploadedFiles.update((files) =>
+        files.filter((f) => f?.id !== file.id),
+      );
+
+      // Call delete API endpoint
+      await this.fileUploadService.deleteFile(file.id).toPromise();
+
+      this.snackBar.open(`${fileName} deleted successfully`, 'Close', {
+        duration: 3000,
+      });
+    } catch (error) {
+      // Restore file in local state if delete failed
+      this._uploadedFiles.update((files) => [...files, file]);
+
+      const message =
+        error instanceof Error ? error.message : 'Failed to delete file';
+      this.snackBar.open(`Failed to delete ${fileName}: ${message}`, 'Close', {
+        duration: 5000,
+      });
+    }
   }
 
   trackByFile(index: number, item: FileUploadProgress): string {

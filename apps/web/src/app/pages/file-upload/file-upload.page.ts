@@ -1,4 +1,4 @@
-import { Component, signal, ViewChild } from '@angular/core';
+import { Component, signal, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatCardModule } from '@angular/material/card';
@@ -8,6 +8,7 @@ import {
   FileUploadComponent,
   FileManagementComponent,
   UploadedFile,
+  FileUploadService,
 } from '../../shared/components/file-upload';
 
 @Component({
@@ -57,10 +58,10 @@ import {
             <mat-icon class="mr-2">folder_open</mat-icon>
             File Management
             <span
-              *ngIf="uploadedFilesCount() > 0"
+              *ngIf="fileStats()?.totalFiles && fileStats()!.totalFiles > 0"
               class="ml-2 bg-primary text-white text-xs px-2 py-1 rounded-full"
             >
-              {{ uploadedFilesCount() }}
+              {{ fileStats()!.totalFiles }}
             </span>
           </ng-template>
 
@@ -130,15 +131,15 @@ import {
 export class FileUploadPage {
   @ViewChild(FileManagementComponent) fileManagement!: FileManagementComponent;
 
-  // Track uploaded files count for badge
-  private _uploadedFilesCount = signal(0);
-  readonly uploadedFilesCount = this._uploadedFilesCount.asReadonly();
+  private fileUploadService = inject(FileUploadService);
+
+  // Use file statistics from the API instead of local counter
+  readonly fileStats = this.fileUploadService.fileStats;
 
   onUploadComplete(files: UploadedFile[]): void {
     console.log('Files uploaded successfully:', files);
-    this._uploadedFilesCount.update((count) => count + files.length);
 
-    // Refresh file management list to show newly uploaded files
+    // Refresh file management list and stats to show newly uploaded files
     if (this.fileManagement) {
       this.fileManagement.refreshFiles();
     }
@@ -151,10 +152,6 @@ export class FileUploadPage {
 
   onFilesDeleted(files: UploadedFile[]): void {
     console.log('Files deleted:', files);
-    this._uploadedFilesCount.update((count) =>
-      Math.max(0, count - files.length),
-    );
-
-    // File management already refreshes after deletion, so no need to call refreshFiles() here
+    // File management already refreshes and reloads stats after deletion
   }
 }

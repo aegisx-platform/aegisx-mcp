@@ -148,6 +148,11 @@ export class FileUploadService {
       formData.append('isTemporary', options.isTemporary.toString());
     if (options.expiresIn)
       formData.append('expiresIn', options.expiresIn.toString());
+    // Always send allowDuplicates - default to true if not specified
+    const allowDuplicates =
+      options.allowDuplicates !== undefined ? options.allowDuplicates : true;
+    formData.append('allowDuplicates', allowDuplicates.toString());
+    console.log('Sending allowDuplicates:', allowDuplicates);
     if (options.metadata)
       formData.append('metadata', JSON.stringify(options.metadata));
 
@@ -200,6 +205,11 @@ export class FileUploadService {
       formData.append('isTemporary', options.isTemporary.toString());
     if (options.expiresIn)
       formData.append('expiresIn', options.expiresIn.toString());
+    // Always send allowDuplicates - default to true if not specified
+    const allowDuplicates =
+      options.allowDuplicates !== undefined ? options.allowDuplicates : true;
+    formData.append('allowDuplicates', allowDuplicates.toString());
+    console.log('Sending allowDuplicates:', allowDuplicates);
     if (options.metadata)
       formData.append('metadata', JSON.stringify(options.metadata));
 

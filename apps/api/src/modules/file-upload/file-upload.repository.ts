@@ -587,6 +587,7 @@ export class FileUploadRepository {
       uploadedBy: file.uploaded_by,
       uploadedAt: file.created_at.toISOString(),
       updatedAt: file.updated_at.toISOString(),
+      signedUrls: undefined, // Optional field, will be populated by service layer if needed
     };
   }
 }

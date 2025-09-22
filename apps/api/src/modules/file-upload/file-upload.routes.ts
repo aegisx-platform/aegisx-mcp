@@ -8,6 +8,7 @@ import {
   ThumbnailQuerySchema,
   ViewQuerySchema,
   FileIdParamSchema,
+  DeleteQuerySchema,
   FileUploadResponseSchema,
   MultipleFileUploadResponseSchema,
   FileListResponseSchema,
@@ -17,7 +18,10 @@ import {
   FileUploadErrorSchema,
   FileStatsResponseSchema,
 } from './file-upload.schemas';
-import { StandardRouteResponses } from '../../schemas/base.schemas';
+import {
+  StandardRouteResponses,
+  ApiMetaSchema,
+} from '../../schemas/base.schemas';
 import { Type } from '@sinclair/typebox';
 import { FileUploadController } from './file-upload.controller';
 import { createOptionalAuthHandler } from '../../shared/helpers/optional-auth.helper';
@@ -42,9 +46,47 @@ export async function fileUploadRoutes(
       tags: ['File Upload'],
       summary: 'Upload a single file',
       description:
-        'Upload a single file with optional metadata and processing options',
+        'Upload a single file with optional metadata and processing options. Send as multipart/form-data with file and optional fields.',
       consumes: ['multipart/form-data'],
-      // Don't validate body for multipart uploads - handled by @fastify/multipart
+      body: {
+        type: 'object',
+        properties: {
+          file: {
+            type: 'string',
+            format: 'binary',
+            description: 'File to upload (required)',
+          },
+          category: {
+            type: 'string',
+            description: 'File category (avatar, document, image, media)',
+          },
+          isPublic: {
+            type: 'string',
+            enum: ['true', 'false'],
+            description: 'Whether the file should be publicly accessible',
+          },
+          isTemporary: {
+            type: 'string',
+            enum: ['true', 'false'],
+            description:
+              'Whether the file is temporary and should be auto-deleted',
+          },
+          expiresIn: {
+            type: 'string',
+            description: 'Expiration time in seconds for temporary files',
+          },
+          allowDuplicates: {
+            type: 'string',
+            enum: ['true', 'false'],
+            description: 'Whether to allow duplicate files based on hash',
+          },
+          metadata: {
+            type: 'string',
+            description: 'JSON string containing additional metadata',
+          },
+        },
+        required: ['file'],
+      },
       response: {
         201: FileUploadResponseSchema,
         400: StandardRouteResponses[400],
@@ -56,6 +98,7 @@ export async function fileUploadRoutes(
       },
       security: [{ bearerAuth: [] }],
     },
+    attachValidation: true, // Skip validation errors
     preHandler: [fastify.authenticate],
     handler: controller.uploadSingleFile.bind(controller),
   });
@@ -66,9 +109,52 @@ export async function fileUploadRoutes(
       tags: ['File Upload'],
       summary: 'Upload multiple files',
       description:
-        'Upload multiple files in a single request with shared metadata',
+        'Upload multiple files in a single request with shared metadata. Send as multipart/form-data with multiple files and optional fields.',
       consumes: ['multipart/form-data'],
-      // Don't validate body for multipart uploads - handled by @fastify/multipart
+      body: {
+        type: 'object',
+        properties: {
+          file: {
+            type: 'array',
+            items: {
+              type: 'string',
+              format: 'binary',
+            },
+            description: 'Files to upload (required, multiple files allowed)',
+          },
+          category: {
+            type: 'string',
+            description:
+              'File category applied to all files (avatar, document, image, media)',
+          },
+          isPublic: {
+            type: 'string',
+            enum: ['true', 'false'],
+            description: 'Whether the files should be publicly accessible',
+          },
+          isTemporary: {
+            type: 'string',
+            enum: ['true', 'false'],
+            description:
+              'Whether the files are temporary and should be auto-deleted',
+          },
+          expiresIn: {
+            type: 'string',
+            description: 'Expiration time in seconds for temporary files',
+          },
+          allowDuplicates: {
+            type: 'string',
+            enum: ['true', 'false'],
+            description: 'Whether to allow duplicate files based on hash',
+          },
+          metadata: {
+            type: 'string',
+            description:
+              'JSON string containing additional metadata applied to all files',
+          },
+        },
+        required: ['file'],
+      },
       response: {
         201: MultipleFileUploadResponseSchema,
         207: MultipleFileUploadResponseSchema, // Multi-status
@@ -79,6 +165,7 @@ export async function fileUploadRoutes(
       },
       security: [{ bearerAuth: [] }],
     },
+    attachValidation: true, // Skip validation errors
     bodyLimit: 1024 * 1024 * 1024, // 1GB body limit for multiple file uploads
     preHandler: [fastify.authenticate],
     handler: controller.uploadMultipleFiles.bind(controller),
@@ -296,14 +383,7 @@ export async function fileUploadRoutes(
       description:
         'Delete file (soft delete by default, force=true for hard delete)',
       params: FileIdParamSchema,
-      querystring: Type.Object({
-        force: Type.Optional(
-          Type.Boolean({
-            description:
-              'Force delete (permanently remove from storage and database)',
-          }),
-        ),
-      }),
+      querystring: DeleteQuerySchema,
       response: {
         200: DeleteFileResponseSchema,
         401: FileUploadErrorSchema,

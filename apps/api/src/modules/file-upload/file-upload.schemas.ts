@@ -312,6 +312,28 @@ export const ViewQuerySchema = Type.Object({
 });
 
 // =============================================
+// Signed URLs Schema (defined here to resolve dependency)
+// =============================================
+
+/**
+ * Signed URL collection
+ */
+export const SignedUrlsSchema = Type.Object({
+  view: Type.String({
+    format: 'uri',
+    description: 'Signed URL for viewing the file inline',
+  }),
+  download: Type.String({
+    format: 'uri',
+    description: 'Signed URL for downloading the file',
+  }),
+  thumbnail: Type.String({
+    format: 'uri',
+    description: 'Signed URL for accessing the thumbnail',
+  }),
+});
+
+// =============================================
 // Response Schemas
 // =============================================
 
@@ -380,6 +402,7 @@ export const UploadedFileSchema = Type.Object({
     format: 'date-time',
     description: 'When the file was last updated',
   }),
+  signedUrls: Type.Optional(SignedUrlsSchema),
 });
 
 // ✅ FIXED: Using base schema standards
@@ -574,6 +597,15 @@ export const FileIdParamSchema = Type.Object({
   }),
 });
 
+export const DeleteQuerySchema = Type.Object({
+  force: Type.Optional(
+    Type.Boolean({
+      description:
+        'Force delete (permanently remove from storage and database)',
+    }),
+  ),
+});
+
 // =============================================
 // Type Exports
 // =============================================
@@ -587,6 +619,7 @@ export type ThumbnailQuery = Static<typeof ThumbnailQuerySchema>;
 export type ViewQuery = Static<typeof ViewQuerySchema>;
 export type UploadedFile = Static<typeof UploadedFileSchema>;
 export type FileIdParam = Static<typeof FileIdParamSchema>;
+export type DeleteQuery = Static<typeof DeleteQuerySchema>;
 export type FileStatsData = Static<typeof FileStatsDataSchema>;
 export type FileStatsResponse = Static<typeof FileStatsResponseSchema>;
 
@@ -796,23 +829,7 @@ export const SignedUrlRequestSchema = Type.Object(
   },
 );
 
-/**
- * Signed URL collection
- */
-export const SignedUrlsSchema = Type.Object({
-  view: Type.String({
-    format: 'uri',
-    description: 'Signed URL for viewing the file inline',
-  }),
-  download: Type.String({
-    format: 'uri',
-    description: 'Signed URL for downloading the file',
-  }),
-  thumbnail: Type.String({
-    format: 'uri',
-    description: 'Signed URL for accessing the thumbnail',
-  }),
-});
+// SignedUrlsSchema moved above to resolve dependency
 
 /**
  * Storage metadata for signed URLs

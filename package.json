@@ -88,6 +88,7 @@
   },
   "private": true,
   "dependencies": {
+    "@aegisx/fastify-multipart": "^1.0.1",
     "@angular/animations": "^20.2.3",
     "@angular/cdk": "^20.2.1",
     "@angular/common": "~20.1.0",
