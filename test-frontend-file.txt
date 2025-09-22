@@ -1,3 +1,0 @@
-This is a test file for frontend signed URL testing!
-Created to verify the file management interface works correctly with signed URLs.
-The signed URLs should work for view, download, and thumbnail access.

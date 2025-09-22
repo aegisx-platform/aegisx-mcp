@@ -36,6 +36,20 @@ yarn-error.log
 testem.log
 /typings
 
+# Test files and temporary files
+test-*.*
+*-test.*
+*.test.*
+test-file-uploads/
+test-results/
+playwright-report/
+
+# Log files
+*.log
+api-server.log
+server.log
+web.log
+
 # System Files
 .DS_Store
 Thumbs.db
