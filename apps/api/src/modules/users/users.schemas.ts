@@ -53,7 +53,9 @@ const CreateUserRequestSchema = Type.Object({
   password: Type.String({ minLength: 8 }),
   firstName: Type.Optional(Type.String({ maxLength: 100 })),
   lastName: Type.Optional(Type.String({ maxLength: 100 })),
-  roleId: Type.String({ format: 'uuid' }),
+  // Support both roleId (UUID) and role (name) for flexibility
+  roleId: Type.Optional(Type.String({ format: 'uuid' })),
+  role: Type.Optional(Type.String()),
   isActive: Type.Optional(Type.Boolean({ default: true })),
 });
 

@@ -1,5 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { UsersService } from './users.service';
+import { EventService } from '../../shared/websocket/event.service';
+import { CrudEventHelper } from '../../shared/websocket/crud-event-helper';
 import {
   ListUsersQuery,
   CreateUserRequest,
@@ -13,7 +15,15 @@ import {
 } from './users.schemas';
 
 export class UsersController {
-  constructor(private usersService: UsersService) {}
+  private userEvents: CrudEventHelper;
+  
+  constructor(
+    private usersService: UsersService,
+    private eventService: EventService,
+  ) {
+    // Create CRUD event helper for users
+    this.userEvents = this.eventService.createCrudHelper('users', 'user');
+  }
 
   async listUsers(
     request: FastifyRequest<{ Querystring: ListUsersQuery }>,
@@ -59,6 +69,10 @@ export class UsersController {
     reply: FastifyReply,
   ) {
     const user = await this.usersService.createUser(request.body);
+    
+    // Emit real-time event
+    this.userEvents.emitCreated(user);
+    
     return reply.code(201).success(user);
   }
 
@@ -73,6 +87,10 @@ export class UsersController {
       request.params.id,
       request.body,
     );
+    
+    // Emit real-time event
+    this.userEvents.emitUpdated(user);
+    
     return reply.success(user);
   }
 
@@ -166,12 +184,50 @@ export class UsersController {
     request: FastifyRequest<{ Params: { id: string } }>,
     reply: FastifyReply,
   ) {
-    const currentUserId = request.user.id;
-    await this.usersService.deleteUser(request.params.id, currentUserId);
-    return reply.success({
-      id: request.params.id,
-      message: 'User deleted successfully',
-    });
+    try {
+      const currentUserId = request.user.id;
+      await this.usersService.deleteUser(request.params.id, currentUserId);
+      
+      // Emit real-time event
+      console.log('🗑️ Emitting userDeleted event for ID:', request.params.id);
+      this.userEvents.emitDeleted(request.params.id);
+      console.log('✅ userDeleted event emitted successfully');
+      
+      return reply.success({
+        id: request.params.id,
+        message: 'User deleted successfully',
+      });
+    } catch (error: any) {
+      console.error('❌ Failed to delete user:', error);
+      
+      if (error.code === 'CANNOT_DELETE_SELF') {
+        return reply.code(400).send({
+          success: false,
+          error: {
+            code: 'CANNOT_DELETE_SELF',
+            message: 'Cannot delete your own account',
+          },
+        });
+      }
+      
+      if (error.code === 'USER_NOT_FOUND') {
+        return reply.code(404).send({
+          success: false,
+          error: {
+            code: 'USER_NOT_FOUND',
+            message: 'User not found',
+          },
+        });
+      }
+
+      return reply.code(500).send({
+        success: false,
+        error: {
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to delete user',
+        },
+      });
+    }
   }
 
   async listRoles(request: FastifyRequest, reply: FastifyReply) {

@@ -214,7 +214,10 @@ async function bootstrap() {
   // 14. Static files (before feature modules)
   await app.register(staticFilesPlugin);
 
-  // 15. Feature modules
+  // 15. WebSocket support (before feature modules that depend on it)
+  await app.register(websocketPlugin);
+
+  // 16. Feature modules
   // Default/System module (info, status, health endpoints)
   await app.register(defaultPlugin);
 
@@ -241,9 +244,6 @@ async function bootstrap() {
 
   // Monitoring module (client error logging)
   await app.register(monitoringModulePlugin);
-
-  // WebSocket support
-  await app.register(websocketPlugin);
 
   // Start server
   const port = process.env.PORT || 3333;

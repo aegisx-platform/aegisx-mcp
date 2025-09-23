@@ -1,15 +1,17 @@
 export const environment = {
   production: false,
-  apiUrl: '', // Use relative path for proxy in development
+  apiUrl: 'http://localhost:3383', // Direct API URL for Multi-Instance Development
   features: {
     enableComponentShowcase: true, // Enable component showcase in development
   },
   websocket: {
     path: '/api/ws/',
     timeout: 20000,
-    reconnectionAttempts: 5,
+    reconnectionAttempts: 3, // Reduce reconnection attempts
+    reconnectionDelay: 2000, // Add delay between reconnections
     forceSecure: false,
-    transports: ['polling'], // Start with polling only for debugging
+    transports: ['websocket', 'polling'], // Allow fallback
     upgrade: true,
+    autoConnect: false, // Don't auto-connect, wait for manual connection
   },
 };

@@ -1,5 +1,7 @@
 import { FastifyRequest } from 'fastify';
 import { WebSocketManager, WebSocketMessage } from './websocket.gateway';
+import { RealtimeEventBus } from './realtime-event-bus';
+import { CrudEventHelper, createCrudEventHelper } from './crud-event-helper';
 
 interface EventContext {
   userId?: string;
@@ -9,29 +11,38 @@ interface EventContext {
   ipAddress?: string;
 }
 
-interface EventMetadata {
-  timestamp: string;
-  userId: string;
-  sessionId: string;
-  featureVersion: string;
-  priority: 'low' | 'normal' | 'high' | 'critical';
-  context?: EventContext;
-}
-
-interface BulkEventProgress {
-  total: number;
-  completed: number;
-  failed: number;
-  percentage: number;
-  estimatedTimeRemaining?: number;
-}
-
+/**
+ * Scalable Event Service using Generic CrudEventHelper Pattern
+ * 
+ * Instead of having individual methods for each entity, this service provides
+ * a clean API: eventService.for('feature', 'entity').emitCreated(data)
+ * 
+ * Usage Examples:
+ * - eventService.for('users', 'user').emitCreated(user)
+ * - eventService.for('products', 'product').emitDeleted(productId)
+ * - eventService.for('orders', 'payment').emitCustom('failed', errorData)
+ * - eventService.for('rbac', 'role').emitAssigned(roleAssignmentData)
+ */
 export class EventService {
   private websocketManager: WebSocketManager;
   private currentRequest?: FastifyRequest;
+  private eventBus?: RealtimeEventBus;
+  private eventHelpers: Map<string, CrudEventHelper> = new Map();
 
-  constructor(websocketManager: WebSocketManager) {
+  constructor(websocketManager: WebSocketManager, eventBus?: RealtimeEventBus) {
     this.websocketManager = websocketManager;
+    this.eventBus = eventBus;
+  }
+
+  /**
+   * Set event bus instance for enhanced event handling
+   */
+  setEventBus(eventBus: RealtimeEventBus): void {
+    this.eventBus = eventBus;
+    // Update all existing helpers with new event bus
+    this.eventHelpers.forEach(helper => {
+      helper.setEventBus(eventBus);
+    });
   }
 
   /**
@@ -39,10 +50,41 @@ export class EventService {
    */
   setRequestContext(request: FastifyRequest) {
     this.currentRequest = request;
+    
+    // Update context for all existing event helpers
+    const userId = this.getCurrentUserId();
+    const sessionId = this.getCurrentSessionId();
+    this.eventHelpers.forEach(helper => {
+      helper.setContext(userId, sessionId);
+    });
+  }
+
+  /**
+   * Main method: Get or create CrudEventHelper for any feature/entity pair
+   * This is the core of the scalable design
+   * 
+   * Usage: eventService.for('users', 'user').emitCreated(userData)
+   */
+  for(feature: string, entity: string): CrudEventHelper {
+    const key = `${feature}.${entity}`;
+    
+    if (!this.eventHelpers.has(key)) {
+      const helper = createCrudEventHelper(this.websocketManager, feature, entity, this.eventBus);
+      
+      // Set current context
+      const userId = this.getCurrentUserId();
+      const sessionId = this.getCurrentSessionId();
+      helper.setContext(userId, sessionId);
+      
+      this.eventHelpers.set(key, helper);
+    }
+    
+    return this.eventHelpers.get(key)!;
   }
 
   /**
    * Emit a generic event to all subscribers of a feature
+   * @deprecated Use eventService.for(feature, entity).emitCustom(action, data) instead
    */
   emit(
     feature: string,
@@ -52,19 +94,12 @@ export class EventService {
     priority: 'low' | 'normal' | 'high' | 'critical' = 'normal',
     context?: EventContext
   ): void {
-    try {
-      this.websocketManager.emitToFeature(feature, entity, action, data, priority);
-      
-      console.log(
-        `📡 Emitted event: ${feature}.${entity}.${action} with priority ${priority}`
-      );
-    } catch (error) {
-      console.error(`❌ Failed to emit event ${feature}.${entity}.${action}:`, error);
-    }
+    this.for(feature, entity).emitCustom(action, data, priority);
   }
 
   /**
    * Emit event to specific user only
+   * @deprecated Use eventService.for(feature, entity).emitToUser(userId, action, data) instead
    */
   emitToUser(
     userId: string,
@@ -74,223 +109,131 @@ export class EventService {
     data: any,
     priority: 'low' | 'normal' | 'high' | 'critical' = 'normal'
   ): void {
-    try {
-      const eventName = `${feature}.${entity}.${action}`;
-      this.websocketManager.emitToUser(userId, eventName, data);
-      
-      console.log(
-        `📡 Emitted event to user ${userId}: ${feature}.${entity}.${action}`
-      );
-    } catch (error) {
-      console.error(`❌ Failed to emit event to user ${userId}:`, error);
-    }
+    this.for(feature, entity).emitToUser(userId, action, data, priority);
   }
 
-  // Convenience methods for common CRUD operations
+  // ===== BACKWARD COMPATIBILITY METHODS =====
+  // These methods maintain compatibility with existing code
+  // New code should use eventService.for('feature', 'entity').emitCreated(data)
+
+  // Users Events (backward compatibility)
+  users = {
+    userCreated: (user: any) => this.for('users', 'user').emitCreated(user),
+    userUpdated: (user: any) => this.for('users', 'user').emitUpdated(user),
+    userDeleted: (userId: string) => this.for('users', 'user').emitDeleted(userId),
+    userActivated: (user: any) => this.for('users', 'user').emitActivated(user),
+    userDeactivated: (user: any) => this.for('users', 'user').emitDeactivated(user),
+    profileUpdated: (profile: any) => this.for('users', 'profile').emitUpdated(profile),
+    sessionCreated: (session: any) => this.for('users', 'session').emitCreated(session),
+    sessionExpired: (sessionId: string) => this.for('users', 'session').emitCustom('expired', { id: sessionId }, 'high'),
+  };
 
   /**
-   * Emit created event
+   * @deprecated Use eventService.for(feature, entity).emitCreated(data) instead
    */
   emitCreated(feature: string, entity: string, data: any, priority: 'low' | 'normal' | 'high' | 'critical' = 'normal'): void {
-    this.emit(feature, entity, 'created', data, priority);
+    this.for(feature, entity).emitCreated(data, priority);
   }
 
   /**
-   * Emit updated event
+   * @deprecated Use eventService.for(feature, entity).emitUpdated(data) instead
    */
   emitUpdated(feature: string, entity: string, data: any, priority: 'low' | 'normal' | 'high' | 'critical' = 'normal'): void {
-    this.emit(feature, entity, 'updated', data, priority);
+    this.for(feature, entity).emitUpdated(data, priority);
   }
 
   /**
-   * Emit deleted event
+   * @deprecated Use eventService.for(feature, entity).emitDeleted(id) instead
    */
   emitDeleted(feature: string, entity: string, id: string, priority: 'low' | 'normal' | 'high' | 'critical' = 'normal'): void {
-    this.emit(feature, entity, 'deleted', { id }, priority);
+    this.for(feature, entity).emitDeleted(id, priority);
   }
 
   /**
-   * Emit assigned event (for relationships like user-role assignments)
-   */
-  emitAssigned(feature: string, entity: string, data: any, priority: 'low' | 'normal' | 'high' | 'critical' = 'high'): void {
-    this.emit(feature, entity, 'assigned', data, priority);
-  }
-
-  /**
-   * Emit revoked event (for relationship removals)
-   */
-  emitRevoked(feature: string, entity: string, data: any, priority: 'low' | 'normal' | 'high' | 'critical' = 'high'): void {
-    this.emit(feature, entity, 'revoked', data, priority);
-  }
-
-  /**
-   * Emit status change event
-   */
-  emitStatusChanged(feature: string, entity: string, data: { id: string; oldStatus: string; newStatus: string; [key: string]: any }): void {
-    this.emit(feature, entity, 'status_changed', data, 'normal');
-  }
-
-  /**
-   * Emit activated event
+   * @deprecated Use eventService.for(feature, entity).emitActivated(data) instead
    */
   emitActivated(feature: string, entity: string, data: any): void {
-    this.emit(feature, entity, 'activated', data, 'normal');
+    this.for(feature, entity).emitActivated(data);
   }
 
   /**
-   * Emit deactivated event
+   * @deprecated Use eventService.for(feature, entity).emitDeactivated(data) instead
    */
   emitDeactivated(feature: string, entity: string, data: any): void {
-    this.emit(feature, entity, 'deactivated', data, 'normal');
+    this.for(feature, entity).emitDeactivated(data);
   }
 
-  // Bulk operation events
+  /**
+   * @deprecated Use eventService.for(feature, entity).emitStatusChanged(data) instead
+   */
+  emitStatusChanged(feature: string, entity: string, data: { id: string; oldStatus: string; newStatus: string; [key: string]: any }): void {
+    this.for(feature, entity).emitStatusChanged(data);
+  }
 
   /**
-   * Emit bulk operation started event
+   * @deprecated Use eventService.for(feature, entity).emitAssigned(data) instead
+   */
+  emitAssigned(feature: string, entity: string, data: any, priority: 'low' | 'normal' | 'high' | 'critical' = 'high'): void {
+    this.for(feature, entity).emitAssigned(data, priority);
+  }
+
+  /**
+   * @deprecated Use eventService.for(feature, entity).emitRevoked(data) instead
+   */
+  emitRevoked(feature: string, entity: string, data: any, priority: 'low' | 'normal' | 'high' | 'critical' = 'high'): void {
+    this.for(feature, entity).emitRevoked(data, priority);
+  }
+
+  /**
+   * @deprecated Use eventService.for(feature, entity).emitBulkStarted(data) instead
    */
   emitBulkStarted(feature: string, entity: string, data: { operationId: string; total: number; operation: string }): void {
-    this.emit(feature, entity, 'bulk_started', data, 'high');
+    this.for(feature, entity).emitBulkStarted(data);
   }
 
   /**
-   * Emit bulk operation progress event
+   * @deprecated Use eventService.for(feature, entity).emitBulkProgress(data) instead
    */
-  emitBulkProgress(feature: string, entity: string, data: { operationId: string; progress: BulkEventProgress }): void {
-    this.emit(feature, entity, 'bulk_progress', data, 'normal');
+  emitBulkProgress(feature: string, entity: string, data: { operationId: string; progress: any }): void {
+    this.for(feature, entity).emitBulkProgress(data);
   }
 
   /**
-   * Emit bulk operation completed event
+   * @deprecated Use eventService.for(feature, entity).emitBulkCompleted(data) instead
    */
   emitBulkCompleted(feature: string, entity: string, data: { operationId: string; results: { successful: number; failed: number; errors?: any[] } }): void {
-    this.emit(feature, entity, 'bulk_completed', data, 'high');
+    this.for(feature, entity).emitBulkCompleted(data);
   }
 
-  // Real-time collaboration events
-
   /**
-   * Emit lock acquired event (for collaborative editing)
+   * @deprecated Use eventService.for(feature, entity).emitLockAcquired(data) instead
    */
   emitLockAcquired(feature: string, entity: string, data: { id: string; userId: string; lockType?: string }): void {
-    this.emit(feature, entity, 'lock_acquired', data, 'high');
+    this.for(feature, entity).emitLockAcquired(data);
   }
 
   /**
-   * Emit lock released event
+   * @deprecated Use eventService.for(feature, entity).emitLockReleased(data) instead
    */
   emitLockReleased(feature: string, entity: string, data: { id: string; userId: string; lockType?: string }): void {
-    this.emit(feature, entity, 'lock_released', data, 'high');
+    this.for(feature, entity).emitLockReleased(data);
   }
 
   /**
-   * Emit conflict detected event
+   * @deprecated Use eventService.for(feature, entity).emitConflictDetected(data) instead
    */
   emitConflictDetected(feature: string, entity: string, data: { id: string; conflictType: string; users: string[] }): void {
-    this.emit(feature, entity, 'conflict_detected', data, 'critical');
+    this.for(feature, entity).emitConflictDetected(data);
   }
 
   /**
-   * Emit conflict resolved event
+   * @deprecated Use eventService.for(feature, entity).emitConflictResolved(data) instead
    */
   emitConflictResolved(feature: string, entity: string, data: { id: string; resolution: string; resolvedBy: string }): void {
-    this.emit(feature, entity, 'conflict_resolved', data, 'high');
+    this.for(feature, entity).emitConflictResolved(data);
   }
 
-  // Feature-specific convenience methods
-
-  // RBAC Events
-  rbac = {
-    roleCreated: (role: any) => this.emitCreated('rbac', 'role', role),
-    roleUpdated: (role: any) => this.emitUpdated('rbac', 'role', role),
-    roleDeleted: (roleId: string) => this.emitDeleted('rbac', 'role', roleId),
-    permissionAssigned: (data: { roleId: string; permissionId: string; assignedBy: string }) => 
-      this.emitAssigned('rbac', 'permission', data),
-    permissionRevoked: (data: { roleId: string; permissionId: string; revokedBy: string }) => 
-      this.emitRevoked('rbac', 'permission', data),
-    userRoleAssigned: (data: { userId: string; roleId: string; assignedBy: string; expiresAt?: string }) => 
-      this.emitAssigned('rbac', 'user_role', data),
-    userRoleRemoved: (data: { userId: string; roleId: string; removedBy: string }) => 
-      this.emitRevoked('rbac', 'user_role', data),
-    hierarchyChanged: (data: { roleId: string; oldParentId?: string; newParentId?: string; changedBy: string }) => 
-      this.emit('rbac', 'hierarchy', 'changed', data, 'high'),
-  };
-
-  // Users Events
-  users = {
-    userCreated: (user: any) => this.emitCreated('users', 'user', user),
-    userUpdated: (user: any) => this.emitUpdated('users', 'user', user),
-    userDeleted: (userId: string) => this.emitDeleted('users', 'user', userId),
-    userActivated: (user: any) => this.emitActivated('users', 'user', user),
-    userDeactivated: (user: any) => this.emitDeactivated('users', 'user', user),
-    profileUpdated: (profile: any) => this.emitUpdated('users', 'profile', profile),
-    sessionCreated: (session: any) => this.emitCreated('users', 'session', session),
-    sessionExpired: (sessionId: string) => this.emit('users', 'session', 'expired', { id: sessionId }, 'high'),
-  };
-
-  // Products Events
-  products = {
-    productCreated: (product: any) => this.emitCreated('products', 'product', product),
-    productUpdated: (product: any) => this.emitUpdated('products', 'product', product),
-    productDeleted: (productId: string) => this.emitDeleted('products', 'product', productId),
-    inventoryUpdated: (data: { productId: string; oldQuantity: number; newQuantity: number }) => 
-      this.emit('products', 'inventory', 'updated', data, 'normal'),
-    priceUpdated: (data: { productId: string; oldPrice: number; newPrice: number; effectiveDate?: string }) => 
-      this.emit('products', 'pricing', 'updated', data, 'normal'),
-    stockAlert: (data: { productId: string; currentStock: number; threshold: number; alertType: 'low' | 'out' }) => 
-      this.emit('products', 'inventory', 'alert', data, 'high'),
-  };
-
-  // Orders Events
-  orders = {
-    orderCreated: (order: any) => this.emitCreated('orders', 'order', order, 'high'),
-    orderUpdated: (order: any) => this.emitUpdated('orders', 'order', order, 'high'),
-    orderCancelled: (data: { orderId: string; reason: string; cancelledBy: string }) => 
-      this.emit('orders', 'order', 'cancelled', data, 'high'),
-    paymentReceived: (payment: any) => this.emitCreated('orders', 'payment', payment, 'high'),
-    paymentFailed: (data: { orderId: string; paymentId: string; error: string }) => 
-      this.emit('orders', 'payment', 'failed', data, 'critical'),
-    orderShipped: (shipment: any) => this.emitCreated('orders', 'shipment', shipment, 'high'),
-    orderDelivered: (data: { orderId: string; deliveredAt: string; signature?: string }) => 
-      this.emit('orders', 'order', 'delivered', data, 'high'),
-  };
-
-  // Notification Events
-  notifications = {
-    messageSent: (message: any) => this.emitCreated('notifications', 'message', message, 'high'),
-    messageRead: (data: { messageId: string; readBy: string; readAt: string }) => 
-      this.emit('notifications', 'message', 'read', data, 'normal'),
-    broadcastSent: (broadcast: any) => this.emitCreated('notifications', 'broadcast', broadcast, 'critical'),
-  };
-
-  // System Events
-  system = {
-    maintenanceStarted: (data: { message: string; estimatedDuration?: number }) => 
-      this.emit('system', 'maintenance', 'started', data, 'critical'),
-    maintenanceCompleted: (data: { message: string; actualDuration: number }) => 
-      this.emit('system', 'maintenance', 'completed', data, 'critical'),
-    configurationChanged: (data: { key: string; oldValue: any; newValue: any; changedBy: string }) => 
-      this.emit('system', 'configuration', 'changed', data, 'high'),
-    featureToggled: (data: { feature: string; enabled: boolean; toggledBy: string }) => 
-      this.emit('system', 'feature', 'toggled', data, 'high'),
-  };
-
-  /**
-   * Create event metadata from current context
-   */
-  private createEventMetadata(
-    priority: 'low' | 'normal' | 'high' | 'critical',
-    context?: EventContext
-  ): EventMetadata {
-    return {
-      timestamp: new Date().toISOString(),
-      userId: context?.userId || this.getCurrentUserId(),
-      sessionId: context?.sessionId || this.getCurrentSessionId(),
-      featureVersion: this.getFeatureVersion(),
-      priority,
-      context: context || this.getRequestContext()
-    };
-  }
+  // ===== HELPER METHODS =====
 
   /**
    * Get current user ID from request context
@@ -312,30 +255,6 @@ export class EventService {
     } catch {
       return 'unknown';
     }
-  }
-
-  /**
-   * Get request context information
-   */
-  private getRequestContext(): EventContext {
-    try {
-      return {
-        userId: this.getCurrentUserId(),
-        sessionId: this.getCurrentSessionId(),
-        requestId: (this.currentRequest as any)?.id,
-        userAgent: this.currentRequest?.headers?.['user-agent'],
-        ipAddress: this.currentRequest?.ip
-      };
-    } catch {
-      return {};
-    }
-  }
-
-  /**
-   * Get feature version (can be enhanced to read from package.json or environment)
-   */
-  private getFeatureVersion(): string {
-    return process.env.APP_VERSION || '1.0.0';
   }
 
   /**

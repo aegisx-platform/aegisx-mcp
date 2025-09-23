@@ -2,8 +2,8 @@
 
 > **🚨 CRITICAL** - This registry MUST be updated before starting any feature development to prevent conflicts and ensure smooth parallel development.
 
-**Last Updated**: 2025-09-13 15:00  
-**Active Features**: 2
+**Last Updated**: 2025-09-22 16:45  
+**Active Features**: 3
 **Resolved Conflicts**: 0
 
 ---
@@ -23,6 +23,8 @@
 | role_hierarchy | rbac | Claude | 🔒 Reserved | Role hierarchy and inheritance structure | 2025-09-13 |
 | permission_categories | rbac | Claude | 🔒 Reserved | Categories for organizing permissions | 2025-09-13 |
 | audit_role_changes | rbac-management | Claude | 🔒 Reserved | Audit trail for role and permission changes | 2025-09-13 |
+| event_store | realtime-event-system | Claude | 🔒 Reserved | Optional event sourcing storage | 2025-09-22 |
+| websocket_sessions | realtime-event-system | Claude | 🔒 Reserved | WebSocket session management | 2025-09-22 |
 
 ### Available Tables for New Features
 
@@ -50,6 +52,10 @@
 | /api/admin/rbac/* | rbac-management | Claude | 🔒 Reserved | Admin UI for RBAC management | 2025-09-13 |
 | /api/admin/users/*/assign-roles | rbac-management | Claude | 🔒 Reserved | Bulk user role assignment | 2025-09-13 |
 | /api/admin/audit/rbac/* | rbac-management | Claude | 🔒 Reserved | RBAC audit trail endpoints | 2025-09-13 |
+| /api/events/* | realtime-event-system | Claude | 🔒 Reserved | Event management and monitoring | 2025-09-22 |
+| /api/websocket/health | realtime-event-system | Claude | 🔒 Reserved | WebSocket health check endpoint | 2025-09-22 |
+| /api/websocket/stats | realtime-event-system | Claude | 🔒 Reserved | WebSocket connection statistics | 2025-09-22 |
+| /api/events/publish | realtime-event-system | Claude | 🔒 Reserved | Manual event publishing endpoint | 2025-09-22 |
 
 ### Available Endpoint Patterns
 
@@ -72,6 +78,8 @@
 | /admin/rbac/hierarchy | rbac-management | Claude | 🔒 Reserved | Role hierarchy management | 2025-09-13 |
 | /admin/rbac/audit | rbac-management | Claude | 🔒 Reserved | RBAC audit trail view | 2025-09-13 |
 | /admin/rbac/matrix | rbac-management | Claude | 🔒 Reserved | Permission matrix view | 2025-09-13 |
+| /admin/events | realtime-event-system | Claude | 🔒 Reserved | Event monitoring dashboard | 2025-09-22 |
+| /admin/websocket | realtime-event-system | Claude | 🔒 Reserved | WebSocket connections monitor | 2025-09-22 |
 
 ### Available Route Patterns
 
@@ -95,6 +103,10 @@
 | `NotificationService`       | (Available)    | -              | 🟢 Available | Service for notification handling      | 2025-09-12   |
 | `SecurityGuard`             | (Available)    | -              | 🟢 Available | Route guard for security checks        | 2025-09-12   |
 | `PasswordStrengthComponent` | (Available)    | -              | 🟢 Available | Reusable password strength indicator   | 2025-09-12   |
+| `RealtimeEventBus`          | realtime-event-system | Claude | 🔒 Reserved | Core event bus with Socket.IO integration | 2025-09-22 |
+| `WebSocketTransport`        | realtime-event-system | Claude | 🔒 Reserved | Switchable WebSocket transport layer | 2025-09-22 |
+| `EventService`              | realtime-event-system | Claude | 🔒 Reserved | Enhanced event service with patterns | 2025-09-22 |
+| `WebSocketService`          | realtime-event-system | Claude | 🤝 Shared | Frontend WebSocket service (enhanced) | 2025-09-22 |
 
 ---
 

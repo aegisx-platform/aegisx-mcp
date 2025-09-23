@@ -114,8 +114,16 @@ export class WebSocketService implements OnDestroy {
    * Connect to WebSocket server
    */
   connect(token: string, options?: { forceReconnect?: boolean }): void {
+    // Prevent multiple connection attempts
     if (this.socket?.connected && !options?.forceReconnect) {
       console.log('WebSocket already connected');
+      return;
+    }
+    
+    // Prevent connection while already connecting
+    const currentStatus = this._connectionStatus().status;
+    if (currentStatus === 'connecting' && !options?.forceReconnect) {
+      console.log('WebSocket connection already in progress');
       return;
     }
 
@@ -144,18 +152,21 @@ export class WebSocketService implements OnDestroy {
         auth: {
           token,
         },
-        autoConnect: true,
+        autoConnect: false, // Don't auto-connect to prevent multiple connections
         reconnection: true,
         reconnectionAttempts: this.maxReconnectAttempts,
-        reconnectionDelay: 1000,
-        reconnectionDelayMax: 5000,
+        reconnectionDelay: 2000, // Increase delay
+        reconnectionDelayMax: 10000, // Increase max delay
         timeout: wsConfig.timeout,
-        forceNew: true,
+        forceNew: false, // Don't force new connections
         upgrade: wsConfig.upgrade,
       });
 
       this.setupEventHandlers();
       this.storeToken(token);
+      
+      // Manually connect since autoConnect is false
+      this.socket.connect();
     } catch (error) {
       console.error('Failed to connect to WebSocket:', error);
       this.updateConnectionStatus('error', `Connection failed: ${error}`);
@@ -357,29 +368,6 @@ export class WebSocketService implements OnDestroy {
   };
 
   /**
-   * Users-specific subscriptions
-   */
-  users = {
-    subscribeToUsers: () => this.subscribeToEntity('users', 'user'),
-    subscribeToProfiles: () => this.subscribeToEntity('users', 'profile'),
-    subscribeToSessions: () => this.subscribeToEntity('users', 'session'),
-
-    subscribeToUserCreated: () =>
-      this.subscribeToEvent('users', 'user', 'created'),
-    subscribeToUserUpdated: () =>
-      this.subscribeToEvent('users', 'user', 'updated'),
-    subscribeToUserActivated: () =>
-      this.subscribeToEvent('users', 'user', 'activated'),
-    subscribeToUserDeactivated: () =>
-      this.subscribeToEvent('users', 'user', 'deactivated'),
-
-    subscribeToProfileUpdated: () =>
-      this.subscribeToEvent('users', 'profile', 'updated'),
-    subscribeToSessionExpired: () =>
-      this.subscribeToEvent('users', 'session', 'expired'),
-  };
-
-  /**
    * Products-specific subscriptions
    */
   products = {
@@ -546,6 +534,11 @@ export class WebSocketService implements OnDestroy {
    * Attempt to reconnect with exponential backoff
    */
   private attemptReconnect(): void {
+    // Prevent multiple reconnection attempts
+    if (this.reconnectTimeout) {
+      return;
+    }
+    
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
       console.error('❌ Max reconnection attempts reached');
       this.updateConnectionStatus('error', 'Max reconnection attempts reached');
@@ -571,6 +564,7 @@ export class WebSocketService implements OnDestroy {
       console.log(
         `🔄 Reconnecting... (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`,
       );
+      this.reconnectTimeout = undefined; // Clear timeout reference
       this.connect(token, { forceReconnect: true });
     }, delay);
   }
@@ -624,4 +618,27 @@ export class WebSocketService implements OnDestroy {
       console.warn('Could not remove WebSocket token:', error);
     }
   }
+
+  /**
+   * Users-specific subscriptions
+   */
+  users = {
+    subscribeToUsers: () => this.subscribeToEntity('users', 'user'),
+    subscribeToProfiles: () => this.subscribeToEntity('users', 'profile'),
+    subscribeToSessions: () => this.subscribeToEntity('users', 'session'),
+    subscribeToUserCreated: () =>
+      this.subscribeToEvent('users', 'user', 'created'),
+    subscribeToUserUpdated: () =>
+      this.subscribeToEvent('users', 'user', 'updated'),
+    subscribeToUserDeleted: () =>
+      this.subscribeToEvent('users', 'user', 'deleted'),
+    subscribeToUserActivated: () =>
+      this.subscribeToEvent('users', 'user', 'activated'),
+    subscribeToUserDeactivated: () =>
+      this.subscribeToEvent('users', 'user', 'deactivated'),
+    subscribeToProfileUpdated: () =>
+      this.subscribeToEvent('users', 'profile', 'updated'),
+    subscribeToSessionExpired: () =>
+      this.subscribeToEvent('users', 'session', 'expired'),
+  };
 }

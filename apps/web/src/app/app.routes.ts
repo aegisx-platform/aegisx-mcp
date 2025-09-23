@@ -25,6 +25,12 @@ export const appRoutes: Route[] = [
     canActivate: [AuthGuard],
   },
   {
+    path: 'realtime-demo',
+    loadComponent: () =>
+      import('./pages/realtime-demo/realtime-demo.component').then((m) => m.RealtimeDemoComponent),
+    canActivate: [AuthGuard],
+  },
+  {
     path: 'dashboards/project',
     loadComponent: () =>
       import('./pages/dashboard/project-dashboard.page').then(

@@ -22,7 +22,7 @@ export default fp(
     // Create service instances manually (avoiding tsyringe for now)
     const usersRepository = new UsersRepository(fastify.knex);
     const usersService = new UsersService(usersRepository);
-    const usersController = new UsersController(usersService);
+    const usersController = new UsersController(usersService, fastify.eventService);
 
     // Register routes
     await fastify.register(usersRoutes, {
@@ -34,6 +34,6 @@ export default fp(
   },
   {
     name: 'users-plugin',
-    dependencies: ['knex-plugin', 'jwt-auth-plugin'],
+    dependencies: ['knex-plugin', 'jwt-auth-plugin', 'websocket-plugin'],
   },
 );
