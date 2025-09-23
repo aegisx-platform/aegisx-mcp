@@ -1,0 +1,194 @@
+import { BaseRepository } from '../../shared/repositories/base.repository';
+import { knex } from '../../shared/database/knex';
+import {
+  type Create{{ModuleName}},
+  type Update{{ModuleName}},
+  type {{ModuleName}},
+  type Get{{ModuleName}}Query,
+  type List{{ModuleName}}Query
+} from './{{moduleName}}.types';
+{{#if withEvents}}
+import { CrudEventHelper } from '../../shared/websocket/crud-event-helper';
+{{/if}}
+
+export class {{ModuleName}}Service extends BaseRepository<{{ModuleName}}> {
+  {{#if withEvents}}
+  private eventHelper: CrudEventHelper<{{ModuleName}}>;
+  {{/if}}
+
+  constructor() {
+    super(knex, '{{tableName}}');
+    {{#if withEvents}}
+    this.eventHelper = new CrudEventHelper<{{ModuleName}}>('{{moduleName}}');
+    {{/if}}
+  }
+
+  async create(data: Create{{ModuleName}}): Promise<{{ModuleName}}> {
+    try {
+      const [{{moduleName}}] = await this.query()
+        .insert(data)
+        .returning('*');
+
+      {{#if withEvents}}
+      // Emit internal event for potential side effects
+      await this.eventHelper.emitCreated({{moduleName}});
+      {{/if}}
+
+      return {{moduleName}};
+    } catch (error) {
+      throw new Error(`Failed to create {{moduleName}}: ${error.message}`);
+    }
+  }
+
+  async findById(
+    id: number | string,
+    options: Get{{ModuleName}}Query = {}
+  ): Promise<{{ModuleName}} | null> {
+    try {
+      let query = this.query().where('{{#each primaryKey}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}', id);
+
+      // Handle query options
+      if (options.include) {
+        // Add include logic based on relationships
+        const includes = Array.isArray(options.include) ? options.include : [options.include];
+        includes.forEach(relation => {
+          // TODO: Add join logic for relationships
+        });
+      }
+
+      const {{moduleName}} = await query.first();
+      
+      {{#if withEvents}}
+      if ({{moduleName}}) {
+        await this.eventHelper.emitRead({{moduleName}});
+      }
+      {{/if}}
+
+      return {{moduleName}} || null;
+    } catch (error) {
+      throw new Error(`Failed to find {{moduleName}}: ${error.message}`);
+    }
+  }
+
+  async findMany(options: List{{ModuleName}}Query = {}): Promise<{
+    data: {{ModuleName}}[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+    };
+  }> {
+    try {
+      const {
+        page = 1,
+        limit = 20,
+        sortBy = '{{#each primaryKey}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}',
+        sortOrder = 'desc',
+        search,
+        include
+      } = options;
+
+      let query = this.query();
+
+      // Search functionality
+      if (search) {
+        query = query.where(builder => {
+          {{#each columns}}
+          {{#ifEquals type 'string'}}
+          builder.orWhere('{{name}}', 'ilike', `%${search}%`);
+          {{/ifEquals}}
+          {{/each}}
+        });
+      }
+
+      // Include relationships
+      if (include) {
+        const includes = Array.isArray(include) ? include : [include];
+        includes.forEach(relation => {
+          // TODO: Add join logic for relationships
+        });
+      }
+
+      // Get total count
+      const countQuery = query.clone();
+      const totalResult = await countQuery.count('* as count').first();
+      const total = parseInt(totalResult?.count as string) || 0;
+
+      // Apply pagination and sorting
+      const data = await query
+        .orderBy(sortBy, sortOrder)
+        .limit(limit)
+        .offset((page - 1) * limit);
+
+      {{#if withEvents}}
+      // Emit bulk read event
+      await this.eventHelper.emitBulkRead(data);
+      {{/if}}
+
+      return {
+        data,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit)
+        }
+      };
+    } catch (error) {
+      throw new Error(`Failed to find {{moduleName}}s: ${error.message}`);
+    }
+  }
+
+  async update(
+    id: number | string,
+    data: Update{{ModuleName}}
+  ): Promise<{{ModuleName}} | null> {
+    try {
+      const [{{moduleName}}] = await this.query()
+        .where('{{#each primaryKey}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}', id)
+        .update({
+          ...data,
+          updated_at: new Date()
+        })
+        .returning('*');
+
+      {{#if withEvents}}
+      if ({{moduleName}}) {
+        await this.eventHelper.emitUpdated({{moduleName}});
+      }
+      {{/if}}
+
+      return {{moduleName}} || null;
+    } catch (error) {
+      throw new Error(`Failed to update {{moduleName}}: ${error.message}`);
+    }
+  }
+
+  async delete(
+    id: number | string
+  ): Promise<boolean> {
+    try {
+      // Get the record before deletion for event emission
+      {{#if withEvents}}
+      const {{moduleName}} = await this.findById(id);
+      {{/if}}
+
+      const deleted = await this.query()
+        .where('{{#each primaryKey}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}', id)
+        .del();
+
+      {{#if withEvents}}
+      if (deleted && {{moduleName}}) {
+        await this.eventHelper.emitDeleted({{moduleName}});
+      }
+      {{/if}}
+
+      return deleted > 0;
+    } catch (error) {
+      throw new Error(`Failed to delete {{moduleName}}: ${error.message}`);
+    }
+  }
+
+  // Additional business logic methods can be added here
+}

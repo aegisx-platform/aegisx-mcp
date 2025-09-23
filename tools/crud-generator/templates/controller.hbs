@@ -1,0 +1,186 @@
+import { FastifyRequest, FastifyReply } from 'fastify';
+import { Static } from '@sinclair/typebox';
+import { {{ModuleName}}Service } from './{{moduleName}}.service';
+import {
+  Create{{ModuleName}}Schema,
+  Update{{ModuleName}}Schema,
+  {{ModuleName}}IdParamSchema,
+  Get{{ModuleName}}QuerySchema,
+  List{{ModuleName}}QuerySchema,
+  type Create{{ModuleName}},
+  type Update{{ModuleName}},
+  type {{ModuleName}}IdParam,
+  type Get{{ModuleName}}Query,
+  type List{{ModuleName}}Query
+} from './{{moduleName}}.schemas';
+{{#if withEvents}}
+import { EventService } from '../../shared/websocket/event.service';
+{{/if}}
+
+export class {{ModuleName}}Controller {
+  constructor(
+    private {{moduleName}}Service: {{ModuleName}}Service{{#if withEvents}},
+    private eventService: EventService{{/if}}
+  ) {}
+
+  async create(
+    request: FastifyRequest<{ Body: Create{{ModuleName}} }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const {{moduleName}} = await this.{{moduleName}}Service.create(request.body);
+      
+      {{#if withEvents}}
+      // Emit real-time event
+      await this.eventService.emitToRoom(
+        'global',
+        '{{moduleName}}.created',
+        {{moduleName}}
+      );
+      {{/if}}
+
+      return reply.status(201).send({
+        success: true,
+        data: {{moduleName}}
+      });
+    } catch (error) {
+      request.log.error(error, 'Error creating {{moduleName}}');
+      return reply.status(500).send({
+        success: false,
+        error: 'Internal server error'
+      });
+    }
+  }
+
+  async findOne(
+    request: FastifyRequest<{
+      Params: {{ModuleName}}IdParam;
+      Querystring: Get{{ModuleName}}Query;
+    }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const {{moduleName}} = await this.{{moduleName}}Service.findById(
+        request.params.id,
+        request.query
+      );
+
+      if (!{{moduleName}}) {
+        return reply.status(404).send({
+          success: false,
+          error: '{{ModuleName}} not found'
+        });
+      }
+
+      return reply.send({
+        success: true,
+        data: {{moduleName}}
+      });
+    } catch (error) {
+      request.log.error(error, 'Error finding {{moduleName}}');
+      return reply.status(500).send({
+        success: false,
+        error: 'Internal server error'
+      });
+    }
+  }
+
+  async findMany(
+    request: FastifyRequest<{ Querystring: List{{ModuleName}}Query }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const result = await this.{{moduleName}}Service.findMany(request.query);
+
+      return reply.send({
+        success: true,
+        data: result.data,
+        pagination: result.pagination
+      });
+    } catch (error) {
+      request.log.error(error, 'Error finding {{moduleName}}s');
+      return reply.status(500).send({
+        success: false,
+        error: 'Internal server error'
+      });
+    }
+  }
+
+  async update(
+    request: FastifyRequest<{
+      Params: {{ModuleName}}IdParam;
+      Body: Update{{ModuleName}};
+    }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const {{moduleName}} = await this.{{moduleName}}Service.update(
+        request.params.id,
+        request.body
+      );
+
+      if (!{{moduleName}}) {
+        return reply.status(404).send({
+          success: false,
+          error: '{{ModuleName}} not found'
+        });
+      }
+
+      {{#if withEvents}}
+      // Emit real-time event
+      await this.eventService.emitToRoom(
+        'global',
+        '{{moduleName}}.updated',
+        {{moduleName}}
+      );
+      {{/if}}
+
+      return reply.send({
+        success: true,
+        data: {{moduleName}}
+      });
+    } catch (error) {
+      request.log.error(error, 'Error updating {{moduleName}}');
+      return reply.status(500).send({
+        success: false,
+        error: 'Internal server error'
+      });
+    }
+  }
+
+  async delete(
+    request: FastifyRequest<{ Params: {{ModuleName}}IdParam }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const deleted = await this.{{moduleName}}Service.delete(request.params.id);
+
+      if (!deleted) {
+        return reply.status(404).send({
+          success: false,
+          error: '{{ModuleName}} not found'
+        });
+      }
+
+      {{#if withEvents}}
+      // Emit real-time event
+      await this.eventService.emitToRoom(
+        'global',
+        '{{moduleName}}.deleted',
+        { id: request.params.id }
+      );
+      {{/if}}
+
+      return reply.send({
+        success: true,
+        message: '{{ModuleName}} deleted successfully'
+      });
+    } catch (error) {
+      request.log.error(error, 'Error deleting {{moduleName}}');
+      return reply.status(500).send({
+        success: false,
+        error: 'Internal server error'
+      });
+    }
+  }
+}

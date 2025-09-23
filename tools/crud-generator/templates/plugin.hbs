@@ -1,0 +1,53 @@
+import fp from 'fastify-plugin';
+import { FastifyInstance } from 'fastify';
+import { {{ModuleName}}Controller } from './{{moduleName}}.controller';
+import { {{ModuleName}}Service } from './{{moduleName}}.service';
+import { {{moduleName}}Routes } from './{{moduleName}}.routes';
+{{#if withEvents}}
+import { EventService } from '../../shared/websocket/event.service';
+{{/if}}
+
+export interface {{ModuleName}}PluginOptions {
+  // Plugin configuration options
+}
+
+async function {{moduleName}}Plugin(
+  fastify: FastifyInstance,
+  opts: {{ModuleName}}PluginOptions
+) {
+  // Register dependencies
+  const {{moduleName}}Service = new {{ModuleName}}Service();
+  {{#if withEvents}}
+  
+  // Get EventService from DI container or create new instance
+  const eventService = fastify.diContainer?.cradle?.eventService || new EventService();
+  
+  const {{moduleName}}Controller = new {{ModuleName}}Controller(
+    {{moduleName}}Service,
+    eventService
+  );
+  {{else}}
+  const {{moduleName}}Controller = new {{ModuleName}}Controller({{moduleName}}Service);
+  {{/if}}
+
+  // Register routes
+  await fastify.register({{moduleName}}Routes, {
+    controller: {{moduleName}}Controller,
+    prefix: '/{{moduleName}}'
+  });
+
+  {{#if withEvents}}
+  // Register WebSocket event listeners if needed
+  fastify.addHook('onReady', async () => {
+    // Set up any additional event listeners or real-time subscriptions
+    fastify.log.info('{{ModuleName}} plugin registered with real-time events');
+  });
+  {{/if}}
+
+  fastify.log.info('{{ModuleName}} plugin registered successfully');
+}
+
+export default fp({{moduleName}}Plugin, {
+  name: '{{moduleName}}-plugin',
+  dependencies: [{{#if withEvents}}'websocket-plugin'{{/if}}]
+});
