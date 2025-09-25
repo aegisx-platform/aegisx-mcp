@@ -104,10 +104,6 @@ API requests are rate limited to prevent abuse. Rate limit headers are included 
             name: 'Settings',
             description: 'Application settings and configuration',
           },
-          {
-            name: 'Theme',
-            description: 'Theme and appearance settings',
-          },
         ],
       },
       hideUntagged: false,
@@ -116,7 +112,7 @@ API requests are rate limited to prevent abuse. Rate limit headers are included 
 
     // Register Swagger UI
     await fastify.register(fastifySwaggerUi, {
-      routePrefix: '/api-docs',
+      routePrefix: '/documentation',
       uiConfig: {
         docExpansion: 'list',
         deepLinking: false,
@@ -183,7 +179,7 @@ API requests are rate limited to prevent abuse. Rate limit headers are included 
 
     // Log Swagger setup
     fastify.log.info('Swagger OpenAPI documentation configured');
-    fastify.log.info('Swagger UI available at: /api-docs');
+    fastify.log.info('Swagger UI available at: /documentation');
     fastify.log.info('OpenAPI JSON available at: /api/documentation/json');
   },
   {
