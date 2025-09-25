@@ -22,8 +22,8 @@ async function navigationPlugin(
   // Decorate fastify instance with navigation service
   fastify.decorate('navigationService', navigationService);
 
-  // Register navigation routes with /api prefix
-  await fastify.register(navigationRoutes, { prefix: '/api' });
+  // Register navigation routes (prefix handled by main.ts)
+  await fastify.register(navigationRoutes);
 
   // Add navigation-specific hooks
   fastify.addHook('onClose', async () => {

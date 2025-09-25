@@ -7,8 +7,8 @@ async function monitoringPlugin(fastify: FastifyInstance) {
   // Register monitoring schemas
   fastify.schemaRegistry.registerModuleSchemas('monitoring', monitoringSchemas);
 
-  // Register monitoring routes with /api prefix
-  await fastify.register(monitoringRoutes, { prefix: '/api' });
+  // Register monitoring routes (prefix handled by main.ts)
+  await fastify.register(monitoringRoutes);
 }
 
 export default fp(monitoringPlugin, {

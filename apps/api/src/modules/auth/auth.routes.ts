@@ -20,7 +20,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
 
     typedFastify.route({
       method: 'POST',
-      url: '/api/auth/register',
+      url: '/auth/register',
       schema: {
         tags: ['Authentication'],
         summary: 'Register a new user account',
@@ -51,7 +51,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
   // POST /api/auth/login
   typedFastify.route({
     method: 'POST',
-    url: '/api/auth/login',
+    url: '/auth/login',
     schema: {
       tags: ['Authentication'],
       summary: 'Login with email and password',
@@ -77,7 +77,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
   // POST /api/auth/refresh
   typedFastify.route({
     method: 'POST',
-    url: '/api/auth/refresh',
+    url: '/auth/refresh',
     schema: {
       tags: ['Authentication'],
       summary: 'Refresh access token using refresh token',
@@ -94,7 +94,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
   // POST /api/auth/logout
   typedFastify.route({
     method: 'POST',
-    url: '/api/auth/logout',
+    url: '/auth/logout',
     schema: {
       tags: ['Authentication'],
       summary: 'Logout and clear session',
@@ -119,7 +119,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
   // GET /api/auth/me - Get current user profile
   typedFastify.route({
     method: 'GET',
-    url: '/api/auth/me',
+    url: '/auth/me',
     schema: {
       tags: ['Authentication'],
       summary: 'Get current authenticated user profile',
