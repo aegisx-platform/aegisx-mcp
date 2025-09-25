@@ -1,15 +1,15 @@
 import { Type, Static } from '@sinclair/typebox';
-import { 
-  UuidParamSchema, 
-  PaginationQuerySchema, 
+import {
+  UuidParamSchema,
+  PaginationQuerySchema,
   ApiErrorResponseSchema,
   ApiSuccessResponseSchema,
-  PaginatedResponseSchema 
+  PaginatedResponseSchema,
 } from '../../../schemas/base.schemas';
 
 // Base Themes Schema
 export const ThemesSchema = Type.Object({
-  id: Type.String({ format: "uuid" }),
+  id: Type.String({ format: 'uuid' }),
   name: Type.String(),
   display_name: Type.String(),
   description: Type.Optional(Type.String()),
@@ -19,8 +19,8 @@ export const ThemesSchema = Type.Object({
   is_active: Type.Optional(Type.Boolean()),
   is_default: Type.Optional(Type.Boolean()),
   sort_order: Type.Optional(Type.Integer()),
-  created_at: Type.String({ format: "date-time" }),
-  updated_at: Type.String({ format: "date-time" })
+  created_at: Type.String({ format: 'date-time' }),
+  updated_at: Type.String({ format: 'date-time' }),
 });
 
 // Create Schema (without auto-generated fields)
@@ -48,20 +48,19 @@ export const UpdateThemesSchema = Type.Partial(
     is_active: Type.Optional(Type.Boolean()),
     is_default: Type.Optional(Type.Boolean()),
     sort_order: Type.Optional(Type.Integer()),
-  })
+  }),
 );
 
 // ID Parameter Schema
 export const ThemesIdParamSchema = Type.Object({
-  id: Type.Union([Type.String(), Type.Number()])
+  id: Type.Union([Type.String(), Type.Number()]),
 });
 
 // Query Schemas
 export const GetThemesQuerySchema = Type.Object({
-  include: Type.Optional(Type.Union([
-    Type.String(),
-    Type.Array(Type.String())
-  ]))
+  include: Type.Optional(
+    Type.Union([Type.String(), Type.Array(Type.String())]),
+  ),
 });
 
 export const ListThemesQuerySchema = Type.Object({
@@ -69,25 +68,27 @@ export const ListThemesQuerySchema = Type.Object({
   page: Type.Optional(Type.Number({ minimum: 1, default: 1 })),
   limit: Type.Optional(Type.Number({ minimum: 1, maximum: 1000, default: 20 })),
   sortBy: Type.Optional(Type.String()),
-  sortOrder: Type.Optional(Type.Union([
-    Type.Literal('asc'), 
-    Type.Literal('desc')
-  ], { default: 'desc' })),
-  
+  sortOrder: Type.Optional(
+    Type.Union([Type.Literal('asc'), Type.Literal('desc')], {
+      default: 'desc',
+    }),
+  ),
+
   // Search and filtering
   search: Type.Optional(Type.String({ minLength: 1, maxLength: 100 })),
-  
+
   // Include related data
-  include: Type.Optional(Type.Union([
-    Type.String(),
-    Type.Array(Type.String())
-  ])),
-  
+  include: Type.Optional(
+    Type.Union([Type.String(), Type.Array(Type.String())]),
+  ),
+
   // Add column-specific filters dynamically
   name: Type.Optional(Type.String({ minLength: 1, maxLength: 255 })),
   display_name: Type.Optional(Type.String({ minLength: 1, maxLength: 255 })),
   description: Type.Optional(Type.String({ minLength: 1, maxLength: 255 })),
-  preview_image_url: Type.Optional(Type.String({ minLength: 1, maxLength: 255 })),
+  preview_image_url: Type.Optional(
+    Type.String({ minLength: 1, maxLength: 255 }),
+  ),
   is_active: Type.Optional(Type.Boolean()),
   is_default: Type.Optional(Type.Boolean()),
   sort_order: Type.Optional(Type.Number({ minimum: 0 })),
@@ -104,25 +105,3 @@ export type UpdateThemes = Static<typeof UpdateThemesSchema>;
 export type ThemesIdParam = Static<typeof ThemesIdParamSchema>;
 export type GetThemesQuery = Static<typeof GetThemesQuerySchema>;
 export type ListThemesQuery = Static<typeof ListThemesQuerySchema>;
-
-// WebSocket Event Schemas
-export const ThemesCreatedEventSchema = Type.Object({
-  type: Type.Literal('themes.created'),
-  data: ThemesSchema
-});
-
-export const ThemesUpdatedEventSchema = Type.Object({
-  type: Type.Literal('themes.updated'),
-  data: ThemesSchema
-});
-
-export const ThemesDeletedEventSchema = Type.Object({
-  type: Type.Literal('themes.deleted'),
-  data: Type.Object({
-    id: Type.Union([Type.String(), Type.Number()])
-  })
-});
-
-export type ThemesCreatedEvent = Static<typeof ThemesCreatedEventSchema>;
-export type ThemesUpdatedEvent = Static<typeof ThemesUpdatedEventSchema>;
-export type ThemesDeletedEvent = Static<typeof ThemesDeletedEventSchema>;

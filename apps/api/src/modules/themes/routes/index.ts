@@ -18,7 +18,7 @@ export interface ThemesRoutesOptions extends FastifyPluginOptions {
 
 export async function themesRoutes(
   fastify: FastifyInstance,
-  options: ThemesRoutesOptions
+  options: ThemesRoutesOptions,
 ) {
   const { controller } = options;
 
@@ -35,10 +35,11 @@ export async function themesRoutes(
         401: SchemaRefs.Unauthorized,
         403: SchemaRefs.Forbidden,
         409: SchemaRefs.Conflict,
-        500: SchemaRefs.ServerError
-      }
+        500: SchemaRefs.ServerError,
+      },
     },
-    handler: controller.create.bind(controller)
+    preValidation: [fastify.authenticate], // Authentication required
+    handler: controller.create.bind(controller),
   });
 
   // Get themes by ID
@@ -55,10 +56,11 @@ export async function themesRoutes(
         401: SchemaRefs.Unauthorized,
         403: SchemaRefs.Forbidden,
         404: SchemaRefs.NotFound,
-        500: SchemaRefs.ServerError
-      }
+        500: SchemaRefs.ServerError,
+      },
     },
-    handler: controller.findOne.bind(controller)
+    preValidation: [fastify.authenticate], // Authentication required
+    handler: controller.findOne.bind(controller),
   });
 
   // Get all themess
@@ -66,17 +68,19 @@ export async function themesRoutes(
     schema: {
       tags: ['Themes'],
       summary: 'Get all themess with pagination',
-      description: 'Retrieve a paginated list of themess with optional filtering',
+      description:
+        'Retrieve a paginated list of themess with optional filtering',
       querystring: ListThemesQuerySchema,
       response: {
         200: ThemesListResponseSchema,
         400: SchemaRefs.ValidationError,
         401: SchemaRefs.Unauthorized,
         403: SchemaRefs.Forbidden,
-        500: SchemaRefs.ServerError
-      }
+        500: SchemaRefs.ServerError,
+      },
     },
-    handler: controller.findMany.bind(controller)
+    preValidation: [fastify.authenticate], // Authentication required
+    handler: controller.findMany.bind(controller),
   });
 
   // Update themes
@@ -94,10 +98,11 @@ export async function themesRoutes(
         403: SchemaRefs.Forbidden,
         404: SchemaRefs.NotFound,
         409: SchemaRefs.Conflict,
-        500: SchemaRefs.ServerError
-      }
+        500: SchemaRefs.ServerError,
+      },
     },
-    handler: controller.update.bind(controller)
+    preValidation: [fastify.authenticate], // Authentication required
+    handler: controller.update.bind(controller),
   });
 
   // Delete themes
@@ -113,10 +118,10 @@ export async function themesRoutes(
         401: SchemaRefs.Unauthorized,
         403: SchemaRefs.Forbidden,
         404: SchemaRefs.NotFound,
-        500: SchemaRefs.ServerError
-      }
+        500: SchemaRefs.ServerError,
+      },
     },
-    handler: controller.delete.bind(controller)
+    preValidation: [fastify.authenticate], // Authentication required
+    handler: controller.delete.bind(controller),
   });
-
 }

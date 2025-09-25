@@ -7,7 +7,7 @@ import { ThemesCreate, ThemesUpdate } from '../schemas/themes.types';
  * 
  * Integration tests for themes domain functionality.
  * 
- * Generated on: 2025-09-25T00:51:45.987Z
+ * Generated on: 2025-09-25T15:15:50.991Z
  */
 
 describe('Themes Domain', () => {
@@ -204,17 +204,6 @@ describe('Themes Domain', () => {
       });
     });
 
-    describe('WebSocket Events', () => {
-      it('should handle WebSocket connections', async () => {
-        // TODO: Add WebSocket testing logic
-        // This requires setting up WebSocket test client
-      });
-
-      it('should emit events on CRUD operations', async () => {
-        // TODO: Add event emission testing
-        // This requires event listener setup
-      });
-    });
   });
 
   describe('Themes Service', () => {

@@ -162,7 +162,7 @@ export async function settingsRoutes(fastify: FastifyInstance) {
           500: SchemaRefs.ServerError,
         },
       },
-      preValidation: [fastify.authenticate, fastify.verifyRole(['admin'])],
+      preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
     },
     controller.getSettingById,
   );
@@ -185,7 +185,7 @@ export async function settingsRoutes(fastify: FastifyInstance) {
           500: SchemaRefs.ServerError,
         },
       },
-      preValidation: [fastify.authenticate, fastify.verifyRole(['admin'])],
+      preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
     },
     controller.createSetting,
   );
@@ -209,7 +209,7 @@ export async function settingsRoutes(fastify: FastifyInstance) {
           500: SchemaRefs.ServerError,
         },
       },
-      preValidation: [fastify.authenticate, fastify.verifyRole(['admin'])],
+      preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
     },
     controller.updateSetting,
   );
@@ -233,7 +233,7 @@ export async function settingsRoutes(fastify: FastifyInstance) {
           500: SchemaRefs.ServerError,
         },
       },
-      preValidation: [fastify.authenticate, fastify.verifyRole(['admin'])],
+      preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
     },
     controller.updateSettingValue,
   );
@@ -261,7 +261,7 @@ export async function settingsRoutes(fastify: FastifyInstance) {
           500: SchemaRefs.ServerError,
         },
       },
-      preValidation: [fastify.authenticate, fastify.verifyRole(['admin'])],
+      preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
     },
     controller.deleteSetting,
   );
@@ -289,7 +289,7 @@ export async function settingsRoutes(fastify: FastifyInstance) {
           500: SchemaRefs.ServerError,
         },
       },
-      preValidation: [fastify.authenticate, fastify.verifyRole(['admin'])],
+      preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
     },
     controller.bulkUpdateSettings,
   );
@@ -311,7 +311,7 @@ export async function settingsRoutes(fastify: FastifyInstance) {
           500: SchemaRefs.ServerError,
         },
       },
-      preValidation: [fastify.authenticate, fastify.verifyRole(['admin'])],
+      preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
     },
     controller.getSettingHistory,
   );

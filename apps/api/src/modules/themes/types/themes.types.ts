@@ -6,9 +6,6 @@ import {
   type ThemesIdParam,
   type GetThemesQuery,
   type ListThemesQuery,
-  type ThemesCreatedEvent,
-  type ThemesUpdatedEvent,
-  type ThemesDeletedEvent
 } from '../schemas/themes.schemas';
 
 export {
@@ -18,9 +15,6 @@ export {
   type ThemesIdParam,
   type GetThemesQuery,
   type ListThemesQuery,
-  type ThemesCreatedEvent,
-  type ThemesUpdatedEvent,
-  type ThemesDeletedEvent
 };
 
 // Additional type definitions
@@ -38,18 +32,6 @@ export interface ThemesRepository {
   }>;
   update(id: number | string, data: UpdateThemes): Promise<Themes | null>;
   delete(id: number | string): Promise<boolean>;
-}
-
-// Real-time event type definitions
-export interface ThemesEventHandlers {
-  onCreated?: (data: Themes) => void | Promise<void>;
-  onUpdated?: (data: Themes) => void | Promise<void>;
-  onDeleted?: (data: { id: number | string }) => void | Promise<void>;
-}
-
-export interface ThemesWebSocketSubscription {
-  subscribe(handlers: ThemesEventHandlers): void;
-  unsubscribe(): void;
 }
 
 // Database entity type (matches database table structure exactly)

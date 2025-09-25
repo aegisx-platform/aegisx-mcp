@@ -38,6 +38,7 @@ export async function {{moduleName}}Routes(
         500: SchemaRefs.ServerError
       }
     },
+    preValidation: [fastify.authenticate], // Authentication required
     handler: controller.create.bind(controller)
   });
 
@@ -58,6 +59,7 @@ export async function {{moduleName}}Routes(
         500: SchemaRefs.ServerError
       }
     },
+    preValidation: [fastify.authenticate], // Authentication required
     handler: controller.findOne.bind(controller)
   });
 
@@ -76,6 +78,7 @@ export async function {{moduleName}}Routes(
         500: SchemaRefs.ServerError
       }
     },
+    preValidation: [fastify.authenticate], // Authentication required
     handler: controller.findMany.bind(controller)
   });
 
@@ -97,6 +100,7 @@ export async function {{moduleName}}Routes(
         500: SchemaRefs.ServerError
       }
     },
+    preValidation: [fastify.authenticate], // Authentication required
     handler: controller.update.bind(controller)
   });
 
@@ -116,6 +120,7 @@ export async function {{moduleName}}Routes(
         500: SchemaRefs.ServerError
       }
     },
+    preValidation: [fastify.authenticate], // Authentication required  
     handler: controller.delete.bind(controller)
   });
 

@@ -236,7 +236,7 @@ export async function fileUploadRoutes(
       },
       security: [{ bearerAuth: [] }],
     },
-    preHandler: [fastify.authenticate], // TODO: Add admin role check
+    preHandler: [fastify.authenticate, fastify.authorize(['admin'])], // Admin access required for storage configuration
     handler: controller.getStorageConfiguration.bind(controller),
   });
 
@@ -427,7 +427,7 @@ export async function fileUploadRoutes(
       },
       security: [{ bearerAuth: [] }],
     },
-    preHandler: [fastify.authenticate],
+    preHandler: [fastify.authenticate, fastify.authorize(['admin'])], // Admin-only cleanup operation
     handler: controller.cleanupSoftDeletedFiles.bind(controller),
   });
 
