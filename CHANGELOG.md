@@ -1,3 +1,59 @@
+# [1.3.0](https://github.com/aegisx-platform/aegisx-starter/compare/v1.2.0...v1.3.0) (2025-09-25)
+
+
+### Bug Fixes
+
+* add /stats route to prevent conflict with /:id parameterized route ([44a2be8](https://github.com/aegisx-platform/aegisx-starter/commit/44a2be83189432d0bc5290eee9819897564abd2e))
+* add proper content padding like other pages ([62de681](https://github.com/aegisx-platform/aegisx-starter/commit/62de68132d15bef9cf84c16db75449f49131decd))
+* add uploadedAt support to file upload sort parameters ([0512852](https://github.com/aegisx-platform/aegisx-starter/commit/0512852eac17a3cc13a489b280229d180e7e9b85))
+* configure multipart limits and enhance error handling for file uploads ([1a3707a](https://github.com/aegisx-platform/aegisx-starter/commit/1a3707af0fa0dc23eae317b03a3e31485ecda3a1))
+* correct FormData field name for multiple file upload ([9f9a448](https://github.com/aegisx-platform/aegisx-starter/commit/9f9a448ca79f8564a34821263d3bd16f9381255e))
+* correct response handling in sequential upload ([9737331](https://github.com/aegisx-platform/aegisx-starter/commit/97373318a25d7a5438280aec4e23a3accb04bbf2))
+* enable environment-based PORT configuration for API server ([a377762](https://github.com/aegisx-platform/aegisx-starter/commit/a37776282b573601ede54bdaa49e9506eb55b85f))
+* enable multi-instance development with environment-based port configuration ([43c6684](https://github.com/aegisx-platform/aegisx-starter/commit/43c6684d7c316fc948d3a70352c80db356b1d929))
+* enable WebSocket support and improve test component ([7f11040](https://github.com/aegisx-platform/aegisx-starter/commit/7f1104056252371d3474124a76aeef04400de52d))
+* enhance setup-env.sh to create secure .env with 64-char JWT secrets ([4e2dca6](https://github.com/aegisx-platform/aegisx-starter/commit/4e2dca68f392333b3dd56f5bd7497fe14899b259))
+* optimize file upload component to use base64 previews instead of API calls ([c80229f](https://github.com/aegisx-platform/aegisx-starter/commit/c80229fd1d53eee4679432a39da4cea91fe0a332))
+* remove /api prefix from user service endpoints to use interceptor ([85487fd](https://github.com/aegisx-platform/aegisx-starter/commit/85487fd5492fdd2d4f50077b73d84f566b39870e))
+* remove body validation from multipart file upload routes ([b8e960e](https://github.com/aegisx-platform/aegisx-starter/commit/b8e960e1f7eaa411a41b16ec02376703cf7cb9ae))
+* remove hardcoded port from admin project.json to enable dynamic port configuration ([fb18aa7](https://github.com/aegisx-platform/aegisx-starter/commit/fb18aa7cdfebca209d265cdb611ebed74b6a237a))
+* resolve component showcase layout issues ([0c8b2bb](https://github.com/aegisx-platform/aegisx-starter/commit/0c8b2bbec59e7839c75cd47ee9d36e58ee770a62))
+* resolve database column mapping and route conflicts in file upload API ([33229ff](https://github.com/aegisx-platform/aegisx-starter/commit/33229ff8e5552616669a3827697883aee3e50dc0))
+* resolve file upload API error serialization issue ([86567e1](https://github.com/aegisx-platform/aegisx-starter/commit/86567e1df2508eda02025f87c99acfeff7d551a6))
+* resolve JSON parsing error and add missing statusCode to error responses ([e528f99](https://github.com/aegisx-platform/aegisx-starter/commit/e528f99f6bf7ccb99aa8c0576482de20016d9f13))
+* resolve multipart plugin registration conflict ([b98c0ce](https://github.com/aegisx-platform/aegisx-starter/commit/b98c0ce90a28fb81af85eaa82041c49fdd07446e))
+* resolve sidebar layout overflow issue ([7b80300](https://github.com/aegisx-platform/aegisx-starter/commit/7b803007a4cdb73ddf02d2a90563e12f6774cdcb))
+* update avatar upload system for new multipart library compatibility ([4589643](https://github.com/aegisx-platform/aegisx-starter/commit/45896437a69ac54a1fb8272a7698e0f697902416))
+* update EventService API calls from createCrudHelper to for method ([1afeadc](https://github.com/aegisx-platform/aegisx-starter/commit/1afeadc69d1f7c076cf61decf6af43e2b720b282))
+* update Knex imports for v3.1.0 compatibility and fix unit tests ([ebc7222](https://github.com/aegisx-platform/aegisx-starter/commit/ebc72220364342006856746319c49fe7af5b227f))
+* update pnpm version to 10.17.0 in GitHub Actions workflows ([8b3c6a0](https://github.com/aegisx-platform/aegisx-starter/commit/8b3c6a066a55e43a2b5f7ed3901b95fd0b175f58))
+* update swagger plugin configuration ([66a8f08](https://github.com/aegisx-platform/aegisx-starter/commit/66a8f08a5d5ffe5518a65c869624929ea791d535))
+
+
+### Features
+
+* complete component-showcase enhancement with real working demos ([dc092f1](https://github.com/aegisx-platform/aegisx-starter/commit/dc092f1417e0bf64f974609ca53853cc1d5fa43d))
+* complete CRUD Generator CLI with conditional event integration ([3431de9](https://github.com/aegisx-platform/aegisx-starter/commit/3431de9ff1822349dc47bdf6ea74ffb6b275810e))
+* complete file upload system with Swagger UI integration ([3ba349c](https://github.com/aegisx-platform/aegisx-starter/commit/3ba349c2e70f107818346ad7be19053ca235df6f))
+* complete realtime-event-system implementation with comprehensive testing ([1f77900](https://github.com/aegisx-platform/aegisx-starter/commit/1f7790067753f4bfb4d6ce020fc9e49507cec011))
+* **crud-generator:** add dependency on Real-time Event System ([828d30e](https://github.com/aegisx-platform/aegisx-starter/commit/828d30ed31683277e52a8afd6ef6091554dd2ca5))
+* enhance aegisx-ui library for universal Angular compatibility ([1d0c4b0](https://github.com/aegisx-platform/aegisx-starter/commit/1d0c4b08ea5cf1d786e86c7700ace2506e9b22af))
+* enhance component showcase UI layout and responsiveness ([08a8918](https://github.com/aegisx-platform/aegisx-starter/commit/08a8918a82192036f7ca7d79d7ed05347d509313))
+* enhance CRUD generator templates with production-ready improvements ([0276702](https://github.com/aegisx-platform/aegisx-starter/commit/027670298b77683cc5c2d92ae67b0fc72ca13714))
+* enhance file upload system with timeout protection and proxy configuration ([f94cd08](https://github.com/aegisx-platform/aegisx-starter/commit/f94cd082972f368108d6437f5835b183e8480fc6))
+* implement API-first configuration with BaseUrl interceptor and WebSocket centralization ([47f249a](https://github.com/aegisx-platform/aegisx-starter/commit/47f249a63bf8651c8a5ff12423ec68f773a4bc1e))
+* implement comprehensive file upload system with secure storage ([333de0d](https://github.com/aegisx-platform/aegisx-starter/commit/333de0d9559a989072d0f386290cfbb2ac58d754))
+* implement comprehensive signed URL system for file uploads ([24c6d6e](https://github.com/aegisx-platform/aegisx-starter/commit/24c6d6e353cdd5af8a089380dc462f27daf51892))
+* implement dynamic proxy configuration with environment-based API targeting ([61f36c2](https://github.com/aegisx-platform/aegisx-starter/commit/61f36c29d59040f9fd74edf6058bde6db50dcb24))
+* implement optional duplicate detection with helpful suggestions ([95a1500](https://github.com/aegisx-platform/aegisx-starter/commit/95a1500abb965896b5837a796e70eb0cbe6a8617))
+* implement Smart View system and remove thumbnail pre-generation ([4d2b884](https://github.com/aegisx-platform/aegisx-starter/commit/4d2b88457a09311df3e66fae604b9e1617882f56))
+* implement soft delete with retention policy and cleanup jobs ([f2e0225](https://github.com/aegisx-platform/aegisx-starter/commit/f2e02254a19a2118c28fed4c248c9e47f2fc135f))
+* initialize aegisx-ui-improvements feature planning ([7d77688](https://github.com/aegisx-platform/aegisx-starter/commit/7d77688fbc0d4bd4314165f8f5a2670d51bc09b2))
+* initialize crud-generator feature planning ([b962ac3](https://github.com/aegisx-platform/aegisx-starter/commit/b962ac3756af8c0eeb78f3939018204aa94362d9))
+* initialize file-upload-system feature planning ([b20d715](https://github.com/aegisx-platform/aegisx-starter/commit/b20d71542e80e8a1488af4605bd7152251f310f3))
+* initialize realtime-event-system feature planning ([d336476](https://github.com/aegisx-platform/aegisx-starter/commit/d33647654a39a00d1c29dcd54750bb63e91ec163))
+* merge CRUD generator enhancements into develop ([7b3b033](https://github.com/aegisx-platform/aegisx-starter/commit/7b3b033ab87c9f75b0298f3257f3ad11de8ec67f))
+
 # [1.2.0](https://github.com/aegisx-platform/aegisx-starter/compare/v1.1.1...v1.2.0) (2025-09-17)
 
 
