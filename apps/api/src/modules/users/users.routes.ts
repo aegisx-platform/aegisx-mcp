@@ -159,11 +159,11 @@ export async function usersRoutes(
         params: SchemaRefs.UuidParam,
         response: {
           200: SchemaRefs.module('users', 'delete-user-response'),
-          400: SchemaRefs.ValidationError,
+          400: { $ref: 'api-error-response#' }, // Business logic errors, not validation errors
           401: SchemaRefs.Unauthorized,
           403: SchemaRefs.Forbidden,
-          404: SchemaRefs.NotFound,
-          500: SchemaRefs.ServerError,
+          404: { $ref: 'api-error-response#' }, // Generic not found errors
+          500: { $ref: 'api-error-response#' }, // Internal server errors
         },
       },
     },

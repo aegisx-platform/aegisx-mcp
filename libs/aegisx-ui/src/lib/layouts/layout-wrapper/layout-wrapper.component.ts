@@ -16,7 +16,7 @@ import { EnterpriseLayoutComponent } from '../enterprise/enterprise-layout.compo
     EmptyLayoutComponent,
     ClassicLayoutComponent,
     CompactLayoutComponent,
-    EnterpriseLayoutComponent
+    EnterpriseLayoutComponent,
   ],
   template: `
     <div class="ax-layout-wrapper">
@@ -49,25 +49,27 @@ import { EnterpriseLayoutComponent } from '../enterprise/enterprise-layout.compo
       }
     </div>
   `,
-  styles: [`
-    :host {
-      display: flex;
-      flex: 1 1 auto;
-      width: 100%;
-      height: 100%;
-    }
+  styles: [
+    `
+      :host {
+        display: flex;
+        flex: 1 1 auto;
+        width: 100%;
+        height: 100%;
+      }
 
-    .ax-layout-wrapper {
-      display: flex;
-      flex: 1 1 auto;
-      width: 100%;
-      height: 100%;
-    }
-  `]
+      .ax-layout-wrapper {
+        display: flex;
+        flex: 1 1 auto;
+        width: 100%;
+        height: 100%;
+      }
+    `,
+  ],
 })
 export class LayoutWrapperComponent {
   private _configService = inject(AegisxConfigService);
-  
-  // Get current layout from config
-  layout = computed(() => this._configService.layout());
+
+  // Get current layout type from config
+  layout = computed(() => this._configService.layout()?.default || 'classic');
 }

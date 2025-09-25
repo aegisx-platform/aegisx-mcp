@@ -1,4 +1,4 @@
-import { Knex } from 'knex';
+import Knex from 'knex';
 import {
   User,
   UserWithRole,
@@ -8,7 +8,7 @@ import {
 } from './users.types';
 
 export class UsersRepository {
-  constructor(private knex: Knex) {}
+  constructor(private knex: any) {}
 
   async findAll(
     options: UserListOptions,

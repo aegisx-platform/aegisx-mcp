@@ -1,26 +1,56 @@
 {
   "name": "@aegisx/ui",
-  "version": "0.0.1",
+  "version": "0.1.0",
+  "description": "Enterprise Angular UI library with layouts, components, and services built on Angular Material and TailwindCSS",
+  "keywords": [
+    "angular",
+    "ui",
+    "components",
+    "material",
+    "tailwind",
+    "enterprise",
+    "aegisx"
+  ],
   "exports": {
     ".": {
       "import": "./esm2022/aegisx-ui.mjs",
       "require": "./bundles/aegisx-ui.umd.js",
       "default": "./esm2022/aegisx-ui.mjs"
     },
-    "./styles": "./styles/index.scss"
+    "./styles": "./styles/index.scss",
+    "./core": "./esm2022/core/index.mjs",
+    "./layouts": "./esm2022/layouts/index.mjs",
+    "./components": "./esm2022/components/index.mjs"
   },
   "peerDependencies": {
-    "@angular/common": "^20.1.0",
-    "@angular/core": "^20.1.0",
-    "@angular/material": "^20.1.0",
-    "@angular/cdk": "^20.1.0",
-    "@angular/router": "^20.1.0",
-    "@angular/animations": "^20.1.0",
-    "rxjs": "^7.8.0",
+    "@angular/common": ">=17.0.0 <21.0.0",
+    "@angular/core": ">=17.0.0 <21.0.0",
+    "@angular/material": ">=17.0.0 <21.0.0",
+    "@angular/cdk": ">=17.0.0 <21.0.0",
+    "@angular/animations": ">=17.0.0 <21.0.0",
+    "@angular/router": ">=17.0.0 <21.0.0",
+    "@angular/forms": ">=17.0.0 <21.0.0",
+    "@angular/platform-browser": ">=17.0.0 <21.0.0",
+    "rxjs": ">=7.0.0 <8.0.0",
     "lodash-es": "^4.17.21",
-    "@nx/angular": "^21.4.1",
-    "@angular/platform-browser": "~20.1.0",
-    "@angular/forms": "~20.1.0"
+    "@nx/angular": ">=21.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@angular/router": {
+      "optional": true
+    },
+    "@angular/forms": {
+      "optional": true
+    },
+    "@angular/platform-browser": {
+      "optional": true
+    },
+    "lodash-es": {
+      "optional": true
+    },
+    "@nx/angular": {
+      "optional": true
+    }
   },
   "sideEffects": false
 }

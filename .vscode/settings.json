@@ -51,5 +51,7 @@
   "editor.accessibilitySupport": "on",
 
   // Extension recommendations (when .vscode/extensions.json exists)
-  "extensions.showRecommendationsOnlyOnDemand": false
+  "extensions.showRecommendationsOnlyOnDemand": false,
+  "makefile.configureOnOpen": false,
+  "nxConsole.generateAiAgentRules": true
 }

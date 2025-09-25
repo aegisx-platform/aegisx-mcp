@@ -1,0 +1,201 @@
+import { BaseRepository, BaseListQuery, PaginatedListResult } from '../../shared/repositories/base.repository';
+import { Knex } from 'knex';
+import {
+  type Create{{ModuleName}},
+  type Update{{ModuleName}},
+  type {{ModuleName}},
+  type Get{{ModuleName}}Query,
+  type List{{ModuleName}}Query,
+  type {{ModuleName}}Entity
+} from './{{moduleName}}.types';
+
+export interface {{ModuleName}}ListQuery extends BaseListQuery {
+  // Add specific filters for {{ModuleName}}
+  {{#each columns}}
+  {{#unless (or isPrimaryKey (eq name 'created_at') (eq name 'updated_at'))}}
+  {{#ifEquals tsType 'boolean'}}
+  {{name}}?: boolean;
+  {{else}}{{#ifEquals tsType 'string'}}
+  {{name}}?: string;
+  {{else}}{{#ifEquals tsType 'number'}}
+  {{name}}?: number;
+  {{/ifEquals}}{{/ifEquals}}{{/ifEquals}}
+  {{/unless}}
+  {{/each}}
+}
+
+export class {{ModuleName}}Repository extends BaseRepository<{{ModuleName}}, Create{{ModuleName}}, Update{{ModuleName}}> {
+
+  constructor(knex: Knex) {
+    super(
+      knex,
+      '{{tableName}}',
+      [
+        // Define searchable fields
+        {{#each columns}}
+        {{#unless (or isPrimaryKey (eq name 'created_at') (eq name 'updated_at'))}}
+        {{#ifEquals tsType 'string'}}
+        '{{tableName}}.{{name}}'{{#unless @last}},{{/unless}}
+        {{/ifEquals}}
+        {{/unless}}
+        {{/each}}
+      ]
+    );
+  }
+
+  // Transform database row to entity
+  transformToEntity(dbRow: any): {{ModuleName}} {
+    if (!dbRow) throw new Error('Cannot transform null database row');
+
+    return {
+      {{#each columns}}
+      {{name}}: dbRow.{{name}}{{#unless @last}},{{/unless}}
+      {{/each}}
+    };
+  }
+
+  // Transform DTO to database format
+  transformToDb(dto: Create{{ModuleName}} | Update{{ModuleName}}): Partial<{{ModuleName}}Entity> {
+    const transformed: Partial<{{ModuleName}}Entity> = {};
+
+    {{#each columns}}
+    {{#unless isPrimaryKey}}
+    {{#unless (eq name 'created_at')}}
+    {{#unless (eq name 'updated_at')}}
+    if ('{{name}}' in dto && dto.{{name}} !== undefined) {
+      {{#if (eq tsType 'Date')}}
+      transformed.{{name}} = typeof dto.{{name}} === 'string' ? new Date(dto.{{name}}) : dto.{{name}};
+      {{else}}
+      transformed.{{name}} = dto.{{name}};
+      {{/if}}
+    }
+    {{/unless}}
+    {{/unless}}
+    {{/unless}}
+    {{/each}}
+    // updated_at is handled automatically by database
+
+    return transformed;
+  }
+
+  // Custom query with joins if needed
+  getJoinQuery() {
+    return this.knex('{{tableName}}')
+      .select('{{tableName}}.*');
+      // Add joins here if needed
+      // .leftJoin('other_table', '{{tableName}}.foreign_key', 'other_table.id')
+  }
+
+  // Apply custom filters
+  protected applyCustomFilters(query: any, filters: {{ModuleName}}ListQuery): void {
+    // Apply base filters first
+    super.applyCustomFilters(query, filters);
+
+    // Apply specific {{ModuleName}} filters
+    {{#each columns}}
+    {{#unless (or isPrimaryKey (eq name 'created_at') (eq name 'updated_at'))}}
+    if (filters.{{name}} !== undefined) {
+      query.where('{{tableName}}.{{name}}', filters.{{name}});
+    }
+    {{/unless}}
+    {{/each}}
+  }
+
+  // Custom sort fields mapping
+  protected getSortField(sortBy: string): string {
+    const sortFields: Record<string, string> = {
+      {{#each columns}}
+      {{camelCase name}}: '{{tableName}}.{{name}}'{{#unless @last}},{{/unless}}
+      {{/each}}
+    };
+
+    return sortFields[sortBy] || '{{tableName}}.{{#each primaryKey}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}';
+  }
+
+  // Extended find method with options
+  async findById(
+    id: number | string,
+    options: Get{{ModuleName}}Query = {}
+  ): Promise<{{ModuleName}} | null> {
+    let query = this.getJoinQuery();
+    query = query.where('{{tableName}}.{{#each primaryKey}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}', id);
+
+    // Handle include options
+    if (options.include) {
+      const includes = Array.isArray(options.include) ? options.include : [options.include];
+      includes.forEach(relation => {
+        // TODO: Add join logic for relationships
+        // Example: if (relation === 'category') query.leftJoin('categories', 'items.category_id', 'categories.id');
+      });
+    }
+
+    const row = await query.first();
+    return row ? this.transformToEntity(row) : null;
+  }
+
+  // Extended list method with specific query type
+  async list(query: {{ModuleName}}ListQuery = {}): Promise<PaginatedListResult<{{ModuleName}}>> {
+    return super.list(query);
+  }
+
+  // Additional business-specific methods
+  
+  {{#each columns}}
+  {{#unless (or isPrimaryKey (eq name 'created_at') (eq name 'updated_at'))}}
+  {{#if (eq tsType 'string')}}
+  async findBy{{pascalCase name}}({{camelCase name}}: string): Promise<{{../ModuleName}} | null> {
+    const query = this.getJoinQuery();
+    const row = await query.where('{{../tableName}}.{{name}}', {{camelCase name}}).first();
+    return row ? this.transformToEntity(row) : null;
+  }
+
+  {{/if}}
+  {{/unless}}
+  {{/each}}
+
+  // Statistics and aggregation methods
+  async getStats(): Promise<{
+    total: number;
+    {{#each columns}}
+    {{#unless (or isPrimaryKey (eq name 'created_at') (eq name 'updated_at'))}}
+    {{#if (eq tsType 'boolean')}}
+    {{camelCase name}}Count: number;
+    {{/if}}
+    {{/unless}}
+    {{/each}}
+  }> {
+    const stats: any = await this.knex('{{tableName}}')
+      .select([
+        this.knex.raw('COUNT(*) as total'){{#each columns}}{{#unless (or isPrimaryKey (eq name 'created_at') (eq name 'updated_at'))}}{{#if (eq tsType 'boolean')}},
+        this.knex.raw('COUNT(*) FILTER (WHERE {{name}} = true) as {{camelCase name}}_count'){{/if}}{{/unless}}{{/each}}
+      ])
+      .first();
+
+    return {
+      total: parseInt(stats?.total || '0'),
+      {{#each columns}}
+      {{#unless (or isPrimaryKey (eq name 'created_at') (eq name 'updated_at'))}}
+      {{#if (eq tsType 'boolean')}}
+      {{camelCase name}}Count: parseInt(stats?.{{camelCase name}}_count || '0'){{#unless @last}},{{/unless}}
+      {{/if}}
+      {{/unless}}
+      {{/each}}
+    };
+  }
+
+  // Bulk operations with better type safety
+  async createMany(data: Create{{ModuleName}}[]): Promise<{{ModuleName}}[]> {
+    const transformedData = data.map(item => this.transformToDb(item));
+    const rows = await this.knex('{{tableName}}').insert(transformedData).returning('*');
+    return rows.map(row => this.transformToEntity(row));
+  }
+
+  // Transaction support for complex operations
+  async createWithTransaction(data: Create{{ModuleName}}): Promise<{{ModuleName}}> {
+    return this.withTransaction(async (trx) => {
+      const transformedData = this.transformToDb(data);
+      const [row] = await trx('{{tableName}}').insert(transformedData).returning('*');
+      return this.transformToEntity(row);
+    });
+  }
+}

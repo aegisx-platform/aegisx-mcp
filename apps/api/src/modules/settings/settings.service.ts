@@ -1,4 +1,4 @@
-import { Knex } from 'knex';
+import Knex from 'knex';
 import { Redis } from 'ioredis';
 import {
   type Setting,
@@ -26,7 +26,7 @@ export class SettingsService {
   private cache?: RedisCacheService;
 
   constructor(
-    private db: Knex,
+    private db: any,
     private redis?: Redis,
     logger?: any,
     fastify?: FastifyInstance,

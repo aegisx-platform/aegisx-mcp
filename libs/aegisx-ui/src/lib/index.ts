@@ -1,53 +1,40 @@
-// Main module export
+// =============================================================================
+// AEGISX UI LIBRARY - Main Exports
+// =============================================================================
+
+// Main module (legacy NgModule support)
 export * from './aegisx-ui.module';
 
-// Services
-export * from './services/config/config.service';
-export * from './services/navigation/navigation.service';
-export * from './services/loading/loading.service';
-export * from './services/media-watcher/media-watcher.service';
-export * from './services/icon.service';
+// =============================================================================
+// FEATURE MODULES (Tree-shakable)
+// =============================================================================
+export * from './core';
+export * from './layouts';
+export * from './components';
 
-// Components
-export * from './components/navigation/navigation.component';
-export * from './components/loading-bar/loading-bar.component';
-export * from './components/user-menu/user-menu.component';
-export * from './components/card/card.component';
-export * from './components/alert/alert.component';
-export * from './components/drawer/drawer.component';
-export * from './components/breadcrumb/breadcrumb.component';
+// =============================================================================
+// PROVIDER FUNCTIONS (Modern Angular)
+// =============================================================================
+export * from './providers/aegisx.provider';
 
-// Layouts
-export * from './layouts/layout-wrapper/layout-wrapper.component';
-export * from './layouts/empty/empty-layout.component';
-export * from './layouts/classic/classic-layout.component';
-export * from './layouts/compact/compact-layout.component';
-export * from './layouts/enterprise/enterprise-layout.component';
+// =============================================================================
+// CORE SERVICES
+// =============================================================================
+export * from './services';
 
-// Layout Components
-export * from './layouts/components/navbar/navbar.component';
-export * from './layouts/components/toolbar/toolbar.component';
-
-// Types and interfaces
+// =============================================================================
+// TYPES & INTERFACES
+// =============================================================================
 export * from './types';
 
-// Animations
+// =============================================================================
+// UTILITIES & HELPERS
+// =============================================================================
 export * from './animations';
-
-// Utils
 export * from './utils';
-
-// Directives
 export * from './directives';
 
-// Ax Components
-export * from './layouts/ax-classic/ax-classic-layout.component';
-export * from './layouts/ax-compact/ax-compact-layout.component';
-export * from './layouts/ax-classic/simple-vertical-navigation.component';
-export * from './services/ax-media-watcher.service';
-export * from './components/ax-loading-bar.component';
-export * from './components/ax-fullscreen.component';
+// =============================================================================
+// LEGACY EXPORTS (Backward Compatibility)
+// =============================================================================
 export * from './providers/ax.provider';
-export * from './components/ax-navigation.component';
-export * from './components/ax-navigation-icon.component';
-export * from './types/ax-navigation.types';

@@ -1,0 +1,35 @@
+{
+  "name": "@aegisx/crud-generator",
+  "version": "1.0.0",
+  "description": "CRUD Generator CLI for AegisX platform",
+  "main": "index.js",
+  "bin": {
+    "crud-generator": "./index.js",
+    "aegisx-crud": "./index.js"
+  },
+  "scripts": {
+    "test": "jest",
+    "lint": "eslint src/",
+    "build": "echo 'No build needed for CLI tool'"
+  },
+  "keywords": [
+    "crud",
+    "generator",
+    "aegisx",
+    "fastify",
+    "typescript"
+  ],
+  "author": "AegisX Team",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^12.0.0",
+    "handlebars": "^4.7.8",
+    "chalk": "^4.1.2",
+    "ora": "^5.4.1",
+    "inquirer": "^8.2.6"
+  },
+  "devDependencies": {
+    "jest": "^30.0.2",
+    "eslint": "^9.34.0"
+  }
+}

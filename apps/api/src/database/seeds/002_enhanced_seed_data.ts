@@ -1,7 +1,7 @@
-import { Knex } from 'knex';
+import Knex from 'knex';
 import * as bcrypt from 'bcrypt';
 
-export async function seed(knex: Knex): Promise<void> {
+export async function seed(knex: any): Promise<void> {
   // Clear existing data in dependency order
   await knex('session_security_events').del();
   await knex('session_activity').del();

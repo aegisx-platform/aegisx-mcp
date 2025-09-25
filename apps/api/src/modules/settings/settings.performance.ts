@@ -5,7 +5,7 @@
  * for the Settings API module.
  */
 
-import { Knex } from 'knex';
+import Knex from 'knex';
 
 /**
  * Additional indexes for optimizing Settings API queries
@@ -56,8 +56,8 @@ export class SettingsQueryOptimizer {
   /**
    * Optimized query for finding settings with full-text search
    */
-  static getOptimizedSearchQuery(knex: Knex) {
-    return (qb: Knex.QueryBuilder, search: string) => {
+  static getOptimizedSearchQuery(knex: any) {
+    return (qb: any, search: string) => {
       // Use PostgreSQL full-text search instead of ILIKE for better performance
       const searchVector = knex.raw(`
         to_tsvector('english', coalesce(key, '') || ' ' || 
@@ -75,7 +75,7 @@ export class SettingsQueryOptimizer {
    * Batch load settings to reduce N+1 queries
    */
   static async batchLoadSettings(
-    knex: Knex,
+    knex: any,
     settingIds: string[],
   ): Promise<Map<string, any>> {
     if (settingIds.length === 0) return new Map();
@@ -91,7 +91,7 @@ export class SettingsQueryOptimizer {
    * Optimized grouped settings query with single pass
    */
   static async getGroupedSettingsOptimized(
-    knex: Knex,
+    knex: any,
     namespace = 'default',
   ): Promise<Record<string, Record<string, any[]>>> {
     const settings = await knex('app_settings')
@@ -144,8 +144,8 @@ export class SettingsQueryOptimizer {
    * Use EXPLAIN ANALYZE to check query performance
    */
   static async analyzeQuery(
-    knex: Knex,
-    query: Knex.QueryBuilder,
+    knex: any,
+    query: any,
   ): Promise<any> {
     const sql = query.toSQL();
     const result = await knex.raw(
@@ -166,7 +166,7 @@ export class SettingsCacheWarmer {
   /**
    * Warm cache with frequently accessed settings
    */
-  static async warmFrequentSettings(knex: Knex, redis: any): Promise<void> {
+  static async warmFrequentSettings(knex: any, redis: any): Promise<void> {
     // Get frequently accessed settings (public and user level)
     const frequentSettings = await knex('app_settings')
       .whereIn('access_level', ['public', 'user'])
@@ -188,7 +188,7 @@ export class SettingsCacheWarmer {
    * Pre-cache user settings for active users
    */
   static async warmUserSettings(
-    knex: Knex,
+    knex: any,
     redis: any,
     activeUserIds: string[],
   ): Promise<void> {

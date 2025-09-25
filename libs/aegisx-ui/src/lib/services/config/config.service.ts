@@ -25,14 +25,16 @@ export class AegisxConfigService {
 
   // Computed signals for common config values
   readonly theme = computed(() => this.config().theme);
-  readonly scheme = computed(() => this.config().scheme);
+  readonly scheme = computed(() => this.config().theme?.scheme || 'light');
   readonly layout = computed(() => this.config().layout);
-  readonly language = computed(() => this.config().language);
+  readonly language = computed(() => this.config().language || 'en');
   readonly isDarkMode = computed(() => this.scheme() === 'dark');
   readonly isLightMode = computed(() => this.scheme() === 'light');
-  readonly navigationSize = computed(() => this.config().navigation.size);
+  readonly navigationSize = computed(
+    () => this.config().navigation?.size || 'default',
+  );
   readonly navigationPosition = computed(
-    () => this.config().navigation.position,
+    () => this.config().navigation?.position || 'left',
   );
 
   constructor() {
@@ -73,14 +75,14 @@ export class AegisxConfigService {
    * Set theme
    */
   setTheme(theme: string): void {
-    this.updateConfig({ theme });
+    this.updateConfig({ theme: { name: theme } });
   }
 
   /**
    * Set scheme (light/dark/auto)
    */
   setScheme(scheme: 'light' | 'dark' | 'auto'): void {
-    this.updateConfig({ scheme });
+    this.updateConfig({ theme: { scheme } });
   }
 
   /**
@@ -96,7 +98,7 @@ export class AegisxConfigService {
    * Set layout
    */
   setLayout(layout: AegisxLayoutType): void {
-    this.updateConfig({ layout });
+    this.updateConfig({ layout: { default: layout } });
   }
 
   /**

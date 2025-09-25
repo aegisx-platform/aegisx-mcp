@@ -11,6 +11,7 @@ import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { AuthService } from './core/auth.service';
 import { NavigationService } from './core/navigation.service';
+import { WebSocketService } from './shared/services/websocket.service';
 
 interface Notification {
   id: number;
@@ -225,6 +226,7 @@ export class AppComponent implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
   private navigationService = inject(NavigationService);
+  private websocketService = inject(WebSocketService);
 
   isDarkMode = signal(false);
   shouldShowLayout = signal(true);
@@ -298,6 +300,12 @@ export class AppComponent implements OnInit {
       this.navigationService.loadNavigation().subscribe();
     }
 
+    // Initialize WebSocket connection for authenticated users
+    if (this.authService.isAuthenticated() && this.authService.accessToken()) {
+      console.log('🔌 Initializing WebSocket connection on app startup');
+      this.initializeWebSocket();
+    }
+
     // Current user is now loaded from AuthService via computed signal
 
     // Load sample notifications
@@ -349,6 +357,9 @@ export class AppComponent implements OnInit {
   }
 
   logout() {
+    // Disconnect WebSocket before logout
+    this.websocketService.disconnect();
+    
     this.authService.logout().subscribe({
       next: () => {
         console.log('Logged out successfully');
@@ -358,5 +369,25 @@ export class AppComponent implements OnInit {
         // AuthService will still clear data and navigate
       },
     });
+  }
+
+  private initializeWebSocket(): void {
+    try {
+      const token = this.authService.accessToken();
+      if (token) {
+        console.log('🔌 Connecting to WebSocket...');
+        this.websocketService.connect(token);
+        
+        // Subscribe to all real-time features
+        setTimeout(() => {
+          console.log('📡 Subscribing to real-time features...');
+          this.websocketService.subscribe({
+            features: ['users', 'rbac', 'products', 'orders']
+          });
+        }, 1000);
+      }
+    } catch (error) {
+      console.error('❌ Failed to initialize WebSocket:', error);
+    }
   }
 }

@@ -1,7 +1,14 @@
-import { Injectable, OnDestroy, signal, computed } from '@angular/core';
-import { BehaviorSubject, Observable, Subject, filter, map, takeUntil } from 'rxjs';
+import { Injectable, OnDestroy, signal, computed, inject } from '@angular/core';
+import {
+  BehaviorSubject,
+  Observable,
+  Subject,
+  filter,
+  map,
+  takeUntil,
+} from 'rxjs';
 import { io, Socket } from 'socket.io-client';
-import { environment } from '../../../environments/environment';
+import { ApiConfigService } from '../../core/api-config.service';
 
 // WebSocket Message Interface (matches backend)
 export interface WebSocketMessage {
@@ -26,7 +33,12 @@ export interface WebSocketMessage {
 }
 
 export interface ConnectionStatus {
-  status: 'disconnected' | 'connecting' | 'connected' | 'reconnecting' | 'error';
+  status:
+    | 'disconnected'
+    | 'connecting'
+    | 'connected'
+    | 'reconnecting'
+    | 'error';
   timestamp: Date;
   error?: string;
 }
@@ -38,40 +50,45 @@ export interface SubscriptionOptions {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class WebSocketService implements OnDestroy {
   private socket?: Socket;
   private subscriptions = new Map<string, Subject<WebSocketMessage>>();
   private reconnectAttempts = 0;
-  private maxReconnectAttempts = 5;
+  private maxReconnectAttempts: number;
   private reconnectTimeout?: any;
   private destroy$ = new Subject<void>();
+  private apiConfig = inject(ApiConfigService);
+
+  constructor() {
+    // Get WebSocket config from ApiConfigService
+    const wsConfig = this.apiConfig.getWebSocketConfig();
+    this.maxReconnectAttempts = wsConfig.reconnectionAttempts;
+
+    console.log('🔌 WebSocket Service initialized with config:', wsConfig);
+
+    // Don't auto-connect in constructor - let components manually connect
+    // This prevents multiple connection attempts
+    console.log('🔌 WebSocket service ready for manual connection');
+  }
 
   // Connection status
   private connectionStatus$ = new BehaviorSubject<ConnectionStatus>({
     status: 'disconnected',
-    timestamp: new Date()
+    timestamp: new Date(),
   });
-  
+
   // Signal for reactive connection status
   private _connectionStatus = signal<ConnectionStatus>({
     status: 'disconnected',
-    timestamp: new Date()
+    timestamp: new Date(),
   });
-  
+
   getConnectionStatus = computed(() => this._connectionStatus());
 
   // Message subjects for different features
   private allMessages$ = new Subject<WebSocketMessage>();
-
-  constructor() {
-    // Auto-connect when service is injected (if token available)
-    const token = this.getStoredToken();
-    if (token) {
-      this.connect(token);
-    }
-  }
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -97,8 +114,16 @@ export class WebSocketService implements OnDestroy {
    * Connect to WebSocket server
    */
   connect(token: string, options?: { forceReconnect?: boolean }): void {
+    // Prevent multiple connection attempts
     if (this.socket?.connected && !options?.forceReconnect) {
       console.log('WebSocket already connected');
+      return;
+    }
+    
+    // Prevent connection while already connecting
+    const currentStatus = this._connectionStatus().status;
+    if (currentStatus === 'connecting' && !options?.forceReconnect) {
+      console.log('WebSocket connection already in progress');
       return;
     }
 
@@ -110,24 +135,38 @@ export class WebSocketService implements OnDestroy {
         this.socket.disconnect();
       }
 
+      const wsUrl = this.apiConfig.getWebSocketUrl();
+      const wsConfig = this.apiConfig.getWebSocketConfig();
+      const wsPath = this.apiConfig.getWebSocketPath();
+
+      console.log('🔌 Connecting to WebSocket:', {
+        url: wsUrl,
+        path: wsPath,
+        config: wsConfig,
+      });
+
       // Create new socket connection
-      this.socket = io(environment.apiUrl || 'http://localhost:3333', {
-        path: '/api/ws',
-        transports: ['websocket', 'polling'],
+      this.socket = io(wsUrl, {
+        path: this.apiConfig.getWebSocketPath(),
+        transports: wsConfig.transports,
         auth: {
-          token
+          token,
         },
-        autoConnect: true,
+        autoConnect: false, // Don't auto-connect to prevent multiple connections
         reconnection: true,
         reconnectionAttempts: this.maxReconnectAttempts,
-        reconnectionDelay: 1000,
-        reconnectionDelayMax: 5000,
-        timeout: 10000
+        reconnectionDelay: 2000, // Increase delay
+        reconnectionDelayMax: 10000, // Increase max delay
+        timeout: wsConfig.timeout,
+        forceNew: false, // Don't force new connections
+        upgrade: wsConfig.upgrade,
       });
 
       this.setupEventHandlers();
       this.storeToken(token);
-
+      
+      // Manually connect since autoConnect is false
+      this.socket.connect();
     } catch (error) {
       console.error('Failed to connect to WebSocket:', error);
       this.updateConnectionStatus('error', `Connection failed: ${error}`);
@@ -165,7 +204,7 @@ export class WebSocketService implements OnDestroy {
     this.socket.emit('subscribe:features', options);
 
     // Create subjects for new features
-    options.features.forEach(feature => {
+    options.features.forEach((feature) => {
       if (!this.subscriptions.has(feature)) {
         this.subscriptions.set(feature, new Subject<WebSocketMessage>());
       }
@@ -184,7 +223,7 @@ export class WebSocketService implements OnDestroy {
     this.socket.emit('unsubscribe:features', { features });
 
     // Clean up subjects
-    features.forEach(feature => {
+    features.forEach((feature) => {
       const subject = this.subscriptions.get(feature);
       if (subject) {
         subject.complete();
@@ -201,37 +240,47 @@ export class WebSocketService implements OnDestroy {
       this.subscriptions.set(feature, new Subject<WebSocketMessage>());
     }
 
-    return this.subscriptions.get(feature)!.asObservable().pipe(
-      takeUntil(this.destroy$)
-    );
+    return this.subscriptions
+      .get(feature)!
+      .asObservable()
+      .pipe(takeUntil(this.destroy$));
   }
 
   /**
    * Subscribe to specific entity within a feature
    */
-  subscribeToEntity(feature: string, entity: string): Observable<WebSocketMessage> {
+  subscribeToEntity(
+    feature: string,
+    entity: string,
+  ): Observable<WebSocketMessage> {
     return this.subscribeToFeature(feature).pipe(
-      filter(message => message.entity === entity)
+      filter((message) => message.entity === entity),
     );
   }
 
   /**
    * Subscribe to specific event type
    */
-  subscribeToEvent(feature: string, entity: string, action: string): Observable<any> {
+  subscribeToEvent(
+    feature: string,
+    entity: string,
+    action: string,
+  ): Observable<any> {
     return this.subscribeToEntity(feature, entity).pipe(
-      filter(message => message.action === action),
-      map(message => message.data)
+      filter((message) => message.action === action),
+      map((message) => message.data),
     );
   }
 
   /**
    * Subscribe to events with specific priority
    */
-  subscribeByPriority(priority: 'low' | 'normal' | 'high' | 'critical'): Observable<WebSocketMessage> {
+  subscribeByPriority(
+    priority: 'low' | 'normal' | 'high' | 'critical',
+  ): Observable<WebSocketMessage> {
     return this.allMessages$.pipe(
-      filter(message => message.meta.priority === priority),
-      takeUntil(this.destroy$)
+      filter((message) => message.meta.priority === priority),
+      takeUntil(this.destroy$),
     );
   }
 
@@ -240,8 +289,8 @@ export class WebSocketService implements OnDestroy {
    */
   subscribeToUserEvents(userId: string): Observable<WebSocketMessage> {
     return this.allMessages$.pipe(
-      filter(message => message.meta.userId === userId),
-      takeUntil(this.destroy$)
+      filter((message) => message.meta.userId === userId),
+      takeUntil(this.destroy$),
     );
   }
 
@@ -296,35 +345,26 @@ export class WebSocketService implements OnDestroy {
     subscribeToPermissions: () => this.subscribeToEntity('rbac', 'permission'),
     subscribeToUserRoles: () => this.subscribeToEntity('rbac', 'user_role'),
     subscribeToHierarchy: () => this.subscribeToEntity('rbac', 'hierarchy'),
-    
-    subscribeToRoleCreated: () => this.subscribeToEvent('rbac', 'role', 'created'),
-    subscribeToRoleUpdated: () => this.subscribeToEvent('rbac', 'role', 'updated'),
-    subscribeToRoleDeleted: () => this.subscribeToEvent('rbac', 'role', 'deleted'),
-    
-    subscribeToPermissionAssigned: () => this.subscribeToEvent('rbac', 'permission', 'assigned'),
-    subscribeToPermissionRevoked: () => this.subscribeToEvent('rbac', 'permission', 'revoked'),
-    
-    subscribeToUserRoleAssigned: () => this.subscribeToEvent('rbac', 'user_role', 'assigned'),
-    subscribeToUserRoleRemoved: () => this.subscribeToEvent('rbac', 'user_role', 'revoked'),
-    
-    subscribeToHierarchyChanged: () => this.subscribeToEvent('rbac', 'hierarchy', 'changed'),
-  };
 
-  /**
-   * Users-specific subscriptions
-   */
-  users = {
-    subscribeToUsers: () => this.subscribeToEntity('users', 'user'),
-    subscribeToProfiles: () => this.subscribeToEntity('users', 'profile'),
-    subscribeToSessions: () => this.subscribeToEntity('users', 'session'),
-    
-    subscribeToUserCreated: () => this.subscribeToEvent('users', 'user', 'created'),
-    subscribeToUserUpdated: () => this.subscribeToEvent('users', 'user', 'updated'),
-    subscribeToUserActivated: () => this.subscribeToEvent('users', 'user', 'activated'),
-    subscribeToUserDeactivated: () => this.subscribeToEvent('users', 'user', 'deactivated'),
-    
-    subscribeToProfileUpdated: () => this.subscribeToEvent('users', 'profile', 'updated'),
-    subscribeToSessionExpired: () => this.subscribeToEvent('users', 'session', 'expired'),
+    subscribeToRoleCreated: () =>
+      this.subscribeToEvent('rbac', 'role', 'created'),
+    subscribeToRoleUpdated: () =>
+      this.subscribeToEvent('rbac', 'role', 'updated'),
+    subscribeToRoleDeleted: () =>
+      this.subscribeToEvent('rbac', 'role', 'deleted'),
+
+    subscribeToPermissionAssigned: () =>
+      this.subscribeToEvent('rbac', 'permission', 'assigned'),
+    subscribeToPermissionRevoked: () =>
+      this.subscribeToEvent('rbac', 'permission', 'revoked'),
+
+    subscribeToUserRoleAssigned: () =>
+      this.subscribeToEvent('rbac', 'user_role', 'assigned'),
+    subscribeToUserRoleRemoved: () =>
+      this.subscribeToEvent('rbac', 'user_role', 'revoked'),
+
+    subscribeToHierarchyChanged: () =>
+      this.subscribeToEvent('rbac', 'hierarchy', 'changed'),
   };
 
   /**
@@ -334,12 +374,17 @@ export class WebSocketService implements OnDestroy {
     subscribeToProducts: () => this.subscribeToEntity('products', 'product'),
     subscribeToInventory: () => this.subscribeToEntity('products', 'inventory'),
     subscribeToPricing: () => this.subscribeToEntity('products', 'pricing'),
-    
-    subscribeToProductCreated: () => this.subscribeToEvent('products', 'product', 'created'),
-    subscribeToProductUpdated: () => this.subscribeToEvent('products', 'product', 'updated'),
-    subscribeToInventoryUpdated: () => this.subscribeToEvent('products', 'inventory', 'updated'),
-    subscribeToPriceUpdated: () => this.subscribeToEvent('products', 'pricing', 'updated'),
-    subscribeToStockAlerts: () => this.subscribeToEvent('products', 'inventory', 'alert'),
+
+    subscribeToProductCreated: () =>
+      this.subscribeToEvent('products', 'product', 'created'),
+    subscribeToProductUpdated: () =>
+      this.subscribeToEvent('products', 'product', 'updated'),
+    subscribeToInventoryUpdated: () =>
+      this.subscribeToEvent('products', 'inventory', 'updated'),
+    subscribeToPriceUpdated: () =>
+      this.subscribeToEvent('products', 'pricing', 'updated'),
+    subscribeToStockAlerts: () =>
+      this.subscribeToEvent('products', 'inventory', 'alert'),
   };
 
   /**
@@ -349,16 +394,23 @@ export class WebSocketService implements OnDestroy {
     subscribeToOrders: () => this.subscribeToEntity('orders', 'order'),
     subscribeToPayments: () => this.subscribeToEntity('orders', 'payment'),
     subscribeToShipments: () => this.subscribeToEntity('orders', 'shipment'),
-    
-    subscribeToOrderCreated: () => this.subscribeToEvent('orders', 'order', 'created'),
-    subscribeToOrderUpdated: () => this.subscribeToEvent('orders', 'order', 'updated'),
-    subscribeToOrderCancelled: () => this.subscribeToEvent('orders', 'order', 'cancelled'),
-    subscribeToOrderDelivered: () => this.subscribeToEvent('orders', 'order', 'delivered'),
-    
-    subscribeToPaymentReceived: () => this.subscribeToEvent('orders', 'payment', 'created'),
-    subscribeToPaymentFailed: () => this.subscribeToEvent('orders', 'payment', 'failed'),
-    
-    subscribeToOrderShipped: () => this.subscribeToEvent('orders', 'shipment', 'created'),
+
+    subscribeToOrderCreated: () =>
+      this.subscribeToEvent('orders', 'order', 'created'),
+    subscribeToOrderUpdated: () =>
+      this.subscribeToEvent('orders', 'order', 'updated'),
+    subscribeToOrderCancelled: () =>
+      this.subscribeToEvent('orders', 'order', 'cancelled'),
+    subscribeToOrderDelivered: () =>
+      this.subscribeToEvent('orders', 'order', 'delivered'),
+
+    subscribeToPaymentReceived: () =>
+      this.subscribeToEvent('orders', 'payment', 'created'),
+    subscribeToPaymentFailed: () =>
+      this.subscribeToEvent('orders', 'payment', 'failed'),
+
+    subscribeToOrderShipped: () =>
+      this.subscribeToEvent('orders', 'shipment', 'created'),
   };
 
   /**
@@ -369,7 +421,8 @@ export class WebSocketService implements OnDestroy {
 
     // Connection events
     this.socket.on('connect', () => {
-      console.log('WebSocket connected');
+      console.log('✅ WebSocket connected successfully!');
+      console.log('✅ Socket ID:', this.socket?.id);
       this.updateConnectionStatus('connected');
       this.reconnectAttempts = 0;
     });
@@ -377,17 +430,22 @@ export class WebSocketService implements OnDestroy {
     this.socket.on('disconnect', (reason) => {
       console.log('WebSocket disconnected:', reason);
       this.updateConnectionStatus('disconnected');
-      
+
       if (reason === 'io server disconnect') {
         // Server initiated disconnect - don't auto-reconnect
         return;
       }
-      
+
       this.attemptReconnect();
     });
 
     this.socket.on('connect_error', (error) => {
       console.error('WebSocket connection error:', error);
+      console.error('Error details:', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack,
+      });
       this.updateConnectionStatus('error', error.message);
       this.attemptReconnect();
     });
@@ -399,7 +457,7 @@ export class WebSocketService implements OnDestroy {
         const [feature, entity, action] = eventName.split('.');
         const wsMessage: WebSocketMessage = {
           feature,
-          entity, 
+          entity,
           action,
           data: message.data || message,
           meta: message.meta || {
@@ -407,8 +465,8 @@ export class WebSocketService implements OnDestroy {
             userId: 'unknown',
             sessionId: 'unknown',
             featureVersion: 'v1',
-            priority: 'normal'
-          }
+            priority: 'normal',
+          },
         };
         this.routeMessage(wsMessage);
       }
@@ -464,7 +522,9 @@ export class WebSocketService implements OnDestroy {
         featureSubject.next(message);
       }
 
-      console.debug(`Routed message: ${message.feature}.${message.entity}.${message.action}`);
+      console.debug(
+        `Routed message: ${message.feature}.${message.entity}.${message.action}`,
+      );
     } catch (error) {
       console.error('Error routing message:', error, message);
     }
@@ -474,25 +534,37 @@ export class WebSocketService implements OnDestroy {
    * Attempt to reconnect with exponential backoff
    */
   private attemptReconnect(): void {
+    // Prevent multiple reconnection attempts
+    if (this.reconnectTimeout) {
+      return;
+    }
+    
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.error('Max reconnection attempts reached');
+      console.error('❌ Max reconnection attempts reached');
       this.updateConnectionStatus('error', 'Max reconnection attempts reached');
       return;
     }
 
     const token = this.getStoredToken();
     if (!token) {
-      console.warn('Cannot reconnect: No token available');
+      console.warn('⚠️ Cannot reconnect: No token available');
       return;
     }
 
+    console.log(
+      `🔄 Scheduling reconnect attempt ${this.reconnectAttempts + 1}/${this.maxReconnectAttempts}`,
+    );
     this.updateConnectionStatus('reconnecting');
     this.reconnectAttempts++;
 
     const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
-    
+    console.log(`⏱️ Waiting ${delay}ms before reconnect...`);
+
     this.reconnectTimeout = setTimeout(() => {
-      console.log(`Reconnecting... (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+      console.log(
+        `🔄 Reconnecting... (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`,
+      );
+      this.reconnectTimeout = undefined; // Clear timeout reference
       this.connect(token, { forceReconnect: true });
     }, delay);
   }
@@ -500,11 +572,14 @@ export class WebSocketService implements OnDestroy {
   /**
    * Update connection status
    */
-  private updateConnectionStatus(status: ConnectionStatus['status'], error?: string): void {
+  private updateConnectionStatus(
+    status: ConnectionStatus['status'],
+    error?: string,
+  ): void {
     const statusObj = {
       status,
       timestamp: new Date(),
-      error
+      error,
     };
     this.connectionStatus$.next(statusObj);
     this._connectionStatus.set(statusObj);
@@ -543,4 +618,27 @@ export class WebSocketService implements OnDestroy {
       console.warn('Could not remove WebSocket token:', error);
     }
   }
+
+  /**
+   * Users-specific subscriptions
+   */
+  users = {
+    subscribeToUsers: () => this.subscribeToEntity('users', 'user'),
+    subscribeToProfiles: () => this.subscribeToEntity('users', 'profile'),
+    subscribeToSessions: () => this.subscribeToEntity('users', 'session'),
+    subscribeToUserCreated: () =>
+      this.subscribeToEvent('users', 'user', 'created'),
+    subscribeToUserUpdated: () =>
+      this.subscribeToEvent('users', 'user', 'updated'),
+    subscribeToUserDeleted: () =>
+      this.subscribeToEvent('users', 'user', 'deleted'),
+    subscribeToUserActivated: () =>
+      this.subscribeToEvent('users', 'user', 'activated'),
+    subscribeToUserDeactivated: () =>
+      this.subscribeToEvent('users', 'user', 'deactivated'),
+    subscribeToProfileUpdated: () =>
+      this.subscribeToEvent('users', 'profile', 'updated'),
+    subscribeToSessionExpired: () =>
+      this.subscribeToEvent('users', 'session', 'expired'),
+  };
 }

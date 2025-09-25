@@ -1,4 +1,4 @@
-import { Knex } from 'knex';
+import Knex from 'knex';
 import {
   UserProfile,
   UserRole,
@@ -10,7 +10,7 @@ import {
 } from './user-profile.types';
 
 export class UserProfileRepository {
-  constructor(private knex: Knex) {}
+  constructor(private knex: any) {}
 
   async findUserWithProfileById(id: string): Promise<UserProfile | null> {
     const result = await this.knex('users')

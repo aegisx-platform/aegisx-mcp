@@ -1,14 +1,34 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-// import { MultipartFile } from '@fastify/multipart'; // TODO: Re-enable when file upload is implemented
+
+// Extend FastifyRequest for @aegisx/fastify-multipart
+declare module 'fastify' {
+  interface FastifyRequest {
+    parseMultipart(): Promise<{
+      files: Array<{
+        filename: string;
+        mimetype: string;
+        encoding: string;
+        size: number;
+        toBuffer(): Promise<Buffer>;
+        createReadStream(): NodeJS.ReadableStream;
+      }>;
+      fields: Record<string, string>;
+    }>;
+  }
+}
+
 import { UserProfileService } from './services/user-profile.service';
-import { UserPreferencesUpdateRequest, UserProfileUpdateRequest } from './user-profile.types';
+import {
+  UserPreferencesUpdateRequest,
+  UserProfileUpdateRequest,
+} from './user-profile.types';
 
 export interface UserProfileControllerDependencies {
   userProfileService: UserProfileService;
 }
 
 export class UserProfileController {
-  constructor(private deps: UserProfileControllerDependencies) { }
+  constructor(private deps: UserProfileControllerDependencies) {}
 
   async getUserProfile(request: FastifyRequest, reply: FastifyReply) {
     try {
@@ -46,11 +66,17 @@ export class UserProfileController {
         return reply.badRequest('Name cannot be empty');
       }
 
-      if (updates.firstName !== undefined && updates.firstName.trim().length === 0) {
+      if (
+        updates.firstName !== undefined &&
+        updates.firstName.trim().length === 0
+      ) {
         return reply.badRequest('First name cannot be empty');
       }
 
-      if (updates.lastName !== undefined && updates.lastName.trim().length === 0) {
+      if (
+        updates.lastName !== undefined &&
+        updates.lastName.trim().length === 0
+      ) {
         return reply.badRequest('Last name cannot be empty');
       }
 
@@ -58,7 +84,8 @@ export class UserProfileController {
         return reply.badRequest('Bio cannot exceed 500 characters');
       }
 
-      const updatedProfile = await this.deps.userProfileService.updateUserProfile(userId, updates);
+      const updatedProfile =
+        await this.deps.userProfileService.updateUserProfile(userId, updates);
 
       if (!updatedProfile) {
         return reply.notFound('User not found');
@@ -92,9 +119,13 @@ export class UserProfileController {
         return reply.unauthorized('Authentication required');
       }
 
-      const preferences = await this.deps.userProfileService.getUserPreferences(userId);
+      const preferences =
+        await this.deps.userProfileService.getUserPreferences(userId);
 
-      return reply.success(preferences, 'User preferences retrieved successfully');
+      return reply.success(
+        preferences,
+        'User preferences retrieved successfully',
+      );
     } catch (error) {
       request.log.error({ error }, 'Error retrieving user preferences');
       return reply.internalServerError('Failed to retrieve user preferences');
@@ -111,9 +142,16 @@ export class UserProfileController {
 
       const updates = request.body as UserPreferencesUpdateRequest;
 
-      const updatedPreferences = await this.deps.userProfileService.updateUserPreferences(userId, updates);
+      const updatedPreferences =
+        await this.deps.userProfileService.updateUserPreferences(
+          userId,
+          updates,
+        );
 
-      return reply.success(updatedPreferences, 'User preferences updated successfully');
+      return reply.success(
+        updatedPreferences,
+        'User preferences updated successfully',
+      );
     } catch (error) {
       request.log.error({ error }, 'Error updating user preferences');
 
@@ -138,17 +176,92 @@ export class UserProfileController {
       const userId = request.user?.id;
 
       if (!userId) {
-        return reply.unauthorized('Authentication required');
+        return reply.code(401).send({
+          success: false,
+          error: {
+            code: 'UNAUTHORIZED',
+            message: 'Authentication required',
+          },
+          meta: {
+            requestId: request.id,
+            timestamp: new Date().toISOString(),
+            version: '1.0',
+          },
+        });
       }
 
-      // Get the uploaded file
-      const data = await request.file();
+      // Use @aegisx/fastify-multipart clean API
+      const { files, fields } = await request.parseMultipart();
 
-      if (!data) {
-        return reply.badRequest('No file uploaded');
+      if (!files || files.length === 0) {
+        return reply.code(400).send({
+          success: false,
+          error: {
+            code: 'NO_FILE_PROVIDED',
+            message: 'No avatar file provided in request',
+          },
+          meta: {
+            requestId: request.id,
+            timestamp: new Date().toISOString(),
+            version: '1.0',
+          },
+        });
       }
 
-      const result = await this.deps.userProfileService.uploadUserAvatar(userId, data);
+      const data = files[0]; // Get first file for avatar upload
+
+      // Validate file type
+      const allowedTypes = [
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/webp',
+      ];
+      if (!allowedTypes.includes(data.mimetype)) {
+        return reply.code(415).send({
+          success: false,
+          error: {
+            code: 'UNSUPPORTED_MEDIA_TYPE',
+            message: 'Only JPEG, PNG, and WebP images are supported',
+          },
+          meta: {
+            requestId: request.id,
+            timestamp: new Date().toISOString(),
+            version: '1.0',
+          },
+        });
+      }
+
+      // Validate file size (5MB limit)
+      const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
+      if (data.size > maxSizeInBytes) {
+        return reply.code(413).send({
+          success: false,
+          error: {
+            code: 'FILE_TOO_LARGE',
+            message: 'File size exceeds maximum limit of 5MB',
+          },
+          meta: {
+            requestId: request.id,
+            timestamp: new Date().toISOString(),
+            version: '1.0',
+          },
+        });
+      }
+
+      // Create adapter object for backward compatibility with MultipartFile interface
+      const multipartFile = {
+        filename: data.filename,
+        mimetype: data.mimetype,
+        encoding: data.encoding,
+        file: data.createReadStream(),
+        toBuffer: () => data.toBuffer(),
+      };
+
+      const result = await this.deps.userProfileService.uploadUserAvatar(
+        userId,
+        multipartFile as any,
+      );
 
       return reply.success(result, 'Avatar uploaded successfully');
     } catch (error) {
@@ -159,8 +272,8 @@ export class UserProfileController {
           success: false,
           error: {
             code: 'UNSUPPORTED_MEDIA_TYPE',
-            message: 'Only JPEG, PNG, and WebP images are supported'
-          }
+            message: 'Only JPEG, PNG, and WebP images are supported',
+          },
         });
       }
 
@@ -169,8 +282,8 @@ export class UserProfileController {
           success: false,
           error: {
             code: 'FILE_TOO_LARGE',
-            message: 'File size exceeds maximum limit of 5MB'
-          }
+            message: 'File size exceeds maximum limit of 5MB',
+          },
         });
       }
 
@@ -190,7 +303,7 @@ export class UserProfileController {
 
       return reply.success(
         { message: 'Avatar deleted successfully' },
-        'Avatar deleted successfully'
+        'Avatar deleted successfully',
       );
     } catch (error) {
       request.log.error({ error }, 'Error deleting user avatar');

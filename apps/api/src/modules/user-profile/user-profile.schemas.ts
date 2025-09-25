@@ -10,7 +10,7 @@ import {
   ActivitySessionsResponseSchema,
   ActivityStatsSchema,
   ActivityStatsResponseSchema,
-  ACTIVITY_ACTIONS
+  ACTIVITY_ACTIONS,
 } from './user-activity.schemas';
 // Import delete account schemas
 import {
@@ -116,7 +116,7 @@ export const UserProfileSchema = Type.Object({
   firstName: Type.Union([Type.String(), Type.Null()]),
   lastName: Type.Union([Type.String(), Type.Null()]),
   bio: Type.Union([Type.String(), Type.Null()], {
-    description: 'User biography or description'
+    description: 'User biography or description',
   }),
   avatar: Type.Union([Type.String({ format: 'uri' }), Type.Null()]),
   role: UserRoleSchema,
@@ -134,10 +134,12 @@ export const UserProfileUpdateRequestSchema = Type.Object({
   name: Type.Optional(Type.String({ minLength: 1, maxLength: 100 })),
   firstName: Type.Optional(Type.String({ minLength: 1, maxLength: 50 })),
   lastName: Type.Optional(Type.String({ minLength: 1, maxLength: 50 })),
-  bio: Type.Optional(Type.String({ 
-    maxLength: 500, 
-    description: 'User biography or description (max 500 characters)' 
-  })),
+  bio: Type.Optional(
+    Type.String({
+      maxLength: 500,
+      description: 'User biography or description (max 500 characters)',
+    }),
+  ),
   preferences: Type.Optional(Type.Partial(UserPreferencesSchema)),
 });
 
@@ -153,6 +155,24 @@ export const UserPreferencesResponseSchema = ApiSuccessResponseSchema(
 );
 
 // Avatar upload schemas
+export const AvatarUploadRequestSchema = Type.Object(
+  {
+    avatar: Type.Object(
+      {
+        type: Type.Literal('file'),
+        format: Type.Literal('binary'),
+      },
+      {
+        description: 'Avatar image file (JPEG, PNG, or WebP up to 5MB)',
+      },
+    ),
+  },
+  {
+    title: 'AvatarUploadRequest',
+    description: 'Avatar upload form data',
+  },
+);
+
 export const AvatarUploadDataSchema = Type.Object({
   avatar: Type.String({ format: 'uri', description: 'Avatar URL' }),
   thumbnails: Type.Object({
@@ -184,7 +204,7 @@ export {
   ActivitySessionsResponseSchema,
   ActivityStatsSchema,
   ActivityStatsResponseSchema,
-  ACTIVITY_ACTIONS
+  ACTIVITY_ACTIONS,
 };
 
 // Re-export delete account schemas (already imported above)
@@ -212,6 +232,7 @@ export type UserProfileResponse = Static<typeof UserProfileResponseSchema>;
 export type UserPreferencesResponse = Static<
   typeof UserPreferencesResponseSchema
 >;
+export type AvatarUploadRequest = Static<typeof AvatarUploadRequestSchema>;
 export type AvatarUploadData = Static<typeof AvatarUploadDataSchema>;
 export type AvatarUploadResponse = Static<typeof AvatarUploadResponseSchema>;
 export type AvatarDeleteData = Static<typeof AvatarDeleteDataSchema>;
@@ -234,6 +255,7 @@ export const userProfileSchemas = {
   // Request schemas
   'user-profile-update-request': UserProfileUpdateRequestSchema,
   'user-preferences-update-request': UserPreferencesUpdateRequestSchema,
+  'avatar-upload-request': AvatarUploadRequestSchema,
 
   // Response schemas
   'user-profile-response': UserProfileResponseSchema,

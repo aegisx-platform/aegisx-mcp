@@ -3,9 +3,6 @@ import { CommonModule } from '@angular/common';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatListModule } from '@angular/material/list';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -39,9 +36,6 @@ interface ShowcaseTab {
     MatTabsModule,
     MatIconModule,
     MatButtonModule,
-    MatToolbarModule,
-    MatSidenavModule,
-    MatListModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
@@ -55,111 +49,70 @@ interface ShowcaseTab {
     InteractiveDemosComponent,
   ],
   template: `
-    <div class="component-showcase">
-      <!-- Header -->
-      <mat-toolbar class="showcase-header" color="primary">
-        <span class="showcase-title">
-          <mat-icon class="title-icon">widgets</mat-icon>
-          Component Showcase
-        </span>
-        <span class="spacer"></span>
-
-        <!-- Theme Toggle -->
-        <mat-slide-toggle
-          [(ngModel)]="isDarkTheme"
-          (change)="toggleTheme()"
-          class="theme-toggle"
-        >
-          <mat-icon>{{ isDarkTheme() ? 'dark_mode' : 'light_mode' }}</mat-icon>
-        </mat-slide-toggle>
-
-        <!-- Search -->
-        <mat-form-field appearance="outline" class="search-field">
-          <mat-label>Search components</mat-label>
-          <mat-icon matPrefix>search</mat-icon>
-          <input
-            matInput
-            placeholder="Search components..."
-            [(ngModel)]="searchQuery"
-            (input)="onSearch($event)"
-          />
-          <button
-            *ngIf="searchQuery()"
-            matSuffix
-            mat-icon-button
-            (click)="clearSearch()"
-          >
-            <mat-icon>clear</mat-icon>
-          </button>
-        </mat-form-field>
-
-        <!-- Filter -->
-        <mat-form-field appearance="outline" class="filter-field">
-          <mat-label>Filter</mat-label>
-          <mat-select
-            [(value)]="selectedFilter"
-            (selectionChange)="onFilterChange($event)"
-          >
-            <mat-option value="all">All Components</mat-option>
-            <mat-option value="material">Material Design</mat-option>
-            <mat-option value="aegisx">AegisX UI</mat-option>
-            <mat-option value="widgets">Widgets</mat-option>
-            <mat-option value="demos">Interactive</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </mat-toolbar>
-
-      <!-- Progress Bar for Loading -->
-      <mat-progress-bar
-        *ngIf="isLoading()"
-        mode="indeterminate"
-        class="loading-bar"
-      >
-      </mat-progress-bar>
-
-      <!-- Main Content -->
-      <div class="showcase-content">
-        <!-- Sidebar Navigation (Optional Mobile) -->
-        <mat-sidenav-container class="sidenav-container">
-          <mat-sidenav
-            #drawer
-            mode="over"
-            class="showcase-sidenav"
-            [class.show-mobile]="isMobile()"
-          >
-            <mat-list role="navigation">
-              <h3 matSubheader>Component Categories</h3>
-              <mat-list-item
-                *ngFor="let tab of filteredTabs()"
-                [class.active]="selectedTabIndex() === tab.id"
-                (click)="selectTab(tab.id); drawer.close()"
+    <div class="component-showcase-wrapper">
+      <div class="component-showcase-container">
+        <div class="component-showcase">
+          <!-- Controls Bar (แทน Header) -->
+          <div class="showcase-controls">
+            <!-- Search -->
+            <mat-form-field appearance="outline" class="search-field">
+              <mat-label>Search components</mat-label>
+              <mat-icon matPrefix>search</mat-icon>
+              <input
+                matInput
+                placeholder="Search components..."
+                [(ngModel)]="searchQuery"
+                (input)="onSearch($event)"
+              />
+              <button
+                *ngIf="searchQuery()"
+                matSuffix
+                mat-icon-button
+                (click)="clearSearch()"
               >
-                <mat-icon matListItemIcon>{{ tab.icon }}</mat-icon>
-                <div matListItemTitle>{{ tab.label }}</div>
-                <div matListItemLine>{{ tab.description }}</div>
-                <mat-chip
-                  *ngIf="tab.badgeCount"
-                  class="count-badge"
-                  [color]="selectedTabIndex() === tab.id ? 'accent' : 'primary'"
-                >
-                  {{ tab.badgeCount }}
-                </mat-chip>
-              </mat-list-item>
-            </mat-list>
-          </mat-sidenav>
+                <mat-icon>clear</mat-icon>
+              </button>
+            </mat-form-field>
 
-          <!-- Main Tab Content -->
-          <mat-sidenav-content class="main-content">
-            <!-- Mobile Menu Button -->
-            <button
-              *ngIf="isMobile()"
-              mat-icon-button
-              class="mobile-menu-btn"
-              (click)="drawer.toggle()"
+            <!-- Filter -->
+            <mat-form-field appearance="outline" class="filter-field">
+              <mat-label>Filter</mat-label>
+              <mat-select
+                [(value)]="selectedFilter"
+                (selectionChange)="onFilterChange($event)"
+              >
+                <mat-option value="all">All Components</mat-option>
+                <mat-option value="material">Material Design</mat-option>
+                <mat-option value="aegisx">AegisX UI</mat-option>
+                <mat-option value="widgets">Widgets</mat-option>
+                <mat-option value="demos">Interactive</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <div class="spacer"></div>
+
+            <!-- Theme Toggle -->
+            <mat-slide-toggle
+              [(ngModel)]="isDarkTheme"
+              (change)="toggleTheme()"
+              class="theme-toggle"
             >
-              <mat-icon>menu</mat-icon>
-            </button>
+              <mat-icon>{{
+                isDarkTheme() ? 'dark_mode' : 'light_mode'
+              }}</mat-icon>
+            </mat-slide-toggle>
+          </div>
 
+          <!-- Progress Bar for Loading -->
+          <mat-progress-bar
+            *ngIf="isLoading()"
+            mode="indeterminate"
+            class="loading-bar"
+          >
+          </mat-progress-bar>
+
+          <!-- Main Content -->
+          <div class="showcase-content">
             <!-- Tab Content -->
             <mat-tab-group
               [(selectedIndex)]="selectedTabIndexNumber"
@@ -226,24 +179,24 @@ interface ShowcaseTab {
                 </div>
               </mat-tab>
             </mat-tab-group>
-          </mat-sidenav-content>
-        </mat-sidenav-container>
-      </div>
+          </div>
 
-      <!-- Footer -->
-      <div class="showcase-footer">
-        <p>
-          AegisX Component Showcase -
-          <span class="component-count"
-            >{{ totalComponentCount() }} components</span
-          >
-          | <span class="version">v{{ version }}</span> |
-          <a href="https://material.angular.io" target="_blank"
-            >Angular Material</a
-          >
-          |
-          <a href="#" (click)="showAbout()">About</a>
-        </p>
+          <!-- Footer -->
+          <div class="showcase-footer">
+            <p>
+              AegisX Component Showcase -
+              <span class="component-count"
+                >{{ totalComponentCount() }} components</span
+              >
+              | <span class="version">v{{ version }}</span> |
+              <a href="https://material.angular.io" target="_blank"
+                >Angular Material</a
+              >
+              |
+              <a href="#" (click)="showAbout()">About</a>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   `,

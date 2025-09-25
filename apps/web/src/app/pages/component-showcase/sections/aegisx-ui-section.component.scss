@@ -1,760 +1,350 @@
 .aegisx-ui-section {
-  padding: 2rem;
-  min-height: 100%;
+  padding: 0;
 
-  .section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 2rem;
-    padding: 2rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 12px;
-    color: white;
+  // Demo Header
+  .demo-header {
+    padding: 2rem 2rem 1rem;
+    border-bottom: 1px solid #e0e0e0;
+    background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
 
-    .header-content {
+    h3 {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.75rem;
+      margin: 0 0 1rem 0;
+      color: #2e7d32;
+      font-size: 1.5rem;
+      font-weight: 600;
 
-      .section-icon {
-        font-size: 3rem;
-        width: 3rem;
-        height: 3rem;
+      mat-icon {
+        color: #4caf50;
+        font-size: 1.75rem;
+        width: 1.75rem;
+        height: 1.75rem;
+      }
+    }
+
+    .demo-description {
+      margin: 0;
+      color: #388e3c;
+      line-height: 1.6;
+      font-size: 1rem;
+      max-width: 800px;
+    }
+  }
+
+  // Demo Sections
+  .aegisx-demo-sections {
+    padding: 0;
+
+    .demo-section {
+      margin-bottom: 0;
+      padding: 2rem;
+      border-bottom: 1px solid #f0f0f0;
+      background-color: white;
+
+      &:last-child {
+        border-bottom: none;
       }
 
-      .section-info {
-        h2 {
-          margin: 0 0 0.5rem;
-          font-size: 2rem;
-          font-weight: 300;
+      .section-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin: 0 0 0.5rem 0;
+        color: #1976d2;
+        font-size: 1.25rem;
+        font-weight: 600;
+
+        mat-icon {
+          color: #2196f3;
+          font-size: 1.5rem;
+          width: 1.5rem;
+          height: 1.5rem;
+        }
+      }
+
+      .section-description {
+        margin: 0 0 2rem 0;
+        color: #666;
+        font-size: 0.95rem;
+        line-height: 1.5;
+      }
+
+      .demo-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 2rem;
+        margin-top: 1.5rem;
+
+        @media (max-width: 768px) {
+          grid-template-columns: 1fr;
+          gap: 1.5rem;
         }
 
-        p {
-          margin: 0;
-          opacity: 0.9;
-          font-size: 1.1rem;
+        .demo-item {
+          &.full-width {
+            grid-column: 1 / -1;
+          }
+
+          h4 {
+            margin: 0 0 1rem 0;
+            color: #424242;
+            font-size: 1rem;
+            font-weight: 500;
+            border-bottom: 2px solid #e3f2fd;
+            padding-bottom: 0.5rem;
+          }
+        }
+      }
+    }
+  }
+
+  // AegisX Component Styling
+  ::ng-deep {
+    // AegisX Card Styling
+    ax-card {
+      display: block;
+      margin-bottom: 1rem;
+
+      .card-actions {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid #f0f0f0;
+      }
+
+      .card-stats {
+        display: flex;
+        gap: 2rem;
+        margin: 1.5rem 0;
+
+        .stat-item {
+          text-align: center;
+
+          .stat-number {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1976d2;
+          }
+
+          .stat-label {
+            display: block;
+            font-size: 0.875rem;
+            color: #666;
+            margin-top: 0.25rem;
+          }
         }
       }
     }
 
-    .section-stats {
+    // AegisX Alert Styling
+    ax-alert {
+      display: block;
+      margin-bottom: 1rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    .alert-stack {
       display: flex;
-      gap: 2rem;
+      flex-direction: column;
+      gap: 1rem;
+    }
 
-      .stat {
+    // Breadcrumb Styling
+    ax-breadcrumb {
+      display: block;
+      padding: 1rem;
+      background-color: #f8f9fa;
+      border-radius: 6px;
+      border: 1px solid #e9ecef;
+    }
+
+    // Loading Bar Demo
+    .loading-demo {
+      padding: 1.5rem;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+
+      .loading-controls {
+        margin-top: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+
+        @media (max-width: 768px) {
+          flex-direction: column;
+          align-items: stretch;
+
+          mat-button-toggle-group {
+            width: 100%;
+          }
+        }
+      }
+    }
+
+    // User Menu Demo
+    .user-menu-demo {
+      padding: 1.5rem;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+      text-align: center;
+    }
+
+    // Integration Example
+    .widget-content {
+      margin: 1.5rem 0;
+
+      .revenue-display {
         text-align: center;
+        margin-bottom: 1.5rem;
 
-        .stat-number {
+        .revenue-amount {
           display: block;
-          font-size: 2.5rem;
-          font-weight: 300;
+          font-size: 2rem;
+          font-weight: 700;
+          color: #2e7d32;
           line-height: 1;
         }
 
-        .stat-label {
+        .revenue-change {
+          display: inline-block;
           font-size: 0.875rem;
-          opacity: 0.8;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
+          font-weight: 500;
+          margin-top: 0.5rem;
+          padding: 0.25rem 0.5rem;
+          border-radius: 12px;
+
+          &.positive {
+            background-color: #e8f5e8;
+            color: #2e7d32;
+          }
+
+          &.negative {
+            background-color: #ffebee;
+            color: #c62828;
+          }
         }
       }
     }
-  }
 
-  .search-results {
-    margin-bottom: 3rem;
-
-    .search-title {
+    .widget-actions {
       display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 2rem;
-      color: var(--mat-primary-color);
-      font-size: 1.25rem;
-      font-weight: 500;
-
-      mat-icon {
-        font-size: 1.5rem;
-        width: 1.5rem;
-        height: 1.5rem;
-      }
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid #f0f0f0;
+      justify-content: flex-end;
     }
   }
 
-  .organized-sections {
-    margin-bottom: 3rem;
-
-    .sections-accordion {
-      .section-panel {
-        margin-bottom: 2rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        border-radius: 12px;
-        overflow: hidden;
-
-        ::ng-deep {
-          .mat-expansion-panel-header {
-            background: linear-gradient(45deg, #f8f9fa 0%, #e9ecef 100%);
-            padding: 1.5rem;
-
-            .mat-expansion-panel-header-title {
-              display: flex;
-              align-items: center;
-              gap: 0.75rem;
-              font-size: 1.25rem;
-              font-weight: 500;
-
-              mat-icon {
-                color: var(--mat-primary-color);
-                font-size: 1.5rem;
-                width: 1.5rem;
-                height: 1.5rem;
-              }
-
-              .count-chip {
-                margin-left: auto;
-                background-color: var(--mat-primary-color);
-                color: white;
-                font-weight: 500;
-              }
-            }
-
-            .mat-expansion-panel-header-description {
-              margin-top: 0.5rem;
-              color: #666;
-              font-size: 0.9rem;
-            }
-
-            &.mat-expanded {
-              background: linear-gradient(
-                45deg,
-                var(--mat-primary-color) 0%,
-                #764ba2 100%
-              );
-              color: white;
-
-              .mat-expansion-panel-header-title {
-                mat-icon {
-                  color: white;
-                }
-
-                .count-chip {
-                  background-color: rgba(255, 255, 255, 0.2);
-                  color: white;
-                }
-              }
-
-              .mat-expansion-panel-header-description {
-                color: rgba(255, 255, 255, 0.8);
-              }
-            }
-          }
-
-          .mat-expansion-panel-content .mat-expansion-panel-body {
-            padding: 0;
-          }
-        }
-
-        .section-content {
-          padding: 2rem;
-
-          .section-intro {
-            margin-bottom: 2rem;
-            padding: 1rem;
-            background-color: #f8f9fa;
-            border-left: 4px solid var(--mat-primary-color);
-            border-radius: 0 8px 8px 0;
-
-            p {
-              margin: 0;
-              color: #666;
-              font-size: 0.95rem;
-              line-height: 1.6;
-            }
-          }
-        }
-      }
-    }
-  }
-
-  .component-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
-    gap: 2rem;
-
-    .component-card {
-      border-radius: 16px;
-      overflow: hidden;
-      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-
-      &:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
-      }
-
-      &.search-result {
-        border-left: 4px solid var(--mat-accent-color);
-      }
-
-      mat-card-header {
-        padding: 1.5rem 1.5rem 1rem;
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-
-        .component-avatar {
-          background-color: var(--mat-primary-color);
-          color: white;
-          width: 48px;
-          height: 48px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 12px;
-
-          mat-icon {
-            font-size: 24px;
-            width: 24px;
-            height: 24px;
-          }
-        }
-
-        ::ng-deep {
-          .mat-card-header-text {
-            .mat-card-title {
-              font-size: 1.25rem;
-              font-weight: 500;
-              margin-bottom: 0.25rem;
-            }
-
-            .mat-card-subtitle {
-              font-size: 0.875rem;
-              color: #666;
-            }
-          }
-        }
-      }
-
-      mat-card-content {
-        padding: 1.5rem;
-
-        > p {
-          margin: 0 0 1.5rem;
-          color: #555;
-          line-height: 1.6;
-        }
-
-        .component-preview-container {
-          margin: 1.5rem 0;
-          border: 2px dashed #e0e0e0;
-          border-radius: 12px;
-          background: rgba(0, 0, 0, 0.02);
-          overflow: hidden;
-
-          // AegisX UI specific demo styles
-          .layout-demo {
-            .layout-preview {
-              display: grid;
-              gap: 4px;
-              font-size: 0.75rem;
-              text-align: center;
-              background: #fff;
-
-              &.classic {
-                grid-template-areas:
-                  'header header'
-                  'sidebar content'
-                  'footer footer';
-                grid-template-columns: 80px 1fr;
-                grid-template-rows: 30px 100px 30px;
-
-                .header {
-                  grid-area: header;
-                  background: #1976d2;
-                  color: white;
-                }
-                .sidebar {
-                  grid-area: sidebar;
-                  background: #f5f5f5;
-                }
-                .content {
-                  grid-area: content;
-                  background: #fff;
-                }
-                .footer {
-                  grid-area: footer;
-                  background: #424242;
-                  color: white;
-                }
-              }
-
-              &.compact {
-                grid-template-areas:
-                  'toolbar'
-                  'main';
-                grid-template-rows: 40px 100px;
-
-                .toolbar {
-                  grid-area: toolbar;
-                  background: #1976d2;
-                  color: white;
-                }
-                .main {
-                  grid-area: main;
-                  background: #fff;
-                }
-              }
-
-              > div {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 0.5rem;
-              }
-            }
-          }
-
-          .nav-demo {
-            padding: 1rem;
-
-            .nav-preview {
-              .nav-item {
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                padding: 0.75rem;
-                border-radius: 8px;
-                margin-bottom: 0.25rem;
-                transition: background-color 0.2s;
-
-                &:hover {
-                  background-color: #f5f5f5;
-                }
-
-                &.active {
-                  background-color: var(--mat-primary-color);
-                  color: white;
-                }
-
-                mat-icon {
-                  font-size: 1rem;
-                  width: 1rem;
-                  height: 1rem;
-                }
-              }
-            }
-          }
-
-          .card-demo {
-            padding: 1rem;
-
-            .aegisx-card-preview {
-              border: 1px solid #e0e0e0;
-              border-radius: 8px;
-              overflow: hidden;
-              background: #fff;
-
-              .card-header {
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                padding: 1rem;
-                background: linear-gradient(45deg, #667eea, #764ba2);
-                color: white;
-                font-weight: 500;
-              }
-
-              .card-body {
-                padding: 1rem;
-                color: #555;
-              }
-
-              .card-actions {
-                padding: 0.5rem 1rem 1rem;
-              }
-            }
-          }
-
-          .alert-demo {
-            padding: 1rem;
-
-            .alert-preview {
-              display: flex;
-              align-items: center;
-              gap: 0.5rem;
-              padding: 0.75rem 1rem;
-              border-radius: 8px;
-              font-size: 0.875rem;
-
-              &.success {
-                background-color: #e8f5e8;
-                color: #2e7d32;
-                border: 1px solid #a5d6a7;
-              }
-
-              mat-icon {
-                font-size: 1.25rem;
-                width: 1.25rem;
-                height: 1.25rem;
-              }
-            }
-          }
-
-          .loading-demo {
-            padding: 2rem;
-            text-align: center;
-
-            .loading-preview {
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              gap: 1rem;
-
-              .loading-spinner {
-                width: 32px;
-                height: 32px;
-                border: 3px solid #e0e0e0;
-                border-top: 3px solid var(--mat-primary-color);
-                border-radius: 50%;
-                animation: spin 1s linear infinite;
-              }
-
-              span {
-                color: #666;
-                font-size: 0.875rem;
-              }
-            }
-          }
-
-          .default-preview {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-            text-align: center;
-
-            .preview-icon {
-              font-size: 3rem;
-              width: 3rem;
-              height: 3rem;
-              margin-bottom: 1rem;
-              color: #ccc;
-            }
-
-            h4 {
-              margin: 0 0 0.5rem;
-              color: #666;
-            }
-
-            p {
-              margin: 0;
-              color: #999;
-              font-size: 0.875rem;
-            }
-          }
-        }
-
-        .component-tags {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.5rem;
-          margin: 1rem 0;
-
-          .tag-chip {
-            background-color: #e3f2fd;
-            color: #1565c0;
-            font-size: 0.75rem;
-            height: 28px;
-          }
-        }
-
-        .component-features {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.5rem;
-          margin-top: 1rem;
-
-          .complexity-chip {
-            font-size: 0.75rem;
-            height: 28px;
-          }
-
-          .feature-chip {
-            background-color: #f3e5f5;
-            color: #7b1fa2;
-            font-size: 0.75rem;
-            height: 28px;
-
-            mat-icon {
-              font-size: 0.875rem;
-              width: 0.875rem;
-              height: 0.875rem;
-              margin-right: 0.25rem;
-            }
-          }
-        }
-      }
-
-      mat-card-actions {
-        padding: 1rem 1.5rem 1.5rem;
-        display: flex;
-        gap: 0.5rem;
-
-        button {
-          mat-icon {
-            margin-right: 0.25rem;
-            font-size: 1rem;
-            width: 1rem;
-            height: 1rem;
-          }
-        }
-      }
-    }
-  }
-
-  .no-results {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 4rem 2rem;
-    text-align: center;
-
-    mat-icon {
-      font-size: 4rem;
-      width: 4rem;
-      height: 4rem;
-      margin-bottom: 1rem;
-      color: #ccc;
-    }
-
-    h3 {
-      margin: 0 0 1rem;
-      color: #666;
-      font-size: 1.5rem;
-    }
-
-    p {
-      margin: 0 0 2rem;
-      color: #999;
-      max-width: 400px;
-    }
-  }
-
-  .getting-started {
-    margin-top: 3rem;
-
-    .guide-card {
-      border-radius: 16px;
-      overflow: hidden;
-      border-left: 4px solid var(--mat-primary-color);
-
-      mat-card-header {
-        background: linear-gradient(45deg, #f8f9fa, #e9ecef);
-        padding: 2rem;
-
-        ::ng-deep .mat-card-header-text {
-          .mat-card-title {
-            font-size: 1.5rem;
-            font-weight: 500;
-          }
-
-          .mat-card-subtitle {
-            font-size: 1rem;
-            margin-top: 0.5rem;
-          }
-        }
-      }
-
-      mat-card-content {
-        padding: 2rem;
-
-        .installation-steps {
-          h4 {
-            margin: 0 0 1rem;
-            color: #333;
-            font-size: 1.1rem;
-            font-weight: 500;
-
-            &:not(:first-child) {
-              margin-top: 2rem;
-            }
-          }
-        }
-      }
-
-      mat-card-actions {
-        padding: 1rem 2rem 2rem;
-        display: flex;
-        gap: 1rem;
-
-        button mat-icon {
-          margin-right: 0.5rem;
-        }
-      }
-    }
-  }
-}
-
-// Animations
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-// Responsive design
-@media (max-width: 768px) {
-  .aegisx-ui-section {
-    padding: 1rem;
-
-    .section-header {
-      flex-direction: column;
-      align-items: stretch;
-      gap: 1.5rem;
+  // Responsive Design
+  @media (max-width: 768px) {
+    .aegisx-demo-sections .demo-section {
       padding: 1.5rem;
 
-      .header-content {
-        text-align: center;
-        flex-direction: column;
-
-        .section-icon {
-          font-size: 2.5rem;
-          width: 2.5rem;
-          height: 2.5rem;
-        }
-
-        .section-info h2 {
-          font-size: 1.5rem;
-        }
-      }
-
-      .section-stats {
-        justify-content: center;
-        gap: 1rem;
-
-        .stat-number {
-          font-size: 2rem;
-        }
+      .demo-grid {
+        grid-template-columns: 1fr;
       }
     }
 
-    .organized-sections .sections-accordion .section-panel .section-content {
-      padding: 1rem;
-    }
+    .demo-header {
+      padding: 1.5rem;
 
-    .component-grid {
-      grid-template-columns: 1fr;
-      gap: 1rem;
-
-      .component-card {
-        mat-card-header {
-          padding: 1rem;
-        }
-
-        mat-card-content {
-          padding: 1rem;
-
-          .component-preview-container {
-            margin: 1rem 0;
-          }
-        }
-
-        mat-card-actions {
-          padding: 0.75rem 1rem 1rem;
-          flex-direction: column;
-
-          button {
-            width: 100%;
-            margin-bottom: 0.5rem;
-
-            &:last-child {
-              margin-bottom: 0;
-            }
-          }
-        }
-      }
-    }
-
-    .getting-started .guide-card {
-      mat-card-header,
-      mat-card-content {
-        padding: 1rem;
-      }
-
-      mat-card-actions {
-        padding: 0.75rem 1rem 1rem;
-        flex-direction: column;
-
-        button {
-          width: 100%;
-          margin-bottom: 0.5rem;
-
-          &:last-child {
-            margin-bottom: 0;
-          }
-        }
+      h3 {
+        font-size: 1.25rem;
       }
     }
   }
-}
 
-// Dark theme support
-:host-context(.dark-theme) .aegisx-ui-section {
-  .section-header {
-    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-  }
+  // Dark Theme Support
+  :host-context(.dark-theme) & {
+    .demo-header {
+      background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
 
-  .organized-sections .sections-accordion .section-panel {
-    ::ng-deep .mat-expansion-panel-header {
-      background: linear-gradient(45deg, #3d3d3d 0%, #2d2d2d 100%);
-      color: #fff;
+      h3 {
+        color: #c8e6c9;
+      }
 
-      .mat-expansion-panel-header-description {
+      .demo-description {
+        color: #a5d6a7;
+      }
+    }
+
+    .aegisx-demo-sections .demo-section {
+      background-color: #2d2d2d;
+      border-bottom-color: #444;
+
+      .section-title {
+        color: #64b5f6;
+
+        mat-icon {
+          color: #42a5f5;
+        }
+      }
+
+      .section-description {
         color: #ccc;
       }
 
-      &.mat-expanded {
-        background: linear-gradient(45deg, #2c3e50 0%, #34495e 100%);
+      .demo-item h4 {
+        color: #fff;
+        border-bottom-color: #1e88e5;
+      }
+    }
+
+    ::ng-deep {
+      .loading-demo,
+      .user-menu-demo {
+        background-color: #3d3d3d;
+        border-color: #555;
+      }
+
+      ax-breadcrumb {
+        background-color: #3d3d3d;
+        border-color: #555;
       }
     }
   }
 
-  .organized-sections
-    .sections-accordion
-    .section-panel
-    .section-content
-    .section-intro {
-    background-color: #3d3d3d;
-    color: #ccc;
+  // Print Styles
+  @media print {
+    .demo-header {
+      background: none !important;
+      border-bottom: 2px solid #000;
+    }
 
-    p {
-      color: #ccc;
+    .aegisx-demo-sections .demo-section {
+      break-inside: avoid;
+      border-bottom: 1px solid #000;
+    }
+
+    ::ng-deep {
+      .loading-controls,
+      .widget-actions,
+      .card-actions {
+        display: none;
+      }
     }
   }
 
-  .component-grid .component-card {
-    background-color: #2d2d2d;
-    color: #fff;
+  // Animation for Interactive Elements
+  .loading-demo,
+  .user-menu-demo,
+  ::ng-deep ax-card {
+    transition: all 0.3s ease;
 
-    mat-card-header {
-      background: linear-gradient(135deg, #3d3d3d 0%, #2d2d2d 100%);
-    }
-
-    mat-card-content > p {
-      color: #ccc;
-    }
-  }
-
-  .getting-started .guide-card {
-    background-color: #2d2d2d;
-    color: #fff;
-
-    mat-card-header {
-      background: linear-gradient(45deg, #3d3d3d, #2d2d2d);
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
   }
 }

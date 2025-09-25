@@ -18,6 +18,7 @@ import { appRoutes } from './app.routes';
 import { provideGlobalErrorHandler } from './core/error-handler.service';
 import { httpErrorInterceptorProvider } from './core/http-error.interceptor';
 import { authInterceptor } from './core/auth.interceptor';
+import { baseUrlInterceptor } from './core/base-url.interceptor';
 import { MonitoringService } from './core/monitoring.service';
 
 // Factory function to initialize monitoring service
@@ -44,7 +45,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(appRoutes),
     provideAnimations(),
-    provideHttpClient(withInterceptors([authInterceptor])),
+    provideHttpClient(withInterceptors([baseUrlInterceptor, authInterceptor])),
 
     // Error handling and monitoring
     provideGlobalErrorHandler(),

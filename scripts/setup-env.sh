@@ -134,6 +134,40 @@ if [ "$FOUND_CONFLICTS" = true ]; then
     echo ""
 fi
 
+# Generate secure secrets function
+generate_secure_secret() {
+    local length=${1:-64}
+    openssl rand -base64 $((length * 3 / 4)) | tr -d "=+/" | cut -c1-${length}
+}
+
+# Create .env from .env.example if it doesn't exist
+if [ ! -f ".env" ]; then
+    print_status "📄 Creating .env from .env.example..."
+    
+    if [ ! -f ".env.example" ]; then
+        print_error "❌ .env.example not found!"
+        exit 1
+    fi
+    
+    # Generate secure secrets
+    JWT_SECRET=$(generate_secure_secret 64)
+    SESSION_SECRET=$(generate_secure_secret 64)
+    
+    print_status "🔐 Generated secure JWT and session secrets"
+    
+    # Copy .env.example to .env and replace secrets
+    cp .env.example .env
+    
+    # Replace the short secrets with secure ones
+    sed -i.bak "s/JWT_SECRET=.*/JWT_SECRET=${JWT_SECRET}/" .env
+    sed -i.bak "s/SESSION_SECRET=.*/SESSION_SECRET=${SESSION_SECRET}/" .env
+    rm .env.bak
+    
+    print_success "✅ .env created with secure secrets"
+else
+    print_status "✅ .env already exists"
+fi
+
 # Generate .env.local file
 print_status "📄 Generating .env.local..."
 
@@ -161,6 +195,7 @@ REDIS_PORT=$REDIS_PORT
 # API Configuration
 API_PORT=$API_PORT
 API_URL=http://localhost:$API_PORT
+API_BASE_URL=http://localhost:$WEB_PORT
 
 # Frontend Configuration
 WEB_PORT=$WEB_PORT

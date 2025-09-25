@@ -18,7 +18,7 @@ export interface AegisxNavigationItem {
   target?: '_blank' | '_self' | '_parent' | '_top';
   permissions?: string[];
   classes?: string;
-  meta?: Record<string, any>;
+  meta?: Record<string, unknown>;
   expanded?: boolean;
 }
 

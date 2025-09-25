@@ -62,15 +62,26 @@ export class UsersService {
       throw new AppError('Username already exists', 409, 'USERNAME_EXISTS');
     }
 
-    // If role name is provided instead of roleId, convert it
+    // Determine roleId - either from roleId field or by converting role name
     let roleId = data.roleId;
-    if (!roleId && (data as any).role) {
+    if (!roleId && data.role) {
       const roles = await this.usersRepository.getRoles();
-      const role = roles.find((r) => r.name === (data as any).role);
+      const role = roles.find((r) => r.name === data.role);
       if (role) {
         roleId = role.id;
       } else {
         throw new AppError('Invalid role', 400, 'INVALID_ROLE');
+      }
+    }
+    
+    // If still no roleId, use default 'user' role
+    if (!roleId) {
+      const roles = await this.usersRepository.getRoles();
+      const defaultRole = roles.find((r) => r.name === 'user');
+      if (defaultRole) {
+        roleId = defaultRole.id;
+      } else {
+        throw new AppError('Default user role not found', 500, 'DEFAULT_ROLE_NOT_FOUND');
       }
     }
 

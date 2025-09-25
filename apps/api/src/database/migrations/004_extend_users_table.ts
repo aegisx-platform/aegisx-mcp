@@ -1,6 +1,6 @@
-import { Knex } from 'knex';
+import Knex from 'knex';
 
-export async function up(knex: Knex): Promise<void> {
+export async function up(knex: any): Promise<void> {
   // Extend users table to match OpenAPI UserProfile schema
   await knex.schema.alterTable('users', (table) => {
     // Avatar and profile fields
@@ -54,7 +54,7 @@ export async function up(knex: Knex): Promise<void> {
   });
 }
 
-export async function down(knex: Knex): Promise<void> {
+export async function down(knex: any): Promise<void> {
   // Drop avatar_files table first (foreign key dependency)
   await knex.schema.dropTableIfExists('avatar_files');
   

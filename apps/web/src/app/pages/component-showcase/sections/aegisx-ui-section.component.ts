@@ -21,8 +21,17 @@ import {
   ShowcaseDataService,
   ComponentExample,
 } from '../services/showcase-data.service';
-import { CodeViewerComponent } from '../shared/code-viewer.component';
-import { ComponentPreviewComponent } from '../shared/component-preview.component';
+// Removed unused imports: CodeViewerComponent, ComponentPreviewComponent
+
+// Import AegisX UI Components
+import {
+  AegisxCardComponent,
+  AegisxAlertComponent,
+  BreadcrumbComponent,
+  AxLoadingBarComponent,
+  AxNavigationComponent,
+  UserMenuComponent,
+} from '@aegisx/ui';
 
 interface AegisxSection {
   id: string;
@@ -47,374 +56,315 @@ interface AegisxSection {
     MatExpansionModule,
     MatProgressBarModule,
     MatButtonToggleModule,
-    CodeViewerComponent,
-    ComponentPreviewComponent,
+    // Removed unused imports
+    // AegisX UI Components
+    AegisxCardComponent,
+    AegisxAlertComponent,
+    BreadcrumbComponent,
+    AxLoadingBarComponent,
+    UserMenuComponent,
   ],
   template: `
     <div class="aegisx-ui-section">
-      <div class="section-header">
-        <div class="header-content">
-          <mat-icon class="section-icon">architecture</mat-icon>
-          <div class="section-info">
-            <h2>AegisX UI Components</h2>
-            <p>Custom component library built for enterprise applications</p>
-          </div>
-        </div>
-        <div class="section-stats">
-          <div class="stat">
-            <span class="stat-number">{{ totalComponents() }}</span>
-            <span class="stat-label">Components</span>
-          </div>
-          <div class="stat">
-            <span class="stat-number">{{ filteredComponents().length }}</span>
-            <span class="stat-label">Matches</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Search Results (if searching) -->
-      <div
-        *ngIf="searchQuery && filteredComponents().length > 0"
-        class="search-results"
-      >
-        <h3 class="search-title">
-          <mat-icon>search</mat-icon>
-          Search Results for "{{ searchQuery }}" ({{
-            filteredComponents().length
-          }})
+      <!-- AegisX UI Demo Header -->
+      <div class="demo-header">
+        <h3>
+          <mat-icon>architecture</mat-icon>
+          AegisX UI Components Library
         </h3>
-
-        <div class="component-grid">
-          <mat-card
-            *ngFor="let component of filteredComponents()"
-            class="component-card"
-          >
-            <mat-card-header>
-              <mat-card-title>{{ component.name }}</mat-card-title>
-              <mat-card-subtitle>{{ component.source }}</mat-card-subtitle>
-            </mat-card-header>
-
-            <mat-card-content>
-              <p>{{ component.description }}</p>
-
-              <!-- Installation Note -->
-              <div class="installation-note">
-                <mat-icon>info</mat-icon>
-                <span
-                  >Custom AegisX UI component - part of enterprise library</span
-                >
-              </div>
-
-              <!-- Tags -->
-              <div class="component-tags">
-                <mat-chip *ngFor="let tag of component.tags" class="tag-chip">
-                  {{ tag }}
-                </mat-chip>
-              </div>
-            </mat-card-content>
-
-            <mat-card-actions>
-              <button mat-button (click)="showCode(component)">
-                <mat-icon>code</mat-icon>
-                View Code
-              </button>
-              <button mat-button (click)="tryComponent(component)">
-                <mat-icon>play_arrow</mat-icon>
-                Try Component
-              </button>
-            </mat-card-actions>
-          </mat-card>
-        </div>
+        <p class="demo-description">
+          Custom enterprise-grade Angular components that extend Material Design with additional functionality.
+          These components are part of the @aegisx/ui library and provide enhanced features for business applications.
+        </p>
       </div>
 
-      <!-- Organized Sections -->
-      <div *ngIf="!searchQuery" class="organized-sections">
-        <!-- Getting Started Section -->
-        <div class="getting-started-section">
-          <mat-card class="getting-started-card">
-            <mat-card-header>
-              <mat-card-title>
-                <mat-icon>rocket_launch</mat-icon>
-                Getting Started with AegisX UI
-              </mat-card-title>
-            </mat-card-header>
-
-            <mat-card-content>
-              <p>
-                AegisX UI is a custom component library designed for enterprise
-                applications. It extends Angular Material with additional
-                components and enhanced styling.
-              </p>
-
-              <div class="code-sections">
-                <div class="code-section">
-                  <h4>Installation</h4>
-                  <app-code-viewer
-                    language="bash"
-                    [code]="installationCode"
-                    title="Install AegisX UI"
-                  >
-                  </app-code-viewer>
+      <!-- Real AegisX UI Components Demo -->
+      <div class="aegisx-demo-sections">
+        
+        <!-- AegisX Card Component Demo -->
+        <section class="demo-section">
+          <h2 class="section-title">
+            <mat-icon>view_module</mat-icon>
+            AegisX Card Component
+          </h2>
+          <p class="section-description">Enhanced card component with additional styling and features.</p>
+          
+          <div class="demo-grid">
+            <div class="demo-item">
+              <h4>Standard AegisX Card</h4>
+              <ax-card 
+                title="Sample Card" 
+                subtitle="AegisX UI Component"
+                appearance="outlined">
+                <p>This is an AegisX card component that provides additional features beyond standard Material cards.</p>
+                <div class="card-actions">
+                  <button mat-raised-button color="primary">Primary Action</button>
+                  <button mat-button>Secondary</button>
                 </div>
+              </ax-card>
+            </div>
 
-                <div class="code-section">
-                  <h4>Basic Usage</h4>
-                  <app-code-viewer
-                    language="typescript"
-                    [code]="usageCode"
-                    title="Basic Usage Example"
-                  >
-                  </app-code-viewer>
+            <div class="demo-item">
+              <h4>Elevated AegisX Card</h4>
+              <ax-card 
+                title="Elevated Card" 
+                subtitle="With Shadow"
+                appearance="elevated">
+                <p>This card has elevated styling with enhanced shadows and spacing.</p>
+                <div class="card-stats">
+                  <div class="stat-item">
+                    <span class="stat-number">24</span>
+                    <span class="stat-label">Active Users</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-number">156</span>
+                    <span class="stat-label">Total Sessions</span>
+                  </div>
                 </div>
-              </div>
-            </mat-card-content>
-          </mat-card>
-        </div>
+              </ax-card>
+            </div>
+          </div>
+        </section>
 
-        <!-- Component Categories -->
-        <mat-accordion class="sections-accordion" multi>
-          <mat-expansion-panel
-            *ngFor="let section of aegisxSections()"
-            [expanded]="section.expanded"
-            class="section-panel"
-          >
-            <mat-expansion-panel-header>
-              <mat-panel-title>
-                <mat-icon>{{ section.icon }}</mat-icon>
-                {{ section.title }}
-                <mat-chip class="count-chip">{{
-                  section.components.length
-                }}</mat-chip>
-              </mat-panel-title>
-              <mat-panel-description>
-                {{ section.description }}
-              </mat-panel-description>
-            </mat-expansion-panel-header>
-
-            <div class="section-content">
-              <div class="component-grid">
-                <mat-card
-                  *ngFor="let component of section.components"
-                  class="component-card"
-                >
-                  <mat-card-header>
-                    <mat-card-title>{{ component.name }}</mat-card-title>
-                    <mat-card-subtitle>
-                      <mat-icon>code</mat-icon>
-                      {{ component.source }}
-                    </mat-card-subtitle>
-                  </mat-card-header>
-
-                  <mat-card-content>
-                    <p>{{ component.description }}</p>
-
-                    <!-- Component Preview -->
-                    <div class="component-preview" *ngIf="component.liveDemo">
-                      <app-component-preview
-                        [componentId]="component.id"
-                        [responsive]="component.responsive || false"
-                      >
-                      </app-component-preview>
-                    </div>
-
-                    <!-- Coming Soon Notice -->
-                    <div *ngIf="!component.liveDemo" class="coming-soon">
-                      <mat-icon>schedule</mat-icon>
-                      <span>Component preview coming soon</span>
-                    </div>
-
-                    <!-- Tags -->
-                    <div class="component-tags">
-                      <mat-chip
-                        *ngFor="let tag of component.tags"
-                        class="tag-chip"
-                      >
-                        {{ tag }}
-                      </mat-chip>
-                    </div>
-                  </mat-card-content>
-
-                  <mat-card-actions>
-                    <button mat-button (click)="showCode(component)">
-                      <mat-icon>code</mat-icon>
-                      Code
-                    </button>
-                    <button mat-button (click)="tryComponent(component)">
-                      <mat-icon>play_arrow</mat-icon>
-                      Try
-                    </button>
-                    <button mat-button (click)="openInStackBlitz(component)">
-                      <mat-icon>open_in_new</mat-icon>
-                      StackBlitz
-                    </button>
-                  </mat-card-actions>
-                </mat-card>
+        <!-- AegisX Alert Component Demo -->
+        <section class="demo-section">
+          <h2 class="section-title">
+            <mat-icon>announcement</mat-icon>
+            AegisX Alert Component
+          </h2>
+          <p class="section-description">Customizable alert component with multiple variants and actions.</p>
+          
+          <div class="demo-grid">
+            <div class="demo-item">
+              <h4>Alert Variants</h4>
+              <div class="alert-stack">
+                <ax-alert 
+                  type="success" 
+                  title="Success Alert"
+                  [dismissible]="true">
+                  Operation completed successfully!
+                </ax-alert>
+                
+                <ax-alert 
+                  type="warning" 
+                  title="Warning Alert"
+                  [dismissible]="true">
+                  Please review your settings before proceeding.
+                </ax-alert>
+                
+                <ax-alert 
+                  type="error" 
+                  title="Error Alert"
+                  [dismissible]="true">
+                  An error occurred while processing your request.
+                </ax-alert>
+                
+                <ax-alert 
+                  type="info" 
+                  title="Information"
+                  [dismissible]="true">
+                  New features are now available in your dashboard.
+                </ax-alert>
               </div>
             </div>
-          </mat-expansion-panel>
-        </mat-accordion>
-      </div>
+          </div>
+        </section>
 
-      <!-- No Results -->
-      <div
-        *ngIf="searchQuery && filteredComponents().length === 0"
-        class="no-results"
-      >
-        <mat-icon>search_off</mat-icon>
-        <h3>No AegisX UI components found</h3>
-        <p>Try searching with different keywords or browse all components.</p>
-        <button mat-raised-button color="primary" (click)="clearSearch()">
-          Browse All Components
-        </button>
+        <!-- Breadcrumb Component Demo -->
+        <section class="demo-section">
+          <h2 class="section-title">
+            <mat-icon>navigation</mat-icon>
+            Breadcrumb Navigation
+          </h2>
+          <p class="section-description">Enhanced breadcrumb component for navigation hierarchy.</p>
+          
+          <div class="demo-grid">
+            <div class="demo-item">
+              <h4>Standard Breadcrumb</h4>
+              <ax-breadcrumb [items]="breadcrumbItems"></ax-breadcrumb>
+            </div>
+
+            <div class="demo-item">
+              <h4>Interactive Breadcrumb</h4>
+              <ax-breadcrumb 
+                [items]="complexBreadcrumbItems" 
+                [showIcons]="true"
+                [maxItems]="4">
+              </ax-breadcrumb>
+            </div>
+          </div>
+        </section>
+
+        <!-- Loading Components Demo -->
+        <section class="demo-section">
+          <h2 class="section-title">
+            <mat-icon>hourglass_empty</mat-icon>
+            Loading Components
+          </h2>
+          <p class="section-description">Loading indicators and progress components.</p>
+          
+          <div class="demo-grid">
+            <div class="demo-item">
+              <h4>AegisX Loading Bar</h4>
+              <div class="loading-demo">
+                <div *ngIf="showLoadingBar()">
+                  <ax-loading-bar></ax-loading-bar>
+                </div>
+                <div class="loading-controls">
+                  <button mat-raised-button (click)="toggleLoadingBar()">
+                    {{ showLoadingBar() ? 'Hide' : 'Show' }} Loading Bar
+                  </button>
+                  <p class="loading-note">
+                    This loading bar is positioned fixed at the top of the page when active.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- User Menu Component Demo -->
+        <section class="demo-section">
+          <h2 class="section-title">
+            <mat-icon>account_circle</mat-icon>
+            User Menu Component
+          </h2>
+          <p class="section-description">Enterprise user menu with avatar, actions, and profile options.</p>
+          
+          <div class="demo-grid">
+            <div class="demo-item">
+              <h4>User Menu</h4>
+              <div class="user-menu-demo">
+                <ax-user-menu>
+                  <!-- User menu will use default settings -->
+                </ax-user-menu>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Integration Examples -->
+        <section class="demo-section">
+          <h2 class="section-title">
+            <mat-icon>integration_instructions</mat-icon>
+            Integration Examples
+          </h2>
+          <p class="section-description">Real-world usage examples combining multiple AegisX UI components.</p>
+          
+          <div class="demo-grid">
+            <div class="demo-item full-width">
+              <h4>Dashboard Widget Example</h4>
+              <ax-card 
+                title="Monthly Revenue" 
+                subtitle="Analytics Dashboard"
+                appearance="outlined">
+                
+                <div class="widget-content">
+                  <div class="revenue-display">
+                    <span class="revenue-amount">$24,567</span>
+                    <span class="revenue-change positive">+12.5%</span>
+                  </div>
+                  
+                  <ax-alert 
+                    type="success" 
+                    title="Target Achieved"
+                    [dismissible]="false">
+                    Monthly revenue target exceeded by 8.3%
+                  </ax-alert>
+                </div>
+                
+                <div class="widget-actions">
+                  <button mat-button>View Details</button>
+                  <button mat-raised-button color="primary">Generate Report</button>
+                </div>
+              </ax-card>
+            </div>
+          </div>
+        </section>
+
       </div>
-    </div>
-  `,
+    </div>`,
   styleUrls: ['./aegisx-ui-section.component.scss'],
 })
 export class AegisxUiSectionComponent implements OnInit {
   @Input() searchQuery: string = '';
   @Input() theme: 'light' | 'dark' = 'light';
 
-  private showcaseDataService = inject(ShowcaseDataService);
+  // Signals for interactive controls
+  showLoadingBar = signal(false);
 
-  // Signals
-  components = signal<ComponentExample[]>([]);
-  loading = signal(false);
-
-  // Computed properties
-  filteredComponents = computed(() => {
-    if (!this.searchQuery) return [];
-
-    return this.components().filter(
-      (component) =>
-        component.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        component.description
-          .toLowerCase()
-          .includes(this.searchQuery.toLowerCase()) ||
-        component.tags.some((tag) =>
-          tag.toLowerCase().includes(this.searchQuery.toLowerCase()),
-        ),
-    );
-  });
-
-  totalComponents = computed(() => this.components().length);
-
-  aegisxSections = computed(() => {
-    const componentsByCategory = this.groupComponentsByCategory();
-
-    const sections: AegisxSection[] = [
-      {
-        id: 'layout-components',
-        title: 'Layout Components',
-        description: 'Structural components for organizing application layouts',
-        icon: 'view_quilt',
-        components: componentsByCategory['Layout Components'] || [],
-        expanded: true,
-      },
-      {
-        id: 'navigation-components',
-        title: 'Navigation Components',
-        description: 'Enhanced navigation and menu components',
-        icon: 'navigation',
-        components: componentsByCategory['Navigation Components'] || [],
-      },
-      {
-        id: 'content-components',
-        title: 'Content Components',
-        description: 'Cards, alerts, and content display components',
-        icon: 'article',
-        components: componentsByCategory['Content Components'] || [],
-      },
-      {
-        id: 'interactive-components',
-        title: 'Interactive Components',
-        description: 'User interaction and feedback components',
-        icon: 'touch_app',
-        components: componentsByCategory['Interactive Components'] || [],
-      },
-    ];
-
-    return sections.filter((section) => section.components.length > 0);
-  });
-
-  // Code examples for getting started
-  installationCode = `npm install @aegisx/ui
-
-# or with yarn
-yarn add @aegisx/ui`;
-
-  usageCode = `import { AegisxUiModule } from '@aegisx/ui';
-import { Component } from '@angular/core';
-
-@Component({
-  selector: 'app-root',
-  template: \\\`
-    <aegisx-classic-layout>
-      <aegisx-nav-menu [items]="menuItems"></aegisx-nav-menu>
-      <router-outlet></router-outlet>
-    </aegisx-classic-layout>
-  \\\`,
-  imports: [AegisxUiModule]
-})
-export class AppComponent {
-  menuItems = [
-    { label: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
-    { label: 'Users', icon: 'people', route: '/users' }
+  // Demo data
+  breadcrumbItems = [
+    {
+      id: 'home',
+      title: 'Home',
+      icon: 'home',
+      link: '/',
+      type: 'basic' as const,
+    },
+    {
+      id: 'products',
+      title: 'Products',
+      link: '/products',
+      type: 'basic' as const,
+    },
+    {
+      id: 'electronics',
+      title: 'Electronics',
+      link: '/products/electronics',
+      type: 'basic' as const,
+    },
+    { id: 'phones', title: 'Mobile Phones', type: 'basic' as const },
   ];
-}`;
+
+  complexBreadcrumbItems = [
+    {
+      id: 'dashboard',
+      title: 'Dashboard',
+      icon: 'dashboard',
+      link: '/dashboard',
+      type: 'basic' as const,
+    },
+    {
+      id: 'analytics',
+      title: 'Analytics',
+      icon: 'analytics',
+      link: '/analytics',
+      type: 'basic' as const,
+    },
+    {
+      id: 'reports',
+      title: 'Reports',
+      icon: 'assessment',
+      link: '/analytics/reports',
+      type: 'basic' as const,
+    },
+    {
+      id: 'sales',
+      title: 'Sales Report',
+      icon: 'trending_up',
+      link: '/analytics/reports/sales',
+      type: 'basic' as const,
+    },
+    { id: 'monthly', title: 'Monthly Sales', type: 'basic' as const },
+  ];
+
+  demoUser = {
+    id: '1',
+    name: 'John Doe',
+    email: 'john.doe@company.com',
+    avatar:
+      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+    role: 'Administrator',
+    department: 'Engineering',
+  };
 
   ngOnInit() {
-    this.loadAegisxComponents();
+    // Initialize demo
   }
 
-  private async loadAegisxComponents() {
-    this.loading.set(true);
-
-    try {
-      await this.showcaseDataService.loadComponentData();
-      const aegisxData = this.showcaseDataService.getCategoryData('aegisx');
-
-      if (aegisxData) {
-        this.components.set(aegisxData.components);
-      }
-    } catch (error) {
-      console.error('Failed to load AegisX UI components:', error);
-    } finally {
-      this.loading.set(false);
-    }
-  }
-
-  private groupComponentsByCategory(): Record<string, ComponentExample[]> {
-    const grouped: Record<string, ComponentExample[]> = {};
-
-    for (const component of this.components()) {
-      if (!grouped[component.category]) {
-        grouped[component.category] = [];
-      }
-      grouped[component.category].push(component);
-    }
-
-    return grouped;
-  }
-
-  // Event handlers
-  showCode(component: ComponentExample) {
-    // Show code example in dialog or expand section
-    console.log('Showing code for:', component.name);
-  }
-
-  tryComponent(component: ComponentExample) {
-    // Open interactive playground or demo
-    console.log('Trying component:', component.name);
-  }
-
-  openInStackBlitz(component: ComponentExample) {
-    // Open component example in StackBlitz
-    console.log('Opening in StackBlitz:', component.name);
-  }
-
-  clearSearch() {
-    // Emit event to parent to clear search
-    console.log('Clear search requested');
+  // Interactive demo methods
+  toggleLoadingBar() {
+    this.showLoadingBar.set(!this.showLoadingBar());
   }
 }

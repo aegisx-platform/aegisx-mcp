@@ -2,27 +2,31 @@
 
 > **🚨 CRITICAL** - This registry MUST be updated before starting any feature development to prevent conflicts and ensure smooth parallel development.
 
-**Last Updated**: 2025-09-13 15:00  
-**Active Features**: 2
+**Last Updated**: 2025-09-22 16:45
+**Active Features**: 3
 **Resolved Conflicts**: 0
 
 ---
 
 ## 🗄️ Database Resources (Reserved)
 
-| Table/Column          | Feature | Developer | Status | Notes | Reserved Date |
-| --------------------- | ------- | --------- | ------ | ----- | ------------- |
-| `users.bio` column    | user-profile | Claude | ✅ Completed | For user biography text | 2025-09-13 |
-| `users.avatar_url`    | user-profile | Claude | ✅ Completed | Profile picture URL | 2025-09-13 |
-| `user_preferences`    | user-profile | Claude | ✅ Completed | User settings/preferences | 2025-09-13 |
-| `user_activity_logs`  | user-profile | Claude | 🔶 Reserved | Account activity history | 2025-09-13 |
-| roles | rbac | Claude | 🔒 Reserved | Core roles table for RBAC system | 2025-09-13 |
-| permissions | rbac | Claude | 🔒 Reserved | Permissions table for RBAC system | 2025-09-13 |
-| role_permissions | rbac | Claude | 🔒 Reserved | Many-to-many mapping of roles to permissions | 2025-09-13 |
-| user_roles | rbac | Claude | 🔒 Reserved | Many-to-many mapping of users to roles | 2025-09-13 |
-| role_hierarchy | rbac | Claude | 🔒 Reserved | Role hierarchy and inheritance structure | 2025-09-13 |
-| permission_categories | rbac | Claude | 🔒 Reserved | Categories for organizing permissions | 2025-09-13 |
-| audit_role_changes | rbac-management | Claude | 🔒 Reserved | Audit trail for role and permission changes | 2025-09-13 |
+| Table/Column          | Feature               | Developer | Status       | Notes                                           | Reserved Date |
+| --------------------- | --------------------- | --------- | ------------ | ----------------------------------------------- | ------------- |
+| `users.bio` column    | user-profile          | Claude    | ✅ Completed | For user biography text                         | 2025-09-13    |
+| `users.avatar_url`    | user-profile          | Claude    | ✅ Completed | Profile picture URL                             | 2025-09-13    |
+| `user_preferences`    | user-profile          | Claude    | ✅ Completed | User settings/preferences                       | 2025-09-13    |
+| `user_activity_logs`  | user-profile          | Claude    | 🔶 Reserved  | Account activity history                        | 2025-09-13    |
+| roles                 | rbac                  | Claude    | 🔒 Reserved  | Core roles table for RBAC system               | 2025-09-13    |
+| permissions           | rbac                  | Claude    | 🔒 Reserved  | Permissions table for RBAC system              | 2025-09-13    |
+| role_permissions      | rbac                  | Claude    | 🔒 Reserved  | Many-to-many mapping of roles to permissions   | 2025-09-13    |
+| user_roles            | rbac                  | Claude    | 🔒 Reserved  | Many-to-many mapping of users to roles         | 2025-09-13    |
+| role_hierarchy        | rbac                  | Claude    | 🔒 Reserved  | Role hierarchy and inheritance structure       | 2025-09-13    |
+| permission_categories | rbac                  | Claude    | 🔒 Reserved  | Categories for organizing permissions          | 2025-09-13    |
+| audit_role_changes    | rbac-management       | Claude    | 🔒 Reserved  | Audit trail for role and permission changes    | 2025-09-13    |
+| generator_templates   | crud-generator        | Claude    | 🔒 Reserved  | Template storage for code generation (optional)| 2025-09-22    |
+| generator_configs     | crud-generator        | Claude    | 🔒 Reserved  | Generator configuration settings (optional)    | 2025-09-22    |
+| event_store           | realtime-event-system | Claude    | 🔒 Reserved  | Optional event sourcing storage                 | 2025-09-22    |
+| websocket_sessions    | realtime-event-system | Claude    | 🔒 Reserved  | WebSocket session management                    | 2025-09-22    |
 
 ### Available Tables for New Features
 
@@ -35,6 +39,26 @@
 
 ## 🛣️ API Endpoints (Reserved)
 
+<<<<<<< HEAD
+| Endpoint Pattern                 | Feature         | Developer | Status       | Notes                             | Reserved Date |
+| -------------------------------- | --------------- | --------- | ------------ | --------------------------------- | ------------- |
+| `/api/profile`                   | user-profile    | Claude    | ✅ Completed | User profile CRUD                 | 2025-09-13    |
+| `/api/profile/password`          | user-profile    | Claude    | ✅ Completed | Password change                   | 2025-09-13    |
+| `/api/profile/avatar`            | user-profile    | Claude    | ✅ Completed | Avatar upload/update              | 2025-09-13    |
+| `/api/profile/preferences`       | user-profile    | Claude    | ✅ Completed | User preferences                  | 2025-09-13    |
+| `/api/profile/activity`          | user-profile    | Claude    | 🔶 Reserved  | Activity logs                     | 2025-09-13    |
+| /api/rbac/roles/\*               | rbac            | Claude    | 🔒 Reserved  | Role management endpoints         | 2025-09-13    |
+| /api/rbac/permissions/\*         | rbac            | Claude    | 🔒 Reserved  | Permission management endpoints   | 2025-09-13    |
+| /api/rbac/users/\*/roles         | rbac            | Claude    | 🔒 Reserved  | User role assignment endpoints    | 2025-09-13    |
+| /api/rbac/check-permission       | rbac            | Claude    | 🔒 Reserved  | Permission checking endpoint      | 2025-09-13    |
+| /api/rbac/hierarchy/\*           | rbac            | Claude    | 🔒 Reserved  | Role hierarchy management         | 2025-09-13    |
+| /api/admin/rbac/\*               | rbac-management | Claude    | 🔒 Reserved  | Admin UI for RBAC management      | 2025-09-13    |
+| /api/admin/users/\*/assign-roles | rbac-management | Claude    | 🔒 Reserved  | Bulk user role assignment         | 2025-09-13    |
+| /api/admin/audit/rbac/\*         | rbac-management | Claude    | 🔒 Reserved  | RBAC audit trail endpoints        | 2025-09-13    |
+| /api/generator/\*                | crud-generator  | Claude    | 🔒 Reserved  | API endpoints for CRUD generation | 2025-09-22    |
+| /api/generator/templates/\*      | crud-generator  | Claude    | 🔒 Reserved  | Template management endpoints     | 2025-09-22    |
+| /api/generator/preview/\*        | crud-generator  | Claude    | 🔒 Reserved  | Code preview before generation    | 2025-09-22    |
+=======
 | Endpoint Pattern      | Feature | Developer | Status | Notes | Reserved Date |
 | --------------------- | ------- | --------- | ------ | ----- | ------------- |
 | `/api/profile`        | user-profile | Claude | ✅ Completed | User profile CRUD | 2025-09-13 |
@@ -50,6 +74,11 @@
 | /api/admin/rbac/* | rbac-management | Claude | 🔒 Reserved | Admin UI for RBAC management | 2025-09-13 |
 | /api/admin/users/*/assign-roles | rbac-management | Claude | 🔒 Reserved | Bulk user role assignment | 2025-09-13 |
 | /api/admin/audit/rbac/* | rbac-management | Claude | 🔒 Reserved | RBAC audit trail endpoints | 2025-09-13 |
+| /api/events/* | realtime-event-system | Claude | 🔒 Reserved | Event management and monitoring | 2025-09-22 |
+| /api/websocket/health | realtime-event-system | Claude | 🔒 Reserved | WebSocket health check endpoint | 2025-09-22 |
+| /api/websocket/stats | realtime-event-system | Claude | 🔒 Reserved | WebSocket connection statistics | 2025-09-22 |
+| /api/events/publish | realtime-event-system | Claude | 🔒 Reserved | Manual event publishing endpoint | 2025-09-22 |
+>>>>>>> feature/realtime-event-system
 
 ### Available Endpoint Patterns
 
@@ -63,6 +92,20 @@
 
 ## 🎨 Frontend Routes (Reserved)
 
+<<<<<<< HEAD
+| Route Pattern              | Feature         | Developer | Status      | Notes                                  | Reserved Date |
+| -------------------------- | --------------- | --------- | ----------- | -------------------------------------- | ------------- |
+| /rbac/\*                   | rbac            | Claude    | 🔒 Reserved | Core RBAC system routes (internal use) | 2025-09-13    |
+| /admin/rbac/roles          | rbac-management | Claude    | 🔒 Reserved | Role management interface              | 2025-09-13    |
+| /admin/rbac/permissions    | rbac-management | Claude    | 🔒 Reserved | Permission management interface        | 2025-09-13    |
+| /admin/rbac/users          | rbac-management | Claude    | 🔒 Reserved | User role assignment interface         | 2025-09-13    |
+| /admin/rbac/hierarchy      | rbac-management | Claude    | 🔒 Reserved | Role hierarchy management              | 2025-09-13    |
+| /admin/rbac/audit          | rbac-management | Claude    | 🔒 Reserved | RBAC audit trail view                  | 2025-09-13    |
+| /admin/rbac/matrix         | rbac-management | Claude    | 🔒 Reserved | Permission matrix view                 | 2025-09-13    |
+| /admin/generator           | crud-generator  | Claude    | 🔒 Reserved | CRUD Generator admin interface         | 2025-09-22    |
+| /admin/generator/templates | crud-generator  | Claude    | 🔒 Reserved | Template management interface          | 2025-09-22    |
+| /admin/generator/history   | crud-generator  | Claude    | 🔒 Reserved | Generation history and logs            | 2025-09-22    |
+=======
 | Route Pattern         | Feature | Developer | Status | Notes | Reserved Date |
 | --------------------- | ------- | --------- | ------ | ----- | ------------- |
 | /rbac/* | rbac | Claude | 🔒 Reserved | Core RBAC system routes (internal use) | 2025-09-13 |
@@ -72,6 +115,9 @@
 | /admin/rbac/hierarchy | rbac-management | Claude | 🔒 Reserved | Role hierarchy management | 2025-09-13 |
 | /admin/rbac/audit | rbac-management | Claude | 🔒 Reserved | RBAC audit trail view | 2025-09-13 |
 | /admin/rbac/matrix | rbac-management | Claude | 🔒 Reserved | Permission matrix view | 2025-09-13 |
+| /admin/events | realtime-event-system | Claude | 🔒 Reserved | Event monitoring dashboard | 2025-09-22 |
+| /admin/websocket | realtime-event-system | Claude | 🔒 Reserved | WebSocket connections monitor | 2025-09-22 |
+>>>>>>> feature/realtime-event-system
 
 ### Available Route Patterns
 
@@ -85,6 +131,21 @@
 
 ## 🧩 Shared Components (Coordination Required)
 
+<<<<<<< HEAD
+| Component                   | Features Using        | Lead Developer | Status       | Coordination Notes                           | Last Updated |
+| --------------------------- | --------------------- | -------------- | ------------ | -------------------------------------------- | ------------ |
+| `RBACService`               | rbac, rbac-management | Claude         | 🔒 Reserved  | Core RBAC service for permission checking    | 2025-09-13   |
+| `PermissionGuard`           | rbac, rbac-management | Claude         | 🤝 Shared    | Route guard using RBAC permissions           | 2025-09-13   |
+| `RoleAssignmentComponent`   | rbac-management       | Claude         | 🔒 Reserved  | Component for managing user role assignments | 2025-09-13   |
+| `PermissionMatrixComponent` | rbac-management       | Claude         | 🔒 Reserved  | Visual permission matrix display             | 2025-09-13   |
+| `UserProfileService`        | (Available)           | -              | 🟢 Available | Angular service for profile operations       | 2025-09-12   |
+| `NotificationService`       | (Available)           | -              | 🟢 Available | Service for notification handling            | 2025-09-12   |
+| `SecurityGuard`             | (Available)           | -              | 🟢 Available | Route guard for security checks              | 2025-09-12   |
+| `PasswordStrengthComponent` | (Available)           | -              | 🟢 Available | Reusable password strength indicator         | 2025-09-12   |
+| `CodeGeneratorService`      | crud-generator        | Claude         | 🔒 Reserved  | Service for generating CRUD code             | 2025-09-22   |
+| `TemplateEngine`            | crud-generator        | Claude         | 🔒 Reserved  | Template processing and rendering            | 2025-09-22   |
+| `DatabaseIntrospector`      | crud-generator        | Claude         | 🔒 Reserved  | Service for reading database schema          | 2025-09-22   |
+=======
 | Component                   | Features Using | Lead Developer | Status       | Coordination Notes                     | Last Updated |
 | --------------------------- | -------------- | -------------- | ------------ | -------------------------------------- | ------------ |
 | `RBACService`               | rbac, rbac-management | Claude | 🔒 Reserved | Core RBAC service for permission checking | 2025-09-13 |
@@ -95,6 +156,11 @@
 | `NotificationService`       | (Available)    | -              | 🟢 Available | Service for notification handling      | 2025-09-12   |
 | `SecurityGuard`             | (Available)    | -              | 🟢 Available | Route guard for security checks        | 2025-09-12   |
 | `PasswordStrengthComponent` | (Available)    | -              | 🟢 Available | Reusable password strength indicator   | 2025-09-12   |
+| `RealtimeEventBus`          | realtime-event-system | Claude | 🔒 Reserved | Core event bus with Socket.IO integration | 2025-09-22 |
+| `WebSocketTransport`        | realtime-event-system | Claude | 🔒 Reserved | Switchable WebSocket transport layer | 2025-09-22 |
+| `EventService`              | realtime-event-system | Claude | 🔒 Reserved | Enhanced event service with patterns | 2025-09-22 |
+| `WebSocketService`          | realtime-event-system | Claude | 🤝 Shared | Frontend WebSocket service (enhanced) | 2025-09-22 |
+>>>>>>> feature/realtime-event-system
 
 ---
 
@@ -103,7 +169,7 @@
 ### Next Available Migration Numbers
 
 - **Backend API**: `012_` (next available after RBAC migrations)
-- **Database Schema**: `010_rbac_tables` (reserved), `011_rbac_audit` (reserved)
+- **Database Schema**: `010_rbac_tables` (reserved), `011_rbac_audit` (reserved), `012_generator_tables` (reserved)
 
 ### Migration Coordination Rules
 

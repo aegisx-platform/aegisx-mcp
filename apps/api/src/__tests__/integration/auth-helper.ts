@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import { Knex } from 'knex';
+import Knex from 'knex';
 import bcrypt from 'bcrypt';
 
 export interface TestUser {
@@ -24,7 +24,7 @@ export interface AuthTokens {
 export class AuthHelper {
   constructor(
     private app: FastifyInstance,
-    private db: Knex,
+    private db: any,
   ) {}
 
   /**

@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import fp from 'fastify-plugin';
-import knex, { Knex } from 'knex';
+import knex from 'knex';
 
 async function knexPlugin(fastify: FastifyInstance, _opts: FastifyPluginOptions) {
   const db = knex({
@@ -51,7 +51,7 @@ export default fp(knexPlugin, {
 // TypeScript declarations
 declare module 'fastify' {
   interface FastifyInstance {
-    knex: Knex;
-    db: Knex;
+    knex: any;
+    db: any;
   }
 }

@@ -4,11 +4,11 @@ import {
   PerformanceMonitor,
 } from './settings.performance';
 import { SettingsRepository } from './settings.repository';
-import { Knex } from 'knex';
+import Knex from 'knex';
 
 export class SettingsCacheService {
   private redis: any;
-  private knex: Knex;
+  private knex: any;
   private repository: SettingsRepository;
   private warmupInterval?: NodeJS.Timeout;
 

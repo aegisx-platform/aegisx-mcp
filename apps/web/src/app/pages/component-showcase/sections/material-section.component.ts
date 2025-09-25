@@ -71,6 +71,27 @@ interface MaterialSection {
 
       <!-- Enhanced View -->
       <div *ngIf="viewMode() === 'enhanced'" class="enhanced-view">
+        <!-- Embedded Material Demo (Full showcase) -->
+        <div class="embedded-demo">
+          <div class="demo-header">
+            <h3>
+              <mat-icon>palette</mat-icon>
+              Complete Material Design Components Demo
+            </h3>
+            <p class="demo-description">
+              This section displays all Angular Material components with various
+              sizes, styles, and configurations. The demo includes form utility
+              classes (.form-xs, .form-compact, .form-standard, .form-lg) and
+              comprehensive examples of every Material component.
+            </p>
+          </div>
+
+          <!-- Embedded Material Demo Component -->
+          <div class="material-demo-embedded">
+            <app-material-demo></app-material-demo>
+          </div>
+        </div>
+
         <!-- Search Results (if searching) -->
         <div
           *ngIf="searchQuery && filteredComponents().length > 0"
@@ -148,97 +169,6 @@ interface MaterialSection {
               </mat-card-actions>
             </mat-card>
           </div>
-        </div>
-
-        <!-- Organized Sections -->
-        <div *ngIf="!searchQuery" class="organized-sections">
-          <mat-accordion class="sections-accordion" multi>
-            <mat-expansion-panel
-              *ngFor="let section of materialSections()"
-              [expanded]="section.expanded"
-              class="section-panel"
-            >
-              <mat-expansion-panel-header>
-                <mat-panel-title>
-                  <mat-icon>{{ section.icon }}</mat-icon>
-                  {{ section.title }}
-                  <mat-chip class="count-chip">{{
-                    section.components.length
-                  }}</mat-chip>
-                </mat-panel-title>
-                <mat-panel-description>
-                  {{ section.description }}
-                </mat-panel-description>
-              </mat-expansion-panel-header>
-
-              <div class="section-content">
-                <div class="component-grid">
-                  <mat-card
-                    *ngFor="let component of section.components"
-                    class="component-card"
-                    [id]="'card-' + component.id"
-                  >
-                    <mat-card-header>
-                      <mat-card-title>{{ component.name }}</mat-card-title>
-                      <mat-card-subtitle>
-                        <mat-icon>code</mat-icon>
-                        {{ component.source }}
-                      </mat-card-subtitle>
-                    </mat-card-header>
-
-                    <mat-card-content>
-                      <p>{{ component.description }}</p>
-
-                      <!-- Live Preview -->
-                      <div *ngIf="component.liveDemo" class="live-preview">
-                        <app-component-preview
-                          [componentId]="component.id"
-                          [responsive]="component.responsive || false"
-                        >
-                        </app-component-preview>
-                      </div>
-
-                      <!-- Tags -->
-                      <div class="component-tags">
-                        <mat-chip
-                          *ngFor="let tag of component.tags"
-                          class="tag-chip"
-                        >
-                          {{ tag }}
-                        </mat-chip>
-                      </div>
-                    </mat-card-content>
-
-                    <mat-card-actions>
-                      <button
-                        mat-button
-                        (click)="showInOriginalDemo(component.id)"
-                      >
-                        <mat-icon>open_in_new</mat-icon>
-                        Full Demo
-                      </button>
-                      <button
-                        mat-button
-                        *ngIf="component.codeExample"
-                        (click)="showCode(component)"
-                      >
-                        <mat-icon>code</mat-icon>
-                        Code
-                      </button>
-                      <button
-                        mat-button
-                        *ngIf="component.documentation"
-                        (click)="openDocumentation(component.documentation!)"
-                      >
-                        <mat-icon>help</mat-icon>
-                        Docs
-                      </button>
-                    </mat-card-actions>
-                  </mat-card>
-                </div>
-              </div>
-            </mat-expansion-panel>
-          </mat-accordion>
         </div>
 
         <!-- No Results -->

@@ -1,6 +1,6 @@
-import { Knex } from 'knex';
+import Knex from 'knex';
 
-export async function seed(knex: Knex): Promise<void> {
+export async function seed(knex: any): Promise<void> {
   // Helper function to safely insert navigation items
   async function insertNavigationItems(items: any[]) {
     const insertedItems = [];

@@ -19,16 +19,21 @@ import redisPlugin from './plugins/redis.plugin';
 import responseHandlerPlugin from './plugins/response-handler.plugin';
 import schemasPlugin from './plugins/schemas.plugin';
 // import schemaEnforcementPlugin from './plugins/schema-enforcement.plugin';
+import multipartPlugin from './plugins/multipart.plugin';
 import { activityLoggingPlugin } from './plugins/activity-logging';
 import authPlugin from './modules/auth/auth.plugin';
 import authStrategiesPlugin from './modules/auth/strategies/auth.strategies';
 import defaultPlugin from './modules/default/default.plugin';
+import fileUploadPlugin from './modules/file-upload/file-upload.plugin';
 import { monitoringPlugin as monitoringModulePlugin } from './modules/monitoring';
 import navigationPlugin from './modules/navigation/navigation.plugin';
 import settingsPlugin from './modules/settings/settings.plugin';
 import userProfilePlugin from './modules/user-profile/user-profile.plugin';
 import { usersPlugin } from './modules/users';
 import rbacPlugin from './modules/rbac/rbac.plugin';
+import themesPlugin from './modules/themes';
+// import apiKeysPlugin from './modules/apiKeys/index';
+// import apiKeysDomainPlugin from './modules/apiKeys';
 import jwtAuthPlugin from './plugins/jwt-auth.plugin';
 import staticFilesPlugin from './plugins/static-files.plugin';
 import swaggerPlugin from './plugins/swagger.plugin';
@@ -51,14 +56,33 @@ async function bootstrap() {
   });
 
   // 2. Infrastructure plugins
+  const corsOrigins =
+    process.env.CORS_ORIGIN?.split(',').map((origin) => origin.trim()) || [];
+
   await app.register(fastifyCors, {
-    origin:
-      process.env.NODE_ENV === 'production'
-        ? ['https://yourdomain.com', 'https://admin.yourdomain.com']
-        : true,
+    origin: corsOrigins.length > 0 ? corsOrigins : true,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   });
+
+  // Dynamic CSP configuration based on environment
+  const apiBaseUrl = process.env.API_BASE_URL || 'http://localhost:4200';
+  const webUrl = process.env.WEB_URL || 'http://localhost:4200';
+  const apiUrl = process.env.API_URL || 'http://localhost:3333';
+
+  // Parse URLs to extract hosts and origins for CSP
+  const getOriginFromUrl = (url: string) => {
+    try {
+      const urlObj = new URL(url);
+      return urlObj.origin;
+    } catch {
+      return url; // fallback for invalid URLs
+    }
+  };
+
+  const apiOrigin = getOriginFromUrl(apiUrl);
+  const webOrigin = getOriginFromUrl(webUrl);
+  const baseOrigin = getOriginFromUrl(apiBaseUrl);
 
   await app.register(fastifyHelmet, {
     contentSecurityPolicy: {
@@ -71,12 +95,23 @@ async function bootstrap() {
           "'unsafe-eval'",
           'https://cdn.jsdelivr.net',
         ],
-        imgSrc: ["'self'", 'data:', 'https:', 'blob:'],
+        imgSrc: [
+          "'self'",
+          'data:',
+          'https:',
+          'blob:',
+          // Allow images from all configured origins
+          webOrigin,
+          baseOrigin,
+          ...(webOrigin !== baseOrigin ? [baseOrigin] : []),
+        ],
         fontSrc: ["'self'", 'https:', 'data:'],
         connectSrc: [
           "'self'",
-          'http://localhost:3333',
-          'http://127.0.0.1:3333',
+          // Allow connections to all configured API endpoints
+          apiOrigin,
+          webOrigin,
+          ...(apiOrigin !== webOrigin ? [webOrigin] : []),
         ],
         workerSrc: ["'self'", 'blob:'],
       },
@@ -146,14 +181,22 @@ async function bootstrap() {
   // 9. Common schemas
   await app.register(schemasPlugin);
 
-  // 10. Schema enforcement (ensures all routes have schemas)
+  // 10. Multipart support (global)
+  await app.register(multipartPlugin, {
+    maxFileSize: 100 * 1024 * 1024, // 100MB
+    maxFiles: 10,
+    maxFieldSize: 10 * 1024 * 1024, // 10MB
+    maxFields: 20,
+  });
+
+  // 11. Schema enforcement (ensures all routes have schemas)
   // TODO: Re-enable after fixing all route schemas
   // await app.register(schemaEnforcementPlugin);
 
-  // 11. Auth strategies
+  // 12. Auth strategies
   await app.register(authStrategiesPlugin);
 
-  // 11.5. Activity logging (after auth but before feature modules)
+  // 12.5. Activity logging (after auth but before feature modules)
   await app.register(activityLoggingPlugin, {
     config: {
       enabled: process.env.ACTIVITY_LOGGING_ENABLED !== 'false',
@@ -168,13 +211,16 @@ async function bootstrap() {
     },
   });
 
-  // 12. Swagger documentation (before routes so it can capture them)
+  // 13. Swagger documentation (before routes so it can capture them)
   await app.register(swaggerPlugin);
 
-  // 13. Static files (before feature modules)
+  // 14. Static files (before feature modules)
   await app.register(staticFilesPlugin);
 
-  // 14. Feature modules
+  // 15. WebSocket support (before feature modules that depend on it)
+  await app.register(websocketPlugin);
+
+  // 16. Feature modules
   // Default/System module (info, status, health endpoints)
   await app.register(defaultPlugin);
 
@@ -196,11 +242,18 @@ async function bootstrap() {
   // RBAC module (after users and settings)
   await app.register(rbacPlugin);
 
+  // // Themes domain module
+  await app.register(themesPlugin);
+  // await app.register(apiKeysPlugin);
+
+  // // API Keys domain module
+  // await app.register(apiKeysDomainPlugin, { prefix: '/api' });
+
+  // File Upload module
+  await app.register(fileUploadPlugin);
+
   // Monitoring module (client error logging)
   await app.register(monitoringModulePlugin);
-
-  // WebSocket support
-  await app.register(websocketPlugin);
 
   // Start server
   const port = process.env.PORT || 3333;

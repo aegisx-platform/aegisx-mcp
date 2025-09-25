@@ -116,6 +116,13 @@ export class NavigationService {
           link: '/settings',
         },
         {
+          id: 'file-upload',
+          title: 'File Upload',
+          type: 'item',
+          icon: 'heroicons_outline:cloud-arrow-up',
+          link: '/file-upload',
+        },
+        {
           id: 'test-ax',
           title: 'Test Ax Navigation',
           type: 'item',
@@ -144,6 +151,13 @@ export class NavigationService {
               },
             ]
           : []),
+        {
+          id: 'file-upload-demo',
+          title: 'File Upload Demo',
+          type: 'item',
+          icon: 'heroicons_outline:beaker',
+          link: '/file-upload-demo',
+        },
         {
           id: 'test-rbac-websocket',
           title: 'RBAC WebSocket Test',

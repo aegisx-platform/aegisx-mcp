@@ -25,6 +25,12 @@ export const appRoutes: Route[] = [
     canActivate: [AuthGuard],
   },
   {
+    path: 'realtime-demo',
+    loadComponent: () =>
+      import('./pages/realtime-demo/realtime-demo.component').then((m) => m.RealtimeDemoComponent),
+    canActivate: [AuthGuard],
+  },
+  {
     path: 'dashboards/project',
     loadComponent: () =>
       import('./pages/dashboard/project-dashboard.page').then(
@@ -80,6 +86,22 @@ export const appRoutes: Route[] = [
       description: 'Role-Based Access Control Management System',
       requiredPermissions: ['rbac.read', 'admin.*'],
     },
+  },
+  {
+    path: 'file-upload',
+    loadComponent: () =>
+      import('./pages/file-upload/file-upload.page').then(
+        (m) => m.FileUploadPage,
+      ),
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'file-upload-demo',
+    loadComponent: () =>
+      import('./pages/file-upload/file-upload-demo.page').then(
+        (m) => m.FileUploadDemoPage,
+      ),
+    canActivate: [AuthGuard],
   },
   {
     path: 'components',

@@ -1,4 +1,4 @@
-import { Knex } from 'knex';
+import Knex from 'knex';
 
 export interface PaginationMeta {
   page: number;
@@ -22,7 +22,7 @@ export interface PaginatedResult<T> {
 }
 
 export async function buildPaginationQuery<T>(
-  baseQuery: Knex.QueryBuilder,
+  baseQuery: any,
   query: PaginationQuery,
   defaultSort = 'created_at',
   defaultOrder: 'asc' | 'desc' = 'desc',

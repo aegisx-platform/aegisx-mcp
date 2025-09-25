@@ -1,6 +1,6 @@
-import { Knex } from 'knex';
+import Knex from 'knex';
 
-export async function up(knex: Knex): Promise<void> {
+export async function up(knex: any): Promise<void> {
   await knex.schema.table('users', (table) => {
     // deleted_at already exists, only add missing columns
     table.text('deletion_reason').nullable();
@@ -13,7 +13,7 @@ export async function up(knex: Knex): Promise<void> {
   await knex.schema.raw('CREATE INDEX IF NOT EXISTS idx_users_recovery_deadline ON users(recovery_deadline) WHERE recovery_deadline IS NOT NULL');
 }
 
-export async function down(knex: Knex): Promise<void> {
+export async function down(knex: any): Promise<void> {
   await knex.schema.raw('DROP INDEX IF EXISTS idx_users_recovery_deadline');
   
   await knex.schema.table('users', (table) => {

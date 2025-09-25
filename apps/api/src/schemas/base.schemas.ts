@@ -164,6 +164,16 @@ export const ServerErrorResponseSchema = Type.Object({
   meta: Type.Optional(ApiMetaSchema),
 });
 
+// Base entity schemas
+export const BaseIdSchema = Type.Object({
+  id: Type.String({ format: 'uuid', description: 'Unique identifier' })
+});
+
+export const TimestampSchema = Type.Object({
+  created_at: Type.String({ format: 'date-time', description: 'Creation timestamp' }),
+  updated_at: Type.String({ format: 'date-time', description: 'Last update timestamp' })
+});
+
 // Common query parameters
 export const PaginationQuerySchema = Type.Object({
   page: Type.Optional(Type.Number({ minimum: 1, default: 1 })),

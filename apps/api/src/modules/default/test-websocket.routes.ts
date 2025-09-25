@@ -3,30 +3,35 @@ import { FastifyInstance } from 'fastify';
 export default async function testWebSocketRoutes(fastify: FastifyInstance) {
   // Test WebSocket event emission
   fastify.post('/test/websocket/emit', async (request, reply) => {
-    const { feature = 'rbac', entity = 'role', action = 'created', data = {} } = request.body as any;
+    const {
+      feature = 'rbac',
+      entity = 'role',
+      action = 'created',
+      data = {},
+    } = request.body as any;
 
     try {
       // Emit WebSocket event using EventService
       if (fastify.eventService) {
         fastify.eventService.emit(feature, entity, action, data, 'normal');
-        
+
         const eventName = `${feature}.${entity}.${action}`;
-        
+
         return reply.send({
           success: true,
           data: {
             message: 'WebSocket event emitted successfully',
             event: eventName,
-            emitted: true
-          }
+            emitted: true,
+          },
         });
       } else {
         return reply.code(503).send({
           success: false,
           error: {
             code: 'WEBSOCKET_NOT_AVAILABLE',
-            message: 'WebSocket service is not available'
-          }
+            message: 'WebSocket service is not available',
+          },
         });
       }
     } catch (error: any) {
@@ -35,15 +40,19 @@ export default async function testWebSocketRoutes(fastify: FastifyInstance) {
         success: false,
         error: {
           code: 'EMISSION_FAILED',
-          message: 'Failed to emit WebSocket event'
-        }
+          message: 'Failed to emit WebSocket event',
+        },
       });
     }
   });
 
   // Test RBAC role creation (for realistic testing)
   fastify.post('/test/rbac/role', async (request, reply) => {
-    const { name = 'Test Role', description, category = 'Test' } = request.body as any;
+    const {
+      name = 'Test Role',
+      description,
+      category = 'Test',
+    } = request.body as any;
 
     try {
       // Create mock role data
@@ -58,33 +67,33 @@ export default async function testWebSocketRoutes(fastify: FastifyInstance) {
         permissions: [],
         userCount: 0,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
 
       const events: string[] = [];
 
       // Emit role created event
       if (fastify.eventService) {
-        fastify.eventService.rbac.roleCreated(role);
+        fastify.eventService.for('rbac', 'role').emitCreated(role);
         events.push('rbac.role.created');
 
-        // Also emit a permission assignment event for testing
+        // Also emit a permission assignment event for testing using generic pattern
         const permissionData = {
           roleId: role.id,
           permissionId: 'test-permission-123',
-          assignedBy: 'system'
+          assignedBy: 'system',
         };
-        fastify.eventService.rbac.permissionAssigned(permissionData);
+        fastify.eventService.for('rbac', 'permission').emitCustom('assigned', permissionData);
         events.push('rbac.permission.assigned');
 
-        // Emit hierarchy change event
+        // Emit hierarchy change event using custom event
         const hierarchyData = {
           roleId: role.id,
           oldParentId: undefined,
           newParentId: 'root',
-          changedBy: 'system'
+          changedBy: 'system',
         };
-        fastify.eventService.rbac.hierarchyChanged(hierarchyData);
+        fastify.eventService.for('rbac', 'hierarchy').emitCustom('changed', hierarchyData, 'high');
         events.push('rbac.hierarchy.changed');
       }
 
@@ -92,8 +101,8 @@ export default async function testWebSocketRoutes(fastify: FastifyInstance) {
         success: true,
         data: {
           role,
-          events
-        }
+          events,
+        },
       });
     } catch (error: any) {
       console.error('Failed to create test role:', error);
@@ -101,8 +110,8 @@ export default async function testWebSocketRoutes(fastify: FastifyInstance) {
         success: false,
         error: {
           code: 'ROLE_CREATION_FAILED',
-          message: 'Failed to create test role'
-        }
+          message: 'Failed to create test role',
+        },
       });
     }
   });
@@ -119,7 +128,7 @@ export default async function testWebSocketRoutes(fastify: FastifyInstance) {
         fastify.eventService.emitBulkStarted('rbac', 'role', {
           operationId,
           total: itemCount,
-          operation: operationType
+          operation: operationType,
         });
         events.push('rbac.role.bulk_started');
 
@@ -135,8 +144,8 @@ export default async function testWebSocketRoutes(fastify: FastifyInstance) {
                     total: itemCount,
                     completed: i,
                     failed: 0,
-                    percentage: Math.round((i / itemCount) * 100)
-                  }
+                    percentage: Math.round((i / itemCount) * 100),
+                  },
                 });
 
                 // If this is the last item, emit completion
@@ -147,8 +156,8 @@ export default async function testWebSocketRoutes(fastify: FastifyInstance) {
                         operationId,
                         results: {
                           successful: itemCount,
-                          failed: 0
-                        }
+                          failed: 0,
+                        },
                       });
                     }
                   }, 100);
@@ -167,8 +176,8 @@ export default async function testWebSocketRoutes(fastify: FastifyInstance) {
         data: {
           operationId,
           totalItems: itemCount,
-          events
-        }
+          events,
+        },
       });
     } catch (error: any) {
       console.error('Failed to simulate bulk operation:', error);
@@ -176,8 +185,8 @@ export default async function testWebSocketRoutes(fastify: FastifyInstance) {
         success: false,
         error: {
           code: 'BULK_OPERATION_FAILED',
-          message: 'Failed to simulate bulk operation'
-        }
+          message: 'Failed to simulate bulk operation',
+        },
       });
     }
   });
@@ -187,21 +196,21 @@ export default async function testWebSocketRoutes(fastify: FastifyInstance) {
     try {
       if (fastify.eventService && fastify.websocketManager) {
         const stats = fastify.eventService.getConnectionStats();
-        
+
         return reply.send({
           success: true,
           data: {
             websocketAvailable: true,
-            stats
-          }
+            stats,
+          },
         });
       } else {
         return reply.send({
           success: true,
           data: {
             websocketAvailable: false,
-            stats: null
-          }
+            stats: null,
+          },
         });
       }
     } catch (error: any) {
@@ -210,8 +219,8 @@ export default async function testWebSocketRoutes(fastify: FastifyInstance) {
         success: false,
         error: {
           code: 'STATS_FAILED',
-          message: 'Failed to get WebSocket statistics'
-        }
+          message: 'Failed to get WebSocket statistics',
+        },
       });
     }
   });

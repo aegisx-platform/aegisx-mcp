@@ -1,4 +1,4 @@
-import { Knex } from 'knex';
+import Knex from 'knex';
 import bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -68,7 +68,7 @@ export interface SettingsFactoryOptions {
 }
 
 export class TestUserFactory {
-  constructor(private db: Knex) {}
+  constructor(private db: any) {}
 
   async create(options: UserFactoryOptions = {}): Promise<any> {
     const timestamp = Date.now();
@@ -243,7 +243,7 @@ export class TestUserFactory {
 }
 
 export class NavigationItemFactory {
-  constructor(private db: Knex) {}
+  constructor(private db: any) {}
 
   async create(options: NavigationItemFactoryOptions = {}): Promise<any> {
     const timestamp = Date.now();
@@ -354,7 +354,7 @@ export class NavigationItemFactory {
 }
 
 export class SessionFactory {
-  constructor(private db: Knex) {}
+  constructor(private db: any) {}
 
   async create(options: SessionFactoryOptions = {}): Promise<any> {
     const timestamp = Date.now();
@@ -390,7 +390,7 @@ export class SessionFactory {
 }
 
 export class SettingsFactory {
-  constructor(private db: Knex) {}
+  constructor(private db: any) {}
 
   async create(options: SettingsFactoryOptions = {}): Promise<any> {
     const settingsData = {
@@ -437,7 +437,7 @@ export class TestDataFactory {
   public session: SessionFactory;
   public settings: SettingsFactory;
 
-  constructor(db: Knex) {
+  constructor(db: any) {
     this.user = new TestUserFactory(db);
     this.navigation = new NavigationItemFactory(db);
     this.session = new SessionFactory(db);
@@ -525,7 +525,7 @@ export class TestDataFactory {
   /**
    * Reference to the database for custom operations
    */
-  get db(): Knex {
+  get db(): any {
     return this.user['db'];
   }
 }

@@ -130,13 +130,14 @@ export async function userProfileRoutes(
     '/profile/avatar',
     {
       preValidation: [fastify.authenticate],
+      attachValidation: true, // Skip validation errors for multipart/form-data compatibility
       schema: {
         description: 'Upload user avatar',
         tags: ['User Profile'],
         summary: 'Upload a new avatar image',
         security: [{ bearerAuth: [] }],
         consumes: ['multipart/form-data'],
-        // Note: No body schema for multipart/form-data uploads
+        body: SchemaRefs.module('user-profile', 'avatar-upload-request'),
         response: {
           200: SchemaRefs.module('user-profile', 'avatar-upload-response'),
           400: SchemaRefs.ValidationError,
@@ -183,7 +184,10 @@ export async function userProfileRoutes(
         tags: ['User Activity'],
         summary: 'Retrieve user activity history with optional filters',
         security: [{ bearerAuth: [] }],
-        querystring: SchemaRefs.module('user-profile', 'get-activity-logs-query'),
+        querystring: SchemaRefs.module(
+          'user-profile',
+          'get-activity-logs-query',
+        ),
         response: {
           200: SchemaRefs.module('user-profile', 'activity-logs-response'),
           401: SchemaRefs.Unauthorized,
@@ -208,8 +212,8 @@ export async function userProfileRoutes(
           type: 'object',
           properties: {
             page: { type: 'integer', minimum: 1, default: 1 },
-            limit: { type: 'integer', minimum: 1, maximum: 50, default: 10 }
-          }
+            limit: { type: 'integer', minimum: 1, maximum: 50, default: 10 },
+          },
         },
         response: {
           200: SchemaRefs.module('user-profile', 'activity-sessions-response'),
@@ -257,8 +261,8 @@ export async function userProfileRoutes(
             type: 'object',
             properties: {
               success: { type: 'boolean' },
-              data: SchemaRefs.module('user-profile', 'activity-log')
-            }
+              data: SchemaRefs.module('user-profile', 'activity-log'),
+            },
           },
           401: SchemaRefs.Unauthorized,
           500: SchemaRefs.ServerError,

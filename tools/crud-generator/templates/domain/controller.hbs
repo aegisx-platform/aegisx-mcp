@@ -1,0 +1,267 @@
+import { FastifyRequest, FastifyReply } from 'fastify';
+import { Static } from '@sinclair/typebox';
+import { {{ModuleName}}Service } from '../services/{{currentRoute.camelName}}.service';
+import {
+  Create{{ModuleName}}Schema,
+  Update{{ModuleName}}Schema,
+  {{ModuleName}}IdParamSchema,
+  Get{{ModuleName}}QuerySchema,
+  List{{ModuleName}}QuerySchema
+} from '../schemas/{{currentRoute.camelName}}.schemas';
+
+/**
+ * {{ModuleName}} Controller
+ * 
+ * Following Fastify controller patterns:
+ * - Proper request/reply typing with Static<typeof Schema>
+ * - Schema-based validation integration
+ * - Structured error handling
+ * - Logging integration with Fastify's logger
+ */
+export class {{ModuleName}}Controller {
+  constructor(private {{moduleName}}Service: {{ModuleName}}Service) {}
+
+  /**
+   * Create new {{moduleName}}
+   * POST /{{moduleName}}
+   */
+  async create(
+    request: FastifyRequest<{ Body: Static<typeof Create{{ModuleName}}Schema> }>,
+    reply: FastifyReply
+  ) {
+    try {
+      request.log.info({ body: request.body }, 'Creating {{moduleName}}');
+
+      // Transform API schema to domain model
+      const createData = this.transformCreateSchema(request.body);
+      
+      const {{moduleName}} = await this.{{moduleName}}Service.create(createData);
+      
+      request.log.info({ {{moduleName}}Id: {{moduleName}}.id }, '{{ModuleName}} created successfully');
+
+      return reply.status(201).send({
+        success: true,
+        data: {{moduleName}},
+        message: '{{ModuleName}} created successfully'
+      });
+    } catch (error) {
+      request.log.error(error, 'Error creating {{moduleName}}');
+      
+      return reply.status(500).send({
+        success: false,
+        error: {
+          code: 'CREATION_FAILED',
+          message: error instanceof Error ? error.message : 'Failed to create {{moduleName}}'
+        }
+      });
+    }
+  }
+
+  /**
+   * Get {{moduleName}} by ID
+   * GET /{{moduleName}}/:id
+   */
+  async findOne(
+    request: FastifyRequest<{
+      Params: Static<typeof {{ModuleName}}IdParamSchema>;
+      Querystring: Static<typeof Get{{ModuleName}}QuerySchema>;
+    }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const { id } = request.params;
+      request.log.info({ {{moduleName}}Id: id }, 'Fetching {{moduleName}}');
+
+      const {{moduleName}} = await this.{{moduleName}}Service.findById(id, request.query);
+
+      if (!{{moduleName}}) {
+        return reply.status(404).send({
+          success: false,
+          error: {
+            code: 'NOT_FOUND',
+            message: '{{ModuleName}} not found'
+          }
+        });
+      }
+
+      return reply.send({
+        success: true,
+        data: {{moduleName}}
+      });
+    } catch (error) {
+      request.log.error({ error, {{moduleName}}Id: request.params.id }, 'Error fetching {{moduleName}}');
+      
+      return reply.status(500).send({
+        success: false,
+        error: {
+          code: 'FETCH_FAILED',
+          message: 'Failed to fetch {{moduleName}}'
+        }
+      });
+    }
+  }
+
+  /**
+   * Get paginated list of {{moduleName}}s
+   * GET /{{moduleName}}
+   */
+  async findMany(
+    request: FastifyRequest<{ Querystring: Static<typeof List{{ModuleName}}QuerySchema> }>,
+    reply: FastifyReply
+  ) {
+    try {
+      request.log.info({ query: request.query }, 'Fetching {{moduleName}} list');
+
+      const result = await this.{{moduleName}}Service.findMany(request.query);
+
+      request.log.info({ count: result.data.length, total: result.pagination.total }, '{{ModuleName}} list fetched');
+
+      return reply.send({
+        success: true,
+        data: result.data,
+        pagination: result.pagination
+      });
+    } catch (error) {
+      request.log.error({ error, query: request.query }, 'Error fetching {{moduleName}} list');
+      
+      return reply.status(500).send({
+        success: false,
+        error: {
+          code: 'LIST_FETCH_FAILED',
+          message: 'Failed to fetch {{moduleName}} list'
+        }
+      });
+    }
+  }
+
+  /**
+   * Update {{moduleName}}
+   * PUT /{{moduleName}}/:id
+   */
+  async update(
+    request: FastifyRequest<{
+      Params: Static<typeof {{ModuleName}}IdParamSchema>;
+      Body: Static<typeof Update{{ModuleName}}Schema>;
+    }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const { id } = request.params;
+      request.log.info({ {{moduleName}}Id: id, body: request.body }, 'Updating {{moduleName}}');
+
+      // Transform API schema to domain model
+      const updateData = this.transformUpdateSchema(request.body);
+      
+      const {{moduleName}} = await this.{{moduleName}}Service.update(id, updateData);
+
+      if (!{{moduleName}}) {
+        return reply.status(404).send({
+          success: false,
+          error: {
+            code: 'NOT_FOUND',
+            message: '{{ModuleName}} not found'
+          }
+        });
+      }
+
+      request.log.info({ {{moduleName}}Id: id }, '{{ModuleName}} updated successfully');
+
+      return reply.send({
+        success: true,
+        data: {{moduleName}},
+        message: '{{ModuleName}} updated successfully'
+      });
+    } catch (error) {
+      request.log.error({ error, {{moduleName}}Id: request.params.id }, 'Error updating {{moduleName}}');
+      
+      return reply.status(500).send({
+        success: false,
+        error: {
+          code: 'UPDATE_FAILED',
+          message: error instanceof Error ? error.message : 'Failed to update {{moduleName}}'
+        }
+      });
+    }
+  }
+
+  /**
+   * Delete {{moduleName}}
+   * DELETE /{{moduleName}}/:id
+   */
+  async delete(
+    request: FastifyRequest<{ Params: Static<typeof {{ModuleName}}IdParamSchema> }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const { id } = request.params;
+      request.log.info({ {{moduleName}}Id: id }, 'Deleting {{moduleName}}');
+
+      const deleted = await this.{{moduleName}}Service.delete(id);
+
+      if (!deleted) {
+        return reply.status(404).send({
+          success: false,
+          error: {
+            code: 'NOT_FOUND',
+            message: '{{ModuleName}} not found'
+          }
+        });
+      }
+
+      request.log.info({ {{moduleName}}Id: id }, '{{ModuleName}} deleted successfully');
+
+      return reply.send({
+        success: true,
+        message: '{{ModuleName}} deleted successfully',
+        data: { id, deleted: true }
+      });
+    } catch (error) {
+      request.log.error({ error, {{moduleName}}Id: request.params.id }, 'Error deleting {{moduleName}}');
+      
+      return reply.status(500).send({
+        success: false,
+        error: {
+          code: 'DELETE_FAILED',
+          message: error instanceof Error ? error.message : 'Failed to delete {{moduleName}}'
+        }
+      });
+    }
+  }
+
+  // ===== PRIVATE TRANSFORMATION METHODS =====
+
+  /**
+   * Transform API create schema to domain model
+   */
+  private transformCreateSchema(schema: Static<typeof Create{{ModuleName}}Schema>) {
+    return {
+      // Transform snake_case API fields to camelCase domain fields
+      {{#each columns}}
+      {{#unless isPrimaryKey}}
+      {{#unless (or (eq name 'created_at') (eq name 'updated_at'))}}
+      {{name}}: schema.{{name}},
+      {{/unless}}
+      {{/unless}}
+      {{/each}}
+    };
+  }
+
+  /**
+   * Transform API update schema to domain model  
+   */
+  private transformUpdateSchema(schema: Static<typeof Update{{ModuleName}}Schema>) {
+    const updateData: any = {};
+    
+    {{#each columns}}
+    {{#unless isPrimaryKey}}
+    {{#unless (or (eq name 'created_at') (eq name 'updated_at'))}}
+    if (schema.{{name}} !== undefined) {
+      updateData.{{name}} = schema.{{name}};
+    }
+    {{/unless}}
+    {{/unless}}
+    {{/each}}
+    
+    return updateData;
+  }
+}

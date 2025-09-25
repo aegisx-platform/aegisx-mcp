@@ -1,82 +1,142 @@
 # @aegisx/ui
 
-A comprehensive Angular UI library for the AegisX platform, featuring layouts, components, services, and directives built with Angular Material and TailwindCSS.
+A comprehensive enterprise Angular UI library featuring layouts, components, and services built with Angular Material and TailwindCSS. Supports Angular 17+ with multiple integration patterns.
 
-## Installation
+[![npm version](https://badge.fury.io/js/%40aegisx%2Fui.svg)](https://badge.fury.io/js/%40aegisx%2Fui)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+## 🚀 Quick Start
+
+### Installation
 
 ```bash
 npm install @aegisx/ui
 # or
+pnpm add @aegisx/ui
+# or
 yarn add @aegisx/ui
 ```
 
-## Setup
+### Setup Options
 
-### 1. Import the Module
+#### 🆕 **Option 1: Provider Functions (Recommended for Angular 17+)**
 
 ```typescript
+// main.ts
+import { bootstrapApplication } from '@angular/platform-browser';
+import { provideAegisxUI } from '@aegisx/ui';
+import { AppComponent } from './app/app.component';
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideAegisxUI({
+      theme: { name: 'indigo', scheme: 'auto' },
+      layout: { default: 'classic', sidenavWidth: 280 },
+      features: { darkMode: true, animations: true },
+    }),
+  ],
+});
+```
+
+#### **Option 2: NgModule (Legacy Support)**
+
+```typescript
+// app.module.ts
 import { AegisxUIModule } from '@aegisx/ui';
 
 @NgModule({
   imports: [
-    // ... other imports
     AegisxUIModule.forRoot({
-      theme: 'default',
-      scheme: 'auto',
-      layout: 'classic'
-    })
-  ]
+      theme: { name: 'default', scheme: 'light' },
+      layout: { default: 'classic' },
+    }),
+  ],
 })
-export class AppModule { }
+export class AppModule {}
 ```
 
-### 2. For Standalone Components
+#### **Option 3: Feature Modules (Tree-shaking)**
 
 ```typescript
-import { AegisxConfigService, ClassicLayoutComponent } from '@aegisx/ui';
+// app.module.ts
+import { AegisxCoreModule, AegisxLayoutsModule } from '@aegisx/ui';
+
+@NgModule({
+  imports: [
+    AegisxCoreModule.forRoot(config),
+    AegisxLayoutsModule, // Only import what you need
+  ],
+})
+export class AppModule {}
+```
+
+### Basic Usage
+
+```typescript
+// app.component.ts
+import { Component } from '@angular/core';
+import { AxClassicLayoutComponent, AxCardComponent } from '@aegisx/ui';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [ClassicLayoutComponent],
+  imports: [AxClassicLayoutComponent, AxCardComponent],
   template: `
     <ax-classic-layout>
-      <!-- Your content here -->
+      <div toolbar-title>Dashboard</div>
+
+      <ax-card title="Welcome" subtitle="Getting started">
+        <p>Your content here</p>
+      </ax-card>
     </ax-classic-layout>
-  `
+  `,
 })
-export class AppComponent { }
+export class AppComponent {}
 ```
 
-## Features
+## ✨ Features
 
-### 📐 Layouts
+### 📐 Layout System
 
-- **Empty Layout** - Minimal layout with no navigation
-- **Classic Layout** - Traditional admin layout with sidenav
-- **Compact Layout** - Collapsible icon-based navigation
-- **Enterprise Layout** - Horizontal navigation for complex applications
+- **📱 Responsive** - Mobile-first design with automatic adaptation
+- **🎨 Customizable** - Configurable sidebars, headers, and navigation
+- **🚀 Modern** - Built with Angular Signals and standalone components
 
-### 🛠️ Services
+| Layout                 | Description                           | Best For               |
+| ---------------------- | ------------------------------------- | ---------------------- |
+| `ax-classic-layout`    | Traditional admin layout with sidebar | Dashboard applications |
+| `ax-compact-layout`    | Collapsible icon-based navigation     | Content-focused apps   |
+| `ax-enterprise-layout` | Horizontal navigation bar             | Complex applications   |
+| `ax-empty-layout`      | Minimal layout without navigation     | Landing pages, auth    |
 
-- **ConfigService** - Application configuration and theming
-- **NavigationService** - Navigation state management
-- **LoadingService** - Global loading state
-- **MediaWatcherService** - Responsive breakpoint detection
+### 🛠️ Core Services
 
-### 🎨 Components
+| Service                     | Purpose                  | Features                             |
+| --------------------------- | ------------------------ | ------------------------------------ |
+| `AegisxConfigService`       | Configuration management | Theme switching, layout preferences  |
+| `AegisxNavigationService`   | Navigation state         | Dynamic menu generation, breadcrumbs |
+| `AegisxLoadingService`      | Loading states           | Global loading indicators            |
+| `AegisxMediaWatcherService` | Responsive breakpoints   | Mobile/desktop detection             |
 
-- **Navigation** - Flexible navigation component
-- **LoadingBar** - Global loading indicator
-- **UserMenu** - User profile dropdown
-- **Card** - Material Design card component
-- **Alert** - Notification alerts
-- **Drawer** - Side panel component
+### 🎨 UI Components
 
-### 🎯 Directives
+| Component   | Selector           | Description                       |
+| ----------- | ------------------ | --------------------------------- |
+| Card        | `<ax-card>`        | Enhanced Material Design cards    |
+| Alert       | `<ax-alert>`       | Notification alerts with variants |
+| Drawer      | `<ax-drawer>`      | Configurable side panels          |
+| Navigation  | `<ax-navigation>`  | Flexible navigation trees         |
+| Breadcrumb  | `<ax-breadcrumb>`  | Dynamic breadcrumb navigation     |
+| Loading Bar | `<ax-loading-bar>` | Global progress indicators        |
+| User Menu   | `<ax-user-menu>`   | User profile dropdowns            |
 
-- **axScrollbar** - Custom scrollbar styling
-- **axScrollReset** - Auto-scroll reset on navigation
+### 🎯 Developer Experience
+
+- **🔤 TypeScript** - Fully typed with strict mode
+- **📦 Tree-shakable** - Import only what you need
+- **🔄 SSR Ready** - Server-side rendering support
+- **♿ Accessible** - WCAG 2.1 compliant components
+- **🎨 Themeable** - Custom theme support with CSS variables
 
 ## Usage Examples
 
@@ -91,7 +151,7 @@ export class AppComponent { }
       <mat-icon>settings</mat-icon>
     </button>
   </div>
-  
+
   <!-- Page content -->
   <div class="p-6">
     <h1>Welcome to AegisX</h1>
@@ -107,11 +167,11 @@ import { AegisxConfigService, AegisxNavigationService } from '@aegisx/ui';
 export class AppComponent {
   constructor(
     private config: AegisxConfigService,
-    private navigation: AegisxNavigationService
+    private navigation: AegisxNavigationService,
   ) {
     // Set configuration
     this.config.update({ scheme: 'dark' });
-    
+
     // Set navigation
     this.navigation.setNavigation('default', [
       {
@@ -119,8 +179,8 @@ export class AppComponent {
         title: 'Dashboard',
         type: 'basic',
         icon: 'dashboard',
-        link: '/dashboard'
-      }
+        link: '/dashboard',
+      },
     ]);
   }
 }
@@ -130,8 +190,8 @@ export class AppComponent {
 
 ```typescript
 // Card Component
-<ax-card 
-  title="Statistics" 
+<ax-card
+  title="Statistics"
   subtitle="Monthly overview"
   icon="bar_chart"
   appearance="elevated"
@@ -143,8 +203,8 @@ export class AppComponent {
 </ax-card>
 
 // Alert Component
-<ax-alert 
-  type="success" 
+<ax-alert
+  type="success"
   title="Success!"
   [dismissible]="true"
 >
@@ -176,19 +236,132 @@ export class AppComponent {
 </main>
 ```
 
-## Theming
+## 🎨 Advanced Configuration
 
-The library uses TailwindCSS for styling and supports dark mode out of the box:
+### Theme Customization
 
 ```typescript
-// Toggle dark mode
-this.config.update({ scheme: 'dark' });
+import { provideAegisxUI } from '@aegisx/ui';
 
-// Change theme
-this.config.update({ theme: 'purple' });
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideAegisxUI({
+      theme: {
+        name: 'custom',
+        scheme: 'auto', // 'light' | 'dark' | 'auto'
+        colors: {
+          primary: '#6366f1',
+          accent: '#f59e0b',
+          warn: '#ef4444',
+        },
+        typography: {
+          fontFamily: 'Inter, sans-serif',
+          fontSize: '14px',
+        },
+      },
+      layout: {
+        default: 'classic',
+        sidenavWidth: 320,
+        showBranding: true,
+        collapsible: true,
+      },
+      features: {
+        darkMode: true,
+        animations: true,
+        rtl: false,
+      },
+    }),
+  ],
+});
+```
 
-// Change layout
-this.config.setLayout('compact');
+### Runtime Configuration Updates
+
+```typescript
+import { AegisxConfigService } from '@aegisx/ui';
+
+@Component({...})
+export class SettingsComponent {
+  constructor(private config: AegisxConfigService) {}
+
+  toggleDarkMode() {
+    this.config.update({
+      theme: { scheme: 'dark' }
+    });
+  }
+
+  changeLayout(layout: 'classic' | 'compact') {
+    this.config.update({
+      layout: { default: layout }
+    });
+  }
+}
+```
+
+## 🔄 Migration Guide
+
+### From v0.0.x to v0.1.x
+
+**1. Update Package Installation**
+
+```bash
+# Remove old version
+npm uninstall @aegisx/ui
+
+# Install new version
+npm install @aegisx/ui@^0.1.0
+```
+
+**2. Configuration Changes**
+
+```typescript
+// ❌ Old configuration (v0.0.x)
+AegisxUIModule.forRoot({
+  theme: 'default',
+  scheme: 'light',
+  layout: 'classic',
+});
+
+// ✅ New configuration (v0.1.x)
+AegisxUIModule.forRoot({
+  theme: { name: 'default', scheme: 'light' },
+  layout: { default: 'classic' },
+});
+
+// 🆕 Or use provider functions (recommended)
+provideAegisxUI({
+  theme: { name: 'default', scheme: 'light' },
+  layout: { default: 'classic' },
+});
+```
+
+**3. Component Import Updates**
+
+```typescript
+// ❌ Old imports (still supported)
+import { ClassicLayoutComponent } from '@aegisx/ui';
+
+// ✅ New standardized imports
+import { AxClassicLayoutComponent } from '@aegisx/ui';
+// or
+import { AxClassicLayoutComponent } from '@aegisx/ui/layouts';
+
+// Component usage remains the same
+<ax-classic-layout>...</ax-classic-layout>
+```
+
+**4. Feature Module Imports (Optional)**
+
+```typescript
+// 🆕 Tree-shakable imports
+import { AegisxCoreModule, AegisxLayoutsModule } from '@aegisx/ui';
+
+@NgModule({
+  imports: [
+    AegisxCoreModule.forRoot(config),
+    AegisxLayoutsModule // Only layouts
+  ]
+})
 ```
 
 ## Development

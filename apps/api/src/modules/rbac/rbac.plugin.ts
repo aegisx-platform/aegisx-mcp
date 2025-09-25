@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import fp from 'fastify-plugin';
-import { Knex } from 'knex';
+import Knex from 'knex';
 import { rbacRoutes } from './rbac.routes';
 import { RbacController } from './rbac.controller';
 import { RbacService } from './rbac.service';
@@ -13,7 +13,7 @@ async function rbacPlugin(
   options: RbacPluginOptions,
 ) {
   // Get database instance from global decorators
-  const db = fastify.db as Knex;
+  const db = fastify.db;
   if (!db) {
     throw new Error(
       'Database connection not found. Make sure database plugin is registered first.',

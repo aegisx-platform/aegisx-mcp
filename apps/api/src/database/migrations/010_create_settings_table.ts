@@ -1,6 +1,6 @@
-import { Knex } from 'knex';
+import Knex from 'knex';
 
-export async function up(knex: Knex): Promise<void> {
+export async function up(knex: any): Promise<void> {
   // Create app_settings table (renamed to avoid conflict with existing tables)
   await knex.schema.createTable('app_settings', (table) => {
     table.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));
@@ -104,7 +104,7 @@ export async function up(knex: Knex): Promise<void> {
   await knex.raw('CREATE INDEX idx_app_settings_namespace_key ON app_settings(namespace, key)');
 }
 
-export async function down(knex: Knex): Promise<void> {
+export async function down(knex: any): Promise<void> {
   // Drop indexes
   await knex.raw('DROP INDEX IF EXISTS idx_app_settings_namespace_key');
   await knex.raw('DROP INDEX IF EXISTS idx_app_settings_namespace_category');
