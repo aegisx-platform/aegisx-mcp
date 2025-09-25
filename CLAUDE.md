@@ -86,6 +86,22 @@ Keep commit messages clean and professional.
 - **This includes temporary files, old code, or seemingly unused files**
 - When refactoring or cleaning up, list files to be deleted and wait for confirmation
 
+**CRITICAL: Documentation Organization Policy**
+
+- **KEEP root directory clean** - Only essential files should remain in root
+- **Essential root files only:**
+  - `README.md` - Project introduction and quick start
+  - `CHANGELOG.md` - Release notes and version history
+  - `CLAUDE.md` - Instructions for AI development assistant
+  - `PROJECT_STATUS.md` - Current development status
+  - `package.json`, `tsconfig.json` - Core configuration files
+- **Move documentation to organized structure:**
+  - Feature docs → `docs/features/[feature-name]/`
+  - Architecture docs → `docs/architecture/`
+  - Development guides → `docs/development/`
+  - Infrastructure guides → `docs/infrastructure/`
+- **NEVER create standalone .md files in root** without specific justification
+
 ### Feature Documentation Policy (MANDATORY)
 
 **🚨 ALL new features MUST have comprehensive documentation - NO EXCEPTIONS**
