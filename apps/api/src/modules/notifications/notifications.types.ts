@@ -1,12 +1,27 @@
-// Re-export types from schemas for convenience
+// Import and re-export types from schemas for convenience
+import {
+  type Notifications,
+  type CreateNotifications,
+  type UpdateNotifications,
+  type NotificationsIdParam,
+  type GetNotificationsQuery,
+  type ListNotificationsQuery,
+  type NotificationsCreatedEvent,
+  type NotificationsUpdatedEvent,
+  type NotificationsDeletedEvent
+} from './notifications.schemas';
+
 export {
   type Notifications,
   type CreateNotifications,
   type UpdateNotifications,
   type NotificationsIdParam,
   type GetNotificationsQuery,
-  type ListNotificationsQuery
-} from './notifications.schemas';
+  type ListNotificationsQuery,
+  type NotificationsCreatedEvent,
+  type NotificationsUpdatedEvent,
+  type NotificationsDeletedEvent
+};
 
 // Additional type definitions
 export interface NotificationsRepository {
@@ -25,6 +40,17 @@ export interface NotificationsRepository {
   delete(id: number | string): Promise<boolean>;
 }
 
+// Real-time event type definitions
+export interface NotificationsEventHandlers {
+  onCreated?: (data: Notifications) => void | Promise<void>;
+  onUpdated?: (data: Notifications) => void | Promise<void>;
+  onDeleted?: (data: { id: number | string }) => void | Promise<void>;
+}
+
+export interface NotificationsWebSocketSubscription {
+  subscribe(handlers: NotificationsEventHandlers): void;
+  unsubscribe(): void;
+}
 
 // Database entity type (matches database table structure exactly)
 export interface NotificationsEntity {
@@ -33,7 +59,7 @@ export interface NotificationsEntity {
   type: string;
   title: string;
   message: string;
-  data: Record&lt;string, any&gt; | null;
+  data: Record<string, any> | null;
   action_url: string | null;
   read: boolean | null;
   read_at: Date | null;

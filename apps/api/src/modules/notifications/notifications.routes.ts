@@ -8,8 +8,9 @@ import {
   ListNotificationsQuerySchema,
   NotificationsResponseSchema,
   NotificationsListResponseSchema,
-  ErrorResponseSchema
 } from './notifications.schemas';
+import { ApiErrorResponseSchema as ErrorResponseSchema } from '../../schemas/base.schemas';
+import { SchemaRefs } from '../../schemas/registry';
 
 export interface NotificationsRoutesOptions extends FastifyPluginOptions {
   controller: NotificationsController;
@@ -26,11 +27,15 @@ export async function notificationsRoutes(
     schema: {
       tags: ['Notifications'],
       summary: 'Create a new notifications',
+      description: 'Create a new notifications with the provided data',
       body: CreateNotificationsSchema,
       response: {
         201: NotificationsResponseSchema,
-        400: ErrorResponseSchema,
-        500: ErrorResponseSchema
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        409: SchemaRefs.Conflict,
+        500: SchemaRefs.ServerError
       }
     },
     handler: controller.create.bind(controller)
@@ -41,12 +46,16 @@ export async function notificationsRoutes(
     schema: {
       tags: ['Notifications'],
       summary: 'Get notifications by ID',
+      description: 'Retrieve a notifications by its unique identifier',
       params: NotificationsIdParamSchema,
       querystring: GetNotificationsQuerySchema,
       response: {
         200: NotificationsResponseSchema,
-        404: ErrorResponseSchema,
-        500: ErrorResponseSchema
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        404: SchemaRefs.NotFound,
+        500: SchemaRefs.ServerError
       }
     },
     handler: controller.findOne.bind(controller)
@@ -57,10 +66,14 @@ export async function notificationsRoutes(
     schema: {
       tags: ['Notifications'],
       summary: 'Get all notificationss with pagination',
+      description: 'Retrieve a paginated list of notificationss with optional filtering',
       querystring: ListNotificationsQuerySchema,
       response: {
         200: NotificationsListResponseSchema,
-        500: ErrorResponseSchema
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        500: SchemaRefs.ServerError
       }
     },
     handler: controller.findMany.bind(controller)
@@ -71,12 +84,17 @@ export async function notificationsRoutes(
     schema: {
       tags: ['Notifications'],
       summary: 'Update notifications by ID',
+      description: 'Update an existing notifications with new data',
       params: NotificationsIdParamSchema,
       body: UpdateNotificationsSchema,
       response: {
         200: NotificationsResponseSchema,
-        404: ErrorResponseSchema,
-        500: ErrorResponseSchema
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        404: SchemaRefs.NotFound,
+        409: SchemaRefs.Conflict,
+        500: SchemaRefs.ServerError
       }
     },
     handler: controller.update.bind(controller)
@@ -87,17 +105,15 @@ export async function notificationsRoutes(
     schema: {
       tags: ['Notifications'],
       summary: 'Delete notifications by ID',
+      description: 'Delete a notifications by its unique identifier',
       params: NotificationsIdParamSchema,
       response: {
-        200: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            message: { type: 'string' }
-          }
-        },
-        404: ErrorResponseSchema,
-        500: ErrorResponseSchema
+        200: SchemaRefs.SuccessMessage,
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        404: SchemaRefs.NotFound,
+        500: SchemaRefs.ServerError
       }
     },
     handler: controller.delete.bind(controller)

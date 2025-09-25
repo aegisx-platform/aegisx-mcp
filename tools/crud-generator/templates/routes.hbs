@@ -8,8 +8,9 @@ import {
   List{{ModuleName}}QuerySchema,
   {{ModuleName}}ResponseSchema,
   {{ModuleName}}ListResponseSchema,
-  ErrorResponseSchema
 } from './{{moduleName}}.schemas';
+import { ApiErrorResponseSchema as ErrorResponseSchema } from '../../schemas/base.schemas';
+import { SchemaRefs } from '../../schemas/registry';
 
 export interface {{ModuleName}}RoutesOptions extends FastifyPluginOptions {
   controller: {{ModuleName}}Controller;
@@ -26,11 +27,15 @@ export async function {{moduleName}}Routes(
     schema: {
       tags: ['{{ModuleName}}'],
       summary: 'Create a new {{moduleName}}',
+      description: 'Create a new {{moduleName}} with the provided data',
       body: Create{{ModuleName}}Schema,
       response: {
         201: {{ModuleName}}ResponseSchema,
-        400: ErrorResponseSchema,
-        500: ErrorResponseSchema
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        409: SchemaRefs.Conflict,
+        500: SchemaRefs.ServerError
       }
     },
     handler: controller.create.bind(controller)
@@ -41,12 +46,16 @@ export async function {{moduleName}}Routes(
     schema: {
       tags: ['{{ModuleName}}'],
       summary: 'Get {{moduleName}} by ID',
+      description: 'Retrieve a {{moduleName}} by its unique identifier',
       params: {{ModuleName}}IdParamSchema,
       querystring: Get{{ModuleName}}QuerySchema,
       response: {
         200: {{ModuleName}}ResponseSchema,
-        404: ErrorResponseSchema,
-        500: ErrorResponseSchema
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        404: SchemaRefs.NotFound,
+        500: SchemaRefs.ServerError
       }
     },
     handler: controller.findOne.bind(controller)
@@ -57,10 +66,14 @@ export async function {{moduleName}}Routes(
     schema: {
       tags: ['{{ModuleName}}'],
       summary: 'Get all {{moduleName}}s with pagination',
+      description: 'Retrieve a paginated list of {{moduleName}}s with optional filtering',
       querystring: List{{ModuleName}}QuerySchema,
       response: {
         200: {{ModuleName}}ListResponseSchema,
-        500: ErrorResponseSchema
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        500: SchemaRefs.ServerError
       }
     },
     handler: controller.findMany.bind(controller)
@@ -71,12 +84,17 @@ export async function {{moduleName}}Routes(
     schema: {
       tags: ['{{ModuleName}}'],
       summary: 'Update {{moduleName}} by ID',
+      description: 'Update an existing {{moduleName}} with new data',
       params: {{ModuleName}}IdParamSchema,
       body: Update{{ModuleName}}Schema,
       response: {
         200: {{ModuleName}}ResponseSchema,
-        404: ErrorResponseSchema,
-        500: ErrorResponseSchema
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        404: SchemaRefs.NotFound,
+        409: SchemaRefs.Conflict,
+        500: SchemaRefs.ServerError
       }
     },
     handler: controller.update.bind(controller)
@@ -87,51 +105,18 @@ export async function {{moduleName}}Routes(
     schema: {
       tags: ['{{ModuleName}}'],
       summary: 'Delete {{moduleName}} by ID',
+      description: 'Delete a {{moduleName}} by its unique identifier',
       params: {{ModuleName}}IdParamSchema,
       response: {
-        200: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            message: { type: 'string' }
-          }
-        },
-        404: ErrorResponseSchema,
-        500: ErrorResponseSchema
+        200: SchemaRefs.SuccessMessage,
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        404: SchemaRefs.NotFound,
+        500: SchemaRefs.ServerError
       }
     },
     handler: controller.delete.bind(controller)
   });
 
-  {{#if withEvents}}
-  // WebSocket endpoints for real-time updates
-  fastify.get('/ws/subscribe', {
-    websocket: true,
-    schema: {
-      tags: ['{{ModuleName}} WebSocket'],
-      summary: 'Subscribe to {{moduleName}} real-time updates'
-    },
-    wsHandler: async (socket, request) => {
-      // Join the {{moduleName}} room for real-time updates
-      const eventService = fastify.diContainer?.cradle?.eventService;
-      if (eventService) {
-        await eventService.joinRoom(socket, '{{moduleName}}-updates');
-        
-        socket.on('message', (message) => {
-          try {
-            const data = JSON.parse(message.toString());
-            // Handle client messages if needed
-            fastify.log.info('{{ModuleName}} WebSocket message:', data);
-          } catch (error) {
-            fastify.log.error('Invalid WebSocket message:', error);
-          }
-        });
-
-        socket.on('close', () => {
-          fastify.log.info('{{ModuleName}} WebSocket connection closed');
-        });
-      }
-    }
-  });
-  {{/if}}
 }

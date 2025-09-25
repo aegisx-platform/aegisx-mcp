@@ -21,8 +21,8 @@ export class UsersController {
     private usersService: UsersService,
     private eventService: EventService,
   ) {
-    // Create CRUD event helper for users
-    this.userEvents = this.eventService.createCrudHelper('users', 'user');
+    // Create CRUD event helper for users using new API
+    this.userEvents = this.eventService.for('users', 'user');
   }
 
   async listUsers(

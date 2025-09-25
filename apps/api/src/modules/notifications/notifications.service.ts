@@ -1,57 +1,63 @@
-import { BaseRepository } from '../../shared/repositories/base.repository';
-import { knex } from '../../shared/database/knex';
+import { BaseService } from '../../shared/services/base.service';
+import { NotificationsRepository } from './notifications.repository';
+import { EventService } from '../../shared/websocket/event.service';
+import { CrudEventHelper } from '../../shared/websocket/crud-event-helper';
 import {
+  type Notifications,
   type CreateNotifications,
   type UpdateNotifications,
-  type Notifications,
   type GetNotificationsQuery,
   type ListNotificationsQuery
 } from './notifications.types';
 
-export class NotificationsService extends BaseRepository<Notifications> {
+/**
+ * Notifications Service
+ * 
+ * Following Fastify + BaseService pattern:
+ * - Extends BaseService for standard CRUD operations
+ * - Proper dependency injection through constructor
+ * - Optional EventService integration for real-time features
+ * - Business logic hooks for validation and processing
+ */
+export class NotificationsService extends BaseService<Notifications, CreateNotifications, UpdateNotifications> {
+  private eventHelper?: CrudEventHelper;
 
-  constructor() {
-    super(knex, 'notifications');
-  }
-
-  async create(data: CreateNotifications): Promise<Notifications> {
-    try {
-      const [notifications] = await this.query()
-        .insert(data)
-        .returning('*');
-
-
-      return notifications;
-    } catch (error) {
-      throw new Error(`Failed to create notifications: ${error.message}`);
+  constructor(
+    private notificationsRepository: NotificationsRepository,
+    private eventService?: EventService
+  ) {
+    super(notificationsRepository);
+    
+    // Initialize event helper using Fastify pattern
+    if (eventService) {
+      this.eventHelper = eventService.for('notifications', 'notifications');
     }
   }
 
-  async findById(
-    id: number | string,
-    options: GetNotificationsQuery = {}
-  ): Promise<Notifications | null> {
-    try {
-      let query = this.query().where('id', id);
-
-      // Handle query options
+  /**
+   * Get notifications by ID with optional query parameters
+   */
+  async findById(id: string | number, options: GetNotificationsQuery = {}): Promise<Notifications | null> {
+    const notifications = await this.getById(id);
+    
+    if (notifications) {
+      // Handle query options (includes, etc.)
       if (options.include) {
-        // Add include logic based on relationships
-        const includes = Array.isArray(options.include) ? options.include : [options.include];
-        includes.forEach(relation => {
-          // TODO: Add join logic for relationships
-        });
+        // Add relationship loading logic here
       }
-
-      const notifications = await query.first();
       
-
-      return notifications || null;
-    } catch (error) {
-      throw new Error(`Failed to find notifications: ${error.message}`);
+      // Emit read event for monitoring/analytics
+      if (this.eventHelper) {
+        await this.eventHelper.emitCustom('read', notifications);
+      }
     }
+
+    return notifications;
   }
 
+  /**
+   * Get paginated list with filtering and sorting
+   */
   async findMany(options: ListNotificationsQuery = {}): Promise<{
     data: Notifications[];
     pagination: {
@@ -61,94 +67,96 @@ export class NotificationsService extends BaseRepository<Notifications> {
       totalPages: number;
     };
   }> {
-    try {
-      const {
-        page = 1,
-        limit = 20,
-        sortBy = 'id',
-        sortOrder = 'desc',
-        search,
-        include
-      } = options;
-
-      let query = this.query();
-
-      // Search functionality
-      if (search) {
-        query = query.where(builder => {
-        });
-      }
-
-      // Include relationships
-      if (include) {
-        const includes = Array.isArray(include) ? include : [include];
-        includes.forEach(relation => {
-          // TODO: Add join logic for relationships
-        });
-      }
-
-      // Get total count
-      const countQuery = query.clone();
-      const totalResult = await countQuery.count('* as count').first();
-      const total = parseInt(totalResult?.count as string) || 0;
-
-      // Apply pagination and sorting
-      const data = await query
-        .orderBy(sortBy, sortOrder)
-        .limit(limit)
-        .offset((page - 1) * limit);
-
-
-      return {
-        data,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages: Math.ceil(total / limit)
-        }
-      };
-    } catch (error) {
-      throw new Error(`Failed to find notificationss: ${error.message}`);
+    const result = await this.getList(options);
+    
+    // Emit bulk read event
+    if (this.eventHelper) {
+      await this.eventHelper.emitCustom('bulk_read', {
+        count: result.data.length,
+        filters: options
+      });
     }
+    
+    return result;
   }
 
-  async update(
-    id: number | string,
-    data: UpdateNotifications
-  ): Promise<Notifications | null> {
-    try {
-      const [notifications] = await this.query()
-        .where('id', id)
-        .update({
-          ...data,
-          updated_at: new Date()
-        })
-        .returning('*');
-
-
-      return notifications || null;
-    } catch (error) {
-      throw new Error(`Failed to update notifications: ${error.message}`);
+  /**
+   * Create new notifications
+   */
+  async create(data: CreateNotifications): Promise<Notifications> {
+    const notifications = await super.create(data);
+    
+    // Emit created event for real-time updates
+    if (this.eventHelper) {
+      await this.eventHelper.emitCreated(notifications);
     }
+    
+    return notifications;
   }
 
-  async delete(
-    id: number | string
-  ): Promise<boolean> {
-    try {
-      // Get the record before deletion for event emission
-
-      const deleted = await this.query()
-        .where('id', id)
-        .del();
-
-
-      return deleted > 0;
-    } catch (error) {
-      throw new Error(`Failed to delete notifications: ${error.message}`);
+  /**
+   * Update existing notifications
+   */
+  async update(id: string | number, data: UpdateNotifications): Promise<Notifications | null> {
+    const notifications = await super.update(id, data);
+    
+    if (notifications && this.eventHelper) {
+      await this.eventHelper.emitUpdated(notifications);
     }
+    
+    return notifications;
   }
 
-  // Additional business logic methods can be added here
+  /**
+   * Delete notifications
+   */
+  async delete(id: string | number): Promise<boolean> {
+    // Get entity before deletion for event emission
+    const notifications = await this.getById(id);
+    
+    const deleted = await super.delete(id);
+    
+    if (deleted && notifications && this.eventHelper) {
+      await this.eventHelper.emitDeleted(notifications.id);
+    }
+    
+    return deleted;
+  }
+
+  // ===== BUSINESS LOGIC HOOKS =====
+  // Override these methods in child classes for custom validation/processing
+
+  /**
+   * Validate data before creating notifications
+   */
+  protected async validateCreate(data: CreateNotifications): Promise<void> {
+    // Add custom validation logic here
+  }
+
+  /**
+   * Process data before creation
+   */
+  protected async beforeCreate(data: CreateNotifications): Promise<CreateNotifications> {
+    // Add custom business logic here
+    return {
+      ...data,
+      // Add default values or processing
+    };
+  }
+
+  /**
+   * Execute logic after notifications creation
+   */
+  protected async afterCreate(notifications: Notifications, _originalData: CreateNotifications): Promise<void> {
+    // Add post-creation logic (notifications, logging, etc.)
+    console.log('Notifications created:', JSON.stringify(notifications), '(ID: ' + notifications.id + ')');
+  }
+
+  /**
+   * Validate before deletion
+   */
+  protected async validateDelete(_id: string | number, existing: Notifications): Promise<void> {
+    // Add deletion validation logic here
+    // Example: Prevent deletion if entity has dependent records
+  }
 }

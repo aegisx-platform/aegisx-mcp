@@ -1,75 +1,71 @@
-import { BaseRepository } from '../../shared/repositories/base.repository';
-import { knex } from '../../shared/database/knex';
+import { BaseService } from '../../shared/services/base.service';
+import { {{ModuleName}}Repository } from './{{moduleName}}.repository';
+{{#if withEvents}}
+import { EventService } from '../../shared/websocket/event.service';
+import { CrudEventHelper } from '../../shared/websocket/crud-event-helper';
+{{/if}}
 import {
+  type {{ModuleName}},
   type Create{{ModuleName}},
   type Update{{ModuleName}},
-  type {{ModuleName}},
   type Get{{ModuleName}}Query,
   type List{{ModuleName}}Query
 } from './{{moduleName}}.types';
-{{#if withEvents}}
-import { CrudEventHelper } from '../../shared/websocket/crud-event-helper';
-{{/if}}
 
-export class {{ModuleName}}Service extends BaseRepository<{{ModuleName}}> {
+/**
+ * {{ModuleName}} Service
+ * 
+ * Following Fastify + BaseService pattern:
+ * - Extends BaseService for standard CRUD operations
+ * - Proper dependency injection through constructor
+ * - Optional EventService integration for real-time features
+ * - Business logic hooks for validation and processing
+ */
+export class {{ModuleName}}Service extends BaseService<{{ModuleName}}, Create{{ModuleName}}, Update{{ModuleName}}> {
   {{#if withEvents}}
-  private eventHelper: CrudEventHelper<{{ModuleName}}>;
+  private eventHelper?: CrudEventHelper;
   {{/if}}
 
-  constructor() {
-    super(knex, '{{tableName}}');
+  constructor(
+    private {{moduleName}}Repository: {{ModuleName}}Repository,
+    {{#if withEvents}}private eventService?: EventService{{/if}}
+  ) {
+    super({{moduleName}}Repository);
+    
     {{#if withEvents}}
-    this.eventHelper = new CrudEventHelper<{{ModuleName}}>('{{moduleName}}');
+    // Initialize event helper using Fastify pattern
+    if (eventService) {
+      this.eventHelper = eventService.for('{{moduleName}}', '{{moduleName}}');
+    }
     {{/if}}
   }
 
-  async create(data: Create{{ModuleName}}): Promise<{{ModuleName}}> {
-    try {
-      const [{{moduleName}}] = await this.query()
-        .insert(data)
-        .returning('*');
-
-      {{#if withEvents}}
-      // Emit internal event for potential side effects
-      await this.eventHelper.emitCreated({{moduleName}});
-      {{/if}}
-
-      return {{moduleName}};
-    } catch (error) {
-      throw new Error(`Failed to create {{moduleName}}: ${error.message}`);
-    }
-  }
-
-  async findById(
-    id: number | string,
-    options: Get{{ModuleName}}Query = {}
-  ): Promise<{{ModuleName}} | null> {
-    try {
-      let query = this.query().where('{{#each primaryKey}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}', id);
-
-      // Handle query options
+  /**
+   * Get {{moduleName}} by ID with optional query parameters
+   */
+  async findById(id: string | number, options: Get{{ModuleName}}Query = {}): Promise<{{ModuleName}} | null> {
+    const {{moduleName}} = await this.getById(id);
+    
+    if ({{moduleName}}) {
+      // Handle query options (includes, etc.)
       if (options.include) {
-        // Add include logic based on relationships
-        const includes = Array.isArray(options.include) ? options.include : [options.include];
-        includes.forEach(relation => {
-          // TODO: Add join logic for relationships
-        });
+        // Add relationship loading logic here
       }
-
-      const {{moduleName}} = await query.first();
       
       {{#if withEvents}}
-      if ({{moduleName}}) {
-        await this.eventHelper.emitRead({{moduleName}});
+      // Emit read event for monitoring/analytics
+      if (this.eventHelper) {
+        await this.eventHelper.emitCustom('read', {{moduleName}});
       }
       {{/if}}
-
-      return {{moduleName}} || null;
-    } catch (error) {
-      throw new Error(`Failed to find {{moduleName}}: ${error.message}`);
     }
+
+    return {{moduleName}};
   }
 
+  /**
+   * Get paginated list with filtering and sorting
+   */
   async findMany(options: List{{ModuleName}}Query = {}): Promise<{
     data: {{ModuleName}}[];
     pagination: {
@@ -79,116 +75,118 @@ export class {{ModuleName}}Service extends BaseRepository<{{ModuleName}}> {
       totalPages: number;
     };
   }> {
-    try {
-      const {
-        page = 1,
-        limit = 20,
-        sortBy = '{{#each primaryKey}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}',
-        sortOrder = 'desc',
-        search,
-        include
-      } = options;
-
-      let query = this.query();
-
-      // Search functionality
-      if (search) {
-        query = query.where(builder => {
-          {{#each columns}}
-          {{#ifEquals type 'string'}}
-          builder.orWhere('{{name}}', 'ilike', `%${search}%`);
-          {{/ifEquals}}
-          {{/each}}
-        });
-      }
-
-      // Include relationships
-      if (include) {
-        const includes = Array.isArray(include) ? include : [include];
-        includes.forEach(relation => {
-          // TODO: Add join logic for relationships
-        });
-      }
-
-      // Get total count
-      const countQuery = query.clone();
-      const totalResult = await countQuery.count('* as count').first();
-      const total = parseInt(totalResult?.count as string) || 0;
-
-      // Apply pagination and sorting
-      const data = await query
-        .orderBy(sortBy, sortOrder)
-        .limit(limit)
-        .offset((page - 1) * limit);
-
-      {{#if withEvents}}
-      // Emit bulk read event
-      await this.eventHelper.emitBulkRead(data);
-      {{/if}}
-
-      return {
-        data,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages: Math.ceil(total / limit)
-        }
-      };
-    } catch (error) {
-      throw new Error(`Failed to find {{moduleName}}s: ${error.message}`);
+    const result = await this.getList(options);
+    
+    {{#if withEvents}}
+    // Emit bulk read event
+    if (this.eventHelper) {
+      await this.eventHelper.emitCustom('bulk_read', {
+        count: result.data.length,
+        filters: options
+      });
     }
+    {{/if}}
+    
+    return result;
   }
 
-  async update(
-    id: number | string,
-    data: Update{{ModuleName}}
-  ): Promise<{{ModuleName}} | null> {
-    try {
-      const [{{moduleName}}] = await this.query()
-        .where('{{#each primaryKey}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}', id)
-        .update({
-          ...data,
-          updated_at: new Date()
-        })
-        .returning('*');
-
-      {{#if withEvents}}
-      if ({{moduleName}}) {
-        await this.eventHelper.emitUpdated({{moduleName}});
-      }
-      {{/if}}
-
-      return {{moduleName}} || null;
-    } catch (error) {
-      throw new Error(`Failed to update {{moduleName}}: ${error.message}`);
+  /**
+   * Create new {{moduleName}}
+   */
+  async create(data: Create{{ModuleName}}): Promise<{{ModuleName}}> {
+    const {{moduleName}} = await super.create(data);
+    
+    {{#if withEvents}}
+    // Emit created event for real-time updates
+    if (this.eventHelper) {
+      await this.eventHelper.emitCreated({{moduleName}});
     }
+    {{/if}}
+    
+    return {{moduleName}};
   }
 
-  async delete(
-    id: number | string
-  ): Promise<boolean> {
-    try {
-      // Get the record before deletion for event emission
-      {{#if withEvents}}
-      const {{moduleName}} = await this.findById(id);
-      {{/if}}
-
-      const deleted = await this.query()
-        .where('{{#each primaryKey}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}', id)
-        .del();
-
-      {{#if withEvents}}
-      if (deleted && {{moduleName}}) {
-        await this.eventHelper.emitDeleted({{moduleName}});
-      }
-      {{/if}}
-
-      return deleted > 0;
-    } catch (error) {
-      throw new Error(`Failed to delete {{moduleName}}: ${error.message}`);
+  /**
+   * Update existing {{moduleName}}
+   */
+  async update(id: string | number, data: Update{{ModuleName}}): Promise<{{ModuleName}} | null> {
+    const {{moduleName}} = await super.update(id, data);
+    
+    {{#if withEvents}}
+    if ({{moduleName}} && this.eventHelper) {
+      await this.eventHelper.emitUpdated({{moduleName}});
     }
+    {{/if}}
+    
+    return {{moduleName}};
   }
 
-  // Additional business logic methods can be added here
+  /**
+   * Delete {{moduleName}}
+   */
+  async delete(id: string | number): Promise<boolean> {
+    // Get entity before deletion for event emission
+    const {{moduleName}} = await this.getById(id);
+    
+    const deleted = await super.delete(id);
+    
+    {{#if withEvents}}
+    if (deleted && {{moduleName}} && this.eventHelper) {
+      await this.eventHelper.emitDeleted({{moduleName}}.id);
+    }
+    {{/if}}
+    
+    return deleted;
+  }
+
+  // ===== BUSINESS LOGIC HOOKS =====
+  // Override these methods in child classes for custom validation/processing
+
+  /**
+   * Validate data before creating {{moduleName}}
+   */
+  protected async validateCreate(data: Create{{ModuleName}}): Promise<void> {
+    // Add custom validation logic here
+    {{#each columns}}
+    {{#if isRequired}}
+    if (!data.{{camelCase name}}?.toString().trim()) {
+      throw new Error('{{displayName}} is required');
+    }
+    {{/if}}
+    {{/each}}
+  }
+
+  /**
+   * Process data before creation
+   */
+  protected async beforeCreate(data: Create{{ModuleName}}): Promise<Create{{ModuleName}}> {
+    // Add custom business logic here
+    return {
+      ...data,
+      // Add default values or processing
+    };
+  }
+
+  /**
+   * Execute logic after {{moduleName}} creation
+   */
+  protected async afterCreate({{moduleName}}: {{ModuleName}}, _originalData: Create{{ModuleName}}): Promise<void> {
+    // Add post-creation logic (notifications, logging, etc.)
+    console.log('{{ModuleName}} created:', JSON.stringify({{moduleName}}), '(ID: ' + {{moduleName}}.id + ')');
+  }
+
+  /**
+   * Validate before deletion
+   */
+  protected async validateDelete(_id: string | number, existing: {{ModuleName}}): Promise<void> {
+    // Add deletion validation logic here
+    // Example: Prevent deletion if entity has dependent records
+    {{#each columns}}
+    {{#if (eq name 'status')}}
+    if (existing.status === 'active') {
+      throw new Error('Cannot delete active {{moduleName}}');
+    }
+    {{/if}}
+    {{/each}}
+  }
 }

@@ -1,30 +1,44 @@
 import { Type, Static } from '@sinclair/typebox';
-import { BaseIdParamSchema, PaginationQuerySchema, ErrorResponseSchema } from '../../schemas/base.schemas';
+import { 
+  UuidParamSchema, 
+  PaginationQuerySchema, 
+  ApiErrorResponseSchema,
+  ApiSuccessResponseSchema,
+  PaginatedResponseSchema 
+} from '../../schemas/base.schemas';
 
 // Base {{ModuleName}} Schema
 export const {{ModuleName}}Schema = Type.Object({
   {{#each columns}}
-  {{name}}: {{{typeboxType}}}{{#unless @last}},{{/unless}}
+  {{name}}: {{{raw typeboxType}}}{{#unless @last}},{{/unless}}
   {{/each}}
 });
 
 // Create Schema (without auto-generated fields)
 export const Create{{ModuleName}}Schema = Type.Object({
-  {{#each columns}}
-  {{#unless (or isPrimaryKey (eq name 'created_at') (eq name 'updated_at'))}}
-  {{name}}: {{{typeboxType}}}{{#unless @last}},{{/unless}}
-  {{/unless}}
-  {{/each}}
+{{#each columns}}
+{{#unless isPrimaryKey}}
+{{#unless (eq name 'created_at')}}
+{{#unless (eq name 'updated_at')}}
+  {{name}}: {{{raw typeboxType}}},
+{{/unless}}
+{{/unless}}
+{{/unless}}
+{{/each}}
 });
 
 // Update Schema (partial, without auto-generated fields)
 export const Update{{ModuleName}}Schema = Type.Partial(
   Type.Object({
-    {{#each columns}}
-    {{#unless (or isPrimaryKey (eq name 'created_at') (eq name 'updated_at'))}}
-    {{name}}: {{{typeboxType}}}{{#unless @last}},{{/unless}}
-    {{/unless}}
-    {{/each}}
+{{#each columns}}
+{{#unless isPrimaryKey}}
+{{#unless (eq name 'created_at')}}
+{{#unless (eq name 'updated_at')}}
+    {{name}}: {{{raw typeboxType}}},
+{{/unless}}
+{{/unless}}
+{{/unless}}
+{{/each}}
   })
 );
 
@@ -41,38 +55,44 @@ export const Get{{ModuleName}}QuerySchema = Type.Object({
   ]))
 });
 
-export const List{{ModuleName}}QuerySchema = Type.Intersect([
-  PaginationQuerySchema,
-  Type.Object({
-    search: Type.Optional(Type.String()),
-    sortBy: Type.Optional(Type.String({ default: '{{#each primaryKey}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}' })),
-    sortOrder: Type.Optional(Type.Union([
-      Type.Literal('asc'),
-      Type.Literal('desc')
-    ], { default: 'desc' })),
-    include: Type.Optional(Type.Union([
-      Type.String(),
-      Type.Array(Type.String())
-    ]))
-  })
-]);
-
-// Response Schemas
-export const {{ModuleName}}ResponseSchema = Type.Object({
-  success: Type.Boolean(),
-  data: {{ModuleName}}Schema
+export const List{{ModuleName}}QuerySchema = Type.Object({
+  // Pagination parameters
+  page: Type.Optional(Type.Number({ minimum: 1, default: 1 })),
+  limit: Type.Optional(Type.Number({ minimum: 1, maximum: 1000, default: 20 })),
+  sortBy: Type.Optional(Type.String()),
+  sortOrder: Type.Optional(Type.Union([
+    Type.Literal('asc'), 
+    Type.Literal('desc')
+  ], { default: 'desc' })),
+  
+  // Search and filtering
+  search: Type.Optional(Type.String({ minLength: 1, maxLength: 100 })),
+  
+  // Include related data
+  include: Type.Optional(Type.Union([
+    Type.String(),
+    Type.Array(Type.String())
+  ])),
+  
+  // Add column-specific filters dynamically
+  {{#each columns}}
+  {{#unless (or isPrimaryKey (eq name 'created_at') (eq name 'updated_at'))}}
+  {{#if (eq tsType 'boolean')}}
+  {{name}}: Type.Optional(Type.Boolean()),
+  {{/if}}
+  {{#if (eq tsType 'string')}}
+  {{name}}: Type.Optional(Type.String({ minLength: 1, maxLength: 255 })),
+  {{/if}}
+  {{#if (eq tsType 'number')}}
+  {{name}}: Type.Optional(Type.Number({ minimum: 0 })),
+  {{/if}}
+  {{/unless}}
+  {{/each}}
 });
 
-export const {{ModuleName}}ListResponseSchema = Type.Object({
-  success: Type.Boolean(),
-  data: Type.Array({{ModuleName}}Schema),
-  pagination: Type.Object({
-    page: Type.Number(),
-    limit: Type.Number(),
-    total: Type.Number(),
-    totalPages: Type.Number()
-  })
-});
+// Response Schemas using base wrappers
+export const {{ModuleName}}ResponseSchema = ApiSuccessResponseSchema({{ModuleName}}Schema);
+export const {{ModuleName}}ListResponseSchema = PaginatedResponseSchema({{ModuleName}}Schema);
 
 // Export types
 export type {{ModuleName}} = Static<typeof {{ModuleName}}Schema>;

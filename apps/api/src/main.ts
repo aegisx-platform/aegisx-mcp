@@ -31,6 +31,9 @@ import settingsPlugin from './modules/settings/settings.plugin';
 import userProfilePlugin from './modules/user-profile/user-profile.plugin';
 import { usersPlugin } from './modules/users';
 import rbacPlugin from './modules/rbac/rbac.plugin';
+import themesPlugin from './modules/themes';
+// import apiKeysPlugin from './modules/apiKeys/index';
+// import apiKeysDomainPlugin from './modules/apiKeys';
 import jwtAuthPlugin from './plugins/jwt-auth.plugin';
 import staticFilesPlugin from './plugins/static-files.plugin';
 import swaggerPlugin from './plugins/swagger.plugin';
@@ -238,6 +241,13 @@ async function bootstrap() {
 
   // RBAC module (after users and settings)
   await app.register(rbacPlugin);
+
+  // // Themes domain module
+  await app.register(themesPlugin);
+  // await app.register(apiKeysPlugin);
+
+  // // API Keys domain module
+  // await app.register(apiKeysDomainPlugin, { prefix: '/api' });
 
   // File Upload module
   await app.register(fileUploadPlugin);

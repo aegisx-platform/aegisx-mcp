@@ -65,29 +65,26 @@ export default async function testWebSocketRoutes(fastify: FastifyInstance) {
 
       // Emit role created event
       if (fastify.eventService) {
-        const roleEvents = fastify.eventService.createCrudHelper('rbac', 'role');
-        roleEvents.emitCreated(role);
+        fastify.eventService.for('rbac', 'role').emitCreated(role);
         events.push('rbac.role.created');
 
         // Also emit a permission assignment event for testing using generic pattern
-        const rbacEvents = fastify.eventService.createCrudHelper('rbac', 'permission');
         const permissionData = {
           roleId: role.id,
           permissionId: 'test-permission-123',
           assignedBy: 'system'
         };
-        rbacEvents.emitAssigned(permissionData);
+        fastify.eventService.for('rbac', 'permission').emitCustom('assigned', permissionData);
         events.push('rbac.permission.assigned');
 
         // Emit hierarchy change event using custom event
-        const hierarchyEvents = fastify.eventService.createCrudHelper('rbac', 'hierarchy');
         const hierarchyData = {
           roleId: role.id,
           oldParentId: undefined,
           newParentId: 'root',
           changedBy: 'system'
         };
-        hierarchyEvents.emitCustom('changed', hierarchyData, 'high');
+        fastify.eventService.for('rbac', 'hierarchy').emitCustom('changed', hierarchyData, 'high');
         events.push('rbac.hierarchy.changed');
       }
 

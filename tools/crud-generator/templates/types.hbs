@@ -1,5 +1,5 @@
-// Re-export types from schemas for convenience
-export {
+// Import and re-export types from schemas for convenience
+import {
   type {{ModuleName}},
   type Create{{ModuleName}},
   type Update{{ModuleName}},
@@ -10,6 +10,18 @@ export {
   type {{ModuleName}}UpdatedEvent,
   type {{ModuleName}}DeletedEvent{{/if}}
 } from './{{moduleName}}.schemas';
+
+export {
+  type {{ModuleName}},
+  type Create{{ModuleName}},
+  type Update{{ModuleName}},
+  type {{ModuleName}}IdParam,
+  type Get{{ModuleName}}Query,
+  type List{{ModuleName}}Query{{#if withEvents}},
+  type {{ModuleName}}CreatedEvent,
+  type {{ModuleName}}UpdatedEvent,
+  type {{ModuleName}}DeletedEvent{{/if}}
+};
 
 // Additional type definitions
 export interface {{ModuleName}}Repository {
@@ -45,6 +57,6 @@ export interface {{ModuleName}}WebSocketSubscription {
 // Database entity type (matches database table structure exactly)
 export interface {{ModuleName}}Entity {
   {{#each columns}}
-  {{name}}: {{tsType}}{{#if isNullable}} | null{{/if}};
+  {{name}}: {{{raw tsType}}}{{#if isNullable}} | null{{/if}};
   {{/each}}
 }
