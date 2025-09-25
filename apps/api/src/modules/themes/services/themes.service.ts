@@ -22,7 +22,10 @@ export class ThemesService extends BaseService<
   CreateThemes,
   UpdateThemes
 > {
-  constructor(private themesRepository: ThemesRepository) {
+  constructor(
+    private themesRepository: ThemesRepository,
+    private eventService?: any,
+  ) {
     super(themesRepository);
   }
 

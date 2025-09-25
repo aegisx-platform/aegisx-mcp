@@ -217,43 +217,52 @@ async function bootstrap() {
   // 14. Static files (before feature modules)
   await app.register(staticFilesPlugin);
 
-  // 15. WebSocket support (before feature modules that depend on it)
-  await app.register(websocketPlugin);
+  // 15. API Prefix Configuration
+  const API_PREFIX = process.env.API_PREFIX || '/api';
 
-  // 16. Feature modules
-  // Default/System module (info, status, health endpoints)
-  await app.register(defaultPlugin);
+  // 16. Non-API modules (no prefix) - Health checks, docs, static files
+  // Note: Default plugin moved to API context since its routes expect /api prefix
 
-  // Auth module
-  await app.register(authPlugin);
+  // 17. All API endpoints with configurable prefix
+  await app.register(
+    async function (fastify) {
+      // System info, status endpoints (expects /api prefix in routes)
+      await fastify.register(defaultPlugin);
 
-  // Navigation module
-  await app.register(navigationPlugin);
+      // WebSocket support (before feature modules that depend on it)
+      await fastify.register(websocketPlugin);
 
-  // Users management module (must be before user-profile)
-  await app.register(usersPlugin);
+      // Feature modules
+      // Auth module
+      await fastify.register(authPlugin);
 
-  // User Profile module
-  await app.register(userProfilePlugin);
+      // Navigation module
+      await fastify.register(navigationPlugin);
 
-  // Settings module
-  await app.register(settingsPlugin);
+      // Users management module (must be before user-profile)
+      await fastify.register(usersPlugin);
 
-  // RBAC module (after users and settings)
-  await app.register(rbacPlugin);
+      // User Profile module
+      await fastify.register(userProfilePlugin);
 
-  // // Themes domain module
-  await app.register(themesPlugin);
-  // await app.register(apiKeysPlugin);
+      // Settings module
+      await fastify.register(settingsPlugin);
 
-  // // API Keys domain module
-  // await app.register(apiKeysDomainPlugin, { prefix: '/api' });
+      // RBAC module (after users and settings)
+      await fastify.register(rbacPlugin);
 
-  // File Upload module
-  await app.register(fileUploadPlugin);
+      // Themes domain module
+      await fastify.register(themesPlugin);
+      // await app.register(apiKeysPlugin);
 
-  // Monitoring module (client error logging)
-  await app.register(monitoringModulePlugin);
+      // File Upload module
+      await fastify.register(fileUploadPlugin);
+
+      // Monitoring module (client error logging)
+      await fastify.register(monitoringModulePlugin);
+    },
+    { prefix: API_PREFIX },
+  );
 
   // Start server
   const port = process.env.PORT || 3333;

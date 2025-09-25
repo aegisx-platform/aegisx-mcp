@@ -42,8 +42,8 @@ async function settingsPlugin(
     cacheService.stopCacheWarming();
   });
 
-  // Register settings routes with /api/settings prefix
-  await fastify.register(settingsRoutes, { prefix: '/api/settings' });
+  // Register settings routes (prefix handled by main.ts)
+  await fastify.register(settingsRoutes, { prefix: '/settings' });
 
   fastify.log.info('Settings plugin registered successfully');
 }
