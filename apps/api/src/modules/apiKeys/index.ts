@@ -35,6 +35,7 @@ export default fp(
     const apiKeysService = new ApiKeysService(
       apiKeysRepository,
       (fastify as any).eventService,
+      fastify, // Pass Fastify instance for cache service initialization
     );
     const apiKeysController = new ApiKeysController(apiKeysService);
 
