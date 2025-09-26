@@ -26,6 +26,13 @@ export async function defaultRoutes(
     // Try to get API keys service from the registry
     if (fastify.hasDecorator('apiKeysService')) {
       apiKeysService = (fastify as any).apiKeysService;
+      fastify.log.info(
+        '✅ API Keys service found - protected routes will be enabled',
+      );
+    } else {
+      fastify.log.warn(
+        '⚠️ API Keys service not available - protected routes will be skipped',
+      );
     }
   } catch (error) {
     fastify.log.warn(
@@ -262,5 +269,11 @@ export async function defaultRoutes(
         });
       },
     });
+
+    fastify.log.info('📋 API Key protected routes registered successfully');
+  } else {
+    fastify.log.warn(
+      '⚠️ API Keys service not available - demo protected routes will be skipped',
+    );
   }
 }
