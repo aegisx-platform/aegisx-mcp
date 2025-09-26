@@ -2,6 +2,8 @@ import { BaseService } from '../../../shared/services/base.service';
 import { ApiKeysRepository } from '../repositories/apiKeys.repository';
 import { EventService } from '../../../shared/websocket/event.service';
 import { CrudEventHelper } from '../../../shared/websocket/crud-event-helper';
+import { ApiKeyCacheService } from './apiKeys-cache.service';
+import { FastifyInstance } from 'fastify';
 import {
   type ApiKeys,
   type CreateApiKeys,
@@ -40,16 +42,23 @@ export class ApiKeysService extends BaseService<
   UpdateApiKeys
 > {
   private eventHelper?: CrudEventHelper;
+  private cacheService?: ApiKeyCacheService;
 
   constructor(
     private apiKeysRepository: ApiKeysRepository,
     private eventService?: EventService,
+    private fastify?: FastifyInstance,
   ) {
     super(apiKeysRepository);
 
     // Initialize event helper using Fastify pattern
     if (eventService) {
       this.eventHelper = eventService.for('apiKeys', 'apiKeys');
+    }
+
+    // Initialize cache service if Fastify instance is available
+    if (fastify) {
+      this.cacheService = new ApiKeyCacheService(fastify);
     }
   }
 
@@ -222,6 +231,7 @@ export class ApiKeysService extends BaseService<
 
   /**
    * Validate API key and return associated data
+   * Uses cache-first strategy for improved performance
    */
   async validateKey(apiKey: string): Promise<{
     isValid: boolean;
@@ -237,8 +247,64 @@ export class ApiKeysService extends BaseService<
       };
     }
 
-    // Find key by prefix
-    const keyData = await this.findByPrefix(formatValidation.prefix!);
+    const keyPrefix = formatValidation.prefix!;
+
+    // Try cache first
+    if (this.cacheService) {
+      const cachedData = await this.cacheService.getCachedValidation(keyPrefix);
+      if (cachedData) {
+        // Check if cached key is still active and not expired
+        if (!cachedData.is_active) {
+          return {
+            isValid: false,
+            error: 'API key is disabled',
+          };
+        }
+
+        if (
+          isKeyExpired(
+            cachedData.expires_at ? new Date(cachedData.expires_at) : null,
+          )
+        ) {
+          // Remove expired key from cache
+          await this.cacheService.invalidateValidation(keyPrefix);
+          return {
+            isValid: false,
+            error: 'API key has expired',
+          };
+        }
+
+        // Still need to validate the hash against the actual key
+        // But we need the hash from database for this
+        const keyData = await this.findByPrefix(keyPrefix);
+        if (!keyData) {
+          // Key was deleted, remove from cache
+          await this.cacheService.invalidateValidation(keyPrefix);
+          return {
+            isValid: false,
+            error: 'API key not found',
+          };
+        }
+
+        // Validate hash
+        const isValidHash = validateApiKey(apiKey, keyData.key_hash);
+        if (!isValidHash) {
+          return {
+            isValid: false,
+            error: 'Invalid API key',
+          };
+        }
+
+        // Return success with full key data (cache doesn't include hash)
+        return {
+          isValid: true,
+          keyData,
+        };
+      }
+    }
+
+    // Cache miss - fall back to database
+    const keyData = await this.findByPrefix(keyPrefix);
     if (!keyData) {
       return {
         isValid: false,
@@ -273,6 +339,11 @@ export class ApiKeysService extends BaseService<
       };
     }
 
+    // Cache the successful validation result (exclude sensitive hash)
+    if (this.cacheService) {
+      await this.cacheService.setCachedValidation(keyPrefix, keyData);
+    }
+
     return {
       isValid: true,
       keyData,
@@ -305,6 +376,7 @@ export class ApiKeysService extends BaseService<
 
   /**
    * Check if API key has required scope
+   * Uses cache-first strategy for improved performance
    */
   async checkScope(
     keyData: ApiKeys,
@@ -316,7 +388,34 @@ export class ApiKeysService extends BaseService<
       return true;
     }
 
-    return validateScope(keyData.scopes, resource, action);
+    // Try cache first
+    if (this.cacheService) {
+      const cachedResult = await this.cacheService.getCachedScopeValidation(
+        keyData.id,
+        resource,
+        action,
+      );
+
+      if (cachedResult !== null) {
+        return cachedResult;
+      }
+    }
+
+    // Cache miss - validate scope
+    const isValid = validateScope(keyData.scopes, resource, action);
+
+    // Cache the result
+    if (this.cacheService) {
+      await this.cacheService.setCachedScopeValidation(
+        keyData.id,
+        resource,
+        action,
+        isValid,
+        keyData.user_id,
+      );
+    }
+
+    return isValid;
   }
 
   /**
