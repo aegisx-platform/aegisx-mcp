@@ -8,10 +8,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatListModule } from '@angular/material/list';
 import { WebSocketService } from './shared/services/websocket.service';
-import {
-  RbacRoleStateManager,
-  Role,
-} from './features/rbac/services/rbac-state.manager';
+import { RbacRoleStateManager } from './features/rbac/services/rbac-state.manager';
+import { Role } from './features/rbac/models/rbac.interfaces';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
@@ -146,13 +144,13 @@ import { Subject, takeUntil } from 'rxjs';
               <mat-list>
                 <mat-list-item *ngFor="let role of roles()">
                   <mat-icon matListItemIcon>
-                    {{ role.isActive ? 'check_circle' : 'cancel' }}
+                    {{ role.is_active ? 'check_circle' : 'cancel' }}
                   </mat-icon>
                   <div matListItemTitle>{{ role.name }}</div>
                   <div matListItemLine>{{ role.description }}</div>
                   <div matListItemLine style="font-size: 12px; color: gray;">
                     ID: {{ role.id }} | Category: {{ role.category }} | Users:
-                    {{ role.userCount }}
+                    {{ role.user_count }}
                   </div>
                   <div
                     matListItemMeta

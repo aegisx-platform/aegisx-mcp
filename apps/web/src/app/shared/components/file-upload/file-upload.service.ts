@@ -1,8 +1,8 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpParams, HttpEventType } from '@angular/common/http';
 import { Observable, map, catchError, throwError, BehaviorSubject } from 'rxjs';
-import { AuthService } from '../../../core/auth.service';
-import { ApiConfigService } from '../../../core/api-config.service';
+import { AuthService } from '../../../core/auth';
+import { ApiConfigService } from '../../../core/http';
 import {
   FileUploadOptions,
   FileUpdateRequest,

@@ -9,8 +9,8 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { filter } from 'rxjs/operators';
-import { AuthService } from './core/auth.service';
-import { NavigationService } from './core/navigation.service';
+import { AuthService } from './core/auth';
+import { NavigationService } from './core/navigation';
 import { WebSocketService } from './shared/services/websocket.service';
 
 interface Notification {
@@ -359,7 +359,7 @@ export class AppComponent implements OnInit {
   logout() {
     // Disconnect WebSocket before logout
     this.websocketService.disconnect();
-    
+
     this.authService.logout().subscribe({
       next: () => {
         console.log('Logged out successfully');
@@ -377,12 +377,12 @@ export class AppComponent implements OnInit {
       if (token) {
         console.log('🔌 Connecting to WebSocket...');
         this.websocketService.connect(token);
-        
+
         // Subscribe to all real-time features
         setTimeout(() => {
           console.log('📡 Subscribing to real-time features...');
           this.websocketService.subscribe({
-            features: ['users', 'rbac', 'products', 'orders']
+            features: ['users', 'rbac', 'products', 'orders'],
           });
         }, 1000);
       }

@@ -15,11 +15,11 @@ import {
   provideAx,
 } from '@aegisx/ui';
 import { appRoutes } from './app.routes';
-import { provideGlobalErrorHandler } from './core/error-handler.service';
-import { httpErrorInterceptorProvider } from './core/http-error.interceptor';
-import { authInterceptor } from './core/auth.interceptor';
-import { baseUrlInterceptor } from './core/base-url.interceptor';
-import { MonitoringService } from './core/monitoring.service';
+import { provideGlobalErrorHandler } from './core/error-handling';
+import { httpErrorInterceptorProvider } from './core/http';
+import { authInterceptor } from './core/auth';
+import { baseUrlInterceptor } from './core/http';
+import { MonitoringService } from './core/monitoring';
 
 // Factory function to initialize monitoring service
 function initializeMonitoring() {

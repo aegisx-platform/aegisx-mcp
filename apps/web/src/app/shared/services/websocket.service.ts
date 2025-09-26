@@ -8,7 +8,7 @@ import {
   takeUntil,
 } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
-import { ApiConfigService } from '../../core/api-config.service';
+import { ApiConfigService } from '../../core/http';
 
 // WebSocket Message Interface (matches backend)
 export interface WebSocketMessage {
@@ -119,7 +119,7 @@ export class WebSocketService implements OnDestroy {
       console.log('WebSocket already connected');
       return;
     }
-    
+
     // Prevent connection while already connecting
     const currentStatus = this._connectionStatus().status;
     if (currentStatus === 'connecting' && !options?.forceReconnect) {
@@ -164,7 +164,7 @@ export class WebSocketService implements OnDestroy {
 
       this.setupEventHandlers();
       this.storeToken(token);
-      
+
       // Manually connect since autoConnect is false
       this.socket.connect();
     } catch (error) {
@@ -538,7 +538,7 @@ export class WebSocketService implements OnDestroy {
     if (this.reconnectTimeout) {
       return;
     }
-    
+
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
       console.error('❌ Max reconnection attempts reached');
       this.updateConnectionStatus('error', 'Max reconnection attempts reached');

@@ -1,6 +1,20 @@
-import { Component, signal, inject, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
+import {
+  Component,
+  signal,
+  inject,
+  OnInit,
+  OnDestroy,
+  Input,
+  Output,
+  EventEmitter,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -14,7 +28,11 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Subject, takeUntil } from 'rxjs';
 import { AegisxCardComponent, AegisxAlertComponent } from '@aegisx/ui';
-import { UserService, UserPreferences, UserProfile } from '../../users/user.service';
+import {
+  UserService,
+  UserPreferences,
+  UserProfile,
+} from '../../users/services/user.service';
 
 @Component({
   selector: 'ax-user-preferences',
@@ -69,7 +87,6 @@ import { UserService, UserPreferences, UserProfile } from '../../users/user.serv
       @else {
         <form [formGroup]="preferencesForm" (ngSubmit)="savePreferences()">
           <div class="space-y-6">
-            
             <!-- Appearance Section -->
             <ax-card [appearance]="'outlined'">
               <div class="card-header">
@@ -81,7 +98,7 @@ import { UserService, UserPreferences, UserProfile } from '../../users/user.serv
                   Customize the visual appearance of your interface
                 </p>
               </div>
-              
+
               <div class="card-content">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <!-- Theme -->
@@ -136,7 +153,7 @@ import { UserService, UserPreferences, UserProfile } from '../../users/user.serv
                   Set your language, timezone, and date/time formats
                 </p>
               </div>
-              
+
               <div class="card-content">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <!-- Language -->
@@ -160,14 +177,30 @@ import { UserService, UserPreferences, UserProfile } from '../../users/user.serv
                   <mat-form-field appearance="outline">
                     <mat-label>Timezone</mat-label>
                     <mat-select formControlName="timezone">
-                      <mat-option value="UTC">UTC (Coordinated Universal Time)</mat-option>
-                      <mat-option value="Asia/Bangkok">Asia/Bangkok (GMT+7)</mat-option>
-                      <mat-option value="Asia/Tokyo">Asia/Tokyo (GMT+9)</mat-option>
-                      <mat-option value="America/New_York">America/New_York (EST)</mat-option>
-                      <mat-option value="America/Los_Angeles">America/Los_Angeles (PST)</mat-option>
-                      <mat-option value="Europe/London">Europe/London (GMT)</mat-option>
-                      <mat-option value="Europe/Paris">Europe/Paris (CET)</mat-option>
-                      <mat-option value="Australia/Sydney">Australia/Sydney (AEST)</mat-option>
+                      <mat-option value="UTC"
+                        >UTC (Coordinated Universal Time)</mat-option
+                      >
+                      <mat-option value="Asia/Bangkok"
+                        >Asia/Bangkok (GMT+7)</mat-option
+                      >
+                      <mat-option value="Asia/Tokyo"
+                        >Asia/Tokyo (GMT+9)</mat-option
+                      >
+                      <mat-option value="America/New_York"
+                        >America/New_York (EST)</mat-option
+                      >
+                      <mat-option value="America/Los_Angeles"
+                        >America/Los_Angeles (PST)</mat-option
+                      >
+                      <mat-option value="Europe/London"
+                        >Europe/London (GMT)</mat-option
+                      >
+                      <mat-option value="Europe/Paris"
+                        >Europe/Paris (CET)</mat-option
+                      >
+                      <mat-option value="Australia/Sydney"
+                        >Australia/Sydney (AEST)</mat-option
+                      >
                     </mat-select>
                     <mat-icon matSuffix>schedule</mat-icon>
                     <mat-hint>Your local timezone</mat-hint>
@@ -177,9 +210,15 @@ import { UserService, UserPreferences, UserProfile } from '../../users/user.serv
                   <mat-form-field appearance="outline">
                     <mat-label>Date Format</mat-label>
                     <mat-select formControlName="dateFormat">
-                      <mat-option value="MM/DD/YYYY">MM/DD/YYYY (US)</mat-option>
-                      <mat-option value="DD/MM/YYYY">DD/MM/YYYY (International)</mat-option>
-                      <mat-option value="YYYY-MM-DD">YYYY-MM-DD (ISO)</mat-option>
+                      <mat-option value="MM/DD/YYYY"
+                        >MM/DD/YYYY (US)</mat-option
+                      >
+                      <mat-option value="DD/MM/YYYY"
+                        >DD/MM/YYYY (International)</mat-option
+                      >
+                      <mat-option value="YYYY-MM-DD"
+                        >YYYY-MM-DD (ISO)</mat-option
+                      >
                     </mat-select>
                     <mat-icon matSuffix>calendar_today</mat-icon>
                     <mat-hint>How dates are displayed</mat-hint>
@@ -210,7 +249,7 @@ import { UserService, UserPreferences, UserProfile } from '../../users/user.serv
                   Control how and when you receive notifications
                 </p>
               </div>
-              
+
               <div class="card-content" formGroupName="notifications">
                 <div class="space-y-4">
                   <!-- Email Notifications -->
@@ -291,7 +330,7 @@ import { UserService, UserPreferences, UserProfile } from '../../users/user.serv
                   Customize the navigation menu behavior
                 </p>
               </div>
-              
+
               <div class="card-content" formGroupName="navigation">
                 <div class="space-y-4">
                   <!-- Navigation Collapsed -->
@@ -349,7 +388,7 @@ import { UserService, UserPreferences, UserProfile } from '../../users/user.serv
               >
                 Reset to Defaults
               </button>
-              
+
               <div class="flex space-x-2">
                 <button
                   type="button"
@@ -363,7 +402,9 @@ import { UserService, UserPreferences, UserProfile } from '../../users/user.serv
                   type="submit"
                   mat-raised-button
                   color="primary"
-                  [disabled]="!hasChanges() || preferencesForm.invalid || isSaving()"
+                  [disabled]="
+                    !hasChanges() || preferencesForm.invalid || isSaving()
+                  "
                 >
                   @if (isSaving()) {
                     <mat-icon class="animate-spin mr-2">sync</mat-icon>
@@ -466,13 +507,13 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
         email: [true],
         push: [false],
         desktop: [true],
-        sound: [true]
+        sound: [true],
       }),
       navigation: this.formBuilder.group({
         collapsed: [false],
         type: ['default', [Validators.required]],
-        position: ['left', [Validators.required]]
-      })
+        position: ['left', [Validators.required]],
+      }),
     });
   }
 
@@ -480,7 +521,8 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.isLoading.set(true);
     this.error.set(null);
 
-    this.userService.getPreferences()
+    this.userService
+      .getPreferences()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (preferences) => {
@@ -502,7 +544,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   hasChanges(): boolean {
     const currentValues = this.preferencesForm.value;
     const original = this.originalPreferences();
-    
+
     if (!original) return false;
 
     return JSON.stringify(currentValues) !== JSON.stringify(original);
@@ -515,12 +557,14 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
     try {
       const preferences = this.preferencesForm.value as UserPreferences;
-      const updatedPreferences = await this.userService.updatePreferences(preferences).toPromise();
-      
+      const updatedPreferences = await this.userService
+        .updatePreferences(preferences)
+        .toPromise();
+
       if (updatedPreferences) {
         this.originalPreferences.set(updatedPreferences);
         this.preferencesChange.emit(updatedPreferences);
-        
+
         this.snackBar.open('Preferences updated successfully!', 'Close', {
           duration: 3000,
           horizontalPosition: 'end',
@@ -528,12 +572,16 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
         });
       }
     } catch (error: any) {
-      this.snackBar.open(error.message || 'Failed to update preferences', 'Close', {
-        duration: 5000,
-        panelClass: ['error-snackbar'],
-        horizontalPosition: 'end',
-        verticalPosition: 'bottom',
-      });
+      this.snackBar.open(
+        error.message || 'Failed to update preferences',
+        'Close',
+        {
+          duration: 5000,
+          panelClass: ['error-snackbar'],
+          horizontalPosition: 'end',
+          verticalPosition: 'bottom',
+        },
+      );
     } finally {
       this.isSaving.set(false);
     }
@@ -559,13 +607,13 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
         email: true,
         push: false,
         desktop: true,
-        sound: true
+        sound: true,
       },
       navigation: {
         collapsed: false,
         type: 'default',
-        position: 'left'
-      }
+        position: 'left',
+      },
     };
 
     this.preferencesForm.patchValue(defaultPreferences);

@@ -1,5 +1,5 @@
 import { Route } from '@angular/router';
-import { AuthGuard, GuestGuard } from './core/auth.guard';
+import { AuthGuard, GuestGuard } from './core/auth';
 import { showcaseGuard } from './pages/component-showcase/guards/showcase.guard';
 
 export const appRoutes: Route[] = [
@@ -27,7 +27,9 @@ export const appRoutes: Route[] = [
   {
     path: 'realtime-demo',
     loadComponent: () =>
-      import('./pages/realtime-demo/realtime-demo.component').then((m) => m.RealtimeDemoComponent),
+      import('./pages/realtime-demo/realtime-demo.component').then(
+        (m) => m.RealtimeDemoComponent,
+      ),
     canActivate: [AuthGuard],
   },
   {
@@ -40,46 +42,30 @@ export const appRoutes: Route[] = [
   },
   {
     path: 'users',
+    loadChildren: () =>
+      import('./features/users/users.routes').then((m) => m.usersRoutes),
     canActivate: [AuthGuard],
-    children: [
-      {
-        path: '',
-        loadComponent: () =>
-          import('./features/users/user-list.component').then(
-            (m) => m.UserListComponent,
-          ),
-      },
-      {
-        path: ':id',
-        loadComponent: () =>
-          import('./features/users/user-detail.component').then(
-            (m) => m.UserDetailComponent,
-          ),
-      },
-    ],
   },
   {
     path: 'profile',
-    loadComponent: () =>
-      import('./features/user-profile/user-profile.component').then(
-        (m) => m.UserProfileComponent,
+    loadChildren: () =>
+      import('./features/user-profile/user-profile.routes').then(
+        (m) => m.userProfileRoutes,
       ),
     canActivate: [AuthGuard],
   },
   {
     path: 'settings',
-    loadComponent: () =>
-      import('./features/settings/settings.component').then(
-        (m) => m.SettingsComponent,
+    loadChildren: () =>
+      import('./features/settings/settings.routes').then(
+        (m) => m.settingsRoutes,
       ),
     canActivate: [AuthGuard],
   },
   {
     path: 'rbac',
     loadChildren: () =>
-      import('./modules/rbac-management/rbac-management.module').then(
-        (m) => m.RbacManagementModule,
-      ),
+      import('./features/rbac/rbac.routes').then((m) => m.rbacRoutes),
     canActivate: [AuthGuard],
     data: {
       title: 'RBAC Management',

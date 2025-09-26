@@ -14,7 +14,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { UserService } from '../../users/user.service';
+import { UserService } from '../../users/services/user.service';
 
 export interface AvatarUploadResult {
   success: boolean;
