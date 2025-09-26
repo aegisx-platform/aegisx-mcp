@@ -38,9 +38,12 @@ import { monitoringPlugin as monitoringModulePlugin } from '../core/monitoring';
 import systemPlugin from '../core/system/default.plugin';
 
 // Business feature modules
+import apiKeysPlugin from '../modules/apiKeys';
 import fileUploadPlugin from '../modules/file-upload/file-upload.plugin';
 import navigationPlugin from '../modules/navigation/navigation.plugin';
+import notificationsPlugin from '../modules/notifications';
 import settingsPlugin from '../modules/settings/settings.plugin';
+import systemSettingsPlugin from '../modules/systemSettings';
 import userProfilePlugin from '../modules/user-profile/user-profile.plugin';
 import themesPlugin from '../modules/themes';
 import websocketPlugin from '../shared/websocket/websocket.plugin';
@@ -324,6 +327,11 @@ export function createFeaturePluginGroup(apiPrefix: string): PluginGroup {
     description: 'Business feature modules',
     plugins: [
       {
+        name: 'api-keys',
+        plugin: apiKeysPlugin,
+        required: true,
+      },
+      {
         name: 'navigation',
         plugin: navigationPlugin,
         required: true,
@@ -336,6 +344,16 @@ export function createFeaturePluginGroup(apiPrefix: string): PluginGroup {
       {
         name: 'settings',
         plugin: settingsPlugin,
+        required: true,
+      },
+      {
+        name: 'system-settings',
+        plugin: systemSettingsPlugin,
+        required: true,
+      },
+      {
+        name: 'notifications',
+        plugin: notificationsPlugin,
         required: true,
       },
       {
