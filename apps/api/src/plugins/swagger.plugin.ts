@@ -158,8 +158,10 @@ API requests are rate limited to prevent abuse. Rate limit headers are included 
     });
 
     // Add JSON endpoint for programmatic access
+    // Use serverInfo.apiPrefix to avoid duplication
+    const apiPrefix = (fastify as any).serverInfo?.apiPrefix || '/api';
     fastify.get(
-      '/api/documentation/json',
+      `${apiPrefix}/documentation/json`,
       {
         schema: {
           tags: ['Documentation'],
@@ -180,7 +182,9 @@ API requests are rate limited to prevent abuse. Rate limit headers are included 
     // Log Swagger setup
     fastify.log.info('Swagger OpenAPI documentation configured');
     fastify.log.info('Swagger UI available at: /documentation');
-    fastify.log.info('OpenAPI JSON available at: /api/documentation/json');
+    fastify.log.info(
+      `OpenAPI JSON available at: ${apiPrefix}/documentation/json`,
+    );
   },
   {
     name: 'swagger-plugin',

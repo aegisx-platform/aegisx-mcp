@@ -6,12 +6,18 @@ import {
   UpdateApiKeysSchema,
   ApiKeysIdParamSchema,
   GetApiKeysQuerySchema,
-  ListApiKeysQuerySchema
+  ListApiKeysQuerySchema,
+  GenerateApiKeySchema,
+  ValidateApiKeySchema,
+  RevokeApiKeySchema,
+  RotateApiKeySchema,
+  UserApiKeysQuerySchema,
 } from '../schemas/apiKeys.schemas';
+import { AuthenticatedRequest } from '../middleware/apiKeys.middleware';
 
 /**
  * ApiKeys Controller
- * 
+ *
  * Following Fastify controller patterns:
  * - Proper request/reply typing with Static<typeof Schema>
  * - Schema-based validation integration
@@ -27,32 +33,36 @@ export class ApiKeysController {
    */
   async create(
     request: FastifyRequest<{ Body: Static<typeof CreateApiKeysSchema> }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ) {
     try {
       request.log.info({ body: request.body }, 'Creating apiKeys');
 
       // Transform API schema to domain model
       const createData = this.transformCreateSchema(request.body);
-      
+
       const apiKeys = await this.apiKeysService.create(createData);
-      
-      request.log.info({ apiKeysId: apiKeys.id }, 'ApiKeys created successfully');
+
+      request.log.info(
+        { apiKeysId: apiKeys.id },
+        'ApiKeys created successfully',
+      );
 
       return reply.status(201).send({
         success: true,
         data: apiKeys,
-        message: 'ApiKeys created successfully'
+        message: 'ApiKeys created successfully',
       });
     } catch (error) {
       request.log.error(error, 'Error creating apiKeys');
-      
+
       return reply.status(500).send({
         success: false,
         error: {
           code: 'CREATION_FAILED',
-          message: error instanceof Error ? error.message : 'Failed to create apiKeys'
-        }
+          message:
+            error instanceof Error ? error.message : 'Failed to create apiKeys',
+        },
       });
     }
   }
@@ -66,7 +76,7 @@ export class ApiKeysController {
       Params: Static<typeof ApiKeysIdParamSchema>;
       Querystring: Static<typeof GetApiKeysQuerySchema>;
     }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ) {
     try {
       const { id } = request.params;
@@ -79,24 +89,27 @@ export class ApiKeysController {
           success: false,
           error: {
             code: 'NOT_FOUND',
-            message: 'ApiKeys not found'
-          }
+            message: 'ApiKeys not found',
+          },
         });
       }
 
       return reply.send({
         success: true,
-        data: apiKeys
+        data: apiKeys,
       });
     } catch (error) {
-      request.log.error({ error, apiKeysId: request.params.id }, 'Error fetching apiKeys');
-      
+      request.log.error(
+        { error, apiKeysId: request.params.id },
+        'Error fetching apiKeys',
+      );
+
       return reply.status(500).send({
         success: false,
         error: {
           code: 'FETCH_FAILED',
-          message: 'Failed to fetch apiKeys'
-        }
+          message: 'Failed to fetch apiKeys',
+        },
       });
     }
   }
@@ -106,30 +119,38 @@ export class ApiKeysController {
    * GET /apiKeys
    */
   async findMany(
-    request: FastifyRequest<{ Querystring: Static<typeof ListApiKeysQuerySchema> }>,
-    reply: FastifyReply
+    request: FastifyRequest<{
+      Querystring: Static<typeof ListApiKeysQuerySchema>;
+    }>,
+    reply: FastifyReply,
   ) {
     try {
       request.log.info({ query: request.query }, 'Fetching apiKeys list');
 
       const result = await this.apiKeysService.findMany(request.query);
 
-      request.log.info({ count: result.data.length, total: result.pagination.total }, 'ApiKeys list fetched');
+      request.log.info(
+        { count: result.data.length, total: result.pagination.total },
+        'ApiKeys list fetched',
+      );
 
       return reply.send({
         success: true,
         data: result.data,
-        pagination: result.pagination
+        pagination: result.pagination,
       });
     } catch (error) {
-      request.log.error({ error, query: request.query }, 'Error fetching apiKeys list');
-      
+      request.log.error(
+        { error, query: request.query },
+        'Error fetching apiKeys list',
+      );
+
       return reply.status(500).send({
         success: false,
         error: {
           code: 'LIST_FETCH_FAILED',
-          message: 'Failed to fetch apiKeys list'
-        }
+          message: 'Failed to fetch apiKeys list',
+        },
       });
     }
   }
@@ -143,15 +164,18 @@ export class ApiKeysController {
       Params: Static<typeof ApiKeysIdParamSchema>;
       Body: Static<typeof UpdateApiKeysSchema>;
     }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ) {
     try {
       const { id } = request.params;
-      request.log.info({ apiKeysId: id, body: request.body }, 'Updating apiKeys');
+      request.log.info(
+        { apiKeysId: id, body: request.body },
+        'Updating apiKeys',
+      );
 
       // Transform API schema to domain model
       const updateData = this.transformUpdateSchema(request.body);
-      
+
       const apiKeys = await this.apiKeysService.update(id, updateData);
 
       if (!apiKeys) {
@@ -159,8 +183,8 @@ export class ApiKeysController {
           success: false,
           error: {
             code: 'NOT_FOUND',
-            message: 'ApiKeys not found'
-          }
+            message: 'ApiKeys not found',
+          },
         });
       }
 
@@ -169,17 +193,21 @@ export class ApiKeysController {
       return reply.send({
         success: true,
         data: apiKeys,
-        message: 'ApiKeys updated successfully'
+        message: 'ApiKeys updated successfully',
       });
     } catch (error) {
-      request.log.error({ error, apiKeysId: request.params.id }, 'Error updating apiKeys');
-      
+      request.log.error(
+        { error, apiKeysId: request.params.id },
+        'Error updating apiKeys',
+      );
+
       return reply.status(500).send({
         success: false,
         error: {
           code: 'UPDATE_FAILED',
-          message: error instanceof Error ? error.message : 'Failed to update apiKeys'
-        }
+          message:
+            error instanceof Error ? error.message : 'Failed to update apiKeys',
+        },
       });
     }
   }
@@ -190,7 +218,7 @@ export class ApiKeysController {
    */
   async delete(
     request: FastifyRequest<{ Params: Static<typeof ApiKeysIdParamSchema> }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ) {
     try {
       const { id } = request.params;
@@ -203,8 +231,8 @@ export class ApiKeysController {
           success: false,
           error: {
             code: 'NOT_FOUND',
-            message: 'ApiKeys not found'
-          }
+            message: 'ApiKeys not found',
+          },
         });
       }
 
@@ -213,17 +241,21 @@ export class ApiKeysController {
       return reply.send({
         success: true,
         message: 'ApiKeys deleted successfully',
-        data: { id, deleted: true }
+        data: { id, deleted: true },
       });
     } catch (error) {
-      request.log.error({ error, apiKeysId: request.params.id }, 'Error deleting apiKeys');
-      
+      request.log.error(
+        { error, apiKeysId: request.params.id },
+        'Error deleting apiKeys',
+      );
+
       return reply.status(500).send({
         success: false,
         error: {
           code: 'DELETE_FAILED',
-          message: error instanceof Error ? error.message : 'Failed to delete apiKeys'
-        }
+          message:
+            error instanceof Error ? error.message : 'Failed to delete apiKeys',
+        },
       });
     }
   }
@@ -249,11 +281,11 @@ export class ApiKeysController {
   }
 
   /**
-   * Transform API update schema to domain model  
+   * Transform API update schema to domain model
    */
   private transformUpdateSchema(schema: Static<typeof UpdateApiKeysSchema>) {
     const updateData: any = {};
-    
+
     if (schema.user_id !== undefined) {
       updateData.user_id = schema.user_id;
     }
@@ -281,7 +313,323 @@ export class ApiKeysController {
     if (schema.is_active !== undefined) {
       updateData.is_active = schema.is_active;
     }
-    
+
     return updateData;
+  }
+
+  // ===== NEW API KEY MANAGEMENT ENDPOINTS =====
+
+  /**
+   * Generate a new API key
+   * POST /apiKeys/generate
+   */
+  async generateKey(
+    request: FastifyRequest<{ Body: Static<typeof GenerateApiKeySchema> }> & {
+      user?: any;
+    },
+    reply: FastifyReply,
+  ) {
+    try {
+      const userId = request.user?.id;
+      if (!userId) {
+        return reply.status(401).send({
+          success: false,
+          error: {
+            code: 'UNAUTHORIZED',
+            message: 'User authentication required',
+          },
+        });
+      }
+
+      request.log.info({ userId, body: request.body }, 'Generating API key');
+
+      const { name, scopes, expiryDays, isActive } = request.body;
+
+      const result = await this.apiKeysService.generateKey(userId, name, {
+        scopes: scopes || undefined,
+        expiryDays,
+        isActive,
+      });
+
+      request.log.info(
+        {
+          userId,
+          keyId: result.apiKey.id,
+          prefix: result.apiKey.key_prefix,
+        },
+        'API key generated successfully',
+      );
+
+      return reply.status(201).send({
+        success: true,
+        data: {
+          id: result.apiKey.id,
+          name: result.apiKey.name,
+          key: result.fullKey, // ⚠️ Only shown once!
+          prefix: result.apiKey.key_prefix,
+          preview: result.preview,
+          scopes: result.apiKey.scopes,
+          expires_at: result.apiKey.expires_at,
+          is_active: result.apiKey.is_active,
+          created_at: result.apiKey.created_at,
+        },
+        message:
+          'API key generated successfully. Store it securely - it will not be shown again!',
+        warning:
+          'This API key will only be displayed once. Make sure to copy and store it securely.',
+      });
+    } catch (error) {
+      request.log.error(error, 'Error generating API key');
+
+      return reply.status(500).send({
+        success: false,
+        error: {
+          code: 'GENERATION_FAILED',
+          message:
+            error instanceof Error
+              ? error.message
+              : 'Failed to generate API key',
+        },
+      });
+    }
+  }
+
+  /**
+   * Validate API key
+   * POST /apiKeys/validate
+   */
+  async validateKey(
+    request: FastifyRequest<{ Body: Static<typeof ValidateApiKeySchema> }>,
+    reply: FastifyReply,
+  ) {
+    try {
+      const { key, resource, action } = request.body;
+
+      request.log.info({ resource, action }, 'Validating API key');
+
+      const validation = await this.apiKeysService.validateKey(key);
+
+      let hasAccess: boolean | undefined;
+      if (validation.isValid && validation.keyData && resource && action) {
+        hasAccess = await this.apiKeysService.checkScope(
+          validation.keyData,
+          resource,
+          action,
+        );
+      }
+
+      return reply.send({
+        success: true,
+        data: {
+          valid: validation.isValid,
+          keyData: validation.keyData
+            ? {
+                id: validation.keyData.id,
+                name: validation.keyData.name,
+                prefix: validation.keyData.key_prefix,
+                user_id: validation.keyData.user_id,
+                scopes: validation.keyData.scopes,
+                expires_at: validation.keyData.expires_at,
+                is_active: validation.keyData.is_active,
+              }
+            : undefined,
+          hasAccess,
+          error: validation.error,
+        },
+      });
+    } catch (error) {
+      request.log.error(error, 'Error validating API key');
+
+      return reply.status(500).send({
+        success: false,
+        error: {
+          code: 'VALIDATION_FAILED',
+          message: 'API key validation failed',
+        },
+      });
+    }
+  }
+
+  /**
+   * Get current user's API keys
+   * GET /apiKeys/my-keys
+   */
+  async getMyKeys(
+    request: FastifyRequest<{
+      Querystring: Static<typeof UserApiKeysQuerySchema>;
+    }> & { user?: any },
+    reply: FastifyReply,
+  ) {
+    try {
+      const userId = request.user?.id;
+      if (!userId) {
+        return reply.status(401).send({
+          success: false,
+          error: {
+            code: 'UNAUTHORIZED',
+            message: 'User authentication required',
+          },
+        });
+      }
+
+      request.log.info(
+        { userId, query: request.query },
+        'Fetching user API keys',
+      );
+
+      const result = await this.apiKeysService.getUserKeys(
+        userId,
+        request.query,
+      );
+
+      request.log.info(
+        {
+          userId,
+          count: result.data.length,
+          total: result.pagination.total,
+        },
+        'User API keys fetched',
+      );
+
+      return reply.send({
+        success: true,
+        data: result.data,
+        pagination: result.pagination,
+      });
+    } catch (error) {
+      request.log.error(error, 'Error fetching user API keys');
+
+      return reply.status(500).send({
+        success: false,
+        error: {
+          code: 'FETCH_FAILED',
+          message: 'Failed to fetch API keys',
+        },
+      });
+    }
+  }
+
+  /**
+   * Revoke (deactivate) API key
+   * POST /apiKeys/:id/revoke
+   */
+  async revokeKey(
+    request: FastifyRequest<{
+      Params: Static<typeof ApiKeysIdParamSchema>;
+      Body: Static<typeof RevokeApiKeySchema>;
+    }> & { user?: any },
+    reply: FastifyReply,
+  ) {
+    try {
+      const userId = request.user?.id;
+      const { id } = request.params;
+      const { reason } = request.body;
+
+      request.log.info({ userId, keyId: id, reason }, 'Revoking API key');
+
+      const revoked = await this.apiKeysService.revokeKey(id, userId);
+
+      if (!revoked) {
+        return reply.status(404).send({
+          success: false,
+          error: {
+            code: 'NOT_FOUND',
+            message: 'API key not found or access denied',
+          },
+        });
+      }
+
+      request.log.info({ userId, keyId: id }, 'API key revoked successfully');
+
+      return reply.send({
+        success: true,
+        data: {
+          success: true,
+          keyId: id,
+          revokedAt: new Date().toISOString(),
+        },
+        message: 'API key revoked successfully',
+      });
+    } catch (error) {
+      request.log.error(error, 'Error revoking API key');
+
+      return reply.status(500).send({
+        success: false,
+        error: {
+          code: 'REVOCATION_FAILED',
+          message:
+            error instanceof Error ? error.message : 'Failed to revoke API key',
+        },
+      });
+    }
+  }
+
+  /**
+   * Rotate API key (generate new key with same settings)
+   * POST /apiKeys/:id/rotate
+   */
+  async rotateKey(
+    request: FastifyRequest<{
+      Params: Static<typeof ApiKeysIdParamSchema>;
+      Body: Static<typeof RotateApiKeySchema>;
+    }> & { user?: any },
+    reply: FastifyReply,
+  ) {
+    try {
+      const userId = request.user?.id;
+      const { id } = request.params;
+      const { newName } = request.body;
+
+      request.log.info({ userId, keyId: id, newName }, 'Rotating API key');
+
+      const result = await this.apiKeysService.rotateKey(id, userId);
+
+      // Update name if provided
+      if (newName) {
+        await this.apiKeysService.update(result.newApiKey.id, {
+          name: newName,
+        });
+        result.newApiKey.name = newName;
+      }
+
+      request.log.info(
+        {
+          userId,
+          oldKeyId: id,
+          newKeyId: result.newApiKey.id,
+        },
+        'API key rotated successfully',
+      );
+
+      return reply.status(201).send({
+        success: true,
+        data: {
+          id: result.newApiKey.id,
+          name: result.newApiKey.name,
+          key: result.fullKey, // ⚠️ Only shown once!
+          prefix: result.newApiKey.key_prefix,
+          preview: result.preview,
+          scopes: result.newApiKey.scopes,
+          expires_at: result.newApiKey.expires_at,
+          is_active: result.newApiKey.is_active,
+          created_at: result.newApiKey.created_at,
+        },
+        message:
+          'API key rotated successfully. Store the new key securely - it will not be shown again!',
+        warning:
+          'The old API key has been deactivated. The new key will only be displayed once.',
+      });
+    } catch (error) {
+      request.log.error(error, 'Error rotating API key');
+
+      return reply.status(500).send({
+        success: false,
+        error: {
+          code: 'ROTATION_FAILED',
+          message:
+            error instanceof Error ? error.message : 'Failed to rotate API key',
+        },
+      });
+    }
   }
 }

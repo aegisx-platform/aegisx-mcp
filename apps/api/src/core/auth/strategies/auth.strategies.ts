@@ -10,22 +10,26 @@ async function authStrategiesPlugin(fastify: FastifyInstance) {
     async function (request: FastifyRequest, reply: FastifyReply) {
       try {
         await request.jwtVerify();
-        
+
         // Check if user account is deleted (soft delete)
         const user = request.user;
         if (user && user.id) {
-          const userRecord = await fastify.knex('users')
+          const userRecord = await fastify
+            .knex('users')
             .select('deleted_at')
             .where('id', user.id)
             .first();
-            
+
           if (!userRecord) {
             request.log.warn({ userId: user.id }, 'User not found in database');
             return reply.unauthorized('User account not found');
           }
-          
+
           if (userRecord.deleted_at) {
-            request.log.warn({ userId: user.id, deletedAt: userRecord.deleted_at }, 'Deleted user attempting access');
+            request.log.warn(
+              { userId: user.id, deletedAt: userRecord.deleted_at },
+              'Deleted user attempting access',
+            );
             return reply.unauthorized('User account has been deleted');
           }
         }

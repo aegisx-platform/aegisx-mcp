@@ -73,7 +73,7 @@ export class UsersService {
         throw new AppError('Invalid role', 400, 'INVALID_ROLE');
       }
     }
-    
+
     // If still no roleId, use default 'user' role
     if (!roleId) {
       const roles = await this.usersRepository.getRoles();
@@ -81,7 +81,11 @@ export class UsersService {
       if (defaultRole) {
         roleId = defaultRole.id;
       } else {
-        throw new AppError('Default user role not found', 500, 'DEFAULT_ROLE_NOT_FOUND');
+        throw new AppError(
+          'Default user role not found',
+          500,
+          'DEFAULT_ROLE_NOT_FOUND',
+        );
       }
     }
 
@@ -248,21 +252,29 @@ export class UsersService {
     return profile;
   }
 
-  async updateProfile(userId: string, data: {
-    firstName?: string;
-    lastName?: string;
-    username?: string;
-    bio?: string;
-  }): Promise<any> {
+  async updateProfile(
+    userId: string,
+    data: {
+      firstName?: string;
+      lastName?: string;
+      username?: string;
+      bio?: string;
+    },
+  ): Promise<any> {
     // Check if username is taken (if username is being changed)
     if (data.username) {
-      const existingUser = await this.usersRepository.findByUsername(data.username);
+      const existingUser = await this.usersRepository.findByUsername(
+        data.username,
+      );
       if (existingUser && existingUser.id !== userId) {
         throw new AppError('Username is already taken', 400, 'USERNAME_TAKEN');
       }
     }
 
-    const updatedProfile = await this.usersRepository.updateProfile(userId, data);
+    const updatedProfile = await this.usersRepository.updateProfile(
+      userId,
+      data,
+    );
     if (!updatedProfile) {
       throw new AppError('Profile not found', 404, 'PROFILE_NOT_FOUND');
     }
@@ -461,7 +473,8 @@ export class UsersService {
 
   // Password verification for account deletion
   async verifyPassword(userId: string, password: string): Promise<boolean> {
-    const user = await this.usersRepository.findByIdWithPasswordForVerification(userId);
+    const user =
+      await this.usersRepository.findByIdWithPasswordForVerification(userId);
     if (!user) {
       return false;
     }
@@ -470,11 +483,14 @@ export class UsersService {
   }
 
   // Soft delete account
-  async softDeleteAccount(userId: string, metadata: {
-    reason?: string;
-    ip?: string;
-    userAgent?: string;
-  }): Promise<{
+  async softDeleteAccount(
+    userId: string,
+    metadata: {
+      reason?: string;
+      ip?: string;
+      userAgent?: string;
+    },
+  ): Promise<{
     deletedAt: string;
     recoveryDeadline: string;
   }> {
@@ -484,7 +500,11 @@ export class UsersService {
     }
 
     if (user.deleted_at) {
-      throw new AppError('Account is already marked for deletion', 409, 'ACCOUNT_ALREADY_DELETED');
+      throw new AppError(
+        'Account is already marked for deletion',
+        409,
+        'ACCOUNT_ALREADY_DELETED',
+      );
     }
 
     const now = new Date();
@@ -499,8 +519,11 @@ export class UsersService {
       deleted_by_user_agent: metadata.userAgent || null,
     };
 
-    const success = await this.usersRepository.updateUserDeletionData(userId, updateData);
-    
+    const success = await this.usersRepository.updateUserDeletionData(
+      userId,
+      updateData,
+    );
+
     if (!success) {
       throw new AppError('Failed to delete account', 500, 'DELETE_FAILED');
     }
@@ -512,7 +535,10 @@ export class UsersService {
   }
 
   // Get user by ID (including deleted users) - overloaded method
-  async getUserByIdIncludeDeleted(userId: string, includeDeleted: boolean = false): Promise<UserWithRole | null> {
+  async getUserByIdIncludeDeleted(
+    userId: string,
+    includeDeleted: boolean = false,
+  ): Promise<UserWithRole | null> {
     if (includeDeleted) {
       return this.usersRepository.findByIdIncludeDeleted(userId);
     }

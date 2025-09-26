@@ -4,19 +4,12 @@ import { authController } from './auth.controller';
 import { SchemaRefs } from '../../schemas/registry';
 
 export default async function authRoutes(fastify: FastifyInstance) {
-  console.log('[AUTH_ROUTES] Registering auth routes...');
   const typedFastify = fastify.withTypeProvider<TypeBoxTypeProvider>();
 
   // POST /api/auth/register
-  console.log('[AUTH_ROUTES] Registering POST /api/auth/register...');
-
   try {
-    console.log('[AUTH_ROUTES] Getting schema refs...');
     const bodySchema = SchemaRefs.module('auth', 'registerRequest');
     const responseSchema = SchemaRefs.module('auth', 'registerResponse');
-
-    console.log('[AUTH_ROUTES] Body schema:', typeof bodySchema);
-    console.log('[AUTH_ROUTES] Response schema:', typeof responseSchema);
 
     typedFastify.route({
       method: 'POST',
@@ -42,7 +35,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
       },
       handler: authController.register,
     });
-    console.log('[AUTH_ROUTES] Register route registered successfully');
+    // Register route configured
   } catch (error) {
     console.error('[AUTH_ROUTES] Error registering register route:', error);
     throw error;

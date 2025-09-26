@@ -357,11 +357,7 @@ async function websocketPlugin(
     console.log('🔌 WebSocket plugin closed');
   });
 
-  console.log(
-    '🔌 WebSocket plugin initialized with EventBus and Redis support',
-  );
-  console.log(`🔌 Instance ID: ${eventBusConfig.instanceId}`);
-  console.log(`🔌 Redis enabled: ${eventBusConfig.enableRedis}`);
+  // WebSocket plugin initialized (silent)
 }
 
 export default fp(websocketPlugin, {

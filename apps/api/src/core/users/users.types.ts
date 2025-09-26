@@ -28,7 +28,7 @@ export interface UserCreateData {
   firstName?: string;
   lastName?: string;
   roleId?: string; // Optional - can be provided directly
-  role?: string;   // Optional - role name to be converted to roleId
+  role?: string; // Optional - role name to be converted to roleId
   isActive?: boolean;
 }
 

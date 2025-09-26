@@ -9,7 +9,7 @@ import { apiKeysRoutes } from './routes/index';
 
 /**
  * ApiKeys Domain Plugin
- * 
+ *
  * Following Fastify best practices:
  * - Service instantiation with proper dependency injection
  * - Encapsulation through plugin scoping
@@ -19,13 +19,13 @@ import { apiKeysRoutes } from './routes/index';
 export default fp(
   async function apiKeysDomainPlugin(
     fastify: FastifyInstance,
-    options: FastifyPluginOptions
+    options: FastifyPluginOptions,
   ) {
     // Register schemas using Fastify's built-in schema registry
     if (fastify.hasDecorator('schemaRegistry')) {
       (fastify as any).schemaRegistry.registerModuleSchemas(
         'apiKeys',
-        {} // schemas will be imported automatically
+        {}, // schemas will be imported automatically
       );
     }
 
@@ -34,17 +34,17 @@ export default fp(
     const apiKeysRepository = new ApiKeysRepository((fastify as any).knex);
     const apiKeysService = new ApiKeysService(
       apiKeysRepository,
-      (fastify as any).eventService
+      (fastify as any).eventService,
     );
     const apiKeysController = new ApiKeysController(apiKeysService);
 
-    // Optional: Decorate Fastify instance with service for cross-plugin access
-    // fastify.decorate('apiKeysService', apiKeysService);
+    // Decorate Fastify instance with service for cross-plugin access
+    fastify.decorate('apiKeysService', apiKeysService);
 
     // Register routes with controller dependency
     await fastify.register(apiKeysRoutes, {
       controller: apiKeysController,
-      prefix: options.prefix || '/apiKeys'
+      prefix: options.prefix || '/apiKeys',
     });
 
     // Lifecycle hooks for monitoring
@@ -60,8 +60,8 @@ export default fp(
   },
   {
     name: 'apiKeys-domain-plugin',
-    dependencies: ['knex-plugin', 'websocket-plugin']
-  }
+    dependencies: ['knex-plugin', 'websocket-plugin'],
+  },
 );
 
 // Re-exports for external consumers
@@ -81,8 +81,50 @@ export type {
   ListApiKeysQuery,
   ApiKeysCreatedEvent,
   ApiKeysUpdatedEvent,
-  ApiKeysDeletedEvent
+  ApiKeysDeletedEvent,
+  // New API key management types
+  ApiKeyScope,
+  GenerateApiKey,
+  GeneratedApiKey,
+  ValidateApiKey,
+  ApiKeyValidationResponse,
+  RevokeApiKey,
+  RotateApiKey,
+  UserApiKeysQuery,
+  ApiKeyPreview,
+  UserApiKeysResponse,
 } from './schemas/apiKeys.schemas';
+
+// Re-export middleware
+export {
+  createApiKeyAuth,
+  createHybridAuth,
+  createApiKeyRateLimit,
+  createApiKeyAuditLog,
+  requireScope,
+} from './middleware/apiKeys.middleware';
+export type {
+  ApiKeyAuthOptions,
+  AuthenticatedRequest,
+} from './middleware/apiKeys.middleware';
+
+// Re-export crypto utilities
+export {
+  generateApiKey,
+  generateScopedApiKey,
+  validateApiKey,
+  validateApiKeyFormat,
+  validateScope,
+  generatePreview,
+  isKeyExpired,
+  calculateExpiration,
+  createAuditHash,
+  API_KEY_CONSTANTS,
+} from './utils/apiKeys.crypto';
+export type {
+  ApiKeyComponents,
+  ApiKeyValidationResult,
+} from './utils/apiKeys.crypto';
 
 // Event type definitions for external consumers
 import { ApiKeys } from './schemas/apiKeys.schemas';
@@ -100,3 +142,10 @@ export interface ApiKeysWebSocketSubscription {
 
 // Module name constant
 export const MODULE_NAME = 'apiKeys' as const;
+
+// TypeScript declarations
+declare module 'fastify' {
+  interface FastifyInstance {
+    apiKeysService: ApiKeysService;
+  }
+}

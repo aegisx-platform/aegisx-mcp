@@ -398,12 +398,7 @@ async function healthCheckPlugin(
     },
   );
 
-  fastify.logger.info('Health check plugin initialized', {
-    endpoints: ['/health/live', '/health/ready'],
-    enableDetailedChecks,
-    databaseTimeout: `${databaseTimeout}ms`,
-    redisTimeout: `${redisTimeout}ms`,
-  });
+  // Health check plugin initialized (silent)
 }
 
 export default fp(healthCheckPlugin, {

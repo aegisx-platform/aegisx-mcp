@@ -95,7 +95,9 @@ export class UsersRepository {
     return user ? this.mapToUserWithRole(user) : null;
   }
 
-  async findByIdWithPassword(id: string): Promise<(User & { password: string }) | null> {
+  async findByIdWithPassword(
+    id: string,
+  ): Promise<(User & { password: string }) | null> {
     const user = await this.knex('users')
       .select('*')
       .where('id', id)
@@ -254,7 +256,7 @@ export class UsersRepository {
     const user = await this.knex('users')
       .select(
         'users.id',
-        'users.email', 
+        'users.email',
         'users.username',
         'users.first_name',
         'users.last_name',
@@ -264,7 +266,7 @@ export class UsersRepository {
         'users.email_verified',
         'users.created_at',
         'users.updated_at',
-        'roles.name as role'
+        'roles.name as role',
       )
       .leftJoin('user_roles', 'users.id', 'user_roles.user_id')
       .leftJoin('roles', 'user_roles.role_id', 'roles.id')
@@ -289,12 +291,15 @@ export class UsersRepository {
     };
   }
 
-  async updateProfile(id: string, data: {
-    firstName?: string;
-    lastName?: string;
-    username?: string;
-    bio?: string;
-  }): Promise<any | null> {
+  async updateProfile(
+    id: string,
+    data: {
+      firstName?: string;
+      lastName?: string;
+      username?: string;
+      bio?: string;
+    },
+  ): Promise<any | null> {
     const updateData: any = {};
     if (data.firstName !== undefined) updateData.first_name = data.firstName;
     if (data.lastName !== undefined) updateData.last_name = data.lastName;
@@ -322,23 +327,24 @@ export class UsersRepository {
   }
 
   // Update user deletion data for soft delete
-  async updateUserDeletionData(id: string, data: {
-    deleted_at: Date;
-    recovery_deadline: Date;
-    deletion_reason?: string | null;
-    deleted_by_ip?: string | null;
-    deleted_by_user_agent?: string | null;
-  }): Promise<boolean> {
-    const result = await this.knex('users')
-      .where({ id })
-      .update({
-        deleted_at: data.deleted_at,
-        recovery_deadline: data.recovery_deadline,
-        deletion_reason: data.deletion_reason,
-        deleted_by_ip: data.deleted_by_ip,
-        deleted_by_user_agent: data.deleted_by_user_agent,
-        updated_at: this.knex.fn.now(),
-      });
+  async updateUserDeletionData(
+    id: string,
+    data: {
+      deleted_at: Date;
+      recovery_deadline: Date;
+      deletion_reason?: string | null;
+      deleted_by_ip?: string | null;
+      deleted_by_user_agent?: string | null;
+    },
+  ): Promise<boolean> {
+    const result = await this.knex('users').where({ id }).update({
+      deleted_at: data.deleted_at,
+      recovery_deadline: data.recovery_deadline,
+      deletion_reason: data.deletion_reason,
+      deleted_by_ip: data.deleted_by_ip,
+      deleted_by_user_agent: data.deleted_by_user_agent,
+      updated_at: this.knex.fn.now(),
+    });
 
     return result > 0;
   }
@@ -346,11 +352,7 @@ export class UsersRepository {
   // Find user by ID including deleted users
   async findByIdIncludeDeleted(id: string): Promise<UserWithRole | null> {
     const user = await this.knex
-      .select(
-        'users.*',
-        'roles.name as role_name',
-        'roles.id as role_id'
-      )
+      .select('users.*', 'roles.name as role_name', 'roles.id as role_id')
       .from('users')
       .leftJoin('user_roles', 'users.id', 'user_roles.user_id')
       .leftJoin('roles', 'user_roles.role_id', 'roles.id')
@@ -369,7 +371,9 @@ export class UsersRepository {
       bio: user.bio,
       isActive: user.is_active,
       isEmailVerified: user.email_verified,
-      lastLoginAt: user.last_login_at ? new Date(user.last_login_at) : undefined,
+      lastLoginAt: user.last_login_at
+        ? new Date(user.last_login_at)
+        : undefined,
       createdAt: new Date(user.created_at),
       updatedAt: new Date(user.updated_at),
       role: user.role_name || 'user',
@@ -381,12 +385,14 @@ export class UsersRepository {
   }
 
   // Find user by ID with password (for password verification) - Updated method
-  async findByIdWithPasswordForVerification(id: string): Promise<(UserWithRole & { password: string }) | null> {
+  async findByIdWithPasswordForVerification(
+    id: string,
+  ): Promise<(UserWithRole & { password: string }) | null> {
     const user = await this.knex
       .select(
         'users.*',
         'roles.name as role_name',
-        'roles.description as role_description'
+        'roles.description as role_description',
       )
       .from('users')
       .leftJoin('user_roles', 'users.id', 'user_roles.user_id')
@@ -404,7 +410,9 @@ export class UsersRepository {
       firstName: user.first_name,
       lastName: user.last_name,
       isActive: user.is_active,
-      lastLoginAt: user.last_login_at ? new Date(user.last_login_at) : undefined,
+      lastLoginAt: user.last_login_at
+        ? new Date(user.last_login_at)
+        : undefined,
       createdAt: new Date(user.created_at),
       updatedAt: new Date(user.updated_at),
       password: user.password, // Include password hash

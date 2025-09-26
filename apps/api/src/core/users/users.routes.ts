@@ -172,7 +172,7 @@ export async function usersRoutes(
 
   // Get all roles (admin/manager only)
   typedFastify.get(
-    '/api/roles',
+    '/roles',
     {
       preValidation: [
         fastify.authenticate,
@@ -196,7 +196,7 @@ export async function usersRoutes(
 
   // Change current user password (self)
   typedFastify.post(
-    '/api/profile/password',
+    '/profile/password',
     {
       preValidation: [fastify.authenticate],
       schema: {
@@ -224,7 +224,7 @@ export async function usersRoutes(
 
   // Bulk activate users (admin only)
   typedFastify.post(
-    '/api/users/bulk/activate',
+    '/users/bulk/activate',
     {
       preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
       schema: {
@@ -266,7 +266,7 @@ export async function usersRoutes(
 
   // Bulk deactivate users (admin only)
   typedFastify.post(
-    '/api/users/bulk/deactivate',
+    '/users/bulk/deactivate',
     {
       preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
       schema: {
@@ -308,7 +308,7 @@ export async function usersRoutes(
 
   // Bulk delete users (admin only)
   typedFastify.post(
-    '/api/users/bulk/delete',
+    '/users/bulk/delete',
     {
       preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
       schema: {
@@ -350,7 +350,7 @@ export async function usersRoutes(
 
   // Bulk role change (admin only)
   typedFastify.post(
-    '/api/users/bulk/role-change',
+    '/users/bulk/role-change',
     {
       preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
       schema: {

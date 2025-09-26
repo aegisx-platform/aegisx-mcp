@@ -41,7 +41,7 @@ export async function rbacRoutes(
 
   // List roles
   typedFastify.get(
-    '/api/rbac/roles',
+    '/rbac/roles',
     {
       preValidation: [
         fastify.authenticate,
@@ -69,7 +69,7 @@ export async function rbacRoutes(
 
   // Get role by ID
   typedFastify.get(
-    '/api/rbac/roles/:id',
+    '/rbac/roles/:id',
     {
       preValidation: [
         fastify.authenticate,
@@ -98,7 +98,7 @@ export async function rbacRoutes(
 
   // Create role
   typedFastify.post(
-    '/api/rbac/roles',
+    '/rbac/roles',
     {
       preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
       schema: {
@@ -122,7 +122,7 @@ export async function rbacRoutes(
 
   // Update role
   typedFastify.put(
-    '/api/rbac/roles/:id',
+    '/rbac/roles/:id',
     {
       preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
       schema: {
@@ -148,7 +148,7 @@ export async function rbacRoutes(
 
   // Delete role
   typedFastify.delete(
-    '/api/rbac/roles/:id',
+    '/rbac/roles/:id',
     {
       preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
       schema: {
@@ -174,7 +174,7 @@ export async function rbacRoutes(
 
   // List permissions
   typedFastify.get(
-    '/api/rbac/permissions',
+    '/rbac/permissions',
     {
       preValidation: [
         fastify.authenticate,
@@ -199,7 +199,7 @@ export async function rbacRoutes(
 
   // Get permission by ID
   typedFastify.get(
-    '/api/rbac/permissions/:id',
+    '/rbac/permissions/:id',
     {
       preValidation: [
         fastify.authenticate,
@@ -225,7 +225,7 @@ export async function rbacRoutes(
 
   // Create permission
   typedFastify.post(
-    '/api/rbac/permissions',
+    '/rbac/permissions',
     {
       preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
       schema: {
@@ -249,7 +249,7 @@ export async function rbacRoutes(
 
   // Update permission
   typedFastify.put(
-    '/api/rbac/permissions/:id',
+    '/rbac/permissions/:id',
     {
       preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
       schema: {
@@ -274,7 +274,7 @@ export async function rbacRoutes(
 
   // Delete permission
   typedFastify.delete(
-    '/api/rbac/permissions/:id',
+    '/rbac/permissions/:id',
     {
       preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
       schema: {
@@ -299,7 +299,7 @@ export async function rbacRoutes(
 
   // List user roles
   typedFastify.get(
-    '/api/rbac/user-roles',
+    '/rbac/user-roles',
     {
       preValidation: [
         fastify.authenticate,
@@ -324,7 +324,7 @@ export async function rbacRoutes(
 
   // Assign role to user
   typedFastify.post(
-    '/api/rbac/users/:id/roles',
+    '/rbac/users/:id/roles',
     {
       preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
       schema: {
@@ -350,7 +350,7 @@ export async function rbacRoutes(
 
   // Remove role from user
   typedFastify.delete(
-    '/api/rbac/users/:userId/roles/:roleId',
+    '/rbac/users/:userId/roles/:roleId',
     {
       preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
       schema: {
@@ -376,7 +376,7 @@ export async function rbacRoutes(
 
   // Update user role expiry
   typedFastify.put(
-    '/api/rbac/users/:userId/roles/:roleId/expiry',
+    '/rbac/users/:userId/roles/:roleId/expiry',
     {
       preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
       schema: {
@@ -406,7 +406,7 @@ export async function rbacRoutes(
 
   // Bulk assign roles
   typedFastify.post(
-    '/api/rbac/bulk/assign-roles',
+    '/rbac/bulk/assign-roles',
     {
       preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
       schema: {
@@ -430,7 +430,7 @@ export async function rbacRoutes(
 
   // Bulk update roles
   typedFastify.post(
-    '/api/rbac/bulk/update-roles',
+    '/rbac/bulk/update-roles',
     {
       preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
       schema: {
@@ -454,7 +454,7 @@ export async function rbacRoutes(
 
   // Bulk update permissions
   typedFastify.post(
-    '/api/rbac/bulk/update-permissions',
+    '/rbac/bulk/update-permissions',
     {
       preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
       schema: {
@@ -479,7 +479,7 @@ export async function rbacRoutes(
 
   // Get RBAC statistics
   typedFastify.get(
-    '/api/rbac/stats',
+    '/rbac/stats',
     {
       preValidation: [
         fastify.authenticate,
@@ -503,7 +503,7 @@ export async function rbacRoutes(
 
   // Get role hierarchy
   typedFastify.get(
-    '/api/rbac/roles/hierarchy',
+    '/rbac/roles/hierarchy',
     {
       preValidation: [
         fastify.authenticate,
@@ -535,7 +535,7 @@ export async function rbacRoutes(
 
   // Get permissions by category
   typedFastify.get(
-    '/api/rbac/permissions/by-category',
+    '/rbac/permissions/by-category',
     {
       preValidation: [
         fastify.authenticate,
@@ -567,7 +567,7 @@ export async function rbacRoutes(
 
   // Get user effective permissions
   typedFastify.get(
-    '/api/rbac/users/:id/effective-permissions',
+    '/rbac/users/:id/effective-permissions',
     {
       preValidation: [
         fastify.authenticate,

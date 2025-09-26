@@ -22,7 +22,10 @@ export default fp(
     // Create service instances manually (avoiding tsyringe for now)
     const usersRepository = new UsersRepository(fastify.knex);
     const usersService = new UsersService(usersRepository);
-    const usersController = new UsersController(usersService, fastify.eventService);
+    const usersController = new UsersController(
+      usersService,
+      fastify.eventService,
+    );
 
     // Register routes
     await fastify.register(usersRoutes, {
