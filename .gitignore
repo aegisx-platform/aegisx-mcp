@@ -36,10 +36,18 @@ yarn-error.log
 testem.log
 /typings
 
-# Test files and temporary files
-test-*.*
+# Test files and temporary files (exclude important .ts route files)
+test-*.html
+test-*.json
+test-*.txt
+test-*.sh
+test-*.md
+test-*.log
 *-test.*
 *.test.*
+# Keep important test route files in API modules
+!apps/api/src/**/test-*.ts
+!apps/api/src/**/test-*.js
 test-file-uploads/
 test-results/
 playwright-report/
