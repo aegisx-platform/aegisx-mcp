@@ -61,12 +61,22 @@ psql $DATABASE_URL -c "SELECT * FROM {MODULE}s LIMIT 1"
 ### 2.1 Read Existing OpenAPI Spec
 
 ```bash
-# ดู endpoints ทั้งหมด
-curl -s "http://localhost:3333/api-docs/json" | jq '.paths | keys'
+# ดู endpoints ทั้งหมด (default port: 3333)
+curl -s "/documentation/json" | jq '.paths | keys'
 
 # ดู specific module endpoints (เปลี่ยน {MODULE} เป็น auth, users, settings, ฯลฯ)
-curl -s "http://localhost:3333/api-docs/json" | jq '.paths' | grep "/api/{MODULE}"
+curl -s "/documentation/json" | jq '.paths' | grep "/api/{MODULE}"
+
+# เปิด Swagger UI (default port: 3333)
+open /documentation
 ```
+
+**📝 API Documentation Notes:**
+
+- **Default Port**: 3333 สำหรับ main repository
+- **Multi-Instance**: แต่ละ feature repo ใช้ port ที่แตกต่างกัน (auto-assigned)
+- **Environment Variables**: ใช้ `${API_URL}/documentation` สำหรับ staging/production
+- **Alternative Access**: `http://localhost:3333/documentation` ถ้าต้องการระบุ port เต็ม
 
 ### 1.2 Check API Routes File
 
@@ -315,8 +325,8 @@ npx nx serve web
 ### Users Module:
 
 ```bash
-# API endpoints
-curl -s "http://localhost:3333/api-docs/json" | jq '.paths' | grep "/api/users"
+# API endpoints (default port: 3333)
+curl -s "/documentation/json" | jq '.paths' | grep "/api/users"
 # Frontend service
 apps/web/src/app/services/users.service.ts
 # URL pattern: /api/users, /api/users/{id}
@@ -325,8 +335,8 @@ apps/web/src/app/services/users.service.ts
 ### Settings Module:
 
 ```bash
-# API endpoints
-curl -s "http://localhost:3333/api-docs/json" | jq '.paths' | grep "/api/settings"
+# API endpoints (default port: 3333)
+curl -s "/documentation/json" | jq '.paths' | grep "/api/settings"
 # Frontend service
 apps/web/src/app/services/settings.service.ts
 # URL pattern: /api/settings, /api/settings/{key}
@@ -335,8 +345,8 @@ apps/web/src/app/services/settings.service.ts
 ### Products Module:
 
 ```bash
-# API endpoints
-curl -s "http://localhost:3333/api-docs/json" | jq '.paths' | grep "/api/products"
+# API endpoints (default port: 3333)
+curl -s "/documentation/json" | jq '.paths' | grep "/api/products"
 # Frontend service
 apps/web/src/app/services/products.service.ts
 # URL pattern: /api/products, /api/products/{id}
@@ -667,18 +677,23 @@ export const {MODULE}Schemas = {
 ## 🚀 Quick Verification Commands
 
 ```bash
-# All-in-one check for any module
-curl -s http://localhost:3333/api/health && \
+# All-in-one check for any module (default port: 3333)
+curl -s /api/health && \
 grep -q "3333" apps/web/src/environments/environment.ts && \
 grep -q "/api/{MODULE}" apps/web/src/app/services/{MODULE}.service.ts && \
 nx run-many --target=build --all && \
 echo "✅ Ready for {MODULE} development!"
 
-# Test specific module endpoint
-curl -X GET "http://localhost:3333/api/{MODULE}" \
+# Test specific module endpoint (default port: 3333)
+curl -X GET "/api/{MODULE}" \
   -H "Content-Type: application/json" \
   | jq '.success'
 # Should return: true
+
+# Multi-instance development notes:
+# - Main repo (aegisx-starter): port 3333 (default)
+# - Feature repos: auto-assigned ports (3334, 3335, etc.)
+# - Use ${API_URL}/documentation for environment-specific access
 ```
 
 ---
@@ -708,8 +723,8 @@ psql $DATABASE_URL -c "\d+ {MODULE}s"  # ดู columns
 # ✅ 2. API Running
 curl -s http://localhost:3333/api/health  # API must respond 200
 
-# ✅ 3. OpenAPI Spec
-curl -s "http://localhost:3333/api-docs/json" | jq '.paths' | grep "/api/{MODULE}"
+# ✅ 3. OpenAPI Spec (default port: 3333)
+curl -s "/documentation/json" | jq '.paths' | grep "/api/{MODULE}"
 
 # ✅ 4. Environment Check
 grep "3333" apps/web/src/environments/environment.ts  # Must be port 3333
