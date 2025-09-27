@@ -32,10 +32,7 @@ export default fp(
     // Service instantiation following Fastify DI pattern
     // Dependencies are accessed from Fastify instance decorators
     const themesRepository = new ThemesRepository((fastify as any).knex);
-    const themesService = new ThemesService(
-      themesRepository,
-      (fastify as any).eventService,
-    );
+    const themesService = new ThemesService(themesRepository);
     const themesController = new ThemesController(themesService);
 
     // Optional: Decorate Fastify instance with service for cross-plugin access
@@ -54,7 +51,7 @@ export default fp(
   },
   {
     name: 'themes-domain-plugin',
-    dependencies: ['knex-plugin', 'websocket-plugin'],
+    dependencies: ['knex-plugin'],
   },
 );
 
@@ -73,9 +70,6 @@ export type {
   ThemesIdParam,
   GetThemesQuery,
   ListThemesQuery,
-  ThemesCreatedEvent,
-  ThemesUpdatedEvent,
-  ThemesDeletedEvent,
 } from './schemas/themes.schemas';
 
 // Module name constant

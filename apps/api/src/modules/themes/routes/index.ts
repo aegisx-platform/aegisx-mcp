@@ -38,7 +38,10 @@ export async function themesRoutes(
         500: SchemaRefs.ServerError,
       },
     },
-    preValidation: [fastify.authenticate], // Authentication required
+    preValidation: [
+      fastify.authenticate,
+      fastify.authorize(['themes.create', 'admin']),
+    ], // Authentication & authorization required
     handler: controller.create.bind(controller),
   });
 
@@ -59,7 +62,10 @@ export async function themesRoutes(
         500: SchemaRefs.ServerError,
       },
     },
-    preValidation: [fastify.authenticate], // Authentication required
+    preValidation: [
+      fastify.authenticate,
+      fastify.authorize(['themes.read', 'admin']),
+    ], // Authentication & authorization required
     handler: controller.findOne.bind(controller),
   });
 
@@ -79,7 +85,10 @@ export async function themesRoutes(
         500: SchemaRefs.ServerError,
       },
     },
-    preValidation: [fastify.authenticate], // Authentication required
+    preValidation: [
+      fastify.authenticate,
+      fastify.authorize(['themes.read', 'admin']),
+    ], // Authentication & authorization required
     handler: controller.findMany.bind(controller),
   });
 
@@ -101,7 +110,10 @@ export async function themesRoutes(
         500: SchemaRefs.ServerError,
       },
     },
-    preValidation: [fastify.authenticate], // Authentication required
+    preValidation: [
+      fastify.authenticate,
+      fastify.authorize(['themes.update', 'admin']),
+    ], // Authentication & authorization required
     handler: controller.update.bind(controller),
   });
 
@@ -121,7 +133,10 @@ export async function themesRoutes(
         500: SchemaRefs.ServerError,
       },
     },
-    preValidation: [fastify.authenticate], // Authentication required
+    preValidation: [
+      fastify.authenticate,
+      fastify.authorize(['themes.delete', 'admin']),
+    ], // Authentication & authorization required
     handler: controller.delete.bind(controller),
   });
 }

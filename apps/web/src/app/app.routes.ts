@@ -126,27 +126,31 @@ export const appRoutes: Route[] = [
   {
     path: 'test-ax',
     loadComponent: () =>
-      import('./dev-tools/pages/test-ax/test-ax.component').then(
-        (m) => m.TestAxComponent,
+      import('./dev-tools/pages/material-demo/material-demo.component').then(
+        (m) => m.MaterialDemoComponent,
       ),
     canActivate: [AuthGuard],
   },
   {
     path: 'icon-test',
     loadComponent: () =>
-      import('./dev-tools/components/icon-test.component').then((m) => m.IconTestComponent),
+      import('./dev-tools/components/debug-icons.component').then(
+        (m) => m.DebugIconsComponent,
+      ),
   },
   {
     path: 'test-navigation',
     loadComponent: () =>
-      import('./dev-tools/components/test-navigation.component').then(
-        (m) => m.TestNavigationComponent,
+      import('./dev-tools/components/debug-navigation.component').then(
+        (m) => m.DebugNavigationComponent,
       ),
   },
   {
     path: 'debug-icons',
     loadComponent: () =>
-      import('./dev-tools/components/debug-icons.component').then((m) => m.DebugIconsComponent),
+      import('./dev-tools/components/debug-icons.component').then(
+        (m) => m.DebugIconsComponent,
+      ),
   },
   {
     path: 'debug-navigation',
@@ -182,16 +186,16 @@ export const appRoutes: Route[] = [
   {
     path: 'test-material',
     loadComponent: () =>
-      import('./dev-tools/components/test-material.component').then(
-        (m) => m.TestMaterialComponent,
+      import('./dev-tools/pages/material-demo/material-demo.component').then(
+        (m) => m.MaterialDemoComponent,
       ),
     canActivate: [AuthGuard],
   },
   {
     path: 'test-rbac-websocket',
     loadComponent: () =>
-      import('./dev-tools/components/test-rbac-websocket.component').then(
-        (m) => m.TestRbacWebsocketComponent,
+      import('./dev-tools/pages/realtime-demo/realtime-demo.component').then(
+        (m) => m.RealtimeDemoComponent,
       ),
   },
   {

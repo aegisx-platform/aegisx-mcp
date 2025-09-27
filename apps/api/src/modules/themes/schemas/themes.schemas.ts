@@ -98,27 +98,6 @@ export const ListThemesQuerySchema = Type.Object({
 export const ThemesResponseSchema = ApiSuccessResponseSchema(ThemesSchema);
 export const ThemesListResponseSchema = PaginatedResponseSchema(ThemesSchema);
 
-// Event Schemas
-export const ThemesCreatedEventSchema = Type.Object({
-  event: Type.Literal('themes:created'),
-  data: ThemesSchema,
-  timestamp: Type.String({ format: 'date-time' }),
-});
-
-export const ThemesUpdatedEventSchema = Type.Object({
-  event: Type.Literal('themes:updated'),
-  data: ThemesSchema,
-  timestamp: Type.String({ format: 'date-time' }),
-});
-
-export const ThemesDeletedEventSchema = Type.Object({
-  event: Type.Literal('themes:deleted'),
-  data: Type.Object({
-    id: Type.String({ format: 'uuid' }),
-  }),
-  timestamp: Type.String({ format: 'date-time' }),
-});
-
 // Export types
 export type Themes = Static<typeof ThemesSchema>;
 export type CreateThemes = Static<typeof CreateThemesSchema>;
@@ -126,6 +105,3 @@ export type UpdateThemes = Static<typeof UpdateThemesSchema>;
 export type ThemesIdParam = Static<typeof ThemesIdParamSchema>;
 export type GetThemesQuery = Static<typeof GetThemesQuerySchema>;
 export type ListThemesQuery = Static<typeof ListThemesQuerySchema>;
-export type ThemesCreatedEvent = Static<typeof ThemesCreatedEventSchema>;
-export type ThemesUpdatedEvent = Static<typeof ThemesUpdatedEventSchema>;
-export type ThemesDeletedEvent = Static<typeof ThemesDeletedEventSchema>;
