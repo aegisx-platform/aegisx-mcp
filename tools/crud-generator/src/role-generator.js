@@ -18,7 +18,45 @@ async function generateMigrationFile(moduleName, options = {}) {
     dryRun = false,
     multipleRoles = false,
     outputDir = path.resolve(cwd, defaultPath),
+    force = false,
   } = options;
+
+  // ✅ Check for existing migrations with same pattern
+  try {
+    const existingFiles = await fs.readdir(outputDir);
+    const existingPermissionMigrations = existingFiles.filter(
+      (file) =>
+        file.includes(`add_${moduleName}_permissions`) && file.endsWith('.ts'),
+    );
+
+    if (existingPermissionMigrations.length > 0 && !force) {
+      console.log(
+        `⚠️  Found existing permissions migration(s) for ${moduleName}:`,
+      );
+      existingPermissionMigrations.forEach((file) => {
+        console.log(`   📄 ${file}`);
+      });
+
+      if (!dryRun) {
+        // Remove existing duplicate migrations
+        console.log(
+          `🧹 Removing ${existingPermissionMigrations.length} duplicate migration(s)...`,
+        );
+        for (const file of existingPermissionMigrations) {
+          const filePath = path.join(outputDir, file);
+          await fs.unlink(filePath);
+          console.log(`   🗑️  Removed: ${file}`);
+        }
+      } else {
+        console.log(
+          `📋 Would remove ${existingPermissionMigrations.length} duplicate migration(s)`,
+        );
+      }
+    }
+  } catch (error) {
+    // Directory might not exist yet, continue
+    console.log(`📁 Creating migrations directory: ${outputDir}`);
+  }
 
   // Generate data structure same as before
   const permissions = [
@@ -188,11 +226,59 @@ async function generateRolesAndPermissions(moduleName, options = {}) {
  * Write roles and permissions directly to database (legacy)
  */
 async function writeToDatabase(moduleName, options = {}) {
-  const { dryRun = false, multipleRoles = false } = options;
+  const { dryRun = false, multipleRoles = false, force = false } = options;
 
   const knex = getKnexConnection();
 
   try {
+    // ✅ Check if permissions already exist in database
+    const existingPermissions = await knex('permissions')
+      .where('resource', moduleName)
+      .select('name', 'resource', 'action');
+
+    if (existingPermissions.length > 0 && !force) {
+      console.log(
+        `⚠️  Found existing permissions for ${moduleName} in database:`,
+      );
+      existingPermissions.forEach((perm) => {
+        console.log(`   🔐 ${perm.name} (${perm.action})`);
+      });
+
+      if (!dryRun) {
+        console.log(
+          `🧹 Removing ${existingPermissions.length} existing permission(s)...`,
+        );
+
+        // Remove existing role_permissions first
+        const permissionIds = await knex('permissions')
+          .where('resource', moduleName)
+          .pluck('id');
+
+        if (permissionIds.length > 0) {
+          await knex('role_permissions')
+            .whereIn('permission_id', permissionIds)
+            .del();
+          console.log(`   🔗 Removed role_permissions links`);
+        }
+
+        // Remove existing permissions
+        const deletedCount = await knex('permissions')
+          .where('resource', moduleName)
+          .del();
+        console.log(`   🗑️  Removed ${deletedCount} permissions`);
+
+        // Remove roles if they exist
+        const deletedRoleCount = await knex('roles')
+          .where('name', 'like', `${moduleName}%`)
+          .del();
+        console.log(`   🗑️  Removed ${deletedRoleCount} roles`);
+      } else {
+        console.log(
+          `📋 Would remove ${existingPermissions.length} existing permission(s)`,
+        );
+      }
+    }
+
     // Define CRUD permissions for the module
     const permissions = [
       {
@@ -274,14 +360,14 @@ async function writeToDatabase(moduleName, options = {}) {
     }
 
     // Check if permissions already exist
-    const existingPermissions = await knex('permissions')
+    const existingDbPermissions = await knex('permissions')
       .whereIn(
         'name',
         permissions.map((p) => p.name),
       )
       .select('name');
 
-    const existingPermissionNames = existingPermissions.map((p) => p.name);
+    const existingPermissionNames = existingDbPermissions.map((p) => p.name);
     const newPermissions = permissions.filter(
       (p) => !existingPermissionNames.includes(p.name),
     );

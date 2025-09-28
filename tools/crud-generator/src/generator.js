@@ -265,6 +265,7 @@ async function generateCrudModule(tableName, options = {}) {
 
       const roleOptions = {
         dryRun,
+        force,
         useMigration: !directDb,
         directDb,
         multipleRoles,
@@ -905,6 +906,7 @@ async function generateDomainModule(domainName, options = {}) {
 
       const roleOptions = {
         dryRun,
+        force,
         useMigration: !directDb,
         directDb,
         multipleRoles,
