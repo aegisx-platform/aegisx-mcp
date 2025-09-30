@@ -1,4 +1,11 @@
-import { Component, OnInit, computed, signal, inject, OnDestroy } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  computed,
+  signal,
+  inject,
+  OnDestroy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -21,10 +28,19 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
 
 import { NotificationService } from '../services/notifications.service';
-import { Notification, ListNotificationQuery, ListNotificationParams } from '../types/notification.types';
+import {
+  Notification,
+  ListNotificationQuery,
+} from '../types/notification.types';
 import { NotificationCreateDialogComponent } from './notifications-create.dialog';
-import { NotificationEditDialogComponent, NotificationEditDialogData } from './notifications-edit.dialog';
-import { NotificationViewDialogComponent, NotificationViewDialogData } from './notifications-view.dialog';
+import {
+  NotificationEditDialogComponent,
+  NotificationEditDialogData,
+} from './notifications-edit.dialog';
+import {
+  NotificationViewDialogComponent,
+  NotificationViewDialogData,
+} from './notifications-view.dialog';
 
 @Component({
   selector: 'app-notifications-list',
@@ -53,9 +69,9 @@ import { NotificationViewDialogComponent, NotificationViewDialogData } from './n
       <mat-toolbar color="primary" class="page-header">
         <h1 class="page-title">Notifications</h1>
         <span class="spacer"></span>
-        <button 
-          mat-raised-button 
-          color="accent" 
+        <button
+          mat-raised-button
+          color="accent"
           (click)="openCreateDialog()"
           [disabled]="notificationsService.loading()"
         >
@@ -68,38 +84,67 @@ import { NotificationViewDialogComponent, NotificationViewDialogData } from './n
         <mat-card-content>
           <!-- Search and Filters -->
           <div class="search-container">
-            <mat-form-field appearance="outline" class="search-field">
-              <mat-label>Search Notifications</mat-label>
-              <input 
-                matInput 
-                placeholder="Search by title, name, description"
-                [(ngModel)]="searchTerm"
-                (input)="onSearchChange()"
-              >
-              <mat-icon matSuffix>search</mat-icon>
-            </mat-form-field>
+            <div class="search-group">
+              <mat-form-field appearance="outline" class="search-field">
+                <mat-label>Search Notifications</mat-label>
+                <input
+                  matInput
+                  placeholder="Search by title, name, description"
+                  [(ngModel)]="searchTerm"
+                  (input)="onSearchChange()"
+                  (keyup.enter)="onSearchButtonClick()"
+                />
+                <mat-icon matSuffix>search</mat-icon>
+              </mat-form-field>
+              <div class="search-buttons">
+                <button
+                  mat-raised-button
+                  color="primary"
+                  (click)="onSearchButtonClick()"
+                  [disabled]="notificationsService.loading()"
+                  class="search-btn"
+                >
+                  <mat-icon>search</mat-icon>
+                  Search
+                </button>
+                <button
+                  mat-stroked-button
+                  (click)="clearSearch()"
+                  [disabled]="
+                    !searchTerm.trim() || notificationsService.loading()
+                  "
+                  class="clear-search-btn"
+                >
+                  <mat-icon>clear</mat-icon>
+                  Clear
+                </button>
+              </div>
+            </div>
 
             <mat-form-field appearance="outline">
               <mat-label>Id</mat-label>
-              <input 
-                matInput 
+              <input
+                matInput
                 type="text"
                 [(ngModel)]="filters().id"
                 (input)="applyFilters()"
-              >
+              />
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>User Id</mat-label>
-              <input 
-                matInput 
+              <input
+                matInput
                 type="text"
                 [(ngModel)]="filters().user_id"
                 (input)="applyFilters()"
-              >
+              />
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>Type</mat-label>
-              <mat-select [(ngModel)]="filters().type" (selectionChange)="applyFilters()">
+              <mat-select
+                [(ngModel)]="filters().type"
+                (selectionChange)="applyFilters()"
+              >
                 <mat-option value="">All</mat-option>
                 <mat-option value="info">Info</mat-option>
                 <mat-option value="warning">Warning</mat-option>
@@ -108,42 +153,42 @@ import { NotificationViewDialogComponent, NotificationViewDialogData } from './n
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>Title</mat-label>
-              <input 
-                matInput 
+              <input
+                matInput
                 type="text"
                 [(ngModel)]="filters().title"
                 (input)="applyFilters()"
-              >
+              />
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>Message</mat-label>
-              <input 
-                matInput 
+              <input
+                matInput
                 type="text"
                 [(ngModel)]="filters().message"
                 (input)="applyFilters()"
-              >
+              />
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>Data</mat-label>
-              <input 
-                matInput 
+              <input
+                matInput
                 type="text"
                 [(ngModel)]="filters().data"
                 (input)="applyFilters()"
-              >
+              />
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>Action Url</mat-label>
-              <input 
-                matInput 
+              <input
+                matInput
                 type="text"
                 [(ngModel)]="filters().action_url"
                 (input)="applyFilters()"
-              >
+              />
             </mat-form-field>
             <div class="checkbox-filter">
-              <mat-checkbox 
+              <mat-checkbox
                 [(ngModel)]="filters().read"
                 (change)="applyFilters()"
               >
@@ -152,15 +197,15 @@ import { NotificationViewDialogComponent, NotificationViewDialogData } from './n
             </div>
             <mat-form-field appearance="outline">
               <mat-label>Read At</mat-label>
-              <input 
-                matInput 
+              <input
+                matInput
                 type="text"
                 [(ngModel)]="filters().read_at"
                 (input)="applyFilters()"
-              >
+              />
             </mat-form-field>
             <div class="checkbox-filter">
-              <mat-checkbox 
+              <mat-checkbox
                 [(ngModel)]="filters().archived"
                 (change)="applyFilters()"
               >
@@ -169,16 +214,19 @@ import { NotificationViewDialogComponent, NotificationViewDialogData } from './n
             </div>
             <mat-form-field appearance="outline">
               <mat-label>Archived At</mat-label>
-              <input 
-                matInput 
+              <input
+                matInput
                 type="text"
                 [(ngModel)]="filters().archived_at"
                 (input)="applyFilters()"
-              >
+              />
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>Priority</mat-label>
-              <mat-select [(ngModel)]="filters().priority" (selectionChange)="applyFilters()">
+              <mat-select
+                [(ngModel)]="filters().priority"
+                (selectionChange)="applyFilters()"
+              >
                 <mat-option value="">All</mat-option>
                 <mat-option value="low">Low</mat-option>
                 <mat-option value="normal">Normal</mat-option>
@@ -188,34 +236,34 @@ import { NotificationViewDialogComponent, NotificationViewDialogData } from './n
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>Expires At</mat-label>
-              <input 
-                matInput 
+              <input
+                matInput
                 type="text"
                 [(ngModel)]="filters().expires_at"
                 (input)="applyFilters()"
-              >
+              />
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>Created At</mat-label>
-              <input 
-                matInput 
+              <input
+                matInput
                 type="text"
                 [(ngModel)]="filters().created_at"
                 (input)="applyFilters()"
-              >
+              />
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>Updated At</mat-label>
-              <input 
-                matInput 
+              <input
+                matInput
                 type="text"
                 [(ngModel)]="filters().updated_at"
                 (input)="applyFilters()"
-              >
+              />
             </mat-form-field>
 
-            <button 
-              mat-stroked-button 
+            <button
+              mat-stroked-button
               (click)="clearFilters()"
               [disabled]="!hasActiveFilters()"
             >
@@ -228,7 +276,10 @@ import { NotificationViewDialogComponent, NotificationViewDialogData } from './n
 
       <!-- Loading State -->
       <div *ngIf="notificationsService.loading()" class="loading-container">
-        <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+        <mat-progress-spinner
+          mode="indeterminate"
+          diameter="50"
+        ></mat-progress-spinner>
         <p>Loading Notifications...</p>
       </div>
 
@@ -237,7 +288,7 @@ import { NotificationViewDialogComponent, NotificationViewDialogData } from './n
         <mat-card-content>
           <div class="error-content">
             <mat-icon color="warn">error</mat-icon>
-            <p>{{ notificationsService.error() \}}</p>
+            <p>{{ notificationsService.error() }}</p>
             <button mat-button color="primary" (click)="retry()">
               <mat-icon>refresh</mat-icon>
               Retry
@@ -247,16 +298,27 @@ import { NotificationViewDialogComponent, NotificationViewDialogData } from './n
       </mat-card>
 
       <!-- Data Table -->
-      <mat-card *ngIf="!notificationsService.loading() && !notificationsService.error()" class="table-card">
+      <mat-card
+        *ngIf="!notificationsService.loading() && !notificationsService.error()"
+        class="table-card"
+      >
         <mat-card-content>
           <!-- Bulk Actions -->
           <div *ngIf="hasSelected()" class="bulk-actions">
-            <span class="selection-info">{{ selectedItems().length \}} selected</span>
+            <span class="selection-info"
+              >{{ selectedItems().length }} selected</span
+            >
             <div class="bulk-buttons">
-              <button 
-                mat-stroked-button 
-                (click)="clearSelection()"
+              <button
+                mat-stroked-button
+                color="warn"
+                (click)="bulkDelete()"
+                [disabled]="notificationsService.loading()"
               >
+                <mat-icon>delete</mat-icon>
+                Delete Selected
+              </button>
+              <button mat-stroked-button (click)="clearSelection()">
                 <mat-icon>clear</mat-icon>
                 Clear Selection
               </button>
@@ -265,7 +327,11 @@ import { NotificationViewDialogComponent, NotificationViewDialogData } from './n
 
           <!-- Table -->
           <div class="table-container">
-            <table mat-table [dataSource]="notificationsService.notificationsList()" class="notifications-table">
+            <table
+              mat-table
+              [dataSource]="notificationsService.notificationsList()"
+              class="notifications-table"
+            >
               <!-- Selection Column -->
               <ng-container matColumnDef="select">
                 <th mat-header-cell *matHeaderCellDef>
@@ -287,24 +353,24 @@ import { NotificationViewDialogComponent, NotificationViewDialogData } from './n
               <ng-container matColumnDef="user_id">
                 <th mat-header-cell *matHeaderCellDef>User Id</th>
                 <td mat-cell *matCellDef="let notifications">
-                  {{ notifications.user_id \}}
-                                  </td>
+                  {{ notifications.user_id }}
+                </td>
               </ng-container>
 
               <!-- type Column -->
               <ng-container matColumnDef="type">
                 <th mat-header-cell *matHeaderCellDef>Type</th>
                 <td mat-cell *matCellDef="let notifications">
-                  {{ notifications.type \}}
-                                  </td>
+                  {{ notifications.type }}
+                </td>
               </ng-container>
 
               <!-- title Column -->
               <ng-container matColumnDef="title">
                 <th mat-header-cell *matHeaderCellDef>Title</th>
                 <td mat-cell *matCellDef="let notifications">
-                  {{ notifications.title \}}
-                                  </td>
+                  {{ notifications.title }}
+                </td>
               </ng-container>
 
               <!-- message Column -->
@@ -312,7 +378,8 @@ import { NotificationViewDialogComponent, NotificationViewDialogData } from './n
                 <th mat-header-cell *matHeaderCellDef>Message</th>
                 <td mat-cell *matCellDef="let notifications">
                   <span [title]="notifications.message">
-                    {{ notifications.message | slice:0:50 \}}<span *ngIf="notifications.message.length > 50">...</span>
+                    {{ notifications.message | slice: 0 : 50
+                    }}<span *ngIf="notifications.message.length > 50">...</span>
                   </span>
                 </td>
               </ng-container>
@@ -321,38 +388,38 @@ import { NotificationViewDialogComponent, NotificationViewDialogData } from './n
               <ng-container matColumnDef="data">
                 <th mat-header-cell *matHeaderCellDef>Data</th>
                 <td mat-cell *matCellDef="let notifications">
-                  {{ notifications.data \}}
-                                  </td>
+                  {{ notifications.data }}
+                </td>
               </ng-container>
 
               <!-- action_url Column -->
               <ng-container matColumnDef="action_url">
                 <th mat-header-cell *matHeaderCellDef>Action Url</th>
                 <td mat-cell *matCellDef="let notifications">
-                  {{ notifications.action_url \}}
-                                  </td>
+                  {{ notifications.action_url }}
+                </td>
               </ng-container>
 
               <!-- Actions Column -->
               <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef>Actions</th>
                 <td mat-cell *matCellDef="let notifications">
-                  <button 
-                    mat-icon-button 
+                  <button
+                    mat-icon-button
                     (click)="openViewDialog(notifications)"
                     matTooltip="View Details"
                   >
                     <mat-icon>visibility</mat-icon>
                   </button>
-                  <button 
-                    mat-icon-button 
+                  <button
+                    mat-icon-button
                     (click)="openEditDialog(notifications)"
                     matTooltip="Edit"
                   >
                     <mat-icon>edit</mat-icon>
                   </button>
-                  <button 
-                    mat-icon-button 
+                  <button
+                    mat-icon-button
                     color="warn"
                     (click)="deleteNotification(notifications)"
                     matTooltip="Delete"
@@ -364,16 +431,23 @@ import { NotificationViewDialogComponent, NotificationViewDialogData } from './n
               </ng-container>
 
               <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
             </table>
           </div>
 
           <!-- Empty State -->
-          <div *ngIf="notificationsService.notificationsList().length === 0" class="empty-state">
+          <div
+            *ngIf="notificationsService.notificationsList().length === 0"
+            class="empty-state"
+          >
             <mat-icon class="empty-icon">inbox</mat-icon>
             <h3>No Notifications found</h3>
             <p>Create your first Notifications to get started</p>
-            <button mat-raised-button color="primary" (click)="openCreateDialog()">
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="openCreateDialog()"
+            >
               <mat-icon>add</mat-icon>
               Add Notifications
             </button>
@@ -393,159 +467,200 @@ import { NotificationViewDialogComponent, NotificationViewDialogData } from './n
       </mat-card>
     </div>
   `,
-  styles: [`
-    .notifications-list-container {
-      padding: 16px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .page-header {
-      margin-bottom: 16px;
-      border-radius: 4px;
-    }
-
-    .page-title {
-      margin: 0;
-      font-weight: 500;
-    }
-
-    .spacer {
-      flex: 1 1 auto;
-    }
-
-    .search-card {
-      margin-bottom: 16px;
-    }
-
-    .search-container {
-      display: flex;
-      gap: 16px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .search-field {
-      flex: 1;
-      min-width: 300px;
-    }
-
-    .checkbox-filter {
-      display: flex;
-      align-items: center;
-      min-width: 120px;
-      margin: 8px 0;
-    }
-
-    .loading-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 40px;
-    }
-
-    .loading-container p {
-      margin-top: 16px;
-      color: #666;
-    }
-
-    .error-card {
-      margin-bottom: 16px;
-    }
-
-    .error-content {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .error-content mat-icon {
-      font-size: 24px;
-    }
-
-    .error-content p {
-      flex: 1;
-      margin: 0;
-    }
-
-    .table-card {
-      margin-bottom: 16px;
-    }
-
-    .bulk-actions {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 16px 0;
-      border-bottom: 1px solid #e0e0e0;
-      margin-bottom: 16px;
-    }
-
-    .selection-info {
-      font-weight: 500;
-      color: #1976d2;
-    }
-
-    .bulk-buttons {
-      display: flex;
-      gap: 8px;
-    }
-
-    .table-container {
-      overflow-x: auto;
-    }
-
-    .notifications-table {
-      width: 100%;
-      min-width: 600px;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 40px;
-    }
-
-    .empty-icon {
-      font-size: 48px;
-      color: #ccc;
-      margin-bottom: 16px;
-    }
-
-    .empty-state h3 {
-      margin: 0 0 8px 0;
-      color: #666;
-    }
-
-    .empty-state p {
-      margin: 0 0 24px 0;
-      color: #999;
-    }
-
-    @media (max-width: 768px) {
+  styles: [
+    `
       .notifications-list-container {
-        padding: 8px;
+        padding: 16px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .page-header {
+        margin-bottom: 16px;
+        border-radius: 4px;
+      }
+
+      .page-title {
+        margin: 0;
+        font-weight: 500;
+      }
+
+      .spacer {
+        flex: 1 1 auto;
+      }
+
+      .search-card {
+        margin-bottom: 16px;
       }
 
       .search-container {
-        flex-direction: column;
-        align-items: stretch;
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .search-group {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex: 1;
+        min-width: 300px;
       }
 
       .search-field {
-        min-width: unset;
+        flex: 1;
+        min-width: 250px;
+      }
+
+      .search-buttons {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .search-btn {
+        min-width: 100px;
+      }
+
+      .clear-search-btn {
+        min-width: 80px;
+      }
+
+      .checkbox-filter {
+        display: flex;
+        align-items: center;
+        min-width: 120px;
+        margin: 8px 0;
+      }
+
+      .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px;
+      }
+
+      .loading-container p {
+        margin-top: 16px;
+        color: #666;
+      }
+
+      .error-card {
+        margin-bottom: 16px;
+      }
+
+      .error-content {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .error-content mat-icon {
+        font-size: 24px;
+      }
+
+      .error-content p {
+        flex: 1;
+        margin: 0;
+      }
+
+      .table-card {
+        margin-bottom: 16px;
       }
 
       .bulk-actions {
-        flex-direction: column;
-        gap: 8px;
-        align-items: stretch;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 0;
+        border-bottom: 1px solid #e0e0e0;
+        margin-bottom: 16px;
+      }
+
+      .selection-info {
+        font-weight: 500;
+        color: #1976d2;
       }
 
       .bulk-buttons {
-        justify-content: center;
+        display: flex;
+        gap: 8px;
       }
-    }
-  `]
+
+      .table-container {
+        overflow-x: auto;
+      }
+
+      .notifications-table {
+        width: 100%;
+        min-width: 600px;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 40px;
+      }
+
+      .empty-icon {
+        font-size: 48px;
+        color: #ccc;
+        margin-bottom: 16px;
+      }
+
+      .empty-state h3 {
+        margin: 0 0 8px 0;
+        color: #666;
+      }
+
+      .empty-state p {
+        margin: 0 0 24px 0;
+        color: #999;
+      }
+
+      @media (max-width: 768px) {
+        .notifications-list-container {
+          padding: 8px;
+        }
+
+        .search-container {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .search-group {
+          flex-direction: column;
+          align-items: stretch;
+          min-width: unset;
+          gap: 8px;
+        }
+
+        .search-field {
+          min-width: unset;
+        }
+
+        .search-buttons {
+          justify-content: center;
+        }
+
+        .search-btn,
+        .clear-search-btn {
+          flex: 1;
+          min-width: unset;
+        }
+
+        .bulk-actions {
+          flex-direction: column;
+          gap: 8px;
+          align-items: stretch;
+        }
+
+        .bulk-buttons {
+          justify-content: center;
+        }
+      }
+    `,
+  ],
 })
 export class NotificationListComponent implements OnInit, OnDestroy {
   protected notificationsService = inject(NotificationService);
@@ -555,8 +670,8 @@ export class NotificationListComponent implements OnInit, OnDestroy {
   // Search and filtering
   searchTerm = '';
   private searchTimeout: any;
-  
-  private filtersSignal = signal<Partial<ListNotificationParams>>({});
+
+  private filtersSignal = signal<Partial<ListNotificationQuery>>({});
   readonly filters = this.filtersSignal.asReadonly();
 
   // Selection
@@ -572,7 +687,7 @@ export class NotificationListComponent implements OnInit, OnDestroy {
     'message',
     'data',
     'action_url',
-    'actions'
+    'actions',
   ];
 
   ngOnInit() {
@@ -588,7 +703,7 @@ export class NotificationListComponent implements OnInit, OnDestroy {
   // ===== DATA LOADING =====
 
   async loadNotifications() {
-    const params: ListNotificationParams = {
+    const params: ListNotificationQuery = {
       page: this.notificationsService.currentPage(),
       limit: this.notificationsService.pageSize(),
       ...this.filters(),
@@ -609,15 +724,35 @@ export class NotificationListComponent implements OnInit, OnDestroy {
   // ===== SEARCH AND FILTERING =====
 
   onSearchChange() {
-    // Debounce search
+    // Debounce search for auto-search
     if (this.searchTimeout) {
       clearTimeout(this.searchTimeout);
     }
-    
+
     this.searchTimeout = setTimeout(() => {
       this.notificationsService.setCurrentPage(1);
       this.loadNotifications();
     }, 300);
+  }
+
+  onSearchButtonClick() {
+    // Manual search - immediate execution
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+    }
+
+    this.notificationsService.setCurrentPage(1);
+    this.loadNotifications();
+  }
+
+  clearSearch() {
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+    }
+
+    this.searchTerm = '';
+    this.notificationsService.setCurrentPage(1);
+    this.loadNotifications();
   }
 
   applyFilters() {
@@ -626,6 +761,10 @@ export class NotificationListComponent implements OnInit, OnDestroy {
   }
 
   clearFilters() {
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+    }
+
     this.searchTerm = '';
     this.filtersSignal.set({});
     this.notificationsService.setCurrentPage(1);
@@ -660,7 +799,7 @@ export class NotificationListComponent implements OnInit, OnDestroy {
   }
 
   toggleSelect(id: string) {
-    this.selectedIdsSignal.update(selected => {
+    this.selectedIdsSignal.update((selected) => {
       const newSet = new Set(selected);
       if (newSet.has(id)) {
         newSet.delete(id);
@@ -675,7 +814,9 @@ export class NotificationListComponent implements OnInit, OnDestroy {
     if (this.isAllSelected()) {
       this.selectedIdsSignal.set(new Set());
     } else {
-      const allIds = this.notificationsService.notificationsList().map(item => item.id);
+      const allIds = this.notificationsService
+        .notificationsList()
+        .map((item) => item.id);
       this.selectedIdsSignal.set(new Set(allIds));
     }
   }
@@ -749,4 +890,29 @@ export class NotificationListComponent implements OnInit, OnDestroy {
     }
   }
 
+  async bulkDelete() {
+    const selectedIds = Array.from(this.selectedIdsSignal());
+    if (selectedIds.length === 0) return;
+
+    const confirmed = confirm(
+      `Are you sure you want to delete ${selectedIds.length} Notifications?`,
+    );
+    if (!confirmed) return;
+
+    try {
+      await this.notificationsService.bulkDeleteNotification(selectedIds);
+      this.clearSelection();
+      this.snackBar.open(
+        `${selectedIds.length} Notifications deleted successfully`,
+        'Close',
+        {
+          duration: 3000,
+        },
+      );
+    } catch (error) {
+      this.snackBar.open('Failed to delete Notifications', 'Close', {
+        duration: 5000,
+      });
+    }
+  }
 }

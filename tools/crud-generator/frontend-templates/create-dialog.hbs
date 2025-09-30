@@ -1,217 +1,38 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule, MatOptionModule } from '@angular/material/core';
+import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { {{PascalCase}}Service } from '../services/{{kebabCase moduleName}}.service';
 import { Create{{PascalCase}}Request } from '../types/{{typesFileName}}';
+import { {{PascalCase}}FormComponent, {{PascalCase}}FormData } from './{{kebabCase moduleName}}-form.component';
 
 @Component({
   selector: 'app-{{kebabCase moduleName}}-create-dialog',
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule,
     MatDialogModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatCheckboxModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatProgressSpinnerModule,
-    MatOptionModule,
+    {{PascalCase}}FormComponent,
   ],
   template: `
     <div class="create-dialog">
       <h2 mat-dialog-title>Create {{title}}</h2>
       
       <mat-dialog-content>
-        <form [formGroup]="createForm" class="create-form">
-          {{#each formFields}}
-          {{#if (eq type 'string')}}
-          <!-- {{name}} Field -->
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>{{label}}</mat-label>
-            {{#if (eq inputType 'textarea')}}
-            <textarea 
-              matInput 
-              formControlName="{{name}}"
-              placeholder="{{placeholder}}"
-              rows="3"
-            ></textarea>
-            {{else}}
-            <input 
-              matInput 
-              type="{{inputType}}"
-              formControlName="{{name}}"
-              placeholder="{{placeholder}}"
-            >
-            {{/if}}
-            {{#if required}}
-            <mat-error *ngIf="createForm.get('{{name}}')?.hasError('required')">
-              {{label}} is required
-            </mat-error>
-            {{/if}}
-            {{#if maxLength}}
-            <mat-error *ngIf="createForm.get('{{name}}')?.hasError('maxlength')">
-              {{label}} must be less than {{maxLength}} characters
-            </mat-error>
-            {{/if}}
-          </mat-form-field>
-          {{/if}}
-
-          {{#if (eq type 'number')}}
-          <!-- {{name}} Field -->
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>{{label}}</mat-label>
-            <input 
-              matInput 
-              type="number"
-              formControlName="{{name}}"
-              placeholder="{{placeholder}}"
-            >
-            {{#if required}}
-            <mat-error *ngIf="createForm.get('{{name}}')?.hasError('required')">
-              {{label}} is required
-            </mat-error>
-            {{/if}}
-            {{#if min}}
-            <mat-error *ngIf="createForm.get('{{name}}')?.hasError('min')">
-              {{label}} must be at least {{min}}
-            </mat-error>
-            {{/if}}
-            {{#if max}}
-            <mat-error *ngIf="createForm.get('{{name}}')?.hasError('max')">
-              {{label}} must be at most {{max}}
-            </mat-error>
-            {{/if}}
-          </mat-form-field>
-          {{/if}}
-
-          {{#if (eq type 'boolean')}}
-          <!-- {{name}} Field -->
-          <div class="checkbox-field">
-            <mat-checkbox formControlName="{{name}}">
-              {{label}}
-            </mat-checkbox>
-          </div>
-          {{/if}}
-
-          {{#if (eq type 'date')}}
-          <!-- {{name}} Field -->
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>{{label}}</mat-label>
-            <input 
-              matInput 
-              [matDatepicker]="{{name}}Picker"
-              formControlName="{{name}}"
-              placeholder="{{placeholder}}"
-            >
-            <mat-datepicker-toggle matSuffix [for]="{{name}}Picker"></mat-datepicker-toggle>
-            <mat-datepicker #{{name}}Picker></mat-datepicker>
-            {{#if required}}
-            <mat-error *ngIf="createForm.get('{{name}}')?.hasError('required')">
-              {{label}} is required
-            </mat-error>
-            {{/if}}
-          </mat-form-field>
-          {{/if}}
-
-          {{#if (eq type 'select')}}
-          <!-- {{name}} Field -->
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>{{label}}</mat-label>
-            <mat-select formControlName="{{name}}">
-              {{#each options}}
-              <mat-option value="{{value}}">{{label}}</mat-option>
-              {{/each}}
-            </mat-select>
-            {{#if required}}
-            <mat-error *ngIf="createForm.get('{{name}}')?.hasError('required')">
-              {{label}} is required
-            </mat-error>
-            {{/if}}
-          </mat-form-field>
-          {{/if}}
-
-          {{#if (eq type 'json')}}
-          <!-- {{name}} Field -->
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>{{label}} (JSON)</mat-label>
-            <textarea 
-              matInput 
-              formControlName="{{name}}"
-              placeholder='{{placeholder}}'
-              rows="3"
-            ></textarea>
-            <mat-hint>Enter valid JSON object (optional)</mat-hint>
-            <mat-error *ngIf="createForm.get('{{name}}')?.hasError('invalidJson')">
-              Invalid JSON format
-            </mat-error>
-          </mat-form-field>
-          {{/if}}
-          {{/each}}
-        </form>
+        <app-{{kebabCase moduleName}}-form
+          mode="create"
+          [loading]="loading()"
+          (formSubmit)="onFormSubmit($event)"
+          (formCancel)="onCancel()"
+        ></app-{{kebabCase moduleName}}-form>
       </mat-dialog-content>
-
-      <mat-dialog-actions align="end">
-        <button 
-          mat-button 
-          type="button"
-          (click)="onCancel()"
-          [disabled]="loading()"
-        >
-          Cancel
-        </button>
-        <button 
-          mat-raised-button 
-          color="primary" 
-          type="button"
-          (click)="onCreate()"
-          [disabled]="createForm.invalid || loading()"
-        >
-          {{#if loading}}
-          <mat-spinner diameter="20" class="inline-spinner"></mat-spinner>
-          {{/if}}
-          Create {{title}}
-        </button>
-      </mat-dialog-actions>
     </div>
   `,
   styles: [`
     .create-dialog {
       min-width: 500px;
       max-width: 800px;
-    }
-
-    .create-form {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      padding: 16px 0;
-    }
-
-    .full-width {
-      width: 100%;
-    }
-
-    .checkbox-field {
-      margin: 8px 0;
-    }
-
-    .inline-spinner {
-      margin-right: 8px;
     }
 
     mat-dialog-content {
@@ -227,85 +48,37 @@ import { Create{{PascalCase}}Request } from '../types/{{typesFileName}}';
   `]
 })
 export class {{PascalCase}}CreateDialogComponent {
-  private fb = inject(FormBuilder);
   private {{camelCase moduleName}}Service = inject({{PascalCase}}Service);
   private snackBar = inject(MatSnackBar);
   private dialogRef = inject(MatDialogRef<{{PascalCase}}CreateDialogComponent>);
 
   loading = signal<boolean>(false);
-{{#if hasJsonFields}}
 
-  // Custom JSON validator
-  private jsonValidator(control: AbstractControl) {
-    if (!control.value) {
-      return null; // Empty is valid (optional field)
-    }
+  async onFormSubmit(formData: {{PascalCase}}FormData) {
+    this.loading.set(true);
     
     try {
-      JSON.parse(control.value);
-      return null; // Valid JSON
-    } catch (error) {
-      return { invalidJson: true }; // Invalid JSON
-    }
-  }
-{{/if}}
-
-  createForm: FormGroup = this.fb.group({
-    {{#each formFields}}
-    {{name}}: [
-      {{#if defaultValue}}'{{defaultValue}}'{{else}}{{#if (eq type 'boolean')}}false{{else}}''{{/if}}{{/if}},
-      [
-        {{#if required}}Validators.required{{/if}}{{#if maxLength}}{{#if required}}, {{/if}}Validators.maxLength({{maxLength}}){{/if}}{{#if min}}{{#if (or required maxLength)}}, {{/if}}Validators.min({{min}}){{/if}}{{#if max}}{{#if (or required maxLength min)}}, {{/if}}Validators.max({{max}}){{/if}}{{#if (eq type 'json')}}{{#if (or required maxLength min max)}}, {{/if}}this.jsonValidator.bind(this){{/if}}
-      ]
-    ]{{#unless @last}},{{/unless}}
-    {{/each}}
-  });
-
-  async onCreate() {
-    if (this.createForm.valid) {
-      this.loading.set(true);
+      const createRequest = formData as Create{{PascalCase}}Request;
+      const result = await this.{{camelCase moduleName}}Service.create{{PascalCase}}(createRequest);
       
-      try {
-        const formData = { ...this.createForm.value } as Create{{PascalCase}}Request;
-{{#if hasJsonFields}}
-        
-        // Parse JSON fields
-{{#each formFields}}
-{{#if (eq type 'json')}}
-        if (formData.{{name}} && typeof formData.{{name}} === 'string') {
-          try {
-            formData.{{name}} = JSON.parse(formData.{{name}});
-          } catch (error) {
-            formData.{{name}} = {};
-          }
-        } else if (!formData.{{name}}) {
-          formData.{{name}} = {};
-        }
-{{/if}}
-{{/each}}
-{{/if}}
-        
-        const result = await this.{{camelCase moduleName}}Service.create{{PascalCase}}(formData);
-        
-        if (result) {
-          this.snackBar.open('{{title}} created successfully', 'Close', {
-            duration: 3000,
-          });
-          this.dialogRef.close(result);
-        } else {
-          this.snackBar.open('Failed to create {{title}}', 'Close', {
-            duration: 5000,
-          });
-        }
-      } catch (error: any) {
-        this.snackBar.open(
-          error.message || 'Failed to create {{title}}', 
-          'Close', 
-          { duration: 5000 }
-        );
-      } finally {
-        this.loading.set(false);
+      if (result) {
+        this.snackBar.open('{{title}} created successfully', 'Close', {
+          duration: 3000,
+        });
+        this.dialogRef.close(result);
+      } else {
+        this.snackBar.open('Failed to create {{title}}', 'Close', {
+          duration: 5000,
+        });
       }
+    } catch (error: any) {
+      this.snackBar.open(
+        error.message || 'Failed to create {{title}}', 
+        'Close', 
+        { duration: 5000 }
+      );
+    } finally {
+      this.loading.set(false);
     }
   }
 

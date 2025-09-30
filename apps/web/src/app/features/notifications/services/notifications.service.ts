@@ -10,7 +10,7 @@ import {
   UpdateNotificationRequest,
   ListNotificationQuery,
   ApiResponse,
-  BulkResponse
+  BulkResponse,
 } from '../types/notification.types';
 
 // ===== SERVICE CONFIGURATION =====
@@ -25,7 +25,7 @@ export class NotificationService {
   private baseUrl = `${API_BASE_URL}/notifications`;
 
   // ===== SIGNALS FOR STATE MANAGEMENT =====
-  
+
   private notificationsListSignal = signal<Notification[]>([]);
   private loadingSignal = signal<boolean>(false);
   private errorSignal = signal<string | null>(null);
@@ -35,7 +35,7 @@ export class NotificationService {
   private totalNotificationSignal = signal<number>(0);
 
   // ===== PUBLIC READONLY SIGNALS =====
-  
+
   readonly notificationsList = this.notificationsListSignal.asReadonly();
   readonly loading = this.loadingSignal.asReadonly();
   readonly error = this.errorSignal.asReadonly();
@@ -45,7 +45,7 @@ export class NotificationService {
   readonly pageSize = this.pageSizeSignal.asReadonly();
 
   // ===== COMPUTED SIGNALS =====
-  
+
   readonly totalPages = computed(() => {
     const total = this.totalNotificationSignal();
     const size = this.pageSizeSignal();
@@ -72,24 +72,44 @@ export class NotificationService {
     try {
       // Build HTTP params
       let httpParams = new HttpParams();
-      if (params?.page) httpParams = httpParams.set('page', params.page.toString());
-      if (params?.limit) httpParams = httpParams.set('limit', params.limit.toString());
+      if (params?.page)
+        httpParams = httpParams.set('page', params.page.toString());
+      if (params?.limit)
+        httpParams = httpParams.set('limit', params.limit.toString());
       if (params?.search) httpParams = httpParams.set('search', params.search);
-      if (params?.id !== undefined) httpParams = httpParams.set('id', params.id.toString());
-      if (params?.user_id !== undefined) httpParams = httpParams.set('user_id', params.user_id.toString());
-      if (params?.type !== undefined) httpParams = httpParams.set('type', params.type.toString());
-      if (params?.title !== undefined) httpParams = httpParams.set('title', params.title.toString());
-      if (params?.message !== undefined) httpParams = httpParams.set('message', params.message.toString());
-      if (params?.data !== undefined) httpParams = httpParams.set('data', params.data.toString());
-      if (params?.action_url !== undefined) httpParams = httpParams.set('action_url', params.action_url.toString());
-      if (params?.read !== undefined) httpParams = httpParams.set('read', params.read.toString());
-      if (params?.read_at !== undefined) httpParams = httpParams.set('read_at', params.read_at.toString());
-      if (params?.archived !== undefined) httpParams = httpParams.set('archived', params.archived.toString());
-      if (params?.archived_at !== undefined) httpParams = httpParams.set('archived_at', params.archived_at.toString());
-      if (params?.priority !== undefined) httpParams = httpParams.set('priority', params.priority.toString());
-      if (params?.expires_at !== undefined) httpParams = httpParams.set('expires_at', params.expires_at.toString());
-      if (params?.created_at !== undefined) httpParams = httpParams.set('created_at', params.created_at.toString());
-      if (params?.updated_at !== undefined) httpParams = httpParams.set('updated_at', params.updated_at.toString());
+      if (params?.id !== undefined)
+        httpParams = httpParams.set('id', params.id.toString());
+      if (params?.user_id !== undefined)
+        httpParams = httpParams.set('user_id', params.user_id.toString());
+      if (params?.type !== undefined)
+        httpParams = httpParams.set('type', params.type.toString());
+      if (params?.title !== undefined)
+        httpParams = httpParams.set('title', params.title.toString());
+      if (params?.message !== undefined)
+        httpParams = httpParams.set('message', params.message.toString());
+      if (params?.data !== undefined)
+        httpParams = httpParams.set('data', params.data.toString());
+      if (params?.action_url !== undefined)
+        httpParams = httpParams.set('action_url', params.action_url.toString());
+      if (params?.read !== undefined)
+        httpParams = httpParams.set('read', params.read.toString());
+      if (params?.read_at !== undefined)
+        httpParams = httpParams.set('read_at', params.read_at.toString());
+      if (params?.archived !== undefined)
+        httpParams = httpParams.set('archived', params.archived.toString());
+      if (params?.archived_at !== undefined)
+        httpParams = httpParams.set(
+          'archived_at',
+          params.archived_at.toString(),
+        );
+      if (params?.priority !== undefined)
+        httpParams = httpParams.set('priority', params.priority.toString());
+      if (params?.expires_at !== undefined)
+        httpParams = httpParams.set('expires_at', params.expires_at.toString());
+      if (params?.created_at !== undefined)
+        httpParams = httpParams.set('created_at', params.created_at.toString());
+      if (params?.updated_at !== undefined)
+        httpParams = httpParams.set('updated_at', params.updated_at.toString());
 
       const response = await this.http
         .get<ApiResponse<Notification[]>>(this.baseUrl, { params: httpParams })
@@ -105,7 +125,9 @@ export class NotificationService {
         }
       }
     } catch (error: any) {
-      this.errorSignal.set(error.message || 'Failed to load notifications list');
+      this.errorSignal.set(
+        error.message || 'Failed to load notifications list',
+      );
     } finally {
       this.loadingSignal.set(false);
     }
@@ -138,7 +160,9 @@ export class NotificationService {
   /**
    * Create new notifications
    */
-  async createNotification(data: CreateNotificationRequest): Promise<Notification | null> {
+  async createNotification(
+    data: CreateNotificationRequest,
+  ): Promise<Notification | null> {
     this.loadingSignal.set(true);
 
     try {
@@ -148,8 +172,11 @@ export class NotificationService {
 
       if (response?.success && response.data) {
         // Optimistic update: add to list
-        this.notificationsListSignal.update((list) => [...list, response.data!]);
-        this.totalNotificationSignal.update(total => total + 1);
+        this.notificationsListSignal.update((list) => [
+          ...list,
+          response.data!,
+        ]);
+        this.totalNotificationSignal.update((total) => total + 1);
         return response.data;
       }
       return null;
@@ -164,7 +191,10 @@ export class NotificationService {
   /**
    * Update existing notifications
    */
-  async updateNotification(id: string, data: UpdateNotificationRequest): Promise<Notification | null> {
+  async updateNotification(
+    id: string,
+    data: UpdateNotificationRequest,
+  ): Promise<Notification | null> {
     this.loadingSignal.set(true);
 
     try {
@@ -175,7 +205,7 @@ export class NotificationService {
       if (response?.success && response.data) {
         // Optimistic update: replace in list
         this.notificationsListSignal.update((list) =>
-          list.map((item) => (item.id === id ? response.data! : item))
+          list.map((item) => (item.id === id ? response.data! : item)),
         );
         // Update selected notifications if it's the same
         if (this.selectedNotificationSignal()?.id === id) {
@@ -206,9 +236,9 @@ export class NotificationService {
       if (response?.success) {
         // Optimistic update: remove from list
         this.notificationsListSignal.update((list) =>
-          list.filter((item) => item.id !== id)
+          list.filter((item) => item.id !== id),
         );
-        this.totalNotificationSignal.update(total => Math.max(0, total - 1));
+        this.totalNotificationSignal.update((total) => Math.max(0, total - 1));
         // Clear selected notifications if it's the deleted one
         if (this.selectedNotificationSignal()?.id === id) {
           this.selectedNotificationSignal.set(null);
@@ -229,10 +259,12 @@ export class NotificationService {
   /**
    * Get dropdown options for notifications
    */
-  async getDropdownOptions(): Promise<Array<{value: string, label: string}>> {
+  async getDropdownOptions(): Promise<Array<{ value: string; label: string }>> {
     try {
       const response = await this.http
-        .get<ApiResponse<Array<{value: string, label: string}>>>(`${this.baseUrl}/dropdown`)
+        .get<
+          ApiResponse<Array<{ value: string; label: string }>>
+        >(`${this.baseUrl}/dropdown`)
         .toPromise();
 
       if (response?.success && response.data) {
@@ -248,14 +280,26 @@ export class NotificationService {
   /**
    * Get users dropdown options for user_id field
    */
-  async getUsersDropdown(params: {search?: string, limit?: number} = {}): Promise<Array<{value: string, label: string, disabled?: boolean}>> {
+  async getUsersDropdown(
+    params: { search?: string; limit?: number } = {},
+  ): Promise<Array<{ value: string; label: string; disabled?: boolean }>> {
     try {
       let httpParams = new HttpParams();
       if (params.search) httpParams = httpParams.set('search', params.search);
-      if (params.limit) httpParams = httpParams.set('limit', params.limit.toString());
+      if (params.limit)
+        httpParams = httpParams.set('limit', params.limit.toString());
 
       const response = await this.http
-        .get<ApiResponse<{options: Array<{value: string, label: string, disabled?: boolean}>, total: number}>>('/users/dropdown', { params: httpParams })
+        .get<
+          ApiResponse<{
+            options: Array<{
+              value: string;
+              label: string;
+              disabled?: boolean;
+            }>;
+            total: number;
+          }>
+        >('/users/dropdown', { params: httpParams })
         .toPromise();
 
       if (response?.success && response.data?.options) {
@@ -268,11 +312,12 @@ export class NotificationService {
     }
   }
 
-
   /**
    * Bulk create notificationss
    */
-  async bulkCreateNotification(items: CreateNotificationRequest[]): Promise<BulkResponse<Notification> | null> {
+  async bulkCreateNotification(
+    items: CreateNotificationRequest[],
+  ): Promise<BulkResponse<Notification> | null> {
     this.loadingSignal.set(true);
 
     try {
@@ -287,7 +332,9 @@ export class NotificationService {
       }
       return null;
     } catch (error: any) {
-      this.errorSignal.set(error.message || 'Failed to bulk create notificationss');
+      this.errorSignal.set(
+        error.message || 'Failed to bulk create notificationss',
+      );
       throw error;
     } finally {
       this.loadingSignal.set(false);
@@ -297,7 +344,9 @@ export class NotificationService {
   /**
    * Bulk update notificationss
    */
-  async bulkUpdateNotification(items: Array<{ id: string, data: UpdateNotificationRequest }>): Promise<BulkResponse<Notification> | null> {
+  async bulkUpdateNotification(
+    items: Array<{ id: string; data: UpdateNotificationRequest }>,
+  ): Promise<BulkResponse<Notification> | null> {
     this.loadingSignal.set(true);
 
     try {
@@ -312,7 +361,9 @@ export class NotificationService {
       }
       return null;
     } catch (error: any) {
-      this.errorSignal.set(error.message || 'Failed to bulk update notificationss');
+      this.errorSignal.set(
+        error.message || 'Failed to bulk update notificationss',
+      );
       throw error;
     } finally {
       this.loadingSignal.set(false);
@@ -322,12 +373,16 @@ export class NotificationService {
   /**
    * Bulk delete notificationss
    */
-  async bulkDeleteNotification(ids: string[]): Promise<BulkResponse<Notification> | null> {
+  async bulkDeleteNotification(
+    ids: string[],
+  ): Promise<BulkResponse<Notification> | null> {
     this.loadingSignal.set(true);
 
     try {
       const response = await this.http
-        .delete<BulkResponse<Notification>>(`${this.baseUrl}/bulk`, { body: { ids } })
+        .delete<
+          BulkResponse<Notification>
+        >(`${this.baseUrl}/bulk`, { body: { ids } })
         .toPromise();
 
       if (response?.success && response.data) {
@@ -337,13 +392,89 @@ export class NotificationService {
       }
       return null;
     } catch (error: any) {
-      this.errorSignal.set(error.message || 'Failed to bulk delete notificationss');
+      this.errorSignal.set(
+        error.message || 'Failed to bulk delete notificationss',
+      );
       throw error;
     } finally {
       this.loadingSignal.set(false);
     }
   }
 
+  // ===== ADVANCED OPERATIONS (FULL PACKAGE) =====
+
+  /**
+   * Validate notifications data before save
+   */
+  async validateNotification(
+    data: CreateNotificationRequest,
+  ): Promise<{ valid: boolean; errors?: any[] }> {
+    try {
+      const response = await this.http
+        .post<
+          ApiResponse<{ valid: boolean; errors?: any[] }>
+        >(`${this.baseUrl}/validate`, { data })
+        .toPromise();
+
+      if (response?.success && response.data) {
+        return response.data;
+      }
+      return { valid: false, errors: ['Validation failed'] };
+    } catch (error: any) {
+      console.error('Failed to validate notifications:', error);
+      return { valid: false, errors: [error.message || 'Validation error'] };
+    }
+  }
+
+  /**
+   * Check field uniqueness
+   */
+  async checkUniqueness(
+    field: string,
+    value: string,
+    excludeId?: string,
+  ): Promise<{ unique: boolean }> {
+    try {
+      let params = new HttpParams().set('value', value);
+
+      if (excludeId) {
+        params = params.set('excludeId', excludeId);
+      }
+
+      const response = await this.http
+        .get<
+          ApiResponse<{ unique: boolean }>
+        >(`${this.baseUrl}/check/${field}`, { params })
+        .toPromise();
+
+      if (response?.success && response.data) {
+        return response.data;
+      }
+      return { unique: false };
+    } catch (error: any) {
+      console.error('Failed to check uniqueness:', error);
+      return { unique: false };
+    }
+  }
+
+  /**
+   * Get notifications statistics
+   */
+  async getStats(): Promise<{ total: number } | null> {
+    try {
+      const response = await this.http
+        .get<ApiResponse<{ total: number }>>(`${this.baseUrl}/stats`)
+        .toPromise();
+
+      if (response?.success && response.data) {
+        return response.data;
+      }
+      return null;
+    } catch (error: any) {
+      console.error('Failed to get notifications stats:', error);
+      return null;
+    }
+  }
 
   // ===== UTILITY METHODS =====
 

@@ -7,7 +7,7 @@ import { NotificationsCreate, NotificationsUpdate } from '../schemas/notificatio
  * 
  * Integration tests for notifications domain functionality.
  * 
- * Generated on: 2025-09-29T14:06:01.360Z
+ * Generated on: 2025-09-30T02:33:33.542Z
  */
 
 describe('Notifications Domain', () => {

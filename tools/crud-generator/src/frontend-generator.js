@@ -5,43 +5,57 @@ const Handlebars = require('handlebars');
 // Register Handlebars helpers
 // Note: Don't register PascalCase as helper since templates use {{PascalCase}} as context variable
 
-Handlebars.registerHelper('pascalCase', function(str) {
+Handlebars.registerHelper('pascalCase', function (str) {
   if (!str || typeof str !== 'string') return '';
-  return str.charAt(0).toUpperCase() + str.slice(1).replace(/[-_](.)/g, (_, char) => char.toUpperCase());
+  return (
+    str.charAt(0).toUpperCase() +
+    str.slice(1).replace(/[-_](.)/g, (_, char) => char.toUpperCase())
+  );
 });
 
-Handlebars.registerHelper('camelCase', function(str) {
+Handlebars.registerHelper('camelCase', function (str) {
   if (!str || typeof str !== 'string') return '';
-  return str.charAt(0).toLowerCase() + str.slice(1).replace(/[-_](.)/g, (_, char) => char.toUpperCase());
+  return (
+    str.charAt(0).toLowerCase() +
+    str.slice(1).replace(/[-_](.)/g, (_, char) => char.toUpperCase())
+  );
 });
 
-Handlebars.registerHelper('kebabCase', function(str) {
+Handlebars.registerHelper('kebabCase', function (str) {
   if (!str || typeof str !== 'string') return '';
-  return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase().replace(/[_\s]+/g, '-');
+  return str
+    .replace(/([a-z])([A-Z])/g, '$1-$2')
+    .toLowerCase()
+    .replace(/[_\s]+/g, '-');
+});
+
+Handlebars.registerHelper('capitalize', function (str) {
+  if (!str || typeof str !== 'string') return '';
+  return str.charAt(0).toUpperCase() + str.slice(1);
 });
 
 // Removed custom 'each' helper to avoid conflicts with built-in Handlebars helper
 
 // Conditional helpers
-Handlebars.registerHelper('eq', function(a, b) {
+Handlebars.registerHelper('eq', function (a, b) {
   return a === b;
 });
 
-Handlebars.registerHelper('or', function(...args) {
+Handlebars.registerHelper('or', function (...args) {
   for (let i = 0; i < args.length - 1; i++) {
     if (args[i]) return true;
   }
   return false;
 });
 
-Handlebars.registerHelper('and', function(...args) {
+Handlebars.registerHelper('and', function (...args) {
   for (let i = 0; i < args.length - 1; i++) {
     if (!args[i]) return false;
   }
   return true;
 });
 
-Handlebars.registerHelper('unless', function(conditional, options) {
+Handlebars.registerHelper('unless', function (conditional, options) {
   if (!conditional) {
     return options.fn(this);
   }
@@ -52,29 +66,53 @@ class FrontendGenerator {
   constructor() {
     this.toolsDir = path.resolve(__dirname, '..');
     this.templatesDir = path.join(this.toolsDir, 'frontend-templates');
-    this.outputDir = path.resolve(this.toolsDir, '..', '..', 'apps', 'web', 'src', 'app', 'features');
+    this.outputDir = path.resolve(
+      this.toolsDir,
+      '..',
+      '..',
+      'apps',
+      'web',
+      'src',
+      'app',
+      'features',
+    );
   }
 
   /**
    * Extract TypeScript types from backend TypeBox schemas
    */
   extractTypesFromBackendModule(moduleName) {
-    const backendModulePath = path.resolve(this.toolsDir, '..', '..', 'apps', 'api', 'src', 'modules', moduleName);
-    
+    const backendModulePath = path.resolve(
+      this.toolsDir,
+      '..',
+      '..',
+      'apps',
+      'api',
+      'src',
+      'modules',
+      moduleName,
+    );
+
     try {
       // Read the schemas file
-      const schemasPath = path.join(backendModulePath, 'schemas', `${moduleName}.schemas.ts`);
+      const schemasPath = path.join(
+        backendModulePath,
+        'schemas',
+        `${moduleName}.schemas.ts`,
+      );
       // Use module name for types file consistency with backend
       const typeFileName = `${moduleName}.types.ts`;
       const typesPath = path.join(backendModulePath, 'types', typeFileName);
-      
+
       if (!fs.existsSync(schemasPath)) {
         throw new Error(`Backend schemas file not found: ${schemasPath}`);
       }
 
       // Read and parse schema file for type information
       const schemasContent = fs.readFileSync(schemasPath, 'utf8');
-      const typesContent = fs.existsSync(typesPath) ? fs.readFileSync(typesPath, 'utf8') : '';
+      const typesContent = fs.existsSync(typesPath)
+        ? fs.readFileSync(typesPath, 'utf8')
+        : '';
 
       return this.parseBackendTypes(schemasContent, typesContent, moduleName);
     } catch (error) {
@@ -88,23 +126,37 @@ class FrontendGenerator {
    */
   parseBackendTypes(schemasContent, typesContent, moduleName) {
     const pascalName = this.toPascalCase(moduleName);
-    
+
     // Extract basic schema structure
     const types = {};
-    
+
     // Define the main entity type based on the schema
-    const mainEntityFields = this.extractSchemaFields(schemasContent, `${pascalName}Schema`);
-    const createFields = this.extractSchemaFields(schemasContent, `Create${pascalName}Schema`);
-    const updateFields = this.extractSchemaFields(schemasContent, `Update${pascalName}Schema`);
-    const queryFields = this.extractSchemaFields(schemasContent, `List${pascalName}QuerySchema`);
+    const mainEntityFields = this.extractSchemaFields(
+      schemasContent,
+      `${pascalName}Schema`,
+    );
+    const createFields = this.extractSchemaFields(
+      schemasContent,
+      `Create${pascalName}Schema`,
+    );
+    const updateFields = this.extractSchemaFields(
+      schemasContent,
+      `Update${pascalName}Schema`,
+    );
+    const queryFields = this.extractSchemaFields(
+      schemasContent,
+      `List${pascalName}QuerySchema`,
+    );
 
     // Use the singular form for the main entity (e.g., "Notification" not "Notifications")
-    const singularPascalName = pascalName.endsWith('s') ? pascalName.slice(0, -1) : pascalName;
-    
+    const singularPascalName = pascalName.endsWith('s')
+      ? pascalName.slice(0, -1)
+      : pascalName;
+
     types[singularPascalName] = mainEntityFields;
     types[`Create${singularPascalName}Request`] = createFields;
     types[`Update${singularPascalName}Request`] = updateFields;
-    types[`List${pascalName}Query`] = queryFields;  // Keep plural for List query to match backend
+    types[`List${pascalName}Query`] = queryFields; // Keep plural for List query to match backend
 
     return types;
   }
@@ -114,7 +166,7 @@ class FrontendGenerator {
    */
   extractSchemaFields(content, schemaName) {
     const fields = {};
-    
+
     try {
       // For now, provide basic fallback types based on common patterns
       // In a real implementation, this would parse the actual TypeBox schemas
@@ -134,7 +186,7 @@ class FrontendGenerator {
           priority: 'string | undefined',
           expires_at: 'string | undefined',
           created_at: 'string',
-          updated_at: 'string'
+          updated_at: 'string',
         };
       }
     } catch (error) {
@@ -149,14 +201,14 @@ class FrontendGenerator {
    */
   mapTypeBoxToTypeScript(typeboxType, params = '') {
     const mapping = {
-      'String': 'string',
-      'Number': 'number',
-      'Boolean': 'boolean',
-      'Optional': 'string | undefined', // Default for optional
-      'Union': 'string | number', // Default union
-      'Array': 'any[]',
-      'Record': 'Record<string, any>',
-      'Any': 'any'
+      String: 'string',
+      Number: 'number',
+      Boolean: 'boolean',
+      Optional: 'string | undefined', // Default for optional
+      Union: 'string | number', // Default union
+      Array: 'any[]',
+      Record: 'Record<string, any>',
+      Any: 'any',
     };
 
     // Handle optional fields
@@ -181,24 +233,33 @@ class FrontendGenerator {
    * Analyze backend API structure to determine features
    */
   analyzeBackendAPI(moduleName) {
-    const backendModulePath = path.resolve(this.toolsDir, '..', '..', 'apps', 'api', 'src', 'modules', moduleName);
-    
+    const backendModulePath = path.resolve(
+      this.toolsDir,
+      '..',
+      '..',
+      'apps',
+      'api',
+      'src',
+      'modules',
+      moduleName,
+    );
+
     try {
       // Check routes file to determine available endpoints
       const routesPath = path.join(backendModulePath, 'routes', 'index.ts');
-      
+
       if (!fs.existsSync(routesPath)) {
         throw new Error(`Backend routes file not found: ${routesPath}`);
       }
 
       const routesContent = fs.readFileSync(routesPath, 'utf8');
-      
+
       return {
         hasEnhancedOps: this.hasEnhancedOperations(routesContent),
         hasFullOps: this.hasFullOperations(routesContent),
         hasEvents: this.hasWebSocketEvents(backendModulePath),
         searchFields: this.extractSearchFields(routesContent),
-        endpoints: this.extractEndpoints(routesContent)
+        endpoints: this.extractEndpoints(routesContent),
       };
     } catch (error) {
       console.error('Error analyzing backend API:', error.message);
@@ -207,7 +268,7 @@ class FrontendGenerator {
         hasFullOps: false,
         hasEvents: false,
         searchFields: [],
-        endpoints: []
+        endpoints: [],
       };
     }
   }
@@ -216,35 +277,48 @@ class FrontendGenerator {
    * Check if backend has enhanced operations (bulk operations)
    */
   hasEnhancedOperations(routesContent) {
-    return routesContent.includes('/bulk') || routesContent.includes('/dropdown');
+    return (
+      routesContent.includes('/bulk') || routesContent.includes('/dropdown')
+    );
   }
 
   /**
    * Check if backend has full operations (validation, stats, etc.)
    */
   hasFullOperations(routesContent) {
-    return routesContent.includes('/validate') || routesContent.includes('/stats') || routesContent.includes('/check/:field');
+    return (
+      routesContent.includes('/validate') ||
+      routesContent.includes('/stats') ||
+      routesContent.includes('/check/:field')
+    );
   }
 
   /**
    * Check if backend has WebSocket events
    */
   hasWebSocketEvents(backendModulePath) {
-    const serviceFile = path.join(backendModulePath, 'services', `${path.basename(backendModulePath)}.service.ts`);
-    
+    const serviceFile = path.join(
+      backendModulePath,
+      'services',
+      `${path.basename(backendModulePath)}.service.ts`,
+    );
+
     if (!fs.existsSync(serviceFile)) {
       return false;
     }
 
     const serviceContent = fs.readFileSync(serviceFile, 'utf8');
-    return serviceContent.includes('EventService') || serviceContent.includes('websocket');
+    return (
+      serviceContent.includes('EventService') ||
+      serviceContent.includes('websocket')
+    );
   }
 
   /**
    * Extract search fields from backend
    */
   extractSearchFields(routesContent) {
-    // This is a simplified approach - in a real implementation, 
+    // This is a simplified approach - in a real implementation,
     // you'd parse the schema more thoroughly
     return ['title', 'name', 'description']; // Common search fields
   }
@@ -254,18 +328,19 @@ class FrontendGenerator {
    */
   extractEndpoints(routesContent) {
     const endpoints = [];
-    
+
     // Standard CRUD
     if (routesContent.includes("fastify.post('/'")) endpoints.push('create');
     if (routesContent.includes("fastify.get('/:id'")) endpoints.push('read');
     if (routesContent.includes("fastify.get('/'")) endpoints.push('list');
     if (routesContent.includes("fastify.put('/:id'")) endpoints.push('update');
-    if (routesContent.includes("fastify.delete('/:id'")) endpoints.push('delete');
-    
+    if (routesContent.includes("fastify.delete('/:id'"))
+      endpoints.push('delete');
+
     // Enhanced operations
     if (routesContent.includes('/dropdown')) endpoints.push('dropdown');
     if (routesContent.includes('/bulk')) endpoints.push('bulk');
-    
+
     // Full operations
     if (routesContent.includes('/validate')) endpoints.push('validate');
     if (routesContent.includes('/check/:field')) endpoints.push('uniqueness');
@@ -282,8 +357,8 @@ class FrontendGenerator {
     if (!entityType) return [];
 
     const columns = [];
-    
-    Object.keys(entityType).forEach(fieldName => {
+
+    Object.keys(entityType).forEach((fieldName) => {
       // Skip certain fields from display
       if (['id', 'created_at', 'updated_at'].includes(fieldName)) {
         return;
@@ -295,12 +370,14 @@ class FrontendGenerator {
         label: this.fieldNameToLabel(fieldName),
         isDate: fieldType === 'string' && fieldName.includes('_at'),
         isBoolean: fieldType === 'boolean',
-        isTruncated: fieldType === 'string' && ['description', 'message', 'content'].includes(fieldName),
+        isTruncated:
+          fieldType === 'string' &&
+          ['description', 'message', 'content'].includes(fieldName),
         truncateLength: 50,
         showEllipsis: true,
         // Add context variables for template access
         camelCase: context.camelCase || entityName.toLowerCase(),
-        moduleName: context.moduleName || entityName.toLowerCase()
+        moduleName: context.moduleName || entityName.toLowerCase(),
       };
 
       columns.push(column);
@@ -312,14 +389,21 @@ class FrontendGenerator {
   /**
    * Generate form fields for dialog components with enhanced database detection
    */
-  generateFormFields(types, entityName, isCreate = true, enhancedSchema = null) {
-    const typeKey = isCreate ? `Create${entityName}Request` : `Update${entityName}Request`;
+  generateFormFields(
+    types,
+    entityName,
+    isCreate = true,
+    enhancedSchema = null,
+  ) {
+    const typeKey = isCreate
+      ? `Create${entityName}Request`
+      : `Update${entityName}Request`;
     const entityType = types[typeKey] || types[entityName];
     if (!entityType) return [];
 
     const fields = [];
-    
-    Object.keys(entityType).forEach(fieldName => {
+
+    Object.keys(entityType).forEach((fieldName) => {
       // Skip auto-generated fields but include audit user fields
       if (['id', 'created_at', 'updated_at'].includes(fieldName)) {
         return;
@@ -330,16 +414,27 @@ class FrontendGenerator {
       const baseType = fieldType.replace(' | undefined', '');
 
       // Get enhanced field info if available
-      const enhancedColumn = enhancedSchema?.columns?.find(col => col.name === fieldName);
-      
+      const enhancedColumn = enhancedSchema?.columns?.find(
+        (col) => col.name === fieldName,
+      );
+
+      // Determine required status from database schema (more reliable than TS types)
+      let isRequired = !isOptional; // fallback to TS type
+      if (enhancedColumn && typeof enhancedColumn.isNullable === 'boolean') {
+        isRequired =
+          !enhancedColumn.isNullable &&
+          !enhancedColumn.isPrimaryKey &&
+          !enhancedColumn.defaultValue;
+      }
+
       const field = {
         name: fieldName,
         label: this.fieldNameToLabel(fieldName),
         type: this.getFormFieldType(fieldName, baseType, enhancedColumn),
         inputType: this.getFormInputType(fieldName, baseType, enhancedColumn),
-        required: !isOptional,
+        required: isRequired,
         placeholder: this.generatePlaceholder(fieldName),
-        defaultValue: this.getDefaultValue(fieldName, baseType)
+        defaultValue: this.getDefaultValue(fieldName, baseType),
       };
 
       // Add validation rules
@@ -350,18 +445,28 @@ class FrontendGenerator {
       // Enhanced field type handling
       if (enhancedColumn) {
         // Foreign key dropdown
-        if (enhancedColumn.fieldType === 'foreign-key-dropdown' && enhancedColumn.dropdownInfo) {
+        if (
+          enhancedColumn.fieldType === 'foreign-key-dropdown' &&
+          enhancedColumn.dropdownInfo
+        ) {
           field.type = 'dropdown';
           field.dropdownEndpoint = enhancedColumn.dropdownInfo.endpoint;
-          field.dropdownDisplayFields = enhancedColumn.dropdownInfo.displayFields;
+          field.dropdownDisplayFields =
+            enhancedColumn.dropdownInfo.displayFields;
           field.referencedTable = enhancedColumn.foreignKeyInfo.referencedTable;
         }
         // Enum select
         else if (enhancedColumn.fieldType === 'enum-select') {
           field.type = 'select';
-          field.options = enhancedColumn.enumInfo ? 
-            enhancedColumn.enumInfo.values.map(val => ({ value: val, label: this.formatEnumLabel(val) })) :
-            enhancedColumn.constraintValues?.map(val => ({ value: val, label: this.formatEnumLabel(val) })) || [];
+          field.options = enhancedColumn.enumInfo
+            ? enhancedColumn.enumInfo.values.map((val) => ({
+                value: val,
+                label: this.formatEnumLabel(val),
+              }))
+            : enhancedColumn.constraintValues?.map((val) => ({
+                value: val,
+                label: this.formatEnumLabel(val),
+              })) || [];
         }
         // Convention-based select fields (for fields like priority, status, type)
         else if (this.isSelectField(fieldName, baseType)) {
@@ -389,8 +494,8 @@ class FrontendGenerator {
     if (!entityType) return [];
 
     const fields = [];
-    
-    Object.keys(entityType).forEach(fieldName => {
+
+    Object.keys(entityType).forEach((fieldName) => {
       // Skip user_id but include everything else
       if (['user_id'].includes(fieldName)) {
         return;
@@ -406,7 +511,7 @@ class FrontendGenerator {
         inputType: this.getFormInputType(fieldName, baseType),
         // Add context variables for template access
         camelCase: context.camelCase || entityName.toLowerCase(),
-        moduleName: context.moduleName || entityName.toLowerCase()
+        moduleName: context.moduleName || entityName.toLowerCase(),
       };
 
       fields.push(field);
@@ -422,7 +527,7 @@ class FrontendGenerator {
     if (!enumValue) return '';
     return enumValue
       .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
   }
 
@@ -433,16 +538,123 @@ class FrontendGenerator {
     // Use enhanced column info if available
     if (enhancedColumn) {
       switch (enhancedColumn.fieldType) {
-        case 'foreign-key-dropdown': return 'dropdown';
-        case 'enum-select': return 'select';
-        case 'email': return 'string';
-        case 'password': return 'string';
-        case 'url': return 'string';
-        case 'textarea': return 'string';
-        case 'datetime': return 'date';
-        case 'boolean': return 'boolean';
-        case 'number': return 'number';
-        default: return 'string';
+        case 'foreign-key-dropdown':
+          return 'dropdown';
+        case 'enum-select':
+          return 'select';
+
+        // Text Types
+        case 'email':
+          return 'string';
+        case 'password':
+          return 'string';
+        case 'url':
+          return 'string';
+        case 'phone':
+          return 'string';
+        case 'textarea':
+          return 'string';
+        case 'varchar':
+          return 'string';
+        case 'char':
+          return 'string';
+        case 'search':
+          return 'string';
+        case 'slug':
+          return 'string';
+
+        // Date/Time Types
+        case 'datetime':
+          return 'date';
+        case 'date':
+          return 'date';
+        case 'timestamp':
+          return 'datetime';
+        case 'timestamptz':
+          return 'datetime-tz';
+        case 'time':
+          return 'time';
+        case 'timetz':
+          return 'time-tz';
+        case 'interval':
+          return 'interval';
+
+        // Numeric Types
+        case 'number':
+          return 'number';
+        case 'bigint':
+          return 'bigint';
+        case 'decimal':
+          return 'decimal';
+        case 'float':
+          return 'float';
+        case 'serial':
+          return 'serial';
+        case 'currency':
+          return 'currency';
+        case 'percentage':
+          return 'percentage';
+
+        // Boolean
+        case 'boolean':
+          return 'boolean';
+
+        // Special Types
+        case 'uuid':
+          return 'uuid';
+        case 'json':
+          return 'json';
+        case 'jsonb':
+          return 'jsonb';
+        case 'xml':
+          return 'xml';
+        case 'color':
+          return 'color';
+
+        // Array Types
+        case 'array':
+          return 'array';
+
+        // Network Types
+        case 'inet':
+          return 'inet';
+        case 'cidr':
+          return 'cidr';
+        case 'macaddr':
+          return 'macaddr';
+
+        // Binary Types
+        case 'binary':
+          return 'binary';
+        case 'file':
+          return 'file';
+        case 'image':
+          return 'image';
+
+        // Geometric Types
+        case 'point':
+          return 'point';
+        case 'box':
+          return 'box';
+        case 'polygon':
+          return 'polygon';
+        case 'line':
+          return 'line';
+        case 'lseg':
+          return 'lseg';
+        case 'path':
+          return 'path';
+        case 'circle':
+          return 'circle';
+
+        // Bit Types
+        case 'bit':
+          return 'bit';
+        case 'varbit':
+          return 'varbit';
+
+        default:
+          return 'string';
       }
     }
 
@@ -452,7 +664,12 @@ class FrontendGenerator {
     if (fieldName.includes('_at') || fieldName.includes('date')) return 'date';
     if (fieldName.includes('url')) return 'string';
     if (fieldName === 'message' || fieldName === 'description') return 'string';
-    if (fieldType.includes('Record<') || fieldType.includes('object') || fieldName === 'data') return 'json';
+    if (
+      fieldType.includes('Record<') ||
+      fieldType.includes('object') ||
+      fieldName === 'data'
+    )
+      return 'json';
     return 'string';
   }
 
@@ -475,16 +692,26 @@ class FrontendGenerator {
     // Use enhanced column info if available
     if (enhancedColumn) {
       switch (enhancedColumn.fieldType) {
-        case 'foreign-key-dropdown': return 'dropdown';
-        case 'enum-select': return 'select';
-        case 'email': return 'email';
-        case 'password': return 'password';
-        case 'url': return 'url';
-        case 'textarea': return 'textarea';
-        case 'datetime': return 'date';
-        case 'boolean': return 'checkbox';
-        case 'number': return 'number';
-        default: return 'text';
+        case 'foreign-key-dropdown':
+          return 'dropdown';
+        case 'enum-select':
+          return 'select';
+        case 'email':
+          return 'email';
+        case 'password':
+          return 'password';
+        case 'url':
+          return 'url';
+        case 'textarea':
+          return 'textarea';
+        case 'datetime':
+          return 'date';
+        case 'boolean':
+          return 'checkbox';
+        case 'number':
+          return 'number';
+        default:
+          return 'text';
       }
     }
 
@@ -493,7 +720,8 @@ class FrontendGenerator {
     if (fieldName.includes('email')) return 'email';
     if (fieldName.includes('password')) return 'password';
     if (fieldName.includes('url')) return 'url';
-    if (['message', 'description', 'content'].includes(fieldName)) return 'textarea';
+    if (['message', 'description', 'content'].includes(fieldName))
+      return 'textarea';
     return 'text';
   }
 
@@ -509,10 +737,13 @@ class FrontendGenerator {
       description: 'Enter description',
       type: 'Select type',
       priority: 'Select priority',
-      status: 'Select status'
+      status: 'Select status',
     };
 
-    return placeholders[fieldName] || `Enter ${this.fieldNameToLabel(fieldName).toLowerCase()}`;
+    return (
+      placeholders[fieldName] ||
+      `Enter ${this.fieldNameToLabel(fieldName).toLowerCase()}`
+    );
   }
 
   /**
@@ -529,7 +760,7 @@ class FrontendGenerator {
    */
   getMaxLength(fieldName, fieldType) {
     if (!fieldType.includes('string')) return null;
-    
+
     const maxLengths = {
       title: 255,
       name: 255,
@@ -538,7 +769,7 @@ class FrontendGenerator {
       description: 1000,
       type: 50,
       priority: 20,
-      status: 20
+      status: 20,
     };
 
     return maxLengths[fieldName] || null;
@@ -568,10 +799,14 @@ class FrontendGenerator {
     if (!queryType) return [];
 
     const filters = [];
-    
-    Object.keys(queryType).forEach(fieldName => {
+
+    Object.keys(queryType).forEach((fieldName) => {
       // Skip pagination and search fields
-      if (['page', 'limit', 'search', 'include', 'sortBy', 'sortOrder'].includes(fieldName)) {
+      if (
+        ['page', 'limit', 'search', 'include', 'sortBy', 'sortOrder'].includes(
+          fieldName,
+        )
+      ) {
         return;
       }
 
@@ -581,7 +816,7 @@ class FrontendGenerator {
         label: this.fieldNameToLabel(fieldName),
         type: fieldType,
         inputType: this.getInputType(fieldType),
-        isSelect: this.isSelectField(fieldName, fieldType)
+        isSelect: this.isSelectField(fieldName, fieldType),
       };
 
       // Add options for select fields
@@ -613,7 +848,10 @@ class FrontendGenerator {
         enhancedSchema = await getEnhancedSchema(moduleName);
         console.log(`✅ Enhanced schema loaded for ${moduleName} service`);
       } catch (error) {
-        console.warn(`⚠️ Could not load enhanced schema for ${moduleName} service:`, error.message);
+        console.warn(
+          `⚠️ Could not load enhanced schema for ${moduleName} service:`,
+          error.message,
+        );
       }
 
       const pascalName = this.toPascalCase(moduleName);
@@ -621,27 +859,37 @@ class FrontendGenerator {
       const kebabName = this.toKebabCase(moduleName);
 
       // Prepare template context
-      const typesFileName = moduleName === 'notifications' ? 'notification.types' : `${kebabName}.types`;
+      const typesFileName =
+        moduleName === 'notifications'
+          ? 'notification.types'
+          : `${kebabName}.types`;
       // Use singular form for entity types (e.g., "Notification" not "Notifications")
-      const singularPascalName = pascalName.endsWith('s') ? pascalName.slice(0, -1) : pascalName;
-      const singularCamelName = camelName.endsWith('s') ? camelName.slice(0, -1) : camelName;
-      
+      const singularPascalName = pascalName.endsWith('s')
+        ? pascalName.slice(0, -1)
+        : pascalName;
+      const singularCamelName = camelName.endsWith('s')
+        ? camelName.slice(0, -1)
+        : camelName;
+
       // Extract dropdown dependencies from enhanced schema
       const dropdownDependencies = [];
       if (enhancedSchema) {
-        enhancedSchema.columns.forEach(column => {
-          if (column.fieldType === 'foreign-key-dropdown' && column.dropdownInfo) {
+        enhancedSchema.columns.forEach((column) => {
+          if (
+            column.fieldType === 'foreign-key-dropdown' &&
+            column.dropdownInfo
+          ) {
             dropdownDependencies.push({
               field: column.name,
               referencedTable: column.foreignKeyInfo.referencedTable,
               endpoint: column.dropdownInfo.endpoint,
               displayFields: column.dropdownInfo.displayFields,
-              pascalCase: this.toPascalCase
+              pascalCase: this.toPascalCase,
             });
           }
         });
       }
-      
+
       const context = {
         moduleName,
         PascalCase: singularPascalName,
@@ -654,10 +902,13 @@ class FrontendGenerator {
         searchFields: apiInfo.searchFields.length > 0,
         searchFieldsDisplay: apiInfo.searchFields.join(', '),
         queryFilters: this.generateQueryFilters(types, pascalName),
-        includeEnhanced: options.enhanced || apiInfo.hasEnhancedOps || dropdownDependencies.length > 0,
+        includeEnhanced:
+          options.enhanced ||
+          apiInfo.hasEnhancedOps ||
+          dropdownDependencies.length > 0,
         includeFull: options.full || apiInfo.hasFullOps,
         dropdownDependencies: dropdownDependencies,
-        title: this.fieldNameToLabel(moduleName)
+        title: this.fieldNameToLabel(moduleName),
       };
 
       // Load and compile template
@@ -674,15 +925,25 @@ class FrontendGenerator {
       // Debug generated code length
       console.log('📝 Generated code length:', generatedCode.length);
       if (generatedCode.length < 100) {
-        console.log('⚠️ Generated code seems too short:', generatedCode.substring(0, 200));
+        console.log(
+          '⚠️ Generated code seems too short:',
+          generatedCode.substring(0, 200),
+        );
       }
 
       // Prepare output directory
-      const outputDir = path.join(this.outputDir, this.toKebabCase(moduleName), 'services');
+      const outputDir = path.join(
+        this.outputDir,
+        this.toKebabCase(moduleName),
+        'services',
+      );
       this.ensureDirectoryExists(outputDir);
 
       // Write file
-      const outputFile = path.join(outputDir, `${this.toKebabCase(moduleName)}.service.ts`);
+      const outputFile = path.join(
+        outputDir,
+        `${this.toKebabCase(moduleName)}.service.ts`,
+      );
       fs.writeFileSync(outputFile, generatedCode);
 
       console.log(`✅ Service generated: ${outputFile}`);
@@ -709,11 +970,18 @@ class FrontendGenerator {
       const kebabName = this.toKebabCase(moduleName);
 
       // Prepare template context
-      const typesFileName = moduleName === 'notifications' ? 'notification.types' : `${kebabName}.types`;
+      const typesFileName =
+        moduleName === 'notifications'
+          ? 'notification.types'
+          : `${kebabName}.types`;
       // Use singular form for entity types (e.g., "Notification" not "Notifications")
-      const singularPascalName = pascalName.endsWith('s') ? pascalName.slice(0, -1) : pascalName;
-      const singularCamelName = camelName.endsWith('s') ? camelName.slice(0, -1) : camelName;
-      
+      const singularPascalName = pascalName.endsWith('s')
+        ? pascalName.slice(0, -1)
+        : pascalName;
+      const singularCamelName = camelName.endsWith('s')
+        ? camelName.slice(0, -1)
+        : camelName;
+
       const context = {
         moduleName,
         PascalCase: singularPascalName,
@@ -725,10 +993,13 @@ class FrontendGenerator {
         types,
         searchFields: apiInfo.searchFields.length > 0,
         searchFieldsDisplay: apiInfo.searchFields.join(', '),
-        displayColumns: this.generateDisplayColumns(types, singularPascalName, { camelCase: camelName, moduleName }),
+        displayColumns: this.generateDisplayColumns(types, singularPascalName, {
+          camelCase: camelName,
+          moduleName,
+        }),
         filters: this.generateQueryFilters(types, pascalName),
         includeEnhanced: options.enhanced || apiInfo.hasEnhancedOps,
-        includeFull: options.full || apiInfo.hasFullOps
+        includeFull: options.full || apiInfo.hasFullOps,
       };
 
       // Load and compile template
@@ -740,11 +1011,18 @@ class FrontendGenerator {
       const generatedCode = template(context);
 
       // Prepare output directory
-      const outputDir = path.join(this.outputDir, this.toKebabCase(moduleName), 'components');
+      const outputDir = path.join(
+        this.outputDir,
+        this.toKebabCase(moduleName),
+        'components',
+      );
       this.ensureDirectoryExists(outputDir);
 
       // Write file
-      const outputFile = path.join(outputDir, `${this.toKebabCase(moduleName)}-list.component.ts`);
+      const outputFile = path.join(
+        outputDir,
+        `${this.toKebabCase(moduleName)}-list.component.ts`,
+      );
       fs.writeFileSync(outputFile, generatedCode);
 
       console.log(`✅ List component generated: ${outputFile}`);
@@ -773,18 +1051,28 @@ class FrontendGenerator {
         enhancedSchema = await getEnhancedSchema(moduleName);
         console.log(`✅ Enhanced schema loaded for ${moduleName}`);
       } catch (error) {
-        console.warn(`⚠️ Could not load enhanced schema for ${moduleName}:`, error.message);
+        console.warn(
+          `⚠️ Could not load enhanced schema for ${moduleName}:`,
+          error.message,
+        );
       }
 
       const pascalName = this.toPascalCase(moduleName);
       const camelName = this.toCamelCase(moduleName);
       const kebabName = this.toKebabCase(moduleName);
 
-      const typesFileName = moduleName === 'notifications' ? 'notification.types' : `${kebabName}.types`;
+      const typesFileName =
+        moduleName === 'notifications'
+          ? 'notification.types'
+          : `${kebabName}.types`;
       // Use singular form for entity types (e.g., "Notification" not "Notifications")
-      const singularPascalName = pascalName.endsWith('s') ? pascalName.slice(0, -1) : pascalName;
-      const singularCamelName = camelName.endsWith('s') ? camelName.slice(0, -1) : camelName;
-      
+      const singularPascalName = pascalName.endsWith('s')
+        ? pascalName.slice(0, -1)
+        : pascalName;
+      const singularCamelName = camelName.endsWith('s')
+        ? camelName.slice(0, -1)
+        : camelName;
+
       const baseContext = {
         moduleName,
         PascalCase: singularPascalName,
@@ -793,22 +1081,51 @@ class FrontendGenerator {
         singularCamelName: singularCamelName,
         typesFileName,
         title: this.fieldNameToLabel(moduleName),
-        types
+        types,
       };
 
       const generatedFiles = [];
-      const outputDir = path.join(this.outputDir, this.toKebabCase(moduleName), 'components');
+      const outputDir = path.join(
+        this.outputDir,
+        this.toKebabCase(moduleName),
+        'components',
+      );
       this.ensureDirectoryExists(outputDir);
 
       // 1. Generate Create Dialog
-      const createFormFields = this.generateFormFields(types, singularPascalName, true, enhancedSchema);
+      const createFormFields = this.generateFormFields(
+        types,
+        singularPascalName,
+        true,
+        enhancedSchema,
+      );
       const createContext = {
         ...baseContext,
         formFields: createFormFields,
-        hasJsonFields: createFormFields.some(field => field.type === 'json')
+        hasJsonFields: createFormFields.some((field) => field.type === 'json'),
+        hasDateTimeFields: createFormFields.some((field) =>
+          ['datetime', 'datetime-tz'].includes(field.type),
+        ),
+        hasNewFieldTypes: createFormFields.some((field) =>
+          [
+            'uuid',
+            'array',
+            'inet',
+            'cidr',
+            'macaddr',
+            'binary',
+            'xml',
+            'point',
+            'box',
+            'polygon',
+          ].includes(field.type),
+        ),
       };
-      
-      const createTemplateContent = fs.readFileSync(path.join(this.templatesDir, 'create-dialog.hbs'), 'utf8');
+
+      const createTemplateContent = fs.readFileSync(
+        path.join(this.templatesDir, 'create-dialog.hbs'),
+        'utf8',
+      );
       const createTemplate = Handlebars.compile(createTemplateContent);
       const createCode = createTemplate(createContext);
       const createFile = path.join(outputDir, `${kebabName}-create.dialog.ts`);
@@ -816,34 +1133,117 @@ class FrontendGenerator {
       generatedFiles.push(createFile);
 
       // 2. Generate Edit Dialog
-      const editFormFields = this.generateFormFields(types, singularPascalName, false, enhancedSchema);
+      const editFormFields = this.generateFormFields(
+        types,
+        singularPascalName,
+        false,
+        enhancedSchema,
+      );
       const editContext = {
         ...baseContext,
         formFields: editFormFields,
-        hasJsonFields: editFormFields.some(field => field.type === 'json')
+        hasJsonFields: editFormFields.some((field) => field.type === 'json'),
+        hasDateTimeFields: editFormFields.some((field) =>
+          ['datetime', 'datetime-tz'].includes(field.type),
+        ),
+        hasNewFieldTypes: editFormFields.some((field) =>
+          [
+            'uuid',
+            'array',
+            'inet',
+            'cidr',
+            'macaddr',
+            'binary',
+            'xml',
+            'point',
+            'box',
+            'polygon',
+          ].includes(field.type),
+        ),
       };
-      
-      const editTemplateContent = fs.readFileSync(path.join(this.templatesDir, 'edit-dialog.hbs'), 'utf8');
+
+      const editTemplateContent = fs.readFileSync(
+        path.join(this.templatesDir, 'edit-dialog.hbs'),
+        'utf8',
+      );
       const editTemplate = Handlebars.compile(editTemplateContent);
       const editCode = editTemplate(editContext);
       const editFile = path.join(outputDir, `${kebabName}-edit.dialog.ts`);
       fs.writeFileSync(editFile, editCode);
       generatedFiles.push(editFile);
 
-      // 3. Generate View Dialog
+      // 3. Generate Shared Form Component
+      const sharedFormFields = this.generateFormFields(
+        types,
+        singularPascalName,
+        false,
+        enhancedSchema,
+      );
+      const foreignKeyServices = this.extractForeignKeyServices(
+        sharedFormFields,
+        enhancedSchema,
+      );
+
+      const sharedFormContext = {
+        ...baseContext,
+        formFields: sharedFormFields,
+        hasForeignKeys: foreignKeyServices.length > 0,
+        foreignKeyServices: foreignKeyServices,
+        hasJsonFields: sharedFormFields.some((field) => field.type === 'json'),
+        hasDateTimeFields: sharedFormFields.some((field) =>
+          ['datetime', 'datetime-tz'].includes(field.type),
+        ),
+        hasNewFieldTypes: sharedFormFields.some((field) =>
+          [
+            'uuid',
+            'array',
+            'inet',
+            'cidr',
+            'macaddr',
+            'binary',
+            'xml',
+            'point',
+            'box',
+            'polygon',
+          ].includes(field.type),
+        ),
+      };
+
+      const sharedFormTemplateContent = fs.readFileSync(
+        path.join(this.templatesDir, 'shared-form.hbs'),
+        'utf8',
+      );
+      const sharedFormTemplate = Handlebars.compile(sharedFormTemplateContent);
+      const sharedFormCode = sharedFormTemplate(sharedFormContext);
+      const sharedFormFile = path.join(
+        outputDir,
+        `${kebabName}-form.component.ts`,
+      );
+      fs.writeFileSync(sharedFormFile, sharedFormCode);
+      generatedFiles.push(sharedFormFile);
+
+      // 4. Generate View Dialog
       const viewContext = {
         ...baseContext,
-        viewFields: this.generateViewFields(types, singularPascalName, { camelCase: camelName, moduleName })
+        viewFields: this.generateViewFields(types, singularPascalName, {
+          camelCase: camelName,
+          moduleName,
+        }),
       };
-      
-      const viewTemplateContent = fs.readFileSync(path.join(this.templatesDir, 'view-dialog.hbs'), 'utf8');
+
+      const viewTemplateContent = fs.readFileSync(
+        path.join(this.templatesDir, 'view-dialog.hbs'),
+        'utf8',
+      );
       const viewTemplate = Handlebars.compile(viewTemplateContent);
       const viewCode = viewTemplate(viewContext);
       const viewFile = path.join(outputDir, `${kebabName}-view.dialog.ts`);
       fs.writeFileSync(viewFile, viewCode);
       generatedFiles.push(viewFile);
 
-      console.log(`✅ Dialog components generated: ${generatedFiles.length} files`);
+      console.log(
+        `✅ Dialog components generated: ${generatedFiles.length} files`,
+      );
       return generatedFiles;
     } catch (error) {
       console.error(`❌ Error generating dialog components:`, error.message);
@@ -862,11 +1262,18 @@ class FrontendGenerator {
       const camelName = this.toCamelCase(moduleName);
       const kebabName = this.toKebabCase(moduleName);
 
-      const typesFileName = moduleName === 'notifications' ? 'notification.types' : `${kebabName}.types`;
+      const typesFileName =
+        moduleName === 'notifications'
+          ? 'notification.types'
+          : `${kebabName}.types`;
       // Use singular form for entity types (e.g., "Notification" not "Notifications")
-      const singularPascalName = pascalName.endsWith('s') ? pascalName.slice(0, -1) : pascalName;
-      const singularCamelName = camelName.endsWith('s') ? camelName.slice(0, -1) : camelName;
-      
+      const singularPascalName = pascalName.endsWith('s')
+        ? pascalName.slice(0, -1)
+        : pascalName;
+      const singularCamelName = camelName.endsWith('s')
+        ? camelName.slice(0, -1)
+        : camelName;
+
       const context = {
         moduleName,
         PascalCase: singularPascalName,
@@ -874,7 +1281,7 @@ class FrontendGenerator {
         kebabCase: kebabName,
         singularCamelName: singularCamelName,
         typesFileName,
-        title: this.fieldNameToLabel(moduleName)
+        title: this.fieldNameToLabel(moduleName),
       };
 
       // Load and compile template
@@ -890,7 +1297,10 @@ class FrontendGenerator {
       this.ensureDirectoryExists(outputDir);
 
       // Write file
-      const outputFile = path.join(outputDir, `${this.toKebabCase(moduleName)}.routes.ts`);
+      const outputFile = path.join(
+        outputDir,
+        `${this.toKebabCase(moduleName)}.routes.ts`,
+      );
       fs.writeFileSync(outputFile, generatedCode);
 
       console.log(`✅ Routes generated: ${outputFile}`);
@@ -916,11 +1326,17 @@ class FrontendGenerator {
       generatedFiles.push(serviceFile);
 
       // Generate dialog components
-      const dialogFiles = await this.generateDialogComponents(moduleName, options);
+      const dialogFiles = await this.generateDialogComponents(
+        moduleName,
+        options,
+      );
       generatedFiles.push(...dialogFiles);
 
       // Generate list component (must be after dialogs for imports)
-      const listComponentFile = await this.generateListComponent(moduleName, options);
+      const listComponentFile = await this.generateListComponent(
+        moduleName,
+        options,
+      );
       generatedFiles.push(listComponentFile);
 
       // Generate routes
@@ -929,7 +1345,7 @@ class FrontendGenerator {
 
       console.log(`\n✅ Frontend module generation completed!`);
       console.log(`📁 Generated files:`, generatedFiles.length);
-      generatedFiles.forEach(file => console.log(`   - ${file}`));
+      generatedFiles.forEach((file) => console.log(`   - ${file}`));
 
       return generatedFiles;
     } catch (error) {
@@ -941,15 +1357,24 @@ class FrontendGenerator {
   // ===== UTILITY METHODS =====
 
   toPascalCase(str) {
-    return str.charAt(0).toUpperCase() + str.slice(1).replace(/[-_](.)/g, (_, char) => char.toUpperCase());
+    return (
+      str.charAt(0).toUpperCase() +
+      str.slice(1).replace(/[-_](.)/g, (_, char) => char.toUpperCase())
+    );
   }
 
   toCamelCase(str) {
-    return str.charAt(0).toLowerCase() + str.slice(1).replace(/[-_](.)/g, (_, char) => char.toUpperCase());
+    return (
+      str.charAt(0).toLowerCase() +
+      str.slice(1).replace(/[-_](.)/g, (_, char) => char.toUpperCase())
+    );
   }
 
   toKebabCase(str) {
-    return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase().replace(/[_\s]+/g, '-');
+    return str
+      .replace(/([a-z])([A-Z])/g, '$1-$2')
+      .toLowerCase()
+      .replace(/[_\s]+/g, '-');
   }
 
   fieldNameToLabel(fieldName) {
@@ -957,7 +1382,7 @@ class FrontendGenerator {
       .replace(/([a-z])([A-Z])/g, '$1 $2')
       .replace(/[_-]/g, ' ')
       .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
   }
 
@@ -970,29 +1395,29 @@ class FrontendGenerator {
 
   isSelectField(fieldName, fieldType) {
     const selectFields = ['status', 'type', 'priority', 'role'];
-    return selectFields.some(field => fieldName.includes(field));
+    return selectFields.some((field) => fieldName.includes(field));
   }
 
   getSelectOptions(fieldName) {
     const optionsMap = {
       status: [
         { value: 'active', label: 'Active' },
-        { value: 'inactive', label: 'Inactive' }
+        { value: 'inactive', label: 'Inactive' },
       ],
       type: [
         { value: 'info', label: 'Info' },
         { value: 'warning', label: 'Warning' },
-        { value: 'error', label: 'Error' }
+        { value: 'error', label: 'Error' },
       ],
       priority: [
         { value: 'low', label: 'Low' },
         { value: 'normal', label: 'Normal' },
         { value: 'high', label: 'High' },
-        { value: 'urgent', label: 'Urgent' }
-      ]
+        { value: 'urgent', label: 'Urgent' },
+      ],
     };
 
-    const key = Object.keys(optionsMap).find(k => fieldName.includes(k));
+    const key = Object.keys(optionsMap).find((k) => fieldName.includes(k));
     return optionsMap[key] || [];
   }
 
@@ -1001,23 +1426,61 @@ class FrontendGenerator {
       fs.mkdirSync(dirPath, { recursive: true });
     }
   }
+
+  /**
+   * Extract foreign key services needed for the shared form
+   */
+  extractForeignKeyServices(formFields, enhancedSchema) {
+    const services = [];
+
+    if (!enhancedSchema) return services;
+
+    formFields.forEach((field) => {
+      if (field.type === 'dropdown' && field.referencedTable) {
+        const referencedTable = field.referencedTable;
+        const serviceName = this.toCamelCase(referencedTable) + 'Service';
+        const serviceClass = this.toPascalCase(referencedTable) + 'Service';
+
+        // Find the enhanced column for more details
+        const enhancedColumn = enhancedSchema.columns.find(
+          (col) => col.name === field.name,
+        );
+        const dropdownFields = enhancedColumn?.dropdownInfo?.displayFields || [
+          'id',
+        ];
+
+        if (!services.find((s) => s.serviceName === serviceName)) {
+          services.push({
+            serviceName: serviceName,
+            serviceClass: serviceClass,
+            referencedTable: referencedTable,
+            displayFields: dropdownFields,
+            import: `../../../${this.toKebabCase(referencedTable)}/services/${this.toKebabCase(referencedTable)}.service`,
+          });
+        }
+      }
+    });
+
+    return services;
+  }
 }
 
 // Main execution
 if (require.main === module) {
   const moduleName = process.argv[2];
-  
+
   if (!moduleName) {
     console.error('Usage: node frontend-generator.js <module-name>');
     process.exit(1);
   }
 
   const generator = new FrontendGenerator();
-  generator.generateFrontendModule(moduleName)
+  generator
+    .generateFrontendModule(moduleName)
     .then(() => {
       console.log(`✅ Frontend generated successfully for ${moduleName}`);
     })
-    .catch(error => {
+    .catch((error) => {
       console.error('❌ Frontend generation failed:', error.message);
       process.exit(1);
     });

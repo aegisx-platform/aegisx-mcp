@@ -69,16 +69,40 @@ import { {{PascalCase}}ViewDialogComponent, {{PascalCase}}ViewDialogData } from 
           <!-- Search and Filters -->
           <div class="search-container">
 {{#if searchFields}}
-            <mat-form-field appearance="outline" class="search-field">
-              <mat-label>Search {{title}}</mat-label>
-              <input 
-                matInput 
-                placeholder="Search by {{searchFieldsDisplay}}"
-                [(ngModel)]="searchTerm"
-                (input)="onSearchChange()"
-              >
-              <mat-icon matSuffix>search</mat-icon>
-            </mat-form-field>
+            <div class="search-group">
+              <mat-form-field appearance="outline" class="search-field">
+                <mat-label>Search {{title}}</mat-label>
+                <input 
+                  matInput 
+                  placeholder="Search by {{searchFieldsDisplay}}"
+                  [(ngModel)]="searchTerm"
+                  (input)="onSearchChange()"
+                  (keyup.enter)="onSearchButtonClick()"
+                >
+                <mat-icon matSuffix>search</mat-icon>
+              </mat-form-field>
+              <div class="search-buttons">
+                <button 
+                  mat-raised-button 
+                  color="primary" 
+                  (click)="onSearchButtonClick()"
+                  [disabled]="{{camelCase moduleName}}Service.loading()"
+                  class="search-btn"
+                >
+                  <mat-icon>search</mat-icon>
+                  Search
+                </button>
+                <button 
+                  mat-stroked-button 
+                  (click)="clearSearch()"
+                  [disabled]="!searchTerm.trim() || {{camelCase moduleName}}Service.loading()"
+                  class="clear-search-btn"
+                >
+                  <mat-icon>clear</mat-icon>
+                  Clear
+                </button>
+              </div>
+            </div>
 {{/if}}
 
 {{#each filters}}
@@ -307,9 +331,31 @@ import { {{PascalCase}}ViewDialogComponent, {{PascalCase}}ViewDialogData } from 
       flex-wrap: wrap;
     }
 
-    .search-field {
+    .search-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
       flex: 1;
       min-width: 300px;
+    }
+
+    .search-field {
+      flex: 1;
+      min-width: 250px;
+    }
+
+    .search-buttons {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .search-btn {
+      min-width: 100px;
+    }
+
+    .clear-search-btn {
+      min-width: 80px;
     }
 
     .checkbox-filter {
@@ -413,7 +459,24 @@ import { {{PascalCase}}ViewDialogComponent, {{PascalCase}}ViewDialogData } from 
         align-items: stretch;
       }
 
+      .search-group {
+        flex-direction: column;
+        align-items: stretch;
+        min-width: unset;
+        gap: 8px;
+      }
+
       .search-field {
+        min-width: unset;
+      }
+
+      .search-buttons {
+        justify-content: center;
+      }
+
+      .search-btn,
+      .clear-search-btn {
+        flex: 1;
         min-width: unset;
       }
 
@@ -491,7 +554,7 @@ export class {{PascalCase}}ListComponent implements OnInit, OnDestroy {
 
 {{#if searchFields}}
   onSearchChange() {
-    // Debounce search
+    // Debounce search for auto-search
     if (this.searchTimeout) {
       clearTimeout(this.searchTimeout);
     }
@@ -501,6 +564,26 @@ export class {{PascalCase}}ListComponent implements OnInit, OnDestroy {
       this.load{{PascalCase}}s();
     }, 300);
   }
+
+  onSearchButtonClick() {
+    // Manual search - immediate execution
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+    }
+    
+    this.{{camelCase moduleName}}Service.setCurrentPage(1);
+    this.load{{PascalCase}}s();
+  }
+
+  clearSearch() {
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+    }
+    
+    this.searchTerm = '';
+    this.{{camelCase moduleName}}Service.setCurrentPage(1);
+    this.load{{PascalCase}}s();
+  }
 {{/if}}
 
   applyFilters() {
@@ -509,6 +592,10 @@ export class {{PascalCase}}ListComponent implements OnInit, OnDestroy {
   }
 
   clearFilters() {
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+    }
+    
     this.searchTerm = '';
     this.filtersSignal.set({});
     this.{{camelCase moduleName}}Service.setCurrentPage(1);

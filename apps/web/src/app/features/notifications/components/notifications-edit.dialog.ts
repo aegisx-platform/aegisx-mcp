@@ -1,19 +1,21 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule, MatOptionModule } from '@angular/material/core';
+import {
+  MatDialogRef,
+  MAT_DIALOG_DATA,
+  MatDialogModule,
+} from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { NotificationService } from '../services/notifications.service';
-import { Notification, UpdateNotificationRequest } from '../types/notification.types';
+import {
+  Notification,
+  UpdateNotificationRequest,
+} from '../types/notification.types';
+import {
+  NotificationFormComponent,
+  NotificationFormData,
+} from './notifications-form.component';
 
 export interface NotificationEditDialogData {
   notifications: Notification;
@@ -22,451 +24,82 @@ export interface NotificationEditDialogData {
 @Component({
   selector: 'app-notifications-edit-dialog',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatDialogModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatCheckboxModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatProgressSpinnerModule,
-    MatOptionModule,
-  ],
+  imports: [CommonModule, MatDialogModule, NotificationFormComponent],
   template: `
     <div class="edit-dialog">
       <h2 mat-dialog-title>Edit Notifications</h2>
-      
+
       <mat-dialog-content>
-        <form [formGroup]="editForm" class="edit-form">
-
-          <!-- user_id Field -->
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>User</mat-label>
-            <mat-select formControlName="user_id">
-              <mat-option *ngFor="let user of userOptions" [value]="user.value">
-                {{ user.label }}
-              </mat-option>
-            </mat-select>
-            <mat-error *ngIf="editForm.get('user_id')?.hasError('required')">
-              User is required
-            </mat-error>
-          </mat-form-field>
-
-          <!-- type Field -->
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Type</mat-label>
-            <mat-select formControlName="type">
-              <mat-option value="info">Info</mat-option>
-              <mat-option value="warning">Warning</mat-option>
-              <mat-option value="error">Error</mat-option>
-            </mat-select>
-            <mat-error *ngIf="editForm.get('type')?.hasError('required')">
-              Type is required
-            </mat-error>
-          </mat-form-field>
-          <!-- title Field -->
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Title</mat-label>
-            <input 
-              matInput 
-              type="text"
-              formControlName="title"
-              placeholder="Enter title"
-            >
-            <mat-error *ngIf="editForm.get('title')?.hasError('required')">
-              Title is required
-            </mat-error>
-            <mat-error *ngIf="editForm.get('title')?.hasError('maxlength')">
-              Title must be less than 255 characters
-            </mat-error>
-          </mat-form-field>
-
-
-
-
-          <!-- message Field -->
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Message</mat-label>
-            <textarea 
-              matInput 
-              formControlName="message"
-              placeholder="Enter message"
-              rows="3"
-            ></textarea>
-            <mat-error *ngIf="editForm.get('message')?.hasError('required')">
-              Message is required
-            </mat-error>
-            <mat-error *ngIf="editForm.get('message')?.hasError('maxlength')">
-              Message must be less than 1000 characters
-            </mat-error>
-          </mat-form-field>
-
-
-
-
-          <!-- data Field -->
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Data (JSON)</mat-label>
-            <textarea 
-              matInput 
-              formControlName="data"
-              placeholder='Enter JSON data (e.g., {"key": "value"})'
-              rows="3"
-            ></textarea>
-            <mat-hint>Enter valid JSON object (optional)</mat-hint>
-            <mat-error *ngIf="editForm.get('data')?.hasError('invalidJson')">
-              Invalid JSON format
-            </mat-error>
-          </mat-form-field>
-
-
-
-
-          <!-- action_url Field -->
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Action Url</mat-label>
-            <input 
-              matInput 
-              type="url"
-              formControlName="action_url"
-              placeholder="Enter action url"
-            >
-          </mat-form-field>
-
-
-
-
-
-
-          <!-- read Field -->
-          <div class="checkbox-field">
-            <mat-checkbox formControlName="read">
-              Read
-            </mat-checkbox>
-          </div>
-
-
-
-
-
-          <!-- read_at Field -->
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Read At</mat-label>
-            <input 
-              matInput 
-              [matDatepicker]="read_atPicker"
-              formControlName="read_at"
-              placeholder="Enter read at"
-            >
-            <mat-datepicker-toggle matSuffix [for]="read_atPicker"></mat-datepicker-toggle>
-            <mat-datepicker #read_atPicker></mat-datepicker>
-          </mat-form-field>
-
-
-
-          <!-- archived Field -->
-          <div class="checkbox-field">
-            <mat-checkbox formControlName="archived">
-              Archived
-            </mat-checkbox>
-          </div>
-
-
-
-
-
-          <!-- archived_at Field -->
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Archived At</mat-label>
-            <input 
-              matInput 
-              [matDatepicker]="archived_atPicker"
-              formControlName="archived_at"
-              placeholder="Enter archived at"
-            >
-            <mat-datepicker-toggle matSuffix [for]="archived_atPicker"></mat-datepicker-toggle>
-            <mat-datepicker #archived_atPicker></mat-datepicker>
-          </mat-form-field>
-
-
-
-
-
-          <!-- priority Field -->
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Priority</mat-label>
-            <mat-select formControlName="priority">
-              <mat-option value="low">Low</mat-option>
-              <mat-option value="normal">Normal</mat-option>
-              <mat-option value="high">High</mat-option>
-              <mat-option value="urgent">Urgent</mat-option>
-            </mat-select>
-          </mat-form-field>
-
-
-
-          <!-- expires_at Field -->
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Expires At</mat-label>
-            <input 
-              matInput 
-              [matDatepicker]="expires_atPicker"
-              formControlName="expires_at"
-              placeholder="Enter expires at"
-            >
-            <mat-datepicker-toggle matSuffix [for]="expires_atPicker"></mat-datepicker-toggle>
-            <mat-datepicker #expires_atPicker></mat-datepicker>
-          </mat-form-field>
-
-        </form>
+        <app-notifications-form
+          mode="edit"
+          [initialData]="data.notifications"
+          [loading]="loading()"
+          (formSubmit)="onFormSubmit($event)"
+          (formCancel)="onCancel()"
+        ></app-notifications-form>
       </mat-dialog-content>
-
-      <mat-dialog-actions align="end">
-        <button 
-          mat-button 
-          type="button"
-          (click)="onCancel()"
-          [disabled]="loading()"
-        >
-          Cancel
-        </button>
-        <button 
-          mat-raised-button 
-          color="primary" 
-          type="button"
-          (click)="onUpdate()"
-          [disabled]="editForm.invalid || loading() || !hasChanges()"
-        >
-          Update Notifications
-        </button>
-      </mat-dialog-actions>
     </div>
   `,
-  styles: [`
-    .edit-dialog {
-      min-width: 500px;
-      max-width: 800px;
-    }
-
-    .edit-form {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      padding: 16px 0;
-    }
-
-    .full-width {
-      width: 100%;
-    }
-
-    .checkbox-field {
-      margin: 8px 0;
-    }
-
-    .inline-spinner {
-      margin-right: 8px;
-    }
-
-    mat-dialog-content {
-      max-height: 70vh;
-      overflow-y: auto;
-    }
-
-    @media (max-width: 768px) {
+  styles: [
+    `
       .edit-dialog {
-        min-width: 90vw;
+        min-width: 500px;
+        max-width: 800px;
       }
-    }
-  `]
+
+      mat-dialog-content {
+        max-height: 70vh;
+        overflow-y: auto;
+      }
+
+      @media (max-width: 768px) {
+        .edit-dialog {
+          min-width: 90vw;
+        }
+      }
+    `,
+  ],
 })
 export class NotificationEditDialogComponent implements OnInit {
-  private fb = inject(FormBuilder);
   private notificationsService = inject(NotificationService);
   private snackBar = inject(MatSnackBar);
   private dialogRef = inject(MatDialogRef<NotificationEditDialogComponent>);
-  private data = inject<NotificationEditDialogData>(MAT_DIALOG_DATA);
+  public data = inject<NotificationEditDialogData>(MAT_DIALOG_DATA);
 
   loading = signal<boolean>(false);
-  private originalFormValue: any;
-  userOptions: Array<{value: string, label: string}> = [];
-
-  // Custom JSON validator
-  private jsonValidator(control: AbstractControl) {
-    if (!control.value) {
-      return null; // Empty is valid (optional field)
-    }
-    
-    try {
-      JSON.parse(control.value);
-      return null; // Valid JSON
-    } catch (error) {
-      return { invalidJson: true }; // Invalid JSON
-    }
-  }
-
-  editForm: FormGroup = this.fb.group({
-    user_id: [
-      '',
-      [
-        Validators.required
-      ]
-    ],
-    type: [
-      '',
-      [
-        Validators.required, Validators.maxLength(50)
-      ]
-    ],
-    title: [
-      '',
-      [
-        Validators.required, Validators.maxLength(255)
-      ]
-    ],
-    message: [
-      '',
-      [
-        Validators.required, Validators.maxLength(1000)
-      ]
-    ],
-    data: [
-      '',
-      [
-        this.jsonValidator.bind(this)
-      ]
-    ],
-    action_url: [
-      '',
-      [
-        
-      ]
-    ],
-    read: [
-      '',
-      [
-        
-      ]
-    ],
-    read_at: [
-      '',
-      [
-        
-      ]
-    ],
-    archived: [
-      '',
-      [
-        
-      ]
-    ],
-    archived_at: [
-      '',
-      [
-        
-      ]
-    ],
-    priority: [
-      '',
-      [
-        Validators.maxLength(20)
-      ]
-    ],
-    expires_at: [
-      '',
-      [
-        
-      ]
-    ]
-  });
 
   ngOnInit() {
-    this.loadUserOptions();
-    if (this.data.notifications) {
-      this.populateForm(this.data.notifications);
-    }
+    // No additional setup needed since shared form handles data population
   }
 
-  async loadUserOptions() {
+  async onFormSubmit(formData: NotificationFormData) {
+    this.loading.set(true);
+
     try {
-      this.userOptions = await this.notificationsService.getUsersDropdown();
-    } catch (error) {
-      console.error('Failed to load user options:', error);
-    }
-  }
+      const updateRequest = formData as UpdateNotificationRequest;
+      const result = await this.notificationsService.updateNotification(
+        this.data.notifications.id,
+        updateRequest,
+      );
 
-  private populateForm(notifications: Notification) {
-    const formValue = {
-      user_id: notifications.user_id,
-      type: notifications.type,
-      title: notifications.title,
-      message: notifications.message,
-      data: notifications.data ? JSON.stringify(notifications.data, null, 2) : '',
-      action_url: notifications.action_url,
-      read: notifications.read,
-      read_at: notifications.read_at ? new Date(notifications.read_at) : null,
-      archived: notifications.archived,
-      archived_at: notifications.archived_at ? new Date(notifications.archived_at) : null,
-      priority: notifications.priority,
-      expires_at: notifications.expires_at ? new Date(notifications.expires_at) : null
-    };
-    
-    this.editForm.patchValue(formValue);
-    this.originalFormValue = this.editForm.value;
-  }
-
-  hasChanges(): boolean {
-    const currentValue = this.editForm.value;
-    return JSON.stringify(currentValue) !== JSON.stringify(this.originalFormValue);
-  }
-
-  async onUpdate() {
-    if (this.editForm.valid && this.hasChanges()) {
-      this.loading.set(true);
-      
-      try {
-        const formData = { ...this.editForm.value } as UpdateNotificationRequest;
-        
-        // Parse JSON data field if it contains a string
-        if (formData.data && typeof formData.data === 'string') {
-          try {
-            formData.data = JSON.parse(formData.data);
-          } catch (error) {
-            // This shouldn't happen due to validation, but just in case
-            formData.data = {};
-          }
-        } else if (!formData.data) {
-          // If empty, set to empty object
-          formData.data = {};
-        }
-        
-        const result = await this.notificationsService.updateNotification(
-          this.data.notifications.id, 
-          formData
-        );
-        
-        if (result) {
-          this.snackBar.open('Notifications updated successfully', 'Close', {
-            duration: 3000,
-          });
-          this.dialogRef.close(result);
-        } else {
-          this.snackBar.open('Failed to update Notifications', 'Close', {
-            duration: 5000,
-          });
-        }
-      } catch (error: any) {
-        this.snackBar.open(
-          error.message || 'Failed to update Notifications', 
-          'Close', 
-          { duration: 5000 }
-        );
-      } finally {
-        this.loading.set(false);
+      if (result) {
+        this.snackBar.open('Notifications updated successfully', 'Close', {
+          duration: 3000,
+        });
+        this.dialogRef.close(result);
+      } else {
+        this.snackBar.open('Failed to update Notifications', 'Close', {
+          duration: 5000,
+        });
       }
+    } catch (error: any) {
+      this.snackBar.open(
+        error.message || 'Failed to update Notifications',
+        'Close',
+        { duration: 5000 },
+      );
+    } finally {
+      this.loading.set(false);
     }
   }
 

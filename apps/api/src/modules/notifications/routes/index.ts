@@ -11,6 +11,20 @@ import {
   NotificationsListResponseSchema,
   FlexibleNotificationsListResponseSchema,
 } from '../schemas/notifications.schemas';
+import {
+  DropdownQuerySchema,
+  DropdownResponseSchema,
+  BulkCreateSchema,
+  BulkUpdateSchema,
+  BulkDeleteSchema,
+  BulkResponseSchema,
+  ValidationRequestSchema,
+  ValidationResponseSchema,
+  UniquenessParamSchema,
+  UniquenessQuerySchema,
+  UniquenessResponseSchema,
+  StatisticsResponseSchema,
+} from '../../../schemas/base.schemas';
 import { ApiErrorResponseSchema as ErrorResponseSchema } from '../../../schemas/base.schemas';
 import { SchemaRefs } from '../../../schemas/registry';
 
@@ -140,5 +154,146 @@ export async function notificationsRoutes(
       fastify.authorize(['notifications.delete', 'admin']),
     ], // Authentication & authorization required
     handler: controller.delete.bind(controller),
+  });
+
+  // ===== ENHANCED CRUD ROUTES =====
+
+  // Get dropdown options for UI components
+  fastify.get('/dropdown', {
+    schema: {
+      tags: ['Notifications'],
+      summary: 'Get notifications dropdown options',
+      description: 'Get notifications options for dropdown/select components',
+      querystring: DropdownQuerySchema,
+      response: {
+        200: DropdownResponseSchema,
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [
+      fastify.authenticate,
+      fastify.authorize(['notifications.read', 'admin']),
+    ],
+    handler: controller.getDropdownOptions.bind(controller),
+  });
+
+  // Bulk create notificationss
+  fastify.post('/bulk', {
+    schema: {
+      tags: ['Notifications'],
+      summary: 'Bulk create notificationss',
+      description: 'Create multiple notificationss in one operation',
+      body: BulkCreateSchema(CreateNotificationsSchema),
+      response: {
+        201: BulkResponseSchema(NotificationsResponseSchema),
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [
+      fastify.authenticate,
+      fastify.authorize(['notifications.create', 'admin']),
+    ],
+    handler: controller.bulkCreate.bind(controller),
+  });
+
+  // Bulk update notificationss
+  fastify.put('/bulk', {
+    schema: {
+      tags: ['Notifications'],
+      summary: 'Bulk update notificationss',
+      description: 'Update multiple notificationss in one operation',
+      body: BulkUpdateSchema(UpdateNotificationsSchema),
+      response: {
+        200: BulkResponseSchema(NotificationsResponseSchema),
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [
+      fastify.authenticate,
+      fastify.authorize(['notifications.update', 'admin']),
+    ],
+    handler: controller.bulkUpdate.bind(controller),
+  });
+
+  // Bulk delete notificationss
+  fastify.delete('/bulk', {
+    schema: {
+      tags: ['Notifications'],
+      summary: 'Bulk delete notificationss',
+      description: 'Delete multiple notificationss in one operation',
+      body: BulkDeleteSchema,
+      response: {
+        200: BulkResponseSchema(NotificationsResponseSchema),
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [
+      fastify.authenticate,
+      fastify.authorize(['notifications.delete', 'admin']),
+    ],
+    handler: controller.bulkDelete.bind(controller),
+  });
+
+  // ===== FULL PACKAGE ROUTES =====
+
+  // Validate data before save
+  fastify.post('/validate', {
+    schema: {
+      tags: ['Notifications'],
+      summary: 'Validate notifications data',
+      description: 'Validate notifications data before saving',
+      body: ValidationRequestSchema(CreateNotificationsSchema),
+      response: {
+        200: ValidationResponseSchema,
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [
+      fastify.authenticate,
+      fastify.authorize([
+        'notifications.create',
+        'notifications.update',
+        'admin',
+      ]),
+    ],
+    handler: controller.validate.bind(controller),
+  });
+
+  // Check field uniqueness
+  fastify.get('/check/:field', {
+    schema: {
+      tags: ['Notifications'],
+      summary: 'Check field uniqueness',
+      description: 'Check if a field value is unique',
+      params: UniquenessParamSchema,
+      querystring: UniquenessQuerySchema,
+      response: {
+        200: UniquenessResponseSchema,
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [
+      fastify.authenticate,
+      fastify.authorize(['notifications.read', 'admin']),
+    ],
+    handler: controller.checkUniqueness.bind(controller),
   });
 }
