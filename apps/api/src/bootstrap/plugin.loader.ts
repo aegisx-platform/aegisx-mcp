@@ -39,6 +39,7 @@ import systemPlugin from '../core/system/default.plugin';
 
 // Business feature modules
 import apiKeysPlugin from '../modules/apiKeys';
+import articlesPlugin from '../modules/articles';
 import fileUploadPlugin from '../modules/file-upload/file-upload.plugin';
 import navigationPlugin from '../modules/navigation/navigation.plugin';
 import notificationsPlugin from '../modules/notifications';
@@ -329,6 +330,11 @@ export function createFeaturePluginGroup(apiPrefix: string): PluginGroup {
       {
         name: 'api-keys',
         plugin: apiKeysPlugin,
+        required: true,
+      },
+      {
+        name: 'articles',
+        plugin: articlesPlugin,
         required: true,
       },
       {

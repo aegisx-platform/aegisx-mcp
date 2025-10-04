@@ -129,41 +129,11 @@ export class NotificationsRepository extends BaseRepository<
     query: any,
     filters: NotificationsListQuery,
   ): void {
-    // List of reserved parameters that should not be treated as filters
-    const reservedParams = ['fields', 'format', 'include'];
-
-    // List of UUID fields that need special handling
-    const uuidFields = ['id', 'user_id'];
-
-    // Apply general filters with UUID field validation
-    Object.keys(filters).forEach((key) => {
-      if (
-        filters[key] !== undefined &&
-        filters[key] !== null &&
-        !reservedParams.includes(key)
-      ) {
-        const value = filters[key];
-
-        // Skip empty strings for UUID fields
-        if (
-          uuidFields.includes(key) &&
-          (value === '' || value === null || value === undefined)
-        ) {
-          return;
-        }
-
-        // Skip empty strings for regular string fields too
-        if (typeof value === 'string' && value.trim() === '') {
-          return;
-        }
-
-        // Apply the filter
-        query.where(`notifications.${key}`, value);
-      }
-    });
+    // Apply base filters first
+    super.applyCustomFilters(query, filters);
 
     // Apply specific Notifications filters based on intelligent field categorization
-    if (filters.type !== undefined && filters.type !== '') {
+    if (filters.type !== undefined) {
       query.where('notifications.type', filters.type);
     }
     if (filters.read !== undefined) {
@@ -195,6 +165,30 @@ export class NotificationsRepository extends BaseRepository<
     }
     if (filters.updated_at_max !== undefined) {
       query.where('notifications.updated_at', '<=', filters.updated_at_max);
+    }
+  }
+
+  // Apply multiple sort parsing
+  protected applyMultipleSort(query: any, sort?: string): void {
+    if (sort) {
+      if (sort.includes(',')) {
+        // Multiple sort format: field1:desc,field2:asc,field3:desc
+        const sortPairs = sort.split(',');
+        sortPairs.forEach((pair) => {
+          const [field, direction] = pair.split(':');
+          const mappedField = this.getSortField(field.trim());
+          const sortDirection =
+            direction?.trim().toLowerCase() === 'asc' ? 'asc' : 'desc';
+          query.orderBy(mappedField, sortDirection);
+        });
+      } else {
+        // Single sort field
+        const mappedField = this.getSortField(sort);
+        query.orderBy(mappedField, 'desc');
+      }
+    } else {
+      // Default sort
+      query.orderBy(this.getSortField('created_at'), 'desc');
     }
   }
 
@@ -248,90 +242,7 @@ export class NotificationsRepository extends BaseRepository<
   async list(
     query: NotificationsListQuery = {},
   ): Promise<PaginatedListResult<Notifications>> {
-    const {
-      page = 1,
-      limit = 10,
-      search,
-      sortBy = 'created_at',
-      sortOrder = 'desc',
-      fields, // Extract fields parameter
-      ...filters
-    } = query;
-
-    // Base query
-    const baseQuery = this.getJoinQuery();
-
-    // Handle field selection if specified
-    if (fields && Array.isArray(fields) && fields.length > 0) {
-      // Map field names to table columns with proper prefixing
-      const validFields = fields
-        .filter(
-          (field) =>
-            typeof field === 'string' && /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(field),
-        )
-        .map((field) => `notifications.${field}`);
-
-      if (validFields.length > 0) {
-        baseQuery.clearSelect().select(validFields);
-      }
-    }
-
-    // Apply search functionality
-    if (search && this.searchFields.length > 0) {
-      baseQuery.where((builder) => {
-        this.searchFields.forEach((field, index) => {
-          if (index === 0) {
-            builder.whereILike(field, `%${search}%`);
-          } else {
-            builder.orWhereILike(field, `%${search}%`);
-          }
-        });
-      });
-    }
-
-    // Apply custom filters (without fields parameter)
-    this.applyCustomFilters(baseQuery, filters);
-
-    // Get total count (use separate query without field selection)
-    const countQuery = this.getJoinQuery();
-    if (search && this.searchFields.length > 0) {
-      countQuery.where((builder) => {
-        this.searchFields.forEach((field, index) => {
-          if (index === 0) {
-            builder.whereILike(field, `%${search}%`);
-          } else {
-            builder.orWhereILike(field, `%${search}%`);
-          }
-        });
-      });
-    }
-    this.applyCustomFilters(countQuery, filters);
-    countQuery.clearSelect().count('* as total');
-    const [{ total }] = await countQuery;
-
-    // Apply sorting and pagination
-    const data = await baseQuery
-      .orderBy(this.getSortField(sortBy), sortOrder)
-      .limit(limit)
-      .offset((page - 1) * limit);
-
-    // Transform data if transformer is available
-    const transformedData = data.map((row) => this.transformToEntity(row));
-
-    const totalCount = parseInt(total as string);
-    const totalPages = Math.ceil(totalCount / limit);
-
-    return {
-      data: transformedData,
-      pagination: {
-        page,
-        limit,
-        total: totalCount,
-        totalPages,
-        hasNext: page < totalPages,
-        hasPrev: page > 1,
-      },
-    };
+    return super.list(query);
   }
 
   // Business-specific methods for unique/important fields

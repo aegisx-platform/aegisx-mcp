@@ -86,10 +86,18 @@ export const ListNotificationsQuerySchema = Type.Object({
   // Pagination parameters
   page: Type.Optional(Type.Number({ minimum: 1, default: 1 })),
   limit: Type.Optional(Type.Number({ minimum: 1, maximum: 1000, default: 20 })),
-  sortBy: Type.Optional(Type.String()),
-  sortOrder: Type.Optional(
-    Type.Union([Type.Literal('asc'), Type.Literal('desc')], {
-      default: 'desc',
+  // Modern multiple sort support
+  sort: Type.Optional(
+    Type.String({
+      pattern:
+        '^[a-zA-Z_][a-zA-Z0-9_]*(:(asc|desc))?(,[a-zA-Z_][a-zA-Z0-9_]*(:(asc|desc))?)*$',
+      description:
+        'Multiple sort: field1:desc,field2:asc,field3:desc. Example: title:asc,created_at:desc',
+      examples: [
+        'title:asc',
+        'created_at:desc',
+        'title:asc,view_count:desc,published_at:asc',
+      ],
     }),
   ),
 

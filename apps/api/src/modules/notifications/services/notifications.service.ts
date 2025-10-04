@@ -190,8 +190,7 @@ export class NotificationsService extends BaseService<
     const result = await this.notificationsRepository.list({
       limit,
       search,
-      sortBy: labelField,
-      sortOrder: 'asc',
+      sort: `${labelField}:asc`,
     });
 
     const dropdownOptions = result.data.map((item) => ({
