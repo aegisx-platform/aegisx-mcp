@@ -1,14 +1,14 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { Static } from '@sinclair/typebox';
-import { {{ModuleName}}Service } from '../services/{{currentRoute.camelName}}.service';
-import { Create{{ModuleName}}, Update{{ModuleName}} } from '../types/{{currentRoute.camelName}}.types';
+import { {{ModuleName}}Service } from '../services/{{kebabCase currentRoute.camelName}}.service';
+import { Create{{ModuleName}}, Update{{ModuleName}} } from '../types/{{kebabCase currentRoute.camelName}}.types';
 import {
   Create{{ModuleName}}Schema,
   Update{{ModuleName}}Schema,
   {{ModuleName}}IdParamSchema,
   Get{{ModuleName}}QuerySchema,
   List{{ModuleName}}QuerySchema
-} from '../schemas/{{currentRoute.camelName}}.schemas';
+} from '../schemas/{{kebabCase currentRoute.camelName}}.schemas';
 {{#if (or (eq package 'enterprise') (eq package 'full'))}}
 import {
   DropdownQuerySchema,

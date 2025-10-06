@@ -41,7 +41,7 @@ describe('{{ModuleName}} CRUD Operations', () => {
       const {{moduleName}}Data: Create{{ModuleName}} = {
         {{#each columns}}
         {{#unless (or isPrimaryKey (eq name 'created_at') (eq name 'updated_at'))}}
-        {{name}}: {{#ifEquals tsType 'string'}}'test-{{name}}'{{else}}{{#ifEquals tsType 'number'}}123{{else}}{{#ifEquals tsType 'boolean'}}true{{else}}null{{/ifEquals}}{{/ifEquals}}{{/ifEquals}}{{#unless @last}},{{/unless}}
+        {{name}}: {{#if (getConstraintValue name 0)}}{{#if (eq tsType 'string')}}'{{getConstraintValue name 0}}'{{else}}{{getConstraintValue name 0}}{{/if}}{{else}}{{#ifEquals tsType 'string'}}'test-{{name}}'{{else}}{{#ifEquals tsType 'number'}}123{{else}}{{#ifEquals tsType 'boolean'}}true{{else}}null{{/ifEquals}}{{/ifEquals}}{{/ifEquals}}{{/if}}{{#unless @last}},{{/unless}}
         {{/unless}}
         {{/each}}
       };
@@ -86,7 +86,7 @@ describe('{{ModuleName}} CRUD Operations', () => {
       const {{moduleName}}Data: Create{{ModuleName}} = {
         {{#each columns}}
         {{#unless (or isPrimaryKey (eq name 'created_at') (eq name 'updated_at'))}}
-        {{name}}: {{#ifEquals tsType 'string'}}'test-{{name}}'{{else}}{{#ifEquals tsType 'number'}}123{{else}}{{#ifEquals tsType 'boolean'}}true{{else}}null{{/ifEquals}}{{/ifEquals}}{{/ifEquals}}{{#unless @last}},{{/unless}}
+        {{name}}: {{#if (getConstraintValue name 0)}}{{#if (eq tsType 'string')}}'{{getConstraintValue name 0}}'{{else}}{{getConstraintValue name 0}}{{/if}}{{else}}{{#ifEquals tsType 'string'}}'test-{{name}}'{{else}}{{#ifEquals tsType 'number'}}123{{else}}{{#ifEquals tsType 'boolean'}}true{{else}}null{{/ifEquals}}{{/ifEquals}}{{/ifEquals}}{{/if}}{{#unless @last}},{{/unless}}
         {{/unless}}
         {{/each}}
       };
@@ -121,7 +121,7 @@ describe('{{ModuleName}} CRUD Operations', () => {
       const {{moduleName}}Data: Create{{ModuleName}} = {
         {{#each columns}}
         {{#unless (or isPrimaryKey (eq name 'created_at') (eq name 'updated_at'))}}
-        {{name}}: {{#ifEquals tsType 'string'}}'test-{{name}}'{{else}}{{#ifEquals tsType 'number'}}123{{else}}{{#ifEquals tsType 'boolean'}}true{{else}}null{{/ifEquals}}{{/ifEquals}}{{/ifEquals}}{{#unless @last}},{{/unless}}
+        {{name}}: {{#if (getConstraintValue name 0)}}{{#if (eq tsType 'string')}}'{{getConstraintValue name 0}}'{{else}}{{getConstraintValue name 0}}{{/if}}{{else}}{{#ifEquals tsType 'string'}}'test-{{name}}'{{else}}{{#ifEquals tsType 'number'}}123{{else}}{{#ifEquals tsType 'boolean'}}true{{else}}null{{/ifEquals}}{{/ifEquals}}{{/ifEquals}}{{/if}}{{#unless @last}},{{/unless}}
         {{/unless}}
         {{/each}}
       };
@@ -230,7 +230,7 @@ describe('{{ModuleName}} CRUD Operations', () => {
       const {{moduleName}}Data: Create{{ModuleName}} = {
         {{#each columns}}
         {{#unless (or isPrimaryKey (eq name 'created_at') (eq name 'updated_at'))}}
-        {{name}}: {{#ifEquals tsType 'string'}}'test-{{name}}'{{else}}{{#ifEquals tsType 'number'}}123{{else}}{{#ifEquals tsType 'boolean'}}true{{else}}null{{/ifEquals}}{{/ifEquals}}{{/ifEquals}}{{#unless @last}},{{/unless}}
+        {{name}}: {{#if (getConstraintValue name 0)}}{{#if (eq tsType 'string')}}'{{getConstraintValue name 0}}'{{else}}{{getConstraintValue name 0}}{{/if}}{{else}}{{#ifEquals tsType 'string'}}'test-{{name}}'{{else}}{{#ifEquals tsType 'number'}}123{{else}}{{#ifEquals tsType 'boolean'}}true{{else}}null{{/ifEquals}}{{/ifEquals}}{{/ifEquals}}{{/if}}{{#unless @last}},{{/unless}}
         {{/unless}}
         {{/each}}
       };

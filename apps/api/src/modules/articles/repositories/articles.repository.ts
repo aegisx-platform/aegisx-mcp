@@ -30,20 +30,11 @@ export class ArticlesRepository extends BaseRepository<
   UpdateArticles
 > {
   constructor(knex: Knex) {
-    super(
-      knex,
-      'articles',
-      [
-        // Define searchable fields based on intelligent detection
-        'articles.title',
-        'articles.content',
-      ],
-      [
-        // 🛡️ Explicit UUID fields for validation
-        'id',
-        'author_id',
-      ],
-    );
+    super(knex, 'articles', [
+      // Define searchable fields based on intelligent detection
+      'articles.title',
+      'articles.content',
+    ]);
   }
 
   // Transform database row to entity

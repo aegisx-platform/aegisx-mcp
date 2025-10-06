@@ -34,7 +34,6 @@ import {
   CreateNotificationRequest,
   UpdateNotificationRequest,
 } from '../types/notification.types';
-import { UserService } from '../../users/services/user.service';
 import {
   formatDateTimeForInput,
   formatDateTimeForSubmission,
@@ -49,9 +48,9 @@ export interface NotificationFormData {
   message: string;
   data?: Record<string, any>;
   action_url?: string;
-  read?: boolean;
+  read?: string;
   read_at?: string;
-  archived?: boolean;
+  archived?: string;
   archived_at?: string;
   priority?: string;
   expires_at?: string;
@@ -77,30 +76,24 @@ export interface NotificationFormData {
     MatTooltipModule,
   ],
   template: `
-    <form [formGroup]="notificationForm" class="notification-form">
+    <form [formGroup]="notificationsForm" class="-form">
       <!-- user_id Field -->
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>User</mat-label>
-        <mat-select formControlName="user_id" [disabled]="loadingUsers()">
-          <mat-option *ngIf="loadingUsers()" disabled>
-            <mat-spinner diameter="16"></mat-spinner>
-            Loading users...
-          </mat-option>
-          <mat-option *ngFor="let user of users()" [value]="user.id">
-            {{ user.firstName }} {{ user.lastName }} ({{ user.email }})
-          </mat-option>
-        </mat-select>
+        <mat-label>User Id</mat-label>
+        <input
+          matInput
+          type="text"
+          formControlName="user_id"
+          placeholder="Enter user id"
+        />
         <mat-error
-          *ngIf="notificationForm.get('user_id')?.hasError('required')"
+          *ngIf="notificationsForm.get('user_id')?.hasError('required')"
         >
-          User is required
+          User Id is required
         </mat-error>
-        <mat-hint *ngIf="!loadingUsers() && users().length === 0">
-          No users available
-        </mat-hint>
       </mat-form-field>
 
-      <!-- type Field -->
+      <!-- type Field (Select) -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Type</mat-label>
         <mat-select formControlName="type">
@@ -108,7 +101,7 @@ export interface NotificationFormData {
           <mat-option value="warning">Warning</mat-option>
           <mat-option value="error">Error</mat-option>
         </mat-select>
-        <mat-error *ngIf="notificationForm.get('type')?.hasError('required')">
+        <mat-error *ngIf="notificationsForm.get('type')?.hasError('required')">
           Type is required
         </mat-error>
       </mat-form-field>
@@ -122,10 +115,12 @@ export interface NotificationFormData {
           formControlName="title"
           placeholder="Enter title"
         />
-        <mat-error *ngIf="notificationForm.get('title')?.hasError('required')">
+        <mat-error *ngIf="notificationsForm.get('title')?.hasError('required')">
           Title is required
         </mat-error>
-        <mat-error *ngIf="notificationForm.get('title')?.hasError('maxlength')">
+        <mat-error
+          *ngIf="notificationsForm.get('title')?.hasError('maxlength')"
+        >
           Title must be less than 255 characters
         </mat-error>
       </mat-form-field>
@@ -140,12 +135,12 @@ export interface NotificationFormData {
           rows="3"
         ></textarea>
         <mat-error
-          *ngIf="notificationForm.get('message')?.hasError('required')"
+          *ngIf="notificationsForm.get('message')?.hasError('required')"
         >
           Message is required
         </mat-error>
         <mat-error
-          *ngIf="notificationForm.get('message')?.hasError('maxlength')"
+          *ngIf="notificationsForm.get('message')?.hasError('maxlength')"
         >
           Message must be less than 1000 characters
         </mat-error>
@@ -162,7 +157,7 @@ export interface NotificationFormData {
         ></textarea>
         <mat-hint>Enter valid JSON object (optional)</mat-hint>
         <mat-error
-          *ngIf="notificationForm.get('data')?.hasError('invalidJson')"
+          *ngIf="notificationsForm.get('data')?.hasError('invalidJson')"
         >
           Invalid JSON format
         </mat-error>
@@ -213,14 +208,14 @@ export interface NotificationFormData {
         <mat-hint>Timezone will be handled automatically</mat-hint>
       </mat-form-field>
 
-      <!-- priority Field -->
+      <!-- priority Field (Select) -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Priority</mat-label>
         <mat-select formControlName="priority">
-          <mat-option value="low">Low</mat-option>
-          <mat-option value="normal">Normal</mat-option>
-          <mat-option value="high">High</mat-option>
-          <mat-option value="urgent">Urgent</mat-option>
+          <mat-option value="low&#x27;">Low&#x27;</mat-option>
+          <mat-option value="normal&#x27;">Normal&#x27;</mat-option>
+          <mat-option value="high&#x27;">High&#x27;</mat-option>
+          <mat-option value="urgent&#x27;">Urgent&#x27;</mat-option>
         </mat-select>
       </mat-form-field>
 
@@ -252,7 +247,7 @@ export interface NotificationFormData {
           type="button"
           (click)="onSubmit()"
           [disabled]="
-            notificationForm.invalid ||
+            notificationsForm.invalid ||
             loading ||
             (mode === 'edit' && !hasChanges())
           "
@@ -262,14 +257,14 @@ export interface NotificationFormData {
             class="inline-spinner"
             *ngIf="loading"
           ></mat-spinner>
-          {{ mode === 'create' ? 'Create' : 'Update' }} Notification
+          {{ mode === 'create' ? 'Create' : 'Update' }} Notifications
         </button>
       </div>
     </form>
   `,
   styles: [
     `
-      .notification-form {
+      .-form {
         display: flex;
         flex-direction: column;
         gap: 16px;
@@ -308,7 +303,6 @@ export interface NotificationFormData {
 })
 export class NotificationFormComponent implements OnInit, OnChanges {
   private fb = inject(FormBuilder);
-  private userService = inject(UserService);
 
   @Input() mode: NotificationFormMode = 'create';
   @Input() initialData?: Notification;
@@ -318,8 +312,6 @@ export class NotificationFormComponent implements OnInit, OnChanges {
   @Output() formCancel = new EventEmitter<void>();
 
   private originalFormValue: any;
-  users = signal<any[]>([]);
-  loadingUsers = signal<boolean>(false);
 
   // Custom JSON validator
   private jsonValidator(control: AbstractControl) {
@@ -335,39 +327,24 @@ export class NotificationFormComponent implements OnInit, OnChanges {
     }
   }
 
-  notificationForm: FormGroup = this.fb.group({
+  notificationsForm: FormGroup = this.fb.group({
     user_id: ['', [Validators.required]],
     type: ['', [Validators.required, Validators.maxLength(50)]],
     title: ['', [Validators.required, Validators.maxLength(255)]],
     message: ['', [Validators.required, Validators.maxLength(1000)]],
     data: ['', [this.jsonValidator.bind(this)]],
-    action_url: [''],
-    read: [false],
-    read_at: [''],
-    archived: [false],
-    archived_at: [''],
-    priority: [''],
-    expires_at: [''],
+    action_url: ['', []],
+    read: [false, []],
+    read_at: ['', []],
+    archived: [false, []],
+    archived_at: ['', []],
+    priority: ['', [Validators.maxLength(20)]],
+    expires_at: ['', []],
   });
 
   ngOnInit() {
-    this.loadUsers();
     if (this.mode === 'edit' && this.initialData) {
       this.populateForm(this.initialData);
-    }
-  }
-
-  private async loadUsers() {
-    this.loadingUsers.set(true);
-    try {
-      await this.userService.loadUsers({ page: 1, limit: 1000 });
-      // UserService updates its internal signal, so we get the data from there
-      this.users.set(this.userService.users());
-    } catch (error) {
-      console.error('Failed to load users:', error);
-      this.users.set([]);
-    } finally {
-      this.loadingUsers.set(false);
     }
   }
 
@@ -377,38 +354,40 @@ export class NotificationFormComponent implements OnInit, OnChanges {
     }
   }
 
-  private populateForm(notification: Notification) {
+  private populateForm(notifications: Notification) {
     const formValue = {
-      user_id: notification.user_id,
-      type: notification.type,
-      title: notification.title,
-      message: notification.message,
-      data: notification.data ? JSON.stringify(notification.data, null, 2) : '',
-      action_url: notification.action_url,
-      read: notification.read,
-      read_at: formatDateTimeForInput(notification.read_at),
-      archived: notification.archived,
-      archived_at: formatDateTimeForInput(notification.archived_at),
-      priority: notification.priority,
-      expires_at: formatDateTimeForInput(notification.expires_at),
+      user_id: notifications.user_id,
+      type: notifications.type,
+      title: notifications.title,
+      message: notifications.message,
+      data: notifications.data
+        ? JSON.stringify(notifications.data, null, 2)
+        : '',
+      action_url: notifications.action_url,
+      read: notifications.read,
+      read_at: formatDateTimeForInput(notifications.read_at),
+      archived: notifications.archived,
+      archived_at: formatDateTimeForInput(notifications.archived_at),
+      priority: notifications.priority,
+      expires_at: formatDateTimeForInput(notifications.expires_at),
     };
 
-    this.notificationForm.patchValue(formValue);
-    this.originalFormValue = this.notificationForm.value;
+    this.notificationsForm.patchValue(formValue);
+    this.originalFormValue = this.notificationsForm.value;
   }
 
   hasChanges(): boolean {
     if (this.mode === 'create') return true;
-    const currentValue = this.notificationForm.value;
+    const currentValue = this.notificationsForm.value;
     return (
       JSON.stringify(currentValue) !== JSON.stringify(this.originalFormValue)
     );
   }
 
   onSubmit() {
-    if (this.notificationForm.valid) {
+    if (this.notificationsForm.valid) {
       const formData = {
-        ...this.notificationForm.value,
+        ...this.notificationsForm.value,
       } as NotificationFormData;
 
       // Parse JSON fields

@@ -6,15 +6,6 @@ import {
   ApiSuccessResponseSchema,
   PaginatedResponseSchema,
   PartialPaginatedResponseSchema,
-  DropdownOptionSchema,
-  BulkCreateSchema,
-  BulkUpdateSchema,
-  BulkDeleteSchema,
-  BulkStatusSchema,
-  StatusToggleSchema,
-  StatisticsSchema,
-  ValidationRequestSchema,
-  UniquenessCheckSchema,
 } from '../../../schemas/base.schemas';
 
 // Base Notifications Schema
@@ -92,12 +83,8 @@ export const ListNotificationsQuerySchema = Type.Object({
       pattern:
         '^[a-zA-Z_][a-zA-Z0-9_]*(:(asc|desc))?(,[a-zA-Z_][a-zA-Z0-9_]*(:(asc|desc))?)*$',
       description:
-        'Multiple sort: field1:desc,field2:asc,field3:desc. Example: title:asc,created_at:desc',
-      examples: [
-        'title:asc',
-        'created_at:desc',
-        'title:asc,view_count:desc,published_at:asc',
-      ],
+        'Multiple sort: field1:desc,field2:asc,field3:desc. Example: id:asc,created_at:desc',
+      examples: ['id:asc', 'created_at:desc', 'user_id:asc,created_at:desc'],
     }),
   ),
 
@@ -116,7 +103,7 @@ export const ListNotificationsQuerySchema = Type.Object({
         minItems: 1,
         maxItems: 20, // Prevent excessive field requests
         description:
-          'Specific fields to return. Example: ["id", "title", "created_at"]. Field access is role-based for security.',
+          'Specific fields to return. Example: ["id", "user_id", "created_at"]. Field access is role-based for security.',
       },
     ),
   ),

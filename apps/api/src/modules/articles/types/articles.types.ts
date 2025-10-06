@@ -43,6 +43,6 @@ export interface ArticlesEntity {
   published: boolean | null;
   published_at: Date | null;
   view_count: number | null;
-  created_at: Date | null;
-  updated_at: Date | null;
+  created_at: Date;
+  updated_at: Date;
 }

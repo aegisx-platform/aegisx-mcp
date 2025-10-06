@@ -183,9 +183,30 @@ export class {{ModuleName}}Service extends BaseService<{{ModuleName}}, Create{{M
     // Example: Prevent deletion if entity has dependent records
     {{#each columns}}
     {{#if (eq name 'status')}}
-    if (existing.status === 'active') {
+    {{#if (or (eq tsType 'boolean') (eq type 'boolean'))}}
+    if (existing.status === true) {
       throw new Error('Cannot delete active {{moduleName}}');
     }
+    {{else}}
+      {{#if (hasConstraints name)}}
+        {{#with (getConstraintValue name 1)}}
+    if (existing.status === '{{this}}') {
+      throw new Error('Cannot delete {{this}} {{moduleName}}');
+    }
+        {{else}}
+          {{#with (getConstraintValue name 0)}}
+    if (existing.status && existing.status !== '{{this}}') {
+      throw new Error('Cannot delete {{moduleName}} with current status');
+    }
+          {{/with}}
+        {{/with}}
+      {{else}}
+    // No status constraints found - manual validation required
+    if (existing.status) {
+      throw new Error('Cannot delete {{moduleName}} - please verify status manually');
+    }
+      {{/if}}
+    {{/if}}
     {{/if}}
     {{/each}}
   }

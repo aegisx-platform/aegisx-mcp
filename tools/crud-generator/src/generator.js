@@ -18,8 +18,8 @@ async function generateCrudModule(tableName, options = {}) {
 
   console.log(`🔍 Analyzing table: ${tableName}`);
 
-  // Get database schema for the table
-  const schema = await getDatabaseSchema(tableName);
+  // Get enhanced database schema for the table (includes constraint detection)
+  const schema = await getEnhancedSchema(tableName);
 
   if (!schema) {
     throw new Error(`Table '${tableName}' not found in database`);
@@ -371,6 +371,19 @@ function toPascalCase(str) {
 }
 
 /**
+ * Convert string to kebab-case
+ */
+function toKebabCase(str) {
+  if (!str || typeof str !== 'string') return '';
+  return str
+    .replace(/([a-z])([A-Z])/g, '$1-$2')
+    .toLowerCase()
+    .replace(/[_\s]+/g, '-')
+    .replace(/^-+|-+$/g, '') // Remove leading/trailing dashes
+    .replace(/--+/g, '-'); // Replace multiple dashes with single dash
+}
+
+/**
  * Field categorization helper functions for intelligent parameter generation
  */
 
@@ -661,6 +674,10 @@ Handlebars.registerHelper('uppercase', function (str) {
   return str.toUpperCase();
 });
 
+Handlebars.registerHelper('kebabCase', function (str) {
+  return toKebabCase(str);
+});
+
 // Helper to prevent HTML escaping for TypeScript types
 Handlebars.registerHelper('raw', function (text) {
   return new Handlebars.SafeString(text);
@@ -743,6 +760,249 @@ Handlebars.registerHelper('getFilterCategory', function (column) {
   );
 });
 
+// ===== CONSTRAINT VALUE HELPERS =====
+
+/**
+ * Check if a field has constraint values available
+ */
+Handlebars.registerHelper('hasConstraints', function (fieldName, context) {
+  const { columns } = context.data.root;
+  const column = columns.find((col) => col.name === fieldName);
+  if (!column) return false;
+
+  return (
+    (column.constraintValues && column.constraintValues.length > 0) ||
+    (column.enumInfo &&
+      column.enumInfo.values &&
+      column.enumInfo.values.length > 0)
+  );
+});
+
+/**
+ * Get constraint value by index
+ */
+Handlebars.registerHelper(
+  'getConstraintValue',
+  function (fieldName, index, context) {
+    const { columns } = context.data.root;
+    const column = columns.find((col) => col.name === fieldName);
+    if (!column) return null;
+
+    // Priority: enum > constraint > null
+    if (column.enumInfo && column.enumInfo.values) {
+      const values = column.enumInfo.values;
+      return values[index] || values[0] || null;
+    }
+
+    if (column.constraintValues && column.constraintValues.length > 0) {
+      const values = column.constraintValues;
+      return values[index] || values[0] || null;
+    }
+
+    return null;
+  },
+);
+
+/**
+ * Get safe default value for a field
+ */
+Handlebars.registerHelper(
+  'getSafeDefault',
+  function (fieldName, fieldType, context) {
+    const { columns } = context.data.root;
+    const column = columns.find((col) => col.name === fieldName);
+    if (!column) return null;
+
+    // Use constraint metadata if available
+    if (column.constraintMetadata && column.constraintMetadata.defaultValue) {
+      return column.constraintMetadata.defaultValue;
+    }
+
+    // Fallback to first constraint value
+    const constraintValue = Handlebars.helpers.getConstraintValue(
+      fieldName,
+      0,
+      context,
+    );
+    if (constraintValue) return constraintValue;
+
+    // Boolean type - safe to use default
+    if (fieldType === 'boolean' || column.jsType === 'boolean') {
+      return 'true';
+    }
+
+    // No safe default
+    return null;
+  },
+);
+
+/**
+ * Check if a value is safe for a field (within constraints)
+ */
+Handlebars.registerHelper('isValueSafe', function (fieldName, value, context) {
+  const { columns } = context.data.root;
+  const column = columns.find((col) => col.name === fieldName);
+  if (!column) return false;
+
+  // Boolean values are always safe
+  if (column.jsType === 'boolean' && ['true', 'false'].includes(value)) {
+    return true;
+  }
+
+  // Check constraint values
+  const validValues = column.constraintValues || column.enumInfo?.values || [];
+  return validValues.includes(value);
+});
+
+/**
+ * Get all constraint values for a field
+ */
+Handlebars.registerHelper('getConstraintValues', function (fieldName, context) {
+  const { columns } = context.data.root;
+  const column = columns.find((col) => col.name === fieldName);
+  if (!column) return [];
+
+  return column.constraintValues || column.enumInfo?.values || [];
+});
+
+/**
+ * Get constraint confidence level
+ */
+Handlebars.registerHelper(
+  'getConstraintConfidence',
+  function (fieldName, context) {
+    const { columns } = context.data.root;
+    const column = columns.find((col) => col.name === fieldName);
+    if (!column || !column.constraintMetadata) return 0;
+
+    return column.constraintMetadata.confidence || 0;
+  },
+);
+
+// ===== VALIDATION AND SAFETY FUNCTIONS =====
+
+/**
+ * Validate constraint usage before generation
+ */
+function validateConstraintUsage(schema) {
+  const warnings = [];
+  const errors = [];
+
+  schema.columns.forEach((column) => {
+    // Check constraint availability
+    if (
+      column.fieldType === 'enum-select' &&
+      !column.constraintValues &&
+      !column.enumInfo
+    ) {
+      warnings.push(
+        `Field ${column.name} appears to be enum but no constraints detected`,
+      );
+    }
+
+    // Check boolean consistency
+    if (column.jsType === 'boolean' && column.constraintValues) {
+      warnings.push(
+        `Field ${column.name} is boolean but has constraint values - using boolean logic`,
+      );
+    }
+
+    // Check constraint confidence
+    if (
+      column.constraintMetadata &&
+      column.constraintMetadata.confidence < 50
+    ) {
+      warnings.push(
+        `Field ${column.name} has low constraint confidence (${column.constraintMetadata.confidence}%)`,
+      );
+    }
+  });
+
+  return { warnings, errors };
+}
+
+/**
+ * Generate constraint usage report
+ */
+function generateConstraintReport(schema) {
+  const report = {
+    constraintFields: [],
+    fallbackFields: [],
+    unsafeFields: [],
+  };
+
+  schema.columns.forEach((column) => {
+    if (column.constraintValues || column.enumInfo) {
+      report.constraintFields.push({
+        name: column.name,
+        type: column.constraintMetadata?.type || 'unknown',
+        values: column.constraintValues || column.enumInfo?.values || [],
+        confidence: column.constraintMetadata?.confidence || 0,
+        source: column.constraintMetadata?.source || 'unknown',
+      });
+    } else if (column.jsType === 'boolean') {
+      report.fallbackFields.push({
+        name: column.name,
+        reason: 'Boolean type - safe fallback',
+      });
+    } else if (
+      column.fieldType.includes('enum') ||
+      column.fieldType.includes('select')
+    ) {
+      report.unsafeFields.push({
+        name: column.name,
+        reason: 'No constraints detected - manual review required',
+      });
+    }
+  });
+
+  return report;
+}
+
+/**
+ * Generate with constraint validation
+ */
+async function generateWithConstraintChecks(templateFunction, context) {
+  // Pre-generation validation
+  const validation = validateConstraintUsage(context);
+  if (validation.warnings.length > 0) {
+    console.warn('⚠️ Constraint warnings:', validation.warnings);
+  }
+  if (validation.errors.length > 0) {
+    throw new Error(
+      `Constraint validation errors: ${validation.errors.join(', ')}`,
+    );
+  }
+
+  // Generate with validation
+  const result = await templateFunction(context);
+
+  // Post-generation report
+  const report = generateConstraintReport(context);
+  if (report.constraintFields.length > 0) {
+    console.log(
+      `✅ Using database constraints for ${report.constraintFields.length} fields:`,
+      report.constraintFields
+        .map((f) => `${f.name} (${f.confidence}%)`)
+        .join(', '),
+    );
+  }
+  if (report.fallbackFields.length > 0) {
+    console.log(
+      `🔄 Safe fallbacks for ${report.fallbackFields.length} fields:`,
+      report.fallbackFields.map((f) => f.name).join(', '),
+    );
+  }
+  if (report.unsafeFields.length > 0) {
+    console.warn(
+      `⚠️ Manual review needed for ${report.unsafeFields.length} fields:`,
+      report.unsafeFields.map((f) => f.name).join(', '),
+    );
+  }
+
+  return result;
+}
+
 /**
  * Generate domain module with organized structure
  */
@@ -762,8 +1022,8 @@ async function generateDomainModule(domainName, options = {}) {
 
   console.log(`🔍 Analyzing table: ${domainName}`);
 
-  // Get database schema for the table
-  const schema = await getDatabaseSchema(domainName);
+  // Get enhanced database schema for the table (includes constraint detection)
+  const schema = await getEnhancedSchema(domainName);
 
   if (!schema) {
     throw new Error(`Table '${domainName}' not found in database`);
@@ -884,23 +1144,23 @@ async function generateDomainModule(domainName, options = {}) {
       },
       {
         template: 'domain/service.hbs',
-        output: `${context.moduleName}/services/${route.camelName}.service.ts`,
+        output: `${context.moduleName}/services/${toKebabCase(route.camelName)}.service.ts`,
       },
       {
         template: 'domain/controller.hbs',
-        output: `${context.moduleName}/controllers/${route.camelName}.controller.ts`,
+        output: `${context.moduleName}/controllers/${toKebabCase(route.camelName)}.controller.ts`,
       },
       {
         template: 'domain/repository.hbs',
-        output: `${context.moduleName}/repositories/${route.camelName}.repository.ts`,
+        output: `${context.moduleName}/repositories/${toKebabCase(route.camelName)}.repository.ts`,
       },
       {
         template: 'domain/schemas.hbs',
-        output: `${context.moduleName}/schemas/${route.camelName}.schemas.ts`,
+        output: `${context.moduleName}/schemas/${toKebabCase(route.camelName)}.schemas.ts`,
       },
       {
         template: 'domain/types.hbs',
-        output: `${context.moduleName}/types/${route.camelName}.types.ts`,
+        output: `${context.moduleName}/types/${toKebabCase(route.camelName)}.types.ts`,
       },
     );
   });
@@ -908,7 +1168,7 @@ async function generateDomainModule(domainName, options = {}) {
   // Add test template
   templates.push({
     template: 'domain/test.hbs',
-    output: `${context.moduleName}/__tests__/${context.moduleName}.test.ts`,
+    output: `${context.moduleName}/__tests__/${toKebabCase(context.moduleName)}.test.ts`,
   });
 
   // Check for existing files before generation
@@ -1208,4 +1468,5 @@ module.exports = {
   renderTemplate,
   toCamelCase,
   toPascalCase,
+  toKebabCase,
 };

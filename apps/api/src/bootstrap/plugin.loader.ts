@@ -40,10 +40,14 @@ import systemPlugin from '../core/system/default.plugin';
 // Business feature modules
 import apiKeysPlugin from '../modules/apiKeys';
 import articlesPlugin from '../modules/articles';
+import authorsPlugin from '../modules/authors';
+import booksPlugin from '../modules/books';
+import comprehensiveTestsPlugin from '../modules/comprehensiveTests';
 import fileUploadPlugin from '../modules/file-upload/file-upload.plugin';
 import navigationPlugin from '../modules/navigation/navigation.plugin';
 import notificationsPlugin from '../modules/notifications';
 import settingsPlugin from '../modules/settings/settings.plugin';
+import simpleTestsPlugin from '../modules/simpleTests';
 import systemSettingsPlugin from '../modules/systemSettings';
 import userProfilePlugin from '../modules/user-profile/user-profile.plugin';
 import themesPlugin from '../modules/themes';
@@ -338,6 +342,21 @@ export function createFeaturePluginGroup(apiPrefix: string): PluginGroup {
         required: true,
       },
       {
+        name: 'authors',
+        plugin: authorsPlugin,
+        required: true,
+      },
+      {
+        name: 'books',
+        plugin: booksPlugin,
+        required: true,
+      },
+      {
+        name: 'comprehensive-tests',
+        plugin: comprehensiveTestsPlugin,
+        required: true,
+      },
+      {
         name: 'navigation',
         plugin: navigationPlugin,
         required: true,
@@ -360,6 +379,11 @@ export function createFeaturePluginGroup(apiPrefix: string): PluginGroup {
       {
         name: 'notifications',
         plugin: notificationsPlugin,
+        required: true,
+      },
+      {
+        name: 'simpleTests',
+        plugin: simpleTestsPlugin,
         required: true,
       },
       {

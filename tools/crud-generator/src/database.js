@@ -89,7 +89,8 @@ async function getDatabaseSchema(tableName) {
       JOIN information_schema.constraint_column_usage kcu
         ON cc.constraint_name = kcu.constraint_name
       WHERE kcu.table_name = ?
-        AND cc.check_clause LIKE '%IN (%'
+        AND (cc.check_clause LIKE '%IN (%' 
+             OR cc.check_clause LIKE '%ANY%ARRAY%')
     `,
       [tableName],
     );
@@ -109,17 +110,20 @@ async function getDatabaseSchema(tableName) {
         (c) => c.column_name === col.column_name,
       );
 
-      // Extract enum values from check constraints
+      // Extract enum values from check constraints with enhanced patterns
       let constraintValues = null;
       if (checkConstraint) {
-        const match = checkConstraint.check_clause.match(/IN\s*\(([^)]+)\)/i);
-        if (match) {
-          constraintValues = match[1]
-            .split(',')
-            .map((val) => val.trim().replace(/['"]/g, ''))
-            .filter((val) => val.length > 0);
-        }
+        constraintValues = extractConstraintValues(
+          checkConstraint.check_clause,
+        );
       }
+
+      // Create constraint metadata
+      const constraintMetadata = createConstraintMetadata(
+        constraintValues,
+        enumData,
+        col,
+      );
 
       const fieldType = determineFieldType(
         col,
@@ -158,6 +162,7 @@ async function getDatabaseSchema(tableName) {
             }
           : null,
         constraintValues: constraintValues,
+        constraintMetadata: constraintMetadata,
         // Smart field detection
         fieldType: fieldType,
         filteringStrategy: filteringStrategy,
@@ -927,6 +932,130 @@ async function validateDropdownEndpoints(enhancedSchema) {
   return results;
 }
 
+/**
+ * Enhanced constraint value extraction with multiple patterns
+ */
+function extractConstraintValues(checkClause) {
+  if (!checkClause) return null;
+
+  // Pattern 1: status IN ('draft', 'published')
+  let match = checkClause.match(/IN\s*\(\s*([^)]+)\s*\)/i);
+  if (match) {
+    return match[1]
+      .split(',')
+      .map((val) => val.trim().replace(/^['"]|['"]$/g, ''))
+      .filter((val) => val.length > 0);
+  }
+
+  // Pattern 2: status = ANY(ARRAY['draft', 'published']) - PostgreSQL format with optional type casting
+  match = checkClause.match(
+    /=\s*ANY\s*\(\s*\(\s*ARRAY\s*\[\s*([^\]]+)\s*\]\s*\)/i,
+  );
+  if (match) {
+    return match[1]
+      .split(',')
+      .map(
+        (val) =>
+          val
+            .trim()
+            .replace(/^['"]|['"]$/g, '') // Remove quotes
+            .replace(/'::character\s+varying/g, '') // Remove PostgreSQL type casting
+            .replace(/::[\w\s]+/g, ''), // Remove other type casting
+      )
+      .filter((val) => val.length > 0);
+  }
+
+  // Pattern 3: Simple ANY(ARRAY[...]) format (alternative PostgreSQL format)
+  match = checkClause.match(/=\s*ANY\s*\(\s*ARRAY\s*\[\s*([^\]]+)\s*\]\s*\)/i);
+  if (match) {
+    return match[1]
+      .split(',')
+      .map(
+        (val) =>
+          val
+            .trim()
+            .replace(/^['"]|['"]$/g, '') // Remove quotes
+            .replace(/'::character\s+varying/g, '') // Remove PostgreSQL type casting
+            .replace(/::[\w\s]+/g, ''), // Remove other type casting
+      )
+      .filter((val) => val.length > 0);
+  }
+
+  return null;
+}
+
+/**
+ * Determine constraint type and confidence
+ */
+function determineConstraintType(constraintValues, enumData, column) {
+  if (enumData && enumData.enum_values) return 'postgres_enum';
+  if (constraintValues && constraintValues.length > 0)
+    return 'check_constraint';
+  if (column.data_type === 'boolean') return 'boolean';
+  return 'unknown';
+}
+
+/**
+ * Calculate confidence level for constraint detection
+ */
+function calculateConfidence(constraintValues, enumData, column) {
+  if (enumData && enumData.enum_values) return 100; // PostgreSQL enums are 100% reliable
+  if (constraintValues && constraintValues.length > 0) return 95; // Check constraints are 95% reliable
+  if (column.data_type === 'boolean') return 100; // Boolean type is 100% reliable
+  return 0; // Unknown type
+}
+
+/**
+ * Get safe default value from constraints
+ */
+function getConstraintDefault(constraintValues, enumData, column) {
+  // Use enum values first (highest priority)
+  if (enumData && enumData.enum_values && enumData.enum_values.length > 0) {
+    return enumData.enum_values[0];
+  }
+
+  // Use constraint values second
+  if (constraintValues && constraintValues.length > 0) {
+    return constraintValues[0];
+  }
+
+  // Boolean type default
+  if (column.data_type === 'boolean') {
+    return 'true';
+  }
+
+  // No safe default available
+  return null;
+}
+
+/**
+ * Get constraint source information
+ */
+function getConstraintSource(checkConstraint, enumData) {
+  if (enumData) return 'postgres_enum';
+  if (checkConstraint) return 'check_constraint';
+  return 'inference';
+}
+
+/**
+ * Create comprehensive constraint metadata
+ */
+function createConstraintMetadata(constraintValues, enumData, column) {
+  const type = determineConstraintType(constraintValues, enumData, column);
+  const confidence = calculateConfidence(constraintValues, enumData, column);
+  const defaultValue = getConstraintDefault(constraintValues, enumData, column);
+  const source = getConstraintSource(null, enumData);
+
+  return {
+    type,
+    confidence,
+    defaultValue,
+    source,
+    values: constraintValues || enumData?.enum_values || [],
+    allowNull: column.is_nullable === 'YES',
+  };
+}
+
 module.exports = {
   getDatabaseSchema,
   getEnhancedSchema,
@@ -939,6 +1068,8 @@ module.exports = {
   getDropdownEndpoint,
   hasDropdownEndpoint,
   getDropdownDisplayFields,
+  extractConstraintValues,
+  createConstraintMetadata,
   FIELD_FILTERING_STRATEGIES,
   POSTGRES_TYPE_MAPPING,
 };

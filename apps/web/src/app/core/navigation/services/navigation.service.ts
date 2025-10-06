@@ -84,11 +84,18 @@ export class NavigationService {
           link: '/users',
         },
         {
-          id: 'articles',
-          title: 'Article Management',
+          id: 'books',
+          title: 'Book Management',
           type: 'item',
           icon: 'heroicons_outline:document-text',
-          link: '/articles',
+          link: '/books',
+        },
+        {
+          id: 'authors',
+          title: 'Author Management',
+          type: 'item',
+          icon: 'heroicons_outline:document-text',
+          link: '/authors',
         },
         {
           id: 'notifications',
@@ -96,6 +103,13 @@ export class NavigationService {
           type: 'item',
           icon: 'heroicons_outline:bell',
           link: '/notifications',
+        },
+        {
+          id: 'comprehensive-tests',
+          title: 'Comprehensive Tests',
+          type: 'item',
+          icon: 'heroicons_outline:beaker',
+          link: '/comprehensive-tests',
         },
         {
           id: 'rbac',

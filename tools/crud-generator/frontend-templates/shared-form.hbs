@@ -16,7 +16,10 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { {{PascalCase}}, Create{{PascalCase}}Request, Update{{PascalCase}}Request } from '../types/{{typesFileName}}';
 {{#if hasForeignKeys}}
 {{#each foreignKeyServices}}
-import { {{serviceName}} } from '{{{import}}}';
+{{#if exists}}
+// CRUD-GENERATOR-TAG: Foreign Key Service Import
+import { {{serviceClass}} } from '{{{import}}}';
+{{/if}}
 {{/each}}
 {{/if}}
 {{#if hasDateTimeFields}}
@@ -25,12 +28,18 @@ import {
   formatDateTimeForSubmission 
 } from '../../../shared/utils/datetime.utils';
 {{/if}}
+{{#if hasDateFields}}
+import { 
+  formatDateForInput, 
+  formatDateForSubmission 
+} from '../../../shared/utils/datetime.utils';
+{{/if}}
 
 export type {{PascalCase}}FormMode = 'create' | 'edit';
 
 export interface {{PascalCase}}FormData {
   {{#each formFields}}
-  {{name}}{{#unless required}}?{{/unless}}: {{#if (eq type 'json')}}Record<string, any>{{else if (eq type 'array')}}string[]{{else}}{{tsType}}{{/if}};
+  {{name}}{{#unless required}}?{{/unless}}: {{#if (eq type 'json')}}Record<string, any>{{else if (eq type 'array')}}string[]{{else if (eq tsType 'string')}}string{{else if (eq tsType 'number')}}number{{else if (eq tsType 'boolean')}}boolean{{else if (contains tsType 'Record&lt;string, any&gt;')}}Record<string, any>{{else}}string{{/if}};
   {{/each}}
 }
 
@@ -58,6 +67,7 @@ export interface {{PascalCase}}FormData {
       {{#each formFields}}
       
       {{#if (eq type 'dropdown')}}
+      {{#if serviceExists}}
       <!-- {{name}} Field (Foreign Key Dropdown) -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>{{label}}</mat-label>
@@ -66,11 +76,11 @@ export interface {{PascalCase}}FormData {
             <mat-spinner diameter="16"></mat-spinner>
             Loading {{referencedTable}}...
           </mat-option>
-          <mat-option *ngFor="let item of {{serviceName}}Options()" [value]="item.id">
+          <mat-option *ngFor="let item of {{serviceName}}Options()" [value]="item.value">
             {{#if (eq referencedTable 'users')}}
-            \{{ item.firstName }} \{{ item.lastName }} (\{{ item.email }})
+            \{{ item.label }}
             {{else}}
-            \{{ item.name || item.title || item.id }}
+            \{{ item.label }}
             {{/if}}
           </mat-option>
         </mat-select>
@@ -83,6 +93,19 @@ export interface {{PascalCase}}FormData {
           No {{referencedTable}} available
         </mat-hint>
       </mat-form-field>
+      {{else}}
+      <!-- {{name}} Field (FK Fallback - Text Input) -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{label}} (ID)</mat-label>
+        <input matInput formControlName="{{name}}" placeholder="Enter {{referencedTable}} ID">
+        {{#if required}}
+        <mat-error *ngIf="{{formName}}.get('{{name}}')?.hasError('required')">
+          {{label}} is required
+        </mat-error>
+        {{/if}}
+        <mat-hint>TODO: Generate {{referencedTable}} service for dropdown functionality</mat-hint>
+      </mat-form-field>
+      {{/if}}
       {{/if}}
 
       {{#if (eq type 'select')}}
@@ -119,6 +142,8 @@ export interface {{PascalCase}}FormData {
           type="{{inputType}}"
           formControlName="{{name}}"
           placeholder="{{placeholder}}"
+          {{#if pattern}}pattern="{{pattern}}"{{/if}}
+          {{#if accept}}accept="{{accept}}"{{/if}}
         >
         {{/if}}
         {{#if required}}
@@ -129,6 +154,11 @@ export interface {{PascalCase}}FormData {
         {{#if maxLength}}
         <mat-error *ngIf="{{formName}}.get('{{name}}')?.hasError('maxlength')">
           {{label}} must be less than {{maxLength}} characters
+        </mat-error>
+        {{/if}}
+        {{#if pattern}}
+        <mat-error *ngIf="{{formName}}.get('{{name}}')?.hasError('pattern')">
+          {{label}} format is invalid
         </mat-error>
         {{/if}}
       </mat-form-field>
@@ -143,6 +173,9 @@ export interface {{PascalCase}}FormData {
           type="number"
           formControlName="{{name}}"
           placeholder="{{placeholder}}"
+          {{#if step}}step="{{step}}"{{/if}}
+          {{#if min}}min="{{min}}"{{/if}}
+          {{#if max}}max="{{max}}"{{/if}}
         >
         {{#if required}}
         <mat-error *ngIf="{{formName}}.get('{{name}}')?.hasError('required')">
@@ -287,6 +320,218 @@ export interface {{PascalCase}}FormData {
       </mat-form-field>
       {{/if}}
 
+      {{#if (eq type 'bigint')}}
+      <!-- {{name}} Field (BigInt) -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{label}}</mat-label>
+        <input 
+          matInput 
+          type="number"
+          formControlName="{{name}}"
+          placeholder="{{placeholder}}"
+          min="0"
+        >
+        <mat-hint>Large integer values (up to 9,223,372,036,854,775,807)</mat-hint>
+        {{#if required}}
+        <mat-error *ngIf="{{formName}}.get('{{name}}')?.hasError('required')">
+          {{label}} is required
+        </mat-error>
+        {{/if}}
+      </mat-form-field>
+      {{/if}}
+
+      {{#if (eq type 'currency')}}
+      <!-- {{name}} Field (Currency) -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{label}}</mat-label>
+        <input 
+          matInput 
+          type="number"
+          formControlName="{{name}}"
+          placeholder="{{placeholder}}"
+          step="0.01"
+          min="0"
+        >
+        <span matPrefix>$ &nbsp;</span>
+        {{#if required}}
+        <mat-error *ngIf="{{formName}}.get('{{name}}')?.hasError('required')">
+          {{label}} is required
+        </mat-error>
+        {{/if}}
+        <mat-error *ngIf="{{formName}}.get('{{name}}')?.hasError('min')">
+          {{label}} must be a positive amount
+        </mat-error>
+      </mat-form-field>
+      {{/if}}
+
+      {{#if (eq type 'binary')}}
+      <!-- {{name}} Field (Binary/File) -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{label}}</mat-label>
+        <input 
+          matInput 
+          type="file"
+          formControlName="{{name}}"
+          accept="*/*"
+        >
+        <mat-hint>Upload any file type</mat-hint>
+        {{#if required}}
+        <mat-error *ngIf="{{formName}}.get('{{name}}')?.hasError('required')">
+          {{label}} is required
+        </mat-error>
+        {{/if}}
+      </mat-form-field>
+      {{/if}}
+
+      {{#if (eq type 'xml')}}
+      <!-- {{name}} Field (XML) -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{label}} (XML)</mat-label>
+        <textarea 
+          matInput 
+          formControlName="{{name}}"
+          placeholder='{{placeholder}}'
+          rows="4"
+        ></textarea>
+        <mat-hint>Enter valid XML content</mat-hint>
+        {{#if required}}
+        <mat-error *ngIf="{{formName}}.get('{{name}}')?.hasError('required')">
+          {{label}} is required
+        </mat-error>
+        {{/if}}
+        <mat-error *ngIf="{{formName}}.get('{{name}}')?.hasError('invalidXml')">
+          Invalid XML format
+        </mat-error>
+      </mat-form-field>
+      {{/if}}
+
+      {{#if (eq type 'bit')}}
+      <!-- {{name}} Field (Bit) -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{label}}</mat-label>
+        <input 
+          matInput 
+          formControlName="{{name}}"
+          placeholder="{{placeholder}}"
+          pattern="[01]+"
+        >
+        <mat-hint>Enter binary digits (0 and 1 only)</mat-hint>
+        {{#if required}}
+        <mat-error *ngIf="{{formName}}.get('{{name}}')?.hasError('required')">
+          {{label}} is required
+        </mat-error>
+        {{/if}}
+        <mat-error *ngIf="{{formName}}.get('{{name}}')?.hasError('pattern')">
+          Only binary digits (0 and 1) are allowed
+        </mat-error>
+      </mat-form-field>
+      {{/if}}
+
+      {{#if (eq type 'varbit')}}
+      <!-- {{name}} Field (Variable Bit) -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{label}}</mat-label>
+        <input 
+          matInput 
+          formControlName="{{name}}"
+          placeholder="{{placeholder}}"
+          pattern="[01]*"
+        >
+        <mat-hint>Enter variable-length binary digits (0 and 1)</mat-hint>
+        {{#if required}}
+        <mat-error *ngIf="{{formName}}.get('{{name}}')?.hasError('required')">
+          {{label}} is required
+        </mat-error>
+        {{/if}}
+        <mat-error *ngIf="{{formName}}.get('{{name}}')?.hasError('pattern')">
+          Only binary digits (0 and 1) are allowed
+        </mat-error>
+      </mat-form-field>
+      {{/if}}
+
+      {{#if (eq type 'color')}}
+      <!-- {{name}} Field (Color) -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{label}}</mat-label>
+        <input 
+          matInput 
+          type="color"
+          formControlName="{{name}}"
+          placeholder="{{placeholder}}"
+        >
+        {{#if required}}
+        <mat-error *ngIf="{{formName}}.get('{{name}}')?.hasError('required')">
+          {{label}} is required
+        </mat-error>
+        {{/if}}
+      </mat-form-field>
+      {{/if}}
+
+      {{#if (eq type 'percentage')}}
+      <!-- {{name}} Field (Percentage) -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{label}}</mat-label>
+        <input 
+          matInput 
+          type="number"
+          formControlName="{{name}}"
+          placeholder="{{placeholder}}"
+          min="0"
+          max="100"
+          step="0.01"
+        >
+        <span matSuffix>%</span>
+        {{#if required}}
+        <mat-error *ngIf="{{formName}}.get('{{name}}')?.hasError('required')">
+          {{label}} is required
+        </mat-error>
+        {{/if}}
+        <mat-error *ngIf="{{formName}}.get('{{name}}')?.hasError('min')">
+          {{label}} must be at least 0%
+        </mat-error>
+        <mat-error *ngIf="{{formName}}.get('{{name}}')?.hasError('max')">
+          {{label}} must be at most 100%
+        </mat-error>
+      </mat-form-field>
+      {{/if}}
+
+      {{#if (eq type 'array')}}
+      <!-- {{name}} Field (Array) -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{label}} (Array)</mat-label>
+        <textarea 
+          matInput 
+          formControlName="{{name}}"
+          placeholder='{{placeholder}}'
+          rows="3"
+        ></textarea>
+        <mat-hint>Enter comma-separated values</mat-hint>
+        {{#if required}}
+        <mat-error *ngIf="{{formName}}.get('{{name}}')?.hasError('required')">
+          {{label}} is required
+        </mat-error>
+        {{/if}}
+      </mat-form-field>
+      {{/if}}
+
+      {{#if (eq type 'interval')}}
+      <!-- {{name}} Field (Interval) -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{label}}</mat-label>
+        <input 
+          matInput 
+          formControlName="{{name}}"
+          placeholder="{{placeholder}}"
+        >
+        <mat-hint>Format: "1 day", "2 hours 30 minutes", etc.</mat-hint>
+        {{#if required}}
+        <mat-error *ngIf="{{formName}}.get('{{name}}')?.hasError('required')">
+          {{label}} is required
+        </mat-error>
+        {{/if}}
+      </mat-form-field>
+      {{/if}}
+
       {{/each}}
 
       <!-- Form Actions -->
@@ -353,7 +598,10 @@ export class {{PascalCase}}FormComponent implements OnInit, OnChanges {
   private fb = inject(FormBuilder);
   {{#if hasForeignKeys}}
   {{#each foreignKeyServices}}
-  private {{serviceName}} = inject({{serviceName}});
+  {{#if exists}}
+  // CRUD-GENERATOR-TAG: Foreign Key Service Injection
+  private {{serviceName}} = inject({{serviceClass}});
+  {{/if}}
   {{/each}}
   {{/if}}
 
@@ -367,6 +615,7 @@ export class {{PascalCase}}FormComponent implements OnInit, OnChanges {
   private originalFormValue: any;
   {{#if hasForeignKeys}}
   {{#each foreignKeyServices}}
+  // CRUD-GENERATOR-TAG: Foreign Key Options State
   {{serviceName}}Options = signal<any[]>([]);
   loading{{capitalize serviceName}} = signal<boolean>(false);
   {{/each}}
@@ -402,7 +651,10 @@ export class {{PascalCase}}FormComponent implements OnInit, OnChanges {
   ngOnInit() {
     {{#if hasForeignKeys}}
     {{#each foreignKeyServices}}
+    {{#if exists}}
+    // CRUD-GENERATOR-TAG: Load Foreign Key Options
     this.load{{capitalize referencedTable}}();
+    {{/if}}
     {{/each}}
     {{/if}}
     if (this.mode === 'edit' && this.initialData) {
@@ -412,11 +664,13 @@ export class {{PascalCase}}FormComponent implements OnInit, OnChanges {
 
   {{#if hasForeignKeys}}
   {{#each foreignKeyServices}}
+  {{#if exists}}
+  // CRUD-GENERATOR-TAG: Foreign Key Data Loading Method
   private async load{{capitalize referencedTable}}() {
     this.loading{{capitalize serviceName}}.set(true);
     try {
-      await this.{{serviceName}}.load{{capitalize referencedTable}}({ page: 1, limit: 1000 });
-      this.{{serviceName}}Options.set(this.{{serviceName}}.{{referencedTable}}());
+      const response = await this.{{serviceName}}.getDropdownOptions();
+      this.{{serviceName}}Options.set(response || []);
     } catch (error) {
       console.error('Failed to load {{serviceName}}:', error);
       this.{{serviceName}}Options.set([]);
@@ -424,6 +678,7 @@ export class {{PascalCase}}FormComponent implements OnInit, OnChanges {
       this.loading{{capitalize serviceName}}.set(false);
     }
   }
+  {{/if}}
   {{/each}}
   {{/if}}
 
@@ -485,6 +740,17 @@ export class {{PascalCase}}FormComponent implements OnInit, OnChanges {
       {{#if (or (eq type 'datetime') (eq type 'datetime-tz'))}}
       if (formData.{{name}}) {
         formData.{{name}} = formatDateTimeForSubmission(formData.{{name}});
+      }
+      {{/if}}
+      {{/each}}
+      {{/if}}
+
+      {{#if hasDateFields}}
+      // Convert date fields to date-only format for submission
+      {{#each formFields}}
+      {{#if (eq type 'date')}}
+      if (formData.{{name}}) {
+        formData.{{name}} = formatDateForSubmission(formData.{{name}});
       }
       {{/if}}
       {{/each}}

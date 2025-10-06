@@ -31,7 +31,6 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatBadgeModule } from '@angular/material/badge';
 
 import { NotificationService } from '../services/notifications.service';
-import { DateRangeFilterComponent } from '../../../shared/components/date-range-filter/date-range-filter.component';
 import {
   Notification,
   ListNotificationQuery,
@@ -45,6 +44,7 @@ import {
   NotificationViewDialogComponent,
   NotificationViewDialogData,
 } from './notifications-view.dialog';
+import { DateRangeFilterComponent } from '../../../shared/components/date-range-filter/date-range-filter.component';
 
 @Component({
   selector: 'app-notifications-list',
@@ -75,115 +75,85 @@ import {
     <div class="notifications-list-container">
       <!-- Header -->
       <mat-toolbar color="primary" class="page-header">
-        <h1 class="page-title">🔔 Notifications Management</h1>
+        <h1 class="page-title">Notifications</h1>
         <span class="spacer"></span>
-        <div class="header-info">
-          <span class="total-count"
-            >{{ notificationsService.totalNotification() }} total</span
-          >
-        </div>
       </mat-toolbar>
 
       <!-- Quick Search Section -->
       <mat-card class="search-card">
         <mat-card-content>
-          <div class="quick-search-container">
-            <!-- Search Box -->
-            <div class="search-wrapper">
-              <mat-form-field appearance="outline" class="search-field">
-                <mat-label
-                  >Search notifications by title, message, or ID...</mat-label
-                >
-                <input
-                  matInput
-                  [(ngModel)]="searchTerm"
-                  (input)="onSearchChange()"
-                  (keyup.enter)="onSearchButtonClick()"
-                />
-                <mat-icon matPrefix>search</mat-icon>
-              </mat-form-field>
-              <button
-                mat-raised-button
-                color="primary"
-                (click)="openCreateDialog()"
-                class="add-btn"
-              >
-                <mat-icon>add</mat-icon>
-                Add Notification
-              </button>
-            </div>
-
-            <!-- Quick Access Filters -->
-            <div class="quick-filters">
-              <button
-                mat-button
-                [class.active]="quickFilter === 'all'"
-                (click)="setQuickFilter('all')"
-                class="filter-chip"
-              >
-                All
-              </button>
-              <button
-                mat-button
-                [class.active]="quickFilter === 'unread'"
-                (click)="setQuickFilter('unread')"
-                class="filter-chip"
-              >
-                Unread
-                <mat-icon
-                  matBadge="{{ getUnreadCount() }}"
-                  matBadgeColor="accent"
-                  matBadgeSize="small"
-                  >notifications</mat-icon
-                >
-              </button>
-              <button
-                mat-button
-                [class.active]="quickFilter === 'today'"
-                (click)="setQuickFilter('today')"
-                class="filter-chip"
-              >
-                Today
-              </button>
-              <button
-                mat-button
-                [class.active]="quickFilter === 'week'"
-                (click)="setQuickFilter('week')"
-                class="filter-chip"
-              >
-                This Week
-              </button>
-            </div>
-
-            <!-- Active Filters Display -->
-            <div class="active-filters" *ngIf="hasActiveFilters()">
-              <span class="active-filters-label">Active Filters:</span>
-              <mat-chip-set>
-                <mat-chip
-                  *ngFor="let filter of getActiveFilterChips()"
-                  (removed)="removeFilter(filter.key)"
-                  [removable]="true"
-                >
-                  {{ filter.label }}: {{ filter.value }}
-                  <mat-icon matChipRemove>cancel</mat-icon>
-                </mat-chip>
-              </mat-chip-set>
-              <button
-                mat-button
-                color="warn"
-                (click)="clearAllFilters()"
-                class="clear-all-btn"
-              >
-                Clear All
-              </button>
-            </div>
+          <div class="search-wrapper">
+            <mat-form-field appearance="outline" class="search-field">
+              <mat-label>Search Notifications</mat-label>
+              <input
+                matInput
+                placeholder="Search by title, name, description"
+                [(ngModel)]="searchTerm"
+                (input)="onSearchChange()"
+                (keyup.enter)="onSearchButtonClick()"
+              />
+              <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="openCreateDialog()"
+              [disabled]="notificationsService.loading()"
+              class="add-btn"
+            >
+              <mat-icon>add</mat-icon>
+              Add Notifications
+            </button>
           </div>
         </mat-card-content>
       </mat-card>
 
+      <!-- Quick Filters -->
+      <mat-card class="quick-filters-card">
+        <mat-card-content>
+          <div class="quick-filters">
+            <button
+              mat-stroked-button
+              [class.active]="quickFilter === 'all'"
+              (click)="setQuickFilter('all')"
+              class="filter-chip"
+            >
+              All
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Active Filters -->
+      @if (getActiveFilterChips().length > 0) {
+        <div class="active-filters">
+          <span class="active-filters-label">Active Filters:</span>
+          <div class="filter-chips">
+            <mat-chip
+              *ngFor="let chip of getActiveFilterChips()"
+              (removed)="removeFilter(chip.key)"
+              class="filter-chip"
+              removable
+            >
+              <strong>{{ chip.label }}:</strong> {{ chip.value }}
+              <mat-icon matChipRemove>cancel</mat-icon>
+            </mat-chip>
+          </div>
+          <button
+            mat-stroked-button
+            color="warn"
+            (click)="clearAllFilters()"
+            class="clear-all-btn"
+          >
+            <mat-icon>clear_all</mat-icon>
+            Clear All
+          </button>
+        </div>
+      }
+
       <!-- Advanced Filters -->
       <mat-card class="advanced-filters-card">
-        <mat-expansion-panel class="advanced-panel">
+        <mat-expansion-panel class="filters-panel">
           <mat-expansion-panel-header>
             <mat-panel-title>
               <mat-icon>tune</mat-icon>
@@ -194,166 +164,111 @@ import {
             </mat-panel-description>
           </mat-expansion-panel-header>
 
-          <div class="advanced-filters-content">
+          <div class="advanced-filters">
+            <!-- Filter Fields -->
             <div class="filter-grid">
-              <!-- Row 1: IDs -->
-              <div class="filter-row">
-                <div class="filter-group">
-                  <label class="filter-label">Notification ID</label>
-                  <mat-form-field appearance="outline" class="filter-field">
-                    <mat-label>Enter notification ID</mat-label>
-                    <input
-                      matInput
-                      type="text"
-                      [(ngModel)]="filters().id"
-                      (input)="applyFilters()"
-                      [class.mat-form-field-invalid]="validationErrors()['id']"
-                      placeholder="Optional: Filter by specific ID"
-                    />
-                    <mat-hint>Leave empty to show all</mat-hint>
-                    <mat-error *ngIf="validationErrors()['id']">
-                      {{ validationErrors()['id'] }}
-                    </mat-error>
-                  </mat-form-field>
-                </div>
-
-                <div class="filter-group">
-                  <label class="filter-label">User ID / Email</label>
-                  <mat-form-field appearance="outline" class="filter-field">
-                    <mat-label>Search by user...</mat-label>
-                    <input
-                      matInput
-                      type="text"
-                      [(ngModel)]="filters().user_id"
-                      (input)="applyFilters()"
-                      [class.mat-form-field-invalid]="
-                        validationErrors()['user_id']
-                      "
-                      placeholder="Start typing to search"
-                    />
-                    <mat-error *ngIf="validationErrors()['user_id']">
-                      {{ validationErrors()['user_id'] }}
-                    </mat-error>
-                  </mat-form-field>
-                </div>
+              <!-- Fields Filter -->
+              <div class="filter-group">
+                <label class="filter-label">Fields</label>
+                <mat-form-field appearance="outline" class="filter-field">
+                  <mat-label>Fields</mat-label>
+                  <input
+                    matInput
+                    type="text"
+                    [value]="filters().fields || ''"
+                    (input)="onFilterChange('fields', $event)"
+                    placeholder="Enter fields"
+                  />
+                </mat-form-field>
               </div>
 
-              <!-- Row 2: Type and Priority -->
-              <div class="filter-row">
-                <div class="filter-group">
-                  <label class="filter-label"
-                    >Notification Type <span class="required">*</span></label
+              <!-- Type Filter -->
+              <div class="filter-group">
+                <label class="filter-label">Type</label>
+                <mat-form-field appearance="outline" class="filter-field">
+                  <mat-label>Type</mat-label>
+                  <input
+                    matInput
+                    type="text"
+                    [value]="filters().type || ''"
+                    (input)="onFilterChange('type', $event)"
+                    placeholder="Select type"
+                  />
+                </mat-form-field>
+              </div>
+
+              <!-- Read Filter -->
+              <div class="filter-group">
+                <label class="filter-label">Read</label>
+                <mat-form-field appearance="outline" class="filter-field">
+                  <mat-label>Read</mat-label>
+                  <mat-select
+                    [value]="filters().read"
+                    (selectionChange)="onFilterChange('read', $event.value)"
                   >
-                  <mat-form-field appearance="outline" class="filter-field">
-                    <mat-label>-- Select Type --</mat-label>
-                    <mat-select
-                      [(ngModel)]="filters().type"
-                      (selectionChange)="applyFilters()"
-                    >
-                      <mat-option value="">All Types</mat-option>
-                      <mat-option value="info">Info</mat-option>
-                      <mat-option value="warning">Warning</mat-option>
-                      <mat-option value="error">Error</mat-option>
-                    </mat-select>
-                  </mat-form-field>
-                </div>
-
-                <div class="filter-group">
-                  <label class="filter-label">Priority</label>
-                  <mat-form-field appearance="outline" class="filter-field">
-                    <mat-label>Any priority</mat-label>
-                    <mat-select
-                      [(ngModel)]="filters().priority"
-                      (selectionChange)="applyFilters()"
-                    >
-                      <mat-option value="">All Priorities</mat-option>
-                      <mat-option value="low">Low</mat-option>
-                      <mat-option value="normal">Normal</mat-option>
-                      <mat-option value="high">High</mat-option>
-                      <mat-option value="urgent">Urgent</mat-option>
-                    </mat-select>
-                  </mat-form-field>
-                </div>
+                    <mat-option value="">All</mat-option>
+                    <mat-option [value]="true">Yes</mat-option>
+                    <mat-option [value]="false">No</mat-option>
+                  </mat-select>
+                </mat-form-field>
               </div>
 
-              <!-- Row 3: Message Content -->
-              <div class="filter-row">
-                <div class="filter-group full-width">
-                  <label class="filter-label">Message Contains</label>
-                  <mat-form-field appearance="outline" class="filter-field">
-                    <mat-label>Search in message content...</mat-label>
-                    <input
-                      matInput
-                      type="text"
-                      [(ngModel)]="filters().message"
-                      (input)="applyFilters()"
-                    />
-                  </mat-form-field>
-                </div>
+              <!-- Archived Filter -->
+              <div class="filter-group">
+                <label class="filter-label">Archived</label>
+                <mat-form-field appearance="outline" class="filter-field">
+                  <mat-label>Archived</mat-label>
+                  <mat-select
+                    [value]="filters().archived"
+                    (selectionChange)="onFilterChange('archived', $event.value)"
+                  >
+                    <mat-option value="">All</mat-option>
+                    <mat-option [value]="true">Yes</mat-option>
+                    <mat-option [value]="false">No</mat-option>
+                  </mat-select>
+                </mat-form-field>
               </div>
+            </div>
 
-              <!-- Date Filters Section -->
-              <div class="date-filters-section">
-                <h4 class="section-header">
-                  <mat-icon>event</mat-icon>
-                  Date Filters
-                </h4>
+            <!-- Date Filters Section -->
+            <div class="date-filters-section">
+              <h4 class="section-header">
+                <mat-icon>event</mat-icon>
+                Date Filters
+              </h4>
 
-                <div class="date-filters-grid">
-                  <!-- Read At Filter -->
-                  <div class="date-filter-group">
-                    <label class="filter-label">Read Date</label>
-                    <app-date-range-filter
-                      fieldName="read_at"
-                      label="Read Date"
-                      [isDateTime]="true"
-                      (filterChange)="onDateFilterChange($event)"
-                    ></app-date-range-filter>
-                  </div>
+              <div class="date-filters-grid">
+                <!-- Published Date Filter -->
+                <div class="date-filter-group">
+                  <label class="filter-label">Published Date</label>
+                  <app-date-range-filter
+                    fieldName="published_at"
+                    label="Published Date"
+                    [isDateTime]="true"
+                    (filterChange)="onDateFilterChange($event)"
+                  ></app-date-range-filter>
+                </div>
 
-                  <!-- Archived At Filter -->
-                  <div class="date-filter-group">
-                    <label class="filter-label">Archived Date</label>
-                    <app-date-range-filter
-                      fieldName="archived_at"
-                      label="Archived Date"
-                      [isDateTime]="true"
-                      (filterChange)="onDateFilterChange($event)"
-                    ></app-date-range-filter>
-                  </div>
+                <!-- Created Date Filter -->
+                <div class="date-filter-group">
+                  <label class="filter-label">Created Date</label>
+                  <app-date-range-filter
+                    fieldName="created_at"
+                    label="Created Date"
+                    [isDateTime]="true"
+                    (filterChange)="onDateFilterChange($event)"
+                  ></app-date-range-filter>
+                </div>
 
-                  <!-- Expires At Filter -->
-                  <div class="date-filter-group">
-                    <label class="filter-label">Expiration Date</label>
-                    <app-date-range-filter
-                      fieldName="expires_at"
-                      label="Expiration Date"
-                      [isDateTime]="true"
-                      (filterChange)="onDateFilterChange($event)"
-                    ></app-date-range-filter>
-                  </div>
-
-                  <!-- Created At Filter -->
-                  <div class="date-filter-group">
-                    <label class="filter-label">Created Date</label>
-                    <app-date-range-filter
-                      fieldName="created_at"
-                      label="Created Date"
-                      [isDateTime]="true"
-                      (filterChange)="onDateFilterChange($event)"
-                    ></app-date-range-filter>
-                  </div>
-
-                  <!-- Updated At Filter -->
-                  <div class="date-filter-group">
-                    <label class="filter-label">Updated Date</label>
-                    <app-date-range-filter
-                      fieldName="updated_at"
-                      label="Updated Date"
-                      [isDateTime]="true"
-                      (filterChange)="onDateFilterChange($event)"
-                    ></app-date-range-filter>
-                  </div>
+                <!-- Updated Date Filter -->
+                <div class="date-filter-group">
+                  <label class="filter-label">Updated Date</label>
+                  <app-date-range-filter
+                    fieldName="updated_at"
+                    label="Updated Date"
+                    [isDateTime]="true"
+                    (filterChange)="onDateFilterChange($event)"
+                  ></app-date-range-filter>
                 </div>
               </div>
             </div>
@@ -381,196 +296,289 @@ import {
       </mat-card>
 
       <!-- Loading State -->
-      <div *ngIf="notificationsService.loading()" class="loading-container">
-        <mat-progress-spinner
-          mode="indeterminate"
-          diameter="50"
-        ></mat-progress-spinner>
-        <p>Loading Notifications...</p>
-      </div>
+      @if (notificationsService.loading()) {
+        <div class="loading-container">
+          <mat-progress-spinner
+            mode="indeterminate"
+            diameter="50"
+          ></mat-progress-spinner>
+          <p>Loading Notifications...</p>
+        </div>
+      }
 
       <!-- Error State -->
-      <mat-card *ngIf="notificationsService.error()" class="error-card">
-        <mat-card-content>
-          <div class="error-content">
-            <mat-icon color="warn">error</mat-icon>
-            <p>{{ notificationsService.error() }}</p>
-            <button mat-button color="primary" (click)="retry()">
-              <mat-icon>refresh</mat-icon>
-              Retry
-            </button>
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- Data Table -->
-      <mat-card
-        *ngIf="!notificationsService.loading() && !notificationsService.error()"
-        class="table-card"
-      >
-        <mat-card-content>
-          <!-- Bulk Actions -->
-          <div *ngIf="hasSelected()" class="bulk-actions">
-            <span class="selection-info"
-              >{{ selectedItems().length }} selected</span
-            >
-            <div class="bulk-buttons">
-              <button
-                mat-stroked-button
-                color="warn"
-                (click)="bulkDelete()"
-                [disabled]="notificationsService.loading()"
-              >
-                <mat-icon>delete</mat-icon>
-                Delete Selected
-              </button>
-              <button mat-stroked-button (click)="clearSelection()">
-                <mat-icon>clear</mat-icon>
-                Clear Selection
+      @if (notificationsService.error()) {
+        <mat-card class="error-card">
+          <mat-card-content>
+            <div class="error-content">
+              <mat-icon color="warn">error</mat-icon>
+              <p>{{ notificationsService.error() }}</p>
+              <button mat-button color="primary" (click)="retry()">
+                <mat-icon>refresh</mat-icon>
+                Retry
               </button>
             </div>
-          </div>
+          </mat-card-content>
+        </mat-card>
+      }
 
-          <!-- Table -->
-          <div class="table-container">
-            <table
-              mat-table
-              [dataSource]="notificationsService.notificationsList()"
-              class="notifications-table"
-            >
-              <!-- Selection Column -->
-              <ng-container matColumnDef="select">
-                <th mat-header-cell *matHeaderCellDef>
-                  <mat-checkbox
-                    [checked]="isAllSelected()"
-                    [indeterminate]="hasSelected() && !isAllSelected()"
-                    (change)="toggleSelectAll()"
-                  ></mat-checkbox>
-                </th>
-                <td mat-cell *matCellDef="let notifications">
-                  <mat-checkbox
-                    [checked]="isSelected(notifications.id)"
-                    (change)="toggleSelect(notifications.id)"
-                  ></mat-checkbox>
-                </td>
-              </ng-container>
-
-              <!-- user_id Column -->
-              <ng-container matColumnDef="user_id">
-                <th mat-header-cell *matHeaderCellDef>User Id</th>
-                <td mat-cell *matCellDef="let notifications">
-                  {{ notifications.user_id }}
-                </td>
-              </ng-container>
-
-              <!-- type Column -->
-              <ng-container matColumnDef="type">
-                <th mat-header-cell *matHeaderCellDef>Type</th>
-                <td mat-cell *matCellDef="let notifications">
-                  {{ notifications.type }}
-                </td>
-              </ng-container>
-
-              <!-- title Column -->
-              <ng-container matColumnDef="title">
-                <th mat-header-cell *matHeaderCellDef>Title</th>
-                <td mat-cell *matCellDef="let notifications">
-                  {{ notifications.title }}
-                </td>
-              </ng-container>
-
-              <!-- message Column -->
-              <ng-container matColumnDef="message">
-                <th mat-header-cell *matHeaderCellDef>Message</th>
-                <td mat-cell *matCellDef="let notifications">
-                  <span [title]="notifications.message">
-                    {{ notifications.message | slice: 0 : 50
-                    }}<span *ngIf="notifications.message.length > 50">...</span>
-                  </span>
-                </td>
-              </ng-container>
-
-              <!-- data Column -->
-              <ng-container matColumnDef="data">
-                <th mat-header-cell *matHeaderCellDef>Data</th>
-                <td mat-cell *matCellDef="let notifications">
-                  {{ notifications.data }}
-                </td>
-              </ng-container>
-
-              <!-- action_url Column -->
-              <ng-container matColumnDef="action_url">
-                <th mat-header-cell *matHeaderCellDef>Action Url</th>
-                <td mat-cell *matCellDef="let notifications">
-                  {{ notifications.action_url }}
-                </td>
-              </ng-container>
-
-              <!-- Actions Column -->
-              <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef>Actions</th>
-                <td mat-cell *matCellDef="let notifications">
+      <!-- Data Table -->
+      @if (!notificationsService.loading() && !notificationsService.error()) {
+        <mat-card class="table-card">
+          <mat-card-content>
+            <!-- Bulk Actions -->
+            @if (hasSelected()) {
+              <div class="bulk-actions">
+                <span class="selection-info"
+                  >{{ selectedItems().length }} selected</span
+                >
+                <div class="bulk-buttons">
                   <button
-                    mat-icon-button
-                    (click)="openViewDialog(notifications)"
-                    matTooltip="View Details"
-                  >
-                    <mat-icon>visibility</mat-icon>
-                  </button>
-                  <button
-                    mat-icon-button
-                    (click)="openEditDialog(notifications)"
-                    matTooltip="Edit"
-                  >
-                    <mat-icon>edit</mat-icon>
-                  </button>
-                  <button
-                    mat-icon-button
+                    mat-stroked-button
                     color="warn"
-                    (click)="deleteNotification(notifications)"
-                    matTooltip="Delete"
+                    (click)="bulkDelete()"
                     [disabled]="notificationsService.loading()"
                   >
                     <mat-icon>delete</mat-icon>
+                    Delete Selected
                   </button>
-                </td>
-              </ng-container>
+                  <button mat-stroked-button (click)="clearSelection()">
+                    <mat-icon>clear</mat-icon>
+                    Clear Selection
+                  </button>
+                </div>
+              </div>
+            }
 
-              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-            </table>
-          </div>
+            <!-- Table -->
+            <div class="table-container">
+              <table
+                mat-table
+                [dataSource]="notificationsService.notificationsList()"
+                class="notifications-table"
+              >
+                <!-- Selection Column -->
+                <ng-container matColumnDef="select">
+                  <th mat-header-cell *matHeaderCellDef>
+                    <mat-checkbox
+                      [checked]="isAllSelected()"
+                      [indeterminate]="hasSelected() && !isAllSelected()"
+                      (change)="toggleSelectAll()"
+                    ></mat-checkbox>
+                  </th>
+                  <td mat-cell *matCellDef="let notifications">
+                    <mat-checkbox
+                      [checked]="isSelected(notifications.id)"
+                      (change)="toggleSelect(notifications.id)"
+                    ></mat-checkbox>
+                  </td>
+                </ng-container>
 
-          <!-- Empty State -->
-          <div
-            *ngIf="notificationsService.notificationsList().length === 0"
-            class="empty-state"
-          >
-            <mat-icon class="empty-icon">inbox</mat-icon>
-            <h3>No Notifications found</h3>
-            <p>Create your first Notifications to get started</p>
-            <button
-              mat-raised-button
-              color="primary"
-              (click)="openCreateDialog()"
-            >
-              <mat-icon>add</mat-icon>
-              Add Notifications
-            </button>
-          </div>
+                <!-- user_id Column -->
+                <ng-container matColumnDef="user_id">
+                  <th mat-header-cell *matHeaderCellDef>User_id</th>
+                  <td mat-cell *matCellDef="let notifications">
+                    <span class="text-cell">{{
+                      notifications.user_id || '-'
+                    }}</span>
+                  </td>
+                </ng-container>
 
-          <!-- Pagination -->
-          <mat-paginator
-            *ngIf="notificationsService.notificationsList().length > 0"
-            [length]="notificationsService.totalNotification()"
-            [pageSize]="notificationsService.pageSize()"
-            [pageSizeOptions]="[5, 10, 25, 50, 100]"
-            [pageIndex]="notificationsService.currentPage() - 1"
-            (page)="onPageChange($event)"
-            showFirstLastButtons
-          ></mat-paginator>
-        </mat-card-content>
-      </mat-card>
+                <!-- type Column -->
+                <ng-container matColumnDef="type">
+                  <th mat-header-cell *matHeaderCellDef>Type</th>
+                  <td mat-cell *matCellDef="let notifications">
+                    <span class="text-cell">{{
+                      notifications.type || '-'
+                    }}</span>
+                  </td>
+                </ng-container>
+
+                <!-- title Column -->
+                <ng-container matColumnDef="title">
+                  <th mat-header-cell *matHeaderCellDef>Title</th>
+                  <td mat-cell *matCellDef="let notifications">
+                    <span class="text-cell">{{
+                      notifications.title || '-'
+                    }}</span>
+                  </td>
+                </ng-container>
+
+                <!-- message Column -->
+                <ng-container matColumnDef="message">
+                  <th mat-header-cell *matHeaderCellDef>Message</th>
+                  <td mat-cell *matCellDef="let notifications">
+                    <span
+                      [title]="notifications.message"
+                      class="truncated-cell"
+                    >
+                      {{ notifications.message | slice: 0 : 50 }}
+                      @if (
+                        notifications.message &&
+                        notifications.message.length > 50
+                      ) {
+                        <span>...</span>
+                      }
+                    </span>
+                  </td>
+                </ng-container>
+
+                <!-- data Column -->
+                <ng-container matColumnDef="data">
+                  <th mat-header-cell *matHeaderCellDef>Data</th>
+                  <td mat-cell *matCellDef="let notifications">
+                    <span class="text-cell">{{
+                      notifications.data || '-'
+                    }}</span>
+                  </td>
+                </ng-container>
+
+                <!-- action_url Column -->
+                <ng-container matColumnDef="action_url">
+                  <th mat-header-cell *matHeaderCellDef>Action_url</th>
+                  <td mat-cell *matCellDef="let notifications">
+                    <span class="text-cell">{{
+                      notifications.action_url || '-'
+                    }}</span>
+                  </td>
+                </ng-container>
+
+                <!-- read Column -->
+                <ng-container matColumnDef="read">
+                  <th mat-header-cell *matHeaderCellDef>Read</th>
+                  <td mat-cell *matCellDef="let notifications">
+                    <mat-icon
+                      [color]="notifications.read ? 'primary' : 'warn'"
+                      class="status-icon"
+                    >
+                      {{ notifications.read ? 'check_circle' : 'cancel' }}
+                    </mat-icon>
+                  </td>
+                </ng-container>
+
+                <!-- read_at Column -->
+                <ng-container matColumnDef="read_at">
+                  <th mat-header-cell *matHeaderCellDef>Read_at</th>
+                  <td mat-cell *matCellDef="let notifications">
+                    {{ notifications.read_at | date: 'short' }}
+                  </td>
+                </ng-container>
+
+                <!-- archived Column -->
+                <ng-container matColumnDef="archived">
+                  <th mat-header-cell *matHeaderCellDef>Archived</th>
+                  <td mat-cell *matCellDef="let notifications">
+                    <mat-icon
+                      [color]="notifications.archived ? 'primary' : 'warn'"
+                      class="status-icon"
+                    >
+                      {{ notifications.archived ? 'check_circle' : 'cancel' }}
+                    </mat-icon>
+                  </td>
+                </ng-container>
+
+                <!-- archived_at Column -->
+                <ng-container matColumnDef="archived_at">
+                  <th mat-header-cell *matHeaderCellDef>Archived_at</th>
+                  <td mat-cell *matCellDef="let notifications">
+                    {{ notifications.archived_at | date: 'short' }}
+                  </td>
+                </ng-container>
+
+                <!-- priority Column -->
+                <ng-container matColumnDef="priority">
+                  <th mat-header-cell *matHeaderCellDef>Priority</th>
+                  <td mat-cell *matCellDef="let notifications">
+                    <span class="text-cell">{{
+                      notifications.priority || '-'
+                    }}</span>
+                  </td>
+                </ng-container>
+
+                <!-- expires_at Column -->
+                <ng-container matColumnDef="expires_at">
+                  <th mat-header-cell *matHeaderCellDef>Expires_at</th>
+                  <td mat-cell *matCellDef="let notifications">
+                    {{ notifications.expires_at | date: 'short' }}
+                  </td>
+                </ng-container>
+
+                <!-- Created Date Column -->
+                <ng-container matColumnDef="created_at">
+                  <th mat-header-cell *matHeaderCellDef>Created</th>
+                  <td mat-cell *matCellDef="let notifications">
+                    {{ notifications.created_at | date: 'short' }}
+                  </td>
+                </ng-container>
+                <!-- Actions Column -->
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef>Actions</th>
+                  <td mat-cell *matCellDef="let notifications">
+                    <button
+                      mat-icon-button
+                      (click)="openViewDialog(notifications)"
+                      matTooltip="View Details"
+                    >
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                    <button
+                      mat-icon-button
+                      (click)="openEditDialog(notifications)"
+                      matTooltip="Edit"
+                    >
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button
+                      mat-icon-button
+                      color="warn"
+                      (click)="deleteNotification(notifications)"
+                      matTooltip="Delete"
+                      [disabled]="notificationsService.loading()"
+                    >
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr
+                  mat-row
+                  *matRowDef="let row; columns: displayedColumns"
+                ></tr>
+              </table>
+            </div>
+
+            <!-- Empty State -->
+            @if (notificationsService.notificationsList().length === 0) {
+              <div class="empty-state">
+                <mat-icon class="empty-icon">inbox</mat-icon>
+                <h3>No Notifications found</h3>
+                <p>Create your first Notifications to get started</p>
+                <button
+                  mat-raised-button
+                  color="primary"
+                  (click)="openCreateDialog()"
+                >
+                  <mat-icon>add</mat-icon>
+                  Add Notifications
+                </button>
+              </div>
+            }
+
+            <!-- Pagination -->
+            @if (notificationsService.notificationsList().length > 0) {
+              <mat-paginator
+                [length]="notificationsService.totalNotification()"
+                [pageSize]="notificationsService.pageSize()"
+                [pageSizeOptions]="[5, 10, 25, 50, 100]"
+                [pageIndex]="notificationsService.currentPage() - 1"
+                (page)="onPageChange($event)"
+                showFirstLastButtons
+              ></mat-paginator>
+            }
+          </mat-card-content>
+        </mat-card>
+      }
     </div>
   `,
   styles: [
@@ -589,43 +597,23 @@ import {
       .page-title {
         margin: 0;
         font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .header-info {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-      }
-
-      .total-count {
-        background-color: rgba(255, 255, 255, 0.2);
-        padding: 4px 12px;
-        border-radius: 12px;
-        font-size: 0.875rem;
       }
 
       .spacer {
         flex: 1 1 auto;
       }
 
-      .search-card {
+      .search-card,
+      .quick-filters-card,
+      .advanced-filters-card {
         margin-bottom: 16px;
-      }
-
-      /* Quick Search Styles */
-      .quick-search-container {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
       }
 
       .search-wrapper {
         display: flex;
         gap: 12px;
         align-items: flex-start;
+        flex-wrap: wrap;
       }
 
       .search-field {
@@ -637,99 +625,91 @@ import {
         height: 56px;
         padding: 0 24px;
         white-space: nowrap;
+        min-width: 140px;
       }
 
-      /* Quick Filters */
       .quick-filters {
         display: flex;
         gap: 8px;
         flex-wrap: wrap;
+        align-items: center;
       }
 
       .filter-chip {
-        border-radius: 16px;
-        text-transform: none;
-        min-height: 36px;
-        padding: 0 16px;
-        border: 1px solid #e0e0e0;
+        transition: all 0.2s ease;
       }
 
       .filter-chip.active {
         background-color: #1976d2;
         color: white;
-        border-color: #1976d2;
       }
 
-      .filter-chip mat-icon {
-        margin-left: 8px;
-        font-size: 18px;
-      }
-
-      /* Active Filters */
       .active-filters {
         display: flex;
+        justify-content: space-between;
         align-items: center;
-        gap: 12px;
-        flex-wrap: wrap;
-        padding: 12px;
+        gap: 16px;
+        margin-bottom: 16px;
+        padding: 12px 16px;
         background-color: #f5f5f5;
         border-radius: 8px;
+        border-left: 4px solid #1976d2;
       }
 
       .active-filters-label {
         font-weight: 500;
-        color: #666;
-        white-space: nowrap;
+        color: #1976d2;
+        margin-right: 8px;
+        flex-shrink: 0;
+      }
+
+      .filter-chips {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+        flex: 1;
+      }
+
+      .filter-chips mat-chip {
+        background-color: #e3f2fd;
+        color: #1976d2;
       }
 
       .clear-all-btn {
         margin-left: auto;
+        flex-shrink: 0;
       }
 
-      /* Advanced Filters */
-      .advanced-filters-card {
-        margin-bottom: 16px;
+      .filters-panel {
+        box-shadow: none !important;
       }
 
-      .advanced-panel {
-        box-shadow: none;
-      }
-
-      .advanced-filters-content {
+      .advanced-filters {
         padding: 16px 0;
       }
 
       .filter-grid {
-        display: flex;
-        flex-direction: column;
-        gap: 24px;
-      }
-
-      .filter-row {
-        display: flex;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         gap: 16px;
-        align-items: flex-start;
+        margin-bottom: 24px;
       }
 
       .filter-group {
-        flex: 1;
         display: flex;
         flex-direction: column;
         gap: 8px;
       }
 
       .filter-group.full-width {
-        flex: 2;
+        grid-column: 1 / -1;
       }
 
       .filter-label {
         font-weight: 500;
-        color: #333;
-        margin-bottom: 4px;
-      }
-
-      .filter-label .required {
-        color: #f44336;
+        color: #424242;
+        font-size: 14px;
       }
 
       .filter-field {
@@ -738,11 +718,9 @@ import {
 
       .filter-actions {
         display: flex;
-        justify-content: flex-end;
         gap: 12px;
-        margin-top: 24px;
-        padding-top: 16px;
-        border-top: 1px solid #e0e0e0;
+        justify-content: flex-end;
+        align-items: center;
       }
 
       .reset-btn {
@@ -750,7 +728,15 @@ import {
       }
 
       .apply-btn {
-        min-width: 120px;
+        min-width: 140px;
+      }
+
+      .search-btn {
+        min-width: 100px;
+      }
+
+      .clear-search-btn {
+        min-width: 80px;
       }
 
       .checkbox-filter {
@@ -758,47 +744,6 @@ import {
         align-items: center;
         min-width: 120px;
         margin: 8px 0;
-      }
-
-      /* Date Filters Styles */
-      .date-filters-section {
-        margin-top: 32px;
-        padding-top: 24px;
-        border-top: 1px solid #e0e0e0;
-      }
-
-      .section-header {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin: 0 0 20px 0;
-        font-size: 16px;
-        font-weight: 500;
-        color: #333;
-      }
-
-      .section-header mat-icon {
-        color: #1976d2;
-        font-size: 20px;
-      }
-
-      .date-filters-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 24px;
-        align-items: start;
-      }
-
-      .date-filter-group {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      .date-filter-group .filter-label {
-        font-weight: 500;
-        color: #333;
-        margin-bottom: 8px;
       }
 
       .loading-container {
@@ -885,59 +830,69 @@ import {
         color: #999;
       }
 
+      /* Date Filters Styles */
+      .date-filters-section {
+        margin-top: 24px;
+        padding-top: 16px;
+        border-top: 1px solid #e0e0e0;
+      }
+
+      .section-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 16px 0;
+        font-size: 16px;
+        font-weight: 500;
+        color: #333;
+      }
+
+      .section-header mat-icon {
+        font-size: 20px;
+        color: #1976d2;
+      }
+
+      .date-filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 16px;
+      }
+
+      .date-filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
       @media (max-width: 768px) {
         .notifications-list-container {
           padding: 8px;
         }
 
-        .search-wrapper {
+        .search-container {
           flex-direction: column;
-          gap: 16px;
+          align-items: stretch;
+        }
+
+        .search-group {
+          flex-direction: column;
+          align-items: stretch;
+          min-width: unset;
+          gap: 8px;
         }
 
         .search-field {
           min-width: unset;
         }
 
-        .add-btn {
-          height: auto;
-          padding: 12px 16px;
-        }
-
-        .quick-filters {
+        .search-buttons {
           justify-content: center;
         }
 
-        .filter-chip {
+        .search-btn,
+        .clear-search-btn {
           flex: 1;
-          min-width: 0;
-          text-align: center;
-        }
-
-        .active-filters {
-          flex-direction: column;
-          align-items: stretch;
-          gap: 8px;
-        }
-
-        .clear-all-btn {
-          margin-left: 0;
-          align-self: flex-end;
-        }
-
-        .filter-row {
-          flex-direction: column;
-          gap: 16px;
-        }
-
-        .filter-actions {
-          flex-direction: column;
-          gap: 8px;
-        }
-
-        .reset-btn,
-        .apply-btn {
-          width: 100%;
+          min-width: unset;
         }
 
         .bulk-actions {
@@ -948,14 +903,6 @@ import {
 
         .bulk-buttons {
           justify-content: center;
-        }
-
-        .date-filters-grid {
-          grid-template-columns: 1fr;
-        }
-
-        .date-filter-group {
-          margin-bottom: 16px;
         }
       }
     `,
@@ -974,12 +921,12 @@ export class NotificationListComponent implements OnInit, OnDestroy {
   private filtersSignal = signal<Partial<ListNotificationQuery>>({});
   readonly filters = this.filtersSignal.asReadonly();
 
+  // Quick filter state
+  protected quickFilter = 'all';
+
   // Validation state
   private validationErrorsSignal = signal<Record<string, string>>({});
   readonly validationErrors = this.validationErrorsSignal.asReadonly();
-
-  // Quick filter state
-  protected quickFilter = 'all';
 
   // Selection
   private selectedIdsSignal = signal<Set<string>>(new Set());
@@ -994,6 +941,13 @@ export class NotificationListComponent implements OnInit, OnDestroy {
     'message',
     'data',
     'action_url',
+    'read',
+    'read_at',
+    'archived',
+    'archived_at',
+    'priority',
+    'expires_at',
+    'created_at',
     'actions',
   ];
 
@@ -1013,27 +967,16 @@ export class NotificationListComponent implements OnInit, OnDestroy {
   // ===== DATA LOADING =====
 
   async loadNotifications() {
-    const filters = this.filters();
-
-    // Clean filters by removing null/undefined/empty values
-    const cleanFilters: any = {};
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value !== null && value !== undefined && value !== '') {
-        cleanFilters[key] = value;
-      }
-    });
-
     const params: ListNotificationQuery = {
       page: this.notificationsService.currentPage(),
       limit: this.notificationsService.pageSize(),
-      ...cleanFilters,
+      ...this.filters(),
     };
 
     if (this.searchTerm.trim()) {
       params.search = this.searchTerm.trim();
     }
 
-    console.log('API Request Params:', params); // Debug log
     await this.notificationsService.loadNotificationList(params);
   }
 
@@ -1053,21 +996,6 @@ export class NotificationListComponent implements OnInit, OnDestroy {
   private validateTechnicalFields(): { field: string; message: string }[] {
     const errors: { field: string; message: string }[] = [];
     const filters = this.filters();
-
-    // Validate UUID fields
-    if (filters.id && !this.isValidUuid(filters.id as string)) {
-      errors.push({
-        field: 'id',
-        message: 'Please enter a valid UUID format',
-      });
-    }
-
-    if (filters.user_id && !this.isValidUuid(filters.user_id as string)) {
-      errors.push({
-        field: 'user_id',
-        message: 'Please enter a valid UUID format',
-      });
-    }
 
     return errors;
   }
@@ -1091,23 +1019,6 @@ export class NotificationListComponent implements OnInit, OnDestroy {
 
   private clearValidationErrors() {
     this.validationErrorsSignal.set({});
-  }
-
-  // ===== DATE FILTERING =====
-
-  onDateFilterChange(dateFilter: { [key: string]: string | null | undefined }) {
-    console.log('Date filter change:', dateFilter); // Debug log
-
-    // Update filters with date filter values
-    this.filtersSignal.update((filters) => ({
-      ...filters,
-      ...dateFilter,
-    }));
-
-    console.log('Updated filters:', this.filters()); // Debug log
-
-    // Apply filters with debounce
-    this.applyFilters();
   }
 
   // ===== SEARCH AND FILTERING =====
@@ -1155,6 +1066,55 @@ export class NotificationListComponent implements OnInit, OnDestroy {
     this.loadNotifications();
   }
 
+  // ===== DATE FILTERING =====
+
+  onDateFilterChange(dateFilter: { [key: string]: string | null | undefined }) {
+    console.log('Date filter change:', dateFilter); // Debug log
+
+    // Update filters with date filter values
+    this.filtersSignal.update((filters) => ({
+      ...filters,
+      ...dateFilter,
+    }));
+
+    console.log('Updated filters:', this.filters()); // Debug log
+
+    // Apply filters with debounce
+    this.applyFilters();
+  }
+
+  // Handle filter field changes
+  onFilterChange(field: string, event: any) {
+    const value = event.target ? event.target.value : event;
+
+    // Convert string numbers to numbers for numeric fields
+    let processedValue = value;
+    if (
+      field.includes('_min') ||
+      field.includes('_max') ||
+      field === 'view_count'
+    ) {
+      processedValue = value === '' ? undefined : Number(value);
+    }
+
+    // Convert string booleans for boolean fields
+    if (field === 'published') {
+      processedValue = value === '' ? undefined : value;
+    }
+
+    // Clear quick filter when advance filters are used
+    if (this.quickFilter !== 'all') {
+      this.quickFilter = 'all';
+    }
+
+    this.filtersSignal.update((filters) => ({
+      ...filters,
+      [field]: processedValue,
+    }));
+
+    this.applyFilters();
+  }
+
   applyFilters() {
     // Debounce filter changes to prevent multiple API calls
     if (this.filterTimeout) {
@@ -1194,277 +1154,6 @@ export class NotificationListComponent implements OnInit, OnDestroy {
 
   hasActiveFilters(): boolean {
     return this.searchTerm.length > 0 || Object.keys(this.filters()).length > 0;
-  }
-
-  // ===== QUICK FILTERS =====
-
-  protected setQuickFilter(filter: string) {
-    // Clear any pending filter operations
-    if (this.filterTimeout) {
-      clearTimeout(this.filterTimeout);
-    }
-
-    this.quickFilter = filter;
-
-    // Clear all filters first
-    this.searchTerm = '';
-    this.filtersSignal.set({});
-    this.clearValidationErrors();
-
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-
-    switch (filter) {
-      case 'unread':
-        this.filtersSignal.set({ read: false });
-        break;
-      case 'today':
-        this.filtersSignal.set({
-          created_at: today.toISOString().split('T')[0],
-        });
-        break;
-      case 'week':
-        this.filtersSignal.set({
-          created_at: weekAgo.toISOString().split('T')[0],
-        });
-        break;
-      case 'all':
-      default:
-        // Already cleared above
-        break;
-    }
-
-    // Quick filters should apply immediately
-    this.notificationsService.setCurrentPage(1);
-    this.loadNotifications();
-  }
-
-  protected getUnreadCount(): number {
-    // This would typically come from a service
-    return 5; // Mock count
-  }
-
-  // ===== ACTIVE FILTER CHIPS =====
-
-  protected getActiveFilterChips(): Array<{
-    key: string;
-    label: string;
-    value: string;
-  }> {
-    const chips: Array<{ key: string; label: string; value: string }> = [];
-    const filters = this.filters();
-
-    // Add quick filter chip if not 'all'
-    if (this.quickFilter !== 'all') {
-      const quickFilterLabels: Record<string, string> = {
-        unread: 'Status: Unread',
-        today: 'Date: Today',
-        week: 'Date: This Week',
-      };
-      chips.push({
-        key: '_quickFilter',
-        label: 'Quick Filter',
-        value: quickFilterLabels[this.quickFilter] || this.quickFilter,
-      });
-    }
-
-    if (this.searchTerm) {
-      chips.push({ key: 'search', label: 'Search', value: this.searchTerm });
-    }
-
-    if (filters.type) {
-      chips.push({
-        key: 'type',
-        label: 'Type',
-        value: this.getTypeLabel(filters.type as string),
-      });
-    }
-
-    if (filters.priority) {
-      chips.push({
-        key: 'priority',
-        label: 'Priority',
-        value: this.getPriorityLabel(filters.priority as string),
-      });
-    }
-
-    // Don't show read status chip if it's from quick filter
-    if (filters.read !== undefined && this.quickFilter === 'all') {
-      chips.push({
-        key: 'read',
-        label: 'Status',
-        value: filters.read ? 'Read' : 'Unread',
-      });
-    }
-
-    if (filters.user_id) {
-      chips.push({
-        key: 'user_id',
-        label: 'User',
-        value: filters.user_id as string,
-      });
-    }
-
-    if (filters.message) {
-      chips.push({
-        key: 'message',
-        label: 'Message Contains',
-        value: filters.message as string,
-      });
-    }
-
-    // Don't show created_at chip if it's from quick filter
-    if (filters.created_at && this.quickFilter === 'all') {
-      chips.push({
-        key: 'created_at',
-        label: 'Date',
-        value: filters.created_at as string,
-      });
-    }
-
-    // Date range filters
-    const dateFields = [
-      { key: 'read_at', label: 'Read Date' },
-      { key: 'archived_at', label: 'Archived Date' },
-      { key: 'expires_at', label: 'Expiration Date' },
-      { key: 'updated_at', label: 'Updated Date' },
-    ];
-
-    dateFields.forEach((field) => {
-      // Check for exact date match
-      if ((filters as any)[field.key]) {
-        const dateValue = new Date(
-          (filters as any)[field.key] as string,
-        ).toLocaleDateString();
-        chips.push({ key: field.key, label: field.label, value: dateValue });
-      }
-
-      // Check for date range
-      const minKey = `${field.key}_min`;
-      const maxKey = `${field.key}_max`;
-
-      if ((filters as any)[minKey] || (filters as any)[maxKey]) {
-        let rangeValue = '';
-        if ((filters as any)[minKey] && (filters as any)[maxKey]) {
-          const fromDate = new Date(
-            (filters as any)[minKey] as string,
-          ).toLocaleDateString();
-          const toDate = new Date(
-            (filters as any)[maxKey] as string,
-          ).toLocaleDateString();
-          rangeValue = `${fromDate} - ${toDate}`;
-        } else if ((filters as any)[minKey]) {
-          const fromDate = new Date(
-            (filters as any)[minKey] as string,
-          ).toLocaleDateString();
-          rangeValue = `From ${fromDate}`;
-        } else if ((filters as any)[maxKey]) {
-          const toDate = new Date(
-            (filters as any)[maxKey] as string,
-          ).toLocaleDateString();
-          rangeValue = `Until ${toDate}`;
-        }
-
-        if (rangeValue) {
-          chips.push({
-            key: `${field.key}_range`,
-            label: `${field.label} Range`,
-            value: rangeValue,
-          });
-        }
-      }
-    });
-
-    return chips;
-  }
-
-  protected removeFilter(key: string) {
-    // Clear any pending filter operations
-    if (this.filterTimeout) {
-      clearTimeout(this.filterTimeout);
-    }
-
-    if (key === '_quickFilter') {
-      // Reset quick filter to 'all'
-      this.setQuickFilter('all');
-      return;
-    }
-
-    if (key === 'search') {
-      this.searchTerm = '';
-    } else if (key.endsWith('_range')) {
-      // Handle date range filter removal
-      const baseKey = key.replace('_range', '');
-      this.filtersSignal.update((filters) => {
-        const updated = { ...filters } as any;
-        delete updated[`${baseKey}_min`];
-        delete updated[`${baseKey}_max`];
-        return updated;
-      });
-    } else {
-      this.filtersSignal.update((filters) => {
-        const updated = { ...filters } as any;
-        delete updated[key];
-        // Also remove related min/max fields if removing a date field
-        if (key.includes('_at')) {
-          delete updated[`${key}_min`];
-          delete updated[`${key}_max`];
-        }
-        return updated;
-      });
-    }
-    this.clearValidationErrors();
-    this.notificationsService.setCurrentPage(1);
-    this.loadNotifications();
-  }
-
-  protected clearAllFilters() {
-    // Clear any pending filter operations
-    if (this.filterTimeout) {
-      clearTimeout(this.filterTimeout);
-    }
-
-    this.searchTerm = '';
-    this.filtersSignal.set({});
-    this.quickFilter = 'all';
-    this.clearValidationErrors();
-    this.notificationsService.setCurrentPage(1);
-    this.loadNotifications();
-  }
-
-  protected resetFilters() {
-    // Clear any pending filter operations
-    if (this.filterTimeout) {
-      clearTimeout(this.filterTimeout);
-    }
-
-    this.filtersSignal.set({});
-    this.clearValidationErrors();
-
-    // Reset filters should apply immediately
-    this.notificationsService.setCurrentPage(1);
-    this.loadNotifications();
-  }
-
-  // Helper methods for display labels
-  private getTypeLabel(type: string): string {
-    const labels: Record<string, string> = {
-      info: 'Info',
-      warning: 'Warning',
-      error: 'Error',
-    };
-    return labels[type] || type;
-  }
-
-  private getPriorityLabel(priority: string): string {
-    const labels: Record<string, string> = {
-      low: 'Low',
-      normal: 'Normal',
-      high: 'High',
-      urgent: 'Urgent',
-    };
-    return labels[priority] || priority;
   }
 
   // ===== PAGINATION =====
@@ -1565,17 +1254,220 @@ export class NotificationListComponent implements OnInit, OnDestroy {
     });
   }
 
+  // ===== QUICK FILTERS =====
+
+  protected setQuickFilter(filter: string) {
+    // Clear any pending filter operations
+    if (this.filterTimeout) {
+      clearTimeout(this.filterTimeout);
+    }
+
+    this.quickFilter = filter;
+
+    // Clear all filters first
+    this.searchTerm = '';
+    this.filtersSignal.set({});
+    this.clearValidationErrors();
+
+    switch (filter) {
+      case 'all':
+      default:
+        // Already cleared above
+        break;
+    }
+
+    // Quick filters should apply immediately
+    this.notificationsService.setCurrentPage(1);
+    this.loadNotifications();
+  }
+
+  // ===== ACTIVE FILTER CHIPS =====
+
+  protected getActiveFilterChips(): Array<{
+    key: string;
+    label: string;
+    value: string;
+  }> {
+    const chips: Array<{ key: string; label: string; value: string }> = [];
+    const filters = this.filters();
+
+    // Add quick filter chip if not 'all'
+    if (this.quickFilter !== 'all') {
+      const quickFilterLabels: Record<string, string> = {
+        published_true: 'Status: Published',
+      };
+      chips.push({
+        key: '_quickFilter',
+        label: 'Quick Filter',
+        value: quickFilterLabels[this.quickFilter] || this.quickFilter,
+      });
+    }
+
+    if (this.searchTerm) {
+      chips.push({ key: 'search', label: 'Search', value: this.searchTerm });
+    }
+
+    // Date field filters - only add if fields exist in schema
+
+    if (filters.created_at) {
+      chips.push({
+        key: 'created_at',
+        label: 'Created Date',
+        value: this.formatDate(filters.created_at as string),
+      });
+    } else if (filters.created_at_min || filters.created_at_max) {
+      const from = filters.created_at_min
+        ? this.formatDate(filters.created_at_min as string)
+        : '...';
+      const to = filters.created_at_max
+        ? this.formatDate(filters.created_at_max as string)
+        : '...';
+      chips.push({
+        key: 'created_at_range',
+        label: 'Created Date Range',
+        value: `${from} - ${to}`,
+      });
+    }
+
+    if (filters.updated_at) {
+      chips.push({
+        key: 'updated_at',
+        label: 'Updated Date',
+        value: this.formatDate(filters.updated_at as string),
+      });
+    } else if (filters.updated_at_min || filters.updated_at_max) {
+      const from = filters.updated_at_min
+        ? this.formatDate(filters.updated_at_min as string)
+        : '...';
+      const to = filters.updated_at_max
+        ? this.formatDate(filters.updated_at_max as string)
+        : '...';
+      chips.push({
+        key: 'updated_at_range',
+        label: 'Updated Date Range',
+        value: `${from} - ${to}`,
+      });
+    }
+
+    // Regular field filters
+    if (filters.fields !== undefined && filters.fields.length > 0) {
+      chips.push({
+        key: 'fields',
+        label: 'Fields',
+        value: String(filters.fields),
+      });
+    }
+
+    if (filters.type !== undefined && filters.type !== '') {
+      chips.push({ key: 'type', label: 'Type', value: String(filters.type) });
+    }
+
+    if (filters.read !== undefined && filters.read !== null) {
+      chips.push({
+        key: 'read',
+        label: 'Read',
+        value: filters.read ? 'Yes' : 'No',
+      });
+    }
+
+    if (filters.archived !== undefined && filters.archived !== null) {
+      chips.push({
+        key: 'archived',
+        label: 'Archived',
+        value: filters.archived ? 'Yes' : 'No',
+      });
+    }
+
+    return chips;
+  }
+
+  protected removeFilter(key: string) {
+    // Clear any pending filter operations
+    if (this.filterTimeout) {
+      clearTimeout(this.filterTimeout);
+    }
+
+    if (key === '_quickFilter') {
+      // Reset quick filter to 'all'
+      this.setQuickFilter('all');
+      return;
+    }
+
+    if (key === 'search') {
+      this.searchTerm = '';
+    } else if (key.includes('_range')) {
+      // Handle date range removal
+      const fieldName = key.replace('_range', '');
+      this.filtersSignal.update((filters) => {
+        const updated = { ...filters } as any;
+        delete updated[fieldName];
+        delete updated[`${fieldName}_min`];
+        delete updated[`${fieldName}_max`];
+        return updated;
+      });
+    } else {
+      this.filtersSignal.update((filters) => {
+        const updated = { ...filters } as any;
+        delete updated[key];
+        return updated;
+      });
+    }
+    this.clearValidationErrors();
+    this.notificationsService.setCurrentPage(1);
+    this.loadNotifications();
+  }
+
+  protected clearAllFilters() {
+    // Clear any pending filter operations
+    if (this.filterTimeout) {
+      clearTimeout(this.filterTimeout);
+    }
+
+    this.searchTerm = '';
+    this.filtersSignal.set({});
+    this.quickFilter = 'all';
+    this.clearValidationErrors();
+    this.notificationsService.setCurrentPage(1);
+    this.loadNotifications();
+  }
+
+  protected resetFilters() {
+    // Clear any pending filter operations
+    if (this.filterTimeout) {
+      clearTimeout(this.filterTimeout);
+    }
+
+    this.filtersSignal.set({});
+    this.clearValidationErrors();
+
+    // Reset filters should apply immediately
+    this.notificationsService.setCurrentPage(1);
+    this.loadNotifications();
+  }
+
+  // ===== DATE FILTER HANDLERS =====
+
+  protected updateDateFilter(filterUpdate: any) {
+    this.filtersSignal.update((current) => ({ ...current, ...filterUpdate }));
+    this.applyFilters();
+  }
+
+  private formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
+  }
+
   // ===== ACTIONS =====
 
   async deleteNotification(notifications: Notification) {
-    if (confirm(`Are you sure you want to delete this notification?`)) {
+    if (confirm(`Are you sure you want to delete this notifications?`)) {
       try {
         await this.notificationsService.deleteNotification(notifications.id);
-        this.snackBar.open('Notification deleted successfully', 'Close', {
+        this.snackBar.open('Notifications deleted successfully', 'Close', {
           duration: 3000,
         });
       } catch (error) {
-        this.snackBar.open('Failed to delete notification', 'Close', {
+        this.snackBar.open('Failed to delete Notifications', 'Close', {
           duration: 5000,
         });
       }
@@ -1587,7 +1479,7 @@ export class NotificationListComponent implements OnInit, OnDestroy {
     if (selectedIds.length === 0) return;
 
     const confirmed = confirm(
-      `Are you sure you want to delete ${selectedIds.length} notifications?`,
+      `Are you sure you want to delete ${selectedIds.length} Notifications?`,
     );
     if (!confirmed) return;
 
@@ -1595,14 +1487,14 @@ export class NotificationListComponent implements OnInit, OnDestroy {
       await this.notificationsService.bulkDeleteNotification(selectedIds);
       this.clearSelection();
       this.snackBar.open(
-        `${selectedIds.length} notifications deleted successfully`,
+        `${selectedIds.length} Notifications deleted successfully`,
         'Close',
         {
           duration: 3000,
         },
       );
     } catch (error) {
-      this.snackBar.open('Failed to delete notifications', 'Close', {
+      this.snackBar.open('Failed to delete Notifications', 'Close', {
         duration: 5000,
       });
     }

@@ -182,3 +182,114 @@ export function convertDateTimeFieldsForSubmission<
 
   return converted;
 }
+
+/**
+ * Converts ISO date string to date input format (YYYY-MM-DD)
+ * Used for populating date inputs in forms
+ *
+ * @param isoDateString - ISO 8601 date string (e.g., "2025-09-30T17:00:00.000Z")
+ * @returns Formatted string for date input (e.g., "2025-09-30")
+ */
+export function formatDateForInput(isoDateString?: string | null): string {
+  if (!isoDateString) return '';
+
+  try {
+    const date = new Date(isoDateString);
+    if (isNaN(date.getTime())) return '';
+
+    // Extract just the date part (YYYY-MM-DD)
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+  } catch (error) {
+    console.warn('Failed to format date for input:', isoDateString, error);
+    return '';
+  }
+}
+
+/**
+ * Converts date input format to date-only string for API submission
+ * Used when submitting forms with date inputs
+ *
+ * @param dateValue - Date object or date string (e.g., "2025-09-30" or Date object)
+ * @returns Date-only string (e.g., "2025-09-30")
+ */
+export function formatDateForSubmission(
+  dateValue?: Date | string | null,
+): string {
+  if (!dateValue) return '';
+
+  try {
+    let date: Date;
+
+    if (dateValue instanceof Date) {
+      date = dateValue;
+    } else {
+      date = new Date(dateValue);
+    }
+
+    if (isNaN(date.getTime())) return '';
+
+    // Return just the date part (YYYY-MM-DD) without time
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+  } catch (error) {
+    console.warn('Failed to format date for submission:', dateValue, error);
+    return '';
+  }
+}
+
+/**
+ * Converts date fields in an object from ISO to date input format
+ * Useful for populating forms with multiple date fields
+ *
+ * @param data - Object containing date fields
+ * @param dateFields - Array of field names that contain date values
+ * @returns Object with converted date fields
+ */
+export function convertDateFieldsForInput<T extends Record<string, any>>(
+  data: T,
+  dateFields: (keyof T)[],
+): T {
+  const converted = { ...data };
+
+  dateFields.forEach((field) => {
+    if (converted[field]) {
+      converted[field] = formatDateForInput(
+        converted[field] as string,
+      ) as T[keyof T];
+    }
+  });
+
+  return converted;
+}
+
+/**
+ * Converts date fields in an object from date input to date-only format
+ * Useful for preparing form data for API submission
+ *
+ * @param data - Object containing date input fields
+ * @param dateFields - Array of field names that contain date input values
+ * @returns Object with converted date fields
+ */
+export function convertDateFieldsForSubmission<T extends Record<string, any>>(
+  data: T,
+  dateFields: (keyof T)[],
+): T {
+  const converted = { ...data };
+
+  dateFields.forEach((field) => {
+    if (converted[field]) {
+      converted[field] = formatDateForSubmission(
+        converted[field] as Date | string,
+      ) as T[keyof T];
+    }
+  });
+
+  return converted;
+}

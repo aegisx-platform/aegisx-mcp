@@ -26,7 +26,19 @@ Handlebars.registerHelper('kebabCase', function (str) {
   return str
     .replace(/([a-z])([A-Z])/g, '$1-$2')
     .toLowerCase()
-    .replace(/[_\s]+/g, '-');
+    .replace(/[_\s]+/g, '-')
+    .replace(/^-+|-+$/g, ''); // Remove leading/trailing dashes
+});
+
+// Helper to convert camelCase moduleName back to kebab-case table name
+Handlebars.registerHelper('tableNameToKebab', function (camelCaseModuleName) {
+  if (!camelCaseModuleName || typeof camelCaseModuleName !== 'string')
+    return '';
+  // Convert camelCase to snake_case then to kebab-case
+  const snakeCase = camelCaseModuleName
+    .replace(/([a-z])([A-Z])/g, '$1_$2')
+    .toLowerCase();
+  return snakeCase.replace(/_/g, '-');
 });
 
 Handlebars.registerHelper('isStringType', function (type) {
@@ -34,6 +46,11 @@ Handlebars.registerHelper('isStringType', function (type) {
 });
 
 Handlebars.registerHelper('capitalize', function (str) {
+  if (!str || typeof str !== 'string') return '';
+  return str.charAt(0).toUpperCase() + str.slice(1);
+});
+
+Handlebars.registerHelper('capitalizeFirst', function (str) {
   if (!str || typeof str !== 'string') return '';
   return str.charAt(0).toUpperCase() + str.slice(1);
 });
@@ -136,6 +153,10 @@ class FrontendGenerator {
    * Extract TypeScript types from backend TypeBox schemas
    */
   extractTypesFromBackendModule(moduleName) {
+    // Convert moduleName to camelCase to match backend module naming
+    const camelCaseModuleName = this.toCamelCase(moduleName);
+    // Convert to kebab-case for file paths since files are now kebab-case
+    const kebabCaseModuleName = this.toKebabCase(moduleName);
     const backendModulePath = path.resolve(
       this.toolsDir,
       '..',
@@ -144,18 +165,18 @@ class FrontendGenerator {
       'api',
       'src',
       'modules',
-      moduleName,
+      camelCaseModuleName,
     );
 
     try {
-      // Read the schemas file
+      // Read the schemas file - now use kebab-case file names
       const schemasPath = path.join(
         backendModulePath,
         'schemas',
-        `${moduleName}.schemas.ts`,
+        `${kebabCaseModuleName}.schemas.ts`,
       );
-      // Use module name for types file consistency with backend
-      const typeFileName = `${moduleName}.types.ts`;
+      // Use kebab-case for types file consistency with backend
+      const typeFileName = `${kebabCaseModuleName}.types.ts`;
       const typesPath = path.join(backendModulePath, 'types', typeFileName);
 
       if (!fs.existsSync(schemasPath)) {
@@ -184,7 +205,12 @@ class FrontendGenerator {
     // Extract basic schema structure
     const types = {};
 
-    // Define the main entity type based on the schema
+    // Use the singular form for the main entity (e.g., "Notification" not "Notifications")
+    const singularPascalName = pascalName.endsWith('s')
+      ? pascalName.slice(0, -1)
+      : pascalName;
+
+    // Define the main entity type based on the schema (backend uses PLURAL names)
     const mainEntityFields = this.extractSchemaFields(
       schemasContent,
       `${pascalName}Schema`,
@@ -202,11 +228,6 @@ class FrontendGenerator {
       `List${pascalName}QuerySchema`,
     );
 
-    // Use the singular form for the main entity (e.g., "Notification" not "Notifications")
-    const singularPascalName = pascalName.endsWith('s')
-      ? pascalName.slice(0, -1)
-      : pascalName;
-
     types[singularPascalName] = mainEntityFields;
     types[`Create${singularPascalName}Request`] = createFields;
     types[`Update${singularPascalName}Request`] = updateFields;
@@ -216,38 +237,164 @@ class FrontendGenerator {
   }
 
   /**
-   * Extract field definitions from TypeBox schema
+   * Extract field definitions from actual TypeScript interface files
    */
   extractSchemaFields(content, schemaName) {
-    const fields = {};
-
     try {
-      // For now, provide basic fallback types based on common patterns
-      // In a real implementation, this would parse the actual TypeBox schemas
-      if (schemaName.includes('Notifications')) {
-        return {
-          id: 'string',
-          user_id: 'string',
-          type: 'string',
-          title: 'string',
-          message: 'string',
-          data: 'Record<string, any> | undefined',
-          action_url: 'string | undefined',
-          read: 'boolean | undefined',
-          read_at: 'string | undefined',
-          archived: 'boolean | undefined',
-          archived_at: 'string | undefined',
-          priority: 'string | undefined',
-          expires_at: 'string | undefined',
-          created_at: 'string',
-          updated_at: 'string',
-        };
+      // Parse TypeBox schema from backend content
+      if (content && content.includes(schemaName)) {
+        const fields = this.parseTypeBoxSchema(content, schemaName);
+        if (fields && Object.keys(fields).length > 0) {
+          return fields;
+        }
       }
+
+      // Fallback: return empty for now to avoid hardcoded mismatches
+      console.warn(
+        `No type definition found for ${schemaName}, returning empty fields`,
+      );
+      return {};
     } catch (error) {
       console.warn(`Could not parse schema ${schemaName}:`, error.message);
     }
 
-    return fields;
+    return {};
+  }
+
+  /**
+   * Parse TypeBox schema definition to extract field types
+   */
+  parseTypeBoxSchema(content, schemaName) {
+    try {
+      // Find the start of schema definition
+      const startPattern = `export const ${schemaName} = `;
+      const startIndex = content.indexOf(startPattern);
+
+      if (startIndex === -1) {
+        return {};
+      }
+
+      // Extract the schema definition by finding the matching braces
+      const start = startIndex + startPattern.length;
+      let braceCount = 0;
+      let inBraces = false;
+      let schemaContent = '';
+
+      for (let i = start; i < content.length; i++) {
+        const char = content[i];
+
+        if (char === '{') {
+          braceCount++;
+          inBraces = true;
+        } else if (char === '}') {
+          braceCount--;
+        }
+
+        if (inBraces) {
+          schemaContent += char;
+        }
+
+        // Stop when we've closed all braces
+        if (inBraces && braceCount === 0) {
+          break;
+        }
+      }
+
+      const fields = {};
+
+      // More robust field parsing - handle multiline definitions
+      const fieldPattern = /(\w+):\s*Type\.(Optional\()?(\w+)/g;
+      let fieldMatch;
+
+      while ((fieldMatch = fieldPattern.exec(schemaContent)) !== null) {
+        const [, fieldName, optionalWrapper, typeboxType] = fieldMatch;
+        const isOptional = !!optionalWrapper;
+
+        // Map TypeBox types to TypeScript types
+        let tsType = 'string';
+        if (typeboxType === 'Integer' || typeboxType === 'Number') {
+          tsType = 'number';
+        } else if (typeboxType === 'Boolean') {
+          tsType = 'boolean';
+        }
+
+        fields[fieldName] = isOptional ? `${tsType} | undefined` : tsType;
+      }
+
+      return fields;
+    } catch (error) {
+      console.error(`Error parsing TypeBox schema ${schemaName}:`, error);
+      return {};
+    }
+  }
+
+  /**
+   * Extract module name from schema name (e.g., "ListAuthorQuery" -> "authors")
+   */
+  extractModuleNameFromSchema(schemaName) {
+    if (schemaName.includes('Notification')) return 'notifications';
+    if (schemaName.includes('Author')) return 'authors';
+    if (schemaName.includes('Book')) return 'books';
+    if (schemaName.includes('Article')) return 'articles';
+    return null;
+  }
+
+  /**
+   * Read types from actual generated TypeScript file
+   */
+  readTypesFromFile(moduleName, schemaName) {
+    try {
+      const typesFileName =
+        moduleName === 'notifications'
+          ? 'notification.types'
+          : `${this.toKebabCase(moduleName)}.types`;
+      const typesPath = path.join(
+        this.outputDir,
+        this.toKebabCase(moduleName),
+        'types',
+        `${typesFileName}.ts`,
+      );
+
+      if (!fs.existsSync(typesPath)) {
+        console.warn(`Types file not found: ${typesPath}`);
+        return {};
+      }
+
+      const content = fs.readFileSync(typesPath, 'utf8');
+
+      // Simple regex to extract interface fields (basic implementation)
+      const interfaceRegex = new RegExp(
+        `export interface ${schemaName} \\{([^}]+)\\}`,
+        's',
+      );
+      const match = content.match(interfaceRegex);
+
+      if (!match) {
+        console.warn(`Interface ${schemaName} not found in ${typesPath}`);
+        return {};
+      }
+
+      const fieldsContent = match[1];
+      const fields = {};
+
+      // Parse field definitions (basic parsing)
+      const fieldLines = fieldsContent
+        .split('\n')
+        .filter((line) => line.trim() && !line.trim().startsWith('//'));
+
+      for (const line of fieldLines) {
+        const fieldMatch = line.match(/(\w+)\??:\s*([^;]+);?/);
+        if (fieldMatch) {
+          const [, fieldName, fieldType] = fieldMatch;
+          fields[fieldName] = fieldType.trim();
+        }
+      }
+
+      return fields;
+    } catch (error) {
+      console.warn(`Error reading types from file:`, error.message);
+      return {};
+    }
   }
 
   /**
@@ -287,6 +434,8 @@ class FrontendGenerator {
    * Analyze backend API structure to determine features
    */
   analyzeBackendAPI(moduleName) {
+    // Convert moduleName to camelCase to match backend module naming
+    const camelCaseModuleName = this.toCamelCase(moduleName);
     const backendModulePath = path.resolve(
       this.toolsDir,
       '..',
@@ -295,7 +444,7 @@ class FrontendGenerator {
       'api',
       'src',
       'modules',
-      moduleName,
+      camelCaseModuleName,
     );
 
     try {
@@ -351,10 +500,13 @@ class FrontendGenerator {
    * Check if backend has WebSocket events
    */
   hasWebSocketEvents(backendModulePath) {
+    // Convert the module directory name to kebab-case for service file lookup
+    const moduleName = path.basename(backendModulePath);
+    const kebabCaseModuleName = this.toKebabCase(moduleName);
     const serviceFile = path.join(
       backendModulePath,
       'services',
-      `${path.basename(backendModulePath)}.service.ts`,
+      `${kebabCaseModuleName}.service.ts`,
     );
 
     if (!fs.existsSync(serviceFile)) {
@@ -453,6 +605,7 @@ class FrontendGenerator {
       ? `Create${entityName}Request`
       : `Update${entityName}Request`;
     const entityType = types[typeKey] || types[entityName];
+
     if (!entityType || Object.keys(entityType).length === 0) {
       // Fallback: generate basic fields from known schema
       console.log(
@@ -502,6 +655,11 @@ class FrontendGenerator {
       field.min = this.getMinValue(fieldName, baseType);
       field.max = this.getMaxValue(fieldName, baseType);
 
+      // Add step attribute for decimal/numeric fields
+      if (enhancedColumn && enhancedColumn.fieldType === 'decimal') {
+        field.step = '0.01';
+      }
+
       // Enhanced field type handling
       if (enhancedColumn) {
         // Foreign key dropdown
@@ -509,11 +667,30 @@ class FrontendGenerator {
           enhancedColumn.fieldType === 'foreign-key-dropdown' &&
           enhancedColumn.dropdownInfo
         ) {
-          field.type = 'dropdown';
+          const referencedTable = enhancedColumn.foreignKeyInfo.referencedTable;
+
+          // Check if service exists
+          const servicePath = path.resolve(
+            this.outputDir,
+            this.toKebabCase(referencedTable),
+            'services',
+            `${this.toKebabCase(referencedTable)}.service.ts`,
+          );
+          const serviceExists = fs.existsSync(servicePath);
+
+          field.type = serviceExists ? 'dropdown' : 'string';
+          field.inputType = serviceExists ? 'dropdown' : 'text';
           field.dropdownEndpoint = enhancedColumn.dropdownInfo.endpoint;
           field.dropdownDisplayFields =
             enhancedColumn.dropdownInfo.displayFields;
-          field.referencedTable = enhancedColumn.foreignKeyInfo.referencedTable;
+          field.referencedTable = referencedTable;
+          field.serviceExists = serviceExists;
+          field.serviceName = this.toCamelCase(referencedTable) + 'Service';
+
+          // Add fallback info for template
+          if (!serviceExists) {
+            field.fallbackMessage = `Service for ${referencedTable} not found. Using text input. Generate ${referencedTable} service for dropdown functionality.`;
+          }
         }
         // Enum select
         else if (enhancedColumn.fieldType === 'enum-select') {
@@ -531,7 +708,7 @@ class FrontendGenerator {
         // Convention-based select fields (for fields like priority, status, type)
         else if (this.isSelectField(fieldName, baseType)) {
           field.type = 'select';
-          field.options = this.getSelectOptions(fieldName);
+          field.options = this.getSelectOptions(fieldName, enhancedColumn);
         }
       }
       // Fallback to original logic if no enhanced schema
@@ -618,6 +795,105 @@ class FrontendGenerator {
       );
     }
 
+    // Books specific fields
+    if (entityName.toLowerCase().includes('book')) {
+      fields.push(
+        {
+          name: 'title',
+          label: 'Title',
+          type: 'string',
+          inputType: 'text',
+          required: true,
+          placeholder: 'Enter book title',
+          tsType: 'string',
+          formControlName: 'title',
+          maxLength: 255,
+        },
+        {
+          name: 'description',
+          label: 'Description',
+          type: 'string',
+          inputType: 'textarea',
+          required: false,
+          placeholder: 'Enter book description',
+          tsType: 'string',
+          formControlName: 'description',
+          maxLength: 1000,
+        },
+        {
+          name: 'author_id',
+          label: 'Author',
+          type: 'dropdown',
+          required: true,
+          referencedTable: 'authors',
+          placeholder: 'Select author',
+          tsType: 'string',
+          formControlName: 'author_id',
+          serviceExists: true,
+          serviceName: 'authorsService',
+        },
+        {
+          name: 'isbn',
+          label: 'ISBN',
+          type: 'string',
+          inputType: 'text',
+          required: false,
+          placeholder: 'Enter ISBN',
+          tsType: 'string',
+          formControlName: 'isbn',
+        },
+        {
+          name: 'pages',
+          label: 'Pages',
+          type: 'number',
+          inputType: 'number',
+          required: false,
+          placeholder: 'Enter number of pages',
+          tsType: 'number',
+          formControlName: 'pages',
+        },
+        {
+          name: 'published_date',
+          label: 'Published Date',
+          type: 'date',
+          required: false,
+          placeholder: 'Select published date',
+          tsType: 'string',
+          formControlName: 'published_date',
+        },
+        {
+          name: 'price',
+          label: 'Price',
+          type: 'number',
+          inputType: 'number',
+          required: false,
+          placeholder: 'Enter price',
+          tsType: 'number',
+          formControlName: 'price',
+          step: '0.01',
+        },
+        {
+          name: 'genre',
+          label: 'Genre',
+          type: 'string',
+          inputType: 'text',
+          required: false,
+          placeholder: 'Enter genre',
+          tsType: 'string',
+          formControlName: 'genre',
+        },
+        {
+          name: 'available',
+          label: 'Available',
+          type: 'boolean',
+          required: false,
+          defaultValue: true,
+          tsType: 'boolean',
+          formControlName: 'available',
+        },
+      );
+    }
+
     return fields;
   }
 
@@ -700,7 +976,7 @@ class FrontendGenerator {
 
         // Date/Time Types
         case 'datetime':
-          return 'date';
+          return 'datetime';
         case 'date':
           return 'date';
         case 'timestamp':
@@ -716,17 +992,31 @@ class FrontendGenerator {
 
         // Numeric Types
         case 'number':
+        case 'integer':
+        case 'int':
+        case 'int4':
+        case 'smallint':
+        case 'int2':
           return 'number';
         case 'bigint':
+        case 'int8':
           return 'bigint';
         case 'decimal':
-          return 'decimal';
+        case 'numeric':
+          return 'number';
+        case 'real':
+        case 'float4':
+        case 'double precision':
         case 'float':
-          return 'float';
-        case 'serial':
-          return 'serial';
-        case 'currency':
+        case 'float8':
+          return 'number';
+        case 'money':
           return 'currency';
+        case 'serial':
+        case 'serial4':
+        case 'bigserial':
+        case 'serial8':
+          return 'number';
         case 'percentage':
           return 'percentage';
 
@@ -736,13 +1026,24 @@ class FrontendGenerator {
 
         // Special Types
         case 'uuid':
-          return 'uuid';
+          return 'string';
         case 'json':
           return 'json';
         case 'jsonb':
-          return 'jsonb';
+          return 'json';
         case 'xml':
           return 'xml';
+        case 'bytea':
+          return 'binary';
+        case 'bit':
+        case 'bit varying':
+        case 'varbit':
+          return 'string';
+        case 'tsvector':
+        case 'tsquery':
+        case 'pg_lsn':
+        case 'pg_snapshot':
+          return 'string';
         case 'color':
           return 'color';
 
@@ -752,11 +1053,10 @@ class FrontendGenerator {
 
         // Network Types
         case 'inet':
-          return 'inet';
         case 'cidr':
-          return 'cidr';
         case 'macaddr':
-          return 'macaddr';
+        case 'macaddr8':
+          return 'string';
 
         // Binary Types
         case 'binary':
@@ -768,25 +1068,19 @@ class FrontendGenerator {
 
         // Geometric Types
         case 'point':
-          return 'point';
-        case 'box':
-          return 'box';
-        case 'polygon':
-          return 'polygon';
         case 'line':
-          return 'line';
         case 'lseg':
-          return 'lseg';
+        case 'box':
         case 'path':
-          return 'path';
+        case 'polygon':
         case 'circle':
-          return 'circle';
+          return 'string';
 
-        // Bit Types
-        case 'bit':
-          return 'bit';
-        case 'varbit':
-          return 'varbit';
+        // Bit Types (already handled above)
+        // case 'bit':
+        //   return 'bit';
+        // case 'varbit':
+        //   return 'varbit';
 
         default:
           return 'string';
@@ -840,24 +1134,100 @@ class FrontendGenerator {
         case 'textarea':
           return 'textarea';
         case 'datetime':
-          return 'date';
+          return 'datetime';
         case 'boolean':
           return 'checkbox';
         case 'number':
+          return 'number';
+        case 'decimal':
           return 'number';
         default:
           return 'text';
       }
     }
 
-    // Fallback to original logic
-    if (fieldType.includes('number')) return 'number';
-    if (fieldName.includes('email')) return 'email';
-    if (fieldName.includes('password')) return 'password';
-    if (fieldName.includes('url')) return 'url';
-    if (['message', 'description', 'content'].includes(fieldName))
-      return 'textarea';
-    return 'text';
+    // Direct PostgreSQL type mapping for form inputs
+    switch (fieldType) {
+      // Numeric types
+      case 'bigint':
+      case 'int8':
+        return 'number';
+      case 'currency':
+      case 'money':
+        return 'number';
+      case 'real':
+      case 'float4':
+      case 'double precision':
+      case 'float':
+      case 'float8':
+        return 'number';
+      case 'percentage':
+        return 'number';
+
+      // Special types
+      case 'binary':
+      case 'bytea':
+        return 'file';
+      case 'xml':
+        return 'textarea';
+      case 'uuid':
+        return 'text';
+      case 'bit':
+      case 'varbit':
+        return 'text';
+      case 'color':
+        return 'color';
+      case 'image':
+        return 'file';
+
+      // Date/Time types
+      case 'date':
+        return 'date';
+      case 'datetime':
+      case 'timestamp':
+        return 'datetime-local';
+      case 'datetime-tz':
+      case 'timestamptz':
+        return 'datetime-local';
+      case 'time':
+        return 'time';
+      case 'time-tz':
+      case 'timetz':
+        return 'time';
+
+      // Network/Geometric types
+      case 'inet':
+      case 'cidr':
+      case 'macaddr':
+      case 'macaddr8':
+      case 'point':
+      case 'line':
+      case 'lseg':
+      case 'box':
+      case 'path':
+      case 'polygon':
+      case 'circle':
+        return 'text';
+
+      // Array types
+      case 'array':
+        return 'textarea';
+
+      // JSON types
+      case 'json':
+      case 'jsonb':
+        return 'textarea';
+
+      default:
+        // Fallback to original logic
+        if (fieldType.includes('number')) return 'number';
+        if (fieldName.includes('email')) return 'email';
+        if (fieldName.includes('password')) return 'password';
+        if (fieldName.includes('url')) return 'url';
+        if (['message', 'description', 'content'].includes(fieldName))
+          return 'textarea';
+        return 'text';
+    }
   }
 
   /**
@@ -929,30 +1299,69 @@ class FrontendGenerator {
   /**
    * Generate query filters for the list component
    */
-  generateQueryFilters(types, entityName) {
+  generateQueryFilters(types, entityName, enhancedSchema = null) {
     const queryType = types[`List${entityName}Query`];
     if (!queryType) return [];
 
     const filters = [];
 
     Object.keys(queryType).forEach((fieldName) => {
-      // Skip pagination and search fields
+      // Skip pagination, search, date range and system fields
       if (['page', 'limit', 'search', 'include', 'sort'].includes(fieldName)) {
         return;
       }
 
+      // Skip date range fields (min/max) as they're handled separately
+      if (fieldName.endsWith('_min') || fieldName.endsWith('_max')) {
+        return;
+      }
+
+      // Skip date filter fields as they have their own section
+      if (fieldName.includes('_at')) {
+        return;
+      }
+
       const fieldType = queryType[fieldName];
+      const isBoolean =
+        fieldType.includes('boolean') ||
+        [
+          'read',
+          'archived',
+          'is_active',
+          'is_verified',
+          'enabled',
+          'visible',
+          'available',
+          'is_featured',
+          'is_available',
+        ].includes(fieldName);
+      const isNumeric = fieldType.includes('number');
+      const isUuid = fieldName.endsWith('_id') || fieldName === 'id';
+
+      // Get enhanced column info for constraint values
+      const enhancedColumn = enhancedSchema?.columns?.find(
+        (col) => col.name === fieldName,
+      );
+
       const filter = {
         name: fieldName,
         label: this.fieldNameToLabel(fieldName),
         type: fieldType,
+        isBoolean: isBoolean,
+        isNumeric: isNumeric,
+        isUuid: isUuid,
+        placeholder: this.generatePlaceholder(fieldName),
         inputType: this.getInputType(fieldType),
-        isSelect: this.isSelectField(fieldName, fieldType),
+        isSelect:
+          this.isSelectField(fieldName, fieldType) ||
+          (enhancedColumn &&
+            (enhancedColumn.constraintValues?.length > 0 ||
+              enhancedColumn.enumInfo?.values?.length > 0)),
       };
 
       // Add options for select fields
       if (filter.isSelect) {
-        filter.options = this.getSelectOptions(fieldName);
+        filter.options = this.getSelectOptions(fieldName, enhancedColumn);
       }
 
       filters.push(filter);
@@ -1129,6 +1538,11 @@ class FrontendGenerator {
         ? camelName.slice(0, -1)
         : camelName;
 
+      // Check if query schema has specific fields
+      const queryType = types[`List${pascalName}Query`] || {};
+      const hasPublishedField = 'published' in queryType;
+      const hasPublishedAtField = 'published_at' in queryType;
+
       const context = {
         moduleName,
         PascalCase: singularPascalName,
@@ -1145,7 +1559,9 @@ class FrontendGenerator {
           camelCase: camelName,
           moduleName,
         }),
-        filters: this.generateQueryFilters(types, pascalName),
+        filters: this.generateQueryFilters(types, pascalName, enhancedSchema),
+        hasPublishedField,
+        hasPublishedAtField,
         includeEnhanced: options.enhanced || apiInfo.hasEnhancedOps,
         includeFull: options.full || apiInfo.hasFullOps,
       };
@@ -1254,6 +1670,7 @@ class FrontendGenerator {
         hasDateTimeFields: createFormFields.some((field) =>
           ['datetime', 'datetime-tz'].includes(field.type),
         ),
+        hasDateFields: createFormFields.some((field) => field.type === 'date'),
         hasNewFieldTypes: createFormFields.some((field) =>
           [
             'uuid',
@@ -1294,6 +1711,7 @@ class FrontendGenerator {
         hasDateTimeFields: editFormFields.some((field) =>
           ['datetime', 'datetime-tz'].includes(field.type),
         ),
+        hasDateFields: editFormFields.some((field) => field.type === 'date'),
         hasNewFieldTypes: editFormFields.some((field) =>
           [
             'uuid',
@@ -1341,6 +1759,7 @@ class FrontendGenerator {
         hasDateTimeFields: sharedFormFields.some((field) =>
           ['datetime', 'datetime-tz'].includes(field.type),
         ),
+        hasDateFields: sharedFormFields.some((field) => field.type === 'date'),
         // Add form name directly to avoid nested helper calls in template
         formName: camelName + 'Form',
         hasNewFieldTypes: sharedFormFields.some((field) =>
@@ -1530,10 +1949,13 @@ class FrontendGenerator {
   }
 
   toKebabCase(str) {
+    if (!str || typeof str !== 'string') return '';
     return str
       .replace(/([a-z])([A-Z])/g, '$1-$2')
       .toLowerCase()
-      .replace(/[_\s]+/g, '-');
+      .replace(/[_\s]+/g, '-')
+      .replace(/^-+|-+$/g, '') // Remove leading/trailing dashes
+      .replace(/--+/g, '-'); // Replace multiple dashes with single dash
   }
 
   fieldNameToLabel(fieldName) {
@@ -1557,27 +1979,45 @@ class FrontendGenerator {
     return selectFields.some((field) => fieldName.includes(field));
   }
 
-  getSelectOptions(fieldName) {
+  getSelectOptions(fieldName, enhancedColumn = null) {
+    // Use constraint values from database first (highest priority)
+    if (enhancedColumn) {
+      // Use enum values first
+      if (enhancedColumn.enumInfo && enhancedColumn.enumInfo.values) {
+        return enhancedColumn.enumInfo.values.map((value) => ({
+          value: value,
+          label: this.formatLabel(value),
+        }));
+      }
+
+      // Use constraint values second
+      if (
+        enhancedColumn.constraintValues &&
+        enhancedColumn.constraintValues.length > 0
+      ) {
+        return enhancedColumn.constraintValues.map((value) => ({
+          value: value,
+          label: this.formatLabel(value),
+        }));
+      }
+    }
+
+    // Fallback to hardcoded options (for backward compatibility only)
     const optionsMap = {
-      status: [
-        { value: 'active', label: 'Active' },
-        { value: 'inactive', label: 'Inactive' },
-      ],
       type: [
         { value: 'info', label: 'Info' },
         { value: 'warning', label: 'Warning' },
         { value: 'error', label: 'Error' },
       ],
-      priority: [
-        { value: 'low', label: 'Low' },
-        { value: 'normal', label: 'Normal' },
-        { value: 'high', label: 'High' },
-        { value: 'urgent', label: 'Urgent' },
-      ],
     };
 
     const key = Object.keys(optionsMap).find((k) => fieldName.includes(k));
     return optionsMap[key] || [];
+  }
+
+  formatLabel(value) {
+    // Convert 'draft' -> 'Draft', 'published' -> 'Published'
+    return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
   }
 
   ensureDirectoryExists(dirPath) {
@@ -1678,7 +2118,11 @@ class FrontendGenerator {
       if (field.type === 'dropdown' && field.referencedTable) {
         const referencedTable = field.referencedTable;
         const serviceName = this.toCamelCase(referencedTable) + 'Service';
-        const serviceClass = this.toPascalCase(referencedTable) + 'Service';
+        // Use singular form for service class name
+        const singularTable = referencedTable.endsWith('s')
+          ? referencedTable.slice(0, -1)
+          : referencedTable;
+        const serviceClass = this.toPascalCase(singularTable) + 'Service';
 
         // Find the enhanced column for more details
         const enhancedColumn = enhancedSchema.columns.find(
@@ -1688,13 +2132,24 @@ class FrontendGenerator {
           'id',
         ];
 
+        // Check if service exists
+        const servicePath = path.resolve(
+          this.outputDir,
+          this.toKebabCase(referencedTable),
+          'services',
+          `${this.toKebabCase(referencedTable)}.service.ts`,
+        );
+        const serviceExists = fs.existsSync(servicePath);
+
         if (!services.find((s) => s.serviceName === serviceName)) {
           services.push({
             serviceName: serviceName,
             serviceClass: serviceClass,
             referencedTable: referencedTable,
             displayFields: dropdownFields,
-            import: `../../../${this.toKebabCase(referencedTable)}/services/${this.toKebabCase(referencedTable)}.service`,
+            import: `../../${this.toKebabCase(referencedTable)}/services/${this.toKebabCase(referencedTable)}.service`,
+            exists: serviceExists,
+            fallbackType: serviceExists ? 'dropdown' : 'text',
           });
         }
       }

@@ -117,16 +117,6 @@ import { DateRangeFilterComponent } from '../../../shared/components/date-range-
             >
               All
             </button>
-
-            <!-- Published Quick Filter -->
-            <button
-              mat-stroked-button
-              [class.active]="quickFilter === 'published_true'"
-              (click)="setQuickFilter('published_true')"
-              class="filter-chip"
-            >
-              Published
-            </button>
           </div>
         </mat-card-content>
       </mat-card>
@@ -173,93 +163,7 @@ import { DateRangeFilterComponent } from '../../../shared/components/date-range-
 
           <div class="advanced-filters">
             <!-- Filter Fields -->
-            <div class="filter-grid">
-              <!-- Title Filter -->
-              <div class="filter-group">
-                <label class="filter-label">Title</label>
-                <mat-form-field appearance="outline" class="filter-field">
-                  <mat-label>Title</mat-label>
-                  <input
-                    matInput
-                    type="text"
-                    [value]="filters().title || ''"
-                    (input)="onFilterChange('title', $event)"
-                    placeholder="Enter title"
-                  />
-                </mat-form-field>
-              </div>
-
-              <!-- Author ID Filter -->
-              <div class="filter-group">
-                <label class="filter-label">Author ID</label>
-                <mat-form-field appearance="outline" class="filter-field">
-                  <mat-label>Author ID</mat-label>
-                  <input
-                    matInput
-                    type="text"
-                    [value]="filters().author_id || ''"
-                    (input)="onFilterChange('author_id', $event)"
-                    [class.mat-form-field-invalid]="
-                      validationErrors()['author_id']
-                    "
-                    placeholder="Enter author ID"
-                  />
-                  <mat-hint>Leave empty to show all</mat-hint>
-                  @if (validationErrors()['author_id']) {
-                    <mat-error>
-                      {{ validationErrors()['author_id'] }}
-                    </mat-error>
-                  }
-                </mat-form-field>
-              </div>
-
-              <!-- Published Filter -->
-              <div class="filter-group">
-                <label class="filter-label">Published</label>
-                <mat-form-field appearance="outline" class="filter-field">
-                  <mat-label>Published</mat-label>
-                  <mat-select
-                    [value]="filters().published"
-                    (selectionChange)="
-                      onFilterChange('published', $event.value)
-                    "
-                  >
-                    <mat-option value="">All</mat-option>
-                    <mat-option [value]="true">Yes</mat-option>
-                    <mat-option [value]="false">No</mat-option>
-                  </mat-select>
-                </mat-form-field>
-              </div>
-
-              <!-- View Count Range Filter -->
-              <div class="filter-group">
-                <label class="filter-label">View Count (Min)</label>
-                <mat-form-field appearance="outline" class="filter-field">
-                  <mat-label>Min Views</mat-label>
-                  <input
-                    matInput
-                    type="number"
-                    [value]="filters().view_count_min || ''"
-                    (input)="onFilterChange('view_count_min', $event)"
-                    placeholder="Minimum views"
-                  />
-                </mat-form-field>
-              </div>
-
-              <div class="filter-group">
-                <label class="filter-label">View Count (Max)</label>
-                <mat-form-field appearance="outline" class="filter-field">
-                  <mat-label>Max Views</mat-label>
-                  <input
-                    matInput
-                    type="number"
-                    [value]="filters().view_count_max || ''"
-                    (input)="onFilterChange('view_count_max', $event)"
-                    placeholder="Maximum views"
-                  />
-                </mat-form-field>
-              </div>
-            </div>
+            <div class="filter-grid"></div>
 
             <!-- Date Filters Section -->
             <div class="date-filters-section">
@@ -364,6 +268,15 @@ import { DateRangeFilterComponent } from '../../../shared/components/date-range-
                   >{{ selectedItems().length }} selected</span
                 >
                 <div class="bulk-buttons">
+                  <button
+                    mat-stroked-button
+                    color="warn"
+                    (click)="bulkDelete()"
+                    [disabled]="articlesService.loading()"
+                  >
+                    <mat-icon>delete</mat-icon>
+                    Delete Selected
+                  </button>
                   <button mat-stroked-button (click)="clearSelection()">
                     <mat-icon>clear</mat-icon>
                     Clear Selection
@@ -393,53 +306,6 @@ import { DateRangeFilterComponent } from '../../../shared/components/date-range-
                       [checked]="isSelected(articles.id)"
                       (change)="toggleSelect(articles.id)"
                     ></mat-checkbox>
-                  </td>
-                </ng-container>
-
-                <!-- Title Column -->
-                <ng-container matColumnDef="title">
-                  <th mat-header-cell *matHeaderCellDef>Title</th>
-                  <td mat-cell *matCellDef="let article">
-                    <span [title]="article.title">
-                      {{ article.title | slice: 0 : 50 }}
-                      @if (article.title && article.title.length > 50) {
-                        <span>...</span>
-                      }
-                    </span>
-                  </td>
-                </ng-container>
-
-                <!-- Author Column -->
-                <ng-container matColumnDef="author_id">
-                  <th mat-header-cell *matHeaderCellDef>Author</th>
-                  <td mat-cell *matCellDef="let article">
-                    {{ article.author_id }}
-                  </td>
-                </ng-container>
-
-                <!-- Published Column -->
-                <ng-container matColumnDef="published">
-                  <th mat-header-cell *matHeaderCellDef>Published</th>
-                  <td mat-cell *matCellDef="let article">
-                    <mat-icon [color]="article.published ? 'primary' : 'warn'">
-                      {{ article.published ? 'check_circle' : 'cancel' }}
-                    </mat-icon>
-                  </td>
-                </ng-container>
-
-                <!-- Published Date Column -->
-                <ng-container matColumnDef="published_at">
-                  <th mat-header-cell *matHeaderCellDef>Published Date</th>
-                  <td mat-cell *matCellDef="let article">
-                    {{ article.published_at | date: 'short' }}
-                  </td>
-                </ng-container>
-
-                <!-- View Count Column -->
-                <ng-container matColumnDef="view_count">
-                  <th mat-header-cell *matHeaderCellDef>Views</th>
-                  <td mat-cell *matCellDef="let article">
-                    {{ article.view_count }}
                   </td>
                 </ng-container>
 
@@ -873,16 +739,7 @@ export class ArticleListComponent implements OnInit, OnDestroy {
   readonly selectedItems = computed(() => Array.from(this.selectedIdsSignal()));
 
   // Table configuration
-  displayedColumns: string[] = [
-    'select',
-    'title',
-    'author_id',
-    'published',
-    'published_at',
-    'view_count',
-    'created_at',
-    'actions',
-  ];
+  displayedColumns: string[] = ['select', 'created_at', 'actions'];
 
   ngOnInit() {
     this.loadArticles();
@@ -929,14 +786,6 @@ export class ArticleListComponent implements OnInit, OnDestroy {
   private validateTechnicalFields(): { field: string; message: string }[] {
     const errors: { field: string; message: string }[] = [];
     const filters = this.filters();
-
-    // Validate author_id UUID field
-    if (filters.author_id && !this.isValidUuid(filters.author_id as string)) {
-      errors.push({
-        field: 'author_id',
-        message: 'Please enter a valid UUID format',
-      });
-    }
 
     return errors;
   }
@@ -1209,9 +1058,6 @@ export class ArticleListComponent implements OnInit, OnDestroy {
     this.clearValidationErrors();
 
     switch (filter) {
-      case 'published_true':
-        this.filtersSignal.set({ published: true });
-        break;
       case 'all':
       default:
         // Already cleared above
@@ -1249,26 +1095,7 @@ export class ArticleListComponent implements OnInit, OnDestroy {
       chips.push({ key: 'search', label: 'Search', value: this.searchTerm });
     }
 
-    // Date field filters
-    if (filters.published_at) {
-      chips.push({
-        key: 'published_at',
-        label: 'Published Date',
-        value: this.formatDate(filters.published_at as string),
-      });
-    } else if (filters.published_at_min || filters.published_at_max) {
-      const from = filters.published_at_min
-        ? this.formatDate(filters.published_at_min as string)
-        : '...';
-      const to = filters.published_at_max
-        ? this.formatDate(filters.published_at_max as string)
-        : '...';
-      chips.push({
-        key: 'published_at_range',
-        label: 'Published Date Range',
-        value: `${from} - ${to}`,
-      });
-    }
+    // Date field filters - only add if fields exist in schema
 
     if (filters.created_at) {
       chips.push({
@@ -1311,51 +1138,6 @@ export class ArticleListComponent implements OnInit, OnDestroy {
     }
 
     // Regular field filters
-    if (filters.title !== undefined && filters.title !== '') {
-      chips.push({
-        key: 'title',
-        label: 'Title',
-        value: String(filters.title),
-      });
-    }
-
-    if (filters.author_id !== undefined && filters.author_id !== '') {
-      chips.push({
-        key: 'author_id',
-        label: 'Author ID',
-        value: String(filters.author_id),
-      });
-    }
-
-    if (filters.published !== undefined && filters.published !== null) {
-      chips.push({
-        key: 'published',
-        label: 'Published',
-        value: filters.published ? 'Yes' : 'No',
-      });
-    }
-
-    if (
-      filters.view_count_min !== undefined &&
-      filters.view_count_min !== null
-    ) {
-      chips.push({
-        key: 'view_count_min',
-        label: 'Min Views',
-        value: String(filters.view_count_min),
-      });
-    }
-
-    if (
-      filters.view_count_max !== undefined &&
-      filters.view_count_max !== null
-    ) {
-      chips.push({
-        key: 'view_count_max',
-        label: 'Max Views',
-        value: String(filters.view_count_max),
-      });
-    }
 
     return chips;
   }
@@ -1450,6 +1232,32 @@ export class ArticleListComponent implements OnInit, OnDestroy {
           duration: 5000,
         });
       }
+    }
+  }
+
+  async bulkDelete() {
+    const selectedIds = Array.from(this.selectedIdsSignal());
+    if (selectedIds.length === 0) return;
+
+    const confirmed = confirm(
+      `Are you sure you want to delete ${selectedIds.length} Articles?`,
+    );
+    if (!confirmed) return;
+
+    try {
+      await this.articlesService.bulkDeleteArticle(selectedIds);
+      this.clearSelection();
+      this.snackBar.open(
+        `${selectedIds.length} Articles deleted successfully`,
+        'Close',
+        {
+          duration: 3000,
+        },
+      );
+    } catch (error) {
+      this.snackBar.open('Failed to delete Articles', 'Close', {
+        duration: 5000,
+      });
     }
   }
 }

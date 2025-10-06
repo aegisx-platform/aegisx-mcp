@@ -8,7 +8,10 @@ async function generateFrontendDirect() {
     const toolsDir = __dirname;
     const projectRoot = path.resolve(toolsDir, '..', '..');
 
-    console.log('🚀 Starting direct frontend generation for articles');
+    // Get module name from command line argument or default to articles
+    const moduleName = process.argv[2] || 'articles';
+
+    console.log(`🚀 Starting direct frontend generation for ${moduleName}`);
     console.log('📁 Tools directory:', toolsDir);
     console.log('📁 Project root:', projectRoot);
 
@@ -27,7 +30,7 @@ async function generateFrontendDirect() {
     console.log('📊 Generation options:', options);
 
     const generatedFiles = await generator.generateFrontendModule(
-      'articles',
+      moduleName,
       options,
     );
 

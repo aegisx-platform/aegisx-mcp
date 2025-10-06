@@ -17,8 +17,8 @@ export const ArticlesSchema = Type.Object({
   published: Type.Optional(Type.Boolean()),
   published_at: Type.Optional(Type.String({ format: 'date-time' })),
   view_count: Type.Optional(Type.Integer()),
-  created_at: Type.Optional(Type.String({ format: 'date-time' })),
-  updated_at: Type.Optional(Type.String({ format: 'date-time' })),
+  created_at: Type.String({ format: 'date-time' }),
+  updated_at: Type.String({ format: 'date-time' }),
 });
 
 // Create Schema (without auto-generated fields)
@@ -91,6 +91,9 @@ export const ListArticlesQuerySchema = Type.Object({
   ),
 
   // Include related data (only if table has foreign keys)
+  include: Type.Optional(
+    Type.Union([Type.String(), Type.Array(Type.String())]),
+  ),
 
   // Smart field-based filters
   published: Type.Optional(Type.Boolean()),

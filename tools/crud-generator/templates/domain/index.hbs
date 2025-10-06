@@ -1,8 +1,8 @@
 import fp from 'fastify-plugin';
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
-import { {{ModuleName}}Controller } from './controllers/{{currentRoute.camelName}}.controller';
-import { {{ModuleName}}Service } from './services/{{currentRoute.camelName}}.service';
-import { {{ModuleName}}Repository } from './repositories/{{currentRoute.camelName}}.repository';
+import { {{ModuleName}}Controller } from './controllers/{{kebabCase currentRoute.camelName}}.controller';
+import { {{ModuleName}}Service } from './services/{{kebabCase currentRoute.camelName}}.service';
+import { {{ModuleName}}Repository } from './repositories/{{kebabCase currentRoute.camelName}}.repository';
 import { {{currentRoute.camelName}}Routes } from './routes/index';
 
 // Note: FastifyInstance eventService type is declared in websocket.plugin.ts
@@ -44,7 +44,7 @@ export default fp(
     // Register routes with controller dependency
     await fastify.register({{currentRoute.camelName}}Routes, {
       controller: {{moduleName}}Controller,
-      prefix: options.prefix || '/{{moduleName}}'
+      prefix: options.prefix || '/{{kebabCase tableName}}'
     });
 
     // Lifecycle hooks for monitoring
@@ -67,11 +67,11 @@ export default fp(
 );
 
 // Re-exports for external consumers
-export * from './schemas/{{currentRoute.camelName}}.schemas';
-export * from './types/{{currentRoute.camelName}}.types';
-export { {{ModuleName}}Repository } from './repositories/{{currentRoute.camelName}}.repository';
-export { {{ModuleName}}Service } from './services/{{currentRoute.camelName}}.service';
-export { {{ModuleName}}Controller } from './controllers/{{currentRoute.camelName}}.controller';
+export * from './schemas/{{kebabCase currentRoute.camelName}}.schemas';
+export * from './types/{{kebabCase currentRoute.camelName}}.types';
+export { {{ModuleName}}Repository } from './repositories/{{kebabCase currentRoute.camelName}}.repository';
+export { {{ModuleName}}Service } from './services/{{kebabCase currentRoute.camelName}}.service';
+export { {{ModuleName}}Controller } from './controllers/{{kebabCase currentRoute.camelName}}.controller';
 
 // Re-export commonly used types for external use
 export type {
@@ -84,11 +84,11 @@ export type {
   {{ModuleName}}CreatedEvent,
   {{ModuleName}}UpdatedEvent,
   {{ModuleName}}DeletedEvent{{/if}}
-} from './schemas/{{currentRoute.camelName}}.schemas';
+} from './schemas/{{kebabCase currentRoute.camelName}}.schemas';
 
 {{#if withEvents}}
 // Event type definitions for external consumers
-import { {{ModuleName}} } from './schemas/{{currentRoute.camelName}}.schemas';
+import { {{ModuleName}} } from './schemas/{{kebabCase currentRoute.camelName}}.schemas';
 
 export interface {{ModuleName}}EventHandlers {
   onCreated?: (data: {{ModuleName}}) => void | Promise<void>;

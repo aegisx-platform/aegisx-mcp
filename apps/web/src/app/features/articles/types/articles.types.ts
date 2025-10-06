@@ -3,31 +3,31 @@
 export interface Article {
   id: string;
   title: string;
-  content: string;
+  content?: string | null;
   author_id: string;
-  published: boolean;
-  published_at: string;
-  view_count: number;
+  published?: boolean | null;
+  published_at?: string | null;
+  view_count?: number | null;
   created_at: string;
   updated_at: string;
 }
 
 export interface CreateArticleRequest {
   title: string;
-  content: string;
+  content?: string | null;
   author_id: string;
-  published: boolean;
-  published_at: string;
-  view_count: number;
+  published?: boolean | null;
+  published_at?: string | null;
+  view_count?: number | null;
 }
 
 export interface UpdateArticleRequest {
   title?: string;
-  content?: string;
+  content?: string | null;
   author_id?: string;
-  published?: boolean;
-  published_at?: string;
-  view_count?: number;
+  published?: boolean | null;
+  published_at?: string | null;
+  view_count?: number | null;
 }
 
 // ===== QUERY TYPES =====
@@ -111,6 +111,43 @@ export interface PaginatedResponse<T> {
   };
 }
 
+// ===== ENHANCED TYPES =====
+
+export interface DropdownOption {
+  value: string;
+  label: string;
+  disabled?: boolean;
+}
+
+export interface DropdownResponse {
+  options: DropdownOption[];
+  total: number;
+}
+
+export interface BulkOperationSummary {
+  total: number;
+  successful: number;
+  failed: number;
+  errors: Array<{
+    index: number;
+    error: string;
+    data?: any;
+  }>;
+}
+
+export interface BulkResponse {
+  success: boolean;
+  data: Article[];
+  summary: BulkOperationSummary;
+  message: string;
+  meta?: {
+    timestamp: string;
+    version: string;
+    requestId: string;
+    environment: string;
+  };
+}
+
 // ===== UTILITY TYPES =====
 
 export type ArticleField = keyof Article;
@@ -122,15 +159,4 @@ export interface ArticleListOptions {
   sort?: string;
   fields?: ArticleField[];
   search?: string;
-}
-
-// ===== BASIC BULK OPERATIONS =====
-
-export interface BulkResponse {
-  success: boolean;
-  created?: number;
-  updated?: number;
-  deleted?: number;
-  errors?: any[];
-  message?: string;
 }

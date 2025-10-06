@@ -276,6 +276,153 @@ export class ArticleService {
     }
   }
 
+  // ===== ENHANCED OPERATIONS =====
+
+  /**
+   * Get dropdown options for articles
+   */
+  async getDropdownOptions(
+    params: { search?: string; limit?: number } = {},
+  ): Promise<Array<{ value: string; label: string }>> {
+    try {
+      let httpParams = new HttpParams();
+      if (params.search) httpParams = httpParams.set('search', params.search);
+      if (params.limit)
+        httpParams = httpParams.set('limit', params.limit.toString());
+
+      const response = await this.http
+        .get<
+          ApiResponse<{
+            options: Array<{ value: string; label: string }>;
+            total: number;
+          }>
+        >(`${this.baseUrl}/dropdown`, { params: httpParams })
+        .toPromise();
+
+      if (response?.success && response.data?.options) {
+        return response.data.options;
+      }
+      return [];
+    } catch (error: any) {
+      console.error('Failed to fetch articles dropdown options:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get users dropdown options for author_id field
+   */
+  async getUsersDropdown(
+    params: { search?: string; limit?: number } = {},
+  ): Promise<Array<{ value: string; label: string; disabled?: boolean }>> {
+    try {
+      let httpParams = new HttpParams();
+      if (params.search) httpParams = httpParams.set('search', params.search);
+      if (params.limit)
+        httpParams = httpParams.set('limit', params.limit.toString());
+
+      const response = await this.http
+        .get<
+          ApiResponse<{
+            options: Array<{
+              value: string;
+              label: string;
+              disabled?: boolean;
+            }>;
+            total: number;
+          }>
+        >('/users/dropdown', { params: httpParams })
+        .toPromise();
+
+      if (response?.success && response.data?.options) {
+        return response.data.options;
+      }
+      return [];
+    } catch (error: any) {
+      console.error('Failed to fetch users dropdown options:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Bulk create articless
+   */
+  async bulkCreateArticle(
+    items: CreateArticleRequest[],
+  ): Promise<BulkResponse | null> {
+    this.loadingSignal.set(true);
+
+    try {
+      const response = await this.http
+        .post<BulkResponse>(`${this.baseUrl}/bulk`, { items })
+        .toPromise();
+
+      if (response) {
+        // Refresh list after bulk operation
+        await this.loadArticleList();
+        return response;
+      }
+      return null;
+    } catch (error: any) {
+      this.errorSignal.set(error.message || 'Failed to bulk create articless');
+      throw error;
+    } finally {
+      this.loadingSignal.set(false);
+    }
+  }
+
+  /**
+   * Bulk update articless
+   */
+  async bulkUpdateArticle(
+    items: Array<{ id: string; data: UpdateArticleRequest }>,
+  ): Promise<BulkResponse | null> {
+    this.loadingSignal.set(true);
+
+    try {
+      const response = await this.http
+        .put<BulkResponse>(`${this.baseUrl}/bulk`, { items })
+        .toPromise();
+
+      if (response) {
+        // Refresh list after bulk operation
+        await this.loadArticleList();
+        return response;
+      }
+      return null;
+    } catch (error: any) {
+      this.errorSignal.set(error.message || 'Failed to bulk update articless');
+      throw error;
+    } finally {
+      this.loadingSignal.set(false);
+    }
+  }
+
+  /**
+   * Bulk delete articless
+   */
+  async bulkDeleteArticle(ids: string[]): Promise<BulkResponse | null> {
+    this.loadingSignal.set(true);
+
+    try {
+      const response = await this.http
+        .delete<BulkResponse>(`${this.baseUrl}/bulk`, { body: { ids } })
+        .toPromise();
+
+      if (response) {
+        // Refresh list after bulk operation
+        await this.loadArticleList();
+        return response;
+      }
+      return null;
+    } catch (error: any) {
+      this.errorSignal.set(error.message || 'Failed to bulk delete articless');
+      throw error;
+    } finally {
+      this.loadingSignal.set(false);
+    }
+  }
+
   // ===== UTILITY METHODS =====
 
   /**

@@ -7,7 +7,7 @@ import {
   type Get{{ModuleName}}Query,
   type List{{ModuleName}}Query,
   type {{ModuleName}}Entity
-} from '../types/{{currentRoute.camelName}}.types';
+} from '../types/{{kebabCase currentRoute.camelName}}.types';
 
 export interface {{ModuleName}}ListQuery extends BaseListQuery {
   // Smart field-based filters for {{ModuleName}}

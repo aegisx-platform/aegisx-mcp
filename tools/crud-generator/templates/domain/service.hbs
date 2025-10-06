@@ -1,5 +1,5 @@
 import { BaseService } from '../../../shared/services/base.service';
-import { {{ModuleName}}Repository } from '../repositories/{{currentRoute.camelName}}.repository';
+import { {{ModuleName}}Repository } from '../repositories/{{kebabCase currentRoute.camelName}}.repository';
 {{#if withEvents}}
 import { EventService } from '../../../shared/websocket/event.service';
 import { CrudEventHelper } from '../../../shared/websocket/crud-event-helper';
@@ -10,7 +10,7 @@ import {
   type Update{{ModuleName}},
   type Get{{ModuleName}}Query,
   type List{{ModuleName}}Query
-} from '../types/{{currentRoute.camelName}}.types';
+} from '../types/{{kebabCase currentRoute.camelName}}.types';
 
 /**
  * {{ModuleName}} Service
@@ -208,9 +208,30 @@ export class {{ModuleName}}Service extends BaseService<{{ModuleName}}, Create{{M
     // Example: Prevent deletion if entity has dependent records
     {{#each columns}}
     {{#if (eq name 'status')}}
-    if (existing.status === 'active') {
+    {{#if (or (eq tsType 'boolean') (eq type 'boolean'))}}
+    if (existing.status === true) {
       throw new Error('Cannot delete active {{moduleName}}');
     }
+    {{else}}
+      {{#if (hasConstraints name)}}
+        {{#with (getConstraintValue name 1)}}
+    if (existing.status === '{{this}}') {
+      throw new Error('Cannot delete {{this}} {{moduleName}}');
+    }
+        {{else}}
+          {{#with (getConstraintValue name 0)}}
+    if (existing.status && existing.status !== '{{this}}') {
+      throw new Error('Cannot delete {{moduleName}} with current status');
+    }
+          {{/with}}
+        {{/with}}
+      {{else}}
+    // No status constraints found - manual validation required
+    if (existing.status) {
+      throw new Error('Cannot delete {{moduleName}} - please verify status manually');
+    }
+      {{/if}}
+    {{/if}}
     {{/if}}
     {{/each}}
   }
@@ -527,15 +548,17 @@ export class {{ModuleName}}Service extends BaseService<{{ModuleName}}, Create{{M
       query.excludeId = options.excludeId;
     }
 
-    // Use field-specific find methods based on available repository methods
+    // Use field-specific find methods based on repository's isDisplayField logic
     let existing: any = null;
     
     {{#each columns}}
-    {{#if (or (eq name 'name') (eq name 'email') (eq name 'username') (eq name 'slug'))}}
+    {{#unless (or isPrimaryKey (eq name 'created_at') (eq name 'updated_at'))}}
+    {{#if (isDisplayField this)}}
     if (field === '{{name}}' && options.value) {
       existing = await this.{{../moduleName}}Repository.findBy{{pascalCase name}}(options.value);
     }{{#unless @last}} else {{/unless}}
     {{/if}}
+    {{/unless}}
     {{/each}}
     
     // If updating (excludeId provided), ignore the current record

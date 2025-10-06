@@ -4,8 +4,21 @@ const dotenv = require('dotenv');
 // Load environment variables
 dotenv.config();
 if (process.env.NODE_ENV !== 'production') {
-  // Load from project root .env.local
-  dotenv.config({ path: '../../.env.local', override: true });
+  // Try multiple paths for .env.local
+  const fs = require('fs');
+  const envPaths = [
+    '../../../.env.local', // from tools/crud-generator/src/
+    '../../.env.local', // from tools/crud-generator/
+    './.env.local', // from root
+    '.env.local', // current directory
+  ];
+
+  for (const envPath of envPaths) {
+    if (fs.existsSync(envPath)) {
+      dotenv.config({ path: envPath, override: true });
+      break;
+    }
+  }
 }
 
 const config = {

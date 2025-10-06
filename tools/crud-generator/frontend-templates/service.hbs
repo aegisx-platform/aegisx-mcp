@@ -23,7 +23,7 @@ const API_BASE_URL = '';
 })
 export class {{PascalCase}}Service {
   private http = inject(HttpClient);
-  private baseUrl = `${API_BASE_URL}/{{kebabCase moduleName}}`;
+  private baseUrl = `${API_BASE_URL}/{{tableNameToKebab moduleName}}`;
 
   // ===== SIGNALS FOR STATE MANAGEMENT =====
   

@@ -29,7 +29,7 @@ describe('{{ModuleName}} Domain', () => {
       // TODO: Add actual test data based on your schema
       name: `Test {{currentRoute.pascalName}} ${Date.now()}`,
       description: 'Test description',
-      {{#if hasStatusField}}{{#each columns}}{{#if (or (eq name 'status') (eq name 'is_active'))}}{{#if (eq jsType 'boolean')}}{{name}}: true{{else}}{{name}}: 'active'{{/if}}{{/if}}{{/each}}{{/if}}
+      {{#if hasStatusField}}{{#each columns}}{{#if (or (eq name 'status') (eq name 'is_active'))}}{{#if (eq jsType 'boolean')}}{{name}}: true{{else}}{{#with (getSafeDefault name jsType)}}{{#if this}}{{../name}}: '{{this}}'{{/if}}{{/with}}{{/if}}{{/if}}{{/each}}{{/if}}
     });
 
     describe('POST /{{currentRoute.name}}', () => {
@@ -93,7 +93,7 @@ describe('{{ModuleName}} Domain', () => {
       it('should filter {{currentRoute.name}} by query parameters', async () => {
         const response = await app.inject({
           method: 'GET',
-          url: '/{{currentRoute.name}}?{{#if hasStatusField}}{{#each columns}}{{#if (or (eq name 'status') (eq name 'is_active'))}}{{#if (eq jsType 'boolean')}}{{name}}=true{{else}}{{name}}=active{{/if}}&{{/if}}{{/each}}{{/if}}name=Test'
+          url: '/{{currentRoute.name}}?{{#if hasStatusField}}{{#each columns}}{{#if (or (eq name 'status') (eq name 'is_active'))}}{{#if (eq jsType 'boolean')}}{{name}}=true{{else}}{{#with (getSafeDefault name jsType)}}{{#if this}}{{../name}}={{this}}{{/if}}{{/with}}{{/if}}&{{/if}}{{/each}}{{/if}}name=Test'
         });
 
         expect(response.statusCode).toBe(200);
