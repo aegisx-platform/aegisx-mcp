@@ -10,11 +10,15 @@ import { BookFormComponent, BookFormData } from './books-form.component';
 @Component({
   selector: 'app-books-create-dialog',
   standalone: true,
-  imports: [CommonModule, MatDialogModule, BookFormComponent],
+  imports: [
+    CommonModule,
+    MatDialogModule,
+    BookFormComponent,
+  ],
   template: `
     <div class="create-dialog">
       <h2 mat-dialog-title>Create Books</h2>
-
+      
       <mat-dialog-content>
         <app-books-form
           mode="create"
@@ -25,25 +29,23 @@ import { BookFormComponent, BookFormData } from './books-form.component';
       </mat-dialog-content>
     </div>
   `,
-  styles: [
-    `
+  styles: [`
+    .create-dialog {
+      min-width: 500px;
+      max-width: 800px;
+    }
+
+    mat-dialog-content {
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    @media (max-width: 768px) {
       .create-dialog {
-        min-width: 500px;
-        max-width: 800px;
+        min-width: 90vw;
       }
-
-      mat-dialog-content {
-        max-height: 70vh;
-        overflow-y: auto;
-      }
-
-      @media (max-width: 768px) {
-        .create-dialog {
-          min-width: 90vw;
-        }
-      }
-    `,
-  ],
+    }
+  `]
 })
 export class BookCreateDialogComponent {
   private booksService = inject(BookService);
@@ -54,11 +56,11 @@ export class BookCreateDialogComponent {
 
   async onFormSubmit(formData: BookFormData) {
     this.loading.set(true);
-
+    
     try {
       const createRequest = formData as CreateBookRequest;
       const result = await this.booksService.createBook(createRequest);
-
+      
       if (result) {
         this.snackBar.open('Books created successfully', 'Close', {
           duration: 3000,
@@ -70,9 +72,11 @@ export class BookCreateDialogComponent {
         });
       }
     } catch (error: any) {
-      this.snackBar.open(error.message || 'Failed to create Books', 'Close', {
-        duration: 5000,
-      });
+      this.snackBar.open(
+        error.message || 'Failed to create Books', 
+        'Close', 
+        { duration: 5000 }
+      );
     } finally {
       this.loading.set(false);
     }

@@ -1,11 +1,4 @@
-import {
-  Component,
-  OnInit,
-  computed,
-  signal,
-  inject,
-  OnDestroy,
-} from '@angular/core';
+import { Component, OnInit, computed, signal, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -34,14 +27,8 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { BookService } from '../services/books.service';
 import { Book, ListBookQuery } from '../types/books.types';
 import { BookCreateDialogComponent } from './books-create.dialog';
-import {
-  BookEditDialogComponent,
-  BookEditDialogData,
-} from './books-edit.dialog';
-import {
-  BookViewDialogComponent,
-  BookViewDialogData,
-} from './books-view.dialog';
+import { BookEditDialogComponent, BookEditDialogData } from './books-edit.dialog';
+import { BookViewDialogComponent, BookViewDialogData } from './books-view.dialog';
 import { DateRangeFilterComponent } from '../../../shared/components/date-range-filter/date-range-filter.component';
 
 @Component({
@@ -84,18 +71,18 @@ import { DateRangeFilterComponent } from '../../../shared/components/date-range-
           <div class="search-wrapper">
             <mat-form-field appearance="outline" class="search-field">
               <mat-label>Search Books</mat-label>
-              <input
-                matInput
+              <input 
+                matInput 
                 placeholder="Search by title, name, description"
                 [(ngModel)]="searchTerm"
                 (input)="onSearchChange()"
                 (keyup.enter)="onSearchButtonClick()"
-              />
+              >
               <mat-icon matSuffix>search</mat-icon>
             </mat-form-field>
-            <button
-              mat-raised-button
-              color="primary"
+            <button 
+              mat-raised-button 
+              color="primary" 
               (click)="openCreateDialog()"
               [disabled]="booksService.loading()"
               class="add-btn"
@@ -111,35 +98,35 @@ import { DateRangeFilterComponent } from '../../../shared/components/date-range-
       <mat-card class="quick-filters-card">
         <mat-card-content>
           <div class="quick-filters">
-            <button
-              mat-stroked-button
+            <button 
+              mat-stroked-button 
               [class.active]="quickFilter === 'all'"
               (click)="setQuickFilter('all')"
               class="filter-chip"
             >
               All
             </button>
-
+            
             <!-- Active Items Filter -->
-            <button
-              mat-stroked-button
+            <button 
+              mat-stroked-button 
               [class.active]="quickFilter === 'active'"
               (click)="setQuickFilter('active')"
               class="filter-chip"
             >
               Active
             </button>
-
+            
             <!-- Published Status Filter -->
-            <button
-              mat-stroked-button
+            <button 
+              mat-stroked-button 
               [class.active]="quickFilter === 'published'"
               (click)="setQuickFilter('published')"
               class="filter-chip"
             >
               Published
             </button>
-
+            
             <!-- Additional quick filters - uncomment as needed -->
             <!-- Featured Items:
             <button 
@@ -151,7 +138,7 @@ import { DateRangeFilterComponent } from '../../../shared/components/date-range-
               Featured
             </button>
             -->
-
+            
             <!-- Available Items:
             <button 
               mat-stroked-button 
@@ -162,7 +149,7 @@ import { DateRangeFilterComponent } from '../../../shared/components/date-range-
               Available
             </button>
             -->
-
+            
             <!-- Draft Status:
             <button 
               mat-stroked-button 
@@ -179,29 +166,29 @@ import { DateRangeFilterComponent } from '../../../shared/components/date-range-
 
       <!-- Active Filters -->
       @if (getActiveFilterChips().length > 0) {
-        <div class="active-filters">
-          <span class="active-filters-label">Active Filters:</span>
-          <div class="filter-chips">
-            <mat-chip
-              *ngFor="let chip of getActiveFilterChips()"
-              (removed)="removeFilter(chip.key)"
-              class="filter-chip"
-              removable
-            >
-              <strong>{{ chip.label }}:</strong> {{ chip.value }}
-              <mat-icon matChipRemove>cancel</mat-icon>
-            </mat-chip>
-          </div>
-          <button
-            mat-stroked-button
-            color="warn"
-            (click)="clearAllFilters()"
-            class="clear-all-btn"
+      <div class="active-filters">
+        <span class="active-filters-label">Active Filters:</span>
+        <div class="filter-chips">
+          <mat-chip 
+            *ngFor="let chip of getActiveFilterChips()" 
+            (removed)="removeFilter(chip.key)"
+            class="filter-chip"
+            removable
           >
-            <mat-icon>clear_all</mat-icon>
-            Clear All
-          </button>
+            <strong>{{ chip.label \}}:</strong> {{ chip.value \}}
+            <mat-icon matChipRemove>cancel</mat-icon>
+          </mat-chip>
         </div>
+        <button 
+          mat-stroked-button 
+          color="warn"
+          (click)="clearAllFilters()"
+          class="clear-all-btn"
+        >
+          <mat-icon>clear_all</mat-icon>
+          Clear All
+        </button>
+      </div>
       }
 
       <!-- Summary Dashboard -->
@@ -219,37 +206,37 @@ import { DateRangeFilterComponent } from '../../../shared/components/date-range-
                 <mat-icon color="primary">view_list</mat-icon>
               </div>
               <div class="summary-content">
-                <div class="summary-value">{{ booksService.totalBook() }}</div>
+                <div class="summary-value">{{ booksService.totalBook() \}}</div>
                 <div class="summary-label">Total Books</div>
               </div>
             </div>
-
+            
             <div class="summary-item">
               <div class="summary-icon">
                 <mat-icon color="accent">check_circle</mat-icon>
               </div>
               <div class="summary-content">
-                <div class="summary-value">{{ getActiveCount() }}</div>
+                <div class="summary-value">{{ getActiveCount() \}}</div>
                 <div class="summary-label">Active Items</div>
               </div>
             </div>
-
+            
             <div class="summary-item">
               <div class="summary-icon">
                 <mat-icon color="warn">schedule</mat-icon>
               </div>
               <div class="summary-content">
-                <div class="summary-value">{{ getDraftCount() }}</div>
+                <div class="summary-value">{{ getDraftCount() \}}</div>
                 <div class="summary-label">Draft Items</div>
               </div>
             </div>
-
+            
             <div class="summary-item">
               <div class="summary-icon">
                 <mat-icon>today</mat-icon>
               </div>
               <div class="summary-content">
-                <div class="summary-value">{{ getRecentCount() }}</div>
+                <div class="summary-value">{{ getRecentCount() \}}</div>
                 <div class="summary-label">Added This Week</div>
               </div>
             </div>
@@ -264,14 +251,12 @@ import { DateRangeFilterComponent } from '../../../shared/components/date-range-
             <mat-icon>file_download</mat-icon>
             Export Data
           </mat-card-title>
-          <mat-card-subtitle
-            >Export all Books data in various formats</mat-card-subtitle
-          >
+          <mat-card-subtitle>Export all Books data in various formats</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
           <div class="export-actions">
-            <button
-              mat-raised-button
+            <button 
+              mat-raised-button 
               color="primary"
               (click)="exportAllData('csv')"
               [disabled]="booksService.loading()"
@@ -280,9 +265,9 @@ import { DateRangeFilterComponent } from '../../../shared/components/date-range-
               <mat-icon>table_chart</mat-icon>
               Export CSV
             </button>
-
-            <button
-              mat-raised-button
+            
+            <button 
+              mat-raised-button 
               color="accent"
               (click)="exportAllData('excel')"
               [disabled]="booksService.loading()"
@@ -291,9 +276,9 @@ import { DateRangeFilterComponent } from '../../../shared/components/date-range-
               <mat-icon>grid_on</mat-icon>
               Export Excel
             </button>
-
-            <button
-              mat-raised-button
+            
+            <button 
+              mat-raised-button 
               (click)="exportAllData('pdf')"
               [disabled]="booksService.loading()"
               matTooltip="Export all data as PDF file"
@@ -301,9 +286,9 @@ import { DateRangeFilterComponent } from '../../../shared/components/date-range-
               <mat-icon>picture_as_pdf</mat-icon>
               Export PDF
             </button>
-
+            
             <!-- Export with Filters Toggle -->
-            <mat-slide-toggle
+            <mat-slide-toggle 
               [(ngModel)]="includeFiltersInExport"
               color="primary"
               matTooltip="Include current filters in export"
@@ -311,17 +296,12 @@ import { DateRangeFilterComponent } from '../../../shared/components/date-range-
               Apply Current Filters
             </mat-slide-toggle>
           </div>
-
+          
           <div class="export-info">
             <mat-icon class="info-icon">info</mat-icon>
             <span class="info-text">
-              Exports will include
-              {{ includeFiltersInExport ? 'filtered' : 'all' }} data ({{
-                includeFiltersInExport
-                  ? booksService.booksList().length
-                  : booksService.totalBook()
-              }}
-              records)
+              Exports will include {{ includeFiltersInExport ? 'filtered' : 'all' \}} data
+              ({{ includeFiltersInExport ? booksService.booksList().length : booksService.totalBook() \}} records)
             </span>
           </div>
         </mat-card-content>
@@ -357,17 +337,15 @@ import { DateRangeFilterComponent } from '../../../shared/components/date-range-
                   />
                 </mat-form-field>
               </div>
-
+              
               <!-- Available Filter -->
               <div class="filter-group">
                 <label class="filter-label">Available</label>
                 <mat-form-field appearance="outline" class="filter-field">
                   <mat-label>Available</mat-label>
-                  <mat-select
+                  <mat-select 
                     [value]="filters().available"
-                    (selectionChange)="
-                      onFilterChange('available', $event.value)
-                    "
+                    (selectionChange)="onFilterChange('available', $event.value)"
                   >
                     <mat-option value="">All</mat-option>
                     <mat-option [value]="true">Yes</mat-option>
@@ -375,6 +353,7 @@ import { DateRangeFilterComponent } from '../../../shared/components/date-range-
                   </mat-select>
                 </mat-form-field>
               </div>
+              
             </div>
 
             <!-- Date Filters Section -->
@@ -383,7 +362,7 @@ import { DateRangeFilterComponent } from '../../../shared/components/date-range-
                 <mat-icon>event</mat-icon>
                 Date Filters
               </h4>
-
+              
               <div class="date-filters-grid">
                 <!-- Published Date Filter -->
                 <div class="date-filter-group">
@@ -395,7 +374,7 @@ import { DateRangeFilterComponent } from '../../../shared/components/date-range-
                     (filterChange)="onDateFilterChange($event)"
                   ></app-date-range-filter>
                 </div>
-
+                
                 <!-- Created Date Filter -->
                 <div class="date-filter-group">
                   <label class="filter-label">Created Date</label>
@@ -406,7 +385,7 @@ import { DateRangeFilterComponent } from '../../../shared/components/date-range-
                     (filterChange)="onDateFilterChange($event)"
                   ></app-date-range-filter>
                 </div>
-
+                
                 <!-- Updated Date Filter -->
                 <div class="date-filter-group">
                   <label class="filter-label">Updated Date</label>
@@ -422,16 +401,16 @@ import { DateRangeFilterComponent } from '../../../shared/components/date-range-
 
             <!-- Action Buttons -->
             <div class="filter-actions">
-              <button
-                mat-stroked-button
+              <button 
+                mat-stroked-button 
                 (click)="resetFilters()"
                 class="reset-btn"
               >
                 Reset Filters
               </button>
-              <button
-                mat-raised-button
-                color="primary"
+              <button 
+                mat-raised-button 
+                color="primary" 
                 (click)="applyFiltersImmediate()"
                 class="apply-btn"
               >
@@ -444,731 +423,700 @@ import { DateRangeFilterComponent } from '../../../shared/components/date-range-
 
       <!-- Loading State -->
       @if (booksService.loading()) {
-        <div class="loading-container">
-          <mat-progress-spinner
-            mode="indeterminate"
-            diameter="50"
-          ></mat-progress-spinner>
-          <p>Loading Books...</p>
-        </div>
+      <div class="loading-container">
+        <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+        <p>Loading Books...</p>
+      </div>
       }
 
       <!-- Error State -->
       @if (booksService.error()) {
-        <mat-card class="error-card">
-          <mat-card-content>
-            <div class="error-content">
-              <mat-icon color="warn">error</mat-icon>
-              <p>{{ booksService.error() }}</p>
-              <button mat-button color="primary" (click)="retry()">
-                <mat-icon>refresh</mat-icon>
-                Retry
-              </button>
-            </div>
-          </mat-card-content>
-        </mat-card>
+      <mat-card class="error-card">
+        <mat-card-content>
+          <div class="error-content">
+            <mat-icon color="warn">error</mat-icon>
+            <p>{{ booksService.error() \}}</p>
+            <button mat-button color="primary" (click)="retry()">
+              <mat-icon>refresh</mat-icon>
+              Retry
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
       }
 
       <!-- Data Table -->
       @if (!booksService.loading() && !booksService.error()) {
-        <mat-card class="table-card">
-          <mat-card-content>
-            <!-- Bulk Actions -->
-            @if (hasSelected()) {
-              <div class="bulk-actions">
-                <span class="selection-info"
-                  >{{ selectedItems().length }} selected</span
-                >
-                <div class="bulk-buttons">
-                  <!-- Bulk Delete -->
-                  <button
-                    mat-stroked-button
-                    color="warn"
-                    (click)="bulkDelete()"
-                    [disabled]="booksService.loading()"
-                    matTooltip="Delete selected items"
-                  >
-                    <mat-icon>delete</mat-icon>
-                    Delete
-                  </button>
+      <mat-card class="table-card">
+        <mat-card-content>
+          <!-- Bulk Actions -->
+          @if (hasSelected()) {
+          <div class="bulk-actions">
+            <span class="selection-info">{{ selectedItems().length \}} selected</span>
+            <div class="bulk-buttons">
+              <!-- Bulk Delete -->
+              <button 
+                mat-stroked-button 
+                color="warn"
+                (click)="bulkDelete()"
+                [disabled]="booksService.loading()"
+                matTooltip="Delete selected items"
+              >
+                <mat-icon>delete</mat-icon>
+                Delete
+              </button>
+              
+              <!-- Bulk Status Update -->
+              <button 
+                mat-stroked-button 
+                [matMenuTriggerFor]="bulkStatusMenu"
+                [disabled]="booksService.loading()"
+                matTooltip="Update status for selected items"
+              >
+                <mat-icon>edit</mat-icon>
+                Update Status
+              </button>
+              <mat-menu #bulkStatusMenu="matMenu">
+                <button mat-menu-item (click)="bulkUpdateStatus('active')">
+                  <mat-icon>check_circle</mat-icon>
+                  <span>Set Active</span>
+                </button>
+                <button mat-menu-item (click)="bulkUpdateStatus('inactive')">
+                  <mat-icon>cancel</mat-icon>
+                  <span>Set Inactive</span>
+                </button>
+                <button mat-menu-item (click)="bulkUpdateStatus('published')">
+                  <mat-icon>publish</mat-icon>
+                  <span>Publish</span>
+                </button>
+                <button mat-menu-item (click)="bulkUpdateStatus('draft')">
+                  <mat-icon>draft</mat-icon>
+                  <span>Set Draft</span>
+                </button>
+              </mat-menu>
+              
+              <!-- Bulk Export -->
+              <button 
+                mat-stroked-button 
+                color="accent"
+                [matMenuTriggerFor]="bulkExportMenu"
+                [disabled]="booksService.loading()"
+                matTooltip="Export selected items"
+              >
+                <mat-icon>download</mat-icon>
+                Export
+              </button>
+              <mat-menu #bulkExportMenu="matMenu">
+                <button mat-menu-item (click)="exportSelected('csv')">
+                  <mat-icon>table_chart</mat-icon>
+                  <span>Export as CSV</span>
+                </button>
+                <button mat-menu-item (click)="exportSelected('excel')">
+                  <mat-icon>grid_on</mat-icon>
+                  <span>Export as Excel</span>
+                </button>
+                <button mat-menu-item (click)="exportSelected('pdf')">
+                  <mat-icon>picture_as_pdf</mat-icon>
+                  <span>Export as PDF</span>
+                </button>
+              </mat-menu>
+              
+              <!-- Clear Selection -->
+              <button 
+                mat-stroked-button 
+                (click)="clearSelection()"
+              >
+                <mat-icon>clear</mat-icon>
+                Clear Selection
+              </button>
+            </div>
+          </div>
+          }
 
-                  <!-- Bulk Status Update -->
-                  <button
-                    mat-stroked-button
-                    [matMenuTriggerFor]="bulkStatusMenu"
-                    [disabled]="booksService.loading()"
-                    matTooltip="Update status for selected items"
+          <!-- Table -->
+          <div class="table-container">
+            <table mat-table [dataSource]="booksService.booksList()" class="books-table">
+              <!-- Selection Column -->
+              <ng-container matColumnDef="select">
+                <th mat-header-cell *matHeaderCellDef>
+                  <mat-checkbox
+                    [checked]="isAllSelected()"
+                    [indeterminate]="hasSelected() && !isAllSelected()"
+                    (change)="toggleSelectAll()"
+                  ></mat-checkbox>
+                </th>
+                <td mat-cell *matCellDef="let books">
+                  <mat-checkbox
+                    [checked]="isSelected(books.id)"
+                    (change)="toggleSelect(books.id)"
+                  ></mat-checkbox>
+                </td>
+              </ng-container>
+
+              <!-- title Column -->
+              <ng-container matColumnDef="title">
+                <th mat-header-cell *matHeaderCellDef>Title</th>
+                <td mat-cell *matCellDef="let books">
+                  <span class="text-cell">{{ books.title || '-' \}}</span>
+                </td>
+              </ng-container>
+
+              <!-- description Column -->
+              <ng-container matColumnDef="description">
+                <th mat-header-cell *matHeaderCellDef>Description</th>
+                <td mat-cell *matCellDef="let books">
+                  <span [title]="books.description" class="truncated-cell">
+                    {{ books.description | slice:0:50 \}}
+                    @if (books.description && books.description.length > 50) {
+                      <span>...</span>
+                    }
+                  </span>
+                </td>
+              </ng-container>
+
+              <!-- author_id Column -->
+              <ng-container matColumnDef="author_id">
+                <th mat-header-cell *matHeaderCellDef>Author_id</th>
+                <td mat-cell *matCellDef="let books">
+                  <span class="text-cell">{{ books.author_id || '-' \}}</span>
+                </td>
+              </ng-container>
+
+              <!-- isbn Column -->
+              <ng-container matColumnDef="isbn">
+                <th mat-header-cell *matHeaderCellDef>Isbn</th>
+                <td mat-cell *matCellDef="let books">
+                  <span class="code-cell">{{ books.isbn || '-' \}}</span>
+                </td>
+              </ng-container>
+
+              <!-- pages Column -->
+              <ng-container matColumnDef="pages">
+                <th mat-header-cell *matHeaderCellDef>Pages</th>
+                <td mat-cell *matCellDef="let books">
+                  <span class="numeric-cell">{{ books.pages || '-' \}}</span>
+                </td>
+              </ng-container>
+
+              <!-- published_date Column -->
+              <ng-container matColumnDef="published_date">
+                <th mat-header-cell *matHeaderCellDef>Published_date</th>
+                <td mat-cell *matCellDef="let books">
+                  <span class="text-cell">{{ books.published_date || '-' \}}</span>
+                </td>
+              </ng-container>
+
+              <!-- price Column -->
+              <ng-container matColumnDef="price">
+                <th mat-header-cell *matHeaderCellDef>Price</th>
+                <td mat-cell *matCellDef="let books">
+                  <span class="price-cell">{{ books.price ? (books.price | currency) : '-' \}}</span>
+                </td>
+              </ng-container>
+
+              <!-- genre Column -->
+              <ng-container matColumnDef="genre">
+                <th mat-header-cell *matHeaderCellDef>Genre</th>
+                <td mat-cell *matCellDef="let books">
+                  <span class="text-cell">{{ books.genre || '-' \}}</span>
+                </td>
+              </ng-container>
+
+              <!-- available Column -->
+              <ng-container matColumnDef="available">
+                <th mat-header-cell *matHeaderCellDef>Available</th>
+                <td mat-cell *matCellDef="let books">
+                  <mat-icon [color]="books.available ? 'primary' : 'warn'" class="status-icon">
+                    {{ books.available ? 'check_circle' : 'cancel' \}}
+                  </mat-icon>
+                </td>
+              </ng-container>
+
+
+              <!-- Created Date Column -->
+              <ng-container matColumnDef="created_at">
+                <th mat-header-cell *matHeaderCellDef>Created</th>
+                <td mat-cell *matCellDef="let books">
+                  {{ books.created_at | date:'short' }}
+                </td>
+              </ng-container>
+              <!-- Actions Column -->
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Actions</th>
+                <td mat-cell *matCellDef="let books">
+                  <button 
+                    mat-icon-button 
+                    (click)="openViewDialog(books)"
+                    matTooltip="View Details"
+                  >
+                    <mat-icon>visibility</mat-icon>
+                  </button>
+                  <button 
+                    mat-icon-button 
+                    (click)="openEditDialog(books)"
+                    matTooltip="Edit"
                   >
                     <mat-icon>edit</mat-icon>
-                    Update Status
                   </button>
-                  <mat-menu #bulkStatusMenu="matMenu">
-                    <button mat-menu-item (click)="bulkUpdateStatus('active')">
-                      <mat-icon>check_circle</mat-icon>
-                      <span>Set Active</span>
-                    </button>
-                    <button
-                      mat-menu-item
-                      (click)="bulkUpdateStatus('inactive')"
-                    >
-                      <mat-icon>cancel</mat-icon>
-                      <span>Set Inactive</span>
-                    </button>
-                    <button
-                      mat-menu-item
-                      (click)="bulkUpdateStatus('published')"
-                    >
-                      <mat-icon>publish</mat-icon>
-                      <span>Publish</span>
-                    </button>
-                    <button mat-menu-item (click)="bulkUpdateStatus('draft')">
-                      <mat-icon>draft</mat-icon>
-                      <span>Set Draft</span>
-                    </button>
-                  </mat-menu>
-
-                  <!-- Bulk Export -->
-                  <button
-                    mat-stroked-button
-                    color="accent"
-                    [matMenuTriggerFor]="bulkExportMenu"
+                  <button 
+                    mat-icon-button 
+                    color="warn"
+                    (click)="deleteBook(books)"
+                    matTooltip="Delete"
                     [disabled]="booksService.loading()"
-                    matTooltip="Export selected items"
                   >
-                    <mat-icon>download</mat-icon>
-                    Export
+                    <mat-icon>delete</mat-icon>
                   </button>
-                  <mat-menu #bulkExportMenu="matMenu">
-                    <button mat-menu-item (click)="exportSelected('csv')">
-                      <mat-icon>table_chart</mat-icon>
-                      <span>Export as CSV</span>
-                    </button>
-                    <button mat-menu-item (click)="exportSelected('excel')">
-                      <mat-icon>grid_on</mat-icon>
-                      <span>Export as Excel</span>
-                    </button>
-                    <button mat-menu-item (click)="exportSelected('pdf')">
-                      <mat-icon>picture_as_pdf</mat-icon>
-                      <span>Export as PDF</span>
-                    </button>
-                  </mat-menu>
+                </td>
+              </ng-container>
 
-                  <!-- Clear Selection -->
-                  <button mat-stroked-button (click)="clearSelection()">
-                    <mat-icon>clear</mat-icon>
-                    Clear Selection
-                  </button>
-                </div>
-              </div>
-            }
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+          </div>
 
-            <!-- Table -->
-            <div class="table-container">
-              <table
-                mat-table
-                [dataSource]="booksService.booksList()"
-                class="books-table"
-              >
-                <!-- Selection Column -->
-                <ng-container matColumnDef="select">
-                  <th mat-header-cell *matHeaderCellDef>
-                    <mat-checkbox
-                      [checked]="isAllSelected()"
-                      [indeterminate]="hasSelected() && !isAllSelected()"
-                      (change)="toggleSelectAll()"
-                    ></mat-checkbox>
-                  </th>
-                  <td mat-cell *matCellDef="let books">
-                    <mat-checkbox
-                      [checked]="isSelected(books.id)"
-                      (change)="toggleSelect(books.id)"
-                    ></mat-checkbox>
-                  </td>
-                </ng-container>
+          <!-- Empty State -->
+          @if (booksService.booksList().length === 0) {
+          <div class="empty-state">
+            <mat-icon class="empty-icon">inbox</mat-icon>
+            <h3>No Books found</h3>
+            <p>Create your first Books to get started</p>
+            <button mat-raised-button color="primary" (click)="openCreateDialog()">
+              <mat-icon>add</mat-icon>
+              Add Books
+            </button>
+          </div>
+          }
 
-                <!-- title Column -->
-                <ng-container matColumnDef="title">
-                  <th mat-header-cell *matHeaderCellDef>Title</th>
-                  <td mat-cell *matCellDef="let books">
-                    <span class="text-cell">{{ books.title || '-' }}</span>
-                  </td>
-                </ng-container>
-
-                <!-- description Column -->
-                <ng-container matColumnDef="description">
-                  <th mat-header-cell *matHeaderCellDef>Description</th>
-                  <td mat-cell *matCellDef="let books">
-                    <span [title]="books.description" class="truncated-cell">
-                      {{ books.description | slice: 0 : 50 }}
-                      @if (books.description && books.description.length > 50) {
-                        <span>...</span>
-                      }
-                    </span>
-                  </td>
-                </ng-container>
-
-                <!-- author_id Column -->
-                <ng-container matColumnDef="author_id">
-                  <th mat-header-cell *matHeaderCellDef>Author_id</th>
-                  <td mat-cell *matCellDef="let books">
-                    <span class="text-cell">{{ books.author_id || '-' }}</span>
-                  </td>
-                </ng-container>
-
-                <!-- isbn Column -->
-                <ng-container matColumnDef="isbn">
-                  <th mat-header-cell *matHeaderCellDef>Isbn</th>
-                  <td mat-cell *matCellDef="let books">
-                    <span class="code-cell">{{ books.isbn || '-' }}</span>
-                  </td>
-                </ng-container>
-
-                <!-- pages Column -->
-                <ng-container matColumnDef="pages">
-                  <th mat-header-cell *matHeaderCellDef>Pages</th>
-                  <td mat-cell *matCellDef="let books">
-                    <span class="numeric-cell">{{ books.pages || '-' }}</span>
-                  </td>
-                </ng-container>
-
-                <!-- published_date Column -->
-                <ng-container matColumnDef="published_date">
-                  <th mat-header-cell *matHeaderCellDef>Published_date</th>
-                  <td mat-cell *matCellDef="let books">
-                    <span class="text-cell">{{
-                      books.published_date || '-'
-                    }}</span>
-                  </td>
-                </ng-container>
-
-                <!-- price Column -->
-                <ng-container matColumnDef="price">
-                  <th mat-header-cell *matHeaderCellDef>Price</th>
-                  <td mat-cell *matCellDef="let books">
-                    <span class="price-cell">{{
-                      books.price ? (books.price | currency) : '-'
-                    }}</span>
-                  </td>
-                </ng-container>
-
-                <!-- genre Column -->
-                <ng-container matColumnDef="genre">
-                  <th mat-header-cell *matHeaderCellDef>Genre</th>
-                  <td mat-cell *matCellDef="let books">
-                    <span class="text-cell">{{ books.genre || '-' }}</span>
-                  </td>
-                </ng-container>
-
-                <!-- available Column -->
-                <ng-container matColumnDef="available">
-                  <th mat-header-cell *matHeaderCellDef>Available</th>
-                  <td mat-cell *matCellDef="let books">
-                    <mat-icon
-                      [color]="books.available ? 'primary' : 'warn'"
-                      class="status-icon"
-                    >
-                      {{ books.available ? 'check_circle' : 'cancel' }}
-                    </mat-icon>
-                  </td>
-                </ng-container>
-
-                <!-- Created Date Column -->
-                <ng-container matColumnDef="created_at">
-                  <th mat-header-cell *matHeaderCellDef>Created</th>
-                  <td mat-cell *matCellDef="let books">
-                    {{ books.created_at | date: 'short' }}
-                  </td>
-                </ng-container>
-                <!-- Actions Column -->
-                <ng-container matColumnDef="actions">
-                  <th mat-header-cell *matHeaderCellDef>Actions</th>
-                  <td mat-cell *matCellDef="let books">
-                    <button
-                      mat-icon-button
-                      (click)="openViewDialog(books)"
-                      matTooltip="View Details"
-                    >
-                      <mat-icon>visibility</mat-icon>
-                    </button>
-                    <button
-                      mat-icon-button
-                      (click)="openEditDialog(books)"
-                      matTooltip="Edit"
-                    >
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                    <button
-                      mat-icon-button
-                      color="warn"
-                      (click)="deleteBook(books)"
-                      matTooltip="Delete"
-                      [disabled]="booksService.loading()"
-                    >
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  </td>
-                </ng-container>
-
-                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                <tr
-                  mat-row
-                  *matRowDef="let row; columns: displayedColumns"
-                ></tr>
-              </table>
-            </div>
-
-            <!-- Empty State -->
-            @if (booksService.booksList().length === 0) {
-              <div class="empty-state">
-                <mat-icon class="empty-icon">inbox</mat-icon>
-                <h3>No Books found</h3>
-                <p>Create your first Books to get started</p>
-                <button
-                  mat-raised-button
-                  color="primary"
-                  (click)="openCreateDialog()"
-                >
-                  <mat-icon>add</mat-icon>
-                  Add Books
-                </button>
-              </div>
-            }
-
-            <!-- Pagination -->
-            @if (booksService.booksList().length > 0) {
-              <mat-paginator
-                [length]="booksService.totalBook()"
-                [pageSize]="booksService.pageSize()"
-                [pageSizeOptions]="[5, 10, 25, 50, 100]"
-                [pageIndex]="booksService.currentPage() - 1"
-                (page)="onPageChange($event)"
-                showFirstLastButtons
-              ></mat-paginator>
-            }
-          </mat-card-content>
-        </mat-card>
+          <!-- Pagination -->
+          @if (booksService.booksList().length > 0) {
+          <mat-paginator
+            [length]="booksService.totalBook()"
+            [pageSize]="booksService.pageSize()"
+            [pageSizeOptions]="[5, 10, 25, 50, 100]"
+            [pageIndex]="booksService.currentPage() - 1"
+            (page)="onPageChange($event)"
+            showFirstLastButtons
+          ></mat-paginator>
+          }
+        </mat-card-content>
+      </mat-card>
       }
     </div>
   `,
-  styles: [
-    `
+  styles: [`
+    .books-list-container {
+      padding: 16px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .page-header {
+      margin-bottom: 16px;
+      border-radius: 4px;
+    }
+
+    .page-title {
+      margin: 0;
+      font-weight: 500;
+    }
+
+    .spacer {
+      flex: 1 1 auto;
+    }
+
+    .search-card, .quick-filters-card, .summary-dashboard-card, .export-tools-card, .advanced-filters-card {
+      margin-bottom: 16px;
+    }
+
+    .search-wrapper {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .search-field {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .add-btn {
+      height: 56px;
+      padding: 0 24px;
+      white-space: nowrap;
+      min-width: 140px;
+    }
+
+    .quick-filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-chip {
+      transition: all 0.2s ease;
+    }
+
+    .filter-chip.active {
+      background-color: #1976d2;
+      color: white;
+    }
+
+    .active-filters {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+      padding: 12px 16px;
+      background-color: #f5f5f5;
+      border-radius: 8px;
+      border-left: 4px solid #1976d2;
+    }
+
+    .active-filters-label {
+      font-weight: 500;
+      color: #1976d2;
+      margin-right: 8px;
+      flex-shrink: 0;
+    }
+
+    .filter-chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      flex: 1;
+    }
+
+    .filter-chips mat-chip {
+      background-color: #e3f2fd;
+      color: #1976d2;
+    }
+
+    .clear-all-btn {
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    .filters-panel {
+      box-shadow: none !important;
+    }
+
+    .advanced-filters {
+      padding: 16px 0;
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .filter-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .filter-label {
+      font-weight: 500;
+      color: #424242;
+      font-size: 14px;
+    }
+
+    .filter-field {
+      width: 100%;
+    }
+
+    .filter-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .reset-btn {
+      min-width: 120px;
+    }
+
+    .apply-btn {
+      min-width: 140px;
+    }
+
+    .search-btn {
+      min-width: 100px;
+    }
+
+    .clear-search-btn {
+      min-width: 80px;
+    }
+
+    .checkbox-filter {
+      display: flex;
+      align-items: center;
+      min-width: 120px;
+      margin: 8px 0;
+    }
+
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px;
+    }
+
+    .loading-container p {
+      margin-top: 16px;
+      color: #666;
+    }
+
+    .error-card {
+      margin-bottom: 16px;
+    }
+
+    .error-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .error-content mat-icon {
+      font-size: 24px;
+    }
+
+    .error-content p {
+      flex: 1;
+      margin: 0;
+    }
+
+    .table-card {
+      margin-bottom: 16px;
+    }
+
+    .bulk-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 0;
+      border-bottom: 1px solid #e0e0e0;
+      margin-bottom: 16px;
+    }
+
+    .selection-info {
+      font-weight: 500;
+      color: #1976d2;
+    }
+
+    .bulk-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    .books-table {
+      width: 100%;
+      min-width: 600px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+    }
+
+    .empty-icon {
+      font-size: 48px;
+      color: #ccc;
+      margin-bottom: 16px;
+    }
+
+    .empty-state h3 {
+      margin: 0 0 8px 0;
+      color: #666;
+    }
+
+    .empty-state p {
+      margin: 0 0 24px 0;
+      color: #999;
+    }
+
+    /* Date Filters Styles */
+    .date-filters-section {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 16px 0;
+      font-size: 16px;
+      font-weight: 500;
+      color: #333;
+    }
+
+    .section-header mat-icon {
+      font-size: 20px;
+      color: #1976d2;
+    }
+
+    .date-filters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    .date-filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* Summary Dashboard Styles */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    .summary-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.02);
+    }
+
+    .summary-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    .summary-content {
+      flex: 1;
+    }
+
+    .summary-value {
+      font-size: 24px;
+      font-weight: 600;
+      line-height: 1.2;
+      color: rgba(0, 0, 0, 0.87);
+    }
+
+    .summary-label {
+      font-size: 12px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: rgba(0, 0, 0, 0.6);
+      margin-top: 2px;
+    }
+
+    /* Export Tools Styles */
+    .export-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .export-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.02);
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .info-icon {
+      font-size: 18px;
+      color: rgba(0, 0, 0, 0.6);
+    }
+
+    .info-text {
+      color: rgba(0, 0, 0, 0.7);
+    }
+
+    @media (max-width: 768px) {
       .books-list-container {
-        padding: 16px;
-        max-width: 1200px;
-        margin: 0 auto;
+        padding: 8px;
       }
 
-      .page-header {
-        margin-bottom: 16px;
-        border-radius: 4px;
+      .search-container {
+        flex-direction: column;
+        align-items: stretch;
       }
 
-      .page-title {
-        margin: 0;
-        font-weight: 500;
-      }
-
-      .spacer {
-        flex: 1 1 auto;
-      }
-
-      .search-card,
-      .quick-filters-card,
-      .summary-dashboard-card,
-      .export-tools-card,
-      .advanced-filters-card {
-        margin-bottom: 16px;
-      }
-
-      .search-wrapper {
-        display: flex;
-        gap: 12px;
-        align-items: flex-start;
-        flex-wrap: wrap;
+      .search-group {
+        flex-direction: column;
+        align-items: stretch;
+        min-width: unset;
+        gap: 8px;
       }
 
       .search-field {
-        flex: 1;
-        min-width: 300px;
+        min-width: unset;
       }
 
-      .add-btn {
-        height: 56px;
-        padding: 0 24px;
-        white-space: nowrap;
-        min-width: 140px;
+      .search-buttons {
+        justify-content: center;
       }
 
-      .quick-filters {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        align-items: center;
-      }
-
-      .filter-chip {
-        transition: all 0.2s ease;
-      }
-
-      .filter-chip.active {
-        background-color: #1976d2;
-        color: white;
-      }
-
-      .active-filters {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 16px;
-        margin-bottom: 16px;
-        padding: 12px 16px;
-        background-color: #f5f5f5;
-        border-radius: 8px;
-        border-left: 4px solid #1976d2;
-      }
-
-      .active-filters-label {
-        font-weight: 500;
-        color: #1976d2;
-        margin-right: 8px;
-        flex-shrink: 0;
-      }
-
-      .filter-chips {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        align-items: center;
-        flex: 1;
-      }
-
-      .filter-chips mat-chip {
-        background-color: #e3f2fd;
-        color: #1976d2;
-      }
-
-      .clear-all-btn {
-        margin-left: auto;
-        flex-shrink: 0;
-      }
-
-      .filters-panel {
-        box-shadow: none !important;
-      }
-
-      .advanced-filters {
-        padding: 16px 0;
-      }
-
-      .filter-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 16px;
-        margin-bottom: 24px;
-      }
-
-      .filter-group {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      .filter-group.full-width {
-        grid-column: 1 / -1;
-      }
-
-      .filter-label {
-        font-weight: 500;
-        color: #424242;
-        font-size: 14px;
-      }
-
-      .filter-field {
-        width: 100%;
-      }
-
-      .filter-actions {
-        display: flex;
-        gap: 12px;
-        justify-content: flex-end;
-        align-items: center;
-      }
-
-      .reset-btn {
-        min-width: 120px;
-      }
-
-      .apply-btn {
-        min-width: 140px;
-      }
-
-      .search-btn {
-        min-width: 100px;
-      }
-
+      .search-btn,
       .clear-search-btn {
-        min-width: 80px;
-      }
-
-      .checkbox-filter {
-        display: flex;
-        align-items: center;
-        min-width: 120px;
-        margin: 8px 0;
-      }
-
-      .loading-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 40px;
-      }
-
-      .loading-container p {
-        margin-top: 16px;
-        color: #666;
-      }
-
-      .error-card {
-        margin-bottom: 16px;
-      }
-
-      .error-content {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-      }
-
-      .error-content mat-icon {
-        font-size: 24px;
-      }
-
-      .error-content p {
         flex: 1;
-        margin: 0;
-      }
-
-      .table-card {
-        margin-bottom: 16px;
+        min-width: unset;
       }
 
       .bulk-actions {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 16px 0;
-        border-bottom: 1px solid #e0e0e0;
-        margin-bottom: 16px;
-      }
-
-      .selection-info {
-        font-weight: 500;
-        color: #1976d2;
+        flex-direction: column;
+        gap: 8px;
+        align-items: stretch;
       }
 
       .bulk-buttons {
-        display: flex;
-        gap: 8px;
+        justify-content: center;
       }
 
-      .table-container {
-        overflow-x: auto;
-      }
-
-      .books-table {
-        width: 100%;
-        min-width: 600px;
-      }
-
-      .empty-state {
-        text-align: center;
-        padding: 40px;
-      }
-
-      .empty-icon {
-        font-size: 48px;
-        color: #ccc;
-        margin-bottom: 16px;
-      }
-
-      .empty-state h3 {
-        margin: 0 0 8px 0;
-        color: #666;
-      }
-
-      .empty-state p {
-        margin: 0 0 24px 0;
-        color: #999;
-      }
-
-      /* Date Filters Styles */
-      .date-filters-section {
-        margin-top: 24px;
-        padding-top: 16px;
-        border-top: 1px solid #e0e0e0;
-      }
-
-      .section-header {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin: 0 0 16px 0;
-        font-size: 16px;
-        font-weight: 500;
-        color: #333;
-      }
-
-      .section-header mat-icon {
-        font-size: 20px;
-        color: #1976d2;
-      }
-
-      .date-filters-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 16px;
-      }
-
-      .date-filter-group {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      /* Summary Dashboard Styles */
       .summary-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 16px;
-        margin: 16px 0;
+        grid-template-columns: 1fr;
+        gap: 12px;
       }
 
       .summary-item {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 16px;
-        border: 1px solid rgba(0, 0, 0, 0.12);
-        border-radius: 8px;
-        background: rgba(0, 0, 0, 0.02);
-      }
-
-      .summary-icon {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: rgba(0, 0, 0, 0.05);
-      }
-
-      .summary-content {
-        flex: 1;
-      }
-
-      .summary-value {
-        font-size: 24px;
-        font-weight: 600;
-        line-height: 1.2;
-        color: rgba(0, 0, 0, 0.87);
-      }
-
-      .summary-label {
-        font-size: 12px;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: rgba(0, 0, 0, 0.6);
-        margin-top: 2px;
-      }
-
-      /* Export Tools Styles */
-      .export-actions {
-        display: flex;
-        gap: 12px;
-        align-items: center;
-        flex-wrap: wrap;
-        margin-bottom: 16px;
-      }
-
-      .export-info {
-        display: flex;
-        align-items: center;
-        gap: 8px;
         padding: 12px;
-        background: rgba(0, 0, 0, 0.02);
-        border-radius: 4px;
-        font-size: 14px;
       }
 
-      .info-icon {
-        font-size: 18px;
-        color: rgba(0, 0, 0, 0.6);
+      .export-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
       }
-
-      .info-text {
-        color: rgba(0, 0, 0, 0.7);
-      }
-
-      @media (max-width: 768px) {
-        .books-list-container {
-          padding: 8px;
-        }
-
-        .search-container {
-          flex-direction: column;
-          align-items: stretch;
-        }
-
-        .search-group {
-          flex-direction: column;
-          align-items: stretch;
-          min-width: unset;
-          gap: 8px;
-        }
-
-        .search-field {
-          min-width: unset;
-        }
-
-        .search-buttons {
-          justify-content: center;
-        }
-
-        .search-btn,
-        .clear-search-btn {
-          flex: 1;
-          min-width: unset;
-        }
-
-        .bulk-actions {
-          flex-direction: column;
-          gap: 8px;
-          align-items: stretch;
-        }
-
-        .bulk-buttons {
-          justify-content: center;
-        }
-
-        .summary-grid {
-          grid-template-columns: 1fr;
-          gap: 12px;
-        }
-
-        .summary-item {
-          padding: 12px;
-        }
-
-        .export-actions {
-          flex-direction: column;
-          align-items: stretch;
-          gap: 8px;
-        }
-      }
-    `,
-  ],
+    }
+  `]
 })
 export class BookListComponent implements OnInit, OnDestroy {
   protected booksService = inject(BookService);
@@ -1179,7 +1127,7 @@ export class BookListComponent implements OnInit, OnDestroy {
   searchTerm = '';
   private searchTimeout: any;
   private filterTimeout: any;
-
+  
   private filtersSignal = signal<Partial<ListBookQuery>>({});
   readonly filters = this.filtersSignal.asReadonly();
 
@@ -1210,7 +1158,7 @@ export class BookListComponent implements OnInit, OnDestroy {
     'genre',
     'available',
     'created_at',
-    'actions',
+    'actions'
   ];
 
   ngOnInit() {
@@ -1250,8 +1198,7 @@ export class BookListComponent implements OnInit, OnDestroy {
   // ===== VALIDATION METHODS =====
 
   private isValidUuid(value: string): boolean {
-    const uuidRegex =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     return uuidRegex.test(value);
   }
 
@@ -1264,7 +1211,7 @@ export class BookListComponent implements OnInit, OnDestroy {
 
   private showFieldErrors(errors: { field: string; message: string }[]) {
     const errorMap: Record<string, string> = {};
-    errors.forEach((error) => {
+    errors.forEach(error => {
       errorMap[error.field] = error.message;
     });
     this.validationErrorsSignal.set(errorMap);
@@ -1274,7 +1221,7 @@ export class BookListComponent implements OnInit, OnDestroy {
       this.snackBar.open(
         'Please check your search criteria and try again',
         'Close',
-        { duration: 3000, panelClass: ['error-snackbar'] },
+        { duration: 3000, panelClass: ['error-snackbar'] }
       );
     }
   }
@@ -1290,7 +1237,7 @@ export class BookListComponent implements OnInit, OnDestroy {
     if (this.searchTimeout) {
       clearTimeout(this.searchTimeout);
     }
-
+    
     this.searchTimeout = setTimeout(() => {
       this.booksService.setCurrentPage(1);
       this.loadBooks();
@@ -1305,7 +1252,7 @@ export class BookListComponent implements OnInit, OnDestroy {
 
     // Validate technical fields first
     const validationErrors = this.validateTechnicalFields();
-
+    
     if (validationErrors.length > 0) {
       this.showFieldErrors(validationErrors);
       return; // Don't proceed with search
@@ -1313,7 +1260,7 @@ export class BookListComponent implements OnInit, OnDestroy {
 
     // Clear any previous validation errors
     this.clearValidationErrors();
-
+    
     this.booksService.setCurrentPage(1);
     this.loadBooks();
   }
@@ -1322,7 +1269,7 @@ export class BookListComponent implements OnInit, OnDestroy {
     if (this.searchTimeout) {
       clearTimeout(this.searchTimeout);
     }
-
+    
     this.searchTerm = '';
     this.booksService.setCurrentPage(1);
     this.loadBooks();
@@ -1332,15 +1279,15 @@ export class BookListComponent implements OnInit, OnDestroy {
 
   onDateFilterChange(dateFilter: { [key: string]: string | null | undefined }) {
     console.log('Date filter change:', dateFilter); // Debug log
-
+    
     // Update filters with date filter values
-    this.filtersSignal.update((filters) => ({
+    this.filtersSignal.update(filters => ({
       ...filters,
-      ...dateFilter,
+      ...dateFilter
     }));
-
+    
     console.log('Updated filters:', this.filters()); // Debug log
-
+    
     // Apply filters with debounce
     this.applyFilters();
   }
@@ -1348,32 +1295,28 @@ export class BookListComponent implements OnInit, OnDestroy {
   // Handle filter field changes
   onFilterChange(field: string, event: any) {
     const value = event.target ? event.target.value : event;
-
+    
     // Convert string numbers to numbers for numeric fields
     let processedValue = value;
-    if (
-      field.includes('_min') ||
-      field.includes('_max') ||
-      field === 'view_count'
-    ) {
+    if (field.includes('_min') || field.includes('_max') || field === 'view_count') {
       processedValue = value === '' ? undefined : Number(value);
     }
-
+    
     // Convert string booleans for boolean fields
     if (field === 'published') {
       processedValue = value === '' ? undefined : value;
     }
-
+    
     // Clear quick filter when advance filters are used
     if (this.quickFilter !== 'all') {
       this.quickFilter = 'all';
     }
-
-    this.filtersSignal.update((filters) => ({
+    
+    this.filtersSignal.update(filters => ({
       ...filters,
-      [field]: processedValue,
+      [field]: processedValue
     }));
-
+    
     this.applyFilters();
   }
 
@@ -1382,7 +1325,7 @@ export class BookListComponent implements OnInit, OnDestroy {
     if (this.filterTimeout) {
       clearTimeout(this.filterTimeout);
     }
-
+    
     this.filterTimeout = setTimeout(() => {
       this.booksService.setCurrentPage(1);
       this.loadBooks();
@@ -1394,7 +1337,7 @@ export class BookListComponent implements OnInit, OnDestroy {
     if (this.filterTimeout) {
       clearTimeout(this.filterTimeout);
     }
-
+    
     this.booksService.setCurrentPage(1);
     this.loadBooks();
   }
@@ -1406,7 +1349,7 @@ export class BookListComponent implements OnInit, OnDestroy {
     if (this.filterTimeout) {
       clearTimeout(this.filterTimeout);
     }
-
+    
     this.searchTerm = '';
     this.filtersSignal.set({});
     this.clearValidationErrors();
@@ -1442,7 +1385,7 @@ export class BookListComponent implements OnInit, OnDestroy {
   }
 
   toggleSelect(id: string) {
-    this.selectedIdsSignal.update((selected) => {
+    this.selectedIdsSignal.update(selected => {
       const newSet = new Set(selected);
       if (newSet.has(id)) {
         newSet.delete(id);
@@ -1457,7 +1400,7 @@ export class BookListComponent implements OnInit, OnDestroy {
     if (this.isAllSelected()) {
       this.selectedIdsSignal.set(new Set());
     } else {
-      const allIds = this.booksService.booksList().map((item) => item.id);
+      const allIds = this.booksService.booksList().map(item => item.id);
       this.selectedIdsSignal.set(new Set(allIds));
     }
   }
@@ -1521,21 +1464,21 @@ export class BookListComponent implements OnInit, OnDestroy {
     if (this.filterTimeout) {
       clearTimeout(this.filterTimeout);
     }
-
+    
     this.quickFilter = filter;
-
+    
     // Clear all filters first
     this.searchTerm = '';
     this.filtersSignal.set({});
     this.clearValidationErrors();
-
+    
     switch (filter) {
       case 'active':
         this.filtersSignal.set({ available: true });
-        break;
+                break;
       case 'published':
         this.filtersSignal.set({ available: true });
-        break;
+                break;
       // case 'featured':
       //   this.filtersSignal.set({ is_featured: true });
       //   break;
@@ -1550,7 +1493,7 @@ export class BookListComponent implements OnInit, OnDestroy {
         // Already cleared above
         break;
     }
-
+    
     // Quick filters should apply immediately
     this.booksService.setCurrentPage(1);
     this.loadBooks();
@@ -1558,93 +1501,58 @@ export class BookListComponent implements OnInit, OnDestroy {
 
   // ===== ACTIVE FILTER CHIPS =====
 
-  protected getActiveFilterChips(): Array<{
-    key: string;
-    label: string;
-    value: string;
-  }> {
+  protected getActiveFilterChips(): Array<{ key: string; label: string; value: string }> {
     const chips: Array<{ key: string; label: string; value: string }> = [];
     const filters = this.filters();
-
+    
     // Add quick filter chip if not 'all'
     if (this.quickFilter !== 'all') {
       const quickFilterLabels: Record<string, string> = {
-        active: 'Active Items',
-        published: 'Published Status',
+        'active': 'Active Items',
+        'published': 'Published Status',
         // 'featured': 'Featured Items',
         // 'available': 'Available Items',
         // 'draft': 'Draft Status',
       };
-      chips.push({
-        key: '_quickFilter',
-        label: 'Quick Filter',
-        value: quickFilterLabels[this.quickFilter] || this.quickFilter,
+      chips.push({ 
+        key: '_quickFilter', 
+        label: 'Quick Filter', 
+        value: quickFilterLabels[this.quickFilter] || this.quickFilter 
       });
     }
-
+    
     if (this.searchTerm) {
       chips.push({ key: 'search', label: 'Search', value: this.searchTerm });
     }
-
+    
     // Date field filters - only add if fields exist in schema
-
+    
     if (filters.created_at) {
-      chips.push({
-        key: 'created_at',
-        label: 'Created Date',
-        value: this.formatDate(filters.created_at as string),
-      });
+      chips.push({ key: 'created_at', label: 'Created Date', value: this.formatDate(filters.created_at as string) });
     } else if (filters.created_at_min || filters.created_at_max) {
-      const from = filters.created_at_min
-        ? this.formatDate(filters.created_at_min as string)
-        : '...';
-      const to = filters.created_at_max
-        ? this.formatDate(filters.created_at_max as string)
-        : '...';
-      chips.push({
-        key: 'created_at_range',
-        label: 'Created Date Range',
-        value: `${from} - ${to}`,
-      });
+      const from = filters.created_at_min ? this.formatDate(filters.created_at_min as string) : '...';
+      const to = filters.created_at_max ? this.formatDate(filters.created_at_max as string) : '...';
+      chips.push({ key: 'created_at_range', label: 'Created Date Range', value: `${from} - ${to}` });
     }
-
+    
     if (filters.updated_at) {
-      chips.push({
-        key: 'updated_at',
-        label: 'Updated Date',
-        value: this.formatDate(filters.updated_at as string),
-      });
+      chips.push({ key: 'updated_at', label: 'Updated Date', value: this.formatDate(filters.updated_at as string) });
     } else if (filters.updated_at_min || filters.updated_at_max) {
-      const from = filters.updated_at_min
-        ? this.formatDate(filters.updated_at_min as string)
-        : '...';
-      const to = filters.updated_at_max
-        ? this.formatDate(filters.updated_at_max as string)
-        : '...';
-      chips.push({
-        key: 'updated_at_range',
-        label: 'Updated Date Range',
-        value: `${from} - ${to}`,
-      });
+      const from = filters.updated_at_min ? this.formatDate(filters.updated_at_min as string) : '...';
+      const to = filters.updated_at_max ? this.formatDate(filters.updated_at_max as string) : '...';
+      chips.push({ key: 'updated_at_range', label: 'Updated Date Range', value: `${from} - ${to}` });
     }
-
+    
     // Regular field filters
     if (filters.fields !== undefined && filters.fields.length > 0) {
-      chips.push({
-        key: 'fields',
-        label: 'Fields',
-        value: String(filters.fields),
-      });
+      chips.push({ key: 'fields', label: 'Fields', value: String(filters.fields) });
     }
-
+    
     if (filters.available !== undefined && filters.available !== null) {
-      chips.push({
-        key: 'available',
-        label: 'Available',
-        value: filters.available ? 'Yes' : 'No',
-      });
+      chips.push({ key: 'available', label: 'Available', value: filters.available ? 'Yes' : 'No' });
     }
-
+    
+    
     return chips;
   }
 
@@ -1653,19 +1561,19 @@ export class BookListComponent implements OnInit, OnDestroy {
     if (this.filterTimeout) {
       clearTimeout(this.filterTimeout);
     }
-
+    
     if (key === '_quickFilter') {
       // Reset quick filter to 'all'
       this.setQuickFilter('all');
       return;
     }
-
+    
     if (key === 'search') {
       this.searchTerm = '';
     } else if (key.includes('_range')) {
       // Handle date range removal
       const fieldName = key.replace('_range', '');
-      this.filtersSignal.update((filters) => {
+      this.filtersSignal.update(filters => {
         const updated = { ...filters } as any;
         delete updated[fieldName];
         delete updated[`${fieldName}_min`];
@@ -1673,7 +1581,7 @@ export class BookListComponent implements OnInit, OnDestroy {
         return updated;
       });
     } else {
-      this.filtersSignal.update((filters) => {
+      this.filtersSignal.update(filters => {
         const updated = { ...filters } as any;
         delete updated[key];
         return updated;
@@ -1689,7 +1597,7 @@ export class BookListComponent implements OnInit, OnDestroy {
     if (this.filterTimeout) {
       clearTimeout(this.filterTimeout);
     }
-
+    
     this.searchTerm = '';
     this.filtersSignal.set({});
     this.quickFilter = 'all';
@@ -1703,10 +1611,10 @@ export class BookListComponent implements OnInit, OnDestroy {
     if (this.filterTimeout) {
       clearTimeout(this.filterTimeout);
     }
-
+    
     this.filtersSignal.set({});
     this.clearValidationErrors();
-
+    
     // Reset filters should apply immediately
     this.booksService.setCurrentPage(1);
     this.loadBooks();
@@ -1715,7 +1623,7 @@ export class BookListComponent implements OnInit, OnDestroy {
   // ===== DATE FILTER HANDLERS =====
 
   protected updateDateFilter(filterUpdate: any) {
-    this.filtersSignal.update((current) => ({ ...current, ...filterUpdate }));
+    this.filtersSignal.update(current => ({ ...current, ...filterUpdate }));
     this.applyFilters();
   }
 
@@ -1745,21 +1653,15 @@ export class BookListComponent implements OnInit, OnDestroy {
     const selectedIds = Array.from(this.selectedIdsSignal());
     if (selectedIds.length === 0) return;
 
-    const confirmed = confirm(
-      `Are you sure you want to delete ${selectedIds.length} Books?`,
-    );
+    const confirmed = confirm(`Are you sure you want to delete ${selectedIds.length} Books?`);
     if (!confirmed) return;
 
     try {
       await this.booksService.bulkDeleteBook(selectedIds);
       this.clearSelection();
-      this.snackBar.open(
-        `${selectedIds.length} Books deleted successfully`,
-        'Close',
-        {
-          duration: 3000,
-        },
-      );
+      this.snackBar.open(`${selectedIds.length} Books deleted successfully`, 'Close', {
+        duration: 3000,
+      });
     } catch (error) {
       this.snackBar.open('Failed to delete Books', 'Close', {
         duration: 5000,
@@ -1773,20 +1675,16 @@ export class BookListComponent implements OnInit, OnDestroy {
 
     try {
       // Create bulk update data with status field
-      const items = selectedIds.map((id) => ({
+      const items = selectedIds.map(id => ({
         id,
-        data: { status } as any,
+        data: { status } as any
       }));
-
+      
       await this.booksService.bulkUpdateBook(items);
       this.clearSelection();
-      this.snackBar.open(
-        `${selectedIds.length} Books status updated successfully`,
-        'Close',
-        {
-          duration: 3000,
-        },
-      );
+      this.snackBar.open(`${selectedIds.length} Books status updated successfully`, 'Close', {
+        duration: 3000,
+      });
     } catch (error) {
       this.snackBar.open('Failed to update Books status', 'Close', {
         duration: 5000,
@@ -1797,21 +1695,15 @@ export class BookListComponent implements OnInit, OnDestroy {
   async exportSelected(format: 'csv' | 'excel' | 'pdf') {
     const selectedIds = Array.from(this.selectedIdsSignal());
     if (selectedIds.length === 0) {
-      this.snackBar.open('Please select items to export', 'Close', {
-        duration: 3000,
-      });
+      this.snackBar.open('Please select items to export', 'Close', { duration: 3000 });
       return;
     }
 
     try {
       // For now, show a placeholder message since export endpoints need to be implemented
-      this.snackBar.open(
-        `Export feature coming soon (${format.toUpperCase()})`,
-        'Close',
-        {
-          duration: 3000,
-        },
-      );
+      this.snackBar.open(`Export feature coming soon (${format.toUpperCase()})`, 'Close', {
+        duration: 3000,
+      });
       console.log('Export selected:', { selectedIds, format });
     } catch (error) {
       this.snackBar.open('Failed to export Books', 'Close', {
@@ -1824,18 +1716,10 @@ export class BookListComponent implements OnInit, OnDestroy {
     try {
       const params = this.includeFiltersInExport ? this.filters() : {};
       // For now, show a placeholder message since export endpoints need to be implemented
-      this.snackBar.open(
-        `Export feature coming soon (${format.toUpperCase()})`,
-        'Close',
-        {
-          duration: 3000,
-        },
-      );
-      console.log('Export all data:', {
-        format,
-        params,
-        recordCount: this.booksService.totalBook(),
+      this.snackBar.open(`Export feature coming soon (${format.toUpperCase()})`, 'Close', {
+        duration: 3000,
       });
+      console.log('Export all data:', { format, params, recordCount: this.booksService.totalBook() });
     } catch (error) {
       this.snackBar.open('Failed to export Books', 'Close', {
         duration: 5000,
@@ -1846,13 +1730,13 @@ export class BookListComponent implements OnInit, OnDestroy {
   // ===== SUMMARY DASHBOARD METHODS =====
 
   getActiveCount(): number {
-    return this.booksService.booksList().filter((item) => {
+    return this.booksService.booksList().filter(item => {
       return item.available === true;
     }).length;
   }
 
   getDraftCount(): number {
-    return this.booksService.booksList().filter((item) => {
+    return this.booksService.booksList().filter(item => {
       return item.available === false;
     }).length;
   }
@@ -1860,11 +1744,9 @@ export class BookListComponent implements OnInit, OnDestroy {
   getRecentCount(): number {
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-
-    return this.booksService
-      .booksList()
-      .filter(
-        (item) => item.created_at && new Date(item.created_at) >= oneWeekAgo,
-      ).length;
+    
+    return this.booksService.booksList().filter(item => 
+      item.created_at && new Date(item.created_at) >= oneWeekAgo
+    ).length;
   }
 }

@@ -4,8 +4,8 @@
  * Manages the loading and registration of Fastify plugins in proper order
  */
 
-import type { FastifyInstance, FastifyPluginOptions } from 'fastify';
-import type { AppConfig, SecurityConfig, DatabaseConfig } from '../config';
+import type { FastifyInstance } from 'fastify';
+import type { AppConfig, DatabaseConfig, SecurityConfig } from '../config';
 
 // Import plugins
 import fastifyAuth from '@fastify/auth';
@@ -15,27 +15,27 @@ import fastifyHelmet from '@fastify/helmet';
 import fastifyJwt from '@fastify/jwt';
 import fastifyRateLimit from '@fastify/rate-limit';
 
+import { activityLoggingPlugin } from '../plugins/activity-logging';
 import errorHandlerPlugin from '../plugins/error-handler.plugin';
 import healthCheckPlugin from '../plugins/health-check.plugin';
+import jwtAuthPlugin from '../plugins/jwt-auth.plugin';
 import knexPlugin from '../plugins/knex.plugin';
 import loggingPlugin from '../plugins/logging.plugin';
 import pluginMonitoring from '../plugins/monitoring.plugin';
+import multipartPlugin from '../plugins/multipart.plugin';
 import redisPlugin from '../plugins/redis.plugin';
 import responseHandlerPlugin from '../plugins/response-handler.plugin';
 import schemasPlugin from '../plugins/schemas.plugin';
-import multipartPlugin from '../plugins/multipart.plugin';
-import { activityLoggingPlugin } from '../plugins/activity-logging';
-import jwtAuthPlugin from '../plugins/jwt-auth.plugin';
 import staticFilesPlugin from '../plugins/static-files.plugin';
 import swaggerPlugin from '../plugins/swagger.plugin';
 
 // Core infrastructure modules
-import authStrategiesPlugin from '../core/auth/strategies/auth.strategies';
 import authPlugin from '../core/auth/auth.plugin';
-import { usersPlugin } from '../core/users';
-import rbacPlugin from '../core/rbac/rbac.plugin';
+import authStrategiesPlugin from '../core/auth/strategies/auth.strategies';
 import { monitoringPlugin as monitoringModulePlugin } from '../core/monitoring';
+import rbacPlugin from '../core/rbac/rbac.plugin';
 import systemPlugin from '../core/system/default.plugin';
+import { usersPlugin } from '../core/users';
 
 // Business feature modules
 import apiKeysPlugin from '../modules/apiKeys';
@@ -47,10 +47,9 @@ import fileUploadPlugin from '../modules/file-upload/file-upload.plugin';
 import navigationPlugin from '../modules/navigation/navigation.plugin';
 import notificationsPlugin from '../modules/notifications';
 import settingsPlugin from '../modules/settings/settings.plugin';
-import simpleTestsPlugin from '../modules/simpleTests';
 import systemSettingsPlugin from '../modules/systemSettings';
-import userProfilePlugin from '../modules/user-profile/user-profile.plugin';
 import themesPlugin from '../modules/themes';
+import userProfilePlugin from '../modules/user-profile/user-profile.plugin';
 import websocketPlugin from '../shared/websocket/websocket.plugin';
 
 /**
@@ -379,11 +378,6 @@ export function createFeaturePluginGroup(apiPrefix: string): PluginGroup {
       {
         name: 'notifications',
         plugin: notificationsPlugin,
-        required: true,
-      },
-      {
-        name: 'simpleTests',
-        plugin: simpleTestsPlugin,
         required: true,
       },
       {
