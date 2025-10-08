@@ -1,26 +1,24 @@
-import { FastifyRequest, FastifyReply } from 'fastify';
 import { Static } from '@sinclair/typebox';
-import { AuthorsService } from '../services/authors.service';
-import { CreateAuthors, UpdateAuthors } from '../types/authors.types';
+import { FastifyReply, FastifyRequest } from 'fastify';
 import {
-  CreateAuthorsSchema,
-  UpdateAuthorsSchema,
+  BulkDeleteSchema,
+  DropdownQuerySchema
+} from '../../../schemas/base.schemas';
+import { ExportQuerySchema } from '../../../schemas/export.schemas';
+import { ExportField, ExportService } from '../../../services/export.service';
+import {
   AuthorsIdParamSchema,
+  CreateAuthorsSchema,
   GetAuthorsQuerySchema,
   ListAuthorsQuerySchema,
+  UpdateAuthorsSchema,
 } from '../schemas/authors.schemas';
-import {
-  DropdownQuerySchema,
-  BulkCreateSchema,
-  BulkUpdateSchema,
-  BulkDeleteSchema,
-  ValidationRequestSchema,
-  UniquenessCheckSchema,
-} from '../../../schemas/base.schemas';
+import { AuthorsService } from '../services/authors.service';
+import { CreateAuthors, UpdateAuthors } from '../types/authors.types';
 
 /**
  * Authors Controller
- * Package: full
+ * Package: enterprise
  * Has Status Field: false
  *
  * Following Fastify controller patterns:
@@ -30,7 +28,10 @@ import {
  * - Logging integration with Fastify's logger
  */
 export class AuthorsController {
-  constructor(private authorsService: AuthorsService) {}
+  constructor(
+    private authorsService: AuthorsService,
+    private exportService: ExportService,
+  ) { }
 
   /**
    * Create new authors
@@ -346,48 +347,255 @@ export class AuthorsController {
     return reply.success(stats);
   }
 
-  // ===== FULL PACKAGE METHODS =====
-
   /**
-   * Validate data before save
-   * POST /authors/validate
+   * Export authors data
+   * GET /authors/export
    */
-  async validate(
-    request: FastifyRequest<{
-      Body: { data: Static<typeof CreateAuthorsSchema> };
-    }>,
+  async export(
+    request: FastifyRequest<{ Querystring: Static<typeof ExportQuerySchema> }>,
     reply: FastifyReply,
   ) {
-    request.log.info('Validating authors data');
+    const {
+      format,
+      ids,
+      filters,
+      fields,
+      filename,
+      includeMetadata = true,
+      applyFilters = false,
+    } = request.query;
 
-    const result = await this.authorsService.validate(request.body);
+    request.log.info(
+      {
+        format,
+        idsCount: ids?.length || 0,
+        hasFilters: !!filters,
+        fieldsCount: fields?.length || 0,
+      },
+      'Exporting authors data',
+    );
 
-    return reply.success(result);
+    try {
+      // Prepare query parameters based on export options
+      let queryParams: any = {};
+
+      // Apply specific IDs if provided
+      if (ids && ids.length > 0) {
+        queryParams.ids = ids;
+      }
+
+      // Apply filters if requested
+      if (applyFilters && filters) {
+        queryParams = { ...queryParams, ...filters };
+      }
+
+      // Get data from service
+      const exportData = await this.authorsService.getExportData(
+        queryParams,
+        fields,
+      );
+
+      // Prepare export fields configuration
+      const exportFields = this.getExportFields(fields);
+
+      // Generate export filename and clean any existing extensions
+      let exportFilename =
+        filename || this.generateExportFilename(format, ids?.length);
+
+      // Remove any existing file extensions to prevent double extensions
+      if (exportFilename.includes('.')) {
+        exportFilename = exportFilename.substring(
+          0,
+          exportFilename.lastIndexOf('.'),
+        );
+      }
+
+      // Prepare metadata
+      const metadata = includeMetadata
+        ? {
+          // exportedBy:
+          //   (request.user as any)?.username ||
+          //   (request.user as any)?.email ||
+          //   'System',
+          exportedAt: new Date(),
+          filtersApplied: applyFilters ? filters : undefined,
+          // totalRecords: exportData.length,
+          selectedRecords: ids?.length,
+        }
+        : undefined;
+
+      // Generate export file
+      let buffer: Buffer;
+      switch (format) {
+        case 'csv':
+          buffer = await this.exportService.exportToCsv({
+            data: exportData,
+            fields: exportFields,
+            filename: exportFilename,
+            metadata,
+          });
+          break;
+        case 'excel':
+          buffer = await this.exportService.exportToExcel({
+            data: exportData,
+            fields: exportFields,
+            filename: exportFilename,
+            title: 'Authors Export',
+            metadata,
+          });
+          break;
+        case 'pdf':
+          buffer = await this.exportService.exportToPdf({
+            data: exportData,
+            fields: exportFields,
+            filename: exportFilename,
+            title: 'Authors Export - รายงานผู้แต่ง',
+            metadata,
+            pdfOptions: {
+              template: 'professional',
+              pageSize: 'A4',
+              orientation: 'portrait',
+              subtitle: 'Generated with Thai Font Support',
+              logo: process.env.PDF_LOGO_URL
+            }
+          });
+          break;
+        default:
+          return reply
+            .code(400)
+            .error('INVALID_FORMAT', 'Unsupported export format');
+      }
+
+      // Set response headers for file download
+      const mimeTypes = {
+        csv: 'text/csv',
+        excel: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        pdf: 'application/pdf',
+      };
+
+      const fileExtensions = {
+        csv: 'csv',
+        excel: 'xlsx',
+        pdf: 'pdf',
+      };
+
+      reply
+        .header('Content-Type', mimeTypes[format])
+        .header(
+          'Content-Disposition',
+          `attachment; filename="${exportFilename}.${fileExtensions[format]}"`,
+        )
+        .header('Content-Length', buffer.length);
+
+      request.log.info(
+        {
+          format,
+          filename: `${exportFilename}.${fileExtensions[format]}`,
+          fileSize: buffer.length,
+          recordCount: exportData.length,
+        },
+        'Authors export completed successfully',
+      );
+
+      return reply.send(buffer);
+    } catch (error) {
+      request.log.error({ error, format }, 'Export failed');
+      return reply.code(500).send({
+        success: false,
+        error: {
+          code: 'EXPORT_FAILED',
+          message: `Export failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          statusCode: 500,
+        },
+        meta: {
+          timestamp: new Date().toISOString(),
+          version: 'v1',
+          requestId: request.id,
+          environment: process.env.NODE_ENV || 'development',
+        },
+      });
+    }
+  }
+
+  // ===== PRIVATE EXPORT HELPER METHODS =====
+
+  /**
+   * Get export fields configuration
+   */
+  private getExportFields(requestedFields?: string[]): ExportField[] {
+    // Define all available fields for export
+    const allFields: ExportField[] = [
+      {
+        key: 'id',
+        label: 'Id',
+        type: 'string' as 'string' | 'number' | 'date' | 'boolean' | 'json',
+      },
+      {
+        key: 'name',
+        label: 'Name',
+        type: 'string' as 'string' | 'number' | 'date' | 'boolean' | 'json',
+      },
+      {
+        key: 'email',
+        label: 'Email',
+        type: 'string' as 'string' | 'number' | 'date' | 'boolean' | 'json',
+      },
+      {
+        key: 'bio',
+        label: 'Bio',
+        type: 'string' as 'string' | 'number' | 'date' | 'boolean' | 'json',
+      },
+      {
+        key: 'birth_date',
+        label: 'Birth date',
+        type: 'date' as 'string' | 'number' | 'date' | 'boolean' | 'json',
+      },
+      {
+        key: 'country',
+        label: 'Country',
+        type: 'string' as 'string' | 'number' | 'date' | 'boolean' | 'json',
+      },
+      {
+        key: 'active',
+        label: 'Active',
+        type: 'boolean' as 'string' | 'number' | 'date' | 'boolean' | 'json',
+      },
+      {
+        key: 'created_at',
+        label: 'Created at',
+        type: 'date' as 'string' | 'number' | 'date' | 'boolean' | 'json',
+      },
+      {
+        key: 'updated_at',
+        label: 'Updated at',
+        type: 'date' as 'string' | 'number' | 'date' | 'boolean' | 'json',
+      },
+    ];
+
+    // Return requested fields or all fields
+    if (requestedFields && requestedFields.length > 0) {
+      return allFields.filter((field) => requestedFields.includes(field.key));
+    }
+
+    return allFields;
   }
 
   /**
-   * Check field uniqueness
-   * GET /authors/check/:field
+   * Generate export filename
    */
-  async checkUniqueness(
-    request: FastifyRequest<{
-      Params: { field: string };
-      Querystring: Static<typeof UniquenessCheckSchema>;
-    }>,
-    reply: FastifyReply,
-  ) {
-    const { field } = request.params;
-    request.log.info(
-      { field, value: request.query.value },
-      'Checking authors field uniqueness',
-    );
+  private generateExportFilename(
+    format: string,
+    selectedCount?: number,
+  ): string {
+    const timestamp = new Date().toISOString().split('T')[0];
+    const module = 'authors';
 
-    const result = await this.authorsService.checkUniqueness(field, {
-      value: String(request.query.value),
-      excludeId: request.query.excludeId,
-    });
+    let suffix = '';
+    if (selectedCount && selectedCount > 0) {
+      suffix = `-selected-${selectedCount}`;
+    }
 
-    return reply.success(result);
+    return `${module}-export${suffix}-${timestamp}`;
   }
 
   // ===== PRIVATE TRANSFORMATION METHODS =====

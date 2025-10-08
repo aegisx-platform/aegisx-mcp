@@ -5,19 +5,20 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { NotificationService } from '../services/notifications.service';
 import { CreateNotificationRequest } from '../types/notification.types';
-import {
-  NotificationFormComponent,
-  NotificationFormData,
-} from './notifications-form.component';
+import { NotificationFormComponent, NotificationFormData } from './notifications-form.component';
 
 @Component({
   selector: 'app-notifications-create-dialog',
   standalone: true,
-  imports: [CommonModule, MatDialogModule, NotificationFormComponent],
+  imports: [
+    CommonModule,
+    MatDialogModule,
+    NotificationFormComponent,
+  ],
   template: `
     <div class="create-dialog">
       <h2 mat-dialog-title>Create Notifications</h2>
-
+      
       <mat-dialog-content>
         <app-notifications-form
           mode="create"
@@ -28,25 +29,23 @@ import {
       </mat-dialog-content>
     </div>
   `,
-  styles: [
-    `
+  styles: [`
+    .create-dialog {
+      min-width: 500px;
+      max-width: 800px;
+    }
+
+    mat-dialog-content {
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    @media (max-width: 768px) {
       .create-dialog {
-        min-width: 500px;
-        max-width: 800px;
+        min-width: 90vw;
       }
-
-      mat-dialog-content {
-        max-height: 70vh;
-        overflow-y: auto;
-      }
-
-      @media (max-width: 768px) {
-        .create-dialog {
-          min-width: 90vw;
-        }
-      }
-    `,
-  ],
+    }
+  `]
 })
 export class NotificationCreateDialogComponent {
   private notificationsService = inject(NotificationService);
@@ -57,12 +56,11 @@ export class NotificationCreateDialogComponent {
 
   async onFormSubmit(formData: NotificationFormData) {
     this.loading.set(true);
-
+    
     try {
       const createRequest = formData as CreateNotificationRequest;
-      const result =
-        await this.notificationsService.createNotification(createRequest);
-
+      const result = await this.notificationsService.createNotification(createRequest);
+      
       if (result) {
         this.snackBar.open('Notifications created successfully', 'Close', {
           duration: 3000,
@@ -75,9 +73,9 @@ export class NotificationCreateDialogComponent {
       }
     } catch (error: any) {
       this.snackBar.open(
-        error.message || 'Failed to create Notifications',
-        'Close',
-        { duration: 5000 },
+        error.message || 'Failed to create Notifications', 
+        'Close', 
+        { duration: 5000 }
       );
     } finally {
       this.loading.set(false);

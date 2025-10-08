@@ -95,6 +95,96 @@ async function staticFilesPlugin(
     },
   });
 
+  // Serve general assets (logos, images, etc.)
+  fastify.route({
+    method: 'GET',
+    url: `${apiPrefix}/assets/:type/:filename`,
+    schema: {
+      description: 'Serve asset files (logos, images)',
+      tags: ['Files'],
+      summary: 'Get asset file',
+      params: {
+        type: 'object',
+        required: ['type', 'filename'],
+        properties: {
+          type: {
+            type: 'string',
+            enum: ['logos', 'images', 'icons'],
+            description: 'Asset type directory'
+          },
+          filename: {
+            type: 'string',
+            pattern: '^[a-zA-Z0-9._-]+\\.(jpg|jpeg|png|svg|webp)$',
+            description: 'Asset filename'
+          }
+        }
+      },
+      response: {
+        200: {
+          type: 'string',
+          format: 'binary',
+          description: 'Asset file'
+        },
+        404: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean', const: false },
+            error: { type: 'string' },
+            message: { type: 'string' }
+          }
+        }
+      }
+    },
+    handler: async (request, reply) => {
+      const { type, filename } = request.params as { type: string; filename: string };
+
+      // Security checks
+      const allowedExtensions = ['.jpg', '.jpeg', '.png', '.svg', '.webp'];
+      const ext = path.extname(filename).toLowerCase();
+
+      if (!allowedExtensions.includes(ext)) {
+        return reply.notFound();
+      }
+
+      // Prevent directory traversal
+      if (
+        filename.includes('..') ||
+        filename.includes('/') ||
+        filename.includes('\\') ||
+        type.includes('..') ||
+        type.includes('/') ||
+        type.includes('\\')
+      ) {
+        return reply.notFound();
+      }
+
+      const assetsDir = path.join(process.cwd(), 'apps', 'api', 'src', 'assets', type);
+      const filePath = path.join(assetsDir, filename);
+
+      try {
+        await fs.access(filePath);
+
+        // Set content type
+        const contentTypes: Record<string, string> = {
+          '.jpg': 'image/jpeg',
+          '.jpeg': 'image/jpeg',
+          '.png': 'image/png',
+          '.svg': 'image/svg+xml',
+          '.webp': 'image/webp'
+        };
+
+        reply.type(contentTypes[ext] || 'application/octet-stream');
+        reply.header('Cache-Control', 'public, max-age=31536000');
+        reply.header('ETag', `"${type}-${filename}"`);
+
+        const stream = require('fs').createReadStream(filePath);
+        return reply.send(stream);
+      } catch (_error) {
+        return reply.notFound();
+      }
+    }
+  });
+
   fastify.log.info('Static files plugin registered successfully');
 }
 

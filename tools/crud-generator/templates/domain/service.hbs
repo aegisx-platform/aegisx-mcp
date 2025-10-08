@@ -492,6 +492,100 @@ export class {{ModuleName}}Service extends BaseService<{{ModuleName}}, Create{{M
     return this.{{moduleName}}Repository.getStats();
   }
   {{/if}}
+
+  /**
+   * Get data for export with formatting
+   */
+  async getExportData(queryParams: any = {}, fields?: string[]): Promise<any[]> {
+    // Get specific IDs if provided
+    if (queryParams.ids && queryParams.ids.length > 0) {
+      // Get specific records by IDs
+      const records = await Promise.all(
+        queryParams.ids.map((id: string) => this.getById(id))
+      );
+      
+      // Return raw data - ExportService will handle formatting
+      return records.filter(record => record !== null);
+    }
+
+    // Separate filters from pagination parameters to avoid SQL errors
+    const { limit, offset, page, ...filters } = queryParams;
+    
+    // Build query parameters for data retrieval with proper pagination
+    const query: any = {
+      ...filters, // Only include actual filter parameters
+      limit: limit || 50000, // Max export limit for performance
+      page: 1 // Always start from first page for exports
+    };
+
+    // Get filtered data
+    const result = await this.{{moduleName}}Repository.list(query);
+    
+    // Return raw data - ExportService will handle formatting
+    return result.data;
+  }
+
+  /**
+   * Format single record for export
+   */
+  private formatExportRecord(record: {{ModuleName}}, fields?: string[]): any {
+    const formatted: any = {};
+
+    // Define all exportable fields
+    const exportableFields: { [key: string]: string | ((value: any) => any) } = {
+      {{#each columns}}
+      {{name}}: '{{#if label}}{{label}}{{else}}{{titleCase name}}{{/if}}',
+      {{/each}}
+    };
+
+    // If specific fields requested, use only those
+    const fieldsToExport = fields && fields.length > 0 
+      ? fields.filter(field => exportableFields.hasOwnProperty(field))
+      : Object.keys(exportableFields);
+
+    // Format each field
+    fieldsToExport.forEach(field => {
+      const fieldConfig = exportableFields[field];
+      let value = (record as any)[field];
+
+      // Apply field-specific formatting
+      if (typeof fieldConfig === 'function') {
+        value = fieldConfig(value);
+      } else {
+        // Apply default formatting based on field type
+        {{#each columns}}
+        {{#if (eq name field)}}
+        {{#if (eq dataType 'timestamp')}}
+        if (field === '{{name}}' && value) {
+          value = new Date(value).toLocaleString();
+        }
+        {{/if}}
+        {{#if (eq dataType 'date')}}
+        if (field === '{{name}}' && value) {
+          value = new Date(value).toLocaleDateString();
+        }
+        {{/if}}
+        {{#if (eq dataType 'boolean')}}
+        if (field === '{{name}}') {
+          value = value ? 'Yes' : 'No';
+        }
+        {{/if}}
+        {{#if (eq dataType 'json')}}
+        if (field === '{{name}}' && value && typeof value === 'object') {
+          value = JSON.stringify(value);
+        }
+        {{/if}}
+        {{/if}}
+        {{/each}}
+      }
+
+      // Use field label as key for export
+      const exportKey = typeof fieldConfig === 'string' ? fieldConfig : field;
+      formatted[exportKey] = value;
+    });
+
+    return formatted;
+  }
 {{/if}}
 
 {{#if (eq package 'full')}}

@@ -4,6 +4,7 @@ import { NotificationsController } from './controllers/notifications.controller'
 import { NotificationsService } from './services/notifications.service';
 import { NotificationsRepository } from './repositories/notifications.repository';
 import { notificationsRoutes } from './routes/index';
+import { ExportService } from '../../services/export.service';
 
 // Note: FastifyInstance eventService type is declared in websocket.plugin.ts
 
@@ -37,8 +38,10 @@ export default fp(
     const notificationsService = new NotificationsService(
       notificationsRepository,
     );
+    const exportService = new ExportService();
     const notificationsController = new NotificationsController(
       notificationsService,
+      exportService,
     );
 
     // Optional: Decorate Fastify instance with service for cross-plugin access

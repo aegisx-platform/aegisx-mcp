@@ -4,6 +4,7 @@ import { AuthorsController } from './controllers/authors.controller';
 import { AuthorsService } from './services/authors.service';
 import { AuthorsRepository } from './repositories/authors.repository';
 import { authorsRoutes } from './routes/index';
+import { ExportService } from '../../services/export.service';
 
 // Note: FastifyInstance eventService type is declared in websocket.plugin.ts
 
@@ -33,7 +34,11 @@ export default fp(
     // Dependencies are accessed from Fastify instance decorators
     const authorsRepository = new AuthorsRepository((fastify as any).knex);
     const authorsService = new AuthorsService(authorsRepository);
-    const authorsController = new AuthorsController(authorsService);
+    const exportService = new ExportService();
+    const authorsController = new AuthorsController(
+      authorsService,
+      exportService,
+    );
 
     // Optional: Decorate Fastify instance with service for cross-plugin access
     // fastify.decorate('authorsService', authorsService);

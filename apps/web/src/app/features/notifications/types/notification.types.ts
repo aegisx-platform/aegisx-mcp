@@ -54,31 +54,31 @@ export interface ListNotificationQuery {
   // Pagination
   page?: number;
   limit?: number;
-
+  
   // Search
   search?: string;
-
+  
   // Sort
   sort?: string; // Multiple sort support: field1:desc,field2:asc
-
+  
   // Field selection
   fields?: string[]; // Array of field names to return
-
+  
   // Include related data
   include?: string | string[];
-
+  
   // Smart field-based filters
   // String filtering for user_id
   user_id?: string; // Exact match
-  // String filtering for type
+    // String filtering for type
   type?: string; // Exact match
-  // String filtering for title
+    // String filtering for title
   title?: string; // Exact match
-  // String filtering for message
+    // String filtering for message
   message?: string; // Exact match
-  // String filtering for action_url
+    // String filtering for action_url
   action_url?: string; // Exact match
-  // Boolean filtering for read
+    // Boolean filtering for read
   read?: boolean;
   // Date/DateTime filtering for read_at
   read_at?: string; // ISO date string for exact match
@@ -92,7 +92,7 @@ export interface ListNotificationQuery {
   archived_at_max?: string; // ISO date string for range end
   // String filtering for priority
   priority?: string; // Exact match
-  // Date/DateTime filtering for expires_at
+    // Date/DateTime filtering for expires_at
   expires_at?: string; // ISO date string for exact match
   expires_at_min?: string; // ISO date string for range start
   expires_at_max?: string; // ISO date string for range end
@@ -178,6 +178,7 @@ export interface BulkResponse {
   };
 }
 
+
 // ===== UTILITY TYPES =====
 
 export type NotificationField = keyof Notification;
@@ -190,3 +191,4 @@ export interface NotificationListOptions {
   fields?: NotificationField[];
   search?: string;
 }
+

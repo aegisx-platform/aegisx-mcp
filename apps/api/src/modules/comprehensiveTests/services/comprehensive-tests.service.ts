@@ -426,70 +426,104 @@ export class ComprehensiveTestsService extends BaseService<
     return this.comprehensiveTestsRepository.getStats();
   }
 
-  // ===== FULL PACKAGE METHODS =====
-
   /**
-   * Validate data before save
+   * Get data for export with formatting
    */
-  async validate(data: { data: CreateComprehensiveTests }): Promise<{
-    valid: boolean;
-    errors: Array<{ field: string; message: string }>;
-  }> {
-    const errors: Array<{ field: string; message: string }> = [];
+  async getExportData(
+    queryParams: any = {},
+    fields?: string[],
+  ): Promise<any[]> {
+    // Get specific IDs if provided
+    if (queryParams.ids && queryParams.ids.length > 0) {
+      // Get specific records by IDs
+      const records = await Promise.all(
+        queryParams.ids.map((id: string) => this.getById(id)),
+      );
 
-    try {
-      await this.validateCreate(data.data);
-    } catch (error) {
-      errors.push({
-        field: 'general',
-        message: error instanceof Error ? error.message : String(error),
-      });
+      // Return raw data - ExportService will handle formatting
+      return records.filter((record) => record !== null);
     }
 
-    // Add specific field validations
+    // Separate filters from pagination parameters to avoid SQL errors
+    const { limit, offset, page, ...filters } = queryParams;
 
-    return {
-      valid: errors.length === 0,
-      errors,
+    // Build query parameters for data retrieval with proper pagination
+    const query: any = {
+      ...filters, // Only include actual filter parameters
+      limit: limit || 50000, // Max export limit for performance
+      page: 1, // Always start from first page for exports
     };
+
+    // Get filtered data
+    const result = await this.comprehensiveTestsRepository.list(query);
+
+    // Return raw data - ExportService will handle formatting
+    return result.data;
   }
 
   /**
-   * Check field uniqueness
+   * Format single record for export
    */
-  async checkUniqueness(
-    field: string,
-    options: { value: string; excludeId?: string | number },
-  ): Promise<{
-    unique: boolean;
-    exists?: any;
-  }> {
-    const query: any = { [field]: options.value };
+  private formatExportRecord(
+    record: ComprehensiveTests,
+    fields?: string[],
+  ): any {
+    const formatted: any = {};
 
-    // Add exclusion for updates
-    if (options.excludeId) {
-      query.excludeId = options.excludeId;
-    }
+    // Define all exportable fields
+    const exportableFields: { [key: string]: string | ((value: any) => any) } =
+      {
+        id: 'Id',
+        title: 'Title',
+        description: 'Description',
+        slug: 'Slug',
+        short_code: 'Short code',
+        price: 'Price',
+        quantity: 'Quantity',
+        weight: 'Weight',
+        rating: 'Rating',
+        is_active: 'Is active',
+        is_featured: 'Is featured',
+        is_available: 'Is available',
+        created_at: 'Created at',
+        updated_at: 'Updated at',
+        published_at: 'Published at',
+        expires_at: 'Expires at',
+        start_time: 'Start time',
+        metadata: 'Metadata',
+        tags: 'Tags',
+        ip_address: 'Ip address',
+        website_url: 'Website url',
+        email_address: 'Email address',
+        status: 'Status',
+        priority: 'Priority',
+        content: 'Content',
+        notes: 'Notes',
+      };
 
-    // Use field-specific find methods based on repository's isDisplayField logic
-    let existing: any = null;
+    // If specific fields requested, use only those
+    const fieldsToExport =
+      fields && fields.length > 0
+        ? fields.filter((field) => exportableFields.hasOwnProperty(field))
+        : Object.keys(exportableFields);
 
-    if (field === 'title' && options.value) {
-      existing = await this.comprehensiveTestsRepository.findByTitle(
-        options.value,
-      );
-    } else if (
-      existing &&
-      options.excludeId &&
-      existing.id === options.excludeId
-    ) {
-      // If updating (excludeId provided), ignore the current record
-      existing = null;
-    }
+    // Format each field
+    fieldsToExport.forEach((field) => {
+      const fieldConfig = exportableFields[field];
+      let value = (record as any)[field];
 
-    return {
-      unique: !existing,
-      exists: existing || undefined,
-    };
+      // Apply field-specific formatting
+      if (typeof fieldConfig === 'function') {
+        value = fieldConfig(value);
+      } else {
+        // Apply default formatting based on field type
+      }
+
+      // Use field label as key for export
+      const exportKey = typeof fieldConfig === 'string' ? fieldConfig : field;
+      formatted[exportKey] = value;
+    });
+
+    return formatted;
   }
 }

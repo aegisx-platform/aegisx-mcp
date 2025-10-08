@@ -2,7 +2,6 @@ import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { Type } from '@sinclair/typebox';
 import { ThemesController } from '../controllers/themes.controller';
 import {
-  ThemesSchema,
   CreateThemesSchema,
   UpdateThemesSchema,
   ThemesIdParamSchema,
@@ -10,21 +9,22 @@ import {
   ListThemesQuerySchema,
   ThemesResponseSchema,
   ThemesListResponseSchema,
+  FlexibleThemesListResponseSchema,
 } from '../schemas/themes.schemas';
 import {
   DropdownQuerySchema,
+  DropdownResponseSchema,
   BulkCreateSchema,
   BulkUpdateSchema,
   BulkDeleteSchema,
+  BulkResponseSchema,
   BulkStatusSchema,
   StatusToggleSchema,
-  ValidationRequestSchema,
-  UniquenessCheckSchema,
   StatisticsResponseSchema,
 } from '../../../schemas/base.schemas';
+import { ExportQuerySchema } from '../../../schemas/export.schemas';
 import { ApiErrorResponseSchema as ErrorResponseSchema } from '../../../schemas/base.schemas';
 import { SchemaRefs } from '../../../schemas/registry';
-import { BulkResponseSchema } from '../../../schemas/base.schemas';
 
 export interface ThemesRoutesOptions extends FastifyPluginOptions {
   controller: ThemesController;
@@ -87,12 +87,12 @@ export async function themesRoutes(
   fastify.get('/', {
     schema: {
       tags: ['Themes'],
-      summary: 'Get all themess with pagination',
+      summary: 'Get all themess with pagination and formats',
       description:
-        'Retrieve a paginated list of themess with optional filtering',
+        'Retrieve themess with flexible formatting: ?format=dropdown for UI components, ?format=minimal for lightweight data, ?fields=id,name for custom field selection',
       querystring: ListThemesQuerySchema,
       response: {
-        200: ThemesListResponseSchema,
+        200: FlexibleThemesListResponseSchema,
         400: SchemaRefs.ValidationError,
         401: SchemaRefs.Unauthorized,
         403: SchemaRefs.Forbidden,
@@ -164,29 +164,7 @@ export async function themesRoutes(
       description: 'Get themes options for dropdown/select components',
       querystring: DropdownQuerySchema,
       response: {
-        200: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            data: {
-              type: 'object',
-              properties: {
-                options: {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      value: { type: ['string', 'number'] },
-                      label: { type: 'string' },
-                      disabled: { type: 'boolean' },
-                    },
-                  },
-                },
-                total: { type: 'number' },
-              },
-            },
-          },
-        },
+        200: DropdownResponseSchema,
         400: SchemaRefs.ValidationError,
         401: SchemaRefs.Unauthorized,
         403: SchemaRefs.Forbidden,
@@ -208,40 +186,7 @@ export async function themesRoutes(
       description: 'Create multiple themess in one operation',
       body: BulkCreateSchema(CreateThemesSchema),
       response: {
-        201: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            data: {
-              type: 'object',
-              properties: {
-                created: { type: 'array', items: ThemesSchema },
-                summary: {
-                  type: 'object',
-                  properties: {
-                    successful: { type: 'number' },
-                    failed: { type: 'number' },
-                    errors: {
-                      type: 'array',
-                      items: {
-                        type: 'object',
-                        properties: {
-                          item: {
-                            type: 'object',
-                            additionalProperties: true, // Allow any properties in original data
-                          }, // Original data that failed
-                          error: { type: 'string' },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-            message: { type: 'string' },
-            meta: { type: 'object' },
-          },
-        },
+        201: BulkResponseSchema(ThemesResponseSchema),
         400: SchemaRefs.ValidationError,
         401: SchemaRefs.Unauthorized,
         403: SchemaRefs.Forbidden,
@@ -263,39 +208,7 @@ export async function themesRoutes(
       description: 'Update multiple themess in one operation',
       body: BulkUpdateSchema(UpdateThemesSchema),
       response: {
-        200: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            data: {
-              type: 'object',
-              properties: {
-                updated: { type: 'array', items: ThemesSchema },
-                summary: {
-                  type: 'object',
-                  properties: {
-                    successful: { type: 'number' },
-                    failed: { type: 'number' },
-                    errors: {
-                      type: 'array',
-                      items: {
-                        type: 'object',
-                        properties: {
-                          item: {
-                            type: 'object',
-                            additionalProperties: true, // Allow any properties in original data
-                          }, // Original data that failed
-                          error: { type: 'string' },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-            message: { type: 'string' },
-          },
-        },
+        200: BulkResponseSchema(ThemesResponseSchema),
         400: SchemaRefs.ValidationError,
         401: SchemaRefs.Unauthorized,
         403: SchemaRefs.Forbidden,
@@ -317,39 +230,7 @@ export async function themesRoutes(
       description: 'Delete multiple themess in one operation',
       body: BulkDeleteSchema,
       response: {
-        200: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            data: {
-              type: 'object',
-              properties: {
-                deleted: {
-                  type: 'array',
-                  items: { type: ['string', 'number'] },
-                },
-                summary: {
-                  type: 'object',
-                  properties: {
-                    successful: { type: 'number' },
-                    failed: { type: 'number' },
-                    errors: {
-                      type: 'array',
-                      items: {
-                        type: 'object',
-                        properties: {
-                          id: { type: ['string', 'number'] },
-                          error: { type: 'string' },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-            message: { type: 'string' },
-          },
-        },
+        200: BulkResponseSchema(ThemesResponseSchema),
         400: SchemaRefs.ValidationError,
         401: SchemaRefs.Unauthorized,
         403: SchemaRefs.Forbidden,
@@ -371,39 +252,7 @@ export async function themesRoutes(
       description: 'Update status of multiple themess',
       body: BulkStatusSchema,
       response: {
-        200: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            data: {
-              type: 'object',
-              properties: {
-                updated: { type: 'array', items: ThemesSchema },
-                summary: {
-                  type: 'object',
-                  properties: {
-                    successful: { type: 'number' },
-                    failed: { type: 'number' },
-                    errors: {
-                      type: 'array',
-                      items: {
-                        type: 'object',
-                        properties: {
-                          item: {
-                            type: 'object',
-                            additionalProperties: true, // Allow any properties in original data
-                          }, // Original data that failed
-                          error: { type: 'string' },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-            message: { type: 'string' },
-          },
-        },
+        200: BulkResponseSchema(ThemesResponseSchema),
         400: SchemaRefs.ValidationError,
         401: SchemaRefs.Unauthorized,
         403: SchemaRefs.Forbidden,
@@ -489,58 +338,18 @@ export async function themesRoutes(
     handler: controller.toggle.bind(controller),
   });
 
-  // Get statistics
-  fastify.get('/stats', {
+  // Export themes data
+  fastify.get('/export', {
     schema: {
       tags: ['Themes'],
-      summary: 'Get themes statistics',
-      description: 'Get statistical information about themes',
-      response: {
-        200: StatisticsResponseSchema,
-        400: SchemaRefs.ValidationError,
-        401: SchemaRefs.Unauthorized,
-        403: SchemaRefs.Forbidden,
-        500: SchemaRefs.ServerError,
-      },
-    },
-    preValidation: [
-      fastify.authenticate,
-      fastify.authorize(['themes.read', 'admin']),
-    ],
-    handler: controller.getStats.bind(controller),
-  });
-
-  // ===== FULL PACKAGE ROUTES =====
-
-  // Validate data before save
-  fastify.post('/validate', {
-    schema: {
-      tags: ['Themes'],
-      summary: 'Validate themes data',
-      description: 'Validate themes data before saving',
-      body: ValidationRequestSchema(CreateThemesSchema),
+      summary: 'Export themes data',
+      description: 'Export themes data in various formats (CSV, Excel, PDF)',
+      querystring: ExportQuerySchema,
       response: {
         200: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            data: {
-              type: 'object',
-              properties: {
-                valid: { type: 'boolean' },
-                errors: {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      field: { type: 'string' },
-                      message: { type: 'string' },
-                    },
-                  },
-                },
-              },
-            },
-          },
+          description: 'Export file download',
+          type: 'string',
+          format: 'binary',
         },
         400: SchemaRefs.ValidationError,
         401: SchemaRefs.Unauthorized,
@@ -550,56 +359,8 @@ export async function themesRoutes(
     },
     preValidation: [
       fastify.authenticate,
-      fastify.authorize(['themes.create', 'themes.update', 'admin']),
+      fastify.authorize(['themes.read', 'themes.export', 'admin']),
     ],
-    handler: controller.validate.bind(controller),
-  });
-
-  // Check field uniqueness
-  fastify.get('/check/:field', {
-    schema: {
-      tags: ['Themes'],
-      summary: 'Check field uniqueness',
-      description: 'Check if a field value is unique',
-      params: Type.Object({
-        field: Type.String({
-          description: 'Field name to check for uniqueness',
-        }),
-      }),
-      querystring: Type.Object({
-        value: Type.Union([Type.String(), Type.Number()], {
-          description: 'Value to check for uniqueness',
-        }),
-        excludeId: Type.Optional(
-          Type.Union([Type.String(), Type.Number()], {
-            description: 'ID to exclude from uniqueness check (for updates)',
-          }),
-        ),
-      }),
-      response: {
-        200: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            data: {
-              type: 'object',
-              properties: {
-                unique: { type: 'boolean' },
-                exists: { type: 'object' },
-              },
-            },
-          },
-        },
-        400: SchemaRefs.ValidationError,
-        401: SchemaRefs.Unauthorized,
-        403: SchemaRefs.Forbidden,
-        500: SchemaRefs.ServerError,
-      },
-    },
-    preValidation: [
-      fastify.authenticate,
-      fastify.authorize(['themes.read', 'admin']),
-    ],
-    handler: controller.checkUniqueness.bind(controller),
+    handler: controller.export.bind(controller),
   });
 }

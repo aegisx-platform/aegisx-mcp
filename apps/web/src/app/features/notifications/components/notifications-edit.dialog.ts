@@ -1,21 +1,11 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  MatDialogRef,
-  MAT_DIALOG_DATA,
-  MatDialogModule,
-} from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { NotificationService } from '../services/notifications.service';
-import {
-  Notification,
-  UpdateNotificationRequest,
-} from '../types/notification.types';
-import {
-  NotificationFormComponent,
-  NotificationFormData,
-} from './notifications-form.component';
+import { Notification, UpdateNotificationRequest } from '../types/notification.types';
+import { NotificationFormComponent, NotificationFormData } from './notifications-form.component';
 
 export interface NotificationEditDialogData {
   notifications: Notification;
@@ -24,11 +14,15 @@ export interface NotificationEditDialogData {
 @Component({
   selector: 'app-notifications-edit-dialog',
   standalone: true,
-  imports: [CommonModule, MatDialogModule, NotificationFormComponent],
+  imports: [
+    CommonModule,
+    MatDialogModule,
+    NotificationFormComponent,
+  ],
   template: `
     <div class="edit-dialog">
       <h2 mat-dialog-title>Edit Notifications</h2>
-
+      
       <mat-dialog-content>
         <app-notifications-form
           mode="edit"
@@ -40,25 +34,23 @@ export interface NotificationEditDialogData {
       </mat-dialog-content>
     </div>
   `,
-  styles: [
-    `
+  styles: [`
+    .edit-dialog {
+      min-width: 500px;
+      max-width: 800px;
+    }
+
+    mat-dialog-content {
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    @media (max-width: 768px) {
       .edit-dialog {
-        min-width: 500px;
-        max-width: 800px;
+        min-width: 90vw;
       }
-
-      mat-dialog-content {
-        max-height: 70vh;
-        overflow-y: auto;
-      }
-
-      @media (max-width: 768px) {
-        .edit-dialog {
-          min-width: 90vw;
-        }
-      }
-    `,
-  ],
+    }
+  `]
 })
 export class NotificationEditDialogComponent implements OnInit {
   private notificationsService = inject(NotificationService);
@@ -74,14 +66,14 @@ export class NotificationEditDialogComponent implements OnInit {
 
   async onFormSubmit(formData: NotificationFormData) {
     this.loading.set(true);
-
+    
     try {
       const updateRequest = formData as UpdateNotificationRequest;
       const result = await this.notificationsService.updateNotification(
-        this.data.notifications.id,
-        updateRequest,
+        this.data.notifications.id, 
+        updateRequest
       );
-
+      
       if (result) {
         this.snackBar.open('Notifications updated successfully', 'Close', {
           duration: 3000,
@@ -94,9 +86,9 @@ export class NotificationEditDialogComponent implements OnInit {
       }
     } catch (error: any) {
       this.snackBar.open(
-        error.message || 'Failed to update Notifications',
-        'Close',
-        { duration: 5000 },
+        error.message || 'Failed to update Notifications', 
+        'Close', 
+        { duration: 5000 }
       );
     } finally {
       this.loading.set(false);

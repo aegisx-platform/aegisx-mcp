@@ -4,6 +4,7 @@ import { BooksController } from './controllers/books.controller';
 import { BooksService } from './services/books.service';
 import { BooksRepository } from './repositories/books.repository';
 import { booksRoutes } from './routes/index';
+import { ExportService } from '../../services/export.service';
 
 // Note: FastifyInstance eventService type is declared in websocket.plugin.ts
 
@@ -33,7 +34,8 @@ export default fp(
     // Dependencies are accessed from Fastify instance decorators
     const booksRepository = new BooksRepository((fastify as any).knex);
     const booksService = new BooksService(booksRepository);
-    const booksController = new BooksController(booksService);
+    const exportService = new ExportService();
+    const booksController = new BooksController(booksService, exportService);
 
     // Optional: Decorate Fastify instance with service for cross-plugin access
     // fastify.decorate('booksService', booksService);

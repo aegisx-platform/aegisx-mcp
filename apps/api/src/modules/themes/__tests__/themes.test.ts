@@ -7,7 +7,7 @@ import { ThemesCreate, ThemesUpdate } from '../schemas/themes.types';
  * 
  * Integration tests for themes domain functionality.
  * 
- * Generated on: 2025-09-27T14:23:53.945Z
+ * Generated on: 2025-10-08T15:15:11.396Z
  */
 
 describe('Themes Domain', () => {
@@ -29,7 +29,7 @@ describe('Themes Domain', () => {
       // TODO: Add actual test data based on your schema
       name: `Test Themes ${Date.now()}`,
       description: 'Test description',
-      status: 'active'
+      is_active: 'true'
     });
 
     describe('POST /core', () => {
@@ -93,7 +93,7 @@ describe('Themes Domain', () => {
       it('should filter core by query parameters', async () => {
         const response = await app.inject({
           method: 'GET',
-          url: '/core?status=active&name=Test'
+          url: '/core?is_active=true&name=Test'
         });
 
         expect(response.statusCode).toBe(200);

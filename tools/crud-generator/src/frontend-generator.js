@@ -30,6 +30,13 @@ Handlebars.registerHelper('kebabCase', function (str) {
     .replace(/^-+|-+$/g, ''); // Remove leading/trailing dashes
 });
 
+Handlebars.registerHelper('titleCase', function(str) {
+  if (!str || typeof str !== 'string') return '';
+  return str.replace(/\w\S*/g, (txt) => 
+    txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+  ).replace(/_/g, ' ');
+});
+
 // Helper to convert camelCase moduleName back to kebab-case table name
 Handlebars.registerHelper('tableNameToKebab', function (camelCaseModuleName) {
   if (!camelCaseModuleName || typeof camelCaseModuleName !== 'string')

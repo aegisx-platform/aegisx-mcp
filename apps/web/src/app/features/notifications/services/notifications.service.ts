@@ -11,7 +11,7 @@ import {
   ListNotificationQuery,
   ApiResponse,
   BulkResponse,
-  PaginatedResponse,
+  PaginatedResponse
 } from '../types/notification.types';
 
 // ===== SERVICE CONFIGURATION =====
@@ -26,7 +26,7 @@ export class NotificationService {
   private baseUrl = `${API_BASE_URL}/notifications`;
 
   // ===== SIGNALS FOR STATE MANAGEMENT =====
-
+  
   private notificationsListSignal = signal<Notification[]>([]);
   private loadingSignal = signal<boolean>(false);
   private errorSignal = signal<string | null>(null);
@@ -36,7 +36,7 @@ export class NotificationService {
   private totalNotificationSignal = signal<number>(0);
 
   // ===== PUBLIC READONLY SIGNALS =====
-
+  
   readonly notificationsList = this.notificationsListSignal.asReadonly();
   readonly loading = this.loadingSignal.asReadonly();
   readonly error = this.errorSignal.asReadonly();
@@ -46,7 +46,7 @@ export class NotificationService {
   readonly pageSize = this.pageSizeSignal.asReadonly();
 
   // ===== COMPUTED SIGNALS =====
-
+  
   readonly totalPages = computed(() => {
     const total = this.totalNotificationSignal();
     const size = this.pageSizeSignal();
@@ -73,83 +73,58 @@ export class NotificationService {
     try {
       // Build HTTP params
       let httpParams = new HttpParams();
-      if (params?.page)
-        httpParams = httpParams.set('page', params.page.toString());
-      if (params?.limit)
-        httpParams = httpParams.set('limit', params.limit.toString());
+      if (params?.page) httpParams = httpParams.set('page', params.page.toString());
+      if (params?.limit) httpParams = httpParams.set('limit', params.limit.toString());
       if (params?.search) httpParams = httpParams.set('search', params.search);
       if (params?.sort) httpParams = httpParams.set('sort', params.sort);
-
+      
       // Handle fields array parameter (multiple values)
       if (params?.fields && params.fields.length > 0) {
         params.fields.forEach((field: string) => {
           httpParams = httpParams.append('fields', field);
         });
       }
-
+      
       // Add smart filter parameters based on table schema
       // String filtering for user_id
-      if (params?.user_id)
-        httpParams = httpParams.set('user_id', params.user_id);
-      // String filtering for type
+      if (params?.user_id) httpParams = httpParams.set('user_id', params.user_id);
+            // String filtering for type
       if (params?.type) httpParams = httpParams.set('type', params.type);
-      // String filtering for title
+            // String filtering for title
       if (params?.title) httpParams = httpParams.set('title', params.title);
-      // String filtering for message
-      if (params?.message)
-        httpParams = httpParams.set('message', params.message);
-      // String filtering for action_url
-      if (params?.action_url)
-        httpParams = httpParams.set('action_url', params.action_url);
-      // Boolean filtering for read
-      if (params?.read !== undefined)
-        httpParams = httpParams.set('read', params.read.toString());
+            // String filtering for message
+      if (params?.message) httpParams = httpParams.set('message', params.message);
+            // String filtering for action_url
+      if (params?.action_url) httpParams = httpParams.set('action_url', params.action_url);
+            // Boolean filtering for read
+      if (params?.read !== undefined) httpParams = httpParams.set('read', params.read.toString());
       // Date/DateTime filtering for read_at
-      if (params?.read_at)
-        httpParams = httpParams.set('read_at', params.read_at);
-      if (params?.read_at_min)
-        httpParams = httpParams.set('read_at_min', params.read_at_min);
-      if (params?.read_at_max)
-        httpParams = httpParams.set('read_at_max', params.read_at_max);
+      if (params?.read_at) httpParams = httpParams.set('read_at', params.read_at);
+      if (params?.read_at_min) httpParams = httpParams.set('read_at_min', params.read_at_min);
+      if (params?.read_at_max) httpParams = httpParams.set('read_at_max', params.read_at_max);
       // Boolean filtering for archived
-      if (params?.archived !== undefined)
-        httpParams = httpParams.set('archived', params.archived.toString());
+      if (params?.archived !== undefined) httpParams = httpParams.set('archived', params.archived.toString());
       // Date/DateTime filtering for archived_at
-      if (params?.archived_at)
-        httpParams = httpParams.set('archived_at', params.archived_at);
-      if (params?.archived_at_min)
-        httpParams = httpParams.set('archived_at_min', params.archived_at_min);
-      if (params?.archived_at_max)
-        httpParams = httpParams.set('archived_at_max', params.archived_at_max);
+      if (params?.archived_at) httpParams = httpParams.set('archived_at', params.archived_at);
+      if (params?.archived_at_min) httpParams = httpParams.set('archived_at_min', params.archived_at_min);
+      if (params?.archived_at_max) httpParams = httpParams.set('archived_at_max', params.archived_at_max);
       // String filtering for priority
-      if (params?.priority)
-        httpParams = httpParams.set('priority', params.priority);
-      // Date/DateTime filtering for expires_at
-      if (params?.expires_at)
-        httpParams = httpParams.set('expires_at', params.expires_at);
-      if (params?.expires_at_min)
-        httpParams = httpParams.set('expires_at_min', params.expires_at_min);
-      if (params?.expires_at_max)
-        httpParams = httpParams.set('expires_at_max', params.expires_at_max);
+      if (params?.priority) httpParams = httpParams.set('priority', params.priority);
+            // Date/DateTime filtering for expires_at
+      if (params?.expires_at) httpParams = httpParams.set('expires_at', params.expires_at);
+      if (params?.expires_at_min) httpParams = httpParams.set('expires_at_min', params.expires_at_min);
+      if (params?.expires_at_max) httpParams = httpParams.set('expires_at_max', params.expires_at_max);
       // Date/DateTime filtering for created_at
-      if (params?.created_at)
-        httpParams = httpParams.set('created_at', params.created_at);
-      if (params?.created_at_min)
-        httpParams = httpParams.set('created_at_min', params.created_at_min);
-      if (params?.created_at_max)
-        httpParams = httpParams.set('created_at_max', params.created_at_max);
+      if (params?.created_at) httpParams = httpParams.set('created_at', params.created_at);
+      if (params?.created_at_min) httpParams = httpParams.set('created_at_min', params.created_at_min);
+      if (params?.created_at_max) httpParams = httpParams.set('created_at_max', params.created_at_max);
       // Date/DateTime filtering for updated_at
-      if (params?.updated_at)
-        httpParams = httpParams.set('updated_at', params.updated_at);
-      if (params?.updated_at_min)
-        httpParams = httpParams.set('updated_at_min', params.updated_at_min);
-      if (params?.updated_at_max)
-        httpParams = httpParams.set('updated_at_max', params.updated_at_max);
+      if (params?.updated_at) httpParams = httpParams.set('updated_at', params.updated_at);
+      if (params?.updated_at_min) httpParams = httpParams.set('updated_at_min', params.updated_at_min);
+      if (params?.updated_at_max) httpParams = httpParams.set('updated_at_max', params.updated_at_max);
 
       const response = await this.http
-        .get<
-          PaginatedResponse<Notification>
-        >(this.baseUrl, { params: httpParams })
+        .get<PaginatedResponse<Notification>>(this.baseUrl, { params: httpParams })
         .toPromise();
 
       if (response) {
@@ -162,9 +137,7 @@ export class NotificationService {
         }
       }
     } catch (error: any) {
-      this.errorSignal.set(
-        error.message || 'Failed to load notifications list',
-      );
+      this.errorSignal.set(error.message || 'Failed to load notifications list');
     } finally {
       this.loadingSignal.set(false);
     }
@@ -197,9 +170,7 @@ export class NotificationService {
   /**
    * Create new notifications
    */
-  async createNotification(
-    data: CreateNotificationRequest,
-  ): Promise<Notification | null> {
+  async createNotification(data: CreateNotificationRequest): Promise<Notification | null> {
     this.loadingSignal.set(true);
 
     try {
@@ -209,11 +180,8 @@ export class NotificationService {
 
       if (response) {
         // Optimistic update: add to list
-        this.notificationsListSignal.update((list) => [
-          ...list,
-          response.data!,
-        ]);
-        this.totalNotificationSignal.update((total) => total + 1);
+        this.notificationsListSignal.update((list) => [...list, response.data!]);
+        this.totalNotificationSignal.update(total => total + 1);
         return response.data;
       }
       return null;
@@ -228,10 +196,7 @@ export class NotificationService {
   /**
    * Update existing notifications
    */
-  async updateNotification(
-    id: string,
-    data: UpdateNotificationRequest,
-  ): Promise<Notification | null> {
+  async updateNotification(id: string, data: UpdateNotificationRequest): Promise<Notification | null> {
     this.loadingSignal.set(true);
 
     try {
@@ -242,7 +207,7 @@ export class NotificationService {
       if (response) {
         // Optimistic update: replace in list
         this.notificationsListSignal.update((list) =>
-          list.map((item) => (item.id === id ? response.data! : item)),
+          list.map((item) => (item.id === id ? response.data! : item))
         );
         // Update selected notifications if it's the same
         if (this.selectedNotificationSignal()?.id === id) {
@@ -273,9 +238,9 @@ export class NotificationService {
       if (response?.success) {
         // Optimistic update: remove from list
         this.notificationsListSignal.update((list) =>
-          list.filter((item) => item.id !== id),
+          list.filter((item) => item.id !== id)
         );
-        this.totalNotificationSignal.update((total) => Math.max(0, total - 1));
+        this.totalNotificationSignal.update(total => Math.max(0, total - 1));
         // Clear selected notifications if it's the deleted one
         if (this.selectedNotificationSignal()?.id === id) {
           this.selectedNotificationSignal.set(null);
@@ -294,24 +259,82 @@ export class NotificationService {
   // ===== ENHANCED OPERATIONS =====
 
   /**
+   * Export notifications data
+   */
+  async exportNotification(options: {
+    format: 'csv' | 'excel' | 'pdf';
+    ids?: string[];
+    filters?: Record<string, any>;
+    fields?: string[];
+    filename?: string;
+    applyFilters?: boolean;
+    includeMetadata?: boolean;
+  }): Promise<Blob> {
+    try {
+      let httpParams = new HttpParams()
+        .set('format', options.format);
+
+      if (options.ids && options.ids.length > 0) {
+        options.ids.forEach(id => {
+          httpParams = httpParams.append('ids', id);
+        });
+      }
+
+      if (options.filters && options.applyFilters) {
+        Object.entries(options.filters).forEach(([key, value]) => {
+          if (value !== null && value !== undefined && value !== '') {
+            httpParams = httpParams.set(`filters[${key}]`, String(value));
+          }
+        });
+      }
+
+      if (options.fields && options.fields.length > 0) {
+        options.fields.forEach(field => {
+          httpParams = httpParams.append('fields', field);
+        });
+      }
+
+      if (options.filename) {
+        httpParams = httpParams.set('filename', options.filename);
+      }
+
+      if (options.applyFilters !== undefined) {
+        httpParams = httpParams.set('applyFilters', String(options.applyFilters));
+      }
+
+      if (options.includeMetadata !== undefined) {
+        httpParams = httpParams.set('includeMetadata', String(options.includeMetadata));
+      }
+
+      const response = await this.http
+        .get(`${this.baseUrl}/export`, {
+          params: httpParams,
+          responseType: 'blob'
+        })
+        .toPromise();
+
+      if (response) {
+        return response;
+      }
+
+      throw new Error('Export failed - no response received');
+    } catch (error: any) {
+      console.error('Failed to export notifications data:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Get dropdown options for notifications
    */
-  async getDropdownOptions(
-    params: { search?: string; limit?: number } = {},
-  ): Promise<Array<{ value: string; label: string }>> {
+  async getDropdownOptions(params: {search?: string, limit?: number} = {}): Promise<Array<{value: string, label: string}>> {
     try {
       let httpParams = new HttpParams();
       if (params.search) httpParams = httpParams.set('search', params.search);
-      if (params.limit)
-        httpParams = httpParams.set('limit', params.limit.toString());
+      if (params.limit) httpParams = httpParams.set('limit', params.limit.toString());
 
       const response = await this.http
-        .get<
-          ApiResponse<{
-            options: Array<{ value: string; label: string }>;
-            total: number;
-          }>
-        >(`${this.baseUrl}/dropdown`, { params: httpParams })
+        .get<ApiResponse<{options: Array<{value: string, label: string}>, total: number}>>(`${this.baseUrl}/dropdown`, { params: httpParams })
         .toPromise();
 
       if (response?.success && response.data?.options) {
@@ -327,26 +350,14 @@ export class NotificationService {
   /**
    * Get users dropdown options for user_id field
    */
-  async getUsersDropdown(
-    params: { search?: string; limit?: number } = {},
-  ): Promise<Array<{ value: string; label: string; disabled?: boolean }>> {
+  async getUsersDropdown(params: {search?: string, limit?: number} = {}): Promise<Array<{value: string, label: string, disabled?: boolean}>> {
     try {
       let httpParams = new HttpParams();
       if (params.search) httpParams = httpParams.set('search', params.search);
-      if (params.limit)
-        httpParams = httpParams.set('limit', params.limit.toString());
+      if (params.limit) httpParams = httpParams.set('limit', params.limit.toString());
 
       const response = await this.http
-        .get<
-          ApiResponse<{
-            options: Array<{
-              value: string;
-              label: string;
-              disabled?: boolean;
-            }>;
-            total: number;
-          }>
-        >('/users/dropdown', { params: httpParams })
+        .get<ApiResponse<{options: Array<{value: string, label: string, disabled?: boolean}>, total: number}>>('/users/dropdown', { params: httpParams })
         .toPromise();
 
       if (response?.success && response.data?.options) {
@@ -359,12 +370,11 @@ export class NotificationService {
     }
   }
 
+
   /**
    * Bulk create notificationss
    */
-  async bulkCreateNotification(
-    items: CreateNotificationRequest[],
-  ): Promise<BulkResponse | null> {
+  async bulkCreateNotification(items: CreateNotificationRequest[]): Promise<BulkResponse | null> {
     this.loadingSignal.set(true);
 
     try {
@@ -379,9 +389,7 @@ export class NotificationService {
       }
       return null;
     } catch (error: any) {
-      this.errorSignal.set(
-        error.message || 'Failed to bulk create notificationss',
-      );
+      this.errorSignal.set(error.message || 'Failed to bulk create notificationss');
       throw error;
     } finally {
       this.loadingSignal.set(false);
@@ -391,9 +399,7 @@ export class NotificationService {
   /**
    * Bulk update notificationss
    */
-  async bulkUpdateNotification(
-    items: Array<{ id: string; data: UpdateNotificationRequest }>,
-  ): Promise<BulkResponse | null> {
+  async bulkUpdateNotification(items: Array<{ id: string, data: UpdateNotificationRequest }>): Promise<BulkResponse | null> {
     this.loadingSignal.set(true);
 
     try {
@@ -408,9 +414,7 @@ export class NotificationService {
       }
       return null;
     } catch (error: any) {
-      this.errorSignal.set(
-        error.message || 'Failed to bulk update notificationss',
-      );
+      this.errorSignal.set(error.message || 'Failed to bulk update notificationss');
       throw error;
     } finally {
       this.loadingSignal.set(false);
@@ -435,89 +439,13 @@ export class NotificationService {
       }
       return null;
     } catch (error: any) {
-      this.errorSignal.set(
-        error.message || 'Failed to bulk delete notificationss',
-      );
+      this.errorSignal.set(error.message || 'Failed to bulk delete notificationss');
       throw error;
     } finally {
       this.loadingSignal.set(false);
     }
   }
 
-  // ===== ADVANCED OPERATIONS (FULL PACKAGE) =====
-
-  /**
-   * Validate notifications data before save
-   */
-  async validateNotification(
-    data: CreateNotificationRequest,
-  ): Promise<{ valid: boolean; errors?: any[] }> {
-    try {
-      const response = await this.http
-        .post<
-          ApiResponse<{ valid: boolean; errors?: any[] }>
-        >(`${this.baseUrl}/validate`, { data })
-        .toPromise();
-
-      if (response) {
-        return response.data;
-      }
-      return { valid: false, errors: ['Validation failed'] };
-    } catch (error: any) {
-      console.error('Failed to validate notifications:', error);
-      return { valid: false, errors: [error.message || 'Validation error'] };
-    }
-  }
-
-  /**
-   * Check field uniqueness
-   */
-  async checkUniqueness(
-    field: string,
-    value: string,
-    excludeId?: string,
-  ): Promise<{ unique: boolean }> {
-    try {
-      let params = new HttpParams().set('value', value);
-
-      if (excludeId) {
-        params = params.set('excludeId', excludeId);
-      }
-
-      const response = await this.http
-        .get<
-          ApiResponse<{ unique: boolean }>
-        >(`${this.baseUrl}/check/${field}`, { params })
-        .toPromise();
-
-      if (response) {
-        return response.data;
-      }
-      return { unique: false };
-    } catch (error: any) {
-      console.error('Failed to check uniqueness:', error);
-      return { unique: false };
-    }
-  }
-
-  /**
-   * Get notifications statistics
-   */
-  async getStats(): Promise<{ total: number } | null> {
-    try {
-      const response = await this.http
-        .get<ApiResponse<{ total: number }>>(`${this.baseUrl}/stats`)
-        .toPromise();
-
-      if (response) {
-        return response.data;
-      }
-      return null;
-    } catch (error: any) {
-      console.error('Failed to get notifications stats:', error);
-      return null;
-    }
-  }
 
   // ===== UTILITY METHODS =====
 

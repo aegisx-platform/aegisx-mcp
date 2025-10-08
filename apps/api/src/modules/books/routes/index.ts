@@ -18,13 +18,9 @@ import {
   BulkUpdateSchema,
   BulkDeleteSchema,
   BulkResponseSchema,
-  ValidationRequestSchema,
-  ValidationResponseSchema,
-  UniquenessParamSchema,
-  UniquenessQuerySchema,
-  UniquenessResponseSchema,
   StatisticsResponseSchema,
 } from '../../../schemas/base.schemas';
+import { ExportQuerySchema } from '../../../schemas/export.schemas';
 import { ApiErrorResponseSchema as ErrorResponseSchema } from '../../../schemas/base.schemas';
 import { SchemaRefs } from '../../../schemas/registry';
 
@@ -246,17 +242,19 @@ export async function booksRoutes(
     handler: controller.bulkDelete.bind(controller),
   });
 
-  // ===== FULL PACKAGE ROUTES =====
-
-  // Validate data before save
-  fastify.post('/validate', {
+  // Export books data
+  fastify.get('/export', {
     schema: {
       tags: ['Books'],
-      summary: 'Validate books data',
-      description: 'Validate books data before saving',
-      body: ValidationRequestSchema(CreateBooksSchema),
+      summary: 'Export books data',
+      description: 'Export books data in various formats (CSV, Excel, PDF)',
+      querystring: ExportQuerySchema,
       response: {
-        200: ValidationResponseSchema,
+        200: {
+          description: 'Export file download',
+          type: 'string',
+          format: 'binary',
+        },
         400: SchemaRefs.ValidationError,
         401: SchemaRefs.Unauthorized,
         403: SchemaRefs.Forbidden,
@@ -265,31 +263,8 @@ export async function booksRoutes(
     },
     preValidation: [
       fastify.authenticate,
-      fastify.authorize(['books.create', 'books.update', 'admin']),
+      fastify.authorize(['books.read', 'books.export', 'admin']),
     ],
-    handler: controller.validate.bind(controller),
-  });
-
-  // Check field uniqueness
-  fastify.get('/check/:field', {
-    schema: {
-      tags: ['Books'],
-      summary: 'Check field uniqueness',
-      description: 'Check if a field value is unique',
-      params: UniquenessParamSchema,
-      querystring: UniquenessQuerySchema,
-      response: {
-        200: UniquenessResponseSchema,
-        400: SchemaRefs.ValidationError,
-        401: SchemaRefs.Unauthorized,
-        403: SchemaRefs.Forbidden,
-        500: SchemaRefs.ServerError,
-      },
-    },
-    preValidation: [
-      fastify.authenticate,
-      fastify.authorize(['books.read', 'admin']),
-    ],
-    handler: controller.checkUniqueness.bind(controller),
+    handler: controller.export.bind(controller),
   });
 }

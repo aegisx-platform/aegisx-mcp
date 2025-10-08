@@ -10,11 +10,15 @@ import { AuthorFormComponent, AuthorFormData } from './authors-form.component';
 @Component({
   selector: 'app-authors-create-dialog',
   standalone: true,
-  imports: [CommonModule, MatDialogModule, AuthorFormComponent],
+  imports: [
+    CommonModule,
+    MatDialogModule,
+    AuthorFormComponent,
+  ],
   template: `
     <div class="create-dialog">
       <h2 mat-dialog-title>Create Authors</h2>
-
+      
       <mat-dialog-content>
         <app-authors-form
           mode="create"
@@ -25,25 +29,23 @@ import { AuthorFormComponent, AuthorFormData } from './authors-form.component';
       </mat-dialog-content>
     </div>
   `,
-  styles: [
-    `
+  styles: [`
+    .create-dialog {
+      min-width: 500px;
+      max-width: 800px;
+    }
+
+    mat-dialog-content {
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    @media (max-width: 768px) {
       .create-dialog {
-        min-width: 500px;
-        max-width: 800px;
+        min-width: 90vw;
       }
-
-      mat-dialog-content {
-        max-height: 70vh;
-        overflow-y: auto;
-      }
-
-      @media (max-width: 768px) {
-        .create-dialog {
-          min-width: 90vw;
-        }
-      }
-    `,
-  ],
+    }
+  `]
 })
 export class AuthorCreateDialogComponent {
   private authorsService = inject(AuthorService);
@@ -54,11 +56,11 @@ export class AuthorCreateDialogComponent {
 
   async onFormSubmit(formData: AuthorFormData) {
     this.loading.set(true);
-
+    
     try {
       const createRequest = formData as CreateAuthorRequest;
       const result = await this.authorsService.createAuthor(createRequest);
-
+      
       if (result) {
         this.snackBar.open('Authors created successfully', 'Close', {
           duration: 3000,
@@ -70,9 +72,11 @@ export class AuthorCreateDialogComponent {
         });
       }
     } catch (error: any) {
-      this.snackBar.open(error.message || 'Failed to create Authors', 'Close', {
-        duration: 5000,
-      });
+      this.snackBar.open(
+        error.message || 'Failed to create Authors', 
+        'Close', 
+        { duration: 5000 }
+      );
     } finally {
       this.loading.set(false);
     }

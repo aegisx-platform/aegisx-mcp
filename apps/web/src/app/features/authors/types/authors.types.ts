@@ -36,29 +36,29 @@ export interface ListAuthorQuery {
   // Pagination
   page?: number;
   limit?: number;
-
+  
   // Search
   search?: string;
-
+  
   // Sort
   sort?: string; // Multiple sort support: field1:desc,field2:asc
-
+  
   // Field selection
   fields?: string[]; // Array of field names to return
-
+  
   // Include related data
   include?: string | string[];
-
+  
   // Smart field-based filters
   // String filtering for name
   name?: string; // Exact match
-  // String filtering for email
+    // String filtering for email
   email?: string; // Exact match
-  // String filtering for bio
+    // String filtering for bio
   bio?: string; // Exact match
-  // String filtering for country
+    // String filtering for country
   country?: string; // Exact match
-  // Boolean filtering for active
+    // Boolean filtering for active
   active?: boolean;
   // Date/DateTime filtering for created_at
   created_at?: string; // ISO date string for exact match
@@ -142,6 +142,7 @@ export interface BulkResponse {
   };
 }
 
+
 // ===== UTILITY TYPES =====
 
 export type AuthorField = keyof Author;
@@ -154,3 +155,4 @@ export interface AuthorListOptions {
   fields?: AuthorField[];
   search?: string;
 }
+

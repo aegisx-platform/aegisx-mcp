@@ -181,15 +181,14 @@ export class ThemesService extends BaseService<
     const {
       limit = 100,
       search,
-      labelField = 'display_name',
+      labelField = 'name',
       valueField = 'id',
     } = options;
 
     const result = await this.themesRepository.list({
       limit,
       search,
-      sortBy: labelField,
-      sortOrder: 'asc',
+      sort: `${labelField}:asc`,
     });
 
     const dropdownOptions = result.data.map((item) => ({
@@ -207,58 +206,48 @@ export class ThemesService extends BaseService<
   /**
    * Bulk create multiple themess
    */
-  async bulkCreate(data: {
-    items: Array<{ original: any; transformed: CreateThemes }> | CreateThemes[];
-  }): Promise<{
+  async bulkCreate(data: { items: CreateThemes[] }): Promise<{
     created: Themes[];
     summary: { successful: number; failed: number; errors: any[] };
   }> {
     const results: Themes[] = [];
     const errors: any[] = [];
 
-    // Handle both new format (with original data) and old format (backwards compatibility)
-    const itemsToProcess = data.items.map((item) => {
-      if (
-        typeof item === 'object' &&
-        'original' in item &&
-        'transformed' in item
-      ) {
-        // New format from controller
-        return { original: item.original, toCreate: item.transformed };
-      } else {
-        // Old format - backwards compatibility
-        return { original: item, toCreate: item as CreateThemes };
-      }
-    });
-
-    // Process each item individually
-    for (const { original, toCreate } of itemsToProcess) {
+    // Validate and process all items first
+    const validItems: CreateThemes[] = [];
+    for (const item of data.items) {
       try {
-        // Validate and process
-        await this.validateCreate(toCreate);
-        const processed = await this.beforeCreate(toCreate);
+        await this.validateCreate(item);
+        const processed = await this.beforeCreate(item);
+        validItems.push(processed);
+      } catch (error) {
+        errors.push({
+          item,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
 
-        // Create in database
-        const created = await this.themesRepository.create(processed);
-        results.push(created);
+    // Bulk create valid items
+    if (validItems.length > 0) {
+      try {
+        // Use individual creates instead of createMany for debugging
+        for (const item of validItems) {
+          const created = await this.themesRepository.create(item);
+          results.push(created);
+        }
 
-        // Call afterCreate hook
-        try {
-          await this.afterCreate(created, original);
-        } catch (error) {
-          console.warn('Error in afterCreate:', error);
+        // Call afterCreate for each created item
+        for (let i = 0; i < results.length; i++) {
+          try {
+            await this.afterCreate(results[i], validItems[i]);
+          } catch (error) {
+            console.warn('Error in afterCreate:', error);
+          }
         }
       } catch (error) {
-        console.log('⚠️ BULK CREATE ERROR - Item failed:', {
-          name: original.name || 'unknown',
-          display_name: original.display_name || 'unknown',
-          error:
-            error instanceof Error
-              ? error.message.substring(0, 100) + '...'
-              : String(error),
-        });
         errors.push({
-          item: original, // Include the original data that failed
+          item: 'bulk_operation',
           error: error instanceof Error ? error.message : String(error),
         });
       }
@@ -423,68 +412,87 @@ export class ThemesService extends BaseService<
     return this.themesRepository.getStats();
   }
 
-  // ===== FULL PACKAGE METHODS =====
-
   /**
-   * Validate data before save
+   * Get data for export with formatting
    */
-  async validate(data: { data: CreateThemes }): Promise<{
-    valid: boolean;
-    errors: Array<{ field: string; message: string }>;
-  }> {
-    const errors: Array<{ field: string; message: string }> = [];
+  async getExportData(
+    queryParams: any = {},
+    fields?: string[],
+  ): Promise<any[]> {
+    // Get specific IDs if provided
+    if (queryParams.ids && queryParams.ids.length > 0) {
+      // Get specific records by IDs
+      const records = await Promise.all(
+        queryParams.ids.map((id: string) => this.getById(id)),
+      );
 
-    try {
-      await this.validateCreate(data.data);
-    } catch (error) {
-      errors.push({
-        field: 'general',
-        message: error instanceof Error ? error.message : String(error),
-      });
+      // Return raw data - ExportService will handle formatting
+      return records.filter((record) => record !== null);
     }
 
-    // Add specific field validations
+    // Separate filters from pagination parameters to avoid SQL errors
+    const { limit, offset, page, ...filters } = queryParams;
 
-    return {
-      valid: errors.length === 0,
-      errors,
+    // Build query parameters for data retrieval with proper pagination
+    const query: any = {
+      ...filters, // Only include actual filter parameters
+      limit: limit || 50000, // Max export limit for performance
+      page: 1, // Always start from first page for exports
     };
+
+    // Get filtered data
+    const result = await this.themesRepository.list(query);
+
+    // Return raw data - ExportService will handle formatting
+    return result.data;
   }
 
   /**
-   * Check field uniqueness
+   * Format single record for export
    */
-  async checkUniqueness(
-    field: string,
-    options: { value: string; excludeId?: string | number },
-  ): Promise<{
-    unique: boolean;
-    exists?: any;
-  }> {
-    const query: any = { [field]: options.value };
+  private formatExportRecord(record: Themes, fields?: string[]): any {
+    const formatted: any = {};
 
-    // Add exclusion for updates
-    if (options.excludeId) {
-      query.excludeId = options.excludeId;
-    }
+    // Define all exportable fields
+    const exportableFields: { [key: string]: string | ((value: any) => any) } =
+      {
+        id: 'Id',
+        name: 'Name',
+        display_name: 'Display name',
+        description: 'Description',
+        preview_image_url: 'Preview image url',
+        color_palette: 'Color palette',
+        css_variables: 'Css variables',
+        is_active: 'Is active',
+        is_default: 'Is default',
+        sort_order: 'Sort order',
+        created_at: 'Created at',
+        updated_at: 'Updated at',
+      };
 
-    // Use field-specific find methods based on available repository methods
-    let existing: any = null;
+    // If specific fields requested, use only those
+    const fieldsToExport =
+      fields && fields.length > 0
+        ? fields.filter((field) => exportableFields.hasOwnProperty(field))
+        : Object.keys(exportableFields);
 
-    if (field === 'name' && options.value) {
-      existing = await this.themesRepository.findByName(options.value);
-    } else if (
-      existing &&
-      options.excludeId &&
-      existing.id === options.excludeId
-    ) {
-      // If updating (excludeId provided), ignore the current record
-      existing = null;
-    }
+    // Format each field
+    fieldsToExport.forEach((field) => {
+      const fieldConfig = exportableFields[field];
+      let value = (record as any)[field];
 
-    return {
-      unique: !existing,
-      exists: existing || undefined,
-    };
+      // Apply field-specific formatting
+      if (typeof fieldConfig === 'function') {
+        value = fieldConfig(value);
+      } else {
+        // Apply default formatting based on field type
+      }
+
+      // Use field label as key for export
+      const exportKey = typeof fieldConfig === 'string' ? fieldConfig : field;
+      formatted[exportKey] = value;
+    });
+
+    return formatted;
   }
 }

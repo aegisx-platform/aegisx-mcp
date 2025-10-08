@@ -4,6 +4,7 @@ import { ArticlesController } from './controllers/articles.controller';
 import { ArticlesService } from './services/articles.service';
 import { ArticlesRepository } from './repositories/articles.repository';
 import { articlesRoutes } from './routes/index';
+import { ExportService } from '../../services/export.service';
 
 // Note: FastifyInstance eventService type is declared in websocket.plugin.ts
 
@@ -33,7 +34,11 @@ export default fp(
     // Dependencies are accessed from Fastify instance decorators
     const articlesRepository = new ArticlesRepository((fastify as any).knex);
     const articlesService = new ArticlesService(articlesRepository);
-    const articlesController = new ArticlesController(articlesService);
+    const exportService = new ExportService();
+    const articlesController = new ArticlesController(
+      articlesService,
+      exportService,
+    );
 
     // Optional: Decorate Fastify instance with service for cross-plugin access
     // fastify.decorate('articlesService', articlesService);

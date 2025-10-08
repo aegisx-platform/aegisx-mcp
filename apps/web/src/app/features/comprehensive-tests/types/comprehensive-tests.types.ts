@@ -87,29 +87,29 @@ export interface ListComprehensiveTestQuery {
   // Pagination
   page?: number;
   limit?: number;
-
+  
   // Search
   search?: string;
-
+  
   // Sort
   sort?: string; // Multiple sort support: field1:desc,field2:asc
-
+  
   // Field selection
   fields?: string[]; // Array of field names to return
-
+  
   // Include related data
   include?: string | string[];
-
+  
   // Smart field-based filters
   // String filtering for title
   title?: string; // Exact match
-  // String filtering for description
+    // String filtering for description
   description?: string; // Exact match
-  // String filtering for slug
+    // String filtering for slug
   slug?: string; // Exact match
-  // String filtering for short_code
+    // String filtering for short_code
   short_code?: string; // Exact match
-  // Numeric filtering for price
+    // Numeric filtering for price
   price?: number; // Exact match
   price_min?: number; // Range start
   price_max?: number; // Range end
@@ -145,19 +145,19 @@ export interface ListComprehensiveTestQuery {
   published_at_max?: string; // ISO date string for range end
   // String filtering for start_time
   start_time?: string; // Exact match
-  // String filtering for website_url
+    // String filtering for website_url
   website_url?: string; // Exact match
-  // String filtering for email_address
+    // String filtering for email_address
   email_address?: string; // Exact match
-  // String filtering for status
+    // String filtering for status
   status?: string; // Exact match
-  // String filtering for priority
+    // String filtering for priority
   priority?: string; // Exact match
-  // String filtering for content
+    // String filtering for content
   content?: string; // Exact match
-  // String filtering for notes
+    // String filtering for notes
   notes?: string; // Exact match
-}
+  }
 
 // ===== API RESPONSE TYPES =====
 
@@ -231,6 +231,7 @@ export interface BulkResponse {
   };
 }
 
+
 // ===== UTILITY TYPES =====
 
 export type ComprehensiveTestField = keyof ComprehensiveTest;
@@ -243,3 +244,4 @@ export interface ComprehensiveTestListOptions {
   fields?: ComprehensiveTestField[];
   search?: string;
 }
+

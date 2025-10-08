@@ -20,13 +20,9 @@ import {
   BulkResponseSchema,
   BulkStatusSchema,
   StatusToggleSchema,
-  ValidationRequestSchema,
-  ValidationResponseSchema,
-  UniquenessParamSchema,
-  UniquenessQuerySchema,
-  UniquenessResponseSchema,
   StatisticsResponseSchema,
 } from '../../../schemas/base.schemas';
+import { ExportQuerySchema } from '../../../schemas/export.schemas';
 import { ApiErrorResponseSchema as ErrorResponseSchema } from '../../../schemas/base.schemas';
 import { SchemaRefs } from '../../../schemas/registry';
 
@@ -344,17 +340,20 @@ export async function comprehensiveTestsRoutes(
     handler: controller.toggle.bind(controller),
   });
 
-  // ===== FULL PACKAGE ROUTES =====
-
-  // Validate data before save
-  fastify.post('/validate', {
+  // Export comprehensiveTests data
+  fastify.get('/export', {
     schema: {
       tags: ['ComprehensiveTests'],
-      summary: 'Validate comprehensiveTests data',
-      description: 'Validate comprehensiveTests data before saving',
-      body: ValidationRequestSchema(CreateComprehensiveTestsSchema),
+      summary: 'Export comprehensiveTests data',
+      description:
+        'Export comprehensiveTests data in various formats (CSV, Excel, PDF)',
+      querystring: ExportQuerySchema,
       response: {
-        200: ValidationResponseSchema,
+        200: {
+          description: 'Export file download',
+          type: 'string',
+          format: 'binary',
+        },
         400: SchemaRefs.ValidationError,
         401: SchemaRefs.Unauthorized,
         403: SchemaRefs.Forbidden,
@@ -364,34 +363,11 @@ export async function comprehensiveTestsRoutes(
     preValidation: [
       fastify.authenticate,
       fastify.authorize([
-        'comprehensiveTests.create',
-        'comprehensiveTests.update',
+        'comprehensiveTests.read',
+        'comprehensiveTests.export',
         'admin',
       ]),
     ],
-    handler: controller.validate.bind(controller),
-  });
-
-  // Check field uniqueness
-  fastify.get('/check/:field', {
-    schema: {
-      tags: ['ComprehensiveTests'],
-      summary: 'Check field uniqueness',
-      description: 'Check if a field value is unique',
-      params: UniquenessParamSchema,
-      querystring: UniquenessQuerySchema,
-      response: {
-        200: UniquenessResponseSchema,
-        400: SchemaRefs.ValidationError,
-        401: SchemaRefs.Unauthorized,
-        403: SchemaRefs.Forbidden,
-        500: SchemaRefs.ServerError,
-      },
-    },
-    preValidation: [
-      fastify.authenticate,
-      fastify.authorize(['comprehensiveTests.read', 'admin']),
-    ],
-    handler: controller.checkUniqueness.bind(controller),
+    handler: controller.export.bind(controller),
   });
 }

@@ -100,9 +100,10 @@ export class ThemesRepository extends BaseRepository<
 
   // Apply custom filters
   protected applyCustomFilters(query: any, filters: ThemesListQuery): void {
-    // Don't call super.applyCustomFilters to avoid duplicate filters
-    // Apply specific Themes filters based on intelligent field categorization
+    // Apply base filters first
+    super.applyCustomFilters(query, filters);
 
+    // Apply specific Themes filters based on intelligent field categorization
     if (filters.is_active !== undefined) {
       query.where('themes.is_active', filters.is_active);
     }
@@ -114,6 +115,30 @@ export class ThemesRepository extends BaseRepository<
     }
     if (filters.updated_at_max !== undefined) {
       query.where('themes.updated_at', '<=', filters.updated_at_max);
+    }
+  }
+
+  // Apply multiple sort parsing
+  protected applyMultipleSort(query: any, sort?: string): void {
+    if (sort) {
+      if (sort.includes(',')) {
+        // Multiple sort format: field1:desc,field2:asc,field3:desc
+        const sortPairs = sort.split(',');
+        sortPairs.forEach((pair) => {
+          const [field, direction] = pair.split(':');
+          const mappedField = this.getSortField(field.trim());
+          const sortDirection =
+            direction?.trim().toLowerCase() === 'asc' ? 'asc' : 'desc';
+          query.orderBy(mappedField, sortDirection);
+        });
+      } else {
+        // Single sort field
+        const mappedField = this.getSortField(sort);
+        query.orderBy(mappedField, 'desc');
+      }
+    } else {
+      // Default sort
+      query.orderBy(this.getSortField('created_at'), 'desc');
     }
   }
 

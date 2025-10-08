@@ -1,22 +1,6 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  OnInit,
-  Output,
-  SimpleChanges,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-  AbstractControl,
-} from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -29,14 +13,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-import {
-  Author,
-  CreateAuthorRequest,
-  UpdateAuthorRequest,
-} from '../types/authors.types';
-import {
-  formatDateForInput,
-  formatDateForSubmission,
+import { Author, CreateAuthorRequest, UpdateAuthorRequest } from '../types/authors.types';
+import { 
+  formatDateForInput, 
+  formatDateForSubmission 
 } from '../../../shared/utils/datetime.utils';
 
 export type AuthorFormMode = 'create' | 'edit';
@@ -71,15 +51,20 @@ export interface AuthorFormData {
   ],
   template: `
     <form [formGroup]="authorsForm" class="-form">
+      
+
+
       <!-- name Field -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Name</mat-label>
-        <input
-          matInput
+        <input 
+          matInput 
           type="text"
           formControlName="name"
           placeholder="Enter name"
-        />
+          
+          
+        >
         <mat-error *ngIf="authorsForm.get('name')?.hasError('required')">
           Name is required
         </mat-error>
@@ -88,15 +73,38 @@ export interface AuthorFormData {
         </mat-error>
       </mat-form-field>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+
+
       <!-- email Field -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Email</mat-label>
-        <input
-          matInput
+        <input 
+          matInput 
           type="email"
           formControlName="email"
           placeholder="Enter email address"
-        />
+          
+          
+        >
         <mat-error *ngIf="authorsForm.get('email')?.hasError('required')">
           Email is required
         </mat-error>
@@ -105,116 +113,212 @@ export interface AuthorFormData {
         </mat-error>
       </mat-form-field>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+
+
       <!-- bio Field -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Bio</mat-label>
-        <textarea
-          matInput
+        <textarea 
+          matInput 
           formControlName="bio"
           placeholder="Enter bio"
           rows="3"
         ></textarea>
       </mat-form-field>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+
+
+
+
+
       <!-- birth_date Field -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Birth Date</mat-label>
-        <input
-          matInput
+        <input 
+          matInput 
           [matDatepicker]="birth_datePicker"
           formControlName="birth_date"
           placeholder="Enter birth date"
-        />
-        <mat-datepicker-toggle
-          matSuffix
-          [for]="birth_datePicker"
-        ></mat-datepicker-toggle>
+        >
+        <mat-datepicker-toggle matSuffix [for]="birth_datePicker"></mat-datepicker-toggle>
         <mat-datepicker #birth_datePicker></mat-datepicker>
       </mat-form-field>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+
 
       <!-- country Field -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Country</mat-label>
-        <input
-          matInput
+        <input 
+          matInput 
           type="text"
           formControlName="country"
           placeholder="Enter country"
-        />
+          
+          
+        >
       </mat-form-field>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+
+
+
 
       <!-- active Field -->
       <div class="checkbox-field">
-        <mat-checkbox formControlName="active"> Active </mat-checkbox>
+        <mat-checkbox formControlName="active">
+          Active
+        </mat-checkbox>
       </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
       <!-- Form Actions -->
       <div class="form-actions">
-        <button
-          mat-button
+        <button 
+          mat-button 
           type="button"
           (click)="onCancel()"
           [disabled]="loading"
         >
           Cancel
         </button>
-        <button
-          mat-raised-button
-          color="primary"
+        <button 
+          mat-raised-button 
+          color="primary" 
           type="button"
           (click)="onSubmit()"
-          [disabled]="
-            authorsForm.invalid || loading || (mode === 'edit' && !hasChanges())
-          "
+          [disabled]="authorsForm.invalid || loading || (mode === 'edit' && !hasChanges())"
         >
-          <mat-spinner
-            diameter="20"
-            class="inline-spinner"
-            *ngIf="loading"
-          ></mat-spinner>
+          <mat-spinner diameter="20" class="inline-spinner" *ngIf="loading"></mat-spinner>
           {{ mode === 'create' ? 'Create' : 'Update' }} Authors
         </button>
       </div>
     </form>
   `,
-  styles: [
-    `
-      .-form {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        padding: 16px 0;
-      }
+  styles: [`
+    .-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 16px 0;
+    }
 
-      .full-width {
-        width: 100%;
-      }
+    .full-width {
+      width: 100%;
+    }
 
-      .checkbox-field {
-        margin: 8px 0;
-      }
+    .checkbox-field {
+      margin: 8px 0;
+    }
 
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(0, 0, 0, 0.12);
+    }
+
+    .inline-spinner {
+      margin-right: 8px;
+    }
+
+    @media (max-width: 768px) {
       .form-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 12px;
-        margin-top: 16px;
-        padding-top: 16px;
-        border-top: 1px solid rgba(0, 0, 0, 0.12);
+        flex-direction: column;
+        gap: 8px;
       }
-
-      .inline-spinner {
-        margin-right: 8px;
-      }
-
-      @media (max-width: 768px) {
-        .form-actions {
-          flex-direction: column;
-          gap: 8px;
-        }
-      }
-    `,
-  ],
+    }
+  `]
 })
 export class AuthorFormComponent implements OnInit, OnChanges {
   private fb = inject(FormBuilder);
@@ -228,13 +332,44 @@ export class AuthorFormComponent implements OnInit, OnChanges {
 
   private originalFormValue: any;
 
+
   authorsForm: FormGroup = this.fb.group({
-    name: ['', [Validators.required, Validators.maxLength(255)]],
-    email: ['', [Validators.required, Validators.maxLength(255)]],
-    bio: ['', []],
-    birth_date: ['', []],
-    country: ['', []],
-    active: [false, []],
+    name: [
+      '',
+      [
+        Validators.required, Validators.maxLength(255)
+      ]
+    ],
+    email: [
+      '',
+      [
+        Validators.required, Validators.maxLength(255)
+      ]
+    ],
+    bio: [
+      '',
+      [
+        
+      ]
+    ],
+    birth_date: [
+      '',
+      [
+        
+      ]
+    ],
+    country: [
+      '',
+      [
+        
+      ]
+    ],
+    active: [
+      false,
+      [
+        
+      ]
+    ]
   });
 
   ngOnInit() {
@@ -242,6 +377,7 @@ export class AuthorFormComponent implements OnInit, OnChanges {
       this.populateForm(this.initialData);
     }
   }
+
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['initialData'] && this.initialData && this.mode === 'edit') {
@@ -252,13 +388,13 @@ export class AuthorFormComponent implements OnInit, OnChanges {
   private populateForm(authors: Author) {
     const formValue = {
       name: authors.name,
-      email: authors.email,
-      bio: authors.bio,
-      birth_date: authors.birth_date ? new Date(authors.birth_date) : null,
+            email: authors.email,
+            bio: authors.bio,
+            birth_date: authors.birth_date ? new Date(authors.birth_date) : null,
       country: authors.country,
-      active: authors.active,
-    };
-
+            active: authors.active
+          };
+    
     this.authorsForm.patchValue(formValue);
     this.originalFormValue = this.authorsForm.value;
   }
@@ -266,20 +402,20 @@ export class AuthorFormComponent implements OnInit, OnChanges {
   hasChanges(): boolean {
     if (this.mode === 'create') return true;
     const currentValue = this.authorsForm.value;
-    return (
-      JSON.stringify(currentValue) !== JSON.stringify(this.originalFormValue)
-    );
+    return JSON.stringify(currentValue) !== JSON.stringify(this.originalFormValue);
   }
 
   onSubmit() {
     if (this.authorsForm.valid) {
       const formData = { ...this.authorsForm.value } as AuthorFormData;
+      
+
 
       // Convert date fields to date-only format for submission
       if (formData.birth_date) {
         formData.birth_date = formatDateForSubmission(formData.birth_date);
       }
-
+      
       this.formSubmit.emit(formData);
     }
   }
@@ -287,4 +423,5 @@ export class AuthorFormComponent implements OnInit, OnChanges {
   onCancel() {
     this.formCancel.emit();
   }
+
 }

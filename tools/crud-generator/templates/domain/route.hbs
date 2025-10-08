@@ -28,6 +28,7 @@ import {
   UniquenessResponseSchema,{{/if}}
   StatisticsResponseSchema
 } from '../../../schemas/base.schemas';
+import { ExportQuerySchema } from '../../../schemas/export.schemas';
 {{/if}}
 import { ApiErrorResponseSchema as ErrorResponseSchema } from '../../../schemas/base.schemas';
 import { SchemaRefs } from '../../../schemas/registry';
@@ -368,32 +369,33 @@ export async function {{currentRoute.camelName}}Routes(
     ],
     handler: controller.getStats.bind(controller)
   });
-  {{else}}
-  {{!-- 
-  // Optional: Add statistics route if needed for this specific domain
-  // Uncomment and customize based on your requirements
-  //
-  // fastify.get('/stats', {
-  //   schema: {
-  //     tags: ['{{ModuleName}}'],
-  //     summary: 'Get {{moduleName}} statistics',
-  //     description: 'Get statistical information about {{moduleName}}s',
-  //     response: {
-  //       200: StatisticsResponseSchema,
-  //       400: SchemaRefs.ValidationError,
-  //       401: SchemaRefs.Unauthorized,
-  //       403: SchemaRefs.Forbidden,
-  //       500: SchemaRefs.ServerError
-  //     }
-  //   },
-  //   preValidation: [
-  //     fastify.authenticate,
-  //     fastify.authorize(['{{moduleName}}.read', 'admin'])
-  //   ],
-  //   handler: controller.getStats.bind(controller)
-  // });
-  --}}
   {{/if}}
+
+  // Export {{moduleName}} data
+  fastify.get('/export', {
+    schema: {
+      tags: ['{{ModuleName}}'],
+      summary: 'Export {{moduleName}} data',
+      description: 'Export {{moduleName}} data in various formats (CSV, Excel, PDF)',
+      querystring: ExportQuerySchema,
+      response: {
+        200: {
+          description: 'Export file download',
+          type: 'string',
+          format: 'binary'
+        },
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        500: SchemaRefs.ServerError
+      }
+    },
+    preValidation: [
+      fastify.authenticate,
+      fastify.authorize(['{{moduleName}}.read', '{{moduleName}}.export', 'admin'])
+    ],
+    handler: controller.export.bind(controller)
+  });
 {{/if}}
 
 {{#if (eq package 'full')}}

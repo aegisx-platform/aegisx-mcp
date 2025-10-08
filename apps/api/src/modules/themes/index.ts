@@ -4,6 +4,7 @@ import { ThemesController } from './controllers/themes.controller';
 import { ThemesService } from './services/themes.service';
 import { ThemesRepository } from './repositories/themes.repository';
 import { themesRoutes } from './routes/index';
+import { ExportService } from '../../services/export.service';
 
 // Note: FastifyInstance eventService type is declared in websocket.plugin.ts
 
@@ -33,7 +34,8 @@ export default fp(
     // Dependencies are accessed from Fastify instance decorators
     const themesRepository = new ThemesRepository((fastify as any).knex);
     const themesService = new ThemesService(themesRepository);
-    const themesController = new ThemesController(themesService);
+    const exportService = new ExportService();
+    const themesController = new ThemesController(themesService, exportService);
 
     // Optional: Decorate Fastify instance with service for cross-plugin access
     // fastify.decorate('themesService', themesService);

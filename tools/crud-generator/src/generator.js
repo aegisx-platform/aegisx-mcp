@@ -4,6 +4,43 @@ const Handlebars = require('handlebars');
 const { getDatabaseSchema, getEnhancedSchema } = require('./database');
 const { generateRolesAndPermissions } = require('./role-generator');
 
+// Register Handlebars helpers
+Handlebars.registerHelper('titleCase', function(str) {
+  if (!str || typeof str !== 'string') return '';
+  return str.replace(/\w\S*/g, (txt) => 
+    txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+  ).replace(/_/g, ' ');
+});
+
+Handlebars.registerHelper('getExportFieldType', function(dataType) {
+  const typeMap = {
+    'character varying': 'string',
+    'varchar': 'string',
+    'text': 'string',
+    'char': 'string',
+    'integer': 'number',
+    'bigint': 'number',
+    'smallint': 'number',
+    'decimal': 'number',
+    'numeric': 'number',
+    'real': 'number',
+    'double precision': 'number',
+    'boolean': 'boolean',
+    'date': 'date',
+    'timestamp': 'date',
+    'timestamp with time zone': 'date',
+    'timestamptz': 'date',
+    'json': 'json',
+    'jsonb': 'json',
+    'uuid': 'string'
+  };
+  const mappedType = typeMap[dataType] || 'string';
+  
+  // Ensure return value matches the ExportField type union
+  const validTypes = ['string', 'number', 'date', 'boolean', 'json'];
+  return validTypes.includes(mappedType) ? mappedType : 'string';
+});
+
 /**
  * Main generator function for CRUD modules
  */
@@ -206,6 +243,24 @@ async function generateCrudModule(tableName, options = {}) {
   const files = [];
   const warnings = [];
 
+  // Generate shared templates for enhanced/full packages
+  if ((context.package === 'enterprise' || context.package === 'full') && !options.migrationOnly) {
+    try {
+      console.log('📦 Generating shared export templates...');
+      const srcDir = path.resolve(outputDir, '..');
+      console.log(`🎯 Target directory for shared templates: ${srcDir}`);
+      const sharedFiles = await generateSharedTemplates(
+        srcDir,
+        context,
+        dryRun
+      );
+      files.push(...sharedFiles);
+    } catch (error) {
+      console.error('⚠️  Warning: Failed to generate shared templates:', error.message);
+      warnings.push(`Failed to generate shared templates: ${error.message}`);
+    }
+  }
+
   // Check if migration-only mode
   if (!options.migrationOnly) {
     // Generate each file
@@ -339,6 +394,56 @@ async function renderTemplate(templateName, context) {
   const templateContent = await fs.readFile(templatePath, 'utf8');
   const template = Handlebars.compile(templateContent);
   return template(context);
+}
+
+/**
+ * Generate shared service templates (export service, schemas)
+ */
+async function generateSharedTemplates(outputDir, context, dryRun = false) {
+  const sharedTemplates = [
+    {
+      template: 'shared/export.service.hbs',
+      output: 'services/export.service.ts',
+    },
+    {
+      template: 'shared/export.schemas.hbs', 
+      output: 'schemas/export.schemas.ts',
+    },
+  ];
+
+  const files = [];
+
+  for (const templateConfig of sharedTemplates) {
+    try {
+      const content = await renderTemplate(templateConfig.template, context);
+      const outputPath = path.join(outputDir, templateConfig.output);
+
+      if (!dryRun) {
+        await ensureDirectoryExists(path.dirname(outputPath));
+        
+        let status = '✓ Generated:';
+        try {
+          await fs.access(outputPath);
+          status = '📝 Updated:';
+        } catch {
+          // New file
+        }
+
+        await fs.writeFile(outputPath, content, 'utf8');
+        console.log(`${status} ${outputPath}`);
+      }
+
+      files.push({
+        path: outputPath,
+        template: templateConfig.template,
+        size: content.length,
+      });
+    } catch (error) {
+      console.error(`❌ Failed to generate ${templateConfig.output}:`, error);
+    }
+  }
+
+  return files;
 }
 
 /**
@@ -1221,6 +1326,24 @@ async function generateDomainModule(domainName, options = {}) {
   const files = [];
   const warnings = [];
 
+  // Generate shared templates for enhanced/full packages
+  if ((context.package === 'enterprise' || context.package === 'full')) {
+    try {
+      console.log('📦 Generating shared export templates...');
+      const srcDir = path.resolve(outputDir, '..');
+      console.log(`🎯 Target directory for shared templates: ${srcDir}`);
+      const sharedFiles = await generateSharedTemplates(
+        srcDir,
+        context,
+        dryRun
+      );
+      files.push(...sharedFiles);
+    } catch (error) {
+      console.error('⚠️  Warning: Failed to generate shared templates:', error.message);
+      warnings.push(`Failed to generate shared templates: ${error.message}`);
+    }
+  }
+
   // Generate each file
   for (const templateConfig of templates) {
     try {
@@ -1465,6 +1588,7 @@ module.exports = {
   generateCrudModule,
   generateDomainModule,
   addRouteToDomain,
+  generateSharedTemplates,
   renderTemplate,
   toCamelCase,
   toPascalCase,

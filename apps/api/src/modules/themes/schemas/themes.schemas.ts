@@ -5,6 +5,7 @@ import {
   ApiErrorResponseSchema,
   ApiSuccessResponseSchema,
   PaginatedResponseSchema,
+  PartialPaginatedResponseSchema,
   DropdownOptionSchema,
   BulkCreateSchema,
   BulkUpdateSchema,
@@ -12,8 +13,6 @@ import {
   BulkStatusSchema,
   StatusToggleSchema,
   StatisticsSchema,
-  ValidationRequestSchema,
-  UniquenessCheckSchema,
 } from '../../../schemas/base.schemas';
 
 // Base Themes Schema
@@ -76,15 +75,36 @@ export const ListThemesQuerySchema = Type.Object({
   // Pagination parameters
   page: Type.Optional(Type.Number({ minimum: 1, default: 1 })),
   limit: Type.Optional(Type.Number({ minimum: 1, maximum: 1000, default: 20 })),
-  sortBy: Type.Optional(Type.String()),
-  sortOrder: Type.Optional(
-    Type.Union([Type.Literal('asc'), Type.Literal('desc')], {
-      default: 'desc',
+  // Modern multiple sort support
+  sort: Type.Optional(
+    Type.String({
+      pattern:
+        '^[a-zA-Z_][a-zA-Z0-9_]*(:(asc|desc))?(,[a-zA-Z_][a-zA-Z0-9_]*(:(asc|desc))?)*$',
+      description:
+        'Multiple sort: field1:desc,field2:asc,field3:desc. Example: id:asc,created_at:desc',
+      examples: ['id:asc', 'created_at:desc', 'name:asc,created_at:desc'],
     }),
   ),
 
   // Search and filtering
   search: Type.Optional(Type.String({ minLength: 1, maxLength: 100 })),
+
+  // 🛡️ Secure field selection with validation
+  fields: Type.Optional(
+    Type.Array(
+      Type.String({
+        pattern: '^[a-zA-Z_][a-zA-Z0-9_]*$', // Only alphanumeric + underscore
+        minLength: 1,
+        maxLength: 50,
+      }),
+      {
+        minItems: 1,
+        maxItems: 20, // Prevent excessive field requests
+        description:
+          'Specific fields to return. Example: ["id", "name", "created_at"]. Field access is role-based for security.',
+      },
+    ),
+  ),
 
   // Include related data (only if table has foreign keys)
 
@@ -99,6 +119,11 @@ export const ListThemesQuerySchema = Type.Object({
 export const ThemesResponseSchema = ApiSuccessResponseSchema(ThemesSchema);
 export const ThemesListResponseSchema = PaginatedResponseSchema(ThemesSchema);
 
+// Partial Schemas for field selection support
+export const PartialThemesSchema = Type.Partial(ThemesSchema);
+export const FlexibleThemesListResponseSchema =
+  PartialPaginatedResponseSchema(ThemesSchema);
+
 // Export types
 export type Themes = Static<typeof ThemesSchema>;
 export type CreateThemes = Static<typeof CreateThemesSchema>;
@@ -106,3 +131,9 @@ export type UpdateThemes = Static<typeof UpdateThemesSchema>;
 export type ThemesIdParam = Static<typeof ThemesIdParamSchema>;
 export type GetThemesQuery = Static<typeof GetThemesQuerySchema>;
 export type ListThemesQuery = Static<typeof ListThemesQuerySchema>;
+
+// Partial types for field selection
+export type PartialThemes = Static<typeof PartialThemesSchema>;
+export type FlexibleThemesList = Static<
+  typeof FlexibleThemesListResponseSchema
+>;

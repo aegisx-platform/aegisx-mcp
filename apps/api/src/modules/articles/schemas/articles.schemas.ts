@@ -6,6 +6,13 @@ import {
   ApiSuccessResponseSchema,
   PaginatedResponseSchema,
   PartialPaginatedResponseSchema,
+  DropdownOptionSchema,
+  BulkCreateSchema,
+  BulkUpdateSchema,
+  BulkDeleteSchema,
+  BulkStatusSchema,
+  StatusToggleSchema,
+  StatisticsSchema,
 } from '../../../schemas/base.schemas';
 
 // Base Articles Schema

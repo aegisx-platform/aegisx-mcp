@@ -30,6 +30,7 @@ import { BookCreateDialogComponent } from './books-create.dialog';
 import { BookEditDialogComponent, BookEditDialogData } from './books-edit.dialog';
 import { BookViewDialogComponent, BookViewDialogData } from './books-view.dialog';
 import { DateRangeFilterComponent } from '../../../shared/components/date-range-filter/date-range-filter.component';
+import { SharedExportComponent, ExportOptions, ExportService } from '../../../shared/components/shared-export/shared-export.component';
 
 @Component({
   selector: 'app-books-list',
@@ -56,6 +57,7 @@ import { DateRangeFilterComponent } from '../../../shared/components/date-range-
     MatBadgeModule,
     MatSlideToggleModule,
     DateRangeFilterComponent,
+    SharedExportComponent,
   ],
   template: `
     <div class="books-list-container">
@@ -251,57 +253,30 @@ import { DateRangeFilterComponent } from '../../../shared/components/date-range-
             <mat-icon>file_download</mat-icon>
             Export Data
           </mat-card-title>
-          <mat-card-subtitle>Export all Books data in various formats</mat-card-subtitle>
+          <mat-card-subtitle>Export Books data in various formats</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
-          <div class="export-actions">
-            <button 
-              mat-raised-button 
-              color="primary"
-              (click)="exportAllData('csv')"
-              [disabled]="booksService.loading()"
-              matTooltip="Export all data as CSV file"
-            >
-              <mat-icon>table_chart</mat-icon>
-              Export CSV
-            </button>
-            
-            <button 
-              mat-raised-button 
-              color="accent"
-              (click)="exportAllData('excel')"
-              [disabled]="booksService.loading()"
-              matTooltip="Export all data as Excel file"
-            >
-              <mat-icon>grid_on</mat-icon>
-              Export Excel
-            </button>
-            
-            <button 
-              mat-raised-button 
-              (click)="exportAllData('pdf')"
-              [disabled]="booksService.loading()"
-              matTooltip="Export all data as PDF file"
-            >
-              <mat-icon>picture_as_pdf</mat-icon>
-              Export PDF
-            </button>
-            
-            <!-- Export with Filters Toggle -->
-            <mat-slide-toggle 
-              [(ngModel)]="includeFiltersInExport"
-              color="primary"
-              matTooltip="Include current filters in export"
-            >
-              Apply Current Filters
-            </mat-slide-toggle>
-          </div>
+          <app-export
+            [exportService]="exportServiceAdapter"
+            [currentFilters]="filters()"
+            [selectedItems]="selectedItems()"
+            [availableFields]="availableExportFields"
+            [moduleName]="'books'"
+            (exportStarted)="onExportStarted($event)"
+            (exportCompleted)="onExportCompleted($event)"
+          ></app-export>
           
+          <!-- Export Information -->
           <div class="export-info">
             <mat-icon class="info-icon">info</mat-icon>
             <span class="info-text">
-              Exports will include {{ includeFiltersInExport ? 'filtered' : 'all' \}} data
-              ({{ includeFiltersInExport ? booksService.booksList().length : booksService.totalBook() \}} records)
+              Total Books: {{ booksService.totalBook() \}} records
+              @if (hasActiveFilters()) {
+                ({{ activeFiltersCount() \}} filters active)
+              }
+              @if (selectedItems().length > 0) {
+                | {{ selectedItems().length \}} selected
+              }
             </span>
           </div>
         </mat-card-content>
@@ -1140,10 +1115,29 @@ export class BookListComponent implements OnInit, OnDestroy {
 
   // Selection
   private selectedIdsSignal = signal<Set<string>>(new Set());
-  readonly selectedItems = computed(() => Array.from(this.selectedIdsSignal()));
+  readonly selectedItems = computed(() => 
+    this.booksService.booksList().filter(item => this.selectedIdsSignal().has(item.id))
+  );
 
-  // Export functionality
-  protected includeFiltersInExport = false;
+  // Export configuration
+  exportServiceAdapter: ExportService = {
+    export: (options: ExportOptions) => this.booksService.export(options)
+  };
+  
+  availableExportFields = [
+    { key: 'id', label: 'Id' },
+    { key: 'title', label: 'Title' },
+    { key: 'description', label: 'Description' },
+    { key: 'author_id', label: 'Author id' },
+    { key: 'isbn', label: 'Isbn' },
+    { key: 'pages', label: 'Pages' },
+    { key: 'published_date', label: 'Published date' },
+    { key: 'price', label: 'Price' },
+    { key: 'genre', label: 'Genre' },
+    { key: 'available', label: 'Available' },
+    { key: 'created_at', label: 'Created at' },
+    { key: 'updated_at', label: 'Updated at' },
+  ];
 
   // Table configuration
   displayedColumns: string[] = [
@@ -1359,6 +1353,13 @@ export class BookListComponent implements OnInit, OnDestroy {
 
   hasActiveFilters(): boolean {
     return this.searchTerm.length > 0 || Object.keys(this.filters()).length > 0;
+  }
+
+  activeFiltersCount(): number {
+    let count = 0;
+    if (this.searchTerm.length > 0) count++;
+    count += Object.keys(this.filters()).length;
+    return count;
   }
 
   // ===== PAGINATION =====
@@ -1712,17 +1713,25 @@ export class BookListComponent implements OnInit, OnDestroy {
     }
   }
 
-  async exportAllData(format: 'csv' | 'excel' | 'pdf') {
-    try {
-      const params = this.includeFiltersInExport ? this.filters() : {};
-      // For now, show a placeholder message since export endpoints need to be implemented
-      this.snackBar.open(`Export feature coming soon (${format.toUpperCase()})`, 'Close', {
+  // ===== EXPORT EVENT HANDLERS =====
+
+  onExportStarted(options: ExportOptions) {
+    console.log('Export started:', options);
+    this.snackBar.open(`Preparing ${options.format.toUpperCase()} export...`, '', {
+      duration: 2000,
+    });
+  }
+
+  onExportCompleted(result: { success: boolean; format: string }) {
+    if (result.success) {
+      this.snackBar.open(`${result.format.toUpperCase()} export completed successfully!`, 'Close', {
         duration: 3000,
+        panelClass: ['success-snackbar']
       });
-      console.log('Export all data:', { format, params, recordCount: this.booksService.totalBook() });
-    } catch (error) {
-      this.snackBar.open('Failed to export Books', 'Close', {
+    } else {
+      this.snackBar.open(`${result.format.toUpperCase()} export failed`, 'Close', {
         duration: 5000,
+        panelClass: ['error-snackbar']
       });
     }
   }

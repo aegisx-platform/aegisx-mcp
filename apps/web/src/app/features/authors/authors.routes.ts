@@ -5,8 +5,8 @@ export const authorsRoutes: Routes = [
     path: '',
     loadComponent: () =>
       import('./components/authors-list.component').then(
-        (m) => m.AuthorListComponent,
+        (m) => m.AuthorListComponent
       ),
-    title: 'Authors',
-  },
+    title: 'Authors'
+  }
 ];

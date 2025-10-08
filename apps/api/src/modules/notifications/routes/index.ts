@@ -18,13 +18,9 @@ import {
   BulkUpdateSchema,
   BulkDeleteSchema,
   BulkResponseSchema,
-  ValidationRequestSchema,
-  ValidationResponseSchema,
-  UniquenessParamSchema,
-  UniquenessQuerySchema,
-  UniquenessResponseSchema,
   StatisticsResponseSchema,
 } from '../../../schemas/base.schemas';
+import { ExportQuerySchema } from '../../../schemas/export.schemas';
 import { ApiErrorResponseSchema as ErrorResponseSchema } from '../../../schemas/base.schemas';
 import { SchemaRefs } from '../../../schemas/registry';
 
@@ -246,17 +242,20 @@ export async function notificationsRoutes(
     handler: controller.bulkDelete.bind(controller),
   });
 
-  // ===== FULL PACKAGE ROUTES =====
-
-  // Validate data before save
-  fastify.post('/validate', {
+  // Export notifications data
+  fastify.get('/export', {
     schema: {
       tags: ['Notifications'],
-      summary: 'Validate notifications data',
-      description: 'Validate notifications data before saving',
-      body: ValidationRequestSchema(CreateNotificationsSchema),
+      summary: 'Export notifications data',
+      description:
+        'Export notifications data in various formats (CSV, Excel, PDF)',
+      querystring: ExportQuerySchema,
       response: {
-        200: ValidationResponseSchema,
+        200: {
+          description: 'Export file download',
+          type: 'string',
+          format: 'binary',
+        },
         400: SchemaRefs.ValidationError,
         401: SchemaRefs.Unauthorized,
         403: SchemaRefs.Forbidden,
@@ -266,34 +265,11 @@ export async function notificationsRoutes(
     preValidation: [
       fastify.authenticate,
       fastify.authorize([
-        'notifications.create',
-        'notifications.update',
+        'notifications.read',
+        'notifications.export',
         'admin',
       ]),
     ],
-    handler: controller.validate.bind(controller),
-  });
-
-  // Check field uniqueness
-  fastify.get('/check/:field', {
-    schema: {
-      tags: ['Notifications'],
-      summary: 'Check field uniqueness',
-      description: 'Check if a field value is unique',
-      params: UniquenessParamSchema,
-      querystring: UniquenessQuerySchema,
-      response: {
-        200: UniquenessResponseSchema,
-        400: SchemaRefs.ValidationError,
-        401: SchemaRefs.Unauthorized,
-        403: SchemaRefs.Forbidden,
-        500: SchemaRefs.ServerError,
-      },
-    },
-    preValidation: [
-      fastify.authenticate,
-      fastify.authorize(['notifications.read', 'admin']),
-    ],
-    handler: controller.checkUniqueness.bind(controller),
+    handler: controller.export.bind(controller),
   });
 }

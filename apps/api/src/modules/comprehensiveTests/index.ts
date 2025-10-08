@@ -4,6 +4,7 @@ import { ComprehensiveTestsController } from './controllers/comprehensive-tests.
 import { ComprehensiveTestsService } from './services/comprehensive-tests.service';
 import { ComprehensiveTestsRepository } from './repositories/comprehensive-tests.repository';
 import { comprehensiveTestsRoutes } from './routes/index';
+import { ExportService } from '../../services/export.service';
 
 // Note: FastifyInstance eventService type is declared in websocket.plugin.ts
 
@@ -37,8 +38,10 @@ export default fp(
     const comprehensiveTestsService = new ComprehensiveTestsService(
       comprehensiveTestsRepository,
     );
+    const exportService = new ExportService();
     const comprehensiveTestsController = new ComprehensiveTestsController(
       comprehensiveTestsService,
+      exportService,
     );
 
     // Optional: Decorate Fastify instance with service for cross-plugin access

@@ -251,6 +251,72 @@ export class BookService {
   // ===== ENHANCED OPERATIONS =====
 
   /**
+   * Export books data
+   */
+  async export(options: {
+    format: 'csv' | 'excel' | 'pdf';
+    selectedIds?: string[];
+    filters?: Record<string, any>;
+    fields?: string[];
+    filename?: string;
+    applyFilters?: boolean;
+    includeMetadata?: boolean;
+  }): Promise<Blob> {
+    try {
+      let httpParams = new HttpParams()
+        .set('format', options.format);
+
+      if (options.selectedIds && options.selectedIds.length > 0) {
+        options.selectedIds.forEach(id => {
+          httpParams = httpParams.append('ids', id);
+        });
+      }
+
+      if (options.filters && options.applyFilters) {
+        Object.entries(options.filters).forEach(([key, value]) => {
+          if (value !== null && value !== undefined && value !== '') {
+            httpParams = httpParams.set(`filters[${key}]`, String(value));
+          }
+        });
+      }
+
+      if (options.fields && options.fields.length > 0) {
+        options.fields.forEach(field => {
+          httpParams = httpParams.append('fields', field);
+        });
+      }
+
+      if (options.filename) {
+        httpParams = httpParams.set('filename', options.filename);
+      }
+
+      if (options.applyFilters !== undefined) {
+        httpParams = httpParams.set('applyFilters', String(options.applyFilters));
+      }
+
+      if (options.includeMetadata !== undefined) {
+        httpParams = httpParams.set('includeMetadata', String(options.includeMetadata));
+      }
+
+      const response = await this.http
+        .get(`${this.baseUrl}/export`, {
+          params: httpParams,
+          responseType: 'blob'
+        })
+        .toPromise();
+
+      if (response) {
+        return response;
+      }
+
+      throw new Error('Export failed - no response received');
+    } catch (error: any) {
+      console.error('Failed to export books data:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Get dropdown options for books
    */
   async getDropdownOptions(params: {search?: string, limit?: number} = {}): Promise<Array<{value: string, label: string}>> {
@@ -372,71 +438,6 @@ export class BookService {
     }
   }
 
-  // ===== ADVANCED OPERATIONS (FULL PACKAGE) =====
-
-  /**
-   * Validate books data before save
-   */
-  async validateBook(data: CreateBookRequest): Promise<{valid: boolean, errors?: any[]}> {
-    try {
-      const response = await this.http
-        .post<ApiResponse<{valid: boolean, errors?: any[]}>>(`${this.baseUrl}/validate`, { data })
-        .toPromise();
-
-      if (response) {
-        return response.data;
-      }
-      return { valid: false, errors: ['Validation failed'] };
-    } catch (error: any) {
-      console.error('Failed to validate books:', error);
-      return { valid: false, errors: [error.message || 'Validation error'] };
-    }
-  }
-
-  /**
-   * Check field uniqueness
-   */
-  async checkUniqueness(field: string, value: string, excludeId?: string): Promise<{unique: boolean}> {
-    try {
-      let params = new HttpParams()
-        .set('value', value);
-      
-      if (excludeId) {
-        params = params.set('excludeId', excludeId);
-      }
-
-      const response = await this.http
-        .get<ApiResponse<{unique: boolean}>>(`${this.baseUrl}/check/${field}`, { params })
-        .toPromise();
-
-      if (response) {
-        return response.data;
-      }
-      return { unique: false };
-    } catch (error: any) {
-      console.error('Failed to check uniqueness:', error);
-      return { unique: false };
-    }
-  }
-
-  /**
-   * Get books statistics
-   */
-  async getStats(): Promise<{total: number} | null> {
-    try {
-      const response = await this.http
-        .get<ApiResponse<{total: number}>>(`${this.baseUrl}/stats`)
-        .toPromise();
-
-      if (response) {
-        return response.data;
-      }
-      return null;
-    } catch (error: any) {
-      console.error('Failed to get books stats:', error);
-      return null;
-    }
-  }
 
   // ===== UTILITY METHODS =====
 

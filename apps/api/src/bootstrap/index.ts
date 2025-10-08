@@ -5,6 +5,7 @@
  */
 
 import * as dotenv from 'dotenv';
+import * as dotenvExpand from 'dotenv-expand';
 import 'reflect-metadata'; // Required for tsyringe
 
 // Configuration imports
@@ -93,7 +94,8 @@ export async function bootstrap(): Promise<BootstrapResult> {
 
     // 1. Load environment variables
     logStep('🔧', 'Loading environment configuration');
-    dotenv.config();
+    const env = dotenv.config();
+    dotenvExpand.expand(env);
 
     // 2. Validate environment
     const envStartTime = Date.now();

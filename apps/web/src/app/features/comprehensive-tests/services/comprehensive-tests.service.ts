@@ -11,7 +11,7 @@ import {
   ListComprehensiveTestQuery,
   ApiResponse,
   BulkResponse,
-  PaginatedResponse,
+  PaginatedResponse
 } from '../types/comprehensive-tests.types';
 
 // ===== SERVICE CONFIGURATION =====
@@ -26,32 +26,27 @@ export class ComprehensiveTestService {
   private baseUrl = `${API_BASE_URL}/comprehensive-tests`;
 
   // ===== SIGNALS FOR STATE MANAGEMENT =====
-
+  
   private comprehensiveTestsListSignal = signal<ComprehensiveTest[]>([]);
   private loadingSignal = signal<boolean>(false);
   private errorSignal = signal<string | null>(null);
-  private selectedComprehensiveTestSignal = signal<ComprehensiveTest | null>(
-    null,
-  );
+  private selectedComprehensiveTestSignal = signal<ComprehensiveTest | null>(null);
   private currentPageSignal = signal<number>(1);
   private pageSizeSignal = signal<number>(10);
   private totalComprehensiveTestSignal = signal<number>(0);
 
   // ===== PUBLIC READONLY SIGNALS =====
-
-  readonly comprehensiveTestsList =
-    this.comprehensiveTestsListSignal.asReadonly();
+  
+  readonly comprehensiveTestsList = this.comprehensiveTestsListSignal.asReadonly();
   readonly loading = this.loadingSignal.asReadonly();
   readonly error = this.errorSignal.asReadonly();
-  readonly selectedComprehensiveTest =
-    this.selectedComprehensiveTestSignal.asReadonly();
+  readonly selectedComprehensiveTest = this.selectedComprehensiveTestSignal.asReadonly();
   readonly currentPage = this.currentPageSignal.asReadonly();
-  readonly totalComprehensiveTest =
-    this.totalComprehensiveTestSignal.asReadonly();
+  readonly totalComprehensiveTest = this.totalComprehensiveTestSignal.asReadonly();
   readonly pageSize = this.pageSizeSignal.asReadonly();
 
   // ===== COMPUTED SIGNALS =====
-
+  
   readonly totalPages = computed(() => {
     const total = this.totalComprehensiveTestSignal();
     const size = this.pageSizeSignal();
@@ -71,140 +66,85 @@ export class ComprehensiveTestService {
   /**
    * Load comprehensiveTests list with pagination and filters
    */
-  async loadComprehensiveTestList(
-    params?: ListComprehensiveTestQuery,
-  ): Promise<void> {
+  async loadComprehensiveTestList(params?: ListComprehensiveTestQuery): Promise<void> {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
 
     try {
       // Build HTTP params
       let httpParams = new HttpParams();
-      if (params?.page)
-        httpParams = httpParams.set('page', params.page.toString());
-      if (params?.limit)
-        httpParams = httpParams.set('limit', params.limit.toString());
+      if (params?.page) httpParams = httpParams.set('page', params.page.toString());
+      if (params?.limit) httpParams = httpParams.set('limit', params.limit.toString());
       if (params?.search) httpParams = httpParams.set('search', params.search);
       if (params?.sort) httpParams = httpParams.set('sort', params.sort);
-
+      
       // Handle fields array parameter (multiple values)
       if (params?.fields && params.fields.length > 0) {
         params.fields.forEach((field: string) => {
           httpParams = httpParams.append('fields', field);
         });
       }
-
+      
       // Add smart filter parameters based on table schema
       // String filtering for title
       if (params?.title) httpParams = httpParams.set('title', params.title);
-      // String filtering for description
-      if (params?.description)
-        httpParams = httpParams.set('description', params.description);
-      // String filtering for slug
+            // String filtering for description
+      if (params?.description) httpParams = httpParams.set('description', params.description);
+            // String filtering for slug
       if (params?.slug) httpParams = httpParams.set('slug', params.slug);
-      // String filtering for short_code
-      if (params?.short_code)
-        httpParams = httpParams.set('short_code', params.short_code);
-      // Numeric filtering for price
-      if (params?.price !== undefined)
-        httpParams = httpParams.set('price', params.price.toString());
-      if (params?.price_min !== undefined)
-        httpParams = httpParams.set('price_min', params.price_min.toString());
-      if (params?.price_max !== undefined)
-        httpParams = httpParams.set('price_max', params.price_max.toString());
+            // String filtering for short_code
+      if (params?.short_code) httpParams = httpParams.set('short_code', params.short_code);
+            // Numeric filtering for price
+      if (params?.price !== undefined) httpParams = httpParams.set('price', params.price.toString());
+      if (params?.price_min !== undefined) httpParams = httpParams.set('price_min', params.price_min.toString());
+      if (params?.price_max !== undefined) httpParams = httpParams.set('price_max', params.price_max.toString());
       // Numeric filtering for quantity
-      if (params?.quantity !== undefined)
-        httpParams = httpParams.set('quantity', params.quantity.toString());
-      if (params?.quantity_min !== undefined)
-        httpParams = httpParams.set(
-          'quantity_min',
-          params.quantity_min.toString(),
-        );
-      if (params?.quantity_max !== undefined)
-        httpParams = httpParams.set(
-          'quantity_max',
-          params.quantity_max.toString(),
-        );
+      if (params?.quantity !== undefined) httpParams = httpParams.set('quantity', params.quantity.toString());
+      if (params?.quantity_min !== undefined) httpParams = httpParams.set('quantity_min', params.quantity_min.toString());
+      if (params?.quantity_max !== undefined) httpParams = httpParams.set('quantity_max', params.quantity_max.toString());
       // Numeric filtering for weight
-      if (params?.weight !== undefined)
-        httpParams = httpParams.set('weight', params.weight.toString());
-      if (params?.weight_min !== undefined)
-        httpParams = httpParams.set('weight_min', params.weight_min.toString());
-      if (params?.weight_max !== undefined)
-        httpParams = httpParams.set('weight_max', params.weight_max.toString());
+      if (params?.weight !== undefined) httpParams = httpParams.set('weight', params.weight.toString());
+      if (params?.weight_min !== undefined) httpParams = httpParams.set('weight_min', params.weight_min.toString());
+      if (params?.weight_max !== undefined) httpParams = httpParams.set('weight_max', params.weight_max.toString());
       // Numeric filtering for rating
-      if (params?.rating !== undefined)
-        httpParams = httpParams.set('rating', params.rating.toString());
-      if (params?.rating_min !== undefined)
-        httpParams = httpParams.set('rating_min', params.rating_min.toString());
-      if (params?.rating_max !== undefined)
-        httpParams = httpParams.set('rating_max', params.rating_max.toString());
+      if (params?.rating !== undefined) httpParams = httpParams.set('rating', params.rating.toString());
+      if (params?.rating_min !== undefined) httpParams = httpParams.set('rating_min', params.rating_min.toString());
+      if (params?.rating_max !== undefined) httpParams = httpParams.set('rating_max', params.rating_max.toString());
       // Boolean filtering for is_active
-      if (params?.is_active !== undefined)
-        httpParams = httpParams.set('is_active', params.is_active.toString());
+      if (params?.is_active !== undefined) httpParams = httpParams.set('is_active', params.is_active.toString());
       // Boolean filtering for is_featured
-      if (params?.is_featured !== undefined)
-        httpParams = httpParams.set(
-          'is_featured',
-          params.is_featured.toString(),
-        );
+      if (params?.is_featured !== undefined) httpParams = httpParams.set('is_featured', params.is_featured.toString());
       // Boolean filtering for is_available
-      if (params?.is_available !== undefined)
-        httpParams = httpParams.set(
-          'is_available',
-          params.is_available.toString(),
-        );
+      if (params?.is_available !== undefined) httpParams = httpParams.set('is_available', params.is_available.toString());
       // Date/DateTime filtering for created_at
-      if (params?.created_at)
-        httpParams = httpParams.set('created_at', params.created_at);
-      if (params?.created_at_min)
-        httpParams = httpParams.set('created_at_min', params.created_at_min);
-      if (params?.created_at_max)
-        httpParams = httpParams.set('created_at_max', params.created_at_max);
+      if (params?.created_at) httpParams = httpParams.set('created_at', params.created_at);
+      if (params?.created_at_min) httpParams = httpParams.set('created_at_min', params.created_at_min);
+      if (params?.created_at_max) httpParams = httpParams.set('created_at_max', params.created_at_max);
       // Date/DateTime filtering for updated_at
-      if (params?.updated_at)
-        httpParams = httpParams.set('updated_at', params.updated_at);
-      if (params?.updated_at_min)
-        httpParams = httpParams.set('updated_at_min', params.updated_at_min);
-      if (params?.updated_at_max)
-        httpParams = httpParams.set('updated_at_max', params.updated_at_max);
+      if (params?.updated_at) httpParams = httpParams.set('updated_at', params.updated_at);
+      if (params?.updated_at_min) httpParams = httpParams.set('updated_at_min', params.updated_at_min);
+      if (params?.updated_at_max) httpParams = httpParams.set('updated_at_max', params.updated_at_max);
       // Date/DateTime filtering for published_at
-      if (params?.published_at)
-        httpParams = httpParams.set('published_at', params.published_at);
-      if (params?.published_at_min)
-        httpParams = httpParams.set(
-          'published_at_min',
-          params.published_at_min,
-        );
-      if (params?.published_at_max)
-        httpParams = httpParams.set(
-          'published_at_max',
-          params.published_at_max,
-        );
+      if (params?.published_at) httpParams = httpParams.set('published_at', params.published_at);
+      if (params?.published_at_min) httpParams = httpParams.set('published_at_min', params.published_at_min);
+      if (params?.published_at_max) httpParams = httpParams.set('published_at_max', params.published_at_max);
       // String filtering for start_time
-      if (params?.start_time)
-        httpParams = httpParams.set('start_time', params.start_time);
-      // String filtering for website_url
-      if (params?.website_url)
-        httpParams = httpParams.set('website_url', params.website_url);
-      // String filtering for email_address
-      if (params?.email_address)
-        httpParams = httpParams.set('email_address', params.email_address);
-      // String filtering for status
+      if (params?.start_time) httpParams = httpParams.set('start_time', params.start_time);
+            // String filtering for website_url
+      if (params?.website_url) httpParams = httpParams.set('website_url', params.website_url);
+            // String filtering for email_address
+      if (params?.email_address) httpParams = httpParams.set('email_address', params.email_address);
+            // String filtering for status
       if (params?.status) httpParams = httpParams.set('status', params.status);
-      // String filtering for priority
-      if (params?.priority)
-        httpParams = httpParams.set('priority', params.priority);
-      // String filtering for content
-      if (params?.content)
-        httpParams = httpParams.set('content', params.content);
-      // String filtering for notes
+            // String filtering for priority
+      if (params?.priority) httpParams = httpParams.set('priority', params.priority);
+            // String filtering for content
+      if (params?.content) httpParams = httpParams.set('content', params.content);
+            // String filtering for notes
       if (params?.notes) httpParams = httpParams.set('notes', params.notes);
-
+      
       const response = await this.http
-        .get<
-          PaginatedResponse<ComprehensiveTest>
-        >(this.baseUrl, { params: httpParams })
+        .get<PaginatedResponse<ComprehensiveTest>>(this.baseUrl, { params: httpParams })
         .toPromise();
 
       if (response) {
@@ -217,9 +157,7 @@ export class ComprehensiveTestService {
         }
       }
     } catch (error: any) {
-      this.errorSignal.set(
-        error.message || 'Failed to load comprehensiveTests list',
-      );
+      this.errorSignal.set(error.message || 'Failed to load comprehensiveTests list');
     } finally {
       this.loadingSignal.set(false);
     }
@@ -228,9 +166,7 @@ export class ComprehensiveTestService {
   /**
    * Load single comprehensiveTests by ID
    */
-  async loadComprehensiveTestById(
-    id: string,
-  ): Promise<ComprehensiveTest | null> {
+  async loadComprehensiveTestById(id: string): Promise<ComprehensiveTest | null> {
     this.loadingSignal.set(true);
 
     try {
@@ -244,9 +180,7 @@ export class ComprehensiveTestService {
       }
       return null;
     } catch (error: any) {
-      this.errorSignal.set(
-        error.message || 'Failed to load comprehensiveTests',
-      );
+      this.errorSignal.set(error.message || 'Failed to load comprehensiveTests');
       return null;
     } finally {
       this.loadingSignal.set(false);
@@ -256,9 +190,7 @@ export class ComprehensiveTestService {
   /**
    * Create new comprehensiveTests
    */
-  async createComprehensiveTest(
-    data: CreateComprehensiveTestRequest,
-  ): Promise<ComprehensiveTest | null> {
+  async createComprehensiveTest(data: CreateComprehensiveTestRequest): Promise<ComprehensiveTest | null> {
     this.loadingSignal.set(true);
 
     try {
@@ -268,18 +200,13 @@ export class ComprehensiveTestService {
 
       if (response) {
         // Optimistic update: add to list
-        this.comprehensiveTestsListSignal.update((list) => [
-          ...list,
-          response.data!,
-        ]);
-        this.totalComprehensiveTestSignal.update((total) => total + 1);
+        this.comprehensiveTestsListSignal.update((list) => [...list, response.data!]);
+        this.totalComprehensiveTestSignal.update(total => total + 1);
         return response.data;
       }
       return null;
     } catch (error: any) {
-      this.errorSignal.set(
-        error.message || 'Failed to create comprehensiveTests',
-      );
+      this.errorSignal.set(error.message || 'Failed to create comprehensiveTests');
       throw error;
     } finally {
       this.loadingSignal.set(false);
@@ -289,10 +216,7 @@ export class ComprehensiveTestService {
   /**
    * Update existing comprehensiveTests
    */
-  async updateComprehensiveTest(
-    id: string,
-    data: UpdateComprehensiveTestRequest,
-  ): Promise<ComprehensiveTest | null> {
+  async updateComprehensiveTest(id: string, data: UpdateComprehensiveTestRequest): Promise<ComprehensiveTest | null> {
     this.loadingSignal.set(true);
 
     try {
@@ -303,7 +227,7 @@ export class ComprehensiveTestService {
       if (response) {
         // Optimistic update: replace in list
         this.comprehensiveTestsListSignal.update((list) =>
-          list.map((item) => (item.id === id ? response.data! : item)),
+          list.map((item) => (item.id === id ? response.data! : item))
         );
         // Update selected comprehensiveTests if it's the same
         if (this.selectedComprehensiveTestSignal()?.id === id) {
@@ -313,9 +237,7 @@ export class ComprehensiveTestService {
       }
       return null;
     } catch (error: any) {
-      this.errorSignal.set(
-        error.message || 'Failed to update comprehensiveTests',
-      );
+      this.errorSignal.set(error.message || 'Failed to update comprehensiveTests');
       throw error;
     } finally {
       this.loadingSignal.set(false);
@@ -336,11 +258,9 @@ export class ComprehensiveTestService {
       if (response?.success) {
         // Optimistic update: remove from list
         this.comprehensiveTestsListSignal.update((list) =>
-          list.filter((item) => item.id !== id),
+          list.filter((item) => item.id !== id)
         );
-        this.totalComprehensiveTestSignal.update((total) =>
-          Math.max(0, total - 1),
-        );
+        this.totalComprehensiveTestSignal.update(total => Math.max(0, total - 1));
         // Clear selected comprehensiveTests if it's the deleted one
         if (this.selectedComprehensiveTestSignal()?.id === id) {
           this.selectedComprehensiveTestSignal.set(null);
@@ -349,9 +269,7 @@ export class ComprehensiveTestService {
       }
       return false;
     } catch (error: any) {
-      this.errorSignal.set(
-        error.message || 'Failed to delete comprehensiveTests',
-      );
+      this.errorSignal.set(error.message || 'Failed to delete comprehensiveTests');
       throw error;
     } finally {
       this.loadingSignal.set(false);
@@ -361,24 +279,82 @@ export class ComprehensiveTestService {
   // ===== ENHANCED OPERATIONS =====
 
   /**
+   * Export comprehensiveTests data
+   */
+  async exportComprehensiveTest(options: {
+    format: 'csv' | 'excel' | 'pdf';
+    ids?: string[];
+    filters?: Record<string, any>;
+    fields?: string[];
+    filename?: string;
+    applyFilters?: boolean;
+    includeMetadata?: boolean;
+  }): Promise<Blob> {
+    try {
+      let httpParams = new HttpParams()
+        .set('format', options.format);
+
+      if (options.ids && options.ids.length > 0) {
+        options.ids.forEach(id => {
+          httpParams = httpParams.append('ids', id);
+        });
+      }
+
+      if (options.filters && options.applyFilters) {
+        Object.entries(options.filters).forEach(([key, value]) => {
+          if (value !== null && value !== undefined && value !== '') {
+            httpParams = httpParams.set(`filters[${key}]`, String(value));
+          }
+        });
+      }
+
+      if (options.fields && options.fields.length > 0) {
+        options.fields.forEach(field => {
+          httpParams = httpParams.append('fields', field);
+        });
+      }
+
+      if (options.filename) {
+        httpParams = httpParams.set('filename', options.filename);
+      }
+
+      if (options.applyFilters !== undefined) {
+        httpParams = httpParams.set('applyFilters', String(options.applyFilters));
+      }
+
+      if (options.includeMetadata !== undefined) {
+        httpParams = httpParams.set('includeMetadata', String(options.includeMetadata));
+      }
+
+      const response = await this.http
+        .get(`${this.baseUrl}/export`, {
+          params: httpParams,
+          responseType: 'blob'
+        })
+        .toPromise();
+
+      if (response) {
+        return response;
+      }
+
+      throw new Error('Export failed - no response received');
+    } catch (error: any) {
+      console.error('Failed to export comprehensiveTests data:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Get dropdown options for comprehensiveTests
    */
-  async getDropdownOptions(
-    params: { search?: string; limit?: number } = {},
-  ): Promise<Array<{ value: string; label: string }>> {
+  async getDropdownOptions(params: {search?: string, limit?: number} = {}): Promise<Array<{value: string, label: string}>> {
     try {
       let httpParams = new HttpParams();
       if (params.search) httpParams = httpParams.set('search', params.search);
-      if (params.limit)
-        httpParams = httpParams.set('limit', params.limit.toString());
+      if (params.limit) httpParams = httpParams.set('limit', params.limit.toString());
 
       const response = await this.http
-        .get<
-          ApiResponse<{
-            options: Array<{ value: string; label: string }>;
-            total: number;
-          }>
-        >(`${this.baseUrl}/dropdown`, { params: httpParams })
+        .get<ApiResponse<{options: Array<{value: string, label: string}>, total: number}>>(`${this.baseUrl}/dropdown`, { params: httpParams })
         .toPromise();
 
       if (response?.success && response.data?.options) {
@@ -386,20 +362,16 @@ export class ComprehensiveTestService {
       }
       return [];
     } catch (error: any) {
-      console.error(
-        'Failed to fetch comprehensiveTests dropdown options:',
-        error,
-      );
+      console.error('Failed to fetch comprehensiveTests dropdown options:', error);
       return [];
     }
   }
 
+
   /**
    * Bulk create comprehensiveTestss
    */
-  async bulkCreateComprehensiveTest(
-    items: CreateComprehensiveTestRequest[],
-  ): Promise<BulkResponse | null> {
+  async bulkCreateComprehensiveTest(items: CreateComprehensiveTestRequest[]): Promise<BulkResponse | null> {
     this.loadingSignal.set(true);
 
     try {
@@ -414,9 +386,7 @@ export class ComprehensiveTestService {
       }
       return null;
     } catch (error: any) {
-      this.errorSignal.set(
-        error.message || 'Failed to bulk create comprehensiveTestss',
-      );
+      this.errorSignal.set(error.message || 'Failed to bulk create comprehensiveTestss');
       throw error;
     } finally {
       this.loadingSignal.set(false);
@@ -426,9 +396,7 @@ export class ComprehensiveTestService {
   /**
    * Bulk update comprehensiveTestss
    */
-  async bulkUpdateComprehensiveTest(
-    items: Array<{ id: string; data: UpdateComprehensiveTestRequest }>,
-  ): Promise<BulkResponse | null> {
+  async bulkUpdateComprehensiveTest(items: Array<{ id: string, data: UpdateComprehensiveTestRequest }>): Promise<BulkResponse | null> {
     this.loadingSignal.set(true);
 
     try {
@@ -443,9 +411,7 @@ export class ComprehensiveTestService {
       }
       return null;
     } catch (error: any) {
-      this.errorSignal.set(
-        error.message || 'Failed to bulk update comprehensiveTestss',
-      );
+      this.errorSignal.set(error.message || 'Failed to bulk update comprehensiveTestss');
       throw error;
     } finally {
       this.loadingSignal.set(false);
@@ -455,9 +421,7 @@ export class ComprehensiveTestService {
   /**
    * Bulk delete comprehensiveTestss
    */
-  async bulkDeleteComprehensiveTest(
-    ids: string[],
-  ): Promise<BulkResponse | null> {
+  async bulkDeleteComprehensiveTest(ids: string[]): Promise<BulkResponse | null> {
     this.loadingSignal.set(true);
 
     try {
@@ -472,89 +436,13 @@ export class ComprehensiveTestService {
       }
       return null;
     } catch (error: any) {
-      this.errorSignal.set(
-        error.message || 'Failed to bulk delete comprehensiveTestss',
-      );
+      this.errorSignal.set(error.message || 'Failed to bulk delete comprehensiveTestss');
       throw error;
     } finally {
       this.loadingSignal.set(false);
     }
   }
 
-  // ===== ADVANCED OPERATIONS (FULL PACKAGE) =====
-
-  /**
-   * Validate comprehensiveTests data before save
-   */
-  async validateComprehensiveTest(
-    data: CreateComprehensiveTestRequest,
-  ): Promise<{ valid: boolean; errors?: any[] }> {
-    try {
-      const response = await this.http
-        .post<
-          ApiResponse<{ valid: boolean; errors?: any[] }>
-        >(`${this.baseUrl}/validate`, { data })
-        .toPromise();
-
-      if (response) {
-        return response.data;
-      }
-      return { valid: false, errors: ['Validation failed'] };
-    } catch (error: any) {
-      console.error('Failed to validate comprehensiveTests:', error);
-      return { valid: false, errors: [error.message || 'Validation error'] };
-    }
-  }
-
-  /**
-   * Check field uniqueness
-   */
-  async checkUniqueness(
-    field: string,
-    value: string,
-    excludeId?: string,
-  ): Promise<{ unique: boolean }> {
-    try {
-      let params = new HttpParams().set('value', value);
-
-      if (excludeId) {
-        params = params.set('excludeId', excludeId);
-      }
-
-      const response = await this.http
-        .get<
-          ApiResponse<{ unique: boolean }>
-        >(`${this.baseUrl}/check/${field}`, { params })
-        .toPromise();
-
-      if (response) {
-        return response.data;
-      }
-      return { unique: false };
-    } catch (error: any) {
-      console.error('Failed to check uniqueness:', error);
-      return { unique: false };
-    }
-  }
-
-  /**
-   * Get comprehensiveTests statistics
-   */
-  async getStats(): Promise<{ total: number } | null> {
-    try {
-      const response = await this.http
-        .get<ApiResponse<{ total: number }>>(`${this.baseUrl}/stats`)
-        .toPromise();
-
-      if (response) {
-        return response.data;
-      }
-      return null;
-    } catch (error: any) {
-      console.error('Failed to get comprehensiveTests stats:', error);
-      return null;
-    }
-  }
 
   // ===== UTILITY METHODS =====
 

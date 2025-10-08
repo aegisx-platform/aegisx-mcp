@@ -4,6 +4,9 @@ import { {{ModuleName}}Controller } from './controllers/{{kebabCase currentRoute
 import { {{ModuleName}}Service } from './services/{{kebabCase currentRoute.camelName}}.service';
 import { {{ModuleName}}Repository } from './repositories/{{kebabCase currentRoute.camelName}}.repository';
 import { {{currentRoute.camelName}}Routes } from './routes/index';
+{{#if (or (eq package 'enterprise') (eq package 'full'))}}
+import { ExportService } from '../../services/export.service';
+{{/if}}
 
 // Note: FastifyInstance eventService type is declared in websocket.plugin.ts
 
@@ -36,7 +39,12 @@ export default fp(
       {{moduleName}}Repository{{#if withEvents}},
       (fastify as any).eventService{{/if}}
     );
+    {{#if (or (eq package 'enterprise') (eq package 'full'))}}
+    const exportService = new ExportService();
+    const {{moduleName}}Controller = new {{ModuleName}}Controller({{moduleName}}Service, exportService);
+    {{else}}
     const {{moduleName}}Controller = new {{ModuleName}}Controller({{moduleName}}Service);
+    {{/if}}
 
     // Optional: Decorate Fastify instance with service for cross-plugin access
     // fastify.decorate('{{moduleName}}Service', {{moduleName}}Service);

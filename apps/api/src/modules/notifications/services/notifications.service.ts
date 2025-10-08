@@ -344,68 +344,90 @@ export class NotificationsService extends BaseService<
     return this.notificationsRepository.getStats();
   }
 
-  // ===== FULL PACKAGE METHODS =====
-
   /**
-   * Validate data before save
+   * Get data for export with formatting
    */
-  async validate(data: { data: CreateNotifications }): Promise<{
-    valid: boolean;
-    errors: Array<{ field: string; message: string }>;
-  }> {
-    const errors: Array<{ field: string; message: string }> = [];
+  async getExportData(
+    queryParams: any = {},
+    fields?: string[],
+  ): Promise<any[]> {
+    // Get specific IDs if provided
+    if (queryParams.ids && queryParams.ids.length > 0) {
+      // Get specific records by IDs
+      const records = await Promise.all(
+        queryParams.ids.map((id: string) => this.getById(id)),
+      );
 
-    try {
-      await this.validateCreate(data.data);
-    } catch (error) {
-      errors.push({
-        field: 'general',
-        message: error instanceof Error ? error.message : String(error),
-      });
+      return records
+        .filter((record) => record !== null)
+        .map((record) => this.formatExportRecord(record!, fields));
     }
 
-    // Add specific field validations
+    // Separate filters from pagination parameters to avoid SQL errors
+    const { limit, offset, page, ...filters } = queryParams;
 
-    return {
-      valid: errors.length === 0,
-      errors,
+    // Build query parameters for data retrieval with proper pagination
+    const query: any = {
+      ...filters, // Only include actual filter parameters
+      limit: limit || 50000, // Max export limit for performance
+      page: 1, // Always start from first page for exports
     };
+
+    // Get filtered data
+    const result = await this.notificationsRepository.list(query);
+
+    return result.data.map((record) => this.formatExportRecord(record, fields));
   }
 
   /**
-   * Check field uniqueness
+   * Format single record for export
    */
-  async checkUniqueness(
-    field: string,
-    options: { value: string; excludeId?: string | number },
-  ): Promise<{
-    unique: boolean;
-    exists?: any;
-  }> {
-    const query: any = { [field]: options.value };
+  private formatExportRecord(record: Notifications, fields?: string[]): any {
+    const formatted: any = {};
 
-    // Add exclusion for updates
-    if (options.excludeId) {
-      query.excludeId = options.excludeId;
-    }
+    // Define all exportable fields
+    const exportableFields: { [key: string]: string | ((value: any) => any) } =
+      {
+        id: 'Id',
+        user_id: 'User id',
+        type: 'Type',
+        title: 'Title',
+        message: 'Message',
+        data: 'Data',
+        action_url: 'Action url',
+        read: 'Read',
+        read_at: 'Read at',
+        archived: 'Archived',
+        archived_at: 'Archived at',
+        priority: 'Priority',
+        expires_at: 'Expires at',
+        created_at: 'Created at',
+        updated_at: 'Updated at',
+      };
 
-    // Use field-specific find methods based on repository's isDisplayField logic
-    let existing: any = null;
+    // If specific fields requested, use only those
+    const fieldsToExport =
+      fields && fields.length > 0
+        ? fields.filter((field) => exportableFields.hasOwnProperty(field))
+        : Object.keys(exportableFields);
 
-    if (field === 'title' && options.value) {
-      existing = await this.notificationsRepository.findByTitle(options.value);
-    } else if (
-      existing &&
-      options.excludeId &&
-      existing.id === options.excludeId
-    ) {
-      // If updating (excludeId provided), ignore the current record
-      existing = null;
-    }
+    // Format each field
+    fieldsToExport.forEach((field) => {
+      const fieldConfig = exportableFields[field];
+      let value = (record as any)[field];
 
-    return {
-      unique: !existing,
-      exists: existing || undefined,
-    };
+      // Apply field-specific formatting
+      if (typeof fieldConfig === 'function') {
+        value = fieldConfig(value);
+      } else {
+        // Apply default formatting based on field type
+      }
+
+      // Use field label as key for export
+      const exportKey = typeof fieldConfig === 'string' ? fieldConfig : field;
+      formatted[exportKey] = value;
+    });
+
+    return formatted;
   }
 }
