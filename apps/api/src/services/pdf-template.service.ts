@@ -1,5 +1,5 @@
 import { Knex } from 'knex';
-import { PdfTemplateRepository } from '../repositories/pdf-template.repository';
+import { PdfTemplateRepository } from '../modules/pdf-export/repositories/pdf-template.repository';
 import { HandlebarsTemplateService } from './handlebars-template.service';
 import { PDFMakeService } from './pdfmake.service';
 import {
@@ -12,7 +12,7 @@ import {
   PdfTemplateStats,
   TemplateValidationResult,
   PdfRender,
-  CompiledTemplate
+  CompiledTemplate,
 } from '../types/pdf-template.types';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -20,7 +20,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 /**
  * PDF Template Service
- * 
+ *
  * Main service for managing PDF templates and rendering
  * Integrates Handlebars templating with PDFMake generation
  */
@@ -42,12 +42,17 @@ export class PdfTemplateService {
   /**
    * Create new PDF template
    */
-  async createTemplate(data: CreatePdfTemplate, userId?: string): Promise<PdfTemplate> {
+  async createTemplate(
+    data: CreatePdfTemplate,
+    userId?: string,
+  ): Promise<PdfTemplate> {
     try {
       // Validate template before creating
       const validation = this.validateTemplate(data.template_data);
       if (!validation.isValid) {
-        throw new Error(`Template validation failed: ${validation.errors.join(', ')}`);
+        throw new Error(
+          `Template validation failed: ${validation.errors.join(', ')}`,
+        );
       }
 
       // Check if name is unique
@@ -65,20 +70,25 @@ export class PdfTemplateService {
         orientation: data.orientation || 'portrait',
         version: data.version || '1.0.0',
         is_active: data.is_active !== false,
-        is_default: data.is_default || false
+        is_default: data.is_default || false,
       };
 
       const template = await this.repository.create(templateData, userId);
 
       // Create initial version
-      await this.repository.createVersion(template.id, template.version, {
-        template_data: template.template_data,
-        sample_data: template.sample_data,
-        schema: template.schema,
-        styles: template.styles,
-        fonts: template.fonts,
-        changelog: 'Initial version'
-      }, userId);
+      await this.repository.createVersion(
+        template.id,
+        template.version,
+        {
+          template_data: template.template_data,
+          sample_data: template.sample_data,
+          schema: template.schema,
+          styles: template.styles,
+          fonts: template.fonts,
+          changelog: 'Initial version',
+        },
+        userId,
+      );
 
       // Clear cache for this template
       this.clearTemplateCache(template.id);
@@ -93,7 +103,11 @@ export class PdfTemplateService {
   /**
    * Update PDF template
    */
-  async updateTemplate(id: string, data: UpdatePdfTemplate, userId?: string): Promise<PdfTemplate> {
+  async updateTemplate(
+    id: string,
+    data: UpdatePdfTemplate,
+    userId?: string,
+  ): Promise<PdfTemplate> {
     try {
       const existing = await this.repository.findById(id);
       if (!existing) {
@@ -104,7 +118,9 @@ export class PdfTemplateService {
       if (data.template_data) {
         const validation = this.validateTemplate(data.template_data);
         if (!validation.isValid) {
-          throw new Error(`Template validation failed: ${validation.errors.join(', ')}`);
+          throw new Error(
+            `Template validation failed: ${validation.errors.join(', ')}`,
+          );
         }
       }
 
@@ -123,15 +139,20 @@ export class PdfTemplateService {
       if (hasContentChanges) {
         const newVersion = this.incrementVersion(existing.version);
         await this.repository.update(id, { version: newVersion }, userId);
-        
-        await this.repository.createVersion(id, newVersion, {
-          template_data: data.template_data || existing.template_data,
-          sample_data: data.sample_data || existing.sample_data,
-          schema: data.schema || existing.schema,
-          styles: data.styles || existing.styles,
-          fonts: data.fonts || existing.fonts,
-          changelog: 'Template updated'
-        }, userId);
+
+        await this.repository.createVersion(
+          id,
+          newVersion,
+          {
+            template_data: data.template_data || existing.template_data,
+            sample_data: data.sample_data || existing.sample_data,
+            schema: data.schema || existing.schema,
+            styles: data.styles || existing.styles,
+            fonts: data.fonts || existing.fonts,
+            changelog: 'Template updated',
+          },
+          userId,
+        );
       }
 
       // Clear cache for this template
@@ -199,7 +220,12 @@ export class PdfTemplateService {
   /**
    * Render PDF from template
    */
-  async renderPdf(request: PdfRenderRequest, userId?: string, ipAddress?: string, userAgent?: string): Promise<PdfRenderResponse> {
+  async renderPdf(
+    request: PdfRenderRequest,
+    userId?: string,
+    ipAddress?: string,
+    userAgent?: string,
+  ): Promise<PdfRenderResponse> {
     const startTime = Date.now();
     let renderId: string | undefined;
 
@@ -223,7 +249,7 @@ export class PdfTemplateService {
         rendered_by: userId,
         ip_address: ipAddress,
         user_agent: userAgent,
-        status: 'pending'
+        status: 'pending',
       });
 
       renderId = renderRecord.id;
@@ -232,8 +258,14 @@ export class PdfTemplateService {
       let templateData = template.template_data;
       let templateVersion = template.version;
 
-      if (request.templateVersion && request.templateVersion !== template.version) {
-        const version = await this.repository.getVersion(template.id, request.templateVersion);
+      if (
+        request.templateVersion &&
+        request.templateVersion !== template.version
+      ) {
+        const version = await this.repository.getVersion(
+          template.id,
+          request.templateVersion,
+        );
         if (version) {
           templateData = version.template_data;
           templateVersion = version.version;
@@ -241,10 +273,18 @@ export class PdfTemplateService {
       }
 
       // Compile template
-      const compiled = this.getOrCompileTemplate(template.id, template.name, templateData, templateVersion);
+      const compiled = this.getOrCompileTemplate(
+        template.id,
+        template.name,
+        templateData,
+        templateVersion,
+      );
 
       // Render template with data
-      const documentDefinition = this.handlebarsService.renderTemplate(compiled, request.data);
+      const documentDefinition = this.handlebarsService.renderTemplate(
+        compiled,
+        request.data,
+      );
 
       // Override page settings if specified in options
       if (request.options?.pageSize) {
@@ -269,10 +309,10 @@ export class PdfTemplateService {
             name: template.name,
             layout: { name: 'lightHorizontalLines' },
             styles: documentDefinition.styles || {},
-            pageMargins: documentDefinition.pageMargins || [40, 60, 40, 60]
+            pageMargins: documentDefinition.pageMargins || [40, 60, 40, 60],
           },
           pageSize: documentDefinition.pageSize as any,
-          orientation: documentDefinition.pageOrientation as any
+          orientation: documentDefinition.pageOrientation as any,
         });
 
         if (!previewResult.success) {
@@ -286,23 +326,26 @@ export class PdfTemplateService {
 
         // Save file if requested
         if (request.options?.saveFile) {
-          const filename = request.options.filename || `${template.name}_${Date.now()}.pdf`;
+          const filename =
+            request.options.filename || `${template.name}_${Date.now()}.pdf`;
           const filePath = path.join(this.renderDir, filename);
-          
+
           fs.writeFileSync(filePath, pdfBuffer);
           fileUrl = `/api/pdf-renders/${filename}`;
 
           // Set expiration if specified
           let expiresAt: Date | undefined;
           if (request.options.expiresIn) {
-            expiresAt = new Date(Date.now() + request.options.expiresIn * 60 * 1000);
+            expiresAt = new Date(
+              Date.now() + request.options.expiresIn * 60 * 1000,
+            );
           }
 
           // Update render record with file info
           await this.repository.updateRender(renderId, {
             file_path: filePath,
             file_url: fileUrl,
-            expires_at: expiresAt
+            expires_at: expiresAt,
           });
         }
       }
@@ -314,7 +357,7 @@ export class PdfTemplateService {
         page_count: this.estimatePageCount(pdfBuffer),
         file_size: pdfBuffer?.length,
         render_time_ms: renderTime,
-        status: 'completed'
+        status: 'completed',
       });
 
       // Increment template usage count
@@ -333,20 +376,24 @@ export class PdfTemplateService {
           templateName: template.name,
           templateVersion: templateVersion,
           renderedAt: new Date().toISOString(),
-          expiresAt: request.options?.expiresIn ? 
-            new Date(Date.now() + request.options.expiresIn * 60 * 1000).toISOString() : 
-            undefined
-        }
+          expiresAt: request.options?.expiresIn
+            ? new Date(
+                Date.now() + request.options.expiresIn * 60 * 1000,
+              ).toISOString()
+            : undefined,
+        },
       };
 
       // Return PDF buffer directly for normal renders without file saving
-      if (!request.options?.saveFile && request.options?.renderType !== 'preview') {
+      if (
+        !request.options?.saveFile &&
+        request.options?.renderType !== 'preview'
+      ) {
         // Add buffer to response (in real implementation, you might want to stream this)
         (response as any).buffer = pdfBuffer;
       }
 
       return response;
-
     } catch (error) {
       console.error('Error rendering PDF:', error);
 
@@ -355,14 +402,14 @@ export class PdfTemplateService {
         await this.repository.updateRender(renderId, {
           status: 'failed',
           error_message: error.message,
-          render_time_ms: Date.now() - startTime
+          render_time_ms: Date.now() - startTime,
         });
       }
 
       return {
         success: false,
         error: error.message,
-        renderId
+        renderId,
       };
     }
   }
@@ -413,7 +460,7 @@ export class PdfTemplateService {
       return {
         isValid: false,
         errors: [error.message],
-        warnings: []
+        warnings: [],
       };
     }
   }
@@ -421,7 +468,10 @@ export class PdfTemplateService {
   /**
    * Preview template with sample data
    */
-  async previewTemplate(templateId: string, customData?: Record<string, any>): Promise<PdfRenderResponse> {
+  async previewTemplate(
+    templateId: string,
+    customData?: Record<string, any>,
+  ): Promise<PdfRenderResponse> {
     try {
       const template = await this.repository.findById(templateId);
       if (!template) {
@@ -435,8 +485,8 @@ export class PdfTemplateService {
         data: previewData,
         options: {
           renderType: 'preview',
-          filename: `preview_${template.name}_${Date.now()}.pdf`
-        }
+          filename: `preview_${template.name}_${Date.now()}.pdf`,
+        },
       });
     } catch (error) {
       console.error('Error previewing template:', error);
@@ -447,9 +497,17 @@ export class PdfTemplateService {
   /**
    * Duplicate template
    */
-  async duplicateTemplate(templateId: string, newName: string, userId?: string): Promise<PdfTemplate> {
+  async duplicateTemplate(
+    templateId: string,
+    newName: string,
+    userId?: string,
+  ): Promise<PdfTemplate> {
     try {
-      return await this.repository.duplicateTemplate(templateId, newName, userId);
+      return await this.repository.duplicateTemplate(
+        templateId,
+        newName,
+        userId,
+      );
     } catch (error) {
       console.error('Error duplicating template:', error);
       throw new Error(`Failed to duplicate template: ${error.message}`);
@@ -520,24 +578,35 @@ export class PdfTemplateService {
 
   // Private helper methods
 
-  private getOrCompileTemplate(templateId: string, templateName: string, templateData: any, version: string): CompiledTemplate {
+  private getOrCompileTemplate(
+    templateId: string,
+    templateName: string,
+    templateData: any,
+    version: string,
+  ): CompiledTemplate {
     const cacheKey = `${templateId}_${version}`;
-    
+
     if (this.renderCache.has(cacheKey)) {
       return this.renderCache.get(cacheKey)!;
     }
 
-    const compiled = this.handlebarsService.compileTemplate(templateId, templateName, templateData, version);
+    const compiled = this.handlebarsService.compileTemplate(
+      templateId,
+      templateName,
+      templateData,
+      version,
+    );
     this.renderCache.set(cacheKey, compiled);
-    
+
     return compiled;
   }
 
   private clearTemplateCache(templateId?: string): void {
     if (templateId) {
-      const keysToDelete = Array.from(this.renderCache.keys())
-        .filter(key => key.startsWith(templateId));
-      keysToDelete.forEach(key => this.renderCache.delete(key));
+      const keysToDelete = Array.from(this.renderCache.keys()).filter((key) =>
+        key.startsWith(templateId),
+      );
+      keysToDelete.forEach((key) => this.renderCache.delete(key));
     } else {
       this.renderCache.clear();
     }
@@ -547,7 +616,7 @@ export class PdfTemplateService {
     return new Promise((resolve, reject) => {
       try {
         const PdfMake = require('pdfmake/build/pdfmake');
-        
+
         // Try to load Thai fonts
         try {
           const vfsFonts = require('pdfmake/build/vfs_fonts');
@@ -559,7 +628,7 @@ export class PdfTemplateService {
         }
 
         const pdfDoc = PdfMake.createPdf(docDefinition);
-        
+
         pdfDoc.getBuffer((buffer: Buffer) => {
           resolve(buffer);
         });

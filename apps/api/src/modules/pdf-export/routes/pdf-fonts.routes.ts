@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { PDFMakeService } from '../services/pdfmake.service';
+import { PDFMakeService } from '../../../services/pdfmake.service';
 
 /**
  * PDF Fonts Management Routes

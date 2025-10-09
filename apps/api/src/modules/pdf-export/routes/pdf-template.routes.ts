@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { Static } from '@sinclair/typebox';
-import { PdfTemplateService } from '../services/pdf-template.service';
+import { PdfTemplateService } from '../../../services/pdf-template.service';
 import {
   CreatePdfTemplateSchema,
   UpdatePdfTemplateSchema,
@@ -9,7 +9,7 @@ import {
   PdfRenderRequestSchema,
   PdfTemplateSearchQuerySchema,
   PdfTemplatePreviewRequestSchema,
-} from '../schemas/pdf-template.schemas';
+} from '../../../schemas/pdf-template.schemas';
 
 /**
  * PDF Template Routes

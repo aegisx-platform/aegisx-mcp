@@ -1,5 +1,5 @@
 import { Knex } from 'knex';
-import { BaseRepository } from '../shared/repositories/base.repository';
+import { BaseRepository } from '../../../shared/repositories/base.repository';
 import {
   PdfTemplate,
   CreatePdfTemplate,
@@ -8,7 +8,7 @@ import {
   PdfRender,
   PdfTemplateListQuery,
   PdfTemplateStats,
-} from '../types/pdf-template.types';
+} from '../../../types/pdf-template.types';
 
 /**
  * PDF Template Repository

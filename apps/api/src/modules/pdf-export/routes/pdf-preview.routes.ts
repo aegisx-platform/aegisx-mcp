@@ -1,11 +1,14 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { Static } from '@sinclair/typebox';
-import { PDFMakeService, PdfExportOptions } from '../services/pdfmake.service';
+import {
+  PDFMakeService,
+  PdfExportOptions,
+} from '../../../services/pdfmake.service';
 import {
   PdfPreviewRequestSchema,
   PdfPreviewResponseSchema,
   PdfTemplateSchema,
-} from '../schemas/pdf-preview.schemas';
+} from '../../../schemas/pdf-preview.schemas';
 import * as fs from 'fs';
 
 /**
