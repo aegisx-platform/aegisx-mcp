@@ -23,9 +23,7 @@ import knexPlugin from '../plugins/knex.plugin';
 import loggingPlugin from '../plugins/logging.plugin';
 import pluginMonitoring from '../plugins/monitoring.plugin';
 import multipartPlugin from '../plugins/multipart.plugin';
-import pdfFontsPlugin from '../plugins/pdf-fonts.plugin';
-import pdfPreviewPlugin from '../plugins/pdf-preview.plugin';
-import pdfTemplatePlugin from '../plugins/pdf-template.plugin';
+import pdfExportPlugin from '../modules/pdf-export';
 import redisPlugin from '../plugins/redis.plugin';
 import responseHandlerPlugin from '../plugins/response-handler.plugin';
 import schemasPlugin from '../plugins/schemas.plugin';
@@ -276,18 +274,8 @@ export function createPluginGroups(
           required: true,
         },
         {
-          name: 'pdf-preview',
-          plugin: pdfPreviewPlugin,
-          required: true,
-        },
-        {
-          name: 'pdf-template',
-          plugin: pdfTemplatePlugin,
-          required: true,
-        },
-        {
-          name: 'pdf-fonts',
-          plugin: pdfFontsPlugin,
+          name: 'pdf-export',
+          plugin: pdfExportPlugin,
           required: true,
         },
       ],

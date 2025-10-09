@@ -1,27 +1,31 @@
 import { Knex } from 'knex';
 import { BaseRepository } from '../shared/repositories/base.repository';
-import { 
-  PdfTemplate, 
-  CreatePdfTemplate, 
+import {
+  PdfTemplate,
+  CreatePdfTemplate,
   UpdatePdfTemplate,
   PdfTemplateVersion,
   PdfRender,
   PdfTemplateListQuery,
-  PdfTemplateStats
+  PdfTemplateStats,
 } from '../types/pdf-template.types';
 
 /**
  * PDF Template Repository
- * 
+ *
  * Handles database operations for PDF templates
  */
-export class PdfTemplateRepository extends BaseRepository<PdfTemplate, CreatePdfTemplate, UpdatePdfTemplate> {
+export class PdfTemplateRepository extends BaseRepository<
+  PdfTemplate,
+  CreatePdfTemplate,
+  UpdatePdfTemplate
+> {
   constructor(knex: Knex) {
     super(
       knex,
       'pdf_templates',
       ['name', 'display_name', 'description', 'category', 'type'],
-      ['id', 'created_by', 'updated_by']
+      ['id', 'created_by', 'updated_by'],
     );
   }
 
@@ -47,9 +51,9 @@ export class PdfTemplateRepository extends BaseRepository<PdfTemplate, CreatePdf
       created_by: userId,
       updated_by: userId,
       created_at: new Date(),
-      updated_at: new Date()
+      updated_at: new Date(),
     };
-    
+
     const [row] = await this.query().insert(dbData).returning('*');
     return row;
   }
@@ -57,13 +61,17 @@ export class PdfTemplateRepository extends BaseRepository<PdfTemplate, CreatePdf
   /**
    * Override update to support userId
    */
-  async update(id: string, data: UpdatePdfTemplate, userId?: string): Promise<PdfTemplate> {
+  async update(
+    id: string,
+    data: UpdatePdfTemplate,
+    userId?: string,
+  ): Promise<PdfTemplate> {
     const dbData = {
       ...data,
       updated_by: userId,
-      updated_at: new Date()
+      updated_at: new Date(),
     };
-    
+
     const [row] = await this.query()
       .where({ id })
       .update(dbData)
@@ -79,10 +87,12 @@ export class PdfTemplateRepository extends BaseRepository<PdfTemplate, CreatePdf
   /**
    * Find template by name
    */
-  async findByName(name: string, includeInactive: boolean = false): Promise<PdfTemplate | null> {
+  async findByName(
+    name: string,
+    includeInactive: boolean = false,
+  ): Promise<PdfTemplate | null> {
     try {
-      const query = this.knex(this.tableName)
-        .where('name', name);
+      const query = this.knex(this.tableName).where('name', name);
 
       if (!includeInactive) {
         query.where('is_active', true);
@@ -109,7 +119,7 @@ export class PdfTemplateRepository extends BaseRepository<PdfTemplate, CreatePdf
         isActive,
         search,
         sortBy = 'updated_at',
-        sortOrder = 'desc'
+        sortOrder = 'desc',
       } = query;
 
       let dbQuery = this.knex(this.tableName).select('*');
@@ -128,7 +138,7 @@ export class PdfTemplateRepository extends BaseRepository<PdfTemplate, CreatePdf
       }
 
       if (search) {
-        dbQuery = dbQuery.where(builder => {
+        dbQuery = dbQuery.where((builder) => {
           builder
             .whereILike('name', `%${search}%`)
             .orWhereILike('display_name', `%${search}%`)
@@ -156,8 +166,8 @@ export class PdfTemplateRepository extends BaseRepository<PdfTemplate, CreatePdf
           total,
           totalPages: Math.ceil(total / limit),
           hasNext: page < Math.ceil(total / limit),
-          hasPrev: page > 1
-        }
+          hasPrev: page > 1,
+        },
       };
     } catch (error) {
       console.error('Error finding templates with filters:', error);
@@ -177,9 +187,9 @@ export class PdfTemplateRepository extends BaseRepository<PdfTemplate, CreatePdf
         .groupBy('category')
         .orderBy('count', 'desc');
 
-      return categories.map(cat => ({
+      return categories.map((cat) => ({
         category: cat.category,
-        count: parseInt(cat.count.toString())
+        count: parseInt(cat.count.toString()),
       }));
     } catch (error) {
       console.error('Error getting categories:', error);
@@ -199,9 +209,9 @@ export class PdfTemplateRepository extends BaseRepository<PdfTemplate, CreatePdf
         .groupBy('type')
         .orderBy('count', 'desc');
 
-      return types.map(type => ({
+      return types.map((type) => ({
         type: type.type,
-        count: parseInt(type.count.toString())
+        count: parseInt(type.count.toString()),
       }));
     } catch (error) {
       console.error('Error getting types:', error);
@@ -226,7 +236,12 @@ export class PdfTemplateRepository extends BaseRepository<PdfTemplate, CreatePdf
   /**
    * Create template version
    */
-  async createVersion(templateId: string, version: string, data: Partial<PdfTemplateVersion>, userId?: string): Promise<PdfTemplateVersion> {
+  async createVersion(
+    templateId: string,
+    version: string,
+    data: Partial<PdfTemplateVersion>,
+    userId?: string,
+  ): Promise<PdfTemplateVersion> {
     try {
       const versionData = {
         template_id: templateId,
@@ -238,7 +253,7 @@ export class PdfTemplateRepository extends BaseRepository<PdfTemplate, CreatePdf
         styles: data.styles,
         fonts: data.fonts,
         created_by: userId,
-        created_at: new Date()
+        created_at: new Date(),
       };
 
       const [createdVersion] = await this.knex('pdf_template_versions')
@@ -271,7 +286,10 @@ export class PdfTemplateRepository extends BaseRepository<PdfTemplate, CreatePdf
   /**
    * Get specific template version
    */
-  async getVersion(templateId: string, version: string): Promise<PdfTemplateVersion | null> {
+  async getVersion(
+    templateId: string,
+    version: string,
+  ): Promise<PdfTemplateVersion | null> {
     try {
       const versionData = await this.knex('pdf_template_versions')
         .where('template_id', templateId)
@@ -288,11 +306,13 @@ export class PdfTemplateRepository extends BaseRepository<PdfTemplate, CreatePdf
   /**
    * Create render record
    */
-  async createRender(renderData: Omit<PdfRender, 'id' | 'rendered_at'>): Promise<PdfRender> {
+  async createRender(
+    renderData: Omit<PdfRender, 'id' | 'rendered_at'>,
+  ): Promise<PdfRender> {
     try {
       const data = {
         ...renderData,
-        rendered_at: new Date()
+        rendered_at: new Date(),
       };
 
       const [render] = await this.knex('pdf_renders')
@@ -309,7 +329,10 @@ export class PdfTemplateRepository extends BaseRepository<PdfTemplate, CreatePdf
   /**
    * Update render record
    */
-  async updateRender(renderId: string, updates: Partial<PdfRender>): Promise<PdfRender> {
+  async updateRender(
+    renderId: string,
+    updates: Partial<PdfRender>,
+  ): Promise<PdfRender> {
     try {
       const [updatedRender] = await this.knex('pdf_renders')
         .where('id', renderId)
@@ -385,20 +408,20 @@ export class PdfTemplateRepository extends BaseRepository<PdfTemplate, CreatePdf
         totalTemplates: parseInt(templatesResult.total.toString()),
         activeTemplates: parseInt(templatesResult.active?.toString() || '0'),
         totalRenders: parseInt(rendersResult.total.toString()),
-        popularTemplates: popularTemplates.map(t => ({
+        popularTemplates: popularTemplates.map((t) => ({
           id: t.id,
           name: t.name,
-          usage_count: t.usage_count
+          usage_count: t.usage_count,
         })),
         rendersByCategory: rendersByCategory.reduce((acc, item) => {
           acc[item.category] = parseInt(item.count.toString());
           return acc;
         }, {}),
-        recentActivity: recentActivity.map(activity => ({
+        recentActivity: recentActivity.map((activity) => ({
           template_name: activity.template_name,
           rendered_at: activity.rendered_at,
-          rendered_by: activity.rendered_by
-        }))
+          rendered_by: activity.rendered_by,
+        })),
       };
     } catch (error) {
       console.error('Error getting template stats:', error);
@@ -431,12 +454,14 @@ export class PdfTemplateRepository extends BaseRepository<PdfTemplate, CreatePdf
       // Search in template_data JSON field
       const templates = await this.knex(this.tableName)
         .where('is_active', true)
-        .where(builder => {
+        .where((builder) => {
           builder
             .whereILike('name', `%${searchTerm}%`)
             .orWhereILike('display_name', `%${searchTerm}%`)
             .orWhereILike('description', `%${searchTerm}%`)
-            .orWhereRaw('CAST(template_data AS TEXT) ILIKE ?', [`%${searchTerm}%`]);
+            .orWhereRaw('CAST(template_data AS TEXT) ILIKE ?', [
+              `%${searchTerm}%`,
+            ]);
         })
         .orderBy('usage_count', 'desc');
 
@@ -450,7 +475,10 @@ export class PdfTemplateRepository extends BaseRepository<PdfTemplate, CreatePdf
   /**
    * Get default template by category/type
    */
-  async getDefaultTemplate(category?: string, type?: string): Promise<PdfTemplate | null> {
+  async getDefaultTemplate(
+    category?: string,
+    type?: string,
+  ): Promise<PdfTemplate | null> {
     try {
       let query = this.knex(this.tableName)
         .where('is_active', true)
@@ -475,7 +503,11 @@ export class PdfTemplateRepository extends BaseRepository<PdfTemplate, CreatePdf
   /**
    * Duplicate template
    */
-  async duplicateTemplate(templateId: string, newName: string, userId?: string): Promise<PdfTemplate> {
+  async duplicateTemplate(
+    templateId: string,
+    newName: string,
+    userId?: string,
+  ): Promise<PdfTemplate> {
     try {
       const originalTemplate = await this.findById(templateId);
       if (!originalTemplate) {
@@ -499,7 +531,7 @@ export class PdfTemplateRepository extends BaseRepository<PdfTemplate, CreatePdf
         is_active: true,
         is_default: false,
         assets: originalTemplate.assets,
-        permissions: originalTemplate.permissions
+        permissions: originalTemplate.permissions,
       };
 
       return await this.create(duplicateData, userId);
