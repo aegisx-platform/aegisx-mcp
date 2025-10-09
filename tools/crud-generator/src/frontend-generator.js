@@ -312,13 +312,14 @@ class FrontendGenerator {
 
       const fields = {};
 
-      // More robust field parsing - handle multiline definitions
-      const fieldPattern = /(\w+):\s*Type\.(Optional\()?(\w+)/g;
+      // More robust field parsing - handle multiline definitions and Optional wrapper
+      const fieldPattern = /(\w+):\s*Type\.(?:Optional\(Type\.(\w+)|(\w+))/g;
       let fieldMatch;
 
       while ((fieldMatch = fieldPattern.exec(schemaContent)) !== null) {
-        const [, fieldName, optionalWrapper, typeboxType] = fieldMatch;
-        const isOptional = !!optionalWrapper;
+        const [, fieldName, optionalType, directType] = fieldMatch;
+        const typeboxType = optionalType || directType;
+        const isOptional = !!optionalType;
 
         // Map TypeBox types to TypeScript types
         let tsType = 'string';
@@ -1336,20 +1337,8 @@ class FrontendGenerator {
       }
 
       const fieldType = queryType[fieldName];
-      const isBoolean =
-        fieldType.includes('boolean') ||
-        [
-          'read',
-          'archived',
-          'is_active',
-          'is_verified',
-          'enabled',
-          'visible',
-          'available',
-          'is_featured',
-          'is_available',
-          'active',
-        ].includes(fieldName);
+      // Detect field types based on schema type information only (not hardcoded field names)
+      const isBoolean = fieldType.includes('boolean');
       const isNumeric = fieldType.includes('number');
       const isUuid = fieldName.endsWith('_id') || fieldName === 'id';
 

@@ -1580,14 +1580,6 @@ export class AuthorListComponent implements OnInit, OnDestroy {
     }
 
     // Regular field filters
-    if (filters.fields !== undefined && filters.fields.length > 0) {
-      chips.push({
-        key: 'fields',
-        label: 'Fields',
-        value: String(filters.fields),
-      });
-    }
-
     if (filters.active !== undefined && filters.active !== null) {
       chips.push({
         key: 'active',

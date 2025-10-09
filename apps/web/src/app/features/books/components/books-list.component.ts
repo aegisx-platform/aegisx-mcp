@@ -1159,7 +1159,7 @@ export class BookListComponent implements OnInit, OnDestroy {
 
   // Export configuration
   exportServiceAdapter: ExportService = {
-    export: (options: ExportOptions) => this.booksService.export(options),
+    export: (options: ExportOptions) => this.booksService.exportBook(options),
   };
 
   availableExportFields = [
@@ -1616,14 +1616,6 @@ export class BookListComponent implements OnInit, OnDestroy {
     }
 
     // Regular field filters
-    if (filters.fields !== undefined && filters.fields.length > 0) {
-      chips.push({
-        key: 'fields',
-        label: 'Fields',
-        value: String(filters.fields),
-      });
-    }
-
     if (filters.available !== undefined && filters.available !== null) {
       chips.push({
         key: 'available',
