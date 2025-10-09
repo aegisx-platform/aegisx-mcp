@@ -30,11 +30,14 @@ Handlebars.registerHelper('kebabCase', function (str) {
     .replace(/^-+|-+$/g, ''); // Remove leading/trailing dashes
 });
 
-Handlebars.registerHelper('titleCase', function(str) {
+Handlebars.registerHelper('titleCase', function (str) {
   if (!str || typeof str !== 'string') return '';
-  return str.replace(/\w\S*/g, (txt) => 
-    txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
-  ).replace(/_/g, ' ');
+  return str
+    .replace(
+      /\w\S*/g,
+      (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(),
+    )
+    .replace(/_/g, ' ');
 });
 
 // Helper to convert camelCase moduleName back to kebab-case table name
@@ -1314,7 +1317,11 @@ class FrontendGenerator {
 
     Object.keys(queryType).forEach((fieldName) => {
       // Skip pagination, search, date range and system fields
-      if (['page', 'limit', 'search', 'include', 'sort'].includes(fieldName)) {
+      if (
+        ['page', 'limit', 'search', 'include', 'sort', 'fields'].includes(
+          fieldName,
+        )
+      ) {
         return;
       }
 
