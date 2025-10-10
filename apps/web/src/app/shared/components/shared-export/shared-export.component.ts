@@ -1,9 +1,16 @@
-import { Component, input, output, computed, signal } from '@angular/core';
+import {
+  Component,
+  input,
+  output,
+  computed,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
+import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -44,12 +51,13 @@ export interface ExportService {
   template: `
     <div class="export-container">
       <!-- Export Button with Menu -->
-      <button 
-        mat-raised-button 
+      <button
+        mat-raised-button
         color="accent"
         [matMenuTriggerFor]="exportMenu"
         [disabled]="isExporting()"
-        class="export-button">
+        class="export-button"
+      >
         <mat-icon>download</mat-icon>
         @if (isExporting()) {
           <mat-spinner diameter="20" class="ml-2"></mat-spinner>
@@ -65,27 +73,30 @@ export interface ExportService {
           <div class="format-section">
             <h4>Export Format</h4>
             <div class="format-buttons">
-              <button 
-                mat-button 
+              <button
+                mat-button
                 [class.selected]="selectedFormat() === 'csv'"
                 (click)="selectedFormat.set('csv')"
-                class="format-btn">
+                class="format-btn"
+              >
                 <mat-icon>table_chart</mat-icon>
                 CSV
               </button>
-              <button 
-                mat-button 
+              <button
+                mat-button
                 [class.selected]="selectedFormat() === 'excel'"
                 (click)="selectedFormat.set('excel')"
-                class="format-btn">
+                class="format-btn"
+              >
                 <mat-icon>grid_on</mat-icon>
                 Excel
               </button>
-              <button 
-                mat-button 
+              <button
+                mat-button
                 [class.selected]="selectedFormat() === 'pdf'"
                 (click)="selectedFormat.set('pdf')"
-                class="format-btn">
+                class="format-btn"
+              >
                 <mat-icon>picture_as_pdf</mat-icon>
                 PDF
               </button>
@@ -95,11 +106,9 @@ export interface ExportService {
           <!-- Export Options -->
           <div class="options-section">
             <h4>Export Options</h4>
-            
+
             <!-- Apply Filters Checkbox -->
-            <mat-checkbox 
-              [(ngModel)]="applyFilters"
-              class="option-checkbox">
+            <mat-checkbox [(ngModel)]="applyFilters" class="option-checkbox">
               Apply current filters
               <span class="option-description">
                 @if (hasActiveFilters()) {
@@ -112,9 +121,10 @@ export interface ExportService {
 
             <!-- Selected Items Only (if items are selected) -->
             @if (selectedItemsCount() > 0) {
-              <mat-checkbox 
+              <mat-checkbox
                 [(ngModel)]="exportSelectedOnly"
-                class="option-checkbox">
+                class="option-checkbox"
+              >
                 Export selected items only
                 <span class="option-description">
                   ({{ selectedItemsCount() }} items selected)
@@ -127,10 +137,11 @@ export interface ExportService {
               <div class="field-selection">
                 <mat-form-field appearance="outline" class="field-select">
                   <mat-label>Fields to export</mat-label>
-                  <mat-select 
-                    multiple 
+                  <mat-select
+                    multiple
                     [(value)]="selectedFields"
-                    placeholder="All fields">
+                    placeholder="All fields"
+                  >
                     <mat-option value="all">All fields</mat-option>
                     @for (field of availableFields(); track field.key) {
                       <mat-option [value]="field.key">
@@ -145,18 +156,16 @@ export interface ExportService {
 
           <!-- Action Buttons -->
           <div class="action-buttons">
-            <button 
-              mat-button 
-              (click)="closeMenu()"
-              class="cancel-btn">
+            <button mat-button (click)="closeMenu()" class="cancel-btn">
               Cancel
             </button>
-            <button 
-              mat-raised-button 
+            <button
+              mat-raised-button
               color="primary"
               [disabled]="!selectedFormat() || isExporting()"
               (click)="executeExport()"
-              class="export-btn">
+              class="export-btn"
+            >
               @if (isExporting()) {
                 <mat-spinner diameter="16" class="mr-1"></mat-spinner>
               }
@@ -167,136 +176,147 @@ export interface ExportService {
       </mat-menu>
     </div>
   `,
-  styles: [`
-    .export-container {
-      display: inline-block;
-    }
+  styles: [
+    `
+      .export-container {
+        display: inline-block;
+      }
 
-    .export-button {
-      min-width: 140px;
-    }
+      .export-button {
+        min-width: 140px;
+      }
 
-    .export-menu-content {
-      padding: 16px;
-      width: 100%;
-      max-width: 90vw;
-    }
+      .export-menu-content {
+        padding: 16px;
+        width: 100%;
+        max-width: 90vw;
+      }
 
-    .format-section,
-    .options-section {
-      margin-bottom: 20px;
-    }
+      .format-section,
+      .options-section {
+        margin-bottom: 20px;
+      }
 
-    .format-section h4,
-    .options-section h4 {
-      margin: 0 0 12px 0;
-      font-size: 14px;
-      font-weight: 500;
-      color: rgba(0, 0, 0, 0.87);
-    }
+      .format-section h4,
+      .options-section h4 {
+        margin: 0 0 12px 0;
+        font-size: 14px;
+        font-weight: 500;
+        color: rgba(0, 0, 0, 0.87);
+      }
 
-    .format-buttons {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
+      .format-buttons {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
 
-    .format-btn {
-      display: flex !important;
-      flex-direction: column !important;
-      align-items: center !important;
-      justify-content: center !important;
-      gap: 8px;
-      padding: 14px 10px !important;
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      background: white;
-      transition: all 0.2s ease;
-      min-width: 90px;
-      max-width: 110px;
-      height: auto;
-      min-height: 80px;
-      flex: 1;
-      font-size: 13px;
-      font-weight: 500;
-      line-height: 1.2;
-      overflow: hidden;
-    }
+      .format-btn {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px;
+        padding: 14px 10px !important;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background: white;
+        transition: all 0.2s ease;
+        min-width: 90px;
+        max-width: 110px;
+        height: auto;
+        min-height: 80px;
+        flex: 1;
+        font-size: 13px;
+        font-weight: 500;
+        line-height: 1.2;
+        overflow: hidden;
+      }
 
-    .format-btn:hover {
-      background: #f5f5f5 !important;
-      border-color: #ccc;
-    }
+      .format-btn:hover {
+        background: #f5f5f5 !important;
+        border-color: #ccc;
+      }
 
-    .format-btn.selected {
-      background: #e3f2fd !important;
-      border-color: #2196f3;
-      color: #1976d2;
-    }
+      .format-btn.selected {
+        background: #e3f2fd !important;
+        border-color: #2196f3;
+        color: #1976d2;
+      }
 
-    .format-btn mat-icon {
-      font-size: 24px !important;
-      width: 24px !important;
-      height: 24px !important;
-      line-height: 24px !important;
-      margin: 0 !important;
-    }
+      .format-btn mat-icon {
+        font-size: 24px !important;
+        width: 24px !important;
+        height: 24px !important;
+        line-height: 24px !important;
+        margin: 0 !important;
+      }
 
-    .option-checkbox {
-      display: block;
-      margin: 8px 0;
-    }
+      .option-checkbox {
+        display: block;
+        margin: 8px 0;
+      }
 
-    .option-description {
-      font-size: 12px;
-      color: rgba(0, 0, 0, 0.6);
-      margin-left: 4px;
-    }
+      .option-description {
+        font-size: 12px;
+        color: rgba(0, 0, 0, 0.6);
+        margin-left: 4px;
+      }
 
-    .field-selection {
-      margin-top: 12px;
-    }
+      .field-selection {
+        margin-top: 12px;
+      }
 
-    .field-select {
-      width: 100%;
-    }
+      .field-select {
+        width: 100%;
+      }
 
-    .action-buttons {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      margin-top: 20px;
-      padding-top: 16px;
-      border-top: 1px solid #e0e0e0;
-    }
+      .action-buttons {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 20px;
+        padding-top: 16px;
+        border-top: 1px solid #e0e0e0;
+      }
 
-    .cancel-btn {
-      color: rgba(0, 0, 0, 0.6);
-      min-width: 100px;
-    }
+      .cancel-btn {
+        color: rgba(0, 0, 0, 0.6);
+        min-width: 100px;
+      }
 
-    .export-btn {
-      min-width: 180px;
-      white-space: nowrap;
-    }
+      .export-btn {
+        min-width: 180px;
+        white-space: nowrap;
+      }
 
-    .ml-1 { margin-left: 4px; }
-    .ml-2 { margin-left: 8px; }
-    .mr-1 { margin-right: 4px; }
-  `]
+      .ml-1 {
+        margin-left: 4px;
+      }
+      .ml-2 {
+        margin-left: 8px;
+      }
+      .mr-1 {
+        margin-right: 4px;
+      }
+    `,
+  ],
 })
 export class SharedExportComponent {
   // Inputs
   exportService = input.required<ExportService>();
   currentFilters = input<Record<string, any>>({});
   selectedItems = input<any[]>([]);
-  availableFields = input<Array<{key: string, label: string}>>([]);
+  availableFields = input<Array<{ key: string; label: string }>>([]);
   moduleName = input<string>('data');
 
   // Outputs
   exportStarted = output<ExportOptions>();
   exportCompleted = output<{ success: boolean; format: string }>();
+
+  // ViewChild for menu trigger
+  menuTrigger = viewChild(MatMenuTrigger);
 
   // State
   selectedFormat = signal<'csv' | 'excel' | 'pdf' | null>(null);
@@ -320,20 +340,21 @@ export class SharedExportComponent {
     return this.selectedItems().length;
   });
 
-  constructor(
-    private snackBar: MatSnackBar
-  ) {}
+  constructor(private snackBar: MatSnackBar) {}
 
   getExportButtonText(): string {
     const format = this.selectedFormat();
     if (!format) return '';
-    
+
     const count = this.exportSelectedOnly ? this.selectedItemsCount() : 'All';
     return `${count} as ${format.toUpperCase()}`;
   }
 
   closeMenu(): void {
-    // Menu will close automatically
+    const trigger = this.menuTrigger();
+    if (trigger) {
+      trigger.closeMenu();
+    }
   }
 
   async executeExport(): Promise<void> {
@@ -346,11 +367,14 @@ export class SharedExportComponent {
       const options: ExportOptions = {
         format,
         applyFilters: this.applyFilters && this.hasActiveFilters(),
-        selectedIds: this.exportSelectedOnly ? this.selectedItems().map(item => item.id) : undefined,
-        fields: this.selectedFields.length > 0 && !this.selectedFields.includes('all') 
-          ? this.selectedFields 
+        selectedIds: this.exportSelectedOnly
+          ? this.selectedItems().map((item) => item.id)
           : undefined,
-        filename: this.generateFilename(format)
+        fields:
+          this.selectedFields.length > 0 && !this.selectedFields.includes('all')
+            ? this.selectedFields
+            : undefined,
+        filename: this.generateFilename(format),
       };
 
       // Emit export started event
@@ -361,18 +385,21 @@ export class SharedExportComponent {
 
       // Download the file
       const extensionMap: Record<string, string> = {
-        'csv': 'csv',
-        'excel': 'xlsx', 
-        'pdf': 'pdf'
+        csv: 'csv',
+        excel: 'xlsx',
+        pdf: 'pdf',
       };
       const extension = extensionMap[format] || format;
-      this.downloadFile(blob, options.filename || `${this.moduleName()}-export.${extension}`);
+      this.downloadFile(
+        blob,
+        options.filename || `${this.moduleName()}-export.${extension}`,
+      );
 
       // Show success message
       this.snackBar.open(
         `Export completed successfully! (${format.toUpperCase()})`,
         'Close',
-        { duration: 3000, panelClass: ['success-snackbar'] }
+        { duration: 3000, panelClass: ['success-snackbar'] },
       );
 
       // Emit completion event
@@ -380,18 +407,20 @@ export class SharedExportComponent {
 
       // Reset form
       this.resetForm();
-
     } catch (error) {
       console.error('Export failed:', error);
-      
+
       this.snackBar.open(
         `Export failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
         'Close',
-        { duration: 5000, panelClass: ['error-snackbar'] }
+        { duration: 5000, panelClass: ['error-snackbar'] },
       );
 
       // Emit completion event with error
-      this.exportCompleted.emit({ success: false, format: format || 'unknown' });
+      this.exportCompleted.emit({
+        success: false,
+        format: format || 'unknown',
+      });
     } finally {
       this.isExporting.set(false);
     }
@@ -400,23 +429,23 @@ export class SharedExportComponent {
   private generateFilename(format: string): string {
     const timestamp = new Date().toISOString().split('T')[0];
     const module = this.moduleName();
-    
+
     let suffix = '';
     if (this.exportSelectedOnly) {
       suffix = `-selected-${this.selectedItemsCount()}`;
     } else if (this.applyFilters && this.hasActiveFilters()) {
       suffix = '-filtered';
     }
-    
+
     // Map format to correct file extension
     const extensionMap: Record<string, string> = {
-      'csv': 'csv',
-      'excel': 'xlsx',
-      'pdf': 'pdf'
+      csv: 'csv',
+      excel: 'xlsx',
+      pdf: 'pdf',
     };
-    
+
     const extension = extensionMap[format] || format;
-    
+
     return `${module}-export${suffix}-${timestamp}.${extension}`;
   }
 

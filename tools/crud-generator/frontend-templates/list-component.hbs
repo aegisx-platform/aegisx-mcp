@@ -27,6 +27,11 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { {{PascalCase}}Service } from '../services/{{kebabCase moduleName}}.service';
 import { {{PascalCase}}, List{{PascalCase}}Query } from '../types/{{typesFileName}}';
 import { {{PascalCase}}CreateDialogComponent } from './{{kebabCase moduleName}}-create.dialog';
+{{#if filters.foreignKey.length}}
+{{#each filters.foreignKey}}
+import { {{capitalize serviceName}}Service } from '../../{{kebabCase referencedTable}}/services/{{kebabCase referencedTable}}.service';
+{{/each}}
+{{/if}}
 import { {{PascalCase}}EditDialogComponent, {{PascalCase}}EditDialogData } from './{{kebabCase moduleName}}-edit.dialog';
 import { {{PascalCase}}ViewDialogComponent, {{PascalCase}}ViewDialogData } from './{{kebabCase moduleName}}-view.dialog';
 import { DateRangeFilterComponent } from '../../../shared/components/date-range-filter/date-range-filter.component';
@@ -302,17 +307,19 @@ import { SharedExportComponent, ExportOptions, ExportService } from '../../../sh
           </mat-expansion-panel-header>
 
           <div class="advanced-filters">
+            <!-- Unified Filter Header -->
+            <div class="filters-header">
+              <mat-icon>tune</mat-icon>
+              <span>Filter Your Results</span>
+            </div>
+
+            <!-- Unified Filter Grid -->
+            <div class="unified-filter-grid">
 {{#if filters.boolean.length}}
-            <!-- Boolean Filters -->
-            <div class="filter-grid">
-              <h4 class="section-header">
-                <mat-icon>toggle_on</mat-icon>
-                Boolean Filters
-              </h4>
 {{#each filters.boolean}}
-              <div class="filter-group">
-                <label class="filter-label">{{label}}</label>
-                <mat-form-field appearance="outline" class="filter-field">
+              <!-- Boolean: {{label}} -->
+              <div class="filter-item">
+                <mat-form-field appearance="outline">
                   <mat-label>{{label}}</mat-label>
                   <mat-select
                     [value]="filters().{{name}}"
@@ -325,46 +332,44 @@ import { SharedExportComponent, ExportOptions, ExportService } from '../../../sh
                 </mat-form-field>
               </div>
 {{/each}}
-            </div>
 {{/if}}
 
 {{#if filters.foreignKey.length}}
-            <!-- Foreign Key Filters -->
-            <div class="filter-grid">
-              <h4 class="section-header">
-                <mat-icon>link</mat-icon>
-                Related Filters
-              </h4>
 {{#each filters.foreignKey}}
-              <div class="filter-group">
-                <label class="filter-label">{{label}}</label>
-                <mat-form-field appearance="outline" class="filter-field">
+              <!-- Foreign Key: {{label}} -->
+              <div class="filter-item">
+                <mat-form-field appearance="outline">
                   <mat-label>{{label}}</mat-label>
-                  <input
-                    matInput
-                    type="text"
+                  <mat-select
                     [value]="filters().{{name}} || ''"
-                    (input)="onFilterChange('{{name}}', $event)"
-                    placeholder="{{placeholder}}"
-                  />
-                  <mat-hint>Enter {{referencedTable}} ID</mat-hint>
+                    (selectionChange)="onFilterChange('{{name}}', $event.value)"
+                    [disabled]="loading{{capitalize serviceName}}()"
+                  >
+                    <mat-option value="">All {{capitalize referencedTable}}</mat-option>
+                    <mat-option *ngIf="loading{{capitalize serviceName}}()" disabled>
+                      <mat-spinner diameter="16"></mat-spinner>
+                      Loading {{referencedTable}}...
+                    </mat-option>
+                    <mat-option *ngFor="let item of {{serviceName}}Options()" [value]="item.value">
+                      \{{ item.label }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-hint *ngIf="!loading{{capitalize serviceName}}() && {{serviceName}}Options().length === 0">
+                    No {{referencedTable}} available
+                  </mat-hint>
+                  <mat-hint *ngIf="!loading{{capitalize serviceName}}() && {{serviceName}}Options().length > 0">
+                    Select {{referencedTable}} to filter
+                  </mat-hint>
                 </mat-form-field>
               </div>
 {{/each}}
-            </div>
 {{/if}}
 
 {{#if filters.string.length}}
-            <!-- String Filters -->
-            <div class="filter-grid">
-              <h4 class="section-header">
-                <mat-icon>text_fields</mat-icon>
-                Text Filters
-              </h4>
 {{#each filters.string}}
-              <div class="filter-group">
-                <label class="filter-label">{{label}}</label>
-                <mat-form-field appearance="outline" class="filter-field">
+              <!-- String: {{label}} -->
+              <div class="filter-item">
+                <mat-form-field appearance="outline">
                   <mat-label>{{label}}</mat-label>
 {{#if isSelect}}
                   <mat-select
@@ -388,22 +393,16 @@ import { SharedExportComponent, ExportOptions, ExportService } from '../../../sh
                 </mat-form-field>
               </div>
 {{/each}}
-            </div>
 {{/if}}
 
 {{#if filters.number.length}}
-            <!-- Number Range Filters -->
-            <div class="filter-grid">
-              <h4 class="section-header">
-                <mat-icon>filter_list</mat-icon>
-                Number Range Filters
-              </h4>
 {{#each filters.number}}
-              <div class="filter-group range-filter">
-                <label class="filter-label">{{label}} Range</label>
-                <div class="range-inputs">
-                  <mat-form-field appearance="outline" class="filter-field">
-                    <mat-label>Min {{label}}</mat-label>
+              <!-- Number Range: {{label}} -->
+              <div class="filter-item filter-item-range">
+                <label class="range-label">{{label}}</label>
+                <div class="range-container">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Min</mat-label>
                     <input
                       matInput
                       type="number"
@@ -413,8 +412,8 @@ import { SharedExportComponent, ExportOptions, ExportService } from '../../../sh
                     />
                   </mat-form-field>
                   <span class="range-separator">-</span>
-                  <mat-form-field appearance="outline" class="filter-field">
-                    <mat-label>Max {{label}}</mat-label>
+                  <mat-form-field appearance="outline">
+                    <mat-label>Max</mat-label>
                     <input
                       matInput
                       type="number"
@@ -426,54 +425,37 @@ import { SharedExportComponent, ExportOptions, ExportService } from '../../../sh
                 </div>
               </div>
 {{/each}}
-            </div>
 {{/if}}
 
 {{#if filters.date.length}}
-            <!-- Date Filters (Date only, no time) -->
-            <div class="date-filters-section">
-              <h4 class="section-header">
-                <mat-icon>event</mat-icon>
-                Date Filters
-              </h4>
-              <div class="date-filters-grid">
 {{#each filters.date}}
-                <div class="date-filter-group">
-                  <label class="filter-label">{{label}}</label>
-                  <app-date-range-filter
-                    fieldName="{{name}}"
-                    label="{{label}}"
-                    [isDateTime]="false"
-                    (filterChange)="onDateFilterChange($event)"
-                  ></app-date-range-filter>
-                </div>
-{{/each}}
+              <!-- Date: {{label}} -->
+              <div class="filter-item filter-item-date">
+                <app-date-range-filter
+                  fieldName="{{name}}"
+                  label="{{label}}"
+                  [isDateTime]="false"
+                  (filterChange)="onDateFilterChange($event)"
+                ></app-date-range-filter>
               </div>
-            </div>
+{{/each}}
 {{/if}}
 
 {{#if filters.datetime.length}}
-            <!-- DateTime Filters (Date + Time) -->
-            <div class="date-filters-section">
-              <h4 class="section-header">
-                <mat-icon>schedule</mat-icon>
-                DateTime Filters
-              </h4>
-              <div class="date-filters-grid">
 {{#each filters.datetime}}
-                <div class="date-filter-group">
-                  <label class="filter-label">{{label}}</label>
-                  <app-date-range-filter
-                    fieldName="{{name}}"
-                    label="{{label}}"
-                    [isDateTime]="true"
-                    (filterChange)="onDateFilterChange($event)"
-                  ></app-date-range-filter>
-                </div>
-{{/each}}
+              <!-- DateTime: {{label}} -->
+              <div class="filter-item filter-item-date">
+                <app-date-range-filter
+                  fieldName="{{name}}"
+                  label="{{label}}"
+                  [isDateTime]="true"
+                  (filterChange)="onDateFilterChange($event)"
+                ></app-date-range-filter>
               </div>
-            </div>
+{{/each}}
 {{/if}}
+            </div>
+            <!-- End Unified Filter Grid -->
 
             <!-- Action Buttons -->
             <div class="filter-actions">
@@ -836,34 +818,89 @@ import { SharedExportComponent, ExportOptions, ExportService } from '../../../sh
     }
 
     .advanced-filters {
-      padding: 16px 0;
+      padding: 20px;
     }
 
-    .filter-grid {
+    /* Unified Filter Header */
+    .filters-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      font-size: 18px;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+    }
+
+    .filters-header mat-icon {
+      font-size: 24px;
+    }
+
+    /* Unified Filter Grid */
+    .unified-filter-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 16px;
       margin-bottom: 24px;
     }
 
-    .filter-group {
+    .filter-item {
       display: flex;
       flex-direction: column;
-      gap: 8px;
     }
 
-    .filter-group.full-width {
-      grid-column: 1 / -1;
+    .filter-item mat-form-field {
+      width: 100%;
     }
 
-    .filter-label {
+    /* Range Filter (Number/Date) - Takes 2 columns */
+    .filter-item-range {
+      grid-column: span 2;
+    }
+
+    .filter-item-date {
+      grid-column: span 2;
+    }
+
+    @media (max-width: 968px) {
+      .filter-item-range,
+      .filter-item-date {
+        grid-column: span 1;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .unified-filter-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .range-label {
       font-weight: 500;
       color: #424242;
       font-size: 14px;
+      margin-bottom: 8px;
     }
 
-    .filter-field {
-      width: 100%;
+    .range-container {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .range-container mat-form-field {
+      flex: 1;
+    }
+
+    .range-separator {
+      color: #666;
+      font-weight: 500;
+      padding: 0 4px;
+      margin-top: 8px;
     }
 
     .filter-actions {
@@ -980,39 +1017,6 @@ import { SharedExportComponent, ExportOptions, ExportService } from '../../../sh
       color: #999;
     }
 
-    /* Date Filters Styles */
-    .date-filters-section {
-      margin-top: 24px;
-      padding-top: 16px;
-      border-top: 1px solid #e0e0e0;
-    }
-
-    .section-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin: 0 0 16px 0;
-      font-size: 16px;
-      font-weight: 500;
-      color: #333;
-    }
-
-    .section-header mat-icon {
-      font-size: 20px;
-      color: #1976d2;
-    }
-
-    .date-filters-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 16px;
-    }
-
-    .date-filter-group {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
 
     /* Summary Dashboard Styles */
     .summary-grid {
@@ -1152,6 +1156,13 @@ export class {{PascalCase}}ListComponent implements OnInit, OnDestroy {
   protected {{camelCase moduleName}}Service = inject({{PascalCase}}Service);
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
+{{#if filters.foreignKey.length}}
+
+  // Foreign key services for dropdown filters
+{{#each filters.foreignKey}}
+  private {{serviceName}}Service = inject({{capitalize serviceName}}Service);
+{{/each}}
+{{/if}}
 
   // Search and filtering
   searchTerm = '';
@@ -1167,6 +1178,14 @@ export class {{PascalCase}}ListComponent implements OnInit, OnDestroy {
   // Validation state
   private validationErrorsSignal = signal<Record<string, string>>({});
   readonly validationErrors = this.validationErrorsSignal.asReadonly();
+{{#if filters.foreignKey.length}}
+
+  // Foreign key dropdown options state
+{{#each filters.foreignKey}}
+  {{serviceName}}Options = signal<any[]>([]);
+  loading{{capitalize serviceName}} = signal<boolean>(false);
+{{/each}}
+{{/if}}
 
   // Selection
   private selectedIdsSignal = signal<Set<string>>(new Set());
@@ -1204,6 +1223,12 @@ export class {{PascalCase}}ListComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.load{{PascalCase}}s();
+{{#if filters.foreignKey.length}}
+    // Load foreign key dropdown options
+{{#each filters.foreignKey}}
+    this.load{{capitalize serviceName}}();
+{{/each}}
+{{/if}}
   }
 
   ngOnDestroy() {
@@ -1237,6 +1262,25 @@ export class {{PascalCase}}ListComponent implements OnInit, OnDestroy {
     this.{{camelCase moduleName}}Service.clearError();
     await this.load{{PascalCase}}s();
   }
+{{#if filters.foreignKey.length}}
+
+  // ===== FOREIGN KEY DROPDOWN DATA LOADING =====
+{{#each filters.foreignKey}}
+
+  private async load{{capitalize serviceName}}() {
+    this.loading{{capitalize serviceName}}.set(true);
+    try {
+      const response = await this.{{serviceName}}Service.getDropdownOptions();
+      this.{{serviceName}}Options.set(response || []);
+    } catch (error) {
+      console.error('Failed to load {{serviceName}}:', error);
+      this.{{serviceName}}Options.set([]);
+    } finally {
+      this.loading{{capitalize serviceName}}.set(false);
+    }
+  }
+{{/each}}
+{{/if}}
 
   // ===== VALIDATION METHODS =====
 

@@ -314,11 +314,19 @@ class FrontendGenerator {
 
       // More robust field parsing - handle multiline definitions and Optional wrapper
       // Updated regex to capture format information for date/datetime detection
-      const fieldPattern = /(\w+):\s*Type\.(?:Optional\(Type\.(\w+)(?:\(\{[^}]*format:\s*['"]([^'"]+)['"][^}]*\}\))?|(\w+)(?:\(\{[^}]*format:\s*['"]([^'"]+)['"][^}]*\}\))?)/g;
+      const fieldPattern =
+        /(\w+):\s*Type\.(?:Optional\(Type\.(\w+)(?:\(\{[^}]*format:\s*['"]([^'"]+)['"][^}]*\}\))?|(\w+)(?:\(\{[^}]*format:\s*['"]([^'"]+)['"][^}]*\}\))?)/g;
       let fieldMatch;
 
       while ((fieldMatch = fieldPattern.exec(schemaContent)) !== null) {
-        const [, fieldName, optionalType, optionalFormat, directType, directFormat] = fieldMatch;
+        const [
+          ,
+          fieldName,
+          optionalType,
+          optionalFormat,
+          directType,
+          directFormat,
+        ] = fieldMatch;
         const typeboxType = optionalType || directType;
         const format = optionalFormat || directFormat;
         const isOptional = !!optionalType;
@@ -337,7 +345,9 @@ class FrontendGenerator {
           typeString = `${tsType}:${format}`;
         }
 
-        fields[fieldName] = isOptional ? `${typeString} | undefined` : typeString;
+        fields[fieldName] = isOptional
+          ? `${typeString} | undefined`
+          : typeString;
       }
 
       return fields;
@@ -1328,7 +1338,7 @@ class FrontendGenerator {
       string: [],
       number: [],
       date: [],
-      datetime: []
+      datetime: [],
     };
 
     Object.keys(queryType).forEach((fieldName) => {
@@ -1372,10 +1382,26 @@ class FrontendGenerator {
         filters.boolean.push(filter);
       } else if (isForeignKey) {
         // Check if we have min/max variants in query type
-        const hasRange = queryType[`${fieldName}_min`] || queryType[`${fieldName}_max`];
+        const hasRange =
+          queryType[`${fieldName}_min`] || queryType[`${fieldName}_max`];
         if (!hasRange) {
           filter.isForeignKey = true;
-          filter.referencedTable = fieldName.replace('_id', '');
+
+          // Try to get the actual referenced table from enhanced schema first
+          let referencedTable = fieldName.replace('_id', '');
+          if (enhancedColumn && enhancedColumn.foreignKeyInfo) {
+            referencedTable = enhancedColumn.foreignKeyInfo.referencedTable;
+          }
+
+          // Keep table name as-is for folder paths (e.g., 'authors' stays 'authors')
+          filter.referencedTable = referencedTable;
+
+          // Generate proper service name using SINGULAR form (e.g., 'authors' -> 'author')
+          // This matches how services are generated: AuthorService, not AuthorsService
+          const singularTable = referencedTable.endsWith('s')
+            ? referencedTable.slice(0, -1)
+            : referencedTable;
+          filter.serviceName = this.toCamelCase(singularTable);
           filters.foreignKey.push(filter);
         }
       } else if (isNumeric) {
@@ -1411,15 +1437,18 @@ class FrontendGenerator {
         if (hasMax) {
           const fieldType = queryType[fieldName];
           // Check for format in type string (e.g., "string:date" or "string:date-time")
-          const isDateTime = fieldType.includes(':date-time') || fieldType.includes('date-time');
-          const isDate = (fieldType.includes(':date') && !isDateTime) || (fieldType.includes('date') && !isDateTime);
+          const isDateTime =
+            fieldType.includes(':date-time') || fieldType.includes('date-time');
+          const isDate =
+            (fieldType.includes(':date') && !isDateTime) ||
+            (fieldType.includes('date') && !isDateTime);
 
           const filter = {
             name: baseName,
             label: this.fieldNameToLabel(baseName),
             type: fieldType,
             isDateTime: isDateTime,
-            isDate: isDate
+            isDate: isDate,
           };
 
           if (isDateTime) {

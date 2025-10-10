@@ -1,7 +1,7 @@
 # AegisX Project Status
 
-**Last Updated:** 2025-10-09 (Session 30 - COMPLETED)
-**Current Task:** ✅ COMPLETED: Notifications Module Removal
+**Last Updated:** 2025-10-10 (Session 31 - COMPLETED)
+**Current Task:** ✅ COMPLETED: CRUD Filter Enhancement & Export Dialog UI Improvements
 **Git Repository:** git@github.com:aegisx-platform/aegisx-starter.git
 
 ## 🏗️ Project Overview
@@ -14,11 +14,78 @@ AegisX Starter - Enterprise-ready monorepo with Angular 19, Fastify, PostgreSQL
 
 ### Session Overview
 
-- **Date**: 2025-10-09 (Session 30 - COMPLETED)
-- **Main Focus**: ✅ Notifications Module Removal
-- **Git Commit**: Pending
+- **Date**: 2025-10-10 (Session 31 - COMPLETED)
+- **Main Focus**: ✅ CRUD Filter Enhancement & Export Dialog UI Improvements
+- **Git Commit**: eaa069a - feat(crud): improve string field filters and export dialog UI
 
-### 🎯 Current Session Tasks (Session 30)
+### 🎯 Current Session Tasks (Session 31)
+
+1. **✅ COMPLETED: CRUD Filter Enhancement - String Field Filters**
+   - **Problem**: User reported missing filters for normal string fields in generated CRUD modules: "ทำไมใน api,frontend field ปกติไม่มีให้ filter ใน api ได้หรอเช่น name, email, bio ที่เป็นเเงื่อนไขเช่น email= ตอนนี้ gen มี filter อะไรบ้างที่รองรับ gen ออกมาก้ไม่เห้นมี"
+   - **Root Cause**: `isExactMatchField()` function in CRUD generator used restrictive whitelist approach that only included specific patterns (status, type, category, code, key, tag, role)
+   - **Solution**: Changed from whitelist to blacklist approach - now includes ALL string fields except large text fields
+   - **Technical Changes**:
+     - **Modified**: `tools/crud-generator/src/generator.js` (lines 536-579)
+     - **New Logic**: Include all string fields by default, exclude only large text fields (description, bio, content, notes, comment, message, body, text)
+     - **Field Types**: Also excludes database text types (text, longtext, mediumtext)
+   - **Impact**:
+     - **Authors Module**: Now has 6 filterable fields (name, email, country, active, birth_date range, updated_at range)
+     - **Books Module**: Now has 10 filterable fields (title, author_id, isbn, genre, available, published_date range, price range, updated_at range)
+   - **Verification**: Successfully tested all 23 filter combinations:
+     - ✅ String filters: name, email, country, title, isbn, genre
+     - ✅ Boolean filters: active, available
+     - ✅ Numeric ranges: price_min/max, pages_min/max
+     - ✅ Date ranges: birth_date_min/max, published_date_min/max
+     - ✅ DateTime ranges: created_at_min/max, updated_at_min/max
+     - ✅ Combined filters (multiple parameters)
+   - **Result**: All string fields now automatically get filters in generated CRUD modules
+
+2. **✅ COMPLETED: Export Dialog UI Improvements**
+   - **Problem 1**: User reported export dialog width too narrow: "books ช่วยปรรับ css ของ export มันความกว้างไม่พอ"
+   - **Initial Mistake**: Attempted component-scoped CSS which didn't work due to Angular Material menu rendering at body level
+   - **User Feedback**: "ผมว่าตอนนี้คุณมั่วไปใหญ่ล่ะ ไปดูจริงๆ ว่ามันทำยังไงเพราะตอนนี้มันไม่เปลี่ยนแปลงเลยยกเลิกที่คุณแก้มาทั้งหมด ไปศึกษามาดีๆว่าทำยังไง"
+   - **Correct Solution**:
+     - Reverted incorrect changes with `git checkout`
+     - Added `export-menu-wide` class to `<mat-menu>` element
+     - Added global CSS in `apps/web/src/styles.scss`:
+       ```css
+       .mat-mdc-menu-panel.export-menu-wide {
+         min-width: 420px !important;
+         max-width: 90vw !important;
+       }
+       ```
+   - **Problem 2**: User reported icon overflow: "แล้ว icon มันล้นๆ ปุ่มด้วยครับ" / "มันล้นออกจากปุ่มไม่เห็นหรอ"
+   - **Solution**:
+     - Adjusted icon size from 32px → 28px → 24px (final)
+     - Added button constraints:
+       ```css
+       min-width: 90px;
+       max-width: 110px;
+       min-height: 80px;
+       overflow: hidden;
+       ```
+     - Used `!important` to override Material Design defaults
+     - Adjusted padding to 14px 10px
+     - Reset icon margin to 0
+   - **Problem 3**: User requested center alignment: "ok แล้วแต่อยากให้ alignment ทั้ง 3 ป่มอยู่ตรงกลาง"
+   - **Solution**: Added `justify-content: center` to `.format-buttons` container
+   - **Files Modified**:
+     - `apps/web/src/styles.scss` - Global menu width override
+     - `apps/web/src/app/shared/components/shared-export/shared-export.component.ts` - Button layout and sizing
+   - **Result**: Export dialog now displays at 420px width with properly sized, centered buttons and no icon overflow
+
+3. **✅ COMPLETED: Regenerate Authors & Books Modules**
+   - **Regenerated**: Authors and Books CRUD modules with enhanced filter capabilities
+   - **Backend Updates**:
+     - Enhanced schemas with all string field filters
+     - Updated repositories with new filter support
+     - Added permission migrations
+   - **Frontend Updates**:
+     - Enhanced services with new query parameters
+     - Updated components to support new filters
+   - **Result**: Both modules now have complete filter functionality across all appropriate fields
+
+### 🎯 Previous Session Tasks (Session 30)
 
 1. **✅ COMPLETED: Notifications Module Removal**
    - **Requirement**: User requested removal of notifications module: "ลบ notification ออกทั้ง migration และ frontend, backend เราจะยังไม่ใช้ตอนนี้"
