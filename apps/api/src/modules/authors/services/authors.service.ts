@@ -1,7 +1,5 @@
 import { BaseService } from '../../../shared/services/base.service';
 import { AuthorsRepository } from '../repositories/authors.repository';
-import { EventService } from '../../../shared/websocket/event.service';
-import { CrudEventHelper } from '../../../shared/websocket/crud-event-helper';
 import {
   type Authors,
   type CreateAuthors,
@@ -24,18 +22,8 @@ export class AuthorsService extends BaseService<
   CreateAuthors,
   UpdateAuthors
 > {
-  private eventHelper?: CrudEventHelper;
-
-  constructor(
-    private authorsRepository: AuthorsRepository,
-    private eventService?: EventService,
-  ) {
+  constructor(private authorsRepository: AuthorsRepository) {
     super(authorsRepository);
-
-    // Initialize event helper using Fastify pattern
-    if (eventService) {
-      this.eventHelper = eventService.for('authors', 'authors');
-    }
   }
 
   /**
@@ -51,11 +39,6 @@ export class AuthorsService extends BaseService<
       // Handle query options (includes, etc.)
       if (options.include) {
         // Add relationship loading logic here
-      }
-
-      // Emit read event for monitoring/analytics
-      if (this.eventHelper) {
-        await this.eventHelper.emitCustom('read', authors);
       }
     }
 
@@ -76,14 +59,6 @@ export class AuthorsService extends BaseService<
   }> {
     const result = await this.getList(options);
 
-    // Emit bulk read event
-    if (this.eventHelper) {
-      await this.eventHelper.emitCustom('bulk_read', {
-        count: result.data.length,
-        filters: options,
-      });
-    }
-
     return result;
   }
 
@@ -92,11 +67,6 @@ export class AuthorsService extends BaseService<
    */
   async create(data: CreateAuthors): Promise<Authors> {
     const authors = await super.create(data);
-
-    // Emit created event for real-time updates
-    if (this.eventHelper) {
-      await this.eventHelper.emitCreated(authors);
-    }
 
     return authors;
   }
@@ -109,10 +79,6 @@ export class AuthorsService extends BaseService<
     data: UpdateAuthors,
   ): Promise<Authors | null> {
     const authors = await super.update(id, data);
-
-    if (authors && this.eventHelper) {
-      await this.eventHelper.emitUpdated(authors);
-    }
 
     return authors;
   }
@@ -133,17 +99,10 @@ export class AuthorsService extends BaseService<
 
       console.log('Found authors to delete:', existing.id);
 
-      // Get entity before deletion for event emission
-      const authors = await this.getById(id);
-
       // Direct repository call to avoid base service complexity
       const deleted = await this.authorsRepository.delete(id);
 
       console.log('Delete result:', deleted);
-
-      if (deleted && authors && this.eventHelper) {
-        await this.eventHelper.emitDeleted(authors.id);
-      }
 
       if (deleted) {
         console.log('Authors deleted successfully:', {
@@ -282,9 +241,6 @@ export class AuthorsService extends BaseService<
         for (let i = 0; i < results.length; i++) {
           try {
             await this.afterCreate(results[i], validItems[i]);
-            if (this.eventHelper) {
-              await this.eventHelper.emitCreated(results[i]);
-            }
           } catch (error) {
             console.warn('Error in afterCreate:', error);
           }
@@ -444,9 +400,7 @@ export class AuthorsService extends BaseService<
     // If specific fields requested, use only those
     const fieldsToExport =
       fields && fields.length > 0
-        ? fields.filter((field) =>
-            Object.prototype.hasOwnProperty.call(exportableFields, field),
-          )
+        ? fields.filter((field) => exportableFields.hasOwnProperty(field))
         : Object.keys(exportableFields);
 
     // Format each field

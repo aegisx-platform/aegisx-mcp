@@ -33,10 +33,7 @@ export default fp(
     // Service instantiation following Fastify DI pattern
     // Dependencies are accessed from Fastify instance decorators
     const booksRepository = new BooksRepository((fastify as any).knex);
-    const booksService = new BooksService(
-      booksRepository,
-      (fastify as any).eventService,
-    );
+    const booksService = new BooksService(booksRepository);
     const exportService = new ExportService();
     const booksController = new BooksController(booksService, exportService);
 
@@ -53,16 +50,10 @@ export default fp(
     fastify.addHook('onReady', async () => {
       fastify.log.info(`Books domain module registered successfully`);
     });
-
-    // Cleanup event listeners on close
-    fastify.addHook('onClose', async () => {
-      fastify.log.info(`Cleaning up Books domain module resources`);
-      // Add any cleanup logic here
-    });
   },
   {
     name: 'books-domain-plugin',
-    dependencies: ['knex-plugin', 'websocket-plugin'],
+    dependencies: ['knex-plugin'],
   },
 );
 
@@ -81,24 +72,7 @@ export type {
   BooksIdParam,
   GetBooksQuery,
   ListBooksQuery,
-  BooksCreatedEvent,
-  BooksUpdatedEvent,
-  BooksDeletedEvent,
 } from './schemas/books.schemas';
-
-// Event type definitions for external consumers
-import { Books } from './schemas/books.schemas';
-
-export interface BooksEventHandlers {
-  onCreated?: (data: Books) => void | Promise<void>;
-  onUpdated?: (data: Books) => void | Promise<void>;
-  onDeleted?: (data: { id: number | string }) => void | Promise<void>;
-}
-
-export interface BooksWebSocketSubscription {
-  subscribe(handlers: BooksEventHandlers): void;
-  unsubscribe(): void;
-}
 
 // Module name constant
 export const MODULE_NAME = 'books' as const;

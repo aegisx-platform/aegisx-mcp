@@ -534,25 +534,39 @@ function isSearchableField(column) {
  * Determine if a field is suitable for exact match filtering
  */
 function isExactMatchField(column) {
-  const { name, dataType, tsType } = column;
+  const { name, dataType, tsType, type } = column;
 
   // Boolean fields are always exact match
   if (tsType === 'boolean') return true;
 
-  // String fields with specific patterns
+  // String fields - include all EXCEPT large text fields
   if (tsType === 'string') {
-    const exactMatchPatterns = [
-      'status',
-      'type',
-      'category',
-      'code',
-      'key',
-      'tag',
-      'role',
+    // Exclude large text fields (bio, description, content, notes, etc.)
+    const excludePatterns = [
+      'description',
+      'bio',
+      'content',
+      'notes',
+      'comment',
+      'message',
+      'body',
+      'text',
     ];
-    return exactMatchPatterns.some((pattern) =>
+
+    // Exclude if field name contains any exclude pattern
+    const shouldExclude = excludePatterns.some((pattern) =>
       name.toLowerCase().includes(pattern),
     );
+
+    // Exclude if database type is text or longtext
+    const isLargeTextField =
+      type === 'text' ||
+      type === 'longtext' ||
+      type === 'mediumtext' ||
+      dataType === 'text';
+
+    // Include all other string fields (name, email, country, title, etc.)
+    return !shouldExclude && !isLargeTextField;
   }
 
   // Integer fields that are likely foreign keys or enums

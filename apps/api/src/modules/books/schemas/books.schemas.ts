@@ -114,10 +114,14 @@ export const ListBooksQuerySchema = Type.Object({
   ),
 
   // Smart field-based filters
-  published_date_min: Type.Optional(Type.String({ format: 'date-time' })),
-  published_date_max: Type.Optional(Type.String({ format: 'date-time' })),
+  title: Type.Optional(Type.String({ minLength: 1, maxLength: 100 })),
+  author_id: Type.Optional(Type.String({ minLength: 1, maxLength: 50 })),
+  isbn: Type.Optional(Type.String({ minLength: 1, maxLength: 50 })),
+  published_date_min: Type.Optional(Type.String({ format: 'date' })),
+  published_date_max: Type.Optional(Type.String({ format: 'date' })),
   price_min: Type.Optional(Type.Number({})),
   price_max: Type.Optional(Type.Number({})),
+  genre: Type.Optional(Type.String({ minLength: 1, maxLength: 50 })),
   available: Type.Optional(Type.Boolean()),
   updated_at_min: Type.Optional(Type.String({ format: 'date-time' })),
   updated_at_max: Type.Optional(Type.String({ format: 'date-time' })),
@@ -143,25 +147,3 @@ export type ListBooksQuery = Static<typeof ListBooksQuerySchema>;
 // Partial types for field selection
 export type PartialBooks = Static<typeof PartialBooksSchema>;
 export type FlexibleBooksList = Static<typeof FlexibleBooksListResponseSchema>;
-
-// WebSocket Event Schemas
-export const BooksCreatedEventSchema = Type.Object({
-  type: Type.Literal('books.created'),
-  data: BooksSchema,
-});
-
-export const BooksUpdatedEventSchema = Type.Object({
-  type: Type.Literal('books.updated'),
-  data: BooksSchema,
-});
-
-export const BooksDeletedEventSchema = Type.Object({
-  type: Type.Literal('books.deleted'),
-  data: Type.Object({
-    id: Type.Union([Type.String(), Type.Number()]),
-  }),
-});
-
-export type BooksCreatedEvent = Static<typeof BooksCreatedEventSchema>;
-export type BooksUpdatedEvent = Static<typeof BooksUpdatedEventSchema>;
-export type BooksDeletedEvent = Static<typeof BooksDeletedEventSchema>;

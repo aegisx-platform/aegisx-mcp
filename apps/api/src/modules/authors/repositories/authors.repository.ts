@@ -15,8 +15,11 @@ import {
 
 export interface AuthorsListQuery extends BaseListQuery {
   // Smart field-based filters for Authors
+  name?: string;
+  email?: string;
   birth_date_min?: Date;
   birth_date_max?: Date;
+  country?: string;
   active?: boolean;
   updated_at_min?: Date;
   updated_at_max?: Date;
@@ -94,11 +97,20 @@ export class AuthorsRepository extends BaseRepository<
     super.applyCustomFilters(query, filters);
 
     // Apply specific Authors filters based on intelligent field categorization
+    if (filters.name !== undefined) {
+      query.where('authors.name', filters.name);
+    }
+    if (filters.email !== undefined) {
+      query.where('authors.email', filters.email);
+    }
     if (filters.birth_date_min !== undefined) {
       query.where('authors.birth_date', '>=', filters.birth_date_min);
     }
     if (filters.birth_date_max !== undefined) {
       query.where('authors.birth_date', '<=', filters.birth_date_max);
+    }
+    if (filters.country !== undefined) {
+      query.where('authors.country', filters.country);
     }
     if (filters.active !== undefined) {
       query.where('authors.active', filters.active);

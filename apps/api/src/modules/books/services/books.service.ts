@@ -1,7 +1,5 @@
 import { BaseService } from '../../../shared/services/base.service';
 import { BooksRepository } from '../repositories/books.repository';
-import { EventService } from '../../../shared/websocket/event.service';
-import { CrudEventHelper } from '../../../shared/websocket/crud-event-helper';
 import {
   type Books,
   type CreateBooks,
@@ -20,18 +18,8 @@ import {
  * - Business logic hooks for validation and processing
  */
 export class BooksService extends BaseService<Books, CreateBooks, UpdateBooks> {
-  private eventHelper?: CrudEventHelper;
-
-  constructor(
-    private booksRepository: BooksRepository,
-    private eventService?: EventService,
-  ) {
+  constructor(private booksRepository: BooksRepository) {
     super(booksRepository);
-
-    // Initialize event helper using Fastify pattern
-    if (eventService) {
-      this.eventHelper = eventService.for('books', 'books');
-    }
   }
 
   /**
@@ -47,11 +35,6 @@ export class BooksService extends BaseService<Books, CreateBooks, UpdateBooks> {
       // Handle query options (includes, etc.)
       if (options.include) {
         // Add relationship loading logic here
-      }
-
-      // Emit read event for monitoring/analytics
-      if (this.eventHelper) {
-        await this.eventHelper.emitCustom('read', books);
       }
     }
 
@@ -72,14 +55,6 @@ export class BooksService extends BaseService<Books, CreateBooks, UpdateBooks> {
   }> {
     const result = await this.getList(options);
 
-    // Emit bulk read event
-    if (this.eventHelper) {
-      await this.eventHelper.emitCustom('bulk_read', {
-        count: result.data.length,
-        filters: options,
-      });
-    }
-
     return result;
   }
 
@@ -89,11 +64,6 @@ export class BooksService extends BaseService<Books, CreateBooks, UpdateBooks> {
   async create(data: CreateBooks): Promise<Books> {
     const books = await super.create(data);
 
-    // Emit created event for real-time updates
-    if (this.eventHelper) {
-      await this.eventHelper.emitCreated(books);
-    }
-
     return books;
   }
 
@@ -102,10 +72,6 @@ export class BooksService extends BaseService<Books, CreateBooks, UpdateBooks> {
    */
   async update(id: string | number, data: UpdateBooks): Promise<Books | null> {
     const books = await super.update(id, data);
-
-    if (books && this.eventHelper) {
-      await this.eventHelper.emitUpdated(books);
-    }
 
     return books;
   }
@@ -126,17 +92,10 @@ export class BooksService extends BaseService<Books, CreateBooks, UpdateBooks> {
 
       console.log('Found books to delete:', existing.id);
 
-      // Get entity before deletion for event emission
-      const books = await this.getById(id);
-
       // Direct repository call to avoid base service complexity
       const deleted = await this.booksRepository.delete(id);
 
       console.log('Delete result:', deleted);
-
-      if (deleted && books && this.eventHelper) {
-        await this.eventHelper.emitDeleted(books.id);
-      }
 
       if (deleted) {
         console.log('Books deleted successfully:', {
@@ -275,9 +234,6 @@ export class BooksService extends BaseService<Books, CreateBooks, UpdateBooks> {
         for (let i = 0; i < results.length; i++) {
           try {
             await this.afterCreate(results[i], validItems[i]);
-            if (this.eventHelper) {
-              await this.eventHelper.emitCreated(results[i]);
-            }
           } catch (error) {
             console.warn('Error in afterCreate:', error);
           }
@@ -440,9 +396,7 @@ export class BooksService extends BaseService<Books, CreateBooks, UpdateBooks> {
     // If specific fields requested, use only those
     const fieldsToExport =
       fields && fields.length > 0
-        ? fields.filter((field) =>
-            Object.prototype.hasOwnProperty.call(exportableFields, field),
-          )
+        ? fields.filter((field) => exportableFields.hasOwnProperty(field))
         : Object.keys(exportableFields);
 
     // Format each field

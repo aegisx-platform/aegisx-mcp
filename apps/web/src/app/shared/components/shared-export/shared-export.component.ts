@@ -59,7 +59,7 @@ export interface ExportService {
       </button>
 
       <!-- Export Menu -->
-      <mat-menu #exportMenu="matMenu" class="export-menu">
+      <mat-menu #exportMenu="matMenu" class="export-menu-wide">
         <div class="export-menu-content" (click)="$event.stopPropagation()">
           <!-- Format Selection -->
           <div class="format-section">
@@ -178,7 +178,7 @@ export interface ExportService {
 
     .export-menu-content {
       padding: 16px;
-      width: 320px;
+      width: 100%;
       max-width: 90vw;
     }
 
@@ -199,36 +199,48 @@ export interface ExportService {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
+      justify-content: center;
     }
 
     .format-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      padding: 12px 16px;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 8px;
+      padding: 14px 10px !important;
       border: 1px solid #e0e0e0;
       border-radius: 8px;
       background: white;
       transition: all 0.2s ease;
-      min-width: 80px;
+      min-width: 90px;
+      max-width: 110px;
+      height: auto;
+      min-height: 80px;
+      flex: 1;
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.2;
+      overflow: hidden;
     }
 
     .format-btn:hover {
-      background: #f5f5f5;
+      background: #f5f5f5 !important;
       border-color: #ccc;
     }
 
     .format-btn.selected {
-      background: #e3f2fd;
+      background: #e3f2fd !important;
       border-color: #2196f3;
       color: #1976d2;
     }
 
     .format-btn mat-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
+      font-size: 24px !important;
+      width: 24px !important;
+      height: 24px !important;
+      line-height: 24px !important;
+      margin: 0 !important;
     }
 
     .option-checkbox {
@@ -252,8 +264,8 @@ export interface ExportService {
 
     .action-buttons {
       display: flex;
-      justify-content: flex-end;
-      gap: 8px;
+      justify-content: space-between;
+      gap: 12px;
       margin-top: 20px;
       padding-top: 16px;
       border-top: 1px solid #e0e0e0;
@@ -261,10 +273,12 @@ export interface ExportService {
 
     .cancel-btn {
       color: rgba(0, 0, 0, 0.6);
+      min-width: 100px;
     }
 
     .export-btn {
-      min-width: 120px;
+      min-width: 180px;
+      white-space: nowrap;
     }
 
     .ml-1 { margin-left: 4px; }

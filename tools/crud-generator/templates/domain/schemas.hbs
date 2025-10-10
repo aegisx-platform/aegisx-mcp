@@ -128,8 +128,8 @@ export const List{{ModuleName}}QuerySchema = Type.Object({
   {{name}}: Type.Optional({{#if (eq tsType 'boolean')}}Type.Boolean(){{else if (eq tsType 'string')}}Type.String({{{getFieldConstraints this}}}){{else if (eq tsType 'number')}}Type.Number({{{getFieldConstraints this}}}){{/if}}),
   {{/if}}
   {{#if (isRangeField this)}}
-  {{name}}_min: Type.Optional({{#if (eq tsType 'number')}}Type.Number({{{getFieldConstraints this}}}){{else if (eq tsType 'Date')}}Type.String({ format: 'date-time' }){{/if}}),
-  {{name}}_max: Type.Optional({{#if (eq tsType 'number')}}Type.Number({{{getFieldConstraints this}}}){{else if (eq tsType 'Date')}}Type.String({ format: 'date-time' }){{/if}}),
+  {{name}}_min: Type.Optional({{#if (eq tsType 'number')}}Type.Number({{{getFieldConstraints this}}}){{else if (eq type 'date')}}Type.String({ format: 'date' }){{else if (eq tsType 'Date')}}Type.String({ format: 'date-time' }){{/if}}),
+  {{name}}_max: Type.Optional({{#if (eq tsType 'number')}}Type.Number({{{getFieldConstraints this}}}){{else if (eq type 'date')}}Type.String({ format: 'date' }){{else if (eq tsType 'Date')}}Type.String({ format: 'date-time' }){{/if}}),
   {{/if}}
   {{/unless}}
   {{/each}}

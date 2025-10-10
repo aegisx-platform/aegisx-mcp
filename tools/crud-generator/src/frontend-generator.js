@@ -313,12 +313,14 @@ class FrontendGenerator {
       const fields = {};
 
       // More robust field parsing - handle multiline definitions and Optional wrapper
-      const fieldPattern = /(\w+):\s*Type\.(?:Optional\(Type\.(\w+)|(\w+))/g;
+      // Updated regex to capture format information for date/datetime detection
+      const fieldPattern = /(\w+):\s*Type\.(?:Optional\(Type\.(\w+)(?:\(\{[^}]*format:\s*['"]([^'"]+)['"][^}]*\}\))?|(\w+)(?:\(\{[^}]*format:\s*['"]([^'"]+)['"][^}]*\}\))?)/g;
       let fieldMatch;
 
       while ((fieldMatch = fieldPattern.exec(schemaContent)) !== null) {
-        const [, fieldName, optionalType, directType] = fieldMatch;
+        const [, fieldName, optionalType, optionalFormat, directType, directFormat] = fieldMatch;
         const typeboxType = optionalType || directType;
+        const format = optionalFormat || directFormat;
         const isOptional = !!optionalType;
 
         // Map TypeBox types to TypeScript types
@@ -329,7 +331,13 @@ class FrontendGenerator {
           tsType = 'boolean';
         }
 
-        fields[fieldName] = isOptional ? `${tsType} | undefined` : tsType;
+        // Include format information in the type string for date/datetime detection
+        let typeString = tsType;
+        if (format) {
+          typeString = `${tsType}:${format}`;
+        }
+
+        fields[fieldName] = isOptional ? `${typeString} | undefined` : typeString;
       }
 
       return fields;
@@ -1314,10 +1322,17 @@ class FrontendGenerator {
     const queryType = types[`List${entityName}Query`];
     if (!queryType) return [];
 
-    const filters = [];
+    const filters = {
+      boolean: [],
+      foreignKey: [],
+      string: [],
+      number: [],
+      date: [],
+      datetime: []
+    };
 
     Object.keys(queryType).forEach((fieldName) => {
-      // Skip pagination, search, date range and system fields
+      // Skip pagination, search and system fields
       if (
         ['page', 'limit', 'search', 'include', 'sort', 'fields'].includes(
           fieldName,
@@ -1326,49 +1341,94 @@ class FrontendGenerator {
         return;
       }
 
-      // Skip date range fields (min/max) as they're handled separately
+      // Skip range fields (min/max) as they're handled separately
       if (fieldName.endsWith('_min') || fieldName.endsWith('_max')) {
         return;
       }
 
-      // Skip date filter fields as they have their own section
-      if (fieldName.includes('_at')) {
-        return;
-      }
-
       const fieldType = queryType[fieldName];
-      // Detect field types based on schema type information only (not hardcoded field names)
-      const isBoolean = fieldType.includes('boolean');
-      const isNumeric = fieldType.includes('number');
-      const isUuid = fieldName.endsWith('_id') || fieldName === 'id';
 
       // Get enhanced column info for constraint values
       const enhancedColumn = enhancedSchema?.columns?.find(
         (col) => col.name === fieldName,
       );
 
+      // Detect field types based on schema type information
+      const isBoolean = fieldType.includes('boolean');
+      const isNumeric = fieldType.includes('number');
+      const isForeignKey = fieldName.endsWith('_id') && fieldName !== 'id';
+      const isString = fieldType.includes('string') && !isForeignKey;
+
       const filter = {
         name: fieldName,
         label: this.fieldNameToLabel(fieldName),
         type: fieldType,
-        isBoolean: isBoolean,
-        isNumeric: isNumeric,
-        isUuid: isUuid,
         placeholder: this.generatePlaceholder(fieldName),
         inputType: this.getInputType(fieldType),
-        isSelect:
+      };
+
+      // Categorize filters by type
+      if (isBoolean) {
+        filters.boolean.push(filter);
+      } else if (isForeignKey) {
+        // Check if we have min/max variants in query type
+        const hasRange = queryType[`${fieldName}_min`] || queryType[`${fieldName}_max`];
+        if (!hasRange) {
+          filter.isForeignKey = true;
+          filter.referencedTable = fieldName.replace('_id', '');
+          filters.foreignKey.push(filter);
+        }
+      } else if (isNumeric) {
+        // Number fields will use range inputs
+        const hasMin = !!queryType[`${fieldName}_min`];
+        const hasMax = !!queryType[`${fieldName}_max`];
+        if (hasMin || hasMax) {
+          filter.hasRange = true;
+          filters.number.push(filter);
+        }
+      } else if (isString) {
+        // Check for enum/constraint values
+        filter.isSelect =
           this.isSelectField(fieldName, fieldType) ||
           (enhancedColumn &&
             (enhancedColumn.constraintValues?.length > 0 ||
-              enhancedColumn.enumInfo?.values?.length > 0)),
-      };
+              enhancedColumn.enumInfo?.values?.length > 0));
 
-      // Add options for select fields
-      if (filter.isSelect) {
-        filter.options = this.getSelectOptions(fieldName, enhancedColumn);
+        if (filter.isSelect) {
+          filter.options = this.getSelectOptions(fieldName, enhancedColumn);
+        }
+
+        filters.string.push(filter);
       }
+    });
 
-      filters.push(filter);
+    // Handle date/datetime fields separately by checking for _min/_max pairs
+    Object.keys(queryType).forEach((fieldName) => {
+      if (fieldName.endsWith('_min')) {
+        const baseName = fieldName.replace('_min', '');
+        const hasMax = !!queryType[`${baseName}_max`];
+
+        if (hasMax) {
+          const fieldType = queryType[fieldName];
+          // Check for format in type string (e.g., "string:date" or "string:date-time")
+          const isDateTime = fieldType.includes(':date-time') || fieldType.includes('date-time');
+          const isDate = (fieldType.includes(':date') && !isDateTime) || (fieldType.includes('date') && !isDateTime);
+
+          const filter = {
+            name: baseName,
+            label: this.fieldNameToLabel(baseName),
+            type: fieldType,
+            isDateTime: isDateTime,
+            isDate: isDate
+          };
+
+          if (isDateTime) {
+            filters.datetime.push(filter);
+          } else if (isDate) {
+            filters.date.push(filter);
+          }
+        }
+      }
     });
 
     return filters;

@@ -403,3 +403,9 @@ body {
   background: #ff9800 !important;
   color: white !important;
 }
+
+/* ===== Export Menu Width Override ===== */
+.mat-mdc-menu-panel.export-menu-wide {
+  min-width: 420px !important;
+  max-width: 90vw !important;
+}

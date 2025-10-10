@@ -130,44 +130,52 @@ export const List{{ModuleName}}QuerySchema = Type.Object({
   // Smart field-based filters based on database schema
   {{#each columns}}
   {{#unless isPrimaryKey}}
-  {{#if (contains dataType 'timestamp date')}}
-  // Date/DateTime filtering for {{name}} - supports both equals and range
-  {{name}}: Type.Optional(Type.String({ 
-    format: 'date-time',
-    description: 'Filter by exact {{name}} (equals mode)'
+  {{#if (eq type 'date')}}
+  // Date filtering for {{name}} (type: {{type}}) - supports range queries
+  {{name}}_min: Type.Optional(Type.String({
+    format: 'date',
+    description: 'Filter by {{name}} minimum (range mode)'
   })),
-  {{name}}_min: Type.Optional(Type.String({ 
+  {{name}}_max: Type.Optional(Type.String({
+    format: 'date',
+    description: 'Filter by {{name}} maximum (range mode)'
+  })),
+  {{else if (or (eq type 'timestamp with time zone') (eq type 'timestamp without time zone') (eq type 'timestamptz'))}}
+  // DateTime filtering for {{name}} (type: {{type}}) - supports range queries
+  {{name}}_min: Type.Optional(Type.String({
     format: 'date-time',
     description: 'Filter by {{name}} minimum (range mode)'
   })),
-  {{name}}_max: Type.Optional(Type.String({ 
+  {{name}}_max: Type.Optional(Type.String({
     format: 'date-time',
     description: 'Filter by {{name}} maximum (range mode)'
   })),
   {{else if (eq tsType 'boolean')}}
   // Boolean filtering for {{name}}
-  {{name}}: Type.Optional(Type.Boolean({ 
-    description: 'Filter by {{name}} status' 
+  {{name}}: Type.Optional(Type.Boolean({
+    description: 'Filter by {{name}} status'
   })),
   {{else if (eq tsType 'number')}}
   // Numeric filtering for {{name}} - supports both equals and range
-  {{name}}: Type.Optional(Type.Number({ 
-    minimum: 0,
-    description: 'Filter by exact {{name}} (equals mode)'
-  })),
-  {{name}}_min: Type.Optional(Type.Number({ 
-    minimum: 0,
+  {{name}}_min: Type.Optional(Type.Number({
     description: 'Filter by {{name}} minimum (range mode)'
   })),
-  {{name}}_max: Type.Optional(Type.Number({ 
-    minimum: 0,
+  {{name}}_max: Type.Optional(Type.Number({
     description: 'Filter by {{name}} maximum (range mode)'
+  })),
+  {{else if (and (eq tsType 'string') (contains name '_id') (ne name 'id'))}}
+  // Foreign key filtering for {{name}}
+  {{name}}: Type.Optional(Type.String({
+    format: 'uuid',
+    description: 'Filter by {{name}} (foreign key)'
   })),
   {{else if (eq tsType 'string')}}
   // String filtering for {{name}}
-  {{name}}: Type.Optional(Type.String({ 
-    description: 'Filter by exact {{name}} match'
+  {{name}}: Type.Optional(Type.String({
+    description: 'Filter by {{name}} (exact or partial match)'
   })),
+  {{else}}
+  // DEBUG: Unmatched field {{name}} - type: {{type}}, tsType: {{tsType}}, udtName: {{udtName}}
   {{/if}}
   {{/unless}}
   {{/each}}

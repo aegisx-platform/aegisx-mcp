@@ -102,8 +102,11 @@ export const ListAuthorsQuerySchema = Type.Object({
   // Include related data (only if table has foreign keys)
 
   // Smart field-based filters
-  birth_date_min: Type.Optional(Type.String({ format: 'date-time' })),
-  birth_date_max: Type.Optional(Type.String({ format: 'date-time' })),
+  name: Type.Optional(Type.String({ minLength: 1, maxLength: 100 })),
+  email: Type.Optional(Type.String({ minLength: 1, maxLength: 50 })),
+  birth_date_min: Type.Optional(Type.String({ format: 'date' })),
+  birth_date_max: Type.Optional(Type.String({ format: 'date' })),
+  country: Type.Optional(Type.String({ minLength: 1, maxLength: 50 })),
   active: Type.Optional(Type.Boolean()),
   updated_at_min: Type.Optional(Type.String({ format: 'date-time' })),
   updated_at_max: Type.Optional(Type.String({ format: 'date-time' })),
@@ -131,25 +134,3 @@ export type PartialAuthors = Static<typeof PartialAuthorsSchema>;
 export type FlexibleAuthorsList = Static<
   typeof FlexibleAuthorsListResponseSchema
 >;
-
-// WebSocket Event Schemas
-export const AuthorsCreatedEventSchema = Type.Object({
-  type: Type.Literal('authors.created'),
-  data: AuthorsSchema,
-});
-
-export const AuthorsUpdatedEventSchema = Type.Object({
-  type: Type.Literal('authors.updated'),
-  data: AuthorsSchema,
-});
-
-export const AuthorsDeletedEventSchema = Type.Object({
-  type: Type.Literal('authors.deleted'),
-  data: Type.Object({
-    id: Type.Union([Type.String(), Type.Number()]),
-  }),
-});
-
-export type AuthorsCreatedEvent = Static<typeof AuthorsCreatedEventSchema>;
-export type AuthorsUpdatedEvent = Static<typeof AuthorsUpdatedEventSchema>;
-export type AuthorsDeletedEvent = Static<typeof AuthorsDeletedEventSchema>;

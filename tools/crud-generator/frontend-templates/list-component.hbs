@@ -302,16 +302,19 @@ import { SharedExportComponent, ExportOptions, ExportService } from '../../../sh
           </mat-expansion-panel-header>
 
           <div class="advanced-filters">
-            <!-- Filter Fields -->
+{{#if filters.boolean.length}}
+            <!-- Boolean Filters -->
             <div class="filter-grid">
-{{#each filters}}
-              <!-- {{label}} Filter -->
+              <h4 class="section-header">
+                <mat-icon>toggle_on</mat-icon>
+                Boolean Filters
+              </h4>
+{{#each filters.boolean}}
               <div class="filter-group">
                 <label class="filter-label">{{label}}</label>
                 <mat-form-field appearance="outline" class="filter-field">
                   <mat-label>{{label}}</mat-label>
-{{#if isBoolean}}
-                  <mat-select 
+                  <mat-select
                     [value]="filters().{{name}}"
                     (selectionChange)="onFilterChange('{{name}}', $event.value)"
                   >
@@ -319,8 +322,52 @@ import { SharedExportComponent, ExportOptions, ExportService } from '../../../sh
                     <mat-option [value]="true">Yes</mat-option>
                     <mat-option [value]="false">No</mat-option>
                   </mat-select>
-{{else if isSelect}}
-                  <mat-select 
+                </mat-form-field>
+              </div>
+{{/each}}
+            </div>
+{{/if}}
+
+{{#if filters.foreignKey.length}}
+            <!-- Foreign Key Filters -->
+            <div class="filter-grid">
+              <h4 class="section-header">
+                <mat-icon>link</mat-icon>
+                Related Filters
+              </h4>
+{{#each filters.foreignKey}}
+              <div class="filter-group">
+                <label class="filter-label">{{label}}</label>
+                <mat-form-field appearance="outline" class="filter-field">
+                  <mat-label>{{label}}</mat-label>
+                  <input
+                    matInput
+                    type="text"
+                    [value]="filters().{{name}} || ''"
+                    (input)="onFilterChange('{{name}}', $event)"
+                    placeholder="{{placeholder}}"
+                  />
+                  <mat-hint>Enter {{referencedTable}} ID</mat-hint>
+                </mat-form-field>
+              </div>
+{{/each}}
+            </div>
+{{/if}}
+
+{{#if filters.string.length}}
+            <!-- String Filters -->
+            <div class="filter-grid">
+              <h4 class="section-header">
+                <mat-icon>text_fields</mat-icon>
+                Text Filters
+              </h4>
+{{#each filters.string}}
+              <div class="filter-group">
+                <label class="filter-label">{{label}}</label>
+                <mat-form-field appearance="outline" class="filter-field">
+                  <mat-label>{{label}}</mat-label>
+{{#if isSelect}}
+                  <mat-select
                     [value]="filters().{{name}}"
                     (selectionChange)="onFilterChange('{{name}}', $event.value)"
                   >
@@ -329,82 +376,104 @@ import { SharedExportComponent, ExportOptions, ExportService } from '../../../sh
                     <mat-option value="{{value}}">{{label}}</mat-option>
 {{/each}}
                   </mat-select>
-{{else if isNumeric}}
-                  <input
-                    matInput
-                    type="number"
-                    [value]="filters().{{name}} || ''"
-                    (input)="onFilterChange('{{name}}', $event)"
-                    placeholder="{{placeholder}}"
-                  />
 {{else}}
                   <input
                     matInput
                     type="text"
                     [value]="filters().{{name}} || ''"
                     (input)="onFilterChange('{{name}}', $event)"
-{{#if isUuid}}
-                    [class.mat-form-field-invalid]="validationErrors()['{{name}}']"
-{{/if}}
                     placeholder="{{placeholder}}"
                   />
-{{#if isUuid}}
-                  <mat-hint>Leave empty to show all</mat-hint>
-                  @if (validationErrors()['{{name}}']) {
-                  <mat-error>
-                    \{{ validationErrors()['{{name}}'] \}}
-                  </mat-error>
-                  }
-{{/if}}
 {{/if}}
                 </mat-form-field>
               </div>
-              
 {{/each}}
             </div>
+{{/if}}
 
-            <!-- Date Filters Section -->
+{{#if filters.number.length}}
+            <!-- Number Range Filters -->
+            <div class="filter-grid">
+              <h4 class="section-header">
+                <mat-icon>filter_list</mat-icon>
+                Number Range Filters
+              </h4>
+{{#each filters.number}}
+              <div class="filter-group range-filter">
+                <label class="filter-label">{{label}} Range</label>
+                <div class="range-inputs">
+                  <mat-form-field appearance="outline" class="filter-field">
+                    <mat-label>Min {{label}}</mat-label>
+                    <input
+                      matInput
+                      type="number"
+                      [value]="filters().{{name}}_min || ''"
+                      (input)="onFilterChange('{{name}}_min', $event.target.value)"
+                      placeholder="Minimum"
+                    />
+                  </mat-form-field>
+                  <span class="range-separator">-</span>
+                  <mat-form-field appearance="outline" class="filter-field">
+                    <mat-label>Max {{label}}</mat-label>
+                    <input
+                      matInput
+                      type="number"
+                      [value]="filters().{{name}}_max || ''"
+                      (input)="onFilterChange('{{name}}_max', $event.target.value)"
+                      placeholder="Maximum"
+                    />
+                  </mat-form-field>
+                </div>
+              </div>
+{{/each}}
+            </div>
+{{/if}}
+
+{{#if filters.date.length}}
+            <!-- Date Filters (Date only, no time) -->
             <div class="date-filters-section">
               <h4 class="section-header">
                 <mat-icon>event</mat-icon>
                 Date Filters
               </h4>
-              
               <div class="date-filters-grid">
-                <!-- Published Date Filter -->
+{{#each filters.date}}
                 <div class="date-filter-group">
-                  <label class="filter-label">Published Date</label>
+                  <label class="filter-label">{{label}}</label>
                   <app-date-range-filter
-                    fieldName="published_at"
-                    label="Published Date"
-                    [isDateTime]="true"
+                    fieldName="{{name}}"
+                    label="{{label}}"
+                    [isDateTime]="false"
                     (filterChange)="onDateFilterChange($event)"
                   ></app-date-range-filter>
                 </div>
-                
-                <!-- Created Date Filter -->
-                <div class="date-filter-group">
-                  <label class="filter-label">Created Date</label>
-                  <app-date-range-filter
-                    fieldName="created_at"
-                    label="Created Date"
-                    [isDateTime]="true"
-                    (filterChange)="onDateFilterChange($event)"
-                  ></app-date-range-filter>
-                </div>
-                
-                <!-- Updated Date Filter -->
-                <div class="date-filter-group">
-                  <label class="filter-label">Updated Date</label>
-                  <app-date-range-filter
-                    fieldName="updated_at"
-                    label="Updated Date"
-                    [isDateTime]="true"
-                    (filterChange)="onDateFilterChange($event)"
-                  ></app-date-range-filter>
-                </div>
+{{/each}}
               </div>
             </div>
+{{/if}}
+
+{{#if filters.datetime.length}}
+            <!-- DateTime Filters (Date + Time) -->
+            <div class="date-filters-section">
+              <h4 class="section-header">
+                <mat-icon>schedule</mat-icon>
+                DateTime Filters
+              </h4>
+              <div class="date-filters-grid">
+{{#each filters.datetime}}
+                <div class="date-filter-group">
+                  <label class="filter-label">{{label}}</label>
+                  <app-date-range-filter
+                    fieldName="{{name}}"
+                    label="{{label}}"
+                    [isDateTime]="true"
+                    (filterChange)="onDateFilterChange($event)"
+                  ></app-date-range-filter>
+                </div>
+{{/each}}
+              </div>
+            </div>
+{{/if}}
 
             <!-- Action Buttons -->
             <div class="filter-actions">
@@ -1563,22 +1632,28 @@ export class {{PascalCase}}ListComponent implements OnInit, OnDestroy {
       chips.push({ key: 'updated_at_range', label: 'Updated Date Range', value: `${from} - ${to}` });
     }
     
-    // Regular field filters
-{{#each filters}}
-{{#if (eq name 'fields')}}
-    if (filters.{{name}} !== undefined && filters.{{name}}.length > 0) {
-      chips.push({ key: '{{name}}', label: '{{label}}', value: String(filters.{{name}}) });
-    }
-{{else if isBoolean}}
-    if (filters.{{name}} !== undefined && filters.{{name}} !== null) {
-      chips.push({ key: '{{name}}', label: '{{label}}', value: filters.{{name}} ? 'Yes' : 'No' });
-    }
-{{else}}
+    // String field filters
+{{#each filters.string}}
     if (filters.{{name}} !== undefined && filters.{{name}} !== '') {
       chips.push({ key: '{{name}}', label: '{{label}}', value: String(filters.{{name}}) });
     }
-{{/if}}
-    
+
+{{/each}}
+
+    // Number field filters
+{{#each filters.number}}
+    if (filters.{{name}} !== undefined && filters.{{name}} !== '') {
+      chips.push({ key: '{{name}}', label: '{{label}}', value: String(filters.{{name}}) });
+    }
+
+{{/each}}
+
+    // Foreign Key filters
+{{#each filters.foreignKey}}
+    if (filters.{{name}} !== undefined && filters.{{name}} !== '') {
+      chips.push({ key: '{{name}}', label: '{{label}}', value: String(filters.{{name}}) });
+    }
+
 {{/each}}
     
     return chips;

@@ -15,10 +15,14 @@ import {
 
 export interface BooksListQuery extends BaseListQuery {
   // Smart field-based filters for Books
+  title?: string;
+  author_id?: string;
+  isbn?: string;
   published_date_min?: Date;
   published_date_max?: Date;
   price_min?: number;
   price_max?: number;
+  genre?: string;
   available?: boolean;
   updated_at_min?: Date;
   updated_at_max?: Date;
@@ -109,6 +113,15 @@ export class BooksRepository extends BaseRepository<
     super.applyCustomFilters(query, filters);
 
     // Apply specific Books filters based on intelligent field categorization
+    if (filters.title !== undefined) {
+      query.where('books.title', filters.title);
+    }
+    if (filters.author_id !== undefined) {
+      query.where('books.author_id', filters.author_id);
+    }
+    if (filters.isbn !== undefined) {
+      query.where('books.isbn', filters.isbn);
+    }
     if (filters.published_date_min !== undefined) {
       query.where('books.published_date', '>=', filters.published_date_min);
     }
@@ -120,6 +133,9 @@ export class BooksRepository extends BaseRepository<
     }
     if (filters.price_max !== undefined) {
       query.where('books.price', '<=', filters.price_max);
+    }
+    if (filters.genre !== undefined) {
+      query.where('books.genre', filters.genre);
     }
     if (filters.available !== undefined) {
       query.where('books.available', filters.available);
