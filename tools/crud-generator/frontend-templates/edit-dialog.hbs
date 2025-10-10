@@ -85,10 +85,16 @@ export class {{PascalCase}}EditDialogComponent implements OnInit {
         });
       }
     } catch (error: any) {
+      const errorMessage = this.{{camelCase moduleName}}Service.permissionError()
+        ? 'You do not have permission to update {{title}}'
+        : error?.message || 'Failed to update {{title}}';
       this.snackBar.open(
-        error.message || 'Failed to update {{title}}', 
-        'Close', 
-        { duration: 5000 }
+        errorMessage,
+        'Close',
+        {
+          duration: 5000,
+          panelClass: ['error-snackbar']
+        }
       );
     } finally {
       this.loading.set(false);

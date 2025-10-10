@@ -72,10 +72,16 @@ export class {{PascalCase}}CreateDialogComponent {
         });
       }
     } catch (error: any) {
+      const errorMessage = this.{{camelCase moduleName}}Service.permissionError()
+        ? 'You do not have permission to create {{title}}'
+        : error?.message || 'Failed to create {{title}}';
       this.snackBar.open(
-        error.message || 'Failed to create {{title}}', 
-        'Close', 
-        { duration: 5000 }
+        errorMessage,
+        'Close',
+        {
+          duration: 5000,
+          panelClass: ['error-snackbar']
+        }
       );
     } finally {
       this.loading.set(false);

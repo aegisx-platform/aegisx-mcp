@@ -30,6 +30,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { BookService } from '../services/books.service';
 import { Book, ListBookQuery } from '../types/books.types';
@@ -74,6 +75,7 @@ import {
     MatExpansionModule,
     MatBadgeModule,
     MatSlideToggleModule,
+    MatTooltipModule,
     DateRangeFilterComponent,
     SharedExportComponent,
   ],
@@ -84,6 +86,42 @@ import {
         <h1 class="page-title">Books</h1>
         <span class="spacer"></span>
       </mat-toolbar>
+
+      <!-- Permission Error Banner -->
+      @if (booksService.permissionError()) {
+        <mat-card class="permission-error-banner">
+          <mat-card-content>
+            <div class="permission-error-content">
+              <div class="error-icon-section">
+                <mat-icon class="error-icon">lock</mat-icon>
+              </div>
+              <div class="error-message-section">
+                <h3 class="error-title">Access Denied</h3>
+                <p class="error-message">
+                  You don't have permission to access or modify Books.
+                  @if (booksService.lastErrorStatus() === 403) {
+                    <span class="error-details">
+                      Please contact your administrator to request the necessary
+                      permissions.
+                    </span>
+                  }
+                </p>
+              </div>
+              <div class="error-actions-section">
+                <button
+                  mat-raised-button
+                  color="warn"
+                  (click)="booksService.clearPermissionError()"
+                  class="dismiss-btn"
+                >
+                  <mat-icon>close</mat-icon>
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
 
       <!-- Quick Search Section -->
       <mat-card class="search-card">
@@ -104,7 +142,14 @@ import {
               mat-raised-button
               color="primary"
               (click)="openCreateDialog()"
-              [disabled]="booksService.loading()"
+              [disabled]="
+                booksService.loading() || booksService.permissionError()
+              "
+              [matTooltip]="
+                booksService.permissionError()
+                  ? 'You do not have permission to create Books'
+                  : ''
+              "
               class="add-btn"
             >
               <mat-icon>add</mat-icon>
@@ -789,6 +834,69 @@ import {
 
       .spacer {
         flex: 1 1 auto;
+      }
+
+      /* Permission Error Banner */
+      .permission-error-banner {
+        margin-bottom: 16px;
+        background: #ffebee;
+        border-left: 4px solid #f44336;
+      }
+
+      .permission-error-content {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      .error-icon-section {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .error-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+        color: #f44336;
+      }
+
+      .error-message-section {
+        flex: 1;
+        min-width: 200px;
+      }
+
+      .error-title {
+        margin: 0 0 8px 0;
+        font-size: 18px;
+        font-weight: 500;
+        color: #c62828;
+      }
+
+      .error-message {
+        margin: 0;
+        font-size: 14px;
+        color: rgba(0, 0, 0, 0.87);
+        line-height: 1.5;
+      }
+
+      .error-details {
+        display: block;
+        margin-top: 4px;
+        font-size: 13px;
+        color: rgba(0, 0, 0, 0.6);
+      }
+
+      .error-actions-section {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .dismiss-btn {
+        min-width: 120px;
       }
 
       .search-card,
@@ -1840,9 +1948,13 @@ export class BookListComponent implements OnInit, OnDestroy {
         this.snackBar.open('Books deleted successfully', 'Close', {
           duration: 3000,
         });
-      } catch (error) {
-        this.snackBar.open('Failed to delete Books', 'Close', {
+      } catch (error: any) {
+        const errorMessage = this.booksService.permissionError()
+          ? 'You do not have permission to delete Books'
+          : error?.message || 'Failed to delete Books';
+        this.snackBar.open(errorMessage, 'Close', {
           duration: 5000,
+          panelClass: ['error-snackbar'],
         });
       }
     }
@@ -1867,9 +1979,13 @@ export class BookListComponent implements OnInit, OnDestroy {
           duration: 3000,
         },
       );
-    } catch (error) {
-      this.snackBar.open('Failed to delete Books', 'Close', {
+    } catch (error: any) {
+      const errorMessage = this.booksService.permissionError()
+        ? 'You do not have permission to delete Books'
+        : error?.message || 'Failed to delete Books';
+      this.snackBar.open(errorMessage, 'Close', {
         duration: 5000,
+        panelClass: ['error-snackbar'],
       });
     }
   }
@@ -1894,9 +2010,13 @@ export class BookListComponent implements OnInit, OnDestroy {
           duration: 3000,
         },
       );
-    } catch (error) {
-      this.snackBar.open('Failed to update Books status', 'Close', {
+    } catch (error: any) {
+      const errorMessage = this.booksService.permissionError()
+        ? 'You do not have permission to update Books'
+        : error?.message || 'Failed to update Books status';
+      this.snackBar.open(errorMessage, 'Close', {
         duration: 5000,
+        panelClass: ['error-snackbar'],
       });
     }
   }

@@ -26,20 +26,24 @@ export class {{PascalCase}}Service {
   private baseUrl = `${API_BASE_URL}/{{tableNameToKebab moduleName}}`;
 
   // ===== SIGNALS FOR STATE MANAGEMENT =====
-  
+
   private {{camelCase moduleName}}ListSignal = signal<{{PascalCase}}[]>([]);
   private loadingSignal = signal<boolean>(false);
   private errorSignal = signal<string | null>(null);
+  private permissionErrorSignal = signal<boolean>(false);
+  private lastErrorStatusSignal = signal<number | null>(null);
   private selected{{PascalCase}}Signal = signal<{{PascalCase}} | null>(null);
   private currentPageSignal = signal<number>(1);
   private pageSizeSignal = signal<number>(10);
   private total{{PascalCase}}Signal = signal<number>(0);
 
   // ===== PUBLIC READONLY SIGNALS =====
-  
+
   readonly {{camelCase moduleName}}List = this.{{camelCase moduleName}}ListSignal.asReadonly();
   readonly loading = this.loadingSignal.asReadonly();
   readonly error = this.errorSignal.asReadonly();
+  readonly permissionError = this.permissionErrorSignal.asReadonly();
+  readonly lastErrorStatus = this.lastErrorStatusSignal.asReadonly();
   readonly selected{{PascalCase}} = this.selected{{PascalCase}}Signal.asReadonly();
   readonly currentPage = this.currentPageSignal.asReadonly();
   readonly total{{PascalCase}} = this.total{{PascalCase}}Signal.asReadonly();
@@ -60,6 +64,33 @@ export class {{PascalCase}}Service {
   readonly hasPreviousPage = computed(() => {
     return this.currentPageSignal() > 1;
   });
+
+  // ===== ERROR HANDLING HELPER =====
+
+  /**
+   * Handle HTTP errors and set appropriate error signals
+   */
+  private handleError(error: any, defaultMessage: string): void {
+    const status = error?.status || null;
+    this.lastErrorStatusSignal.set(status);
+
+    // Check if error is 403 Forbidden
+    if (status === 403) {
+      this.permissionErrorSignal.set(true);
+      this.errorSignal.set('You do not have permission to perform this action');
+    } else {
+      this.permissionErrorSignal.set(false);
+      this.errorSignal.set(error.message || defaultMessage);
+    }
+  }
+
+  /**
+   * Clear permission error state
+   */
+  clearPermissionError(): void {
+    this.permissionErrorSignal.set(false);
+    this.lastErrorStatusSignal.set(null);
+  }
 
   // ===== STANDARD CRUD OPERATIONS =====
 
@@ -124,7 +155,7 @@ export class {{PascalCase}}Service {
         }
       }
     } catch (error: any) {
-      this.errorSignal.set(error.message || 'Failed to load {{camelCase moduleName}} list');
+      this.handleError(error, 'Failed to load {{camelCase moduleName}} list');
     } finally {
       this.loadingSignal.set(false);
     }
@@ -147,7 +178,7 @@ export class {{PascalCase}}Service {
       }
       return null;
     } catch (error: any) {
-      this.errorSignal.set(error.message || 'Failed to load {{camelCase moduleName}}');
+      this.handleError(error, 'Failed to load {{camelCase moduleName}}');
       return null;
     } finally {
       this.loadingSignal.set(false);
@@ -173,7 +204,7 @@ export class {{PascalCase}}Service {
       }
       return null;
     } catch (error: any) {
-      this.errorSignal.set(error.message || 'Failed to create {{camelCase moduleName}}');
+      this.handleError(error, 'Failed to create {{camelCase moduleName}}');
       throw error;
     } finally {
       this.loadingSignal.set(false);
@@ -204,7 +235,7 @@ export class {{PascalCase}}Service {
       }
       return null;
     } catch (error: any) {
-      this.errorSignal.set(error.message || 'Failed to update {{camelCase moduleName}}');
+      this.handleError(error, 'Failed to update {{camelCase moduleName}}');
       throw error;
     } finally {
       this.loadingSignal.set(false);
@@ -236,7 +267,7 @@ export class {{PascalCase}}Service {
       }
       return false;
     } catch (error: any) {
-      this.errorSignal.set(error.message || 'Failed to delete {{camelCase moduleName}}');
+      this.handleError(error, 'Failed to delete {{camelCase moduleName}}');
       throw error;
     } finally {
       this.loadingSignal.set(false);
@@ -379,7 +410,7 @@ export class {{PascalCase}}Service {
       }
       return null;
     } catch (error: any) {
-      this.errorSignal.set(error.message || 'Failed to bulk create {{camelCase moduleName}}s');
+      this.handleError(error, 'Failed to bulk create {{camelCase moduleName}}s');
       throw error;
     } finally {
       this.loadingSignal.set(false);
@@ -404,7 +435,7 @@ export class {{PascalCase}}Service {
       }
       return null;
     } catch (error: any) {
-      this.errorSignal.set(error.message || 'Failed to bulk update {{camelCase moduleName}}s');
+      this.handleError(error, 'Failed to bulk update {{camelCase moduleName}}s');
       throw error;
     } finally {
       this.loadingSignal.set(false);
@@ -429,7 +460,7 @@ export class {{PascalCase}}Service {
       }
       return null;
     } catch (error: any) {
-      this.errorSignal.set(error.message || 'Failed to bulk delete {{camelCase moduleName}}s');
+      this.handleError(error, 'Failed to bulk delete {{camelCase moduleName}}s');
       throw error;
     } finally {
       this.loadingSignal.set(false);
@@ -534,6 +565,7 @@ export class {{PascalCase}}Service {
    */
   clearError(): void {
     this.errorSignal.set(null);
+    this.clearPermissionError();
   }
 
   /**
@@ -544,6 +576,7 @@ export class {{PascalCase}}Service {
     this.selected{{PascalCase}}Signal.set(null);
     this.currentPageSignal.set(1);
     this.errorSignal.set(null);
+    this.clearPermissionError();
     this.total{{PascalCase}}Signal.set(0);
   }
 }

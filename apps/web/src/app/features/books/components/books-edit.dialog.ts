@@ -1,6 +1,10 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import {
+  MatDialogRef,
+  MAT_DIALOG_DATA,
+  MatDialogModule,
+} from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { BookService } from '../services/books.service';
@@ -14,15 +18,11 @@ export interface BookEditDialogData {
 @Component({
   selector: 'app-books-edit-dialog',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatDialogModule,
-    BookFormComponent,
-  ],
+  imports: [CommonModule, MatDialogModule, BookFormComponent],
   template: `
     <div class="edit-dialog">
       <h2 mat-dialog-title>Edit Books</h2>
-      
+
       <mat-dialog-content>
         <app-books-form
           mode="edit"
@@ -34,23 +34,25 @@ export interface BookEditDialogData {
       </mat-dialog-content>
     </div>
   `,
-  styles: [`
-    .edit-dialog {
-      min-width: 500px;
-      max-width: 800px;
-    }
-
-    mat-dialog-content {
-      max-height: 70vh;
-      overflow-y: auto;
-    }
-
-    @media (max-width: 768px) {
+  styles: [
+    `
       .edit-dialog {
-        min-width: 90vw;
+        min-width: 500px;
+        max-width: 800px;
       }
-    }
-  `]
+
+      mat-dialog-content {
+        max-height: 70vh;
+        overflow-y: auto;
+      }
+
+      @media (max-width: 768px) {
+        .edit-dialog {
+          min-width: 90vw;
+        }
+      }
+    `,
+  ],
 })
 export class BookEditDialogComponent implements OnInit {
   private booksService = inject(BookService);
@@ -66,14 +68,14 @@ export class BookEditDialogComponent implements OnInit {
 
   async onFormSubmit(formData: BookFormData) {
     this.loading.set(true);
-    
+
     try {
       const updateRequest = formData as UpdateBookRequest;
       const result = await this.booksService.updateBook(
-        this.data.books.id, 
-        updateRequest
+        this.data.books.id,
+        updateRequest,
       );
-      
+
       if (result) {
         this.snackBar.open('Books updated successfully', 'Close', {
           duration: 3000,
@@ -85,11 +87,13 @@ export class BookEditDialogComponent implements OnInit {
         });
       }
     } catch (error: any) {
-      this.snackBar.open(
-        error.message || 'Failed to update Books', 
-        'Close', 
-        { duration: 5000 }
-      );
+      const errorMessage = this.booksService.permissionError()
+        ? 'You do not have permission to update Books'
+        : error?.message || 'Failed to update Books';
+      this.snackBar.open(errorMessage, 'Close', {
+        duration: 5000,
+        panelClass: ['error-snackbar'],
+      });
     } finally {
       this.loading.set(false);
     }

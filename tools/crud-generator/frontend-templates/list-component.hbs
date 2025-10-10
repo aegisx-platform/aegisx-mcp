@@ -23,6 +23,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { {{PascalCase}}Service } from '../services/{{kebabCase moduleName}}.service';
 import { {{PascalCase}}, List{{PascalCase}}Query } from '../types/{{typesFileName}}';
@@ -63,6 +64,7 @@ import { SharedExportComponent, ExportOptions, ExportService } from '../../../sh
     MatExpansionModule,
     MatBadgeModule,
     MatSlideToggleModule,
+    MatTooltipModule,
     DateRangeFilterComponent,{{#if includeEnhanced}}
     SharedExportComponent,{{/if}}
   ],
@@ -73,6 +75,41 @@ import { SharedExportComponent, ExportOptions, ExportService } from '../../../sh
         <h1 class="page-title">{{title}}</h1>
         <span class="spacer"></span>
       </mat-toolbar>
+
+      <!-- Permission Error Banner -->
+      @if ({{camelCase moduleName}}Service.permissionError()) {
+      <mat-card class="permission-error-banner">
+        <mat-card-content>
+          <div class="permission-error-content">
+            <div class="error-icon-section">
+              <mat-icon class="error-icon">lock</mat-icon>
+            </div>
+            <div class="error-message-section">
+              <h3 class="error-title">Access Denied</h3>
+              <p class="error-message">
+                You don't have permission to access or modify {{title}}.
+                @if ({{camelCase moduleName}}Service.lastErrorStatus() === 403) {
+                <span class="error-details">
+                  Please contact your administrator to request the necessary permissions.
+                </span>
+                }
+              </p>
+            </div>
+            <div class="error-actions-section">
+              <button
+                mat-raised-button
+                color="warn"
+                (click)="{{camelCase moduleName}}Service.clearPermissionError()"
+                class="dismiss-btn"
+              >
+                <mat-icon>close</mat-icon>
+                Dismiss
+              </button>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+      }
 
       <!-- Quick Search Section -->
       <mat-card class="search-card">
@@ -91,11 +128,12 @@ import { SharedExportComponent, ExportOptions, ExportService } from '../../../sh
               <mat-icon matSuffix>search</mat-icon>
             </mat-form-field>
 {{/if}}
-            <button 
-              mat-raised-button 
-              color="primary" 
+            <button
+              mat-raised-button
+              color="primary"
               (click)="openCreateDialog()"
-              [disabled]="{{camelCase moduleName}}Service.loading()"
+              [disabled]="{{camelCase moduleName}}Service.loading() || {{camelCase moduleName}}Service.permissionError()"
+              [matTooltip]="{{camelCase moduleName}}Service.permissionError() ? 'You do not have permission to create {{title}}' : ''"
               class="add-btn"
             >
               <mat-icon>add</mat-icon>
@@ -735,6 +773,69 @@ import { SharedExportComponent, ExportOptions, ExportService } from '../../../sh
 
     .spacer {
       flex: 1 1 auto;
+    }
+
+    /* Permission Error Banner */
+    .permission-error-banner {
+      margin-bottom: 16px;
+      background: #ffebee;
+      border-left: 4px solid #f44336;
+    }
+
+    .permission-error-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .error-icon-section {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .error-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      color: #f44336;
+    }
+
+    .error-message-section {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .error-title {
+      margin: 0 0 8px 0;
+      font-size: 18px;
+      font-weight: 500;
+      color: #c62828;
+    }
+
+    .error-message {
+      margin: 0;
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.87);
+      line-height: 1.5;
+    }
+
+    .error-details {
+      display: block;
+      margin-top: 4px;
+      font-size: 13px;
+      color: rgba(0, 0, 0, 0.6);
+    }
+
+    .error-actions-section {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .dismiss-btn {
+      min-width: 120px;
     }
 
     .search-card, .quick-filters-card, .summary-dashboard-card, .export-tools-card, .advanced-filters-card {
@@ -1788,9 +1889,13 @@ export class {{PascalCase}}ListComponent implements OnInit, OnDestroy {
         this.snackBar.open('{{title}} deleted successfully', 'Close', {
           duration: 3000,
         });
-      } catch (error) {
-        this.snackBar.open('Failed to delete {{title}}', 'Close', {
+      } catch (error: any) {
+        const errorMessage = this.{{camelCase moduleName}}Service.permissionError()
+          ? 'You do not have permission to delete {{title}}'
+          : error?.message || 'Failed to delete {{title}}';
+        this.snackBar.open(errorMessage, 'Close', {
           duration: 5000,
+          panelClass: ['error-snackbar']
         });
       }
     }
@@ -1809,9 +1914,13 @@ export class {{PascalCase}}ListComponent implements OnInit, OnDestroy {
       this.snackBar.open(`${selectedIds.length} {{title}} deleted successfully`, 'Close', {
         duration: 3000,
       });
-    } catch (error) {
-      this.snackBar.open('Failed to delete {{title}}', 'Close', {
+    } catch (error: any) {
+      const errorMessage = this.{{camelCase moduleName}}Service.permissionError()
+        ? 'You do not have permission to delete {{title}}'
+        : error?.message || 'Failed to delete {{title}}';
+      this.snackBar.open(errorMessage, 'Close', {
         duration: 5000,
+        panelClass: ['error-snackbar']
       });
     }
   }
@@ -1826,15 +1935,19 @@ export class {{PascalCase}}ListComponent implements OnInit, OnDestroy {
         id,
         data: { status } as any
       }));
-      
+
       await this.{{camelCase moduleName}}Service.bulkUpdate{{PascalCase}}(items);
       this.clearSelection();
       this.snackBar.open(`${selectedIds.length} {{title}} status updated successfully`, 'Close', {
         duration: 3000,
       });
-    } catch (error) {
-      this.snackBar.open('Failed to update {{title}} status', 'Close', {
+    } catch (error: any) {
+      const errorMessage = this.{{camelCase moduleName}}Service.permissionError()
+        ? 'You do not have permission to update {{title}}'
+        : error?.message || 'Failed to update {{title}} status';
+      this.snackBar.open(errorMessage, 'Close', {
         duration: 5000,
+        panelClass: ['error-snackbar']
       });
     }
   }
