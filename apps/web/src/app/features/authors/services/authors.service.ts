@@ -11,7 +11,7 @@ import {
   ListAuthorQuery,
   ApiResponse,
   BulkResponse,
-  PaginatedResponse
+  PaginatedResponse,
 } from '../types/authors.types';
 
 // ===== SERVICE CONFIGURATION =====
@@ -26,27 +26,31 @@ export class AuthorService {
   private baseUrl = `${API_BASE_URL}/authors`;
 
   // ===== SIGNALS FOR STATE MANAGEMENT =====
-  
+
   private authorsListSignal = signal<Author[]>([]);
   private loadingSignal = signal<boolean>(false);
   private errorSignal = signal<string | null>(null);
+  private permissionErrorSignal = signal<boolean>(false);
+  private lastErrorStatusSignal = signal<number | null>(null);
   private selectedAuthorSignal = signal<Author | null>(null);
   private currentPageSignal = signal<number>(1);
   private pageSizeSignal = signal<number>(10);
   private totalAuthorSignal = signal<number>(0);
 
   // ===== PUBLIC READONLY SIGNALS =====
-  
+
   readonly authorsList = this.authorsListSignal.asReadonly();
   readonly loading = this.loadingSignal.asReadonly();
   readonly error = this.errorSignal.asReadonly();
+  readonly permissionError = this.permissionErrorSignal.asReadonly();
+  readonly lastErrorStatus = this.lastErrorStatusSignal.asReadonly();
   readonly selectedAuthor = this.selectedAuthorSignal.asReadonly();
   readonly currentPage = this.currentPageSignal.asReadonly();
   readonly totalAuthor = this.totalAuthorSignal.asReadonly();
   readonly pageSize = this.pageSizeSignal.asReadonly();
 
   // ===== COMPUTED SIGNALS =====
-  
+
   readonly totalPages = computed(() => {
     const total = this.totalAuthorSignal();
     const size = this.pageSizeSignal();
@@ -61,6 +65,33 @@ export class AuthorService {
     return this.currentPageSignal() > 1;
   });
 
+  // ===== ERROR HANDLING HELPER =====
+
+  /**
+   * Handle HTTP errors and set appropriate error signals
+   */
+  private handleError(error: any, defaultMessage: string): void {
+    const status = error?.status || null;
+    this.lastErrorStatusSignal.set(status);
+
+    // Check if error is 403 Forbidden
+    if (status === 403) {
+      this.permissionErrorSignal.set(true);
+      this.errorSignal.set('You do not have permission to perform this action');
+    } else {
+      this.permissionErrorSignal.set(false);
+      this.errorSignal.set(error.message || defaultMessage);
+    }
+  }
+
+  /**
+   * Clear permission error state
+   */
+  clearPermissionError(): void {
+    this.permissionErrorSignal.set(false);
+    this.lastErrorStatusSignal.set(null);
+  }
+
   // ===== STANDARD CRUD OPERATIONS =====
 
   /**
@@ -73,37 +104,47 @@ export class AuthorService {
     try {
       // Build HTTP params
       let httpParams = new HttpParams();
-      if (params?.page) httpParams = httpParams.set('page', params.page.toString());
-      if (params?.limit) httpParams = httpParams.set('limit', params.limit.toString());
+      if (params?.page)
+        httpParams = httpParams.set('page', params.page.toString());
+      if (params?.limit)
+        httpParams = httpParams.set('limit', params.limit.toString());
       if (params?.search) httpParams = httpParams.set('search', params.search);
       if (params?.sort) httpParams = httpParams.set('sort', params.sort);
-      
+
       // Handle fields array parameter (multiple values)
       if (params?.fields && params.fields.length > 0) {
         params.fields.forEach((field: string) => {
           httpParams = httpParams.append('fields', field);
         });
       }
-      
+
       // Add smart filter parameters based on table schema
       // String filtering for name
       if (params?.name) httpParams = httpParams.set('name', params.name);
-            // String filtering for email
+      // String filtering for email
       if (params?.email) httpParams = httpParams.set('email', params.email);
-            // String filtering for bio
+      // String filtering for bio
       if (params?.bio) httpParams = httpParams.set('bio', params.bio);
-            // String filtering for country
-      if (params?.country) httpParams = httpParams.set('country', params.country);
-            // Boolean filtering for active
-      if (params?.active !== undefined) httpParams = httpParams.set('active', params.active.toString());
+      // String filtering for country
+      if (params?.country)
+        httpParams = httpParams.set('country', params.country);
+      // Boolean filtering for active
+      if (params?.active !== undefined)
+        httpParams = httpParams.set('active', params.active.toString());
       // Date/DateTime filtering for created_at
-      if (params?.created_at) httpParams = httpParams.set('created_at', params.created_at);
-      if (params?.created_at_min) httpParams = httpParams.set('created_at_min', params.created_at_min);
-      if (params?.created_at_max) httpParams = httpParams.set('created_at_max', params.created_at_max);
+      if (params?.created_at)
+        httpParams = httpParams.set('created_at', params.created_at);
+      if (params?.created_at_min)
+        httpParams = httpParams.set('created_at_min', params.created_at_min);
+      if (params?.created_at_max)
+        httpParams = httpParams.set('created_at_max', params.created_at_max);
       // Date/DateTime filtering for updated_at
-      if (params?.updated_at) httpParams = httpParams.set('updated_at', params.updated_at);
-      if (params?.updated_at_min) httpParams = httpParams.set('updated_at_min', params.updated_at_min);
-      if (params?.updated_at_max) httpParams = httpParams.set('updated_at_max', params.updated_at_max);
+      if (params?.updated_at)
+        httpParams = httpParams.set('updated_at', params.updated_at);
+      if (params?.updated_at_min)
+        httpParams = httpParams.set('updated_at_min', params.updated_at_min);
+      if (params?.updated_at_max)
+        httpParams = httpParams.set('updated_at_max', params.updated_at_max);
 
       const response = await this.http
         .get<PaginatedResponse<Author>>(this.baseUrl, { params: httpParams })
@@ -119,7 +160,7 @@ export class AuthorService {
         }
       }
     } catch (error: any) {
-      this.errorSignal.set(error.message || 'Failed to load authors list');
+      this.handleError(error, 'Failed to load authors list');
     } finally {
       this.loadingSignal.set(false);
     }
@@ -142,7 +183,7 @@ export class AuthorService {
       }
       return null;
     } catch (error: any) {
-      this.errorSignal.set(error.message || 'Failed to load authors');
+      this.handleError(error, 'Failed to load authors');
       return null;
     } finally {
       this.loadingSignal.set(false);
@@ -163,12 +204,12 @@ export class AuthorService {
       if (response) {
         // Optimistic update: add to list
         this.authorsListSignal.update((list) => [...list, response.data!]);
-        this.totalAuthorSignal.update(total => total + 1);
+        this.totalAuthorSignal.update((total) => total + 1);
         return response.data;
       }
       return null;
     } catch (error: any) {
-      this.errorSignal.set(error.message || 'Failed to create authors');
+      this.handleError(error, 'Failed to create authors');
       throw error;
     } finally {
       this.loadingSignal.set(false);
@@ -178,7 +219,10 @@ export class AuthorService {
   /**
    * Update existing authors
    */
-  async updateAuthor(id: string, data: UpdateAuthorRequest): Promise<Author | null> {
+  async updateAuthor(
+    id: string,
+    data: UpdateAuthorRequest,
+  ): Promise<Author | null> {
     this.loadingSignal.set(true);
 
     try {
@@ -189,7 +233,7 @@ export class AuthorService {
       if (response) {
         // Optimistic update: replace in list
         this.authorsListSignal.update((list) =>
-          list.map((item) => (item.id === id ? response.data! : item))
+          list.map((item) => (item.id === id ? response.data! : item)),
         );
         // Update selected authors if it's the same
         if (this.selectedAuthorSignal()?.id === id) {
@@ -199,7 +243,7 @@ export class AuthorService {
       }
       return null;
     } catch (error: any) {
-      this.errorSignal.set(error.message || 'Failed to update authors');
+      this.handleError(error, 'Failed to update authors');
       throw error;
     } finally {
       this.loadingSignal.set(false);
@@ -220,9 +264,9 @@ export class AuthorService {
       if (response?.success) {
         // Optimistic update: remove from list
         this.authorsListSignal.update((list) =>
-          list.filter((item) => item.id !== id)
+          list.filter((item) => item.id !== id),
         );
-        this.totalAuthorSignal.update(total => Math.max(0, total - 1));
+        this.totalAuthorSignal.update((total) => Math.max(0, total - 1));
         // Clear selected authors if it's the deleted one
         if (this.selectedAuthorSignal()?.id === id) {
           this.selectedAuthorSignal.set(null);
@@ -231,7 +275,7 @@ export class AuthorService {
       }
       return false;
     } catch (error: any) {
-      this.errorSignal.set(error.message || 'Failed to delete authors');
+      this.handleError(error, 'Failed to delete authors');
       throw error;
     } finally {
       this.loadingSignal.set(false);
@@ -253,11 +297,10 @@ export class AuthorService {
     includeMetadata?: boolean;
   }): Promise<Blob> {
     try {
-      let httpParams = new HttpParams()
-        .set('format', options.format);
+      let httpParams = new HttpParams().set('format', options.format);
 
       if (options.ids && options.ids.length > 0) {
-        options.ids.forEach(id => {
+        options.ids.forEach((id) => {
           httpParams = httpParams.append('ids', id);
         });
       }
@@ -271,7 +314,7 @@ export class AuthorService {
       }
 
       if (options.fields && options.fields.length > 0) {
-        options.fields.forEach(field => {
+        options.fields.forEach((field) => {
           httpParams = httpParams.append('fields', field);
         });
       }
@@ -281,17 +324,23 @@ export class AuthorService {
       }
 
       if (options.applyFilters !== undefined) {
-        httpParams = httpParams.set('applyFilters', String(options.applyFilters));
+        httpParams = httpParams.set(
+          'applyFilters',
+          String(options.applyFilters),
+        );
       }
 
       if (options.includeMetadata !== undefined) {
-        httpParams = httpParams.set('includeMetadata', String(options.includeMetadata));
+        httpParams = httpParams.set(
+          'includeMetadata',
+          String(options.includeMetadata),
+        );
       }
 
       const response = await this.http
         .get(`${this.baseUrl}/export`, {
           params: httpParams,
-          responseType: 'blob'
+          responseType: 'blob',
         })
         .toPromise();
 
@@ -309,14 +358,22 @@ export class AuthorService {
   /**
    * Get dropdown options for authors
    */
-  async getDropdownOptions(params: {search?: string, limit?: number} = {}): Promise<Array<{value: string, label: string}>> {
+  async getDropdownOptions(
+    params: { search?: string; limit?: number } = {},
+  ): Promise<Array<{ value: string; label: string }>> {
     try {
       let httpParams = new HttpParams();
       if (params.search) httpParams = httpParams.set('search', params.search);
-      if (params.limit) httpParams = httpParams.set('limit', params.limit.toString());
+      if (params.limit)
+        httpParams = httpParams.set('limit', params.limit.toString());
 
       const response = await this.http
-        .get<ApiResponse<{options: Array<{value: string, label: string}>, total: number}>>(`${this.baseUrl}/dropdown`, { params: httpParams })
+        .get<
+          ApiResponse<{
+            options: Array<{ value: string; label: string }>;
+            total: number;
+          }>
+        >(`${this.baseUrl}/dropdown`, { params: httpParams })
         .toPromise();
 
       if (response?.success && response.data?.options) {
@@ -329,11 +386,12 @@ export class AuthorService {
     }
   }
 
-
   /**
    * Bulk create authorss
    */
-  async bulkCreateAuthor(items: CreateAuthorRequest[]): Promise<BulkResponse | null> {
+  async bulkCreateAuthor(
+    items: CreateAuthorRequest[],
+  ): Promise<BulkResponse | null> {
     this.loadingSignal.set(true);
 
     try {
@@ -348,7 +406,7 @@ export class AuthorService {
       }
       return null;
     } catch (error: any) {
-      this.errorSignal.set(error.message || 'Failed to bulk create authorss');
+      this.handleError(error, 'Failed to bulk create authorss');
       throw error;
     } finally {
       this.loadingSignal.set(false);
@@ -358,7 +416,9 @@ export class AuthorService {
   /**
    * Bulk update authorss
    */
-  async bulkUpdateAuthor(items: Array<{ id: string, data: UpdateAuthorRequest }>): Promise<BulkResponse | null> {
+  async bulkUpdateAuthor(
+    items: Array<{ id: string; data: UpdateAuthorRequest }>,
+  ): Promise<BulkResponse | null> {
     this.loadingSignal.set(true);
 
     try {
@@ -373,7 +433,7 @@ export class AuthorService {
       }
       return null;
     } catch (error: any) {
-      this.errorSignal.set(error.message || 'Failed to bulk update authorss');
+      this.handleError(error, 'Failed to bulk update authorss');
       throw error;
     } finally {
       this.loadingSignal.set(false);
@@ -398,7 +458,7 @@ export class AuthorService {
       }
       return null;
     } catch (error: any) {
-      this.errorSignal.set(error.message || 'Failed to bulk delete authorss');
+      this.handleError(error, 'Failed to bulk delete authorss');
       throw error;
     } finally {
       this.loadingSignal.set(false);
@@ -410,10 +470,14 @@ export class AuthorService {
   /**
    * Validate authors data before save
    */
-  async validateAuthor(data: CreateAuthorRequest): Promise<{valid: boolean, errors?: any[]}> {
+  async validateAuthor(
+    data: CreateAuthorRequest,
+  ): Promise<{ valid: boolean; errors?: any[] }> {
     try {
       const response = await this.http
-        .post<ApiResponse<{valid: boolean, errors?: any[]}>>(`${this.baseUrl}/validate`, { data })
+        .post<
+          ApiResponse<{ valid: boolean; errors?: any[] }>
+        >(`${this.baseUrl}/validate`, { data })
         .toPromise();
 
       if (response) {
@@ -429,17 +493,22 @@ export class AuthorService {
   /**
    * Check field uniqueness
    */
-  async checkUniqueness(field: string, value: string, excludeId?: string): Promise<{unique: boolean}> {
+  async checkUniqueness(
+    field: string,
+    value: string,
+    excludeId?: string,
+  ): Promise<{ unique: boolean }> {
     try {
-      let params = new HttpParams()
-        .set('value', value);
-      
+      let params = new HttpParams().set('value', value);
+
       if (excludeId) {
         params = params.set('excludeId', excludeId);
       }
 
       const response = await this.http
-        .get<ApiResponse<{unique: boolean}>>(`${this.baseUrl}/check/${field}`, { params })
+        .get<
+          ApiResponse<{ unique: boolean }>
+        >(`${this.baseUrl}/check/${field}`, { params })
         .toPromise();
 
       if (response) {
@@ -455,10 +524,10 @@ export class AuthorService {
   /**
    * Get authors statistics
    */
-  async getStats(): Promise<{total: number} | null> {
+  async getStats(): Promise<{ total: number } | null> {
     try {
       const response = await this.http
-        .get<ApiResponse<{total: number}>>(`${this.baseUrl}/stats`)
+        .get<ApiResponse<{ total: number }>>(`${this.baseUrl}/stats`)
         .toPromise();
 
       if (response) {
@@ -500,6 +569,7 @@ export class AuthorService {
    */
   clearError(): void {
     this.errorSignal.set(null);
+    this.clearPermissionError();
   }
 
   /**
@@ -510,6 +580,7 @@ export class AuthorService {
     this.selectedAuthorSignal.set(null);
     this.currentPageSignal.set(1);
     this.errorSignal.set(null);
+    this.clearPermissionError();
     this.totalAuthorSignal.set(0);
   }
 }

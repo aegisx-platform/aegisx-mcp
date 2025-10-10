@@ -1,6 +1,10 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import {
+  MatDialogRef,
+  MAT_DIALOG_DATA,
+  MatDialogModule,
+} from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { AuthorService } from '../services/authors.service';
@@ -14,15 +18,11 @@ export interface AuthorEditDialogData {
 @Component({
   selector: 'app-authors-edit-dialog',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatDialogModule,
-    AuthorFormComponent,
-  ],
+  imports: [CommonModule, MatDialogModule, AuthorFormComponent],
   template: `
     <div class="edit-dialog">
       <h2 mat-dialog-title>Edit Authors</h2>
-      
+
       <mat-dialog-content>
         <app-authors-form
           mode="edit"
@@ -34,23 +34,25 @@ export interface AuthorEditDialogData {
       </mat-dialog-content>
     </div>
   `,
-  styles: [`
-    .edit-dialog {
-      min-width: 500px;
-      max-width: 800px;
-    }
-
-    mat-dialog-content {
-      max-height: 70vh;
-      overflow-y: auto;
-    }
-
-    @media (max-width: 768px) {
+  styles: [
+    `
       .edit-dialog {
-        min-width: 90vw;
+        min-width: 500px;
+        max-width: 800px;
       }
-    }
-  `]
+
+      mat-dialog-content {
+        max-height: 70vh;
+        overflow-y: auto;
+      }
+
+      @media (max-width: 768px) {
+        .edit-dialog {
+          min-width: 90vw;
+        }
+      }
+    `,
+  ],
 })
 export class AuthorEditDialogComponent implements OnInit {
   private authorsService = inject(AuthorService);
@@ -66,14 +68,14 @@ export class AuthorEditDialogComponent implements OnInit {
 
   async onFormSubmit(formData: AuthorFormData) {
     this.loading.set(true);
-    
+
     try {
       const updateRequest = formData as UpdateAuthorRequest;
       const result = await this.authorsService.updateAuthor(
-        this.data.authors.id, 
-        updateRequest
+        this.data.authors.id,
+        updateRequest,
       );
-      
+
       if (result) {
         this.snackBar.open('Authors updated successfully', 'Close', {
           duration: 3000,
@@ -85,11 +87,13 @@ export class AuthorEditDialogComponent implements OnInit {
         });
       }
     } catch (error: any) {
-      this.snackBar.open(
-        error.message || 'Failed to update Authors', 
-        'Close', 
-        { duration: 5000 }
-      );
+      const errorMessage = this.authorsService.permissionError()
+        ? 'You do not have permission to update Authors'
+        : error?.message || 'Failed to update Authors';
+      this.snackBar.open(errorMessage, 'Close', {
+        duration: 5000,
+        panelClass: ['error-snackbar'],
+      });
     } finally {
       this.loading.set(false);
     }
