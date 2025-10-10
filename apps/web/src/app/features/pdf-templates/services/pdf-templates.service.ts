@@ -11,7 +11,7 @@ import {
   ListPdfTemplateQuery,
   ApiResponse,
   BulkResponse,
-  PaginatedResponse
+  PaginatedResponse,
 } from '../types/pdf-templates.types';
 
 // ===== SERVICE CONFIGURATION =====
@@ -23,7 +23,7 @@ const API_BASE_URL = '';
 })
 export class PdfTemplateService {
   private http = inject(HttpClient);
-  private baseUrl = `${API_BASE_URL}/pdf-templates`;
+  private baseUrl = `${API_BASE_URL}/pdf-template`; // Note: singular, not plural
 
   // ===== SIGNALS FOR STATE MANAGEMENT =====
 
@@ -50,7 +50,7 @@ export class PdfTemplateService {
   readonly pageSize = this.pageSizeSignal.asReadonly();
 
   // ===== COMPUTED SIGNALS =====
-  
+
   readonly totalPages = computed(() => {
     const total = this.totalPdfTemplateSignal();
     const size = this.pageSizeSignal();
@@ -104,57 +104,89 @@ export class PdfTemplateService {
     try {
       // Build HTTP params
       let httpParams = new HttpParams();
-      if (params?.page) httpParams = httpParams.set('page', params.page.toString());
-      if (params?.limit) httpParams = httpParams.set('limit', params.limit.toString());
+      if (params?.page)
+        httpParams = httpParams.set('page', params.page.toString());
+      if (params?.limit)
+        httpParams = httpParams.set('limit', params.limit.toString());
       if (params?.sort) httpParams = httpParams.set('sort', params.sort);
-      
+
       // Handle fields array parameter (multiple values)
       if (params?.fields && params.fields.length > 0) {
         params.fields.forEach((field: string) => {
           httpParams = httpParams.append('fields', field);
         });
       }
-      
+
       // Add smart filter parameters based on table schema
       // String filtering for name
       if (params?.name) httpParams = httpParams.set('name', params.name);
-            // String filtering for display_name
-      if (params?.display_name) httpParams = httpParams.set('display_name', params.display_name);
-            // String filtering for description
-      if (params?.description) httpParams = httpParams.set('description', params.description);
-            // String filtering for category
-      if (params?.category) httpParams = httpParams.set('category', params.category);
-            // String filtering for type
+      // String filtering for display_name
+      if (params?.display_name)
+        httpParams = httpParams.set('display_name', params.display_name);
+      // String filtering for description
+      if (params?.description)
+        httpParams = httpParams.set('description', params.description);
+      // String filtering for category
+      if (params?.category)
+        httpParams = httpParams.set('category', params.category);
+      // String filtering for type
       if (params?.type) httpParams = httpParams.set('type', params.type);
-            // String filtering for page_size
-      if (params?.page_size) httpParams = httpParams.set('page_size', params.page_size);
-            // String filtering for orientation
-      if (params?.orientation) httpParams = httpParams.set('orientation', params.orientation);
-            // String filtering for version
-      if (params?.version) httpParams = httpParams.set('version', params.version);
-            // Boolean filtering for is_active
-      if (params?.is_active !== undefined) httpParams = httpParams.set('is_active', params.is_active.toString());
+      // String filtering for page_size
+      if (params?.page_size)
+        httpParams = httpParams.set('page_size', params.page_size);
+      // String filtering for orientation
+      if (params?.orientation)
+        httpParams = httpParams.set('orientation', params.orientation);
+      // String filtering for version
+      if (params?.version)
+        httpParams = httpParams.set('version', params.version);
+      // Boolean filtering for is_active
+      if (params?.is_active !== undefined)
+        httpParams = httpParams.set('is_active', params.is_active.toString());
       // Boolean filtering for is_default
-      if (params?.is_default !== undefined) httpParams = httpParams.set('is_default', params.is_default.toString());
+      if (params?.is_default !== undefined)
+        httpParams = httpParams.set('is_default', params.is_default.toString());
       // Numeric filtering for usage_count
-      if (params?.usage_count !== undefined) httpParams = httpParams.set('usage_count', params.usage_count.toString());
-      if (params?.usage_count_min !== undefined) httpParams = httpParams.set('usage_count_min', params.usage_count_min.toString());
-      if (params?.usage_count_max !== undefined) httpParams = httpParams.set('usage_count_max', params.usage_count_max.toString());
+      if (params?.usage_count !== undefined)
+        httpParams = httpParams.set(
+          'usage_count',
+          params.usage_count.toString(),
+        );
+      if (params?.usage_count_min !== undefined)
+        httpParams = httpParams.set(
+          'usage_count_min',
+          params.usage_count_min.toString(),
+        );
+      if (params?.usage_count_max !== undefined)
+        httpParams = httpParams.set(
+          'usage_count_max',
+          params.usage_count_max.toString(),
+        );
       // String filtering for created_by
-      if (params?.created_by) httpParams = httpParams.set('created_by', params.created_by);
-            // String filtering for updated_by
-      if (params?.updated_by) httpParams = httpParams.set('updated_by', params.updated_by);
-            // Date/DateTime filtering for created_at
-      if (params?.created_at) httpParams = httpParams.set('created_at', params.created_at);
-      if (params?.created_at_min) httpParams = httpParams.set('created_at_min', params.created_at_min);
-      if (params?.created_at_max) httpParams = httpParams.set('created_at_max', params.created_at_max);
+      if (params?.created_by)
+        httpParams = httpParams.set('created_by', params.created_by);
+      // String filtering for updated_by
+      if (params?.updated_by)
+        httpParams = httpParams.set('updated_by', params.updated_by);
+      // Date/DateTime filtering for created_at
+      if (params?.created_at)
+        httpParams = httpParams.set('created_at', params.created_at);
+      if (params?.created_at_min)
+        httpParams = httpParams.set('created_at_min', params.created_at_min);
+      if (params?.created_at_max)
+        httpParams = httpParams.set('created_at_max', params.created_at_max);
       // Date/DateTime filtering for updated_at
-      if (params?.updated_at) httpParams = httpParams.set('updated_at', params.updated_at);
-      if (params?.updated_at_min) httpParams = httpParams.set('updated_at_min', params.updated_at_min);
-      if (params?.updated_at_max) httpParams = httpParams.set('updated_at_max', params.updated_at_max);
+      if (params?.updated_at)
+        httpParams = httpParams.set('updated_at', params.updated_at);
+      if (params?.updated_at_min)
+        httpParams = httpParams.set('updated_at_min', params.updated_at_min);
+      if (params?.updated_at_max)
+        httpParams = httpParams.set('updated_at_max', params.updated_at_max);
 
       const response = await this.http
-        .get<PaginatedResponse<PdfTemplate>>(this.baseUrl, { params: httpParams })
+        .get<
+          PaginatedResponse<PdfTemplate>
+        >(this.baseUrl, { params: httpParams })
         .toPromise();
 
       if (response) {
@@ -200,7 +232,9 @@ export class PdfTemplateService {
   /**
    * Create new pdfTemplates
    */
-  async createPdfTemplate(data: CreatePdfTemplateRequest): Promise<PdfTemplate | null> {
+  async createPdfTemplate(
+    data: CreatePdfTemplateRequest,
+  ): Promise<PdfTemplate | null> {
     this.loadingSignal.set(true);
 
     try {
@@ -211,7 +245,7 @@ export class PdfTemplateService {
       if (response) {
         // Optimistic update: add to list
         this.pdfTemplatesListSignal.update((list) => [...list, response.data!]);
-        this.totalPdfTemplateSignal.update(total => total + 1);
+        this.totalPdfTemplateSignal.update((total) => total + 1);
         return response.data;
       }
       return null;
@@ -226,7 +260,10 @@ export class PdfTemplateService {
   /**
    * Update existing pdfTemplates
    */
-  async updatePdfTemplate(id: string, data: UpdatePdfTemplateRequest): Promise<PdfTemplate | null> {
+  async updatePdfTemplate(
+    id: string,
+    data: UpdatePdfTemplateRequest,
+  ): Promise<PdfTemplate | null> {
     this.loadingSignal.set(true);
 
     try {
@@ -237,7 +274,7 @@ export class PdfTemplateService {
       if (response) {
         // Optimistic update: replace in list
         this.pdfTemplatesListSignal.update((list) =>
-          list.map((item) => (item.id === id ? response.data! : item))
+          list.map((item) => (item.id === id ? response.data! : item)),
         );
         // Update selected pdfTemplates if it's the same
         if (this.selectedPdfTemplateSignal()?.id === id) {
@@ -268,9 +305,9 @@ export class PdfTemplateService {
       if (response?.success) {
         // Optimistic update: remove from list
         this.pdfTemplatesListSignal.update((list) =>
-          list.filter((item) => item.id !== id)
+          list.filter((item) => item.id !== id),
         );
-        this.totalPdfTemplateSignal.update(total => Math.max(0, total - 1));
+        this.totalPdfTemplateSignal.update((total) => Math.max(0, total - 1));
         // Clear selected pdfTemplates if it's the deleted one
         if (this.selectedPdfTemplateSignal()?.id === id) {
           this.selectedPdfTemplateSignal.set(null);
@@ -301,11 +338,10 @@ export class PdfTemplateService {
     includeMetadata?: boolean;
   }): Promise<Blob> {
     try {
-      let httpParams = new HttpParams()
-        .set('format', options.format);
+      let httpParams = new HttpParams().set('format', options.format);
 
       if (options.ids && options.ids.length > 0) {
-        options.ids.forEach(id => {
+        options.ids.forEach((id) => {
           httpParams = httpParams.append('ids', id);
         });
       }
@@ -319,7 +355,7 @@ export class PdfTemplateService {
       }
 
       if (options.fields && options.fields.length > 0) {
-        options.fields.forEach(field => {
+        options.fields.forEach((field) => {
           httpParams = httpParams.append('fields', field);
         });
       }
@@ -329,17 +365,23 @@ export class PdfTemplateService {
       }
 
       if (options.applyFilters !== undefined) {
-        httpParams = httpParams.set('applyFilters', String(options.applyFilters));
+        httpParams = httpParams.set(
+          'applyFilters',
+          String(options.applyFilters),
+        );
       }
 
       if (options.includeMetadata !== undefined) {
-        httpParams = httpParams.set('includeMetadata', String(options.includeMetadata));
+        httpParams = httpParams.set(
+          'includeMetadata',
+          String(options.includeMetadata),
+        );
       }
 
       const response = await this.http
         .get(`${this.baseUrl}/export`, {
           params: httpParams,
-          responseType: 'blob'
+          responseType: 'blob',
         })
         .toPromise();
 
@@ -357,14 +399,22 @@ export class PdfTemplateService {
   /**
    * Get dropdown options for pdfTemplates
    */
-  async getDropdownOptions(params: {search?: string, limit?: number} = {}): Promise<Array<{value: string, label: string}>> {
+  async getDropdownOptions(
+    params: { search?: string; limit?: number } = {},
+  ): Promise<Array<{ value: string; label: string }>> {
     try {
       let httpParams = new HttpParams();
       if (params.search) httpParams = httpParams.set('search', params.search);
-      if (params.limit) httpParams = httpParams.set('limit', params.limit.toString());
+      if (params.limit)
+        httpParams = httpParams.set('limit', params.limit.toString());
 
       const response = await this.http
-        .get<ApiResponse<{options: Array<{value: string, label: string}>, total: number}>>(`${this.baseUrl}/dropdown`, { params: httpParams })
+        .get<
+          ApiResponse<{
+            options: Array<{ value: string; label: string }>;
+            total: number;
+          }>
+        >(`${this.baseUrl}/dropdown`, { params: httpParams })
         .toPromise();
 
       if (response?.success && response.data?.options) {
@@ -377,11 +427,12 @@ export class PdfTemplateService {
     }
   }
 
-
   /**
    * Bulk create pdfTemplatess
    */
-  async bulkCreatePdfTemplate(items: CreatePdfTemplateRequest[]): Promise<BulkResponse | null> {
+  async bulkCreatePdfTemplate(
+    items: CreatePdfTemplateRequest[],
+  ): Promise<BulkResponse | null> {
     this.loadingSignal.set(true);
 
     try {
@@ -406,7 +457,9 @@ export class PdfTemplateService {
   /**
    * Bulk update pdfTemplatess
    */
-  async bulkUpdatePdfTemplate(items: Array<{ id: string, data: UpdatePdfTemplateRequest }>): Promise<BulkResponse | null> {
+  async bulkUpdatePdfTemplate(
+    items: Array<{ id: string; data: UpdatePdfTemplateRequest }>,
+  ): Promise<BulkResponse | null> {
     this.loadingSignal.set(true);
 
     try {
@@ -453,7 +506,6 @@ export class PdfTemplateService {
     }
   }
 
-
   // ===== UTILITY METHODS =====
 
   /**
@@ -496,5 +548,217 @@ export class PdfTemplateService {
     this.errorSignal.set(null);
     this.clearPermissionError();
     this.totalPdfTemplateSignal.set(0);
+  }
+
+  // ===== ADVANCED FEATURE METHODS =====
+
+  /**
+   * Render PDF from template
+   */
+  async renderPdf(
+    request: import('../types/pdf-templates.types').RenderPdfRequest,
+  ): Promise<Blob | null> {
+    try {
+      const response = await this.http
+        .post(`${this.baseUrl}/render`, request, {
+          responseType: 'blob',
+        })
+        .toPromise();
+
+      return response || null;
+    } catch (error: any) {
+      console.error('Failed to render PDF:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Preview template with sample data
+   */
+  async previewTemplate(
+    id: string,
+    data?: Record<string, any>,
+  ): Promise<Blob | null> {
+    try {
+      const response = await this.http
+        .post(
+          `${this.baseUrl}/${id}/preview`,
+          { data },
+          {
+            responseType: 'blob',
+          },
+        )
+        .toPromise();
+
+      return response || null;
+    } catch (error: any) {
+      console.error('Failed to preview template:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Validate template syntax
+   */
+  async validateTemplate(
+    templateData: Record<string, any>,
+  ): Promise<import('../types/pdf-templates.types').ValidateTemplateResponse> {
+    try {
+      const response = await this.http
+        .post<
+          ApiResponse<
+            import('../types/pdf-templates.types').ValidateTemplateResponse
+          >
+        >(`${this.baseUrl}/validate`, { template_data: templateData })
+        .toPromise();
+
+      return response?.data || { valid: false };
+    } catch (error: any) {
+      console.error('Failed to validate template:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Duplicate template
+   */
+  async duplicateTemplate(
+    id: string,
+    name: string,
+  ): Promise<PdfTemplate | null> {
+    this.loadingSignal.set(true);
+
+    try {
+      const response = await this.http
+        .post<
+          ApiResponse<PdfTemplate>
+        >(`${this.baseUrl}/${id}/duplicate`, { name })
+        .toPromise();
+
+      if (response?.data) {
+        // Add to list
+        this.pdfTemplatesListSignal.update((list) => [...list, response.data!]);
+        this.totalPdfTemplateSignal.update((total) => total + 1);
+        return response.data;
+      }
+      return null;
+    } catch (error: any) {
+      this.handleError(error, 'Failed to duplicate template');
+      throw error;
+    } finally {
+      this.loadingSignal.set(false);
+    }
+  }
+
+  /**
+   * Search templates
+   */
+  async searchTemplates(query: string): Promise<PdfTemplate[]> {
+    try {
+      const httpParams = new HttpParams().set('q', query);
+
+      const response = await this.http
+        .get<
+          ApiResponse<PdfTemplate[]>
+        >(`${this.baseUrl}/search`, { params: httpParams })
+        .toPromise();
+
+      return response?.data || [];
+    } catch (error: any) {
+      console.error('Failed to search templates:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get template versions
+   */
+  async getTemplateVersions(
+    id: string,
+  ): Promise<import('../types/pdf-templates.types').TemplateVersion[]> {
+    try {
+      const response = await this.http
+        .get<
+          ApiResponse<import('../types/pdf-templates.types').TemplateVersion[]>
+        >(`${this.baseUrl}/${id}/versions`)
+        .toPromise();
+
+      return response?.data || [];
+    } catch (error: any) {
+      console.error('Failed to get template versions:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get template statistics
+   */
+  async getStats(): Promise<
+    import('../types/pdf-templates.types').TemplateStats | null
+  > {
+    try {
+      const response = await this.http
+        .get<
+          ApiResponse<import('../types/pdf-templates.types').TemplateStats>
+        >(`${this.baseUrl}/stats`)
+        .toPromise();
+
+      return response?.data || null;
+    } catch (error: any) {
+      console.error('Failed to get template stats:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get template categories
+   */
+  async getCategories(): Promise<string[]> {
+    try {
+      const response = await this.http
+        .get<ApiResponse<string[]>>(`${this.baseUrl}/categories`)
+        .toPromise();
+
+      return response?.data || [];
+    } catch (error: any) {
+      console.error('Failed to get categories:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get template types
+   */
+  async getTypes(): Promise<string[]> {
+    try {
+      const response = await this.http
+        .get<ApiResponse<string[]>>(`${this.baseUrl}/types`)
+        .toPromise();
+
+      return response?.data || [];
+    } catch (error: any) {
+      console.error('Failed to get types:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get available Handlebars helpers
+   */
+  async getHelpers(): Promise<
+    import('../types/pdf-templates.types').HandlebarsHelper[]
+  > {
+    try {
+      const response = await this.http
+        .get<
+          ApiResponse<import('../types/pdf-templates.types').HandlebarsHelper[]>
+        >(`${this.baseUrl}/helpers`)
+        .toPromise();
+
+      return response?.data || [];
+    } catch (error: any) {
+      console.error('Failed to get helpers:', error);
+      return [];
+    }
   }
 }

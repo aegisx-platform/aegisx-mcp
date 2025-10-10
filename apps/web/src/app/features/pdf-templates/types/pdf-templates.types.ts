@@ -78,37 +78,37 @@ export interface ListPdfTemplateQuery {
   // Pagination
   page?: number;
   limit?: number;
-  
+
   // Search
   search?: string;
-  
+
   // Sort
   sort?: string; // Multiple sort support: field1:desc,field2:asc
-  
+
   // Field selection
   fields?: string[]; // Array of field names to return
-  
+
   // Include related data
   include?: string | string[];
-  
+
   // Smart field-based filters
   // String filtering for name
   name?: string; // Exact match
-    // String filtering for display_name
+  // String filtering for display_name
   display_name?: string; // Exact match
-    // String filtering for description
+  // String filtering for description
   description?: string; // Exact match
-    // String filtering for category
+  // String filtering for category
   category?: string; // Exact match
-    // String filtering for type
+  // String filtering for type
   type?: string; // Exact match
-    // String filtering for page_size
+  // String filtering for page_size
   page_size?: string; // Exact match
-    // String filtering for orientation
+  // String filtering for orientation
   orientation?: string; // Exact match
-    // String filtering for version
+  // String filtering for version
   version?: string; // Exact match
-    // Boolean filtering for is_active
+  // Boolean filtering for is_active
   is_active?: boolean;
   // Boolean filtering for is_default
   is_default?: boolean;
@@ -118,9 +118,9 @@ export interface ListPdfTemplateQuery {
   usage_count_max?: number; // Range end
   // String filtering for created_by
   created_by?: string; // Exact match
-    // String filtering for updated_by
+  // String filtering for updated_by
   updated_by?: string; // Exact match
-    // Date/DateTime filtering for created_at
+  // Date/DateTime filtering for created_at
   created_at?: string; // ISO date string for exact match
   created_at_min?: string; // ISO date string for range start
   created_at_max?: string; // ISO date string for range end
@@ -202,7 +202,6 @@ export interface BulkResponse {
   };
 }
 
-
 // ===== UTILITY TYPES =====
 
 export type PdfTemplateField = keyof PdfTemplate;
@@ -216,3 +215,93 @@ export interface PdfTemplateListOptions {
   search?: string;
 }
 
+// ===== ADVANCED FEATURE TYPES =====
+
+export interface RenderPdfRequest {
+  templateId?: string;
+  templateName?: string;
+  data: Record<string, any>;
+  options?: {
+    format?: 'buffer' | 'base64' | 'url';
+    filename?: string;
+  };
+}
+
+export interface RenderPdfResponse {
+  success: boolean;
+  buffer?: ArrayBuffer;
+  base64?: string;
+  url?: string;
+  filename?: string;
+  metadata?: {
+    templateId: string;
+    templateName: string;
+    renderedAt: string;
+    fileSize: number;
+  };
+}
+
+export interface PreviewTemplateRequest {
+  data?: Record<string, any>;
+}
+
+export interface PreviewTemplateResponse {
+  success: boolean;
+  previewUrl?: string;
+  buffer?: ArrayBuffer;
+  base64?: string;
+}
+
+export interface ValidateTemplateRequest {
+  template_data: Record<string, any>;
+}
+
+export interface ValidateTemplateResponse {
+  valid: boolean;
+  errors?: Array<{
+    field: string;
+    message: string;
+  }>;
+  warnings?: Array<{
+    field: string;
+    message: string;
+  }>;
+}
+
+export interface DuplicateTemplateRequest {
+  name: string;
+}
+
+export interface SearchTemplateQuery {
+  q: string;
+}
+
+export interface TemplateVersion {
+  id: string;
+  template_id: string;
+  version: string;
+  template_data: Record<string, any>;
+  created_by: string;
+  created_at: string;
+}
+
+export interface TemplateStats {
+  total: number;
+  active: number;
+  inactive: number;
+  byCategory: Record<string, number>;
+  byType: Record<string, number>;
+  mostUsed: Array<{
+    id: string;
+    name: string;
+    usage_count: number;
+  }>;
+}
+
+export interface HandlebarsHelper {
+  name: string;
+  description: string;
+  syntax: string;
+  example: string;
+  category: string;
+}
