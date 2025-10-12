@@ -17,7 +17,10 @@ export async function up(knex: Knex): Promise<void> {
 export async function down(knex: Knex): Promise<void> {
   // Drop index first
   await knex.schema.alterTable('pdf_templates', (table) => {
-    table.dropIndex(['is_template_starter'], 'idx_pdf_templates_template_starter');
+    table.dropIndex(
+      ['is_template_starter'],
+      'idx_pdf_templates_template_starter',
+    );
   });
 
   // Drop column

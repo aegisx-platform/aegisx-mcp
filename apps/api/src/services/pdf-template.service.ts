@@ -245,7 +245,7 @@ export class PdfTemplateService {
       if (template.is_template_starter && !isPreview) {
         throw new Error(
           `Template '${request.templateName}' is a template starter and cannot be used directly for rendering. ` +
-          `Please create a new template based on this starter first.`
+            `Please create a new template based on this starter first.`,
         );
       }
 
@@ -310,15 +310,25 @@ export class PdfTemplateService {
 
       if (request.options?.renderType === 'preview') {
         console.log('[Preview] Starting preview generation...');
-        console.log('[Preview] Document definition:', JSON.stringify(documentDefinition).substring(0, 200));
+        console.log(
+          '[Preview] Document definition:',
+          JSON.stringify(documentDefinition).substring(0, 200),
+        );
 
         // Generate preview using PDFMakeService directly (with proper Thai fonts)
-        console.log('[Preview] Calling PDFMakeService.generatePdfFromDocDefinition...');
-        pdfBuffer = await this.pdfMakeService.generatePdfFromDocDefinition(documentDefinition);
+        console.log(
+          '[Preview] Calling PDFMakeService.generatePdfFromDocDefinition...',
+        );
+        pdfBuffer =
+          await this.pdfMakeService.generatePdfFromDocDefinition(
+            documentDefinition,
+          );
         console.log('[Preview] PDF Buffer generated, size:', pdfBuffer.length);
 
         // Save preview to temp directory
-        const filename = request.options.filename || `preview_${template.name}_${Date.now()}.pdf`;
+        const filename =
+          request.options.filename ||
+          `preview_${template.name}_${Date.now()}.pdf`;
         const previewId = `preview_${Date.now()}_${Math.random().toString(36).substring(7)}`;
         const filePath = path.join(this.renderDir, previewId);
 
@@ -330,15 +340,18 @@ export class PdfTemplateService {
         console.log('[Preview] Preview URL:', previewUrl);
 
         // Set cleanup after 15 minutes
-        setTimeout(() => {
-          try {
-            if (fs.existsSync(filePath)) {
-              fs.unlinkSync(filePath);
+        setTimeout(
+          () => {
+            try {
+              if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+              }
+            } catch (error) {
+              console.error('Error cleaning up preview file:', error);
             }
-          } catch (error) {
-            console.error('Error cleaning up preview file:', error);
-          }
-        }, 15 * 60 * 1000);
+          },
+          15 * 60 * 1000,
+        );
 
         console.log('[Preview] Preview generation completed');
       } else {
@@ -405,7 +418,10 @@ export class PdfTemplateService {
         },
       };
 
-      console.log('[PDF Template Service] Response object:', JSON.stringify(response, null, 2));
+      console.log(
+        '[PDF Template Service] Response object:',
+        JSON.stringify(response, null, 2),
+      );
 
       // Return PDF buffer directly for normal renders without file saving
       if (
@@ -493,7 +509,9 @@ export class PdfTemplateService {
       return await this.repository.getActiveTemplatesForUse();
     } catch (error) {
       console.error('Error getting active templates for use:', error);
-      throw new Error(`Failed to get active templates for use: ${error.message}`);
+      throw new Error(
+        `Failed to get active templates for use: ${error.message}`,
+      );
     }
   }
 
@@ -676,15 +694,22 @@ export class PdfTemplateService {
             console.log('[generatePdfFromDefinition] VFS fonts loaded');
           }
         } catch (error) {
-          console.warn('[generatePdfFromDefinition] VFS fonts not available, using default fonts');
+          console.warn(
+            '[generatePdfFromDefinition] VFS fonts not available, using default fonts',
+          );
         }
 
         console.log('[generatePdfFromDefinition] Creating PDF document...');
         const pdfDoc = PdfMake.createPdf(docDefinition);
-        console.log('[generatePdfFromDefinition] PDF document created, getting buffer...');
+        console.log(
+          '[generatePdfFromDefinition] PDF document created, getting buffer...',
+        );
 
         pdfDoc.getBuffer((buffer: Buffer) => {
-          console.log('[generatePdfFromDefinition] Buffer received, size:', buffer.length);
+          console.log(
+            '[generatePdfFromDefinition] Buffer received, size:',
+            buffer.length,
+          );
           resolve(buffer);
         });
       } catch (error) {

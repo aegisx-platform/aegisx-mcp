@@ -26,13 +26,13 @@ const fixedInvoiceTemplate = {
       text: '{{company}}',
       style: 'header',
       alignment: 'center',
-      margin: [0, 0, 0, 20]
+      margin: [0, 0, 0, 20],
     },
     {
       text: 'INVOICE',
       style: 'subheader',
       alignment: 'center',
-      margin: [0, 0, 0, 30]
+      margin: [0, 0, 0, 30],
     },
     {
       columns: [
@@ -40,17 +40,21 @@ const fixedInvoiceTemplate = {
           width: '*',
           stack: [
             { text: 'Bill To:', style: 'label' },
-            { text: '{{customer}}', style: 'value', margin: [0, 5, 0, 15] }
-          ]
+            { text: '{{customer}}', style: 'value', margin: [0, 5, 0, 15] },
+          ],
         },
         {
           width: 'auto',
           stack: [
             { text: 'Invoice #: {{invoiceNumber}}', alignment: 'right' },
-            { text: 'Date: {{formatDate date "DD/MM/YYYY"}}', alignment: 'right', margin: [0, 5, 0, 0] }
-          ]
-        }
-      ]
+            {
+              text: 'Date: {{formatDate date "DD/MM/YYYY"}}',
+              alignment: 'right',
+              margin: [0, 5, 0, 0],
+            },
+          ],
+        },
+      ],
     },
     {
       style: 'tableStyle',
@@ -62,29 +66,39 @@ const fixedInvoiceTemplate = {
             { text: 'Description', style: 'tableHeader' },
             { text: 'Quantity', style: 'tableHeader', alignment: 'center' },
             { text: 'Unit Price', style: 'tableHeader', alignment: 'right' },
-            { text: 'Total', style: 'tableHeader', alignment: 'right' }
+            { text: 'Total', style: 'tableHeader', alignment: 'right' },
           ],
           ...Array(10).fill([
             '{{description}}',
             { text: '{{quantity}}', alignment: 'center' },
             { text: '{{formatCurrency unitPrice "THB"}}', alignment: 'right' },
-            { text: '{{formatCurrency total "THB"}}', alignment: 'right' }
-          ])
-        ]
+            { text: '{{formatCurrency total "THB"}}', alignment: 'right' },
+          ]),
+        ],
       },
       layout: {
-        hLineWidth: function(i, node) {
-          return (i === 0 || i === 1 || i === node.table.body.length) ? 1 : 0.5;
+        hLineWidth: function (i, node) {
+          return i === 0 || i === 1 || i === node.table.body.length ? 1 : 0.5;
         },
-        vLineWidth: function() { return 0; },
-        hLineColor: function(i) {
+        vLineWidth: function () {
+          return 0;
+        },
+        hLineColor: function (i) {
           return i === 1 ? '#2c3e50' : '#cccccc';
         },
-        paddingLeft: function() { return 8; },
-        paddingRight: function() { return 8; },
-        paddingTop: function() { return 6; },
-        paddingBottom: function() { return 6; }
-      }
+        paddingLeft: function () {
+          return 8;
+        },
+        paddingRight: function () {
+          return 8;
+        },
+        paddingTop: function () {
+          return 6;
+        },
+        paddingBottom: function () {
+          return 6;
+        },
+      },
     },
     {
       columns: [
@@ -95,81 +109,94 @@ const fixedInvoiceTemplate = {
             {
               columns: [
                 { text: 'Subtotal:', alignment: 'right', style: 'totalLabel' },
-                { text: '{{formatCurrency subtotal "THB"}}', alignment: 'right', width: 80 }
-              ]
+                {
+                  text: '{{formatCurrency subtotal "THB"}}',
+                  alignment: 'right',
+                  width: 80,
+                },
+              ],
             },
             {
               columns: [
                 { text: 'Tax:', alignment: 'right', style: 'totalLabel' },
-                { text: '{{formatCurrency tax "THB"}}', alignment: 'right', width: 80 }
+                {
+                  text: '{{formatCurrency tax "THB"}}',
+                  alignment: 'right',
+                  width: 80,
+                },
               ],
-              margin: [0, 5, 0, 0]
+              margin: [0, 5, 0, 0],
             },
             {
               columns: [
                 { text: 'Total:', alignment: 'right', style: 'grandTotal' },
-                { text: '{{formatCurrency grandTotal "THB"}}', alignment: 'right', width: 80, style: 'grandTotal' }
+                {
+                  text: '{{formatCurrency grandTotal "THB"}}',
+                  alignment: 'right',
+                  width: 80,
+                  style: 'grandTotal',
+                },
               ],
-              margin: [0, 10, 0, 0]
-            }
+              margin: [0, 10, 0, 0],
+            },
           ],
-          margin: [0, 20, 0, 0]
-        }
-      ]
+          margin: [0, 20, 0, 0],
+        },
+      ],
     },
     {
       text: 'Thank you for your business!',
       style: 'footer',
       alignment: 'center',
-      margin: [0, 40, 0, 0]
-    }
+      margin: [0, 40, 0, 0],
+    },
   ],
   styles: {
     header: {
       fontSize: 24,
       bold: true,
-      color: '#2c3e50'
+      color: '#2c3e50',
     },
     subheader: {
       fontSize: 18,
       bold: true,
-      color: '#34495e'
+      color: '#34495e',
     },
     label: {
       fontSize: 10,
       bold: true,
-      color: '#7f8c8d'
+      color: '#7f8c8d',
     },
     value: {
-      fontSize: 11
+      fontSize: 11,
     },
     tableHeader: {
       bold: true,
       fontSize: 11,
       color: 'white',
-      fillColor: '#2c3e50'
+      fillColor: '#2c3e50',
     },
     tableStyle: {
-      margin: [0, 20, 0, 0]
+      margin: [0, 20, 0, 0],
     },
     totalLabel: {
       fontSize: 11,
-      bold: true
+      bold: true,
     },
     grandTotal: {
       fontSize: 13,
       bold: true,
-      color: '#2c3e50'
+      color: '#2c3e50',
     },
     footer: {
       fontSize: 12,
       italics: true,
-      color: '#7f8c8d'
-    }
+      color: '#7f8c8d',
+    },
   },
   defaultStyle: {
-    font: 'Sarabun'
-  }
+    font: 'Sarabun',
+  },
 };
 
 const fixedSimpleReportTemplate = {
@@ -181,18 +208,18 @@ const fixedSimpleReportTemplate = {
       text: '{{title}}',
       style: 'header',
       alignment: 'center',
-      margin: [0, 0, 0, 20]
+      margin: [0, 0, 0, 20],
     },
     {
       text: 'Generated on: {{formatDate date "DD/MM/YYYY HH:mm"}}',
       style: 'subheader',
       alignment: 'right',
-      margin: [0, 0, 0, 10]
+      margin: [0, 0, 0, 10],
     },
     {
       text: '{{content}}',
       style: 'content',
-      margin: [0, 10, 0, 10]
+      margin: [0, 10, 0, 10],
     },
     {
       style: 'tableStyle',
@@ -203,44 +230,44 @@ const fixedSimpleReportTemplate = {
           [
             { text: 'Description', style: 'tableHeader' },
             { text: 'Quantity', style: 'tableHeader' },
-            { text: 'Price', style: 'tableHeader' }
+            { text: 'Price', style: 'tableHeader' },
           ],
           ...Array(5).fill([
             '{{description}}',
             '{{quantity}}',
-            '{{formatCurrency price "THB"}}'
-          ])
-        ]
-      }
-    }
+            '{{formatCurrency price "THB"}}',
+          ]),
+        ],
+      },
+    },
   ],
   styles: {
     header: {
       fontSize: 20,
       bold: true,
-      color: '#2c3e50'
+      color: '#2c3e50',
     },
     subheader: {
       fontSize: 12,
-      color: '#7f8c8d'
+      color: '#7f8c8d',
     },
     content: {
       fontSize: 11,
-      lineHeight: 1.4
+      lineHeight: 1.4,
     },
     tableHeader: {
       bold: true,
       fontSize: 10,
       color: 'white',
-      fillColor: '#2c3e50'
+      fillColor: '#2c3e50',
     },
     tableStyle: {
-      margin: [0, 10, 0, 0]
-    }
+      margin: [0, 10, 0, 0],
+    },
   },
   defaultStyle: {
-    font: 'Sarabun'
-  }
+    font: 'Sarabun',
+  },
 };
 
 const fixedInvoiceSampleData = {
@@ -250,22 +277,23 @@ const fixedInvoiceSampleData = {
   date: new Date().toISOString(),
   items: [
     { description: 'Product A', quantity: 2, unitPrice: 1000, total: 2000 },
-    { description: 'Product B', quantity: 1, unitPrice: 2500, total: 2500 }
+    { description: 'Product B', quantity: 1, unitPrice: 2500, total: 2500 },
   ],
   subtotal: 4500,
   tax: 315,
-  grandTotal: 4815
+  grandTotal: 4815,
 };
 
 const fixedSimpleReportSampleData = {
   title: 'Sample Report',
   date: new Date().toISOString(),
-  content: 'This is a sample report content that demonstrates the template functionality.',
+  content:
+    'This is a sample report content that demonstrates the template functionality.',
   items: [
     { description: 'Item 1', quantity: 2, price: 100 },
     { description: 'Item 2', quantity: 1, price: 250 },
-    { description: 'Item 3', quantity: 3, price: 75.5 }
-  ]
+    { description: 'Item 3', quantity: 3, price: 75.5 },
+  ],
 };
 
 async function updateTemplate(client, id, name, templateData, sampleData) {
@@ -282,7 +310,7 @@ async function updateTemplate(client, id, name, templateData, sampleData) {
   const result = await client.query(query, [
     JSON.stringify(templateData),
     JSON.stringify(sampleData),
-    id
+    id,
   ]);
 
   return result.rows[0];
@@ -303,7 +331,7 @@ async function main() {
       'e58ee748-388d-4d03-9741-3b9fe7f1c7ca',
       'invoice-template',
       fixedInvoiceTemplate,
-      fixedInvoiceSampleData
+      fixedInvoiceSampleData,
     );
     console.log(`✅ Updated: ${invoice.display_name} (${invoice.name})\n`);
 
@@ -314,17 +342,20 @@ async function main() {
       'c6627245-8d9c-4dfb-9827-463040e03eb5',
       'simple-reports',
       fixedSimpleReportTemplate,
-      fixedSimpleReportSampleData
+      fixedSimpleReportSampleData,
     );
     console.log(`✅ Updated: ${report.display_name} (${report.name})\n`);
 
     console.log('🎉 All templates updated successfully!');
     console.log('\n📋 Changes made:');
-    console.log('  - Removed invalid Handlebars block helpers split across array elements');
-    console.log('  - Fixed {{#each}} loops by using static table rows with placeholders');
+    console.log(
+      '  - Removed invalid Handlebars block helpers split across array elements',
+    );
+    console.log(
+      '  - Fixed {{#each}} loops by using static table rows with placeholders',
+    );
     console.log('  - Updated sample data to match new template structure');
     console.log('  - Added proper Thai font configuration (Sarabun)');
-
   } catch (error) {
     console.error('❌ Error updating templates:', error);
     process.exit(1);

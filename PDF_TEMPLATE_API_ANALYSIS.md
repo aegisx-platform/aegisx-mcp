@@ -5,6 +5,7 @@
 ### Main Table: `pdf_templates`
 
 **Required Fields:**
+
 - `id` (uuid, PK) - Auto-generated
 - `name` (varchar100, UNIQUE) - Template identifier
 - `display_name` (varchar200) - Human-readable name
@@ -12,6 +13,7 @@
 - `created_at`, `updated_at` (timestamp) - Auto-managed
 
 **Optional Fields with Defaults:**
+
 - `description` (text) - Template description
 - `category` (varchar50, default: 'general') - Template category
 - `type` (varchar50, default: 'document') - Template type
@@ -28,6 +30,7 @@
 - `created_by`, `updated_by` (uuid) - User tracking
 
 **Indexes:**
+
 - PRIMARY KEY on `id`
 - UNIQUE on `name`
 - Indexes on: `category`, `type`, `is_active`, `created_by`
@@ -38,6 +41,7 @@
 Stores historical versions of templates for audit trail.
 
 **Fields:**
+
 - `id` (uuid, PK)
 - `template_id` (uuid, FK → pdf_templates.id, CASCADE DELETE)
 - `version` (varchar20)
@@ -53,6 +57,7 @@ Stores historical versions of templates for audit trail.
 Tracks all PDF generation requests and their results.
 
 **Fields:**
+
 - `id` (uuid, PK)
 - `template_id` (uuid, FK → pdf_templates.id)
 - `template_version` (varchar20)
@@ -157,6 +162,7 @@ Tracks all PDF generation requests and their results.
 - `getStats()` - Returns statistics
 
 ### Dependencies:
+
 - `PdfTemplateRepository` - Database operations
 - `HandlebarsTemplateService` - Template compilation
 - `PDFMakeService` - PDF generation
@@ -197,6 +203,7 @@ From `/apps/api/src/types/pdf-template.types.ts`:
 **Location:** `apps/api/src/modules/pdf-export/routes/pdf-template.routes.ts:221-233`
 
 **Problem:**
+
 ```typescript
 response: {
   200: {
@@ -211,12 +218,14 @@ response: {
 ```
 
 **Root Cause:** Fastify response schema serialization
+
 - Response schema defined `data: { type: 'object' }` without properties
 - Fastify serializer strips all fields from objects without defined properties
 - Repository and service layers were working correctly
 - Issue was in the response serialization layer
 
 **Solution Applied:**
+
 ```typescript
 response: {
   200: {
@@ -234,6 +243,7 @@ response: {
 ```
 
 **Result:**
+
 - Update endpoint now returns complete template object with all 24 fields
 - Frontend receives full data including template_data, sample_data, schema, etc.
 - Edit functionality should work correctly now
@@ -253,6 +263,7 @@ if (hasContentChanges) {
 ```
 
 **Problem:** Updates template twice when content changes
+
 - First update with user data
 - Second update just for version number
 - Could be optimized to single update
@@ -260,6 +271,7 @@ if (hasContentChanges) {
 ## Data Flow
 
 ### Create Template Flow:
+
 1. User → Frontend Form
 2. POST /api/pdf-template
 3. PdfTemplateService.createTemplate()
@@ -269,6 +281,7 @@ if (hasContentChanges) {
 7. Return created template
 
 ### Update Template Flow:
+
 1. User → Frontend Edit Form
 2. PUT /api/pdf-template/:id
 3. PdfTemplateService.updateTemplate()
@@ -278,6 +291,7 @@ if (hasContentChanges) {
 7. Return updated template ❌ But it's {}
 
 ### Render PDF Flow:
+
 1. User → Render request
 2. POST /api/pdf-template/render
 3. PdfTemplateService.renderPdf()
@@ -304,11 +318,13 @@ if (hasContentChanges) {
 ### Form Requirements:
 
 **Required Fields:**
+
 - name (unique identifier)
 - display_name
 - template_data (JSON editor for PDFMake definition)
 
 **Optional Fields:**
+
 - description
 - category (dropdown)
 - type (dropdown)

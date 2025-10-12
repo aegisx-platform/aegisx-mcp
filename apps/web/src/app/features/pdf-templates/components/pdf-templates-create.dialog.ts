@@ -7,8 +7,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { PdfTemplateService } from '../services/pdf-templates.service';
-import { CreatePdfTemplateRequest, PdfTemplate } from '../types/pdf-templates.types';
-import { PdfTemplateFormComponent, PdfTemplateFormData } from './pdf-templates-form.component';
+import {
+  CreatePdfTemplateRequest,
+  PdfTemplate,
+} from '../types/pdf-templates.types';
+import {
+  PdfTemplateFormComponent,
+  PdfTemplateFormData,
+} from './pdf-templates-form.component';
 import { PdfTemplateSelectorComponent } from './pdf-template-selector.component';
 
 @Component({
@@ -34,17 +40,18 @@ import { PdfTemplateSelectorComponent } from './pdf-template-selector.component'
             Create New PDF Template
           }
         </h2>
-        <button
-          mat-icon-button
-          (click)="onCancel()"
-          matTooltip="Close">
+        <button mat-icon-button (click)="onCancel()" matTooltip="Close">
           <mat-icon>close</mat-icon>
         </button>
       </div>
 
       <!-- Step Indicator -->
       <div class="step-indicator">
-        <div class="step" [class.active]="currentStep() === 1" [class.completed]="currentStep() > 1">
+        <div
+          class="step"
+          [class.active]="currentStep() === 1"
+          [class.completed]="currentStep() > 1"
+        >
           <div class="step-number">1</div>
           <div class="step-label">Select Template</div>
         </div>
@@ -69,7 +76,8 @@ import { PdfTemplateSelectorComponent } from './pdf-template-selector.component'
               mat-raised-button
               color="primary"
               (click)="proceedToForm()"
-              [disabled]="!selectedTemplate() && selectedTemplate() !== null">
+              [disabled]="!selectedTemplate() && selectedTemplate() !== null"
+            >
               Next: Configure Template
             </button>
           </div>
@@ -93,119 +101,121 @@ import { PdfTemplateSelectorComponent } from './pdf-template-selector.component'
       </div>
     </div>
   `,
-  styles: [`
-    .create-dialog-container {
-      width: 100%;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      background: #fafafa;
-    }
+  styles: [
+    `
+      .create-dialog-container {
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: #fafafa;
+      }
 
-    .dialog-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 16px 24px;
-      background: white;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      z-index: 10;
-    }
+      .dialog-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 24px;
+        background: white;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+      }
 
-    .dialog-header h2 {
-      margin: 0;
-      font-size: 20px;
-      font-weight: 500;
-    }
+      .dialog-header h2 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 500;
+      }
 
-    .step-indicator {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      background: white;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-    }
+      .step-indicator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background: white;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+      }
 
-    .step {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
+      .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+      }
 
-    .step-number {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      border: 2px solid rgba(0, 0, 0, 0.12);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 500;
-      color: rgba(0, 0, 0, 0.38);
-      background: white;
-      transition: all 0.3s ease;
-    }
+      .step-number {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 2px solid rgba(0, 0, 0, 0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 500;
+        color: rgba(0, 0, 0, 0.38);
+        background: white;
+        transition: all 0.3s ease;
+      }
 
-    .step.active .step-number {
-      border-color: #1976d2;
-      background: #1976d2;
-      color: white;
-    }
+      .step.active .step-number {
+        border-color: #1976d2;
+        background: #1976d2;
+        color: white;
+      }
 
-    .step.completed .step-number {
-      border-color: #4caf50;
-      background: #4caf50;
-      color: white;
-    }
+      .step.completed .step-number {
+        border-color: #4caf50;
+        background: #4caf50;
+        color: white;
+      }
 
-    .step-label {
-      font-size: 12px;
-      color: rgba(0, 0, 0, 0.6);
-      font-weight: 500;
-    }
+      .step-label {
+        font-size: 12px;
+        color: rgba(0, 0, 0, 0.6);
+        font-weight: 500;
+      }
 
-    .step.active .step-label {
-      color: #1976d2;
-    }
+      .step.active .step-label {
+        color: #1976d2;
+      }
 
-    .step-divider {
-      width: 80px;
-      height: 2px;
-      background: rgba(0, 0, 0, 0.12);
-      margin: 0 16px;
-    }
+      .step-divider {
+        width: 80px;
+        height: 2px;
+        background: rgba(0, 0, 0, 0.12);
+        margin: 0 16px;
+      }
 
-    .dialog-content {
-      flex: 1;
-      overflow-y: auto;
-      background: #fafafa;
-      padding: 24px;
-      max-width: 1200px;
-      margin: 0 auto;
-      width: 100%;
-    }
+      .dialog-content {
+        flex: 1;
+        overflow-y: auto;
+        background: #fafafa;
+        padding: 24px;
+        max-width: 1200px;
+        margin: 0 auto;
+        width: 100%;
+      }
 
-    .step-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-      padding: 24px;
-      background: white;
-      border-top: 1px solid rgba(0, 0, 0, 0.12);
-      position: sticky;
-      bottom: 0;
-      z-index: 10;
-    }
+      .step-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        padding: 24px;
+        background: white;
+        border-top: 1px solid rgba(0, 0, 0, 0.12);
+        position: sticky;
+        bottom: 0;
+        z-index: 10;
+      }
 
-    .back-button-container {
-      padding: 16px 24px;
-      background: white;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-    }
-  `]
+      .back-button-container {
+        padding: 16px 24px;
+        background: white;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+      }
+    `,
+  ],
 })
 export class PdfTemplateCreateDialogComponent {
   private pdfTemplatesService = inject(PdfTemplateService);
@@ -259,7 +269,8 @@ export class PdfTemplateCreateDialogComponent {
 
     try {
       const createRequest = formData as CreatePdfTemplateRequest;
-      const result = await this.pdfTemplatesService.createPdfTemplate(createRequest);
+      const result =
+        await this.pdfTemplatesService.createPdfTemplate(createRequest);
 
       if (result) {
         this.snackBar.open('PDF Template created successfully', 'Close', {
@@ -275,14 +286,10 @@ export class PdfTemplateCreateDialogComponent {
       const errorMessage = this.pdfTemplatesService.permissionError()
         ? 'You do not have permission to create PDF Templates'
         : error?.message || 'Failed to create PDF Template';
-      this.snackBar.open(
-        errorMessage,
-        'Close',
-        {
-          duration: 5000,
-          panelClass: ['error-snackbar']
-        }
-      );
+      this.snackBar.open(errorMessage, 'Close', {
+        duration: 5000,
+        panelClass: ['error-snackbar'],
+      });
     } finally {
       this.loading.set(false);
     }

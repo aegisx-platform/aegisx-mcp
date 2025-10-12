@@ -110,7 +110,7 @@ export const appConfig: ApplicationConfig = {
           minimap: { enabled: true },
           wordWrap: 'on',
           lineNumbers: 'on',
-          folding: true
+          folding: true,
         },
         onMonacoLoad: () => {
           console.log('Monaco Editor loaded successfully');
@@ -121,11 +121,11 @@ export const appConfig: ApplicationConfig = {
               validate: true,
               allowComments: false,
               schemas: [],
-              enableSchemaRequest: false
+              enableSchemaRequest: false,
             });
           }
-        }
-      }
-    }
+        },
+      },
+    },
   ],
 };

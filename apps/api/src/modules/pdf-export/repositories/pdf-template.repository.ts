@@ -244,16 +244,19 @@ export class PdfTemplateRepository extends BaseRepository<
     try {
       const templates = await this.knex(this.tableName)
         .where('is_active', true)
-        .where(function() {
-          this.where('is_template_starter', false)
-            .orWhereNull('is_template_starter');
+        .where(function () {
+          this.where('is_template_starter', false).orWhereNull(
+            'is_template_starter',
+          );
         })
         .orderBy('display_name', 'asc');
 
       return templates.map(this.transformToEntity.bind(this));
     } catch (error) {
       console.error('Error getting active templates for use:', error);
-      throw new Error(`Failed to get active templates for use: ${error.message}`);
+      throw new Error(
+        `Failed to get active templates for use: ${error.message}`,
+      );
     }
   }
 

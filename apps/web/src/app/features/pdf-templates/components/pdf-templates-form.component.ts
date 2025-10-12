@@ -1,6 +1,21 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, inject } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges,
+  inject,
+} from '@angular/core';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatChipsModule } from '@angular/material/chips';
@@ -45,25 +60,37 @@ export interface PdfTemplateFormData {
   ],
   template: `
     <form [formGroup]="pdfTemplatesForm" class="pdf-templates-form">
-
       <!-- Basic Information -->
       <h3 class="section-title">Basic Information</h3>
 
       <mat-form-field class="full-width">
         <mat-label>Name (Unique Identifier)</mat-label>
-        <input matInput formControlName="name" placeholder="e.g., invoice-template">
-        <mat-hint>Lowercase alphanumeric with hyphens/underscores only</mat-hint>
+        <input
+          matInput
+          formControlName="name"
+          placeholder="e.g., invoice-template"
+        />
+        <mat-hint
+          >Lowercase alphanumeric with hyphens/underscores only</mat-hint
+        >
         @if (pdfTemplatesForm.get('name')?.hasError('required')) {
           <mat-error>Name is required</mat-error>
         }
         @if (pdfTemplatesForm.get('name')?.hasError('pattern')) {
-          <mat-error>Only lowercase letters, numbers, hyphens, and underscores allowed</mat-error>
+          <mat-error
+            >Only lowercase letters, numbers, hyphens, and underscores
+            allowed</mat-error
+          >
         }
       </mat-form-field>
 
       <mat-form-field class="full-width">
         <mat-label>Display Name</mat-label>
-        <input matInput formControlName="display_name" placeholder="e.g., Invoice Template">
+        <input
+          matInput
+          formControlName="display_name"
+          placeholder="e.g., Invoice Template"
+        />
         @if (pdfTemplatesForm.get('display_name')?.hasError('required')) {
           <mat-error>Display name is required</mat-error>
         }
@@ -117,7 +144,7 @@ export interface PdfTemplateFormData {
 
       <mat-form-field class="full-width">
         <mat-label>Version</mat-label>
-        <input matInput formControlName="version" placeholder="e.g., 1.0.0">
+        <input matInput formControlName="version" placeholder="e.g., 1.0.0" />
         <mat-hint>Semantic versioning recommended (e.g., 1.0.0)</mat-hint>
       </mat-form-field>
 
@@ -150,7 +177,8 @@ export interface PdfTemplateFormData {
             (click)="generateSchemaFromSampleData()"
             [disabled]="!pdfTemplatesForm.get('sample_data_raw')?.value"
             matTooltip="Auto-generate JSON Schema from sample data above"
-            class="generate-schema-btn">
+            class="generate-schema-btn"
+          >
             <mat-icon>auto_awesome</mat-icon>
             Generate from Sample Data
           </button>
@@ -188,8 +216,12 @@ export interface PdfTemplateFormData {
         <mat-checkbox formControlName="is_active" class="checkbox-field">
           Active Template
         </mat-checkbox>
-        <mat-checkbox formControlName="is_template_starter" class="checkbox-field">
-          Template Starter (Show in template selection when creating new templates)
+        <mat-checkbox
+          formControlName="is_template_starter"
+          class="checkbox-field"
+        >
+          Template Starter (Show in template selection when creating new
+          templates)
         </mat-checkbox>
       </div>
 
@@ -208,7 +240,11 @@ export interface PdfTemplateFormData {
           color="primary"
           type="button"
           (click)="onSubmit()"
-          [disabled]="pdfTemplatesForm.invalid || loading || (mode === 'edit' && !hasChanges())"
+          [disabled]="
+            pdfTemplatesForm.invalid ||
+            loading ||
+            (mode === 'edit' && !hasChanges())
+          "
         >
           @if (loading) {
             <mat-spinner diameter="20" class="inline-spinner"></mat-spinner>
@@ -218,117 +254,119 @@ export interface PdfTemplateFormData {
       </div>
     </form>
   `,
-  styles: [`
-    .pdf-templates-form {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      padding: 16px 0;
-    }
-
-    .section-title {
-      margin: 24px 0 12px 0;
-      color: rgba(0, 0, 0, 0.87);
-      font-size: 16px;
-      font-weight: 500;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-      padding-bottom: 8px;
-    }
-
-    .section-title:first-child {
-      margin-top: 0;
-    }
-
-    .full-width {
-      width: 100%;
-    }
-
-    .form-row {
-      display: flex;
-      gap: 16px;
-      width: 100%;
-    }
-
-    .half-width {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .checkbox-field {
-      margin: 8px 0;
-    }
-
-    .checkbox-group {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin: 8px 0;
-    }
-
-    app-monaco-editor {
-      margin-bottom: 16px;
-    }
-
-    .schema-section {
-      margin-bottom: 16px;
-    }
-
-    .schema-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-      padding: 12px 16px;
-      background: rgba(103, 58, 183, 0.05);
-      border-radius: 8px 8px 0 0;
-      border-bottom: 2px solid rgba(103, 58, 183, 0.2);
-    }
-
-    .schema-title {
-      margin: 0;
-      font-size: 14px;
-      font-weight: 500;
-      color: rgba(0, 0, 0, 0.87);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .generate-schema-btn {
-      min-width: 220px;
-    }
-
-    .generate-schema-btn mat-icon {
-      margin-right: 4px;
-    }
-
-    .form-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-      margin-top: 16px;
-      padding: 12px 0;
-      border-top: 1px solid rgba(0, 0, 0, 0.12);
-    }
-
-    .inline-spinner {
-      margin-right: 8px;
-    }
-
-    @media (max-width: 768px) {
-      .form-row {
+  styles: [
+    `
+      .pdf-templates-form {
+        display: flex;
         flex-direction: column;
+        gap: 16px;
+        padding: 16px 0;
       }
 
-      .half-width {
+      .section-title {
+        margin: 24px 0 12px 0;
+        color: rgba(0, 0, 0, 0.87);
+        font-size: 16px;
+        font-weight: 500;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+        padding-bottom: 8px;
+      }
+
+      .section-title:first-child {
+        margin-top: 0;
+      }
+
+      .full-width {
         width: 100%;
       }
 
-      .form-actions {
+      .form-row {
+        display: flex;
+        gap: 16px;
+        width: 100%;
+      }
+
+      .half-width {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .checkbox-field {
+        margin: 8px 0;
+      }
+
+      .checkbox-group {
+        display: flex;
         flex-direction: column;
         gap: 8px;
+        margin: 8px 0;
       }
-    }
-  `]
+
+      app-monaco-editor {
+        margin-bottom: 16px;
+      }
+
+      .schema-section {
+        margin-bottom: 16px;
+      }
+
+      .schema-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+        padding: 12px 16px;
+        background: rgba(103, 58, 183, 0.05);
+        border-radius: 8px 8px 0 0;
+        border-bottom: 2px solid rgba(103, 58, 183, 0.2);
+      }
+
+      .schema-title {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 500;
+        color: rgba(0, 0, 0, 0.87);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .generate-schema-btn {
+        min-width: 220px;
+      }
+
+      .generate-schema-btn mat-icon {
+        margin-right: 4px;
+      }
+
+      .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 16px;
+        padding: 12px 0;
+        border-top: 1px solid rgba(0, 0, 0, 0.12);
+      }
+
+      .inline-spinner {
+        margin-right: 8px;
+      }
+
+      @media (max-width: 768px) {
+        .form-row {
+          flex-direction: column;
+        }
+
+        .half-width {
+          width: 100%;
+        }
+
+        .form-actions {
+          flex-direction: column;
+          gap: 8px;
+        }
+      }
+    `,
+  ],
 })
 export class PdfTemplateFormComponent implements OnInit, OnChanges {
   private fb = inject(FormBuilder);
@@ -343,7 +381,9 @@ export class PdfTemplateFormComponent implements OnInit, OnChanges {
   private originalFormValue: any;
 
   // JSON validator
-  private jsonValidator(control: AbstractControl): { [key: string]: any } | null {
+  private jsonValidator(
+    control: AbstractControl,
+  ): { [key: string]: any } | null {
     if (!control.value) {
       return null; // Allow empty for optional fields
     }
@@ -360,7 +400,10 @@ export class PdfTemplateFormComponent implements OnInit, OnChanges {
     // Required fields
     name: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9_-]+$/)]],
     display_name: ['', [Validators.required]],
-    template_data_raw: ['', [Validators.required, this.jsonValidator.bind(this)]],
+    template_data_raw: [
+      '',
+      [Validators.required, this.jsonValidator.bind(this)],
+    ],
 
     // Optional fields
     description: [''],
@@ -386,7 +429,6 @@ export class PdfTemplateFormComponent implements OnInit, OnChanges {
       this.populateForm(this.initialData);
     }
   }
-
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['initialData'] && this.initialData) {
@@ -431,14 +473,19 @@ export class PdfTemplateFormComponent implements OnInit, OnChanges {
     console.log('[PDF Template Form] Form value to patch:', formValue);
     this.pdfTemplatesForm.patchValue(formValue);
     console.log('[PDF Template Form] Form valid:', this.pdfTemplatesForm.valid);
-    console.log('[PDF Template Form] Form errors:', this.pdfTemplatesForm.errors);
+    console.log(
+      '[PDF Template Form] Form errors:',
+      this.pdfTemplatesForm.errors,
+    );
     this.originalFormValue = this.pdfTemplatesForm.value;
   }
 
   hasChanges(): boolean {
     if (this.mode === 'create') return true;
     const currentValue = this.pdfTemplatesForm.value;
-    return JSON.stringify(currentValue) !== JSON.stringify(this.originalFormValue);
+    return (
+      JSON.stringify(currentValue) !== JSON.stringify(this.originalFormValue)
+    );
   }
 
   onSubmit() {
@@ -448,7 +495,7 @@ export class PdfTemplateFormComponent implements OnInit, OnChanges {
 
     if (!this.pdfTemplatesForm.valid) {
       console.error('[PDF Template Form] Form is invalid. Field errors:');
-      Object.keys(this.pdfTemplatesForm.controls).forEach(key => {
+      Object.keys(this.pdfTemplatesForm.controls).forEach((key) => {
         const control = this.pdfTemplatesForm.get(key);
         if (control?.errors) {
           console.error(`  ${key}:`, control.errors);
@@ -541,7 +588,7 @@ export class PdfTemplateFormComponent implements OnInit, OnChanges {
 
       // Update the schema field with pretty-printed JSON
       this.pdfTemplatesForm.patchValue({
-        schema_raw: JSON.stringify(schema, null, 2)
+        schema_raw: JSON.stringify(schema, null, 2),
       });
 
       console.log('[Schema Generator] Schema generated successfully:', schema);
@@ -562,13 +609,13 @@ export class PdfTemplateFormComponent implements OnInit, OnChanges {
       if (data.length === 0) {
         return {
           type: 'array',
-          items: {}
+          items: {},
         };
       }
       // Infer schema from first item (assumes homogeneous array)
       return {
         type: 'array',
-        items: this.inferSchemaFromData(data[0])
+        items: this.inferSchemaFromData(data[0]),
       };
     }
 
@@ -580,14 +627,14 @@ export class PdfTemplateFormComponent implements OnInit, OnChanges {
         if (this.isDateString(data)) {
           return {
             type: 'string',
-            format: 'date'
+            format: 'date',
           };
         }
         return { type: 'string' };
 
       case 'number':
         return {
-          type: Number.isInteger(data) ? 'integer' : 'number'
+          type: Number.isInteger(data) ? 'integer' : 'number',
         };
 
       case 'boolean':
@@ -610,7 +657,7 @@ export class PdfTemplateFormComponent implements OnInit, OnChanges {
         return {
           type: 'object',
           properties,
-          required: required.length > 0 ? required : undefined
+          required: required.length > 0 ? required : undefined,
         };
       }
 
@@ -625,12 +672,11 @@ export class PdfTemplateFormComponent implements OnInit, OnChanges {
   private isDateString(value: string): boolean {
     // Match common date patterns
     const datePatterns = [
-      /^\d{4}-\d{2}-\d{2}$/,  // YYYY-MM-DD
-      /^\d{2}\/\d{2}\/\d{4}$/,  // DD/MM/YYYY or MM/DD/YYYY
-      /^\d{1,2}\s+[ก-๙]+\s+\d{4}$/,  // Thai date format (15 มกราคม 2567)
+      /^\d{4}-\d{2}-\d{2}$/, // YYYY-MM-DD
+      /^\d{2}\/\d{2}\/\d{4}$/, // DD/MM/YYYY or MM/DD/YYYY
+      /^\d{1,2}\s+[ก-๙]+\s+\d{4}$/, // Thai date format (15 มกราคม 2567)
     ];
 
-    return datePatterns.some(pattern => pattern.test(value));
+    return datePatterns.some((pattern) => pattern.test(value));
   }
-
 }

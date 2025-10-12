@@ -1,6 +1,6 @@
 /**
  * PDF Template Domain Types
- * 
+ *
  * Defines the structure for dynamic PDF templates stored in database
  */
 
@@ -72,13 +72,16 @@ export interface PdfTemplateData {
 export interface PdfTemplateSchema {
   type: 'object';
   required?: string[];
-  properties: Record<string, {
-    type: string;
-    format?: string;
-    items?: any;
-    properties?: any;
-    description?: string;
-  }>;
+  properties: Record<
+    string,
+    {
+      type: string;
+      format?: string;
+      items?: any;
+      properties?: any;
+      description?: string;
+    }
+  >;
 }
 
 export interface PdfTemplateAsset {
@@ -185,7 +188,9 @@ export interface PdfTemplateStats {
 }
 
 // Handlebars helper function types
-export type HandlebarsHelper = (...args: any[]) => string | number | boolean | any;
+export type HandlebarsHelper = (
+  ...args: any[]
+) => string | number | boolean | any;
 
 export interface HandlebarsHelpers {
   formatDate: HandlebarsHelper;

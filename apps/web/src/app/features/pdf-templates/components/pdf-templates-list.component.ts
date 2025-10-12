@@ -139,7 +139,7 @@ import {
                 [(ngModel)]="searchTerm"
                 (ngModelChange)="onSearch($event)"
                 placeholder="Search by name, display name, category..."
-              >
+              />
               <mat-icon matPrefix>search</mat-icon>
               @if (searchTerm) {
                 <button
@@ -158,7 +158,8 @@ import {
               <mat-label>Category</mat-label>
               <mat-select
                 [(ngModel)]="selectedCategory"
-                (ngModelChange)="onCategoryFilterChange($event)">
+                (ngModelChange)="onCategoryFilterChange($event)"
+              >
                 <mat-option [value]="''">All Categories</mat-option>
                 <mat-option value="invoice">Invoice</mat-option>
                 <mat-option value="receipt">Receipt</mat-option>
@@ -174,7 +175,8 @@ import {
               <mat-label>Status</mat-label>
               <mat-select
                 [(ngModel)]="quickFilter"
-                (ngModelChange)="setQuickFilter($event)">
+                (ngModelChange)="setQuickFilter($event)"
+              >
                 <mat-option value="all">All Status</mat-option>
                 <mat-option value="active">Active</mat-option>
                 <mat-option value="inactive">Inactive</mat-option>
@@ -266,7 +268,10 @@ import {
             </div>
 
             <!-- Active Templates -->
-            <div class="summary-item clickable" (click)="setQuickFilter('active')">
+            <div
+              class="summary-item clickable"
+              (click)="setQuickFilter('active')"
+            >
               <div class="summary-icon">
                 <mat-icon color="accent">check_circle</mat-icon>
               </div>
@@ -277,12 +282,17 @@ import {
             </div>
 
             <!-- Template Starters -->
-            <div class="summary-item clickable" (click)="setQuickFilter('starters')">
+            <div
+              class="summary-item clickable"
+              (click)="setQuickFilter('starters')"
+            >
               <div class="summary-icon">
                 <mat-icon style="color: #ff9800;">stars</mat-icon>
               </div>
               <div class="summary-content">
-                <div class="summary-value">{{ getTemplateStartersCount() }}</div>
+                <div class="summary-value">
+                  {{ getTemplateStartersCount() }}
+                </div>
                 <div class="summary-label">Starter Templates</div>
               </div>
             </div>
@@ -306,7 +316,10 @@ import {
               </div>
               <div class="category-list">
                 @for (cat of getCategoryBreakdown(); track cat.category) {
-                  <div class="category-item" (click)="onCategoryFilterChange(cat.category)">
+                  <div
+                    class="category-item"
+                    (click)="onCategoryFilterChange(cat.category)"
+                  >
                     <span class="category-name">{{ cat.label }}</span>
                     <span class="category-count">{{ cat.count }}</span>
                   </div>
@@ -324,7 +337,9 @@ import {
                 @if (getMostUsedTemplate(); as template) {
                   <div class="template-info">
                     <div class="template-name">{{ template.display_name }}</div>
-                    <div class="template-usage">{{ template.usage_count }} uses</div>
+                    <div class="template-usage">
+                      {{ template.usage_count }} uses
+                    </div>
                   </div>
                 } @else {
                   <div class="no-data">No usage data</div>
@@ -475,7 +490,8 @@ import {
                         <mat-icon
                           class="template-starter-icon"
                           matTooltip="Template Starter"
-                          color="accent">
+                          color="accent"
+                        >
                           stars
                         </mat-icon>
                       }
@@ -690,15 +706,24 @@ import {
                         <mat-icon>more_vert</mat-icon>
                       </button>
                       <mat-menu #actionMenu="matMenu">
-                        <button mat-menu-item (click)="openViewDialog(pdfTemplates)">
+                        <button
+                          mat-menu-item
+                          (click)="openViewDialog(pdfTemplates)"
+                        >
                           <mat-icon>visibility</mat-icon>
                           <span>View Details</span>
                         </button>
-                        <button mat-menu-item (click)="openEditDialog(pdfTemplates)">
+                        <button
+                          mat-menu-item
+                          (click)="openEditDialog(pdfTemplates)"
+                        >
                           <mat-icon>edit</mat-icon>
                           <span>Edit</span>
                         </button>
-                        <button mat-menu-item (click)="openDuplicateDialog(pdfTemplates)">
+                        <button
+                          mat-menu-item
+                          (click)="openDuplicateDialog(pdfTemplates)"
+                        >
                           <mat-icon>content_copy</mat-icon>
                           <span>Duplicate</span>
                         </button>
@@ -2046,8 +2071,19 @@ export class PdfTemplateListComponent implements OnInit, OnDestroy {
   /**
    * Get breakdown of templates by category
    */
-  getCategoryBreakdown(): Array<{ category: string; label: string; count: number }> {
-    const categories = ['invoice', 'receipt', 'report', 'letter', 'certificate', 'other'];
+  getCategoryBreakdown(): Array<{
+    category: string;
+    label: string;
+    count: number;
+  }> {
+    const categories = [
+      'invoice',
+      'receipt',
+      'report',
+      'letter',
+      'certificate',
+      'other',
+    ];
     const labels: Record<string, string> = {
       invoice: 'Invoice',
       receipt: 'Receipt',
@@ -2058,14 +2094,14 @@ export class PdfTemplateListComponent implements OnInit, OnDestroy {
     };
 
     const breakdown = categories
-      .map(category => ({
+      .map((category) => ({
         category,
         label: labels[category],
-        count: this.pdfTemplatesService.pdfTemplatesList().filter(
-          item => item.category === category
-        ).length,
+        count: this.pdfTemplatesService
+          .pdfTemplatesList()
+          .filter((item) => item.category === category).length,
       }))
-      .filter(item => item.count > 0); // Only show categories with templates
+      .filter((item) => item.count > 0); // Only show categories with templates
 
     return breakdown;
   }

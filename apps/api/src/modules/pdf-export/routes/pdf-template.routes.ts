@@ -940,7 +940,8 @@ export async function pdfTemplateRoutes(fastify: FastifyInstance) {
     '/for-use',
     {
       schema: {
-        description: 'Get active PDF templates for actual use (excludes template starters)',
+        description:
+          'Get active PDF templates for actual use (excludes template starters)',
         tags: ['PDF Templates'],
         response: {
           200: {

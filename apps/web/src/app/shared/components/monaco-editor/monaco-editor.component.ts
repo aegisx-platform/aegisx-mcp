@@ -1,6 +1,20 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, EventEmitter, forwardRef, Input, OnDestroy, OnInit, Output, signal } from '@angular/core';
-import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms';
+import {
+  AfterViewInit,
+  Component,
+  EventEmitter,
+  forwardRef,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  signal,
+} from '@angular/core';
+import {
+  ControlValueAccessor,
+  FormsModule,
+  NG_VALUE_ACCESSOR,
+} from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -29,8 +43,8 @@ import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => MonacoEditorComponent),
-      multi: true
-    }
+      multi: true,
+    },
   ],
   template: `
     <div class="monaco-editor-wrapper">
@@ -51,7 +65,8 @@ import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
             type="button"
             (click)="formatCode()"
             matTooltip="Format JSON (Alt+Shift+F)"
-            [disabled]="disabled">
+            [disabled]="disabled"
+          >
             <mat-icon>format_align_left</mat-icon>
           </button>
           <button
@@ -59,7 +74,8 @@ import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
             type="button"
             (click)="validateJson()"
             matTooltip="Validate JSON"
-            [disabled]="disabled">
+            [disabled]="disabled"
+          >
             <mat-icon>check_circle</mat-icon>
           </button>
         </div>
@@ -84,123 +100,127 @@ import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
       }
     </div>
   `,
-  styles: [`
-    .monaco-editor-wrapper {
-      display: flex;
-      flex-direction: column;
-      border: 1px solid #3c3c3c;
-      border-radius: 4px;
-      overflow: hidden;
-      background: #1e1e1e;
-    }
+  styles: [
+    `
+      .monaco-editor-wrapper {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid #3c3c3c;
+        border-radius: 4px;
+        overflow: hidden;
+        background: #1e1e1e;
+      }
 
-    .editor-toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 12px;
-      background: #2d2d30;
-      border-bottom: 1px solid #3c3c3c;
-    }
+      .editor-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 12px;
+        background: #2d2d30;
+        border-bottom: 1px solid #3c3c3c;
+      }
 
-    .toolbar-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+      .toolbar-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
 
-    .toolbar-right {
-      display: flex;
-      gap: 4px;
-    }
+      .toolbar-right {
+        display: flex;
+        gap: 4px;
+      }
 
-    .editor-label {
-      font-size: 14px;
-      font-weight: 500;
-      color: #cccccc;
-    }
+      .editor-label {
+        font-size: 14px;
+        font-weight: 500;
+        color: #cccccc;
+      }
 
-    .error-badge {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      color: #f48771;
-      font-size: 12px;
-    }
+      .error-badge {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        color: #f48771;
+        font-size: 12px;
+      }
 
-    .error-badge mat-icon {
-      font-size: 16px;
-      width: 16px;
-      height: 16px;
-    }
+      .error-badge mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+      }
 
-    .monaco-editor-container {
-      flex: 1;
-      min-height: 200px;
-      position: relative;
-      overflow: hidden;
-    }
+      .monaco-editor-container {
+        flex: 1;
+        min-height: 200px;
+        position: relative;
+        overflow: hidden;
+      }
 
-    .monaco-editor {
-      width: 100%;
-      height: 100%;
-    }
+      .monaco-editor {
+        width: 100%;
+        height: 100%;
+      }
 
-    .monaco-editor.has-error {
-      border-left: 3px solid #f48771;
-    }
+      .monaco-editor.has-error {
+        border-left: 3px solid #f48771;
+      }
 
-    .editor-hint {
-      padding: 8px 12px;
-      font-size: 12px;
-      color: #858585;
-      background: #252526;
-      border-top: 1px solid #3c3c3c;
-    }
+      .editor-hint {
+        padding: 8px 12px;
+        font-size: 12px;
+        color: #858585;
+        background: #252526;
+        border-top: 1px solid #3c3c3c;
+      }
 
-    /* Dark theme icon buttons */
-    .toolbar-right button {
-      color: #cccccc;
-    }
+      /* Dark theme icon buttons */
+      .toolbar-right button {
+        color: #cccccc;
+      }
 
-    .toolbar-right button:hover:not(:disabled) {
-      background-color: rgba(90, 93, 94, 0.31);
-    }
+      .toolbar-right button:hover:not(:disabled) {
+        background-color: rgba(90, 93, 94, 0.31);
+      }
 
-    .toolbar-right button mat-icon {
-      color: #cccccc;
-    }
+      .toolbar-right button mat-icon {
+        color: #cccccc;
+      }
 
-    .toolbar-right button:disabled {
-      opacity: 0.4;
-    }
+      .toolbar-right button:disabled {
+        opacity: 0.4;
+      }
 
-    /* Deep styles for Monaco internals */
-    :host ::ng-deep .monaco-editor-container ngx-monaco-editor {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
+      /* Deep styles for Monaco internals */
+      :host ::ng-deep .monaco-editor-container ngx-monaco-editor {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
 
-    :host ::ng-deep .monaco-editor-container .editor-container {
-      width: 100% !important;
-      height: 100% !important;
-    }
+      :host ::ng-deep .monaco-editor-container .editor-container {
+        width: 100% !important;
+        height: 100% !important;
+      }
 
-    :host ::ng-deep .monaco-editor {
-      border: none !important;
-    }
+      :host ::ng-deep .monaco-editor {
+        border: none !important;
+      }
 
-    :host ::ng-deep .monaco-editor .monaco-scrollable-element {
-      border: none !important;
-    }
+      :host ::ng-deep .monaco-editor .monaco-scrollable-element {
+        border: none !important;
+      }
 
-    :host ::ng-deep .monaco-editor .overflow-guard {
-      border: none !important;
-    }
-  `]
+      :host ::ng-deep .monaco-editor .overflow-guard {
+        border: none !important;
+      }
+    `,
+  ],
 })
-export class MonacoEditorComponent implements ControlValueAccessor, OnInit, AfterViewInit, OnDestroy {
+export class MonacoEditorComponent
+  implements ControlValueAccessor, OnInit, AfterViewInit, OnDestroy
+{
   @Input() label = 'JSON Editor';
   @Input() hint = '';
   @Input() height = '300px';
@@ -215,8 +235,10 @@ export class MonacoEditorComponent implements ControlValueAccessor, OnInit, Afte
   errorMessage = signal<string>('');
 
   value = '';
-  private onChange: (value: string) => void = () => { };
-  private onTouched: () => void = () => { };
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  private onChange: (value: string) => void = () => {};
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  private onTouched: () => void = () => {};
 
   editorOptions = {
     theme: 'vs-dark',
@@ -237,21 +259,25 @@ export class MonacoEditorComponent implements ControlValueAccessor, OnInit, Afte
     bracketPairColorization: { enabled: true },
     suggest: {
       showWords: true,
-      showSnippets: true
+      showSnippets: true,
     },
     quickSuggestions: {
       other: true,
       comments: false,
-      strings: true
+      strings: true,
     },
     padding: {
       top: 12,
-      bottom: 12
-    }
+      bottom: 12,
+    },
   };
 
   ngOnInit() {
-    console.log('[Monaco Editor] OnInit', { height: this.height, language: this.language, value: this.value?.substring(0, 50) });
+    console.log('[Monaco Editor] OnInit', {
+      height: this.height,
+      language: this.language,
+      value: this.value?.substring(0, 50),
+    });
 
     // Update editor height
     if (this.height) {
@@ -264,13 +290,15 @@ export class MonacoEditorComponent implements ControlValueAccessor, OnInit, Afte
     if (this.language) {
       this.editorOptions = {
         ...this.editorOptions,
-        language: this.language
+        language: this.language,
       };
     }
   }
 
   ngAfterViewInit() {
-    console.log('[Monaco Editor] AfterViewInit', { value: this.value?.substring(0, 50) });
+    console.log('[Monaco Editor] AfterViewInit', {
+      value: this.value?.substring(0, 50),
+    });
   }
 
   ngOnDestroy() {

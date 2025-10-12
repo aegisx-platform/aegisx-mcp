@@ -94,11 +94,13 @@ export class PDFMakeService {
       const fontStatus = this.fontManager.getFontStatus();
       console.log('Font Status:', {
         loaded: fontStatus.loaded,
-        thaiFontsAvailable: fontStatus.thaiFontsAvailable
+        thaiFontsAvailable: fontStatus.thaiFontsAvailable,
       });
-
     } catch (error) {
-      console.warn('Font initialization failed, using defaults:', error.message);
+      console.warn(
+        'Font initialization failed, using defaults:',
+        error.message,
+      );
       this.fontsInitialized = true; // Continue with default fonts
     }
   }
@@ -119,25 +121,46 @@ export class PDFMakeService {
           const fonts = this.fontManager.getFontsForPDFMake();
 
           // Add direct Sarabun font loading from files
-          const sarabunDir = path.join(process.cwd(), 'apps', 'api', 'src', 'assets', 'fonts', 'Sarabun');
+          const sarabunDir = path.join(
+            process.cwd(),
+            'apps',
+            'api',
+            'src',
+            'assets',
+            'fonts',
+            'Sarabun',
+          );
 
           try {
             if (fs.existsSync(sarabunDir)) {
-              console.log('🔍 Loading Sarabun fonts directly from:', sarabunDir);
+              console.log(
+                '🔍 Loading Sarabun fonts directly from:',
+                sarabunDir,
+              );
               fonts.Sarabun = {
-                normal: fs.readFileSync(path.join(sarabunDir, 'Sarabun-Regular.ttf')),
-                bold: fs.readFileSync(path.join(sarabunDir, 'Sarabun-Bold.ttf')),
-                italics: fs.readFileSync(path.join(sarabunDir, 'Sarabun-Italic.ttf')),
-                bolditalics: fs.readFileSync(path.join(sarabunDir, 'Sarabun-BoldItalic.ttf'))
+                normal: fs.readFileSync(
+                  path.join(sarabunDir, 'Sarabun-Regular.ttf'),
+                ),
+                bold: fs.readFileSync(
+                  path.join(sarabunDir, 'Sarabun-Bold.ttf'),
+                ),
+                italics: fs.readFileSync(
+                  path.join(sarabunDir, 'Sarabun-Italic.ttf'),
+                ),
+                bolditalics: fs.readFileSync(
+                  path.join(sarabunDir, 'Sarabun-BoldItalic.ttf'),
+                ),
               };
               console.log('✅ Sarabun fonts loaded directly');
             } else {
-              console.warn('⚠️ Sarabun directory not found, using Helvetica fallback');
+              console.warn(
+                '⚠️ Sarabun directory not found, using Helvetica fallback',
+              );
               fonts.Sarabun = {
                 normal: 'Helvetica',
                 bold: 'Helvetica-Bold',
                 italics: 'Helvetica-Oblique',
-                bolditalics: 'Helvetica-BoldOblique'
+                bolditalics: 'Helvetica-BoldOblique',
               };
             }
           } catch (error) {
@@ -146,7 +169,7 @@ export class PDFMakeService {
               normal: 'Helvetica',
               bold: 'Helvetica-Bold',
               italics: 'Helvetica-Oblique',
-              bolditalics: 'Helvetica-BoldOblique'
+              bolditalics: 'Helvetica-BoldOblique',
             };
           }
 
@@ -174,7 +197,6 @@ export class PDFMakeService {
 
           // Finalize the PDF
           pdfDoc.end();
-
         } catch (error) {
           console.error('PDFMake createPdf error:', error);
           reject(new Error(`PDF generation failed: ${error.message}`));
@@ -193,7 +215,9 @@ export class PDFMakeService {
   async generatePdfFromDocDefinition(docDefinition: any): Promise<Buffer> {
     return new Promise((resolve, reject) => {
       try {
-        console.log('[PDFMakeService] Generating PDF from document definition...');
+        console.log(
+          '[PDFMakeService] Generating PDF from document definition...',
+        );
         // Get fonts for PdfPrinter
         const fonts = this.fontManager.getFontsForPDFMake();
         const printer = new PdfPrinter(fonts);
@@ -208,18 +232,23 @@ export class PDFMakeService {
 
         pdfDoc.on('end', () => {
           const result = Buffer.concat(chunks);
-          console.log('[PDFMakeService] PDF generated successfully, size:', result.length);
+          console.log(
+            '[PDFMakeService] PDF generated successfully, size:',
+            result.length,
+          );
           resolve(result);
         });
 
         pdfDoc.on('error', (error: Error) => {
-          console.error('[PDFMakeService] PDF document generation error:', error);
+          console.error(
+            '[PDFMakeService] PDF document generation error:',
+            error,
+          );
           reject(new Error(`PDF generation failed: ${error.message}`));
         });
 
         // Finalize the PDF
         pdfDoc.end();
-
       } catch (error) {
         console.error('[PDFMakeService] PDF generation error:', error);
         reject(new Error(`PDF generation failed: ${error.message}`));
@@ -230,7 +259,9 @@ export class PDFMakeService {
   /**
    * Generate PDF preview for server-side preview
    */
-  async generatePreview(options: PdfExportOptions): Promise<PdfPreviewResponse> {
+  async generatePreview(
+    options: PdfExportOptions,
+  ): Promise<PdfPreviewResponse> {
     try {
       const docDefinition = this.createDocumentDefinition(options);
 
@@ -259,13 +290,14 @@ export class PDFMakeService {
               resolve({
                 success: true,
                 previewUrl: `/api/pdf-preview/${previewId}`,
-                documentDefinition: this.sanitizeDocDefinitionForPreview(docDefinition)
+                documentDefinition:
+                  this.sanitizeDocDefinitionForPreview(docDefinition),
               });
             } catch (writeError) {
               console.error('Preview file write error:', writeError);
               resolve({
                 success: false,
-                error: `Preview generation failed: ${writeError.message}`
+                error: `Preview generation failed: ${writeError.message}`,
               });
             }
           });
@@ -274,18 +306,17 @@ export class PDFMakeService {
             console.error('Preview PDF creation error:', error);
             resolve({
               success: false,
-              error: `Preview creation failed: ${error.message}`
+              error: `Preview creation failed: ${error.message}`,
             });
           });
 
           // Finalize the PDF
           pdfDoc.end();
-
         } catch (error) {
           console.error('Preview PDF creation error:', error);
           resolve({
             success: false,
-            error: `Preview creation failed: ${error.message}`
+            error: `Preview creation failed: ${error.message}`,
           });
         }
       });
@@ -293,7 +324,7 @@ export class PDFMakeService {
       console.error('Preview preparation error:', error);
       return {
         success: false,
-        error: `Preview preparation failed: ${error.message}`
+        error: `Preview preparation failed: ${error.message}`,
       };
     }
   }
@@ -353,11 +384,14 @@ export class PDFMakeService {
       orientation,
       showSummary = true,
       groupBy,
-      logo
+      logo,
     } = options;
 
     // Get template configuration
-    const templateConfig = customTemplate || this.templates.get(template) || this.templates.get('professional')!;
+    const templateConfig =
+      customTemplate ||
+      this.templates.get(template) ||
+      this.templates.get('professional')!;
 
     // Debug log: show which template and styles are being used
     console.log('🔍 PDF Template Debug:', {
@@ -365,11 +399,12 @@ export class PDFMakeService {
       templateFound: !!this.templates.get(template),
       usingTemplate: templateConfig.name,
       tableHeaderStyle: templateConfig.styles?.tableHeader,
-      tableCellStyle: templateConfig.styles?.tableCell
+      tableCellStyle: templateConfig.styles?.tableCell,
     });
 
     // Auto-determine orientation based on field count
-    const finalOrientation = orientation || (fields && fields.length > 6 ? 'landscape' : 'portrait');
+    const finalOrientation =
+      orientation || (fields && fields.length > 6 ? 'landscape' : 'portrait');
 
     // Prepare content
     const content: any[] = [];
@@ -403,21 +438,29 @@ export class PDFMakeService {
 
     // Determine the best font for the content
     const documentText = this.extractTextFromContent(content);
-    const bestFont = this.fontManager.getBestFont(documentText, templateConfig.defaultFont);
+    const bestFont = this.fontManager.getBestFont(
+      documentText,
+      templateConfig.defaultFont,
+    );
 
     // Force use Sarabun font for better Thai support
-    const finalFont = this.fontManager.isFontAvailable('Sarabun') ? 'Sarabun' : bestFont;
+    const finalFont = this.fontManager.isFontAvailable('Sarabun')
+      ? 'Sarabun'
+      : bestFont;
 
     console.log('🔍 PDF Font Debug:', {
       documentText: documentText.substring(0, 100),
       bestFont,
       finalFont,
       availableFonts: this.fontManager.getAvailableFonts(),
-      fontStatus: this.fontManager.getFontStatus()
+      fontStatus: this.fontManager.getFontStatus(),
     });
 
     // Optimize styles for font
-    const optimizedStyles = this.optimizeStylesForFont(templateConfig.styles, finalFont);
+    const optimizedStyles = this.optimizeStylesForFont(
+      templateConfig.styles,
+      finalFont,
+    );
 
     // Create document definition with Thai font support
     const docDefinition: any = {
@@ -438,7 +481,7 @@ export class PDFMakeService {
       tableHeaderFinal: optimizedStyles?.tableHeader,
       tableCellFinal: optimizedStyles?.tableCell,
       defaultStyleFont: docDefinition.defaultStyle.font,
-      optimizedStylesKeys: Object.keys(optimizedStyles || {})
+      optimizedStylesKeys: Object.keys(optimizedStyles || {}),
     });
 
     // Add header and footer if defined in template
@@ -453,13 +496,19 @@ export class PDFMakeService {
       const self = this;
 
       const originalFooter = templateConfig.footer;
-      docDefinition.footer = (currentPage: number, pageCount: number, pageSize: any) => {
+      docDefinition.footer = (
+        currentPage: number,
+        pageCount: number,
+        pageSize: any,
+      ) => {
         if (typeof originalFooter === 'function') {
           const footerResult = originalFooter(currentPage, pageCount, pageSize);
 
           // Create export date text for footer
-          const exportDateText = capturedMetadata && capturedShowSummary ?
-            self.createExportDateText(capturedMetadata) : '';
+          const exportDateText =
+            capturedMetadata && capturedShowSummary
+              ? self.createExportDateText(capturedMetadata)
+              : '';
 
           // Return footer with columns layout
           return {
@@ -475,9 +524,9 @@ export class PDFMakeService {
                 fontSize: 7,
                 color: '#95a5a6',
                 width: '*',
-                margin: [0, 0, 10, 0]
-              }
-            ]
+                margin: [0, 0, 10, 0],
+              },
+            ],
           };
         }
         return originalFooter;
@@ -503,8 +552,17 @@ export class PDFMakeService {
       // Convert to local path: apps/api/src/assets/logos/aegisx-logo.png
       const urlPath = logo.split('/api/assets/')[1];
       if (urlPath) {
-        logoPath = path.join(process.cwd(), 'apps', 'api', 'src', 'assets', urlPath);
-        console.log(`🔍 Converting logo URL to local path: ${logo} -> ${logoPath}`);
+        logoPath = path.join(
+          process.cwd(),
+          'apps',
+          'api',
+          'src',
+          'assets',
+          urlPath,
+        );
+        console.log(
+          `🔍 Converting logo URL to local path: ${logo} -> ${logoPath}`,
+        );
 
         // Check if file exists
         if (!fs.existsSync(logoPath)) {
@@ -518,7 +576,7 @@ export class PDFMakeService {
       image: logoPath,
       width: 100,
       alignment: 'center',
-      margin: [0, 0, 0, 5]
+      margin: [0, 0, 0, 5],
     };
   }
 
@@ -531,8 +589,8 @@ export class PDFMakeService {
         text: title,
         style: 'documentTitle',
         alignment: 'center',
-        margin: [0, 0, 0, 0]
-      }
+        margin: [0, 0, 0, 0],
+      },
     ];
 
     if (subtitle) {
@@ -540,7 +598,7 @@ export class PDFMakeService {
         text: subtitle,
         style: 'documentSubtitle',
         alignment: 'center',
-        margin: [0, 0, 0, 0]
+        margin: [0, 0, 0, 0],
       });
     } else {
       titleSection[0].margin = [0, 0, 0, 20];
@@ -566,23 +624,24 @@ export class PDFMakeService {
             hour: '2-digit',
             minute: '2-digit',
             second: '2-digit',
-            hour12: false
-          }), style: 'metadataValue'
-        }
+            hour12: false,
+          }),
+          style: 'metadataValue',
+        },
       ]);
     }
 
     if (metadata?.exportedBy) {
       metadataContent.push([
         { text: 'Exported By:', style: 'metadataLabel' },
-        { text: metadata.exportedBy, style: 'metadataValue' }
+        { text: metadata.exportedBy, style: 'metadataValue' },
       ]);
     }
 
     if (metadata?.totalRecords) {
       metadataContent.push([
         { text: 'Total Records:', style: 'metadataLabel' },
-        { text: metadata.totalRecords.toString(), style: 'metadataValue' }
+        { text: metadata.totalRecords.toString(), style: 'metadataValue' },
       ]);
     }
 
@@ -592,7 +651,7 @@ export class PDFMakeService {
       style: 'metadataSection',
       table: {
         body: metadataContent,
-        widths: ['15%', '85%']
+        widths: ['15%', '85%'],
       },
       layout: 'noBorders',
       margin: [0, 0, 0, 20],
@@ -606,8 +665,13 @@ export class PDFMakeService {
     if (!metadata?.exportedAt) return '';
 
     return `Date: ${metadata.exportedAt.toLocaleString('en-GB', {
-      year: 'numeric', month: '2-digit', day: '2-digit',
-      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
     })}`;
   }
 
@@ -620,28 +684,30 @@ export class PDFMakeService {
     // Basic statistics
     summaryData.push([
       { text: 'Record Count:', style: 'summaryLabel' },
-      { text: data.length.toString(), style: 'summaryValue' }
+      { text: data.length.toString(), style: 'summaryValue' },
     ]);
 
     if (fields) {
       summaryData.push([
         { text: 'Fields Exported:', style: 'summaryLabel' },
-        { text: fields.length.toString(), style: 'summaryValue' }
+        { text: fields.length.toString(), style: 'summaryValue' },
       ]);
     }
 
     // Calculate numeric field statistics if any
     if (fields && data.length > 0) {
-      const numericFields = fields.filter(f => f.type === 'number');
+      const numericFields = fields.filter((f) => f.type === 'number');
 
-      numericFields.forEach(field => {
-        const values = data.map(row => row[field.key]).filter(v => v != null && !isNaN(v));
+      numericFields.forEach((field) => {
+        const values = data
+          .map((row) => row[field.key])
+          .filter((v) => v != null && !isNaN(v));
         if (values.length > 0) {
           const sum = values.reduce((a, b) => a + b, 0);
           const avg = sum / values.length;
           summaryData.push([
             { text: `${field.label} (Avg):`, style: 'summaryLabel' },
-            { text: avg.toFixed(2), style: 'summaryValue' }
+            { text: avg.toFixed(2), style: 'summaryValue' },
           ]);
         }
       });
@@ -651,10 +717,10 @@ export class PDFMakeService {
       style: 'summarySection',
       table: {
         body: summaryData,
-        widths: ['30%', '70%']
+        widths: ['30%', '70%'],
       },
       layout: 'lightHorizontalLines',
-      margin: [0, 0, 0, 20]
+      margin: [0, 0, 0, 20],
     };
   }
 
@@ -671,16 +737,16 @@ export class PDFMakeService {
     }
 
     // Prepare table headers
-    const headers = fields.map(field => ({
+    const headers = fields.map((field) => ({
       text: field.label,
-      style: 'tableHeader'
+      style: 'tableHeader',
     }));
 
     // Debug log: show header structure
     console.log('🔍 Table Headers Debug:', {
       headerCount: headers.length,
       firstHeader: headers[0],
-      headerStyles: headers.map(h => ({ text: h.text, style: h.style }))
+      headerStyles: headers.map((h) => ({ text: h.text, style: h.style })),
     });
 
     // Prepare table body
@@ -688,7 +754,7 @@ export class PDFMakeService {
 
     // Add data rows
     data.forEach((row, index) => {
-      const tableRow = fields.map(field => {
+      const tableRow = fields.map((field) => {
         let value = row[field.key];
 
         // Apply custom formatting
@@ -701,7 +767,7 @@ export class PDFMakeService {
 
         return {
           text: value || '',
-          style: 'tableCell'
+          style: 'tableCell',
         };
       });
 
@@ -717,17 +783,21 @@ export class PDFMakeService {
         headerRows: 1,
         keepWithHeaderRows: 1,
         body: tableBody,
-        widths: widths
+        widths: widths,
       },
       layout: 'lightHorizontalLines',
-      margin: [0, 10, 0, 0]
+      margin: [0, 10, 0, 0],
     };
   }
 
   /**
    * Create grouped table
    */
-  private createGroupedTable(data: any[], fields?: PdfExportField[], groupBy?: string): any[] {
+  private createGroupedTable(
+    data: any[],
+    fields?: PdfExportField[],
+    groupBy?: string,
+  ): any[] {
     if (!groupBy || !fields) {
       return [this.createDataTable(data, fields)];
     }
@@ -740,7 +810,7 @@ export class PDFMakeService {
       content.push({
         text: `${groupBy}: ${groupValue}`,
         style: 'groupHeader',
-        margin: [0, 20, 0, 10]
+        margin: [0, 20, 0, 10],
       });
 
       // Add group table
@@ -754,14 +824,17 @@ export class PDFMakeService {
    * Group data by field
    */
   private groupDataBy(data: any[], field: string): Record<string, any[]> {
-    return data.reduce((groups, item) => {
-      const key = item[field] || 'Unknown';
-      if (!groups[key]) {
-        groups[key] = [];
-      }
-      groups[key].push(item);
-      return groups;
-    }, {} as Record<string, any[]>);
+    return data.reduce(
+      (groups, item) => {
+        const key = item[field] || 'Unknown';
+        if (!groups[key]) {
+          groups[key] = [];
+        }
+        groups[key].push(item);
+        return groups;
+      },
+      {} as Record<string, any[]>,
+    );
   }
 
   /**
@@ -785,9 +858,13 @@ export class PDFMakeService {
       case 'boolean':
         return value ? 'Yes' : 'No';
       case 'number':
-        return typeof value === 'number' ? value.toLocaleString() : value.toString();
+        return typeof value === 'number'
+          ? value.toLocaleString()
+          : value.toString();
       case 'json':
-        return typeof value === 'object' ? JSON.stringify(value, null, 2) : value.toString();
+        return typeof value === 'object'
+          ? JSON.stringify(value, null, 2)
+          : value.toString();
       default:
         return value.toString();
     }
@@ -799,7 +876,7 @@ export class PDFMakeService {
    * Calculate dynamic column widths
    */
   private calculateColumnWidths(fields: PdfExportField[], data: any[]): any[] {
-    return fields.map(field => {
+    return fields.map((field) => {
       // Use explicit width if provided
       if (field.width) {
         return field.width;
@@ -812,7 +889,11 @@ export class PDFMakeService {
         return 60; // IDs are usually shorter
       }
 
-      if (fieldName.includes('description') || fieldName.includes('content') || fieldName.includes('message')) {
+      if (
+        fieldName.includes('description') ||
+        fieldName.includes('content') ||
+        fieldName.includes('message')
+      ) {
         return '*'; // Description fields get remaining space
       }
 
@@ -837,13 +918,15 @@ export class PDFMakeService {
    * Sanitize document definition for preview (remove functions)
    */
   private sanitizeDocDefinitionForPreview(docDef: any): any {
-    const sanitized = JSON.parse(JSON.stringify(docDef, (key, value) => {
-      // Remove functions for JSON serialization
-      if (typeof value === 'function') {
-        return '[Function]';
-      }
-      return value;
-    }));
+    const sanitized = JSON.parse(
+      JSON.stringify(docDef, (key, value) => {
+        // Remove functions for JSON serialization
+        if (typeof value === 'function') {
+          return '[Function]';
+        }
+        return value;
+      }),
+    );
 
     return sanitized;
   }
@@ -865,146 +948,146 @@ export class PDFMakeService {
     this.templates.set('professional', {
       name: 'Professional',
       layout: {
-        name: 'lightHorizontalLines'
+        name: 'lightHorizontalLines',
       },
       pageMargins: [40, 60, 40, 60],
       styles: {
         documentTitle: {
           fontSize: 18,
           bold: true,
-          color: '#2c3e50'
+          color: '#2c3e50',
         },
         documentSubtitle: {
           fontSize: 14,
-          color: '#7f8c8d'
+          color: '#7f8c8d',
         },
         metadataSection: {
           fontSize: 9,
           color: '#95a5a6',
-          lineHeight: 0.6
+          lineHeight: 0.6,
         },
         metadataLabel: {
           bold: true,
-          fontSize: 9
+          fontSize: 9,
         },
         metadataValue: {
-          fontSize: 9
+          fontSize: 9,
         },
         summarySection: {
           fontSize: 10,
-          color: '#2c3e50'
+          color: '#2c3e50',
         },
         summaryLabel: {
           bold: true,
-          fontSize: 10
+          fontSize: 10,
         },
         summaryValue: {
-          fontSize: 10
+          fontSize: 10,
         },
         tableHeader: {
           fontSize: 6,
           bold: true,
           fillColor: '#ecf0f1',
           color: '#2c3e50',
-          alignment: 'left'
+          alignment: 'left',
         },
         tableCell: {
           fontSize: 5,
           color: '#2c3e50',
-          alignment: 'left'
+          alignment: 'left',
         },
         dataTable: {
-          margin: [0, 10, 0, 0]
+          margin: [0, 10, 0, 0],
         },
         groupHeader: {
           fontSize: 14,
           bold: true,
-          color: '#e74c3c'
+          color: '#e74c3c',
         },
         noData: {
           fontSize: 12,
           italics: true,
           color: '#95a5a6',
-          alignment: 'center'
-        }
+          alignment: 'center',
+        },
       },
       footer: (currentPage: number, pageCount: number) => ({
         text: `Page ${currentPage} of ${pageCount}`,
         alignment: 'center',
         fontSize: 8,
-        color: '#95a5a6'
-      })
+        color: '#95a5a6',
+      }),
     });
 
     // Minimal template
     this.templates.set('minimal', {
       name: 'Minimal',
       layout: {
-        name: 'noBorders'
+        name: 'noBorders',
       },
       pageMargins: [30, 40, 30, 40],
       styles: {
         documentTitle: {
           fontSize: 18,
-          bold: true
+          bold: true,
         },
         documentSubtitle: {
-          fontSize: 14
+          fontSize: 14,
         },
         tableHeader: {
           fontSize: 9,
-          bold: true
+          bold: true,
         },
         tableCell: {
-          fontSize: 8
+          fontSize: 8,
         },
         noData: {
           fontSize: 10,
           italics: true,
-          alignment: 'center'
-        }
-      }
+          alignment: 'center',
+        },
+      },
     });
 
     // Standard template
     this.templates.set('standard', {
       name: 'Standard',
       layout: {
-        name: 'headerLineOnly'
+        name: 'headerLineOnly',
       },
       pageMargins: [40, 50, 40, 50],
       styles: {
         documentTitle: {
           fontSize: 20,
-          bold: true
+          bold: true,
         },
         documentSubtitle: {
-          fontSize: 14
+          fontSize: 14,
         },
         tableHeader: {
           fontSize: 10,
           bold: true,
-          fillColor: '#f8f9fa'
+          fillColor: '#f8f9fa',
         },
         tableCell: {
-          fontSize: 9
+          fontSize: 9,
         },
         groupHeader: {
           fontSize: 12,
-          bold: true
+          bold: true,
         },
         noData: {
           fontSize: 11,
           italics: true,
-          alignment: 'center'
-        }
+          alignment: 'center',
+        },
       },
       footer: (currentPage: number, pageCount: number) => ({
         text: `${currentPage}/${pageCount}`,
         alignment: 'right',
         fontSize: 8,
-        margin: [0, 0, 40, 0]
-      })
+        margin: [0, 0, 40, 0],
+      }),
     });
   }
 
@@ -1061,7 +1144,7 @@ export class PDFMakeService {
     const optimizedStyles = JSON.parse(JSON.stringify(styles));
 
     // Apply font to all styles that don't explicitly set a font
-    Object.keys(optimizedStyles).forEach(styleName => {
+    Object.keys(optimizedStyles).forEach((styleName) => {
       const style = optimizedStyles[styleName];
       if (style && typeof style === 'object') {
         // Set font if not explicitly defined
@@ -1085,14 +1168,24 @@ export class PDFMakeService {
   /**
    * Get content type from style name for font size optimization
    */
-  private getContentTypeFromStyleName(styleName: string): 'title' | 'body' | 'small' {
+  private getContentTypeFromStyleName(
+    styleName: string,
+  ): 'title' | 'body' | 'small' {
     const lowerName = styleName.toLowerCase();
 
-    if (lowerName.includes('title') || lowerName.includes('heading') || lowerName.includes('header')) {
+    if (
+      lowerName.includes('title') ||
+      lowerName.includes('heading') ||
+      lowerName.includes('header')
+    ) {
       return 'title';
     }
 
-    if (lowerName.includes('small') || lowerName.includes('caption') || lowerName.includes('footnote')) {
+    if (
+      lowerName.includes('small') ||
+      lowerName.includes('caption') ||
+      lowerName.includes('footnote')
+    ) {
       return 'small';
     }
 
@@ -1127,12 +1220,14 @@ export class PDFMakeService {
     let waited = 0;
 
     while (!this.fontsInitialized && waited < maxWait) {
-      await new Promise(resolve => setTimeout(resolve, checkInterval));
+      await new Promise((resolve) => setTimeout(resolve, checkInterval));
       waited += checkInterval;
     }
 
     if (!this.fontsInitialized) {
-      console.warn('Font initialization timeout, proceeding with default fonts');
+      console.warn(
+        'Font initialization timeout, proceeding with default fonts',
+      );
     }
   }
 
@@ -1149,7 +1244,7 @@ export class PDFMakeService {
   getFontStatus(): any {
     return {
       initialized: this.fontsInitialized,
-      ...this.fontManager.getFontStatus()
+      ...this.fontManager.getFontStatus(),
     };
   }
 }
