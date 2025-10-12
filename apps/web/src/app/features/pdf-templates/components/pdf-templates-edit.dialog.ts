@@ -10,7 +10,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { PdfViewerModule } from 'ng2-pdf-viewer';
+import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 
 import { PdfTemplateService } from '../services/pdf-templates.service';
 import {
@@ -37,7 +37,7 @@ export interface PdfTemplateEditDialogData {
     MatProgressSpinnerModule,
     MatTooltipModule,
     PdfTemplateFormComponent,
-    PdfViewerModule,
+    NgxExtendedPdfViewerModule,
   ],
   template: `
     <div class="edit-dialog-container">
@@ -128,19 +128,26 @@ export interface PdfTemplateEditDialogData {
                   </button>
                 </div>
               } @else if (pdfPreviewUrl()) {
-                <pdf-viewer
+                <ngx-extended-pdf-viewer
                   [src]="pdfPreviewUrl()!"
-                  [render-text]="true"
-                  [original-size]="false"
-                  [show-all]="true"
-                  [fit-to-page]="false"
-                  [zoom]="1.0"
-                  [show-borders]="false"
-                  [autoresize]="true"
-                  [external-link-target]="'blank'"
+                  [textLayer]="true"
+                  [showHandToolButton]="true"
+                  [showSidebarButton]="true"
+                  [showFindButton]="true"
+                  [showPagingButtons]="true"
+                  [showZoomButtons]="true"
+                  [showPresentationModeButton]="true"
+                  [showOpenFileButton]="false"
+                  [showPrintButton]="true"
+                  [showDownloadButton]="true"
+                  [showSecondaryToolbarButton]="true"
+                  [showRotateButton]="true"
+                  [showSpreadButton]="true"
+                  [showPropertiesButton]="true"
+                  [height]="'100%'"
+                  [backgroundColor]="'#525659'"
                   class="pdf-viewer"
-                  style="display: block; width: 100%; height: 100%;"
-                ></pdf-viewer>
+                ></ngx-extended-pdf-viewer>
               } @else {
                 <div class="preview-placeholder">
                   <mat-icon>picture_as_pdf</mat-icon>
