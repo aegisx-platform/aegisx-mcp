@@ -1,5 +1,7 @@
 import { Knex } from 'knex';
 import { PdfTemplateRepository } from '../modules/pdf-export/repositories/pdf-template.repository';
+import { FileUploadRepository } from '../modules/file-upload/file-upload.repository';
+import { FileUploadService } from '../modules/file-upload/file-upload.service';
 import { HandlebarsTemplateService } from './handlebars-template.service';
 import { PDFMakeService } from './pdfmake.service';
 import {
@@ -26,17 +28,30 @@ import { v4 as uuidv4 } from 'uuid';
  */
 export class PdfTemplateService {
   private repository: PdfTemplateRepository;
+  private fileUploadRepository: FileUploadRepository;
+  private fileUploadService: FileUploadService | null = null;
   private handlebarsService: HandlebarsTemplateService;
   private pdfMakeService: PDFMakeService;
   private renderCache: Map<string, CompiledTemplate> = new Map();
   private readonly renderDir: string;
 
-  constructor(knex: Knex) {
+  constructor(knex: Knex, logger?: any) {
     this.repository = new PdfTemplateRepository(knex);
+    this.fileUploadRepository = new FileUploadRepository({
+      db: knex,
+      logger: logger || console,
+    });
     this.handlebarsService = new HandlebarsTemplateService();
     this.pdfMakeService = new PDFMakeService();
     this.renderDir = path.join(process.cwd(), 'temp', 'pdf-renders');
     this.ensureRenderDir();
+  }
+
+  /**
+   * Set FileUploadService (injected from routes)
+   */
+  setFileUploadService(service: FileUploadService): void {
+    this.fileUploadService = service;
   }
 
   /**
@@ -289,10 +304,27 @@ export class PdfTemplateService {
         templateVersion,
       );
 
-      // Render template with data
-      const documentDefinition = this.handlebarsService.renderTemplate(
+      // Merge template metadata with render data
+      // This ensures logo_file_id and other template fields are available
+      const renderData = {
+        ...request.data,
+        // Auto-inject template's logo_file_id if it exists and not already provided
+        ...(template.logo_file_id &&
+          !request.data.logo_file_id && {
+            logo_file_id: template.logo_file_id,
+          }),
+      };
+
+      // Render template with merged data
+      let documentDefinition = this.handlebarsService.renderTemplate(
         compiled,
-        request.data,
+        renderData,
+      );
+
+      // Resolve logo markers to base64 data URLs
+      documentDefinition = await this.resolveLogos(
+        documentDefinition,
+        template,
       );
 
       // Override page settings if specified in options
@@ -543,7 +575,14 @@ export class PdfTemplateService {
         throw new Error('Template not found');
       }
 
-      const previewData = customData || template.sample_data || {};
+      // Merge preview data with template metadata
+      // This ensures logo_file_id and other template fields are available in the render context
+      const previewData = {
+        ...(template.sample_data || {}),
+        ...(customData || {}),
+        // Auto-inject template's logo_file_id if it exists
+        ...(template.logo_file_id && { logo_file_id: template.logo_file_id }),
+      };
 
       return await this.renderPdf({
         templateName: template.name,
@@ -730,6 +769,147 @@ export class PdfTemplateService {
     const parts = currentVersion.split('.');
     const patch = parseInt(parts[2] || '0') + 1;
     return `${parts[0] || '1'}.${parts[1] || '0'}.${patch}`;
+  }
+
+  /**
+   * Resolve logo markers in document definition
+   * Replaces __LOGO_{fileId}__ markers with base64 data URLs or empty objects
+   *
+   * Handles missing/invalid logos gracefully:
+   * - If logo_file_id is null/undefined/invalid: replaces with "{}" (PDFMake skips it)
+   * - If file not found in database: replaces with "{}"
+   * - If file fetch fails: replaces with "{}"
+   */
+  private async resolveLogos(
+    docDefinition: any,
+    template: PdfTemplate,
+  ): Promise<any> {
+    try {
+      // Convert to JSON string to find all logo markers
+      let jsonString = JSON.stringify(docDefinition);
+
+      // Find all __LOGO_<anything>__ markers (including null, undefined, invalid UUIDs)
+      const logoMarkerRegex = /__LOGO_([^_]*)__/g;
+      const matches = jsonString.matchAll(logoMarkerRegex);
+      const fileIds = new Set<string>();
+
+      for (const match of matches) {
+        const fileId = match[1];
+        fileIds.add(fileId); // Add all markers, even invalid ones
+      }
+
+      // If no markers found at all, return as-is
+      if (fileIds.size === 0) {
+        return docDefinition;
+      }
+
+      // Check if FileUploadService is available
+      if (!this.fileUploadService) {
+        console.warn(
+          '[PdfTemplateService] FileUploadService not available for logo resolution',
+        );
+        // Replace all logo markers with empty objects
+        for (const fileId of fileIds) {
+          jsonString = jsonString.replace(
+            new RegExp(`"__LOGO_${fileId}__"`, 'g'),
+            '{}',
+          );
+        }
+        return JSON.parse(jsonString);
+      }
+
+      // Resolve each unique file ID
+      for (const fileId of fileIds) {
+        // Check for null/undefined/invalid markers
+        if (
+          !fileId ||
+          fileId === 'null' ||
+          fileId === 'undefined' ||
+          fileId.length < 10
+        ) {
+          console.log(
+            `[PdfTemplateService] Skipping invalid logo marker: __LOGO_${fileId}__ (replacing with empty object)`,
+          );
+          // Replace with empty object - PDFMake will skip it
+          jsonString = jsonString.replace(
+            new RegExp(`"__LOGO_${fileId}__"`, 'g'),
+            '{}',
+          );
+          continue;
+        }
+
+        try {
+          // Get file metadata
+          const logoFile = await this.fileUploadRepository.findById(fileId);
+
+          if (!logoFile) {
+            console.warn(
+              `[PdfTemplateService] Logo file ${fileId} not found for template ${template.name} - replacing with empty object`,
+            );
+            // Replace with empty object instead of leaving marker
+            jsonString = jsonString.replace(
+              new RegExp(`"__LOGO_${fileId}__"`, 'g'),
+              '{}',
+            );
+            continue;
+          }
+
+          // Generate signed URL for the file
+          const signedUrls = await this.fileUploadService.generateSignedUrls(
+            fileId,
+            { expiresIn: 3600 }, // 1 hour expiry
+          );
+
+          // Fetch file from signed URL
+          const response = await fetch(signedUrls.urls.view);
+          if (!response.ok) {
+            console.warn(
+              `[PdfTemplateService] Failed to fetch logo ${fileId}: ${response.statusText} - replacing with empty object`,
+            );
+            jsonString = jsonString.replace(
+              new RegExp(`"__LOGO_${fileId}__"`, 'g'),
+              '{}',
+            );
+            continue;
+          }
+
+          // Convert response to buffer
+          const arrayBuffer = await response.arrayBuffer();
+          const fileBuffer = Buffer.from(arrayBuffer);
+
+          // Convert to base64 data URL
+          const base64Data = fileBuffer.toString('base64');
+          const mimeType = logoFile.mimeType || 'image/png';
+          const dataUrl = `data:${mimeType};base64,${base64Data}`;
+
+          console.log(
+            `[PdfTemplateService] ✅ Resolved logo ${fileId} (${logoFile.originalName}) - ${Math.round(fileBuffer.length / 1024)}KB`,
+          );
+
+          // Replace all occurrences of this specific marker with data URL
+          jsonString = jsonString.replace(
+            new RegExp(`"__LOGO_${fileId}__"`, 'g'),
+            `"${dataUrl}"`,
+          );
+        } catch (err) {
+          console.error(
+            `[PdfTemplateService] Error resolving logo ${fileId}:`,
+            err,
+          );
+          // Replace with empty object on error
+          jsonString = jsonString.replace(
+            new RegExp(`"__LOGO_${fileId}__"`, 'g'),
+            '{}',
+          );
+        }
+      }
+
+      return JSON.parse(jsonString);
+    } catch (error) {
+      console.error('Error resolving logos:', error);
+      // Return original on error
+      return docDefinition;
+    }
   }
 
   private ensureRenderDir(): void {

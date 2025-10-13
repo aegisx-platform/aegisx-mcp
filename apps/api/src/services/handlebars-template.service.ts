@@ -238,6 +238,14 @@ export class HandlebarsTemplateService {
       // Base64 encoding helper
       base64: (str: string) =>
         Buffer.from(str || '', 'utf8').toString('base64'),
+
+      // Logo helper - resolves file_id to base64 data URL
+      // This will be injected with actual file data at render time by PdfTemplateService
+      logo: (fileId: string, _options?: unknown) => {
+        // Placeholder - actual implementation will be injected by PdfTemplateService
+        // Returns a data URL format: data:image/png;base64,<base64_data>
+        return `__LOGO_${fileId}__`; // Marker for replacement
+      },
     };
   }
 
@@ -304,10 +312,36 @@ export class HandlebarsTemplateService {
 
     // Check cache first
     if (this.compiledTemplates.has(cacheKey)) {
-      return this.compiledTemplates.get(cacheKey)!;
+      const cached = this.compiledTemplates.get(cacheKey);
+      if (cached) {
+        return cached;
+      }
     }
 
     try {
+      // Check if templateData is a string (Handlebars template string)
+      if (typeof templateData === 'string') {
+        // Compile the entire string as a Handlebars template
+        const compiledTemplate = Handlebars.compile(templateData);
+
+        const compiled: CompiledTemplate = {
+          templateId,
+          templateName,
+          version,
+          compiledContent: compiledTemplate,
+          styles: {},
+          pageSettings: {
+            size: 'A4',
+            orientation: 'portrait',
+            margins: [40, 60, 40, 60],
+          },
+          compiledAt: new Date(),
+        };
+
+        this.compiledTemplates.set(cacheKey, compiled);
+        return compiled;
+      }
+
       // Deep clone the template data to avoid modifying original
       const templateDataCopy = JSON.parse(JSON.stringify(templateData));
 
@@ -359,6 +393,29 @@ export class HandlebarsTemplateService {
     }
 
     if (obj && typeof obj === 'object') {
+      // Handle special __handlebarsBody pattern
+      // This is used for table bodies where Handlebars needs to generate array items
+      if (obj.__handlebarsBody && typeof obj.__handlebarsBody === 'string') {
+        // Replace placeholder with the handlebars body string
+        const compiled = {};
+        Object.keys(obj).forEach((key) => {
+          if (key === '__handlebarsBody') {
+            // Skip the __handlebarsBody key in the compiled output
+            return;
+          }
+
+          const value = obj[key];
+          // Replace placeholder with the actual handlebars body
+          if (value === '__HANDLEBARS_BODY_PLACEHOLDER__') {
+            compiled[key] = this.compileObject(obj.__handlebarsBody);
+          } else {
+            compiled[key] = this.compileObject(value);
+          }
+        });
+        return compiled;
+      }
+
+      // Normal object compilation
       const compiled = {};
       Object.keys(obj).forEach((key) => {
         compiled[key] = this.compileObject(obj[key]);
@@ -380,7 +437,46 @@ export class HandlebarsTemplateService {
         helpers: this.helpers,
       };
 
-      // Render the compiled content
+      // Check if compiledContent is a function (string-based template)
+      if (typeof compiled.compiledContent === 'function') {
+        // Render the Handlebars template to get JSON string
+        const renderedString = compiled.compiledContent(contextData);
+
+        console.log(
+          '[Handlebars] Rendered string (first 500 chars):',
+          renderedString.substring(0, 500),
+        );
+
+        // Parse the rendered JSON string
+        let parsedJson;
+        try {
+          parsedJson = JSON.parse(renderedString);
+        } catch (parseError) {
+          console.error('[Handlebars] JSON parse error:', parseError);
+          console.error(
+            '[Handlebars] Invalid JSON:',
+            renderedString.substring(0, 1000),
+          );
+          throw new Error(
+            `Failed to parse rendered template as JSON: ${parseError.message}`,
+          );
+        }
+
+        // Return the complete document definition
+        return {
+          pageSize: compiled.pageSettings.size,
+          pageOrientation: compiled.pageSettings.orientation,
+          pageMargins: compiled.pageSettings.margins,
+          ...parsedJson, // Spread the parsed JSON which should contain content, styles, etc.
+          defaultStyle: parsedJson.defaultStyle || {
+            fontSize: 10,
+            font: 'Sarabun',
+            lineHeight: 1.3,
+          },
+        };
+      }
+
+      // Object-based template (old method)
       const rendered = this.renderObject(compiled.compiledContent, contextData);
 
       // Return the complete document definition
@@ -447,8 +543,21 @@ export class HandlebarsTemplateService {
     };
 
     try {
+      // If templateData is a string (Handlebars template)
+      if (typeof templateData === 'string') {
+        // Skip validation for Handlebars templates
+        // They will be validated at compile/render time
+        result.warnings.push(
+          'Template is a Handlebars string - validation skipped, will be validated at render time',
+        );
+        return result;
+      }
+
+      // For object templates, validate as before
+      const parsedData = templateData;
+
       // Try to compile the template
-      const testCompiled = this.compileObject(templateData.content);
+      const testCompiled = this.compileObject(parsedData.content);
 
       // Try to render with empty data to catch runtime errors
       const testData = {};
@@ -457,7 +566,7 @@ export class HandlebarsTemplateService {
       result.compiledSize = JSON.stringify(testCompiled).length;
 
       // Add warnings for potential issues
-      const templateString = JSON.stringify(templateData);
+      const templateString = JSON.stringify(parsedData);
 
       if (templateString.includes('{{#each')) {
         result.warnings.push(
