@@ -13,12 +13,16 @@ import {
 import {
   ControlValueAccessor,
   FormsModule,
+  NG_VALIDATORS,
   NG_VALUE_ACCESSOR,
+  ValidationErrors,
+  Validator,
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import type { editor } from 'monaco-editor';
 import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 
 /**
@@ -45,6 +49,11 @@ import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
       useExisting: forwardRef(() => MonacoEditorComponent),
       multi: true,
     },
+    {
+      provide: NG_VALIDATORS,
+      useExisting: forwardRef(() => MonacoEditorComponent),
+      multi: true,
+    },
   ],
   template: `
     <div class="monaco-editor-wrapper">
@@ -52,6 +61,12 @@ import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
       <div class="editor-toolbar">
         <div class="toolbar-left">
           <span class="editor-label">{{ label }}</span>
+          @if (allowHandlebars) {
+            <span class="mode-badge handlebars-mode">
+              <mat-icon>code</mat-icon>
+              Handlebars
+            </span>
+          }
           @if (hasError()) {
             <span class="error-badge">
               <mat-icon>error</mat-icon>
@@ -65,7 +80,7 @@ import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
             type="button"
             (click)="formatCode()"
             matTooltip="Format JSON (Alt+Shift+F)"
-            [disabled]="disabled"
+            [disabled]="disabled || allowHandlebars"
           >
             <mat-icon>format_align_left</mat-icon>
           </button>
@@ -84,9 +99,11 @@ import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
       <!-- Monaco Editor -->
       <div class="monaco-editor-container" [style.height]="height">
         <ngx-monaco-editor
+          #monacoEditor
           [options]="editorOptions"
           [(ngModel)]="value"
           (ngModelChange)="onValueChange($event)"
+          (onInit)="onEditorInit($event)"
           [style.height]="height"
           [style.width]="'100%'"
           class="monaco-editor"
@@ -219,7 +236,7 @@ import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
   ],
 })
 export class MonacoEditorComponent
-  implements ControlValueAccessor, OnInit, AfterViewInit, OnDestroy
+  implements ControlValueAccessor, Validator, OnInit, AfterViewInit, OnDestroy
 {
   @Input() label = 'JSON Editor';
   @Input() hint = '';
@@ -227,6 +244,8 @@ export class MonacoEditorComponent
   @Input() language = 'json';
   @Input() disabled = false;
   @Input() required = false;
+  @Input() skipValidation = false; // Skip validation entirely (for special cases)
+  @Input() allowHandlebars = false; // Allow Handlebars syntax (smart validation)
 
   @Output() valueChange = new EventEmitter<string>();
   @Output() validationError = new EventEmitter<string | null>();
@@ -235,6 +254,7 @@ export class MonacoEditorComponent
   errorMessage = signal<string>('');
 
   value = '';
+  private editorInstance: editor.IStandaloneCodeEditor | null = null;
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   private onChange: (value: string) => void = () => {};
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -302,7 +322,35 @@ export class MonacoEditorComponent
   }
 
   ngOnDestroy() {
-    // Cleanup if needed
+    // Cleanup editor instance
+    if (this.editorInstance) {
+      this.editorInstance.dispose();
+      this.editorInstance = null;
+    }
+  }
+
+  /**
+   * Handle editor initialization
+   */
+  onEditorInit(editorInstance: editor.IStandaloneCodeEditor): void {
+    this.editorInstance = editorInstance;
+    console.log('[Monaco Editor] Editor initialized');
+
+    // Disable Monaco's built-in JSON validation when Handlebars is allowed
+    if (this.allowHandlebars && this.language === 'json') {
+      // Get Monaco instance
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const monaco = (window as any).monaco;
+      if (monaco && monaco.languages && monaco.languages.json) {
+        // Configure JSON language to disable validation
+        monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+          validate: false,
+          allowComments: true,
+          schemas: [],
+          enableSchemaRequest: false,
+        });
+      }
+    }
   }
 
   // ControlValueAccessor implementation
@@ -323,6 +371,42 @@ export class MonacoEditorComponent
     this.disabled = isDisabled;
   }
 
+  // Validator implementation
+  validate(): ValidationErrors | null {
+    // 1. Check required field
+    if (!this.value || this.value.trim() === '') {
+      if (this.required) {
+        return { required: true };
+      }
+      return null;
+    }
+
+    // 2. Skip JSON validation if skipValidation is true
+    if (this.skipValidation) {
+      return null;
+    }
+
+    // 3. If allowHandlebars is true, check for Handlebars syntax
+    if (this.allowHandlebars) {
+      const hasHandlebars = this.detectHandlebars(this.value);
+      if (hasHandlebars) {
+        // Has Handlebars - valid
+        return null;
+      }
+    }
+
+    // 4. Validate JSON syntax
+    try {
+      JSON.parse(this.value);
+      return null;
+    } catch (error: unknown) {
+      return {
+        invalidJson: true,
+        message: this.getReadableJsonError(error),
+      };
+    }
+  }
+
   onValueChange(newValue: string): void {
     this.value = newValue;
     this.onChange(newValue);
@@ -332,33 +416,46 @@ export class MonacoEditorComponent
   }
 
   /**
-   * Validate JSON syntax
+   * Validate JSON syntax for UI display
+   * Syncs with the validate() method for form validation
    */
   validateJson(): void {
-    if (!this.value || this.value.trim() === '') {
-      if (this.required) {
-        this.hasError.set(true);
+    const errors = this.validate();
+
+    if (errors) {
+      this.hasError.set(true);
+      if (errors['required']) {
         this.errorMessage.set('This field is required');
         this.validationError.emit('Required field');
-      } else {
-        this.hasError.set(false);
-        this.errorMessage.set('');
-        this.validationError.emit(null);
+      } else if (errors['invalidJson']) {
+        this.errorMessage.set(errors['message'] as string);
+        this.validationError.emit(errors['message'] as string);
       }
-      return;
-    }
-
-    try {
-      JSON.parse(this.value);
+    } else {
       this.hasError.set(false);
       this.errorMessage.set('');
       this.validationError.emit(null);
-    } catch (error: any) {
-      this.hasError.set(true);
-      const errorMsg = this.getReadableJsonError(error);
-      this.errorMessage.set(errorMsg);
-      this.validationError.emit(errorMsg);
     }
+  }
+
+  /**
+   * Detect if content contains Handlebars syntax
+   */
+  private detectHandlebars(content: string): boolean {
+    // Check for common Handlebars patterns
+    const handlebarsPatterns = [
+      /\{\{[^}]+\}\}/, // Variables: {{variable}}
+      /\{\{#each\s+[^}]+\}\}/, // Each loop: {{#each items}}
+      /\{\{\/each\}\}/, // End each: {{/each}}
+      /\{\{#if\s+[^}]+\}\}/, // If statement: {{#if condition}}
+      /\{\{\/if\}\}/, // End if: {{/if}}
+      /\{\{#unless\s+[^}]+\}\}/, // Unless: {{#unless condition}}
+      /\{\{\/unless\}\}/, // End unless: {{/unless}}
+      /\{\{else\}\}/, // Else: {{else}}
+      /\{\{@[^}]+\}\}/, // Special variables: {{@index}}, {{@first}}, etc.
+    ];
+
+    return handlebarsPatterns.some((pattern) => pattern.test(content));
   }
 
   /**
@@ -376,17 +473,93 @@ export class MonacoEditorComponent
       this.hasError.set(false);
       this.errorMessage.set('');
       this.validationError.emit(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Keep original value if formatting fails
       console.warn('Cannot format invalid JSON:', error);
     }
   }
 
   /**
+   * Insert text at the current cursor position
+   * @param text - The text to insert
+   * @param selectInserted - Whether to select the inserted text (default: false)
+   */
+  insertTextAtCursor(text: string, selectInserted = false): void {
+    if (!this.editorInstance) {
+      console.warn('[Monaco Editor] Editor instance not available');
+      return;
+    }
+
+    // Get current cursor position
+    const selection = this.editorInstance.getSelection();
+    if (!selection) {
+      console.warn('[Monaco Editor] No selection available');
+      return;
+    }
+
+    // Create edit operation
+    const range = {
+      startLineNumber: selection.startLineNumber,
+      startColumn: selection.startColumn,
+      endLineNumber: selection.endLineNumber,
+      endColumn: selection.endColumn,
+    };
+
+    // Execute the edit
+    this.editorInstance.executeEdits('insert-text', [
+      {
+        range: range,
+        text: text,
+        forceMoveMarkers: true,
+      },
+    ]);
+
+    // Optionally select the inserted text
+    if (selectInserted) {
+      const lines = text.split('\n');
+      const endLineNumber = range.startLineNumber + lines.length - 1;
+      const endColumn =
+        lines.length === 1
+          ? range.startColumn + text.length
+          : lines[lines.length - 1].length + 1;
+
+      this.editorInstance.setSelection({
+        startLineNumber: range.startLineNumber,
+        startColumn: range.startColumn,
+        endLineNumber: endLineNumber,
+        endColumn: endColumn,
+      });
+    } else {
+      // Move cursor to the end of inserted text
+      const lines = text.split('\n');
+      const endLineNumber = range.startLineNumber + lines.length - 1;
+      const endColumn =
+        lines.length === 1
+          ? range.startColumn + text.length
+          : lines[lines.length - 1].length + 1;
+
+      this.editorInstance.setPosition({
+        lineNumber: endLineNumber,
+        column: endColumn,
+      });
+    }
+
+    // Focus the editor
+    this.editorInstance.focus();
+
+    // Update the value and trigger validation
+    const newValue = this.editorInstance.getValue();
+    this.value = newValue;
+    this.onChange(newValue);
+    this.valueChange.emit(newValue);
+    this.validateJson();
+  }
+
+  /**
    * Get readable error message from JSON parse error
    */
-  private getReadableJsonError(error: any): string {
-    const message = error.message || 'Invalid JSON';
+  private getReadableJsonError(error: unknown): string {
+    const message = error instanceof Error ? error.message : 'Invalid JSON';
 
     // Extract line and column from error message
     const match = message.match(/position (\d+)/);
