@@ -1,6 +1,38 @@
 import { Type, Static } from '@sinclair/typebox';
 
 /**
+ * Logo Settings Schema
+ */
+export const LogoSettingsSchema = Type.Object({
+  width: Type.Optional(Type.Number({ description: 'Logo width in pixels' })),
+  height: Type.Optional(Type.Number({ description: 'Logo height in pixels' })),
+  position: Type.Optional(
+    Type.Union(
+      [Type.Literal('header'), Type.Literal('footer'), Type.Literal('custom')],
+      { description: 'Logo position' },
+    ),
+  ),
+  alignment: Type.Optional(
+    Type.Union(
+      [Type.Literal('left'), Type.Literal('center'), Type.Literal('right')],
+      { description: 'Logo alignment' },
+    ),
+  ),
+  marginTop: Type.Optional(
+    Type.Number({ description: 'Top margin in pixels' }),
+  ),
+  marginBottom: Type.Optional(
+    Type.Number({ description: 'Bottom margin in pixels' }),
+  ),
+  marginLeft: Type.Optional(
+    Type.Number({ description: 'Left margin in pixels' }),
+  ),
+  marginRight: Type.Optional(
+    Type.Number({ description: 'Right margin in pixels' }),
+  ),
+});
+
+/**
  * PDF Template Data Schema
  */
 export const PdfTemplateDataSchema = Type.Object({
@@ -108,7 +140,11 @@ export const CreatePdfTemplateSchema = Type.Object({
       description: 'Template type (document, report, invoice, etc.)',
     }),
   ),
-  template_data: PdfTemplateDataSchema,
+  // Accept both Object (pure JSON) and String (Handlebars template)
+  template_data: Type.Union([PdfTemplateDataSchema, Type.String()], {
+    description:
+      'Template data - Object for pure JSON or String for Handlebars templates',
+  }),
   sample_data: Type.Optional(
     Type.Record(Type.String(), Type.Any(), {
       description: 'Sample data for template testing',
@@ -176,6 +212,12 @@ export const CreatePdfTemplateSchema = Type.Object({
       description: 'Required permissions to use this template',
     }),
   ),
+  logo_file_id: Type.Optional(
+    Type.Union([Type.String({ format: 'uuid' }), Type.Null()], {
+      description: 'UUID of uploaded logo file, or null to remove logo',
+    }),
+  ),
+  logo_settings: Type.Optional(LogoSettingsSchema),
 });
 
 /**
@@ -371,6 +413,10 @@ export const PdfTemplateResponseSchema = Type.Object({
   usage_count: Type.Number(),
   assets: Type.Optional(Type.Array(PdfTemplateAssetSchema)),
   permissions: Type.Optional(Type.Array(Type.String())),
+  logo_file_id: Type.Optional(
+    Type.Union([Type.String({ format: 'uuid' }), Type.Null()]),
+  ),
+  logo_settings: Type.Optional(LogoSettingsSchema),
   created_by: Type.Optional(Type.String({ format: 'uuid' })),
   updated_by: Type.Optional(Type.String({ format: 'uuid' })),
   created_at: Type.String({ format: 'date-time' }),

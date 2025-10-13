@@ -4,6 +4,17 @@
  * Defines the structure for dynamic PDF templates stored in database
  */
 
+export interface LogoSettings {
+  width?: number;
+  height?: number;
+  position?: 'header' | 'footer' | 'custom';
+  alignment?: 'left' | 'center' | 'right';
+  marginTop?: number;
+  marginBottom?: number;
+  marginLeft?: number;
+  marginRight?: number;
+}
+
 export interface PdfTemplate {
   id: string;
   name: string;
@@ -25,6 +36,8 @@ export interface PdfTemplate {
   usage_count: number;
   assets?: PdfTemplateAsset[];
   permissions?: string[];
+  logo_file_id?: string;
+  logo_settings?: LogoSettings;
   created_by?: string;
   updated_by?: string;
   created_at: Date;
@@ -50,13 +63,23 @@ export interface CreatePdfTemplate {
   is_template_starter?: boolean;
   assets?: PdfTemplateAsset[];
   permissions?: string[];
+  logo_file_id?: string;
+  logo_settings?: LogoSettings;
 }
 
 export interface UpdatePdfTemplate extends Partial<CreatePdfTemplate> {
   id?: never; // Prevent ID updates
 }
 
-export interface PdfTemplateData {
+/**
+ * PDF Template Data
+ * Can be either:
+ * - Object: Parsed PDFMake structure (pure JSON templates)
+ * - String: Raw Handlebars template string (will be compiled before rendering)
+ */
+export type PdfTemplateData = PdfTemplateDataObject | string;
+
+export interface PdfTemplateDataObject {
   pageSize?: string;
   pageOrientation?: string;
   pageMargins?: number[];

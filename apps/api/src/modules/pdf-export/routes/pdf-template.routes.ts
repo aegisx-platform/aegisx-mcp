@@ -17,7 +17,9 @@ import {
  * Provides comprehensive PDF template management and rendering API
  */
 export async function pdfTemplateRoutes(fastify: FastifyInstance) {
+  // Create PDF Template Service and inject FileUploadService from fastify instance
   const templateService = new PdfTemplateService(fastify.knex);
+  templateService.setFileUploadService((fastify as any).fileUploadService);
 
   /**
    * Create PDF Template
