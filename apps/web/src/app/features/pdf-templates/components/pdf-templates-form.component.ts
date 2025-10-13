@@ -32,11 +32,13 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MonacoEditorComponent } from '../../../shared/components/monaco-editor/monaco-editor.component';
 import { FileUploadService } from '../../../shared/ui/components/file-upload/file-upload.service';
 import { PdfTemplateGeneratorService } from '../services/pdf-template-generator.service';
-import {
-  InsertTemplate,
-  PdfTemplateInsertService,
-} from '../services/pdf-template-insert.service';
+import { InsertTemplate } from '../services/pdf-template-insert.service';
 import { PdfTemplateValidationService } from '../services/pdf-template-validation.service';
+import {
+  LogoUploadComponent,
+  LogoUploadData,
+} from './logo-upload/logo-upload.component';
+import { TemplateInsertToolbarComponent } from './template-insert-toolbar/template-insert-toolbar.component';
 
 import { PdfTemplate } from '../types/pdf-templates.types';
 
@@ -66,6 +68,8 @@ export interface PdfTemplateFormData {
     MatChipsModule,
     MatTooltipModule,
     MonacoEditorComponent,
+    TemplateInsertToolbarComponent,
+    LogoUploadComponent,
   ],
   template: `
     <form [formGroup]="pdfTemplatesForm" class="pdf-templates-form">
@@ -161,27 +165,10 @@ export interface PdfTemplateFormData {
       <h3 class="section-title">Template Content</h3>
 
       <!-- Quick Insert Toolbar -->
-      <div class="quick-insert-toolbar">
-        <div class="toolbar-header">
-          <mat-icon class="toolbar-icon">auto_awesome</mat-icon>
-          <span class="toolbar-title">Quick Insert</span>
-          <span class="toolbar-subtitle">Add common template structures</span>
-        </div>
-        <div class="toolbar-buttons">
-          @for (template of insertTemplates; track template.name) {
-            <button
-              mat-stroked-button
-              type="button"
-              (click)="insertTemplate(template)"
-              [matTooltip]="template.description"
-              class="insert-btn"
-            >
-              <mat-icon>{{ template.icon }}</mat-icon>
-              <span>{{ template.name }}</span>
-            </button>
-          }
-        </div>
-      </div>
+      <app-template-insert-toolbar
+        [hasLogo]="hasLogoUploaded() || !!pdfTemplatesForm.value.logo_file_id"
+        (templateSelected)="insertTemplate($event)"
+      ></app-template-insert-toolbar>
 
       <app-monaco-editor
         #templateDataEditor
@@ -265,67 +252,17 @@ export interface PdfTemplateFormData {
       <!-- Logo Upload -->
       <h3 class="section-title">Logo Settings</h3>
 
-      <div class="logo-upload-section">
-        <div class="upload-area">
-          <input
-            type="file"
-            #fileInput
-            accept="image/*"
-            (change)="onLogoFileSelected($event)"
-            style="display: none"
-          />
-          <button
-            mat-raised-button
-            color="accent"
-            type="button"
-            (click)="fileInput.click()"
-            [disabled]="uploadingLogo()"
-          >
-            <mat-icon>cloud_upload</mat-icon>
-            {{ uploadedLogo() ? 'Change Logo' : 'Upload Logo' }}
-          </button>
-          @if (uploadingLogo()) {
-            <mat-spinner diameter="24" class="upload-spinner"></mat-spinner>
-          }
-        </div>
-
-        @if (logoPreviewUrl()) {
-          <div class="logo-preview-container">
-            <div class="logo-preview">
-              <img [src]="logoPreviewUrl()" alt="Logo preview" />
-              <button
-                mat-icon-button
-                color="warn"
-                type="button"
-                (click)="removeLogo()"
-                class="remove-logo-btn"
-                matTooltip="Remove logo"
-              >
-                <mat-icon>close</mat-icon>
-              </button>
-            </div>
-            @if (uploadedLogo()) {
-              <div class="logo-info">
-                <p><strong>File:</strong> {{ uploadedLogo()?.originalName }}</p>
-                <p>
-                  <strong>Size:</strong>
-                  {{ formatFileSize(uploadedLogo()?.fileSize || 0) }}
-                </p>
-                <p><strong>Type:</strong> {{ uploadedLogo()?.mimeType }}</p>
-              </div>
-            }
-          </div>
-        }
-
-        @if (logoError()) {
-          <mat-error class="logo-error">{{ logoError() }}</mat-error>
-        }
-
-        <mat-hint class="logo-hint">
-          Upload a logo image (PNG, JPG, SVG). Use
-          <code>{{ logoHelperExample }}</code> in your template to display it.
-        </mat-hint>
-      </div>
+      <app-logo-upload
+        [initialLogoId]="pdfTemplatesForm.value.logo_file_id"
+        [helperText]="
+          'Upload a logo image (PNG, JPG, SVG). Use ' +
+          logoHelperExample +
+          ' in your template to display it.'
+        "
+        (logoUploaded)="onLogoUploaded($event)"
+        (logoRemoved)="onLogoRemoved()"
+        (errorOccurred)="onLogoError($event)"
+      ></app-logo-upload>
 
       <!-- Status & Settings -->
       <h3 class="section-title">Status & Settings</h3>
@@ -488,82 +425,6 @@ export interface PdfTemplateFormData {
         margin-right: 4px;
       }
 
-      .quick-insert-toolbar {
-        margin-bottom: 16px;
-        padding: 16px;
-        background: linear-gradient(
-          135deg,
-          rgba(103, 58, 183, 0.05) 0%,
-          rgba(63, 81, 181, 0.05) 100%
-        );
-        border: 1px solid rgba(103, 58, 183, 0.2);
-        border-radius: 12px;
-      }
-
-      .toolbar-header {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 12px;
-        padding-bottom: 12px;
-        border-bottom: 1px solid rgba(103, 58, 183, 0.15);
-      }
-
-      .toolbar-icon {
-        color: rgba(103, 58, 183, 0.8);
-        font-size: 20px;
-        width: 20px;
-        height: 20px;
-      }
-
-      .toolbar-title {
-        font-size: 14px;
-        font-weight: 600;
-        color: rgba(0, 0, 0, 0.87);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-
-      .toolbar-subtitle {
-        font-size: 12px;
-        color: rgba(0, 0, 0, 0.54);
-        margin-left: auto;
-      }
-
-      .toolbar-buttons {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-      }
-
-      .insert-btn {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 16px;
-        border-color: rgba(103, 58, 183, 0.3);
-        transition: all 0.2s ease;
-      }
-
-      .insert-btn:hover:not(:disabled) {
-        background: rgba(103, 58, 183, 0.08);
-        border-color: rgba(103, 58, 183, 0.5);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(103, 58, 183, 0.15);
-      }
-
-      .insert-btn mat-icon {
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
-        color: rgba(103, 58, 183, 0.8);
-      }
-
-      .insert-btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-
       .form-actions {
         display: flex;
         justify-content: flex-end;
@@ -575,88 +436,6 @@ export interface PdfTemplateFormData {
 
       .inline-spinner {
         margin-right: 8px;
-      }
-
-      .logo-upload-section {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        padding: 16px;
-        background: rgba(0, 0, 0, 0.02);
-        border-radius: 8px;
-        border: 1px dashed rgba(0, 0, 0, 0.12);
-      }
-
-      .upload-area {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
-
-      .upload-spinner {
-        display: inline-block;
-      }
-
-      .logo-preview-container {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-      }
-
-      .logo-preview {
-        position: relative;
-        width: fit-content;
-        max-width: 400px;
-        padding: 16px;
-        background: white;
-        border: 1px solid rgba(0, 0, 0, 0.12);
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-
-      .logo-preview img {
-        max-width: 100%;
-        max-height: 200px;
-        display: block;
-        object-fit: contain;
-      }
-
-      .remove-logo-btn {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        background: white;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-      }
-
-      .logo-info {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        font-size: 14px;
-        color: rgba(0, 0, 0, 0.6);
-      }
-
-      .logo-info p {
-        margin: 0;
-      }
-
-      .logo-error {
-        color: #f44336;
-        font-size: 12px;
-      }
-
-      .logo-hint {
-        font-size: 12px;
-        color: rgba(0, 0, 0, 0.6);
-      }
-
-      .logo-hint code {
-        background: rgba(0, 0, 0, 0.05);
-        padding: 2px 6px;
-        border-radius: 4px;
-        font-family: 'Courier New', monospace;
-        font-size: 11px;
       }
 
       @media (max-width: 768px) {
@@ -672,10 +451,6 @@ export interface PdfTemplateFormData {
           flex-direction: column;
           gap: 8px;
         }
-
-        .logo-preview {
-          max-width: 100%;
-        }
       }
     `,
   ],
@@ -684,7 +459,6 @@ export class PdfTemplateFormComponent implements OnInit, OnChanges {
   private fb = inject(FormBuilder);
   private fileUploadService = inject(FileUploadService);
   private generatorService = inject(PdfTemplateGeneratorService);
-  private insertService = inject(PdfTemplateInsertService);
   private validationService = inject(PdfTemplateValidationService);
 
   @Input() mode: PdfTemplateFormMode = 'create';
@@ -700,21 +474,11 @@ export class PdfTemplateFormComponent implements OnInit, OnChanges {
 
   private originalFormValue: Record<string, unknown> | null = null;
 
-  // Logo upload state
-  uploadingLogo = signal(false);
-  uploadedLogo = signal<{
-    fileSize?: number;
-    originalName?: string;
-    mimeType?: string;
-  } | null>(null);
-  logoPreviewUrl = signal<string | null>(null);
-  logoError = signal<string | null>(null);
-
   // Example text for handlebars helper
   readonly logoHelperExample = '{{logo logo_file_id}}';
 
-  // Get Quick Insert Templates from service
-  readonly insertTemplates = this.insertService.getAllTemplates();
+  // Track if logo is uploaded (for template insert toolbar)
+  hasLogoUploaded = signal(false);
 
   // JSON validator - delegate to validation service
   private jsonValidator(
@@ -830,26 +594,9 @@ export class PdfTemplateFormComponent implements OnInit, OnChanges {
     console.log('[PDF Template Form] Form value to patch:', formValue);
     this.pdfTemplatesForm.patchValue(formValue);
 
-    // Load existing logo if present
+    // Set hasLogoUploaded signal if logo exists
     if (pdfTemplates.logo_file_id) {
-      this.fileUploadService.getFile(pdfTemplates.logo_file_id).subscribe({
-        next: (response) => {
-          if (response.success && response.data) {
-            this.uploadedLogo.set(response.data);
-
-            // Use signed URL from API response (like file-management component)
-            // This bypasses proxy issues with long JWT tokens
-            if (response.data.signedUrls?.view) {
-              this.logoPreviewUrl.set(response.data.signedUrls.view);
-            } else if (response.data.signedUrls?.thumbnail) {
-              this.logoPreviewUrl.set(response.data.signedUrls.thumbnail);
-            }
-          }
-        },
-        error: (error) => {
-          console.error('Failed to load logo file:', error);
-        },
-      });
+      this.hasLogoUploaded.set(true);
     }
 
     console.log('[PDF Template Form] Form valid:', this.pdfTemplatesForm.valid);
@@ -1395,81 +1142,23 @@ export class PdfTemplateFormComponent implements OnInit, OnChanges {
   }
 
   /**
-   * Handle logo file selection
+   * Handle logo upload from logo-upload component
    */
-  async onLogoFileSelected(event: Event) {
-    const input = event.target as HTMLInputElement;
-    if (!input.files || input.files.length === 0) {
-      return;
-    }
-
-    const file = input.files[0];
-
-    // Validate file
-    const validation = this.fileUploadService.validateFiles([file], {
-      allowedTypes: ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml'],
-      maxFileSize: 5 * 1024 * 1024, // 5MB
-      maxFiles: 1,
+  onLogoUploaded(logoData: LogoUploadData) {
+    this.hasLogoUploaded.set(true);
+    this.pdfTemplatesForm.patchValue({
+      logo_file_id: logoData.id,
     });
-
-    if (!validation[0].valid) {
-      this.logoError.set(validation[0].errors.join(', '));
-      return;
-    }
-
-    this.logoError.set(null);
-
-    // Generate preview
-    const preview = await this.fileUploadService.generateFilePreview(file);
-    if (preview) {
-      this.logoPreviewUrl.set(preview);
-    }
-
-    // Upload file
-    this.uploadingLogo.set(true);
-    this.fileUploadService
-      .uploadFile(file, {
-        category: 'logo',
-        isPublic: true,
-      })
-      .subscribe({
-        next: (response) => {
-          if (response.success && response.data) {
-            this.uploadedLogo.set(response.data);
-            this.pdfTemplatesForm.patchValue({
-              logo_file_id: response.data.id,
-            });
-
-            // Use signed URL from API response (like file-management component)
-            // This bypasses proxy issues with long JWT tokens
-            if (response.data.signedUrls?.view) {
-              this.logoPreviewUrl.set(response.data.signedUrls.view);
-            } else if (response.data.signedUrls?.thumbnail) {
-              this.logoPreviewUrl.set(response.data.signedUrls.thumbnail);
-            }
-
-            this.uploadingLogo.set(false);
-            console.log('Logo uploaded successfully:', response.data);
-
-            // Emit event to trigger preview refresh in dialog
-            this.logoChanged.emit();
-          }
-        },
-        error: (error) => {
-          this.uploadingLogo.set(false);
-          this.logoError.set(error.message || 'Failed to upload logo');
-          console.error('Logo upload error:', error);
-        },
-      });
+    console.log('Logo uploaded:', logoData);
+    // Emit event to trigger preview refresh in dialog
+    this.logoChanged.emit();
   }
 
   /**
-   * Remove logo
+   * Handle logo removal from logo-upload component
    */
-  removeLogo() {
-    this.uploadedLogo.set(null);
-    this.logoPreviewUrl.set(null);
-    this.logoError.set(null);
+  onLogoRemoved() {
+    this.hasLogoUploaded.set(false);
     this.pdfTemplatesForm.patchValue({
       logo_file_id: null,
     });
@@ -1478,10 +1167,11 @@ export class PdfTemplateFormComponent implements OnInit, OnChanges {
   }
 
   /**
-   * Format file size for display
+   * Handle logo error from logo-upload component
    */
-  formatFileSize(bytes: number): string {
-    return this.fileUploadService.formatFileSize(bytes);
+  onLogoError(error: string) {
+    console.error('Logo error:', error);
+    // Could show a snackbar or other notification here
   }
 
   /**
@@ -1489,7 +1179,7 @@ export class PdfTemplateFormComponent implements OnInit, OnChanges {
    */
   private getStarterTemplate(): Record<string, unknown> {
     const hasLogo =
-      this.uploadedLogo() || this.pdfTemplatesForm.value.logo_file_id;
+      this.hasLogoUploaded() || this.pdfTemplatesForm.value.logo_file_id;
 
     return {
       pageSize: 'A4',
@@ -1750,7 +1440,7 @@ export class PdfTemplateFormComponent implements OnInit, OnChanges {
     // Check if editor is available
     if (!this.templateDataEditor) {
       console.error('[Insert Template] Template data editor not available');
-      this.logoError.set('Editor not ready. Please try again.');
+      console.warn('Editor not ready. Please try again.');
       return;
     }
 
@@ -1763,13 +1453,11 @@ export class PdfTemplateFormComponent implements OnInit, OnChanges {
     ];
     if (
       logoTemplateNames.includes(insertTemplate.name) &&
-      !this.uploadedLogo() &&
+      !this.hasLogoUploaded() &&
       !this.pdfTemplatesForm.value.logo_file_id
     ) {
       console.warn('[Insert Template] Logo required but not uploaded');
-      this.logoError.set(
-        'Please upload a logo first before inserting logo template',
-      );
+      console.warn('Please upload a logo first before inserting logo template');
       return;
     }
 
@@ -1820,7 +1508,6 @@ export class PdfTemplateFormComponent implements OnInit, OnChanges {
             '[Insert Template] Replaced with starter template:',
             insertTemplate.name,
           );
-          this.logoError.set(null);
           return;
         } else {
           return;
@@ -1838,7 +1525,6 @@ export class PdfTemplateFormComponent implements OnInit, OnChanges {
       '[Insert Template] Inserted template at cursor:',
       insertTemplate.name,
     );
-    this.logoError.set(null);
   }
 
   /**
