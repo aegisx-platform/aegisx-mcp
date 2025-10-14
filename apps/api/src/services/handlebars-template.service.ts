@@ -1,11 +1,15 @@
 import * as Handlebars from 'handlebars';
 import moment from 'moment';
 import {
-  HandlebarsHelpers,
   CompiledTemplate,
+  HandlebarsHelpers,
+  JsonObject,
   PdfTemplateData,
   TemplateValidationResult,
 } from '../types/pdf-template.types';
+
+type HelperOptions = Handlebars.HelperOptions;
+type TemplateDelegate = Handlebars.TemplateDelegate;
 
 /**
  * Handlebars Template Service
@@ -78,36 +82,34 @@ export class HandlebarsTemplateService {
       },
 
       // Default value helper
-      default: (value: any, defaultValue: any = '') => {
+      default: (value: unknown, defaultValue: unknown = '') => {
         return value !== null && value !== undefined && value !== ''
           ? value
           : defaultValue;
       },
 
       // Comparison helpers
-      eq: (a: any, b: any) => a === b,
-      gt: (a: any, b: any) => a > b,
-      lt: (a: any, b: any) => a < b,
-      gte: (a: any, b: any) => a >= b,
-      lte: (a: any, b: any) => a <= b,
-      ne: (a: any, b: any) => a !== b,
+      eq: (a: unknown, b: unknown) => a === b,
+      gt: (a: unknown, b: unknown) => a > b,
+      lt: (a: unknown, b: unknown) => a < b,
+      gte: (a: unknown, b: unknown) => a >= b,
+      lte: (a: unknown, b: unknown) => a <= b,
+      ne: (a: unknown, b: unknown) => a !== b,
 
       // Logical helpers
-      or: (...args: any[]) => {
+      or: (...args: unknown[]) => {
         // Remove the last argument which is Handlebars options object
         const values = args.slice(0, -1);
         return values.some((val) => !!val);
       },
 
-      and: (...args: any[]) => {
+      and: (...args: unknown[]) => {
         // Remove the last argument which is Handlebars options object
         const values = args.slice(0, -1);
         return values.every((val) => !!val);
       },
 
-      not: (value: any) => !value,
-
-      // Math helpers
+      not: (value: unknown) => !value, // Math helpers
       add: (a: number, b: number) => (a || 0) + (b || 0),
       subtract: (a: number, b: number) => (a || 0) - (b || 0),
       multiply: (a: number, b: number) => (a || 0) * (b || 0),
@@ -123,21 +125,21 @@ export class HandlebarsTemplateService {
       floor: (num: number) => Math.floor(num || 0),
 
       // Array helpers
-      length: (arr: any[]) => (Array.isArray(arr) ? arr.length : 0),
+      length: (arr: unknown[]) => (Array.isArray(arr) ? arr.length : 0),
 
-      join: (arr: any[], separator: string = ', ') => {
+      join: (arr: unknown[], separator: string = ', ') => {
         return Array.isArray(arr) ? arr.join(separator) : '';
       },
 
       // Array access helper
-      at: (arr: any[], index: number) => {
+      at: (arr: unknown[], index: number) => {
         return Array.isArray(arr) && arr[index] !== undefined
           ? arr[index]
           : null;
       },
 
       // Array filtering helper
-      where: (arr: any[], key: string, value: any) => {
+      where: (arr: unknown[], key: string, value: unknown) => {
         if (!Array.isArray(arr)) return [];
         return arr.filter((item) => item && item[key] === value);
       },
@@ -174,7 +176,13 @@ export class HandlebarsTemplateService {
       },
 
       // Conditional helpers
-      ifCond: function (v1: any, operator: string, v2: any, options: any) {
+      // Conditional helpers
+      ifCond: function (
+        v1: unknown,
+        operator: string,
+        v2: unknown,
+        options: HelperOptions,
+      ) {
         switch (operator) {
           case '==':
             return v1 == v2 ? options.fn(this) : options.inverse(this);
@@ -202,7 +210,7 @@ export class HandlebarsTemplateService {
       },
 
       // Loop helpers
-      times: function (n: number, options: any) {
+      times: function (n: number, options: HelperOptions) {
         let result = '';
         for (let i = 0; i < n; i++) {
           result += options.fn({ index: i, count: i + 1 });
@@ -213,18 +221,19 @@ export class HandlebarsTemplateService {
       // Index helpers for loops
       increment: (value: number) => (value || 0) + 1,
       isFirst: (index: number) => index === 0,
-      isLast: (index: number, array: any[]) => index === array.length - 1,
+      isLast: (index: number, array: unknown[]) =>
+        Array.isArray(array) ? index === array.length - 1 : false,
       isEven: (index: number) => index % 2 === 0,
       isOdd: (index: number) => index % 2 !== 0,
 
       // Debug helper
-      debug: (value: any) => {
+      debug: (value: unknown) => {
         console.log('Handlebars Debug:', JSON.stringify(value, null, 2));
         return '';
       },
 
       // JSON helper
-      json: (obj: any) => JSON.stringify(obj),
+      json: (obj: unknown) => JSON.stringify(obj),
 
       // String manipulation helpers
       replace: (str: string, search: string, replace: string) => {
@@ -246,6 +255,15 @@ export class HandlebarsTemplateService {
         // Returns a data URL format: data:image/png;base64,<base64_data>
         return `__LOGO_${fileId}__`; // Marker for replacement
       },
+
+      // Generic asset helper (images, icons, etc.)
+      // Behaves like logo helper but supports any uploaded asset
+      asset: function (this: unknown, fileId: string, _options?: unknown) {
+        // Handle both direct string literal and variable from context
+        const resolvedFileId = typeof fileId === 'string' ? fileId : undefined;
+
+        return `__ASSET_${resolvedFileId}__`;
+      },
     };
   }
 
@@ -260,17 +278,24 @@ export class HandlebarsTemplateService {
     // Register block helpers
     Handlebars.registerHelper(
       'each_with_index',
-      function (context: any[], options: any) {
+      function (context: unknown[], options: HelperOptions) {
         let result = '';
         for (let i = 0; i < context.length; i++) {
-          const data = {
-            ...context[i],
+          const item = context[i];
+          const data =
+            typeof item === 'object' && item !== null && !Array.isArray(item)
+              ? { ...(item as Record<string, unknown>) }
+              : { value: item };
+
+          // Add index metadata
+          Object.assign(data, {
             '@index': i,
             '@first': i === 0,
             '@last': i === context.length - 1,
             '@even': i % 2 === 0,
             '@odd': i % 2 !== 0,
-          };
+          });
+
           result += options.fn(data);
         }
         return result;
@@ -280,15 +305,32 @@ export class HandlebarsTemplateService {
     // Group by helper
     Handlebars.registerHelper(
       'groupBy',
-      function (context: any[], key: string, options: any) {
-        if (!Array.isArray(context)) return '';
+      function (context: unknown, key: string, options: HelperOptions) {
+        if (!Array.isArray(context)) {
+          return '';
+        }
 
-        const grouped = context.reduce((groups, item) => {
-          const group = item[key] || 'Unknown';
-          if (!groups[group]) groups[group] = [];
-          groups[group].push(item);
-          return groups;
-        }, {});
+        const grouped = context.reduce<Record<string, unknown[]>>(
+          (groups, item) => {
+            if (
+              typeof item === 'object' &&
+              item !== null &&
+              !Array.isArray(item)
+            ) {
+              const record = item as Record<string, unknown>;
+              const groupKey = String(record[key] ?? 'Unknown');
+              groups[groupKey] = groups[groupKey] || [];
+              groups[groupKey].push(record);
+              return groups;
+            }
+
+            const fallbackGroup = 'Unknown';
+            groups[fallbackGroup] = groups[fallbackGroup] || [];
+            groups[fallbackGroup].push(item);
+            return groups;
+          },
+          {},
+        );
 
         let result = '';
         Object.entries(grouped).forEach(([groupName, items]) => {
@@ -367,14 +409,16 @@ export class HandlebarsTemplateService {
 
       return compiled;
     } catch (error) {
-      throw new Error(`Template compilation failed: ${error.message}`);
+      const message =
+        error instanceof Error ? error.message : 'Unknown compilation error';
+      throw new Error(`Template compilation failed: ${message}`);
     }
   }
 
   /**
    * Recursively compile Handlebars templates in objects and arrays
    */
-  private compileObject(obj: any): any {
+  private compileObject(obj: unknown): unknown {
     if (typeof obj === 'string') {
       // Only compile if string contains Handlebars syntax
       if (obj.includes('{{') || obj.includes('{{{')) {
@@ -393,21 +437,22 @@ export class HandlebarsTemplateService {
     }
 
     if (obj && typeof obj === 'object') {
+      const record = obj as Record<string, unknown>;
       // Handle special __handlebarsBody pattern
       // This is used for table bodies where Handlebars needs to generate array items
-      if (obj.__handlebarsBody && typeof obj.__handlebarsBody === 'string') {
+      if (typeof record.__handlebarsBody === 'string') {
         // Replace placeholder with the handlebars body string
-        const compiled = {};
-        Object.keys(obj).forEach((key) => {
+        const compiled: Record<string, unknown> = {};
+        Object.keys(record).forEach((key) => {
           if (key === '__handlebarsBody') {
             // Skip the __handlebarsBody key in the compiled output
             return;
           }
 
-          const value = obj[key];
+          const value = record[key];
           // Replace placeholder with the actual handlebars body
           if (value === '__HANDLEBARS_BODY_PLACEHOLDER__') {
-            compiled[key] = this.compileObject(obj.__handlebarsBody);
+            compiled[key] = this.compileObject(record.__handlebarsBody);
           } else {
             compiled[key] = this.compileObject(value);
           }
@@ -416,9 +461,10 @@ export class HandlebarsTemplateService {
       }
 
       // Normal object compilation
-      const compiled = {};
-      Object.keys(obj).forEach((key) => {
-        compiled[key] = this.compileObject(obj[key]);
+      const compiled: Record<string, unknown> = {};
+      Object.keys(record).forEach((key) => {
+        const value = record[key];
+        compiled[key] = this.compileObject(value);
       });
       return compiled;
     }
@@ -429,13 +475,10 @@ export class HandlebarsTemplateService {
   /**
    * Render a compiled template with data
    */
-  renderTemplate(compiled: CompiledTemplate, data: Record<string, any>): any {
+  renderTemplate(compiled: CompiledTemplate, data: JsonObject): JsonObject {
     try {
-      // Add helper functions to data context
-      const contextData = {
-        ...data,
-        helpers: this.helpers,
-      };
+      // Use data context as-is (helpers are already registered globally)
+      const contextData: JsonObject = { ...data };
 
       // Check if compiledContent is a function (string-based template)
       if (typeof compiled.compiledContent === 'function') {
@@ -448,17 +491,21 @@ export class HandlebarsTemplateService {
         );
 
         // Parse the rendered JSON string
-        let parsedJson;
+        let parsedJson: JsonObject;
         try {
-          parsedJson = JSON.parse(renderedString);
+          parsedJson = JSON.parse(renderedString) as JsonObject;
         } catch (parseError) {
+          const message =
+            parseError instanceof Error
+              ? parseError.message
+              : 'Unknown parse error';
           console.error('[Handlebars] JSON parse error:', parseError);
           console.error(
             '[Handlebars] Invalid JSON:',
             renderedString.substring(0, 1000),
           );
           throw new Error(
-            `Failed to parse rendered template as JSON: ${parseError.message}`,
+            `Failed to parse rendered template as JSON: ${message}`,
           );
         }
 
@@ -468,7 +515,7 @@ export class HandlebarsTemplateService {
           pageOrientation: compiled.pageSettings.orientation,
           pageMargins: compiled.pageSettings.margins,
           ...parsedJson, // Spread the parsed JSON which should contain content, styles, etc.
-          defaultStyle: parsedJson.defaultStyle || {
+          defaultStyle: (parsedJson.defaultStyle as JsonObject) || {
             fontSize: 10,
             font: 'Sarabun',
             lineHeight: 1.3,
@@ -477,7 +524,10 @@ export class HandlebarsTemplateService {
       }
 
       // Object-based template (old method)
-      const rendered = this.renderObject(compiled.compiledContent, contextData);
+      const rendered = this.renderObject(
+        compiled.compiledContent,
+        contextData,
+      ) as JsonObject;
 
       // Return the complete document definition
       return {
@@ -485,7 +535,7 @@ export class HandlebarsTemplateService {
         pageOrientation: compiled.pageSettings.orientation,
         pageMargins: compiled.pageSettings.margins,
         content: rendered,
-        styles: compiled.styles || {},
+        styles: (compiled.styles as JsonObject) || {},
         defaultStyle: {
           fontSize: 10,
           font: 'Sarabun', // Default to Thai font for better Thai text support
@@ -493,24 +543,31 @@ export class HandlebarsTemplateService {
         },
       };
     } catch (error) {
-      throw new Error(`Template rendering failed: ${error.message}`);
+      const message =
+        error instanceof Error ? error.message : 'Unknown rendering error';
+      throw new Error(`Template rendering failed: ${message}`);
     }
   }
 
   /**
    * Recursively render compiled objects with data
    */
-  private renderObject(obj: any, data: Record<string, any>): any {
+  private renderObject(obj: unknown, data: JsonObject): unknown {
     if (typeof obj === 'function') {
       // This is a compiled Handlebars template
       try {
-        const result = obj(data);
-        // Try to parse as JSON in case it's a JSON string
-        try {
-          return JSON.parse(result);
-        } catch {
-          return result;
+        const templateFn = obj as TemplateDelegate;
+        const renderedValue = templateFn(data);
+
+        if (typeof renderedValue === 'string') {
+          try {
+            return JSON.parse(renderedValue);
+          } catch {
+            return renderedValue;
+          }
         }
+
+        return renderedValue;
       } catch (error) {
         console.warn('Failed to render template function:', error);
         return '';
@@ -522,9 +579,10 @@ export class HandlebarsTemplateService {
     }
 
     if (obj && typeof obj === 'object') {
-      const rendered = {};
-      Object.keys(obj).forEach((key) => {
-        rendered[key] = this.renderObject(obj[key], data);
+      const record = obj as Record<string, unknown>;
+      const rendered: Record<string, unknown> = {};
+      Object.keys(record).forEach((key) => {
+        rendered[key] = this.renderObject(record[key], data);
       });
       return rendered;
     }
@@ -560,7 +618,7 @@ export class HandlebarsTemplateService {
       const testCompiled = this.compileObject(parsedData.content);
 
       // Try to render with empty data to catch runtime errors
-      const testData = {};
+      const testData: JsonObject = {};
       this.renderObject(testCompiled, testData);
 
       result.compiledSize = JSON.stringify(testCompiled).length;
@@ -588,7 +646,8 @@ export class HandlebarsTemplateService {
       }
     } catch (error) {
       result.isValid = false;
-      result.errors.push(error.message);
+      const message = error instanceof Error ? error.message : String(error);
+      result.errors.push(message);
     }
 
     return result;
@@ -634,7 +693,7 @@ export class HandlebarsTemplateService {
   /**
    * Register custom helper
    */
-  registerCustomHelper(name: string, helper: any): void {
+  registerCustomHelper(name: string, helper: Handlebars.HelperDelegate): void {
     this.helpers[name] = helper;
     Handlebars.registerHelper(name, helper);
   }

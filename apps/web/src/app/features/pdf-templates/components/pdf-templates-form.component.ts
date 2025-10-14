@@ -31,10 +31,15 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MonacoEditorComponent } from '../../../shared/components/monaco-editor/monaco-editor.component';
 import { FileUploadService } from '../../../shared/ui/components/file-upload/file-upload.service';
+import { PdfSampleDataGeneratorService } from '../services/pdf-sample-data-generator.service';
 import { PdfTemplateGeneratorService } from '../services/pdf-template-generator.service';
 import { InsertTemplate } from '../services/pdf-template-insert.service';
 import { PdfTemplateValidationService } from '../services/pdf-template-validation.service';
-import { PdfSampleDataGeneratorService } from '../services/pdf-sample-data-generator.service';
+import {
+  AssetData,
+  AssetInsertEvent,
+  AssetsManagerComponent,
+} from './assets-manager/assets-manager.component';
 import {
   LogoUploadComponent,
   LogoUploadData,
@@ -71,6 +76,7 @@ export interface PdfTemplateFormData {
     MonacoEditorComponent,
     TemplateInsertToolbarComponent,
     LogoUploadComponent,
+    AssetsManagerComponent,
   ],
   template: `
     <form [formGroup]="pdfTemplatesForm" class="pdf-templates-form">
@@ -264,6 +270,19 @@ export interface PdfTemplateFormData {
         (logoRemoved)="onLogoRemoved()"
         (errorOccurred)="onLogoError($event)"
       ></app-logo-upload>
+
+      <!-- Assets Manager -->
+      <h3 class="section-title">Template Assets</h3>
+
+      <app-assets-manager
+        [initialAssetIds]="initialAssetIds()"
+        [allowDuplicates]="true"
+        [maxAssets]="20"
+        (assetUploaded)="onAssetUploaded($event)"
+        (assetRemoved)="onAssetRemoved($event)"
+        (assetInserted)="onAssetInserted($event)"
+        (errorOccurred)="onAssetError($event)"
+      ></app-assets-manager>
 
       <!-- Status & Settings -->
       <h3 class="section-title">Status & Settings</h3>
@@ -536,6 +555,9 @@ export class PdfTemplateFormComponent implements OnInit, OnChanges {
     // Logo field
     logo_file_id: [''],
 
+    // Asset file IDs (stored as JSON array string)
+    asset_file_ids: ['[]'],
+
     // Boolean fields
     is_active: [true],
     is_template_starter: [false],
@@ -589,6 +611,9 @@ export class PdfTemplateFormComponent implements OnInit, OnChanges {
       // Logo field
       logo_file_id: pdfTemplates.logo_file_id || '',
 
+      // Asset file IDs - will be populated from metadata if available, otherwise scan template
+      asset_file_ids: '[]',
+
       is_active: pdfTemplates.is_active ?? true,
       is_template_starter: pdfTemplates.is_template_starter ?? false,
     };
@@ -599,6 +624,47 @@ export class PdfTemplateFormComponent implements OnInit, OnChanges {
     // Set hasLogoUploaded signal if logo exists
     if (pdfTemplates.logo_file_id) {
       this.hasLogoUploaded.set(true);
+    }
+
+    // Load asset file IDs from metadata or scan template_data
+    let assetIds: string[] = [];
+
+    // First, try to get from metadata (if backend stores it)
+    const pdfTemplateWithAssets = pdfTemplates as Partial<
+      PdfTemplate & { asset_file_ids: string[] | string }
+    >;
+    if (pdfTemplateWithAssets.asset_file_ids) {
+      assetIds = Array.isArray(pdfTemplateWithAssets.asset_file_ids)
+        ? pdfTemplateWithAssets.asset_file_ids
+        : JSON.parse(pdfTemplateWithAssets.asset_file_ids || '[]');
+    } else {
+      // Fallback: Extract asset IDs from template data (scan for {{asset "assetId"}} patterns)
+      if (pdfTemplates.template_data) {
+        const templateDataStr =
+          typeof pdfTemplates.template_data === 'string'
+            ? pdfTemplates.template_data
+            : JSON.stringify(pdfTemplates.template_data);
+        // Match {{asset "uuid"}} or {{asset 'uuid'}} with optional whitespace
+        const assetPattern = /\{\{\s*asset\s+["']([a-f0-9-]{36})["']\s*\}\}/gi;
+        const assetIdSet = new Set<string>();
+        let match;
+        while ((match = assetPattern.exec(templateDataStr)) !== null) {
+          assetIdSet.add(match[1]);
+        }
+        assetIds = Array.from(assetIdSet);
+      }
+    }
+
+    if (assetIds.length > 0) {
+      this.initialAssetIds.set(assetIds);
+      // Populate uploadedAssetIds set for tracking
+      this.uploadedAssetIds.clear();
+      assetIds.forEach((id) => this.uploadedAssetIds.add(id));
+      // Update form field
+      this.pdfTemplatesForm.patchValue({
+        asset_file_ids: JSON.stringify(assetIds),
+      });
+      console.log('[PDF Template Form] Loaded asset IDs:', assetIds);
     }
 
     console.log('[PDF Template Form] Form valid:', this.pdfTemplatesForm.valid);
@@ -651,6 +717,8 @@ export class PdfTemplateFormComponent implements OnInit, OnChanges {
           rawFormData.logo_file_id === null
             ? null
             : rawFormData.logo_file_id || undefined,
+        // Convert Set to Array for asset_file_ids
+        asset_file_ids: Array.from(this.uploadedAssetIds),
         is_active: rawFormData.is_active,
         is_template_starter: rawFormData.is_template_starter,
       };
@@ -659,7 +727,11 @@ export class PdfTemplateFormComponent implements OnInit, OnChanges {
       // If it contains Handlebars directives outside strings, send as string
       // Otherwise parse as JSON object
       try {
-        if (this.detectHandlebars(rawFormData.template_data_raw)) {
+        const hasHandlebars = this.detectHandlebars(
+          rawFormData.template_data_raw,
+        );
+
+        if (hasHandlebars) {
           // Has Handlebars - send as string (backend will handle compilation)
           formData['template_data'] = rawFormData.template_data_raw;
         } else {
@@ -880,260 +952,77 @@ export class PdfTemplateFormComponent implements OnInit, OnChanges {
   }
 
   /**
-   * Get complete starter template with all basic structures
+   * Track uploaded asset IDs
    */
-  private getStarterTemplate(): Record<string, unknown> {
-    const hasLogo =
-      this.hasLogoUploaded() || this.pdfTemplatesForm.value.logo_file_id;
+  initialAssetIds = signal<string[]>([]);
+  private uploadedAssetIds = new Set<string>();
 
-    return {
-      pageSize: 'A4',
-      pageOrientation: 'portrait',
-      pageMargins: [40, 60, 40, 60],
+  /**
+   * Handle asset upload from assets-manager component
+   */
+  onAssetUploaded(asset: AssetData) {
+    this.uploadedAssetIds.add(asset.id);
+    console.log('Asset uploaded:', asset);
 
-      // Header (appears on every page)
-      header: (_currentPage: number, _pageCount: number) => ({
-        text: '{{headerText}}',
-        alignment: 'center',
-        margin: [0, 20, 0, 0],
-        fontSize: 10,
-        color: '#666666',
-      }),
-
-      // Footer (appears on every page)
-      footer: (currentPage: number, pageCount: number) => ({
-        columns: [
-          {
-            text: '{{footerLeft}}',
-            alignment: 'left',
-            fontSize: 10,
-            color: '#666666',
-          },
-          {
-            text: `Page ${currentPage} of ${pageCount}`,
-            alignment: 'right',
-            fontSize: 10,
-            color: '#666666',
-          },
-        ],
-        margin: [40, 0, 40, 20],
-      }),
-
-      // Main content
-      content: [
-        // Logo (if uploaded)
-        ...(hasLogo
-          ? [
-              {
-                columns: [
-                  { width: '*', text: '' },
-                  {
-                    image: '{{logo logo_file_id}}',
-                    width: 80,
-                    height: 80,
-                    fit: [80, 80],
-                  },
-                  { width: '*', text: '' },
-                ],
-                margin: [0, 0, 0, 20],
-              },
-            ]
-          : []),
-
-        // Document Title
-        {
-          text: '{{documentTitle}}',
-          style: 'header',
-          alignment: 'center',
-          margin: [0, 0, 0, 20],
-        },
-
-        // Metadata section
-        {
-          columns: [
-            {
-              width: '*',
-              table: {
-                widths: ['auto', '*'],
-                body: [
-                  ['Document No.:', '{{documentNumber}}'],
-                  ['Date:', '{{date}}'],
-                  ['Reference:', '{{reference}}'],
-                ],
-              },
-              layout: 'noBorders',
-            },
-          ],
-          margin: [0, 0, 0, 20],
-        },
-
-        // Separator line
-        {
-          canvas: [
-            {
-              type: 'line',
-              x1: 0,
-              y1: 0,
-              x2: 515,
-              y2: 0,
-              lineWidth: 1,
-              lineColor: '#cccccc',
-            },
-          ],
-          margin: [0, 0, 0, 20],
-        },
-
-        // Main content area
-        {
-          text: '{{mainContent}}',
-          style: 'body',
-          margin: [0, 0, 0, 20],
-        },
-
-        // Sample table
-        {
-          table: {
-            headerRows: 1,
-            widths: ['auto', '*', 'auto', 'auto'],
-            body: [
-              [
-                { text: 'No.', style: 'tableHeader' },
-                { text: 'Description', style: 'tableHeader' },
-                { text: 'Quantity', style: 'tableHeader' },
-                { text: 'Amount', style: 'tableHeader' },
-              ],
-              [
-                '{{row.no}}',
-                '{{row.description}}',
-                '{{row.qty}}',
-                '{{row.amount}}',
-              ],
-            ],
-          },
-          layout: {
-            hLineWidth: (i: number) => (i === 0 || i === 1 ? 1 : 0.5),
-            vLineWidth: () => 0,
-            hLineColor: () => '#cccccc',
-            paddingLeft: () => 8,
-            paddingRight: () => 8,
-            paddingTop: () => 4,
-            paddingBottom: () => 4,
-          },
-          margin: [0, 0, 0, 20],
-        },
-
-        // Summary section
-        {
-          columns: [
-            { width: '*', text: '' },
-            {
-              width: 'auto',
-              table: {
-                widths: ['auto', 80],
-                body: [
-                  ['Subtotal:', { text: '{{subtotal}}', alignment: 'right' }],
-                  ['Tax (7%):', { text: '{{tax}}', alignment: 'right' }],
-                  [
-                    { text: 'Total:', bold: true },
-                    { text: '{{total}}', bold: true, alignment: 'right' },
-                  ],
-                ],
-              },
-              layout: 'noBorders',
-            },
-          ],
-          margin: [0, 0, 0, 40],
-        },
-
-        // Signature section
-        {
-          columns: [
-            {
-              width: '*',
-              stack: [
-                { text: 'Prepared By:', fontSize: 10, margin: [0, 0, 0, 40] },
-                { text: '_______________________', alignment: 'center' },
-                { text: '({{preparedBy}})', alignment: 'center', fontSize: 10 },
-                {
-                  text: '{{preparedByTitle}}',
-                  alignment: 'center',
-                  fontSize: 9,
-                  color: '#666666',
-                },
-              ],
-            },
-            {
-              width: '*',
-              stack: [
-                { text: 'Approved By:', fontSize: 10, margin: [0, 0, 0, 40] },
-                { text: '_______________________', alignment: 'center' },
-                { text: '({{approvedBy}})', alignment: 'center', fontSize: 10 },
-                {
-                  text: '{{approvedByTitle}}',
-                  alignment: 'center',
-                  fontSize: 9,
-                  color: '#666666',
-                },
-              ],
-            },
-          ],
-          margin: [0, 20, 0, 0],
-        },
-      ],
-
-      // Styles
-      styles: {
-        header: {
-          fontSize: 20,
-          bold: true,
-          color: '#333333',
-        },
-        subheader: {
-          fontSize: 16,
-          bold: true,
-          color: '#666666',
-        },
-        body: {
-          fontSize: 12,
-          lineHeight: 1.5,
-          color: '#333333',
-        },
-        tableHeader: {
-          bold: true,
-          fontSize: 11,
-          color: '#333333',
-          fillColor: '#f5f5f5',
-        },
-        footer: {
-          fontSize: 10,
-          color: '#999999',
-        },
-      },
-
-      // Default style
-      defaultStyle: {
-        font: 'THSarabunNew',
-        fontSize: 14,
-      },
-    };
+    // Update form field with current asset IDs
+    const assetIds = Array.from(this.uploadedAssetIds);
+    this.pdfTemplatesForm.patchValue({
+      asset_file_ids: JSON.stringify(assetIds),
+    });
+    console.log('Updated asset_file_ids:', assetIds);
   }
 
   /**
-   * Get logo template with current logo_file_id
+   * Handle asset removal from assets-manager component
    */
-  private getLogoTemplate(): Record<string, unknown> {
-    return {
-      columns: [
-        { width: '*', text: '' },
-        {
-          image: '{{logo logo_file_id}}',
-          width: 80,
-          height: 80,
-        },
-        { width: '*', text: '' },
-      ],
-      margin: [0, 0, 0, 20],
-    };
+  onAssetRemoved(assetId: string) {
+    this.uploadedAssetIds.delete(assetId);
+    console.log('Asset removed:', assetId);
+
+    // Update form field with current asset IDs
+    const assetIds = Array.from(this.uploadedAssetIds);
+    this.pdfTemplatesForm.patchValue({
+      asset_file_ids: JSON.stringify(assetIds),
+    });
+    console.log('Updated asset_file_ids:', assetIds);
+  }
+
+  /**
+   * Handle asset insertion into template editor
+   * Inserts Handlebars helper syntax: {{asset "assetId"}}
+   */
+  onAssetInserted(event: AssetInsertEvent) {
+    console.log('[Insert Asset] Button clicked:', event.assetId);
+
+    // Check if editor is available
+    if (!this.templateDataEditor) {
+      console.error('[Insert Asset] Template data editor not available');
+      console.warn('Editor not ready. Please try again.');
+      return;
+    }
+
+    // Insert asset as image object with proper JSON structure
+    // Using single quotes inside Handlebars helper to avoid JSON escape issues
+    const assetImageObject = `{
+  "image": "{{asset '${event.assetId}'}}",
+  "width": 100,
+  "height": 100
+}`;
+
+    this.templateDataEditor.insertTextAtCursor(assetImageObject);
+
+    console.log(
+      '[Insert Asset] Inserted image object for asset:',
+      event.assetId,
+    );
+  }
+
+  /**
+   * Handle asset error from assets-manager component
+   */
+  onAssetError(error: string) {
+    console.error('Asset error:', error);
+    // Could show a snackbar or other notification here
   }
 
   /**

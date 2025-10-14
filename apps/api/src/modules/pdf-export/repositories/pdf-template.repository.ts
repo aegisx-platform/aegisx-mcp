@@ -1,13 +1,13 @@
 import { Knex } from 'knex';
 import { BaseRepository } from '../../../shared/repositories/base.repository';
 import {
-  PdfTemplate,
   CreatePdfTemplate,
-  UpdatePdfTemplate,
-  PdfTemplateVersion,
   PdfRender,
+  PdfTemplate,
   PdfTemplateListQuery,
   PdfTemplateStats,
+  PdfTemplateVersion,
+  UpdatePdfTemplate,
 } from '../../../types/pdf-template.types';
 
 /**
@@ -30,12 +30,29 @@ export class PdfTemplateRepository extends BaseRepository<
   }
 
   // Implement abstract methods from BaseRepository
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   transformToEntity(dbRow: any): PdfTemplate {
     return dbRow; // No transformation needed for this model
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   transformToDb(dto: CreatePdfTemplate | UpdatePdfTemplate): any {
-    return dto; // No transformation needed for this model
+    const transformed = { ...dto };
+
+    // Stringify JSONB fields for Postgres
+    if (transformed.asset_file_ids !== undefined) {
+      (transformed as Record<string, unknown>).asset_file_ids = JSON.stringify(
+        transformed.asset_file_ids,
+      );
+    }
+
+    if (transformed.logo_settings !== undefined) {
+      (transformed as Record<string, unknown>).logo_settings = JSON.stringify(
+        transformed.logo_settings,
+      );
+    }
+
+    return transformed;
   }
 
   getJoinQuery(): Knex.QueryBuilder {
@@ -46,8 +63,9 @@ export class PdfTemplateRepository extends BaseRepository<
    * Override create to support userId
    */
   async create(data: CreatePdfTemplate, userId?: string): Promise<PdfTemplate> {
+    const transformed = this.transformToDb(data);
     const dbData = {
-      ...data,
+      ...transformed,
       created_by: userId,
       updated_by: userId,
       created_at: new Date(),
@@ -66,8 +84,9 @@ export class PdfTemplateRepository extends BaseRepository<
     data: UpdatePdfTemplate,
     userId?: string,
   ): Promise<PdfTemplate> {
+    const transformed = this.transformToDb(data);
     const dbData = {
-      ...data,
+      ...transformed,
       updated_by: userId,
       updated_at: new Date(),
     };
@@ -123,6 +142,7 @@ export class PdfTemplateRepository extends BaseRepository<
       } = query;
 
       // Build base query for filters
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const buildFilteredQuery = (query: any) => {
         if (category) {
           query = query.where('category', category);
@@ -293,6 +313,9 @@ export class PdfTemplateRepository extends BaseRepository<
         schema: data.schema,
         styles: data.styles,
         fonts: data.fonts,
+        asset_file_ids: data.asset_file_ids
+          ? JSON.stringify(data.asset_file_ids)
+          : undefined,
         created_by: userId,
         created_at: new Date(),
       };

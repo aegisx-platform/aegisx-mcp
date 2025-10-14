@@ -18,22 +18,23 @@ export interface PdfTemplate {
   description?: string | null;
   category?: string | null;
   type?: string | null;
-  template_data: Record<string, any>;
-  sample_data?: Record<string, any> | null;
-  schema?: Record<string, any> | null;
+  template_data: Record<string, unknown> | string;
+  sample_data?: Record<string, unknown> | null;
+  schema?: Record<string, unknown> | null;
   page_size?: string | null;
   orientation?: string | null;
-  styles?: Record<string, any> | null;
-  fonts?: Record<string, any> | null;
+  styles?: Record<string, unknown> | null;
+  fonts?: Record<string, unknown> | null;
   version?: string | null;
   is_active?: boolean | null;
   is_default?: boolean | null;
   is_template_starter?: boolean | null;
   usage_count?: number | null;
-  assets?: Record<string, any> | null;
-  permissions?: Record<string, any> | null;
+  assets?: Record<string, unknown> | null;
+  permissions?: Record<string, unknown> | null;
   logo_file_id?: string | null;
   logo_settings?: LogoSettings | null;
+  asset_file_ids?: string[] | null;
   created_by?: string | null;
   updated_by?: string | null;
   created_at: string;
@@ -46,22 +47,23 @@ export interface CreatePdfTemplateRequest {
   description?: string | null;
   category?: string | null;
   type?: string | null;
-  template_data: Record<string, any>;
-  sample_data?: Record<string, any> | null;
-  schema?: Record<string, any> | null;
+  template_data: Record<string, unknown> | string;
+  sample_data?: Record<string, unknown> | null;
+  schema?: Record<string, unknown> | null;
   page_size?: string | null;
   orientation?: string | null;
-  styles?: Record<string, any> | null;
-  fonts?: Record<string, any> | null;
+  styles?: Record<string, unknown> | null;
+  fonts?: Record<string, unknown> | null;
   version?: string | null;
   is_active?: boolean | null;
   is_default?: boolean | null;
   is_template_starter?: boolean | null;
   usage_count?: number | null;
-  assets?: Record<string, any> | null;
-  permissions?: Record<string, any> | null;
+  assets?: Record<string, unknown> | null;
+  permissions?: Record<string, unknown> | null;
   logo_file_id?: string | null;
   logo_settings?: LogoSettings | null;
+  asset_file_ids?: string[] | null;
   created_by?: string | null;
   updated_by?: string | null;
 }
@@ -72,22 +74,23 @@ export interface UpdatePdfTemplateRequest {
   description?: string | null;
   category?: string | null;
   type?: string | null;
-  template_data?: Record<string, any>;
-  sample_data?: Record<string, any> | null;
-  schema?: Record<string, any> | null;
+  template_data?: Record<string, unknown> | string;
+  sample_data?: Record<string, unknown> | null;
+  schema?: Record<string, unknown> | null;
   page_size?: string | null;
   orientation?: string | null;
-  styles?: Record<string, any> | null;
-  fonts?: Record<string, any> | null;
+  styles?: Record<string, unknown> | null;
+  fonts?: Record<string, unknown> | null;
   version?: string | null;
   is_active?: boolean | null;
   is_default?: boolean | null;
   is_template_starter?: boolean | null;
   usage_count?: number | null;
-  assets?: Record<string, any> | null;
-  permissions?: Record<string, any> | null;
+  assets?: Record<string, unknown> | null;
+  permissions?: Record<string, unknown> | null;
   logo_file_id?: string | null;
   logo_settings?: LogoSettings | null;
+  asset_file_ids?: string[] | null;
   created_by?: string | null;
   updated_by?: string | null;
 }
@@ -207,7 +210,7 @@ export interface BulkOperationSummary {
   errors: Array<{
     index: number;
     error: string;
-    data?: any;
+    data?: unknown;
   }>;
 }
 
@@ -242,7 +245,7 @@ export interface PdfTemplateListOptions {
 export interface RenderPdfRequest {
   templateId?: string;
   templateName?: string;
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   options?: {
     format?: 'buffer' | 'base64' | 'url';
     filename?: string;
@@ -264,7 +267,7 @@ export interface RenderPdfResponse {
 }
 
 export interface PreviewTemplateRequest {
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
 }
 
 export interface PreviewTemplateResponse {
@@ -275,7 +278,7 @@ export interface PreviewTemplateResponse {
 }
 
 export interface ValidateTemplateRequest {
-  template_data: Record<string, any>;
+  template_data: Record<string, unknown>;
 }
 
 export interface ValidateTemplateResponse {
@@ -302,7 +305,7 @@ export interface TemplateVersion {
   id: string;
   template_id: string;
   version: string;
-  template_data: Record<string, any>;
+  template_data: Record<string, unknown>;
   created_by: string;
   created_at: string;
 }

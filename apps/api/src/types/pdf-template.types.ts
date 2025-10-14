@@ -4,6 +4,13 @@
  * Defines the structure for dynamic PDF templates stored in database
  */
 
+export type JsonPrimitive = string | number | boolean | null;
+export type JsonValue = JsonPrimitive | JsonObject | JsonArray;
+export interface JsonObject {
+  [key: string]: JsonValue;
+}
+export type JsonArray = JsonValue[];
+
 export interface LogoSettings {
   width?: number;
   height?: number;
@@ -23,12 +30,12 @@ export interface PdfTemplate {
   category: string;
   type: string;
   template_data: PdfTemplateData;
-  sample_data?: Record<string, any>;
+  sample_data?: JsonObject;
   schema?: PdfTemplateSchema;
   page_size: 'A4' | 'A3' | 'LETTER' | 'LEGAL';
   orientation: 'portrait' | 'landscape';
-  styles?: Record<string, any>;
-  fonts?: Record<string, any>;
+  styles?: JsonObject;
+  fonts?: JsonObject;
   version: string;
   is_active: boolean;
   is_default: boolean;
@@ -38,6 +45,7 @@ export interface PdfTemplate {
   permissions?: string[];
   logo_file_id?: string;
   logo_settings?: LogoSettings;
+  asset_file_ids?: string[];
   created_by?: string;
   updated_by?: string;
   created_at: Date;
@@ -51,12 +59,12 @@ export interface CreatePdfTemplate {
   category?: string;
   type?: string;
   template_data: PdfTemplateData;
-  sample_data?: Record<string, any>;
+  sample_data?: JsonObject;
   schema?: PdfTemplateSchema;
   page_size?: 'A4' | 'A3' | 'LETTER' | 'LEGAL';
   orientation?: 'portrait' | 'landscape';
-  styles?: Record<string, any>;
-  fonts?: Record<string, any>;
+  styles?: JsonObject;
+  fonts?: JsonObject;
   version?: string;
   is_active?: boolean;
   is_default?: boolean;
@@ -65,6 +73,7 @@ export interface CreatePdfTemplate {
   permissions?: string[];
   logo_file_id?: string;
   logo_settings?: LogoSettings;
+  asset_file_ids?: string[];
 }
 
 export interface UpdatePdfTemplate extends Partial<CreatePdfTemplate> {
@@ -83,13 +92,13 @@ export interface PdfTemplateDataObject {
   pageSize?: string;
   pageOrientation?: string;
   pageMargins?: number[];
-  content: any[]; // PDFMake content with Handlebars templates
-  styles?: Record<string, any>;
-  defaultStyle?: Record<string, any>;
-  header?: any;
-  footer?: any;
-  watermark?: any;
-  info?: Record<string, any>;
+  content: unknown[]; // PDFMake content with Handlebars templates
+  styles?: JsonObject;
+  defaultStyle?: JsonObject;
+  header?: JsonValue;
+  footer?: JsonValue;
+  watermark?: JsonValue;
+  info?: JsonObject;
 }
 
 export interface PdfTemplateSchema {
@@ -100,8 +109,8 @@ export interface PdfTemplateSchema {
     {
       type: string;
       format?: string;
-      items?: any;
-      properties?: any;
+      items?: JsonValue;
+      properties?: JsonObject;
       description?: string;
     }
   >;
@@ -122,10 +131,11 @@ export interface PdfTemplateVersion {
   version: string;
   changelog?: string;
   template_data: PdfTemplateData;
-  sample_data?: Record<string, any>;
+  sample_data?: JsonObject;
   schema?: PdfTemplateSchema;
-  styles?: Record<string, any>;
-  fonts?: Record<string, any>;
+  styles?: JsonObject;
+  fonts?: JsonObject;
+  asset_file_ids?: string[];
   created_by?: string;
   created_at: Date;
 }
@@ -135,7 +145,7 @@ export interface PdfRender {
   template_id: string;
   template_version?: string;
   render_type: 'normal' | 'preview' | 'test';
-  render_data?: Record<string, any>;
+  render_data?: JsonObject;
   page_count?: number;
   file_size?: number;
   render_time_ms?: number;
@@ -153,7 +163,7 @@ export interface PdfRender {
 export interface PdfRenderRequest {
   templateName: string;
   templateVersion?: string;
-  data: Record<string, any>;
+  data: JsonObject;
   options?: {
     renderType?: 'normal' | 'preview' | 'test';
     pageSize?: 'A4' | 'A3' | 'LETTER' | 'LEGAL';
@@ -174,6 +184,7 @@ export interface PdfRenderResponse {
   fileSize?: number;
   renderTime?: number;
   error?: string;
+  buffer?: Buffer;
   metadata?: {
     templateName: string;
     templateVersion: string;
@@ -211,9 +222,7 @@ export interface PdfTemplateStats {
 }
 
 // Handlebars helper function types
-export type HandlebarsHelper = (
-  ...args: any[]
-) => string | number | boolean | any;
+export type HandlebarsHelper = (...args: unknown[]) => unknown;
 
 export interface HandlebarsHelpers {
   formatDate: HandlebarsHelper;
@@ -241,8 +250,8 @@ export interface CompiledTemplate {
   templateId: string;
   templateName: string;
   version: string;
-  compiledContent: any; // Compiled Handlebars template
-  styles?: Record<string, any>;
+  compiledContent: unknown; // Compiled Handlebars template
+  styles?: Record<string, unknown>;
   pageSettings: {
     size: string;
     orientation: string;
@@ -259,7 +268,7 @@ export interface TemplateValidationResult {
 }
 
 export interface TemplatePreviewOptions {
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
   useDefaultData?: boolean;
   renderType?: 'quick' | 'full';
   pageLimit?: number;

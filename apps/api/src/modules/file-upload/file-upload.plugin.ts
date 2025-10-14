@@ -70,3 +70,9 @@ export default fp(fileUploadPlugin, {
 });
 
 export { fileUploadPlugin };
+
+declare module 'fastify' {
+  interface FastifyInstance {
+    fileUploadService: FileUploadService;
+  }
+}

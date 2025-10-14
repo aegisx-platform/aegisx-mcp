@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { Static } from '@sinclair/typebox';
 import { PdfTemplateService } from '../../../services/pdf-template.service';
+import { PdfTemplateData } from '../../../types/pdf-template.types';
 import {
   CreatePdfTemplateSchema,
   UpdatePdfTemplateSchema,
@@ -19,7 +20,7 @@ import {
 export async function pdfTemplateRoutes(fastify: FastifyInstance) {
   // Create PDF Template Service and inject FileUploadService from fastify instance
   const templateService = new PdfTemplateService(fastify.knex);
-  templateService.setFileUploadService((fastify as any).fileUploadService);
+  templateService.setFileUploadService(fastify.fileUploadService);
 
   /**
    * Create PDF Template
@@ -61,7 +62,7 @@ export async function pdfTemplateRoutes(fastify: FastifyInstance) {
       try {
         const template = await templateService.createTemplate(
           request.body,
-          (request.user as any)?.id,
+          request.user?.id,
         );
 
         request.log.info(
@@ -244,7 +245,7 @@ export async function pdfTemplateRoutes(fastify: FastifyInstance) {
         const template = await templateService.updateTemplate(
           request.params.id,
           request.body,
-          (request.user as any)?.id,
+          request.user?.id,
         );
 
         request.log.info(
@@ -379,7 +380,7 @@ export async function pdfTemplateRoutes(fastify: FastifyInstance) {
       try {
         const result = await templateService.renderPdf(
           request.body,
-          (request.user as any)?.id,
+          request.user?.id,
           request.ip,
           request.headers['user-agent'],
         );
@@ -392,9 +393,8 @@ export async function pdfTemplateRoutes(fastify: FastifyInstance) {
         }
 
         // If we have a buffer (direct render), send it as PDF
-        if ((result as any).buffer) {
-          const buffer = (result as any).buffer;
-          delete (result as any).buffer;
+        if (result.buffer) {
+          const buffer = result.buffer;
 
           reply
             .header('Content-Type', 'application/pdf')
@@ -498,7 +498,7 @@ export async function pdfTemplateRoutes(fastify: FastifyInstance) {
    * POST /api/pdf-templates/validate
    */
   fastify.post<{
-    Body: { template_data: any };
+    Body: { template_data: PdfTemplateData };
   }>(
     '/validate',
     {
@@ -525,7 +525,7 @@ export async function pdfTemplateRoutes(fastify: FastifyInstance) {
       preValidation: [fastify.authenticate],
     },
     async (
-      request: FastifyRequest<{ Body: { template_data: any } }>,
+      request: FastifyRequest<{ Body: { template_data: PdfTemplateData } }>,
       reply: FastifyReply,
     ) => {
       try {
@@ -644,7 +644,7 @@ export async function pdfTemplateRoutes(fastify: FastifyInstance) {
         const template = await templateService.duplicateTemplate(
           request.params.id,
           request.body.name,
-          (request.user as any)?.id,
+          request.user?.id,
         );
 
         request.log.info(

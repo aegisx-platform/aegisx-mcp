@@ -218,6 +218,13 @@ export const CreatePdfTemplateSchema = Type.Object({
     }),
   ),
   logo_settings: Type.Optional(LogoSettingsSchema),
+  asset_file_ids: Type.Optional(
+    Type.Array(Type.String({ format: 'uuid' }), {
+      default: [],
+      description:
+        'List of uploaded asset file IDs referenced by this template',
+    }),
+  ),
 });
 
 /**

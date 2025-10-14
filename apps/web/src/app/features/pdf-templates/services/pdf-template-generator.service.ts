@@ -385,4 +385,242 @@ export class PdfTemplateGeneratorService {
 
     return datePatterns.some((pattern) => pattern.test(value));
   }
+
+  /**
+   * Get complete starter template with all basic structures
+   * @param hasLogo Whether to include logo section in the template
+   * @returns PDF template structure with header, footer, content, and styles
+   */
+  getStarterTemplate(hasLogo = false): Record<string, unknown> {
+    return {
+      pageSize: 'A4',
+      pageOrientation: 'portrait',
+      pageMargins: [40, 60, 40, 60],
+
+      // Header (appears on every page)
+      header: (_currentPage: number, _pageCount: number) => ({
+        text: '{{headerText}}',
+        alignment: 'center',
+        margin: [0, 20, 0, 0],
+        fontSize: 10,
+        color: '#666666',
+      }),
+
+      // Footer (appears on every page)
+      footer: (currentPage: number, pageCount: number) => ({
+        columns: [
+          {
+            text: '{{footerLeft}}',
+            alignment: 'left',
+            fontSize: 10,
+            color: '#666666',
+          },
+          {
+            text: `Page ${currentPage} of ${pageCount}`,
+            alignment: 'right',
+            fontSize: 10,
+            color: '#666666',
+          },
+        ],
+        margin: [40, 0, 40, 20],
+      }),
+
+      // Main content
+      content: [
+        // Logo (if uploaded)
+        ...(hasLogo
+          ? [
+              {
+                columns: [
+                  { width: '*', text: '' },
+                  {
+                    image: '{{logo logo_file_id}}',
+                    width: 80,
+                    height: 80,
+                    fit: [80, 80],
+                  },
+                  { width: '*', text: '' },
+                ],
+                margin: [0, 0, 0, 20],
+              },
+            ]
+          : []),
+
+        // Document Title
+        {
+          text: '{{documentTitle}}',
+          style: 'header',
+          alignment: 'center',
+          margin: [0, 0, 0, 20],
+        },
+
+        // Metadata section
+        {
+          columns: [
+            {
+              width: '*',
+              table: {
+                widths: ['auto', '*'],
+                body: [
+                  ['Document No.:', '{{documentNumber}}'],
+                  ['Date:', '{{date}}'],
+                  ['Reference:', '{{reference}}'],
+                ],
+              },
+              layout: 'noBorders',
+            },
+          ],
+          margin: [0, 0, 0, 20],
+        },
+
+        // Separator line
+        {
+          canvas: [
+            {
+              type: 'line',
+              x1: 0,
+              y1: 0,
+              x2: 515,
+              y2: 0,
+              lineWidth: 1,
+              lineColor: '#cccccc',
+            },
+          ],
+          margin: [0, 0, 0, 20],
+        },
+
+        // Main content area
+        {
+          text: '{{mainContent}}',
+          style: 'body',
+          margin: [0, 0, 0, 20],
+        },
+
+        // Sample table
+        {
+          table: {
+            headerRows: 1,
+            widths: ['auto', '*', 'auto', 'auto'],
+            body: [
+              [
+                { text: 'No.', style: 'tableHeader' },
+                { text: 'Description', style: 'tableHeader' },
+                { text: 'Quantity', style: 'tableHeader' },
+                { text: 'Amount', style: 'tableHeader' },
+              ],
+              [
+                '{{row.no}}',
+                '{{row.description}}',
+                '{{row.qty}}',
+                '{{row.amount}}',
+              ],
+            ],
+          },
+          layout: {
+            hLineWidth: (i: number) => (i === 0 || i === 1 ? 1 : 0.5),
+            vLineWidth: () => 0,
+            hLineColor: () => '#cccccc',
+            paddingLeft: () => 8,
+            paddingRight: () => 8,
+            paddingTop: () => 4,
+            paddingBottom: () => 4,
+          },
+          margin: [0, 0, 0, 20],
+        },
+
+        // Summary section
+        {
+          columns: [
+            { width: '*', text: '' },
+            {
+              width: 'auto',
+              table: {
+                widths: ['auto', 80],
+                body: [
+                  ['Subtotal:', { text: '{{subtotal}}', alignment: 'right' }],
+                  ['Tax (7%):', { text: '{{tax}}', alignment: 'right' }],
+                  [
+                    { text: 'Total:', bold: true },
+                    { text: '{{total}}', bold: true, alignment: 'right' },
+                  ],
+                ],
+              },
+              layout: 'noBorders',
+            },
+          ],
+          margin: [0, 0, 0, 40],
+        },
+
+        // Signature section
+        {
+          columns: [
+            {
+              width: '*',
+              stack: [
+                { text: 'Prepared By:', fontSize: 10, margin: [0, 0, 0, 40] },
+                { text: '_______________________', alignment: 'center' },
+                { text: '({{preparedBy}})', alignment: 'center', fontSize: 10 },
+                {
+                  text: '{{preparedByTitle}}',
+                  alignment: 'center',
+                  fontSize: 9,
+                  color: '#666666',
+                },
+              ],
+            },
+            {
+              width: '*',
+              stack: [
+                { text: 'Approved By:', fontSize: 10, margin: [0, 0, 0, 40] },
+                { text: '_______________________', alignment: 'center' },
+                { text: '({{approvedBy}})', alignment: 'center', fontSize: 10 },
+                {
+                  text: '{{approvedByTitle}}',
+                  alignment: 'center',
+                  fontSize: 9,
+                  color: '#666666',
+                },
+              ],
+            },
+          ],
+          margin: [0, 20, 0, 0],
+        },
+      ],
+
+      // Styles
+      styles: {
+        header: {
+          fontSize: 20,
+          bold: true,
+          color: '#333333',
+        },
+        subheader: {
+          fontSize: 16,
+          bold: true,
+          color: '#666666',
+        },
+        body: {
+          fontSize: 12,
+          lineHeight: 1.5,
+          color: '#333333',
+        },
+        tableHeader: {
+          bold: true,
+          fontSize: 11,
+          color: '#333333',
+          fillColor: '#f5f5f5',
+        },
+        footer: {
+          fontSize: 10,
+          color: '#999999',
+        },
+      },
+
+      // Default style
+      defaultStyle: {
+        font: 'THSarabunNew',
+        fontSize: 14,
+      },
+    };
+  }
 }

@@ -1,7 +1,7 @@
 # AegisX Project Status
 
-**Last Updated:** 2025-10-13 (Session 34 - Logo Feature Complete)
-**Current Task:** ✅ PDF Template Logo Feature - Testing & Documentation Complete
+**Last Updated:** 2025-10-14 (Session 35 - Multi-Asset Upload Feature Complete)
+**Current Task:** ✅ PDF Template Multi-Asset Upload Feature - Implementation Complete
 **Git Repository:** git@github.com:aegisx-platform/aegisx-starter.git
 
 ## 🏗️ Project Overview
@@ -14,9 +14,151 @@ AegisX Starter - Enterprise-ready monorepo with Angular 19, Fastify, PostgreSQL
 
 ### Session Overview
 
-- **Date**: 2025-10-13 (Session 34 - COMPLETED)
-- **Main Focus**: ✅ PDF Template Logo Feature - Testing, Troubleshooting & Documentation
-- **Status**: Logo feature fully functional, all issues resolved, comprehensive testing complete
+- **Date**: 2025-10-14 (Session 35 - COMPLETED)
+- **Main Focus**: ✅ PDF Template Multi-Asset Upload Feature - Full Implementation
+- **Status**: Multi-asset upload system complete with persistence, ready for testing
+
+### 🎯 Session 35 Tasks (COMPLETED)
+
+#### 1. **✅ COMPLETED: Backend Type Safety & Generalization**
+
+- **Files Modified**:
+  - `apps/api/src/services/handlebars-template.service.ts`
+  - `apps/api/src/services/pdf-template.service.ts`
+- **Changes**:
+  - Replaced all `any` types with `JsonObject`, `JsonValue`, `unknown`
+  - Removed duplicate Handlebars helpers (times, increment, isFirst, isLast, isEven, isOdd, debug, json)
+  - Added `asset` Handlebars helper (parallel to `logo` helper)
+  - Generalized `resolveFileMarkers()` to support both `__LOGO_*__` and `__ASSET_*__` markers
+  - Fixed spread types error in `each_with_index` helper
+  - Fixed logger type casting for FileUploadRepository
+- **Result**: ✅ Strict TypeScript compliance, generic file marker system
+
+#### 2. **✅ COMPLETED: Frontend AssetsManagerComponent**
+
+- **New File**: `apps/web/src/app/features/pdf-templates/components/assets-manager/assets-manager.component.ts`
+- **Features**:
+  - Material Card grid layout for asset display
+  - Multi-file upload support (PNG/JPG/SVG/WEBP, max 20 files)
+  - Thumbnail previews with file info (name, size, type)
+  - Per-asset actions: Insert, View, Remove
+  - Event emitters: `assetUploaded`, `assetRemoved`, `assetInserted`, `errorOccurred`
+  - Angular Signals for reactive state management
+  - Upload progress tracking
+  - Error handling with user feedback
+- **Result**: ✅ Full-featured multi-asset management UI
+
+#### 3. **✅ COMPLETED: Form Integration**
+
+- **File Modified**: `apps/web/src/app/features/pdf-templates/components/pdf-templates-form.component.ts`
+- **Changes**:
+  - Added `<app-assets-manager>` section to template (line 276-284)
+  - Added form control: `asset_file_ids: ['[]']` (JSON array string)
+  - Added `initialAssetIds = signal<string[]>([])` for hydration
+  - Implemented handler methods:
+    - `onAssetUploaded(asset)` - tracks uploaded assets, updates form
+    - `onAssetRemoved(assetId)` - removes from tracking, updates form
+    - `onAssetInserted(event)` - inserts `{{asset "id"}}` into Monaco editor
+    - `onAssetError(error)` - handles errors
+  - Updated `populateForm()` to load asset_file_ids from backend or scan template_data
+  - Updated `onSubmit()` to parse and send asset_file_ids array
+- **Result**: ✅ Seamless asset tracking and persistence
+
+#### 4. **✅ COMPLETED: Database Schema & Migration**
+
+- **New Migration**: `apps/api/src/database/migrations/20251014093000_add_asset_file_ids_to_pdf_templates.ts`
+- **Changes**:
+  - Added `asset_file_ids` JSONB column to `pdf_templates` table (default: `'[]'::jsonb`)
+  - Added `asset_file_ids` JSONB column to `pdf_template_versions` table
+  - Migration includes up/down functions
+- **Status**: ⏳ Migration created, needs to run: `pnpm db:migrate`
+
+#### 5. **✅ COMPLETED: Backend Type Definitions**
+
+- **Files Modified**:
+  - `apps/api/src/types/pdf-template.types.ts`
+  - `apps/api/src/schemas/pdf-template.schemas.ts`
+- **Changes**:
+  - Added `asset_file_ids?: string[]` to `PdfTemplate` interface
+  - Added `asset_file_ids?: string[]` to `CreatePdfTemplate` interface
+  - Added `asset_file_ids?: string[]` to `PdfTemplateVersion` interface
+  - Updated TypeBox schemas for API validation
+- **Result**: ✅ Type-safe asset ID persistence
+
+#### 6. **✅ COMPLETED: Bug Fixes**
+
+- Fixed `uploadedAt` vs `createdAt` field mismatch in AssetsManagerComponent
+- Fixed Monaco Editor API access (use `insertTextAtCursor()` method)
+- Fixed logger type casting issues (cast through `unknown`)
+- Fixed compilation errors in handlebars and pdf-template services
+- Resolved duplicate helper definitions
+- Fixed spread types error with non-object values
+- **Result**: ✅ Zero TypeScript/lint errors
+
+### Key Implementation Details
+
+#### Asset Storage Flow
+
+```typescript
+// 1. User uploads asset → stored in uploads/
+// 2. Asset ID tracked in uploadedAssetIds Set
+// 3. On form submit → asset_file_ids: ["uuid1", "uuid2", ...]
+// 4. Saved to database as JSONB array
+// 5. On form load → extract from asset_file_ids or scan template_data
+// 6. Assets displayed in AssetsManagerComponent grid
+```
+
+#### Template Usage
+
+```handlebars
+{{! In template editor }}
+{ "image": "{{asset 'c56be34b-8891-4f26-947b-04ca25c85f33'}}", "width": 80, "height": 80 }
+```
+
+#### Backend Resolution
+
+```typescript
+// During PDF render:
+// {{asset "uuid"}} → __ASSET_uuid__ marker
+// resolveFileMarkers() fetches file → converts to base64 data URL
+// Final PDF contains embedded image data
+```
+
+### Technical Architecture
+
+**Frontend Flow:**
+
+1. AssetsManagerComponent manages upload/display
+2. Events bubble up to PdfTemplateFormComponent
+3. Form tracks asset IDs in `uploadedAssetIds` Set
+4. On submit: serialize to JSON array string
+5. On load: deserialize and populate initialAssetIds signal
+
+**Backend Flow:**
+
+1. Handlebars `{{asset "id"}}` → compiles to marker
+2. During render: `resolveFileMarkers()` replaces markers
+3. Fetch file via FileUploadService
+4. Convert to base64 data URL
+5. Embed in final PDF document
+
+### Files Created/Modified Summary
+
+**New Files (1):**
+
+- `apps/web/src/app/features/pdf-templates/components/assets-manager/assets-manager.component.ts` (573 lines)
+- `apps/api/src/database/migrations/20251014093000_add_asset_file_ids_to_pdf_templates.ts`
+
+**Modified Files (6):**
+
+- `apps/api/src/services/handlebars-template.service.ts` - type safety, asset helper, cleanup
+- `apps/api/src/services/pdf-template.service.ts` - generic marker resolution, logger fix
+- `apps/api/src/types/pdf-template.types.ts` - added asset_file_ids field
+- `apps/api/src/schemas/pdf-template.schemas.ts` - added asset_file_ids validation
+- `apps/web/src/app/features/pdf-templates/components/pdf-templates-form.component.ts` - asset integration
+- `apps/web/src/app/features/pdf-templates/types/pdf-templates.types.ts` - type updates
+
+### 🎯 Session 34 Tasks (COMPLETED - Previous Session)
 
 ### 🎯 Session 34 Tasks (COMPLETED)
 
@@ -345,7 +487,38 @@ AegisX Starter - Enterprise-ready monorepo with Angular 19, Fastify, PostgreSQL
 
 ### 🔄 In Progress
 
-None - Session 33 completed successfully
+**⏳ Pending: Database Migration**
+
+- Migration file created: `20251014093000_add_asset_file_ids_to_pdf_templates.ts`
+- Command: `pnpm db:migrate`
+- Impact: Adds `asset_file_ids` JSONB column to `pdf_templates` and `pdf_template_versions` tables
+
+### ⏳ Next Steps (Session 36)
+
+1. **Run Database Migration**:
+
+   ```bash
+   pnpm db:migrate
+   ```
+
+2. **End-to-End Testing**:
+   - Start API and Web servers
+   - Upload multiple assets in PDF template form
+   - Insert `{{asset "id"}}` markers into template
+   - Save template → verify `asset_file_ids` persists
+   - Re-open template → verify assets load back
+   - Render PDF with asset markers → verify image embedding
+
+3. **Documentation Updates**:
+   - Update `docs/features/pdf-templates/PDF_TEMPLATES_GUIDE.md`
+   - Add `{{asset}}` helper documentation
+   - Include multi-asset upload workflow examples
+   - Document asset persistence behavior
+
+4. **Test Coverage**:
+   - Unit tests for `AssetsManagerComponent`
+   - Integration tests for asset persistence
+   - E2E tests for full upload-to-render flow
 
 ### 📋 Backlog
 
