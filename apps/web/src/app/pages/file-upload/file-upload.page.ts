@@ -9,7 +9,7 @@ import {
   FileManagementComponent,
   UploadedFile,
   FileUploadService,
-} from '../../shared/components/file-upload';
+} from '../../shared/ui/components/file-upload';
 
 @Component({
   selector: 'app-file-upload-page',

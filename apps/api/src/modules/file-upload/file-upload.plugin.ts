@@ -47,10 +47,10 @@ async function fileUploadPlugin(fastify: FastifyInstance) {
     fileUploadService: service,
   });
 
-  // Register routes
+  // Register routes (prefix handled by main.ts)
   await fastify.register(fileUploadRoutes, {
     controller,
-    prefix: '/api/files',
+    prefix: '/files',
   });
 
   // Decorate fastify instance with services (optional, for testing or other modules)
@@ -70,3 +70,9 @@ export default fp(fileUploadPlugin, {
 });
 
 export { fileUploadPlugin };
+
+declare module 'fastify' {
+  interface FastifyInstance {
+    fileUploadService: FileUploadService;
+  }
+}

@@ -236,14 +236,7 @@ async function loggingPlugin(
     );
   }
 
-  // Log server startup
-  logger.info('Logging plugin initialized', {
-    level: logger.level,
-    environment: process.env.NODE_ENV || 'development',
-    enableRequestLogging: options.enableRequestLogging !== false,
-    enableFileRotation:
-      options.enableFileRotation || process.env.NODE_ENV === 'production',
-  });
+  // Logging plugin initialized (silent startup)
 }
 
 export default fp(loggingPlugin, {

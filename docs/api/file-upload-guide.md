@@ -222,7 +222,7 @@ curl -X 'POST' \
 
 ### 3. Swagger UI
 
-Navigate to `http://localhost:3333/api-docs` and expand the "File Upload" section. You will see:
+Navigate to `/documentation` (default port: 3333) and expand the "File Upload" section. You will see:
 
 - ✅ Browse button for file selection
 - ✅ All form fields with descriptions

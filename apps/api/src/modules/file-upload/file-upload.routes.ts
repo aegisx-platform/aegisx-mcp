@@ -236,7 +236,7 @@ export async function fileUploadRoutes(
       },
       security: [{ bearerAuth: [] }],
     },
-    preHandler: [fastify.authenticate], // TODO: Add admin role check
+    preHandler: [fastify.authenticate, fastify.authorize(['admin'])], // Admin access required for storage configuration
     handler: controller.getStorageConfiguration.bind(controller),
   });
 
@@ -306,24 +306,25 @@ export async function fileUploadRoutes(
 
   // View file inline (optional authentication - public files accessible without auth, private files require token)
   fastify.get('/:id/view', {
-    // schema: {
-    //   tags: ['File Access'],
-    //   summary: 'View file inline',
-    //   description: 'View file content inline in browser. Public files can be accessed without authentication, private files require valid token.',
-    //   params: FileIdParamSchema,
-    //   querystring: ViewQuerySchema,
-    //   response: {
-    //     200: {
-    //       description: 'File content displayed inline',
-    //       type: 'string',
-    //       format: 'binary',
-    //     },
-    //     401: FileUploadErrorSchema,
-    //     404: FileUploadErrorSchema,
-    //     500: FileUploadErrorSchema,
-    //   },
-    //   security: [{ bearerAuth: [] }],
-    // },
+    schema: {
+      tags: ['File Access'],
+      summary: 'View file inline',
+      description:
+        'View file content inline in browser. Public files can be accessed without authentication, private files require valid token.',
+      params: FileIdParamSchema,
+      querystring: ViewQuerySchema,
+      response: {
+        200: {
+          description: 'File content displayed inline',
+          type: 'string',
+          format: 'binary',
+        },
+        401: FileUploadErrorSchema,
+        404: FileUploadErrorSchema,
+        500: FileUploadErrorSchema,
+      },
+      security: [{ bearerAuth: [] }],
+    },
     // Optional authentication - try to authenticate but don't fail if no token
     preHandler: createOptionalAuthHandler(fastify),
     handler: controller.viewFile.bind(controller),
@@ -427,7 +428,7 @@ export async function fileUploadRoutes(
       },
       security: [{ bearerAuth: [] }],
     },
-    preHandler: [fastify.authenticate],
+    preHandler: [fastify.authenticate, fastify.authorize(['admin'])], // Admin-only cleanup operation
     handler: controller.cleanupSoftDeletedFiles.bind(controller),
   });
 

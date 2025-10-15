@@ -7,7 +7,7 @@ import { ThemesCreate, ThemesUpdate } from '../schemas/themes.types';
  * 
  * Integration tests for themes domain functionality.
  * 
- * Generated on: 2025-09-25T00:51:45.987Z
+ * Generated on: 2025-10-08T15:15:11.396Z
  */
 
 describe('Themes Domain', () => {
@@ -29,7 +29,7 @@ describe('Themes Domain', () => {
       // TODO: Add actual test data based on your schema
       name: `Test Themes ${Date.now()}`,
       description: 'Test description',
-      status: 'active'
+      is_active: 'true'
     });
 
     describe('POST /core', () => {
@@ -93,7 +93,7 @@ describe('Themes Domain', () => {
       it('should filter core by query parameters', async () => {
         const response = await app.inject({
           method: 'GET',
-          url: '/core?status=active&name=Test'
+          url: '/core?is_active=true&name=Test'
         });
 
         expect(response.statusCode).toBe(200);
@@ -204,17 +204,6 @@ describe('Themes Domain', () => {
       });
     });
 
-    describe('WebSocket Events', () => {
-      it('should handle WebSocket connections', async () => {
-        // TODO: Add WebSocket testing logic
-        // This requires setting up WebSocket test client
-      });
-
-      it('should emit events on CRUD operations', async () => {
-        // TODO: Add event emission testing
-        // This requires event listener setup
-      });
-    });
   });
 
   describe('Themes Service', () => {

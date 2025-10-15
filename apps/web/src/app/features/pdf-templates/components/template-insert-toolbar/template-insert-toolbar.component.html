@@ -1,0 +1,23 @@
+<div class="template-insert-toolbar">
+  <div class="toolbar-header">
+    <mat-icon class="toolbar-icon">auto_awesome</mat-icon>
+    <span class="toolbar-title">Quick Insert</span>
+    <span class="toolbar-subtitle">Add common template structures</span>
+  </div>
+
+  <div class="toolbar-buttons">
+    @for (template of insertTemplates; track template.name) {
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="onTemplateClick(template)"
+        [disabled]="isTemplateDisabled(template)"
+        [matTooltip]="template.description"
+        class="insert-btn"
+      >
+        <mat-icon>{{ template.icon }}</mat-icon>
+        <span>{{ template.name }}</span>
+      </button>
+    }
+  </div>
+</div>

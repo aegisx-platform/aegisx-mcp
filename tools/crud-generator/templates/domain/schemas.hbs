@@ -4,7 +4,17 @@ import {
   PaginationQuerySchema, 
   ApiErrorResponseSchema,
   ApiSuccessResponseSchema,
-  PaginatedResponseSchema 
+  PaginatedResponseSchema,
+  PartialPaginatedResponseSchema{{#if (or (eq package 'enterprise') (eq package 'full'))}},
+  DropdownOptionSchema,
+  BulkCreateSchema,
+  BulkUpdateSchema,
+  BulkDeleteSchema,
+  BulkStatusSchema,
+  StatusToggleSchema,
+  StatisticsSchema{{/if}}{{#if (eq package 'full')}},
+  ValidationRequestSchema,
+  UniquenessCheckSchema{{/if}} 
 } from '../../../schemas/base.schemas';
 
 // Base {{ModuleName}} Schema
@@ -20,10 +30,20 @@ export const Create{{ModuleName}}Schema = Type.Object({
 {{#unless isPrimaryKey}}
 {{#unless (eq name 'created_at')}}
 {{#unless (eq name 'updated_at')}}
+{{#unless (eq name 'created_by')}}
+{{#unless (eq name 'updated_by')}}
   {{name}}: {{{raw typeboxType}}},
 {{/unless}}
 {{/unless}}
 {{/unless}}
+{{/unless}}
+{{/unless}}
+{{/each}}
+{{#each columns}}
+{{#if (eq name 'created_by')}}
+  // created_by is auto-filled from JWT token
+  created_by: Type.Optional(Type.String({ format: 'uuid', description: 'User who created this record (auto-filled from JWT)' })),
+{{/if}}
 {{/each}}
 });
 
@@ -34,10 +54,20 @@ export const Update{{ModuleName}}Schema = Type.Partial(
 {{#unless isPrimaryKey}}
 {{#unless (eq name 'created_at')}}
 {{#unless (eq name 'updated_at')}}
+{{#unless (eq name 'created_by')}}
+{{#unless (eq name 'updated_by')}}
     {{name}}: {{{raw typeboxType}}},
 {{/unless}}
 {{/unless}}
 {{/unless}}
+{{/unless}}
+{{/unless}}
+{{/each}}
+{{#each columns}}
+{{#if (eq name 'updated_by')}}
+    // updated_by is auto-filled from JWT token
+    updated_by: Type.String({ format: 'uuid', description: 'User who updated this record (auto-filled from JWT)' }),
+{{/if}}
 {{/each}}
   })
 );
@@ -59,32 +89,47 @@ export const List{{ModuleName}}QuerySchema = Type.Object({
   // Pagination parameters
   page: Type.Optional(Type.Number({ minimum: 1, default: 1 })),
   limit: Type.Optional(Type.Number({ minimum: 1, maximum: 1000, default: 20 })),
-  sortBy: Type.Optional(Type.String()),
-  sortOrder: Type.Optional(Type.Union([
-    Type.Literal('asc'), 
-    Type.Literal('desc')
-  ], { default: 'desc' })),
+  // Modern multiple sort support
+  sort: Type.Optional(Type.String({
+    pattern: '^[a-zA-Z_][a-zA-Z0-9_]*(:(asc|desc))?(,[a-zA-Z_][a-zA-Z0-9_]*(:(asc|desc))?)*$',
+    description: 'Multiple sort: field1:desc,field2:asc,field3:desc. Example: {{#each columns}}{{#if @first}}{{name}}:asc{{/if}}{{/each}},created_at:desc',
+    examples: [{{#each columns}}{{#if @first}}'{{name}}:asc'{{/if}}{{/each}}, 'created_at:desc'{{#each columns}}{{#if (eq @index 1)}}, '{{name}}:asc,created_at:desc'{{/if}}{{/each}}]
+  })),
   
   // Search and filtering
   search: Type.Optional(Type.String({ minLength: 1, maxLength: 100 })),
   
-  // Include related data
+  // 🛡️ Secure field selection with validation
+  fields: Type.Optional(Type.Array(
+    Type.String({ 
+      pattern: '^[a-zA-Z_][a-zA-Z0-9_]*$', // Only alphanumeric + underscore
+      minLength: 1,
+      maxLength: 50 
+    }), 
+    { 
+      minItems: 1,
+      maxItems: 20, // Prevent excessive field requests
+      description: 'Specific fields to return. Example: ["id", {{#each columns}}{{#if (eq @index 1)}}"{{name}}"{{/if}}{{/each}}, "created_at"]. Field access is role-based for security.'
+    }
+  )),
+  
+  // Include related data (only if table has foreign keys)
+  {{#if (hasForeignKeys schema)}}
   include: Type.Optional(Type.Union([
     Type.String(),
     Type.Array(Type.String())
   ])),
+  {{/if}}
   
-  // Add column-specific filters dynamically
+  // Smart field-based filters
   {{#each columns}}
   {{#unless (or isPrimaryKey (eq name 'created_at') (eq name 'updated_at'))}}
-  {{#if (eq tsType 'boolean')}}
-  {{name}}: Type.Optional(Type.Boolean()),
+  {{#if (isExactMatchField this)}}
+  {{name}}: Type.Optional({{#if (eq tsType 'boolean')}}Type.Boolean(){{else if (eq tsType 'string')}}Type.String({{{getFieldConstraints this}}}){{else if (eq tsType 'number')}}Type.Number({{{getFieldConstraints this}}}){{/if}}),
   {{/if}}
-  {{#if (eq tsType 'string')}}
-  {{name}}: Type.Optional(Type.String({ minLength: 1, maxLength: 255 })),
-  {{/if}}
-  {{#if (eq tsType 'number')}}
-  {{name}}: Type.Optional(Type.Number({ minimum: 0 })),
+  {{#if (isRangeField this)}}
+  {{name}}_min: Type.Optional({{#if (eq tsType 'number')}}Type.Number({{{getFieldConstraints this}}}){{else if (eq type 'date')}}Type.String({ format: 'date' }){{else if (eq tsType 'Date')}}Type.String({ format: 'date-time' }){{/if}}),
+  {{name}}_max: Type.Optional({{#if (eq tsType 'number')}}Type.Number({{{getFieldConstraints this}}}){{else if (eq type 'date')}}Type.String({ format: 'date' }){{else if (eq tsType 'Date')}}Type.String({ format: 'date-time' }){{/if}}),
   {{/if}}
   {{/unless}}
   {{/each}}
@@ -94,6 +139,10 @@ export const List{{ModuleName}}QuerySchema = Type.Object({
 export const {{ModuleName}}ResponseSchema = ApiSuccessResponseSchema({{ModuleName}}Schema);
 export const {{ModuleName}}ListResponseSchema = PaginatedResponseSchema({{ModuleName}}Schema);
 
+// Partial Schemas for field selection support
+export const Partial{{ModuleName}}Schema = Type.Partial({{ModuleName}}Schema);
+export const Flexible{{ModuleName}}ListResponseSchema = PartialPaginatedResponseSchema({{ModuleName}}Schema);
+
 // Export types
 export type {{ModuleName}} = Static<typeof {{ModuleName}}Schema>;
 export type Create{{ModuleName}} = Static<typeof Create{{ModuleName}}Schema>;
@@ -101,6 +150,10 @@ export type Update{{ModuleName}} = Static<typeof Update{{ModuleName}}Schema>;
 export type {{ModuleName}}IdParam = Static<typeof {{ModuleName}}IdParamSchema>;
 export type Get{{ModuleName}}Query = Static<typeof Get{{ModuleName}}QuerySchema>;
 export type List{{ModuleName}}Query = Static<typeof List{{ModuleName}}QuerySchema>;
+
+// Partial types for field selection
+export type Partial{{ModuleName}} = Static<typeof Partial{{ModuleName}}Schema>;
+export type Flexible{{ModuleName}}List = Static<typeof Flexible{{ModuleName}}ListResponseSchema>;
 
 {{#if withEvents}}
 // WebSocket Event Schemas

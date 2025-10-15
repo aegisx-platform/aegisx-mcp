@@ -18,7 +18,7 @@ export interface SystemSettingsRoutesOptions extends FastifyPluginOptions {
 
 export async function systemSettingsRoutes(
   fastify: FastifyInstance,
-  options: SystemSettingsRoutesOptions
+  options: SystemSettingsRoutesOptions,
 ) {
   const { controller } = options;
 
@@ -35,10 +35,10 @@ export async function systemSettingsRoutes(
         401: SchemaRefs.Unauthorized,
         403: SchemaRefs.Forbidden,
         409: SchemaRefs.Conflict,
-        500: SchemaRefs.ServerError
-      }
+        500: SchemaRefs.ServerError,
+      },
     },
-    handler: controller.create.bind(controller)
+    handler: controller.create.bind(controller),
   });
 
   // Get systemSettings by ID
@@ -55,10 +55,10 @@ export async function systemSettingsRoutes(
         401: SchemaRefs.Unauthorized,
         403: SchemaRefs.Forbidden,
         404: SchemaRefs.NotFound,
-        500: SchemaRefs.ServerError
-      }
+        500: SchemaRefs.ServerError,
+      },
     },
-    handler: controller.findOne.bind(controller)
+    handler: controller.findOne.bind(controller),
   });
 
   // Get all systemSettingss
@@ -66,17 +66,18 @@ export async function systemSettingsRoutes(
     schema: {
       tags: ['SystemSettings'],
       summary: 'Get all systemSettingss with pagination',
-      description: 'Retrieve a paginated list of systemSettingss with optional filtering',
+      description:
+        'Retrieve a paginated list of systemSettingss with optional filtering',
       querystring: ListSystemSettingsQuerySchema,
       response: {
         200: SystemSettingsListResponseSchema,
         400: SchemaRefs.ValidationError,
         401: SchemaRefs.Unauthorized,
         403: SchemaRefs.Forbidden,
-        500: SchemaRefs.ServerError
-      }
+        500: SchemaRefs.ServerError,
+      },
     },
-    handler: controller.findMany.bind(controller)
+    handler: controller.findMany.bind(controller),
   });
 
   // Update systemSettings
@@ -94,10 +95,10 @@ export async function systemSettingsRoutes(
         403: SchemaRefs.Forbidden,
         404: SchemaRefs.NotFound,
         409: SchemaRefs.Conflict,
-        500: SchemaRefs.ServerError
-      }
+        500: SchemaRefs.ServerError,
+      },
     },
-    handler: controller.update.bind(controller)
+    handler: controller.update.bind(controller),
   });
 
   // Delete systemSettings
@@ -108,15 +109,14 @@ export async function systemSettingsRoutes(
       description: 'Delete a systemSettings by its unique identifier',
       params: SystemSettingsIdParamSchema,
       response: {
-        200: SchemaRefs.SuccessMessage,
+        200: SchemaRefs.OperationResult,
         400: SchemaRefs.ValidationError,
         401: SchemaRefs.Unauthorized,
         403: SchemaRefs.Forbidden,
         404: SchemaRefs.NotFound,
-        500: SchemaRefs.ServerError
-      }
+        500: SchemaRefs.ServerError,
+      },
     },
-    handler: controller.delete.bind(controller)
+    handler: controller.delete.bind(controller),
   });
-
 }

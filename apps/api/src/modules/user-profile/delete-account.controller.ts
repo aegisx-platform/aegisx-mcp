@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { UsersService } from '../users/users.service';
+import { UsersService } from '../../core/users/users.service';
 import { UserActivityService } from './user-activity.service';
 import { ACTIVITY_ACTIONS } from './user-activity.schemas';
 import {
@@ -47,7 +47,7 @@ export class DeleteAccountController {
           {
             severity: 'warning',
             metadata: { reason: 'invalid_confirmation' },
-          }
+          },
         );
 
         return reply.status(400).send({
@@ -66,7 +66,10 @@ export class DeleteAccountController {
       }
 
       // 2. Verify current password
-      const isPasswordValid = await this.usersService.verifyPassword(userId, password);
+      const isPasswordValid = await this.usersService.verifyPassword(
+        userId,
+        password,
+      );
       if (!isPasswordValid) {
         await this.activityService.logActivity(
           userId,
@@ -76,7 +79,7 @@ export class DeleteAccountController {
           {
             severity: 'warning',
             metadata: { reason: 'incorrect_password' },
-          }
+          },
         );
 
         return reply.status(401).send({
@@ -95,7 +98,10 @@ export class DeleteAccountController {
       }
 
       // 3. Check if account is already deleted
-      const user = await this.usersService.getUserByIdIncludeDeleted(userId, true);
+      const user = await this.usersService.getUserByIdIncludeDeleted(
+        userId,
+        true,
+      );
       if (!user) {
         return reply.status(404).send({
           success: false,
@@ -147,7 +153,7 @@ export class DeleteAccountController {
             reason,
             recoveryDeadline: deletionResult.recoveryDeadline,
           },
-        }
+        },
       );
 
       // 6. Return success response
@@ -167,7 +173,6 @@ export class DeleteAccountController {
       };
 
       return reply.status(200).send(response);
-
     } catch (error: any) {
       request.log.error(`Account deletion failed: ${error.message}`);
 
@@ -184,10 +189,12 @@ export class DeleteAccountController {
               error: error.message,
               reason: 'internal_error',
             },
-          }
+          },
         );
       } catch (logError) {
-        request.log.error(`Failed to log activity: ${(logError as Error).message}`);
+        request.log.error(
+          `Failed to log activity: ${(logError as Error).message}`,
+        );
       }
 
       // Handle specific known errors

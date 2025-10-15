@@ -4,7 +4,7 @@ import {
   ApiMetaSchema,
   PaginationMetaSchema,
   ApiErrorResponseSchema,
-  SuccessMessageSchema,
+  OperationResultResponseSchema,
   ValidationErrorResponseSchema,
   UnauthorizedResponseSchema,
   ForbiddenResponseSchema,
@@ -39,7 +39,7 @@ export class SchemaRegistry {
       'api-meta': ApiMetaSchema,
       'pagination-meta': PaginationMetaSchema,
       'api-error-response': ApiErrorResponseSchema,
-      'success-message': SuccessMessageSchema,
+      'operation-result': OperationResultResponseSchema,
       'validation-error-response': ValidationErrorResponseSchema,
       'unauthorized-response': UnauthorizedResponseSchema,
       'forbidden-response': ForbiddenResponseSchema,
@@ -133,7 +133,7 @@ export function createSchemaRegistry(fastify: FastifyInstance): SchemaRegistry {
  */
 export const SchemaRefs = {
   // Response schemas
-  SuccessMessage: { $ref: 'success-message#' },
+  OperationResult: { $ref: 'operation-result#' },
   ValidationError: { $ref: 'validation-error-response#' },
   Unauthorized: { $ref: 'unauthorized-response#' },
   Forbidden: { $ref: 'forbidden-response#' },

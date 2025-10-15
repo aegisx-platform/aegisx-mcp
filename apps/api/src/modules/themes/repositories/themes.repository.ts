@@ -1,54 +1,38 @@
-import { BaseRepository, BaseListQuery, PaginatedListResult } from '../../../shared/repositories/base.repository';
-import { Knex } from 'knex';
+import {
+  BaseRepository,
+  BaseListQuery,
+  PaginatedListResult,
+} from '../../../shared/repositories/base.repository';
+import type { Knex } from 'knex';
 import {
   type CreateThemes,
   type UpdateThemes,
   type Themes,
   type GetThemesQuery,
   type ListThemesQuery,
-  type ThemesEntity
+  type ThemesEntity,
 } from '../types/themes.types';
 
 export interface ThemesListQuery extends BaseListQuery {
-  // Add specific filters for Themes
-
-  name?: string;
-  
-
-  display_name?: string;
-  
-
-  description?: string;
-  
-
-  preview_image_url?: string;
-  
-
-
+  // Smart field-based filters for Themes
   is_active?: boolean;
-  
   is_default?: boolean;
-  
-
-  sort_order?: number;
-  
-
+  updated_at_min?: Date;
+  updated_at_max?: Date;
 }
 
-export class ThemesRepository extends BaseRepository<Themes, CreateThemes, UpdateThemes> {
-
+export class ThemesRepository extends BaseRepository<
+  Themes,
+  CreateThemes,
+  UpdateThemes
+> {
   constructor(knex: Knex) {
-    super(
-      knex,
-      'themes',
-      [
-        // Define searchable fields
-        'themes.name',
-        'themes.display_name',
-        'themes.description',
-        'themes.preview_image_url',
-      ]
-    );
+    super(knex, 'themes', [
+      // Define searchable fields based on intelligent detection
+      'themes.name',
+      'themes.display_name',
+      'themes.description',
+    ]);
   }
 
   // Transform database row to entity
@@ -67,7 +51,7 @@ export class ThemesRepository extends BaseRepository<Themes, CreateThemes, Updat
       is_default: dbRow.is_default,
       sort_order: dbRow.sort_order,
       created_at: dbRow.created_at,
-      updated_at: dbRow.updated_at
+      updated_at: dbRow.updated_at,
     };
   }
 
@@ -109,10 +93,9 @@ export class ThemesRepository extends BaseRepository<Themes, CreateThemes, Updat
 
   // Custom query with joins if needed
   getJoinQuery() {
-    return this.knex('themes')
-      .select('themes.*');
-      // Add joins here if needed
-      // .leftJoin('other_table', 'themes.foreign_key', 'other_table.id')
+    return this.knex('themes').select('themes.*');
+    // Add joins here if needed
+    // .leftJoin('other_table', 'themes.foreign_key', 'other_table.id')
   }
 
   // Apply custom filters
@@ -120,36 +103,42 @@ export class ThemesRepository extends BaseRepository<Themes, CreateThemes, Updat
     // Apply base filters first
     super.applyCustomFilters(query, filters);
 
-    // Apply specific Themes filters
-    if (filters.name !== undefined) {
-      query.where('themes.name', filters.name);
-    }
-    if (filters.display_name !== undefined) {
-      query.where('themes.display_name', filters.display_name);
-    }
-    if (filters.description !== undefined) {
-      query.where('themes.description', filters.description);
-    }
-    if (filters.preview_image_url !== undefined) {
-      query.where('themes.preview_image_url', filters.preview_image_url);
-    }
-    if (filters.color_palette !== undefined) {
-      query.where('themes.color_palette', filters.color_palette);
-    }
-    if (filters.css_variables !== undefined) {
-      query.where('themes.css_variables', filters.css_variables);
-    }
+    // Apply specific Themes filters based on intelligent field categorization
     if (filters.is_active !== undefined) {
       query.where('themes.is_active', filters.is_active);
     }
     if (filters.is_default !== undefined) {
       query.where('themes.is_default', filters.is_default);
     }
-    if (filters.sort_order !== undefined) {
-      query.where('themes.sort_order', filters.sort_order);
+    if (filters.updated_at_min !== undefined) {
+      query.where('themes.updated_at', '>=', filters.updated_at_min);
     }
-    if (filters.updated_at !== undefined) {
-      query.where('themes.updated_at', filters.updated_at);
+    if (filters.updated_at_max !== undefined) {
+      query.where('themes.updated_at', '<=', filters.updated_at_max);
+    }
+  }
+
+  // Apply multiple sort parsing
+  protected applyMultipleSort(query: any, sort?: string): void {
+    if (sort) {
+      if (sort.includes(',')) {
+        // Multiple sort format: field1:desc,field2:asc,field3:desc
+        const sortPairs = sort.split(',');
+        sortPairs.forEach((pair) => {
+          const [field, direction] = pair.split(':');
+          const mappedField = this.getSortField(field.trim());
+          const sortDirection =
+            direction?.trim().toLowerCase() === 'asc' ? 'asc' : 'desc';
+          query.orderBy(mappedField, sortDirection);
+        });
+      } else {
+        // Single sort field
+        const mappedField = this.getSortField(sort);
+        query.orderBy(mappedField, 'desc');
+      }
+    } else {
+      // Default sort
+      query.orderBy(this.getSortField('created_at'), 'desc');
     }
   }
 
@@ -167,7 +156,7 @@ export class ThemesRepository extends BaseRepository<Themes, CreateThemes, Updat
       isDefault: 'themes.is_default',
       sortOrder: 'themes.sort_order',
       createdAt: 'themes.created_at',
-      updatedAt: 'themes.updated_at'
+      updatedAt: 'themes.updated_at',
     };
 
     return sortFields[sortBy] || 'themes.id';
@@ -176,15 +165,17 @@ export class ThemesRepository extends BaseRepository<Themes, CreateThemes, Updat
   // Extended find method with options
   async findById(
     id: number | string,
-    options: GetThemesQuery = {}
+    options: GetThemesQuery = {},
   ): Promise<Themes | null> {
     let query = this.getJoinQuery();
     query = query.where('themes.id', id);
 
     // Handle include options
     if (options.include) {
-      const includes = Array.isArray(options.include) ? options.include : [options.include];
-      includes.forEach(relation => {
+      const includes = Array.isArray(options.include)
+        ? options.include
+        : [options.include];
+      includes.forEach((relation) => {
         // TODO: Add join logic for relationships
         // Example: if (relation === 'category') query.leftJoin('categories', 'items.category_id', 'categories.id');
       });
@@ -195,12 +186,14 @@ export class ThemesRepository extends BaseRepository<Themes, CreateThemes, Updat
   }
 
   // Extended list method with specific query type
-  async list(query: ThemesListQuery = {}): Promise<PaginatedListResult<Themes>> {
+  async list(
+    query: ThemesListQuery = {},
+  ): Promise<PaginatedListResult<Themes>> {
     return super.list(query);
   }
 
-  // Additional business-specific methods
-  
+  // Business-specific methods for unique/important fields
+
   async findByName(name: string): Promise<Themes | null> {
     const query = this.getJoinQuery();
     const row = await query.where('themes.name', name).first();
@@ -213,45 +206,26 @@ export class ThemesRepository extends BaseRepository<Themes, CreateThemes, Updat
     return row ? this.transformToEntity(row) : null;
   }
 
-  async findByDescription(description: string): Promise<Themes | null> {
-    const query = this.getJoinQuery();
-    const row = await query.where('themes.description', description).first();
-    return row ? this.transformToEntity(row) : null;
-  }
-
-  async findByPreviewImageUrl(previewImageUrl: string): Promise<Themes | null> {
-    const query = this.getJoinQuery();
-    const row = await query.where('themes.preview_image_url', previewImageUrl).first();
-    return row ? this.transformToEntity(row) : null;
-  }
-
-
-  // Statistics and aggregation methods
+  // Basic Statistics - count only
   async getStats(): Promise<{
     total: number;
-    isActiveCount: number;
-    isDefaultCount: number;
   }> {
     const stats: any = await this.knex('themes')
-      .select([
-        this.knex.raw('COUNT(*) as total'),
-        this.knex.raw('COUNT(*) FILTER (WHERE is_active = true) as isActive_count'),
-        this.knex.raw('COUNT(*) FILTER (WHERE is_default = true) as isDefault_count')
-      ])
+      .select([this.knex.raw('COUNT(*) as total')])
       .first();
 
     return {
       total: parseInt(stats?.total || '0'),
-      isActiveCount: parseInt(stats?.isActive_count || '0'),
-      isDefaultCount: parseInt(stats?.isDefault_count || '0'),
     };
   }
 
   // Bulk operations with better type safety
   async createMany(data: CreateThemes[]): Promise<Themes[]> {
-    const transformedData = data.map(item => this.transformToDb(item));
-    const rows = await this.knex('themes').insert(transformedData).returning('*');
-    return rows.map(row => this.transformToEntity(row));
+    const transformedData = data.map((item) => this.transformToDb(item));
+    const rows = await this.knex('themes')
+      .insert(transformedData)
+      .returning('*');
+    return rows.map((row) => this.transformToEntity(row));
   }
 
   // Transaction support for complex operations

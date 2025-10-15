@@ -171,7 +171,7 @@ test.describe('User Preferences Error Scenarios', () => {
       });
 
       // Verify eventual success
-      await preferencesPage.verifySuccessMessage();
+      await preferencesPage.verifyOperationResult();
     });
   });
 
@@ -671,7 +671,7 @@ test.describe('User Preferences Error Scenarios', () => {
       await preferencesPage.savePreferences();
 
       // Should eventually succeed
-      await preferencesPage.verifySuccessMessage();
+      await preferencesPage.verifyOperationResult();
 
       await page.screenshot({
         path: 'screenshots/error-recovery-final-success.png',

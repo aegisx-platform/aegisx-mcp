@@ -421,9 +421,22 @@ export class FileUploadController {
         });
       }
 
+      // Generate signed URLs for immediate use (like upload endpoint does)
+      const signedUrlsResult =
+        await this.deps.fileUploadService.generateSignedUrls(
+          file.id,
+          {
+            expiresIn: 3600, // 1 hour
+          },
+          userId,
+        );
+
       return reply.send({
         success: true,
-        data: file,
+        data: {
+          ...file,
+          signedUrls: signedUrlsResult.urls,
+        },
         meta: {
           requestId: request.id,
           timestamp: new Date().toISOString(),

@@ -23,7 +23,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCardModule } from '@angular/material/card';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { UserService } from '../../users/user.service';
+import { UserService } from '../../users/services/user.service';
 import {
   AvatarUploadComponent,
   AvatarUploadResult,
@@ -323,7 +323,6 @@ export class ProfileInfoComponent implements OnChanges {
 
       this.profileForm.patchValue(profileData);
       this.originalValues = { ...profileData };
-
     }
   }
 
@@ -405,7 +404,6 @@ export class ProfileInfoComponent implements OnChanges {
 
       // Update original values to reflect saved state
       this.originalValues = { ...changes };
-
 
       // Emit the updated profile to parent component
       this.profileChange.emit(updatedProfile);

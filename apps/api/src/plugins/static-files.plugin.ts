@@ -5,12 +5,15 @@ import * as fs from 'fs/promises';
 
 async function staticFilesPlugin(
   fastify: FastifyInstance,
-  _options: FastifyPluginOptions
+  _options: FastifyPluginOptions,
 ) {
+  // Get API prefix from serverInfo to avoid duplication
+  const apiPrefix = (fastify as any).serverInfo?.apiPrefix || '/api';
+
   // Serve avatar files
   fastify.route({
     method: 'GET',
-    url: '/api/uploads/avatars/:filename',
+    url: `${apiPrefix}/uploads/avatars/:filename`,
     schema: {
       description: 'Serve avatar image files',
       tags: ['Files'],
@@ -22,7 +25,97 @@ async function staticFilesPlugin(
           filename: {
             type: 'string',
             pattern: '^[a-zA-Z0-9._-]+\\.(jpg|jpeg|png|webp)$',
-            description: 'Avatar filename'
+            description: 'Avatar filename',
+          },
+        },
+      },
+      response: {
+        200: {
+          type: 'string',
+          format: 'binary',
+          description: 'Avatar image file',
+        },
+        404: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean', const: false },
+            error: { type: 'string' },
+            message: { type: 'string' },
+          },
+        },
+      },
+    },
+    handler: async (request, reply) => {
+      const { filename } = request.params as { filename: string };
+
+      // Basic security: only allow certain file extensions
+      const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
+      const ext = path.extname(filename).toLowerCase();
+
+      if (!allowedExtensions.includes(ext)) {
+        return reply.notFound();
+      }
+
+      // Prevent directory traversal
+      if (
+        filename.includes('..') ||
+        filename.includes('/') ||
+        filename.includes('\\')
+      ) {
+        return reply.notFound();
+      }
+
+      const uploadsDir = path.join(process.cwd(), 'uploads', 'avatars');
+      const filePath = path.join(uploadsDir, filename);
+
+      try {
+        // Check if file exists
+        await fs.access(filePath);
+
+        // Set appropriate content type
+        const contentTypes: Record<string, string> = {
+          '.jpg': 'image/jpeg',
+          '.jpeg': 'image/jpeg',
+          '.png': 'image/png',
+          '.webp': 'image/webp',
+        };
+
+        reply.type(contentTypes[ext] || 'application/octet-stream');
+
+        // Set caching headers
+        reply.header('Cache-Control', 'public, max-age=31536000'); // 1 year
+        reply.header('ETag', `"${filename}"`);
+
+        // Stream the file
+        const stream = require('fs').createReadStream(filePath);
+        return reply.send(stream);
+      } catch (_error) {
+        return reply.notFound();
+      }
+    },
+  });
+
+  // Serve general assets (logos, images, etc.)
+  fastify.route({
+    method: 'GET',
+    url: `${apiPrefix}/assets/:type/:filename`,
+    schema: {
+      description: 'Serve asset files (logos, images)',
+      tags: ['Files'],
+      summary: 'Get asset file',
+      params: {
+        type: 'object',
+        required: ['type', 'filename'],
+        properties: {
+          type: {
+            type: 'string',
+            enum: ['logos', 'images', 'icons'],
+            description: 'Asset type directory'
+          },
+          filename: {
+            type: 'string',
+            pattern: '^[a-zA-Z0-9._-]+\\.(jpg|jpeg|png|svg|webp)$',
+            description: 'Asset filename'
           }
         }
       },
@@ -30,7 +123,7 @@ async function staticFilesPlugin(
         200: {
           type: 'string',
           format: 'binary',
-          description: 'Avatar image file'
+          description: 'Asset file'
         },
         404: {
           type: 'object',
@@ -43,48 +136,52 @@ async function staticFilesPlugin(
       }
     },
     handler: async (request, reply) => {
-    const { filename } = request.params as { filename: string };
-    
-    // Basic security: only allow certain file extensions
-    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
-    const ext = path.extname(filename).toLowerCase();
-    
-    if (!allowedExtensions.includes(ext)) {
-      return reply.notFound();
-    }
-    
-    // Prevent directory traversal
-    if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
-      return reply.notFound();
-    }
-    
-    const uploadsDir = path.join(process.cwd(), 'uploads', 'avatars');
-    const filePath = path.join(uploadsDir, filename);
-    
-    try {
-      // Check if file exists
-      await fs.access(filePath);
-      
-      // Set appropriate content type
-      const contentTypes: Record<string, string> = {
-        '.jpg': 'image/jpeg',
-        '.jpeg': 'image/jpeg',
-        '.png': 'image/png',
-        '.webp': 'image/webp'
-      };
-      
-      reply.type(contentTypes[ext] || 'application/octet-stream');
-      
-      // Set caching headers
-      reply.header('Cache-Control', 'public, max-age=31536000'); // 1 year
-      reply.header('ETag', `"${filename}"`);
-      
-      // Stream the file
-      const stream = require('fs').createReadStream(filePath);
-      return reply.send(stream);
-    } catch (_error) {
-      return reply.notFound();
-    }
+      const { type, filename } = request.params as { type: string; filename: string };
+
+      // Security checks
+      const allowedExtensions = ['.jpg', '.jpeg', '.png', '.svg', '.webp'];
+      const ext = path.extname(filename).toLowerCase();
+
+      if (!allowedExtensions.includes(ext)) {
+        return reply.notFound();
+      }
+
+      // Prevent directory traversal
+      if (
+        filename.includes('..') ||
+        filename.includes('/') ||
+        filename.includes('\\') ||
+        type.includes('..') ||
+        type.includes('/') ||
+        type.includes('\\')
+      ) {
+        return reply.notFound();
+      }
+
+      const assetsDir = path.join(process.cwd(), 'apps', 'api', 'src', 'assets', type);
+      const filePath = path.join(assetsDir, filename);
+
+      try {
+        await fs.access(filePath);
+
+        // Set content type
+        const contentTypes: Record<string, string> = {
+          '.jpg': 'image/jpeg',
+          '.jpeg': 'image/jpeg',
+          '.png': 'image/png',
+          '.svg': 'image/svg+xml',
+          '.webp': 'image/webp'
+        };
+
+        reply.type(contentTypes[ext] || 'application/octet-stream');
+        reply.header('Cache-Control', 'public, max-age=31536000');
+        reply.header('ETag', `"${type}-${filename}"`);
+
+        const stream = require('fs').createReadStream(filePath);
+        return reply.send(stream);
+      } catch (_error) {
+        return reply.notFound();
+      }
     }
   });
 
@@ -92,5 +189,5 @@ async function staticFilesPlugin(
 }
 
 export default fp(staticFilesPlugin, {
-  name: 'static-files-plugin'
+  name: 'static-files-plugin',
 });

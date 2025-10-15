@@ -13,17 +13,21 @@ export class ProfilePage extends BasePage {
     profile: '[data-testid="profile"], .profile, .user-profile',
     profileHeader: '[data-testid="profile-header"], .profile-header',
     profileContent: '[data-testid="profile-content"], .profile-content',
-    
+
     // Avatar section (enhanced for actual implementation)
-    avatarSection: '[data-testid="avatar-section"], .avatar-section, ax-avatar-upload',
-    avatar: '[data-testid="avatar"], .avatar, .profile-avatar, ax-avatar-upload img',
+    avatarSection:
+      '[data-testid="avatar-section"], .avatar-section, ax-avatar-upload',
+    avatar:
+      '[data-testid="avatar"], .avatar, .profile-avatar, ax-avatar-upload img',
     avatarUpload: '[data-testid="avatar-upload"], input[type="file"]',
-    avatarUploadButton: '[data-testid="avatar-upload-btn"], .avatar-upload-btn, ax-avatar-upload button',
+    avatarUploadButton:
+      '[data-testid="avatar-upload-btn"], .avatar-upload-btn, ax-avatar-upload button',
     avatarPreview: '[data-testid="avatar-preview"], .avatar-preview',
     avatarComponent: 'ax-avatar-upload',
     avatarImage: 'ax-avatar-upload img, ax-avatar-upload .avatar-image',
-    avatarPlaceholder: 'ax-avatar-upload .avatar-placeholder, ax-avatar-upload mat-icon',
-    
+    avatarPlaceholder:
+      'ax-avatar-upload .avatar-placeholder, ax-avatar-upload mat-icon',
+
     // Profile form
     profileForm: '[data-testid="profile-form"], .profile-form, form',
     firstNameInput: '[data-testid="first-name"], input[name="firstName"]',
@@ -31,22 +35,22 @@ export class ProfilePage extends BasePage {
     emailInput: '[data-testid="email"], input[name="email"]',
     phoneInput: '[data-testid="phone"], input[name="phone"]',
     bioInput: '[data-testid="bio"], textarea[name="bio"]',
-    
+
     // Settings
     timezoneSelect: '[data-testid="timezone"], select[name="timezone"]',
     languageSelect: '[data-testid="language"], select[name="language"]',
     themeSelect: '[data-testid="theme"], select[name="theme"]',
-    
+
     // Action buttons
     editButton: '[data-testid="edit-btn"], .edit-btn, [aria-label*="edit"]',
     saveButton: '[data-testid="save-btn"], .save-btn, button[type="submit"]',
     cancelButton: '[data-testid="cancel-btn"], .cancel-btn',
-    
+
     // Profile sections
     personalInfoSection: '[data-testid="personal-info"], .personal-info',
     contactInfoSection: '[data-testid="contact-info"], .contact-info',
     preferencesSection: '[data-testid="preferences"], .preferences',
-    
+
     // Display mode (read-only)
     displayName: '[data-testid="display-name"], .display-name',
     displayEmail: '[data-testid="display-email"], .display-email',
@@ -55,15 +59,15 @@ export class ProfilePage extends BasePage {
     displayTimezone: '[data-testid="display-timezone"], .display-timezone',
     displayLanguage: '[data-testid="display-language"], .display-language',
     displayTheme: '[data-testid="display-theme"], .display-theme',
-    
+
     // Loading and success states
     loadingSpinner: '.loading, .spinner, [data-testid="loading"]',
     successMessage: '[data-testid="success"], .success, .alert-success',
     errorMessage: '[data-testid="error"], .error, .alert-error',
-    
+
     // Validation messages
     validationError: '.field-error, .validation-error, .form-error',
-    
+
     // Tab navigation (if profile has tabs)
     tabNavigation: '[data-testid="profile-tabs"], .profile-tabs, .tabs',
     tabButton: '[data-testid="tab-btn"], .tab-btn, .tab',
@@ -94,7 +98,9 @@ export class ProfilePage extends BasePage {
    * Wait for loading to complete
    */
   async waitForLoadingComplete(): Promise<void> {
-    const loadingExists = await this.elementExists(this.selectors.loadingSpinner);
+    const loadingExists = await this.elementExists(
+      this.selectors.loadingSpinner,
+    );
     if (loadingExists) {
       await this.waitForElementHidden(this.selectors.loadingSpinner);
     }
@@ -133,7 +139,7 @@ export class ProfilePage extends BasePage {
   async waitForSaveComplete(): Promise<void> {
     // Wait for loading to disappear
     await this.waitForLoadingComplete();
-    
+
     // Check for success or error message
     try {
       await this.waitForElement(this.selectors.successMessage, 5000);
@@ -158,35 +164,68 @@ export class ProfilePage extends BasePage {
    * Fill profile form with data
    */
   async fillProfileForm(profileData: Partial<TestUserProfile>): Promise<void> {
-    if (profileData.firstName && await this.elementExists(this.selectors.firstNameInput)) {
-      await this.fillInput(this.selectors.firstNameInput, profileData.firstName);
+    if (
+      profileData.firstName &&
+      (await this.elementExists(this.selectors.firstNameInput))
+    ) {
+      await this.fillInput(
+        this.selectors.firstNameInput,
+        profileData.firstName,
+      );
     }
-    
-    if (profileData.lastName && await this.elementExists(this.selectors.lastNameInput)) {
+
+    if (
+      profileData.lastName &&
+      (await this.elementExists(this.selectors.lastNameInput))
+    ) {
       await this.fillInput(this.selectors.lastNameInput, profileData.lastName);
     }
-    
-    if (profileData.email && await this.elementExists(this.selectors.emailInput)) {
+
+    if (
+      profileData.email &&
+      (await this.elementExists(this.selectors.emailInput))
+    ) {
       await this.fillInput(this.selectors.emailInput, profileData.email);
     }
-    
-    if (profileData.phone && await this.elementExists(this.selectors.phoneInput)) {
+
+    if (
+      profileData.phone &&
+      (await this.elementExists(this.selectors.phoneInput))
+    ) {
       await this.fillInput(this.selectors.phoneInput, profileData.phone);
     }
-    
-    if (profileData.bio && await this.elementExists(this.selectors.bioInput)) {
+
+    if (
+      profileData.bio &&
+      (await this.elementExists(this.selectors.bioInput))
+    ) {
       await this.fillInput(this.selectors.bioInput, profileData.bio);
     }
-    
-    if (profileData.timezone && await this.elementExists(this.selectors.timezoneSelect)) {
-      await this.selectOption(this.selectors.timezoneSelect, profileData.timezone);
+
+    if (
+      profileData.timezone &&
+      (await this.elementExists(this.selectors.timezoneSelect))
+    ) {
+      await this.selectOption(
+        this.selectors.timezoneSelect,
+        profileData.timezone,
+      );
     }
-    
-    if (profileData.language && await this.elementExists(this.selectors.languageSelect)) {
-      await this.selectOption(this.selectors.languageSelect, profileData.language);
+
+    if (
+      profileData.language &&
+      (await this.elementExists(this.selectors.languageSelect))
+    ) {
+      await this.selectOption(
+        this.selectors.languageSelect,
+        profileData.language,
+      );
     }
-    
-    if (profileData.theme && await this.elementExists(this.selectors.themeSelect)) {
+
+    if (
+      profileData.theme &&
+      (await this.elementExists(this.selectors.themeSelect))
+    ) {
       await this.selectOption(this.selectors.themeSelect, profileData.theme);
     }
   }
@@ -212,7 +251,7 @@ export class ProfilePage extends BasePage {
       await this.clickElement(this.selectors.avatarUploadButton);
       await this.page.setInputFiles(this.selectors.avatarUpload, imagePath);
     }
-    
+
     // Wait for upload to complete
     await this.waitForLoadingComplete();
   }
@@ -226,27 +265,37 @@ export class ProfilePage extends BasePage {
       lastName: '',
       email: '',
     };
-    
+
     if (await this.isInEditMode()) {
       // Get data from form inputs
       if (await this.elementExists(this.selectors.firstNameInput)) {
-        profileData.firstName = await this.page.locator(this.selectors.firstNameInput).inputValue();
+        profileData.firstName = await this.page
+          .locator(this.selectors.firstNameInput)
+          .inputValue();
       }
-      
+
       if (await this.elementExists(this.selectors.lastNameInput)) {
-        profileData.lastName = await this.page.locator(this.selectors.lastNameInput).inputValue();
+        profileData.lastName = await this.page
+          .locator(this.selectors.lastNameInput)
+          .inputValue();
       }
-      
+
       if (await this.elementExists(this.selectors.emailInput)) {
-        profileData.email = await this.page.locator(this.selectors.emailInput).inputValue();
+        profileData.email = await this.page
+          .locator(this.selectors.emailInput)
+          .inputValue();
       }
-      
+
       if (await this.elementExists(this.selectors.phoneInput)) {
-        profileData.phone = await this.page.locator(this.selectors.phoneInput).inputValue();
+        profileData.phone = await this.page
+          .locator(this.selectors.phoneInput)
+          .inputValue();
       }
-      
+
       if (await this.elementExists(this.selectors.bioInput)) {
-        profileData.bio = await this.page.locator(this.selectors.bioInput).inputValue();
+        profileData.bio = await this.page
+          .locator(this.selectors.bioInput)
+          .inputValue();
       }
     } else {
       // Get data from display elements
@@ -256,43 +305,65 @@ export class ProfilePage extends BasePage {
         profileData.firstName = nameParts[0] || '';
         profileData.lastName = nameParts.slice(1).join(' ') || '';
       }
-      
+
       if (await this.elementExists(this.selectors.displayEmail)) {
-        profileData.email = await this.getElementText(this.selectors.displayEmail);
+        profileData.email = await this.getElementText(
+          this.selectors.displayEmail,
+        );
       }
-      
+
       if (await this.elementExists(this.selectors.displayPhone)) {
-        profileData.phone = await this.getElementText(this.selectors.displayPhone);
+        profileData.phone = await this.getElementText(
+          this.selectors.displayPhone,
+        );
       }
-      
+
       if (await this.elementExists(this.selectors.displayBio)) {
         profileData.bio = await this.getElementText(this.selectors.displayBio);
       }
     }
-    
+
     return profileData;
   }
 
   /**
    * Verify profile data is displayed correctly
    */
-  async verifyProfileData(expectedData: Partial<TestUserProfile>): Promise<void> {
+  async verifyProfileData(
+    expectedData: Partial<TestUserProfile>,
+  ): Promise<void> {
     if (expectedData.firstName || expectedData.lastName) {
-      const expectedName = `${expectedData.firstName || ''} ${expectedData.lastName || ''}`.trim();
+      const expectedName =
+        `${expectedData.firstName || ''} ${expectedData.lastName || ''}`.trim();
       if (await this.elementExists(this.selectors.displayName)) {
         await this.verifyElementText(this.selectors.displayName, expectedName);
       }
     }
-    
-    if (expectedData.email && await this.elementExists(this.selectors.displayEmail)) {
-      await this.verifyElementText(this.selectors.displayEmail, expectedData.email);
+
+    if (
+      expectedData.email &&
+      (await this.elementExists(this.selectors.displayEmail))
+    ) {
+      await this.verifyElementText(
+        this.selectors.displayEmail,
+        expectedData.email,
+      );
     }
-    
-    if (expectedData.phone && await this.elementExists(this.selectors.displayPhone)) {
-      await this.verifyElementText(this.selectors.displayPhone, expectedData.phone);
+
+    if (
+      expectedData.phone &&
+      (await this.elementExists(this.selectors.displayPhone))
+    ) {
+      await this.verifyElementText(
+        this.selectors.displayPhone,
+        expectedData.phone,
+      );
     }
-    
-    if (expectedData.bio && await this.elementExists(this.selectors.displayBio)) {
+
+    if (
+      expectedData.bio &&
+      (await this.elementExists(this.selectors.displayBio))
+    ) {
       await this.verifyElementText(this.selectors.displayBio, expectedData.bio);
     }
   }
@@ -300,11 +371,14 @@ export class ProfilePage extends BasePage {
   /**
    * Verify success message is displayed
    */
-  async verifySuccessMessage(expectedMessage?: string): Promise<void> {
+  async verifyOperationResult(expectedMessage?: string): Promise<void> {
     await this.verifyElementVisible(this.selectors.successMessage);
-    
+
     if (expectedMessage) {
-      await this.verifyElementContainsText(this.selectors.successMessage, expectedMessage);
+      await this.verifyElementContainsText(
+        this.selectors.successMessage,
+        expectedMessage,
+      );
     }
   }
 
@@ -313,9 +387,12 @@ export class ProfilePage extends BasePage {
    */
   async verifyErrorMessage(expectedMessage?: string): Promise<void> {
     await this.verifyElementVisible(this.selectors.errorMessage);
-    
+
     if (expectedMessage) {
-      await this.verifyElementContainsText(this.selectors.errorMessage, expectedMessage);
+      await this.verifyElementContainsText(
+        this.selectors.errorMessage,
+        expectedMessage,
+      );
     }
   }
 
@@ -324,17 +401,17 @@ export class ProfilePage extends BasePage {
    */
   async verifyValidationErrors(): Promise<string[]> {
     const errors: string[] = [];
-    
+
     if (await this.elementExists(this.selectors.validationError)) {
       const errorElements = this.page.locator(this.selectors.validationError);
       const count = await errorElements.count();
-      
+
       for (let i = 0; i < count; i++) {
-        const errorText = await errorElements.nth(i).textContent() ?? '';
+        const errorText = (await errorElements.nth(i).textContent()) ?? '';
         errors.push(errorText.trim());
       }
     }
-    
+
     return errors;
   }
 
@@ -349,7 +426,7 @@ export class ProfilePage extends BasePage {
       this.selectors.phoneInput,
       this.selectors.bioInput,
     ];
-    
+
     for (const selector of inputs) {
       if (await this.elementExists(selector)) {
         await this.fillInput(selector, '', { clear: true });
@@ -362,9 +439,10 @@ export class ProfilePage extends BasePage {
    */
   async switchToTab(tabName: string): Promise<void> {
     if (await this.elementExists(this.selectors.tabNavigation)) {
-      const tab = this.page.locator(this.selectors.tabButton)
+      const tab = this.page
+        .locator(this.selectors.tabButton)
         .filter({ hasText: tabName });
-      
+
       await tab.click();
       await this.page.waitForTimeout(300); // Wait for tab animation
     }
@@ -386,7 +464,7 @@ export class ProfilePage extends BasePage {
   async verifyProfileDisplayMode(): Promise<void> {
     const isEditMode = await this.isInEditMode();
     expect(isEditMode).toBeFalsy();
-    
+
     if (await this.elementExists(this.selectors.displayName)) {
       await this.verifyElementVisible(this.selectors.displayName);
     }
@@ -397,14 +475,14 @@ export class ProfilePage extends BasePage {
    */
   async testFormValidation(): Promise<void> {
     await this.enterEditMode();
-    
+
     // Clear required fields
     await this.fillInput(this.selectors.firstNameInput, '');
     await this.fillInput(this.selectors.emailInput, '');
-    
+
     // Try to save
     await this.saveProfile();
-    
+
     // Should show validation errors
     const errors = await this.verifyValidationErrors();
     expect(errors.length).toBeGreaterThan(0);
@@ -415,18 +493,19 @@ export class ProfilePage extends BasePage {
    */
   async testEmailValidation(): Promise<void> {
     await this.enterEditMode();
-    
+
     // Enter invalid email
     await this.fillInput(this.selectors.emailInput, 'invalid-email');
     await this.saveProfile();
-    
+
     // Should show email validation error
     const errors = await this.verifyValidationErrors();
-    const hasEmailError = errors.some(error => 
-      error.toLowerCase().includes('email') || 
-      error.toLowerCase().includes('valid')
+    const hasEmailError = errors.some(
+      (error) =>
+        error.toLowerCase().includes('email') ||
+        error.toLowerCase().includes('valid'),
     );
-    
+
     expect(hasEmailError).toBeTruthy();
   }
 
@@ -476,11 +555,11 @@ export class ProfilePage extends BasePage {
   async getAvatarSrc(): Promise<string | null> {
     const avatarComponent = await this.getAvatarComponent();
     const avatarImage = avatarComponent.locator('img');
-    
+
     if (await avatarImage.isVisible()) {
       return await avatarImage.getAttribute('src');
     }
-    
+
     return null;
   }
 
@@ -490,19 +569,20 @@ export class ProfilePage extends BasePage {
   async verifyAvatarIsCircular(): Promise<void> {
     const avatarComponent = await this.getAvatarComponent();
     const avatarImage = avatarComponent.locator('img');
-    
+
     await expect(avatarImage).toBeVisible();
-    
+
     // Check for circular styling
-    const borderRadius = await avatarImage.evaluate(el => 
-      getComputedStyle(el).borderRadius
+    const borderRadius = await avatarImage.evaluate(
+      (el) => getComputedStyle(el).borderRadius,
     );
-    
+
     // Should be either 50% or a large enough value to make it circular
-    const isCircular = borderRadius === '50%' || 
-                      borderRadius.includes('9999px') || 
-                      borderRadius.includes('999px');
-    
+    const isCircular =
+      borderRadius === '50%' ||
+      borderRadius.includes('9999px') ||
+      borderRadius.includes('999px');
+
     expect(isCircular).toBeTruthy();
   }
 
@@ -511,11 +591,13 @@ export class ProfilePage extends BasePage {
    */
   async verifyAvatarFallback(): Promise<void> {
     const avatarComponent = await this.getAvatarComponent();
-    
+
     // Should show either image or placeholder
     const hasImage = await avatarComponent.locator('img').isVisible();
-    const hasPlaceholder = await avatarComponent.locator(this.selectors.avatarPlaceholder).isVisible();
-    
+    const hasPlaceholder = await avatarComponent
+      .locator(this.selectors.avatarPlaceholder)
+      .isVisible();
+
     expect(hasImage || hasPlaceholder).toBeTruthy();
   }
 

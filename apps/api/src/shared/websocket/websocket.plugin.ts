@@ -1,6 +1,5 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import fp from 'fastify-plugin';
-import { Server } from 'socket.io';
 import { WebSocketManager } from './websocket.gateway';
 import { EventService } from './event.service';
 import { RealtimeEventBus } from './realtime-event-bus';
@@ -18,34 +17,42 @@ async function websocketPlugin(
 ) {
   // Configure EventBus
   const eventBusConfig: EventBusConfig = {
-    enableRedis: process.env.NODE_ENV === 'production' || process.env.ENABLE_REDIS === 'true',
+    enableRedis:
+      process.env.NODE_ENV === 'production' ||
+      process.env.ENABLE_REDIS === 'true',
     redis: {
       host: process.env.REDIS_HOST || 'localhost',
       port: parseInt(process.env.REDIS_PORT || '6379'),
       password: process.env.REDIS_PASSWORD,
-      db: parseInt(process.env.REDIS_DB || '0')
+      db: parseInt(process.env.REDIS_DB || '0'),
     },
-    instanceId: process.env.INSTANCE_ID || `api_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    instanceId:
+      process.env.INSTANCE_ID ||
+      `api_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     wildcard: true,
     delimiter: '.',
     maxListeners: 50,
-    ...opts.eventBus
+    ...opts.eventBus,
   };
 
   // Configure Transport
   const transportConfig: TransportConfig = {
     cors: {
-      origin: process.env.NODE_ENV === 'production'
-        ? (process.env.CORS_ORIGINS?.split(',') || ['https://yourdomain.com', 'https://admin.yourdomain.com'])
-        : true,
-      credentials: true
+      origin:
+        process.env.NODE_ENV === 'production'
+          ? process.env.CORS_ORIGINS?.split(',') || [
+              'https://yourdomain.com',
+              'https://admin.yourdomain.com',
+            ]
+          : true,
+      credentials: true,
     },
     redis: eventBusConfig.enableRedis ? eventBusConfig.redis : undefined,
     enableCompression: true,
     maxConnections: 1000,
     pingTimeout: 60000,
     pingInterval: 25000,
-    ...opts.transport
+    ...opts.transport,
   };
 
   // Create RealtimeEventBus
@@ -62,7 +69,7 @@ async function websocketPlugin(
   // Create enhanced WebSocket manager with EventBus integration
   const io = transport.getInstance();
   const websocketManager = new WebSocketManager(fastify, io);
-  
+
   // Connect EventBus to WebSocketManager for auto-forwarding
   websocketManager.setEventBus(eventBus);
 
@@ -79,114 +86,268 @@ async function websocketPlugin(
   fastify.addHook('preHandler', async (request) => {
     // Only set context for WebSocket endpoints
     if (
-      request.url.startsWith('/api/websocket/') ||
-      request.url.startsWith('/api/ws/')
+      request.url.includes('/websocket/') ||
+      request.url.includes('/ws/') ||
+      request.url.includes('/events/')
     ) {
       eventService.setRequestContext(request);
     }
   });
 
   // Add WebSocket health check endpoint (separate from Socket.IO path)
-  fastify.get('/api/websocket/health', async () => {
-    const stats = websocketManager.getStats();
-    return {
-      success: true,
-      data: {
-        status: 'healthy',
-        ...stats,
-        uptime: process.uptime(),
+  fastify.get(
+    '/websocket/health',
+    {
+      schema: {
+        tags: ['WebSocket'],
+        summary: 'WebSocket Health Check',
+        description: 'Get WebSocket service health status and basic statistics',
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              data: {
+                type: 'object',
+                properties: {
+                  status: { type: 'string' },
+                  connections: { type: 'number' },
+                  uptime: { type: 'number' },
+                },
+              },
+            },
+          },
+        },
       },
-    };
-  });
+    },
+    async () => {
+      const stats = websocketManager.getStats();
+      return {
+        success: true,
+        data: {
+          status: 'healthy',
+          ...stats,
+          uptime: process.uptime(),
+        },
+      };
+    },
+  );
 
   // Add enhanced WebSocket stats endpoint
-  fastify.get('/api/websocket/stats', async () => {
-    const websocketStats = websocketManager.getStats();
-    const eventBusStats = eventBus.getStatistics();
-    
-    return {
-      success: true,
-      data: {
-        websocket: websocketStats,
-        eventBus: eventBusStats,
-        transport: {
-          type: 'socket.io',
-          connections: transport.getConnectionCount(),
-          redis: eventBusConfig.enableRedis
-        }
+  fastify.get(
+    '/websocket/stats',
+    {
+      schema: {
+        tags: ['WebSocket'],
+        summary: 'WebSocket Statistics',
+        description: 'Get comprehensive WebSocket and EventBus statistics',
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              data: {
+                type: 'object',
+                properties: {
+                  websocket: { type: 'object' },
+                  eventBus: { type: 'object' },
+                  transport: { type: 'object' },
+                },
+              },
+            },
+          },
+        },
       },
-    };
-  });
+    },
+    async () => {
+      const websocketStats = websocketManager.getStats();
+      const eventBusStats = eventBus.getStatistics();
+
+      return {
+        success: true,
+        data: {
+          websocket: websocketStats,
+          eventBus: eventBusStats,
+          transport: {
+            type: 'socket.io',
+            connections: transport.getConnectionCount(),
+            redis: eventBusConfig.enableRedis,
+          },
+        },
+      };
+    },
+  );
 
   // Add detailed health metrics endpoint
-  fastify.get('/api/websocket/health-detailed', async () => {
-    return {
-      success: true,
-      data: websocketManager.getHealthMetrics(),
-    };
-  });
+  fastify.get(
+    '/websocket/health-detailed',
+    {
+      schema: {
+        tags: ['WebSocket'],
+        summary: 'Detailed Health Metrics',
+        description:
+          'Get detailed WebSocket health metrics including performance data',
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              data: { type: 'object' },
+            },
+          },
+        },
+      },
+    },
+    async () => {
+      return {
+        success: true,
+        data: websocketManager.getHealthMetrics(),
+      };
+    },
+  );
 
   // Add queue status endpoint
-  fastify.get('/api/websocket/queue-status', async () => {
-    return {
-      success: true,
-      data: websocketManager.getQueueStatus(),
-    };
-  });
+  fastify.get(
+    '/websocket/queue-status',
+    {
+      schema: {
+        tags: ['WebSocket'],
+        summary: 'Queue Status',
+        description: 'Get current status of WebSocket message queues',
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              data: { type: 'object' },
+            },
+          },
+        },
+      },
+    },
+    async () => {
+      return {
+        success: true,
+        data: websocketManager.getQueueStatus(),
+      };
+    },
+  );
 
   // Add connection cleanup endpoint (admin only)
-  fastify.post('/api/websocket/cleanup', async () => {
-    const cleaned = await websocketManager.forceCleanupInactiveConnections();
-    return {
-      success: true,
-      data: {
-        message: `Cleaned up ${cleaned} inactive connections`,
-        cleaned,
-        timestamp: new Date().toISOString(),
+  fastify.post(
+    '/websocket/cleanup',
+    {
+      schema: {
+        tags: ['WebSocket'],
+        summary: 'Cleanup Inactive Connections',
+        description:
+          'Force cleanup of inactive WebSocket connections (admin only)',
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              data: {
+                type: 'object',
+                properties: {
+                  message: { type: 'string' },
+                  cleaned: { type: 'number' },
+                  timestamp: { type: 'string' },
+                },
+              },
+            },
+          },
+        },
       },
-    };
-  });
+    },
+    async () => {
+      const cleaned = await websocketManager.forceCleanupInactiveConnections();
+      return {
+        success: true,
+        data: {
+          message: `Cleaned up ${cleaned} inactive connections`,
+          cleaned,
+          timestamp: new Date().toISOString(),
+        },
+      };
+    },
+  );
 
   // Add event system monitoring endpoint
-  fastify.get('/api/events/stats', async () => {
-    return {
-      success: true,
-      data: eventBus.getStatistics(),
-    };
-  });
+  fastify.get(
+    '/events/stats',
+    {
+      schema: {
+        tags: ['Events'],
+        summary: 'Event System Statistics',
+        description: 'Get EventBus statistics and performance metrics',
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              data: { type: 'object' },
+            },
+          },
+        },
+      },
+    },
+    async () => {
+      return {
+        success: true,
+        data: eventBus.getStatistics(),
+      };
+    },
+  );
 
   // Add real-time metrics endpoint with streaming
-  fastify.get('/api/websocket/metrics-stream', async (request, reply) => {
-    reply.raw.writeHead(200, {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Headers': 'Cache-Control',
-    });
+  fastify.get(
+    '/websocket/metrics-stream',
+    {
+      schema: {
+        tags: ['WebSocket'],
+        summary: 'Real-time Metrics Stream',
+        description: 'Server-Sent Events stream of real-time WebSocket metrics',
+        response: {
+          200: {
+            type: 'string',
+            description: 'Server-Sent Events stream',
+          },
+        },
+      },
+    },
+    async (request, reply) => {
+      reply.raw.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        Connection: 'keep-alive',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Cache-Control',
+      });
 
-    const sendMetrics = () => {
-      const metrics = {
-        timestamp: new Date().toISOString(),
-        connections: websocketManager.getStats().connections,
-        queues: websocketManager.getQueueStatus(),
-        memory: process.memoryUsage(),
+      const sendMetrics = () => {
+        const metrics = {
+          timestamp: new Date().toISOString(),
+          connections: websocketManager.getStats().connections,
+          queues: websocketManager.getQueueStatus(),
+          memory: process.memoryUsage(),
+        };
+
+        reply.raw.write(`data: ${JSON.stringify(metrics)}\n\n`);
       };
-      
-      reply.raw.write(`data: ${JSON.stringify(metrics)}\n\n`);
-    };
 
-    // Send initial metrics
-    sendMetrics();
+      // Send initial metrics
+      sendMetrics();
 
-    // Send metrics every 5 seconds
-    const interval = setInterval(sendMetrics, 5000);
+      // Send metrics every 5 seconds
+      const interval = setInterval(sendMetrics, 5000);
 
-    // Cleanup on client disconnect
-    request.raw.on('close', () => {
-      clearInterval(interval);
-    });
-  });
+      // Cleanup on client disconnect
+      request.raw.on('close', () => {
+        clearInterval(interval);
+      });
+    },
+  );
 
   // Add graceful shutdown handler
   fastify.addHook('onClose', async () => {
@@ -196,9 +357,7 @@ async function websocketPlugin(
     console.log('🔌 WebSocket plugin closed');
   });
 
-  console.log('🔌 WebSocket plugin initialized with EventBus and Redis support');
-  console.log(`🔌 Instance ID: ${eventBusConfig.instanceId}`);
-  console.log(`🔌 Redis enabled: ${eventBusConfig.enableRedis}`);
+  // WebSocket plugin initialized (silent)
 }
 
 export default fp(websocketPlugin, {

@@ -1,5 +1,5 @@
 import { Route } from '@angular/router';
-import { AuthGuard, GuestGuard } from './core/auth.guard';
+import { AuthGuard, GuestGuard } from './core/auth';
 import { showcaseGuard } from './pages/component-showcase/guards/showcase.guard';
 
 export const appRoutes: Route[] = [
@@ -27,7 +27,9 @@ export const appRoutes: Route[] = [
   {
     path: 'realtime-demo',
     loadComponent: () =>
-      import('./pages/realtime-demo/realtime-demo.component').then((m) => m.RealtimeDemoComponent),
+      import('./dev-tools/pages/realtime-demo/realtime-demo.component').then(
+        (m) => m.RealtimeDemoComponent,
+      ),
     canActivate: [AuthGuard],
   },
   {
@@ -40,51 +42,70 @@ export const appRoutes: Route[] = [
   },
   {
     path: 'users',
+    loadChildren: () =>
+      import('./features/users/users.routes').then((m) => m.usersRoutes),
     canActivate: [AuthGuard],
-    children: [
-      {
-        path: '',
-        loadComponent: () =>
-          import('./features/users/user-list.component').then(
-            (m) => m.UserListComponent,
-          ),
-      },
-      {
-        path: ':id',
-        loadComponent: () =>
-          import('./features/users/user-detail.component').then(
-            (m) => m.UserDetailComponent,
-          ),
-      },
-    ],
   },
   {
     path: 'profile',
-    loadComponent: () =>
-      import('./features/user-profile/user-profile.component').then(
-        (m) => m.UserProfileComponent,
+    loadChildren: () =>
+      import('./features/user-profile/user-profile.routes').then(
+        (m) => m.userProfileRoutes,
       ),
     canActivate: [AuthGuard],
   },
   {
     path: 'settings',
-    loadComponent: () =>
-      import('./features/settings/settings.component').then(
-        (m) => m.SettingsComponent,
+    loadChildren: () =>
+      import('./features/settings/settings.routes').then(
+        (m) => m.settingsRoutes,
       ),
     canActivate: [AuthGuard],
   },
   {
     path: 'rbac',
     loadChildren: () =>
-      import('./modules/rbac-management/rbac-management.module').then(
-        (m) => m.RbacManagementModule,
-      ),
+      import('./features/rbac/rbac.routes').then((m) => m.rbacRoutes),
     canActivate: [AuthGuard],
     data: {
       title: 'RBAC Management',
       description: 'Role-Based Access Control Management System',
       requiredPermissions: ['rbac.read', 'admin.*'],
+    },
+  },
+  {
+    path: 'books',
+    loadChildren: () =>
+      import('./features/books/books.routes').then((m) => m.booksRoutes),
+    canActivate: [AuthGuard],
+    data: {
+      title: 'Books',
+      description: 'Books Management System',
+      requiredPermissions: ['books.read', 'admin.*'],
+    },
+  },
+  {
+    path: 'authors',
+    loadChildren: () =>
+      import('./features/authors/authors.routes').then((m) => m.authorsRoutes),
+    canActivate: [AuthGuard],
+    data: {
+      title: 'Authors',
+      description: 'Authors Management System',
+      requiredPermissions: ['authors.read', 'admin.*'],
+    },
+  },
+  {
+    path: 'pdf-templates',
+    loadChildren: () =>
+      import('./features/pdf-templates/pdf-templates.routes').then(
+        (m) => m.pdf_templatesRoutes,
+      ),
+    canActivate: [AuthGuard],
+    data: {
+      title: 'PDF Templates',
+      description: 'PDF Template Management System',
+      requiredPermissions: ['templates.read', 'admin.*'],
     },
   },
   {
@@ -98,7 +119,7 @@ export const appRoutes: Route[] = [
   {
     path: 'file-upload-demo',
     loadComponent: () =>
-      import('./pages/file-upload/file-upload-demo.page').then(
+      import('./dev-tools/pages/file-upload-demo.page').then(
         (m) => m.FileUploadDemoPage,
       ),
     canActivate: [AuthGuard],
@@ -140,32 +161,36 @@ export const appRoutes: Route[] = [
   {
     path: 'test-ax',
     loadComponent: () =>
-      import('./pages/test-ax/test-ax.component').then(
-        (m) => m.TestAxComponent,
+      import('./dev-tools/pages/material-demo/material-demo.component').then(
+        (m) => m.MaterialDemoComponent,
       ),
     canActivate: [AuthGuard],
   },
   {
     path: 'icon-test',
     loadComponent: () =>
-      import('./icon-test.component').then((m) => m.IconTestComponent),
+      import('./dev-tools/components/debug-icons.component').then(
+        (m) => m.DebugIconsComponent,
+      ),
   },
   {
     path: 'test-navigation',
     loadComponent: () =>
-      import('./test-navigation.component').then(
-        (m) => m.TestNavigationComponent,
+      import('./dev-tools/components/debug-navigation.component').then(
+        (m) => m.DebugNavigationComponent,
       ),
   },
   {
     path: 'debug-icons',
     loadComponent: () =>
-      import('./debug-icons.component').then((m) => m.DebugIconsComponent),
+      import('./dev-tools/components/debug-icons.component').then(
+        (m) => m.DebugIconsComponent,
+      ),
   },
   {
     path: 'debug-navigation',
     loadComponent: () =>
-      import('./debug-navigation.component').then(
+      import('./dev-tools/components/debug-navigation.component').then(
         (m) => m.DebugNavigationComponent,
       ),
     canActivate: [AuthGuard],
@@ -173,14 +198,14 @@ export const appRoutes: Route[] = [
   {
     path: 'demo/navigation',
     loadComponent: () =>
-      import('./demo/navigation-demo.component').then(
+      import('./dev-tools/demo/navigation-demo.component').then(
         (m) => m.NavigationDemoComponent,
       ),
   },
   {
     path: 'material-demo',
     loadComponent: () =>
-      import('./pages/material-demo/material-demo.component').then(
+      import('./dev-tools/pages/material-demo/material-demo.component').then(
         (m) => m.MaterialDemoComponent,
       ),
     canActivate: [AuthGuard],
@@ -196,16 +221,16 @@ export const appRoutes: Route[] = [
   {
     path: 'test-material',
     loadComponent: () =>
-      import('./pages/material-demo/test-material.component').then(
-        (m) => m.TestMaterialComponent,
+      import('./dev-tools/pages/material-demo/material-demo.component').then(
+        (m) => m.MaterialDemoComponent,
       ),
     canActivate: [AuthGuard],
   },
   {
     path: 'test-rbac-websocket',
     loadComponent: () =>
-      import('./test-rbac-websocket.component').then(
-        (m) => m.TestRbacWebsocketComponent,
+      import('./dev-tools/pages/realtime-demo/realtime-demo.component').then(
+        (m) => m.RealtimeDemoComponent,
       ),
   },
   {

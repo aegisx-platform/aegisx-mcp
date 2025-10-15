@@ -247,11 +247,7 @@ async function monitoringPlugin(
     return register.metrics();
   });
 
-  fastify.logger.info('Monitoring plugin initialized', {
-    enableDefaultMetrics: options.enableDefaultMetrics !== false,
-    enableResourceMonitoring: options.enableResourceMonitoring !== false,
-    metricsPrefix: prefix,
-  });
+  // Monitoring plugin initialized (silent)
 }
 
 export default fp(monitoringPlugin, {

@@ -8,7 +8,7 @@ import {
   DEFAULT_USER_PREFERENCES,
   TestPreferencesFactory,
   UserPreferences,
-  TEST_API_ENDPOINTS
+  TEST_API_ENDPOINTS,
 } from '../fixtures/test-data';
 
 test.describe('User Preferences E2E Tests', () => {
@@ -33,30 +33,52 @@ test.describe('User Preferences E2E Tests', () => {
       // Take screenshot of profile page
       await page.screenshot({
         path: 'screenshots/01-profile-page-loaded.png',
-        fullPage: true
+        fullPage: true,
       });
 
       // Verify preferences component loads correctly
       await preferencesPage.verifyPreferencesComponentLoads();
 
       // Take screenshot of preferences tab
-      await preferencesPage.takePreferencesScreenshot('02-preferences-tab-loaded');
+      await preferencesPage.takePreferencesScreenshot(
+        '02-preferences-tab-loaded',
+      );
     });
 
     test('should display all preference sections', async () => {
       await preferencesPage.goto();
 
       // Verify all sections are visible
-      await expect(page.locator('ax-card:has-text("Appearance")')).toBeVisible();
-      await expect(page.locator('ax-card:has-text("Localization")')).toBeVisible();
-      await expect(page.locator('ax-card:has-text("Notifications")')).toBeVisible();
-      await expect(page.locator('ax-card:has-text("Navigation")')).toBeVisible();
+      await expect(
+        page.locator('ax-card:has-text("Appearance")'),
+      ).toBeVisible();
+      await expect(
+        page.locator('ax-card:has-text("Localization")'),
+      ).toBeVisible();
+      await expect(
+        page.locator('ax-card:has-text("Notifications")'),
+      ).toBeVisible();
+      await expect(
+        page.locator('ax-card:has-text("Navigation")'),
+      ).toBeVisible();
 
       // Take screenshots of each section
-      await preferencesPage.takeSectionScreenshot('Appearance', '03-appearance-section');
-      await preferencesPage.takeSectionScreenshot('Localization', '04-localization-section');
-      await preferencesPage.takeSectionScreenshot('Notifications', '05-notifications-section');
-      await preferencesPage.takeSectionScreenshot('Navigation', '06-navigation-section');
+      await preferencesPage.takeSectionScreenshot(
+        'Appearance',
+        '03-appearance-section',
+      );
+      await preferencesPage.takeSectionScreenshot(
+        'Localization',
+        '04-localization-section',
+      );
+      await preferencesPage.takeSectionScreenshot(
+        'Notifications',
+        '05-notifications-section',
+      );
+      await preferencesPage.takeSectionScreenshot(
+        'Navigation',
+        '06-navigation-section',
+      );
     });
   });
 
@@ -72,8 +94,8 @@ test.describe('User Preferences E2E Tests', () => {
             contentType: 'application/json',
             body: JSON.stringify({
               success: true,
-              data: DEFAULT_USER_PREFERENCES
-            })
+              data: DEFAULT_USER_PREFERENCES,
+            }),
           });
         } else if (route.request().method() === 'PUT') {
           const requestData = JSON.parse(route.request().postData() || '{}');
@@ -82,8 +104,8 @@ test.describe('User Preferences E2E Tests', () => {
             contentType: 'application/json',
             body: JSON.stringify({
               success: true,
-              data: { ...DEFAULT_USER_PREFERENCES, ...requestData }
-            })
+              data: { ...DEFAULT_USER_PREFERENCES, ...requestData },
+            }),
           });
         }
       });
@@ -95,40 +117,45 @@ test.describe('User Preferences E2E Tests', () => {
       // Take screenshot before saving
       await page.screenshot({
         path: 'screenshots/07-theme-changed-before-save.png',
-        fullPage: true
+        fullPage: true,
       });
 
       // Save preferences
       await preferencesPage.savePreferences();
 
       // Verify success message
-      await preferencesPage.verifySuccessMessage();
+      await preferencesPage.verifyOperationResult();
 
       // Take screenshot after saving
       await page.screenshot({
         path: 'screenshots/08-theme-changed-after-save.png',
-        fullPage: true
+        fullPage: true,
       });
 
       // Verify the changes persist
       await preferencesPage.verifyCurrentPreferences({
         theme: 'dark',
-        scheme: 'dark'
+        scheme: 'dark',
       });
     });
 
     test('should test all theme options', async () => {
       await preferencesPage.goto();
 
-      const themes: Array<UserPreferences['theme']> = ['default', 'light', 'dark', 'auto'];
+      const themes: Array<UserPreferences['theme']> = [
+        'default',
+        'light',
+        'dark',
+        'auto',
+      ];
 
       for (const theme of themes) {
         await preferencesPage.changeTheme(theme);
-        
+
         // Take screenshot for each theme
         await page.screenshot({
           path: `screenshots/09-theme-${theme}.png`,
-          fullPage: true
+          fullPage: true,
         });
 
         // Verify the selection
@@ -150,8 +177,8 @@ test.describe('User Preferences E2E Tests', () => {
             contentType: 'application/json',
             body: JSON.stringify({
               success: true,
-              data: TEST_PREFERENCES.internationalUser
-            })
+              data: TEST_PREFERENCES.internationalUser,
+            }),
           });
         }
       });
@@ -165,19 +192,19 @@ test.describe('User Preferences E2E Tests', () => {
       // Take screenshot before saving
       await page.screenshot({
         path: 'screenshots/10-language-changed-before-save.png',
-        fullPage: true
+        fullPage: true,
       });
 
       // Save preferences
       await preferencesPage.savePreferences();
 
       // Verify success message
-      await preferencesPage.verifySuccessMessage();
+      await preferencesPage.verifyOperationResult();
 
       // Take screenshot after saving
       await page.screenshot({
         path: 'screenshots/11-language-changed-after-save.png',
-        fullPage: true
+        fullPage: true,
       });
 
       // Verify the changes
@@ -185,7 +212,7 @@ test.describe('User Preferences E2E Tests', () => {
         language: 'th',
         timezone: 'Asia/Bangkok',
         dateFormat: 'DD/MM/YYYY',
-        timeFormat: '24h'
+        timeFormat: '24h',
       });
     });
 
@@ -201,11 +228,11 @@ test.describe('User Preferences E2E Tests', () => {
 
       for (const language of languages) {
         await preferencesPage.changeLanguage(language.code);
-        
+
         // Take screenshot for each language
         await page.screenshot({
           path: `screenshots/12-language-${language.code}.png`,
-          fullPage: true
+          fullPage: true,
         });
 
         // Verify the selection
@@ -227,8 +254,8 @@ test.describe('User Preferences E2E Tests', () => {
             contentType: 'application/json',
             body: JSON.stringify({
               success: true,
-              data: TEST_PREFERENCES.allNotificationsEnabled
-            })
+              data: TEST_PREFERENCES.allNotificationsEnabled,
+            }),
           });
         }
       });
@@ -242,14 +269,14 @@ test.describe('User Preferences E2E Tests', () => {
       // Take screenshot with all notifications enabled
       await page.screenshot({
         path: 'screenshots/13-all-notifications-enabled.png',
-        fullPage: true
+        fullPage: true,
       });
 
       // Save preferences
       await preferencesPage.savePreferences();
 
       // Verify success message
-      await preferencesPage.verifySuccessMessage();
+      await preferencesPage.verifyOperationResult();
 
       // Verify all notifications are enabled
       await preferencesPage.verifyCurrentPreferences({
@@ -257,8 +284,8 @@ test.describe('User Preferences E2E Tests', () => {
           email: true,
           push: true,
           desktop: true,
-          sound: true
-        }
+          sound: true,
+        },
       });
 
       // Now disable all notifications
@@ -269,8 +296,8 @@ test.describe('User Preferences E2E Tests', () => {
             contentType: 'application/json',
             body: JSON.stringify({
               success: true,
-              data: TEST_PREFERENCES.minimalNotifications
-            })
+              data: TEST_PREFERENCES.minimalNotifications,
+            }),
           });
         }
       });
@@ -283,7 +310,7 @@ test.describe('User Preferences E2E Tests', () => {
       // Take screenshot with all notifications disabled
       await page.screenshot({
         path: 'screenshots/14-all-notifications-disabled.png',
-        fullPage: true
+        fullPage: true,
       });
 
       // Save preferences
@@ -295,8 +322,8 @@ test.describe('User Preferences E2E Tests', () => {
           email: false,
           push: false,
           desktop: false,
-          sound: false
-        }
+          sound: false,
+        },
       });
     });
 
@@ -304,29 +331,44 @@ test.describe('User Preferences E2E Tests', () => {
       await preferencesPage.goto();
 
       const notificationTypes = [
-        { name: 'email', toggle: preferencesPage.toggleEmailNotifications.bind(preferencesPage) },
-        { name: 'push', toggle: preferencesPage.togglePushNotifications.bind(preferencesPage) },
-        { name: 'desktop', toggle: preferencesPage.toggleDesktopNotifications.bind(preferencesPage) },
-        { name: 'sound', toggle: preferencesPage.toggleSoundNotifications.bind(preferencesPage) }
+        {
+          name: 'email',
+          toggle:
+            preferencesPage.toggleEmailNotifications.bind(preferencesPage),
+        },
+        {
+          name: 'push',
+          toggle: preferencesPage.togglePushNotifications.bind(preferencesPage),
+        },
+        {
+          name: 'desktop',
+          toggle:
+            preferencesPage.toggleDesktopNotifications.bind(preferencesPage),
+        },
+        {
+          name: 'sound',
+          toggle:
+            preferencesPage.toggleSoundNotifications.bind(preferencesPage),
+        },
       ];
 
       for (const notification of notificationTypes) {
         // Enable the notification
         await notification.toggle(true);
-        
+
         // Take screenshot
         await page.screenshot({
           path: `screenshots/15-notification-${notification.name}-enabled.png`,
-          fullPage: true
+          fullPage: true,
         });
 
         // Disable the notification
         await notification.toggle(false);
-        
+
         // Take screenshot
         await page.screenshot({
           path: `screenshots/16-notification-${notification.name}-disabled.png`,
-          fullPage: true
+          fullPage: true,
         });
       }
     });
@@ -344,8 +386,8 @@ test.describe('User Preferences E2E Tests', () => {
             contentType: 'application/json',
             body: JSON.stringify({
               success: true,
-              data: TEST_PREFERENCES.horizontalNavigation
-            })
+              data: TEST_PREFERENCES.horizontalNavigation,
+            }),
           });
         }
       });
@@ -358,19 +400,19 @@ test.describe('User Preferences E2E Tests', () => {
       // Take screenshot before saving
       await page.screenshot({
         path: 'screenshots/17-navigation-horizontal-before-save.png',
-        fullPage: true
+        fullPage: true,
       });
 
       // Save preferences
       await preferencesPage.savePreferences();
 
       // Verify success message
-      await preferencesPage.verifySuccessMessage();
+      await preferencesPage.verifyOperationResult();
 
       // Take screenshot after saving
       await page.screenshot({
         path: 'screenshots/18-navigation-horizontal-after-save.png',
-        fullPage: true
+        fullPage: true,
       });
 
       // Verify the changes
@@ -378,8 +420,8 @@ test.describe('User Preferences E2E Tests', () => {
         navigation: {
           collapsed: false,
           type: 'horizontal',
-          position: 'top'
-        }
+          position: 'top',
+        },
       });
     });
 
@@ -390,7 +432,7 @@ test.describe('User Preferences E2E Tests', () => {
         { type: 'default', position: 'left', collapsed: false },
         { type: 'compact', position: 'left', collapsed: true },
         { type: 'horizontal', position: 'top', collapsed: false },
-        { type: 'default', position: 'right', collapsed: false }
+        { type: 'default', position: 'right', collapsed: false },
       ];
 
       for (const config of configurations) {
@@ -401,7 +443,7 @@ test.describe('User Preferences E2E Tests', () => {
         // Take screenshot for each configuration
         await page.screenshot({
           path: `screenshots/19-nav-${config.type}-${config.position}-${config.collapsed ? 'collapsed' : 'expanded'}.png`,
-          fullPage: true
+          fullPage: true,
         });
       }
     });
@@ -421,8 +463,8 @@ test.describe('User Preferences E2E Tests', () => {
             body: JSON.stringify({
               success: true,
               data: { ...DEFAULT_USER_PREFERENCES, ...requestData },
-              message: 'Preferences updated successfully!'
-            })
+              message: 'Preferences updated successfully!',
+            }),
           });
         }
       });
@@ -440,13 +482,13 @@ test.describe('User Preferences E2E Tests', () => {
           email: true,
           push: true,
           desktop: false,
-          sound: true
+          sound: true,
         },
         navigation: {
           collapsed: true,
           type: 'compact',
-          position: 'left'
-        }
+          position: 'left',
+        },
       });
 
       await preferencesPage.fillAllPreferences(testPreferences);
@@ -454,19 +496,21 @@ test.describe('User Preferences E2E Tests', () => {
       // Take screenshot before saving
       await page.screenshot({
         path: 'screenshots/20-all-preferences-filled.png',
-        fullPage: true
+        fullPage: true,
       });
 
       // Save preferences
       await preferencesPage.savePreferences();
 
       // Verify success message appears
-      await preferencesPage.verifySuccessMessage('Preferences updated successfully!');
+      await preferencesPage.verifyOperationResult(
+        'Preferences updated successfully!',
+      );
 
       // Take screenshot after successful save
       await page.screenshot({
         path: 'screenshots/21-preferences-saved-successfully.png',
-        fullPage: true
+        fullPage: true,
       });
 
       // Verify all changes are applied
@@ -484,7 +528,7 @@ test.describe('User Preferences E2E Tests', () => {
       // Take screenshot with changed preferences
       await page.screenshot({
         path: 'screenshots/22-preferences-changed.png',
-        fullPage: true
+        fullPage: true,
       });
 
       // Reset to defaults
@@ -493,7 +537,7 @@ test.describe('User Preferences E2E Tests', () => {
       // Take screenshot after reset
       await page.screenshot({
         path: 'screenshots/23-preferences-reset-to-defaults.png',
-        fullPage: true
+        fullPage: true,
       });
 
       // Verify preferences are back to defaults
@@ -510,7 +554,7 @@ test.describe('User Preferences E2E Tests', () => {
       // Take screenshot with unsaved changes
       await page.screenshot({
         path: 'screenshots/24-unsaved-changes.png',
-        fullPage: true
+        fullPage: true,
       });
 
       // Discard changes
@@ -519,7 +563,7 @@ test.describe('User Preferences E2E Tests', () => {
       // Take screenshot after discarding
       await page.screenshot({
         path: 'screenshots/25-changes-discarded.png',
-        fullPage: true
+        fullPage: true,
       });
 
       // Verify changes were discarded (should be back to original values)
@@ -541,8 +585,8 @@ test.describe('User Preferences E2E Tests', () => {
             contentType: 'application/json',
             body: JSON.stringify({
               success: false,
-              error: 'Internal server error'
-            })
+              error: 'Internal server error',
+            }),
           });
         }
       });
@@ -557,7 +601,7 @@ test.describe('User Preferences E2E Tests', () => {
       // Take screenshot of error state
       await page.screenshot({
         path: 'screenshots/26-api-error-handling.png',
-        fullPage: true
+        fullPage: true,
       });
     });
 
@@ -579,7 +623,7 @@ test.describe('User Preferences E2E Tests', () => {
       // Take screenshot of network error state
       await page.screenshot({
         path: 'screenshots/27-network-error-handling.png',
-        fullPage: true
+        fullPage: true,
       });
     });
 
@@ -592,7 +636,7 @@ test.describe('User Preferences E2E Tests', () => {
       // Take screenshot of validation state
       await page.screenshot({
         path: 'screenshots/28-form-validation.png',
-        fullPage: true
+        fullPage: true,
       });
     });
   });
@@ -606,9 +650,15 @@ test.describe('User Preferences E2E Tests', () => {
         { name: 'default-state', prefs: DEFAULT_USER_PREFERENCES },
         { name: 'dark-theme', prefs: TEST_PREFERENCES.darkMode },
         { name: 'compact-layout', prefs: TEST_PREFERENCES.compactLayout },
-        { name: 'international-settings', prefs: TEST_PREFERENCES.internationalUser },
-        { name: 'minimal-notifications', prefs: TEST_PREFERENCES.minimalNotifications },
-        { name: 'enterprise-layout', prefs: TEST_PREFERENCES.enterpriseLayout }
+        {
+          name: 'international-settings',
+          prefs: TEST_PREFERENCES.internationalUser,
+        },
+        {
+          name: 'minimal-notifications',
+          prefs: TEST_PREFERENCES.minimalNotifications,
+        },
+        { name: 'enterprise-layout', prefs: TEST_PREFERENCES.enterpriseLayout },
       ];
 
       for (const state of states) {
@@ -618,7 +668,7 @@ test.describe('User Preferences E2E Tests', () => {
         // Take visual snapshot
         await page.screenshot({
           path: `screenshots/visual-${state.name}.png`,
-          fullPage: true
+          fullPage: true,
         });
 
         // Reset for next test
@@ -630,7 +680,7 @@ test.describe('User Preferences E2E Tests', () => {
       const viewports = [
         { name: 'mobile', width: 375, height: 667 },
         { name: 'tablet', width: 768, height: 1024 },
-        { name: 'desktop', width: 1920, height: 1080 }
+        { name: 'desktop', width: 1920, height: 1080 },
       ];
 
       for (const viewport of viewports) {
@@ -640,7 +690,7 @@ test.describe('User Preferences E2E Tests', () => {
         // Take screenshot for each viewport
         await page.screenshot({
           path: `screenshots/responsive-${viewport.name}.png`,
-          fullPage: true
+          fullPage: true,
         });
       }
     });
@@ -658,7 +708,10 @@ test.describe('User Preferences E2E Tests', () => {
         apiCalls.push({
           method: request.method(),
           url: request.url(),
-          data: request.method() === 'PUT' ? JSON.parse(request.postData() || '{}') : undefined
+          data:
+            request.method() === 'PUT'
+              ? JSON.parse(request.postData() || '{}')
+              : undefined,
         });
 
         if (request.method() === 'GET') {
@@ -667,8 +720,8 @@ test.describe('User Preferences E2E Tests', () => {
             contentType: 'application/json',
             body: JSON.stringify({
               success: true,
-              data: DEFAULT_USER_PREFERENCES
-            })
+              data: DEFAULT_USER_PREFERENCES,
+            }),
           });
         } else if (request.method() === 'PUT') {
           await route.fulfill({
@@ -676,8 +729,11 @@ test.describe('User Preferences E2E Tests', () => {
             contentType: 'application/json',
             body: JSON.stringify({
               success: true,
-              data: { ...DEFAULT_USER_PREFERENCES, ...JSON.parse(request.postData() || '{}') }
-            })
+              data: {
+                ...DEFAULT_USER_PREFERENCES,
+                ...JSON.parse(request.postData() || '{}'),
+              },
+            }),
           });
         }
       });
@@ -693,13 +749,13 @@ test.describe('User Preferences E2E Tests', () => {
       expect(apiCalls[1].method).toBe('PUT');
       expect(apiCalls[1].data).toMatchObject({
         theme: 'dark',
-        language: 'th'
+        language: 'th',
       });
 
       // Take final screenshot
       await page.screenshot({
         path: 'screenshots/29-api-integration-complete.png',
-        fullPage: true
+        fullPage: true,
       });
     });
   });

@@ -1,11 +1,11 @@
 import { test, expect } from '@playwright/test';
-import { 
-  SettingsPage, 
-  GeneralSettingsTab, 
-  SecuritySettingsTab, 
+import {
+  SettingsPage,
+  GeneralSettingsTab,
+  SecuritySettingsTab,
   NotificationSettingsTab,
   IntegrationSettingsTab,
-  AppearanceSettingsTab
+  AppearanceSettingsTab,
 } from '../pages/settings.page';
 
 test.describe('Settings Management', () => {
@@ -36,7 +36,13 @@ test.describe('Settings Management', () => {
     // Verify all tabs are present
     await expect(settingsPage.tabGroup).toBeVisible();
 
-    const tabs = ['General', 'Security', 'Notifications', 'Integrations', 'Appearance'];
+    const tabs = [
+      'General',
+      'Security',
+      'Notifications',
+      'Integrations',
+      'Appearance',
+    ];
     for (const tab of tabs) {
       const tabElement = page.locator(`mat-tab-label:has-text("${tab}")`);
       await expect(tabElement).toBeVisible();
@@ -58,7 +64,7 @@ test.describe('Settings Management', () => {
       supportPhone: '+1-555-0123',
       timezone: 'UTC',
       language: 'English',
-      dateFormat: 'MM/DD/YYYY'
+      dateFormat: 'MM/DD/YYYY',
     };
 
     await generalSettings.updateGeneralSettings(newSettings);
@@ -67,7 +73,7 @@ test.describe('Settings Management', () => {
     await settingsPage.saveChanges();
 
     // Verify success message
-    await settingsPage.waitForSuccessMessage();
+    await settingsPage.waitForOperationResult();
 
     // Reload page to verify persistence
     await page.reload();
@@ -86,7 +92,9 @@ test.describe('Settings Management', () => {
     await generalSettings.contactEmailInput.blur();
 
     // Check for validation error
-    const emailError = generalSettings.container.locator('mat-error:has-text("email")');
+    const emailError = generalSettings.container.locator(
+      'mat-error:has-text("email")',
+    );
     await expect(emailError).toBeVisible();
 
     // Fix email
@@ -112,7 +120,7 @@ test.describe('Settings Management', () => {
       maxLoginAttempts: 5,
       enableTwoFactor: true,
       enforceTwoFactor: false,
-      allowedDomains: 'aegisx.com\nexample.com'
+      allowedDomains: 'aegisx.com\nexample.com',
     };
 
     await securitySettings.updateSecuritySettings(newSettings);
@@ -125,7 +133,7 @@ test.describe('Settings Management', () => {
 
     // Save changes
     await settingsPage.saveChanges();
-    await settingsPage.waitForSuccessMessage();
+    await settingsPage.waitForOperationResult();
   });
 
   test('should validate security settings constraints', async () => {
@@ -137,7 +145,9 @@ test.describe('Settings Management', () => {
     await securitySettings.passwordMinLengthInput.blur();
 
     // Should show validation error
-    const minLengthError = securitySettings.container.locator('mat-error:has-text("minimum")');
+    const minLengthError = securitySettings.container.locator(
+      'mat-error:has-text("minimum")',
+    );
     await expect(minLengthError).toBeVisible();
 
     // Try invalid session timeout
@@ -163,7 +173,8 @@ test.describe('Settings Management', () => {
     await notificationSettings.toggleNotificationType('push', true);
 
     // Verify all are enabled
-    const enabledTypes = await notificationSettings.getEnabledNotificationTypes();
+    const enabledTypes =
+      await notificationSettings.getEnabledNotificationTypes();
     expect(enabledTypes).toContain('email');
     expect(enabledTypes).toContain('sms');
     expect(enabledTypes).toContain('push');
@@ -174,7 +185,7 @@ test.describe('Settings Management', () => {
 
     // Save changes
     await settingsPage.saveChanges();
-    await settingsPage.waitForSuccessMessage();
+    await settingsPage.waitForOperationResult();
   });
 
   test('should manage integrations', async ({ page }) => {
@@ -189,7 +200,7 @@ test.describe('Settings Management', () => {
     await integrationSettings.addIntegration(
       'Test API Integration',
       'test-api-key-123456',
-      'https://webhook.example.com'
+      'https://webhook.example.com',
     );
 
     // Verify integration was added
@@ -201,7 +212,7 @@ test.describe('Settings Management', () => {
 
     // Save changes
     await settingsPage.saveChanges();
-    await settingsPage.waitForSuccessMessage();
+    await settingsPage.waitForOperationResult();
 
     // Remove integration
     await integrationSettings.removeIntegration('Test API Integration');
@@ -241,14 +252,16 @@ test.describe('Settings Management', () => {
 
     // Save changes
     await settingsPage.saveChanges();
-    await settingsPage.waitForSuccessMessage();
+    await settingsPage.waitForOperationResult();
 
     // Verify theme was applied
     const appliedTheme = await appearanceSettings.getCurrentTheme();
     expect(appliedTheme.toLowerCase()).toContain(newTheme);
   });
 
-  test('should handle file uploads in appearance settings', async ({ page }) => {
+  test('should handle file uploads in appearance settings', async ({
+    page,
+  }) => {
     await settingsPage.selectTab('Appearance');
 
     // Create test files
@@ -259,23 +272,27 @@ test.describe('Settings Management', () => {
     await appearanceSettings.logoUpload.setInputFiles({
       name: 'logo.png',
       mimeType: 'image/png',
-      buffer: logoContent
+      buffer: logoContent,
     });
 
     // Upload favicon
     await appearanceSettings.faviconUpload.setInputFiles({
       name: 'favicon.ico',
       mimeType: 'image/x-icon',
-      buffer: faviconContent
+      buffer: faviconContent,
     });
 
     // Save changes
     await settingsPage.saveChanges();
 
     // Should either succeed or show appropriate error for file validation
-    const hasSuccess = await settingsPage.successMessage.isVisible().catch(() => false);
-    const hasError = await settingsPage.errorMessage.isVisible().catch(() => false);
-    
+    const hasSuccess = await settingsPage.successMessage
+      .isVisible()
+      .catch(() => false);
+    const hasError = await settingsPage.errorMessage
+      .isVisible()
+      .catch(() => false);
+
     expect(hasSuccess || hasError).toBe(true);
   });
 
@@ -297,7 +314,8 @@ test.describe('Settings Management', () => {
     expect(theme.toLowerCase()).toContain('light');
 
     // Colors should be reset
-    const primaryColor = await appearanceSettings.primaryColorPicker.inputValue();
+    const primaryColor =
+      await appearanceSettings.primaryColorPicker.inputValue();
     expect(primaryColor).not.toBe('#000000');
   });
 
@@ -307,7 +325,7 @@ test.describe('Settings Management', () => {
 
     await generalSettings.updateGeneralSettings({
       siteName: 'Temporary Change',
-      contactEmail: 'temp@example.com'
+      contactEmail: 'temp@example.com',
     });
 
     // Cancel changes
@@ -315,7 +333,7 @@ test.describe('Settings Management', () => {
 
     // Check if confirmation dialog appears
     const confirmDialog = settingsPage.page.locator('[role="alertdialog"]');
-    if (await confirmDialog.count() > 0) {
+    if ((await confirmDialog.count()) > 0) {
       await confirmDialog.locator('button:has-text("Confirm")').click();
     }
 
@@ -328,7 +346,7 @@ test.describe('Settings Management', () => {
   test('should maintain settings state across tabs', async () => {
     // Make change in General tab
     await generalSettings.updateGeneralSettings({
-      siteName: 'Tab Switch Test'
+      siteName: 'Tab Switch Test',
     });
 
     // Switch to Security tab
@@ -351,22 +369,26 @@ test.describe('Settings Management', () => {
 
     // Make changes in first tab
     await generalSettings.updateGeneralSettings({
-      siteName: 'First Tab Change'
+      siteName: 'First Tab Change',
     });
     await settingsPage.saveChanges();
-    await settingsPage.waitForSuccessMessage();
+    await settingsPage.waitForOperationResult();
 
     // Try to make conflicting change in second tab
     const generalSettings2 = new GeneralSettingsTab(page2);
     await generalSettings2.updateGeneralSettings({
-      siteName: 'Second Tab Change'
+      siteName: 'Second Tab Change',
     });
     await settingsPage2.saveChanges();
 
     // Should either handle gracefully or show conflict message
-    const hasSuccess = await settingsPage2.successMessage.isVisible().catch(() => false);
-    const hasError = await settingsPage2.errorMessage.isVisible().catch(() => false);
-    
+    const hasSuccess = await settingsPage2.successMessage
+      .isVisible()
+      .catch(() => false);
+    const hasError = await settingsPage2.errorMessage
+      .isVisible()
+      .catch(() => false);
+
     expect(hasSuccess || hasError).toBe(true);
 
     await page2.close();
@@ -402,8 +424,10 @@ test.describe('Settings Accessibility', () => {
       const el = document.activeElement;
       return el?.tagName.toLowerCase();
     });
-    
-    expect(['input', 'textarea', 'mat-select', 'mat-slide-toggle']).toContain(focusedElement);
+
+    expect(['input', 'textarea', 'mat-select', 'mat-slide-toggle']).toContain(
+      focusedElement,
+    );
   });
 
   test('should have proper ARIA labels and roles', async ({ page }) => {
@@ -427,11 +451,11 @@ test.describe('Settings Accessibility', () => {
     // Check for live regions
     const liveRegions = page.locator('[aria-live]');
     const liveRegionCount = await liveRegions.count();
-    
+
     // Make a change and save
     const generalSettings = new GeneralSettingsTab(page);
     await generalSettings.updateGeneralSettings({
-      siteName: 'Accessibility Test'
+      siteName: 'Accessibility Test',
     });
     await settingsPage.saveChanges();
 

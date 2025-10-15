@@ -15,8 +15,12 @@ export class SettingsPage {
     this.tabGroup = page.locator('mat-tab-group');
     this.saveButton = page.locator('button:has-text("Save")');
     this.cancelButton = page.locator('button:has-text("Cancel")');
-    this.successMessage = page.locator('.mat-snack-bar:has-text("saved successfully")');
-    this.errorMessage = page.locator('.mat-snack-bar:has-text("error"), .error-message');
+    this.successMessage = page.locator(
+      '.mat-snack-bar:has-text("saved successfully")',
+    );
+    this.errorMessage = page.locator(
+      '.mat-snack-bar:has-text("error"), .error-message',
+    );
   }
 
   async goto() {
@@ -44,7 +48,7 @@ export class SettingsPage {
     await this.cancelButton.click();
   }
 
-  async waitForSuccessMessage() {
+  async waitForOperationResult() {
     await this.successMessage.waitFor({ state: 'visible', timeout: 5000 });
   }
 }
@@ -63,13 +67,27 @@ export class GeneralSettingsTab {
   constructor(page: Page) {
     this.page = page;
     this.container = page.locator('ax-general-settings');
-    this.siteNameInput = this.container.locator('input[formControlName="siteName"]');
-    this.siteDescriptionInput = this.container.locator('textarea[formControlName="siteDescription"]');
-    this.contactEmailInput = this.container.locator('input[formControlName="contactEmail"]');
-    this.supportPhoneInput = this.container.locator('input[formControlName="supportPhone"]');
-    this.timezoneSelect = this.container.locator('mat-select[formControlName="timezone"]');
-    this.languageSelect = this.container.locator('mat-select[formControlName="language"]');
-    this.dateFormatSelect = this.container.locator('mat-select[formControlName="dateFormat"]');
+    this.siteNameInput = this.container.locator(
+      'input[formControlName="siteName"]',
+    );
+    this.siteDescriptionInput = this.container.locator(
+      'textarea[formControlName="siteDescription"]',
+    );
+    this.contactEmailInput = this.container.locator(
+      'input[formControlName="contactEmail"]',
+    );
+    this.supportPhoneInput = this.container.locator(
+      'input[formControlName="supportPhone"]',
+    );
+    this.timezoneSelect = this.container.locator(
+      'mat-select[formControlName="timezone"]',
+    );
+    this.languageSelect = this.container.locator(
+      'mat-select[formControlName="language"]',
+    );
+    this.dateFormatSelect = this.container.locator(
+      'mat-select[formControlName="dateFormat"]',
+    );
   }
 
   async updateGeneralSettings(settings: {
@@ -103,17 +121,23 @@ export class GeneralSettingsTab {
 
     if (settings.timezone) {
       await this.timezoneSelect.click();
-      await this.page.locator(`mat-option:has-text("${settings.timezone}")`).click();
+      await this.page
+        .locator(`mat-option:has-text("${settings.timezone}")`)
+        .click();
     }
 
     if (settings.language) {
       await this.languageSelect.click();
-      await this.page.locator(`mat-option:has-text("${settings.language}")`).click();
+      await this.page
+        .locator(`mat-option:has-text("${settings.language}")`)
+        .click();
     }
 
     if (settings.dateFormat) {
       await this.dateFormatSelect.click();
-      await this.page.locator(`mat-option:has-text("${settings.dateFormat}")`).click();
+      await this.page
+        .locator(`mat-option:has-text("${settings.dateFormat}")`)
+        .click();
     }
   }
 
@@ -123,9 +147,15 @@ export class GeneralSettingsTab {
       siteDescription: await this.siteDescriptionInput.inputValue(),
       contactEmail: await this.contactEmailInput.inputValue(),
       supportPhone: await this.supportPhoneInput.inputValue(),
-      timezone: await this.timezoneSelect.locator('.mat-select-value-text').textContent(),
-      language: await this.languageSelect.locator('.mat-select-value-text').textContent(),
-      dateFormat: await this.dateFormatSelect.locator('.mat-select-value-text').textContent(),
+      timezone: await this.timezoneSelect
+        .locator('.mat-select-value-text')
+        .textContent(),
+      language: await this.languageSelect
+        .locator('.mat-select-value-text')
+        .textContent(),
+      dateFormat: await this.dateFormatSelect
+        .locator('.mat-select-value-text')
+        .textContent(),
     };
   }
 }
@@ -146,15 +176,33 @@ export class SecuritySettingsTab {
   constructor(page: Page) {
     this.page = page;
     this.container = page.locator('ax-security-settings');
-    this.passwordMinLengthInput = this.container.locator('input[formControlName="passwordMinLength"]');
-    this.passwordRequireUppercase = this.container.locator('mat-checkbox[formControlName="passwordRequireUppercase"]');
-    this.passwordRequireNumbers = this.container.locator('mat-checkbox[formControlName="passwordRequireNumbers"]');
-    this.passwordRequireSpecialChars = this.container.locator('mat-checkbox[formControlName="passwordRequireSpecialChars"]');
-    this.sessionTimeoutInput = this.container.locator('input[formControlName="sessionTimeout"]');
-    this.maxLoginAttemptsInput = this.container.locator('input[formControlName="maxLoginAttempts"]');
-    this.enableTwoFactor = this.container.locator('mat-slide-toggle[formControlName="enableTwoFactor"]');
-    this.enforceTwoFactor = this.container.locator('mat-slide-toggle[formControlName="enforceTwoFactor"]');
-    this.allowedDomainsInput = this.container.locator('textarea[formControlName="allowedDomains"]');
+    this.passwordMinLengthInput = this.container.locator(
+      'input[formControlName="passwordMinLength"]',
+    );
+    this.passwordRequireUppercase = this.container.locator(
+      'mat-checkbox[formControlName="passwordRequireUppercase"]',
+    );
+    this.passwordRequireNumbers = this.container.locator(
+      'mat-checkbox[formControlName="passwordRequireNumbers"]',
+    );
+    this.passwordRequireSpecialChars = this.container.locator(
+      'mat-checkbox[formControlName="passwordRequireSpecialChars"]',
+    );
+    this.sessionTimeoutInput = this.container.locator(
+      'input[formControlName="sessionTimeout"]',
+    );
+    this.maxLoginAttemptsInput = this.container.locator(
+      'input[formControlName="maxLoginAttempts"]',
+    );
+    this.enableTwoFactor = this.container.locator(
+      'mat-slide-toggle[formControlName="enableTwoFactor"]',
+    );
+    this.enforceTwoFactor = this.container.locator(
+      'mat-slide-toggle[formControlName="enforceTwoFactor"]',
+    );
+    this.allowedDomainsInput = this.container.locator(
+      'textarea[formControlName="allowedDomains"]',
+    );
   }
 
   async updateSecuritySettings(settings: {
@@ -170,7 +218,9 @@ export class SecuritySettingsTab {
   }) {
     if (settings.passwordMinLength !== undefined) {
       await this.passwordMinLengthInput.clear();
-      await this.passwordMinLengthInput.fill(settings.passwordMinLength.toString());
+      await this.passwordMinLengthInput.fill(
+        settings.passwordMinLength.toString(),
+      );
     }
 
     if (settings.passwordRequireUppercase !== undefined) {
@@ -201,7 +251,9 @@ export class SecuritySettingsTab {
 
     if (settings.maxLoginAttempts !== undefined) {
       await this.maxLoginAttemptsInput.clear();
-      await this.maxLoginAttemptsInput.fill(settings.maxLoginAttempts.toString());
+      await this.maxLoginAttemptsInput.fill(
+        settings.maxLoginAttempts.toString(),
+      );
     }
 
     if (settings.enableTwoFactor !== undefined) {
@@ -226,19 +278,19 @@ export class SecuritySettingsTab {
 
   async getPasswordComplexityStatus(): Promise<string[]> {
     const requirements: string[] = [];
-    
+
     if (await this.passwordRequireUppercase.isChecked()) {
       requirements.push('uppercase');
     }
-    
+
     if (await this.passwordRequireNumbers.isChecked()) {
       requirements.push('numbers');
     }
-    
+
     if (await this.passwordRequireSpecialChars.isChecked()) {
       requirements.push('special');
     }
-    
+
     return requirements;
   }
 }
@@ -254,15 +306,24 @@ export class NotificationSettingsTab {
   constructor(page: Page) {
     this.page = page;
     this.container = page.locator('ax-notification-settings');
-    this.emailNotifications = this.container.locator('mat-slide-toggle[formControlName="emailNotifications"]');
-    this.smsNotifications = this.container.locator('mat-slide-toggle[formControlName="smsNotifications"]');
-    this.pushNotifications = this.container.locator('mat-slide-toggle[formControlName="pushNotifications"]');
+    this.emailNotifications = this.container.locator(
+      'mat-slide-toggle[formControlName="emailNotifications"]',
+    );
+    this.smsNotifications = this.container.locator(
+      'mat-slide-toggle[formControlName="smsNotifications"]',
+    );
+    this.pushNotifications = this.container.locator(
+      'mat-slide-toggle[formControlName="pushNotifications"]',
+    );
     this.notificationToggles = this.container.locator('mat-slide-toggle');
   }
 
-  async toggleNotificationType(type: 'email' | 'sms' | 'push', enabled: boolean) {
+  async toggleNotificationType(
+    type: 'email' | 'sms' | 'push',
+    enabled: boolean,
+  ) {
     let toggle: Locator;
-    
+
     switch (type) {
       case 'email':
         toggle = this.emailNotifications;
@@ -282,9 +343,11 @@ export class NotificationSettingsTab {
   }
 
   async toggleNotificationCategory(category: string, enabled: boolean) {
-    const categoryToggle = this.container.locator(`mat-slide-toggle[ng-reflect-name*="${category}"]`);
+    const categoryToggle = this.container.locator(
+      `mat-slide-toggle[ng-reflect-name*="${category}"]`,
+    );
     const isChecked = await categoryToggle.isChecked();
-    
+
     if (isChecked !== enabled) {
       await categoryToggle.click();
     }
@@ -292,11 +355,11 @@ export class NotificationSettingsTab {
 
   async getEnabledNotificationTypes(): Promise<string[]> {
     const types: string[] = [];
-    
+
     if (await this.emailNotifications.isChecked()) types.push('email');
     if (await this.smsNotifications.isChecked()) types.push('sms');
     if (await this.pushNotifications.isChecked()) types.push('push');
-    
+
     return types;
   }
 }
@@ -310,13 +373,15 @@ export class IntegrationSettingsTab {
   constructor(page: Page) {
     this.page = page;
     this.container = page.locator('ax-integration-settings');
-    this.addIntegrationButton = this.container.locator('button:has-text("Add Integration")');
+    this.addIntegrationButton = this.container.locator(
+      'button:has-text("Add Integration")',
+    );
     this.integrationCards = this.container.locator('.integration-card');
   }
 
   async addIntegration(name: string, apiKey: string, webhook?: string) {
     await this.addIntegrationButton.click();
-    
+
     // Wait for dialog
     const dialog = this.page.locator('mat-dialog-container');
     await dialog.waitFor({ state: 'visible' });
@@ -324,7 +389,7 @@ export class IntegrationSettingsTab {
     // Fill integration form
     await dialog.locator('input[formControlName="name"]').fill(name);
     await dialog.locator('input[formControlName="apiKey"]').fill(apiKey);
-    
+
     if (webhook) {
       await dialog.locator('input[formControlName="webhookUrl"]').fill(webhook);
     }
@@ -347,7 +412,7 @@ export class IntegrationSettingsTab {
   async toggleIntegration(name: string, enabled: boolean) {
     const card = this.integrationCards.filter({ hasText: name });
     const toggle = card.locator('mat-slide-toggle');
-    
+
     const isChecked = await toggle.isChecked();
     if (isChecked !== enabled) {
       await toggle.click();
@@ -374,12 +439,22 @@ export class AppearanceSettingsTab {
   constructor(page: Page) {
     this.page = page;
     this.container = page.locator('ax-appearance-settings');
-    this.themeSelect = this.container.locator('mat-select[formControlName="theme"]');
-    this.primaryColorPicker = this.container.locator('input[formControlName="primaryColor"]');
-    this.accentColorPicker = this.container.locator('input[formControlName="accentColor"]');
+    this.themeSelect = this.container.locator(
+      'mat-select[formControlName="theme"]',
+    );
+    this.primaryColorPicker = this.container.locator(
+      'input[formControlName="primaryColor"]',
+    );
+    this.accentColorPicker = this.container.locator(
+      'input[formControlName="accentColor"]',
+    );
     this.logoUpload = this.container.locator('input[type="file"]#logo-upload');
-    this.faviconUpload = this.container.locator('input[type="file"]#favicon-upload');
-    this.customCssTextarea = this.container.locator('textarea[formControlName="customCss"]');
+    this.faviconUpload = this.container.locator(
+      'input[type="file"]#favicon-upload',
+    );
+    this.customCssTextarea = this.container.locator(
+      'textarea[formControlName="customCss"]',
+    );
     this.previewButton = this.container.locator('button:has-text("Preview")');
     this.resetButton = this.container.locator('button:has-text("Reset")');
   }
@@ -392,7 +467,7 @@ export class AppearanceSettingsTab {
   async setColors(primary: string, accent: string) {
     await this.primaryColorPicker.clear();
     await this.primaryColorPicker.fill(primary);
-    
+
     await this.accentColorPicker.clear();
     await this.accentColorPicker.fill(accent);
   }
@@ -416,13 +491,17 @@ export class AppearanceSettingsTab {
 
   async resetToDefaults() {
     await this.resetButton.click();
-    
+
     // Confirm reset
     const confirmDialog = this.page.locator('[role="alertdialog"]');
     await confirmDialog.locator('button:has-text("Confirm")').click();
   }
 
   async getCurrentTheme(): Promise<string> {
-    return await this.themeSelect.locator('.mat-select-value-text').textContent() || '';
+    return (
+      (await this.themeSelect
+        .locator('.mat-select-value-text')
+        .textContent()) || ''
+    );
   }
 }

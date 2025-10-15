@@ -1,5 +1,5 @@
 import { BaseRepository, BaseListQuery, PaginatedListResult } from '../../shared/repositories/base.repository';
-import { Knex } from 'knex';
+import type { Knex } from 'knex';
 import {
   type CreateSystemSettings,
   type UpdateSystemSettings,

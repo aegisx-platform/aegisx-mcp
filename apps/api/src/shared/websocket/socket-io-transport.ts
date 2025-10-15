@@ -7,7 +7,11 @@ import { Server, Socket } from 'socket.io';
 import { createAdapter } from '@socket.io/redis-adapter';
 import { createClient } from 'redis';
 import type { FastifyInstance } from 'fastify';
-import type { IWebSocketTransport, TransportConfig, ConnectionInfo } from './transport.interface';
+import type {
+  IWebSocketTransport,
+  TransportConfig,
+  ConnectionInfo,
+} from './transport.interface';
 
 export class SocketIOTransport implements IWebSocketTransport {
   private io: Server | null = null;
@@ -19,10 +23,10 @@ export class SocketIOTransport implements IWebSocketTransport {
   async initialize(fastify: FastifyInstance): Promise<void> {
     // Create Socket.IO server
     this.io = new Server(fastify.server, {
-      path: '/api/ws/',  // Match frontend expectation
+      path: '/api/ws/', // Match frontend expectation
       cors: this.config.cors || {
         origin: true,
-        credentials: true
+        credentials: true,
       },
       maxHttpBufferSize: 1e6, // 1MB
       pingTimeout: this.config.pingTimeout || 60000,
@@ -41,7 +45,7 @@ export class SocketIOTransport implements IWebSocketTransport {
     // Setup connection handling
     this.setupConnectionHandling();
 
-    console.log('[SocketIOTransport] Initialized');
+    // Transport initialized (silent)
   }
 
   getInstance(): Server {
@@ -82,8 +86,8 @@ export class SocketIOTransport implements IWebSocketTransport {
   getSocketRooms(socketId: string): string[] {
     const socket = this.connections.get(socketId);
     if (!socket) return [];
-    
-    return Array.from(socket.rooms).filter(room => room !== socketId);
+
+    return Array.from(socket.rooms).filter((room) => room !== socketId);
   }
 
   disconnectSocket(socketId: string): void {
@@ -116,16 +120,16 @@ export class SocketIOTransport implements IWebSocketTransport {
       handshake: {
         headers: socket.handshake.headers as Record<string, string>,
         query: socket.handshake.query as Record<string, string>,
-        auth: socket.handshake.auth || {}
+        auth: socket.handshake.auth || {},
       },
-      connectedAt: new Date(socket.handshake.time)
+      connectedAt: new Date(socket.handshake.time),
     };
   }
 
   getAllConnections(): ConnectionInfo[] {
     return Array.from(this.connections.keys())
-      .map(id => this.getConnectionInfo(id))
-      .filter(info => info !== null) as ConnectionInfo[];
+      .map((id) => this.getConnectionInfo(id))
+      .filter((info) => info !== null) as ConnectionInfo[];
   }
 
   emitToSocket(socketId: string, event: string, data: any): void {
@@ -155,10 +159,7 @@ export class SocketIOTransport implements IWebSocketTransport {
       const pubClient = createClient(redisConfig);
       const subClient = pubClient.duplicate();
 
-      await Promise.all([
-        pubClient.connect(),
-        subClient.connect()
-      ]);
+      await Promise.all([pubClient.connect(), subClient.connect()]);
 
       this.redisAdapter = createAdapter(pubClient, subClient);
       this.io.adapter(this.redisAdapter);
@@ -174,7 +175,7 @@ export class SocketIOTransport implements IWebSocketTransport {
 
     this.io.on('connection', (socket: Socket) => {
       console.log(`[SocketIOTransport] Client connected: ${socket.id}`);
-      
+
       // Store connection
       this.connections.set(socket.id, socket);
 
@@ -186,19 +187,24 @@ export class SocketIOTransport implements IWebSocketTransport {
 
       // Setup disconnection
       socket.on('disconnect', (reason) => {
-        console.log(`[SocketIOTransport] Client disconnected: ${socket.id}, reason: ${reason}`);
+        console.log(
+          `[SocketIOTransport] Client disconnected: ${socket.id}, reason: ${reason}`,
+        );
         this.connections.delete(socket.id);
       });
 
       // Setup error handling
       socket.on('error', (error) => {
-        console.error(`[SocketIOTransport] Socket error for ${socket.id}:`, error);
+        console.error(
+          `[SocketIOTransport] Socket error for ${socket.id}:`,
+          error,
+        );
       });
 
       // Emit connection established event
       socket.emit('connection:established', {
         socketId: socket.id,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     });
 
@@ -210,12 +216,14 @@ export class SocketIOTransport implements IWebSocketTransport {
 
   private handleAuthentication(socket: Socket): void {
     const token = socket.handshake.auth?.token || socket.handshake.query?.token;
-    
+
     if (token) {
       // TODO: Validate JWT token
       // For now, just log that we received a token
-      console.log(`[SocketIOTransport] Authentication token received for ${socket.id}`);
-      
+      console.log(
+        `[SocketIOTransport] Authentication token received for ${socket.id}`,
+      );
+
       // Join authenticated users room
       socket.join('authenticated');
     } else {
@@ -230,19 +238,31 @@ export class SocketIOTransport implements IWebSocketTransport {
       if (typeof feature === 'string' && feature.length > 0) {
         socket.join(feature);
         socket.emit('joined:feature', { feature, socketId: socket.id });
-        console.log(`[SocketIOTransport] ${socket.id} joined feature room: ${feature}`);
+        console.log(
+          `[SocketIOTransport] ${socket.id} joined feature room: ${feature}`,
+        );
       }
     });
 
     // Join entity-specific rooms
-    socket.on('join:entity', ({ feature, entity }: { feature: string; entity: string }) => {
-      if (typeof feature === 'string' && typeof entity === 'string') {
-        const room = `${feature}:${entity}`;
-        socket.join(room);
-        socket.emit('joined:entity', { feature, entity, room, socketId: socket.id });
-        console.log(`[SocketIOTransport] ${socket.id} joined entity room: ${room}`);
-      }
-    });
+    socket.on(
+      'join:entity',
+      ({ feature, entity }: { feature: string; entity: string }) => {
+        if (typeof feature === 'string' && typeof entity === 'string') {
+          const room = `${feature}:${entity}`;
+          socket.join(room);
+          socket.emit('joined:entity', {
+            feature,
+            entity,
+            room,
+            socketId: socket.id,
+          });
+          console.log(
+            `[SocketIOTransport] ${socket.id} joined entity room: ${room}`,
+          );
+        }
+      },
+    );
 
     // Leave room
     socket.on('leave:room', (room: string) => {

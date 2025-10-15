@@ -183,10 +183,337 @@ export class {{ModuleName}}Service extends BaseService<{{ModuleName}}, Create{{M
     // Example: Prevent deletion if entity has dependent records
     {{#each columns}}
     {{#if (eq name 'status')}}
-    if (existing.status === 'active') {
+    {{#if (or (eq tsType 'boolean') (eq type 'boolean'))}}
+    if (existing.status === true) {
       throw new Error('Cannot delete active {{moduleName}}');
     }
+    {{else}}
+      {{#if (hasConstraints name)}}
+        {{#with (getConstraintValue name 1)}}
+    if (existing.status === '{{this}}') {
+      throw new Error('Cannot delete {{this}} {{moduleName}}');
+    }
+        {{else}}
+          {{#with (getConstraintValue name 0)}}
+    if (existing.status && existing.status !== '{{this}}') {
+      throw new Error('Cannot delete {{moduleName}} with current status');
+    }
+          {{/with}}
+        {{/with}}
+      {{else}}
+    // No status constraints found - manual validation required
+    if (existing.status) {
+      throw new Error('Cannot delete {{moduleName}} - please verify status manually');
+    }
+      {{/if}}
+    {{/if}}
     {{/if}}
     {{/each}}
   }
+
+{{#if (or (eq package 'enterprise') (eq package 'full'))}}
+
+  // ===== ENHANCED CRUD METHODS =====
+
+  /**
+   * Get dropdown options for UI components
+   */
+  async getDropdownOptions(options: any = {}): Promise<{
+    options: Array<{ value: string | number; label: string; disabled?: boolean }>;
+    total: number;
+  }> {
+    const { limit = 100, search, labelField = '{{defaultLabelField}}', valueField = 'id' } = options;
+    
+    const result = await this.repository.list({
+      limit,
+      search,
+      sort: `${labelField}:asc`
+    });
+
+    const dropdownOptions = result.data.map(item => ({
+      value: item[valueField],
+      label: item[labelField] || `${item.id}`,
+      {{#if hasStatusField}}disabled: item.is_active === false{{else}}disabled: false{{/if}}
+    }));
+
+    return {
+      options: dropdownOptions,
+      total: result.pagination.total
+    };
+  }
+
+  /**
+   * Bulk create multiple {{moduleName}}s
+   */
+  async bulkCreate(data: { items: Array<{ original: any; transformed: Create{{ModuleName}} }> | Create{{ModuleName}}[] }): Promise<{
+    created: {{ModuleName}}[];
+    summary: { successful: number; failed: number; errors: any[] };
+  }> {
+    const results: {{ModuleName}}[] = [];
+    const errors: any[] = [];
+
+    // Handle both new format (with original data) and old format (backwards compatibility)
+    const itemsToProcess = data.items.map(item => {
+      if (typeof item === 'object' && 'original' in item && 'transformed' in item) {
+        // New format from controller
+        return { original: item.original, toCreate: item.transformed };
+      } else {
+        // Old format - backwards compatibility
+        return { original: item, toCreate: item as Create{{ModuleName}} };
+      }
+    });
+
+    // Process each item individually
+    for (const { original, toCreate } of itemsToProcess) {
+      try {
+        // Validate and process
+        await this.validateCreate(toCreate);
+        const processed = await this.beforeCreate(toCreate);
+        
+        // Create in database
+        const created = await this.repository.create(processed);
+        results.push(created);
+        
+        // Call afterCreate hook
+        try {
+          await this.afterCreate(created, original);
+        } catch (error) {
+          console.warn('Error in afterCreate:', error);
+        }
+
+        {{#if withEvents}}
+        if (this.eventHelper) {
+          await this.eventHelper.emitCreated(created);
+        }
+        {{/if}}
+      } catch (error) {
+        console.log('⚠️ BULK CREATE ERROR - Item failed:', {
+          name: original.name || 'unknown',
+          {{#if displayNameField}}{{displayNameField}}: original.{{displayNameField}} || 'unknown',{{else}}id: original.id || 'unknown',{{/if}}
+          error: error instanceof Error ? error.message.substring(0, 100) + '...' : String(error)
+        });
+        errors.push({
+          item: original, // Include the original data that failed
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+
+    return {
+      created: results,
+      summary: {
+        successful: results.length,
+        failed: errors.length,
+        errors,
+      },
+    };
+  }
+
+  /**
+   * Bulk update multiple {{moduleName}}s
+   */
+  async bulkUpdate(data: { items: Array<{ id: string | number; data: Update{{ModuleName}} }> }): Promise<{
+    updated: {{ModuleName}}[];
+    summary: { successful: number; failed: number; errors: any[] };
+  }> {
+    const results: {{ModuleName}}[] = [];
+    const errors: any[] = [];
+
+    for (const item of data.items) {
+      try {
+        const updated = await this.update(item.id, item.data);
+        if (updated) {
+          results.push(updated);
+        }
+      } catch (error) {
+        errors.push({
+          item,
+          error: error instanceof Error ? error.message : String(error)
+        });
+      }
+    }
+
+    return {
+      updated: results,
+      summary: {
+        successful: results.length,
+        failed: errors.length,
+        errors
+      }
+    };
+  }
+
+  /**
+   * Bulk delete multiple {{moduleName}}s
+   */
+  async bulkDelete(data: { ids: Array<string | number> }): Promise<{
+    deleted: Array<string | number>;
+    summary: { successful: number; failed: number; errors: any[] };
+  }> {
+    const results: Array<string | number> = [];
+    const errors: any[] = [];
+
+    for (const id of data.ids) {
+      try {
+        const deleted = await this.delete(id);
+        if (deleted) {
+          results.push(id);
+        }
+      } catch (error) {
+        errors.push({
+          id,
+          error: error instanceof Error ? error.message : String(error)
+        });
+      }
+    }
+
+    return {
+      deleted: results,
+      summary: {
+        successful: results.length,
+        failed: errors.length,
+        errors
+      }
+    };
+  }
+
+  {{#if hasStatusField}}
+  /**
+   * Bulk update status for multiple {{moduleName}}s
+   */
+  async bulkUpdateStatus(data: { ids: Array<string | number>; status: boolean }): Promise<{
+    updated: {{ModuleName}}[];
+    summary: { successful: number; failed: number; errors: any[] };
+  }> {
+    const results: {{ModuleName}}[] = [];
+    const errors: any[] = [];
+
+    for (const id of data.ids) {
+      try {
+        const updated = await this.update(id, { is_active: data.status } as Update{{ModuleName}});
+        if (updated) {
+          results.push(updated);
+        }
+      } catch (error) {
+        errors.push({
+          id,
+          error: error instanceof Error ? error.message : String(error)
+        });
+      }
+    }
+
+    return {
+      updated: results,
+      summary: {
+        successful: results.length,
+        failed: errors.length,
+        errors
+      }
+    };
+  }
+
+  /**
+   * Activate {{moduleName}}
+   */
+  async activate(id: string | number, options: any = {}): Promise<{{ModuleName}} | null> {
+    return this.update(id, { is_active: true } as Update{{ModuleName}});
+  }
+
+  /**
+   * Deactivate {{moduleName}}
+   */
+  async deactivate(id: string | number, options: any = {}): Promise<{{ModuleName}} | null> {
+    return this.update(id, { is_active: false } as Update{{ModuleName}});
+  }
+
+  /**
+   * Toggle {{moduleName}} status
+   */
+  async toggle(id: string | number, options: any = {}): Promise<{{ModuleName}} | null> {
+    const current = await this.getById(id);
+    if (!current) return null;
+
+    const newStatus = !current.is_active;
+    return this.update(id, { is_active: newStatus } as Update{{ModuleName}});
+  }
+  {{/if}}
+
+  /**
+   * Get statistics
+   */
+  async getStats(): Promise<{
+    total: number;
+    active: number;
+    inactive: number;
+    percentages?: {
+      active: number;
+      inactive: number;
+    };
+  }> {
+    return this.repository.getStats();
+  }
+{{/if}}
+
+{{#if (eq package 'full')}}
+
+  // ===== FULL PACKAGE METHODS =====
+
+  /**
+   * Validate data before save
+   */
+  async validate(data: { data: Create{{ModuleName}} }): Promise<{
+    valid: boolean;
+    errors: Array<{ field: string; message: string }>;
+  }> {
+    const errors: Array<{ field: string; message: string }> = [];
+
+    try {
+      await this.validateCreate(data.data);
+    } catch (error) {
+      errors.push({
+        field: 'general',
+        message: error instanceof Error ? error.message : String(error)
+      });
+    }
+
+    // Add specific field validations
+    {{#each columns}}
+    {{#if isRequired}}
+    if (!data.data.{{name}}) {
+      errors.push({
+        field: '{{name}}',
+        message: '{{displayName}} is required'
+      });
+    }
+    {{/if}}
+    {{/each}}
+
+    return {
+      valid: errors.length === 0,
+      errors
+    };
+  }
+
+  /**
+   * Check field uniqueness
+   */
+  async checkUniqueness(field: string, options: { value: string; excludeId?: string | number }): Promise<{
+    unique: boolean;
+    exists?: any;
+  }> {
+    const query: any = { [field]: options.value };
+    
+    // Add exclusion for updates
+    if (options.excludeId) {
+      query.excludeId = options.excludeId;
+    }
+
+    const existing = await this.repository.findOne(query);
+    
+    return {
+      unique: !existing,
+      exists: existing || undefined
+    };
+  }
+{{/if}}
 }

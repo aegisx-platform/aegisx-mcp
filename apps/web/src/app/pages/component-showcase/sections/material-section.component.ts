@@ -18,13 +18,11 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { FormsModule } from '@angular/forms';
 
 // Import the existing material demo component
-import { MaterialDemoComponent } from '../../material-demo/material-demo.component';
+import { MaterialDemoComponent } from '../../../dev-tools/pages/material-demo/material-demo.component';
 import {
   ShowcaseDataService,
   ComponentExample,
 } from '../services/showcase-data.service';
-import { CodeViewerComponent } from '../shared/code-viewer.component';
-import { ComponentPreviewComponent } from '../shared/component-preview.component';
 
 interface MaterialSection {
   id: string;
@@ -50,8 +48,6 @@ interface MaterialSection {
     MatProgressBarModule,
     MatButtonToggleModule,
     MaterialDemoComponent,
-    CodeViewerComponent,
-    ComponentPreviewComponent,
   ],
   template: `
     <div class="material-section">

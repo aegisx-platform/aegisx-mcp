@@ -2,7 +2,10 @@ import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import fp from 'fastify-plugin';
 import knex from 'knex';
 
-async function knexPlugin(fastify: FastifyInstance, _opts: FastifyPluginOptions) {
+async function knexPlugin(
+  fastify: FastifyInstance,
+  _opts: FastifyPluginOptions,
+) {
   const db = knex({
     client: 'postgresql',
     connection: {
@@ -10,19 +13,20 @@ async function knexPlugin(fastify: FastifyInstance, _opts: FastifyPluginOptions)
       port: parseInt(process.env.DATABASE_PORT || '5432'),
       user: process.env.DATABASE_USER || 'postgres',
       password: process.env.DATABASE_PASSWORD || 'postgres',
-      database: process.env.DATABASE_NAME || 'aegisx_db'
+      database: process.env.DATABASE_NAME || 'aegisx_db',
     },
     pool: {
       min: parseInt(process.env.DB_POOL_MIN || '2'),
-      max: parseInt(process.env.DB_POOL_MAX || '10')
+      max: parseInt(process.env.DB_POOL_MAX || '10'),
     },
     migrations: {
       directory: './database/migrations',
-      tableName: 'knex_migrations'
+      tableName: 'knex_migrations',
     },
     seeds: {
-      directory: './database/seeds'
-    }
+      directory: './database/seeds',
+    },
+    debug: process.env.DB_DEBUG === 'true',
   });
 
   // Test the connection
@@ -37,7 +41,7 @@ async function knexPlugin(fastify: FastifyInstance, _opts: FastifyPluginOptions)
   // Decorate fastify with knex instance
   fastify.decorate('knex', db);
   fastify.decorate('db', db); // Alias for convenience
-  
+
   // Graceful shutdown
   fastify.addHook('onClose', async () => {
     await db.destroy();
@@ -45,7 +49,7 @@ async function knexPlugin(fastify: FastifyInstance, _opts: FastifyPluginOptions)
 }
 
 export default fp(knexPlugin, {
-  name: 'knex-plugin'
+  name: 'knex-plugin',
 });
 
 // TypeScript declarations

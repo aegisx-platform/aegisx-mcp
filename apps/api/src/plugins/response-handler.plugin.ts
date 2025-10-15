@@ -22,6 +22,8 @@ export interface Pagination {
   limit: number;
   total: number;
   totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
 }
 
 // Success responses
@@ -63,6 +65,8 @@ export const createPaginatedResponse = <T>(
     limit,
     total,
     totalPages: Math.ceil(total / limit),
+    hasNext: page < Math.ceil(total / limit),
+    hasPrev: page > 1,
   },
   meta: {
     timestamp: new Date().toISOString(),

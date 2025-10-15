@@ -162,7 +162,7 @@ await app.register(import('@fastify/swagger'), {
 });
 
 await app.register(import('@fastify/swagger-ui'), {
-  routePrefix: '/api-docs',
+  routePrefix: '/documentation',
   uiConfig: {
     docExpansion: 'list',
     deepLinking: false,
