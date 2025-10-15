@@ -1,22 +1,19 @@
-import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, inject, signal } from '@angular/core';
 import {
   FormBuilder,
+  FormControl,
   FormGroup,
-  Validators,
+  FormGroupDirective,
+  NgForm,
   ReactiveFormsModule,
+  Validators,
 } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import { ErrorStateMatcher } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../core/auth';
-import { ErrorStateMatcher } from '@angular/material/core';
-import { FormControl, FormGroupDirective, NgForm } from '@angular/forms';
 
 /** Error when invalid control is dirty, touched, or submitted. */
 export class MyErrorStateMatcher implements ErrorStateMatcher {
@@ -40,163 +37,235 @@ export class MyErrorStateMatcher implements ErrorStateMatcher {
     CommonModule,
     ReactiveFormsModule,
     RouterModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatCheckboxModule,
     MatIconModule,
     MatProgressSpinnerModule,
   ],
   template: `
     <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div class="max-w-md w-full space-y-8">
+      <div class="max-w-md w-full space-y-6">
+
         <!-- Logo and Header -->
         <div class="text-center">
-          <div class="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-indigo-100">
-            <mat-icon class="text-indigo-600">lock</mat-icon>
+          <div class="mx-auto h-20 w-20 flex items-center justify-center rounded-3xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-xl shadow-blue-500/30">
+            <mat-icon class="text-white text-3xl">shield</mat-icon>
           </div>
-          <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to AegisX
+          <h2 class="mt-6 text-3xl font-bold text-slate-900 tracking-tight">
+            Welcome back
           </h2>
-          <p class="mt-2 text-center text-sm text-gray-600">
-            Enter your credentials to access your account
+          <p class="mt-2 text-sm text-slate-600">
+            Sign in to your AegisX account
           </p>
         </div>
 
-        <!-- Login Form -->
-        <mat-card class="p-6">
+        <!-- Login Form Card - Tremor Style -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
           <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-            
-            <!-- Error Message -->
+
+            <!-- Error Alert - Tremor Style -->
             @if (errorMessage()) {
-              <div 
-                class="rounded-md bg-red-50 p-4 border border-red-200 mb-6"
+              <div
+                class="rounded-lg bg-red-50 p-4 border border-red-200 mb-6"
                 data-testid="login-error"
                 role="alert"
                 aria-live="polite"
               >
-                <div class="flex">
+                <div class="flex items-start gap-3">
                   <div class="flex-shrink-0">
-                    <mat-icon class="h-5 w-5 text-red-400">error</mat-icon>
+                    <div class="flex h-5 w-5 items-center justify-center rounded-full bg-red-100">
+                      <mat-icon class="text-red-600 !text-sm">error</mat-icon>
+                    </div>
                   </div>
-                  <div class="ml-3">
-                    <p class="text-sm text-red-800">{{ errorMessage() }}</p>
+                  <div class="flex-1">
+                    <p class="text-sm font-medium text-red-900">{{ errorMessage() }}</p>
                   </div>
                 </div>
               </div>
             }
 
-            <!-- Email Field -->
-            <div class="mb-4">
-            <mat-form-field appearance="outline" class="w-full">
-              <mat-label>Email address</mat-label>
-              <input 
-                matInput 
-                type="email" 
-                formControlName="email"
-                placeholder="Enter your email"
-                autocomplete="email"
-                [attr.aria-invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
-                required
-              >
-              <mat-icon matSuffix>email</mat-icon>
-              <mat-error *ngIf="loginForm.get('email')?.hasError('required') && loginForm.get('email')?.touched">
-                Email is required
-              </mat-error>
-              <mat-error *ngIf="loginForm.get('email')?.hasError('email') && loginForm.get('email')?.touched">
-                Please enter a valid email address
-              </mat-error>
-            </mat-form-field>
+            <!-- Email Field - Tremor Style -->
+            <div class="mb-5">
+              <label class="block text-sm font-medium text-slate-700 mb-2">
+                Email
+              </label>
+              <div class="relative">
+                <input
+                  type="email"
+                  formControlName="email"
+                  placeholder="name@company.com"
+                  autocomplete="email"
+                  class="w-full px-4 py-2.5 text-sm border rounded-lg transition-colors
+                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                         disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed
+                         placeholder:text-slate-400"
+                  [class.border-slate-300]="!loginForm.get('email')?.invalid || !loginForm.get('email')?.touched"
+                  [class.border-red-500]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+                  [class.bg-red-50]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+                  [attr.aria-invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+                  required
+                >
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <mat-icon class="text-slate-400 !text-base">email</mat-icon>
+                </div>
+              </div>
+              @if (loginForm.get('email')?.hasError('required') && loginForm.get('email')?.touched) {
+                <p class="mt-1.5 text-xs text-red-600">Email is required</p>
+              }
+              @if (loginForm.get('email')?.hasError('email') && loginForm.get('email')?.touched) {
+                <p class="mt-1.5 text-xs text-red-600">Please enter a valid email address</p>
+              }
             </div>
 
-            <!-- Password Field -->
-            <div class="mb-4">
-            <mat-form-field appearance="outline" class="w-full">
-              <mat-label>Password</mat-label>
-              <input 
-                matInput 
-                [type]="hidePassword() ? 'password' : 'text'"
-                formControlName="password"
-                placeholder="Enter your password"
-                autocomplete="current-password"
-                [attr.aria-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
-                required
-              >
-              <button
-                mat-icon-button
-                matSuffix
-                type="button"
-                (click)="togglePasswordVisibility()"
-                [attr.aria-label]="hidePassword() ? 'Show password' : 'Hide password'"
-              >
-                <mat-icon>{{ hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
-              </button>
-              <mat-error *ngIf="loginForm.get('password')?.hasError('required') && loginForm.get('password')?.touched">
-                Password is required
-              </mat-error>
-              <mat-error *ngIf="loginForm.get('password')?.hasError('minlength') && loginForm.get('password')?.touched">
-                Password must be at least 6 characters
-              </mat-error>
-            </mat-form-field>
+            <!-- Password Field - Tremor Style -->
+            <div class="mb-5">
+              <label class="block text-sm font-medium text-slate-700 mb-2">
+                Password
+              </label>
+              <div class="relative">
+                <input
+                  [type]="hidePassword() ? 'password' : 'text'"
+                  formControlName="password"
+                  placeholder="Enter your password"
+                  autocomplete="current-password"
+                  class="w-full px-4 py-2.5 text-sm border rounded-lg transition-colors pr-10
+                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                         disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed
+                         placeholder:text-slate-400"
+                  [class.border-slate-300]="!loginForm.get('password')?.invalid || !loginForm.get('password')?.touched"
+                  [class.border-red-500]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+                  [class.bg-red-50]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+                  [attr.aria-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+                  required
+                >
+                <button
+                  type="button"
+                  (click)="togglePasswordVisibility()"
+                  class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 transition-colors"
+                  [attr.aria-label]="hidePassword() ? 'Show password' : 'Hide password'"
+                >
+                  <mat-icon class="!text-base">{{ hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
+                </button>
+              </div>
+              @if (loginForm.get('password')?.hasError('required') && loginForm.get('password')?.touched) {
+                <p class="mt-1.5 text-xs text-red-600">Password is required</p>
+              }
+              @if (loginForm.get('password')?.hasError('minlength') && loginForm.get('password')?.touched) {
+                <p class="mt-1.5 text-xs text-red-600">Password must be at least 6 characters</p>
+              }
             </div>
 
-            <!-- Remember Me Checkbox -->
-            <div class="mb-4">
-            <div class="flex items-center">
-              <mat-checkbox formControlName="rememberMe" class="text-sm">
-                Remember me
-              </mat-checkbox>
-            </div>
+            <!-- Remember Me & Forgot Password -->
+            <div class="flex items-center justify-between mb-6">
+              <label class="flex items-center cursor-pointer group">
+                <input
+                  type="checkbox"
+                  formControlName="rememberMe"
+                  class="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer"
+                >
+                <span class="ml-2 text-sm text-slate-700 group-hover:text-slate-900">Remember me</span>
+              </label>
+              <a
+                routerLink="/forgot-password"
+                class="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+              >
+                Forgot password?
+              </a>
             </div>
 
-            <!-- Submit Button -->
-            <div class="mb-4">
+            <!-- Submit Button - Tremor Style -->
             <button
-              mat-raised-button
-              color="primary"
               type="submit"
-              class="w-full py-3 text-white font-medium"
+              class="w-full px-4 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg
+                     hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                     disabled:bg-slate-300 disabled:cursor-not-allowed
+                     transition-colors duration-200 shadow-sm"
               [disabled]="loginForm.invalid || isLoading()"
             >
               @if (isLoading()) {
-                <mat-spinner diameter="20" class="inline mr-2"></mat-spinner>
+                <span class="flex items-center justify-center gap-2">
+                  <mat-spinner diameter="16" class="inline"></mat-spinner>
+                  <span>Signing in...</span>
+                </span>
+              } @else {
+                Sign in
               }
-              {{ isLoading() ? 'Signing in...' : 'Sign in' }}
             </button>
-            </div>
 
-            <!-- Forgot Password Link -->
-            <div class="text-center">
-              <a 
-                routerLink="/forgot-password" 
-                class="text-sm text-indigo-600 hover:text-indigo-500 font-medium"
-              >
-                Forgot your password?
-              </a>
+            <!-- Divider -->
+            <div class="relative my-6">
+              <div class="absolute inset-0 flex items-center">
+                <div class="w-full border-t border-slate-200"></div>
+              </div>
+              <div class="relative flex justify-center text-xs">
+                <span class="px-2 bg-white text-slate-500">Don't have an account?</span>
+              </div>
             </div>
 
             <!-- Sign Up Link -->
             <div class="text-center">
-              <span class="text-sm text-gray-600">Don't have an account? </span>
-              <a 
-                routerLink="/register" 
-                class="text-sm text-indigo-600 hover:text-indigo-500 font-medium"
+              <a
+                routerLink="/register"
+                class="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
               >
-                Sign up
+                Create an account
               </a>
             </div>
           </form>
-        </mat-card>
-
-        <!-- Demo Credentials -->
-        <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-          <h4 class="text-sm font-medium text-blue-800 mb-2">Demo Credentials</h4>
-          <div class="text-xs text-blue-700 space-y-1">
-            <div><strong>Admin:</strong> admin@aegisx.local / Admin123!</div>
-            <div><strong>Demo:</strong> demo@aegisx.local / Demo123!</div>
-          </div>
         </div>
+
+        <!-- Demo Credentials - Tremor Style (Development Only) -->
+        @if (isDevelopment()) {
+          <div class="bg-white rounded-xl border border-blue-200 p-5 shadow-sm">
+            <div class="flex items-start gap-3">
+              <div class="flex-shrink-0">
+                <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50">
+                  <mat-icon class="text-blue-600 !text-base">info</mat-icon>
+                </div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h4 class="text-sm font-semibold text-slate-900 mb-3">Quick Login (Dev Only)</h4>
+                <div class="space-y-2">
+                  <!-- Admin Button -->
+                  <button
+                    type="button"
+                    (click)="fillDemoCredentials('admin')"
+                    class="w-full flex items-center gap-3 px-3 py-2.5 text-left rounded-lg border border-slate-200
+                           hover:border-blue-300 hover:bg-blue-50 transition-all group"
+                  >
+                    <div class="flex-shrink-0">
+                      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                        <mat-icon class="text-white !text-sm">admin_panel_settings</mat-icon>
+                      </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="text-xs font-semibold text-slate-900 group-hover:text-blue-700">Admin Account</div>
+                      <div class="text-xs text-slate-500 truncate">admin@aegisx.local</div>
+                    </div>
+                    <mat-icon class="text-slate-400 group-hover:text-blue-600 !text-base">arrow_forward</mat-icon>
+                  </button>
+
+                  <!-- Demo Button -->
+                  <button
+                    type="button"
+                    (click)="fillDemoCredentials('demo')"
+                    class="w-full flex items-center gap-3 px-3 py-2.5 text-left rounded-lg border border-slate-200
+                           hover:border-green-300 hover:bg-green-50 transition-all group"
+                  >
+                    <div class="flex-shrink-0">
+                      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                        <mat-icon class="text-white !text-sm">person</mat-icon>
+                      </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="text-xs font-semibold text-slate-900 group-hover:text-green-700">Demo Account</div>
+                      <div class="text-xs text-slate-500 truncate">demo@aegisx.local</div>
+                    </div>
+                    <mat-icon class="text-slate-400 group-hover:text-green-600 !text-base">arrow_forward</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
       </div>
     </div>
   `,
@@ -207,74 +276,69 @@ export class MyErrorStateMatcher implements ErrorStateMatcher {
         min-height: 100vh;
       }
 
-      .mat-mdc-card {
-        box-shadow:
-          0 10px 25px -5px rgba(0, 0, 0, 0.1),
-          0 10px 10px -5px rgba(0, 0, 0, 0.04);
-      }
-
-      .mat-mdc-form-field {
-        margin-bottom: 0.5rem;
-        display: block;
-      }
-
-      /* Add proper space for error messages */
-      ::ng-deep .mat-mdc-form-field-subscript-wrapper {
-        position: static !important;
-        margin-top: 0.5rem !important;
-        min-height: 1.5rem !important;
-        padding-bottom: 0.5rem !important;
-      }
-
-      /* Ensure error messages don't overlap */
-      ::ng-deep .mat-mdc-form-field-error-wrapper {
-        padding: 0.25rem 0;
-        display: block !important;
-      }
-
-      /* Fix form field bottom spacing */
-      ::ng-deep .mat-mdc-text-field-wrapper {
-        margin-bottom: 0 !important;
-      }
-
-      /* Add explicit spacing between form fields */
-      .mb-4 {
-        margin-bottom: 1.5rem !important;
-      }
-
-      /* Ensure mat-form-field has enough bottom space */
-      ::ng-deep .mat-mdc-form-field {
-        margin-bottom: 0.75rem !important;
-      }
-
-      .mat-mdc-raised-button {
-        height: 48px;
-      }
-
+      /* Tremor-inspired spinner styling */
       .mat-spinner {
-        color: white !important;
+        --mdc-circular-progress-active-indicator-color: white !important;
       }
 
-      /* Fix for Material form field outline appearance */
-      ::ng-deep .mat-mdc-form-field-outline {
-        color: rgba(0, 0, 0, 0.12) !important;
+      ::ng-deep .mat-mdc-progress-spinner circle {
+        stroke: white !important;
       }
 
-      ::ng-deep .mat-mdc-form-field.mat-focused .mat-mdc-form-field-outline {
-        color: #2196f3 !important;
+      /* Custom checkbox styling */
+      input[type='checkbox'] {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-color: white;
+        border: 1px solid #cbd5e1;
+        border-radius: 0.25rem;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.2s;
       }
 
-      ::ng-deep
-        .mat-mdc-form-field.mat-form-field-invalid
-        .mat-mdc-form-field-outline {
-        color: #f44336 !important;
+      input[type='checkbox']:checked {
+        background-color: #2563eb;
+        border-color: #2563eb;
       }
 
-      /* Only show error state when field is touched */
-      ::ng-deep
-        .mat-mdc-form-field:not(.mat-form-field-invalid)
-        .mat-mdc-form-field-outline {
-        color: rgba(0, 0, 0, 0.12) !important;
+      input[type='checkbox']:checked::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 0.375rem;
+        height: 0.625rem;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: translate(-50%, -60%) rotate(45deg);
+      }
+
+      input[type='checkbox']:focus {
+        outline: 2px solid #2563eb;
+        outline-offset: 2px;
+      }
+
+      /* Icon size adjustments - allow custom sizes */
+      .mat-icon {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+      }
+
+      /* Smooth transitions */
+      input,
+      button,
+      a {
+        transition: all 0.15s ease-in-out;
+      }
+
+      /* Code blocks */
+      code {
+        font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+        font-size: 0.75rem;
       }
     `,
   ],
@@ -288,6 +352,7 @@ export class LoginPage {
   protected isLoading = signal<boolean>(false);
   protected errorMessage = signal<string>('');
   protected hidePassword = signal<boolean>(true);
+  protected isDevelopment = signal<boolean>(!this.isProduction());
 
   // Reactive form
   protected loginForm: FormGroup;
@@ -345,6 +410,41 @@ export class LoginPage {
 
   protected togglePasswordVisibility(): void {
     this.hidePassword.set(!this.hidePassword());
+  }
+
+  protected fillDemoCredentials(type: 'admin' | 'demo'): void {
+    const credentials = {
+      admin: {
+        email: 'admin@aegisx.local',
+        password: 'Admin123!',
+      },
+      demo: {
+        email: 'demo@aegisx.local',
+        password: 'Demo123!',
+      },
+    };
+
+    const { email, password } = credentials[type];
+
+    this.loginForm.patchValue({
+      email,
+      password,
+      rememberMe: false,
+    });
+
+    // Mark fields as touched to show they're filled
+    this.loginForm.get('email')?.markAsTouched();
+    this.loginForm.get('password')?.markAsTouched();
+  }
+
+  private isProduction(): boolean {
+    // Check if we're in production mode
+    // You can customize this based on your environment setup
+    return (
+      window.location.hostname === 'aegisx.com' ||
+      window.location.hostname === 'www.aegisx.com' ||
+      localStorage.getItem('environment') === 'production'
+    );
   }
 
   private markFormGroupTouched(): void {
