@@ -5,37 +5,40 @@ const { getDatabaseSchema, getEnhancedSchema } = require('./database');
 const { generateRolesAndPermissions } = require('./role-generator');
 
 // Register Handlebars helpers
-Handlebars.registerHelper('titleCase', function(str) {
+Handlebars.registerHelper('titleCase', function (str) {
   if (!str || typeof str !== 'string') return '';
-  return str.replace(/\w\S*/g, (txt) => 
-    txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
-  ).replace(/_/g, ' ');
+  return str
+    .replace(
+      /\w\S*/g,
+      (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(),
+    )
+    .replace(/_/g, ' ');
 });
 
-Handlebars.registerHelper('getExportFieldType', function(dataType) {
+Handlebars.registerHelper('getExportFieldType', function (dataType) {
   const typeMap = {
     'character varying': 'string',
-    'varchar': 'string',
-    'text': 'string',
-    'char': 'string',
-    'integer': 'number',
-    'bigint': 'number',
-    'smallint': 'number',
-    'decimal': 'number',
-    'numeric': 'number',
-    'real': 'number',
+    varchar: 'string',
+    text: 'string',
+    char: 'string',
+    integer: 'number',
+    bigint: 'number',
+    smallint: 'number',
+    decimal: 'number',
+    numeric: 'number',
+    real: 'number',
     'double precision': 'number',
-    'boolean': 'boolean',
-    'date': 'date',
-    'timestamp': 'date',
+    boolean: 'boolean',
+    date: 'date',
+    timestamp: 'date',
     'timestamp with time zone': 'date',
-    'timestamptz': 'date',
-    'json': 'json',
-    'jsonb': 'json',
-    'uuid': 'string'
+    timestamptz: 'date',
+    json: 'json',
+    jsonb: 'json',
+    uuid: 'string',
   };
   const mappedType = typeMap[dataType] || 'string';
-  
+
   // Ensure return value matches the ExportField type union
   const validTypes = ['string', 'number', 'date', 'boolean', 'json'];
   return validTypes.includes(mappedType) ? mappedType : 'string';
@@ -244,7 +247,10 @@ async function generateCrudModule(tableName, options = {}) {
   const warnings = [];
 
   // Generate shared templates for enhanced/full packages
-  if ((context.package === 'enterprise' || context.package === 'full') && !options.migrationOnly) {
+  if (
+    (context.package === 'enterprise' || context.package === 'full') &&
+    !options.migrationOnly
+  ) {
     try {
       console.log('📦 Generating shared export templates...');
       const srcDir = path.resolve(outputDir, '..');
@@ -252,11 +258,14 @@ async function generateCrudModule(tableName, options = {}) {
       const sharedFiles = await generateSharedTemplates(
         srcDir,
         context,
-        dryRun
+        dryRun,
       );
       files.push(...sharedFiles);
     } catch (error) {
-      console.error('⚠️  Warning: Failed to generate shared templates:', error.message);
+      console.error(
+        '⚠️  Warning: Failed to generate shared templates:',
+        error.message,
+      );
       warnings.push(`Failed to generate shared templates: ${error.message}`);
     }
   }
@@ -324,10 +333,7 @@ async function generateCrudModule(tableName, options = {}) {
         useMigration: !directDb,
         directDb,
         multipleRoles,
-        outputDir: path.resolve(
-          process.cwd(),
-          'apps/api/src/database/migrations',
-        ),
+        // Don't pass outputDir - let role-generator detect correct path automatically
       };
 
       rolesData = await generateRolesAndPermissions(
@@ -406,7 +412,7 @@ async function generateSharedTemplates(outputDir, context, dryRun = false) {
       output: 'services/export.service.ts',
     },
     {
-      template: 'shared/export.schemas.hbs', 
+      template: 'shared/export.schemas.hbs',
       output: 'schemas/export.schemas.ts',
     },
   ];
@@ -420,7 +426,7 @@ async function generateSharedTemplates(outputDir, context, dryRun = false) {
 
       if (!dryRun) {
         await ensureDirectoryExists(path.dirname(outputPath));
-        
+
         let status = '✓ Generated:';
         try {
           await fs.access(outputPath);
@@ -1341,7 +1347,7 @@ async function generateDomainModule(domainName, options = {}) {
   const warnings = [];
 
   // Generate shared templates for enhanced/full packages
-  if ((context.package === 'enterprise' || context.package === 'full')) {
+  if (context.package === 'enterprise' || context.package === 'full') {
     try {
       console.log('📦 Generating shared export templates...');
       const srcDir = path.resolve(outputDir, '..');
@@ -1349,11 +1355,14 @@ async function generateDomainModule(domainName, options = {}) {
       const sharedFiles = await generateSharedTemplates(
         srcDir,
         context,
-        dryRun
+        dryRun,
       );
       files.push(...sharedFiles);
     } catch (error) {
-      console.error('⚠️  Warning: Failed to generate shared templates:', error.message);
+      console.error(
+        '⚠️  Warning: Failed to generate shared templates:',
+        error.message,
+      );
       warnings.push(`Failed to generate shared templates: ${error.message}`);
     }
   }
@@ -1422,10 +1431,7 @@ async function generateDomainModule(domainName, options = {}) {
         useMigration: !directDb,
         directDb,
         multipleRoles,
-        outputDir: path.resolve(
-          process.cwd(),
-          'apps/api/src/database/migrations',
-        ),
+        // Don't pass outputDir - let role-generator detect correct path automatically
       };
 
       rolesData = await generateRolesAndPermissions(
