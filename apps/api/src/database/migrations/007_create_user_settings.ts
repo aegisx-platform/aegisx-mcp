@@ -1,4 +1,4 @@
-import Knex from 'knex';
+import type { Knex } from 'knex';
 
 export async function up(knex: any): Promise<void> {
   // Create user_settings table for granular settings management
@@ -12,13 +12,17 @@ export async function up(knex: any): Promise<void> {
     table.text('description').nullable();
     table.boolean('is_system').defaultTo(false); // System settings vs user settings
     table.timestamps(true, true);
-    
+
     // Foreign key
-    table.foreign('user_id').references('id').inTable('users').onDelete('CASCADE');
-    
+    table
+      .foreign('user_id')
+      .references('id')
+      .inTable('users')
+      .onDelete('CASCADE');
+
     // Unique constraint on user_id + category + key
     table.unique(['user_id', 'category', 'key']);
-    
+
     // Indexes
     table.index('user_id');
     table.index('category');
@@ -39,7 +43,7 @@ export async function up(knex: any): Promise<void> {
     table.boolean('is_default').defaultTo(false);
     table.integer('sort_order').defaultTo(0);
     table.timestamps(true, true);
-    
+
     // Indexes
     table.index('name');
     table.index('is_active');
@@ -58,10 +62,10 @@ export async function up(knex: any): Promise<void> {
     table.boolean('is_public').defaultTo(false); // Can be exposed to frontend
     table.boolean('requires_restart').defaultTo(false); // App restart needed for changes
     table.timestamps(true, true);
-    
+
     // Unique constraint on category + key
     table.unique(['category', 'key']);
-    
+
     // Indexes
     table.index('category');
     table.index('is_public');
@@ -80,10 +84,10 @@ export async function up(knex: any): Promise<void> {
     table.boolean('user_configurable').defaultTo(true);
     table.boolean('required').defaultTo(false);
     table.timestamps(true, true);
-    
+
     // Unique constraint
     table.unique(['category', 'key']);
-    
+
     // Indexes
     table.index('category');
     table.index('user_configurable');

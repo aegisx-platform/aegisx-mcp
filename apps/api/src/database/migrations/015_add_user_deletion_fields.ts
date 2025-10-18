@@ -1,4 +1,4 @@
-import Knex from 'knex';
+import type { Knex } from 'knex';
 
 export async function up(knex: any): Promise<void> {
   await knex.schema.table('users', (table) => {
@@ -10,12 +10,14 @@ export async function up(knex: any): Promise<void> {
   });
 
   // Add index on recovery_deadline for cleanup jobs
-  await knex.schema.raw('CREATE INDEX IF NOT EXISTS idx_users_recovery_deadline ON users(recovery_deadline) WHERE recovery_deadline IS NOT NULL');
+  await knex.schema.raw(
+    'CREATE INDEX IF NOT EXISTS idx_users_recovery_deadline ON users(recovery_deadline) WHERE recovery_deadline IS NOT NULL',
+  );
 }
 
 export async function down(knex: any): Promise<void> {
   await knex.schema.raw('DROP INDEX IF EXISTS idx_users_recovery_deadline');
-  
+
   await knex.schema.table('users', (table) => {
     // Don't drop deleted_at as it existed before
     table.dropColumn('deletion_reason');

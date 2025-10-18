@@ -1,6 +1,6 @@
-import Knex from 'knex';
+import type { Knex } from 'knex';
 
-export async function up(knex: any): Promise<void> {
+export async function up(knex: Knex): Promise<void> {
   // Create roles table
   await knex.schema.createTable('roles', (table) => {
     table.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));
@@ -16,7 +16,7 @@ export async function up(knex: any): Promise<void> {
     table.string('action', 50).notNullable();
     table.string('description', 255);
     table.timestamps(true, true);
-    
+
     // Create unique constraint on resource + action
     table.unique(['resource', 'action']);
   });
@@ -26,11 +26,19 @@ export async function up(knex: any): Promise<void> {
     table.uuid('role_id').notNullable();
     table.uuid('permission_id').notNullable();
     table.timestamps(true, true);
-    
+
     // Foreign keys
-    table.foreign('role_id').references('id').inTable('roles').onDelete('CASCADE');
-    table.foreign('permission_id').references('id').inTable('permissions').onDelete('CASCADE');
-    
+    table
+      .foreign('role_id')
+      .references('id')
+      .inTable('roles')
+      .onDelete('CASCADE');
+    table
+      .foreign('permission_id')
+      .references('id')
+      .inTable('permissions')
+      .onDelete('CASCADE');
+
     // Composite primary key
     table.primary(['role_id', 'permission_id']);
   });

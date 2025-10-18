@@ -1,4 +1,4 @@
-import Knex from 'knex';
+import type { Knex } from 'knex';
 
 export async function up(knex: any): Promise<void> {
   // Enhance user_sessions table with device info and location tracking
@@ -8,7 +8,7 @@ export async function up(knex: any): Promise<void> {
     table.string('device_os', 50).nullable(); // macOS, Windows, iOS, Android, etc.
     table.string('device_browser', 50).nullable(); // Chrome, Safari, Firefox, etc.
     table.string('device_name', 100).nullable(); // User-defined device name
-    
+
     // Location information
     table.string('location_country', 100).nullable();
     table.string('location_region', 100).nullable();
@@ -16,20 +16,20 @@ export async function up(knex: any): Promise<void> {
     table.string('location_timezone', 100).nullable();
     table.decimal('location_latitude', 10, 8).nullable();
     table.decimal('location_longitude', 11, 8).nullable();
-    
+
     // Session tracking
     table.timestamp('last_activity_at').nullable();
     table.string('access_token_hash', 255).nullable(); // For token validation
     table.boolean('is_current_session').defaultTo(false);
     table.integer('activity_count').defaultTo(0); // Track session activity
-    
+
     // Security flags
     table.boolean('is_suspicious').defaultTo(false);
     table.string('security_flags', 500).nullable(); // JSON array of security flags
-    
+
     // Additional session metadata
     table.json('session_data').nullable(); // Store additional session information
-    
+
     // Add indexes
     table.index('device_type');
     table.index('device_os');
@@ -52,10 +52,14 @@ export async function up(knex: any): Promise<void> {
     table.json('request_data').nullable(); // Store request metadata
     table.json('response_data').nullable(); // Store response metadata
     table.timestamp('created_at').defaultTo(knex.fn.now());
-    
+
     // Foreign key
-    table.foreign('session_id').references('id').inTable('user_sessions').onDelete('CASCADE');
-    
+    table
+      .foreign('session_id')
+      .references('id')
+      .inTable('user_sessions')
+      .onDelete('CASCADE');
+
     // Indexes
     table.index('session_id');
     table.index('activity_type');
@@ -79,12 +83,24 @@ export async function up(knex: any): Promise<void> {
     table.timestamp('resolved_at').nullable();
     table.uuid('resolved_by').nullable(); // User who resolved the event
     table.timestamps(true, true);
-    
+
     // Foreign keys
-    table.foreign('session_id').references('id').inTable('user_sessions').onDelete('SET NULL');
-    table.foreign('user_id').references('id').inTable('users').onDelete('SET NULL');
-    table.foreign('resolved_by').references('id').inTable('users').onDelete('SET NULL');
-    
+    table
+      .foreign('session_id')
+      .references('id')
+      .inTable('user_sessions')
+      .onDelete('SET NULL');
+    table
+      .foreign('user_id')
+      .references('id')
+      .inTable('users')
+      .onDelete('SET NULL');
+    table
+      .foreign('resolved_by')
+      .references('id')
+      .inTable('users')
+      .onDelete('SET NULL');
+
     // Indexes
     table.index('session_id');
     table.index('user_id');
@@ -99,7 +115,7 @@ export async function down(knex: any): Promise<void> {
   // Drop tables in reverse order
   await knex.schema.dropTableIfExists('session_security_events');
   await knex.schema.dropTableIfExists('session_activity');
-  
+
   // Remove added columns from user_sessions
   await knex.schema.alterTable('user_sessions', (table) => {
     table.dropColumn('device_type');
