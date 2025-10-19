@@ -106,6 +106,7 @@ export class BookService {
   async loadBookList(params?: ListBookQuery): Promise<void> {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
+    this.permissionErrorSignal.set(false);
 
     try {
       // Build HTTP params
@@ -158,6 +159,19 @@ export class BookService {
       if (params?.available !== undefined) {
         httpParams = httpParams.set('available', params.available.toString());
       }
+      // Date/DateTime filtering for published_date
+      if (params?.published_date)
+        httpParams = httpParams.set('published_date', params.published_date);
+      if (params?.published_date_min)
+        httpParams = httpParams.set(
+          'published_date_min',
+          params.published_date_min,
+        );
+      if (params?.published_date_max)
+        httpParams = httpParams.set(
+          'published_date_max',
+          params.published_date_max,
+        );
       // Date/DateTime filtering for created_at
       if (params?.created_at)
         httpParams = httpParams.set('created_at', params.created_at);

@@ -45,29 +45,29 @@ export interface ListBookQuery {
   // Pagination
   page?: number;
   limit?: number;
-  
+
   // Search
   search?: string;
-  
+
   // Sort
   sort?: string; // Multiple sort support: field1:desc,field2:asc
-  
+
   // Field selection
   fields?: string[]; // Array of field names to return
-  
+
   // Include related data
   include?: string | string[];
-  
+
   // Smart field-based filters
   // String filtering for title
   title?: string; // Exact match
-    // String filtering for description
+  // String filtering for description
   description?: string; // Exact match
-    // String filtering for author_id
+  // String filtering for author_id
   author_id?: string; // Exact match
-    // String filtering for isbn
+  // String filtering for isbn
   isbn?: string; // Exact match
-    // Numeric filtering for pages
+  // Numeric filtering for pages
   pages?: number; // Exact match
   pages_min?: number; // Range start
   pages_max?: number; // Range end
@@ -77,8 +77,12 @@ export interface ListBookQuery {
   price_max?: number; // Range end
   // String filtering for genre
   genre?: string; // Exact match
-    // Boolean filtering for available
+  // Boolean filtering for available
   available?: boolean;
+  // Date/DateTime filtering for published_date
+  published_date?: string; // ISO date string for exact match
+  published_date_min?: string; // ISO date string for range start
+  published_date_max?: string; // ISO date string for range end
   // Date/DateTime filtering for created_at
   created_at?: string; // ISO date string for exact match
   created_at_min?: string; // ISO date string for range start
@@ -161,7 +165,6 @@ export interface BulkResponse {
   };
 }
 
-
 // ===== UTILITY TYPES =====
 
 export type BookField = keyof Book;
@@ -174,4 +177,3 @@ export interface BookListOptions {
   fields?: BookField[];
   search?: string;
 }
-

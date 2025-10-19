@@ -294,7 +294,7 @@ export interface BookFormData {
         margin: 8px 0;
       }
 
-      /* Form Actions - Tremor button style */
+      /* Form Actions */
       .form-actions {
         display: flex;
         justify-content: flex-end;
@@ -302,42 +302,6 @@ export interface BookFormData {
         margin-top: 16px;
         padding-top: 16px;
         border-top: 1px solid #e5e7eb;
-
-        /* Cancel Button */
-        button[mat-button] {
-          color: #6b7280;
-          border: 1px solid #e5e7eb;
-          border-radius: 6px;
-          transition: all 0.2s ease;
-
-          &:hover:not([disabled]) {
-            background-color: #f9fafb;
-            border-color: #d1d5db;
-            color: #374151;
-          }
-        }
-
-        /* Submit Button */
-        button[mat-raised-button] {
-          color: white !important;
-          background-color: #3b82f6 !important;
-          border-radius: 6px;
-          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-          transition: all 0.2s ease;
-
-          &:hover:not([disabled]) {
-            background-color: #2563eb !important;
-            box-shadow:
-              0 4px 6px -1px rgba(0, 0, 0, 0.1),
-              0 2px 4px -1px rgba(0, 0, 0, 0.06);
-          }
-
-          &[disabled] {
-            color: white !important;
-            background-color: #9ca3af !important;
-            box-shadow: none;
-          }
-        }
       }
 
       .inline-spinner {
