@@ -31,7 +31,12 @@ export interface BookEditDialogData {
     <div class="edit-dialog">
       <div class="dialog-header">
         <h2 mat-dialog-title>Edit Book</h2>
-        <button mat-icon-button (click)="onCancel()" class="close-button">
+
+        <button
+          mat-icon-button
+          [mat-dialog-close]="true"
+          class="close-button m-2"
+        >
           <mat-icon>close</mat-icon>
         </button>
       </div>
@@ -58,7 +63,6 @@ export interface BookEditDialogData {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-right: -12px;
       }
 
       .dialog-header h2 {
