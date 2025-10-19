@@ -35,9 +35,9 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 import {
+  AegisxNavigationItem,
   AxDialogService,
   BreadcrumbComponent,
-  AegisxNavigationItem,
 } from '@aegisx/ui';
 import {
   ExportOptions,
@@ -87,13 +87,8 @@ import {
         <!-- Header with Stats Summary -->
         <div class="flex items-start justify-between">
           <div class="flex-1">
-            <div class="flex items-center gap-3 mb-2">
+            <div class="flex items-center gap-3">
               <h1 class="text-2xl font-semibold text-gray-900">Books</h1>
-              <span
-                class="px-2.5 py-1 text-sm font-medium bg-gray-100 text-gray-700 rounded-md"
-              >
-                {{ booksService.totalBook() }} total
-              </span>
             </div>
             <p class="text-sm text-gray-600">Manage your book collection</p>
           </div>
@@ -856,13 +851,6 @@ export class BooksListComponent {
       link: '/',
     },
     {
-      id: 'management',
-      title: 'Management',
-      type: 'basic',
-      icon: 'settings',
-      link: '/management',
-    },
-    {
       id: 'books',
       title: 'Books',
       type: 'basic',
@@ -912,6 +900,9 @@ export class BooksListComponent {
   protected genreFilterSignal = signal('');
   protected authorIdFilterSignal = signal('');
   protected availableFilterSignal = signal<boolean | undefined>(undefined);
+
+  // Reload trigger - increment to force data reload even when filters unchanged
+  private reloadTrigger = signal(0);
 
   // Holds current MatSort subscription
   private matSortSubscription?: import('rxjs').Subscription;
@@ -1054,6 +1045,9 @@ export class BooksListComponent {
 
     // Reload data when signals change (no auto-search on typing)
     effect(async () => {
+      // Track reload trigger to force refresh even when filters unchanged
+      this.reloadTrigger();
+
       const sort = this.sortState();
       const page = this.pageState();
       const search = this.searchTermSignal();
@@ -1113,6 +1107,9 @@ export class BooksListComponent {
     this.authorIdFilterSignal.set('');
 
     if (this.paginator) this.paginator.pageIndex = 0;
+
+    // Trigger reload even if filters are already empty
+    this.reloadTrigger.update((n) => n + 1);
   }
 
   applyFilterImmediate() {
@@ -1212,7 +1209,8 @@ export class BooksListComponent {
 
     dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
-        // effect will reload
+        // Trigger reload to show newly created book
+        this.reloadTrigger.update((n) => n + 1);
       }
     });
   }
@@ -1232,7 +1230,8 @@ export class BooksListComponent {
 
     dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
-        // effect will reload
+        // Trigger reload to show updated book data
+        this.reloadTrigger.update((n) => n + 1);
       }
     });
   }
@@ -1245,7 +1244,8 @@ export class BooksListComponent {
           this.snackBar.open('Book deleted successfully', 'Close', {
             duration: 3000,
           });
-          // effect will reload
+          // Trigger reload to update list after deletion
+          this.reloadTrigger.update((n) => n + 1);
         } catch {
           this.snackBar.open('Failed to delete book', 'Close', {
             duration: 3000,
@@ -1273,7 +1273,8 @@ export class BooksListComponent {
               { duration: 3000 },
             );
             this.selection.clear();
-            // effect will reload
+            // Trigger reload to update list after bulk deletion
+            this.reloadTrigger.update((n) => n + 1);
           } catch {
             this.snackBar.open('Failed to delete some books', 'Close', {
               duration: 3000,
