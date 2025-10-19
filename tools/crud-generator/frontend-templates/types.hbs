@@ -2,7 +2,7 @@
 
 export interface {{PascalCase}} {
   {{#each columns}}
-  {{name}}{{#if isNullable}}?{{/if}}: {{#if (contains type 'timestamp')}}string{{else if (eq type 'jsonb')}}Record<string, any>{{else if (eq type 'json')}}Record<string, any>{{else if (eq tsType 'Record<string, any>')}}Record<string, any>{{else if (contains tsType 'Record&lt;string, any&gt;')}}Record<string, any>{{else if (eq tsType 'string')}}string{{else if (eq tsType 'number')}}number{{else if (eq tsType 'boolean')}}boolean{{else}}string{{/if}}{{#if isNullable}} | null{{/if}};
+  {{name}}{{#if isNullable}}?{{/if}}: {{#if (or (contains type 'timestamp') (eq type 'date'))}}string{{else if (eq type 'jsonb')}}Record<string, any>{{else if (eq type 'json')}}Record<string, any>{{else if (eq tsType 'Record<string, any>')}}Record<string, any>{{else if (contains tsType 'Record&lt;string, any&gt;')}}Record<string, any>{{else if (eq tsType 'string')}}string{{else if (eq tsType 'number')}}number{{else if (eq tsType 'boolean')}}boolean{{else}}string{{/if}}{{#if isNullable}} | null{{/if}};
   {{/each}}
 }
 
@@ -11,7 +11,7 @@ export interface Create{{PascalCase}}Request {
   {{#unless isPrimaryKey}}
   {{#unless (eq name 'created_at')}}
   {{#unless (eq name 'updated_at')}}
-  {{name}}{{#if isNullable}}?{{/if}}: {{#if (contains type 'timestamp')}}string{{else if (eq type 'jsonb')}}Record<string, any>{{else if (eq type 'json')}}Record<string, any>{{else if (eq tsType 'Record<string, any>')}}Record<string, any>{{else if (contains tsType 'Record&lt;string, any&gt;')}}Record<string, any>{{else if (eq tsType 'string')}}string{{else if (eq tsType 'number')}}number{{else if (eq tsType 'boolean')}}boolean{{else}}string{{/if}}{{#if isNullable}} | null{{/if}};
+  {{name}}{{#if isNullable}}?{{/if}}: {{#if (or (contains type 'timestamp') (eq type 'date'))}}string{{else if (eq type 'jsonb')}}Record<string, any>{{else if (eq type 'json')}}Record<string, any>{{else if (eq tsType 'Record<string, any>')}}Record<string, any>{{else if (contains tsType 'Record&lt;string, any&gt;')}}Record<string, any>{{else if (eq tsType 'string')}}string{{else if (eq tsType 'number')}}number{{else if (eq tsType 'boolean')}}boolean{{else}}string{{/if}}{{#if isNullable}} | null{{/if}};
   {{/unless}}
   {{/unless}}
   {{/unless}}
@@ -23,7 +23,7 @@ export interface Update{{PascalCase}}Request {
   {{#unless isPrimaryKey}}
   {{#unless (eq name 'created_at')}}
   {{#unless (eq name 'updated_at')}}
-  {{name}}?: {{#if (contains type 'timestamp')}}string{{else if (eq type 'jsonb')}}Record<string, any>{{else if (eq type 'json')}}Record<string, any>{{else if (eq tsType 'Record<string, any>')}}Record<string, any>{{else if (contains tsType 'Record&lt;string, any&gt;')}}Record<string, any>{{else if (eq tsType 'string')}}string{{else if (eq tsType 'number')}}number{{else if (eq tsType 'boolean')}}boolean{{else}}string{{/if}}{{#if isNullable}} | null{{/if}};
+  {{name}}?: {{#if (or (contains type 'timestamp') (eq type 'date'))}}string{{else if (eq type 'jsonb')}}Record<string, any>{{else if (eq type 'json')}}Record<string, any>{{else if (eq tsType 'Record<string, any>')}}Record<string, any>{{else if (contains tsType 'Record&lt;string, any&gt;')}}Record<string, any>{{else if (eq tsType 'string')}}string{{else if (eq tsType 'number')}}number{{else if (eq tsType 'boolean')}}boolean{{else}}string{{/if}}{{#if isNullable}} | null{{/if}};
   {{/unless}}
   {{/unless}}
   {{/unless}}
@@ -52,7 +52,7 @@ export interface List{{PascalCase}}Query {
   // Smart field-based filters
   {{#each columns}}
   {{#unless isPrimaryKey}}
-  {{#if (contains type 'timestamp')}}
+  {{#if (or (contains type 'timestamp') (eq type 'date'))}}
   // Date/DateTime filtering for {{name}}
   {{name}}?: string; // ISO date string for exact match
   {{name}}_min?: string; // ISO date string for range start
