@@ -12,6 +12,13 @@ import {
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { fromEventPattern } from 'rxjs';
+import {
+  trigger,
+  state,
+  style,
+  transition,
+  animate,
+} from '@angular/animations';
 
 // Material imports for table
 import { SelectionModel } from '@angular/cdk/collections';
@@ -88,6 +95,16 @@ import { BooksListHeaderComponent } from './books-list-header.component';
   ],
   templateUrl: './books-list.component.html',
   styleUrl: './books-list.component.scss',
+  animations: [
+    trigger('detailExpand', [
+      state('collapsed', style({ height: '0px', minHeight: '0' })),
+      state('expanded', style({ height: '*' })),
+      transition(
+        'expanded <=> collapsed',
+        animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)'),
+      ),
+    ]),
+  ],
 })
 export class BooksListComponent {
   booksService = inject(BookService);
@@ -212,6 +229,9 @@ export class BooksListComponent {
   // Show loading indicator only if loading takes longer than 300ms
   showLoadingIndicator = signal(false);
   private loadingTimeout: any;
+
+  // Expandable rows state
+  protected expandedBook = signal<Book | null>(null);
 
   // Computed signals
   advancedFilters = computed(() => ({
@@ -632,5 +652,21 @@ export class BooksListComponent {
   getPercentage(count: number): number {
     const total = this.stats().total;
     return total > 0 ? Math.round((count / total) * 100) : 0;
+  }
+
+  // Expandable Row Methods
+  toggleExpandRow(book: Book): void {
+    const currentExpanded = this.expandedBook();
+    if (currentExpanded?.id === book.id) {
+      // Collapse currently expanded row
+      this.expandedBook.set(null);
+    } else {
+      // Expand new row (and collapse previous if any)
+      this.expandedBook.set(book);
+    }
+  }
+
+  isRowExpanded(book: Book): boolean {
+    return this.expandedBook()?.id === book.id;
   }
 }
