@@ -225,7 +225,7 @@ interface AdvancedFilters {
                   type="text"
                   [(ngModel)]="searchTerm"
                   (keyup.enter)="search()"
-                  placeholder="Search by title, author, ISBN..."
+                  placeholder="Search by title, author, ISBN... (Press Enter or click Search)"
                   aria-label="Search books"
                   [class.pr-10]="searchTerm || booksService.loading()"
                   class="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -340,12 +340,7 @@ interface AdvancedFilters {
               ></app-export>
 
               <!-- Clear All (show when filters active) -->
-              @if (
-                searchTerm ||
-                advancedFilters.available !== undefined ||
-                advancedFilters.genre ||
-                advancedFilters.author_id
-              ) {
+              @if (hasActiveFilters()) {
                 <button
                   (click)="clearAllFilters()"
                   class="px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md transition-colors flex items-center gap-1"
@@ -357,6 +352,94 @@ interface AdvancedFilters {
             </div>
           </div>
 
+          <!-- Active Filter Chips -->
+          @if (hasActiveFilters()) {
+            <div class="mt-3 flex flex-wrap gap-2">
+              @if (searchTermSignal()) {
+                <span
+                  class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-100 text-blue-700 rounded-md text-xs font-medium"
+                >
+                  <mat-icon class="!text-sm !w-4 !h-4">search</mat-icon>
+                  Search: {{ searchTermSignal() }}
+                  <button
+                    (click)="searchTermSignal.set('')"
+                    class="hover:text-blue-900"
+                  >
+                    <mat-icon class="!text-sm !w-3 !h-3">close</mat-icon>
+                  </button>
+                </span>
+              }
+              @if (availableFilterSignal() === true) {
+                <span
+                  class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-100 text-green-700 rounded-md text-xs font-medium"
+                >
+                  <mat-icon class="!text-sm !w-4 !h-4">check_circle</mat-icon>
+                  Available
+                  <button
+                    (click)="
+                      availableInputSignal.set(undefined);
+                      availableFilterSignal.set(undefined);
+                      quickFilter = 'all'
+                    "
+                    class="hover:text-green-900"
+                  >
+                    <mat-icon class="!text-sm !w-3 !h-3">close</mat-icon>
+                  </button>
+                </span>
+              }
+              @if (availableFilterSignal() === false) {
+                <span
+                  class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-100 text-red-700 rounded-md text-xs font-medium"
+                >
+                  <mat-icon class="!text-sm !w-4 !h-4">block</mat-icon>
+                  Unavailable
+                  <button
+                    (click)="
+                      availableInputSignal.set(undefined);
+                      availableFilterSignal.set(undefined);
+                      quickFilter = 'all'
+                    "
+                    class="hover:text-red-900"
+                  >
+                    <mat-icon class="!text-sm !w-3 !h-3">close</mat-icon>
+                  </button>
+                </span>
+              }
+              @if (genreFilterSignal()) {
+                <span
+                  class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-purple-100 text-purple-700 rounded-md text-xs font-medium"
+                >
+                  <mat-icon class="!text-sm !w-4 !h-4">category</mat-icon>
+                  Genre: {{ genreFilterSignal() }}
+                  <button
+                    (click)="
+                      genreInputSignal.set(''); genreFilterSignal.set('')
+                    "
+                    class="hover:text-purple-900"
+                  >
+                    <mat-icon class="!text-sm !w-3 !h-3">close</mat-icon>
+                  </button>
+                </span>
+              }
+              @if (authorIdFilterSignal()) {
+                <span
+                  class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-orange-100 text-orange-700 rounded-md text-xs font-medium"
+                >
+                  <mat-icon class="!text-sm !w-4 !h-4">person</mat-icon>
+                  Author: {{ authorIdFilterSignal() }}
+                  <button
+                    (click)="
+                      authorIdInputSignal.set(''); authorIdFilterSignal.set('')
+                    "
+                    class="hover:text-orange-900"
+                  >
+                    <mat-icon class="!text-sm !w-3 !h-3">close</mat-icon>
+                  </button>
+                </span>
+              }
+            </div>
+          }
+
           <!-- Advanced Filters Panel -->
           @if (showAdvancedFilters()) {
             <div class="mt-4 pt-4 border-t border-gray-200">
@@ -366,8 +449,7 @@ interface AdvancedFilters {
                     >Status</label
                   >
                   <select
-                    [(ngModel)]="advancedFilters.available"
-                    (change)="applyFilterImmediate()"
+                    [(ngModel)]="availableFilter"
                     class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option [ngValue]="undefined">All statuses</option>
@@ -382,7 +464,7 @@ interface AdvancedFilters {
                   >
                   <input
                     type="text"
-                    [(ngModel)]="advancedFilters.genre"
+                    [(ngModel)]="genreFilter"
                     (keyup.enter)="applyFilterImmediate()"
                     placeholder="e.g., Fiction, Science"
                     class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -395,7 +477,7 @@ interface AdvancedFilters {
                   >
                   <input
                     type="text"
-                    [(ngModel)]="advancedFilters.author_id"
+                    [(ngModel)]="authorIdFilter"
                     (keyup.enter)="applyFilterImmediate()"
                     placeholder="Search by author"
                     class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -423,17 +505,6 @@ interface AdvancedFilters {
           }
         </div>
 
-        <!-- Loading State -->
-        @if (booksService.loading()) {
-          <!-- Loading Spinner -->
-          <div
-            class="bg-white rounded-lg border border-gray-200 p-12 text-center"
-          >
-            <mat-spinner class="!mx-auto" [diameter]="40"></mat-spinner>
-            <p class="text-sm text-gray-600 mt-4">Loading books...</p>
-          </div>
-        }
-
         <!-- Error State -->
         @if (booksService.error()) {
           <!-- Error Message -->
@@ -458,8 +529,19 @@ interface AdvancedFilters {
 
         <!-- Table Section: always in DOM -->
         <div
-          class="bg-white rounded-lg border border-gray-200 overflow-hidden tremor-table"
+          class="bg-white rounded-lg border border-gray-200 overflow-hidden tremor-table relative"
         >
+          <!-- Loading Overlay -->
+          @if (booksService.loading()) {
+            <div
+              class="absolute inset-0 bg-white/75 backdrop-blur-sm flex items-center justify-center z-10"
+            >
+              <div class="text-center">
+                <mat-spinner class="!mx-auto" [diameter]="40"></mat-spinner>
+                <p class="text-sm text-gray-600 mt-4">Loading books...</p>
+              </div>
+            </div>
+          }
           <!-- Bulk Actions -->
           @if (selection.selected.length > 0) {
             <div
@@ -639,23 +721,13 @@ interface AdvancedFilters {
               No books found
             </h3>
             <p class="text-sm text-gray-600 mt-2">
-              @if (
-                searchTerm ||
-                advancedFilters.available !== undefined ||
-                advancedFilters.genre ||
-                advancedFilters.author_id
-              ) {
+              @if (hasActiveFilters()) {
                 Try adjusting your search or filters
               } @else {
                 Get started by adding your first book
               }
             </p>
-            @if (
-              searchTerm ||
-              advancedFilters.available !== undefined ||
-              advancedFilters.genre ||
-              advancedFilters.author_id
-            ) {
+            @if (hasActiveFilters()) {
               <button
                 (click)="clearAllFilters()"
                 class="mt-4 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700"
@@ -798,7 +870,20 @@ export class BooksListComponent {
     direction: '',
   });
   pageState = signal<{ index: number; size: number }>({ index: 0, size: 25 });
-  searchTermSignal = signal('');
+
+  // Search & Filter Signals
+  protected searchTermSignal = signal(''); // Active search term (sent to API)
+  protected searchInputSignal = signal(''); // Input field value (not auto-searched)
+
+  // Advanced filter INPUT signals (not sent to API until Apply is clicked)
+  protected genreInputSignal = signal('');
+  protected authorIdInputSignal = signal('');
+  protected availableInputSignal = signal<boolean | undefined>(undefined);
+
+  // Advanced filter ACTIVE signals (sent to API)
+  protected genreFilterSignal = signal('');
+  protected authorIdFilterSignal = signal('');
+  protected availableFilterSignal = signal<boolean | undefined>(undefined);
 
   // Holds current MatSort subscription
   private matSortSubscription?: import('rxjs').Subscription;
@@ -842,16 +927,48 @@ export class BooksListComponent {
   @ViewChild(MatPaginator, { static: false }) paginator!: MatPaginator;
   private destroyRef = inject(DestroyRef);
 
-  // Search & Filter
-  // Deprecated: use searchTermSignal instead
-  searchTerm = '';
+  // Search & Filter UI State
   quickFilter: 'all' | 'active' | 'unavailable' = 'all';
   showAdvancedFilters = signal(false);
-  advancedFiltersSignal = signal<AdvancedFilters>({
-    available: undefined,
-    genre: '',
-    author_id: '',
-  });
+
+  // Computed signal for advanced filter INPUTS (for display in form)
+  advancedFilters = computed(() => ({
+    available: this.availableInputSignal(),
+    genre: this.genreInputSignal(),
+    author_id: this.authorIdInputSignal(),
+  }));
+
+  // Two-way binding helpers (for ngModel)
+  get searchTerm() {
+    return this.searchInputSignal();
+  }
+  set searchTerm(value: string) {
+    this.searchInputSignal.set(value);
+    // Note: Does NOT trigger search automatically
+    // User must click Search button or press Enter
+  }
+
+  // Getters/setters for advanced filter INPUTS (form binding)
+  get genreFilter() {
+    return this.genreInputSignal();
+  }
+  set genreFilter(value: string) {
+    this.genreInputSignal.set(value);
+  }
+
+  get authorIdFilter() {
+    return this.authorIdInputSignal();
+  }
+  set authorIdFilter(value: string) {
+    this.authorIdInputSignal.set(value);
+  }
+
+  get availableFilter() {
+    return this.availableInputSignal();
+  }
+  set availableFilter(value: boolean | undefined) {
+    this.availableInputSignal.set(value);
+  }
 
   // Stats from API (should come from dedicated stats endpoint)
   stats = computed(() => ({
@@ -885,14 +1002,6 @@ export class BooksListComponent {
 
   subscriptionsInitialized = false;
 
-  get advancedFilters() {
-    return this.advancedFiltersSignal();
-  }
-
-  set advancedFilters(val: AdvancedFilters) {
-    this.advancedFiltersSignal.set(val);
-  }
-
   ngAfterViewInit() {
     this.cdr.detectChanges();
     // Subscribe paginator changes to update pageState
@@ -909,11 +1018,20 @@ export class BooksListComponent {
 
   // --- Effect: reload books on sort/page/search/filter change ---
   constructor() {
+    // Sync export selection state
+    effect(() => {
+      const ids = new Set(this.selection.selected.map((b) => b.id));
+      this.selectedIdsSignal.set(ids);
+    });
+
+    // Reload data when signals change (no auto-search on typing)
     effect(async () => {
       const sort = this.sortState();
       const page = this.pageState();
       const search = this.searchTermSignal();
-      const filters = this.advancedFilters;
+      const available = this.availableFilterSignal();
+      const genre = this.genreFilterSignal();
+      const authorId = this.authorIdFilterSignal();
 
       const params: Partial<ListBookQuery> = {
         page: (page?.index ?? 0) + 1,
@@ -923,9 +1041,9 @@ export class BooksListComponent {
             ? `${sort.active}:${sort.direction}`
             : undefined,
         search: search?.trim() || undefined,
-        available: filters.available,
-        genre: filters.genre?.trim() || undefined,
-        author_id: filters.author_id?.trim() || undefined,
+        available: available,
+        genre: genre?.trim() || undefined,
+        author_id: authorId?.trim() || undefined,
       };
       Object.keys(params).forEach(
         (k) =>
@@ -946,88 +1064,100 @@ export class BooksListComponent {
   // Search & Filter Methods
 
   search() {
-    // Set searchTermSignal, reset page
-    this.searchTermSignal.set(this.searchTerm.trim());
+    // Apply search when user clicks Search button or presses Enter
+    const searchValue = this.searchInputSignal().trim();
+    this.searchTermSignal.set(searchValue);
     if (this.paginator) this.paginator.pageIndex = 0;
   }
 
   refresh() {
-    this.searchTerm = '';
+    // Clear all inputs
+    this.searchInputSignal.set('');
     this.searchTermSignal.set('');
+    this.genreInputSignal.set('');
+    this.authorIdInputSignal.set('');
+    this.availableInputSignal.set(undefined);
+
+    // Clear all active filters
     this.quickFilter = 'all';
-    this.advancedFilters = {
-      available: undefined,
-      genre: '',
-      author_id: '',
-    };
+    this.availableFilterSignal.set(undefined);
+    this.genreFilterSignal.set('');
+    this.authorIdFilterSignal.set('');
+
     if (this.paginator) this.paginator.pageIndex = 0;
   }
 
   applyFilterImmediate() {
-    // Always trigger effect by updating searchTermSignal (even if empty)
-    this.searchTermSignal.set(this.searchTerm.trim());
-    // Force advancedFiltersSignal to emit (important for object mutation via ngModel)
-    this.advancedFiltersSignal.set({ ...this.advancedFilters });
+    // Apply advanced filter inputs to active filters
+    // This triggers the effect to reload data
+    this.genreFilterSignal.set(this.genreInputSignal().trim());
+    this.authorIdFilterSignal.set(this.authorIdInputSignal().trim());
+    this.availableFilterSignal.set(this.availableInputSignal());
+
+    // Reset pagination
     if (this.paginator) this.paginator.pageIndex = 0;
   }
 
   clearSearch() {
-    this.searchTerm = '';
-    this.applyFilterImmediate();
+    this.searchInputSignal.set('');
+    this.searchTermSignal.set('');
+    if (this.paginator) this.paginator.pageIndex = 0;
   }
 
   setQuickFilter(filter: 'all' | 'active' | 'unavailable') {
     this.quickFilter = filter;
+
+    // Update both input and active signals for quick filters
     if (filter === 'all') {
-      this.advancedFiltersSignal.set({
-        ...this.advancedFilters,
-        available: undefined,
-      });
+      this.availableInputSignal.set(undefined);
+      this.availableFilterSignal.set(undefined);
     } else if (filter === 'active') {
-      this.advancedFiltersSignal.set({
-        ...this.advancedFilters,
-        available: true,
-      });
+      this.availableInputSignal.set(true);
+      this.availableFilterSignal.set(true);
     } else if (filter === 'unavailable') {
-      this.advancedFiltersSignal.set({
-        ...this.advancedFilters,
-        available: false,
-      });
+      this.availableInputSignal.set(false);
+      this.availableFilterSignal.set(false);
     }
-    // Always trigger effect by updating searchTermSignal (even if empty)
-    this.searchTermSignal.set(this.searchTerm.trim());
+
     if (this.paginator) this.paginator.pageIndex = 0;
   }
 
   clearAllFilters() {
-    this.searchTerm = '';
+    // Clear all inputs
+    this.searchInputSignal.set('');
+    this.genreInputSignal.set('');
+    this.authorIdInputSignal.set('');
+    this.availableInputSignal.set(undefined);
+
+    // Clear all active filters
     this.searchTermSignal.set('');
     this.quickFilter = 'all';
-    this.advancedFilters = {
-      available: undefined,
-      genre: '',
-      author_id: '',
-    };
+    this.availableFilterSignal.set(undefined);
+    this.genreFilterSignal.set('');
+    this.authorIdFilterSignal.set('');
+
     this.showAdvancedFilters.set(false);
-    this.applyFilterImmediate();
+    if (this.paginator) this.paginator.pageIndex = 0;
   }
 
   // Helper methods for filter UI
   hasActiveFilters(): boolean {
+    // Check ACTIVE filters (not inputs)
     return (
-      this.searchTerm.trim() !== '' ||
-      this.advancedFilters.available !== undefined ||
-      this.advancedFilters.genre.trim() !== '' ||
-      (this.advancedFilters.author_id?.trim() || '') !== ''
+      this.searchTermSignal().trim() !== '' ||
+      this.availableFilterSignal() !== undefined ||
+      this.genreFilterSignal().trim() !== '' ||
+      (this.authorIdFilterSignal()?.trim() || '') !== ''
     );
   }
 
   getActiveFilterCount(): number {
+    // Count ACTIVE filters (not inputs)
     let count = 0;
-    if (this.searchTerm.trim()) count++;
-    if (this.advancedFilters.available !== undefined) count++;
-    if (this.advancedFilters.genre.trim()) count++;
-    if (this.advancedFilters.author_id?.trim()) count++;
+    if (this.searchTermSignal().trim()) count++;
+    if (this.availableFilterSignal() !== undefined) count++;
+    if (this.genreFilterSignal().trim()) count++;
+    if (this.authorIdFilterSignal()?.trim()) count++;
     return count;
   }
 
@@ -1168,19 +1298,19 @@ export class BooksListComponent {
 
   getExportFilters(): Record<string, unknown> {
     return {
-      searchTerm: this.searchTerm,
-      available: this.advancedFilters.available,
-      genre: this.advancedFilters.genre,
-      author_id: this.advancedFilters.author_id,
+      searchTerm: this.searchTermSignal(),
+      available: this.availableFilterSignal(),
+      genre: this.genreFilterSignal(),
+      author_id: this.authorIdFilterSignal(),
     };
   }
 
   activeFiltersCount(): number {
     let count = 0;
-    if (this.searchTerm.length > 0) count++;
-    if (this.advancedFilters.available !== undefined) count++;
-    if (this.advancedFilters.genre !== '') count++;
-    if (this.advancedFilters.author_id !== '') count++;
+    if (this.searchTermSignal().length > 0) count++;
+    if (this.availableFilterSignal() !== undefined) count++;
+    if (this.genreFilterSignal() !== '') count++;
+    if (this.authorIdFilterSignal() !== '') count++;
     return count;
   }
 

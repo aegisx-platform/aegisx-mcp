@@ -6,6 +6,8 @@ import {
   MatDialogModule,
 } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 import { BookService } from '../services/books.service';
 import { Book, UpdateBookRequest } from '../types/books.types';
@@ -18,10 +20,21 @@ export interface BookEditDialogData {
 @Component({
   selector: 'app-books-edit-dialog',
   standalone: true,
-  imports: [CommonModule, MatDialogModule, BookFormComponent],
+  imports: [
+    CommonModule,
+    MatDialogModule,
+    BookFormComponent,
+    MatButtonModule,
+    MatIconModule,
+  ],
   template: `
     <div class="edit-dialog">
-      <h2 mat-dialog-title>Edit Books</h2>
+      <div class="dialog-header">
+        <h2 mat-dialog-title>Edit Book</h2>
+        <button mat-icon-button (click)="onCancel()" class="close-button">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
 
       <mat-dialog-content>
         <app-books-form
@@ -41,9 +54,39 @@ export interface BookEditDialogData {
         max-width: 800px;
       }
 
+      .dialog-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-right: -12px;
+      }
+
+      .dialog-header h2 {
+        margin: 0;
+        flex: 1;
+      }
+
+      .close-button {
+        width: 48px;
+        height: 48px;
+        color: #6b7280;
+        transition: color 0.2s ease;
+      }
+
+      .close-button:hover {
+        color: #374151;
+      }
+
+      .close-button mat-icon {
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+      }
+
       mat-dialog-content {
         max-height: 70vh;
         overflow-y: auto;
+        padding: 0 24px 24px 24px;
       }
 
       @media (max-width: 768px) {
@@ -77,19 +120,19 @@ export class BookEditDialogComponent implements OnInit {
       );
 
       if (result) {
-        this.snackBar.open('Books updated successfully', 'Close', {
+        this.snackBar.open('Book updated successfully', 'Close', {
           duration: 3000,
         });
         this.dialogRef.close(result);
       } else {
-        this.snackBar.open('Failed to update Books', 'Close', {
+        this.snackBar.open('Failed to update book', 'Close', {
           duration: 5000,
         });
       }
     } catch (error: any) {
       const errorMessage = this.booksService.permissionError()
-        ? 'You do not have permission to update Books'
-        : error?.message || 'Failed to update Books';
+        ? 'You do not have permission to update book'
+        : error?.message || 'Failed to update book';
       this.snackBar.open(errorMessage, 'Close', {
         duration: 5000,
         panelClass: ['error-snackbar'],

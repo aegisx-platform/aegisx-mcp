@@ -1,6 +1,22 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, inject, signal } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges,
+  inject,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+  AbstractControl,
+} from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -13,12 +29,16 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { Book, CreateBookRequest, UpdateBookRequest } from '../types/books.types';
+import {
+  Book,
+  CreateBookRequest,
+  UpdateBookRequest,
+} from '../types/books.types';
 // CRUD-GENERATOR-TAG: Foreign Key Service Import
 import { AuthorService } from '../../authors/services/authors.service';
-import { 
-  formatDateForInput, 
-  formatDateForSubmission 
+import {
+  formatDateForInput,
+  formatDateForSubmission,
 } from '../../../shared/utils/datetime.utils';
 
 export type BookFormMode = 'create' | 'edit';
@@ -55,21 +75,16 @@ export interface BookFormData {
     MatTooltipModule,
   ],
   template: `
-    <form [formGroup]="booksForm" class="-form">
-      
-
-
+    <form [formGroup]="booksForm" class="books-form">
       <!-- title Field -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Title</mat-label>
-        <input 
-          matInput 
+        <input
+          matInput
           type="text"
           formControlName="title"
           placeholder="Enter title"
-          
-          
-        >
+        />
         <mat-error *ngIf="booksForm.get('title')?.hasError('required')">
           Title is required
         </mat-error>
@@ -78,32 +93,11 @@ export interface BookFormData {
         </mat-error>
       </mat-form-field>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
-
-
       <!-- description Field -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Description</mat-label>
-        <textarea 
-          matInput 
+        <textarea
+          matInput
           formControlName="description"
           placeholder="Enter description"
           rows="3"
@@ -113,325 +107,251 @@ export interface BookFormData {
         </mat-error>
       </mat-form-field>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
       <!-- author_id Field (Foreign Key Dropdown) -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Author Id</mat-label>
-        <mat-select formControlName="author_id" [disabled]="loadingAuthorsService()">
+        <mat-select
+          formControlName="author_id"
+          [disabled]="loadingAuthorsService()"
+        >
           <mat-option *ngIf="loadingAuthorsService()" disabled>
             <mat-spinner diameter="16"></mat-spinner>
             Loading authors...
           </mat-option>
-          <mat-option *ngFor="let item of authorsServiceOptions()" [value]="item.value">
+          <mat-option
+            *ngFor="let item of authorsServiceOptions()"
+            [value]="item.value"
+          >
             {{ item.label }}
           </mat-option>
         </mat-select>
         <mat-error *ngIf="booksForm.get('author_id')?.hasError('required')">
           Author Id is required
         </mat-error>
-        <mat-hint *ngIf="!loadingAuthorsService() && authorsServiceOptions().length === 0">
+        <mat-hint
+          *ngIf="
+            !loadingAuthorsService() && authorsServiceOptions().length === 0
+          "
+        >
           No authors available
         </mat-hint>
       </mat-form-field>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
-
-
       <!-- isbn Field -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Isbn</mat-label>
-        <input 
-          matInput 
+        <input
+          matInput
           type="text"
           formControlName="isbn"
           placeholder="Enter isbn"
-          
-          
-        >
+        />
       </mat-form-field>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
-
-
 
       <!-- pages Field -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Pages</mat-label>
-        <input 
-          matInput 
+        <input
+          matInput
           type="number"
           formControlName="pages"
           placeholder="Enter pages"
-          
-          
-          
-        >
+        />
       </mat-form-field>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
-
-
-
-
 
       <!-- published_date Field -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Published Date</mat-label>
-        <input 
-          matInput 
+        <input
+          matInput
           [matDatepicker]="published_datePicker"
           formControlName="published_date"
           placeholder="Enter published date"
-        >
-        <mat-datepicker-toggle matSuffix [for]="published_datePicker"></mat-datepicker-toggle>
+        />
+        <mat-datepicker-toggle
+          matSuffix
+          [for]="published_datePicker"
+        ></mat-datepicker-toggle>
         <mat-datepicker #published_datePicker></mat-datepicker>
       </mat-form-field>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
-
-
 
       <!-- price Field -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Price</mat-label>
-        <input 
-          matInput 
+        <input
+          matInput
           type="number"
           formControlName="price"
           placeholder="Enter price"
           step="0.01"
-          
-          
-        >
+        />
       </mat-form-field>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
-
 
       <!-- genre Field -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Genre</mat-label>
-        <input 
-          matInput 
+        <input
+          matInput
           type="text"
           formControlName="genre"
           placeholder="Enter genre"
-          
-          
-        >
+        />
       </mat-form-field>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
-
-
-
 
       <!-- available Field -->
       <div class="checkbox-field">
-        <mat-checkbox formControlName="available">
-          Available
-        </mat-checkbox>
+        <mat-checkbox formControlName="available"> Available </mat-checkbox>
       </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
       <!-- Form Actions -->
       <div class="form-actions">
-        <button 
-          mat-button 
+        <button
+          mat-button
           type="button"
           (click)="onCancel()"
           [disabled]="loading"
         >
           Cancel
         </button>
-        <button 
-          mat-raised-button 
-          color="primary" 
+        <button
+          mat-raised-button
+          color="primary"
           type="button"
           (click)="onSubmit()"
-          [disabled]="booksForm.invalid || loading || (mode === 'edit' && !hasChanges())"
+          [disabled]="
+            booksForm.invalid || loading || (mode === 'edit' && !hasChanges())
+          "
         >
-          <mat-spinner diameter="20" class="inline-spinner" *ngIf="loading"></mat-spinner>
-          {{ mode === 'create' ? 'Create' : 'Update' }} Books
+          <mat-spinner
+            diameter="20"
+            class="inline-spinner"
+            *ngIf="loading"
+          ></mat-spinner>
+          {{ mode === 'create' ? 'Create' : 'Update' }} Book
         </button>
       </div>
     </form>
   `,
-  styles: [`
-    .-form {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      padding: 16px 0;
-    }
-
-    .full-width {
-      width: 100%;
-    }
-
-    .checkbox-field {
-      margin: 8px 0;
-    }
-
-    .form-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid rgba(0, 0, 0, 0.12);
-    }
-
-    .inline-spinner {
-      margin-right: 8px;
-    }
-
-    @media (max-width: 768px) {
-      .form-actions {
+  styles: [
+    `
+      /* Tremor-inspired Form - Minimal Changes */
+      .books-form {
+        display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 16px;
+        padding: 16px 0;
       }
-    }
-  `]
+
+      .full-width {
+        width: 100%;
+      }
+
+      /* Tremor Border Colors - Darker (from Tremor Blocks) */
+      ::ng-deep .books-form {
+        .mdc-text-field--outlined:not(.mdc-text-field--disabled) {
+          .mdc-notched-outline__leading,
+          .mdc-notched-outline__notch,
+          .mdc-notched-outline__trailing {
+            border-color: #d1d5db;
+            border-width: 1px;
+          }
+
+          &:hover .mdc-notched-outline {
+            .mdc-notched-outline__leading,
+            .mdc-notched-outline__notch,
+            .mdc-notched-outline__trailing {
+              border-color: #9ca3af;
+            }
+          }
+
+          &.mdc-text-field--focused .mdc-notched-outline {
+            .mdc-notched-outline__leading,
+            .mdc-notched-outline__notch,
+            .mdc-notched-outline__trailing {
+              border-color: #3b82f6;
+              border-width: 2px;
+            }
+          }
+        }
+
+        /* Error Messages - Tremor red */
+        .mat-mdc-form-field-error {
+          color: #ef4444;
+        }
+
+        /* Datepicker Toggle */
+        .mat-datepicker-toggle {
+          color: #6b7280;
+
+          &:hover {
+            color: #3b82f6;
+          }
+        }
+      }
+
+      /* Checkbox Field */
+      .checkbox-field {
+        margin: 8px 0;
+      }
+
+      /* Form Actions - Tremor button style */
+      .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid #e5e7eb;
+
+        /* Cancel Button */
+        button[mat-button] {
+          color: #6b7280;
+          border: 1px solid #e5e7eb;
+          border-radius: 6px;
+          transition: all 0.2s ease;
+
+          &:hover:not([disabled]) {
+            background-color: #f9fafb;
+            border-color: #d1d5db;
+            color: #374151;
+          }
+        }
+
+        /* Submit Button */
+        button[mat-raised-button] {
+          color: white !important;
+          background-color: #3b82f6 !important;
+          border-radius: 6px;
+          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+          transition: all 0.2s ease;
+
+          &:hover:not([disabled]) {
+            background-color: #2563eb !important;
+            box-shadow:
+              0 4px 6px -1px rgba(0, 0, 0, 0.1),
+              0 2px 4px -1px rgba(0, 0, 0, 0.06);
+          }
+
+          &[disabled] {
+            color: white !important;
+            background-color: #9ca3af !important;
+            box-shadow: none;
+          }
+        }
+      }
+
+      .inline-spinner {
+        margin-right: 8px;
+      }
+
+      @media (max-width: 768px) {
+        .form-actions {
+          flex-direction: column;
+          gap: 8px;
+        }
+      }
+    `,
+  ],
 })
 export class BookFormComponent implements OnInit, OnChanges {
   private fb = inject(FormBuilder);
@@ -450,62 +370,16 @@ export class BookFormComponent implements OnInit, OnChanges {
   authorsServiceOptions = signal<any[]>([]);
   loadingAuthorsService = signal<boolean>(false);
 
-
   booksForm: FormGroup = this.fb.group({
-    title: [
-      '',
-      [
-        Validators.required, Validators.maxLength(255)
-      ]
-    ],
-    description: [
-      '',
-      [
-        Validators.maxLength(1000)
-      ]
-    ],
-    author_id: [
-      '',
-      [
-        Validators.required
-      ]
-    ],
-    isbn: [
-      '',
-      [
-        
-      ]
-    ],
-    pages: [
-      '',
-      [
-        
-      ]
-    ],
-    published_date: [
-      '',
-      [
-        
-      ]
-    ],
-    price: [
-      '',
-      [
-        
-      ]
-    ],
-    genre: [
-      '',
-      [
-        
-      ]
-    ],
-    available: [
-      false,
-      [
-        
-      ]
-    ]
+    title: ['', [Validators.required, Validators.maxLength(255)]],
+    description: ['', [Validators.maxLength(1000)]],
+    author_id: ['', [Validators.required]],
+    isbn: ['', []],
+    pages: ['', []],
+    published_date: ['', []],
+    price: ['', []],
+    genre: ['', []],
+    available: [false, []],
   });
 
   ngOnInit() {
@@ -539,16 +413,18 @@ export class BookFormComponent implements OnInit, OnChanges {
   private populateForm(books: Book) {
     const formValue = {
       title: books.title,
-            description: books.description,
-            author_id: books.author_id,
-            isbn: books.isbn,
-            pages: books.pages,
-            published_date: books.published_date ? new Date(books.published_date) : null,
+      description: books.description,
+      author_id: books.author_id,
+      isbn: books.isbn,
+      pages: books.pages,
+      published_date: books.published_date
+        ? new Date(books.published_date)
+        : null,
       price: books.price,
-            genre: books.genre,
-            available: books.available
-          };
-    
+      genre: books.genre,
+      available: books.available,
+    };
+
     this.booksForm.patchValue(formValue);
     this.originalFormValue = this.booksForm.value;
   }
@@ -556,20 +432,22 @@ export class BookFormComponent implements OnInit, OnChanges {
   hasChanges(): boolean {
     if (this.mode === 'create') return true;
     const currentValue = this.booksForm.value;
-    return JSON.stringify(currentValue) !== JSON.stringify(this.originalFormValue);
+    return (
+      JSON.stringify(currentValue) !== JSON.stringify(this.originalFormValue)
+    );
   }
 
   onSubmit() {
     if (this.booksForm.valid) {
       const formData = { ...this.booksForm.value } as BookFormData;
-      
-
 
       // Convert date fields to date-only format for submission
       if (formData.published_date) {
-        formData.published_date = formatDateForSubmission(formData.published_date);
+        formData.published_date = formatDateForSubmission(
+          formData.published_date,
+        );
       }
-      
+
       this.formSubmit.emit(formData);
     }
   }
@@ -577,5 +455,4 @@ export class BookFormComponent implements OnInit, OnChanges {
   onCancel() {
     this.formCancel.emit();
   }
-
 }
