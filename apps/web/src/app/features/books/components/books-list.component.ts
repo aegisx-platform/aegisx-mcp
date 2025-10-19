@@ -34,7 +34,11 @@ import {
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { AxDialogService } from '@aegisx/ui';
+import {
+  AxDialogService,
+  BreadcrumbComponent,
+  AegisxNavigationItem,
+} from '@aegisx/ui';
 import {
   ExportOptions,
   ExportService,
@@ -76,10 +80,16 @@ interface AdvancedFilters {
     MatCardModule,
     MatMenuModule,
     SharedExportComponent,
+    BreadcrumbComponent,
   ],
   template: `
     <div class="min-h-screen bg-gray-50 p-6">
       <div class="max-w-7xl mx-auto space-y-6">
+        <!-- Breadcrumb -->
+        <ax-breadcrumb
+          [items]="breadcrumbItems"
+          [showIcons]="true"
+        ></ax-breadcrumb>
         <!-- Header with Stats Summary -->
         <div class="flex items-start justify-between">
           <div class="flex-1">
@@ -841,6 +851,30 @@ export class BooksListComponent {
   private dialog = inject(MatDialog);
   private axDialog = inject(AxDialogService);
   private cdr = inject(ChangeDetectorRef);
+
+  // Breadcrumb configuration
+  breadcrumbItems: AegisxNavigationItem[] = [
+    {
+      id: 'home',
+      title: 'Home',
+      type: 'basic',
+      icon: 'home',
+      link: '/',
+    },
+    {
+      id: 'management',
+      title: 'Management',
+      type: 'basic',
+      icon: 'settings',
+      link: '/management',
+    },
+    {
+      id: 'books',
+      title: 'Books',
+      type: 'basic',
+      icon: 'menu_book',
+    },
+  ];
 
   // Mat-Table setup
   displayedColumns: string[] = [
