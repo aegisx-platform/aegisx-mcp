@@ -33,7 +33,10 @@ export default fp(
     // Service instantiation following Fastify DI pattern
     // Dependencies are accessed from Fastify instance decorators
     const authorsRepository = new AuthorsRepository((fastify as any).knex);
-    const authorsService = new AuthorsService(authorsRepository);
+    const authorsService = new AuthorsService(
+      authorsRepository,
+      (fastify as any).eventService,
+    );
     const exportService = new ExportService();
     const authorsController = new AuthorsController(
       authorsService,
@@ -53,10 +56,16 @@ export default fp(
     fastify.addHook('onReady', async () => {
       fastify.log.info(`Authors domain module registered successfully`);
     });
+
+    // Cleanup event listeners on close
+    fastify.addHook('onClose', async () => {
+      fastify.log.info(`Cleaning up Authors domain module resources`);
+      // Add any cleanup logic here
+    });
   },
   {
     name: 'authors-domain-plugin',
-    dependencies: ['knex-plugin'],
+    dependencies: ['knex-plugin', 'websocket-plugin'],
   },
 );
 
@@ -75,7 +84,24 @@ export type {
   AuthorsIdParam,
   GetAuthorsQuery,
   ListAuthorsQuery,
+  AuthorsCreatedEvent,
+  AuthorsUpdatedEvent,
+  AuthorsDeletedEvent,
 } from './schemas/authors.schemas';
+
+// Event type definitions for external consumers
+import { Authors } from './schemas/authors.schemas';
+
+export interface AuthorsEventHandlers {
+  onCreated?: (data: Authors) => void | Promise<void>;
+  onUpdated?: (data: Authors) => void | Promise<void>;
+  onDeleted?: (data: { id: number | string }) => void | Promise<void>;
+}
+
+export interface AuthorsWebSocketSubscription {
+  subscribe(handlers: AuthorsEventHandlers): void;
+  unsubscribe(): void;
+}
 
 // Module name constant
 export const MODULE_NAME = 'authors' as const;

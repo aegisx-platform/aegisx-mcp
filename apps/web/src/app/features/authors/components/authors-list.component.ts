@@ -1,37 +1,57 @@
-import {
-  Component,
-  OnInit,
-  computed,
-  signal,
-  inject,
-  OnDestroy,
-} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import {
+  ChangeDetectorRef,
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  inject,
+  signal,
+  ViewChild,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+import { fromEventPattern } from 'rxjs';
+import {
+  trigger,
+  state,
+  style,
+  transition,
+  animate,
+} from '@angular/animations';
 
-// Angular Material imports
-import { MatTableModule } from '@angular/material/table';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+// Material imports for table
+import { SelectionModel } from '@angular/cdk/collections';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDialog } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatDialog } from '@angular/material/dialog';
-import { MatCardModule } from '@angular/material/card';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatSelectModule } from '@angular/material/select';
-import { MatOptionModule } from '@angular/material/core';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatBadgeModule } from '@angular/material/badge';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import {
+  MatSort,
+  MatSortModule,
+  Sort,
+  SortDirection,
+} from '@angular/material/sort';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
+import {
+  AegisxNavigationItem,
+  AegisxEmptyStateComponent,
+  AegisxErrorStateComponent,
+  AxDialogService,
+  BreadcrumbComponent,
+} from '@aegisx/ui';
+import {
+  ExportOptions,
+  ExportService,
+  SharedExportComponent,
+} from '../../../shared/components/shared-export/shared-export.component';
 import { AuthorService } from '../services/authors.service';
 import { Author, ListAuthorQuery } from '../types/authors.types';
 import { AuthorCreateDialogComponent } from './authors-create.dialog';
@@ -43,12 +63,10 @@ import {
   AuthorViewDialogComponent,
   AuthorViewDialogData,
 } from './authors-view.dialog';
-import { DateRangeFilterComponent } from '../../../shared/components/date-range-filter/date-range-filter.component';
-import {
-  SharedExportComponent,
-  ExportOptions,
-  ExportService,
-} from '../../../shared/components/shared-export/shared-export.component';
+
+// Import child components
+import { AuthorsListFiltersComponent } from './authors-list-filters.component';
+import { AuthorsListHeaderComponent } from './authors-list-header.component';
 
 @Component({
   selector: 'app-authors-list',
@@ -57,1246 +75,62 @@ import {
     CommonModule,
     RouterModule,
     FormsModule,
-    MatTableModule,
-    MatPaginatorModule,
     MatButtonModule,
     MatIconModule,
-    MatInputModule,
-    MatFormFieldModule,
-    MatCheckboxModule,
-    MatMenuModule,
     MatProgressSpinnerModule,
-    MatCardModule,
-    MatToolbarModule,
-    MatSelectModule,
-    MatOptionModule,
-    MatChipsModule,
-    MatExpansionModule,
-    MatBadgeModule,
-    MatSlideToggleModule,
+    MatTableModule,
+    MatSortModule,
+    MatPaginatorModule,
+    MatCheckboxModule,
     MatTooltipModule,
-    DateRangeFilterComponent,
+    MatMenuModule,
     SharedExportComponent,
+    BreadcrumbComponent,
+    // Child components
+    AuthorsListHeaderComponent,
+    AuthorsListFiltersComponent,
+    // AegisX UI components
+    AegisxEmptyStateComponent,
+    AegisxErrorStateComponent,
   ],
-  template: `
-    <div class="authors-list-container">
-      <!-- Header -->
-      <mat-toolbar color="primary" class="page-header">
-        <h1 class="page-title">Authors</h1>
-        <span class="spacer"></span>
-      </mat-toolbar>
-
-      <!-- Permission Error Banner -->
-      @if (authorsService.permissionError()) {
-        <mat-card class="permission-error-banner">
-          <mat-card-content>
-            <div class="permission-error-content">
-              <div class="error-icon-section">
-                <mat-icon class="error-icon">lock</mat-icon>
-              </div>
-              <div class="error-message-section">
-                <h3 class="error-title">Access Denied</h3>
-                <p class="error-message">
-                  You don't have permission to access or modify Authors.
-                  @if (authorsService.lastErrorStatus() === 403) {
-                    <span class="error-details">
-                      Please contact your administrator to request the necessary
-                      permissions.
-                    </span>
-                  }
-                </p>
-              </div>
-              <div class="error-actions-section">
-                <button
-                  mat-raised-button
-                  color="warn"
-                  (click)="authorsService.clearPermissionError()"
-                  class="dismiss-btn"
-                >
-                  <mat-icon>close</mat-icon>
-                  Dismiss
-                </button>
-              </div>
-            </div>
-          </mat-card-content>
-        </mat-card>
-      }
-
-      <!-- Quick Search Section -->
-      <mat-card class="search-card">
-        <mat-card-content>
-          <div class="search-wrapper">
-            <mat-form-field appearance="outline" class="search-field">
-              <mat-label>Search Authors</mat-label>
-              <input
-                matInput
-                placeholder="Search by title, name, description"
-                [(ngModel)]="searchTerm"
-                (input)="onSearchChange()"
-                (keyup.enter)="onSearchButtonClick()"
-              />
-              <mat-icon matSuffix>search</mat-icon>
-            </mat-form-field>
-            <button
-              mat-raised-button
-              color="primary"
-              (click)="openCreateDialog()"
-              [disabled]="
-                authorsService.loading() || authorsService.permissionError()
-              "
-              [matTooltip]="
-                authorsService.permissionError()
-                  ? 'You do not have permission to create Authors'
-                  : ''
-              "
-              class="add-btn"
-            >
-              <mat-icon>add</mat-icon>
-              Add Authors
-            </button>
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- Quick Filters -->
-      <mat-card class="quick-filters-card">
-        <mat-card-content>
-          <div class="quick-filters">
-            <button
-              mat-stroked-button
-              [class.active]="quickFilter === 'all'"
-              (click)="setQuickFilter('all')"
-              class="filter-chip"
-            >
-              All
-            </button>
-
-            <!-- Active Items Filter -->
-            <button
-              mat-stroked-button
-              [class.active]="quickFilter === 'active'"
-              (click)="setQuickFilter('active')"
-              class="filter-chip"
-            >
-              Active
-            </button>
-
-            <!-- Published Status Filter -->
-            <button
-              mat-stroked-button
-              [class.active]="quickFilter === 'published'"
-              (click)="setQuickFilter('published')"
-              class="filter-chip"
-            >
-              Published
-            </button>
-
-            <!-- Additional quick filters - uncomment as needed -->
-            <!-- Featured Items:
-            <button 
-              mat-stroked-button 
-              [class.active]="quickFilter === 'featured'"
-              (click)="setQuickFilter('featured')"
-              class="filter-chip"
-            >
-              Featured
-            </button>
-            -->
-
-            <!-- Available Items:
-            <button 
-              mat-stroked-button 
-              [class.active]="quickFilter === 'available'"
-              (click)="setQuickFilter('available')"
-              class="filter-chip"
-            >
-              Available
-            </button>
-            -->
-
-            <!-- Draft Status:
-            <button 
-              mat-stroked-button 
-              [class.active]="quickFilter === 'draft'"
-              (click)="setQuickFilter('draft')"
-              class="filter-chip"
-            >
-              Draft
-            </button>
-            -->
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- Active Filters -->
-      @if (getActiveFilterChips().length > 0) {
-        <div class="active-filters">
-          <span class="active-filters-label">Active Filters:</span>
-          <div class="filter-chips">
-            <mat-chip
-              *ngFor="let chip of getActiveFilterChips()"
-              (removed)="removeFilter(chip.key)"
-              class="filter-chip"
-              removable
-            >
-              <strong>{{ chip.label }}:</strong> {{ chip.value }}
-              <mat-icon matChipRemove>cancel</mat-icon>
-            </mat-chip>
-          </div>
-          <button
-            mat-stroked-button
-            color="warn"
-            (click)="clearAllFilters()"
-            class="clear-all-btn"
-          >
-            <mat-icon>clear_all</mat-icon>
-            Clear All
-          </button>
-        </div>
-      }
-
-      <!-- Summary Dashboard -->
-      <mat-card class="summary-dashboard-card">
-        <mat-card-header>
-          <mat-card-title>
-            <mat-icon>dashboard</mat-icon>
-            Authors Overview
-          </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="summary-grid">
-            <div class="summary-item">
-              <div class="summary-icon">
-                <mat-icon color="primary">view_list</mat-icon>
-              </div>
-              <div class="summary-content">
-                <div class="summary-value">
-                  {{ authorsService.totalAuthor() }}
-                </div>
-                <div class="summary-label">Total Authors</div>
-              </div>
-            </div>
-
-            <div class="summary-item">
-              <div class="summary-icon">
-                <mat-icon color="accent">check_circle</mat-icon>
-              </div>
-              <div class="summary-content">
-                <div class="summary-value">{{ getActiveCount() }}</div>
-                <div class="summary-label">Active Items</div>
-              </div>
-            </div>
-
-            <div class="summary-item">
-              <div class="summary-icon">
-                <mat-icon color="warn">schedule</mat-icon>
-              </div>
-              <div class="summary-content">
-                <div class="summary-value">{{ getDraftCount() }}</div>
-                <div class="summary-label">Draft Items</div>
-              </div>
-            </div>
-
-            <div class="summary-item">
-              <div class="summary-icon">
-                <mat-icon>today</mat-icon>
-              </div>
-              <div class="summary-content">
-                <div class="summary-value">{{ getRecentCount() }}</div>
-                <div class="summary-label">Added This Week</div>
-              </div>
-            </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- Export Tools -->
-      <mat-card class="export-tools-card">
-        <mat-card-header>
-          <mat-card-title>
-            <mat-icon>file_download</mat-icon>
-            Export Data
-          </mat-card-title>
-          <mat-card-subtitle
-            >Export Authors data in various formats</mat-card-subtitle
-          >
-        </mat-card-header>
-        <mat-card-content>
-          <app-export
-            [exportService]="exportServiceAdapter"
-            [currentFilters]="filters()"
-            [selectedItems]="selectedItems()"
-            [availableFields]="availableExportFields"
-            [moduleName]="'authors'"
-            (exportStarted)="onExportStarted($event)"
-            (exportCompleted)="onExportCompleted($event)"
-          ></app-export>
-
-          <!-- Export Information -->
-          <div class="export-info">
-            <mat-icon class="info-icon">info</mat-icon>
-            <span class="info-text">
-              Total Authors: {{ authorsService.totalAuthor() }} records
-              @if (hasActiveFilters()) {
-                ({{ activeFiltersCount() }} filters active)
-              }
-              @if (selectedItems().length > 0) {
-                | {{ selectedItems().length }} selected
-              }
-            </span>
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- Advanced Filters -->
-      <mat-card class="advanced-filters-card">
-        <mat-expansion-panel class="filters-panel">
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-              <mat-icon>tune</mat-icon>
-              Advanced Filters
-            </mat-panel-title>
-            <mat-panel-description>
-              Filter by specific criteria
-            </mat-panel-description>
-          </mat-expansion-panel-header>
-
-          <div class="advanced-filters">
-            <!-- Unified Filter Header -->
-            <div class="filters-header">
-              <mat-icon>tune</mat-icon>
-              <span>Filter Your Results</span>
-            </div>
-
-            <!-- Unified Filter Grid -->
-            <div class="unified-filter-grid">
-              <!-- Boolean: Active -->
-              <div class="filter-item">
-                <mat-form-field appearance="outline">
-                  <mat-label>Active</mat-label>
-                  <mat-select
-                    [value]="filters().active"
-                    (selectionChange)="onFilterChange('active', $event.value)"
-                  >
-                    <mat-option value="">All</mat-option>
-                    <mat-option [value]="true">Yes</mat-option>
-                    <mat-option [value]="false">No</mat-option>
-                  </mat-select>
-                </mat-form-field>
-              </div>
-
-              <!-- String: Name -->
-              <div class="filter-item">
-                <mat-form-field appearance="outline">
-                  <mat-label>Name</mat-label>
-                  <input
-                    matInput
-                    type="text"
-                    [value]="filters().name || ''"
-                    (input)="onFilterChange('name', $event)"
-                    placeholder="Enter name"
-                  />
-                </mat-form-field>
-              </div>
-              <!-- String: Email -->
-              <div class="filter-item">
-                <mat-form-field appearance="outline">
-                  <mat-label>Email</mat-label>
-                  <input
-                    matInput
-                    type="text"
-                    [value]="filters().email || ''"
-                    (input)="onFilterChange('email', $event)"
-                    placeholder="Enter email address"
-                  />
-                </mat-form-field>
-              </div>
-              <!-- String: Country -->
-              <div class="filter-item">
-                <mat-form-field appearance="outline">
-                  <mat-label>Country</mat-label>
-                  <input
-                    matInput
-                    type="text"
-                    [value]="filters().country || ''"
-                    (input)="onFilterChange('country', $event)"
-                    placeholder="Enter country"
-                  />
-                </mat-form-field>
-              </div>
-
-              <!-- Date: Birth Date -->
-              <div class="filter-item filter-item-date">
-                <app-date-range-filter
-                  fieldName="birth_date"
-                  label="Birth Date"
-                  [isDateTime]="false"
-                  (filterChange)="onDateFilterChange($event)"
-                ></app-date-range-filter>
-              </div>
-
-              <!-- DateTime: Updated At -->
-              <div class="filter-item filter-item-date">
-                <app-date-range-filter
-                  fieldName="updated_at"
-                  label="Updated At"
-                  [isDateTime]="true"
-                  (filterChange)="onDateFilterChange($event)"
-                ></app-date-range-filter>
-              </div>
-            </div>
-            <!-- End Unified Filter Grid -->
-
-            <!-- Action Buttons -->
-            <div class="filter-actions">
-              <button
-                mat-stroked-button
-                (click)="resetFilters()"
-                class="reset-btn"
-              >
-                Reset Filters
-              </button>
-              <button
-                mat-raised-button
-                color="primary"
-                (click)="applyFiltersImmediate()"
-                class="apply-btn"
-              >
-                Apply Filters
-              </button>
-            </div>
-          </div>
-        </mat-expansion-panel>
-      </mat-card>
-
-      <!-- Loading State -->
-      @if (authorsService.loading()) {
-        <div class="loading-container">
-          <mat-progress-spinner
-            mode="indeterminate"
-            diameter="50"
-          ></mat-progress-spinner>
-          <p>Loading Authors...</p>
-        </div>
-      }
-
-      <!-- Error State -->
-      @if (authorsService.error()) {
-        <mat-card class="error-card">
-          <mat-card-content>
-            <div class="error-content">
-              <mat-icon color="warn">error</mat-icon>
-              <p>{{ authorsService.error() }}</p>
-              <button mat-button color="primary" (click)="retry()">
-                <mat-icon>refresh</mat-icon>
-                Retry
-              </button>
-            </div>
-          </mat-card-content>
-        </mat-card>
-      }
-
-      <!-- Data Table -->
-      @if (!authorsService.loading() && !authorsService.error()) {
-        <mat-card class="table-card">
-          <mat-card-content>
-            <!-- Bulk Actions -->
-            @if (hasSelected()) {
-              <div class="bulk-actions">
-                <span class="selection-info"
-                  >{{ selectedItems().length }} selected</span
-                >
-                <div class="bulk-buttons">
-                  <!-- Bulk Delete -->
-                  <button
-                    mat-stroked-button
-                    color="warn"
-                    (click)="bulkDelete()"
-                    [disabled]="authorsService.loading()"
-                    matTooltip="Delete selected items"
-                  >
-                    <mat-icon>delete</mat-icon>
-                    Delete
-                  </button>
-
-                  <!-- Bulk Status Update -->
-                  <button
-                    mat-stroked-button
-                    [matMenuTriggerFor]="bulkStatusMenu"
-                    [disabled]="authorsService.loading()"
-                    matTooltip="Update status for selected items"
-                  >
-                    <mat-icon>edit</mat-icon>
-                    Update Status
-                  </button>
-                  <mat-menu #bulkStatusMenu="matMenu">
-                    <button mat-menu-item (click)="bulkUpdateStatus('active')">
-                      <mat-icon>check_circle</mat-icon>
-                      <span>Set Active</span>
-                    </button>
-                    <button
-                      mat-menu-item
-                      (click)="bulkUpdateStatus('inactive')"
-                    >
-                      <mat-icon>cancel</mat-icon>
-                      <span>Set Inactive</span>
-                    </button>
-                    <button
-                      mat-menu-item
-                      (click)="bulkUpdateStatus('published')"
-                    >
-                      <mat-icon>publish</mat-icon>
-                      <span>Publish</span>
-                    </button>
-                    <button mat-menu-item (click)="bulkUpdateStatus('draft')">
-                      <mat-icon>draft</mat-icon>
-                      <span>Set Draft</span>
-                    </button>
-                  </mat-menu>
-
-                  <!-- Bulk Export -->
-                  <button
-                    mat-stroked-button
-                    color="accent"
-                    [matMenuTriggerFor]="bulkExportMenu"
-                    [disabled]="authorsService.loading()"
-                    matTooltip="Export selected items"
-                  >
-                    <mat-icon>download</mat-icon>
-                    Export
-                  </button>
-                  <mat-menu #bulkExportMenu="matMenu">
-                    <button mat-menu-item (click)="exportSelected('csv')">
-                      <mat-icon>table_chart</mat-icon>
-                      <span>Export as CSV</span>
-                    </button>
-                    <button mat-menu-item (click)="exportSelected('excel')">
-                      <mat-icon>grid_on</mat-icon>
-                      <span>Export as Excel</span>
-                    </button>
-                    <button mat-menu-item (click)="exportSelected('pdf')">
-                      <mat-icon>picture_as_pdf</mat-icon>
-                      <span>Export as PDF</span>
-                    </button>
-                  </mat-menu>
-
-                  <!-- Clear Selection -->
-                  <button mat-stroked-button (click)="clearSelection()">
-                    <mat-icon>clear</mat-icon>
-                    Clear Selection
-                  </button>
-                </div>
-              </div>
-            }
-
-            <!-- Table -->
-            <div class="table-container">
-              <table
-                mat-table
-                [dataSource]="authorsService.authorsList()"
-                class="authors-table"
-              >
-                <!-- Selection Column -->
-                <ng-container matColumnDef="select">
-                  <th mat-header-cell *matHeaderCellDef>
-                    <mat-checkbox
-                      [checked]="isAllSelected()"
-                      [indeterminate]="hasSelected() && !isAllSelected()"
-                      (change)="toggleSelectAll()"
-                    ></mat-checkbox>
-                  </th>
-                  <td mat-cell *matCellDef="let authors">
-                    <mat-checkbox
-                      [checked]="isSelected(authors.id)"
-                      (change)="toggleSelect(authors.id)"
-                    ></mat-checkbox>
-                  </td>
-                </ng-container>
-
-                <!-- name Column -->
-                <ng-container matColumnDef="name">
-                  <th mat-header-cell *matHeaderCellDef>Name</th>
-                  <td mat-cell *matCellDef="let authors">
-                    <span class="text-cell">{{ authors.name || '-' }}</span>
-                  </td>
-                </ng-container>
-
-                <!-- email Column -->
-                <ng-container matColumnDef="email">
-                  <th mat-header-cell *matHeaderCellDef>Email</th>
-                  <td mat-cell *matCellDef="let authors">
-                    <span class="text-cell">{{ authors.email || '-' }}</span>
-                  </td>
-                </ng-container>
-
-                <!-- bio Column -->
-                <ng-container matColumnDef="bio">
-                  <th mat-header-cell *matHeaderCellDef>Bio</th>
-                  <td mat-cell *matCellDef="let authors">
-                    <span class="text-cell">{{ authors.bio || '-' }}</span>
-                  </td>
-                </ng-container>
-
-                <!-- birth_date Column -->
-                <ng-container matColumnDef="birth_date">
-                  <th mat-header-cell *matHeaderCellDef>Birth_date</th>
-                  <td mat-cell *matCellDef="let authors">
-                    <span class="text-cell">{{
-                      authors.birth_date || '-'
-                    }}</span>
-                  </td>
-                </ng-container>
-
-                <!-- country Column -->
-                <ng-container matColumnDef="country">
-                  <th mat-header-cell *matHeaderCellDef>Country</th>
-                  <td mat-cell *matCellDef="let authors">
-                    <span class="text-cell">{{ authors.country || '-' }}</span>
-                  </td>
-                </ng-container>
-
-                <!-- active Column -->
-                <ng-container matColumnDef="active">
-                  <th mat-header-cell *matHeaderCellDef>Active</th>
-                  <td mat-cell *matCellDef="let authors">
-                    <mat-icon
-                      [color]="authors.active ? 'primary' : 'warn'"
-                      class="status-icon"
-                    >
-                      {{ authors.active ? 'check_circle' : 'cancel' }}
-                    </mat-icon>
-                  </td>
-                </ng-container>
-
-                <!-- Created Date Column -->
-                <ng-container matColumnDef="created_at">
-                  <th mat-header-cell *matHeaderCellDef>Created</th>
-                  <td mat-cell *matCellDef="let authors">
-                    {{ authors.created_at | date: 'short' }}
-                  </td>
-                </ng-container>
-                <!-- Actions Column -->
-                <ng-container matColumnDef="actions">
-                  <th mat-header-cell *matHeaderCellDef>Actions</th>
-                  <td mat-cell *matCellDef="let authors">
-                    <button
-                      mat-icon-button
-                      (click)="openViewDialog(authors)"
-                      matTooltip="View Details"
-                    >
-                      <mat-icon>visibility</mat-icon>
-                    </button>
-                    <button
-                      mat-icon-button
-                      (click)="openEditDialog(authors)"
-                      matTooltip="Edit"
-                    >
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                    <button
-                      mat-icon-button
-                      color="warn"
-                      (click)="deleteAuthor(authors)"
-                      matTooltip="Delete"
-                      [disabled]="authorsService.loading()"
-                    >
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  </td>
-                </ng-container>
-
-                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                <tr
-                  mat-row
-                  *matRowDef="let row; columns: displayedColumns"
-                ></tr>
-              </table>
-            </div>
-
-            <!-- Empty State -->
-            @if (authorsService.authorsList().length === 0) {
-              <div class="empty-state">
-                <mat-icon class="empty-icon">inbox</mat-icon>
-                <h3>No Authors found</h3>
-                <p>Create your first Authors to get started</p>
-                <button
-                  mat-raised-button
-                  color="primary"
-                  (click)="openCreateDialog()"
-                >
-                  <mat-icon>add</mat-icon>
-                  Add Authors
-                </button>
-              </div>
-            }
-
-            <!-- Pagination -->
-            @if (authorsService.authorsList().length > 0) {
-              <mat-paginator
-                [length]="authorsService.totalAuthor()"
-                [pageSize]="authorsService.pageSize()"
-                [pageSizeOptions]="[5, 10, 25, 50, 100]"
-                [pageIndex]="authorsService.currentPage() - 1"
-                (page)="onPageChange($event)"
-                showFirstLastButtons
-              ></mat-paginator>
-            }
-          </mat-card-content>
-        </mat-card>
-      }
-    </div>
-  `,
-  styles: [
-    `
-      .authors-list-container {
-        padding: 16px;
-        max-width: 1200px;
-        margin: 0 auto;
-      }
-
-      .page-header {
-        margin-bottom: 16px;
-        border-radius: 4px;
-      }
-
-      .page-title {
-        margin: 0;
-        font-weight: 500;
-      }
-
-      .spacer {
-        flex: 1 1 auto;
-      }
-
-      /* Permission Error Banner */
-      .permission-error-banner {
-        margin-bottom: 16px;
-        background: #ffebee;
-        border-left: 4px solid #f44336;
-      }
-
-      .permission-error-content {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        flex-wrap: wrap;
-      }
-
-      .error-icon-section {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .error-icon {
-        font-size: 48px;
-        width: 48px;
-        height: 48px;
-        color: #f44336;
-      }
-
-      .error-message-section {
-        flex: 1;
-        min-width: 200px;
-      }
-
-      .error-title {
-        margin: 0 0 8px 0;
-        font-size: 18px;
-        font-weight: 500;
-        color: #c62828;
-      }
-
-      .error-message {
-        margin: 0;
-        font-size: 14px;
-        color: rgba(0, 0, 0, 0.87);
-        line-height: 1.5;
-      }
-
-      .error-details {
-        display: block;
-        margin-top: 4px;
-        font-size: 13px;
-        color: rgba(0, 0, 0, 0.6);
-      }
-
-      .error-actions-section {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-      }
-
-      .dismiss-btn {
-        min-width: 120px;
-      }
-
-      .search-card,
-      .quick-filters-card,
-      .summary-dashboard-card,
-      .export-tools-card,
-      .advanced-filters-card {
-        margin-bottom: 16px;
-      }
-
-      .search-wrapper {
-        display: flex;
-        gap: 12px;
-        align-items: flex-start;
-        flex-wrap: wrap;
-      }
-
-      .search-field {
-        flex: 1;
-        min-width: 300px;
-      }
-
-      .add-btn {
-        height: 56px;
-        padding: 0 24px;
-        white-space: nowrap;
-        min-width: 140px;
-      }
-
-      .quick-filters {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        align-items: center;
-      }
-
-      .filter-chip {
-        transition: all 0.2s ease;
-      }
-
-      .filter-chip.active {
-        background-color: #1976d2;
-        color: white;
-      }
-
-      .active-filters {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 16px;
-        margin-bottom: 16px;
-        padding: 12px 16px;
-        background-color: #f5f5f5;
-        border-radius: 8px;
-        border-left: 4px solid #1976d2;
-      }
-
-      .active-filters-label {
-        font-weight: 500;
-        color: #1976d2;
-        margin-right: 8px;
-        flex-shrink: 0;
-      }
-
-      .filter-chips {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        align-items: center;
-        flex: 1;
-      }
-
-      .filter-chips mat-chip {
-        background-color: #e3f2fd;
-        color: #1976d2;
-      }
-
-      .clear-all-btn {
-        margin-left: auto;
-        flex-shrink: 0;
-      }
-
-      .filters-panel {
-        box-shadow: none !important;
-      }
-
-      .advanced-filters {
-        padding: 20px;
-      }
-
-      /* Unified Filter Header */
-      .filters-header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 16px 20px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-radius: 12px;
-        margin-bottom: 24px;
-        font-size: 18px;
-        font-weight: 600;
-        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
-      }
-
-      .filters-header mat-icon {
-        font-size: 24px;
-      }
-
-      /* Unified Filter Grid */
-      .unified-filter-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 16px;
-        margin-bottom: 24px;
-      }
-
-      .filter-item {
-        display: flex;
-        flex-direction: column;
-      }
-
-      .filter-item mat-form-field {
-        width: 100%;
-      }
-
-      /* Range Filter (Number/Date) - Takes 2 columns */
-      .filter-item-range {
-        grid-column: span 2;
-      }
-
-      .filter-item-date {
-        grid-column: span 2;
-      }
-
-      @media (max-width: 968px) {
-        .filter-item-range,
-        .filter-item-date {
-          grid-column: span 1;
-        }
-      }
-
-      @media (max-width: 768px) {
-        .unified-filter-grid {
-          grid-template-columns: 1fr;
-        }
-      }
-
-      .range-label {
-        font-weight: 500;
-        color: #424242;
-        font-size: 14px;
-        margin-bottom: 8px;
-      }
-
-      .range-container {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-      }
-
-      .range-container mat-form-field {
-        flex: 1;
-      }
-
-      .range-separator {
-        color: #666;
-        font-weight: 500;
-        padding: 0 4px;
-        margin-top: 8px;
-      }
-
-      .filter-actions {
-        display: flex;
-        gap: 12px;
-        justify-content: flex-end;
-        align-items: center;
-      }
-
-      .reset-btn {
-        min-width: 120px;
-      }
-
-      .apply-btn {
-        min-width: 140px;
-      }
-
-      .search-btn {
-        min-width: 100px;
-      }
-
-      .clear-search-btn {
-        min-width: 80px;
-      }
-
-      .checkbox-filter {
-        display: flex;
-        align-items: center;
-        min-width: 120px;
-        margin: 8px 0;
-      }
-
-      .loading-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 40px;
-      }
-
-      .loading-container p {
-        margin-top: 16px;
-        color: #666;
-      }
-
-      .error-card {
-        margin-bottom: 16px;
-      }
-
-      .error-content {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-      }
-
-      .error-content mat-icon {
-        font-size: 24px;
-      }
-
-      .error-content p {
-        flex: 1;
-        margin: 0;
-      }
-
-      .table-card {
-        margin-bottom: 16px;
-      }
-
-      .bulk-actions {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 16px 0;
-        border-bottom: 1px solid #e0e0e0;
-        margin-bottom: 16px;
-      }
-
-      .selection-info {
-        font-weight: 500;
-        color: #1976d2;
-      }
-
-      .bulk-buttons {
-        display: flex;
-        gap: 8px;
-      }
-
-      .table-container {
-        overflow-x: auto;
-      }
-
-      .authors-table {
-        width: 100%;
-        min-width: 600px;
-      }
-
-      .empty-state {
-        text-align: center;
-        padding: 40px;
-      }
-
-      .empty-icon {
-        font-size: 48px;
-        color: #ccc;
-        margin-bottom: 16px;
-      }
-
-      .empty-state h3 {
-        margin: 0 0 8px 0;
-        color: #666;
-      }
-
-      .empty-state p {
-        margin: 0 0 24px 0;
-        color: #999;
-      }
-
-      /* Summary Dashboard Styles */
-      .summary-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 16px;
-        margin: 16px 0;
-      }
-
-      .summary-item {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 16px;
-        border: 1px solid rgba(0, 0, 0, 0.12);
-        border-radius: 8px;
-        background: rgba(0, 0, 0, 0.02);
-      }
-
-      .summary-icon {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: rgba(0, 0, 0, 0.05);
-      }
-
-      .summary-content {
-        flex: 1;
-      }
-
-      .summary-value {
-        font-size: 24px;
-        font-weight: 600;
-        line-height: 1.2;
-        color: rgba(0, 0, 0, 0.87);
-      }
-
-      .summary-label {
-        font-size: 12px;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: rgba(0, 0, 0, 0.6);
-        margin-top: 2px;
-      }
-
-      /* Export Tools Styles */
-      .export-actions {
-        display: flex;
-        gap: 12px;
-        align-items: center;
-        flex-wrap: wrap;
-        margin-bottom: 16px;
-      }
-
-      .export-info {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 12px;
-        background: rgba(0, 0, 0, 0.02);
-        border-radius: 4px;
-        font-size: 14px;
-      }
-
-      .info-icon {
-        font-size: 18px;
-        color: rgba(0, 0, 0, 0.6);
-      }
-
-      .info-text {
-        color: rgba(0, 0, 0, 0.7);
-      }
-
-      @media (max-width: 768px) {
-        .authors-list-container {
-          padding: 8px;
-        }
-
-        .search-container {
-          flex-direction: column;
-          align-items: stretch;
-        }
-
-        .search-group {
-          flex-direction: column;
-          align-items: stretch;
-          min-width: unset;
-          gap: 8px;
-        }
-
-        .search-field {
-          min-width: unset;
-        }
-
-        .search-buttons {
-          justify-content: center;
-        }
-
-        .search-btn,
-        .clear-search-btn {
-          flex: 1;
-          min-width: unset;
-        }
-
-        .bulk-actions {
-          flex-direction: column;
-          gap: 8px;
-          align-items: stretch;
-        }
-
-        .bulk-buttons {
-          justify-content: center;
-        }
-
-        .summary-grid {
-          grid-template-columns: 1fr;
-          gap: 12px;
-        }
-
-        .summary-item {
-          padding: 12px;
-        }
-
-        .export-actions {
-          flex-direction: column;
-          align-items: stretch;
-          gap: 8px;
-        }
-      }
-    `,
+  templateUrl: './authors-list.component.html',
+  styleUrl: './authors-list.component.scss',
+  animations: [
+    trigger('detailExpand', [
+      state('collapsed', style({ height: '0px', minHeight: '0' })),
+      state('expanded', style({ height: '*' })),
+      transition(
+        'expanded <=> collapsed',
+        animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)'),
+      ),
+    ]),
   ],
 })
-export class AuthorListComponent implements OnInit, OnDestroy {
-  protected authorsService = inject(AuthorService);
+export class AuthorsListComponent {
+  authorsService = inject(AuthorService);
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
+  private axDialog = inject(AxDialogService);
+  private cdr = inject(ChangeDetectorRef);
 
-  // Search and filtering
-  searchTerm = '';
-  private searchTimeout: any;
-  private filterTimeout: any;
-
-  private filtersSignal = signal<Partial<ListAuthorQuery>>({});
-  readonly filters = this.filtersSignal.asReadonly();
-
-  // Quick filter state
-  protected quickFilter = 'all';
-
-  // Validation state
-  private validationErrorsSignal = signal<Record<string, string>>({});
-  readonly validationErrors = this.validationErrorsSignal.asReadonly();
-
-  // Selection
-  private selectedIdsSignal = signal<Set<string>>(new Set());
-  readonly selectedItems = computed(() =>
-    this.authorsService
-      .authorsList()
-      .filter((item) => this.selectedIdsSignal().has(item.id)),
-  );
-
-  // Export configuration
-  exportServiceAdapter: ExportService = {
-    export: (options: ExportOptions) =>
-      this.authorsService.exportAuthor(options),
-  };
-
-  availableExportFields = [
-    { key: 'id', label: 'Id' },
-    { key: 'name', label: 'Name' },
-    { key: 'email', label: 'Email' },
-    { key: 'bio', label: 'Bio' },
-    { key: 'birth_date', label: 'Birth date' },
-    { key: 'country', label: 'Country' },
-    { key: 'active', label: 'Active' },
-    { key: 'created_at', label: 'Created at' },
-    { key: 'updated_at', label: 'Updated at' },
+  // Breadcrumb configuration
+  breadcrumbItems: AegisxNavigationItem[] = [
+    {
+      id: 'home',
+      title: 'Home',
+      type: 'basic',
+      icon: 'home',
+      link: '/',
+    },
+    {
+      id: 'authors',
+      title: 'Authors',
+      type: 'basic',
+      icon: 'menu_book',
+    },
   ];
 
-  // Table configuration
+  // Mat-Table setup
   displayedColumns: string[] = [
     'select',
     'name',
@@ -1305,654 +139,543 @@ export class AuthorListComponent implements OnInit, OnDestroy {
     'birth_date',
     'country',
     'active',
-    'created_at',
     'actions',
   ];
+  dataSource = new MatTableDataSource<Author>([]);
+  selection = new SelectionModel<Author>(true, []);
 
-  ngOnInit() {
-    this.loadAuthors();
-  }
+  // Selection for export feature (like authors)
+  private selectedIdsSignal = signal<Set<string>>(new Set());
+  readonly selectedItems = computed(() =>
+    this.authorsService
+      .authorsList()
+      .filter((item) => this.selectedIdsSignal().has(item.id)),
+  );
 
-  ngOnDestroy() {
-    if (this.searchTimeout) {
-      clearTimeout(this.searchTimeout);
+  // --- Signals for sort, page, search ---
+  sortState = signal<{ active: string; direction: SortDirection }>({
+    active: '',
+    direction: '',
+  });
+  pageState = signal<{ index: number; size: number }>({ index: 0, size: 25 });
+
+  // Search & Filter Signals
+  protected searchTermSignal = signal(''); // Active search term (sent to API)
+  protected searchInputSignal = signal(''); // Input field value (not auto-searched)
+
+  // Advanced filter INPUT signals (not sent to API until Apply is clicked)
+  protected nameInputSignal = signal('');
+  protected emailInputSignal = signal('');
+  protected countryInputSignal = signal('');
+  protected activeInputSignal = signal<boolean | undefined>(undefined);
+
+  // Advanced filter ACTIVE signals (sent to API)
+  protected nameFilterSignal = signal('');
+  protected emailFilterSignal = signal('');
+  protected countryFilterSignal = signal('');
+  protected activeFilterSignal = signal<boolean | undefined>(undefined);
+
+  // Date filter INPUT signals (not sent to API until Apply is clicked)
+  protected birth_dateInputSignal = signal<string | null>(null);
+  protected birth_dateMinInputSignal = signal<string | null>(null);
+  protected birth_dateMaxInputSignal = signal<string | null>(null);
+  protected updated_atInputSignal = signal<string | null>(null);
+  protected updated_atMinInputSignal = signal<string | null>(null);
+  protected updated_atMaxInputSignal = signal<string | null>(null);
+
+  // Date filter ACTIVE signals (sent to API)
+  protected birth_dateSignal = signal<string | null>(null);
+  protected birth_dateMinSignal = signal<string | null>(null);
+  protected birth_dateMaxSignal = signal<string | null>(null);
+  protected updated_atSignal = signal<string | null>(null);
+  protected updated_atMinSignal = signal<string | null>(null);
+  protected updated_atMaxSignal = signal<string | null>(null);
+
+  // Reload trigger - increment to force data reload even when filters unchanged
+  private reloadTrigger = signal(0);
+
+  // Holds current MatSort subscription
+  private matSortSubscription?: import('rxjs').Subscription;
+
+  /**
+   * Angular Material sort event subscription
+   * Ensures only one subscription at a time
+   */
+  @ViewChild(MatSort)
+  set matSort(sort: MatSort | undefined) {
+    this.unsubscribeMatSort();
+    if (sort) {
+      this.matSortSubscription = this.subscribeMatSort(sort);
     }
-    if (this.filterTimeout) {
-      clearTimeout(this.filterTimeout);
+  }
+
+  private subscribeMatSort(sort: MatSort): import('rxjs').Subscription {
+    return fromEventPattern<Sort>((h) => sort.sortChange.subscribe(h))
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((s) => {
+        if (this.paginator) this.paginator.pageIndex = 0;
+        this.sortState.set({ active: s.active, direction: s.direction });
+      });
+  }
+
+  /**
+   * Unsubscribe previous MatSort subscription if exists
+   */
+  private unsubscribeMatSort() {
+    if (this.matSortSubscription) {
+      this.matSortSubscription.unsubscribe();
+      this.matSortSubscription = undefined;
     }
   }
 
-  // ===== DATA LOADING =====
+  @ViewChild(MatPaginator, { static: false }) paginator!: MatPaginator;
+  private destroyRef = inject(DestroyRef);
 
-  async loadAuthors() {
-    const params: ListAuthorQuery = {
-      page: this.authorsService.currentPage(),
-      limit: this.authorsService.pageSize(),
-      ...this.filters(),
-    };
+  // Search & Filter UI State
+  quickFilter: 'all' | 'active' | 'unavailable' = 'all';
+  showAdvancedFilters = signal(false);
 
-    if (this.searchTerm.trim()) {
-      params.search = this.searchTerm.trim();
+  // Show loading indicator only if loading takes longer than 300ms
+  showLoadingIndicator = signal(false);
+  private loadingTimeout: any;
+
+  // Expandable rows state
+  protected expandedAuthor = signal<Author | null>(null);
+
+  // Computed signals
+  advancedFilters = computed(() => ({
+    name: this.nameInputSignal(),
+    email: this.emailInputSignal(),
+    country: this.countryInputSignal(),
+    active: this.activeInputSignal(),
+  }));
+
+  // Two-way binding helpers
+  get searchTerm() {
+    return this.searchInputSignal();
+  }
+  set searchTerm(value: string) {
+    this.searchInputSignal.set(value);
+  }
+
+  get nameFilter() {
+    return this.nameInputSignal();
+  }
+  set nameFilter(value: string) {
+    this.nameInputSignal.set(value);
+  }
+  get emailFilter() {
+    return this.emailInputSignal();
+  }
+  set emailFilter(value: string) {
+    this.emailInputSignal.set(value);
+  }
+  get countryFilter() {
+    return this.countryInputSignal();
+  }
+  set countryFilter(value: string) {
+    this.countryInputSignal.set(value);
+  }
+
+  get activeFilter() {
+    return this.activeInputSignal();
+  }
+  set activeFilter(value: boolean | undefined) {
+    this.activeInputSignal.set(value);
+  }
+
+  // Stats from API (should come from dedicated stats endpoint)
+  stats = computed(() => ({
+    total: this.authorsService.totalAuthor(),
+    available: 0,
+    unavailable: 0,
+    recentWeek: 0,
+  }));
+
+  // Export configuration
+  exportServiceAdapter: ExportService = {
+    export: (options: ExportOptions) =>
+      this.authorsService.exportAuthor(options),
+  };
+
+  availableExportFields = [
+    { key: 'id', label: 'ID' },
+    { key: 'name', label: 'Name' },
+    { key: 'email', label: 'Email' },
+    { key: 'bio', label: 'Bio' },
+    { key: 'birth_date', label: 'Birth Date' },
+    { key: 'country', label: 'Country' },
+    { key: 'active', label: 'Active' },
+    { key: 'created_at', label: 'Created At' },
+    { key: 'updated_at', label: 'Updated At' },
+  ];
+
+  ngAfterViewInit() {
+    this.cdr.detectChanges();
+    // Subscribe paginator changes to update pageState
+    if (this.paginator) {
+      fromEventPattern<{ pageIndex: number; pageSize: number }>((h) =>
+        this.paginator.page.subscribe(h),
+      )
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe((event) => {
+          this.pageState.set({ index: event.pageIndex, size: event.pageSize });
+        });
     }
-
-    await this.authorsService.loadAuthorList(params);
   }
 
-  async retry() {
-    this.authorsService.clearError();
-    await this.loadAuthors();
-  }
-
-  // ===== VALIDATION METHODS =====
-
-  private isValidUuid(value: string): boolean {
-    const uuidRegex =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    return uuidRegex.test(value);
-  }
-
-  private validateTechnicalFields(): { field: string; message: string }[] {
-    const errors: { field: string; message: string }[] = [];
-    const filters = this.filters();
-
-    return errors;
-  }
-
-  private showFieldErrors(errors: { field: string; message: string }[]) {
-    const errorMap: Record<string, string> = {};
-    errors.forEach((error) => {
-      errorMap[error.field] = error.message;
+  // --- Effect: reload authors on sort/page/search/filter change ---
+  constructor() {
+    // Sync export selection state
+    effect(() => {
+      const ids = new Set(this.selection.selected.map((b) => b.id));
+      this.selectedIdsSignal.set(ids);
     });
-    this.validationErrorsSignal.set(errorMap);
 
-    // Show snackbar for user feedback
-    if (errors.length > 0) {
-      this.snackBar.open(
-        'Please check your search criteria and try again',
-        'Close',
-        { duration: 3000, panelClass: ['error-snackbar'] },
+    // Track loading state and delay loading indicator
+    effect(() => {
+      const loading = this.authorsService.loading();
+
+      // Clear any existing timeout
+      if (this.loadingTimeout) {
+        clearTimeout(this.loadingTimeout);
+        this.loadingTimeout = null;
+      }
+
+      if (loading) {
+        // Show loading indicator only after 300ms delay
+        this.loadingTimeout = setTimeout(() => {
+          this.showLoadingIndicator.set(true);
+        }, 300);
+      } else {
+        // Hide immediately when loading completes
+        this.showLoadingIndicator.set(false);
+      }
+    });
+
+    // Reload data when signals change (no auto-search on typing)
+    effect(async () => {
+      // Track reload trigger to force refresh even when filters unchanged
+      this.reloadTrigger();
+
+      const sort = this.sortState();
+      const page = this.pageState();
+      const search = this.searchTermSignal();
+
+      const name = this.nameFilterSignal();
+      const email = this.emailFilterSignal();
+      const country = this.countryFilterSignal();
+      const active = this.activeFilterSignal();
+      const birth_date = this.birth_dateSignal();
+      const birth_dateMin = this.birth_dateMinSignal();
+      const birth_dateMax = this.birth_dateMaxSignal();
+      const updated_at = this.updated_atSignal();
+      const updated_atMin = this.updated_atMinSignal();
+      const updated_atMax = this.updated_atMaxSignal();
+
+      const params: Partial<ListAuthorQuery> = {
+        page: (page?.index ?? 0) + 1,
+        limit: page?.size ?? 25,
+        sort:
+          sort.active && sort.direction
+            ? `${sort.active}:${sort.direction}`
+            : undefined,
+        search: search?.trim() || undefined,
+        name: name?.trim() || undefined,
+        email: email?.trim() || undefined,
+        country: country?.trim() || undefined,
+        active: active,
+        birth_date: birth_date || undefined,
+        birth_date_min: birth_dateMin || undefined,
+        birth_date_max: birth_dateMax || undefined,
+        updated_at: updated_at || undefined,
+        updated_at_min: updated_atMin || undefined,
+        updated_at_max: updated_atMax || undefined,
+      } as any;
+
+      Object.keys(params).forEach(
+        (k) =>
+          params[k as keyof typeof params] === undefined &&
+          delete params[k as keyof typeof params],
       );
-    }
+
+      await this.authorsService.loadAuthorList(params);
+      this.dataSource.data = this.authorsService.authorsList();
+      if (this.paginator) {
+        this.paginator.length = this.authorsService.totalAuthor();
+      }
+    });
   }
 
-  private clearValidationErrors() {
-    this.validationErrorsSignal.set({});
+  // Search & Filter Methods
+  search() {
+    const searchValue = this.searchInputSignal().trim();
+    this.searchTermSignal.set(searchValue);
+    if (this.paginator) this.paginator.pageIndex = 0;
   }
 
-  // ===== SEARCH AND FILTERING =====
-
-  onSearchChange() {
-    // Debounce search for auto-search
-    if (this.searchTimeout) {
-      clearTimeout(this.searchTimeout);
-    }
-
-    this.searchTimeout = setTimeout(() => {
-      this.authorsService.setCurrentPage(1);
-      this.loadAuthors();
-    }, 300);
+  refresh() {
+    this.searchInputSignal.set('');
+    this.searchTermSignal.set('');
+    this.nameInputSignal.set('');
+    this.nameFilterSignal.set('');
+    this.emailInputSignal.set('');
+    this.emailFilterSignal.set('');
+    this.countryInputSignal.set('');
+    this.countryFilterSignal.set('');
+    this.activeInputSignal.set(undefined);
+    this.activeFilterSignal.set(undefined);
+    // Clear Birth Date filter INPUT signals
+    this.birth_dateInputSignal.set(null);
+    this.birth_dateMinInputSignal.set(null);
+    this.birth_dateMaxInputSignal.set(null);
+    // Clear Birth Date filter ACTIVE signals
+    this.birth_dateSignal.set(null);
+    this.birth_dateMinSignal.set(null);
+    this.birth_dateMaxSignal.set(null);
+    // Clear Updated At filter INPUT signals
+    this.updated_atInputSignal.set(null);
+    this.updated_atMinInputSignal.set(null);
+    this.updated_atMaxInputSignal.set(null);
+    // Clear Updated At filter ACTIVE signals
+    this.updated_atSignal.set(null);
+    this.updated_atMinSignal.set(null);
+    this.updated_atMaxSignal.set(null);
+    this.quickFilter = 'all';
+    if (this.paginator) this.paginator.pageIndex = 0;
+    this.reloadTrigger.update((n) => n + 1);
   }
 
-  onSearchButtonClick() {
-    // Manual search - validate before execution
-    if (this.searchTimeout) {
-      clearTimeout(this.searchTimeout);
-    }
+  applyFilterImmediate() {
+    // Apply text and selection filters
+    this.nameFilterSignal.set(this.nameInputSignal().trim());
+    this.emailFilterSignal.set(this.emailInputSignal().trim());
+    this.countryFilterSignal.set(this.countryInputSignal().trim());
+    this.activeFilterSignal.set(this.activeInputSignal());
 
-    // Validate technical fields first
-    const validationErrors = this.validateTechnicalFields();
+    // Apply date/datetime filters
+    this.birth_dateSignal.set(this.birth_dateInputSignal());
+    this.birth_dateMinSignal.set(this.birth_dateMinInputSignal());
+    this.birth_dateMaxSignal.set(this.birth_dateMaxInputSignal());
+    this.updated_atSignal.set(this.updated_atInputSignal());
+    this.updated_atMinSignal.set(this.updated_atMinInputSignal());
+    this.updated_atMaxSignal.set(this.updated_atMaxInputSignal());
 
-    if (validationErrors.length > 0) {
-      this.showFieldErrors(validationErrors);
-      return; // Don't proceed with search
-    }
-
-    // Clear any previous validation errors
-    this.clearValidationErrors();
-
-    this.authorsService.setCurrentPage(1);
-    this.loadAuthors();
+    if (this.paginator) this.paginator.pageIndex = 0;
   }
 
   clearSearch() {
-    if (this.searchTimeout) {
-      clearTimeout(this.searchTimeout);
-    }
-
-    this.searchTerm = '';
-    this.authorsService.setCurrentPage(1);
-    this.loadAuthors();
+    this.searchInputSignal.set('');
+    this.searchTermSignal.set('');
+    if (this.paginator) this.paginator.pageIndex = 0;
   }
 
-  // ===== DATE FILTERING =====
+  setQuickFilter(filter: 'all' | 'active' | 'unavailable') {
+    this.quickFilter = filter;
+    // Apply quick filter to first boolean filter field
+    if (filter === 'all') {
+      this.activeInputSignal.set(undefined);
+      this.activeFilterSignal.set(undefined);
+    } else if (filter === 'active') {
+      this.activeInputSignal.set(true);
+      this.activeFilterSignal.set(true);
+    } else if (filter === 'unavailable') {
+      this.activeInputSignal.set(false);
+      this.activeFilterSignal.set(false);
+    }
+    if (this.paginator) this.paginator.pageIndex = 0;
+  }
 
   onDateFilterChange(dateFilter: { [key: string]: string | null | undefined }) {
-    console.log('Date filter change:', dateFilter); // Debug log
-
-    // Update filters with date filter values
-    this.filtersSignal.update((filters) => ({
-      ...filters,
-      ...dateFilter,
-    }));
-
-    console.log('Updated filters:', this.filters()); // Debug log
-
-    // Apply filters with debounce
-    this.applyFilters();
+    // Update INPUT signals only (not sent to API until Apply Filters is clicked)
+    this.birth_dateInputSignal.set(dateFilter['birth_date'] || null);
+    this.birth_dateMinInputSignal.set(dateFilter['birth_date_min'] || null);
+    this.birth_dateMaxInputSignal.set(dateFilter['birth_date_max'] || null);
+    this.updated_atInputSignal.set(dateFilter['updated_at'] || null);
+    this.updated_atMinInputSignal.set(dateFilter['updated_at_min'] || null);
+    this.updated_atMaxInputSignal.set(dateFilter['updated_at_max'] || null);
   }
 
-  // Handle filter field changes
-  onFilterChange(field: string, event: any) {
-    const value = event.target ? event.target.value : event;
-
-    // Convert string numbers to numbers for numeric fields
-    let processedValue = value;
-    if (
-      field.includes('_min') ||
-      field.includes('_max') ||
-      field === 'view_count'
-    ) {
-      processedValue = value === '' ? undefined : Number(value);
-    }
-
-    // Convert string booleans for boolean fields
-    if (field === 'published') {
-      processedValue = value === '' ? undefined : value;
-    }
-
-    // Clear quick filter when advance filters are used
-    if (this.quickFilter !== 'all') {
-      this.quickFilter = 'all';
-    }
-
-    this.filtersSignal.update((filters) => ({
-      ...filters,
-      [field]: processedValue,
-    }));
-
-    this.applyFilters();
+  clearAllFilters() {
+    this.searchInputSignal.set('');
+    this.searchTermSignal.set('');
+    this.nameInputSignal.set('');
+    this.nameFilterSignal.set('');
+    this.emailInputSignal.set('');
+    this.emailFilterSignal.set('');
+    this.countryInputSignal.set('');
+    this.countryFilterSignal.set('');
+    this.activeInputSignal.set(undefined);
+    this.activeFilterSignal.set(undefined);
+    // Clear Birth Date filter INPUT signals
+    this.birth_dateInputSignal.set(null);
+    this.birth_dateMinInputSignal.set(null);
+    this.birth_dateMaxInputSignal.set(null);
+    // Clear Birth Date filter ACTIVE signals
+    this.birth_dateSignal.set(null);
+    this.birth_dateMinSignal.set(null);
+    this.birth_dateMaxSignal.set(null);
+    // Clear Updated At filter INPUT signals
+    this.updated_atInputSignal.set(null);
+    this.updated_atMinInputSignal.set(null);
+    this.updated_atMaxInputSignal.set(null);
+    // Clear Updated At filter ACTIVE signals
+    this.updated_atSignal.set(null);
+    this.updated_atMinSignal.set(null);
+    this.updated_atMaxSignal.set(null);
+    this.quickFilter = 'all';
+    this.showAdvancedFilters.set(false);
+    if (this.paginator) this.paginator.pageIndex = 0;
   }
 
-  applyFilters() {
-    // Debounce filter changes to prevent multiple API calls
-    if (this.filterTimeout) {
-      clearTimeout(this.filterTimeout);
-    }
-
-    this.filterTimeout = setTimeout(() => {
-      this.authorsService.setCurrentPage(1);
-      this.loadAuthors();
-    }, 300);
-  }
-
-  // Immediate filter application (for button clicks)
-  applyFiltersImmediate() {
-    if (this.filterTimeout) {
-      clearTimeout(this.filterTimeout);
-    }
-
-    this.authorsService.setCurrentPage(1);
-    this.loadAuthors();
-  }
-
-  clearFilters() {
-    if (this.searchTimeout) {
-      clearTimeout(this.searchTimeout);
-    }
-    if (this.filterTimeout) {
-      clearTimeout(this.filterTimeout);
-    }
-
-    this.searchTerm = '';
-    this.filtersSignal.set({});
-    this.clearValidationErrors();
-    this.authorsService.setCurrentPage(1);
-    this.loadAuthors();
-  }
-
+  // Helper methods
   hasActiveFilters(): boolean {
-    return this.searchTerm.length > 0 || Object.keys(this.filters()).length > 0;
+    return (
+      this.searchTermSignal().trim() !== '' ||
+      this.nameFilterSignal().trim() !== '' ||
+      this.emailFilterSignal().trim() !== '' ||
+      this.countryFilterSignal().trim() !== '' ||
+      this.activeFilterSignal() !== undefined ||
+      this.birth_dateSignal() !== null ||
+      this.birth_dateMinSignal() !== null ||
+      this.birth_dateMaxSignal() !== null ||
+      this.updated_atSignal() !== null ||
+      this.updated_atMinSignal() !== null ||
+      this.updated_atMaxSignal() !== null
+    );
   }
 
-  activeFiltersCount(): number {
+  getActiveFilterCount(): number {
     let count = 0;
-    if (this.searchTerm.length > 0) count++;
-    count += Object.keys(this.filters()).length;
+    if (this.searchTermSignal().trim()) count++;
+    if (this.nameFilterSignal().trim()) count++;
+    if (this.emailFilterSignal().trim()) count++;
+    if (this.countryFilterSignal().trim()) count++;
+    if (this.activeFilterSignal() !== undefined) count++;
+    // Count Birth Date filter as one if any date field is set
+    if (
+      this.birth_dateSignal() ||
+      this.birth_dateMinSignal() ||
+      this.birth_dateMaxSignal()
+    )
+      count++;
+    // Count Updated At filter as one if any datetime field is set
+    if (
+      this.updated_atSignal() ||
+      this.updated_atMinSignal() ||
+      this.updated_atMaxSignal()
+    )
+      count++;
     return count;
   }
 
-  // ===== PAGINATION =====
-
-  onPageChange(event: PageEvent) {
-    this.authorsService.setCurrentPage(event.pageIndex + 1);
-    this.authorsService.setPageSize(event.pageSize);
-    this.loadAuthors();
+  // Selection Methods
+  isAllSelected() {
+    const numSelected = this.selection.selected.length;
+    const numRows = this.dataSource.data.length;
+    return numSelected === numRows;
   }
 
-  // ===== SELECTION =====
-
-  isSelected(id: string): boolean {
-    return this.selectedIdsSignal().has(id);
-  }
-
-  hasSelected(): boolean {
-    return this.selectedIdsSignal().size > 0;
-  }
-
-  isAllSelected(): boolean {
-    const total = this.authorsService.authorsList().length;
-    return total > 0 && this.selectedIdsSignal().size === total;
-  }
-
-  toggleSelect(id: string) {
-    this.selectedIdsSignal.update((selected) => {
-      const newSet = new Set(selected);
-      if (newSet.has(id)) {
-        newSet.delete(id);
-      } else {
-        newSet.add(id);
-      }
-      return newSet;
-    });
-  }
-
-  toggleSelectAll() {
+  toggleAllRows() {
     if (this.isAllSelected()) {
-      this.selectedIdsSignal.set(new Set());
-    } else {
-      const allIds = this.authorsService.authorsList().map((item) => item.id);
-      this.selectedIdsSignal.set(new Set(allIds));
+      this.selection.clear();
+      return;
     }
+    this.selection.select(...this.dataSource.data);
   }
 
-  clearSelection() {
-    this.selectedIdsSignal.set(new Set());
-  }
-
-  // ===== DIALOG OPERATIONS =====
-
+  // CRUD Operations
   openCreateDialog() {
     const dialogRef = this.dialog.open(AuthorCreateDialogComponent, {
       width: '600px',
-      maxWidth: '90vw',
-      disableClose: true,
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
+    dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
-        // Refresh the list to show the new item
-        this.loadAuthors();
+        this.reloadTrigger.update((n) => n + 1);
       }
     });
   }
 
-  openEditDialog(authors: Author) {
+  onViewAuthor(author: Author) {
+    const dialogRef = this.dialog.open(AuthorViewDialogComponent, {
+      width: '600px',
+      data: { authors: author } as AuthorViewDialogData,
+    });
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result?.action === 'edit') {
+        this.onEditAuthor(result.data);
+      }
+    });
+  }
+
+  onEditAuthor(author: Author) {
     const dialogRef = this.dialog.open(AuthorEditDialogComponent, {
       width: '600px',
-      maxWidth: '90vw',
-      disableClose: true,
-      data: { authors } as AuthorEditDialogData,
+      data: { authors: author } as AuthorEditDialogData,
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
+    dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
-        // The service automatically updates the list with optimistic updates
-        // No need to refresh unless there was an error
+        this.reloadTrigger.update((n) => n + 1);
       }
     });
   }
 
-  openViewDialog(authors: Author) {
-    const dialogRef = this.dialog.open(AuthorViewDialogComponent, {
-      width: '700px',
-      maxWidth: '90vw',
-      data: { authors } as AuthorViewDialogData,
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result && result.action === 'edit') {
-        // User clicked edit from view dialog
-        this.openEditDialog(result.data);
+  onDeleteAuthor(author: Author) {
+    const itemName = (author as any).name || (author as any).title || 'author';
+    this.axDialog.confirmDelete(itemName).subscribe(async (confirmed) => {
+      if (confirmed) {
+        try {
+          await this.authorsService.deleteAuthor(author.id);
+          this.snackBar.open('Author deleted successfully', 'Close', {
+            duration: 3000,
+          });
+          this.reloadTrigger.update((n) => n + 1);
+        } catch {
+          this.snackBar.open('Failed to delete author', 'Close', {
+            duration: 3000,
+          });
+        }
       }
     });
   }
 
-  // ===== QUICK FILTERS =====
+  bulkDelete() {
+    const count = this.selection.selected.length;
+    this.axDialog
+      .confirmBulkDelete(count, 'authors')
+      .subscribe(async (confirmed) => {
+        if (confirmed) {
+          try {
+            const deletePromises = this.selection.selected.map((author) =>
+              this.authorsService.deleteAuthor(author.id),
+            );
 
-  protected setQuickFilter(filter: string) {
-    // Clear any pending filter operations
-    if (this.filterTimeout) {
-      clearTimeout(this.filterTimeout);
-    }
-
-    this.quickFilter = filter;
-
-    // Clear all filters first
-    this.searchTerm = '';
-    this.filtersSignal.set({});
-    this.clearValidationErrors();
-
-    switch (filter) {
-      case 'active':
-        this.filtersSignal.set({ active: true });
-        break;
-      case 'published':
-        this.filtersSignal.set({ active: true });
-        break;
-      // case 'featured':
-      //   this.filtersSignal.set({ is_featured: true });
-      //   break;
-      // case 'available':
-      //   this.filtersSignal.set({ is_available: true });
-      //   break;
-      // case 'draft':
-      //   this.filtersSignal.set({ status: 'draft' });
-      //   break;
-      case 'all':
-      default:
-        // Already cleared above
-        break;
-    }
-
-    // Quick filters should apply immediately
-    this.authorsService.setCurrentPage(1);
-    this.loadAuthors();
+            await Promise.all(deletePromises);
+            this.snackBar.open(
+              `${count} author(s) deleted successfully`,
+              'Close',
+              { duration: 3000 },
+            );
+            this.selection.clear();
+            this.reloadTrigger.update((n) => n + 1);
+          } catch {
+            this.snackBar.open('Failed to delete some authors', 'Close', {
+              duration: 3000,
+            });
+          }
+        }
+      });
   }
 
-  // ===== ACTIVE FILTER CHIPS =====
-
-  protected getActiveFilterChips(): Array<{
-    key: string;
-    label: string;
-    value: string;
-  }> {
-    const chips: Array<{ key: string; label: string; value: string }> = [];
-    const filters = this.filters();
-
-    // Add quick filter chip if not 'all'
-    if (this.quickFilter !== 'all') {
-      const quickFilterLabels: Record<string, string> = {
-        active: 'Active Items',
-        published: 'Published Status',
-        // 'featured': 'Featured Items',
-        // 'available': 'Available Items',
-        // 'draft': 'Draft Status',
-      };
-      chips.push({
-        key: '_quickFilter',
-        label: 'Quick Filter',
-        value: quickFilterLabels[this.quickFilter] || this.quickFilter,
-      });
-    }
-
-    if (this.searchTerm) {
-      chips.push({ key: 'search', label: 'Search', value: this.searchTerm });
-    }
-
-    // Date field filters - only add if fields exist in schema
-
-    if (filters.created_at) {
-      chips.push({
-        key: 'created_at',
-        label: 'Created Date',
-        value: this.formatDate(filters.created_at as string),
-      });
-    } else if (filters.created_at_min || filters.created_at_max) {
-      const from = filters.created_at_min
-        ? this.formatDate(filters.created_at_min as string)
-        : '...';
-      const to = filters.created_at_max
-        ? this.formatDate(filters.created_at_max as string)
-        : '...';
-      chips.push({
-        key: 'created_at_range',
-        label: 'Created Date Range',
-        value: `${from} - ${to}`,
-      });
-    }
-
-    if (filters.updated_at) {
-      chips.push({
-        key: 'updated_at',
-        label: 'Updated Date',
-        value: this.formatDate(filters.updated_at as string),
-      });
-    } else if (filters.updated_at_min || filters.updated_at_max) {
-      const from = filters.updated_at_min
-        ? this.formatDate(filters.updated_at_min as string)
-        : '...';
-      const to = filters.updated_at_max
-        ? this.formatDate(filters.updated_at_max as string)
-        : '...';
-      chips.push({
-        key: 'updated_at_range',
-        label: 'Updated Date Range',
-        value: `${from} - ${to}`,
-      });
-    }
-
-    // String field filters
-    if (filters.name !== undefined && filters.name !== '') {
-      chips.push({ key: 'name', label: 'Name', value: String(filters.name) });
-    }
-
-    if (filters.email !== undefined && filters.email !== '') {
-      chips.push({
-        key: 'email',
-        label: 'Email',
-        value: String(filters.email),
-      });
-    }
-
-    if (filters.country !== undefined && filters.country !== '') {
-      chips.push({
-        key: 'country',
-        label: 'Country',
-        value: String(filters.country),
-      });
-    }
-
-    // Number field filters
-
-    // Foreign Key filters
-
-    return chips;
-  }
-
-  protected removeFilter(key: string) {
-    // Clear any pending filter operations
-    if (this.filterTimeout) {
-      clearTimeout(this.filterTimeout);
-    }
-
-    if (key === '_quickFilter') {
-      // Reset quick filter to 'all'
-      this.setQuickFilter('all');
-      return;
-    }
-
-    if (key === 'search') {
-      this.searchTerm = '';
-    } else if (key.includes('_range')) {
-      // Handle date range removal
-      const fieldName = key.replace('_range', '');
-      this.filtersSignal.update((filters) => {
-        const updated = { ...filters } as any;
-        delete updated[fieldName];
-        delete updated[`${fieldName}_min`];
-        delete updated[`${fieldName}_max`];
-        return updated;
-      });
-    } else {
-      this.filtersSignal.update((filters) => {
-        const updated = { ...filters } as any;
-        delete updated[key];
-        return updated;
-      });
-    }
-    this.clearValidationErrors();
-    this.authorsService.setCurrentPage(1);
-    this.loadAuthors();
-  }
-
-  protected clearAllFilters() {
-    // Clear any pending filter operations
-    if (this.filterTimeout) {
-      clearTimeout(this.filterTimeout);
-    }
-
-    this.searchTerm = '';
-    this.filtersSignal.set({});
-    this.quickFilter = 'all';
-    this.clearValidationErrors();
-    this.authorsService.setCurrentPage(1);
-    this.loadAuthors();
-  }
-
-  protected resetFilters() {
-    // Clear any pending filter operations
-    if (this.filterTimeout) {
-      clearTimeout(this.filterTimeout);
-    }
-
-    this.filtersSignal.set({});
-    this.clearValidationErrors();
-
-    // Reset filters should apply immediately
-    this.authorsService.setCurrentPage(1);
-    this.loadAuthors();
-  }
-
-  // ===== DATE FILTER HANDLERS =====
-
-  protected updateDateFilter(filterUpdate: any) {
-    this.filtersSignal.update((current) => ({ ...current, ...filterUpdate }));
-    this.applyFilters();
-  }
-
-  private formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleDateString();
-  }
-
-  // ===== ACTIONS =====
-
-  async deleteAuthor(authors: Author) {
-    if (confirm(`Are you sure you want to delete this authors?`)) {
-      try {
-        await this.authorsService.deleteAuthor(authors.id);
-        this.snackBar.open('Authors deleted successfully', 'Close', {
-          duration: 3000,
-        });
-      } catch (error: any) {
-        const errorMessage = this.authorsService.permissionError()
-          ? 'You do not have permission to delete Authors'
-          : error?.message || 'Failed to delete Authors';
-        this.snackBar.open(errorMessage, 'Close', {
-          duration: 5000,
-          panelClass: ['error-snackbar'],
-        });
-      }
-    }
-  }
-
-  async bulkDelete() {
-    const selectedIds = Array.from(this.selectedIdsSignal());
-    if (selectedIds.length === 0) return;
-
-    const confirmed = confirm(
-      `Are you sure you want to delete ${selectedIds.length} Authors?`,
-    );
-    if (!confirmed) return;
-
-    try {
-      await this.authorsService.bulkDeleteAuthor(selectedIds);
-      this.clearSelection();
-      this.snackBar.open(
-        `${selectedIds.length} Authors deleted successfully`,
-        'Close',
-        {
-          duration: 3000,
-        },
-      );
-    } catch (error: any) {
-      const errorMessage = this.authorsService.permissionError()
-        ? 'You do not have permission to delete Authors'
-        : error?.message || 'Failed to delete Authors';
-      this.snackBar.open(errorMessage, 'Close', {
-        duration: 5000,
-        panelClass: ['error-snackbar'],
-      });
-    }
-  }
-
-  async bulkUpdateStatus(status: string) {
-    const selectedIds = Array.from(this.selectedIdsSignal());
-    if (selectedIds.length === 0) return;
-
-    try {
-      // Create bulk update data with status field
-      const items = selectedIds.map((id) => ({
-        id,
-        data: { status } as any,
-      }));
-
-      await this.authorsService.bulkUpdateAuthor(items);
-      this.clearSelection();
-      this.snackBar.open(
-        `${selectedIds.length} Authors status updated successfully`,
-        'Close',
-        {
-          duration: 3000,
-        },
-      );
-    } catch (error: any) {
-      const errorMessage = this.authorsService.permissionError()
-        ? 'You do not have permission to update Authors'
-        : error?.message || 'Failed to update Authors status';
-      this.snackBar.open(errorMessage, 'Close', {
-        duration: 5000,
-        panelClass: ['error-snackbar'],
-      });
-    }
-  }
-
-  async exportSelected(format: 'csv' | 'excel' | 'pdf') {
-    const selectedIds = Array.from(this.selectedIdsSignal());
-    if (selectedIds.length === 0) {
-      this.snackBar.open('Please select items to export', 'Close', {
-        duration: 3000,
-      });
-      return;
-    }
-
-    try {
-      // For now, show a placeholder message since export endpoints need to be implemented
-      this.snackBar.open(
-        `Export feature coming soon (${format.toUpperCase()})`,
-        'Close',
-        {
-          duration: 3000,
-        },
-      );
-      console.log('Export selected:', { selectedIds, format });
-    } catch (error) {
-      this.snackBar.open('Failed to export Authors', 'Close', {
-        duration: 5000,
-      });
-    }
-  }
-
-  // ===== EXPORT EVENT HANDLERS =====
-
+  // Export Event Handlers
   onExportStarted(options: ExportOptions) {
-    console.log('Export started:', options);
     this.snackBar.open(
       `Preparing ${options.format.toUpperCase()} export...`,
       '',
-      {
-        duration: 2000,
-      },
+      { duration: 2000 },
     );
   }
 
@@ -1978,28 +701,36 @@ export class AuthorListComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ===== SUMMARY DASHBOARD METHODS =====
-
-  getActiveCount(): number {
-    return this.authorsService.authorsList().filter((item) => {
-      return item.active === true;
-    }).length;
+  // Filter Helpers
+  getExportFilters(): Record<string, unknown> {
+    return {
+      searchTerm: this.searchTermSignal(),
+      name: this.nameFilterSignal(),
+      email: this.emailFilterSignal(),
+      country: this.countryFilterSignal(),
+      active: this.activeFilterSignal(),
+    };
   }
 
-  getDraftCount(): number {
-    return this.authorsService.authorsList().filter((item) => {
-      return item.active === false;
-    }).length;
+  // Stats Methods
+  getPercentage(count: number): number {
+    const total = this.stats().total;
+    return total > 0 ? Math.round((count / total) * 100) : 0;
   }
 
-  getRecentCount(): number {
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+  // Expandable Row Methods
+  toggleExpandRow(author: Author): void {
+    const currentExpanded = this.expandedAuthor();
+    if (currentExpanded?.id === author.id) {
+      // Collapse currently expanded row
+      this.expandedAuthor.set(null);
+    } else {
+      // Expand new row (and collapse previous if any)
+      this.expandedAuthor.set(author);
+    }
+  }
 
-    return this.authorsService
-      .authorsList()
-      .filter(
-        (item) => item.created_at && new Date(item.created_at) >= oneWeekAgo,
-      ).length;
+  isRowExpanded(author: Author): boolean {
+    return this.expandedAuthor()?.id === author.id;
   }
 }

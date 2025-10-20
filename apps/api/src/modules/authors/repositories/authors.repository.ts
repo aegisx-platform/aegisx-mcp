@@ -138,8 +138,11 @@ export class AuthorsRepository extends BaseRepository<
         });
       } else {
         // Single sort field
-        const mappedField = this.getSortField(sort);
-        query.orderBy(mappedField, 'desc');
+        const [field, direction] = sort.split(':');
+        const mappedField = this.getSortField(field.trim());
+        const sortDirection =
+          direction?.trim().toLowerCase() === 'asc' ? 'asc' : 'desc';
+        query.orderBy(mappedField, sortDirection);
       }
     } else {
       // Default sort

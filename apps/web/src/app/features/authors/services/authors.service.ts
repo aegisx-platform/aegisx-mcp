@@ -125,6 +125,13 @@ export class AuthorService {
       if (params?.email) httpParams = httpParams.set('email', params.email);
       // String filtering for bio
       if (params?.bio) httpParams = httpParams.set('bio', params.bio);
+      // Date/DateTime filtering for birth_date
+      if (params?.birth_date)
+        httpParams = httpParams.set('birth_date', params.birth_date);
+      if (params?.birth_date_min)
+        httpParams = httpParams.set('birth_date_min', params.birth_date_min);
+      if (params?.birth_date_max)
+        httpParams = httpParams.set('birth_date_max', params.birth_date_max);
       // String filtering for country
       if (params?.country)
         httpParams = httpParams.set('country', params.country);

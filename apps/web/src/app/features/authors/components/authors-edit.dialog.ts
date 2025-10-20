@@ -6,6 +6,8 @@ import {
   MatDialogModule,
 } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 import { AuthorService } from '../services/authors.service';
 import { Author, UpdateAuthorRequest } from '../types/authors.types';
@@ -18,12 +20,38 @@ export interface AuthorEditDialogData {
 @Component({
   selector: 'app-authors-edit-dialog',
   standalone: true,
-  imports: [CommonModule, MatDialogModule, AuthorFormComponent],
+  imports: [
+    CommonModule,
+    MatDialogModule,
+    AuthorFormComponent,
+    MatButtonModule,
+    MatIconModule,
+  ],
   template: `
-    <div class="edit-dialog">
-      <h2 mat-dialog-title>Edit Authors</h2>
+    <div class="tremor-dialog-container">
+      <!-- Header with Icon -->
+      <div class="tremor-dialog-header bg-slate-100">
+        <div class="flex items-center gap-3">
+          <div class="tremor-icon-wrapper tremor-icon-orange">
+            <mat-icon>edit</mat-icon>
+          </div>
+          <div>
+            <h2 class="tremor-dialog-title">Edit Author</h2>
+            <p class="tremor-dialog-subtitle">Update author information</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          mat-icon-button
+          class="tremor-close-button"
+          [mat-dialog-close]="false"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
 
-      <mat-dialog-content>
+      <!-- Content -->
+      <mat-dialog-content class="tremor-dialog-content">
         <app-authors-form
           mode="edit"
           [initialData]="data.authors"
@@ -36,19 +64,97 @@ export interface AuthorEditDialogData {
   `,
   styles: [
     `
-      .edit-dialog {
-        min-width: 500px;
-        max-width: 800px;
+      /* Tremor-inspired Dialog Styles */
+      .tremor-dialog-container {
+        display: flex;
+        flex-direction: column;
+        min-width: 600px;
+        max-width: 900px;
+        max-height: 90vh;
       }
 
-      mat-dialog-content {
-        max-height: 70vh;
+      /* Header */
+      .tremor-dialog-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        padding: 1.5rem;
+        border-bottom: 1px solid #e5e7eb;
+        background: linear-gradient(to bottom, #ffffff, #f9fafb);
+      }
+
+      .tremor-icon-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 3rem;
+        height: 3rem;
+        border-radius: 0.75rem;
+      }
+
+      .tremor-icon-orange {
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+        color: white;
+        box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.3);
+      }
+
+      .tremor-dialog-title {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #111827;
+        line-height: 1.4;
+      }
+
+      .tremor-dialog-subtitle {
+        margin: 0.25rem 0 0 0;
+        font-size: 0.875rem;
+        color: #6b7280;
+      }
+
+      .tremor-close-button {
+        color: #6b7280;
+      }
+
+      .tremor-close-button:hover {
+        color: #111827;
+        background: #f3f4f6;
+      }
+
+      /* Content */
+      .tremor-dialog-content {
+        flex: 1;
         overflow-y: auto;
+        padding: 1.5rem;
       }
 
+      .bg-slate-100 {
+        background-color: #f1f5f9;
+      }
+
+      /* Utility Classes */
+      .flex {
+        display: flex;
+      }
+      .items-center {
+        align-items: center;
+      }
+      .gap-3 {
+        gap: 0.75rem;
+      }
+
+      /* Responsive */
       @media (max-width: 768px) {
-        .edit-dialog {
+        .tremor-dialog-container {
           min-width: 90vw;
+        }
+
+        .tremor-dialog-header {
+          padding: 1rem;
+        }
+
+        .tremor-dialog-content {
+          padding: 1rem;
         }
       }
     `,
@@ -77,19 +183,19 @@ export class AuthorEditDialogComponent implements OnInit {
       );
 
       if (result) {
-        this.snackBar.open('Authors updated successfully', 'Close', {
+        this.snackBar.open('Author updated successfully', 'Close', {
           duration: 3000,
         });
         this.dialogRef.close(result);
       } else {
-        this.snackBar.open('Failed to update Authors', 'Close', {
+        this.snackBar.open('Failed to update author', 'Close', {
           duration: 5000,
         });
       }
     } catch (error: any) {
       const errorMessage = this.authorsService.permissionError()
-        ? 'You do not have permission to update Authors'
-        : error?.message || 'Failed to update Authors';
+        ? 'You do not have permission to update author'
+        : error?.message || 'Failed to update author';
       this.snackBar.open(errorMessage, 'Close', {
         duration: 5000,
         panelClass: ['error-snackbar'],
