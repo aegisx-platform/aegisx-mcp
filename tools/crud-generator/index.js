@@ -7,6 +7,7 @@
 
 const { Command } = require('commander');
 const path = require('path');
+const chalk = require('chalk');
 const {
   generateCrudModule,
   generateDomainModule,
@@ -15,6 +16,13 @@ const {
 const { version } = require('./package.json');
 const TemplateManager = require('./src/core/template-manager');
 const { promptGenerate } = require('./src/prompts/generate-prompts');
+const {
+  promptTemplateType,
+  promptSelectTemplate,
+  promptNewTemplate,
+  promptSetDefault,
+  promptRemoveTemplate,
+} = require('./src/prompts/template-prompts');
 
 // Helper function to find project root (where package.json with nx exists)
 function findProjectRoot(startDir = __dirname) {
@@ -651,6 +659,380 @@ program
     console.log('   • Use STANDARD for simple data models');
     console.log('   • Use ENTERPRISE for admin interfaces and dashboards');
     console.log('   • Use FULL for complex business domains with validation');
+  });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TEMPLATE MANAGEMENT COMMANDS
+// ═══════════════════════════════════════════════════════════════════════════
+
+const templates = program
+  .command('templates')
+  .alias('t')
+  .description('Manage CRUD generator templates');
+
+/**
+ * List available templates
+ */
+templates
+  .command('list [type]')
+  .alias('ls')
+  .description('List available templates (backend, frontend, or all)')
+  .action(async (type) => {
+    try {
+      const templateManager = new TemplateManager({
+        templatesBasePath: path.join(__dirname, 'templates'),
+      });
+      await templateManager.initialize();
+
+      // Determine which templates to list
+      let typesToList = ['backend', 'frontend'];
+      if (type) {
+        if (!['backend', 'frontend', 'all'].includes(type)) {
+          console.error(
+            chalk.red(
+              `❌ Invalid type: ${type}. Must be 'backend', 'frontend', or 'all'`,
+            ),
+          );
+          process.exit(1);
+        }
+        if (type !== 'all') {
+          typesToList = [type];
+        }
+      }
+
+      console.log(chalk.bold.cyan('\n📦 Available Templates\n'));
+
+      for (const templateType of typesToList) {
+        const templateList = await templateManager.listTemplates(templateType);
+        const defaults = templateManager.getDefaults();
+        const isDefault = defaults[templateType];
+
+        console.log(
+          chalk.bold.yellow(
+            `${templateType.toUpperCase()} Templates (${templateList.length}):`,
+          ),
+        );
+
+        if (templateList.length === 0) {
+          console.log(chalk.gray('  No templates found'));
+        } else {
+          templateList.forEach((template) => {
+            let name = `  • ${template.name}`;
+
+            if (template.default || template.name === isDefault) {
+              name = chalk.green(`${name} [DEFAULT]`);
+            }
+
+            if (template.deprecated) {
+              name = chalk.gray(`${name} [DEPRECATED]`);
+            }
+
+            console.log(name);
+            console.log(chalk.gray(`    ${template.description}`));
+            console.log(
+              chalk.gray(
+                `    Version: ${template.version || 'N/A'} | Framework: ${template.framework || 'N/A'}`,
+              ),
+            );
+            console.log('');
+          });
+        }
+      }
+    } catch (error) {
+      console.error(chalk.red('\n❌ Error listing templates:'));
+      console.error(error.message);
+      process.exit(1);
+    }
+  });
+
+/**
+ * Set default template for a type
+ */
+templates
+  .command('set-default')
+  .alias('default')
+  .description('Set default template for backend or frontend')
+  .action(async () => {
+    try {
+      const templateManager = new TemplateManager({
+        templatesBasePath: path.join(__dirname, 'templates'),
+      });
+      await templateManager.initialize();
+
+      // Interactive mode
+      const type = await promptTemplateType();
+
+      const templateList = await templateManager.listTemplates(type);
+      if (templateList.length === 0) {
+        console.log(chalk.yellow(`\n⚠️  No ${type} templates available\n`));
+        return;
+      }
+
+      const templateName = await promptSelectTemplate(
+        templateList,
+        `Select ${type} template to set as default:`,
+      );
+
+      const confirmed = await promptSetDefault(type, templateName);
+
+      if (!confirmed) {
+        console.log(chalk.yellow('\n⚠️  Cancelled by user\n'));
+        return;
+      }
+
+      await templateManager.setDefaultTemplate(type, templateName);
+
+      console.log(
+        chalk.green(`\n✅ Set '${templateName}' as default ${type} template\n`),
+      );
+    } catch (error) {
+      console.error(chalk.red('\n❌ Error setting default template:'));
+      console.error(error.message);
+      process.exit(1);
+    }
+  });
+
+/**
+ * Add custom template
+ */
+templates
+  .command('add')
+  .description('Add a custom template')
+  .action(async () => {
+    try {
+      const templateManager = new TemplateManager({
+        templatesBasePath: path.join(__dirname, 'templates'),
+      });
+      await templateManager.initialize();
+
+      console.log(chalk.bold.cyan('\n📦 Add Custom Template\n'));
+
+      const type = await promptTemplateType();
+      const templateInfo = await promptNewTemplate();
+
+      await templateManager.addCustomTemplate(
+        type,
+        templateInfo.name,
+        templateInfo.path,
+        templateInfo.description,
+      );
+
+      console.log(
+        chalk.green(
+          `\n✅ Added custom ${type} template '${templateInfo.name}'\n`,
+        ),
+      );
+      console.log(chalk.gray(`Path: ${templateInfo.path}`));
+      console.log(chalk.gray(`Description: ${templateInfo.description}\n`));
+    } catch (error) {
+      console.error(chalk.red('\n❌ Error adding custom template:'));
+      console.error(error.message);
+      process.exit(1);
+    }
+  });
+
+/**
+ * Remove custom template
+ */
+templates
+  .command('remove')
+  .alias('rm')
+  .description('Remove a custom template')
+  .action(async () => {
+    try {
+      const templateManager = new TemplateManager({
+        templatesBasePath: path.join(__dirname, 'templates'),
+      });
+      await templateManager.initialize();
+
+      const type = await promptTemplateType();
+
+      const customTemplates =
+        templateManager.config.customTemplates?.[type] || {};
+      const customTemplateNames = Object.keys(customTemplates);
+
+      if (customTemplateNames.length === 0) {
+        console.log(
+          chalk.yellow(`\n⚠️  No custom ${type} templates to remove\n`),
+        );
+        return;
+      }
+
+      const templateList = customTemplateNames.map((name) => ({
+        name,
+        description: customTemplates[name].description || 'Custom template',
+      }));
+
+      const templateName = await promptSelectTemplate(
+        templateList,
+        `Select ${type} template to remove:`,
+      );
+
+      const confirmed = await promptRemoveTemplate(type, templateName);
+
+      if (!confirmed) {
+        console.log(chalk.yellow('\n⚠️  Cancelled by user\n'));
+        return;
+      }
+
+      await templateManager.removeCustomTemplate(type, templateName);
+
+      console.log(
+        chalk.green(`\n✅ Removed custom ${type} template '${templateName}'\n`),
+      );
+    } catch (error) {
+      console.error(chalk.red('\n❌ Error removing custom template:'));
+      console.error(error.message);
+      process.exit(1);
+    }
+  });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CONFIGURATION COMMANDS
+// ═══════════════════════════════════════════════════════════════════════════
+
+const config = program
+  .command('config')
+  .alias('cfg')
+  .description('Manage CRUD generator configuration');
+
+/**
+ * Initialize configuration file
+ */
+config
+  .command('init')
+  .description('Initialize .crudgen.json configuration file')
+  .option('-f, --force', 'Overwrite existing configuration file')
+  .action(async (options) => {
+    try {
+      const fs = require('fs').promises;
+      const configPath = path.join(PROJECT_ROOT, '.crudgen.json');
+
+      // Check if config already exists
+      try {
+        await fs.access(configPath);
+        if (!options.force) {
+          console.log(
+            chalk.yellow(
+              '\n⚠️  Configuration file already exists at .crudgen.json',
+            ),
+          );
+          console.log(
+            chalk.gray('    Use --force to overwrite the existing file\n'),
+          );
+          return;
+        }
+      } catch {
+        // File doesn't exist, proceed
+      }
+
+      const defaultConfig = {
+        defaultTemplates: {
+          backend: 'domain',
+          frontend: 'v2',
+        },
+        customTemplates: {
+          backend: {},
+          frontend: {},
+        },
+        defaultFeatures: {
+          events: true,
+          bulkOperations: true,
+          export: false,
+          import: false,
+        },
+      };
+
+      await fs.writeFile(
+        configPath,
+        JSON.stringify(defaultConfig, null, 2),
+        'utf8',
+      );
+
+      console.log(
+        chalk.green('\n✅ Created .crudgen.json configuration file\n'),
+      );
+      console.log(chalk.gray('Default templates:'));
+      console.log(
+        chalk.gray(`  • Backend: ${defaultConfig.defaultTemplates.backend}`),
+      );
+      console.log(
+        chalk.gray(
+          `  • Frontend: ${defaultConfig.defaultTemplates.frontend}\n`,
+        ),
+      );
+    } catch (error) {
+      console.error(chalk.red('\n❌ Error initializing configuration:'));
+      console.error(error.message);
+      process.exit(1);
+    }
+  });
+
+/**
+ * Show current configuration
+ */
+config
+  .command('show')
+  .description('Show current configuration')
+  .action(async () => {
+    try {
+      const templateManager = new TemplateManager({
+        templatesBasePath: path.join(__dirname, 'templates'),
+      });
+      await templateManager.initialize();
+
+      console.log(chalk.bold.cyan('\n⚙️  CRUD Generator Configuration\n'));
+
+      const defaults = templateManager.getDefaults();
+
+      console.log(chalk.bold.yellow('Default Templates:'));
+      console.log(chalk.gray(`  • Backend:  ${defaults.backend}`));
+      console.log(chalk.gray(`  • Frontend: ${defaults.frontend}\n`));
+
+      const backendCustom =
+        templateManager.config.customTemplates?.backend || {};
+      const frontendCustom =
+        templateManager.config.customTemplates?.frontend || {};
+
+      if (Object.keys(backendCustom).length > 0) {
+        console.log(chalk.bold.yellow('Custom Backend Templates:'));
+        Object.entries(backendCustom).forEach(([name, config]) => {
+          console.log(chalk.gray(`  • ${name}`));
+          console.log(chalk.gray(`    Path: ${config.path}`));
+          console.log(
+            chalk.gray(`    Description: ${config.description || 'N/A'}`),
+          );
+        });
+        console.log('');
+      }
+
+      if (Object.keys(frontendCustom).length > 0) {
+        console.log(chalk.bold.yellow('Custom Frontend Templates:'));
+        Object.entries(frontendCustom).forEach(([name, config]) => {
+          console.log(chalk.gray(`  • ${name}`));
+          console.log(chalk.gray(`    Path: ${config.path}`));
+          console.log(
+            chalk.gray(`    Description: ${config.description || 'N/A'}`),
+          );
+        });
+        console.log('');
+      }
+
+      if (templateManager.config.defaultFeatures) {
+        console.log(chalk.bold.yellow('Default Features:'));
+        Object.entries(templateManager.config.defaultFeatures).forEach(
+          ([feature, enabled]) => {
+            const status = enabled ? chalk.green('✓') : chalk.gray('✗');
+            console.log(chalk.gray(`  ${status} ${feature}`));
+          },
+        );
+        console.log('');
+      }
+    } catch (error) {
+      console.error(chalk.red('\n❌ Error showing configuration:'));
+      console.error(error.message);
+      process.exit(1);
+    }
   });
 
 program.parse();
