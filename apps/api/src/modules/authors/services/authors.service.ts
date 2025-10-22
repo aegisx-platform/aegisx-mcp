@@ -473,7 +473,7 @@ export class AuthorsService extends BaseService<
     // If specific fields requested, use only those
     const fieldsToExport =
       fields && fields.length > 0
-        ? fields.filter((field) => exportableFields.hasOwnProperty(field))
+        ? fields.filter((field) => Object.prototype.hasOwnProperty.call(exportableFields, field))
         : Object.keys(exportableFields);
 
     // Format each field

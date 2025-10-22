@@ -482,6 +482,7 @@ pnpm run db:migrate && pnpm run db:seed
 - **[🚀 Deployment](./docs/infrastructure/deployment.md)** - Docker + CI/CD
 - **[🤖 MCP Integration](./docs/development/mcp-integration.md)** - Nx MCP & Playwright MCP usage
 - **[📋 All Commands Reference](./docs/references/claude-commands.md)** - Complete shell command list
+- **[🤖 CRUD Generator](./docs/crud-generator/)** - Automatic CRUD API generation with error handling & validation
 
 ### CI/CD & DevOps
 

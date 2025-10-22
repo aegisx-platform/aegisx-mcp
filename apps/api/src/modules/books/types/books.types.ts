@@ -49,3 +49,34 @@ export interface BooksEntity {
   created_at: Date;
   updated_at: Date;
 }
+
+// ===== ERROR HANDLING: ERROR CODES =====
+/**
+ * Error codes for Books module
+ * Auto-generated based on database constraints and business rules
+ */
+export enum BooksErrorCode {
+  // Standard errors
+  NOT_FOUND = 'BOOKS_NOT_FOUND',
+  VALIDATION_ERROR = 'BOOKS_VALIDATION_ERROR',
+
+  // Duplicate errors (409 Conflict)
+  DUPLICATE_ISBN = 'BOOKS_DUPLICATE_ISBN',
+
+  // Business rule validation errors (422)
+  INVALID_VALUE_PRICE = 'BOOKS_INVALID_VALUE_PRICE',
+}
+
+/**
+ * Error messages mapped to error codes
+ */
+export const BooksErrorMessages: Record<BooksErrorCode, string> = {
+  [BooksErrorCode.NOT_FOUND]: 'Books not found',
+  [BooksErrorCode.VALIDATION_ERROR]: 'Books validation failed',
+
+  // Duplicate error messages
+  [BooksErrorCode.DUPLICATE_ISBN]: 'Isbn already exists',
+
+  // Business rule messages
+  [BooksErrorCode.INVALID_VALUE_PRICE]: 'price must be a positive number',
+};

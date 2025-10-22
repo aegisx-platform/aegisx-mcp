@@ -115,7 +115,7 @@
     "@fastify/cors": "^11.1.0",
     "@fastify/helmet": "^13.0.1",
     "@fastify/jwt": "^10.0.0",
-    "@fastify/multipart": "^9.0.3",
+    "@fastify/multipart": "^9.2.1",
     "@fastify/rate-limit": "^10.3.0",
     "@fastify/sensible": "^6.0.3",
     "@fastify/swagger": "^9.5.1",
@@ -135,6 +135,7 @@
     "bcryptjs": "^3.0.2",
     "chalk": "^4.1.2",
     "commander": "^12.1.0",
+    "csv-parser": "^3.2.0",
     "dotenv-expand": "^12.0.3",
     "eventemitter2": "6.4.9",
     "exceljs": "^4.4.0",
@@ -168,6 +169,7 @@
     "uuid": "^11.1.0",
     "winston": "^3.17.0",
     "winston-daily-rotate-file": "^5.0.0",
+    "xlsx": "^0.18.5",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {

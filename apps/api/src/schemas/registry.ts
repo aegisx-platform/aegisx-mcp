@@ -10,6 +10,7 @@ import {
   ForbiddenResponseSchema,
   NotFoundResponseSchema,
   ConflictResponseSchema,
+  UnprocessableEntityResponseSchema,
   ServerErrorResponseSchema,
   PaginationQuerySchema,
   SearchQuerySchema,
@@ -45,6 +46,7 @@ export class SchemaRegistry {
       'forbidden-response': ForbiddenResponseSchema,
       'not-found-response': NotFoundResponseSchema,
       'conflict-response': ConflictResponseSchema,
+      'unprocessable-entity-response': UnprocessableEntityResponseSchema,
       'server-error-response': ServerErrorResponseSchema,
       'pagination-query': PaginationQuerySchema,
       'search-query': SearchQuerySchema,
@@ -57,6 +59,7 @@ export class SchemaRegistry {
       forbiddenResponse: ForbiddenResponseSchema,
       notFoundResponse: NotFoundResponseSchema,
       conflictResponse: ConflictResponseSchema,
+      unprocessableEntityResponse: UnprocessableEntityResponseSchema,
       serverErrorResponse: ServerErrorResponseSchema,
     };
 
@@ -139,6 +142,7 @@ export const SchemaRefs = {
   Forbidden: { $ref: 'forbidden-response#' },
   NotFound: { $ref: 'not-found-response#' },
   Conflict: { $ref: 'conflict-response#' },
+  UnprocessableEntity: { $ref: 'unprocessable-entity-response#' },
   ServerError: { $ref: 'server-error-response#' },
 
   // Query schemas

@@ -115,16 +115,17 @@ export const ListBooksQuerySchema = Type.Object({
 
   // Smart field-based filters
   title: Type.Optional(Type.String({ minLength: 1, maxLength: 100 })),
+  description: Type.Optional(Type.String({ minLength: 1, maxLength: 100 })),
   author_id: Type.Optional(Type.String({ minLength: 1, maxLength: 50 })),
   isbn: Type.Optional(Type.String({ minLength: 1, maxLength: 50 })),
-  published_date_min: Type.Optional(Type.String({ format: 'date' })),
-  published_date_max: Type.Optional(Type.String({ format: 'date' })),
+  pages: Type.Optional(Type.Number({ minimum: 0 })),
+  pages_min: Type.Optional(Type.Number({ minimum: 0 })),
+  pages_max: Type.Optional(Type.Number({ minimum: 0 })),
+  price: Type.Optional(Type.Number({})),
   price_min: Type.Optional(Type.Number({})),
   price_max: Type.Optional(Type.Number({})),
   genre: Type.Optional(Type.String({ minLength: 1, maxLength: 50 })),
   available: Type.Optional(Type.Boolean()),
-  updated_at_min: Type.Optional(Type.String({ format: 'date-time' })),
-  updated_at_max: Type.Optional(Type.String({ format: 'date-time' })),
 });
 
 // Response Schemas using base wrappers

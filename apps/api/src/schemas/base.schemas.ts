@@ -174,6 +174,18 @@ export const ConflictResponseSchema = Type.Object({
   meta: Type.Optional(ApiMetaSchema),
 });
 
+// Unprocessable Entity Response (for 422 errors - business rule violations)
+export const UnprocessableEntityResponseSchema = Type.Object({
+  success: Type.Literal(false),
+  error: Type.Object({
+    code: Type.String(), // Allow any error code for business rules
+    message: Type.String(),
+    details: Type.Optional(Type.Any()), // Additional error context (e.g., FK references)
+    statusCode: Type.Literal(422),
+  }),
+  meta: Type.Optional(ApiMetaSchema),
+});
+
 export const ServerErrorResponseSchema = Type.Object({
   success: Type.Literal(false),
   error: Type.Object({

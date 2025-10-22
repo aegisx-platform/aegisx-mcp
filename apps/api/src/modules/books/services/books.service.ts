@@ -6,6 +6,8 @@ import {
   type UpdateBooks,
   type GetBooksQuery,
   type ListBooksQuery,
+  BooksErrorCode,
+  BooksErrorMessages,
 } from '../types/books.types';
 
 /**
@@ -119,6 +121,35 @@ export class BooksService extends BaseService<Books, CreateBooks, UpdateBooks> {
    */
   protected async validateCreate(data: CreateBooks): Promise<void> {
     // Add custom validation logic here
+
+    // ===== ERROR HANDLING: DUPLICATE VALIDATION =====
+
+    // Check for duplicate isbn
+    if (data.isbn) {
+      const existing = await this.booksRepository.findByIsbn(data.isbn);
+      if (existing) {
+        const error = new Error(
+          BooksErrorMessages[BooksErrorCode.DUPLICATE_ISBN],
+        ) as any;
+        error.statusCode = 409;
+        error.code = BooksErrorCode.DUPLICATE_ISBN;
+        throw error;
+      }
+    }
+
+    // ===== ERROR HANDLING: BUSINESS RULES VALIDATION =====
+
+    // Business rule: price must be positive
+    if (data.price !== undefined && data.price !== null) {
+      if (Number(data.price) < 0) {
+        const error = new Error(
+          BooksErrorMessages[BooksErrorCode.INVALID_VALUE_PRICE],
+        ) as any;
+        error.statusCode = 422;
+        error.code = BooksErrorCode.INVALID_VALUE_PRICE;
+        throw error;
+      }
+    }
   }
 
   /**
@@ -151,11 +182,12 @@ export class BooksService extends BaseService<Books, CreateBooks, UpdateBooks> {
    * Validate before deletion
    */
   protected async validateDelete(
-    _id: string | number,
+    id: string | number,
     existing: Books,
   ): Promise<void> {
     // Add deletion validation logic here
     // Example: Prevent deletion if entity has dependent records
+    // ===== ERROR HANDLING: FOREIGN KEY REFERENCE VALIDATION =====
   }
 
   // ===== ENHANCED CRUD METHODS =====
@@ -327,12 +359,10 @@ export class BooksService extends BaseService<Books, CreateBooks, UpdateBooks> {
   }
 
   /**
-   * Get smart statistics based on detected field patterns
+   * Get basic statistics (count only)
    */
   async getStats(): Promise<{
     total: number;
-    recentlyCreated?: number;
-    recentlyUpdated?: number;
   }> {
     return this.booksRepository.getStats();
   }
@@ -398,9 +428,7 @@ export class BooksService extends BaseService<Books, CreateBooks, UpdateBooks> {
     // If specific fields requested, use only those
     const fieldsToExport =
       fields && fields.length > 0
-        ? fields.filter((field) =>
-            Object.prototype.hasOwnProperty.call(exportableFields, field),
-          )
+        ? fields.filter((field) => exportableFields.hasOwnProperty(field))
         : Object.keys(exportableFields);
 
     // Format each field

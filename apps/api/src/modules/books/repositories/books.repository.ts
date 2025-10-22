@@ -1,30 +1,32 @@
-import type { Knex } from 'knex';
 import {
-  BaseListQuery,
   BaseRepository,
+  BaseListQuery,
   PaginatedListResult,
 } from '../../../shared/repositories/base.repository';
+import type { Knex } from 'knex';
 import {
-  type Books,
-  type BooksEntity,
   type CreateBooks,
-  type GetBooksQuery,
   type UpdateBooks,
+  type Books,
+  type GetBooksQuery,
+  type ListBooksQuery,
+  type BooksEntity,
 } from '../types/books.types';
 
 export interface BooksListQuery extends BaseListQuery {
   // Smart field-based filters for Books
   title?: string;
+  description?: string;
   author_id?: string;
   isbn?: string;
-  published_date_min?: Date;
-  published_date_max?: Date;
+  pages?: number;
+  pages_min?: number;
+  pages_max?: number;
+  price?: number;
   price_min?: number;
   price_max?: number;
   genre?: string;
   available?: boolean;
-  updated_at_min?: Date;
-  updated_at_max?: Date;
 }
 
 export class BooksRepository extends BaseRepository<
@@ -115,17 +117,26 @@ export class BooksRepository extends BaseRepository<
     if (filters.title !== undefined) {
       query.where('books.title', filters.title);
     }
+    if (filters.description !== undefined) {
+      query.where('books.description', filters.description);
+    }
     if (filters.author_id !== undefined) {
       query.where('books.author_id', filters.author_id);
     }
     if (filters.isbn !== undefined) {
       query.where('books.isbn', filters.isbn);
     }
-    if (filters.published_date_min !== undefined) {
-      query.where('books.published_date', '>=', filters.published_date_min);
+    if (filters.pages !== undefined) {
+      query.where('books.pages', filters.pages);
     }
-    if (filters.published_date_max !== undefined) {
-      query.where('books.published_date', '<=', filters.published_date_max);
+    if (filters.pages_min !== undefined) {
+      query.where('books.pages', '>=', filters.pages_min);
+    }
+    if (filters.pages_max !== undefined) {
+      query.where('books.pages', '<=', filters.pages_max);
+    }
+    if (filters.price !== undefined) {
+      query.where('books.price', filters.price);
     }
     if (filters.price_min !== undefined) {
       query.where('books.price', '>=', filters.price_min);
@@ -138,12 +149,6 @@ export class BooksRepository extends BaseRepository<
     }
     if (filters.available !== undefined) {
       query.where('books.available', filters.available);
-    }
-    if (filters.updated_at_min !== undefined) {
-      query.where('books.updated_at', '>=', filters.updated_at_min);
-    }
-    if (filters.updated_at_max !== undefined) {
-      query.where('books.updated_at', '<=', filters.updated_at_max);
     }
   }
 
@@ -167,11 +172,6 @@ export class BooksRepository extends BaseRepository<
         const sortDirection =
           direction?.trim().toLowerCase() === 'asc' ? 'asc' : 'desc';
         query.orderBy(mappedField, sortDirection);
-        console.log('Sort direction:', field, direction);
-        console.log(
-          'Single sort query:======================',
-          query.toString(),
-        );
       }
     } else {
       // Default sort
@@ -235,35 +235,40 @@ export class BooksRepository extends BaseRepository<
     return row ? this.transformToEntity(row) : null;
   }
 
-  // Smart Statistics based on detected field patterns
+  /**
+   * Find by unique field: author_id
+   * Used for relationship lookups
+   */
+  async findByAuthorId(authorId: string): Promise<Books[]> {
+    const query = this.getJoinQuery();
+    const rows = await query.where('books.author_id', authorId);
+    return rows.map((row) => this.transformToEntity(row));
+  }
+
+  // ===== ERROR HANDLING: DUPLICATE DETECTION METHODS =====
+
+  /**
+   * Find by unique field: isbn
+   * Used for duplicate detection before insert/update
+   */
+  async findByIsbn(isbn: string | number): Promise<Books | null> {
+    const query = this.getJoinQuery();
+    const row = await query.where('books.isbn', isbn).first();
+    return row ? this.transformToEntity(row) : null;
+  }
+
+  // ===== ERROR HANDLING: DELETE VALIDATION METHODS =====
+
+  // Basic Statistics - count only
   async getStats(): Promise<{
     total: number;
-    recentlyCreated?: number;
-    recentlyUpdated?: number;
   }> {
-    const baseQuery = this.knex('books');
-
-    // Build select fields based on detected patterns
-    const selectFields = [this.knex.raw('COUNT(*) as total')];
-
-    // Add date-based statistics if date fields detected
-    selectFields.push(
-      this.knex.raw(
-        "COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '7 days') as recently_created",
-      ),
-      this.knex.raw(
-        "COUNT(*) FILTER (WHERE updated_at >= NOW() - INTERVAL '7 days') as recently_updated",
-      ),
-    );
-
-    const stats: any = await baseQuery.select(selectFields).first();
-
-    const total = parseInt(stats?.total || '0');
+    const stats: any = await this.knex('books')
+      .select([this.knex.raw('COUNT(*) as total')])
+      .first();
 
     return {
-      total,
-      recentlyCreated: parseInt(stats?.recently_created || '0'),
-      recentlyUpdated: parseInt(stats?.recently_updated || '0'),
+      total: parseInt(stats?.total || '0'),
     };
   }
 

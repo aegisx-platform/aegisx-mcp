@@ -52,6 +52,7 @@ export async function booksRoutes(
         401: SchemaRefs.Unauthorized,
         403: SchemaRefs.Forbidden,
         409: SchemaRefs.Conflict,
+        422: SchemaRefs.UnprocessableEntity,
         500: SchemaRefs.ServerError,
       },
     },
@@ -124,6 +125,7 @@ export async function booksRoutes(
         403: SchemaRefs.Forbidden,
         404: SchemaRefs.NotFound,
         409: SchemaRefs.Conflict,
+        422: SchemaRefs.UnprocessableEntity,
         500: SchemaRefs.ServerError,
       },
     },
@@ -147,6 +149,7 @@ export async function booksRoutes(
         401: SchemaRefs.Unauthorized,
         403: SchemaRefs.Forbidden,
         404: SchemaRefs.NotFound,
+        422: SchemaRefs.UnprocessableEntity,
         500: SchemaRefs.ServerError,
       },
     },
@@ -245,27 +248,6 @@ export async function booksRoutes(
       fastify.authorize(['books.delete', 'admin']),
     ],
     handler: controller.bulkDelete.bind(controller),
-  });
-
-  // Get books statistics
-  fastify.get('/stats', {
-    schema: {
-      tags: ['Books'],
-      summary: 'Get books statistics',
-      description: 'Get statistical information about bookss',
-      response: {
-        200: StatisticsResponseSchema,
-        400: SchemaRefs.ValidationError,
-        401: SchemaRefs.Unauthorized,
-        403: SchemaRefs.Forbidden,
-        500: SchemaRefs.ServerError,
-      },
-    },
-    preValidation: [
-      fastify.authenticate,
-      fastify.authorize(['books.read', 'admin']),
-    ],
-    handler: controller.getStats.bind(controller),
   });
 
   // Export books data
