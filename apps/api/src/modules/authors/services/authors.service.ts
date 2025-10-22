@@ -1,13 +1,13 @@
 import { BaseService } from '../../../shared/services/base.service';
 import { AuthorsRepository } from '../repositories/authors.repository';
-import { EventService } from '../../../shared/websocket/event.service';
-import { CrudEventHelper } from '../../../shared/websocket/crud-event-helper';
 import {
   type Authors,
   type CreateAuthors,
   type UpdateAuthors,
   type GetAuthorsQuery,
   type ListAuthorsQuery,
+  AuthorsErrorCode,
+  AuthorsErrorMessages,
 } from '../types/authors.types';
 
 /**
@@ -24,18 +24,8 @@ export class AuthorsService extends BaseService<
   CreateAuthors,
   UpdateAuthors
 > {
-  private eventHelper?: CrudEventHelper;
-
-  constructor(
-    private authorsRepository: AuthorsRepository,
-    private eventService?: EventService,
-  ) {
+  constructor(private authorsRepository: AuthorsRepository) {
     super(authorsRepository);
-
-    // Initialize event helper using Fastify pattern
-    if (eventService) {
-      this.eventHelper = eventService.for('authors', 'authors');
-    }
   }
 
   /**
@@ -51,11 +41,6 @@ export class AuthorsService extends BaseService<
       // Handle query options (includes, etc.)
       if (options.include) {
         // Add relationship loading logic here
-      }
-
-      // Emit read event for monitoring/analytics
-      if (this.eventHelper) {
-        await this.eventHelper.emitCustom('read', authors);
       }
     }
 
@@ -76,14 +61,6 @@ export class AuthorsService extends BaseService<
   }> {
     const result = await this.getList(options);
 
-    // Emit bulk read event
-    if (this.eventHelper) {
-      await this.eventHelper.emitCustom('bulk_read', {
-        count: result.data.length,
-        filters: options,
-      });
-    }
-
     return result;
   }
 
@@ -92,11 +69,6 @@ export class AuthorsService extends BaseService<
    */
   async create(data: CreateAuthors): Promise<Authors> {
     const authors = await super.create(data);
-
-    // Emit created event for real-time updates
-    if (this.eventHelper) {
-      await this.eventHelper.emitCreated(authors);
-    }
 
     return authors;
   }
@@ -109,10 +81,6 @@ export class AuthorsService extends BaseService<
     data: UpdateAuthors,
   ): Promise<Authors | null> {
     const authors = await super.update(id, data);
-
-    if (authors && this.eventHelper) {
-      await this.eventHelper.emitUpdated(authors);
-    }
 
     return authors;
   }
@@ -133,17 +101,10 @@ export class AuthorsService extends BaseService<
 
       console.log('Found authors to delete:', existing.id);
 
-      // Get entity before deletion for event emission
-      const authors = await this.getById(id);
-
       // Direct repository call to avoid base service complexity
       const deleted = await this.authorsRepository.delete(id);
 
       console.log('Delete result:', deleted);
-
-      if (deleted && authors && this.eventHelper) {
-        await this.eventHelper.emitDeleted(authors.id);
-      }
 
       if (deleted) {
         console.log('Authors deleted successfully:', {
@@ -167,6 +128,50 @@ export class AuthorsService extends BaseService<
    */
   protected async validateCreate(data: CreateAuthors): Promise<void> {
     // Add custom validation logic here
+
+    // ===== ERROR HANDLING: DUPLICATE VALIDATION =====
+
+    // Check for duplicate email
+    if (data.email) {
+      const existing = await this.authorsRepository.findByEmail(data.email);
+      if (existing) {
+        const error = new Error(
+          AuthorsErrorMessages[AuthorsErrorCode.DUPLICATE_EMAIL],
+        ) as any;
+        error.statusCode = 409;
+        error.code = AuthorsErrorCode.DUPLICATE_EMAIL;
+        throw error;
+      }
+    }
+
+    // ===== ERROR HANDLING: BUSINESS RULES VALIDATION =====
+
+    // Business rule: email must be valid email
+    if (data.email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(data.email)) {
+        const error = new Error(
+          AuthorsErrorMessages[AuthorsErrorCode.INVALID_EMAIL_EMAIL],
+        ) as any;
+        error.statusCode = 422;
+        error.code = AuthorsErrorCode.INVALID_EMAIL_EMAIL;
+        throw error;
+      }
+    }
+
+    // Business rule: birth_date cannot be in the future
+    if (data.birth_date) {
+      const fieldDate = new Date(data.birth_date);
+      const now = new Date();
+      if (fieldDate > now) {
+        const error = new Error(
+          AuthorsErrorMessages[AuthorsErrorCode.INVALID_DATE_BIRTH_DATE],
+        ) as any;
+        error.statusCode = 422;
+        error.code = AuthorsErrorCode.INVALID_DATE_BIRTH_DATE;
+        throw error;
+      }
+    }
   }
 
   /**
@@ -199,11 +204,38 @@ export class AuthorsService extends BaseService<
    * Validate before deletion
    */
   protected async validateDelete(
-    _id: string | number,
+    id: string | number,
     existing: Authors,
   ): Promise<void> {
     // Add deletion validation logic here
     // Example: Prevent deletion if entity has dependent records
+
+    // ===== ERROR HANDLING: FOREIGN KEY REFERENCE VALIDATION =====
+
+    // Check if record can be deleted (has foreign key references)
+    const deleteCheck = await this.authorsRepository.canBeDeleted(id);
+
+    if (!deleteCheck.canDelete) {
+      const nonCascadeRefs = deleteCheck.blockedBy.filter(
+        (ref) => !ref.cascade,
+      );
+
+      if (nonCascadeRefs.length > 0) {
+        const refDetails = nonCascadeRefs
+          .map((ref) => `${ref.count} ${ref.table}`)
+          .join(', ');
+        const error = new Error(
+          AuthorsErrorMessages[AuthorsErrorCode.CANNOT_DELETE_HAS_REFERENCES],
+        ) as any;
+        error.statusCode = 422;
+        error.code = AuthorsErrorCode.CANNOT_DELETE_HAS_REFERENCES;
+        error.details = {
+          references: deleteCheck.blockedBy,
+          message: `Cannot delete authors - has ${refDetails} references`,
+        };
+        throw error;
+      }
+    }
   }
 
   // ===== ENHANCED CRUD METHODS =====
@@ -282,9 +314,6 @@ export class AuthorsService extends BaseService<
         for (let i = 0; i < results.length; i++) {
           try {
             await this.afterCreate(results[i], validItems[i]);
-            if (this.eventHelper) {
-              await this.eventHelper.emitCreated(results[i]);
-            }
           } catch (error) {
             console.warn('Error in afterCreate:', error);
           }
@@ -444,9 +473,7 @@ export class AuthorsService extends BaseService<
     // If specific fields requested, use only those
     const fieldsToExport =
       fields && fields.length > 0
-        ? fields.filter((field) =>
-            Object.prototype.hasOwnProperty.call(exportableFields, field),
-          )
+        ? fields.filter((field) => exportableFields.hasOwnProperty(field))
         : Object.keys(exportableFields);
 
     // Format each field

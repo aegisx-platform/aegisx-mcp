@@ -82,7 +82,7 @@ export interface AuthorViewDialogData {
             <label>Id</label>
             <div class="field-value">
               <code>{{ data.authors.id }}</code>
-            </div>
+                          </div>
           </div>
           <div class="field-row">
             <label>Created At</label>

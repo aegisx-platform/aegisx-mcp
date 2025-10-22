@@ -78,9 +78,7 @@ import { DateRangeFilterComponent } from '../../../shared/components/date-range-
             class="flex-shrink-0 px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-md hover:bg-blue-700 transition-colors shadow-sm flex items-center gap-2"
             aria-label="Search"
             [matTooltip]="
-              searchTerm.trim()
-                ? 'Search authors'
-                : 'Enter search term to search'
+              searchTerm.trim() ? 'Search authors' : 'Enter search term to search'
             "
           >
             <mat-icon class="!text-lg !w-5 !h-5">search</mat-icon>
@@ -150,10 +148,7 @@ import { DateRangeFilterComponent } from '../../../shared/components/date-range-
             <mat-icon class="!text-base !w-4 !h-4">tune</mat-icon>
             Advanced Filters
             @if (activeFilterCount > 0) {
-              <span
-                class="ml-1 px-1.5 py-0.5 text-xs bg-blue-600 text-white rounded-full"
-                >{{ activeFilterCount }}</span
-              >
+              <span class="ml-1 px-1.5 py-0.5 text-xs bg-blue-600 text-white rounded-full">{{ activeFilterCount }}</span>
             }
           </button>
 

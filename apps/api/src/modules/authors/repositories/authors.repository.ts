@@ -17,12 +17,9 @@ export interface AuthorsListQuery extends BaseListQuery {
   // Smart field-based filters for Authors
   name?: string;
   email?: string;
-  birth_date_min?: Date;
-  birth_date_max?: Date;
+  bio?: string;
   country?: string;
   active?: boolean;
-  updated_at_min?: Date;
-  updated_at_max?: Date;
 }
 
 export class AuthorsRepository extends BaseRepository<
@@ -103,23 +100,14 @@ export class AuthorsRepository extends BaseRepository<
     if (filters.email !== undefined) {
       query.where('authors.email', filters.email);
     }
-    if (filters.birth_date_min !== undefined) {
-      query.where('authors.birth_date', '>=', filters.birth_date_min);
-    }
-    if (filters.birth_date_max !== undefined) {
-      query.where('authors.birth_date', '<=', filters.birth_date_max);
+    if (filters.bio !== undefined) {
+      query.where('authors.bio', filters.bio);
     }
     if (filters.country !== undefined) {
       query.where('authors.country', filters.country);
     }
     if (filters.active !== undefined) {
       query.where('authors.active', filters.active);
-    }
-    if (filters.updated_at_min !== undefined) {
-      query.where('authors.updated_at', '>=', filters.updated_at_min);
-    }
-    if (filters.updated_at_max !== undefined) {
-      query.where('authors.updated_at', '<=', filters.updated_at_max);
     }
   }
 
@@ -203,6 +191,62 @@ export class AuthorsRepository extends BaseRepository<
     const query = this.getJoinQuery();
     const row = await query.where('authors.name', name).first();
     return row ? this.transformToEntity(row) : null;
+  }
+
+  // ===== ERROR HANDLING: DUPLICATE DETECTION METHODS =====
+
+  /**
+   * Find by unique field: email
+   * Used for duplicate detection before insert/update
+   */
+  async findByEmail(email: string | number): Promise<Authors | null> {
+    const query = this.getJoinQuery();
+    const row = await query.where('authors.email', email).first();
+    return row ? this.transformToEntity(row) : null;
+  }
+
+  // ===== ERROR HANDLING: DELETE VALIDATION METHODS =====
+
+  /**
+   * Check if record can be deleted
+   * Returns foreign key references that would prevent deletion
+   */
+  async canBeDeleted(id: string | number): Promise<{
+    canDelete: boolean;
+    blockedBy: Array<{
+      table: string;
+      field: string;
+      count: number;
+      cascade: boolean;
+    }>;
+  }> {
+    const blockedBy: Array<{
+      table: string;
+      field: string;
+      count: number;
+      cascade: boolean;
+    }> = [];
+
+    // Check books references
+    const booksCount = await this.knex('books')
+      .where('author_id', id)
+      .count('* as count')
+      .first();
+
+    if (parseInt((booksCount?.count as string) || '0') > 0) {
+      blockedBy.push({
+        table: 'books',
+        field: 'author_id',
+        count: parseInt((booksCount?.count as string) || '0'),
+        cascade: true,
+      });
+    }
+
+    return {
+      canDelete:
+        blockedBy.length === 0 || blockedBy.every((ref) => ref.cascade),
+      blockedBy,
+    };
   }
 
   // Basic Statistics - count only

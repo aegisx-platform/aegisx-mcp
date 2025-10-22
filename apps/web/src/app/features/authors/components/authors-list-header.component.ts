@@ -16,14 +16,24 @@ import { MatIconModule } from '@angular/material/icon';
         </div>
         <p class="text-sm text-gray-600">Manage your author collection</p>
       </div>
-      <button
-        (click)="createClicked.emit()"
-        [disabled]="loading || hasError"
-        class="px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors shadow-sm flex items-center gap-2"
-      >
-        <mat-icon class="!text-lg !w-5 !h-5">add</mat-icon>
-        Add author
-      </button>
+      <div class="flex items-center gap-3">
+        <button
+          (click)="importClicked.emit()"
+          [disabled]="loading || hasError"
+          class="px-4 py-2.5 bg-green-600 text-white text-sm font-semibold rounded-md hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors shadow-sm flex items-center gap-2"
+        >
+          <mat-icon class="!text-lg !w-5 !h-5">upload</mat-icon>
+          Import
+        </button>
+        <button
+          (click)="createClicked.emit()"
+          [disabled]="loading || hasError"
+          class="px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors shadow-sm flex items-center gap-2"
+        >
+          <mat-icon class="!text-lg !w-5 !h-5">add</mat-icon>
+          Add author
+        </button>
+      </div>
     </div>
 
     <!-- Permission Error -->
@@ -146,6 +156,7 @@ export class AuthorsListHeaderComponent {
   @Input() hasError = false; // General error state (from service)
 
   @Output() createClicked = new EventEmitter<void>();
+  @Output() importClicked = new EventEmitter<void>();
   @Output() clearPermissionError = new EventEmitter<void>();
 
   getPercentage(count: number): number {
