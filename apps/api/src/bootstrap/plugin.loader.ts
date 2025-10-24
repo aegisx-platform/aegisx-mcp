@@ -42,6 +42,7 @@ import { usersPlugin } from '../core/users';
 import apiKeysPlugin from '../modules/apiKeys';
 import authorsPlugin from '../modules/authors';
 import booksPlugin from '../modules/books';
+import budgetsPlugin from '../modules/budgets';
 import fileUploadPlugin from '../modules/file-upload/file-upload.plugin';
 import navigationPlugin from '../modules/navigation/navigation.plugin';
 import settingsPlugin from '../modules/settings/settings.plugin';
@@ -341,6 +342,11 @@ export function createFeaturePluginGroup(apiPrefix: string): PluginGroup {
       {
         name: 'books',
         plugin: booksPlugin,
+        required: true,
+      },
+      {
+        name: 'budgets',
+        plugin: budgetsPlugin,
         required: true,
       },
       {

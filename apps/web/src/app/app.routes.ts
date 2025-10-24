@@ -96,6 +96,17 @@ export const appRoutes: Route[] = [
     },
   },
   {
+    path: 'budgets',
+    loadChildren: () =>
+      import('./features/budgets/budgets.routes').then((m) => m.budgetsRoutes),
+    canActivate: [AuthGuard],
+    data: {
+      title: 'Budgets',
+      description: 'Budgets Management System',
+      requiredPermissions: ['budgets.read', 'admin.*'],
+    },
+  },
+  {
     path: 'pdf-templates',
     loadChildren: () =>
       import('./features/pdf-templates/pdf-templates.routes').then(

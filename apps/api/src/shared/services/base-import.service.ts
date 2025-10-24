@@ -103,10 +103,11 @@ export abstract class BaseImportService<T> {
         return (index + 1) * 10;
       case 'boolean':
         return index % 2 === 0 ? 'Yes' : 'No';
-      case 'date':
+      case 'date': {
         const date = new Date();
         date.setDate(date.getDate() + index);
         return date.toISOString().split('T')[0];
+      }
       case 'uuid':
         return uuidv4();
       case 'url':
@@ -484,7 +485,7 @@ export abstract class BaseImportService<T> {
     const strValue = String(value).trim();
 
     switch (field.type) {
-      case 'email':
+      case 'email': {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(strValue)) {
           return {
@@ -498,6 +499,7 @@ export abstract class BaseImportService<T> {
           };
         }
         break;
+      }
 
       case 'number':
         if (isNaN(Number(value))) {
@@ -513,7 +515,7 @@ export abstract class BaseImportService<T> {
         }
         break;
 
-      case 'boolean':
+      case 'boolean': {
         const validBooleans = ['true', 'false', 'yes', 'no', '1', '0'];
         if (!validBooleans.includes(strValue.toLowerCase())) {
           return {
@@ -527,8 +529,9 @@ export abstract class BaseImportService<T> {
           };
         }
         break;
+      }
 
-      case 'date':
+      case 'date': {
         const date = new Date(value);
         if (isNaN(date.getTime())) {
           return {
@@ -542,8 +545,9 @@ export abstract class BaseImportService<T> {
           };
         }
         break;
+      }
 
-      case 'uuid':
+      case 'uuid': {
         const uuidRegex =
           /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
         if (!uuidRegex.test(strValue)) {
@@ -558,6 +562,7 @@ export abstract class BaseImportService<T> {
           };
         }
         break;
+      }
 
       case 'url':
         try {

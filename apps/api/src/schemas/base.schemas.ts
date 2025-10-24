@@ -196,6 +196,16 @@ export const ServerErrorResponseSchema = Type.Object({
   meta: Type.Optional(ApiMetaSchema),
 });
 
+export const NotImplementedResponseSchema = Type.Object({
+  success: Type.Literal(false),
+  error: Type.Object({
+    code: Type.Literal('NOT_IMPLEMENTED'),
+    message: Type.String({ default: 'Feature not yet implemented' }),
+    statusCode: Type.Literal(501),
+  }),
+  meta: Type.Optional(ApiMetaSchema),
+});
+
 // Base entity schemas
 export const BaseIdSchema = Type.Object({
   id: Type.String({ format: 'uuid', description: 'Unique identifier' }),
@@ -246,6 +256,7 @@ export const StandardRouteResponses = {
   404: NotFoundResponseSchema,
   409: ConflictResponseSchema,
   500: ServerErrorResponseSchema,
+  501: NotImplementedResponseSchema,
 };
 
 // ==== ENHANCED CRUD SCHEMAS ====
