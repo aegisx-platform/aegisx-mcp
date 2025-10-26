@@ -6,7 +6,6 @@ import { BudgetsRepository } from './repositories/budgets.repository';
 import { budgetsRoutes } from './routes/index';
 import { budgetsImportRoutes } from './routes/budgets-import.routes';
 import { BudgetsImportService } from './services/budgets-import.service';
-import { ExportService } from '../../services/export.service';
 
 // Note: FastifyInstance eventService type is declared in websocket.plugin.ts
 
@@ -35,8 +34,10 @@ export default fp(
     // Service instantiation following Fastify DI pattern
     // Dependencies are accessed from Fastify instance decorators
     const budgetsRepository = new BudgetsRepository((fastify as any).knex);
-    const budgetsService = new BudgetsService(budgetsRepository);
-    const exportService = new ExportService();
+    const budgetsService = new BudgetsService(
+      budgetsRepository,
+      (fastify as any).eventService,
+    );
     const budgetsImportService = new BudgetsImportService(
       (fastify as any).knex,
       budgetsRepository,
@@ -45,7 +46,6 @@ export default fp(
     // Controller instantiation with proper dependencies
     const budgetsController = new BudgetsController(
       budgetsService,
-      exportService,
       budgetsImportService,
     );
 
@@ -68,10 +68,16 @@ export default fp(
     fastify.addHook('onReady', async () => {
       fastify.log.info(`Budgets domain module registered successfully`);
     });
+
+    // Cleanup event listeners on close
+    fastify.addHook('onClose', async () => {
+      fastify.log.info(`Cleaning up Budgets domain module resources`);
+      // Add any cleanup logic here
+    });
   },
   {
     name: 'budgets-domain-plugin',
-    dependencies: ['knex-plugin'],
+    dependencies: ['knex-plugin', 'websocket-plugin'],
   },
 );
 
@@ -90,7 +96,24 @@ export type {
   BudgetsIdParam,
   GetBudgetsQuery,
   ListBudgetsQuery,
+  BudgetsCreatedEvent,
+  BudgetsUpdatedEvent,
+  BudgetsDeletedEvent,
 } from './schemas/budgets.schemas';
+
+// Event type definitions for external consumers
+import { Budgets } from './schemas/budgets.schemas';
+
+export interface BudgetsEventHandlers {
+  onCreated?: (data: Budgets) => void | Promise<void>;
+  onUpdated?: (data: Budgets) => void | Promise<void>;
+  onDeleted?: (data: { id: number | string }) => void | Promise<void>;
+}
+
+export interface BudgetsWebSocketSubscription {
+  subscribe(handlers: BudgetsEventHandlers): void;
+  unsubscribe(): void;
+}
 
 // Module name constant
 export const MODULE_NAME = 'budgets' as const;

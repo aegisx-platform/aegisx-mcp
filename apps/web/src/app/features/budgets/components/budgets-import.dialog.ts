@@ -11,7 +11,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { FormsModule } from '@angular/forms';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
-import { WebSocketService } from '@shared/services/web-socket.service';
+import { WebSocketService } from '../../../shared/business/services/websocket.service';
 
 import { BudgetService } from '../services/budgets.service';
 import {
@@ -1084,9 +1084,9 @@ export class BudgetImportDialogComponent implements OnDestroy {
 
   private setupWebSocketListener(jobId: string): void {
     this.wsService
-      .listen<any>('budgets:import-progress')
+      .subscribeToEvent('budgets', 'import', 'progress')
       .pipe(takeUntil(this.destroy$))
-      .subscribe((event) => {
+      .subscribe((event: any) => {
         // Only process events for this job
         if (event.jobId !== jobId) return;
 

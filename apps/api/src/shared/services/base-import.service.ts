@@ -27,7 +27,7 @@ import {
   ImportJobStatusResponse,
   FieldValidator,
 } from './import-config.interface';
-import { EventService } from './event.service';
+import { EventService } from '../websocket/event.service';
 
 /**
  * Base class for module import services
@@ -36,18 +36,23 @@ import { EventService } from './event.service';
 export abstract class BaseImportService<T> {
   protected readonly config: ImportModuleConfig<T>;
   protected readonly knex: Knex;
-  protected readonly eventService: EventService;
+  protected readonly eventService?: EventService;
   protected readonly resourceName: string;
 
   // In-memory storage (can be upgraded to Redis)
   private sessions: Map<string, ImportSession> = new Map();
   private jobs: Map<string, ImportJobData> = new Map();
 
-  constructor(knex: Knex, config: ImportModuleConfig<T>, resourceName: string) {
+  constructor(
+    knex: Knex,
+    config: ImportModuleConfig<T>,
+    resourceName: string,
+    eventService?: EventService,
+  ) {
     this.knex = knex;
     this.config = config;
     this.resourceName = resourceName;
-    this.eventService = EventService.getInstance();
+    this.eventService = eventService;
 
     // Set defaults
     this.config.maxRows = config.maxRows || 10000;
@@ -771,6 +776,8 @@ export abstract class BaseImportService<T> {
    * Emit import progress event via WebSocket
    */
   private emitImportProgress(job: ImportJobData): void {
+    if (!this.eventService) return;
+
     const progressEvent = {
       jobId: job.jobId,
       sessionId: job.sessionId,
@@ -783,11 +790,10 @@ export abstract class BaseImportService<T> {
       error: job.error,
     };
 
-    // Emit progress event with resource-specific name
-    this.eventService.emit(
-      `${this.resourceName}:import-progress`,
-      progressEvent,
-    );
+    // Emit progress event with resource-specific name using new EventService API
+    this.eventService
+      .for(this.resourceName, 'import')
+      .emitCustom('progress', progressEvent, 'normal');
   }
 
   /**

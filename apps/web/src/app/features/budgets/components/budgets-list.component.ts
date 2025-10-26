@@ -54,6 +54,7 @@ import {
 } from '../../../shared/components/shared-export/shared-export.component';
 import { BudgetService } from '../services/budgets.service';
 import { Budget, ListBudgetQuery } from '../types/budgets.types';
+import { BudgetStateManager } from '../services/budgets-state-manager.service';
 import { BudgetCreateDialogComponent } from './budgets-create.dialog';
 import {
   BudgetEditDialogComponent,
@@ -109,6 +110,7 @@ import { BudgetsListHeaderComponent } from './budgets-list-header.component';
 })
 export class BudgetsListComponent {
   budgetsService = inject(BudgetService);
+  budgetStateManager = inject(BudgetStateManager);
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
   private axDialog = inject(AxDialogService);
@@ -274,14 +276,12 @@ export class BudgetsListComponent {
     this.budget_descriptionInputSignal.set(value);
   }
 
-
   get is_activeFilter() {
     return this.is_activeInputSignal();
   }
   set is_activeFilter(value: boolean | undefined) {
     this.is_activeInputSignal.set(value);
   }
-
 
   // Stats from API (should come from dedicated stats endpoint)
   stats = computed(() => ({
@@ -293,7 +293,8 @@ export class BudgetsListComponent {
 
   // Export configuration
   exportServiceAdapter: ExportService = {
-    export: (options: ExportOptions) => this.budgetsService.exportBudget(options),
+    export: (options: ExportOptions) =>
+      this.budgetsService.exportBudget(options),
   };
 
   availableExportFields = [
@@ -323,6 +324,9 @@ export class BudgetsListComponent {
 
   // --- Effect: reload budgets on sort/page/search/filter change ---
   constructor() {
+    // Initialize real-time state manager
+    this.budgetStateManager.initialize();
+
     // Sync export selection state
     effect(() => {
       const ids = new Set(this.selection.selected.map((b) => b.id));
@@ -386,9 +390,10 @@ export class BudgetsListComponent {
           delete params[k as keyof typeof params],
       );
 
-      await this.budgetsService.loadBudgetList(params);
-      this.dataSource.data = this.budgetsService.budgetsList();
+      // With real-time state manager: Use synced data instead of manual API calls
+      this.dataSource.data = this.budgetStateManager.localState();
       if (this.paginator) {
+        // TODO: State manager doesn't track total count yet, fallback to service
         this.paginator.length = this.budgetsService.totalBudget();
       }
     });
@@ -423,8 +428,12 @@ export class BudgetsListComponent {
     // Apply text and selection filters
     this.budget_codeFilterSignal.set(this.budget_codeInputSignal().trim());
     this.budget_typeFilterSignal.set(this.budget_typeInputSignal().trim());
-    this.budget_categoryFilterSignal.set(this.budget_categoryInputSignal().trim());
-    this.budget_descriptionFilterSignal.set(this.budget_descriptionInputSignal().trim());
+    this.budget_categoryFilterSignal.set(
+      this.budget_categoryInputSignal().trim(),
+    );
+    this.budget_descriptionFilterSignal.set(
+      this.budget_descriptionInputSignal().trim(),
+    );
     this.is_activeFilterSignal.set(this.is_activeInputSignal());
 
     // Apply date/datetime filters
@@ -574,11 +583,12 @@ export class BudgetsListComponent {
     this.axDialog.confirmDelete(itemName).subscribe(async (confirmed) => {
       if (confirmed) {
         try {
-          await this.budgetsService.deleteBudget(budget.id);
+          // Use state manager's optimistic delete for real-time UI updates
+          await this.budgetStateManager.optimisticDelete(budget.id);
           this.snackBar.open('Budget deleted successfully', 'Close', {
             duration: 3000,
           });
-          this.reloadTrigger.update((n) => n + 1);
+          // No need to reload - state manager auto-updates dataSource via effect
         } catch {
           this.snackBar.open('Failed to delete budget', 'Close', {
             duration: 3000,

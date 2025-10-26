@@ -28,11 +28,7 @@ export class BudgetsImportService extends BaseImportService<Budgets> {
     knex: Knex,
     private budgetsRepository: BudgetsRepository,
   ) {
-    super(
-      knex,
-      BudgetsImportService.createConfig(budgetsRepository),
-      'budgets',
-    );
+    super(knex, BudgetsImportService.createConfig(budgetsRepository));
   }
 
   /**

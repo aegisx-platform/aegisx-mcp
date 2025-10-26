@@ -60,7 +60,7 @@ export class BudgetStateManager extends BaseRealtimeStateManager<Budget> {
     try {
       await this.budgetsService.loadBudgetList({
         limit: 10000,
-        offset: 0,
+        page: 1,
       });
 
       const items = this.budgetsService.budgetsList();
@@ -82,6 +82,9 @@ export class BudgetStateManager extends BaseRealtimeStateManager<Budget> {
 
     try {
       const result = await this.budgetsService.createBudget(data);
+      if (!result) {
+        throw new Error('Failed to create budget: Server returned null');
+      }
       console.log('✅ Budget created on server:', result);
 
       return result;
@@ -103,9 +106,12 @@ export class BudgetStateManager extends BaseRealtimeStateManager<Budget> {
 
     try {
       const result = await this.budgetsService.updateBudget(
-        id as string,
+        id as number,
         changes,
       );
+      if (!result) {
+        throw new Error('Failed to update budget: Server returned null');
+      }
       console.log('✅ Budget updated on server:', result);
 
       return result;
@@ -123,7 +129,7 @@ export class BudgetStateManager extends BaseRealtimeStateManager<Budget> {
     console.log('🗑️ Deleting budget from server:', id);
 
     try {
-      await this.budgetsService.deleteBudget(id as string);
+      await this.budgetsService.deleteBudget(id as number);
       console.log('✅ Budget deleted from server');
     } catch (error) {
       console.error('❌ Failed to delete budget:', error);
@@ -141,7 +147,7 @@ export class BudgetStateManager extends BaseRealtimeStateManager<Budget> {
   /**
    * Lifecycle hook: Called when WebSocket connection is established
    */
-  protected onRealtimeConnected(): void {
+  protected override onRealtimeConnected(): void {
     console.log('✅ Budget real-time connection established');
     // Sync with server when connection is restored
     this.syncWithServer().catch((error) => {
@@ -152,7 +158,7 @@ export class BudgetStateManager extends BaseRealtimeStateManager<Budget> {
   /**
    * Lifecycle hook: Called when WebSocket connection is lost
    */
-  protected onRealtimeDisconnected(): void {
+  protected override onRealtimeDisconnected(): void {
     console.warn(
       '⚠️ Budget real-time connection lost - operating in offline mode',
     );
@@ -161,7 +167,7 @@ export class BudgetStateManager extends BaseRealtimeStateManager<Budget> {
   /**
    * Lifecycle hook: Called when bulk operation starts
    */
-  protected onBulkOperationStarted(data: {
+  protected override onBulkOperationStarted(data: {
     operationId: string;
     total: number;
     operation: string;
@@ -172,7 +178,7 @@ export class BudgetStateManager extends BaseRealtimeStateManager<Budget> {
   /**
    * Lifecycle hook: Called during bulk operation progress
    */
-  protected onBulkOperationProgress(data: {
+  protected override onBulkOperationProgress(data: {
     operationId: string;
     progress: any;
   }): void {
@@ -182,7 +188,7 @@ export class BudgetStateManager extends BaseRealtimeStateManager<Budget> {
   /**
    * Lifecycle hook: Called when bulk operation completes
    */
-  protected onBulkOperationCompleted(data: {
+  protected override onBulkOperationCompleted(data: {
     operationId: string;
     results: any;
   }): void {
@@ -196,7 +202,7 @@ export class BudgetStateManager extends BaseRealtimeStateManager<Budget> {
   /**
    * Lifecycle hook: Called when conflict is detected
    */
-  protected onConflictDetected(
+  protected override onConflictDetected(
     entityId: string | number,
     conflict: ConflictInfo,
   ): void {
@@ -210,7 +216,7 @@ export class BudgetStateManager extends BaseRealtimeStateManager<Budget> {
   /**
    * Lifecycle hook: Called when entity is locked by another user
    */
-  protected onEntityLocked(
+  protected override onEntityLocked(
     entityId: string | number,
     userId: string,
     lockType?: string,
@@ -221,7 +227,10 @@ export class BudgetStateManager extends BaseRealtimeStateManager<Budget> {
   /**
    * Lifecycle hook: Called when entity is unlocked
    */
-  protected onEntityUnlocked(entityId: string | number, userId: string): void {
+  protected override onEntityUnlocked(
+    entityId: string | number,
+    userId: string,
+  ): void {
     console.log('🔓 Budget unlocked:', { entityId, userId });
   }
 
