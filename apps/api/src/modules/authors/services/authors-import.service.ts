@@ -28,7 +28,11 @@ export class AuthorsImportService extends BaseImportService<Authors> {
     knex: Knex,
     private authorsRepository: AuthorsRepository,
   ) {
-    super(knex, AuthorsImportService.createConfig(authorsRepository));
+    super(
+      knex,
+      AuthorsImportService.createConfig(authorsRepository),
+      'authors',
+    );
   }
 
   /**
@@ -64,7 +68,9 @@ export class AuthorsImportService extends BaseImportService<Authors> {
           const random = Math.floor(Math.random() * 1000);
           return `author${timestamp}${random}@example.com`;
         },
-        validators: [AuthorsImportService.createEmailUniqueValidator(authorsRepository)],
+        validators: [
+          AuthorsImportService.createEmailUniqueValidator(authorsRepository),
+        ],
         errorMessages: {
           required: 'Email is required',
           invalid: AuthorsErrorMessages[AuthorsErrorCode.INVALID_EMAIL_EMAIL],
@@ -88,7 +94,8 @@ export class AuthorsImportService extends BaseImportService<Authors> {
         defaultExample: '1980-05-15',
         validators: [AuthorsImportService.createBirthDateValidator()],
         errorMessages: {
-          invalid: AuthorsErrorMessages[AuthorsErrorCode.INVALID_DATE_BIRTH_DATE],
+          invalid:
+            AuthorsErrorMessages[AuthorsErrorCode.INVALID_DATE_BIRTH_DATE],
         },
       },
       {
@@ -167,14 +174,19 @@ export class AuthorsImportService extends BaseImportService<Authors> {
     row: any,
     index: number,
   ) => ImportValidationError | null {
-    return (value: any, row: any, index: number): ImportValidationError | null => {
+    return (
+      value: any,
+      row: any,
+      index: number,
+    ): ImportValidationError | null => {
       if (!value) return null;
 
       const date = new Date(value);
       if (date > new Date()) {
         return {
           field: 'birth_date',
-          message: AuthorsErrorMessages[AuthorsErrorCode.INVALID_DATE_BIRTH_DATE],
+          message:
+            AuthorsErrorMessages[AuthorsErrorCode.INVALID_DATE_BIRTH_DATE],
           code: AuthorsErrorCode.INVALID_DATE_BIRTH_DATE,
           severity: ImportValidationSeverity.ERROR,
           value,

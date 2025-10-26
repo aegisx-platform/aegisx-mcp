@@ -27,6 +27,7 @@ import {
   ImportJobStatusResponse,
   FieldValidator,
 } from './import-config.interface';
+import { EventService } from './event.service';
 
 /**
  * Base class for module import services
@@ -35,19 +36,24 @@ import {
 export abstract class BaseImportService<T> {
   protected readonly config: ImportModuleConfig<T>;
   protected readonly knex: Knex;
+  protected readonly eventService: EventService;
+  protected readonly resourceName: string;
 
   // In-memory storage (can be upgraded to Redis)
   private sessions: Map<string, ImportSession> = new Map();
   private jobs: Map<string, ImportJobData> = new Map();
 
-  constructor(knex: Knex, config: ImportModuleConfig<T>) {
+  constructor(knex: Knex, config: ImportModuleConfig<T>, resourceName: string) {
     this.knex = knex;
     this.config = config;
+    this.resourceName = resourceName;
+    this.eventService = EventService.getInstance();
 
     // Set defaults
     this.config.maxRows = config.maxRows || 10000;
     this.config.allowWarnings = config.allowWarnings ?? true;
-    this.config.sessionExpirationMinutes = config.sessionExpirationMinutes || 30;
+    this.config.sessionExpirationMinutes =
+      config.sessionExpirationMinutes || 30;
     this.config.batchSize = config.batchSize || 100;
   }
 
@@ -393,8 +399,7 @@ export abstract class BaseImportService<T> {
     if (field.required && this.isEmpty(transformedValue)) {
       errors.push({
         field: field.name,
-        message:
-          field.errorMessages?.required || `${field.label} is required`,
+        message: field.errorMessages?.required || `${field.label} is required`,
         code: 'REQUIRED_FIELD',
         severity: ImportValidationSeverity.ERROR,
         value: transformedValue,
@@ -691,6 +696,9 @@ export abstract class BaseImportService<T> {
     try {
       job.status = ImportJobStatus.PROCESSING;
 
+      // Emit processing started event
+      this.emitImportProgress(job);
+
       // Transform rows to entity format
       const transformedRows = validRows.map((r) => {
         if (this.config.rowTransformer) {
@@ -719,22 +727,18 @@ export abstract class BaseImportService<T> {
           job.failedCount += batch.length;
           if (this.config.errorHandler) {
             batch.forEach((row, idx) => {
-              this.config.errorHandler!(
-                error as Error,
-                row,
-                i + idx,
-              );
+              this.config.errorHandler!(error as Error, row, i + idx);
             });
           }
         }
 
-        job.processedRecords = Math.min(
-          i + batchSize,
-          transformedRows.length,
-        );
+        job.processedRecords = Math.min(i + batchSize, transformedRows.length);
         job.progress = Math.round(
           (job.processedRecords / job.totalRecords) * 100,
         );
+
+        // Emit progress update after each batch
+        this.emitImportProgress(job);
       }
 
       // Run post-insert hook if provided
@@ -745,10 +749,16 @@ export abstract class BaseImportService<T> {
       job.status = ImportJobStatus.COMPLETED;
       job.completedAt = new Date();
       job.results = results;
+
+      // Emit completion event
+      this.emitImportProgress(job);
     } catch (error) {
       job.status = ImportJobStatus.FAILED;
       job.error = error instanceof Error ? error.message : String(error);
       job.completedAt = new Date();
+
+      // Emit failure event
+      this.emitImportProgress(job);
     }
   }
 
@@ -756,6 +766,29 @@ export abstract class BaseImportService<T> {
    * Insert batch of records (must be implemented by subclass)
    */
   protected abstract insertBatch(batch: Partial<T>[]): Promise<T[]>;
+
+  /**
+   * Emit import progress event via WebSocket
+   */
+  private emitImportProgress(job: ImportJobData): void {
+    const progressEvent = {
+      jobId: job.jobId,
+      sessionId: job.sessionId,
+      status: job.status,
+      progress: job.progress,
+      totalRecords: job.totalRecords,
+      processedRecords: job.processedRecords,
+      successCount: job.successCount,
+      failedCount: job.failedCount,
+      error: job.error,
+    };
+
+    // Emit progress event with resource-specific name
+    this.eventService.emit(
+      `${this.resourceName}:import-progress`,
+      progressEvent,
+    );
+  }
 
   /**
    * Get job status

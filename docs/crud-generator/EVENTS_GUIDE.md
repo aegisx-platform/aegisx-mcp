@@ -21,7 +21,7 @@
 
 The `--with-events` flag enables **real-time WebSocket event emission** for all CRUD operations. When enabled, the backend automatically broadcasts events whenever data changes, allowing frontend applications to react in real-time.
 
-**Current State (v2.2.0)**:
+**Current State (v2.3.0)**:
 
 - ✅ Backend event emission fully implemented
 - ✅ WebSocket infrastructure ready
@@ -30,7 +30,7 @@ The `--with-events` flag enables **real-time WebSocket event emission** for all 
 - ✅ BaseRealtimeStateManager with optimistic updates & conflict detection
 - ✅ List component state manager integration (auto-injected & initialized)
 - ✅ Dialog components integration (create/edit use optimistic updates)
-- 🚧 Import progress via WebSocket (planned for v2.3.0)
+- ✅ Import progress via WebSocket (real-time progress updates)
 
 **Use Cases**:
 
@@ -777,29 +777,176 @@ export class ProductEditDialogComponent {
 - ✨ No manual reload triggers needed
 - 🎯 Consistent UX across all CRUD operations
 
-### Planned for v2.3.0
+### Completed in v2.3.0 ✅
 
 #### Import Progress via WebSocket
 
-Import dialogs will show real-time progress:
+**Real-time Progress Updates** - Import dialogs now receive instant progress updates via WebSocket instead of polling:
+
+**Backend Implementation**:
+
+BaseImportService automatically emits progress events during batch processing:
 
 ```typescript
-// Future generated code (v2.1.0)
-export class ProductsImportDialogComponent {
-  private setupImportProgress(sessionId: string) {
-    this.wsService
-      .listen<ImportProgressEvent>(`products:import-progress`)
-      .pipe(
-        filter((event) => event.sessionId === sessionId),
-        takeUntil(this.destroy$),
-      )
-      .subscribe((event) => {
-        this.progress.set(event.progress);
-        this.processedRows.set(event.processedRows);
-      });
+// apps/api/src/shared/services/base-import.service.ts
+export abstract class BaseImportService<T> {
+  protected readonly eventService: EventService;
+  protected readonly resourceName: string;
+
+  constructor(knex: Knex, config: ImportModuleConfig<T>, resourceName: string) {
+    this.knex = knex;
+    this.config = config;
+    this.resourceName = resourceName;
+    this.eventService = EventService.getInstance();
+  }
+
+  private emitImportProgress(job: ImportJobData): void {
+    const progressEvent = {
+      jobId: job.jobId,
+      sessionId: job.sessionId,
+      status: job.status,
+      progress: job.progress,
+      totalRecords: job.totalRecords,
+      processedRecords: job.processedRecords,
+      successCount: job.successCount,
+      failedCount: job.failedCount,
+      error: job.error,
+    };
+    this.eventService.emit(`${this.resourceName}:import-progress`, progressEvent);
+  }
+
+  private async processImportJob(jobId: string, validRows: ImportRowValidation[]): Promise<void> {
+    const job = this.jobs.get(jobId);
+    if (!job) return;
+
+    try {
+      job.status = ImportJobStatus.PROCESSING;
+      this.emitImportProgress(job); // Emit processing started
+
+      // Process batches...
+      for (let i = 0; i < transformedRows.length; i += batchSize) {
+        // ... batch processing ...
+        job.processedRecords = Math.min(i + batchSize, transformedRows.length);
+        job.progress = Math.round((job.processedRecords / job.totalRecords) * 100);
+
+        this.emitImportProgress(job); // Real-time progress after each batch
+      }
+
+      job.status = ImportJobStatus.COMPLETED;
+      this.emitImportProgress(job); // Emit completion
+    } catch (error) {
+      job.status = ImportJobStatus.FAILED;
+      job.error = error instanceof Error ? error.message : String(error);
+      this.emitImportProgress(job); // Emit failure
+    }
   }
 }
 ```
+
+**Frontend Implementation**:
+
+Generated import dialogs automatically use WebSocket when `--with-events` flag is set:
+
+```typescript
+// Generated with: pnpm run crud-gen products --with-import --with-events
+export class ProductsImportDialogComponent implements OnDestroy {
+  private wsService = inject(WebSocketService);
+  private destroy$ = new Subject<void>();
+
+  async executeImport(): Promise<void> {
+    // ... validation and API call ...
+
+    if (response?.success && response.data) {
+      this.importJob.set(response.data);
+      this.currentStep.set('progress');
+      this.setupWebSocketListener(response.data.jobId); // Use WebSocket instead of polling
+    }
+  }
+
+  private setupWebSocketListener(jobId: string): void {
+    this.wsService
+      .listen<any>('products:import-progress')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((event) => {
+        if (event.jobId !== jobId) return;
+
+        // Update UI immediately when progress event arrives
+        this.importJob.update((current) => ({
+          ...current!,
+          status: event.status,
+          progress: event.progress,
+          processedRecords: event.processedRecords,
+          successCount: event.successCount,
+          failedCount: event.failedCount,
+          error: event.error,
+        }));
+
+        // Handle completion/failure
+        if (event.status === 'completed' || event.status === 'failed') {
+          this.currentStep.set('complete');
+          if (event.status === 'completed') {
+            this.snackBar.open('Import completed successfully!', 'Close', {
+              duration: 5000,
+            });
+          } else {
+            this.snackBar.open('Import failed', 'Close', { duration: 5000 });
+          }
+        }
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+}
+```
+
+**Event Payload Structure**:
+
+```typescript
+{
+  jobId: 'uuid-here',
+  sessionId: 'session-uuid',
+  status: 'processing' | 'completed' | 'failed',
+  progress: 45,              // 0-100
+  totalRecords: 1000,
+  processedRecords: 450,
+  successCount: 445,
+  failedCount: 5,
+  error: null | string
+}
+```
+
+**Benefits**:
+
+- ⚡ **Instant Updates**: 0ms delay vs 2000ms average with polling
+- 📉 **Reduced Server Load**: No repeated API calls every 2 seconds
+- 🎯 **More Accurate Progress**: Updates after each batch instead of periodic sampling
+- 🔄 **Real-time Sync**: Multiple users see progress updates simultaneously
+- ♻️ **Proper Cleanup**: No memory leaks with Subject-based cleanup
+
+**Module-Specific Configuration**:
+
+Each import service extends BaseImportService with resource name:
+
+```typescript
+// apps/api/src/modules/products/services/products-import.service.ts
+export class ProductsImportService extends BaseImportService<Products> {
+  constructor(
+    knex: Knex,
+    private productsRepository: ProductsRepository,
+  ) {
+    super(knex, ProductsImportService.createConfig(productsRepository), 'products');
+    //                                                                    ^^^^^^^^^
+    //                                             Resource name for event naming
+  }
+}
+```
+
+---
+
+### Future Features
 
 ---
 
@@ -979,18 +1126,51 @@ for (const row of 10000rows) {
 
 **Symptoms**: Import completes but no progress updates
 
-**Current Limitation**: v2.0.1 uses polling, not WebSocket for import progress.
+**Solutions**:
 
-**Workaround**:
+1. **Verify `--with-events` flag was used**:
 
-```typescript
-// Import dialog uses polling (current implementation)
-const pollInterval = setInterval(() => {
-  this.checkImportStatus(sessionId);
-}, 2000);
-```
+   ```bash
+   # Generate with events enabled
+   pnpm run crud-gen products --with-import --with-events
+   ```
 
-**Future Solution**: v2.1.0 will use WebSocket for real-time import progress.
+2. **Check WebSocket connection**:
+
+   ```typescript
+   // Verify WebSocket service is injected and connected
+   console.log('WebSocket connected:', this.wsService.isConnected());
+   ```
+
+3. **Verify event listener setup**:
+
+   ```typescript
+   // Should call setupWebSocketListener() instead of startPolling()
+   if (response?.success && response.data) {
+     this.setupWebSocketListener(response.data.jobId); // ✅ With events
+     // NOT: this.startPolling(response.data.jobId);    // ❌ Old polling
+   }
+   ```
+
+4. **Check import service configuration**:
+
+   ```typescript
+   // Verify resource name is passed to BaseImportService
+   constructor(knex: Knex, private repository: Repository) {
+     super(knex, Config.createConfig(repository), 'products'); // ← Must match event name
+   }
+   ```
+
+5. **Backward Compatibility Note**:
+
+   If generated without `--with-events`, module will fall back to polling:
+
+   ```typescript
+   // Without --with-events flag (backward compatible)
+   if (response?.success && response.data) {
+     this.startPolling(response.data.jobId); // Still works with polling
+   }
+   ```
 
 ---
 
@@ -1057,28 +1237,42 @@ export class ProductsListComponent implements OnInit {
 
 ## Summary
 
-**What You Get with `--with-events`**:
+**What You Get with `--with-events` (v2.3.0)**:
+
+**Backend**:
 
 - ✅ Automatic event emission for all CRUD operations
 - ✅ Standardized event structure and naming
 - ✅ Integration with existing EventService
-- ✅ WebSocket infrastructure ready
-- ✅ Backend implementation complete
+- ✅ Real-time import progress events (v2.3.0)
+- ✅ BaseImportService with automatic event emission
 
-**What's Coming in v2.1.0**:
+**Frontend**:
 
-- 🚧 Auto-generated frontend real-time listeners
-- 🚧 Import progress via WebSocket
-- 🚧 Optimistic UI updates
-- 🚧 Batch event handling
+- ✅ Auto-generated real-time state manager (v2.1.0)
+- ✅ Optimistic UI updates with conflict detection (v2.1.0)
+- ✅ List component integration with state manager (v2.1.0)
+- ✅ Dialog components with optimistic updates (v2.2.0)
+- ✅ Import progress via WebSocket (v2.3.0)
+- ✅ Proper RxJS cleanup with takeUntil pattern
+
+**Performance Benefits**:
+
+- ⚡ Instant UI updates (0ms perceived latency)
+- 📉 Reduced server load (no polling)
+- 🎯 Accurate real-time progress tracking
+- 🔄 Multi-user synchronization
+- ♻️ Memory-safe subscriptions
 
 **Best Practices**:
 
-- Use consistent event naming
+- Use consistent event naming patterns
 - Keep event payloads lean
 - Handle events only after successful operations
 - Throttle high-frequency events
-- Always clean up subscriptions
+- Always clean up subscriptions with `takeUntil()`
+- Pass resource name to BaseImportService for event naming
+- Enable `--with-events` for real-time features
 
 **Related Guides**:
 
