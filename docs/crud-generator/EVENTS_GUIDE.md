@@ -28,6 +28,8 @@ The `--with-events` flag enables **real-time WebSocket event emission** for all 
 - ✅ Event types and payload structure defined
 - ✅ Frontend state manager generation (`--with-events` flag)
 - ✅ BaseRealtimeStateManager with optimistic updates & conflict detection
+- ✅ List component state manager integration (auto-injected & initialized)
+- 🚧 Dialog components integration (planned for v2.2.0)
 - 🚧 Import progress via WebSocket (planned for v2.2.0)
 
 **Use Cases**:
@@ -567,7 +569,56 @@ export class WebSocketService {
 }
 ```
 
-### Using Generated State Manager
+### List Component Integration (v2.1.0 ✅)
+
+When you generate a CRUD module with `--with-events`, the list component **automatically** includes state manager integration:
+
+```typescript
+// Generated: apps/web/src/app/features/products/components/products-list.component.ts
+
+export class ProductsListComponent {
+  productsService = inject(ProductService);
+  productStateManager = inject(ProductStateManager); // ← Auto-injected
+
+  constructor() {
+    // ✅ Auto-initialized in constructor
+    this.productStateManager.initialize();
+
+    // ✅ Effect watches state manager data
+    effect(async () => {
+      // ... filter/sort/pagination logic ...
+
+      // ✅ Use real-time data from state manager
+      this.dataSource.data = this.productStateManager.localState();
+    });
+  }
+
+  // ✅ Delete operation uses optimistic update
+  onDeleteProduct(product: Product) {
+    this.axDialog.confirmDelete(itemName).subscribe(async (confirmed) => {
+      if (confirmed) {
+        // Item disappears from UI instantly!
+        await this.productStateManager.optimisticDelete(product.id);
+
+        // No manual reload needed - dataSource auto-updates via effect
+      }
+    });
+  }
+}
+```
+
+**Benefits**:
+
+- 🚀 **Instant Delete**: Item disappears immediately (0ms vs 500ms)
+- 🔄 **Auto-Refresh**: No manual `reloadTrigger` needed
+- 📡 **Real-time Sync**: See changes from other users instantly
+- ⚡ **Better UX**: Users don't wait for server responses
+
+---
+
+### Manual State Manager Usage
+
+For custom components or advanced scenarios, you can use the state manager directly:
 
 **Basic Usage** - Initialize and subscribe to real-time state:
 
@@ -655,6 +706,9 @@ export class ProductStateManager extends BaseRealtimeStateManager<Product> {
 ### Completed in v2.1.0 ✅
 
 - ✅ **State Manager Generation** - Automatically generates real-time state management services
+- ✅ **List Component Integration** - Auto-injects & initializes state manager in list components
+- ✅ **Optimistic Delete** - Delete operations update UI instantly (0ms response time)
+- ✅ **Auto Data Sync** - dataSource uses state manager's real-time data
 - ✅ **Optimistic Updates** - UI updates immediately with automatic server synchronization
 - ✅ **Conflict Detection** - Detects and handles concurrent modifications
 - ✅ **Offline Support** - Pending operations queue for offline scenarios
@@ -662,7 +716,24 @@ export class ProductStateManager extends BaseRealtimeStateManager<Product> {
 
 ### Planned for v2.2.0
 
-#### 1. Import Progress via WebSocket
+#### 1. Dialog Components Integration
+
+Auto-inject state manager in create/edit dialogs:
+
+```typescript
+// Future generated code (v2.2.0)
+export class ProductEditDialogComponent {
+  stateManager = inject(ProductStateManager);
+
+  async onSubmit() {
+    // Optimistic update - dialog closes immediately
+    await this.stateManager.optimisticUpdate(this.data.product.id, formData);
+    this.dialogRef.close(true);
+  }
+}
+```
+
+#### 2. Import Progress via WebSocket
 
 Import dialogs will show real-time progress:
 
