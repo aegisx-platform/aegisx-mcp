@@ -2,16 +2,28 @@
 
 > **Automatic CRUD API generation with built-in error handling and validation**
 
-## 🎉 What's New in v2.0.1
+## 🎉 What's New in v2.1.0
 
-**Import Dialog Type Alignment Fix** - Generated import dialogs now have correct TypeScript interfaces matching BaseImportService API responses:
+**HIS Mode (Hospital Information System Mode)** - New default behavior that prioritizes data accuracy over real-time speed for critical systems:
 
-- ✅ Fixed `progress` property (direct number 0-100, not nested object)
-- ✅ Fixed summary properties (`successCount`, `failedCount` - flat structure)
-- ✅ Fixed error handling (single `error` string, not array)
-- ✅ Removed unsupported 'partial' status
+- ⚕️ **Data Accuracy First**: UI always shows actual database state (no optimistic updates)
+- 📊 **Backend Always Emits Events**: Audit trail and event-driven architecture ready
+- 🔧 **Optional Real-Time Mode**: Easy to enable by uncommenting 4 code blocks
+- 🛡️ **No Confusion**: Users never see outdated or server-rejected data
 
-**Migration**: Regenerate any modules using `--with-import` flag to get updated templates.
+**Why HIS Mode?** In critical systems like hospitals, financial systems, or enterprise applications, showing users data that might not match the database can be dangerous. HIS Mode ensures the UI always reflects the actual server state.
+
+**Migration**: Regenerate modules to get HIS Mode behavior:
+
+```bash
+# With events for audit trail
+pnpm aegisx-crud budgets --package --with-events --force
+
+# With import + events
+pnpm aegisx-crud budgets --package --with-import --with-events --force
+```
+
+**Enabling Optional Real-Time Updates**: See [Events Guide](./EVENTS_GUIDE.md) for step-by-step instructions to enable WebSocket real-time CRUD updates.
 
 See [CHANGELOG.md](./CHANGELOG.md) for complete version history.
 

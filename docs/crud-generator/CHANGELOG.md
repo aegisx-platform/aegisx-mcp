@@ -5,6 +5,115 @@ All notable changes to AegisX CRUD Generator will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2025-10-28
+
+### Added
+
+#### HIS Mode (Hospital Information System Mode)
+
+**New Default Behavior**: Prioritize data accuracy over real-time speed for critical healthcare and enterprise systems.
+
+**Problem Solved**: Optimistic updates in critical systems (like Hospital Information Systems) can cause dangerous data misunderstandings:
+
+- User sees "deleted" but server rejects due to business rules
+- UI shows outdated data that doesn't match database
+- Critical decisions made based on incorrect UI state
+
+**Solution - HIS Mode Architecture**:
+
+1. **Backend Always Emits Events** (for audit trail and event-driven architecture)
+   - All CRUD operations emit WebSocket events when generated with `--with-events`
+   - Events available for microservices integration and audit logging
+   - Event structure: `feature.entity.action` (e.g., `budgets.budgets.created`)
+
+2. **Frontend Uses Reload Trigger** (default behavior for data accuracy)
+   - Services return data WITHOUT modifying local state
+   - List components refresh via `reloadTrigger` signal after operations
+   - UI always displays actual server-verified data
+   - No optimistic updates that might mislead users
+
+3. **Optional Real-Time Mode** (easy to enable when needed)
+   - Comprehensive commented WebSocket subscription code provided in templates
+   - 4 code blocks to uncomment for enabling real-time CRUD updates
+   - State manager still initializes (always needed for import events)
+   - Perfect for non-critical features that benefit from instant feedback
+
+**Files Modified**:
+
+- `templates/frontend/v2/service.hbs` - Removed optimistic updates from create/update/delete
+- `templates/backend/domain/controller.hbs` - Added event emission after CRUD operations
+- `templates/frontend/v2/list-component-v2.hbs` - Added commented WebSocket subscription code
+- `docs/crud-generator/EVENTS_GUIDE.md` - Comprehensive HIS Mode documentation
+
+**Benefits**:
+
+- ⚕️ **Data Accuracy First**: UI always shows actual database state
+- 🛡️ **No Confusion**: Users never see outdated or rejected data
+- 📊 **Audit Trail**: Backend always emits events for compliance
+- 🏗️ **Event-Driven Ready**: Events available for microservices
+- 🔧 **Flexible**: Easy to enable real-time updates when appropriate
+
+**Migration Guide**:
+
+Regenerate modules to get HIS Mode behavior:
+
+```bash
+# With events for audit trail
+pnpm aegisx-crud budgets --package --with-events --force
+
+# With import + events
+pnpm aegisx-crud budgets --package --with-import --with-events --force
+```
+
+**Enabling Optional Real-Time Updates**:
+
+1. Locate the 4 commented code blocks in list component
+2. Uncomment imports, properties, constructor setup, and event listeners
+3. WebSocket will automatically sync CRUD operations across clients
+4. See EVENTS_GUIDE.md for detailed instructions
+
+**Example HIS Mode Pattern**:
+
+```typescript
+// Service returns data without optimistic update
+async deleteBudgets(id: string): Promise<boolean> {
+  const response = await this.httpClient.delete(`${this.baseUrl}/${id}`);
+  if (response?.success) {
+    return true; // ✅ No optimistic update
+  }
+  return false;
+}
+
+// Backend always emits event (audit trail)
+this.eventService.for('budgets', 'budgets').emitCustom('deleted', { id }, 'normal');
+
+// List component refreshes from server
+async onDeleteBudget(budget: Budgets) {
+  await this.budgetsService.deleteBudgets(budget.id);
+  this.reloadTrigger.update(n => n + 1); // ✅ Refresh from database
+}
+```
+
+### Changed
+
+- **Default Behavior**: Services no longer perform optimistic updates
+- **Event Emission**: Backend controllers always emit events (when `--with-events` used)
+- **List Refresh**: Components use reload trigger pattern instead of local state updates
+
+### Removed
+
+- Cleanup of unused test files in `apps/` directory
+- Removed optimistic update logic from service templates
+
+### Documentation
+
+- Updated EVENTS_GUIDE.md with comprehensive HIS Mode documentation
+- Added "Why HIS Mode?" section with healthcare example
+- Added "Enabling Optional Real-Time Updates" step-by-step guide
+- Added complete example with real-time enabled component
+
+---
+
 ## [2.0.1] - 2025-10-26
 
 ### Fixed

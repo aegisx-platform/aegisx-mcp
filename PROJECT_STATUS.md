@@ -1,7 +1,7 @@
 # AegisX Project Status
 
-**Last Updated:** 2025-10-27 (Session 43 - HIS Mode Implementation)
-**Current Task:** ✅ Implemented HIS Mode with Optional Real-Time CRUD Updates
+**Last Updated:** 2025-10-28 (Session 44 - CRUD Generator v2.1.0 Release)
+**Current Task:** ✅ Released CRUD Generator v2.1.0 with HIS Mode to npm
 **Git Repository:** git@github.com:aegisx-platform/aegisx-starter.git
 
 ## 🏗️ Project Overview
@@ -14,11 +14,130 @@ AegisX Starter - Enterprise-ready monorepo with Angular 19, Fastify, PostgreSQL
 
 ### Session Overview
 
-- **Date**: 2025-10-27 (Session 43)
-- **Main Focus**: ✅ Implement HIS Mode (Hospital Information System Mode) for CRUD Generator
-- **Status**: HIS Mode complete, documentation updated, tested with budgets module, committed and pushed
+- **Date**: 2025-10-28 (Session 44)
+- **Main Focus**: ✅ Release CRUD Generator v2.1.0 with HIS Mode to npm
+- **Status**: Version bumped, test files cleaned, committed, synced to separate repo, tagged v2.1.0, ready for npm publish
 
-### 🎯 Session 43 Tasks
+### 🎯 Session 44 Tasks
+
+#### 1. **✅ COMPLETED: Release CRUD Generator v2.1.0**
+
+**Goal**: Package and release CRUD Generator v2.1.0 with HIS Mode implementation to npm registry.
+
+**Tasks Completed**:
+
+1. **✅ Cleanup Unused Test Files**
+   - Reviewed project structure in `libs/aegisx-crud-generator/`
+   - Identified unused test files in `apps/` directory
+   - Deleted entire `apps/` directory with test migrations
+   - Cleaned up project structure for cleaner npm package
+
+2. **✅ Version Bump to 2.1.0**
+   - Updated `libs/aegisx-crud-generator/package.json`
+   - Changed version from `2.0.1` → `2.1.0` (minor version)
+   - Reason: HIS Mode is a new feature with backward compatibility
+   - Follows semantic versioning (major.minor.patch)
+
+3. **✅ Git Commit in Main Repository**
+   - Commit: `e4d509d`
+   - Message: `chore(crud-generator): bump version to 2.1.0 and clean up test files`
+   - Files changed:
+     - `libs/aegisx-crud-generator/package.json` (version bump)
+     - Deleted `libs/aegisx-crud-generator/apps/` directory
+   - Pushed to: `origin develop`
+
+4. **✅ Sync to Separate CRUD Generator Repository**
+   - Used git subtree push to sync changes
+   - Target repository: `git@github.com:aegisx-platform/crud-generator.git`
+   - Branch: `develop`
+   - Commit hash: `51b8b06`
+   - Command executed:
+     ```bash
+     git subtree push --prefix=libs/aegisx-crud-generator \
+       git@github.com:aegisx-platform/crud-generator.git develop
+     ```
+
+5. **✅ Create Tag v2.1.0 in CRUD Generator Repository**
+   - **IMPORTANT**: Tag created in **crud-generator repository**, NOT main repo
+   - Tag: `v2.1.0`
+   - Commit: `51b8b06d1aa1718fd5101abb38536f254a842202`
+   - Command executed:
+     ```bash
+     git push git@github.com:aegisx-platform/crud-generator.git \
+       51b8b06d1aa1718fd5101abb38536f254a842202:refs/tags/v2.1.0
+     ```
+   - Verified: Tag exists in crud-generator repository ✅
+
+6. **⏸️ NPM Publish (User Handles)**
+   - User will publish using OTP authentication
+   - Command for user: `cd libs/aegisx-crud-generator && ./publish.sh <OTP-CODE>`
+   - Package name: `@aegisx/crud-generator@2.1.0`
+   - Registry: https://registry.npmjs.org/
+
+7. **✅ Documentation Updates**
+   - Updated CLAUDE.md with CRUD Generator release workflow
+   - Added communication guide: exact phrases to use for version releases
+   - Documented git subtree architecture and tag creation rules
+   - Added examples and benefits explanation
+
+**Key Learning - Git Subtree Workflow**:
+
+```
+Main Monorepo (aegisx-starter)
+└── libs/aegisx-crud-generator/
+    │
+    ├─ git subtree push ──→ Separate Repo (crud-generator)
+    │                       └── NPM Package Source
+    │                           ├── Tags (v2.1.0, v2.0.1, etc.)
+    │                           └── npm publish → registry.npmjs.org
+    │
+    └─ ❌ NO TAGS HERE! Tags belong in separate repo only
+```
+
+**Benefits of This Architecture**:
+
+1. Main repo stays clean (no package-specific tags)
+2. NPM package has its own version history
+3. Separation of concerns: monorepo vs. published package
+4. Easy to manage multiple packages in future
+
+**Critical Rules Learned**:
+
+**DO:**
+
+- ✅ Create tags in **crud-generator repository** only
+- ✅ Always sync to separate repo before creating tags
+- ✅ Wait for user to provide OTP before npm publish
+- ✅ Use semantic versioning (major.minor.patch)
+
+**DON'T:**
+
+- ❌ NEVER create version tags in main aegisx-starter repository
+- ❌ NEVER create tags before syncing to separate repo
+- ❌ NEVER publish without user's explicit OTP code
+- ❌ NEVER skip git subtree sync step
+
+**Communication Guide for Future Releases**:
+
+| What You Want    | Say This to Claude                      | What Claude Will Do                    |
+| ---------------- | --------------------------------------- | -------------------------------------- |
+| **Version Bump** | "ออก version CRUD generator เป็น X.X.X" | Bump → Commit → Sync                   |
+| **Tag Creation** | "สร้าง tag CRUD generator vX.X.X"       | Create tag in crud-generator repo only |
+| **NPM Publish**  | "publish CRUD generator ไป npm"         | User provides OTP                      |
+| **Full Release** | "release CRUD generator vX.X.X"         | Complete workflow                      |
+| **Sync Only**    | "sync CRUD generator"                   | Git subtree push                       |
+
+**Impact**:
+
+- ✅ Version 2.1.0 ready for npm publish
+- ✅ Tag created in correct repository
+- ✅ Documentation updated for future releases
+- ✅ Clear communication guide established
+- ✅ Git subtree workflow documented
+
+---
+
+### 🎯 Session 43 Tasks (COMPLETED - Previous Session)
 
 #### 1. **✅ COMPLETED: Implement HIS Mode for CRUD Generator v2.4.0**
 
