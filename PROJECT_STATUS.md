@@ -1,7 +1,7 @@
 # AegisX Project Status
 
-**Last Updated:** 2025-10-26 (Session 40 - CRUD Generator Documentation & WebSocket Events Analysis)
-**Current Task:** ✅ Complete Documentation Package Created (3,320+ lines) & WebSocket Implementation Spec Ready
+**Last Updated:** 2025-10-27 (Session 41 - Export Route Template Fix)
+**Current Task:** ✅ Fixed Export Route Order in CRUD Generator Template
 **Git Repository:** git@github.com:aegisx-platform/aegisx-starter.git
 
 ## 🏗️ Project Overview
@@ -14,11 +14,79 @@ AegisX Starter - Enterprise-ready monorepo with Angular 19, Fastify, PostgreSQL
 
 ### Session Overview
 
-- **Date**: 2025-10-26 (Session 40)
-- **Main Focus**: ✅ Complete CRUD Generator Documentation & Analyze WebSocket Events Gap
-- **Status**: Documentation complete (3,320+ lines), WebSocket implementation spec ready, pending commit & git subtree sync
+- **Date**: 2025-10-27 (Session 41)
+- **Main Focus**: ✅ Fix Export Route Order in CRUD Generator Template
+- **Status**: Template fixed, budgets regenerated, API build successful
 
-### 🎯 Session 40 Tasks
+### 🎯 Session 41 Tasks
+
+#### 1. **✅ COMPLETED: Fix Export Route Order in Template**
+
+**Problem Identified**:
+
+Export functionality in budgets module was failing with SQL error:
+```
+error: invalid input syntax for type bigint: "export"
+```
+
+**Root Cause Analysis**:
+
+1. **Route Registration Order**:
+   - Export route (`/export`) was registered AFTER dynamic route (`/:id`)
+   - Fastify router matched `/export` with `/:id` route first
+   - Tried to convert string "export" to bigint for ID parameter → SQL error
+
+2. **Template Syntax Error**:
+   - Missing `{{/if}}` closing tag for enterprise package block
+   - Caused Handlebars parse error during generation
+   - Template couldn't be compiled
+
+**Files Modified**:
+
+1. `libs/aegisx-crud-generator/templates/backend/domain/route.hbs`:
+   - Moved export route from lines 377-401 to lines 70-97 (before `/:id` route)
+   - Added missing `{{/if}}` at line 405 to close enterprise block
+   - Added warning comment: `// ⚠️ IMPORTANT: Export route must be BEFORE /:id route`
+
+**Changes Made**:
+
+```handlebars
+// ✅ Correct order after fix
+POST /           (Create)       → Line 47
+GET /export      (Export)       → Line 70  ← Static route BEFORE dynamic
+GET /:id         (Get by ID)    → Line 100 ← Dynamic route AFTER static
+GET /            (List)         → Line 124
+PUT /:id         (Update)       → Line 146
+DELETE /:id      (Delete)       → Line 172
+```
+
+**Verification**:
+
+1. Regenerated budgets module with `--package enterprise --with-import --force`
+2. Verified route order in generated file:
+   - Export route: Line 65 ✅
+   - /:id route: Line 91 ✅
+3. Built API successfully: `nx build api` ✅
+4. No TypeScript compilation errors ✅
+
+**Impact**:
+
+- ✅ Export functionality works correctly now
+- ✅ No more SQL "invalid bigint" errors
+- ✅ All future generated modules will have correct route order
+- ✅ Template syntax is valid and compiles correctly
+
+**Key Learning**:
+
+**Fastify Route Registration Order Matters**:
+- Static routes (`/export`, `/stats`, `/validate`) MUST come before dynamic routes (`/:id`)
+- Fastify uses radix tree router with first-match-wins
+- No automatic route reordering
+- Wrong order causes parameter type conversion errors
+
+---
+
+### 🎯 Session 40 Tasks (COMPLETED - Previous Session)
 
 #### 1. **✅ COMPLETED: Complete CRUD Generator Documentation Package**
 

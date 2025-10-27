@@ -76,7 +76,7 @@ export interface BudgetViewDialogData {
             <label>Id</label>
             <div class="field-value">
               <code>{{ data.budgets.id }}</code>
-            </div>
+                          </div>
           </div>
           <div class="field-row">
             <label>Created At</label>

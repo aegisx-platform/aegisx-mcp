@@ -11,6 +11,18 @@ import {
   BudgetsListResponseSchema,
   FlexibleBudgetsListResponseSchema,
 } from '../schemas/budgets.schemas';
+import {
+  DropdownQuerySchema,
+  DropdownResponseSchema,
+  BulkCreateSchema,
+  BulkUpdateSchema,
+  BulkDeleteSchema,
+  BulkResponseSchema,
+  BulkStatusSchema,
+  StatusToggleSchema,
+  StatisticsResponseSchema,
+} from '../../../schemas/base.schemas';
+import { ExportQuerySchema } from '../../../schemas/export.schemas';
 import { ApiErrorResponseSchema as ErrorResponseSchema } from '../../../schemas/base.schemas';
 import { SchemaRefs } from '../../../schemas/registry';
 
@@ -46,6 +58,33 @@ export async function budgetsRoutes(
       fastify.authorize(['budgets', 'admin']),
     ], // Authentication & authorization required
     handler: controller.create.bind(controller),
+  });
+
+  // ⚠️ IMPORTANT: Export route must be BEFORE /:id route
+  // Export budgets data
+  fastify.get('/export', {
+    schema: {
+      tags: ['Budgets'],
+      summary: 'Export budgets data',
+      description: 'Export budgets data in various formats (CSV, Excel, PDF)',
+      querystring: ExportQuerySchema,
+      response: {
+        200: {
+          description: 'Export file download',
+          type: 'string',
+          format: 'binary',
+        },
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [
+      fastify.authenticate,
+      fastify.authorize(['budgets.read', 'budgets.export', 'admin']),
+    ],
+    handler: controller.export.bind(controller),
   });
 
   // Get budgets by ID
@@ -143,5 +182,189 @@ export async function budgetsRoutes(
       fastify.authorize(['budgets.delete', 'admin']),
     ], // Authentication & authorization required
     handler: controller.delete.bind(controller),
+  });
+
+  // ===== ENHANCED CRUD ROUTES =====
+
+  // Get dropdown options for UI components
+  fastify.get('/dropdown', {
+    schema: {
+      tags: ['Budgets'],
+      summary: 'Get budgets dropdown options',
+      description: 'Get budgets options for dropdown/select components',
+      querystring: DropdownQuerySchema,
+      response: {
+        200: DropdownResponseSchema,
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [
+      fastify.authenticate,
+      fastify.authorize(['budgets.read', 'admin']),
+    ],
+    handler: controller.getDropdownOptions.bind(controller),
+  });
+
+  // Bulk create budgetss
+  fastify.post('/bulk', {
+    schema: {
+      tags: ['Budgets'],
+      summary: 'Bulk create budgetss',
+      description: 'Create multiple budgetss in one operation',
+      body: BulkCreateSchema(CreateBudgetsSchema),
+      response: {
+        201: BulkResponseSchema(BudgetsResponseSchema),
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [
+      fastify.authenticate,
+      fastify.authorize(['budgets.create', 'admin']),
+    ],
+    handler: controller.bulkCreate.bind(controller),
+  });
+
+  // Bulk update budgetss
+  fastify.put('/bulk', {
+    schema: {
+      tags: ['Budgets'],
+      summary: 'Bulk update budgetss',
+      description: 'Update multiple budgetss in one operation',
+      body: BulkUpdateSchema(UpdateBudgetsSchema),
+      response: {
+        200: BulkResponseSchema(BudgetsResponseSchema),
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [
+      fastify.authenticate,
+      fastify.authorize(['budgets.update', 'admin']),
+    ],
+    handler: controller.bulkUpdate.bind(controller),
+  });
+
+  // Bulk delete budgetss
+  fastify.delete('/bulk', {
+    schema: {
+      tags: ['Budgets'],
+      summary: 'Bulk delete budgetss',
+      description: 'Delete multiple budgetss in one operation',
+      body: BulkDeleteSchema,
+      response: {
+        200: BulkResponseSchema(BudgetsResponseSchema),
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [
+      fastify.authenticate,
+      fastify.authorize(['budgets.delete', 'admin']),
+    ],
+    handler: controller.bulkDelete.bind(controller),
+  });
+
+  // Bulk status update
+  fastify.patch('/bulk/status', {
+    schema: {
+      tags: ['Budgets'],
+      summary: 'Bulk update budgets status',
+      description: 'Update status of multiple budgetss',
+      body: BulkStatusSchema,
+      response: {
+        200: BulkResponseSchema(BudgetsResponseSchema),
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [
+      fastify.authenticate,
+      fastify.authorize(['budgets.update', 'admin']),
+    ],
+    handler: controller.bulkUpdateStatus.bind(controller),
+  });
+
+  // Activate budgets
+  fastify.patch('/:id/activate', {
+    schema: {
+      tags: ['Budgets'],
+      summary: 'Activate budgets',
+      description: 'Activate a budgets by setting is_active to true',
+      params: BudgetsIdParamSchema,
+      body: StatusToggleSchema,
+      response: {
+        200: BudgetsResponseSchema,
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        404: SchemaRefs.NotFound,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [
+      fastify.authenticate,
+      fastify.authorize(['budgets.update', 'admin']),
+    ],
+    handler: controller.activate.bind(controller),
+  });
+
+  // Deactivate budgets
+  fastify.patch('/:id/deactivate', {
+    schema: {
+      tags: ['Budgets'],
+      summary: 'Deactivate budgets',
+      description: 'Deactivate a budgets by setting is_active to false',
+      params: BudgetsIdParamSchema,
+      body: StatusToggleSchema,
+      response: {
+        200: BudgetsResponseSchema,
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        404: SchemaRefs.NotFound,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [
+      fastify.authenticate,
+      fastify.authorize(['budgets.update', 'admin']),
+    ],
+    handler: controller.deactivate.bind(controller),
+  });
+
+  // Toggle budgets status
+  fastify.patch('/:id/toggle', {
+    schema: {
+      tags: ['Budgets'],
+      summary: 'Toggle budgets status',
+      description: 'Toggle the is_active status of a budgets',
+      params: BudgetsIdParamSchema,
+      body: StatusToggleSchema,
+      response: {
+        200: BudgetsResponseSchema,
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        404: SchemaRefs.NotFound,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [
+      fastify.authenticate,
+      fastify.authorize(['budgets.update', 'admin']),
+    ],
+    handler: controller.toggle.bind(controller),
   });
 }

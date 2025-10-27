@@ -542,7 +542,14 @@ export abstract class BaseRealtimeStateManager<T extends BaseEntity> implements 
         this._localState.set(serverData);
         this._hasChanges.set(false);
       } else {
-        this.detectAllConflicts(serverData);
+        // If localState is empty (initial load), populate it directly
+        if (this._localState().length === 0) {
+          this._localState.set(serverData);
+          this._hasChanges.set(false);
+        } else {
+          // Only run conflict detection if we have existing local data
+          this.detectAllConflicts(serverData);
+        }
       }
       
       this.updateLastSync();

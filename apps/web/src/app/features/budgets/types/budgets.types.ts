@@ -32,29 +32,29 @@ export interface ListBudgetQuery {
   // Pagination
   page?: number;
   limit?: number;
-
+  
   // Search
   search?: string;
-
+  
   // Sort
   sort?: string; // Multiple sort support: field1:desc,field2:asc
-
+  
   // Field selection
   fields?: string[]; // Array of field names to return
-
+  
   // Include related data
   include?: string | string[];
-
+  
   // Smart field-based filters
   // String filtering for budget_code
   budget_code?: string; // Exact match
-  // String filtering for budget_type
+    // String filtering for budget_type
   budget_type?: string; // Exact match
-  // String filtering for budget_category
+    // String filtering for budget_category
   budget_category?: string; // Exact match
-  // String filtering for budget_description
+    // String filtering for budget_description
   budget_description?: string; // Exact match
-  // Boolean filtering for is_active
+    // Boolean filtering for is_active
   is_active?: boolean;
   // Date/DateTime filtering for created_at
   created_at?: string; // ISO date string for exact match
@@ -96,6 +96,8 @@ export interface PaginatedResponse<T> {
     environment: string;
   };
 }
+
+
 
 // ===== IMPORT TYPES =====
 

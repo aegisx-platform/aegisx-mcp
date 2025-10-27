@@ -5,8 +5,8 @@ export const budgetsRoutes: Routes = [
     path: '',
     loadComponent: () =>
       import('./components/budgets-list.component').then(
-        (m) => m.BudgetsListComponent,
+        (m) => m.BudgetsListComponent
       ),
-    title: 'Budgets',
-  },
+    title: 'Budgets'
+  }
 ];

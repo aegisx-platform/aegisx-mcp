@@ -28,10 +28,22 @@ export class BudgetsRepository extends BaseRepository<
   UpdateBudgets
 > {
   constructor(knex: Knex) {
-    super(knex, 'budgets', [
-      // Define searchable fields based on intelligent detection
-      'budgets.budget_description',
-    ]);
+    super(
+      knex,
+      'budgets',
+      [
+        // Define searchable fields based on intelligent detection
+        'budgets.budget_description',
+      ],
+      [], // explicitUUIDFields
+      {
+        // Field configuration for automatic timestamp and audit field management
+        hasCreatedAt: true,
+        hasUpdatedAt: false,
+        hasCreatedBy: false,
+        hasUpdatedBy: false,
+      },
+    );
   }
 
   // Transform database row to entity

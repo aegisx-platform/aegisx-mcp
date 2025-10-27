@@ -79,7 +79,7 @@ export interface BudgetFormData {
           Budget Code is required
         </mat-error>
       </mat-form-field>
-
+      
       <!-- budget_type Field -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Budget Type</mat-label>
@@ -93,7 +93,7 @@ export interface BudgetFormData {
           Budget Type is required
         </mat-error>
       </mat-form-field>
-
+      
       <!-- budget_category Field -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Budget Category</mat-label>
@@ -103,13 +103,11 @@ export interface BudgetFormData {
           formControlName="budget_category"
           placeholder="Enter budget category"
         />
-        <mat-error
-          *ngIf="budgetsForm.get('budget_category')?.hasError('required')"
-        >
+        <mat-error *ngIf="budgetsForm.get('budget_category')?.hasError('required')">
           Budget Category is required
         </mat-error>
       </mat-form-field>
-
+      
       <!-- budget_description Field -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Budget Description</mat-label>
@@ -296,6 +294,7 @@ export class BudgetFormComponent implements OnInit, OnChanges {
   onSubmit() {
     if (this.budgetsForm.valid) {
       const formData = { ...this.budgetsForm.value } as BudgetFormData;
+
 
       this.formSubmit.emit(formData);
     }

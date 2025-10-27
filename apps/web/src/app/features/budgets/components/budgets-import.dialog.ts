@@ -9,9 +9,6 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTableModule } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
 import { FormsModule } from '@angular/forms';
-import { takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
-import { WebSocketService } from '../../../shared/business/services/websocket.service';
 
 import { BudgetService } from '../services/budgets.service';
 import {
@@ -400,7 +397,9 @@ type ImportStep = 'upload' | 'review' | 'options' | 'progress' | 'complete';
               <div class="progress-stats">
                 <div class="stat">
                   <span class="stat-label">Progress</span>
-                  <span class="stat-value">{{ importJob()!.progress }}%</span>
+                  <span class="stat-value"
+                    >{{ importJob()!.progress }}%</span
+                  >
                 </div>
                 <div class="stat">
                   <span class="stat-label">Processed</span>
@@ -935,8 +934,6 @@ export class BudgetImportDialogComponent implements OnDestroy {
   private budgetsService = inject(BudgetService);
   private snackBar = inject(MatSnackBar);
   private dialogRef = inject(MatDialogRef<BudgetImportDialogComponent>);
-  private wsService = inject(WebSocketService);
-  private destroy$ = new Subject<void>();
 
   currentStep = signal<ImportStep>('upload');
   loading = signal<boolean>(false);
@@ -960,6 +957,8 @@ export class BudgetImportDialogComponent implements OnDestroy {
     'budget_category',
     'errors',
   ];
+
+  private pollingInterval: any;
 
   getStepTitle(): string {
     const titles: Record<ImportStep, string> = {
@@ -1071,7 +1070,7 @@ export class BudgetImportDialogComponent implements OnDestroy {
       if (response?.success && response.data) {
         this.importJob.set(response.data);
         this.currentStep.set('progress');
-        this.setupWebSocketListener(response.data.jobId);
+        this.startPolling(response.data.jobId);
       }
     } catch (error: any) {
       this.snackBar.open(error?.message || 'Failed to start import', 'Close', {
@@ -1082,38 +1081,41 @@ export class BudgetImportDialogComponent implements OnDestroy {
     }
   }
 
-  private setupWebSocketListener(jobId: string): void {
-    this.wsService
-      .subscribeToEvent('budgets', 'import', 'progress')
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((event: any) => {
-        // Only process events for this job
-        if (event.jobId !== jobId) return;
+  private startPolling(jobId: string): void {
+    this.pollingInterval = setInterval(async () => {
+      try {
+        const response = await this.budgetsService.getImportStatus(jobId);
 
-        // Update import job with progress data
-        this.importJob.update((current) => ({
-          ...current!,
-          status: event.status,
-          progress: event.progress,
-          processedRecords: event.processedRecords,
-          successCount: event.successCount,
-          failedCount: event.failedCount,
-          error: event.error,
-        }));
+        if (response?.success && response.data) {
+          this.importJob.set(response.data);
 
-        // Handle completion/failure
-        if (event.status === 'completed' || event.status === 'failed') {
-          this.currentStep.set('complete');
+          if (
+            response.data.status === 'completed' ||
+            response.data.status === 'failed'
+          ) {
+            this.stopPolling();
+            this.currentStep.set('complete');
 
-          if (event.status === 'completed') {
-            this.snackBar.open('Import completed successfully!', 'Close', {
-              duration: 5000,
-            });
-          } else {
-            this.snackBar.open('Import failed', 'Close', { duration: 5000 });
+            if (response.data.status === 'completed') {
+              this.snackBar.open('Import completed successfully!', 'Close', {
+                duration: 5000,
+              });
+            } else {
+              this.snackBar.open('Import failed', 'Close', { duration: 5000 });
+            }
           }
         }
-      });
+      } catch (error) {
+        console.error('Failed to poll import status:', error);
+      }
+    }, 2000); // Poll every 2 seconds
+  }
+
+  private stopPolling(): void {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+      this.pollingInterval = null;
+    }
   }
 
   goToStep(step: ImportStep): void {
@@ -1141,13 +1143,11 @@ export class BudgetImportDialogComponent implements OnDestroy {
   }
 
   onCancel(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+    this.stopPolling();
     this.dialogRef.close();
   }
 
   ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+    this.stopPolling();
   }
 }

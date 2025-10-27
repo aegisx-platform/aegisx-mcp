@@ -6,9 +6,6 @@ import {
   type BudgetsIdParam,
   type GetBudgetsQuery,
   type ListBudgetsQuery,
-  type BudgetsCreatedEvent,
-  type BudgetsUpdatedEvent,
-  type BudgetsDeletedEvent,
 } from '../schemas/budgets.schemas';
 
 export {
@@ -18,9 +15,6 @@ export {
   type BudgetsIdParam,
   type GetBudgetsQuery,
   type ListBudgetsQuery,
-  type BudgetsCreatedEvent,
-  type BudgetsUpdatedEvent,
-  type BudgetsDeletedEvent,
 };
 
 // Additional type definitions
@@ -38,18 +32,6 @@ export interface BudgetsRepository {
   }>;
   update(id: number | string, data: UpdateBudgets): Promise<Budgets | null>;
   delete(id: number | string): Promise<boolean>;
-}
-
-// Real-time event type definitions
-export interface BudgetsEventHandlers {
-  onCreated?: (data: Budgets) => void | Promise<void>;
-  onUpdated?: (data: Budgets) => void | Promise<void>;
-  onDeleted?: (data: { id: number | string }) => void | Promise<void>;
-}
-
-export interface BudgetsWebSocketSubscription {
-  subscribe(handlers: BudgetsEventHandlers): void;
-  unsubscribe(): void;
 }
 
 // Database entity type (matches database table structure exactly)

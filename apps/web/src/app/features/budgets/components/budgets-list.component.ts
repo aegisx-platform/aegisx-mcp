@@ -54,7 +54,6 @@ import {
 } from '../../../shared/components/shared-export/shared-export.component';
 import { BudgetService } from '../services/budgets.service';
 import { Budget, ListBudgetQuery } from '../types/budgets.types';
-import { BudgetStateManager } from '../services/budgets-state-manager.service';
 import { BudgetCreateDialogComponent } from './budgets-create.dialog';
 import {
   BudgetEditDialogComponent,
@@ -110,7 +109,6 @@ import { BudgetsListHeaderComponent } from './budgets-list-header.component';
 })
 export class BudgetsListComponent {
   budgetsService = inject(BudgetService);
-  budgetStateManager = inject(BudgetStateManager);
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
   private axDialog = inject(AxDialogService);
@@ -325,8 +323,6 @@ export class BudgetsListComponent {
 
   // --- Effect: reload budgets on sort/page/search/filter change ---
   constructor() {
-    // Initialize real-time state manager
-    this.budgetStateManager.initialize();
 
     // Sync export selection state
     effect(() => {
@@ -391,10 +387,11 @@ export class BudgetsListComponent {
           delete params[k as keyof typeof params],
       );
 
-      // With real-time state manager: Use synced data instead of manual API calls
-      this.dataSource.data = this.budgetStateManager.localState();
+      console.log('📡 Loading budgets with params:', params);
+      await this.budgetsService.loadBudgetList(params);
+      console.log('✅ Loaded budgets:', this.budgetsService.budgetsList().length);
+      this.dataSource.data = this.budgetsService.budgetsList();
       if (this.paginator) {
-        // TODO: State manager doesn't track total count yet, fallback to service
         this.paginator.length = this.budgetsService.totalBudget();
       }
     });
@@ -403,7 +400,13 @@ export class BudgetsListComponent {
   // Search & Filter Methods
   search() {
     const searchValue = this.searchInputSignal().trim();
+    console.log('🔍 Search clicked:', {
+      searchInputSignal: this.searchInputSignal(),
+      searchValue,
+      willSetTo: searchValue,
+    });
     this.searchTermSignal.set(searchValue);
+    console.log('🔍 After set, searchTermSignal:', this.searchTermSignal());
     if (this.paginator) this.paginator.pageIndex = 0;
   }
 
@@ -580,12 +583,11 @@ export class BudgetsListComponent {
     this.axDialog.confirmDelete(itemName).subscribe(async (confirmed) => {
       if (confirmed) {
         try {
-          // Use state manager's optimistic delete for real-time UI updates
-          await this.budgetStateManager.optimisticDelete(budget.id);
+          await this.budgetsService.deleteBudget(budget.id);
           this.snackBar.open('Budget deleted successfully', 'Close', {
             duration: 3000,
           });
-          // No need to reload - state manager auto-updates dataSource via effect
+          this.reloadTrigger.update((n) => n + 1);
         } catch {
           this.snackBar.open('Failed to delete budget', 'Close', {
             duration: 3000,

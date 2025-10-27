@@ -11,7 +11,6 @@ import { MatIconModule } from '@angular/material/icon';
 
 import { BudgetService } from '../services/budgets.service';
 import { Budget, UpdateBudgetRequest } from '../types/budgets.types';
-import { BudgetStateManager } from '../services/budgets-state-manager.service';
 import { BudgetFormComponent, BudgetFormData } from './budgets-form.component';
 
 export interface BudgetEditDialogData {
@@ -163,7 +162,6 @@ export interface BudgetEditDialogData {
 })
 export class BudgetEditDialogComponent implements OnInit {
   private budgetsService = inject(BudgetService);
-  private budgetStateManager = inject(BudgetStateManager);
   private snackBar = inject(MatSnackBar);
   private dialogRef = inject(MatDialogRef<BudgetEditDialogComponent>);
   public data = inject<BudgetEditDialogData>(MAT_DIALOG_DATA);
@@ -175,23 +173,25 @@ export class BudgetEditDialogComponent implements OnInit {
   }
 
   async onFormSubmit(formData: BudgetFormData) {
-    // Optimistic update: Close dialog immediately for instant UX
     this.loading.set(true);
 
     try {
       const updateRequest = formData as UpdateBudgetRequest;
-
-      // Use state manager's optimistic update
-      await this.budgetStateManager.optimisticUpdate(
+      const result = await this.budgetsService.updateBudget(
         this.data.budgets.id,
-        updateRequest as any,
+        updateRequest,
       );
 
-      // Show success message and close immediately
-      this.snackBar.open('Budget updated successfully', 'Close', {
-        duration: 3000,
-      });
-      this.dialogRef.close(true); // Close with success flag
+      if (result) {
+        this.snackBar.open('Budget updated successfully', 'Close', {
+          duration: 3000,
+        });
+        this.dialogRef.close(result);
+      } else {
+        this.snackBar.open('Failed to update budget', 'Close', {
+          duration: 5000,
+        });
+      }
     } catch (error: any) {
       const errorMessage = this.budgetsService.permissionError()
         ? 'You do not have permission to update budget'
