@@ -6,13 +6,6 @@ import {
   ApiSuccessResponseSchema,
   PaginatedResponseSchema,
   PartialPaginatedResponseSchema,
-  DropdownOptionSchema,
-  BulkCreateSchema,
-  BulkUpdateSchema,
-  BulkDeleteSchema,
-  BulkStatusSchema,
-  StatusToggleSchema,
-  StatisticsSchema,
 } from '../../../schemas/base.schemas';
 
 // Base Budgets Schema
@@ -134,6 +127,28 @@ export type PartialBudgets = Static<typeof PartialBudgetsSchema>;
 export type FlexibleBudgetsList = Static<
   typeof FlexibleBudgetsListResponseSchema
 >;
+
+// WebSocket Event Schemas
+export const BudgetsCreatedEventSchema = Type.Object({
+  type: Type.Literal('budgets.created'),
+  data: BudgetsSchema,
+});
+
+export const BudgetsUpdatedEventSchema = Type.Object({
+  type: Type.Literal('budgets.updated'),
+  data: BudgetsSchema,
+});
+
+export const BudgetsDeletedEventSchema = Type.Object({
+  type: Type.Literal('budgets.deleted'),
+  data: Type.Object({
+    id: Type.Union([Type.String(), Type.Number()]),
+  }),
+});
+
+export type BudgetsCreatedEvent = Static<typeof BudgetsCreatedEventSchema>;
+export type BudgetsUpdatedEvent = Static<typeof BudgetsUpdatedEventSchema>;
+export type BudgetsDeletedEvent = Static<typeof BudgetsDeletedEventSchema>;
 
 // ===== IMPORT SCHEMAS =====
 
