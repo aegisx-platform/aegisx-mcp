@@ -1,7 +1,7 @@
 # AegisX Project Status
 
-**Last Updated:** 2025-10-27 (Session 42 - WebSocket Events for Import)
-**Current Task:** ✅ Enabled WebSocket Events for Import Functionality
+**Last Updated:** 2025-10-27 (Session 43 - HIS Mode Implementation)
+**Current Task:** ✅ Implemented HIS Mode with Optional Real-Time CRUD Updates
 **Git Repository:** git@github.com:aegisx-platform/aegisx-starter.git
 
 ## 🏗️ Project Overview
@@ -14,11 +14,191 @@ AegisX Starter - Enterprise-ready monorepo with Angular 19, Fastify, PostgreSQL
 
 ### Session Overview
 
-- **Date**: 2025-10-27 (Session 42)
-- **Main Focus**: ✅ Enable WebSocket Events for Import Functionality
-- **Status**: Generator updated, WebSocket events enabled for import, builds successful
+- **Date**: 2025-10-27 (Session 43)
+- **Main Focus**: ✅ Implement HIS Mode (Hospital Information System Mode) for CRUD Generator
+- **Status**: HIS Mode complete, documentation updated, tested with budgets module, committed and pushed
 
-### 🎯 Session 42 Tasks
+### 🎯 Session 43 Tasks
+
+#### 1. **✅ COMPLETED: Implement HIS Mode for CRUD Generator v2.4.0**
+
+**Goal**: Prioritize data accuracy over real-time speed for critical healthcare and enterprise systems.
+
+**Problem**: Optimistic updates can cause data misunderstandings in Hospital Information Systems (HIS):
+
+- User sees "deleted" but server rejects due to business rules
+- UI shows outdated data that doesn't match database
+- Critical systems need server-verified data accuracy
+
+**Solution - HIS Mode Architecture**:
+
+1. **Backend Always Emits Events** (for audit trail and event-driven architecture)
+2. **Frontend Uses Reload Trigger** (default behavior for data accuracy)
+3. **Optional Real-Time Mode** (commented WebSocket subscription code provided)
+
+**Files Modified**:
+
+1. **`libs/aegisx-crud-generator/templates/frontend/v2/service.hbs`**:
+   - Removed optimistic updates from create/update/delete methods
+   - Services return data without modifying local state
+   - List component relies on reload trigger for fresh server data
+
+2. **`libs/aegisx-crud-generator/templates/backend/domain/controller.hbs`**:
+   - Added CRUD event emission after create/update/delete operations
+   - Fixed entity name bug using `{{toKebabCase moduleName}}`
+   - Events always emitted: `this.eventService.for(feature, entity).emitCustom(action, data, priority)`
+
+3. **`libs/aegisx-crud-generator/templates/frontend/v2/list-component-v2.hbs`**:
+   - Added comprehensive commented WebSocket subscription code
+   - Includes imports, class properties, constructor setup, event listeners
+   - Easy to enable by uncommenting 4 code blocks
+   - State manager still initializes (for import events)
+
+4. **`docs/crud-generator/EVENTS_GUIDE.md`**:
+   - Updated to v2.4.0 with HIS Mode documentation
+   - Added "HIS Mode Architecture" section with healthcare example
+   - Added "Enabling Optional Real-Time Updates" step-by-step guide
+   - Updated Summary section with HIS Mode benefits
+
+**Changes Made**:
+
+**Service Template (Removed Optimistic Updates)**:
+
+```typescript
+// BEFORE (v2.3.0):
+async createBudgets(budgets: CreateBudgets) {
+  const response = await this.httpClient.post(...);
+  if (response) {
+    // Optimistic update: add to list
+    this.budgetsListSignal.update(list => [...list, response.data!]);
+    return response.data;
+  }
+}
+
+// AFTER (v2.4.0 - HIS Mode):
+async createBudgets(budgets: CreateBudgets) {
+  const response = await this.httpClient.post(...);
+  if (response) {
+    // ✅ Return data without optimistic update
+    // List component will refresh via reloadTrigger
+    return response.data;
+  }
+}
+```
+
+**Controller Template (Always Emit Events)**:
+
+```typescript
+// Generated controller with --with-events
+async create(request, reply) {
+  const budgets = await this.budgetsService.create(createData);
+
+  // 🔥 Always emit event for audit trail and event-driven architecture
+  this.eventService
+    .for('budgets', 'budgets')
+    .emitCustom('created', budgets, 'normal');
+
+  return reply.code(201).success(budgets);
+}
+```
+
+**List Component Template (Reload Trigger + Commented WebSocket)**:
+
+```typescript
+export class BudgetsListComponent {
+  reloadTrigger = signal(0);
+
+  constructor() {
+    // Initialize state manager for import events
+    this.budgetStateManager.initialize();
+
+    // 🔧 OPTIONAL: Uncomment for real-time CRUD updates
+    /*
+    const token = this.authService.accessToken();
+    if (token) {
+      this.wsService.connect(token);
+      this.wsService.subscribe({ features: ['budgets'] });
+      this.setupCrudEventListeners();
+    }
+    */
+  }
+
+  // After delete, trigger reload
+  async onDeleteBudget(budget: Budgets) {
+    await this.budgetsService.deleteBudgets(budget.id);
+    this.reloadTrigger.update((n) => n + 1); // Refresh from server
+  }
+}
+```
+
+**Verification**:
+
+1. ✅ Regenerated budgets module with `--with-events --with-import --force`
+2. ✅ Backend emits events correctly: `.for('budgets', 'budgets').emitCustom('created', ...)`
+3. ✅ Frontend uses reload trigger pattern (no optimistic updates)
+4. ✅ State manager initializes for import events
+5. ✅ Commented WebSocket subscription code present and complete
+6. ✅ Web build successful: `nx build web`
+7. ✅ User tested and confirmed: "ผ่านครับ" (Passed)
+
+**Impact**:
+
+- ⚕️ **HIS Mode (Default)**: Data accuracy over speed for critical systems
+- 🛡️ **No Data Confusion**: UI always shows actual database state
+- 📊 **Audit Trail**: Backend always emits events for compliance
+- 🏗️ **Event-Driven Ready**: Events available for microservices integration
+- 🔧 **Optional Real-Time**: Easy to enable when needed (uncomment 4 blocks)
+
+**Documentation**:
+
+Created comprehensive HIS Mode documentation in EVENTS_GUIDE.md:
+
+- Why HIS Mode? (healthcare example with patient records)
+- HIS Mode Benefits (data accuracy, no confusion, audit trail)
+- How HIS Mode Works (backend, frontend, list component patterns)
+- Enabling Optional Real-Time Updates (5-step guide with code examples)
+- Complete Example (real-time enabled component)
+
+**Commit**:
+
+- Commit: `fb1cf34`
+- Message: `feat(crud-generator): implement HIS mode with optional real-time CRUD updates`
+- Files changed: 14 files (720 insertions, 175 deletions)
+- Pushed to: `origin/develop`
+
+**Key Technical Details**:
+
+```typescript
+// HIS Mode Pattern (Default):
+// 1. Service returns data without optimistic update
+async delete(id: string): Promise<boolean> {
+  const response = await this.httpClient.delete(`${this.baseUrl}/${id}`);
+  if (response?.success) {
+    // ✅ Return success without optimistic update
+    return true;
+  }
+  return false;
+}
+
+// 2. Backend always emits event
+this.eventService.for('budgets', 'budgets').emitCustom('deleted', { id }, 'normal');
+
+// 3. List component refreshes from server
+this.reloadTrigger.update(n => n + 1);
+
+// Optional Real-Time Mode (Uncomment to enable):
+// 4. Subscribe to WebSocket events
+this.wsService.subscribeToEvent('budgets', 'budgets', 'deleted')
+  .pipe(takeUntil(this.destroy$))
+  .subscribe((event: any) => {
+    console.log('🗑️ Budget deleted:', event.data);
+    this.reloadTrigger.update(n => n + 1); // Refresh display
+  });
+```
+
+---
+
+### 🎯 Session 42 Tasks (COMPLETED - Previous Session)
 
 #### 1. **✅ COMPLETED: Enable WebSocket Events for Import**
 
