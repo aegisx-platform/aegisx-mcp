@@ -35,7 +35,7 @@ import { Budget } from '../types/budgets.types';
   providedIn: 'root',
 })
 export class BudgetStateManager extends BaseRealtimeStateManager<Budget> {
-  private budgetsService: BudgetService;
+  private budgetsService = inject(BudgetService);
 
   constructor() {
     super({
@@ -47,8 +47,8 @@ export class BudgetStateManager extends BaseRealtimeStateManager<Budget> {
       retryAttempts: 3,
     });
 
-    // Inject service after super() call to ensure proper initialization
-    this.budgetsService = inject(BudgetService);
+    // Initialize after all dependencies are ready
+    this.initializeStateManager();
 
     console.log('🎯 BudgetStateManager initialized with real-time features');
   }

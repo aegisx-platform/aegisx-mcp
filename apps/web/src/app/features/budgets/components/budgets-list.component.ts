@@ -276,12 +276,14 @@ export class BudgetsListComponent {
     this.budget_descriptionInputSignal.set(value);
   }
 
+
   get is_activeFilter() {
     return this.is_activeInputSignal();
   }
   set is_activeFilter(value: boolean | undefined) {
     this.is_activeInputSignal.set(value);
   }
+
 
   // Stats from API (should come from dedicated stats endpoint)
   stats = computed(() => ({
@@ -293,8 +295,7 @@ export class BudgetsListComponent {
 
   // Export configuration
   exportServiceAdapter: ExportService = {
-    export: (options: ExportOptions) =>
-      this.budgetsService.exportBudget(options),
+    export: (options: ExportOptions) => this.budgetsService.exportBudget(options),
   };
 
   availableExportFields = [
@@ -428,12 +429,8 @@ export class BudgetsListComponent {
     // Apply text and selection filters
     this.budget_codeFilterSignal.set(this.budget_codeInputSignal().trim());
     this.budget_typeFilterSignal.set(this.budget_typeInputSignal().trim());
-    this.budget_categoryFilterSignal.set(
-      this.budget_categoryInputSignal().trim(),
-    );
-    this.budget_descriptionFilterSignal.set(
-      this.budget_descriptionInputSignal().trim(),
-    );
+    this.budget_categoryFilterSignal.set(this.budget_categoryInputSignal().trim());
+    this.budget_descriptionFilterSignal.set(this.budget_descriptionInputSignal().trim());
     this.is_activeFilterSignal.set(this.is_activeInputSignal());
 
     // Apply date/datetime filters
