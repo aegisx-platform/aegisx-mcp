@@ -537,93 +537,21 @@ pnpm run db:migrate && pnpm run db:seed
 
 ## 📝 Recent Development Sessions
 
-### Session 44 (2025-10-28): CRUD Generator v2.1.0 Release & Repository Cleanup
+> **📌 For complete session history and details, see [PROJECT_STATUS.md](./PROJECT_STATUS.md) § Recent Development Sessions**
 
-**Completed Work:**
+### Current Status (Session 44 - 2025-10-28)
 
-1. **📦 CRUD Generator v2.1.0 Release**
-   - Version bumped from 2.0.1 → 2.1.0 (HIS Mode feature)
-   - Synced to separate crud-generator repository via git subtree
-   - Created tag v2.1.0 in crud-generator repo (NOT main repo)
-   - Ready for npm publish (user handles OTP)
+**Latest Updates:**
 
-2. **🗂️ Repository Cleanup** (4 commits, 143 files deleted, 58,512 lines removed)
-   - **Documentation Updates** (commit `505020a`):
-     - Updated CLAUDE.md with CRUD Generator release workflow
-     - Updated docs/crud-generator/CHANGELOG.md with v2.1.0
-     - Updated docs/crud-generator/README.md with v2.1.0 highlights
-   - **Major Cleanup** (commit `6a7e985`):
-     - Deleted tools/crud-generator/ (132 files, 53,112 lines) - moved to libs/
-     - Deleted outdated root documentation files
-   - **API Specs Cleanup** (commit `c4ea2d3`):
-     - Deleted api-specs/ directory (8 files, 5,031 lines)
-     - Project uses TypeBox + Fastify Swagger instead
-   - **Scripts Cleanup** (commit `a65b632`):
-     - Deleted fix-pdf-templates.js and test-logo-feature.sh (2 files, 369 lines)
+- ✅ **CRUD Generator v2.1.0** - Released with HIS Mode (data accuracy first)
+- ✅ **Repository Cleanup** - 143 files deleted, 58,512 lines removed
+- ✅ **Communication Guide** - Exact phrases for version releases documented
 
-3. **📚 Communication Guide for Version Releases**
-   - Added exact phrases to use for version releases
-   - Documented git subtree workflow and tag creation rules
-   - Prevents future confusion about where to create tags
+**Key Learning from Release Process:**
 
-**Key Learning:**
-
-- Tags for npm packages belong in the PACKAGE repository, not main monorepo
-- Use git subtree to sync between main and package repos
-- Clear communication phrases prevent mistakes
-
-### Session 40 (2025-10-26): CRUD Generator Documentation & WebSocket Events Analysis
-
-**Completed Work:**
-
-1. **📚 Complete CRUD Generator Documentation Package** (3,320+ lines)
-   - Created `docs/crud-generator/CHANGELOG.md` - Version history & migration guides
-   - Created `docs/crud-generator/EVENTS_GUIDE.md` - Complete WebSocket events guide (1,018 lines)
-   - Created `docs/crud-generator/IMPORT_GUIDE.md` - Import functionality & v2.0.1 fixes (1,279 lines)
-   - Created `docs/crud-generator/QUICK_COMMANDS.md` - CLI reference (747 lines)
-   - Updated README files for better navigation and feature highlights
-
-2. **🔍 WebSocket Events Gap Analysis**
-   - Backend events: ✅ 100% complete (`--with-events` flag fully implemented)
-   - Frontend infrastructure: ✅ WebSocketService & BaseRealtimeStateManager exist
-   - **Gap identified**: Frontend templates don't generate WebSocket integration code
-   - Created `docs/crud-generator/WEBSOCKET_IMPLEMENTATION_SPEC.md` with 4-phase implementation plan
-
-3. **📋 Future Roadmap**
-   - Phase 1: State Manager Template (4-6h)
-   - Phase 2: List Component Integration (4-6h)
-   - Phase 3: Import Dialog Real-Time (3-4h)
-   - Phase 4: Backend Testing (2-3h)
-
-### Session 39 (2025-10-26): Import Dialog Template Fix & NPM Publish
-
-**Completed Work:**
-
-1. **🐛 Fixed Import Dialog Type Mismatch**
-   - **Problem**: Import dialog template used `progress.percentage` but BaseImportService returns flat `progress` number
-   - **Fix**: Updated `templates/frontend/v2/import-dialog.hbs` to use correct response structure
-   - **Changes**:
-
-     ```typescript
-     // Before (incorrect)
-     progress: data.progress.percentage;
-     (summary.created, summary.updated, summary.failed);
-
-     // After (correct - matching BaseImportService)
-     progress: data.progress; // Direct number 0-100
-     successCount: data.successCount;
-     errorCount: data.errorCount;
-     ```
-
-2. **📦 Published to NPM Registry**
-   - Package: `@aegisx/crud-generator@2.0.1`
-   - Registry: https://registry.npmjs.org/
-   - Status: ✅ Successfully published
-   - Contains: Import dialog template fix
-
-3. **🔄 Git Subtree Sync**
-   - Successfully synced `libs/aegisx-crud-generator/` to separate repository
-   - Used: `./libs/aegisx-crud-generator/sync-to-repo.sh develop`
+- Tags for npm packages belong in the **PACKAGE repository**, not main monorepo
+- Use git subtree to sync `libs/aegisx-crud-generator/` to separate crud-generator repo
+- Clear communication phrases prevent mistakes (see "CRUD Generator Version Release & NPM Publishing" section below)
 
 ## 🚨 CRITICAL: CRUD Generator Git Workflow
 
