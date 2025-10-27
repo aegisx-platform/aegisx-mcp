@@ -537,6 +537,41 @@ pnpm run db:migrate && pnpm run db:seed
 
 ## 📝 Recent Development Sessions
 
+### Session 44 (2025-10-28): CRUD Generator v2.1.0 Release & Repository Cleanup
+
+**Completed Work:**
+
+1. **📦 CRUD Generator v2.1.0 Release**
+   - Version bumped from 2.0.1 → 2.1.0 (HIS Mode feature)
+   - Synced to separate crud-generator repository via git subtree
+   - Created tag v2.1.0 in crud-generator repo (NOT main repo)
+   - Ready for npm publish (user handles OTP)
+
+2. **🗂️ Repository Cleanup** (4 commits, 143 files deleted, 58,512 lines removed)
+   - **Documentation Updates** (commit `505020a`):
+     - Updated CLAUDE.md with CRUD Generator release workflow
+     - Updated docs/crud-generator/CHANGELOG.md with v2.1.0
+     - Updated docs/crud-generator/README.md with v2.1.0 highlights
+   - **Major Cleanup** (commit `6a7e985`):
+     - Deleted tools/crud-generator/ (132 files, 53,112 lines) - moved to libs/
+     - Deleted outdated root documentation files
+   - **API Specs Cleanup** (commit `c4ea2d3`):
+     - Deleted api-specs/ directory (8 files, 5,031 lines)
+     - Project uses TypeBox + Fastify Swagger instead
+   - **Scripts Cleanup** (commit `a65b632`):
+     - Deleted fix-pdf-templates.js and test-logo-feature.sh (2 files, 369 lines)
+
+3. **📚 Communication Guide for Version Releases**
+   - Added exact phrases to use for version releases
+   - Documented git subtree workflow and tag creation rules
+   - Prevents future confusion about where to create tags
+
+**Key Learning:**
+
+- Tags for npm packages belong in the PACKAGE repository, not main monorepo
+- Use git subtree to sync between main and package repos
+- Clear communication phrases prevent mistakes
+
 ### Session 40 (2025-10-26): CRUD Generator Documentation & WebSocket Events Analysis
 
 **Completed Work:**
