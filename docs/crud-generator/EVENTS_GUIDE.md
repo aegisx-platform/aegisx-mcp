@@ -21,15 +21,16 @@
 
 The `--with-events` flag enables **real-time WebSocket event emission** for all CRUD operations. When enabled, the backend automatically broadcasts events whenever data changes, allowing frontend applications to react in real-time.
 
-**Current State (v2.3.0)**:
+**Current State (v2.4.0)** - HIS Mode Update:
 
 - ✅ Backend event emission fully implemented
 - ✅ WebSocket infrastructure ready
 - ✅ Event types and payload structure defined
 - ✅ Frontend state manager generation (`--with-events` flag)
-- ✅ BaseRealtimeStateManager with optimistic updates & conflict detection
+- ✅ BaseRealtimeStateManager for import events & optional CRUD
 - ✅ List component state manager integration (auto-injected & initialized)
-- ✅ Dialog components integration (create/edit use optimistic updates)
+- ✅ **HIS Mode (Default)**: No optimistic updates, reload trigger for data accuracy
+- ✅ **Commented CRUD subscription code**: Optional real-time updates (uncomment when needed)
 - ✅ Import progress via WebSocket (real-time progress updates)
 
 **Use Cases**:
@@ -493,9 +494,328 @@ describe('ProductsController - Events', () => {
 
 ## Frontend Integration
 
-### Current State (v2.1.0)
+### Current State (v2.4.0) - HIS Mode
 
-**State Manager Generation** - The `--with-events` flag now generates a complete real-time state manager service:
+**⚕️ Hospital Information System (HIS) Mode** - The default behavior now prioritizes **data accuracy over real-time speed** for critical healthcare and enterprise systems:
+
+**Default Behavior (HIS Mode)**:
+
+- ✅ Backend always emits CRUD events (for audit trail, analytics, microservices)
+- ✅ Frontend uses **reload trigger pattern** for data accuracy
+- ✅ NO optimistic updates (prevents data misunderstandings)
+- ✅ Server-verified data only
+- ✅ State manager generated with `--with-events` (for import events)
+- ✅ CRUD subscription code provided as **commented examples** (optional feature)
+
+**Optional Real-Time Mode**:
+
+- Uncomment WebSocket subscription code when real-time updates are needed
+- Suitable for non-critical systems where speed > accuracy
+- Full working examples provided in generated code
+
+---
+
+### HIS Mode Architecture (v2.4.0)
+
+#### Why HIS Mode?
+
+Hospital Information Systems and enterprise applications require **server-verified data accuracy** to prevent critical mistakes:
+
+```typescript
+// ❌ PROBLEM: Optimistic updates in healthcare
+async deletePatientRecord(id: string) {
+  // UI shows record deleted immediately...
+  this.records.update(list => list.filter(r => r.id !== id));
+
+  // ...but server might reject due to:
+  // - Active prescriptions exist
+  // - Insurance claims pending
+  // - Legal hold on record
+
+  // User sees "deleted" but record still exists! 🚨
+}
+
+// ✅ SOLUTION: HIS Mode with reload trigger
+async deletePatientRecord(id: string) {
+  const result = await this.service.delete(id);
+
+  if (result) {
+    // Refresh from server - shows actual database state
+    this.reloadTrigger.update(n => n + 1);
+  }
+}
+```
+
+#### HIS Mode Benefits
+
+1. **Data Accuracy**: Always shows server-verified state
+2. **No Confusion**: What you see = what's in database
+3. **Audit Trail**: Backend events captured for compliance
+4. **Event-Driven Ready**: Backend emits events for microservices
+5. **Optional Real-Time**: Can enable when needed (commented code provided)
+
+#### How HIS Mode Works
+
+**Backend** (Always emits events):
+
+```typescript
+// Generated controller with --with-events
+async create(request: FastifyRequest<{ Body: CreateBudgets }>, reply: FastifyReply) {
+  const budgets = await this.budgetsService.create(createData);
+
+  // 🔥 Always emit event for audit trail and event-driven architecture
+  this.eventService
+    .for('budgets', 'budgets')
+    .emitCustom('created', budgets, 'normal');
+
+  return reply.code(201).success(budgets);
+}
+```
+
+**Frontend** (Uses reload trigger, doesn't subscribe by default):
+
+```typescript
+// Generated service - NO optimistic updates
+async createBudgets(budgets: CreateBudgets): Promise<Budgets | undefined> {
+  const response = await this.httpClient.post<ApiSuccessResponse<Budgets>>(
+    `${this.baseUrl}`,
+    budgets
+  );
+
+  if (response) {
+    // ✅ Return data without optimistic update
+    // List component will refresh via reloadTrigger
+    return response.data;
+  }
+  return undefined;
+}
+```
+
+**List Component** (Reload trigger pattern):
+
+```typescript
+export class BudgetsListComponent {
+  budgetsService = inject(BudgetsService);
+  reloadTrigger = signal(0);
+
+  // Effect watches reload trigger
+  constructor() {
+    effect(async () => {
+      this.reloadTrigger(); // Watch for changes
+      // ... filters, sorting, pagination ...
+
+      // Fetch fresh data from server
+      const result = await this.budgetsService.listBudgets(queryParams);
+      this.dataSource.data = result.data;
+    });
+  }
+
+  // After delete, trigger reload
+  async onDeleteBudget(budget: Budgets) {
+    const confirmed = await this.axDialog.confirmDelete(itemName);
+    if (confirmed) {
+      await this.budgetsService.deleteBudgets(budget.id);
+      this.reloadTrigger.update((n) => n + 1); // Refresh from server
+    }
+  }
+}
+```
+
+---
+
+### Enabling Optional Real-Time Updates (v2.4.0)
+
+When you generate with `--with-events`, **commented WebSocket subscription code** is included in the list component. Uncomment this code to enable real-time CRUD updates:
+
+#### Step 1: Uncomment Required Imports
+
+Find this section in your list component and uncomment:
+
+```typescript
+// 🔧 OPTIONAL: Uncomment for real-time CRUD updates
+/*
+// Note: Import required dependencies first:
+// import { WebSocketService } from '../../../core/services/websocket.service';
+// import { AuthService } from '../../../core/services/auth.service';
+// import { Subject } from 'rxjs';
+// import { takeUntil } from 'rxjs/operators';
+*/
+```
+
+Uncommented:
+
+```typescript
+// Real-time CRUD updates enabled
+import { WebSocketService } from '../../../core/services/websocket.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+```
+
+#### Step 2: Add Class Properties
+
+Find and uncomment:
+
+```typescript
+/*
+// Add these as class properties:
+// private wsService = inject(WebSocketService);
+// private authService = inject(AuthService);
+// private destroy$ = new Subject<void>();
+*/
+```
+
+Uncommented:
+
+```typescript
+// Class properties for WebSocket
+private wsService = inject(WebSocketService);
+private authService = inject(AuthService);
+private destroy$ = new Subject<void>();
+```
+
+#### Step 3: Setup WebSocket in Constructor
+
+Find and uncomment:
+
+```typescript
+constructor() {
+  /*
+  // Setup WebSocket connection for real-time updates
+  const token = this.authService.accessToken();
+  if (token) {
+    this.wsService.connect(token);
+    this.wsService.subscribe({ features: ['budgets'] });
+    this.setupCrudEventListeners();
+  }
+  */
+}
+```
+
+Uncommented:
+
+```typescript
+constructor() {
+  // Setup WebSocket connection for real-time updates
+  const token = this.authService.accessToken();
+  if (token) {
+    this.wsService.connect(token);
+    this.wsService.subscribe({ features: ['budgets'] });
+    this.setupCrudEventListeners();
+  }
+}
+```
+
+#### Step 4: Uncomment Event Listeners
+
+Find the `setupCrudEventListeners()` method and uncomment the entire function:
+
+```typescript
+// 🔧 OPTIONAL: Real-time CRUD Event Listeners
+/*
+private setupCrudEventListeners(): void {
+  // 📡 Subscribe to 'created' event
+  this.wsService
+    .subscribeToEvent('budgets', 'budgets', 'created')
+    .pipe(takeUntil(this.destroy$))
+    .subscribe((event: any) => {
+      console.log('🔥 New budget created:', event.data);
+
+      // Option 1: Add to local state and refresh display
+      this.budgetsService.budgetsListSignal.update(
+        list => [event.data, ...list]
+      );
+      this.reloadTrigger.update(n => n + 1);
+
+      // Option 2: Just refresh from server (more reliable)
+      // this.reloadTrigger.update(n => n + 1);
+    });
+
+  // ... updated and deleted events ...
+}
+*/
+```
+
+#### Step 5: Add Cleanup
+
+Uncomment ngOnDestroy:
+
+```typescript
+/*
+ngOnDestroy() {
+  this.destroy$.next();
+  this.destroy$.complete();
+}
+*/
+```
+
+#### Complete Example (Real-Time Enabled)
+
+```typescript
+import { WebSocketService } from '../../../core/services/websocket.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+
+export class BudgetsListComponent implements OnDestroy {
+  private wsService = inject(WebSocketService);
+  private authService = inject(AuthService);
+  private destroy$ = new Subject<void>();
+
+  constructor() {
+    // Initialize state manager for import events
+    this.budgetStateManager.initialize();
+
+    // Setup WebSocket for real-time CRUD updates
+    const token = this.authService.accessToken();
+    if (token) {
+      this.wsService.connect(token);
+      this.wsService.subscribe({ features: ['budgets'] });
+      this.setupCrudEventListeners();
+    }
+  }
+
+  private setupCrudEventListeners(): void {
+    // Real-time create notifications
+    this.wsService
+      .subscribeToEvent('budgets', 'budgets', 'created')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((event: any) => {
+        console.log('🔥 New budget created:', event.data);
+        this.reloadTrigger.update((n) => n + 1); // Refresh display
+      });
+
+    // Real-time update notifications
+    this.wsService
+      .subscribeToEvent('budgets', 'budgets', 'updated')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((event: any) => {
+        console.log('🔄 Budget updated:', event.data);
+        this.reloadTrigger.update((n) => n + 1); // Refresh display
+      });
+
+    // Real-time delete notifications
+    this.wsService
+      .subscribeToEvent('budgets', 'budgets', 'deleted')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((event: any) => {
+        console.log('🗑️ Budget deleted:', event.data);
+        this.reloadTrigger.update((n) => n + 1); // Refresh display
+      });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+}
+```
+
+---
+
+### State Manager Generation (v2.1.0+)
+
+**State Manager Generation** - The `--with-events` flag generates a complete real-time state manager service:
 
 ```typescript
 // Generated: apps/web/src/app/features/products/services/products-state-manager.service.ts
@@ -1237,26 +1557,44 @@ export class ProductsListComponent implements OnInit {
 
 ## Summary
 
-**What You Get with `--with-events` (v2.3.0)**:
+**What You Get with `--with-events` (v2.4.0 - HIS Mode)**:
 
 **Backend**:
 
-- ✅ Automatic event emission for all CRUD operations
+- ✅ Automatic event emission for all CRUD operations (always enabled)
 - ✅ Standardized event structure and naming
 - ✅ Integration with existing EventService
 - ✅ Real-time import progress events (v2.3.0)
 - ✅ BaseImportService with automatic event emission
+- ✅ Event-driven architecture ready (for microservices, audit trail)
 
-**Frontend**:
+**Frontend (HIS Mode)**:
 
-- ✅ Auto-generated real-time state manager (v2.1.0)
-- ✅ Optimistic UI updates with conflict detection (v2.1.0)
-- ✅ List component integration with state manager (v2.1.0)
-- ✅ Dialog components with optimistic updates (v2.2.0)
+- ✅ Auto-generated state manager for import events (v2.1.0+)
+- ✅ **Reload trigger pattern** for data accuracy (v2.4.0)
+- ✅ **NO optimistic updates by default** (prevents data misunderstandings)
+- ✅ Server-verified data only
+- ✅ **Commented CRUD subscription code** (optional real-time feature)
 - ✅ Import progress via WebSocket (v2.3.0)
 - ✅ Proper RxJS cleanup with takeUntil pattern
 
-**Performance Benefits**:
+**Frontend (Optional Real-Time Mode)**:
+
+- ✅ Full WebSocket subscription examples (commented)
+- ✅ Easy enable: Uncomment 4 code blocks
+- ✅ Multi-user synchronization
+- ✅ Real-time CRUD notifications
+- ✅ Memory-safe subscriptions
+
+**HIS Mode Benefits (v2.4.0)**:
+
+- ⚕️ **Data accuracy over speed** - Critical for healthcare systems
+- 🛡️ **No data confusion** - UI shows actual database state
+- 📊 **Audit trail** - Backend always emits events for compliance
+- 🏗️ **Event-driven ready** - Events available for microservices
+- 🔧 **Optional real-time** - Enable when needed with commented code
+
+**Performance Benefits (When Real-Time Enabled)**:
 
 - ⚡ Instant UI updates (0ms perceived latency)
 - 📉 Reduced server load (no polling)
@@ -1266,13 +1604,16 @@ export class ProductsListComponent implements OnInit {
 
 **Best Practices**:
 
-- Use consistent event naming patterns
+- **Use HIS Mode for critical systems** (healthcare, finance, legal)
+- **Use Real-Time Mode for non-critical systems** (chat, notifications, dashboards)
+- Backend always emits events (for audit trail and microservices)
+- Frontend chooses to subscribe or use reload trigger
 - Keep event payloads lean
 - Handle events only after successful operations
 - Throttle high-frequency events
 - Always clean up subscriptions with `takeUntil()`
 - Pass resource name to BaseImportService for event naming
-- Enable `--with-events` for real-time features
+- Enable `--with-events` for event infrastructure
 
 **Related Guides**:
 

@@ -54,7 +54,7 @@ export class BudgetService {
   readonly pageSize = this.pageSizeSignal.asReadonly();
 
   // ===== COMPUTED SIGNALS =====
-  
+
   readonly totalPages = computed(() => {
     const total = this.totalBudgetSignal();
     const size = this.pageSizeSignal();
@@ -108,33 +108,46 @@ export class BudgetService {
     try {
       // Build HTTP params
       let httpParams = new HttpParams();
-      if (params?.page) httpParams = httpParams.set('page', params.page.toString());
-      if (params?.limit) httpParams = httpParams.set('limit', params.limit.toString());
+      if (params?.page)
+        httpParams = httpParams.set('page', params.page.toString());
+      if (params?.limit)
+        httpParams = httpParams.set('limit', params.limit.toString());
       if (params?.search) httpParams = httpParams.set('search', params.search);
       if (params?.sort) httpParams = httpParams.set('sort', params.sort);
-      
+
       // Handle fields array parameter (multiple values)
       if (params?.fields && params.fields.length > 0) {
         params.fields.forEach((field: string) => {
           httpParams = httpParams.append('fields', field);
         });
       }
-      
+
       // Add smart filter parameters based on table schema
       // String filtering for budget_code
-      if (params?.budget_code) httpParams = httpParams.set('budget_code', params.budget_code);
-            // String filtering for budget_type
-      if (params?.budget_type) httpParams = httpParams.set('budget_type', params.budget_type);
-            // String filtering for budget_category
-      if (params?.budget_category) httpParams = httpParams.set('budget_category', params.budget_category);
-            // String filtering for budget_description
-      if (params?.budget_description) httpParams = httpParams.set('budget_description', params.budget_description);
-            // Boolean filtering for is_active
-      if (params?.is_active !== undefined) httpParams = httpParams.set('is_active', params.is_active.toString());
+      if (params?.budget_code)
+        httpParams = httpParams.set('budget_code', params.budget_code);
+      // String filtering for budget_type
+      if (params?.budget_type)
+        httpParams = httpParams.set('budget_type', params.budget_type);
+      // String filtering for budget_category
+      if (params?.budget_category)
+        httpParams = httpParams.set('budget_category', params.budget_category);
+      // String filtering for budget_description
+      if (params?.budget_description)
+        httpParams = httpParams.set(
+          'budget_description',
+          params.budget_description,
+        );
+      // Boolean filtering for is_active
+      if (params?.is_active !== undefined)
+        httpParams = httpParams.set('is_active', params.is_active.toString());
       // Date/DateTime filtering for created_at
-      if (params?.created_at) httpParams = httpParams.set('created_at', params.created_at);
-      if (params?.created_at_min) httpParams = httpParams.set('created_at_min', params.created_at_min);
-      if (params?.created_at_max) httpParams = httpParams.set('created_at_max', params.created_at_max);
+      if (params?.created_at)
+        httpParams = httpParams.set('created_at', params.created_at);
+      if (params?.created_at_min)
+        httpParams = httpParams.set('created_at_min', params.created_at_min);
+      if (params?.created_at_max)
+        httpParams = httpParams.set('created_at_max', params.created_at_max);
 
       const response = await this.http
         .get<PaginatedResponse<Budget>>(this.baseUrl, { params: httpParams })
@@ -192,9 +205,8 @@ export class BudgetService {
         .toPromise();
 
       if (response) {
-        // Optimistic update: add to list
-        this.budgetsListSignal.update((list) => [...list, response.data!]);
-        this.totalBudgetSignal.update(total => total + 1);
+        // ✅ Return data without optimistic update
+        // List component will refresh via reloadTrigger
         return response.data;
       }
       return null;
@@ -209,7 +221,10 @@ export class BudgetService {
   /**
    * Update existing budgets
    */
-  async updateBudget(id: number, data: UpdateBudgetRequest): Promise<Budget | null> {
+  async updateBudget(
+    id: number,
+    data: UpdateBudgetRequest,
+  ): Promise<Budget | null> {
     this.loadingSignal.set(true);
 
     try {
@@ -218,14 +233,8 @@ export class BudgetService {
         .toPromise();
 
       if (response) {
-        // Optimistic update: replace in list
-        this.budgetsListSignal.update((list) =>
-          list.map((item) => (item.id === id ? response.data! : item))
-        );
-        // Update selected budgets if it's the same
-        if (this.selectedBudgetSignal()?.id === id) {
-          this.selectedBudgetSignal.set(response.data);
-        }
+        // ✅ Return data without optimistic update
+        // List component will refresh via reloadTrigger
         return response.data;
       }
       return null;
@@ -249,15 +258,8 @@ export class BudgetService {
         .toPromise();
 
       if (response?.success) {
-        // Optimistic update: remove from list
-        this.budgetsListSignal.update((list) =>
-          list.filter((item) => item.id !== id)
-        );
-        this.totalBudgetSignal.update(total => Math.max(0, total - 1));
-        // Clear selected budgets if it's the deleted one
-        if (this.selectedBudgetSignal()?.id === id) {
-          this.selectedBudgetSignal.set(null);
-        }
+        // ✅ Return success without optimistic update
+        // List component will refresh via reloadTrigger
         return true;
       }
       return false;
@@ -284,11 +286,10 @@ export class BudgetService {
     includeMetadata?: boolean;
   }): Promise<Blob> {
     try {
-      let httpParams = new HttpParams()
-        .set('format', options.format);
+      let httpParams = new HttpParams().set('format', options.format);
 
       if (options.ids && options.ids.length > 0) {
-        options.ids.forEach(id => {
+        options.ids.forEach((id) => {
           httpParams = httpParams.append('ids', id);
         });
       }
@@ -302,7 +303,7 @@ export class BudgetService {
       }
 
       if (options.fields && options.fields.length > 0) {
-        options.fields.forEach(field => {
+        options.fields.forEach((field) => {
           httpParams = httpParams.append('fields', field);
         });
       }
@@ -312,17 +313,23 @@ export class BudgetService {
       }
 
       if (options.applyFilters !== undefined) {
-        httpParams = httpParams.set('applyFilters', String(options.applyFilters));
+        httpParams = httpParams.set(
+          'applyFilters',
+          String(options.applyFilters),
+        );
       }
 
       if (options.includeMetadata !== undefined) {
-        httpParams = httpParams.set('includeMetadata', String(options.includeMetadata));
+        httpParams = httpParams.set(
+          'includeMetadata',
+          String(options.includeMetadata),
+        );
       }
 
       const response = await this.http
         .get(`${this.baseUrl}/export`, {
           params: httpParams,
-          responseType: 'blob'
+          responseType: 'blob',
         })
         .toPromise();
 
@@ -340,14 +347,22 @@ export class BudgetService {
   /**
    * Get dropdown options for budgets
    */
-  async getDropdownOptions(params: {search?: string, limit?: number} = {}): Promise<Array<{value: string, label: string}>> {
+  async getDropdownOptions(
+    params: { search?: string; limit?: number } = {},
+  ): Promise<Array<{ value: string; label: string }>> {
     try {
       let httpParams = new HttpParams();
       if (params.search) httpParams = httpParams.set('search', params.search);
-      if (params.limit) httpParams = httpParams.set('limit', params.limit.toString());
+      if (params.limit)
+        httpParams = httpParams.set('limit', params.limit.toString());
 
       const response = await this.http
-        .get<ApiResponse<{options: Array<{value: string, label: string}>, total: number}>>(`${this.baseUrl}/dropdown`, { params: httpParams })
+        .get<
+          ApiResponse<{
+            options: Array<{ value: string; label: string }>;
+            total: number;
+          }>
+        >(`${this.baseUrl}/dropdown`, { params: httpParams })
         .toPromise();
 
       if (response?.success && response.data?.options) {
@@ -363,14 +378,26 @@ export class BudgetService {
   /**
    * Get budget_types dropdown options for budget_type field
    */
-  async getBudgetTypesDropdown(params: {search?: string, limit?: number} = {}): Promise<Array<{value: string, label: string, disabled?: boolean}>> {
+  async getBudgetTypesDropdown(
+    params: { search?: string; limit?: number } = {},
+  ): Promise<Array<{ value: string; label: string; disabled?: boolean }>> {
     try {
       let httpParams = new HttpParams();
       if (params.search) httpParams = httpParams.set('search', params.search);
-      if (params.limit) httpParams = httpParams.set('limit', params.limit.toString());
+      if (params.limit)
+        httpParams = httpParams.set('limit', params.limit.toString());
 
       const response = await this.http
-        .get<ApiResponse<{options: Array<{value: string, label: string, disabled?: boolean}>, total: number}>>('/budget_types/dropdown', { params: httpParams })
+        .get<
+          ApiResponse<{
+            options: Array<{
+              value: string;
+              label: string;
+              disabled?: boolean;
+            }>;
+            total: number;
+          }>
+        >('/budget_types/dropdown', { params: httpParams })
         .toPromise();
 
       if (response?.success && response.data?.options) {
@@ -386,14 +413,26 @@ export class BudgetService {
   /**
    * Get budget_categories dropdown options for budget_category field
    */
-  async getBudgetCategoriesDropdown(params: {search?: string, limit?: number} = {}): Promise<Array<{value: string, label: string, disabled?: boolean}>> {
+  async getBudgetCategoriesDropdown(
+    params: { search?: string; limit?: number } = {},
+  ): Promise<Array<{ value: string; label: string; disabled?: boolean }>> {
     try {
       let httpParams = new HttpParams();
       if (params.search) httpParams = httpParams.set('search', params.search);
-      if (params.limit) httpParams = httpParams.set('limit', params.limit.toString());
+      if (params.limit)
+        httpParams = httpParams.set('limit', params.limit.toString());
 
       const response = await this.http
-        .get<ApiResponse<{options: Array<{value: string, label: string, disabled?: boolean}>, total: number}>>('/budget_categories/dropdown', { params: httpParams })
+        .get<
+          ApiResponse<{
+            options: Array<{
+              value: string;
+              label: string;
+              disabled?: boolean;
+            }>;
+            total: number;
+          }>
+        >('/budget_categories/dropdown', { params: httpParams })
         .toPromise();
 
       if (response?.success && response.data?.options) {
@@ -401,16 +440,20 @@ export class BudgetService {
       }
       return [];
     } catch (error: any) {
-      console.error('Failed to fetch budget_categories dropdown options:', error);
+      console.error(
+        'Failed to fetch budget_categories dropdown options:',
+        error,
+      );
       return [];
     }
   }
 
-
   /**
    * Bulk create budgetss
    */
-  async bulkCreateBudget(items: CreateBudgetRequest[]): Promise<BulkResponse | null> {
+  async bulkCreateBudget(
+    items: CreateBudgetRequest[],
+  ): Promise<BulkResponse | null> {
     this.loadingSignal.set(true);
 
     try {
@@ -435,7 +478,9 @@ export class BudgetService {
   /**
    * Bulk update budgetss
    */
-  async bulkUpdateBudget(items: Array<{ id: number, data: UpdateBudgetRequest }>): Promise<BulkResponse | null> {
+  async bulkUpdateBudget(
+    items: Array<{ id: number; data: UpdateBudgetRequest }>,
+  ): Promise<BulkResponse | null> {
     this.loadingSignal.set(true);
 
     try {
@@ -481,7 +526,6 @@ export class BudgetService {
       this.loadingSignal.set(false);
     }
   }
-
 
   // ===== BULK IMPORT OPERATIONS =====
 

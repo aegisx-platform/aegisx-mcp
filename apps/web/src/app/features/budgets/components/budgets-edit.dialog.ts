@@ -175,19 +175,19 @@ export class BudgetEditDialogComponent implements OnInit {
   }
 
   async onFormSubmit(formData: BudgetFormData) {
-    // Optimistic update: Close dialog immediately for instant UX
+    // Call API directly - WebSocket events will handle real-time sync
     this.loading.set(true);
 
     try {
       const updateRequest = formData as UpdateBudgetRequest;
 
-      // Use state manager's optimistic update
-      await this.budgetStateManager.optimisticUpdate(
+      // Call API to update
+      const result = await this.budgetsService.updateBudget(
         this.data.budgets.id,
-        updateRequest as any,
+        updateRequest,
       );
 
-      // Show success message and close immediately
+      // Show success message and close
       this.snackBar.open('Budget updated successfully', 'Close', {
         duration: 3000,
       });

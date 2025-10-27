@@ -327,6 +327,34 @@ export class BudgetsListComponent {
     // Initialize real-time state manager
     this.budgetStateManager.initialize();
 
+    // 🔧 OPTIONAL: Uncomment for real-time CRUD updates
+    // By default, list uses reload trigger for data accuracy (HIS mode)
+    // Uncomment below to enable real-time updates instead:
+    /*
+    // Real-time CRUD event subscriptions (optional)
+    // Backend always emits these events for audit trail and event-driven architecture
+    // Frontend can optionally subscribe for real-time UI updates
+
+    // Note: Import required dependencies first:
+    // import { WebSocketService } from '../../../core/services/websocket.service';
+    // import { AuthService } from '../../../core/services/auth.service';
+    // import { Subject } from 'rxjs';
+    // import { takeUntil } from 'rxjs/operators';
+
+    // Add these as class properties:
+    // private wsService = inject(WebSocketService);
+    // private authService = inject(AuthService);
+    // private destroy$ = new Subject<void>();
+
+    // Setup WebSocket connection for real-time updates
+    const token = this.authService.accessToken();
+    if (token) {
+      this.wsService.connect(token);
+      this.wsService.subscribe({ features: ['budgets'] });
+      this.setupCrudEventListeners();
+    }
+    */
+
     // Sync export selection state
     effect(() => {
       const ids = new Set(this.selection.selected.map((b) => b.id));
@@ -691,4 +719,65 @@ export class BudgetsListComponent {
   isRowExpanded(budget: Budget): boolean {
     return this.expandedBudget()?.id === budget.id;
   }
+
+  // 🔧 OPTIONAL: Real-time CRUD Event Listeners
+  // This method is commented out by default - uncomment to enable real-time updates
+  // Remember to also uncomment the WebSocket setup in constructor and add required imports
+  /*
+  private setupCrudEventListeners(): void {
+    // 📡 Subscribe to 'created' event
+    // Triggered when a new budget is created (by any user)
+    this.wsService
+      .subscribeToEvent('budgets', 'budgets', 'created')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((event: any) => {
+        console.log('🔥 New budget created:', event.data);
+
+        // Option 1: Add to local state and refresh display
+        this.budgetsService.budgetsListSignal.update(
+          list => [event.data, ...list]
+        );
+        this.reloadTrigger.update(n => n + 1); // Refresh display
+
+        // Option 2: Just refresh from server (more reliable)
+        // this.reloadTrigger.update(n => n + 1);
+      });
+
+    // 📡 Subscribe to 'updated' event
+    // Triggered when a budget is modified (by any user)
+    this.wsService
+      .subscribeToEvent('budgets', 'budgets', 'updated')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((event: any) => {
+        console.log('🔄 Budget updated:', event.data);
+
+        // Option 1: Update in local state and refresh display
+        this.budgetsService.budgetsListSignal.update(
+          list => list.map(item => item.id === event.data.id ? event.data : item)
+        );
+        this.reloadTrigger.update(n => n + 1); // Refresh display
+
+        // Option 2: Just refresh from server (more reliable)
+        // this.reloadTrigger.update(n => n + 1);
+      });
+
+    // 📡 Subscribe to 'deleted' event
+    // Triggered when a budget is removed (by any user)
+    this.wsService
+      .subscribeToEvent('budgets', 'budgets', 'deleted')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((event: any) => {
+        console.log('🗑️ Budget deleted:', event.data);
+
+        // Option 1: Remove from local state and refresh display
+        this.budgetsService.budgetsListSignal.update(
+          list => list.filter(item => item.id !== event.data.id)
+        );
+        this.reloadTrigger.update(n => n + 1); // Refresh display
+
+        // Option 2: Just refresh from server (more reliable)
+        // this.reloadTrigger.update(n => n + 1);
+      });
+  }
+  */
 }

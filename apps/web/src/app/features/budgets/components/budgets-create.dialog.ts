@@ -163,18 +163,16 @@ export class BudgetCreateDialogComponent {
   loading = signal<boolean>(false);
 
   async onFormSubmit(formData: BudgetFormData) {
-    // Optimistic create: Close dialog immediately for instant UX
+    // Call API directly - WebSocket events will handle real-time sync
     this.loading.set(true);
 
     try {
       const createRequest = formData as CreateBudgetRequest;
 
-      // Use state manager's optimistic create
-      const result = await this.budgetStateManager.optimisticCreate(
-        createRequest as any,
-      );
+      // Call API to create
+      const result = await this.budgetsService.createBudget(createRequest);
 
-      // Show success message and close immediately
+      // Show success message and close
       this.snackBar.open('Budget created successfully', 'Close', {
         duration: 3000,
       });

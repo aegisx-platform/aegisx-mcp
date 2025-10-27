@@ -51,8 +51,12 @@ export class BudgetsController {
 
     const budgets = await this.budgetsService.create(createData);
 
-    // Emit created event for real-time updates
-    this.eventService.for('budgets', String(budgets.id)).emitCreated(budgets);
+    // 🔥 Emit created event for event-driven architecture
+    // Backend always emits events for audit trail, analytics, and microservices
+    // Frontend can optionally subscribe to these events
+    this.eventService
+      .for('budgets', 'budgets')
+      .emitCustom('created', budgets, 'normal');
 
     request.log.info({ budgetsId: budgets.id }, 'Budgets created successfully');
 
@@ -191,8 +195,10 @@ export class BudgetsController {
 
     const budgets = await this.budgetsService.update(id, updateData);
 
-    // Emit updated event for real-time updates
-    this.eventService.for('budgets', String(id)).emitUpdated(budgets);
+    // 🔥 Emit updated event for event-driven architecture
+    this.eventService
+      .for('budgets', 'budgets')
+      .emitCustom('updated', { id, ...budgets }, 'normal');
 
     request.log.info({ budgetsId: id }, 'Budgets updated successfully');
 
@@ -216,8 +222,10 @@ export class BudgetsController {
       return reply.code(404).error('NOT_FOUND', 'Budgets not found');
     }
 
-    // Emit deleted event for real-time updates
-    this.eventService.for('budgets', String(id)).emitDeleted(id);
+    // 🔥 Emit deleted event for event-driven architecture
+    this.eventService
+      .for('budgets', 'budgets')
+      .emitCustom('deleted', { id }, 'normal');
 
     request.log.info({ budgetsId: id }, 'Budgets deleted successfully');
 

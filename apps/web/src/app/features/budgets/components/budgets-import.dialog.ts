@@ -12,6 +12,7 @@ import { FormsModule } from '@angular/forms';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { WebSocketService } from '../../../shared/business/services/websocket.service';
+import { AuthService } from '../../../core/auth/services/auth.service';
 
 import { BudgetService } from '../services/budgets.service';
 import {
@@ -936,6 +937,7 @@ export class BudgetImportDialogComponent implements OnDestroy {
   private snackBar = inject(MatSnackBar);
   private dialogRef = inject(MatDialogRef<BudgetImportDialogComponent>);
   private wsService = inject(WebSocketService);
+  private authService = inject(AuthService);
   private destroy$ = new Subject<void>();
 
   currentStep = signal<ImportStep>('upload');
@@ -1083,6 +1085,19 @@ export class BudgetImportDialogComponent implements OnDestroy {
   }
 
   private setupWebSocketListener(jobId: string): void {
+    // 🔌 Establish WebSocket connection before subscribing
+    const token = this.authService.accessToken();
+    if (!token) {
+      console.error(
+        'No authentication token available for WebSocket connection',
+      );
+      return;
+    }
+    this.wsService.connect(token);
+
+    // 📡 Subscribe to feature events
+    this.wsService.subscribe({ features: ['budgets'] });
+
     this.wsService
       .subscribeToEvent('budgets', 'import', 'progress')
       .pipe(takeUntil(this.destroy$))
