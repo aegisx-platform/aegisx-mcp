@@ -390,10 +390,11 @@ export class BudgetsListComponent {
           delete params[k as keyof typeof params],
       );
 
-      // With real-time state manager: Use synced data instead of manual API calls
-      this.dataSource.data = this.budgetStateManager.localState();
+      // Always use traditional API for list/search operations
+      // WebSocket events are for real-time sync of CUD operations only
+      await this.budgetsService.loadBudgetList(params);
+      this.dataSource.data = this.budgetsService.budgetsList();
       if (this.paginator) {
-        // TODO: State manager doesn't track total count yet, fallback to service
         this.paginator.length = this.budgetsService.totalBudget();
       }
     });
