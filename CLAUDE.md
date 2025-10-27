@@ -160,6 +160,57 @@ Keep commit messages clean and professional.
   - Infrastructure guides → `docs/infrastructure/`
 - **NEVER create standalone .md files in root** without specific justification
 
+### PROJECT_STATUS.md Update Policy (MANDATORY)
+
+**🚨 CRITICAL: Keep Summary & Recommendations section updated and visible at the top**
+
+**Why This Matters:**
+
+- `PROJECT_STATUS.md` is the session recovery document
+- New sessions append to the file, pushing content down
+- **Summary & Recommendations must stay at the top** for quick access
+- This section shows current project health and next steps at a glance
+
+**MANDATORY Rules:**
+
+1. **Location**: Summary & Recommendations section is located **immediately after "Implemented Features"** section
+2. **Update Frequency**: Update this section **every time you complete a major task or session**
+3. **What to Update**:
+   - ✅ "What's Working Well" - Add new completed features
+   - 🎯 "Recommended Next Steps" - Update priorities based on current status
+   - 📊 "Project Health Status" - Update metrics if changed
+   - 🎉 "Current Project Status" - Update feature counts and capabilities
+
+**When to Update:**
+
+- ✅ After completing a feature
+- ✅ After significant architectural changes
+- ✅ After publishing new versions (CRUD Generator, etc.)
+- ✅ When starting a new major feature
+- ✅ At the end of each session if significant progress made
+
+**How to Update:**
+
+```bash
+# 1. Open PROJECT_STATUS.md
+# 2. Scroll to "Summary & Recommendations" section (near top)
+# 3. Update relevant subsections
+# 4. Update "Last Updated" date at bottom of section
+# 5. Commit changes with descriptive message
+```
+
+**Important Note:**
+
+- ❌ **DO NOT** duplicate Summary & Recommendations at the bottom
+- ✅ **KEEP IT** at the top after "Implemented Features" section
+- ✅ **ADD NOTE** at bottom: "_📌 Note: Summary & Recommendations section is at the top of this file_"
+
+**Example Commit Messages:**
+
+- `docs(status): update project health status after CRUD generator v2.1.0 release`
+- `docs(status): add new completed features to recommendations`
+- `docs(status): update next steps priorities`
+
 ### Feature Documentation Policy (MANDATORY)
 
 **🚨 ALL new features MUST have comprehensive documentation - NO EXCEPTIONS**
