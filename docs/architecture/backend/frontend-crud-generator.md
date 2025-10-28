@@ -1,5 +1,18 @@
 # Frontend CRUD Generator
 
+> **⚠️ DEPRECATED REFERENCE** - This document describes the original frontend CRUD generator concept.
+>
+> **For current CRUD generator documentation (backend-focused), see:**
+>
+> - **[CRUD Generator Documentation](../../crud-generator/)** - Backend CRUD generation with automatic error handling
+> - **[Error Handling Guide](../../crud-generator/ERROR_HANDLING_GUIDE.md)** - Automatic error detection
+> - **[Validation Reference](../../crud-generator/VALIDATION_REFERENCE.md)** - Auto-detected validations
+>
+> **Note:** Frontend generation is currently not implemented. The CRUD generator focuses on backend API generation.
+> This document is kept for future reference only.
+
+---
+
 ## Angular CRUD Generation from OpenAPI
 
 ### Frontend Generator Service

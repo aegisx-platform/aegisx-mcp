@@ -67,13 +67,21 @@
     @apply text-default bg-default #{'!important'};
   }
 
-  /* Set the border color - exclude Material components including notch */
+  /* Set the border color - exclude Material components including notch and dialog */
   body
     *:not(.mdc-notched-outline__leading):not(.mdc-notched-outline__notch):not(
       .mdc-notched-outline__trailing
-    ):not(.mat-mdc-form-field *):not(.mdc-notched-outline),
-  body *:not(.mat-mdc-form-field *):not(.mdc-notched-outline *)::before,
-  body *:not(.mat-mdc-form-field *):not(.mdc-notched-outline *)::after {
+    ):not(.mat-mdc-form-field *):not(.mdc-notched-outline):not(
+      .mat-mdc-dialog-container
+    ):not(.mat-mdc-dialog-surface),
+  body
+    *:not(.mat-mdc-form-field *):not(.mdc-notched-outline *):not(
+      .mat-mdc-dialog-container *
+    ):not(.mat-mdc-dialog-surface *)::before,
+  body
+    *:not(.mat-mdc-form-field *):not(.mdc-notched-outline *):not(
+      .mat-mdc-dialog-container *
+    ):not(.mat-mdc-dialog-surface *)::after {
     --tw-border-opacity: 1 !important;
     border-color: rgba(var(--fuse-border-rgb), var(--tw-border-opacity));
 
@@ -173,7 +181,11 @@
 /* Material Dialog Global Fixes */
 .mat-mdc-dialog-container {
   --mdc-dialog-container-elevation: 0 8px 16px rgba(0, 0, 0, 0.12);
-  border-radius: 12px !important;
+  border-radius: 28px !important;
+}
+
+.mat-mdc-dialog-surface {
+  border-radius: 28px !important;
 }
 
 .mat-mdc-dialog-title {

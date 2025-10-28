@@ -1,6 +1,6 @@
-import Knex from 'knex';
+import type { Knex } from 'knex';
 
-export async function seed(knex: any): Promise<void> {
+export async function seed(knex: Knex): Promise<void> {
   // Helper function to safely insert navigation items
   async function insertNavigationItems(items: any[]) {
     const insertedItems = [];
@@ -185,38 +185,5 @@ export async function seed(knex: any): Promise<void> {
   }
 
   console.log('✅ Linked navigation items with permissions');
-
-  // Create default notification preferences for existing users
-  const allUsers = await knex('users').select(['id']);
-  const notificationTypes = [
-    'security',
-    'updates',
-    'marketing',
-    'reminders',
-    'system',
-  ];
-
-  for (const user of allUsers) {
-    // Check if user already has notification preferences
-    const existingPrefs = await knex('notification_preferences')
-      .where({ user_id: user.id })
-      .first();
-
-    if (!existingPrefs) {
-      const preferences = notificationTypes.map((type) => ({
-        user_id: user.id,
-        notification_type: type,
-        email_enabled: type === 'security' || type === 'system',
-        push_enabled: false,
-        desktop_enabled: type !== 'marketing',
-        sound_enabled: type === 'security' || type === 'system',
-        frequency: type === 'marketing' ? 'weekly' : 'immediate',
-      }));
-
-      await knex('notification_preferences').insert(preferences);
-    }
-  }
-
-  console.log('✅ Created default notification preferences');
   console.log('✅ Navigation and permissions seed completed successfully');
 }

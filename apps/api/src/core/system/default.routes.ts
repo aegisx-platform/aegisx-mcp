@@ -6,8 +6,8 @@ import { SchemaRefs } from '../../schemas/registry';
 import {
   createApiKeyAuth,
   createHybridAuth,
-} from '../../modules/apiKeys/middleware/apiKeys.middleware';
-import { ApiKeysService } from '../../modules/apiKeys/services/apiKeys.service';
+} from '../../core/api-keys/middleware/apiKeys.middleware';
+import { ApiKeysService } from '../../core/api-keys/services/apiKeys.service';
 
 export interface DefaultRoutesOptions {
   controller: DefaultController;

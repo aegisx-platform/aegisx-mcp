@@ -1,11 +1,6 @@
-import { AegisxCardComponent } from '@aegisx/ui';
 import { CommonModule } from '@angular/common';
 import { Component, signal } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTabsModule } from '@angular/material/tabs';
 import {
   ActivityItem,
   ActivityTimelineComponent,
@@ -15,139 +10,172 @@ import {
   ProgressWidgetComponent,
   QuickAction,
   QuickActionsComponent,
-  StatsCardComponent,
-  StatsCardData,
 } from './widgets';
+import {
+  StatsCardDataNew,
+  StatsCardNewComponent,
+} from './widgets/stats-card-new.component';
 
 @Component({
   selector: 'ax-dashboard',
   standalone: true,
   imports: [
     CommonModule,
-    MatCardModule,
-    MatButtonModule,
     MatIconModule,
-    MatGridListModule,
-    MatTabsModule,
-    AegisxCardComponent,
     ChartWidgetComponent,
-    StatsCardComponent,
+    StatsCardNewComponent,
     ActivityTimelineComponent,
     ProgressWidgetComponent,
     QuickActionsComponent,
   ],
   template: `
-    <div class="w-full h-full overflow-y-auto overflow-x-hidden">
-      <!-- Page Header -->
-      <div
-        class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-6 sm:px-8 sm:py-6 bg-white dark:bg-gray-900"
-      >
-        <div>
-          <h1
-            class="text-2xl md:text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100"
+    <div class="w-full h-full overflow-y-auto overflow-x-hidden bg-gray-50">
+      <!-- Page Header - Tremor Style -->
+      <div class="bg-white border-b border-slate-200 sticky top-0 z-10">
+        <div class="px-6 sm:px-8 py-6">
+          <div
+            class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
           >
-            Analytics Dashboard
-          </h1>
-          <p class="text-gray-600 dark:text-gray-400 mt-1">
-            Real-time overview of your application performance and activities
-          </p>
-        </div>
-        <div class="flex items-center mt-4 sm:mt-0 space-x-3">
-          <button mat-stroked-button>
-            <mat-icon class="mr-2">calendar_today</mat-icon>
-            Last 30 days
-          </button>
-          <button mat-flat-button color="primary">
-            <mat-icon class="mr-2">file_download</mat-icon>
-            Export
-          </button>
+            <div>
+              <h1
+                class="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight"
+              >
+                Analytics Dashboard
+              </h1>
+              <p class="text-sm text-slate-600 mt-1">
+                Real-time overview of your application performance and
+                activities
+              </p>
+            </div>
+            <div class="flex items-center gap-3">
+              <button
+                class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white
+                       border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+              >
+                <mat-icon class="!text-base">calendar_today</mat-icon>
+                <span>Last 30 days</span>
+              </button>
+              <button
+                class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600
+                       rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+              >
+                <mat-icon class="!text-base">file_download</mat-icon>
+                <span>Export</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
       <!-- Main Content -->
-      <div class="p-6 sm:p-8">
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div class="p-6 sm:p-8 space-y-8">
+        <!-- Stats Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           @for (stat of statsData(); track stat.title) {
-            <ax-stats-card
+            <ax-stats-card-new
               [data]="stat"
               [showSparkline]="true"
               [actionLabel]="'View Details'"
-            ></ax-stats-card>
+            ></ax-stats-card-new>
           }
         </div>
 
-        <!-- Tab Section for Charts and Analytics -->
-        <mat-tab-group class="mb-8">
-          <mat-tab label="Overview">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-              <ax-chart-widget
-                title="Revenue Trends"
-                subtitle="Last 12 months"
-                [data]="revenueChartData"
-                [chartType]="'line'"
-                [height]="350"
-              ></ax-chart-widget>
-
-              <ax-chart-widget
-                title="User Distribution"
-                subtitle="By region"
-                [data]="userDistributionData"
-                [chartType]="'doughnut'"
-                [height]="350"
-              ></ax-chart-widget>
+        <!-- Custom Tab Section - Tremor Style -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm">
+          <!-- Tab Headers -->
+          <div class="border-b border-slate-200">
+            <div class="flex overflow-x-auto">
+              @for (tab of tabs(); track tab.id) {
+                <button
+                  (click)="activeTab.set(tab.id)"
+                  class="px-6 py-4 text-sm font-medium border-b-2 transition-colors whitespace-nowrap"
+                  [class.border-blue-600]="activeTab() === tab.id"
+                  [class.text-blue-600]="activeTab() === tab.id"
+                  [class.border-transparent]="activeTab() !== tab.id"
+                  [class.text-slate-600]="activeTab() !== tab.id"
+                  [class.hover:text-slate-900]="activeTab() !== tab.id"
+                >
+                  {{ tab.label }}
+                </button>
+              }
             </div>
-          </mat-tab>
+          </div>
 
-          <mat-tab label="Performance">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-              <ax-chart-widget
-                title="API Response Times"
-                subtitle="Average response time (ms)"
-                [data]="apiPerformanceData"
-                [chartType]="'bar'"
-                [height]="350"
-              ></ax-chart-widget>
+          <!-- Tab Content -->
+          <div class="p-6">
+            <!-- Overview Tab -->
+            @if (activeTab() === 'overview') {
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <ax-chart-widget
+                  title="Revenue Trends"
+                  subtitle="Last 12 months"
+                  [data]="revenueChartData"
+                  [chartType]="'line'"
+                  [height]="350"
+                ></ax-chart-widget>
 
-              <ax-progress-widget
-                title="System Resources"
-                subtitle="Current usage"
-                [items]="systemResourcesData"
-                [showTotal]="false"
-              ></ax-progress-widget>
-            </div>
-          </mat-tab>
+                <ax-chart-widget
+                  title="User Distribution"
+                  subtitle="By region"
+                  [data]="userDistributionData"
+                  [chartType]="'doughnut'"
+                  [height]="350"
+                ></ax-chart-widget>
+              </div>
+            }
 
-          <mat-tab label="Analytics">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-              <ax-chart-widget
-                title="Traffic Sources"
-                subtitle="Last 30 days"
-                [data]="trafficSourcesData"
-                [chartType]="'pie'"
-                [height]="300"
-              ></ax-chart-widget>
+            <!-- Performance Tab -->
+            @if (activeTab() === 'performance') {
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <ax-chart-widget
+                  title="API Response Times"
+                  subtitle="Average response time (ms)"
+                  [data]="apiPerformanceData"
+                  [chartType]="'bar'"
+                  [height]="350"
+                ></ax-chart-widget>
 
-              <ax-chart-widget
-                title="Conversion Funnel"
-                subtitle="User journey"
-                [data]="conversionFunnelData"
-                [chartType]="'bar'"
-                [height]="300"
-              ></ax-chart-widget>
+                <ax-progress-widget
+                  title="System Resources"
+                  subtitle="Current usage"
+                  [items]="systemResourcesData"
+                  [showTotal]="false"
+                ></ax-progress-widget>
+              </div>
+            }
 
-              <ax-progress-widget
-                title="Goals Progress"
-                subtitle="Q4 2024"
-                [items]="goalsProgressData"
-                [actionLabel]="'Update Goals'"
-              ></ax-progress-widget>
-            </div>
-          </mat-tab>
-        </mat-tab-group>
+            <!-- Analytics Tab -->
+            @if (activeTab() === 'analytics') {
+              <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <ax-chart-widget
+                  title="Traffic Sources"
+                  subtitle="Last 30 days"
+                  [data]="trafficSourcesData"
+                  [chartType]="'pie'"
+                  [height]="300"
+                ></ax-chart-widget>
+
+                <ax-chart-widget
+                  title="Conversion Funnel"
+                  subtitle="User journey"
+                  [data]="conversionFunnelData"
+                  [chartType]="'bar'"
+                  [height]="300"
+                ></ax-chart-widget>
+
+                <ax-progress-widget
+                  title="Goals Progress"
+                  subtitle="Q4 2024"
+                  [items]="goalsProgressData"
+                  [actionLabel]="'Update Goals'"
+                ></ax-progress-widget>
+              </div>
+            }
+          </div>
+        </div>
 
         <!-- Main Content Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <!-- Activity Timeline (2 columns) -->
           <div class="lg:col-span-2">
             <ax-activity-timeline
@@ -169,7 +197,7 @@ import {
         </div>
 
         <!-- Additional Widgets Row -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <!-- Project Progress -->
           <ax-progress-widget
             title="Active Projects"
@@ -187,68 +215,107 @@ import {
             [height]="250"
           ></ax-chart-widget>
 
-          <!-- Notifications Summary -->
-          <ax-card
-            title="Notifications"
-            subtitle="Recent alerts"
-            icon="notifications"
-            [appearance]="'elevated'"
-          >
-            <div class="space-y-3">
+          <!-- Notifications Summary - Tremor Style -->
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm">
+            <!-- Card Header -->
+            <div
+              class="flex items-center justify-between px-6 py-4 border-b border-slate-200"
+            >
+              <div class="flex items-center gap-3">
+                <div
+                  class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50"
+                >
+                  <mat-icon class="text-blue-600 !text-xl"
+                    >notifications</mat-icon
+                  >
+                </div>
+                <div>
+                  <h3 class="text-base font-semibold text-slate-900">
+                    Notifications
+                  </h3>
+                  <p class="text-xs text-slate-600">Recent alerts</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Notifications List -->
+            <div class="p-4 space-y-2">
               @for (
                 notification of recentNotifications;
                 track notification.id
               ) {
                 <div
-                  class="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
+                  class="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors group"
                 >
-                  <mat-icon
-                    class="text-xl mt-0.5"
-                    [ngClass]="{
-                      'text-red-600': notification.type === 'error',
-                      'text-yellow-600': notification.type === 'warning',
-                      'text-blue-600': notification.type === 'info',
-                      'text-green-600': notification.type === 'success',
-                    }"
-                    >{{ notification.icon }}</mat-icon
+                  <div
+                    class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center"
+                    [class.bg-red-50]="notification.type === 'error'"
+                    [class.bg-yellow-50]="notification.type === 'warning'"
+                    [class.bg-blue-50]="notification.type === 'info'"
+                    [class.bg-green-50]="notification.type === 'success'"
                   >
-                  <div class="flex-1">
+                    <mat-icon
+                      class="!text-base"
+                      [class.text-red-600]="notification.type === 'error'"
+                      [class.text-yellow-600]="notification.type === 'warning'"
+                      [class.text-blue-600]="notification.type === 'info'"
+                      [class.text-green-600]="notification.type === 'success'"
+                    >
+                      {{ notification.icon }}
+                    </mat-icon>
+                  </div>
+                  <div class="flex-1 min-w-0">
                     <p
-                      class="text-sm font-medium text-gray-900 dark:text-gray-100"
+                      class="text-sm font-medium text-slate-900 group-hover:text-blue-600 transition-colors"
                     >
                       {{ notification.title }}
                     </p>
-                    <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                    <p class="text-xs text-slate-500 mt-0.5">
                       {{ notification.time }}
                     </p>
                   </div>
                 </div>
               }
             </div>
-            <div card-actions>
-              <button mat-button color="primary">View All</button>
-              <button mat-button>Mark as Read</button>
+
+            <!-- Card Actions -->
+            <div
+              class="flex items-center justify-between px-6 py-3 border-t border-slate-200 bg-slate-50"
+            >
+              <button
+                class="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+              >
+                View All
+              </button>
+              <button
+                class="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+              >
+                Mark as Read
+              </button>
             </div>
-          </ax-card>
+          </div>
         </div>
       </div>
     </div>
   `,
   styles: [
     `
-      .dashboard-container {
-        min-height: 100vh;
-        padding-bottom: 2rem;
+      :host {
+        display: block;
+        width: 100%;
+        height: 100%;
       }
 
-      ::ng-deep .mat-mdc-tab-group {
-        .mat-mdc-tab-body-wrapper {
-          margin-top: 1rem;
-        }
+      /* Smooth transitions for all interactive elements */
+      button {
+        transition: all 0.2s ease-in-out;
       }
 
-      ::ng-deep .mat-mdc-card {
-        transition: all 0.3s ease;
+      /* Icon adjustments */
+      .mat-icon {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
       }
     `,
   ],
@@ -256,15 +323,23 @@ import {
 export class DashboardPage {
   Math = Math;
 
-  // Stats data with signals for reactivity
-  statsData = signal<StatsCardData[]>([
+  // Tab management
+  activeTab = signal<string>('overview');
+  tabs = signal([
+    { id: 'overview', label: 'Overview' },
+    { id: 'performance', label: 'Performance' },
+    { id: 'analytics', label: 'Analytics' },
+  ]);
+
+  // Stats data with signals for reactivity - Tremor Colors
+  statsData = signal<StatsCardDataNew[]>([
     {
       title: 'Total Users',
       value: 1234,
       icon: 'people',
       change: 12.5,
       changeLabel: 'from last month',
-      color: 'primary',
+      color: 'blue',
       trend: 'up',
     },
     {
@@ -273,7 +348,7 @@ export class DashboardPage {
       icon: 'payments',
       change: 23.8,
       changeLabel: 'from last month',
-      color: 'success',
+      color: 'emerald',
       trend: 'up',
     },
     {
@@ -282,7 +357,7 @@ export class DashboardPage {
       icon: 'folder_open',
       change: -5.4,
       changeLabel: 'from last week',
-      color: 'warn',
+      color: 'rose',
       trend: 'down',
     },
     {
@@ -291,12 +366,12 @@ export class DashboardPage {
       icon: 'speed',
       change: 4.1,
       changeLabel: 'improvement',
-      color: 'info',
+      color: 'cyan',
       trend: 'up',
     },
   ]);
 
-  // Chart data
+  // Chart data - Tremor Planner Color Palette
   revenueChartData: ChartData = {
     labels: [
       'Jan',
@@ -316,14 +391,14 @@ export class DashboardPage {
       {
         label: 'Revenue',
         data: [65, 72, 78, 85, 82, 89, 92, 88, 94, 98, 102, 108],
-        backgroundColor: 'rgba(25, 118, 210, 0.1)',
-        borderColor: '#1976d2',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        borderColor: '#3b82f6',
       },
       {
         label: 'Expenses',
         data: [45, 48, 52, 55, 53, 58, 60, 62, 65, 68, 70, 72],
-        backgroundColor: 'rgba(255, 64, 129, 0.1)',
-        borderColor: '#ff4081',
+        backgroundColor: 'rgba(148, 163, 184, 0.1)',
+        borderColor: '#94a3b8',
       },
     ],
   };
@@ -335,11 +410,11 @@ export class DashboardPage {
         label: 'Users',
         data: [435, 320, 280, 120, 79],
         backgroundColor: [
-          '#1976d2',
-          '#ff4081',
-          '#4caf50',
-          '#ff9800',
-          '#9c27b0',
+          '#3b82f6',
+          '#60a5fa',
+          '#93c5fd',
+          '#bfdbfe',
+          '#dbeafe',
         ],
       },
     ],
@@ -351,7 +426,7 @@ export class DashboardPage {
       {
         label: 'Response Time (ms)',
         data: [45, 52, 38, 65, 89, 125],
-        backgroundColor: '#1976d2',
+        backgroundColor: '#3b82f6',
       },
     ],
   };
@@ -363,11 +438,11 @@ export class DashboardPage {
         label: 'Traffic',
         data: [30, 25, 20, 15, 10],
         backgroundColor: [
-          '#1976d2',
-          '#00bcd4',
-          '#4caf50',
-          '#ff9800',
-          '#f44336',
+          '#3b82f6',
+          '#60a5fa',
+          '#10b981',
+          '#f97316',
+          '#94a3b8',
         ],
       },
     ],
@@ -379,7 +454,7 @@ export class DashboardPage {
       {
         label: 'Users',
         data: [1000, 650, 400, 180],
-        backgroundColor: '#4caf50',
+        backgroundColor: '#3b82f6',
       },
     ],
   };
@@ -390,8 +465,8 @@ export class DashboardPage {
       {
         label: 'Story Points',
         data: [42, 48, 51, 45, 53],
-        backgroundColor: 'rgba(156, 39, 176, 0.2)',
-        borderColor: '#9c27b0',
+        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+        borderColor: '#3b82f6',
       },
     ],
   };

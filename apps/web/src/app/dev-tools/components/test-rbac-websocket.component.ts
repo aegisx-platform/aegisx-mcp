@@ -8,8 +8,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatListModule } from '@angular/material/list';
 import { WebSocketService } from '../../shared/business/services/websocket.service';
-import { RbacRoleStateManager } from '../../features/rbac/services/rbac-state.manager';
-import { Role } from '../../features/rbac/models/rbac.interfaces';
+import { RbacRoleStateManager } from '../../core/rbac/services/rbac-state.manager';
+import { Role } from '../../core/rbac/models/rbac.interfaces';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({

@@ -4,9 +4,9 @@ import type { HelperDelegate } from 'handlebars';
 import { Knex } from 'knex';
 import * as path from 'path';
 import type { TDocumentDefinitions } from 'pdfmake/interfaces';
-import { FileUploadRepository } from '../modules/file-upload/file-upload.repository';
-import { FileUploadService } from '../modules/file-upload/file-upload.service';
-import { PdfTemplateRepository } from '../modules/pdf-export/repositories/pdf-template.repository';
+import { FileUploadRepository } from '../core/file-upload/file-upload.repository';
+import { FileUploadService } from '../core/file-upload/file-upload.service';
+import { PdfTemplateRepository } from '../core/pdf-export/repositories/pdf-template.repository';
 import {
   CompiledTemplate,
   CreatePdfTemplate,

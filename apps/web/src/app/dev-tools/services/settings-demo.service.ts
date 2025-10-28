@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, delay } from 'rxjs';
-import { GroupedSettings, Setting } from '../../features/settings/models/settings.types';
+import { GroupedSettings, Setting } from '../../core/settings/models/settings.types';
 
 /**
  * Demo service with mock data for testing the Settings UI

@@ -1,5 +1,18 @@
 # Knex CRUD with Pagination & Filters
 
+> **⚠️ RECOMMENDED APPROACH** - For new CRUD modules, use the automated CRUD generator instead of manual implementation.
+>
+> **For automated CRUD generation, see:**
+>
+> - **[CRUD Generator Documentation](../../crud-generator/)** - Automatic CRUD generation with error handling
+> - **[Error Handling Guide](../../crud-generator/ERROR_HANDLING_GUIDE.md)** - Automatic error detection
+> - **[Validation Reference](../../crud-generator/VALIDATION_REFERENCE.md)** - Auto-detected validations
+> - **[Testing Guide](../../crud-generator/TESTING_GUIDE.md)** - Testing strategies
+>
+> This document describes the manual Knex CRUD pattern and is kept for reference when you need custom implementations beyond what the generator provides.
+
+---
+
 ## Standard CRUD API Pattern
 
 ```

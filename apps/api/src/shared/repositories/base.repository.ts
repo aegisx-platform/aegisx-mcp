@@ -34,15 +34,53 @@ export interface PaginatedListResult<T> {
   pagination: PaginationMeta;
 }
 
+/**
+ * Configuration for automatic field management in repositories
+ * Allows flexible handling of timestamp and audit fields across different table structures
+ */
+export interface RepositoryFieldConfig {
+  /** Table has created_at column (auto-managed by DB) */
+  hasCreatedAt?: boolean;
+  /** Table has updated_at column (auto-set on UPDATE) */
+  hasUpdatedAt?: boolean;
+  /** Table has created_by column (set from request context) */
+  hasCreatedBy?: boolean;
+  /** Table has updated_by column (set from request context) */
+  hasUpdatedBy?: boolean;
+  /** Custom name for created_at field (default: 'created_at') */
+  createdAtField?: string;
+  /** Custom name for updated_at field (default: 'updated_at') */
+  updatedAtField?: string;
+  /** Custom name for created_by field (default: 'created_by') */
+  createdByField?: string;
+  /** Custom name for updated_by field (default: 'updated_by') */
+  updatedByField?: string;
+}
+
 export abstract class BaseRepository<T, CreateDto = any, UpdateDto = any> {
   protected uuidValidationConfig: UUIDValidationConfig = DEFAULT_UUID_CONFIG;
+  protected fieldConfig: RepositoryFieldConfig;
 
   constructor(
     protected knex: Knex,
     protected tableName: string,
     protected searchFields: string[] = [],
     protected explicitUUIDFields: string[] = [],
-  ) {}
+    fieldConfig: RepositoryFieldConfig = {},
+  ) {
+    // Default configuration - assume modern tables have all fields
+    this.fieldConfig = {
+      hasCreatedAt: true,
+      hasUpdatedAt: true,
+      hasCreatedBy: false, // Most tables don't have this yet
+      hasUpdatedBy: false, // Most tables don't have this yet
+      createdAtField: 'created_at',
+      updatedAtField: 'updated_at',
+      createdByField: 'created_by',
+      updatedByField: 'updated_by',
+      ...fieldConfig,
+    };
+  }
 
   // Abstract methods to implement in child classes
   abstract transformToEntity?(dbRow: any): T;
@@ -64,21 +102,48 @@ export abstract class BaseRepository<T, CreateDto = any, UpdateDto = any> {
     return this.transformToEntity ? this.transformToEntity(row) : row;
   }
 
-  async create(data: CreateDto): Promise<T> {
+  async create(data: CreateDto, userId?: string | number): Promise<T> {
     const dbData = this.transformToDb ? this.transformToDb(data) : data;
-    const [row] = await this.query().insert(dbData).returning('*');
+
+    // Build create data with automatic fields based on configuration
+    const createData: any = { ...dbData };
+
+    // Add created_by if table has this column and userId is provided
+    if (this.fieldConfig.hasCreatedBy && userId !== undefined) {
+      createData[this.fieldConfig.createdByField!] = userId;
+    }
+
+    // Note: created_at is typically auto-managed by database DEFAULT CURRENT_TIMESTAMP
+    // So we don't need to set it here
+
+    const [row] = await this.query().insert(createData).returning('*');
 
     return this.transformToEntity ? this.transformToEntity(row) : row;
   }
 
-  async update(id: string | number, data: UpdateDto): Promise<T | null> {
+  async update(
+    id: string | number,
+    data: UpdateDto,
+    userId?: string | number,
+  ): Promise<T | null> {
     const dbData = this.transformToDb ? this.transformToDb(data) : data;
+
+    // Build update data with automatic fields based on configuration
+    const updateData: any = { ...dbData };
+
+    // Add updated_at if table has this column
+    if (this.fieldConfig.hasUpdatedAt) {
+      updateData[this.fieldConfig.updatedAtField!] = new Date();
+    }
+
+    // Add updated_by if table has this column and userId is provided
+    if (this.fieldConfig.hasUpdatedBy && userId !== undefined) {
+      updateData[this.fieldConfig.updatedByField!] = userId;
+    }
+
     const [row] = await this.query()
       .where({ id })
-      .update({
-        ...dbData,
-        updated_at: new Date(),
-      })
+      .update(updateData)
       .returning('*');
 
     if (!row) return null;
@@ -281,10 +346,18 @@ export abstract class BaseRepository<T, CreateDto = any, UpdateDto = any> {
   }
 
   // Bulk operations
-  async createMany(data: CreateDto[]): Promise<T[]> {
-    const dbData = this.transformToDb
+  async createMany(data: CreateDto[], userId?: string | number): Promise<T[]> {
+    let dbData = this.transformToDb
       ? data.map((item) => this.transformToDb!(item))
       : data;
+
+    // Add created_by to all records if table has this column and userId is provided
+    if (this.fieldConfig.hasCreatedBy && userId !== undefined) {
+      dbData = dbData.map((item: any) => ({
+        ...item,
+        [this.fieldConfig.createdByField!]: userId,
+      }));
+    }
 
     const rows = await this.query().insert(dbData).returning('*');
 
@@ -293,15 +366,27 @@ export abstract class BaseRepository<T, CreateDto = any, UpdateDto = any> {
       : rows;
   }
 
-  async updateMany(ids: (string | number)[], data: UpdateDto): Promise<number> {
+  async updateMany(
+    ids: (string | number)[],
+    data: UpdateDto,
+    userId?: string | number,
+  ): Promise<number> {
     const dbData = this.transformToDb ? this.transformToDb(data) : data;
 
-    const updatedCount = await this.query()
-      .whereIn('id', ids)
-      .update({
-        ...dbData,
-        updated_at: new Date(),
-      });
+    // Build update data with automatic fields based on configuration
+    const updateData: any = { ...dbData };
+
+    // Add updated_at if table has this column
+    if (this.fieldConfig.hasUpdatedAt) {
+      updateData[this.fieldConfig.updatedAtField!] = new Date();
+    }
+
+    // Add updated_by if table has this column and userId is provided
+    if (this.fieldConfig.hasUpdatedBy && userId !== undefined) {
+      updateData[this.fieldConfig.updatedByField!] = userId;
+    }
+
+    const updatedCount = await this.query().whereIn('id', ids).update(updateData);
 
     return updatedCount;
   }

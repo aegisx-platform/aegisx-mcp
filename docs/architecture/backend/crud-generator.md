@@ -1,5 +1,18 @@
 # CRUD Template Generator
 
+> **⚠️ DEPRECATED REFERENCE** - This document describes the original CRUD generator architecture.
+>
+> **For current CRUD generator documentation with automatic error handling and validation, see:**
+>
+> - **[CRUD Generator Documentation](../../crud-generator/)** - Complete user guide
+> - **[Error Handling Guide](../../crud-generator/ERROR_HANDLING_GUIDE.md)** - Automatic error detection
+> - **[Validation Reference](../../crud-generator/VALIDATION_REFERENCE.md)** - Auto-detected validations
+> - **[Testing Guide](../../crud-generator/TESTING_GUIDE.md)** - Testing strategies
+>
+> This document is kept for historical reference only.
+
+---
+
 ## Automatic CRUD Generation from Database Tables
 
 ### CRUD Generator Service

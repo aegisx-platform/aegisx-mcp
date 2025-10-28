@@ -1,6 +1,6 @@
-import Knex from 'knex';
+import type { Knex } from 'knex';
 
-export async function seed(knex: any): Promise<void> {
+export async function seed(knex: Knex): Promise<void> {
   // Clear existing data
   await knex('app_settings_history').del();
   await knex('app_user_settings').del();
@@ -21,14 +21,14 @@ export async function seed(knex: any): Promise<void> {
       access_level: 'public',
       validation_rules: JSON.stringify({
         minLength: 3,
-        maxLength: 100
+        maxLength: 100,
       }),
       ui_schema: JSON.stringify({
         component: 'text-input',
-        placeholder: 'Enter application name'
+        placeholder: 'Enter application name',
       }),
       sort_order: 1,
-      group: 'branding'
+      group: 'branding',
     },
     {
       key: 'app.description',
@@ -41,14 +41,14 @@ export async function seed(knex: any): Promise<void> {
       data_type: 'string',
       access_level: 'public',
       validation_rules: JSON.stringify({
-        maxLength: 500
+        maxLength: 500,
       }),
       ui_schema: JSON.stringify({
         component: 'textarea',
-        rows: 3
+        rows: 3,
       }),
       sort_order: 2,
-      group: 'branding'
+      group: 'branding',
     },
     {
       key: 'app.version',
@@ -62,9 +62,9 @@ export async function seed(knex: any): Promise<void> {
       access_level: 'public',
       is_readonly: true,
       sort_order: 3,
-      group: 'system'
+      group: 'system',
     },
-    
+
     // Email Settings
     {
       key: 'email.enabled',
@@ -77,10 +77,10 @@ export async function seed(knex: any): Promise<void> {
       data_type: 'boolean',
       access_level: 'admin',
       ui_schema: JSON.stringify({
-        component: 'toggle'
+        component: 'toggle',
       }),
       sort_order: 1,
-      group: 'email'
+      group: 'email',
     },
     {
       key: 'email.smtp.host',
@@ -94,14 +94,14 @@ export async function seed(knex: any): Promise<void> {
       access_level: 'admin',
       validation_rules: JSON.stringify({
         required: true,
-        pattern: '^[a-zA-Z0-9.-]+$'
+        pattern: '^[a-zA-Z0-9.-]+$',
       }),
       ui_schema: JSON.stringify({
         component: 'text-input',
-        placeholder: 'smtp.example.com'
+        placeholder: 'smtp.example.com',
       }),
       sort_order: 2,
-      group: 'email'
+      group: 'email',
     },
     {
       key: 'email.smtp.port',
@@ -115,13 +115,13 @@ export async function seed(knex: any): Promise<void> {
       access_level: 'admin',
       validation_rules: JSON.stringify({
         min: 1,
-        max: 65535
+        max: 65535,
       }),
       ui_schema: JSON.stringify({
-        component: 'number-input'
+        component: 'number-input',
       }),
       sort_order: 3,
-      group: 'email'
+      group: 'email',
     },
     {
       key: 'email.from.address',
@@ -134,15 +134,15 @@ export async function seed(knex: any): Promise<void> {
       data_type: 'email',
       access_level: 'admin',
       validation_rules: JSON.stringify({
-        required: true
+        required: true,
       }),
       ui_schema: JSON.stringify({
-        component: 'email-input'
+        component: 'email-input',
       }),
       sort_order: 4,
-      group: 'email'
+      group: 'email',
     },
-    
+
     // Security Settings
     {
       key: 'security.password.min_length',
@@ -156,15 +156,15 @@ export async function seed(knex: any): Promise<void> {
       access_level: 'admin',
       validation_rules: JSON.stringify({
         min: 6,
-        max: 32
+        max: 32,
       }),
       ui_schema: JSON.stringify({
         component: 'number-input',
         min: 6,
-        max: 32
+        max: 32,
       }),
       sort_order: 1,
-      group: 'password_policy'
+      group: 'password_policy',
     },
     {
       key: 'security.password.require_uppercase',
@@ -177,10 +177,10 @@ export async function seed(knex: any): Promise<void> {
       data_type: 'boolean',
       access_level: 'admin',
       ui_schema: JSON.stringify({
-        component: 'toggle'
+        component: 'toggle',
       }),
       sort_order: 2,
-      group: 'password_policy'
+      group: 'password_policy',
     },
     {
       key: 'security.password.require_numbers',
@@ -193,10 +193,10 @@ export async function seed(knex: any): Promise<void> {
       data_type: 'boolean',
       access_level: 'admin',
       ui_schema: JSON.stringify({
-        component: 'toggle'
+        component: 'toggle',
       }),
       sort_order: 3,
-      group: 'password_policy'
+      group: 'password_policy',
     },
     {
       key: 'security.session.timeout',
@@ -210,16 +210,16 @@ export async function seed(knex: any): Promise<void> {
       access_level: 'admin',
       validation_rules: JSON.stringify({
         min: 300,
-        max: 86400
+        max: 86400,
       }),
       ui_schema: JSON.stringify({
         component: 'number-input',
-        suffix: 'seconds'
+        suffix: 'seconds',
       }),
       sort_order: 4,
-      group: 'session'
+      group: 'session',
     },
-    
+
     // Feature Flags
     {
       key: 'features.registration.enabled',
@@ -232,10 +232,10 @@ export async function seed(knex: any): Promise<void> {
       data_type: 'boolean',
       access_level: 'admin',
       ui_schema: JSON.stringify({
-        component: 'toggle'
+        component: 'toggle',
       }),
       sort_order: 1,
-      group: 'registration'
+      group: 'registration',
     },
     {
       key: 'features.registration.require_email_verification',
@@ -248,12 +248,12 @@ export async function seed(knex: any): Promise<void> {
       data_type: 'boolean',
       access_level: 'admin',
       ui_schema: JSON.stringify({
-        component: 'toggle'
+        component: 'toggle',
       }),
       sort_order: 2,
-      group: 'registration'
+      group: 'registration',
     },
-    
+
     // API Settings
     {
       key: 'api.rate_limit.enabled',
@@ -266,10 +266,10 @@ export async function seed(knex: any): Promise<void> {
       data_type: 'boolean',
       access_level: 'admin',
       ui_schema: JSON.stringify({
-        component: 'toggle'
+        component: 'toggle',
       }),
       sort_order: 1,
-      group: 'rate_limiting'
+      group: 'rate_limiting',
     },
     {
       key: 'api.rate_limit.requests_per_minute',
@@ -283,15 +283,15 @@ export async function seed(knex: any): Promise<void> {
       access_level: 'admin',
       validation_rules: JSON.stringify({
         min: 10,
-        max: 1000
+        max: 1000,
       }),
       ui_schema: JSON.stringify({
-        component: 'number-input'
+        component: 'number-input',
       }),
       sort_order: 2,
-      group: 'rate_limiting'
+      group: 'rate_limiting',
     },
-    
+
     // UI Settings
     {
       key: 'ui.theme.default',
@@ -304,18 +304,18 @@ export async function seed(knex: any): Promise<void> {
       data_type: 'string',
       access_level: 'public',
       validation_rules: JSON.stringify({
-        enum: ['light', 'dark', 'auto']
+        enum: ['light', 'dark', 'auto'],
       }),
       ui_schema: JSON.stringify({
         component: 'select',
         options: [
           { value: 'light', label: 'Light' },
           { value: 'dark', label: 'Dark' },
-          { value: 'auto', label: 'Auto (System)' }
-        ]
+          { value: 'auto', label: 'Auto (System)' },
+        ],
       }),
       sort_order: 1,
-      group: 'theme'
+      group: 'theme',
     },
     {
       key: 'ui.sidebar.default_collapsed',
@@ -328,12 +328,12 @@ export async function seed(knex: any): Promise<void> {
       data_type: 'boolean',
       access_level: 'public',
       ui_schema: JSON.stringify({
-        component: 'toggle'
+        component: 'toggle',
       }),
       sort_order: 2,
-      group: 'layout'
+      group: 'layout',
     },
-    
+
     // Storage Settings
     {
       key: 'storage.max_file_size',
@@ -347,30 +347,46 @@ export async function seed(knex: any): Promise<void> {
       access_level: 'admin',
       validation_rules: JSON.stringify({
         min: 1048576, // 1MB
-        max: 104857600 // 100MB
+        max: 104857600, // 100MB
       }),
       ui_schema: JSON.stringify({
-        component: 'file-size-input'
+        component: 'file-size-input',
       }),
       sort_order: 1,
-      group: 'uploads'
+      group: 'uploads',
     },
     {
       key: 'storage.allowed_file_types',
       namespace: 'default',
       category: 'storage',
-      value: JSON.stringify(['jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx']),
-      default_value: JSON.stringify(['jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx']),
+      value: JSON.stringify([
+        'jpg',
+        'jpeg',
+        'png',
+        'gif',
+        'pdf',
+        'doc',
+        'docx',
+      ]),
+      default_value: JSON.stringify([
+        'jpg',
+        'jpeg',
+        'png',
+        'gif',
+        'pdf',
+        'doc',
+        'docx',
+      ]),
       label: 'Allowed File Types',
       description: 'List of allowed file extensions',
       data_type: 'array',
       access_level: 'admin',
       ui_schema: JSON.stringify({
         component: 'tag-input',
-        placeholder: 'Add file extension'
+        placeholder: 'Add file extension',
       }),
       sort_order: 2,
-      group: 'uploads'
-    }
+      group: 'uploads',
+    },
   ]);
 }

@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply, FastifyInstance } from 'fastify';
-import { UserActivityService } from '../../modules/user-profile/user-activity.service';
+import { UserActivityService } from '../../core/user-profile/user-activity.service';
 import { 
   ActivityLogConfig, 
   ActivityLogPluginConfig,

@@ -1,8 +1,8 @@
-import Knex from 'knex';
+import type { Knex } from 'knex';
 import * as path from 'path';
 
 describe('Database Migrations', () => {
-  let knex: any;
+  let knex: Knex;
 
   beforeAll(async () => {
     // Create test database connection
@@ -45,23 +45,25 @@ describe('Database Migrations', () => {
         .where('table_schema', 'public')
         .whereNotIn('table_name', ['knex_migrations', 'knex_migrations_lock']);
 
-      const tableNames = tables.map(t => t.table_name).sort();
+      const tableNames = tables.map((t) => t.table_name).sort();
       // Check that essential core tables exist
       const expectedCoreTables = [
         'permissions',
-        'role_permissions', 
+        'role_permissions',
         'roles',
         'user_roles',
         'user_sessions',
         'users',
       ];
-      
-      expectedCoreTables.forEach(tableName => {
+
+      expectedCoreTables.forEach((tableName) => {
         expect(tableNames).toContain(tableName);
       });
-      
+
       // Should have all expected tables plus additional feature tables
-      expect(tableNames.length).toBeGreaterThanOrEqual(expectedCoreTables.length);
+      expect(tableNames.length).toBeGreaterThanOrEqual(
+        expectedCoreTables.length,
+      );
     });
 
     test('should create users table with correct columns', async () => {
@@ -73,41 +75,74 @@ describe('Database Migrations', () => {
       // Check that essential core columns exist
       const expectedCoreColumns = [
         { column_name: 'id', data_type: 'uuid', is_nullable: 'NO' },
-        { column_name: 'email', data_type: 'character varying', is_nullable: 'NO' },
-        { column_name: 'username', data_type: 'character varying', is_nullable: 'NO' },
-        { column_name: 'password', data_type: 'character varying', is_nullable: 'NO' },
-        { column_name: 'first_name', data_type: 'character varying', is_nullable: 'YES' },
-        { column_name: 'last_name', data_type: 'character varying', is_nullable: 'YES' },
+        {
+          column_name: 'email',
+          data_type: 'character varying',
+          is_nullable: 'NO',
+        },
+        {
+          column_name: 'username',
+          data_type: 'character varying',
+          is_nullable: 'NO',
+        },
+        {
+          column_name: 'password',
+          data_type: 'character varying',
+          is_nullable: 'NO',
+        },
+        {
+          column_name: 'first_name',
+          data_type: 'character varying',
+          is_nullable: 'YES',
+        },
+        {
+          column_name: 'last_name',
+          data_type: 'character varying',
+          is_nullable: 'YES',
+        },
         { column_name: 'is_active', data_type: 'boolean', is_nullable: 'YES' },
-        { column_name: 'last_login_at', data_type: 'timestamp with time zone', is_nullable: 'YES' },
-        { column_name: 'created_at', data_type: 'timestamp with time zone', is_nullable: 'NO' },
-        { column_name: 'updated_at', data_type: 'timestamp with time zone', is_nullable: 'NO' },
+        {
+          column_name: 'last_login_at',
+          data_type: 'timestamp with time zone',
+          is_nullable: 'YES',
+        },
+        {
+          column_name: 'created_at',
+          data_type: 'timestamp with time zone',
+          is_nullable: 'NO',
+        },
+        {
+          column_name: 'updated_at',
+          data_type: 'timestamp with time zone',
+          is_nullable: 'NO',
+        },
       ];
 
       // Check all core columns exist
-      expectedCoreColumns.forEach(expectedColumn => {
-        const foundColumn = columns.find(col => 
-          col.column_name === expectedColumn.column_name &&
-          col.data_type === expectedColumn.data_type &&
-          col.is_nullable === expectedColumn.is_nullable
+      expectedCoreColumns.forEach((expectedColumn) => {
+        const foundColumn = columns.find(
+          (col) =>
+            col.column_name === expectedColumn.column_name &&
+            col.data_type === expectedColumn.data_type &&
+            col.is_nullable === expectedColumn.is_nullable,
         );
         expect(foundColumn).toBeDefined();
       });
-      
+
       // Should have core columns plus additional feature columns
       expect(columns.length).toBeGreaterThanOrEqual(expectedCoreColumns.length);
     });
 
     test('should create proper indexes', async () => {
       const indexes = await knex.raw(`
-        SELECT indexname 
-        FROM pg_indexes 
-        WHERE tablename = 'users' 
+        SELECT indexname
+        FROM pg_indexes
+        WHERE tablename = 'users'
         AND indexname NOT LIKE '%_pkey'
         ORDER BY indexname
       `);
 
-      const indexNames = indexes.rows.map(r => r.indexname);
+      const indexNames = indexes.rows.map((r) => r.indexname);
       expect(indexNames).toContain('users_email_index');
       expect(indexNames).toContain('users_username_index');
       expect(indexNames).toContain('users_is_active_index');
@@ -115,11 +150,11 @@ describe('Database Migrations', () => {
 
     test('should create foreign key constraints', async () => {
       const constraints = await knex.raw(`
-        SELECT 
-          tc.table_name, 
+        SELECT
+          tc.table_name,
           tc.constraint_name,
           ccu.table_name AS foreign_table_name
-        FROM information_schema.table_constraints AS tc 
+        FROM information_schema.table_constraints AS tc
         JOIN information_schema.constraint_column_usage AS ccu
           ON tc.constraint_name = ccu.constraint_name
         WHERE tc.constraint_type = 'FOREIGN KEY'
@@ -127,12 +162,18 @@ describe('Database Migrations', () => {
       `);
 
       const fkConstraints = constraints.rows;
-      
+
       // Check user_roles constraints (may have additional constraints like assigned_by)
-      const userRolesConstraints = fkConstraints.filter(c => c.table_name === 'user_roles');
+      const userRolesConstraints = fkConstraints.filter(
+        (c) => c.table_name === 'user_roles',
+      );
       expect(userRolesConstraints.length).toBeGreaterThanOrEqual(2);
-      expect(userRolesConstraints.some(c => c.foreign_table_name === 'users')).toBe(true);
-      expect(userRolesConstraints.some(c => c.foreign_table_name === 'roles')).toBe(true);
+      expect(
+        userRolesConstraints.some((c) => c.foreign_table_name === 'users'),
+      ).toBe(true);
+      expect(
+        userRolesConstraints.some((c) => c.foreign_table_name === 'roles'),
+      ).toBe(true);
     });
   });
 
@@ -153,7 +194,7 @@ describe('Database Migrations', () => {
       // Run migrations multiple times
       await knex.migrate.latest();
       await knex.migrate.latest();
-      
+
       // Should still have same tables
       const tables = await knex('information_schema.tables')
         .select('table_name')
@@ -175,7 +216,7 @@ describe('Database Migrations', () => {
     test('should create default roles', async () => {
       const roles = await knex('roles').select('name').orderBy('name');
       // Check that essential roles exist
-      const roleNames = roles.map(r => r.name);
+      const roleNames = roles.map((r) => r.name);
       expect(roleNames).toContain('admin');
       expect(roleNames).toContain('user');
       // Should have at least admin and user roles
@@ -199,12 +240,18 @@ describe('Database Migrations', () => {
     test('should assign all permissions to admin role', async () => {
       const adminPermissions = await knex('permissions')
         .count('* as count')
-        .join('role_permissions', 'permissions.id', 'role_permissions.permission_id')
+        .join(
+          'role_permissions',
+          'permissions.id',
+          'role_permissions.permission_id',
+        )
         .join('roles', 'role_permissions.role_id', 'roles.id')
         .where('roles.name', 'admin')
         .first();
 
-      const totalPermissions = await knex('permissions').count('* as count').first();
+      const totalPermissions = await knex('permissions')
+        .count('* as count')
+        .first();
 
       expect(adminPermissions.count).toEqual(totalPermissions.count);
     });

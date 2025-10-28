@@ -52,13 +52,12 @@ export interface ExportService {
     <div class="export-container">
       <!-- Export Button with Menu -->
       <button
-        mat-raised-button
-        color="accent"
+        mat-stroked-button
         [matMenuTriggerFor]="exportMenu"
         [disabled]="isExporting()"
         class="export-button"
       >
-        <mat-icon>download</mat-icon>
+        <mat-icon class="text-blue-600">download</mat-icon>
         @if (isExporting()) {
           <mat-spinner diameter="20" class="ml-2"></mat-spinner>
         } @else {
@@ -360,6 +359,9 @@ export class SharedExportComponent {
   async executeExport(): Promise<void> {
     const format = this.selectedFormat();
     if (!format) return;
+
+    // Close menu immediately to show loading state
+    this.closeMenu();
 
     try {
       this.isExporting.set(true);

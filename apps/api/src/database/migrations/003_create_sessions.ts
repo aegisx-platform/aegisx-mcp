@@ -1,4 +1,4 @@
-import Knex from 'knex';
+import type { Knex } from 'knex';
 
 export async function up(knex: any): Promise<void> {
   // Create user_sessions table for storing refresh tokens
@@ -10,10 +10,14 @@ export async function up(knex: any): Promise<void> {
     table.string('ip_address', 45);
     table.timestamp('expires_at').notNullable();
     table.timestamp('created_at').defaultTo(knex.fn.now());
-    
+
     // Foreign key
-    table.foreign('user_id').references('id').inTable('users').onDelete('CASCADE');
-    
+    table
+      .foreign('user_id')
+      .references('id')
+      .inTable('users')
+      .onDelete('CASCADE');
+
     // Indexes
     table.index('user_id');
     table.index('refresh_token');

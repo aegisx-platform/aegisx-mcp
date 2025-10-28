@@ -43,13 +43,13 @@ export const appRoutes: Route[] = [
   {
     path: 'users',
     loadChildren: () =>
-      import('./features/users/users.routes').then((m) => m.usersRoutes),
+      import('./core/users/users.routes').then((m) => m.usersRoutes),
     canActivate: [AuthGuard],
   },
   {
     path: 'profile',
     loadChildren: () =>
-      import('./features/user-profile/user-profile.routes').then(
+      import('./core/user-profile/user-profile.routes').then(
         (m) => m.userProfileRoutes,
       ),
     canActivate: [AuthGuard],
@@ -57,7 +57,7 @@ export const appRoutes: Route[] = [
   {
     path: 'settings',
     loadChildren: () =>
-      import('./features/settings/settings.routes').then(
+      import('./core/settings/settings.routes').then(
         (m) => m.settingsRoutes,
       ),
     canActivate: [AuthGuard],
@@ -65,7 +65,7 @@ export const appRoutes: Route[] = [
   {
     path: 'rbac',
     loadChildren: () =>
-      import('./features/rbac/rbac.routes').then((m) => m.rbacRoutes),
+      import('./core/rbac/rbac.routes').then((m) => m.rbacRoutes),
     canActivate: [AuthGuard],
     data: {
       title: 'RBAC Management',
@@ -74,31 +74,9 @@ export const appRoutes: Route[] = [
     },
   },
   {
-    path: 'books',
-    loadChildren: () =>
-      import('./features/books/books.routes').then((m) => m.booksRoutes),
-    canActivate: [AuthGuard],
-    data: {
-      title: 'Books',
-      description: 'Books Management System',
-      requiredPermissions: ['books.read', 'admin.*'],
-    },
-  },
-  {
-    path: 'authors',
-    loadChildren: () =>
-      import('./features/authors/authors.routes').then((m) => m.authorsRoutes),
-    canActivate: [AuthGuard],
-    data: {
-      title: 'Authors',
-      description: 'Authors Management System',
-      requiredPermissions: ['authors.read', 'admin.*'],
-    },
-  },
-  {
     path: 'pdf-templates',
     loadChildren: () =>
-      import('./features/pdf-templates/pdf-templates.routes').then(
+      import('./core/pdf-templates/pdf-templates.routes').then(
         (m) => m.pdf_templatesRoutes,
       ),
     canActivate: [AuthGuard],

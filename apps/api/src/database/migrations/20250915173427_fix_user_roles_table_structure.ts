@@ -1,4 +1,4 @@
-import Knex from 'knex';
+import type { Knex } from 'knex';
 
 export async function up(knex: any): Promise<void> {
   // Add missing columns to user_roles table if they don't exist

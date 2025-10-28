@@ -1,4 +1,4 @@
-import Knex from 'knex';
+import type { Knex } from 'knex';
 
 export async function up(knex: any): Promise<void> {
   // Add performance indexes for Settings API
@@ -6,24 +6,24 @@ export async function up(knex: any): Promise<void> {
 
   // 1. Composite index for common filter combinations
   await knex.raw(`
-    CREATE INDEX IF NOT EXISTS idx_settings_filter_combo 
+    CREATE INDEX IF NOT EXISTS idx_settings_filter_combo
     ON app_settings(namespace, access_level, is_hidden, category)
     WHERE is_hidden = false;
   `);
 
   // 2. Full-text search index for better search performance
   await knex.raw(`
-    CREATE INDEX IF NOT EXISTS idx_settings_search_text 
+    CREATE INDEX IF NOT EXISTS idx_settings_search_text
     ON app_settings USING gin(
-      to_tsvector('english', coalesce(key, '') || ' ' || 
-                            coalesce(label, '') || ' ' || 
+      to_tsvector('english', coalesce(key, '') || ' ' ||
+                            coalesce(label, '') || ' ' ||
                             coalesce(description, ''))
     );
   `);
 
   // 3. Index for sorting performance
   await knex.raw(`
-    CREATE INDEX IF NOT EXISTS idx_settings_sort 
+    CREATE INDEX IF NOT EXISTS idx_settings_sort
     ON app_settings(sort_order, created_at);
   `);
 
@@ -33,27 +33,27 @@ export async function up(knex: any): Promise<void> {
   );
   if (pgVersion.rows[0].version >= 110000) {
     await knex.raw(`
-      CREATE INDEX IF NOT EXISTS idx_user_settings_lookup 
-      ON app_user_settings(user_id, setting_id) 
+      CREATE INDEX IF NOT EXISTS idx_user_settings_lookup
+      ON app_user_settings(user_id, setting_id)
       INCLUDE (value);
     `);
   } else {
     // Fallback for older PostgreSQL versions
     await knex.raw(`
-      CREATE INDEX IF NOT EXISTS idx_user_settings_lookup 
+      CREATE INDEX IF NOT EXISTS idx_user_settings_lookup
       ON app_user_settings(user_id, setting_id);
     `);
   }
 
   // 5. Index for history queries with time range
   await knex.raw(`
-    CREATE INDEX IF NOT EXISTS idx_settings_history_time_range 
+    CREATE INDEX IF NOT EXISTS idx_settings_history_time_range
     ON app_settings_history(setting_id, changed_at DESC);
   `);
 
   // 6. Index for history queries by user
   await knex.raw(`
-    CREATE INDEX IF NOT EXISTS idx_settings_history_user 
+    CREATE INDEX IF NOT EXISTS idx_settings_history_user
     ON app_settings_history(changed_by, changed_at DESC);
   `);
 }

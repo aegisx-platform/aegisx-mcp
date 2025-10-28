@@ -119,6 +119,7 @@ yarn monitoring:start
 - [Backend Architecture](./docs/05b-backend-architecture.md) - Fastify patterns & practices
 - [Database Migrations](./docs/05b7-database-migrations.md) - Migration strategies
 - [RBAC & Authentication](./docs/05b2-rbac-auth.md) - Security implementation
+- [CRUD Generator](./docs/crud-generator/) - Automatic CRUD API generation with error handling & validation
 
 ### Development Progress
 

@@ -102,12 +102,23 @@ export abstract class BaseRealtimeStateManager<T extends BaseEntity> implements 
       retryAttempts: 3,
       ...options
     };
-    
+
+    // Don't initialize in constructor - let child class call init() when ready
+    // This allows child class to set up dependencies first
+    console.log(`🎯 BaseRealtimeStateManager constructed for ${this.options.feature}.${this.options.entity}`);
+    console.log(`⚠️  Remember to call initialize() after child class setup is complete`);
+  }
+
+  /**
+   * Initialize real-time features
+   * MUST be called by child class after all dependencies are ready
+   */
+  protected initializeStateManager(): void {
     this.initializeRealtimeConnection();
     this.setupOperationProcessing();
     this.setupConnectionMonitoring();
-    
-    console.log(`🎯 BaseRealtimeStateManager initialized for ${this.options.feature}.${this.options.entity}`);
+
+    console.log(`✅ BaseRealtimeStateManager initialized for ${this.options.feature}.${this.options.entity}`);
   }
   
   ngOnDestroy(): void {
@@ -531,7 +542,14 @@ export abstract class BaseRealtimeStateManager<T extends BaseEntity> implements 
         this._localState.set(serverData);
         this._hasChanges.set(false);
       } else {
-        this.detectAllConflicts(serverData);
+        // If localState is empty (initial load), populate it directly
+        if (this._localState().length === 0) {
+          this._localState.set(serverData);
+          this._hasChanges.set(false);
+        } else {
+          // Only run conflict detection if we have existing local data
+          this.detectAllConflicts(serverData);
+        }
       }
       
       this.updateLastSync();

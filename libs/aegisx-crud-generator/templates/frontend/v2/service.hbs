@@ -1,0 +1,671 @@
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { computed, inject, Injectable, signal } from '@angular/core';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+// Import types from the shared types file
+import {
+  {{PascalCase}},
+  Create{{PascalCase}}Request,
+  Update{{PascalCase}}Request,
+  List{{PascalCase}}Query,
+  ApiResponse,
+  BulkResponse,
+  PaginatedResponse,
+  ImportOptions,
+  ValidateImportResponse,
+  ExecuteImportRequest,
+  ImportJob,
+} from '../types/{{typesFileName}}';
+
+// ===== SERVICE CONFIGURATION =====
+
+const API_BASE_URL = '';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class {{PascalCase}}Service {
+  private http = inject(HttpClient);
+  private baseUrl = `${API_BASE_URL}/{{tableNameToKebab moduleName}}`;
+
+  // ===== SIGNALS FOR STATE MANAGEMENT =====
+
+  private {{camelCaseHelper moduleName}}ListSignal = signal<{{PascalCase}}[]>([]);
+  private loadingSignal = signal<boolean>(false);
+  private errorSignal = signal<string | null>(null);
+  private permissionErrorSignal = signal<boolean>(false);
+  private lastErrorStatusSignal = signal<number | null>(null);
+  private selected{{PascalCase}}Signal = signal<{{PascalCase}} | null>(null);
+  private currentPageSignal = signal<number>(1);
+  private pageSizeSignal = signal<number>(10);
+  private total{{PascalCase}}Signal = signal<number>(0);
+
+  // ===== PUBLIC READONLY SIGNALS =====
+
+  readonly {{camelCaseHelper moduleName}}List = this.{{camelCaseHelper moduleName}}ListSignal.asReadonly();
+  readonly loading = this.loadingSignal.asReadonly();
+  readonly error = this.errorSignal.asReadonly();
+  readonly permissionError = this.permissionErrorSignal.asReadonly();
+  readonly lastErrorStatus = this.lastErrorStatusSignal.asReadonly();
+  readonly selected{{PascalCase}} = this.selected{{PascalCase}}Signal.asReadonly();
+  readonly currentPage = this.currentPageSignal.asReadonly();
+  readonly total{{PascalCase}} = this.total{{PascalCase}}Signal.asReadonly();
+  readonly pageSize = this.pageSizeSignal.asReadonly();
+
+  // ===== COMPUTED SIGNALS =====
+  
+  readonly totalPages = computed(() => {
+    const total = this.total{{PascalCase}}Signal();
+    const size = this.pageSizeSignal();
+    return Math.ceil(total / size);
+  });
+
+  readonly hasNextPage = computed(() => {
+    return this.currentPageSignal() < this.totalPages();
+  });
+
+  readonly hasPreviousPage = computed(() => {
+    return this.currentPageSignal() > 1;
+  });
+
+  // ===== ERROR HANDLING HELPER =====
+
+  /**
+   * Handle HTTP errors and set appropriate error signals
+   */
+  private handleError(error: any, defaultMessage: string): void {
+    const status = error?.status || null;
+    this.lastErrorStatusSignal.set(status);
+
+    // Check if error is 403 Forbidden
+    if (status === 403) {
+      this.permissionErrorSignal.set(true);
+      this.errorSignal.set('You do not have permission to perform this action');
+    } else {
+      this.permissionErrorSignal.set(false);
+      this.errorSignal.set(error.message || defaultMessage);
+    }
+  }
+
+  /**
+   * Clear permission error state
+   */
+  clearPermissionError(): void {
+    this.permissionErrorSignal.set(false);
+    this.lastErrorStatusSignal.set(null);
+  }
+
+  // ===== STANDARD CRUD OPERATIONS =====
+
+  /**
+   * Load {{camelCaseHelper moduleName}} list with pagination and filters
+   */
+  async load{{PascalCase}}List(params?: List{{PascalCase}}Query): Promise<void> {
+    this.loadingSignal.set(true);
+    this.errorSignal.set(null);
+
+    try {
+      // Build HTTP params
+      let httpParams = new HttpParams();
+      if (params?.page) httpParams = httpParams.set('page', params.page.toString());
+      if (params?.limit) httpParams = httpParams.set('limit', params.limit.toString());
+{{#if searchFields}}
+      if (params?.search) httpParams = httpParams.set('search', params.search);
+{{/if}}
+      if (params?.sort) httpParams = httpParams.set('sort', params.sort);
+      
+      // Handle fields array parameter (multiple values)
+      if (params?.fields && params.fields.length > 0) {
+        params.fields.forEach((field: string) => {
+          httpParams = httpParams.append('fields', field);
+        });
+      }
+      
+      // Add smart filter parameters based on table schema
+      {{#each columns}}
+      {{#unless isPrimaryKey}}
+      {{#if (or (contains type 'timestamp') (contains type 'date'))}}
+      // Date/DateTime filtering for {{name}}
+      if (params?.{{name}}) httpParams = httpParams.set('{{name}}', params.{{name}});
+      if (params?.{{name}}_min) httpParams = httpParams.set('{{name}}_min', params.{{name}}_min);
+      if (params?.{{name}}_max) httpParams = httpParams.set('{{name}}_max', params.{{name}}_max);
+      {{else if (eq tsType 'boolean')}}
+      // Boolean filtering for {{name}}
+      if (params?.{{name}} !== undefined) httpParams = httpParams.set('{{name}}', params.{{name}}.toString());
+      {{else if (eq tsType 'number')}}
+      // Numeric filtering for {{name}}
+      if (params?.{{name}} !== undefined) httpParams = httpParams.set('{{name}}', params.{{name}}.toString());
+      if (params?.{{name}}_min !== undefined) httpParams = httpParams.set('{{name}}_min', params.{{name}}_min.toString());
+      if (params?.{{name}}_max !== undefined) httpParams = httpParams.set('{{name}}_max', params.{{name}}_max.toString());
+      {{else if (eq tsType 'string')}}
+      // String filtering for {{name}}
+      if (params?.{{name}}) httpParams = httpParams.set('{{name}}', params.{{name}});
+      {{/if}}
+      {{/unless}}
+      {{/each}}
+
+      const response = await this.http
+        .get<PaginatedResponse<{{PascalCase}}>>(this.baseUrl, { params: httpParams })
+        .toPromise();
+
+      if (response) {
+        this.{{camelCaseHelper moduleName}}ListSignal.set(response.data);
+
+        if (response.pagination) {
+          this.total{{PascalCase}}Signal.set(response.pagination.total);
+          this.currentPageSignal.set(response.pagination.page);
+          this.pageSizeSignal.set(response.pagination.limit);
+        }
+      }
+    } catch (error: any) {
+      this.handleError(error, 'Failed to load {{camelCaseHelper moduleName}} list');
+    } finally {
+      this.loadingSignal.set(false);
+    }
+  }
+
+  /**
+   * Load single {{camelCaseHelper moduleName}} by ID
+   */
+  async load{{PascalCase}}ById(id: {{#each columns}}{{#if isPrimaryKey}}{{tsType}}{{/if}}{{/each}}): Promise<{{PascalCase}} | null> {
+    this.loadingSignal.set(true);
+
+    try {
+      const response = await this.http
+        .get<ApiResponse<{{PascalCase}}>>(`${this.baseUrl}/${id}`)
+        .toPromise();
+
+      if (response) {
+        this.selected{{PascalCase}}Signal.set(response.data);
+        return response.data;
+      }
+      return null;
+    } catch (error: any) {
+      this.handleError(error, 'Failed to load {{camelCaseHelper moduleName}}');
+      return null;
+    } finally {
+      this.loadingSignal.set(false);
+    }
+  }
+
+  /**
+   * Create new {{camelCaseHelper moduleName}}
+   */
+  async create{{PascalCase}}(data: Create{{PascalCase}}Request): Promise<{{PascalCase}} | null> {
+    this.loadingSignal.set(true);
+
+    try {
+      const response = await this.http
+        .post<ApiResponse<{{PascalCase}}>>(`${this.baseUrl}`, data)
+        .toPromise();
+
+      if (response) {
+        // ✅ Return data without optimistic update
+        // List component will refresh via reloadTrigger
+        return response.data;
+      }
+      return null;
+    } catch (error: any) {
+      this.handleError(error, 'Failed to create {{camelCaseHelper moduleName}}');
+      throw error;
+    } finally {
+      this.loadingSignal.set(false);
+    }
+  }
+
+  /**
+   * Update existing {{camelCaseHelper moduleName}}
+   */
+  async update{{PascalCase}}(id: {{#each columns}}{{#if isPrimaryKey}}{{tsType}}{{/if}}{{/each}}, data: Update{{PascalCase}}Request): Promise<{{PascalCase}} | null> {
+    this.loadingSignal.set(true);
+
+    try {
+      const response = await this.http
+        .put<ApiResponse<{{PascalCase}}>>(`${this.baseUrl}/${id}`, data)
+        .toPromise();
+
+      if (response) {
+        // ✅ Return data without optimistic update
+        // List component will refresh via reloadTrigger
+        return response.data;
+      }
+      return null;
+    } catch (error: any) {
+      this.handleError(error, 'Failed to update {{camelCaseHelper moduleName}}');
+      throw error;
+    } finally {
+      this.loadingSignal.set(false);
+    }
+  }
+
+  /**
+   * Delete {{camelCaseHelper moduleName}} by ID
+   */
+  async delete{{PascalCase}}(id: {{#each columns}}{{#if isPrimaryKey}}{{tsType}}{{/if}}{{/each}}): Promise<boolean> {
+    this.loadingSignal.set(true);
+
+    try {
+      const response = await this.http
+        .delete<ApiResponse<{ id: string }>>(`${this.baseUrl}/${id}`)
+        .toPromise();
+
+      if (response?.success) {
+        // ✅ Return success without optimistic update
+        // List component will refresh via reloadTrigger
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      this.handleError(error, 'Failed to delete {{camelCaseHelper moduleName}}');
+      throw error;
+    } finally {
+      this.loadingSignal.set(false);
+    }
+  }
+
+{{#if includeEnhanced}}
+  // ===== ENHANCED OPERATIONS =====
+
+  /**
+   * Export {{camelCaseHelper moduleName}} data
+   */
+  async export{{PascalCase}}(options: {
+    format: 'csv' | 'excel' | 'pdf';
+    ids?: {{#each columns}}{{#if isPrimaryKey}}{{tsType}}{{/if}}{{/each}}[];
+    filters?: Record<string, any>;
+    fields?: string[];
+    filename?: string;
+    applyFilters?: boolean;
+    includeMetadata?: boolean;
+  }): Promise<Blob> {
+    try {
+      let httpParams = new HttpParams()
+        .set('format', options.format);
+
+      if (options.ids && options.ids.length > 0) {
+        options.ids.forEach(id => {
+          httpParams = httpParams.append('ids', id);
+        });
+      }
+
+      if (options.filters && options.applyFilters) {
+        Object.entries(options.filters).forEach(([key, value]) => {
+          if (value !== null && value !== undefined && value !== '') {
+            httpParams = httpParams.set(`filters[${key}]`, String(value));
+          }
+        });
+      }
+
+      if (options.fields && options.fields.length > 0) {
+        options.fields.forEach(field => {
+          httpParams = httpParams.append('fields', field);
+        });
+      }
+
+      if (options.filename) {
+        httpParams = httpParams.set('filename', options.filename);
+      }
+
+      if (options.applyFilters !== undefined) {
+        httpParams = httpParams.set('applyFilters', String(options.applyFilters));
+      }
+
+      if (options.includeMetadata !== undefined) {
+        httpParams = httpParams.set('includeMetadata', String(options.includeMetadata));
+      }
+
+      const response = await this.http
+        .get(`${this.baseUrl}/export`, {
+          params: httpParams,
+          responseType: 'blob'
+        })
+        .toPromise();
+
+      if (response) {
+        return response;
+      }
+
+      throw new Error('Export failed - no response received');
+    } catch (error: any) {
+      console.error('Failed to export {{camelCaseHelper moduleName}} data:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get dropdown options for {{camelCaseHelper moduleName}}
+   */
+  async getDropdownOptions(params: {search?: string, limit?: number} = {}): Promise<Array<{value: string, label: string}>> {
+    try {
+      let httpParams = new HttpParams();
+      if (params.search) httpParams = httpParams.set('search', params.search);
+      if (params.limit) httpParams = httpParams.set('limit', params.limit.toString());
+
+      const response = await this.http
+        .get<ApiResponse<{options: Array<{value: string, label: string}>, total: number}>>(`${this.baseUrl}/dropdown`, { params: httpParams })
+        .toPromise();
+
+      if (response?.success && response.data?.options) {
+        return response.data.options;
+      }
+      return [];
+    } catch (error: any) {
+      console.error('Failed to fetch {{camelCaseHelper moduleName}} dropdown options:', error);
+      return [];
+    }
+  }
+
+  {{#each dropdownDependencies}}
+  /**
+   * Get {{referencedTable}} dropdown options for {{field}} field
+   */
+  async get{{pascalCaseHelper referencedTable}}Dropdown(params: {search?: string, limit?: number} = {}): Promise<Array<{value: string, label: string, disabled?: boolean}>> {
+    try {
+      let httpParams = new HttpParams();
+      if (params.search) httpParams = httpParams.set('search', params.search);
+      if (params.limit) httpParams = httpParams.set('limit', params.limit.toString());
+
+      const response = await this.http
+        .get<ApiResponse<{options: Array<{value: string, label: string, disabled?: boolean}>, total: number}>>('{{endpoint}}', { params: httpParams })
+        .toPromise();
+
+      if (response?.success && response.data?.options) {
+        return response.data.options;
+      }
+      return [];
+    } catch (error: any) {
+      console.error('Failed to fetch {{referencedTable}} dropdown options:', error);
+      return [];
+    }
+  }
+
+  {{/each}}
+
+  /**
+   * Bulk create {{camelCaseHelper moduleName}}s
+   */
+  async bulkCreate{{PascalCase}}(items: Create{{PascalCase}}Request[]): Promise<BulkResponse | null> {
+    this.loadingSignal.set(true);
+
+    try {
+      const response = await this.http
+        .post<BulkResponse>(`${this.baseUrl}/bulk`, { items })
+        .toPromise();
+
+      if (response) {
+        // Refresh list after bulk operation
+        await this.load{{PascalCase}}List();
+        return response;
+      }
+      return null;
+    } catch (error: any) {
+      this.handleError(error, 'Failed to bulk create {{camelCaseHelper moduleName}}s');
+      throw error;
+    } finally {
+      this.loadingSignal.set(false);
+    }
+  }
+
+  /**
+   * Bulk update {{camelCaseHelper moduleName}}s
+   */
+  async bulkUpdate{{PascalCase}}(items: Array<{ id: {{#each columns}}{{#if isPrimaryKey}}{{tsType}}{{/if}}{{/each}}, data: Update{{PascalCase}}Request }>): Promise<BulkResponse | null> {
+    this.loadingSignal.set(true);
+
+    try {
+      const response = await this.http
+        .put<BulkResponse>(`${this.baseUrl}/bulk`, { items })
+        .toPromise();
+
+      if (response) {
+        // Refresh list after bulk operation
+        await this.load{{PascalCase}}List();
+        return response;
+      }
+      return null;
+    } catch (error: any) {
+      this.handleError(error, 'Failed to bulk update {{camelCaseHelper moduleName}}s');
+      throw error;
+    } finally {
+      this.loadingSignal.set(false);
+    }
+  }
+
+  /**
+   * Bulk delete {{camelCaseHelper moduleName}}s
+   */
+  async bulkDelete{{PascalCase}}(ids: {{#each columns}}{{#if isPrimaryKey}}{{tsType}}{{/if}}{{/each}}[]): Promise<BulkResponse | null> {
+    this.loadingSignal.set(true);
+
+    try {
+      const response = await this.http
+        .delete<BulkResponse>(`${this.baseUrl}/bulk`, { body: { ids } })
+        .toPromise();
+
+      if (response) {
+        // Refresh list after bulk operation
+        await this.load{{PascalCase}}List();
+        return response;
+      }
+      return null;
+    } catch (error: any) {
+      this.handleError(error, 'Failed to bulk delete {{camelCaseHelper moduleName}}s');
+      throw error;
+    } finally {
+      this.loadingSignal.set(false);
+    }
+  }
+{{/if}}
+
+{{#if includeFull}}
+  // ===== ADVANCED OPERATIONS (FULL PACKAGE) =====
+
+  /**
+   * Validate {{camelCaseHelper moduleName}} data before save
+   */
+  async validate{{PascalCase}}(data: Create{{PascalCase}}Request): Promise<{valid: boolean, errors?: any[]}> {
+    try {
+      const response = await this.http
+        .post<ApiResponse<{valid: boolean, errors?: any[]}>>(`${this.baseUrl}/validate`, { data })
+        .toPromise();
+
+      if (response) {
+        return response.data;
+      }
+      return { valid: false, errors: ['Validation failed'] };
+    } catch (error: any) {
+      console.error('Failed to validate {{camelCaseHelper moduleName}}:', error);
+      return { valid: false, errors: [error.message || 'Validation error'] };
+    }
+  }
+
+  /**
+   * Check field uniqueness
+   */
+  async checkUniqueness(field: string, value: string, excludeId?: {{#each columns}}{{#if isPrimaryKey}}{{tsType}}{{/if}}{{/each}}): Promise<{unique: boolean}> {
+    try {
+      let params = new HttpParams()
+        .set('value', value);
+      
+      if (excludeId) {
+        params = params.set('excludeId', excludeId);
+      }
+
+      const response = await this.http
+        .get<ApiResponse<{unique: boolean}>>(`${this.baseUrl}/check/${field}`, { params })
+        .toPromise();
+
+      if (response) {
+        return response.data;
+      }
+      return { unique: false };
+    } catch (error: any) {
+      console.error('Failed to check uniqueness:', error);
+      return { unique: false };
+    }
+  }
+
+  /**
+   * Get {{camelCaseHelper moduleName}} statistics
+   */
+  async getStats(): Promise<{total: number} | null> {
+    try {
+      const response = await this.http
+        .get<ApiResponse<{total: number}>>(`${this.baseUrl}/stats`)
+        .toPromise();
+
+      if (response) {
+        return response.data;
+      }
+      return null;
+    } catch (error: any) {
+      console.error('Failed to get {{camelCaseHelper moduleName}} stats:', error);
+      return null;
+    }
+  }
+{{/if}}
+
+  // ===== BULK IMPORT OPERATIONS =====
+
+  /**
+   * Download import template
+   */
+  downloadImportTemplate(
+    format: 'csv' | 'excel' = 'excel',
+    includeExample: boolean = true,
+  ): Observable<Blob> {
+    const httpParams = new HttpParams()
+      .set('format', format)
+      .set('includeExample', includeExample.toString());
+
+    return this.http.get(`${this.baseUrl}/import/template`, {
+      params: httpParams,
+      responseType: 'blob',
+    });
+  }
+
+  /**
+   * Validate import file
+   */
+  async validateImportFile(
+    file: File,
+    options?: ImportOptions,
+  ): Promise<ApiResponse<ValidateImportResponse> | null> {
+    this.loadingSignal.set(true);
+    this.errorSignal.set(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      if (options) {
+        formData.append('options', JSON.stringify(options));
+      }
+
+      const response = await this.http
+        .post<
+          ApiResponse<ValidateImportResponse>
+        >(`${this.baseUrl}/import/validate`, formData)
+        .toPromise();
+
+      return response || null;
+    } catch (error: any) {
+      this.handleError(error, 'Failed to validate import file');
+      throw error;
+    } finally {
+      this.loadingSignal.set(false);
+    }
+  }
+
+  /**
+   * Execute import with validated session
+   */
+  async executeImport(
+    sessionId: string,
+    options?: ImportOptions,
+  ): Promise<ApiResponse<ImportJob> | null> {
+    this.loadingSignal.set(true);
+    this.errorSignal.set(null);
+
+    try {
+      const requestBody: ExecuteImportRequest = {
+        sessionId,
+        options,
+      };
+
+      const response = await this.http
+        .post<
+          ApiResponse<ImportJob>
+        >(`${this.baseUrl}/import/execute`, requestBody)
+        .toPromise();
+
+      return response || null;
+    } catch (error: any) {
+      this.handleError(error, 'Failed to execute import');
+      throw error;
+    } finally {
+      this.loadingSignal.set(false);
+    }
+  }
+
+  /**
+   * Get import job status
+   */
+  async getImportStatus(jobId: string): Promise<ApiResponse<ImportJob> | null> {
+    try {
+      const response = await this.http
+        .get<ApiResponse<ImportJob>>(`${this.baseUrl}/import/status/${jobId}`)
+        .toPromise();
+
+      return response || null;
+    } catch (error: any) {
+      console.error('Failed to get import status:', error);
+      throw error;
+    }
+  }
+
+  // ===== UTILITY METHODS =====
+
+  /**
+   * Set current page
+   */
+  setCurrentPage(page: number): void {
+    this.currentPageSignal.set(page);
+  }
+
+  /**
+   * Set page size and reset to first page
+   */
+  setPageSize(size: number): void {
+    this.pageSizeSignal.set(size);
+    this.currentPageSignal.set(1);
+  }
+
+  /**
+   * Select {{camelCaseHelper moduleName}}
+   */
+  select{{PascalCase}}({{camelCaseHelper moduleName}}: {{PascalCase}} | null): void {
+    this.selected{{PascalCase}}Signal.set({{camelCaseHelper moduleName}});
+  }
+
+  /**
+   * Clear error state
+   */
+  clearError(): void {
+    this.errorSignal.set(null);
+    this.clearPermissionError();
+  }
+
+  /**
+   * Reset service state
+   */
+  reset(): void {
+    this.{{camelCaseHelper moduleName}}ListSignal.set([]);
+    this.selected{{PascalCase}}Signal.set(null);
+    this.currentPageSignal.set(1);
+    this.errorSignal.set(null);
+    this.clearPermissionError();
+    this.total{{PascalCase}}Signal.set(0);
+  }
+}

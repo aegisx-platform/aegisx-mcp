@@ -1,4 +1,4 @@
-import knex from 'knex';
+import type { Knex } from 'knex';
 import * as dotenv from 'dotenv';
 
 // Load .env first (base configuration)
@@ -11,7 +11,7 @@ if (process.env.NODE_ENV !== 'production') {
   dotenv.config({ path: '.env.local', override: true });
 }
 
-const config: { [key: string]: knex.Knex.Config } = {
+const config: { [key: string]: Knex.Config } = {
   development: {
     client: 'postgresql',
     connection: {

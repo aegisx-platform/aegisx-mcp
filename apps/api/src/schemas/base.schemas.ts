@@ -174,12 +174,34 @@ export const ConflictResponseSchema = Type.Object({
   meta: Type.Optional(ApiMetaSchema),
 });
 
+// Unprocessable Entity Response (for 422 errors - business rule violations)
+export const UnprocessableEntityResponseSchema = Type.Object({
+  success: Type.Literal(false),
+  error: Type.Object({
+    code: Type.String(), // Allow any error code for business rules
+    message: Type.String(),
+    details: Type.Optional(Type.Any()), // Additional error context (e.g., FK references)
+    statusCode: Type.Literal(422),
+  }),
+  meta: Type.Optional(ApiMetaSchema),
+});
+
 export const ServerErrorResponseSchema = Type.Object({
   success: Type.Literal(false),
   error: Type.Object({
     code: Type.Literal('INTERNAL_SERVER_ERROR'),
     message: Type.String({ default: 'An unexpected error occurred' }),
     statusCode: Type.Literal(500),
+  }),
+  meta: Type.Optional(ApiMetaSchema),
+});
+
+export const NotImplementedResponseSchema = Type.Object({
+  success: Type.Literal(false),
+  error: Type.Object({
+    code: Type.Literal('NOT_IMPLEMENTED'),
+    message: Type.String({ default: 'Feature not yet implemented' }),
+    statusCode: Type.Literal(501),
   }),
   meta: Type.Optional(ApiMetaSchema),
 });
@@ -234,6 +256,7 @@ export const StandardRouteResponses = {
   404: NotFoundResponseSchema,
   409: ConflictResponseSchema,
   500: ServerErrorResponseSchema,
+  501: NotImplementedResponseSchema,
 };
 
 // ==== ENHANCED CRUD SCHEMAS ====

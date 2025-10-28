@@ -1,4 +1,4 @@
-import Knex from 'knex';
+import type { Knex } from 'knex';
 
 export async function up(knex: any): Promise<void> {
   // Check if roles table exists first

@@ -21,10 +21,14 @@ export interface DateFilterValue {
 }
 
 /**
- * Ensures date string is in proper ISO format for backend validation
+ * Formats date for backend API based on field type
+ * @param dateInput - Date object or string to format
+ * @param isDateTime - If true, returns full ISO datetime. If false, returns date only (YYYY-MM-DD)
+ * @returns Formatted date string or null
  */
-function ensureISOFormat(
+function formatDateForAPI(
   dateInput: Date | string | null | undefined,
+  isDateTime: boolean = false,
 ): string | null {
   if (!dateInput) return null;
 
@@ -33,9 +37,18 @@ function ensureISOFormat(
       typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
     if (!date || isNaN(date.getTime())) return null;
 
-    return date.toISOString();
+    if (isDateTime) {
+      // For datetime fields: return full ISO string with time
+      return date.toISOString();
+    } else {
+      // For date fields: return YYYY-MM-DD only (no time component)
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
   } catch (error) {
-    console.warn('ensureISOFormat error:', error, 'input:', dateInput);
+    console.warn('formatDateForAPI error:', error, 'input:', dateInput);
     return null;
   }
 }
@@ -279,8 +292,8 @@ export class DateRangeFilterComponent implements OnInit {
     if (!this.fieldName) return; // Prevent errors when fieldName is not set
 
     if (this.equalsDate) {
-      // Always send as ISO date-time format for backend validation
-      const filterValue = ensureISOFormat(this.equalsDate);
+      // Format date based on field type (date or datetime)
+      const filterValue = formatDateForAPI(this.equalsDate, this.isDateTime);
 
       this.filterChange.emit({
         [this.fieldName]: filterValue,
@@ -301,39 +314,23 @@ export class DateRangeFilterComponent implements OnInit {
       };
 
       if (this.fromDate) {
-        // For range min: use start of day for date fields, exact time for datetime fields
-        filter[`${this.fieldName}_min`] = this.isDateTime
-          ? ensureISOFormat(this.fromDate)
-          : ensureISOFormat(
-              new Date(
-                this.fromDate.getFullYear(),
-                this.fromDate.getMonth(),
-                this.fromDate.getDate(),
-                0,
-                0,
-                0,
-                0,
-              ),
-            );
+        // For date fields: just use the date (formatDateForAPI will return YYYY-MM-DD)
+        // For datetime fields: use the exact selected datetime
+        filter[`${this.fieldName}_min`] = formatDateForAPI(
+          this.fromDate,
+          this.isDateTime,
+        );
       } else {
         filter[`${this.fieldName}_min`] = null;
       }
 
       if (this.toDate) {
-        // For range max: use end of day for date fields, exact time for datetime fields
-        filter[`${this.fieldName}_max`] = this.isDateTime
-          ? ensureISOFormat(this.toDate)
-          : ensureISOFormat(
-              new Date(
-                this.toDate.getFullYear(),
-                this.toDate.getMonth(),
-                this.toDate.getDate(),
-                23,
-                59,
-                59,
-                999,
-              ),
-            );
+        // For date fields: just use the date (formatDateForAPI will return YYYY-MM-DD)
+        // For datetime fields: use the exact selected datetime
+        filter[`${this.fieldName}_max`] = formatDateForAPI(
+          this.toDate,
+          this.isDateTime,
+        );
       } else {
         filter[`${this.fieldName}_max`] = null;
       }

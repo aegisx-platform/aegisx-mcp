@@ -266,6 +266,7 @@ Every Friday afternoon:
 - [Feature Templates](./templates/) - Copy for new features
 - [Universal Full-Stack Standard](../development/universal-fullstack-standard.md) - Development approach
 - [API-First Workflow](../development/api-first-workflow.md) - Backend-first development
+- [CRUD Generator Documentation](../crud-generator/) - Automatic CRUD API generation with error handling
 
 ### Support & Help
 

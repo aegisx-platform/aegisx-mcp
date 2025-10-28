@@ -1,4 +1,4 @@
-import { ActivityAction } from '../../modules/user-profile/user-activity.schemas';
+import { ActivityAction } from '../../core/user-profile/user-activity.schemas';
 
 /**
  * Configuration options for activity logging on specific routes

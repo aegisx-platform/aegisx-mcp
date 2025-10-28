@@ -1,4 +1,4 @@
-import Knex from 'knex';
+import type { Knex } from 'knex';
 
 export async function up(knex: any): Promise<void> {
   await knex.schema.createTable('uploaded_files', (table) => {

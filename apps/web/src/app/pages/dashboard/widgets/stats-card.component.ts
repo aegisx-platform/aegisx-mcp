@@ -1,9 +1,9 @@
-import { Component, Input, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { AegisxCardComponent } from '@aegisx/ui';
+import { CommonModule } from '@angular/common';
+import { Component, computed, Input, signal } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 export interface StatsCardData {
   title: string;
@@ -94,36 +94,37 @@ export interface StatsCardData {
         display: block;
       }
 
+      /* Tremor Color Palette */
       .text-primary {
-        color: #1976d2;
+        color: #3b82f6; /* blue-500 */
       }
       .text-accent {
-        color: #ff4081;
+        color: #8b5cf6; /* violet-500 */
       }
       .text-warn {
-        color: #ff9800;
+        color: #f59e0b; /* amber-500 */
       }
       .text-success {
-        color: #4caf50;
+        color: #10b981; /* emerald-500 */
       }
       .text-info {
-        color: #2196f3;
+        color: #06b6d4; /* cyan-500 */
       }
 
       .bg-primary {
-        background-color: #1976d2;
+        background-color: #3b82f6; /* blue-500 */
       }
       .bg-accent {
-        background-color: #ff4081;
+        background-color: #8b5cf6; /* violet-500 */
       }
       .bg-warn {
-        background-color: #ff9800;
+        background-color: #f59e0b; /* amber-500 */
       }
       .bg-success {
-        background-color: #4caf50;
+        background-color: #10b981; /* emerald-500 */
       }
       .bg-info {
-        background-color: #2196f3;
+        background-color: #06b6d4; /* cyan-500 */
       }
     `,
   ],

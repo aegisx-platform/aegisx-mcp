@@ -160,6 +160,57 @@ Keep commit messages clean and professional.
   - Infrastructure guides → `docs/infrastructure/`
 - **NEVER create standalone .md files in root** without specific justification
 
+### PROJECT_STATUS.md Update Policy (MANDATORY)
+
+**🚨 CRITICAL: Keep Summary & Recommendations section updated and visible at the top**
+
+**Why This Matters:**
+
+- `PROJECT_STATUS.md` is the session recovery document
+- New sessions append to the file, pushing content down
+- **Summary & Recommendations must stay at the top** for quick access
+- This section shows current project health and next steps at a glance
+
+**MANDATORY Rules:**
+
+1. **Location**: Summary & Recommendations section is located **immediately after "Implemented Features"** section
+2. **Update Frequency**: Update this section **every time you complete a major task or session**
+3. **What to Update**:
+   - ✅ "What's Working Well" - Add new completed features
+   - 🎯 "Recommended Next Steps" - Update priorities based on current status
+   - 📊 "Project Health Status" - Update metrics if changed
+   - 🎉 "Current Project Status" - Update feature counts and capabilities
+
+**When to Update:**
+
+- ✅ After completing a feature
+- ✅ After significant architectural changes
+- ✅ After publishing new versions (CRUD Generator, etc.)
+- ✅ When starting a new major feature
+- ✅ At the end of each session if significant progress made
+
+**How to Update:**
+
+```bash
+# 1. Open PROJECT_STATUS.md
+# 2. Scroll to "Summary & Recommendations" section (near top)
+# 3. Update relevant subsections
+# 4. Update "Last Updated" date at bottom of section
+# 5. Commit changes with descriptive message
+```
+
+**Important Note:**
+
+- ❌ **DO NOT** duplicate Summary & Recommendations at the bottom
+- ✅ **KEEP IT** at the top after "Implemented Features" section
+- ✅ **ADD NOTE** at bottom: "_📌 Note: Summary & Recommendations section is at the top of this file_"
+
+**Example Commit Messages:**
+
+- `docs(status): update project health status after CRUD generator v2.1.0 release`
+- `docs(status): add new completed features to recommendations`
+- `docs(status): update next steps priorities`
+
 ### Feature Documentation Policy (MANDATORY)
 
 **🚨 ALL new features MUST have comprehensive documentation - NO EXCEPTIONS**
@@ -482,6 +533,281 @@ pnpm run db:migrate && pnpm run db:seed
 - **[🚀 Deployment](./docs/infrastructure/deployment.md)** - Docker + CI/CD
 - **[🤖 MCP Integration](./docs/development/mcp-integration.md)** - Nx MCP & Playwright MCP usage
 - **[📋 All Commands Reference](./docs/references/claude-commands.md)** - Complete shell command list
+- **[🤖 CRUD Generator](./docs/crud-generator/)** - Automatic CRUD API generation with error handling & validation
+
+## 📝 Recent Development Sessions
+
+> **📌 For complete session history and details, see [PROJECT_STATUS.md](./PROJECT_STATUS.md) § Recent Development Sessions**
+
+### Current Status (Session 46 - 2025-10-28)
+
+**Latest Cleanup:**
+
+- ✅ **Theme System Removed** - 9 files deleted (themes module not needed)
+- ✅ **ALL Business Features Removed** - 72 files deleted (books, authors, budgets, comprehensive-tests)
+- ✅ **Unused Files Cleaned** - Scripts, test directories, build output removed
+- ✅ **Repository Clean Slate** - Empty modules/ and features/ ready for HIS & Inventory
+- ✅ **Total Cleanup** - 89 files deleted, 4 commits, all pushed successfully
+
+**Repository Status:**
+
+- 14 core backend modules (only essential infrastructure)
+- 10 core frontend features (only core platform)
+- Empty `apps/api/src/modules/` - Ready for HIS modules
+- Empty `apps/web/src/app/features/` - Ready for HIS features
+- CRUD Generator verified working and ready
+
+### Previous Status (Session 44 - 2025-10-28)
+
+**Latest Updates:**
+
+- ✅ **CRUD Generator v2.1.0** - Released with HIS Mode (data accuracy first)
+- ✅ **Repository Cleanup** - 143 files deleted, 58,512 lines removed
+- ✅ **Communication Guide** - Exact phrases for version releases documented
+
+**Key Learning from Release Process:**
+
+- Tags for npm packages belong in the **PACKAGE repository**, not main monorepo
+- Use git subtree to sync `libs/aegisx-crud-generator/` to separate crud-generator repo
+- Clear communication phrases prevent mistakes (see "CRUD Generator Version Release & NPM Publishing" section below)
+
+## 🚨 CRITICAL: CRUD Generator Git Workflow
+
+**⚠️ libs/aegisx-crud-generator/ is synced to separate repository**
+
+**MANDATORY Steps After Making Changes to CRUD Generator:**
+
+```bash
+# 1. Commit changes in main monorepo
+git add libs/aegisx-crud-generator/
+git commit -m "docs(crud-generator): update documentation"
+
+# 2. ⚠️ CRITICAL: Sync to separate crud-generator repository
+./libs/aegisx-crud-generator/sync-to-repo.sh develop
+
+# 3. Push main monorepo
+git push origin develop
+
+# 4. (Optional) Publish to NPM if package.json version changed
+cd libs/aegisx-crud-generator
+npm publish
+```
+
+**Git Subtree Commands:**
+
+```bash
+# Sync to separate repository (most common)
+./libs/aegisx-crud-generator/sync-to-repo.sh develop
+
+# Manual sync (if script unavailable)
+git subtree push --prefix=libs/aegisx-crud-generator \
+  git@github.com:aegisx-platform/crud-generator.git develop
+
+# Pull updates from separate repository (rare)
+git subtree pull --prefix=libs/aegisx-crud-generator \
+  git@github.com:aegisx-platform/crud-generator.git develop --squash
+```
+
+**⚠️ DO NOT FORGET** the git subtree push or changes won't appear in the separate crud-generator repository!
+
+**Why This Matters:**
+
+- `libs/aegisx-crud-generator/` is published as standalone NPM package
+- Separate repository: https://github.com/aegisx-platform/crud-generator
+- Main monorepo is source of truth, must sync to separate repo
+- NPM package is built from separate repository
+
+## 🚨 CRITICAL: CRUD Generator Version Release & NPM Publishing
+
+**⚠️ NEVER create version tags in main aegisx-starter repository!**
+
+**Tags MUST be created ONLY in the separate crud-generator repository**
+
+### 📦 How to Communicate with Claude
+
+**Use these EXACT phrases to avoid confusion:**
+
+| What You Want    | Say This to Claude                      | What Claude Will Do                                                                      |
+| ---------------- | --------------------------------------- | ---------------------------------------------------------------------------------------- |
+| **Version Bump** | "ออก version CRUD generator เป็น X.X.X" | 1. Bump package.json version<br>2. Commit in main repo<br>3. Sync to crud-generator repo |
+| **Tag Creation** | "สร้าง tag CRUD generator vX.X.X"       | Create tag in **crud-generator repo only** (NOT main repo)                               |
+| **NPM Publish**  | "publish CRUD generator ไป npm"         | User provides OTP, Claude runs publish.sh                                                |
+| **Full Release** | "release CRUD generator vX.X.X"         | Complete workflow: bump → commit → sync → tag → npm publish                              |
+| **Sync Only**    | "sync CRUD generator"                   | Git subtree push to crud-generator repo                                                  |
+
+### 🔄 Complete Release Workflow
+
+**When you say: "release CRUD generator v2.1.0"**
+
+```bash
+# Step 1: Version Bump & Commit (in main repo)
+cd libs/aegisx-crud-generator
+# Edit package.json: "version": "2.1.0"
+git add .
+git commit -m "chore(crud-generator): bump version to 2.1.0"
+git push origin develop
+
+# Step 2: Sync to Separate Repository
+cd /path/to/main/repo
+./libs/aegisx-crud-generator/sync-to-repo.sh develop
+# OR manual:
+# git subtree push --prefix=libs/aegisx-crud-generator \
+#   git@github.com:aegisx-platform/crud-generator.git develop
+
+# Step 3: Create Tag in CRUD Generator Repo (NOT main repo!)
+git push git@github.com:aegisx-platform/crud-generator.git \
+  <commit-hash>:refs/tags/v2.1.0
+
+# Step 4: Publish to NPM (user provides OTP)
+cd libs/aegisx-crud-generator
+./publish.sh <OTP-CODE>
+```
+
+### ⚠️ CRITICAL RULES
+
+**DO:**
+
+- ✅ Create tags in **crud-generator repository** (`git@github.com:aegisx-platform/crud-generator.git`)
+- ✅ Always sync to separate repo before creating tags
+- ✅ Wait for user to provide OTP before npm publish
+- ✅ Use semantic versioning (major.minor.patch)
+
+**DON'T:**
+
+- ❌ NEVER create version tags in main aegisx-starter repository
+- ❌ NEVER create tags before syncing to separate repo
+- ❌ NEVER publish without user's explicit OTP code
+- ❌ NEVER skip git subtree sync step
+
+### 🎯 Why This Architecture?
+
+```
+Main Monorepo (aegisx-starter)
+└── libs/aegisx-crud-generator/
+    │
+    ├─ git subtree push ──→ Separate Repo (crud-generator)
+    │                       └── NPM Package Source
+    │                           ├── Tags (v2.1.0, v2.0.1, etc.)
+    │                           └── npm publish → registry.npmjs.org
+    │
+    └─ ❌ NO TAGS HERE! Tags belong in separate repo only
+```
+
+**Benefits:**
+
+1. Main repo stays clean (no package-specific tags)
+2. NPM package has its own version history
+3. Separation of concerns: monorepo vs. published package
+4. Easy to manage multiple packages in future
+
+### 📋 Quick Reference Examples
+
+**Example 1: Full Release**
+
+```
+User: "ออก version CRUD generator 2.1.0 แล้ว publish"
+Claude:
+1. ✅ Bump package.json to 2.1.0
+2. ✅ Commit to main repo
+3. ✅ Sync to crud-generator repo
+4. ✅ Create tag v2.1.0 in crud-generator repo
+5. ⏸️ Wait for user OTP
+User: "OTP: 123456"
+Claude: ✅ Publish to npm
+```
+
+**Example 2: Sync Only**
+
+```
+User: "sync CRUD generator"
+Claude: ✅ Git subtree push to crud-generator repo
+```
+
+**Example 3: Tag Only**
+
+```
+User: "สร้าง tag v2.1.0 ให้ CRUD generator"
+Claude: ✅ Create tag in crud-generator repo (NOT main repo)
+```
+
+## 🤖 CRUD Generator Quick Commands
+
+### Basic Generation
+
+```bash
+# Generate basic CRUD (no import, no events)
+pnpm aegisx-crud books --package
+
+# Generate with import functionality
+pnpm aegisx-crud budgets --package --with-import
+
+# Generate with WebSocket events
+pnpm aegisx-crud notifications --package --with-events
+
+# Generate with both import and events
+pnpm aegisx-crud products --package --with-import --with-events
+```
+
+### Advanced Options
+
+```bash
+# Dry run (preview without creating files)
+pnpm aegisx-crud articles --package --dry-run
+
+# Force overwrite existing files
+pnpm aegisx-crud users --package --force
+
+# Combine all flags
+pnpm aegisx-crud inventory --package --with-import --with-events --force
+```
+
+### Common Workflows
+
+**1. New Feature with Import:**
+
+```bash
+# Generate CRUD with import dialog
+pnpm aegisx-crud budgets --package --with-import
+
+# Files created:
+# - Backend: controller, service, repository, routes, schemas, tests
+# - Frontend: list, create/edit/view dialogs, import dialog, service, types
+# - Database: Migration file
+```
+
+**2. Real-Time Feature with Events:**
+
+```bash
+# Generate CRUD with WebSocket events
+pnpm aegisx-crud notifications --package --with-events
+
+# Backend includes:
+# - EventService integration
+# - Event emission on create/update/delete
+# - Bulk operation events (bulk_started, bulk_progress, bulk_completed)
+```
+
+**3. Regenerate Existing Feature:**
+
+```bash
+# Review changes first
+pnpm aegisx-crud books --package --dry-run
+
+# Force regenerate if satisfied
+pnpm aegisx-crud books --package --force
+```
+
+### Flag Reference
+
+| Flag            | Description                                | Use Case                          |
+| --------------- | ------------------------------------------ | --------------------------------- |
+| `--package`     | Use `.crudgen.json` config                 | ✅ ALWAYS use this flag           |
+| `--with-import` | Add import dialog + backend import service | Bulk data import features         |
+| `--with-events` | Add WebSocket real-time events             | Live updates, notifications       |
+| `--dry-run`     | Preview changes without creating files     | Review before generation          |
+| `--force`       | Overwrite existing files                   | Regenerate after template updates |
+
+**📚 Complete Documentation:** See `docs/crud-generator/` for comprehensive guides
 
 ### CI/CD & DevOps
 

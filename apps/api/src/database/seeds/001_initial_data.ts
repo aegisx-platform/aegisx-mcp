@@ -1,7 +1,7 @@
-import Knex from 'knex';
-import * as bcrypt from 'bcrypt';
+import type { Knex } from 'knex';
+import * as bcrypt from 'bcryptjs';
 
-export async function seed(knex: any): Promise<void> {
+export async function seed(knex: Knex): Promise<void> {
   // Clear existing data in reverse order due to foreign keys
   await knex('user_sessions').del();
   await knex('user_roles').del();

@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyPluginOptions, FastifyRequest, FastifyReply } from 'fastify';
 import fp from 'fastify-plugin';
-import { UserActivityService } from '../../modules/user-profile/user-activity.service';
-import { UserActivityRepository } from '../../modules/user-profile/user-activity.repository';
+import { UserActivityService } from '../../core/user-profile/user-activity.service';
+import { UserActivityRepository } from '../../core/user-profile/user-activity.repository';
 import { ActivityMiddleware } from './activity-middleware';
 import { ActivityLogPluginConfig, defaultPluginConfig, ActivityLogConfig } from './activity-config';
 import { ActivityUtils } from './activity-utils';

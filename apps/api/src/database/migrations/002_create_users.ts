@@ -1,4 +1,4 @@
-import Knex from 'knex';
+import type { Knex } from 'knex';
 
 export async function up(knex: any): Promise<void> {
   // Create users table
@@ -12,7 +12,7 @@ export async function up(knex: any): Promise<void> {
     table.boolean('is_active').defaultTo(true);
     table.timestamp('last_login_at');
     table.timestamps(true, true);
-    
+
     // Indexes for performance
     table.index('email');
     table.index('username');
@@ -24,11 +24,19 @@ export async function up(knex: any): Promise<void> {
     table.uuid('user_id').notNullable();
     table.uuid('role_id').notNullable();
     table.timestamps(true, true);
-    
+
     // Foreign keys
-    table.foreign('user_id').references('id').inTable('users').onDelete('CASCADE');
-    table.foreign('role_id').references('id').inTable('roles').onDelete('CASCADE');
-    
+    table
+      .foreign('user_id')
+      .references('id')
+      .inTable('users')
+      .onDelete('CASCADE');
+    table
+      .foreign('role_id')
+      .references('id')
+      .inTable('roles')
+      .onDelete('CASCADE');
+
     // Composite primary key
     table.primary(['user_id', 'role_id']);
   });
