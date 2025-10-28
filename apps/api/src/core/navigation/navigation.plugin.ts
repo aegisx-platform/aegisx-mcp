@@ -3,6 +3,7 @@ import fp from 'fastify-plugin';
 import { NavigationService } from './services/navigation.service';
 import { navigationSchemas } from './navigation.schemas';
 import navigationRoutes from './navigation.routes';
+import navigationItemsRoutes from './navigation-items.routes';
 
 /**
  * Navigation Plugin
@@ -24,6 +25,7 @@ async function navigationPlugin(
 
   // Register navigation routes (prefix handled by main.ts)
   await fastify.register(navigationRoutes);
+  await fastify.register(navigationItemsRoutes); // Navigation items CRUD routes
 
   // Add navigation-specific hooks
   fastify.addHook('onClose', async () => {

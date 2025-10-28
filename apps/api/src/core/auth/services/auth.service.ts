@@ -158,12 +158,30 @@ export class AuthService {
       throw error;
     }
 
+    // Load user permissions
+    const permissionsResult = await this.app
+      .knex('users as u')
+      .select(
+        this.app.knex.raw(
+          "ARRAY_AGG(DISTINCT CONCAT(p.resource, ':', p.action)) as permissions",
+        ),
+      )
+      .join('user_roles as ur', 'u.id', 'ur.user_id')
+      .join('role_permissions as rp', 'ur.role_id', 'rp.role_id')
+      .join('permissions as p', 'rp.permission_id', 'p.id')
+      .where('u.id', user.id)
+      .groupBy('u.id')
+      .first();
+
+    const permissions = permissionsResult?.permissions || [];
+
     // Generate tokens
     const accessToken = this.app.jwt.sign(
       {
         id: user.id,
         email: user.email,
         role: user.role || 'user',
+        permissions,
       },
       { expiresIn: process.env.JWT_EXPIRES_IN || '15m' },
     );
@@ -191,7 +209,10 @@ export class AuthService {
     const { password: _, ...userWithoutPassword } = user;
 
     return {
-      user: userWithoutPassword,
+      user: {
+        ...userWithoutPassword,
+        permissions, // Add permissions to user response
+      },
       accessToken,
       refreshToken,
     };

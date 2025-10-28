@@ -20,7 +20,7 @@ export async function usersRoutes(
     {
       preValidation: [
         fastify.authenticate,
-        fastify.authorize(['admin', 'manager']),
+        fastify.verifyPermission('users', 'list'),
       ],
       schema: {
         description: 'List all users with pagination and filters',
@@ -48,7 +48,7 @@ export async function usersRoutes(
     {
       preValidation: [
         fastify.authenticate,
-        fastify.authorize(['admin', 'manager']),
+        fastify.verifyPermission('users', 'read'),
       ],
       schema: {
         description: 'Get a user by ID',
@@ -72,7 +72,10 @@ export async function usersRoutes(
   typedFastify.post(
     '/users',
     {
-      preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('users', 'create'),
+      ],
       schema: {
         description: 'Create a new user',
         tags: ['Users'],
@@ -97,7 +100,10 @@ export async function usersRoutes(
   typedFastify.put(
     '/users/:id',
     {
-      preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('users', 'update'),
+      ],
       schema: {
         description: 'Update a user',
         tags: ['Users'],
@@ -124,7 +130,10 @@ export async function usersRoutes(
   typedFastify.put(
     '/users/:id/password',
     {
-      preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('users', 'update-password'),
+      ],
       schema: {
         description: 'Change a user password',
         tags: ['Users'],
@@ -150,7 +159,10 @@ export async function usersRoutes(
   typedFastify.delete(
     '/users/:id',
     {
-      preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('users', 'delete'),
+      ],
       schema: {
         description: 'Delete a user',
         tags: ['Users'],
@@ -226,7 +238,10 @@ export async function usersRoutes(
   typedFastify.post(
     '/users/bulk/activate',
     {
-      preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('users', 'bulk:activate'),
+      ],
       schema: {
         description: 'Bulk activate multiple users',
         tags: ['Users', 'Bulk Operations'],
@@ -268,7 +283,10 @@ export async function usersRoutes(
   typedFastify.post(
     '/users/bulk/deactivate',
     {
-      preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('users', 'bulk:deactivate'),
+      ],
       schema: {
         description: 'Bulk deactivate multiple users',
         tags: ['Users', 'Bulk Operations'],
@@ -310,7 +328,10 @@ export async function usersRoutes(
   typedFastify.post(
     '/users/bulk/delete',
     {
-      preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('users', 'bulk:delete'),
+      ],
       schema: {
         description: 'Bulk soft delete multiple users',
         tags: ['Users', 'Bulk Operations'],
@@ -396,7 +417,7 @@ export async function usersRoutes(
     {
       preValidation: [
         fastify.authenticate,
-        fastify.authorize(['admin', 'manager', 'user']),
+        fastify.verifyPermission('users', 'read'),
       ],
       schema: {
         description: 'Get users dropdown options',

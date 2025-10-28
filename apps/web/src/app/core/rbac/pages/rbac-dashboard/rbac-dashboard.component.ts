@@ -17,6 +17,7 @@ import {
   RecentActivity,
 } from '../../models/rbac.interfaces';
 import { RbacService } from '../../services/rbac.service';
+import { HasPermissionDirective } from '../../directives/has-permission.directive';
 
 @Component({
   selector: 'app-rbac-dashboard',
@@ -33,6 +34,7 @@ import { RbacService } from '../../services/rbac.service';
     MatDividerModule,
     MatListModule,
     BreadcrumbComponent,
+    HasPermissionDirective,
   ],
   template: `
     <div class="rbac-dashboard p-6 space-y-6">
@@ -53,11 +55,17 @@ import { RbacService } from '../../services/rbac.service';
         </div>
 
         <div class="flex flex-wrap gap-2">
-          <button mat-raised-button color="primary" (click)="navigateToRoles()">
+          <button
+            *hasPermission="'roles:read'"
+            mat-raised-button
+            color="primary"
+            (click)="navigateToRoles()"
+          >
             <mat-icon>people</mat-icon>
             Manage Roles
           </button>
           <button
+            *hasPermission="'permissions:read'"
             mat-raised-button
             color="primary"
             (click)="navigateToPermissions()"
@@ -66,6 +74,7 @@ import { RbacService } from '../../services/rbac.service';
             Manage Permissions
           </button>
           <button
+            *hasPermission="'roles:read'"
             mat-raised-button
             color="accent"
             (click)="navigateToUserRoles()"
@@ -160,6 +169,7 @@ import { RbacService } from '../../services/rbac.service';
               <mat-card-content class="p-6">
                 <div class="space-y-3">
                   <button
+                    *hasPermission="'roles:create'"
                     mat-stroked-button
                     class="w-full justify-start"
                     (click)="quickCreateRole()"
@@ -169,6 +179,7 @@ import { RbacService } from '../../services/rbac.service';
                   </button>
 
                   <button
+                    *hasPermission="'permissions:assign'"
                     mat-stroked-button
                     class="w-full justify-start"
                     (click)="quickCreatePermission()"
@@ -178,6 +189,7 @@ import { RbacService } from '../../services/rbac.service';
                   </button>
 
                   <button
+                    *hasPermission="'roles:update'"
                     mat-stroked-button
                     class="w-full justify-start"
                     (click)="bulkAssignRoles()"
@@ -189,6 +201,7 @@ import { RbacService } from '../../services/rbac.service';
                   <mat-divider></mat-divider>
 
                   <button
+                    *hasPermission="'dashboard:view'"
                     mat-stroked-button
                     class="w-full justify-start"
                     (click)="viewAuditLog()"
@@ -198,6 +211,7 @@ import { RbacService } from '../../services/rbac.service';
                   </button>
 
                   <button
+                    *hasPermission="'dashboard:view'"
                     mat-stroked-button
                     class="w-full justify-start"
                     (click)="exportReport()"
@@ -286,7 +300,11 @@ import { RbacService } from '../../services/rbac.service';
                 *ngIf="recentActivity().length > 0"
                 class="p-4 pt-0"
               >
-                <button mat-button (click)="viewAllActivity()">
+                <button
+                  *hasPermission="'dashboard:view'"
+                  mat-button
+                  (click)="viewAllActivity()"
+                >
                   View All Activity
                 </button>
               </mat-card-actions>

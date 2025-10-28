@@ -3,10 +3,26 @@
  * Based on OpenAPI specification: navigation-api.yaml
  */
 
-export type NavigationType = 'default' | 'compact' | 'horizontal' | 'mobile' | 'all';
-export type NavigationItemType = 'item' | 'group' | 'collapsible' | 'divider' | 'spacer';
+export type NavigationType =
+  | 'default'
+  | 'compact'
+  | 'horizontal'
+  | 'mobile'
+  | 'all';
+export type NavigationItemType =
+  | 'item'
+  | 'group'
+  | 'collapsible'
+  | 'divider'
+  | 'spacer';
 export type NavigationTarget = '_self' | '_blank' | '_parent' | '_top';
-export type BadgeVariant = 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'error';
+export type BadgeVariant =
+  | 'default'
+  | 'primary'
+  | 'secondary'
+  | 'success'
+  | 'warning'
+  | 'error';
 
 export interface NavigationBadge {
   title?: string;
@@ -111,7 +127,7 @@ export interface UserContext {
 }
 
 // Cache key types
-export type NavigationCacheKey = 
+export type NavigationCacheKey =
   | `navigation:${NavigationType}:${boolean}` // Global navigation with includeDisabled flag
   | `navigation:user:${string}:${NavigationType}`; // User-specific navigation
 
@@ -123,4 +139,63 @@ export interface GetNavigationQuery {
 
 export interface GetUserNavigationQuery {
   type?: NavigationType;
+}
+
+// CRUD request/response types
+export interface CreateNavigationItemRequest {
+  parent_id?: string;
+  key: string;
+  title: string;
+  type: NavigationItemType;
+  icon?: string;
+  link?: string;
+  target?: NavigationTarget;
+  sort_order?: number;
+  disabled?: boolean;
+  hidden?: boolean;
+  exact_match?: boolean;
+  badge_title?: string;
+  badge_classes?: string;
+  badge_variant?: BadgeVariant;
+  show_in_default?: boolean;
+  show_in_compact?: boolean;
+  show_in_horizontal?: boolean;
+  show_in_mobile?: boolean;
+  meta?: Record<string, unknown>;
+  permission_ids?: string[];
+}
+
+export interface UpdateNavigationItemRequest {
+  parent_id?: string;
+  key?: string;
+  title?: string;
+  type?: NavigationItemType;
+  icon?: string;
+  link?: string;
+  target?: NavigationTarget;
+  sort_order?: number;
+  disabled?: boolean;
+  hidden?: boolean;
+  exact_match?: boolean;
+  badge_title?: string;
+  badge_classes?: string;
+  badge_variant?: BadgeVariant;
+  show_in_default?: boolean;
+  show_in_compact?: boolean;
+  show_in_horizontal?: boolean;
+  show_in_mobile?: boolean;
+  meta?: Record<string, unknown>;
+  permission_ids?: string[];
+}
+
+export interface NavigationItemWithPermissions extends NavigationItemEntity {
+  permissions?: Permission[];
+}
+
+export interface UpdateOrdersRequest {
+  orders: Array<{ id: string; sort_order: number }>;
+}
+
+export interface AssignPermissionsRequest {
+  permission_ids: string[];
 }

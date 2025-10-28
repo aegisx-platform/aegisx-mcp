@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from '../../core/auth/guards/auth.guard';
+import { PermissionGuard } from './guards/permission.guard';
 
 export const rbacRoutes: Routes = [
   {
@@ -13,11 +14,11 @@ export const rbacRoutes: Routes = [
       import('./pages/rbac-dashboard/rbac-dashboard.component').then(
         (m) => m.RbacDashboardComponent,
       ),
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, PermissionGuard],
     data: {
       title: 'RBAC Dashboard',
       description: 'Overview of roles, permissions, and user assignments',
-      requiredPermissions: ['rbac.read', 'admin.*'],
+      permissions: ['rbac:stats:read', '*:*'],
     },
   },
   {
@@ -26,11 +27,11 @@ export const rbacRoutes: Routes = [
       import('./pages/role-management/role-management.component').then(
         (m) => m.RoleManagementComponent,
       ),
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, PermissionGuard],
     data: {
       title: 'Role Management',
       description: 'Manage system roles and their permissions',
-      requiredPermissions: ['rbac.roles.read', 'admin.*'],
+      permissions: ['rbac:roles:list', '*:*'],
     },
   },
   {
@@ -39,11 +40,11 @@ export const rbacRoutes: Routes = [
       import(
         './pages/permission-management/permission-management.component'
       ).then((m) => m.PermissionManagementComponent),
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, PermissionGuard],
     data: {
       title: 'Permission Management',
       description: 'Manage system permissions and access controls',
-      requiredPermissions: ['rbac.permissions.read', 'admin.*'],
+      permissions: ['rbac:permissions:list', '*:*'],
     },
   },
   {
@@ -52,11 +53,24 @@ export const rbacRoutes: Routes = [
       import(
         './pages/user-role-assignment/user-role-assignment.component'
       ).then((m) => m.UserRoleAssignmentComponent),
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, PermissionGuard],
     data: {
       title: 'User Role Assignments',
       description: 'Manage role assignments and user access permissions',
-      requiredPermissions: ['rbac.assignments.read', 'admin.*'],
+      permissions: ['rbac:user-roles:list', '*:*'],
+    },
+  },
+  {
+    path: 'navigation',
+    loadComponent: () =>
+      import(
+        './pages/navigation-management/navigation-management.component'
+      ).then((m) => m.NavigationManagementComponent),
+    canActivate: [AuthGuard, PermissionGuard],
+    data: {
+      title: 'Navigation Management',
+      description: 'Manage application navigation items and menu structure',
+      permissions: ['navigation:read', '*:*'],
     },
   },
   {

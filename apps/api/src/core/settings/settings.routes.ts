@@ -162,7 +162,10 @@ export async function settingsRoutes(fastify: FastifyInstance) {
           500: SchemaRefs.ServerError,
         },
       },
-      preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('settings', 'read'),
+      ],
     },
     controller.getSettingById,
   );
@@ -185,7 +188,10 @@ export async function settingsRoutes(fastify: FastifyInstance) {
           500: SchemaRefs.ServerError,
         },
       },
-      preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('settings', 'create'),
+      ],
     },
     controller.createSetting,
   );
@@ -209,7 +215,10 @@ export async function settingsRoutes(fastify: FastifyInstance) {
           500: SchemaRefs.ServerError,
         },
       },
-      preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('settings', 'update'),
+      ],
     },
     controller.updateSetting,
   );
@@ -233,7 +242,10 @@ export async function settingsRoutes(fastify: FastifyInstance) {
           500: SchemaRefs.ServerError,
         },
       },
-      preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('settings', 'update-value'),
+      ],
     },
     controller.updateSettingValue,
   );
@@ -261,7 +273,10 @@ export async function settingsRoutes(fastify: FastifyInstance) {
           500: SchemaRefs.ServerError,
         },
       },
-      preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('settings', 'delete'),
+      ],
     },
     controller.deleteSetting,
   );
@@ -289,7 +304,10 @@ export async function settingsRoutes(fastify: FastifyInstance) {
           500: SchemaRefs.ServerError,
         },
       },
-      preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('settings', 'bulk-update'),
+      ],
     },
     controller.bulkUpdateSettings,
   );
@@ -311,7 +329,10 @@ export async function settingsRoutes(fastify: FastifyInstance) {
           500: SchemaRefs.ServerError,
         },
       },
-      preValidation: [fastify.authenticate, fastify.authorize(['admin'])],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('settings', 'read-history'),
+      ],
     },
     controller.getSettingHistory,
   );
@@ -338,7 +359,10 @@ export async function settingsRoutes(fastify: FastifyInstance) {
           500: SchemaRefs.ServerError,
         },
       },
-      preValidation: [fastify.authenticate],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('settings', 'user:read'),
+      ],
     },
     controller.getUserSettings,
   );
@@ -374,7 +398,10 @@ export async function settingsRoutes(fastify: FastifyInstance) {
           500: SchemaRefs.ServerError,
         },
       },
-      preValidation: [fastify.authenticate],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('settings', 'user:update'),
+      ],
     },
     controller.updateUserSetting,
   );
@@ -408,7 +435,10 @@ export async function settingsRoutes(fastify: FastifyInstance) {
           500: SchemaRefs.ServerError,
         },
       },
-      preValidation: [fastify.authenticate],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('settings', 'user:delete'),
+      ],
     },
     controller.deleteUserSetting,
   );

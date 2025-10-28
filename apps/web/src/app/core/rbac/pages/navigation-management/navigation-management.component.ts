@@ -26,16 +26,24 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ActivatedRoute } from '@angular/router';
 import { BreadcrumbComponent, AegisxNavigationItem } from '@aegisx/ui';
 import { ConfirmDialogComponent } from '../../../../shared/ui/components/confirm-dialog.component';
-import { Role, RoleFilters } from '../../models/rbac.interfaces';
-import { RbacService } from '../../services/rbac.service';
-import { RoleDialogComponent } from '../../dialogs/role-dialog/role-dialog.component';
+import {
+  NavigationItem,
+  NavigationItemsService,
+} from '../../services/navigation-items.service';
 import { HasPermissionDirective } from '../../directives/has-permission.directive';
+import { NavigationItemDialogComponent } from '../../dialogs/navigation-item-dialog/navigation-item-dialog.component';
+
+interface NavigationFilters {
+  search: string;
+  type: string | null;
+  disabled: boolean | null;
+  hidden: boolean | null;
+}
 
 @Component({
-  selector: 'app-role-management',
+  selector: 'app-navigation-management',
   standalone: true,
   imports: [
     CommonModule,
@@ -61,7 +69,7 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
     HasPermissionDirective,
   ],
   template: `
-    <div class="role-management p-6 space-y-6">
+    <div class="navigation-management p-6 space-y-6">
       <!-- Breadcrumb -->
       <ax-breadcrumb [items]="breadcrumbItems"></ax-breadcrumb>
 
@@ -71,27 +79,27 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
       >
         <div>
           <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
-            Role Management
+            Navigation Management
           </h1>
           <p class="text-gray-600 dark:text-gray-400 mt-1">
-            Create and manage system roles and their permissions
+            Manage application navigation items and menu structure
           </p>
         </div>
 
         <div class="flex flex-wrap gap-2">
           <button
-            *hasPermission="'roles:create'"
+            *hasPermission="'navigation:create'"
             mat-raised-button
             color="primary"
             (click)="openCreateDialog()"
             [disabled]="isLoading()"
           >
             <mat-icon>add</mat-icon>
-            Create Role
+            Create Navigation Item
           </button>
           <button
             mat-raised-button
-            (click)="refreshRoles()"
+            (click)="refreshNavigationItems()"
             [disabled]="isLoading()"
           >
             <mat-icon>refresh</mat-icon>
@@ -105,53 +113,52 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
         <mat-card-content class="p-6">
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <mat-form-field appearance="outline" class="w-full">
-              <mat-label>Search roles</mat-label>
+              <mat-label>Search navigation items</mat-label>
               <input
                 matInput
                 [(ngModel)]="filters.search"
                 (ngModelChange)="onFilterChange()"
-                placeholder="Search by name or description"
+                placeholder="Search by key or title"
               />
               <mat-icon matSuffix>search</mat-icon>
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="w-full">
-              <mat-label>Category</mat-label>
+              <mat-label>Type</mat-label>
               <mat-select
-                [(ngModel)]="filters.category"
+                [(ngModel)]="filters.type"
                 (ngModelChange)="onFilterChange()"
               >
-                <mat-option [value]="null">All Categories</mat-option>
-                <mat-option
-                  *ngFor="let category of availableCategories()"
-                  [value]="category"
-                >
-                  {{ category }}
-                </mat-option>
+                <mat-option [value]="null">All Types</mat-option>
+                <mat-option value="item">Item</mat-option>
+                <mat-option value="group">Group</mat-option>
+                <mat-option value="collapsible">Collapsible</mat-option>
+                <mat-option value="divider">Divider</mat-option>
+                <mat-option value="spacer">Spacer</mat-option>
               </mat-select>
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="w-full">
               <mat-label>Status</mat-label>
               <mat-select
-                [(ngModel)]="filters.isActive"
+                [(ngModel)]="filters.disabled"
                 (ngModelChange)="onFilterChange()"
               >
                 <mat-option [value]="null">All Statuses</mat-option>
-                <mat-option [value]="true">Active</mat-option>
-                <mat-option [value]="false">Inactive</mat-option>
+                <mat-option [value]="false">Enabled</mat-option>
+                <mat-option [value]="true">Disabled</mat-option>
               </mat-select>
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="w-full">
-              <mat-label>Type</mat-label>
+              <mat-label>Visibility</mat-label>
               <mat-select
-                [(ngModel)]="filters.isSystemRole"
+                [(ngModel)]="filters.hidden"
                 (ngModelChange)="onFilterChange()"
               >
-                <mat-option [value]="null">All Types</mat-option>
-                <mat-option [value]="false">Custom</mat-option>
-                <mat-option [value]="true">System</mat-option>
+                <mat-option [value]="null">All</mat-option>
+                <mat-option [value]="false">Visible</mat-option>
+                <mat-option [value]="true">Hidden</mat-option>
               </mat-select>
             </mat-form-field>
           </div>
@@ -162,32 +169,31 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
             class="flex items-center gap-2 mt-4 pt-4 border-t"
           >
             <span class="text-sm text-gray-600">
-              {{ selection.selected.length }} role(s) selected
+              {{ selection.selected.length }} item(s) selected
             </span>
             <button
-              *hasPermission="'roles:update'"
+              *hasPermission="'navigation:update'"
               mat-stroked-button
               color="primary"
-              (click)="bulkActivate()"
+              (click)="bulkEnable()"
             >
               <mat-icon>check_circle</mat-icon>
-              Activate
+              Enable
             </button>
             <button
-              *hasPermission="'roles:update'"
+              *hasPermission="'navigation:update'"
               mat-stroked-button
               color="warn"
-              (click)="bulkDeactivate()"
+              (click)="bulkDisable()"
             >
               <mat-icon>block</mat-icon>
-              Deactivate
+              Disable
             </button>
             <button
-              *hasPermission="'roles:delete'"
+              *hasPermission="'navigation:delete'"
               mat-stroked-button
               color="warn"
               (click)="bulkDelete()"
-              [disabled]="!canBulkDelete()"
             >
               <mat-icon>delete</mat-icon>
               Delete
@@ -196,7 +202,7 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
         </mat-card-content>
       </mat-card>
 
-      <!-- Role Table -->
+      <!-- Navigation Table -->
       <mat-card>
         <div class="overflow-x-auto">
           <table mat-table [dataSource]="dataSource" matSort class="w-full">
@@ -220,61 +226,69 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
               </td>
             </ng-container>
 
-            <!-- Name Column -->
-            <ng-container matColumnDef="name">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
-              <td mat-cell *matCellDef="let role" class="font-medium">
+            <!-- Key Column -->
+            <ng-container matColumnDef="key">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Key</th>
+              <td mat-cell *matCellDef="let item" class="font-medium">
+                {{ item.key }}
+              </td>
+            </ng-container>
+
+            <!-- Title Column -->
+            <ng-container matColumnDef="title">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Title</th>
+              <td mat-cell *matCellDef="let item">
                 <div class="flex items-center gap-2">
-                  <span>{{ role.name }}</span>
-                  <mat-chip-set *ngIf="role.is_system_role">
-                    <mat-chip
-                      class="!bg-blue-100 !text-blue-800 dark:!bg-blue-900 dark:!text-blue-200"
-                    >
-                      System
-                    </mat-chip>
-                  </mat-chip-set>
+                  <mat-icon *ngIf="item.icon" class="text-base">{{
+                    item.icon
+                  }}</mat-icon>
+                  <span>{{ item.title }}</span>
                 </div>
               </td>
             </ng-container>
 
-            <!-- Description Column -->
-            <ng-container matColumnDef="description">
-              <th mat-header-cell *matHeaderCellDef>Description</th>
-              <td mat-cell *matCellDef="let role">
-                <span class="text-gray-600 dark:text-gray-400">
-                  {{ role.description || 'No description' }}
+            <!-- Type Column -->
+            <ng-container matColumnDef="type">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
+              <td mat-cell *matCellDef="let item">
+                <mat-chip-set>
+                  <mat-chip [class]="getTypeChipClass(item.type)">
+                    {{ item.type }}
+                  </mat-chip>
+                </mat-chip-set>
+              </td>
+            </ng-container>
+
+            <!-- Link Column -->
+            <ng-container matColumnDef="link">
+              <th mat-header-cell *matHeaderCellDef>Link</th>
+              <td mat-cell *matCellDef="let item">
+                <span class="text-gray-600 dark:text-gray-400 text-sm">
+                  {{ item.link || '-' }}
                 </span>
               </td>
             </ng-container>
 
-            <!-- Category Column -->
-            <ng-container matColumnDef="category">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header>
-                Category
-              </th>
-              <td mat-cell *matCellDef="let role">
-                <mat-chip-set>
-                  <mat-chip
-                    class="!bg-gray-100 !text-gray-800 dark:!bg-gray-700 dark:!text-gray-200"
-                  >
-                    {{ role.category }}
-                  </mat-chip>
-                </mat-chip-set>
+            <!-- Order Column -->
+            <ng-container matColumnDef="sort_order">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Order</th>
+              <td mat-cell *matCellDef="let item">
+                <span class="text-sm font-medium">{{ item.sort_order }}</span>
               </td>
             </ng-container>
 
             <!-- Permissions Column -->
             <ng-container matColumnDef="permissions">
               <th mat-header-cell *matHeaderCellDef>Permissions</th>
-              <td mat-cell *matCellDef="let role">
+              <td mat-cell *matCellDef="let item">
                 <div class="flex items-center gap-2">
                   <span class="text-sm font-medium">{{
-                    role.permissions?.length || 0
+                    item.permissions?.length || 0
                   }}</span>
                   <button
                     mat-icon-button
-                    (click)="viewPermissions(role); $event.stopPropagation()"
-                    [disabled]="!role.permissions?.length"
+                    (click)="viewPermissions(item); $event.stopPropagation()"
+                    [disabled]="!item.permissions?.length"
                     matTooltip="View permissions"
                   >
                     <mat-icon class="text-base">visibility</mat-icon>
@@ -283,48 +297,37 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
               </td>
             </ng-container>
 
-            <!-- Users Column -->
-            <ng-container matColumnDef="users">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header>Users</th>
-              <td mat-cell *matCellDef="let role">
-                <div class="flex items-center gap-2">
-                  <span class="text-sm font-medium">{{
-                    role.user_count || 0
-                  }}</span>
-                  <button
-                    mat-icon-button
-                    (click)="viewUsers(role); $event.stopPropagation()"
-                    [disabled]="!role.user_count"
-                    matTooltip="View assigned users"
-                  >
-                    <mat-icon class="text-base">people</mat-icon>
-                  </button>
-                </div>
-              </td>
-            </ng-container>
-
             <!-- Status Column -->
             <ng-container matColumnDef="status">
               <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
-              <td mat-cell *matCellDef="let role">
-                <mat-chip-set>
-                  <mat-chip
-                    [class]="
-                      role.is_active
-                        ? '!bg-green-100 !text-green-800 dark:!bg-green-900 dark:!text-green-200'
-                        : '!bg-red-100 !text-red-800 dark:!bg-red-900 dark:!text-red-200'
-                    "
-                  >
-                    {{ role.is_active ? 'Active' : 'Inactive' }}
-                  </mat-chip>
-                </mat-chip-set>
+              <td mat-cell *matCellDef="let item">
+                <div class="flex gap-1">
+                  <mat-chip-set>
+                    <mat-chip
+                      [class]="
+                        !item.disabled
+                          ? '!bg-green-100 !text-green-800 dark:!bg-green-900 dark:!text-green-200'
+                          : '!bg-red-100 !text-red-800 dark:!bg-red-900 dark:!text-red-200'
+                      "
+                    >
+                      {{ !item.disabled ? 'Enabled' : 'Disabled' }}
+                    </mat-chip>
+                  </mat-chip-set>
+                  <mat-chip-set *ngIf="item.hidden">
+                    <mat-chip
+                      class="!bg-gray-100 !text-gray-800 dark:!bg-gray-700 dark:!text-gray-200"
+                    >
+                      Hidden
+                    </mat-chip>
+                  </mat-chip-set>
+                </div>
               </td>
             </ng-container>
 
             <!-- Actions Column -->
             <ng-container matColumnDef="actions">
               <th mat-header-cell *matHeaderCellDef class="w-24">Actions</th>
-              <td mat-cell *matCellDef="let role" class="w-24">
+              <td mat-cell *matCellDef="let item" class="w-24">
                 <button
                   mat-icon-button
                   [matMenuTriggerFor]="actionMenu"
@@ -334,38 +337,33 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
                 </button>
 
                 <mat-menu #actionMenu="matMenu">
+                  <button mat-menu-item (click)="viewNavigationItem(item)">
+                    <mat-icon>visibility</mat-icon>
+                    View Details
+                  </button>
                   <button
-                    *hasPermission="'roles:update'"
+                    *hasPermission="'navigation:update'"
                     mat-menu-item
-                    (click)="editRole(role)"
+                    (click)="editNavigationItem(item)"
                   >
                     <mat-icon>edit</mat-icon>
                     Edit
                   </button>
                   <button
-                    *hasPermission="'roles:create'"
+                    *hasPermission="'navigation:update'"
                     mat-menu-item
-                    (click)="duplicateRole(role)"
-                  >
-                    <mat-icon>content_copy</mat-icon>
-                    Duplicate
-                  </button>
-                  <button
-                    *hasPermission="'roles:update'"
-                    mat-menu-item
-                    (click)="toggleRoleStatus(role)"
+                    (click)="toggleItemStatus(item)"
                   >
                     <mat-icon>{{
-                      role.is_active ? 'block' : 'check_circle'
+                      !item.disabled ? 'block' : 'check_circle'
                     }}</mat-icon>
-                    {{ role.is_active ? 'Deactivate' : 'Activate' }}
+                    {{ !item.disabled ? 'Disable' : 'Enable' }}
                   </button>
                   <mat-divider></mat-divider>
                   <button
-                    *hasPermission="'roles:delete'"
+                    *hasPermission="'navigation:delete'"
                     mat-menu-item
-                    (click)="deleteRole(role)"
-                    [disabled]="!canDeleteRole(role)"
+                    (click)="deleteNavigationItem(item)"
                     class="text-red-600"
                   >
                     <mat-icon class="text-red-600">delete</mat-icon>
@@ -379,7 +377,7 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
             <tr
               mat-row
               *matRowDef="let row; columns: displayedColumns"
-              (click)="viewRoleDetails(row)"
+              (click)="viewNavigationItem(row)"
               class="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
             ></tr>
           </table>
@@ -395,13 +393,13 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
           *ngIf="!isLoading() && dataSource.data.length === 0"
           class="flex flex-col items-center justify-center py-12 text-gray-500"
         >
-          <mat-icon class="text-6xl mb-4 opacity-50">people</mat-icon>
-          <h3 class="text-lg font-medium mb-2">No roles found</h3>
+          <mat-icon class="text-6xl mb-4 opacity-50">menu</mat-icon>
+          <h3 class="text-lg font-medium mb-2">No navigation items found</h3>
           <p class="text-center mb-4">
             {{
               hasActiveFilters()
                 ? 'Try adjusting your filters'
-                : 'Create your first role to get started'
+                : 'Create your first navigation item to get started'
             }}
           </p>
           <button
@@ -410,17 +408,18 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
             (click)="hasActiveFilters() ? clearFilters() : openCreateDialog()"
           >
             <mat-icon>{{ hasActiveFilters() ? 'clear_all' : 'add' }}</mat-icon>
-            {{ hasActiveFilters() ? 'Clear Filters' : 'Create Role' }}
+            {{
+              hasActiveFilters() ? 'Clear Filters' : 'Create Navigation Item'
+            }}
           </button>
         </div>
 
         <!-- Pagination -->
         <mat-paginator
           *ngIf="!isLoading() && dataSource.data.length > 0"
-          [pageSize]="pageSize()"
+          [pageSize]="25"
           [pageSizeOptions]="[10, 25, 50, 100]"
           [showFirstLastButtons]="true"
-          (page)="onPageChange($event)"
         >
         </mat-paginator>
       </mat-card>
@@ -428,7 +427,7 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
   `,
   styles: [
     `
-      .role-management {
+      .navigation-management {
         min-height: 100vh;
       }
 
@@ -461,11 +460,10 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
     `,
   ],
 })
-export class RoleManagementComponent implements OnInit {
-  private readonly rbacService = inject(RbacService);
+export class NavigationManagementComponent implements OnInit {
+  private readonly navigationService = inject(NavigationItemsService);
   private readonly snackBar: MatSnackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
-  private readonly route = inject(ActivatedRoute);
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -473,24 +471,22 @@ export class RoleManagementComponent implements OnInit {
   // Table configuration
   displayedColumns: string[] = [
     'select',
-    'name',
-    'description',
-    'category',
+    'key',
+    'title',
+    'type',
+    'link',
+    'sort_order',
     'permissions',
-    'users',
     'status',
     'actions',
   ];
 
-  dataSource = new MatTableDataSource<Role>([]);
-  selection = new SelectionModel<Role>(true, []);
+  dataSource = new MatTableDataSource<NavigationItem>([]);
+  selection = new SelectionModel<NavigationItem>(true, []);
 
   // Signals
   readonly isLoading = signal(true);
-  readonly roles = signal<Role[]>([]);
-  readonly totalCount = signal(0);
-  readonly pageSize = signal(25);
-  readonly currentPage = signal(0);
+  readonly navigationItems = signal<NavigationItem[]>([]);
 
   // Breadcrumb items
   breadcrumbItems: AegisxNavigationItem[] = [
@@ -515,67 +511,53 @@ export class RoleManagementComponent implements OnInit {
       type: 'basic',
     },
     {
-      id: 'roles',
-      title: 'Role Management',
-      icon: 'people',
+      id: 'navigation',
+      title: 'Navigation Management',
+      icon: 'menu',
       type: 'basic',
     },
   ];
-  readonly availableCategories = signal<string[]>([]);
 
   // Filters
-  filters: RoleFilters = {
+  filters: NavigationFilters = {
     search: '',
-    category: null,
-    isActive: null,
-    isSystemRole: null,
-    parentRoleId: null,
+    type: null,
+    disabled: null,
+    hidden: null,
   };
 
   // Computed
-  readonly filteredRoles = computed(() => {
-    let filtered = this.roles();
+  readonly filteredNavigationItems = computed(() => {
+    let filtered = this.navigationItems();
 
     if (this.filters.search) {
       const search = this.filters.search.toLowerCase();
       filtered = filtered.filter(
-        (role) =>
-          role.name.toLowerCase().includes(search) ||
-          (role.description && role.description.toLowerCase().includes(search)),
+        (item) =>
+          item.key.toLowerCase().includes(search) ||
+          item.title.toLowerCase().includes(search),
       );
     }
 
-    if (this.filters.category) {
+    if (this.filters.type) {
+      filtered = filtered.filter((item) => item.type === this.filters.type);
+    }
+
+    if (this.filters.disabled !== null) {
       filtered = filtered.filter(
-        (role) => role.category === this.filters.category,
+        (item) => item.disabled === this.filters.disabled,
       );
     }
 
-    if (this.filters.isActive !== null) {
-      filtered = filtered.filter(
-        (role) => role.is_active === this.filters.isActive,
-      );
-    }
-
-    if (this.filters.isSystemRole !== null) {
-      filtered = filtered.filter(
-        (role) => role.is_system_role === this.filters.isSystemRole,
-      );
+    if (this.filters.hidden !== null) {
+      filtered = filtered.filter((item) => item.hidden === this.filters.hidden);
     }
 
     return filtered;
   });
 
   ngOnInit(): void {
-    this.loadRoles();
-    this.loadCategories();
-
-    // Check for query parameters
-    this.route.queryParams.subscribe((params) => {
-      if (params['action'] === 'create') {
-        setTimeout(() => this.openCreateDialog(), 100);
-      }
-    });
+    this.loadNavigationItems();
   }
 
   ngAfterViewInit(): void {
@@ -583,65 +565,47 @@ export class RoleManagementComponent implements OnInit {
     this.dataSource.sort = this.sort;
   }
 
-  private async loadRoles(): Promise<void> {
+  private async loadNavigationItems(): Promise<void> {
     try {
       this.isLoading.set(true);
 
-      const response = await this.rbacService
-        .getRoles({
-          page: this.currentPage() + 1,
-          limit: this.pageSize(),
-          include_permissions: true,
-          include_user_count: true,
-        })
-        .toPromise();
+      const items = await this.navigationService.getAll().toPromise();
 
-      if (response) {
-        this.roles.set(response.data);
-        this.totalCount.set(response.pagination.total);
-        this.dataSource.data = response.data;
+      if (items) {
+        this.navigationItems.set(items);
+        this.dataSource.data = items;
       }
     } catch (error) {
-      this.snackBar.open('Failed to load roles', 'Close', { duration: 3000 });
-      console.error('Failed to load roles:', error);
+      this.snackBar.open('Failed to load navigation items', 'Close', {
+        duration: 3000,
+      });
+      console.error('Failed to load navigation items:', error);
     } finally {
       this.isLoading.set(false);
     }
   }
 
-  private async loadCategories(): Promise<void> {
-    try {
-      const categories = await this.rbacService.getRoleCategories().toPromise();
-      if (categories) {
-        this.availableCategories.set(categories);
-      }
-    } catch (error) {
-      console.error('Failed to load categories:', error);
-    }
-  }
-
   // Filter methods
   onFilterChange(): void {
-    this.dataSource.data = this.filteredRoles();
+    this.dataSource.data = this.filteredNavigationItems();
     this.selection.clear();
   }
 
   hasActiveFilters(): boolean {
     return !!(
       this.filters.search ||
-      this.filters.category ||
-      this.filters.isActive !== null ||
-      this.filters.isSystemRole !== null
+      this.filters.type ||
+      this.filters.disabled !== null ||
+      this.filters.hidden !== null
     );
   }
 
   clearFilters(): void {
     this.filters = {
       search: '',
-      category: null,
-      isActive: null,
-      isSystemRole: null,
-      parentRoleId: null,
+      type: null,
+      disabled: null,
+      hidden: null,
     };
     this.onFilterChange();
   }
@@ -661,97 +625,72 @@ export class RoleManagementComponent implements OnInit {
     this.selection.select(...this.dataSource.data);
   }
 
-  onPageChange(event: any): void {
-    this.currentPage.set(event.pageIndex);
-    this.pageSize.set(event.pageSize);
-    this.loadRoles();
-  }
-
-  // Role actions
+  // Navigation actions
   openCreateDialog(): void {
-    const dialogRef = this.dialog.open(RoleDialogComponent, {
-      width: '800px',
+    const dialogRef = this.dialog.open(NavigationItemDialogComponent, {
+      width: '900px',
       data: {
         mode: 'create',
-        availablePermissions: [], // Will be loaded in dialog
-        availableRoles: this.roles().filter((r) => !r.is_system_role),
-      },
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.refreshRoles();
-        this.snackBar.open('Role created successfully', 'Close', {
-          duration: 3000,
-        });
-      }
-    });
-  }
-
-  editRole(role: Role): void {
-    const dialogRef = this.dialog.open(RoleDialogComponent, {
-      width: '800px',
-      data: {
-        mode: 'edit',
-        role: role,
-        availablePermissions: [], // Will be loaded in dialog
-        availableRoles: this.roles().filter(
-          (r) => r.id !== role.id && !r.is_system_role,
+        availableNavigationItems: this.navigationItems().filter(
+          (item) => item.type === 'group' || item.type === 'collapsible',
         ),
       },
     });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.refreshRoles();
-        this.snackBar.open('Role updated successfully', 'Close', {
+        this.refreshNavigationItems();
+        this.snackBar.open('Navigation item created successfully', 'Close', {
           duration: 3000,
         });
       }
     });
   }
 
-  duplicateRole(role: Role): void {
-    const dialogRef = this.dialog.open(RoleDialogComponent, {
-      width: '800px',
+  viewNavigationItem(item: NavigationItem): void {
+    this.dialog.open(NavigationItemDialogComponent, {
+      width: '900px',
       data: {
-        mode: 'create',
-        role: {
-          ...role,
-          id: '',
-          name: `${role.name} (Copy)`,
-          is_system_role: false,
-          user_count: 0,
-          created_at: '',
-          updated_at: '',
-        },
-        availablePermissions: [], // Will be loaded in dialog
-        availableRoles: this.roles().filter((r) => !r.is_system_role),
+        mode: 'view',
+        navigationItem: item,
+        availableNavigationItems: this.navigationItems().filter(
+          (navItem) =>
+            navItem.id !== item.id &&
+            (navItem.type === 'group' || navItem.type === 'collapsible'),
+        ),
+      },
+    });
+  }
+
+  editNavigationItem(item: NavigationItem): void {
+    const dialogRef = this.dialog.open(NavigationItemDialogComponent, {
+      width: '900px',
+      data: {
+        mode: 'edit',
+        navigationItem: item,
+        availableNavigationItems: this.navigationItems().filter(
+          (navItem) =>
+            navItem.id !== item.id &&
+            (navItem.type === 'group' || navItem.type === 'collapsible'),
+        ),
       },
     });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.refreshRoles();
-        this.snackBar.open('Role duplicated successfully', 'Close', {
+        this.refreshNavigationItems();
+        this.snackBar.open('Navigation item updated successfully', 'Close', {
           duration: 3000,
         });
       }
     });
   }
 
-  async deleteRole(role: Role): Promise<void> {
-    if (!this.canDeleteRole(role)) {
-      this.snackBar.open('Cannot delete this role', 'Close', {
-        duration: 3000,
-      });
-      return;
-    }
-
+  async deleteNavigationItem(item: NavigationItem): Promise<void> {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
-        title: 'Delete Role',
-        message: `Are you sure you want to delete the role "${role.name}"? This action cannot be undone.`,
+        title: 'Delete Navigation Item',
+        message: `Are you sure you want to delete "${item.title}"? This action cannot be undone.`,
         confirmText: 'Delete',
         cancelText: 'Cancel',
         type: 'warn',
@@ -761,118 +700,91 @@ export class RoleManagementComponent implements OnInit {
     const confirmed = await dialogRef.afterClosed().toPromise();
     if (confirmed) {
       try {
-        await this.rbacService.deleteRole(role.id).toPromise();
-        this.refreshRoles();
-        this.snackBar.open('Role deleted successfully', 'Close', {
+        await this.navigationService.delete(item.id).toPromise();
+        this.refreshNavigationItems();
+        this.snackBar.open('Navigation item deleted successfully', 'Close', {
           duration: 3000,
         });
       } catch (error) {
-        this.snackBar.open('Failed to delete role', 'Close', {
+        this.snackBar.open('Failed to delete navigation item', 'Close', {
           duration: 3000,
         });
       }
     }
   }
 
-  async toggleRoleStatus(role: Role): Promise<void> {
+  async toggleItemStatus(item: NavigationItem): Promise<void> {
     try {
-      await this.rbacService
-        .updateRole(role.id, {
-          is_active: !role.is_active,
+      await this.navigationService
+        .update(item.id, {
+          disabled: !item.disabled,
         })
         .toPromise();
 
-      this.refreshRoles();
+      this.refreshNavigationItems();
       this.snackBar.open(
-        `Role ${role.is_active ? 'deactivated' : 'activated'} successfully`,
+        `Navigation item ${item.disabled ? 'enabled' : 'disabled'} successfully`,
         'Close',
         { duration: 3000 },
       );
     } catch (error) {
-      this.snackBar.open('Failed to update role status', 'Close', {
+      this.snackBar.open('Failed to update navigation item status', 'Close', {
         duration: 3000,
       });
     }
   }
 
-  viewRoleDetails(role: Role): void {
-    // TODO: Navigate to role details page or open details modal
-    console.log('View role details:', role);
-  }
-
-  viewPermissions(role: Role): void {
+  viewPermissions(item: NavigationItem): void {
     // TODO: Open permissions view modal
-    console.log('View permissions for role:', role);
-  }
-
-  viewUsers(role: Role): void {
-    // TODO: Navigate to user assignments for this role
-    console.log('View users for role:', role);
+    console.log('View permissions for item:', item);
   }
 
   // Bulk actions
-  async bulkActivate(): Promise<void> {
-    const roleIds = this.selection.selected.map((role) => role.id);
-
+  async bulkEnable(): Promise<void> {
     try {
-      await this.rbacService
-        .bulkUpdateRoles({
-          role_ids: roleIds,
-          updates: { is_active: true },
-        })
-        .toPromise();
+      for (const item of this.selection.selected) {
+        await this.navigationService
+          .update(item.id, { disabled: false })
+          .toPromise();
+      }
 
-      this.refreshRoles();
+      this.refreshNavigationItems();
       this.selection.clear();
-      this.snackBar.open('Roles activated successfully', 'Close', {
+      this.snackBar.open('Navigation items enabled successfully', 'Close', {
         duration: 3000,
       });
     } catch (error) {
-      this.snackBar.open('Failed to activate roles', 'Close', {
+      this.snackBar.open('Failed to enable navigation items', 'Close', {
         duration: 3000,
       });
     }
   }
 
-  async bulkDeactivate(): Promise<void> {
-    const roleIds = this.selection.selected.map((role) => role.id);
-
+  async bulkDisable(): Promise<void> {
     try {
-      await this.rbacService
-        .bulkUpdateRoles({
-          role_ids: roleIds,
-          updates: { is_active: false },
-        })
-        .toPromise();
+      for (const item of this.selection.selected) {
+        await this.navigationService
+          .update(item.id, { disabled: true })
+          .toPromise();
+      }
 
-      this.refreshRoles();
+      this.refreshNavigationItems();
       this.selection.clear();
-      this.snackBar.open('Roles deactivated successfully', 'Close', {
+      this.snackBar.open('Navigation items disabled successfully', 'Close', {
         duration: 3000,
       });
     } catch (error) {
-      this.snackBar.open('Failed to deactivate roles', 'Close', {
+      this.snackBar.open('Failed to disable navigation items', 'Close', {
         duration: 3000,
       });
     }
   }
 
   async bulkDelete(): Promise<void> {
-    const deletableRoles = this.selection.selected.filter((role) =>
-      this.canDeleteRole(role),
-    );
-
-    if (deletableRoles.length === 0) {
-      this.snackBar.open('No roles can be deleted', 'Close', {
-        duration: 3000,
-      });
-      return;
-    }
-
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
-        title: 'Delete Roles',
-        message: `Are you sure you want to delete ${deletableRoles.length} role(s)? This action cannot be undone.`,
+        title: 'Delete Navigation Items',
+        message: `Are you sure you want to delete ${this.selection.selected.length} navigation item(s)? This action cannot be undone.`,
         confirmText: 'Delete',
         cancelText: 'Cancel',
         type: 'warn',
@@ -882,20 +794,19 @@ export class RoleManagementComponent implements OnInit {
     const confirmed = await dialogRef.afterClosed().toPromise();
     if (confirmed) {
       try {
-        // Delete roles one by one (API might not support bulk delete)
-        for (const role of deletableRoles) {
-          await this.rbacService.deleteRole(role.id).toPromise();
+        for (const item of this.selection.selected) {
+          await this.navigationService.delete(item.id).toPromise();
         }
 
-        this.refreshRoles();
+        this.refreshNavigationItems();
         this.selection.clear();
         this.snackBar.open(
-          `${deletableRoles.length} role(s) deleted successfully`,
+          `${this.selection.selected.length} navigation item(s) deleted successfully`,
           'Close',
           { duration: 3000 },
         );
       } catch (error) {
-        this.snackBar.open('Failed to delete some roles', 'Close', {
+        this.snackBar.open('Failed to delete some navigation items', 'Close', {
           duration: 3000,
         });
       }
@@ -903,15 +814,22 @@ export class RoleManagementComponent implements OnInit {
   }
 
   // Utility methods
-  refreshRoles(): void {
-    this.loadRoles();
+  refreshNavigationItems(): void {
+    this.loadNavigationItems();
   }
 
-  canDeleteRole(role: Role): boolean {
-    return this.rbacService.isRoleDeletable(role);
-  }
-
-  canBulkDelete(): boolean {
-    return this.selection.selected.some((role) => this.canDeleteRole(role));
+  getTypeChipClass(type: string): string {
+    const classes: Record<string, string> = {
+      item: '!bg-blue-100 !text-blue-800 dark:!bg-blue-900 dark:!text-blue-200',
+      group:
+        '!bg-green-100 !text-green-800 dark:!bg-green-900 dark:!text-green-200',
+      collapsible:
+        '!bg-purple-100 !text-purple-800 dark:!bg-purple-900 dark:!text-purple-200',
+      divider:
+        '!bg-gray-100 !text-gray-800 dark:!bg-gray-700 dark:!text-gray-200',
+      spacer:
+        '!bg-gray-100 !text-gray-800 dark:!bg-gray-700 dark:!text-gray-200',
+    };
+    return classes[type] || classes['item'];
   }
 }

@@ -228,8 +228,28 @@ export class AuthService {
     refreshToken: string;
     user: User;
   }): void {
+    // Extract permissions from JWT token if not in user object
+    let userWithPermissions = authData.user;
+    if (!userWithPermissions.permissions && authData.accessToken) {
+      try {
+        const payload = JSON.parse(atob(authData.accessToken.split('.')[1]));
+        if (payload.permissions) {
+          userWithPermissions = {
+            ...authData.user,
+            permissions: payload.permissions,
+          };
+          console.log(
+            '✅ Extracted permissions from JWT token:',
+            payload.permissions,
+          );
+        }
+      } catch (error) {
+        console.warn('Could not extract permissions from JWT token', error);
+      }
+    }
+
     this._accessToken.set(authData.accessToken);
-    this._currentUser.set(authData.user);
+    this._currentUser.set(userWithPermissions);
     this._isAuthenticated.set(true);
     this.storeToken(authData.accessToken);
   }

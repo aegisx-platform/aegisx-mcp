@@ -41,6 +41,7 @@ import { UserPermissionsDialogComponent } from '../../dialogs/user-permissions-d
 import { UserOverviewDialogComponent } from '../../dialogs/user-overview-dialog/user-overview-dialog.component';
 import { SetExpiryDialogComponent } from '../../dialogs/set-expiry-dialog/set-expiry-dialog.component';
 import { BulkSetExpiryDialogComponent } from '../../dialogs/bulk-set-expiry-dialog/bulk-set-expiry-dialog.component';
+import { HasPermissionDirective } from '../../directives/has-permission.directive';
 
 @Component({
   selector: 'app-user-role-assignment',
@@ -69,6 +70,7 @@ import { BulkSetExpiryDialogComponent } from '../../dialogs/bulk-set-expiry-dial
     MatBadgeModule,
     MatDividerModule,
     BreadcrumbComponent,
+    HasPermissionDirective,
   ],
   template: `
     <div class="user-role-assignment p-6 space-y-6">
@@ -90,6 +92,7 @@ import { BulkSetExpiryDialogComponent } from '../../dialogs/bulk-set-expiry-dial
 
         <div class="flex flex-wrap gap-2">
           <button
+            *hasPermission="'roles:update'"
             mat-raised-button
             color="primary"
             (click)="openAssignDialog()"
@@ -99,6 +102,7 @@ import { BulkSetExpiryDialogComponent } from '../../dialogs/bulk-set-expiry-dial
             Assign Role
           </button>
           <button
+            *hasPermission="'roles:update'"
             mat-raised-button
             color="accent"
             (click)="openBulkAssignDialog()"
@@ -221,6 +225,7 @@ import { BulkSetExpiryDialogComponent } from '../../dialogs/bulk-set-expiry-dial
               {{ selection.selected.length }} assignment(s) selected
             </span>
             <button
+              *hasPermission="'roles:update'"
               mat-stroked-button
               color="primary"
               (click)="bulkSetExpiry()"
@@ -229,6 +234,7 @@ import { BulkSetExpiryDialogComponent } from '../../dialogs/bulk-set-expiry-dial
               Set Expiry
             </button>
             <button
+              *hasPermission="'roles:update'"
               mat-stroked-button
               color="primary"
               (click)="bulkExtendExpiry()"
@@ -236,7 +242,12 @@ import { BulkSetExpiryDialogComponent } from '../../dialogs/bulk-set-expiry-dial
               <mat-icon>schedule</mat-icon>
               Extend Expiry
             </button>
-            <button mat-stroked-button color="warn" (click)="bulkRemoveRoles()">
+            <button
+              *hasPermission="'roles:update'"
+              mat-stroked-button
+              color="warn"
+              (click)="bulkRemoveRoles()"
+            >
               <mat-icon>person_remove</mat-icon>
               Remove Roles
             </button>
@@ -403,12 +414,17 @@ import { BulkSetExpiryDialogComponent } from '../../dialogs/bulk-set-expiry-dial
                     View Permissions
                   </button>
                   <mat-divider></mat-divider>
-                  <button mat-menu-item (click)="setExpiry(assignment)">
+                  <button
+                    *hasPermission="'roles:update'"
+                    mat-menu-item
+                    (click)="setExpiry(assignment)"
+                  >
                     <mat-icon>schedule</mat-icon>
                     Set Expiry
                   </button>
                   <mat-divider></mat-divider>
                   <button
+                    *hasPermission="'roles:update'"
                     mat-menu-item
                     (click)="removeRole(assignment)"
                     class="text-red-600"

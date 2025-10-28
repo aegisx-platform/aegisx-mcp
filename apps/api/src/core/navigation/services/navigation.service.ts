@@ -6,7 +6,7 @@ import {
   NavigationType,
   NavigationItemWithChildren,
   GetNavigationOptions,
-  NavigationCacheKey
+  NavigationCacheKey,
 } from '../navigation.types';
 
 /**
@@ -29,7 +29,9 @@ export class NavigationService {
    * @param options Navigation options
    * @returns Promise<NavigationResponse>
    */
-  async getNavigation(options: GetNavigationOptions = {}): Promise<NavigationResponse> {
+  async getNavigation(
+    options: GetNavigationOptions = {},
+  ): Promise<NavigationResponse> {
     const { type, includeDisabled = false } = options;
 
     // Generate cache key
@@ -46,7 +48,8 @@ export class NavigationService {
     }
 
     // Get navigation items from repository
-    const items = await this.navigationRepository.getNavigationItems(includeDisabled);
+    const items =
+      await this.navigationRepository.getNavigationItems(includeDisabled);
 
     // Transform to API format
     const navigationResponse = this.buildNavigationResponse(items, type);
@@ -66,7 +69,10 @@ export class NavigationService {
    * @param options Navigation options
    * @returns Promise<NavigationResponse>
    */
-  async getUserNavigation(userId: string, options: GetNavigationOptions = {}): Promise<NavigationResponse> {
+  async getUserNavigation(
+    userId: string,
+    options: GetNavigationOptions = {},
+  ): Promise<NavigationResponse> {
     const { type } = options;
 
     // Generate cache key for user-specific navigation
@@ -83,14 +89,22 @@ export class NavigationService {
     }
 
     // Get user navigation items from repository
-    const items = await this.navigationRepository.getUserNavigationItems(userId, type, false);
+    const items = await this.navigationRepository.getUserNavigationItems(
+      userId,
+      type,
+      false,
+    );
 
     // Transform to API format
     const navigationResponse = this.buildNavigationResponse(items, type);
 
     // Cache the result with shorter TTL for user-specific data
     if (this.cacheEnabled) {
-      await this.setCachedData(cacheKey, navigationResponse, Math.floor(this.cacheTTL / 2));
+      await this.setCachedData(
+        cacheKey,
+        navigationResponse,
+        Math.floor(this.cacheTTL / 2),
+      );
       this.app.log.debug(`User navigation cached: ${cacheKey}`);
     }
 
@@ -141,21 +155,33 @@ export class NavigationService {
    */
   private buildNavigationResponse(
     items: NavigationItemWithChildren[],
-    type?: NavigationType
+    type?: NavigationType,
   ): NavigationResponse {
     const response: NavigationResponse = {};
 
     if (type) {
       // Return only requested type
       const filteredItems = this.navigationRepository.filterByType(items, type);
-      response[type] = filteredItems.map(item => this.transformNavigationItem(item));
+      response[type] = filteredItems.map((item) =>
+        this.transformNavigationItem(item),
+      );
     } else {
       // Return all navigation types
-      const types: NavigationType[] = ['default', 'compact', 'horizontal', 'mobile'];
-      
+      const types: NavigationType[] = [
+        'default',
+        'compact',
+        'horizontal',
+        'mobile',
+      ];
+
       for (const navType of types) {
-        const filteredItems = this.navigationRepository.filterByType(items, navType);
-        response[navType] = filteredItems.map(item => this.transformNavigationItem(item));
+        const filteredItems = this.navigationRepository.filterByType(
+          items,
+          navType,
+        );
+        response[navType] = filteredItems.map((item) =>
+          this.transformNavigationItem(item),
+        );
       }
     }
 
@@ -167,27 +193,30 @@ export class NavigationService {
    * @param item Navigation item entity with children
    * @returns NavigationItem
    */
-  private transformNavigationItem(item: NavigationItemWithChildren): NavigationItem {
+  private transformNavigationItem(
+    item: NavigationItemWithChildren,
+  ): NavigationItem {
     const transformed: NavigationItem = {
       id: item.key, // Use key as public ID
       title: item.title,
       type: item.type,
       disabled: item.disabled,
-      hidden: item.hidden
+      hidden: item.hidden,
     };
 
     // Add optional fields
     if (item.icon) transformed.icon = item.icon;
     if (item.link) transformed.link = item.link;
-    if (item.target && item.target !== '_self') transformed.target = item.target;
+    if (item.target && item.target !== '_self')
+      transformed.target = item.target;
 
     // Add badge information
     if (item.badge_title) {
       transformed.badge = {
         title: item.badge_title,
-        variant: item.badge_variant || 'default'
+        variant: item.badge_variant || 'default',
       };
-      
+
       if (item.badge_classes) {
         transformed.badge.classes = item.badge_classes;
       }
@@ -195,7 +224,7 @@ export class NavigationService {
 
     // Add permissions if available
     if (item.permissions && item.permissions.length > 0) {
-      transformed.permissions = item.permissions.filter(p => p !== null);
+      transformed.permissions = item.permissions.filter((p) => p !== null);
     }
 
     // Add meta if available
@@ -205,7 +234,9 @@ export class NavigationService {
 
     // Transform children recursively
     if (item.children && item.children.length > 0) {
-      transformed.children = item.children.map(child => this.transformNavigationItem(child));
+      transformed.children = item.children.map((child) =>
+        this.transformNavigationItem(child),
+      );
     }
 
     return transformed;
@@ -223,7 +254,7 @@ export class NavigationService {
         const cached = await this.app.redis.get(key);
         return cached ? JSON.parse(cached) : null;
       }
-      
+
       // Fallback to simple in-memory cache (not recommended for production)
       return this.getInMemoryCache(key);
     } catch (error) {
@@ -238,7 +269,11 @@ export class NavigationService {
    * @param data Data to cache
    * @param ttl TTL in seconds
    */
-  private async setCachedData(key: string, data: any, ttl: number = this.cacheTTL): Promise<void> {
+  private async setCachedData(
+    key: string,
+    data: any,
+    ttl: number = this.cacheTTL,
+  ): Promise<void> {
     try {
       // If Redis is available, use it. Otherwise, use in-memory cache
       if (this.app.redis) {
@@ -273,29 +308,34 @@ export class NavigationService {
         this.deleteInMemoryCache(pattern);
       }
     } catch (error) {
-      this.app.log.warn(`Failed to delete cached data for pattern ${pattern}: ${error}`);
+      this.app.log.warn(
+        `Failed to delete cached data for pattern ${pattern}: ${error}`,
+      );
     }
   }
 
   // Simple in-memory cache fallback (not recommended for production)
-  private static memoryCache = new Map<string, { data: any; expires: number }>();
+  private static memoryCache = new Map<
+    string,
+    { data: any; expires: number }
+  >();
 
   private getInMemoryCache(key: string): any | null {
     const entry = NavigationService.memoryCache.get(key);
     if (!entry) return null;
-    
+
     if (Date.now() > entry.expires) {
       NavigationService.memoryCache.delete(key);
       return null;
     }
-    
+
     return entry.data;
   }
 
   private setInMemoryCache(key: string, data: any, ttl: number): void {
     NavigationService.memoryCache.set(key, {
       data,
-      expires: Date.now() + (ttl * 1000)
+      expires: Date.now() + ttl * 1000,
     });
   }
 
@@ -310,5 +350,130 @@ export class NavigationService {
     } else {
       NavigationService.memoryCache.delete(pattern);
     }
+  }
+
+  // ============================================================================
+  // Public CRUD Methods - Wrapper methods for repository access
+  // These methods are used by the controller and handle cache invalidation
+  // ============================================================================
+
+  /**
+   * Get all navigation items (flat list)
+   * @param includeDisabled Whether to include disabled items
+   * @returns Promise<NavigationItemWithChildren[]>
+   */
+  async getNavigationItems(
+    includeDisabled = false,
+  ): Promise<NavigationItemWithChildren[]> {
+    return await this.navigationRepository.getNavigationItems(includeDisabled);
+  }
+
+  /**
+   * Get navigation item by ID
+   * @param id Navigation item ID
+   * @returns Promise<NavigationItemEntity | null>
+   */
+  async getNavigationItemById(id: string) {
+    return await this.navigationRepository.getNavigationItemById(id);
+  }
+
+  /**
+   * Get permissions for a navigation item
+   * @param navigationItemId Navigation item ID
+   * @returns Promise<Permission[]>
+   */
+  async getNavigationItemPermissions(navigationItemId: string) {
+    return await this.navigationRepository.getNavigationItemPermissions(
+      navigationItemId,
+    );
+  }
+
+  /**
+   * Check if key is unique
+   * @param key Navigation item key
+   * @param excludeId ID to exclude from check (for updates)
+   * @returns Promise<boolean>
+   */
+  async isKeyUnique(key: string, excludeId?: string): Promise<boolean> {
+    return await this.navigationRepository.isKeyUnique(key, excludeId);
+  }
+
+  /**
+   * Create navigation item
+   * @param item Navigation item data
+   * @returns Promise<NavigationItemEntity>
+   */
+  async createNavigationItem(item: any) {
+    const created = await this.navigationRepository.createNavigationItem(item);
+
+    // Invalidate all navigation cache
+    await this.invalidateCache();
+
+    return created;
+  }
+
+  /**
+   * Update navigation item
+   * @param id Navigation item ID
+   * @param updates Updates to apply
+   * @returns Promise<NavigationItemEntity>
+   */
+  async updateNavigationItem(id: string, updates: any) {
+    const updated = await this.navigationRepository.updateNavigationItem(
+      id,
+      updates,
+    );
+
+    // Invalidate all navigation cache
+    await this.invalidateCache();
+
+    return updated;
+  }
+
+  /**
+   * Delete navigation item
+   * @param id Navigation item ID
+   * @returns Promise<boolean>
+   */
+  async deleteNavigationItem(id: string): Promise<boolean> {
+    const deleted = await this.navigationRepository.deleteNavigationItem(id);
+
+    // Invalidate all navigation cache
+    await this.invalidateCache();
+
+    return deleted;
+  }
+
+  /**
+   * Assign permissions to navigation item
+   * @param navigationItemId Navigation item ID
+   * @param permissionIds Permission IDs to assign
+   * @returns Promise<void>
+   */
+  async assignPermissionsToNavigationItem(
+    navigationItemId: string,
+    permissionIds: string[],
+  ): Promise<void> {
+    await this.navigationRepository.assignPermissionsToNavigationItem(
+      navigationItemId,
+      permissionIds,
+    );
+
+    // Invalidate all navigation cache (permissions affect visibility)
+    await this.invalidateCache();
+  }
+
+  /**
+   * Update navigation item sort orders (for reordering)
+   * @param updates Array of {id, sort_order} pairs
+   * @returns Promise<void>
+   */
+  async updateNavigationItemOrders(
+    updates: Array<{ id: string; sort_order: number }>,
+  ): Promise<void> {
+    await this.navigationRepository.updateNavigationItemOrders(updates);
+
+    // Invalidate all navigation cache
+    await this.invalidateCache();
   }
 }

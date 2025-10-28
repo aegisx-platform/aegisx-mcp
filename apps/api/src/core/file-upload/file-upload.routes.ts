@@ -236,7 +236,10 @@ export async function fileUploadRoutes(
       },
       security: [{ bearerAuth: [] }],
     },
-    preHandler: [fastify.authenticate, fastify.authorize(['admin'])], // Admin access required for storage configuration
+    preHandler: [
+      fastify.authenticate,
+      fastify.verifyPermission('files', 'read-config'),
+    ], // Admin access required for storage configuration
     handler: controller.getStorageConfiguration.bind(controller),
   });
 
@@ -428,7 +431,10 @@ export async function fileUploadRoutes(
       },
       security: [{ bearerAuth: [] }],
     },
-    preHandler: [fastify.authenticate, fastify.authorize(['admin'])], // Admin-only cleanup operation
+    preHandler: [
+      fastify.authenticate,
+      fastify.verifyPermission('files', 'cleanup'),
+    ], // Admin-only cleanup operation
     handler: controller.cleanupSoftDeletedFiles.bind(controller),
   });
 

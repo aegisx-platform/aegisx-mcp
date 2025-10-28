@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, catchError, map, of } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { AuthService } from '../../auth/services/auth.service';
 
 interface ApiNavigationItem {
   id: string;
@@ -46,7 +47,8 @@ interface NavigationResponse {
 })
 export class NavigationService {
   private http = inject(HttpClient);
-  private readonly apiUrl = '/api/navigation';
+  private authService = inject(AuthService);
+  private readonly apiUrl = '/navigation';
 
   // Default navigation items (fallback)
   private readonly defaultNavigation: AxNavigationItem[] = [
@@ -82,6 +84,7 @@ export class NavigationService {
           type: 'item',
           icon: 'heroicons_outline:users',
           link: '/users',
+          permission: 'users:read',
         },
         {
           id: 'books',
@@ -118,6 +121,7 @@ export class NavigationService {
             content: 'Admin',
             type: 'accent',
           },
+          permission: 'dashboard:view',
         },
       ],
     },
@@ -249,53 +253,48 @@ export class NavigationService {
     this._loading.set(true);
     this._error.set(null);
     this._navigationItems.set(this.defaultNavigation); // Reset to default while loading
-    return of(this.defaultNavigation).pipe(
-      map((items) => {
-        this._loading.set(false);
+
+    return this.http.get<NavigationResponse>(this.apiUrl).pipe(
+      map((response) => {
+        if (response.success && response.data && response.data[type]) {
+          const convertedItems = this.convertApiItemsToNavigationItems(
+            response.data[type],
+          );
+          // Filter navigation by user permissions
+          const filteredItems =
+            this.filterNavigationByPermissions(convertedItems);
+          this._navigationItems.set(filteredItems);
+          this._dataSource.set('api');
+          this._loadedOnce.set(true);
+          this._loading.set(false);
+          console.log('✅ Navigation loaded from API', {
+            count: filteredItems.length,
+            type: type,
+            source: 'api',
+          });
+          return filteredItems;
+        } else {
+          throw new Error(
+            `Invalid API response structure or missing ${type} navigation`,
+          );
+        }
+      }),
+      catchError((error) => {
+        console.warn(
+          '⚠️ Failed to load navigation from API, using fallback',
+          error,
+        );
+        // Filter navigation by user permissions for fallback too
+        const filteredItems = this.filterNavigationByPermissions(
+          this.defaultNavigation,
+        );
+        this._navigationItems.set(filteredItems);
         this._dataSource.set('fallback');
-        this._loadedOnce.set(true);
-        console.log('✅ Navigation loaded from fallback', {
-          count: items.length,
-          type: type,
-          source: 'fallback',
-        });
-        return items;
+        this._error.set(error.message || 'Failed to load navigation from API');
+        this._loading.set(false);
+        return of(filteredItems);
       }),
     );
-    // return this.http.get<NavigationResponse>(this.apiUrl).pipe(
-    //   map((response) => {
-    //     if (response.success && response.data && response.data[type]) {
-    //       const convertedItems = this.convertApiItemsToNavigationItems(
-    //         response.data[type],
-    //       );
-    //       this._navigationItems.set(convertedItems);
-    //       this._dataSource.set('api');
-    //       this._loadedOnce.set(true);
-    //       this._loading.set(false);
-    //       console.log('✅ Navigation loaded from API', {
-    //         count: convertedItems.length,
-    //         type: type,
-    //         source: 'api',
-    //       });
-    //       return convertedItems;
-    //     } else {
-    //       throw new Error(
-    //         `Invalid API response structure or missing ${type} navigation`,
-    //       );
-    //     }
-    //   }),
-    //   catchError((error) => {
-    //     console.warn(
-    //       '⚠️ Failed to load navigation from API, using fallback',
-    //       error,
-    //     );
-    //     this._navigationItems.set(this.defaultNavigation);
-    //     this._dataSource.set('fallback');
-    //     this._error.set(error.message || 'Failed to load navigation from API');
-    //     this._loading.set(false);
-    //     return of(this.defaultNavigation);
-    //   }),
-    // );
   }
 
   /**
@@ -365,7 +364,10 @@ export class NavigationService {
    */
   useFallback(): void {
     console.log('🔄 Switching to fallback navigation');
-    this._navigationItems.set(this.defaultNavigation);
+    const filteredItems = this.filterNavigationByPermissions(
+      this.defaultNavigation,
+    );
+    this._navigationItems.set(filteredItems);
     this._dataSource.set('fallback');
     this._error.set(null);
     this._loading.set(false);
@@ -422,6 +424,40 @@ export class NavigationService {
     }
 
     return navItem;
+  }
+
+  /**
+   * Filter navigation items based on user permissions
+   * Items without permission field are always visible
+   * Items with permission field are only visible if user has that permission
+   */
+  filterNavigationByPermissions(items: AxNavigationItem[]): AxNavigationItem[] {
+    return items
+      .filter((item) => {
+        // Always show items without permission requirement
+        if (!item.permission) {
+          return true;
+        }
+        // Check if user has the required permission
+        return this.authService.hasPermission()(item.permission);
+      })
+      .map((item) => {
+        // Recursively filter children if they exist
+        if (item.children && item.children.length > 0) {
+          const filteredChildren = this.filterNavigationByPermissions(
+            item.children,
+          );
+          // Only include parent if it has visible children or if it's not a group/collapsible type
+          if (item.type === 'group' || item.type === 'collapsible') {
+            return filteredChildren.length > 0
+              ? { ...item, children: filteredChildren }
+              : null;
+          }
+          return { ...item, children: filteredChildren };
+        }
+        return item;
+      })
+      .filter((item): item is AxNavigationItem => item !== null);
   }
 
   /**

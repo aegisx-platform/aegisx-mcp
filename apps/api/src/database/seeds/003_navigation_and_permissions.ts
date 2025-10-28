@@ -60,6 +60,138 @@ export async function seed(knex: Knex): Promise<void> {
       action: 'preferences',
       description: 'Update user preferences',
     },
+
+    // RBAC Module - Complete Permission Set
+    // Dashboard & Navigation
+    {
+      resource: 'rbac',
+      action: 'stats:read',
+      description: 'View RBAC statistics and overview',
+    },
+    {
+      resource: 'rbac',
+      action: 'roles:list',
+      description: 'List and view all roles',
+    },
+    {
+      resource: 'rbac',
+      action: 'permissions:list',
+      description: 'List and view all permissions',
+    },
+    {
+      resource: 'rbac',
+      action: 'user-roles:list',
+      description: 'List and view user role assignments',
+    },
+
+    // RBAC - Roles Management
+    { resource: 'rbac', action: 'roles:read', description: 'View roles' },
+    { resource: 'rbac', action: 'roles:create', description: 'Create roles' },
+    { resource: 'rbac', action: 'roles:update', description: 'Update roles' },
+    { resource: 'rbac', action: 'roles:delete', description: 'Delete roles' },
+
+    // RBAC - Permissions Management
+    {
+      resource: 'rbac',
+      action: 'permissions:read',
+      description: 'View permissions',
+    },
+    {
+      resource: 'rbac',
+      action: 'permissions:assign',
+      description: 'Assign permissions to roles',
+    },
+
+    // Roles Management (CRUD operations)
+    { resource: 'roles', action: 'read', description: 'View role details' },
+    { resource: 'roles', action: 'create', description: 'Create new roles' },
+    {
+      resource: 'roles',
+      action: 'update',
+      description: 'Update existing roles',
+    },
+    { resource: 'roles', action: 'delete', description: 'Delete roles' },
+
+    // Permissions Management (CRUD + assign)
+    {
+      resource: 'permissions',
+      action: 'read',
+      description: 'View permission details',
+    },
+    {
+      resource: 'permissions',
+      action: 'create',
+      description: 'Create new permissions',
+    },
+    {
+      resource: 'permissions',
+      action: 'update',
+      description: 'Update existing permissions',
+    },
+    {
+      resource: 'permissions',
+      action: 'delete',
+      description: 'Delete permissions',
+    },
+    {
+      resource: 'permissions',
+      action: 'assign',
+      description: 'Assign permissions to roles',
+    },
+
+    // User Role Assignment
+    {
+      resource: 'user-roles',
+      action: 'read',
+      description: 'View user role assignments',
+    },
+    {
+      resource: 'user-roles',
+      action: 'assign',
+      description: 'Assign roles to users',
+    },
+    {
+      resource: 'user-roles',
+      action: 'revoke',
+      description: 'Revoke roles from users',
+    },
+    {
+      resource: 'user-roles',
+      action: 'bulk-assign',
+      description: 'Bulk assign roles to multiple users',
+    },
+    {
+      resource: 'user-roles',
+      action: 'set-expiry',
+      description: 'Set expiration for role assignments',
+    },
+
+    // Navigation Management - CRUD Operations
+    {
+      resource: 'navigation',
+      action: 'read',
+      description: 'View navigation items',
+    },
+    {
+      resource: 'navigation',
+      action: 'create',
+      description: 'Create new navigation items',
+    },
+    {
+      resource: 'navigation',
+      action: 'update',
+      description: 'Update existing navigation items',
+    },
+    {
+      resource: 'navigation',
+      action: 'delete',
+      description: 'Delete navigation items',
+    },
+    {
+      resource: 'navigation',
+      action: 'assign-permissions',
+      description: 'Assign permissions to navigation items',
+    },
   ];
 
   // Insert permissions that don't already exist
@@ -101,6 +233,28 @@ export async function seed(knex: Knex): Promise<void> {
       });
     }
   }
+
+  // Assign all RBAC permissions to admin role
+  const adminRbacPermissions = allPermissions.filter((perm) =>
+    ['rbac', 'roles', 'permissions', 'user-roles'].includes(perm.resource),
+  );
+
+  for (const perm of adminRbacPermissions) {
+    const existing = await knex('role_permissions')
+      .where({ role_id: adminRole.id, permission_id: perm.id })
+      .first();
+
+    if (!existing) {
+      await knex('role_permissions').insert({
+        role_id: adminRole.id,
+        permission_id: perm.id,
+      });
+    }
+  }
+
+  console.log(
+    `✅ Assigned ${adminRbacPermissions.length} RBAC permissions to admin role`,
+  );
 
   // Assign limited permissions to user role
   const userPermissionList = [
@@ -153,6 +307,9 @@ export async function seed(knex: Knex): Promise<void> {
     // User Management - only items that exist
     { nav_key: 'user-management', permission: 'users.read' },
     { nav_key: 'users-list', permission: 'users.read' },
+
+    // RBAC Management
+    { nav_key: 'rbac-management', permission: 'dashboard.view' },
 
     // Settings - single page, no sub-items
     { nav_key: 'settings', permission: 'settings.view' },

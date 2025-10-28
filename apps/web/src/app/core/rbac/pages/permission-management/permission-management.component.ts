@@ -39,6 +39,7 @@ import {
 } from '../../models/rbac.interfaces';
 import { RbacService } from '../../services/rbac.service';
 import { PermissionDialogComponent } from '../../dialogs/permission-dialog/permission-dialog.component';
+import { HasPermissionDirective } from '../../directives/has-permission.directive';
 
 @Component({
   selector: 'app-permission-management',
@@ -66,6 +67,7 @@ import { PermissionDialogComponent } from '../../dialogs/permission-dialog/permi
     MatBadgeModule,
     MatDividerModule,
     BreadcrumbComponent,
+    HasPermissionDirective,
   ],
   template: `
     <div class="permission-management p-6 space-y-6">
@@ -87,6 +89,7 @@ import { PermissionDialogComponent } from '../../dialogs/permission-dialog/permi
 
         <div class="flex flex-wrap gap-2">
           <button
+            *hasPermission="'permissions:assign'"
             mat-raised-button
             color="primary"
             (click)="openCreateDialog()"
@@ -200,15 +203,26 @@ import { PermissionDialogComponent } from '../../dialogs/permission-dialog/permi
             <span class="text-sm text-gray-600">
               {{ selection.selected.length }} permission(s) selected
             </span>
-            <button mat-stroked-button color="primary" (click)="bulkActivate()">
+            <button
+              *hasPermission="'permissions:assign'"
+              mat-stroked-button
+              color="primary"
+              (click)="bulkActivate()"
+            >
               <mat-icon>check_circle</mat-icon>
               Activate
             </button>
-            <button mat-stroked-button color="warn" (click)="bulkDeactivate()">
+            <button
+              *hasPermission="'permissions:assign'"
+              mat-stroked-button
+              color="warn"
+              (click)="bulkDeactivate()"
+            >
               <mat-icon>block</mat-icon>
               Deactivate
             </button>
             <button
+              *hasPermission="'permissions:assign'"
               mat-stroked-button
               color="warn"
               (click)="bulkDelete()"
@@ -364,11 +378,16 @@ import { PermissionDialogComponent } from '../../dialogs/permission-dialog/permi
                   </button>
 
                   <mat-menu #actionMenu="matMenu">
-                    <button mat-menu-item (click)="editPermission(permission)">
+                    <button
+                      *hasPermission="'permissions:assign'"
+                      mat-menu-item
+                      (click)="editPermission(permission)"
+                    >
                       <mat-icon>edit</mat-icon>
                       Edit
                     </button>
                     <button
+                      *hasPermission="'permissions:assign'"
                       mat-menu-item
                       (click)="duplicatePermission(permission)"
                     >
@@ -376,6 +395,7 @@ import { PermissionDialogComponent } from '../../dialogs/permission-dialog/permi
                       Duplicate
                     </button>
                     <button
+                      *hasPermission="'permissions:assign'"
                       mat-menu-item
                       (click)="togglePermissionStatus(permission)"
                     >
@@ -386,6 +406,7 @@ import { PermissionDialogComponent } from '../../dialogs/permission-dialog/permi
                     </button>
                     <mat-divider></mat-divider>
                     <button
+                      *hasPermission="'permissions:assign'"
                       mat-menu-item
                       (click)="deletePermission(permission)"
                       [disabled]="!canDeletePermission(permission)"

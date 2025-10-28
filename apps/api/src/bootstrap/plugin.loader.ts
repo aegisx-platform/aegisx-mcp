@@ -43,7 +43,6 @@ import apiKeysPlugin from '../core/api-keys';
 import fileUploadPlugin from '../core/file-upload/file-upload.plugin';
 import navigationPlugin from '../core/navigation/navigation.plugin';
 import settingsPlugin from '../core/settings/settings.plugin';
-import systemSettingsPlugin from '../core/system-settings';
 import userProfilePlugin from '../core/user-profile/user-profile.plugin';
 
 // Business feature modules (ready for HIS, Inventory, etc.)
@@ -346,11 +345,6 @@ export function createFeaturePluginGroup(apiPrefix: string): PluginGroup {
       {
         name: 'settings',
         plugin: settingsPlugin,
-        required: true,
-      },
-      {
-        name: 'system-settings',
-        plugin: systemSettingsPlugin,
         required: true,
       },
       {

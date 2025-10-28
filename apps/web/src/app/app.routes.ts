@@ -1,6 +1,7 @@
 import { Route } from '@angular/router';
 import { AuthGuard, GuestGuard } from './core/auth';
 import { showcaseGuard } from './pages/component-showcase/guards/showcase.guard';
+import { PermissionGuard } from './core/rbac/guards/permission.guard';
 
 export const appRoutes: Route[] = [
   {
@@ -57,20 +58,18 @@ export const appRoutes: Route[] = [
   {
     path: 'settings',
     loadChildren: () =>
-      import('./core/settings/settings.routes').then(
-        (m) => m.settingsRoutes,
-      ),
+      import('./core/settings/settings.routes').then((m) => m.settingsRoutes),
     canActivate: [AuthGuard],
   },
   {
     path: 'rbac',
     loadChildren: () =>
       import('./core/rbac/rbac.routes').then((m) => m.rbacRoutes),
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, PermissionGuard],
     data: {
       title: 'RBAC Management',
       description: 'Role-Based Access Control Management System',
-      requiredPermissions: ['rbac.read', 'admin.*'],
+      permissions: ['rbac:stats:read'],
     },
   },
   {

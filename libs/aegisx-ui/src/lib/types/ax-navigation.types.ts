@@ -24,6 +24,7 @@ export interface AxNavigationItem {
   exactMatch?: boolean;
   externalLink?: boolean;
   target?: '_blank' | '_self' | '_parent' | '_top';
+  permission?: string; // RBAC permission required to view this item
 }
 
 /**
