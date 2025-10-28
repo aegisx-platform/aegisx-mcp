@@ -1,7 +1,7 @@
 # AegisX Project Status
 
-**Last Updated:** 2025-10-28 (Session 44 - Repository Cleanup Complete)
-**Current Task:** ✅ Repository Cleanup Complete - 143 files deleted
+**Last Updated:** 2025-10-28 (Session 45 - File Upload System Refactor Planning)
+**Current Task:** 📋 File Upload Refactor - Planning Complete, Implementation Pending
 **Git Repository:** git@github.com:aegisx-platform/aegisx-starter.git
 **CRUD Generator Version:** v2.1.0 (Published to npm)
 
@@ -183,7 +183,7 @@ The AegisX Starter monorepo is a mature, well-documented, enterprise-ready platf
 - Team scaling
 - Enterprise use cases
 
-**Last Updated:** 2025-10-28 (Session 44 - Repository Cleanup Complete)
+**Last Updated:** 2025-10-28 (Session 45 - File Upload System Refactor Planning)
 
 ---
 
@@ -191,9 +191,9 @@ The AegisX Starter monorepo is a mature, well-documented, enterprise-ready platf
 
 ### Session Overview
 
-- **Date**: 2025-10-28 (Project Review)
-- **Main Focus**: ✅ Pull latest changes, understand project, update status documentation
-- **Status**: Repository up to date, all tags fetched, project structure reviewed
+- **Date**: 2025-10-28 (Session 45 - File Upload System Refactor Planning)
+- **Main Focus**: 📋 File Upload System Analysis & Refactor Planning
+- **Status**: Planning complete, implementation ready to start when user approves
 
 ### 🤖 CRUD Generator Capabilities (v2.1.0)
 
@@ -268,6 +268,99 @@ pnpm aegisx-crud inventory --package --with-import --with-events
 ---
 
 ## 📊 Recent Development Sessions
+
+### 🎯 Session 45 (2025-10-28) - File Upload System Refactor Planning
+
+#### **📋 COMPLETED: Comprehensive Analysis & Planning**
+
+**Goal**: Review and design refactoring strategy for file upload system to make it a true core upload system.
+
+**User Request**: "คุณช่วย review ระบบอัพโหลดใหม่ครับให้เป็น core upload ที่แท้จริงนำไปใช้กับ feature อืนๆได้ทุกที่ไม่ว่าจะเป็น siglefile,multiple file, และออกแบบให้รองรับ s3,minio ด้วย พร้อม widget ฝั่ง frontend ให้พร้อมใช้งาน"
+
+**Documentation Created** (4 comprehensive documents, 4,300+ lines total):
+
+1. **FILE_UPLOAD_SYSTEM_REVIEW.md** (900+ lines)
+   - Complete analysis of current file upload system
+   - Critical issues identified: 6-level deep directory structure
+   - Proposed solution: 3-level flat structure compatible with S3/MinIO
+   - Implementation plan overview
+
+2. **MULTIPLE_UPLOAD_ANALYSIS.md** (1,000+ lines)
+   - Deep comparison: dedicated multiple endpoint vs single API loop
+   - Real-world pattern analysis (AWS S3, MinIO, Google Cloud Storage)
+   - **Key Decision**: Use single file API pattern (no dedicated multiple endpoint)
+   - Performance comparison and benefits analysis
+
+3. **IMPLEMENTATION_CHECKLIST.md** (1,100+ lines)
+   - Complete step-by-step implementation guide
+   - Phase 1: Backend Core (Week 1) - Storage adapters, API cleanup
+   - Phase 2: Frontend Widget (Week 2) - Unified upload component
+   - Phase 3: Migration & Testing (Week 3) - Data migration scripts
+
+4. **REFACTOR_PLAN.md** (1,300+ lines)
+   - Day-by-day execution plan with code examples
+   - Complete implementation for each task
+   - Testing procedures and verification steps
+   - Migration scripts
+
+**Key Technical Decisions**:
+
+1. **Directory Structure Change**:
+
+   ```
+   OLD: uploads/{file-id}/file/{year}/{month}/{day}/{filename}  (6 levels!)
+   NEW: uploads/{category}/{year-month}/{identifier}_{timestamp}_{hash}.{ext}  (3 levels)
+   ```
+
+2. **Single API Pattern** (User's insight validated):
+   - Remove dedicated `POST /upload/multiple` endpoint
+   - Frontend loops `POST /upload` with 3-5 concurrent uploads
+   - Same pattern as AWS S3, MinIO, Google Cloud Storage
+   - Benefits: Better progress tracking, per-file retry/cancel, memory efficient
+
+3. **Storage Provider Support**:
+   - LocalStorageAdapter - Refactor to flat structure
+   - S3StorageAdapter - New implementation
+   - MinIOStorageAdapter - New implementation
+   - StorageAdapterFactory - Automatic provider selection
+
+4. **Unified Upload Widget**:
+   - Single component for all upload scenarios
+   - Configurable modes: single/multiple
+   - Category selection (images, documents, avatars, etc.)
+   - Parallel upload service with concurrency control
+
+**Implementation Ready**:
+
+- ✅ Complete documentation (4,300+ lines)
+- ✅ Technical specifications defined
+- ✅ Code examples provided
+- ✅ Migration strategy documented
+- ⏸️ Implementation pending user approval
+
+**Next Steps** (When User Approves):
+
+- Phase 1.1: Refactor LocalStorageAdapter
+- Phase 1.2: Implement S3StorageAdapter
+- Phase 1.3: Implement MinIOStorageAdapter
+- Continue with remaining phases as planned
+
+**Files Created**:
+
+- `docs/features/file-upload/FILE_UPLOAD_SYSTEM_REVIEW.md`
+- `docs/features/file-upload/MULTIPLE_UPLOAD_ANALYSIS.md`
+- `docs/features/file-upload/IMPLEMENTATION_CHECKLIST.md`
+- `docs/features/file-upload/REFACTOR_PLAN.md`
+
+**Impact**:
+
+- 📋 Clear roadmap for file upload refactor (3 weeks estimated)
+- ✅ Single API pattern validated (industry standard)
+- ✅ S3/MinIO compatibility designed
+- ✅ Unified frontend widget specified
+- ✅ Migration strategy documented
+
+---
 
 ### 🎯 Session 44 (2025-10-28) - CRUD Generator v2.1.0 Release & Repository Cleanup
 
