@@ -44,7 +44,6 @@ import fileUploadPlugin from '../core/file-upload/file-upload.plugin';
 import navigationPlugin from '../core/navigation/navigation.plugin';
 import settingsPlugin from '../core/settings/settings.plugin';
 import systemSettingsPlugin from '../core/system-settings';
-import themesPlugin from '../core/themes';
 import userProfilePlugin from '../core/user-profile/user-profile.plugin';
 
 // Business feature modules (example features)
@@ -369,11 +368,6 @@ export function createFeaturePluginGroup(apiPrefix: string): PluginGroup {
       {
         name: 'system-settings',
         plugin: systemSettingsPlugin,
-        required: true,
-      },
-      {
-        name: 'themes',
-        plugin: themesPlugin,
         required: true,
       },
       {
