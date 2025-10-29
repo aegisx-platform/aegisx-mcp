@@ -345,6 +345,46 @@ export class NavigationItemsController {
       );
     }
   }
+
+  /**
+   * POST /api/navigation-items/:id/duplicate
+   * Get navigation item data for duplication (frontend will handle creation via dialog)
+   */
+  async duplicateNavigationItem(
+    request: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply,
+  ) {
+    try {
+      const { id } = request.params;
+
+      // Get source item
+      const sourceItem = await this.navigationService.getNavigationItemById(id);
+      if (!sourceItem) {
+        return reply.notFound('Navigation item not found');
+      }
+
+      // Get source permissions
+      const permissions =
+        await this.navigationService.getNavigationItemPermissions(id);
+
+      // Return source data to frontend for dialog
+      // Frontend will handle key modification and actual creation
+      return reply.success(
+        {
+          ...sourceItem,
+          permissions: permissions.map((p) => p.id),
+        },
+        'Navigation item data retrieved for duplication',
+      );
+    } catch (error) {
+      request.log.error(`Failed to duplicate navigation item: ${error}`);
+      return reply.error(
+        'INTERNAL_SERVER_ERROR',
+        'Failed to duplicate navigation item',
+        500,
+      );
+    }
+  }
 }
 
 /**
@@ -365,5 +405,7 @@ export function createNavigationItemsController(
     getNavigationItemPermissions:
       controller.getNavigationItemPermissions.bind(controller),
     assignPermissions: controller.assignPermissions.bind(controller),
+    duplicateNavigationItem:
+      controller.duplicateNavigationItem.bind(controller),
   };
 }

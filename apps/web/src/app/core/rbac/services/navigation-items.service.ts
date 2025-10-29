@@ -26,7 +26,9 @@ export interface NavigationItem {
   meta?: Record<string, any>;
   created_at: Date;
   updated_at: Date;
-  permissions?: Permission[];
+  // Backend returns permissions as string[] like ['users.create', 'users.read']
+  // This matches ARRAY_AGG(CONCAT(resource, '.', action)) in repository
+  permissions?: string[];
 }
 
 export interface Permission {
@@ -59,7 +61,7 @@ export interface CreateNavigationItemRequest {
   permission_ids?: string[];
 }
 
-export type UpdateNavigationItemRequest = Partial<CreateNavigationItemRequest>
+export type UpdateNavigationItemRequest = Partial<CreateNavigationItemRequest>;
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -151,6 +153,16 @@ export class NavigationItemsService {
       .post<
         ApiResponse<Permission[]>
       >(`${this.baseUrl}/${id}/permissions`, { permission_ids: permissionIds })
+      .pipe(map((response) => response.data));
+  }
+
+  /**
+   * Get navigation item data for duplication
+   * Returns source item data including permissions to pre-fill the create dialog
+   */
+  duplicate(id: string): Observable<NavigationItem> {
+    return this.http
+      .post<ApiResponse<NavigationItem>>(`${this.baseUrl}/${id}/duplicate`, {})
       .pipe(map((response) => response.data));
   }
 }

@@ -365,7 +365,10 @@ export class NavigationService {
   async getNavigationItems(
     includeDisabled = false,
   ): Promise<NavigationItemWithChildren[]> {
-    return await this.navigationRepository.getNavigationItems(includeDisabled);
+    return await this.navigationRepository.getNavigationItems(
+      includeDisabled,
+      true, // flatten=true for management UI
+    );
   }
 
   /**

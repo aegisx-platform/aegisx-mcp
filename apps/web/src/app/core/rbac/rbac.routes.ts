@@ -18,7 +18,7 @@ export const rbacRoutes: Routes = [
     data: {
       title: 'RBAC Dashboard',
       description: 'Overview of roles, permissions, and user assignments',
-      permissions: ['rbac:stats:read', '*:*'],
+      permissions: ['dashboard:view', '*:*'],
     },
   },
   {
@@ -31,7 +31,7 @@ export const rbacRoutes: Routes = [
     data: {
       title: 'Role Management',
       description: 'Manage system roles and their permissions',
-      permissions: ['rbac:roles:list', '*:*'],
+      permissions: ['roles:read', '*:*'],
     },
   },
   {
@@ -44,7 +44,7 @@ export const rbacRoutes: Routes = [
     data: {
       title: 'Permission Management',
       description: 'Manage system permissions and access controls',
-      permissions: ['rbac:permissions:list', '*:*'],
+      permissions: ['permissions:read', '*:*'],
     },
   },
   {
@@ -57,7 +57,7 @@ export const rbacRoutes: Routes = [
     data: {
       title: 'User Role Assignments',
       description: 'Manage role assignments and user access permissions',
-      permissions: ['rbac:user-roles:list', '*:*'],
+      permissions: ['user-roles:read', '*:*'],
     },
   },
   {

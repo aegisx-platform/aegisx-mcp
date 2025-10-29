@@ -258,5 +258,26 @@ export default async function navigationItemsRoutes(
     handler: controller.assignPermissions,
   });
 
+  /**
+   * POST /navigation-items/:id/duplicate
+   * Get navigation item data for duplication
+   */
+  typedFastify.post('/navigation-items/:id/duplicate', {
+    schema: {
+      description:
+        'Get navigation item data for duplication (returns source data for dialog)',
+      tags: ['Navigation Management'],
+      security: [{ bearerAuth: [] }],
+      params: Type.Object({
+        id: Type.String({ format: 'uuid' }),
+      }),
+    },
+    preHandler: [
+      fastify.authenticate,
+      fastify.verifyPermission('navigation', 'create'),
+    ],
+    handler: controller.duplicateNavigationItem,
+  });
+
   fastify.log.info('Navigation items CRUD routes registered successfully');
 }

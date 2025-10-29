@@ -42,17 +42,17 @@ async function authStrategiesPlugin(fastify: FastifyInstance) {
 
   // Strategy 2: Role-based Authorization
   fastify.decorate('verifyRole', function (allowedRoles: string[]) {
-    return async function (request: FastifyRequest, _reply: FastifyReply) {
+    return async function (request: FastifyRequest, reply: FastifyReply) {
       const user = request.user;
       if (!user || !user.role || !allowedRoles.includes(user.role)) {
-        throw new Error('INSUFFICIENT_PERMISSIONS');
+        return reply.forbidden('Insufficient permissions');
       }
     };
   });
 
   // Strategy 3: Resource Ownership
   fastify.decorate('verifyOwnership', function (resourceParam = 'id') {
-    return async function (request: FastifyRequest, _reply: FastifyReply) {
+    return async function (request: FastifyRequest, reply: FastifyReply) {
       const user = request.user;
       const resourceId = (request.params as Record<string, string>)[
         resourceParam
@@ -60,7 +60,7 @@ async function authStrategiesPlugin(fastify: FastifyInstance) {
 
       // Check if user owns resource or is admin
       if (user.role !== 'admin' && user.id !== resourceId) {
-        throw new Error('RESOURCE_ACCESS_DENIED');
+        return reply.forbidden('Access denied to this resource');
       }
     };
   });
@@ -69,7 +69,7 @@ async function authStrategiesPlugin(fastify: FastifyInstance) {
   fastify.decorate(
     'verifyPermission',
     function (resource: string, action: string) {
-      return async function (request: FastifyRequest, _reply: FastifyReply) {
+      return async function (request: FastifyRequest, reply: FastifyReply) {
         const user = request.user;
         const requiredPermission = `${resource}:${action}`;
 
@@ -117,20 +117,15 @@ async function authStrategiesPlugin(fastify: FastifyInstance) {
             !hasResourceWildcard &&
             !hasActionWildcard
           ) {
-            throw new Error('PERMISSION_DENIED');
+            return reply.forbidden('Permission denied');
           }
         } catch (error) {
-          // If it's a permission denied error, re-throw it
-          if (error instanceof Error && error.message === 'PERMISSION_DENIED') {
-            throw error;
-          }
-
-          // For database errors, log and throw a generic permission error
-          (fastify.log as any).error(
-            'Database error in verifyPermission:',
-            error,
+          // For database errors, log and return permission error
+          request.log.error(
+            { error, resource, action, userId: user.id },
+            'Database error in verifyPermission',
           );
-          throw new Error('PERMISSION_DENIED');
+          return reply.forbidden('Permission denied');
         }
       };
     },

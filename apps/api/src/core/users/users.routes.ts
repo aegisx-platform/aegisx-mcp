@@ -20,7 +20,7 @@ export async function usersRoutes(
     {
       preValidation: [
         fastify.authenticate,
-        fastify.verifyPermission('users', 'list'),
+        fastify.verifyPermission('users', 'read'),
       ],
       schema: {
         description: 'List all users with pagination and filters',

@@ -65,11 +65,12 @@ export const appRoutes: Route[] = [
     path: 'rbac',
     loadChildren: () =>
       import('./core/rbac/rbac.routes').then((m) => m.rbacRoutes),
-    canActivate: [AuthGuard, PermissionGuard],
+    canActivate: [AuthGuard],
+    // Note: Removed PermissionGuard from parent route
+    // Each child route has its own permission check
     data: {
       title: 'RBAC Management',
       description: 'Role-Based Access Control Management System',
-      permissions: ['rbac:stats:read'],
     },
   },
   {

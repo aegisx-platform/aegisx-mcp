@@ -18,14 +18,14 @@ import {
   AxNavigationItem,
   AxNavigationConfig,
 } from '../types/ax-navigation.types';
-import { NavigationIconComponent } from './ax-navigation-icon.component';
+import { MatIconModule } from '@angular/material/icon';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'ax-navigation',
   standalone: true,
-  imports: [CommonModule, RouterModule, NavigationIconComponent],
+  imports: [CommonModule, RouterModule, MatIconModule],
   template: `
     <nav
       class="ax-navigation"
@@ -104,11 +104,9 @@ import { filter } from 'rxjs/operators';
               (click)="toggleCollapsible(item)"
             >
               @if (item.icon) {
-                <ax-navigation-icon
-                  [icon]="item.icon"
-                  [size]="20"
-                  class="ax-navigation__item-icon"
-                ></ax-navigation-icon>
+                <mat-icon class="ax-navigation__item-icon">{{
+                  item.icon
+                }}</mat-icon>
               }
               @if (state === 'expanded') {
                 <span class="ax-navigation__item-title" [@fadeIn]>{{
@@ -123,13 +121,12 @@ import { filter } from 'rxjs/operators';
                     {{ item.badge.content }}
                   </span>
                 }
-                <ax-navigation-icon
-                  icon="chevron-right"
-                  [size]="16"
+                <mat-icon
                   class="ax-navigation__item-arrow"
                   [class.ax-navigation__item-arrow--rotated]="isExpanded(item)"
                   [@fadeIn]
-                ></ax-navigation-icon>
+                  >chevron_right</mat-icon
+                >
               }
             </button>
 
@@ -159,11 +156,9 @@ import { filter } from 'rxjs/operators';
               (click)="onItemClick(item)"
             >
               @if (item.icon) {
-                <ax-navigation-icon
-                  [icon]="item.icon"
-                  [size]="20"
-                  class="ax-navigation__item-icon"
-                ></ax-navigation-icon>
+                <mat-icon class="ax-navigation__item-icon">{{
+                  item.icon
+                }}</mat-icon>
               }
               @if (state === 'expanded') {
                 <span class="ax-navigation__item-title" [@fadeIn]>{{
@@ -179,12 +174,9 @@ import { filter } from 'rxjs/operators';
                   </span>
                 }
                 @if (item.externalLink) {
-                  <ax-navigation-icon
-                    icon="external-link"
-                    [size]="14"
-                    class="ax-navigation__item-external"
-                    [@fadeIn]
-                  ></ax-navigation-icon>
+                  <mat-icon class="ax-navigation__item-external" [@fadeIn]
+                    >open_in_new</mat-icon
+                  >
                 }
               }
             </a>

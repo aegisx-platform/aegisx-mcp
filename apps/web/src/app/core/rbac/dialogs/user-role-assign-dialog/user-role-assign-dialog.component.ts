@@ -480,11 +480,40 @@ export class UserRoleAssignDialogComponent implements OnInit {
       const response = await this.rbacService
         .searchUsers(query, 20)
         .toPromise();
+
+      console.log('🔍 Search Users Response:', response);
+      console.log('🔍 Response Type:', typeof response);
+      console.log('🔍 Response Data:', response?.data);
+      console.log(
+        '🔍 Response Keys:',
+        response ? Object.keys(response) : 'null',
+      );
+
       if (response) {
-        this.searchResults.set(response.data);
+        // Handle both possible response formats
+        // Format 1: { data: User[], pagination: {...} }
+        // Format 2: Direct array of users
+        const users = response.data || response;
+
+        console.log('🔍 Users extracted:', users);
+        console.log('🔍 Users is array?', Array.isArray(users));
+        console.log(
+          '🔍 Users length:',
+          Array.isArray(users) ? users.length : 'not array',
+        );
+
+        if (Array.isArray(users)) {
+          this.searchResults.set(users);
+        } else {
+          console.warn('⚠️ Unexpected response format - users is not an array');
+          this.searchResults.set([]);
+        }
+      } else {
+        console.warn('⚠️ Response is null or undefined');
+        this.searchResults.set([]);
       }
     } catch (error) {
-      console.error('Failed to search users:', error);
+      console.error('❌ Failed to search users:', error);
       this.searchResults.set([]);
     } finally {
       this.isSearchingUsers.set(false);

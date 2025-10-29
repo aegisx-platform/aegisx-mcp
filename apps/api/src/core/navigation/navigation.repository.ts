@@ -16,10 +16,12 @@ export class NavigationRepository {
   /**
    * Get all navigation items with their permissions
    * @param includeDisabled Whether to include disabled items
+   * @param flatten Whether to return flat list (true) or tree structure (false)
    * @returns Promise<NavigationItemWithChildren[]>
    */
   async getNavigationItems(
     includeDisabled = false,
+    flatten = false,
   ): Promise<NavigationItemWithChildren[]> {
     const query = this.knex('navigation_items as ni')
       .select([
@@ -43,7 +45,15 @@ export class NavigationRepository {
 
     const items = await query;
 
-    // Build hierarchical structure
+    // Return flat list for management UI
+    if (flatten) {
+      return items.map((item: any) => ({
+        ...item,
+        children: [],
+      })) as NavigationItemWithChildren[];
+    }
+
+    // Build hierarchical tree structure for navigation menu
     return this.buildNavigationTree(
       items as unknown as NavigationItemWithChildren[],
     );
