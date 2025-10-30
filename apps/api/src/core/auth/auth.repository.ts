@@ -9,7 +9,8 @@ export interface User {
   firstName: string;
   lastName: string;
   isActive: boolean;
-  role?: string;
+  role?: string; // Deprecated: Use roles[] for multi-role support
+  roles?: string[]; // Multi-role support
   createdAt: Date;
   updatedAt: Date;
 }
@@ -22,7 +23,8 @@ export interface DBUser {
   first_name: string;
   last_name: string;
   is_active: boolean;
-  role?: string;
+  role?: string; // Deprecated: Use roles[] for multi-role support
+  roles?: string[]; // Multi-role support
   created_at: Date;
   updated_at: Date;
 }
@@ -41,21 +43,33 @@ export class AuthRepository {
   constructor(private knex: any) {}
 
   async findUserByEmail(email: string): Promise<User | null> {
+    // First get the user
     const user = await this.knex('users')
-      .leftJoin('user_roles', 'users.id', 'user_roles.user_id')
-      .leftJoin('roles', 'user_roles.role_id', 'roles.id')
-      .select('users.*', 'roles.name as role')
+      .select('users.*')
       .where('users.email', email)
       .whereNull('users.deleted_at') // Exclude deleted users
       .first();
 
-    return user ? this.transformUser(user) : null;
+    if (!user) return null;
+
+    // Then get all their roles
+    const rolesResult = await this.knex('user_roles')
+      .join('roles', 'user_roles.role_id', 'roles.id')
+      .where('user_roles.user_id', user.id)
+      .select('roles.name');
+
+    const roles = rolesResult.map((r: any) => r.name);
+
+    return this.transformUser({
+      ...user,
+      role: roles[0] || 'user', // Backward compatibility
+      roles: roles.length > 0 ? roles : ['user'], // Multi-role support
+    });
   }
 
   async findUserById(id: string): Promise<User | null> {
+    // First get the user
     const user = await this.knex('users')
-      .leftJoin('user_roles', 'users.id', 'user_roles.user_id')
-      .leftJoin('roles', 'user_roles.role_id', 'roles.id')
       .select(
         'users.id',
         'users.email',
@@ -63,7 +77,6 @@ export class AuthRepository {
         'users.first_name',
         'users.last_name',
         'users.is_active',
-        'roles.name as role',
         'users.created_at',
         'users.updated_at',
       )
@@ -71,7 +84,21 @@ export class AuthRepository {
       .whereNull('users.deleted_at') // Exclude deleted users
       .first();
 
-    return user ? this.transformUser(user) : null;
+    if (!user) return null;
+
+    // Then get all their roles
+    const rolesResult = await this.knex('user_roles')
+      .join('roles', 'user_roles.role_id', 'roles.id')
+      .where('user_roles.user_id', user.id)
+      .select('roles.name');
+
+    const roles = rolesResult.map((r: any) => r.name);
+
+    return this.transformUser({
+      ...user,
+      role: roles[0] || 'user', // Backward compatibility
+      roles: roles.length > 0 ? roles : ['user'], // Multi-role support
+    });
   }
 
   async createUser(userData: {
@@ -244,6 +271,7 @@ export class AuthRepository {
       lastName: dbUser.last_name || '',
       isActive: dbUser.is_active,
       role: dbUser.role || 'user',
+      roles: dbUser.roles || ['user'], // Include roles array for multi-role support
       createdAt: dbUser.created_at,
       updatedAt: dbUser.updated_at,
     };

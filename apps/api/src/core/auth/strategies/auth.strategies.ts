@@ -44,7 +44,16 @@ async function authStrategiesPlugin(fastify: FastifyInstance) {
   fastify.decorate('verifyRole', function (allowedRoles: string[]) {
     return async function (request: FastifyRequest, reply: FastifyReply) {
       const user = request.user;
-      if (!user || !user.role || !allowedRoles.includes(user.role)) {
+
+      // Support both multi-role (roles array) and single role (backward compatibility)
+      const userRoles = user.roles || (user.role ? [user.role] : []);
+
+      // Check if user has at least one of the allowed roles
+      const hasAllowedRole = userRoles.some((role: string) =>
+        allowedRoles.includes(role),
+      );
+
+      if (!user || userRoles.length === 0 || !hasAllowedRole) {
         return reply.forbidden('Insufficient permissions');
       }
     };
@@ -65,7 +74,7 @@ async function authStrategiesPlugin(fastify: FastifyInstance) {
     };
   });
 
-  // Strategy 4: Permission-based Authorization
+  // Strategy 4: Permission-based Authorization with Redis Cache
   fastify.decorate(
     'verifyPermission',
     function (resource: string, action: string) {
@@ -74,24 +83,36 @@ async function authStrategiesPlugin(fastify: FastifyInstance) {
         const requiredPermission = `${resource}:${action}`;
 
         try {
-          // Get user's permissions from database based on their role(s)
-          const permissions = await fastify
-            .knex('user_roles')
-            .join('roles', 'user_roles.role_id', 'roles.id')
-            .join('role_permissions', 'roles.id', 'role_permissions.role_id')
-            .join(
-              'permissions',
-              'role_permissions.permission_id',
-              'permissions.id',
-            )
-            .where('user_roles.user_id', user.id)
-            .select('permissions.resource', 'permissions.action')
-            .distinct();
+          // Try to get permissions from cache first
+          let permissions = await fastify.permissionCache.get(user.id);
+
+          if (!permissions) {
+            // Cache miss - query from database
+            const permissionsResult = await fastify
+              .knex('user_roles')
+              .join('roles', 'user_roles.role_id', 'roles.id')
+              .join('role_permissions', 'roles.id', 'role_permissions.role_id')
+              .join(
+                'permissions',
+                'role_permissions.permission_id',
+                'permissions.id',
+              )
+              .where('user_roles.user_id', user.id)
+              .where('user_roles.is_active', true) // Only active role assignments
+              .select('permissions.resource', 'permissions.action')
+              .distinct();
+
+            // Convert to "resource:action" format for cache
+            permissions = permissionsResult.map(
+              (perm: any) => `${perm.resource}:${perm.action}`,
+            );
+
+            // Cache for future requests
+            await fastify.permissionCache.set(user.id, permissions);
+          }
 
           // Check for admin permission (wildcard access)
-          const hasAdminPermission = permissions.some(
-            (perm: any) => perm.resource === '*' && perm.action === '*',
-          );
+          const hasAdminPermission = permissions.some((perm) => perm === '*:*');
 
           if (hasAdminPermission) {
             return; // Admin has all permissions
@@ -99,17 +120,17 @@ async function authStrategiesPlugin(fastify: FastifyInstance) {
 
           // Check for specific permission
           const hasSpecificPermission = permissions.some(
-            (perm: any) => perm.resource === resource && perm.action === action,
+            (perm) => perm === requiredPermission,
           );
 
           // Check for resource wildcard permission (e.g., users:*)
           const hasResourceWildcard = permissions.some(
-            (perm: any) => perm.resource === resource && perm.action === '*',
+            (perm) => perm === `${resource}:*`,
           );
 
           // Check for action wildcard permission (e.g., *:read)
           const hasActionWildcard = permissions.some(
-            (perm: any) => perm.resource === '*' && perm.action === action,
+            (perm) => perm === `*:${action}`,
           );
 
           if (
@@ -120,10 +141,10 @@ async function authStrategiesPlugin(fastify: FastifyInstance) {
             return reply.forbidden('Permission denied');
           }
         } catch (error) {
-          // For database errors, log and return permission error
+          // For errors, log and return permission error
           request.log.error(
             { error, resource, action, userId: user.id },
-            'Database error in verifyPermission',
+            'Error in verifyPermission (cache or database)',
           );
           return reply.forbidden('Permission denied');
         }

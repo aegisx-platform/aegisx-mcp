@@ -8,12 +8,13 @@ export interface JWTPayload {
   nbf?: number;
   iat?: number;
   jti?: string;
-  
+
   // User claims
   id: string;
   email: string;
-  role: string;
-  
+  role: string; // Deprecated: Use roles[] for multi-role support
+  roles?: string[]; // Multi-role support
+
   // Custom claims
   permissions?: string[];
   sessionId?: string;

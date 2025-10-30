@@ -210,6 +210,11 @@ export class RbacController {
         userId,
       );
 
+      // If permissions were updated, invalidate all cached permissions
+      if (request.body.permission_ids) {
+        await request.server.permissionCache.invalidateAll();
+      }
+
       return reply.code(200).send({
         success: true,
         data: role,
@@ -705,6 +710,9 @@ export class RbacController {
         assignedBy,
       );
 
+      // Invalidate permission cache for this user
+      await request.server.permissionCache.invalidate(request.params.id);
+
       return reply.code(201).send({
         success: true,
         data: userRole,
@@ -774,6 +782,9 @@ export class RbacController {
         request.params.userId,
         request.params.roleId,
       );
+
+      // Invalidate permission cache for this user
+      await request.server.permissionCache.invalidate(request.params.userId);
 
       return reply.code(200).send({
         success: true,
@@ -902,6 +913,11 @@ export class RbacController {
         request.body,
         assignedBy,
       );
+
+      // Invalidate permission cache for all affected users
+      for (const userId of request.body.user_ids) {
+        await request.server.permissionCache.invalidate(userId);
+      }
 
       return reply.code(200).send({
         success: true,
@@ -1041,6 +1057,9 @@ export class RbacController {
         request.body,
         updatedBy,
       );
+
+      // Invalidate all permission cache (permission changes affect all users)
+      await request.server.permissionCache.invalidateAll();
 
       return reply.code(200).send({
         success: true,

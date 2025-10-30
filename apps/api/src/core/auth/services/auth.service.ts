@@ -65,7 +65,8 @@ export class AuthService {
         {
           id: user.id,
           email: user.email,
-          role: user.role || 'user',
+          role: user.role || 'user', // Backward compatibility
+          roles: user.roles || ['user'], // Multi-role support
         },
         { expiresIn: process.env.JWT_EXPIRES_IN || '15m' },
       );
@@ -116,17 +117,19 @@ export class AuthService {
         .whereNull('deleted_at') // Exclude deleted users
         .first();
       if (userResult) {
-        const roleResult = await this.app
+        const rolesResult = await this.app
           .knex('user_roles')
           .join('roles', 'user_roles.role_id', 'roles.id')
           .where('user_roles.user_id', userResult.id)
-          .select('roles.name')
-          .first();
+          .select('roles.name');
+
+        const roles = rolesResult.map((r: any) => r.name);
 
         user = {
           ...userResult,
           isActive: userResult.is_active,
-          role: roleResult?.name || 'user',
+          role: roles[0] || 'user', // Keep backward compatibility with 'role'
+          roles: roles.length > 0 ? roles : ['user'], // New multi-role support
         };
       }
     }
@@ -180,7 +183,8 @@ export class AuthService {
       {
         id: user.id,
         email: user.email,
-        role: user.role || 'user',
+        role: user.role || 'user', // Backward compatibility
+        roles: user.roles || ['user'], // Multi-role support
         permissions,
       },
       { expiresIn: process.env.JWT_EXPIRES_IN || '15m' },
@@ -259,7 +263,8 @@ export class AuthService {
       {
         id: user.id,
         email: user.email,
-        role: user.role || 'user',
+        role: user.role || 'user', // Backward compatibility
+        roles: user.roles || ['user'], // Multi-role support
         permissions,
       },
       { expiresIn: process.env.JWT_EXPIRES_IN || '15m' },

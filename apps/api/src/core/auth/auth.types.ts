@@ -5,7 +5,8 @@ export interface User {
   firstName: string;
   lastName: string;
   isActive: boolean;
-  role: string;
+  role?: string; // Deprecated: Use roles[] for multi-role support
+  roles?: string[]; // Multi-role support
   createdAt: string;
   updatedAt: string;
 }
