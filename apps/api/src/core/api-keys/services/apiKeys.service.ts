@@ -557,7 +557,7 @@ export class ApiKeysService extends BaseService<
     // Add preview to each key
     const keysWithPreview = result.data.map((key) => ({
       ...key,
-      preview: generatePreview(`${key.key_prefix}_dummy`), // Generate preview from prefix
+      preview: generatePreview(`ak_${key.key_prefix}_dummy`), // Generate preview from prefix
     }));
 
     return {

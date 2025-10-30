@@ -34,10 +34,15 @@ export async function apiKeysRoutes(
 
   // Create apiKeys
   fastify.post('/', {
+    preValidation: [
+      fastify.authenticate,
+      fastify.verifyPermission('api-keys', 'create'),
+    ],
     schema: {
       tags: ['ApiKeys'],
       summary: 'Create a new apiKeys',
       description: 'Create a new apiKeys with the provided data',
+      security: [{ bearerAuth: [] }],
       body: CreateApiKeysSchema,
       response: {
         201: ApiKeysResponseSchema,
@@ -53,11 +58,16 @@ export async function apiKeysRoutes(
 
   // Get all apiKeyss
   fastify.get('/', {
+    preValidation: [
+      fastify.authenticate,
+      fastify.verifyPermission('api-keys', 'read'),
+    ],
     schema: {
       tags: ['ApiKeys'],
       summary: 'Get all apiKeyss with pagination',
       description:
         'Retrieve a paginated list of apiKeyss with optional filtering',
+      security: [{ bearerAuth: [] }],
       querystring: ListApiKeysQuerySchema,
       response: {
         200: ApiKeysListResponseSchema,
@@ -74,11 +84,16 @@ export async function apiKeysRoutes(
 
   // Generate new API key
   fastify.post('/generate', {
+    preValidation: [
+      fastify.authenticate,
+      fastify.verifyPermission('api-keys', 'generate'),
+    ],
     schema: {
       tags: ['API Key Management'],
       summary: 'Generate a new API key',
       description:
         'Generate a new API key with optional scopes and expiry. Requires JWT authentication.',
+      security: [{ bearerAuth: [] }],
       body: GenerateApiKeySchema,
       response: {
         201: GenerateApiKeyResponseSchema,
@@ -87,9 +102,7 @@ export async function apiKeysRoutes(
         403: SchemaRefs.Forbidden,
         500: SchemaRefs.ServerError,
       },
-      security: [{ bearerAuth: [] }],
     },
-    preHandler: [fastify.authenticate], // JWT authentication required
     handler: controller.generateKey.bind(controller),
   });
 
@@ -112,21 +125,25 @@ export async function apiKeysRoutes(
 
   // Get current user's API keys
   fastify.get('/my-keys', {
+    preValidation: [
+      fastify.authenticate,
+      fastify.verifyPermission('api-keys', 'read:own'),
+    ],
     schema: {
       tags: ['API Key Management'],
       summary: 'Get my API keys',
       description:
         "Get the current user's API keys with previews (keys are masked for security)",
+      security: [{ bearerAuth: [] }],
       querystring: UserApiKeysQuerySchema,
       response: {
         200: UserApiKeysListResponseSchema,
         400: SchemaRefs.ValidationError,
         401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
         500: SchemaRefs.ServerError,
       },
-      security: [{ bearerAuth: [] }],
     },
-    preHandler: [fastify.authenticate], // JWT authentication required
     handler: controller.getMyKeys.bind(controller),
   });
 
@@ -134,10 +151,15 @@ export async function apiKeysRoutes(
 
   // Get apiKeys by ID
   fastify.get('/:id', {
+    preValidation: [
+      fastify.authenticate,
+      fastify.verifyPermission('api-keys', 'read'),
+    ],
     schema: {
       tags: ['ApiKeys'],
       summary: 'Get apiKeys by ID',
       description: 'Retrieve a apiKeys by its unique identifier',
+      security: [{ bearerAuth: [] }],
       params: ApiKeysIdParamSchema,
       querystring: GetApiKeysQuerySchema,
       response: {
@@ -154,10 +176,15 @@ export async function apiKeysRoutes(
 
   // Update apiKeys
   fastify.put('/:id', {
+    preValidation: [
+      fastify.authenticate,
+      fastify.verifyPermission('api-keys', 'update'),
+    ],
     schema: {
       tags: ['ApiKeys'],
       summary: 'Update apiKeys by ID',
       description: 'Update an existing apiKeys with new data',
+      security: [{ bearerAuth: [] }],
       params: ApiKeysIdParamSchema,
       body: UpdateApiKeysSchema,
       response: {
@@ -175,10 +202,15 @@ export async function apiKeysRoutes(
 
   // Delete apiKeys
   fastify.delete('/:id', {
+    preValidation: [
+      fastify.authenticate,
+      fastify.verifyPermission('api-keys', 'delete'),
+    ],
     schema: {
       tags: ['ApiKeys'],
       summary: 'Delete apiKeys by ID',
       description: 'Delete a apiKeys by its unique identifier',
+      security: [{ bearerAuth: [] }],
       params: ApiKeysIdParamSchema,
       response: {
         200: SchemaRefs.OperationResult,
@@ -194,11 +226,16 @@ export async function apiKeysRoutes(
 
   // Revoke API key
   fastify.post('/:id/revoke', {
+    preValidation: [
+      fastify.authenticate,
+      fastify.verifyPermission('api-keys', 'revoke'),
+    ],
     schema: {
       tags: ['API Key Management'],
       summary: 'Revoke (deactivate) an API key',
       description:
         'Revoke an API key to permanently disable access. Users can only revoke their own keys.',
+      security: [{ bearerAuth: [] }],
       params: ApiKeysIdParamSchema,
       body: RevokeApiKeySchema,
       response: {
@@ -209,19 +246,22 @@ export async function apiKeysRoutes(
         404: SchemaRefs.NotFound,
         500: SchemaRefs.ServerError,
       },
-      security: [{ bearerAuth: [] }],
     },
-    preHandler: [fastify.authenticate], // JWT authentication required
     handler: controller.revokeKey.bind(controller),
   });
 
   // Rotate API key
   fastify.post('/:id/rotate', {
+    preValidation: [
+      fastify.authenticate,
+      fastify.verifyPermission('api-keys', 'rotate'),
+    ],
     schema: {
       tags: ['API Key Management'],
       summary: 'Rotate an API key',
       description:
         'Generate a new API key with the same settings and deactivate the old one',
+      security: [{ bearerAuth: [] }],
       params: ApiKeysIdParamSchema,
       body: RotateApiKeySchema,
       response: {
@@ -232,9 +272,7 @@ export async function apiKeysRoutes(
         404: SchemaRefs.NotFound,
         500: SchemaRefs.ServerError,
       },
-      security: [{ bearerAuth: [] }],
     },
-    preHandler: [fastify.authenticate], // JWT authentication required
     handler: controller.rotateKey.bind(controller),
   });
 }

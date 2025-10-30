@@ -192,6 +192,53 @@ export async function seed(knex: Knex): Promise<void> {
       action: 'assign-permissions',
       description: 'Assign permissions to navigation items',
     },
+
+    // API Keys Management - CRUD Operations
+    {
+      resource: 'api-keys',
+      action: 'read',
+      description: 'View API keys',
+    },
+    {
+      resource: 'api-keys',
+      action: 'read:own',
+      description: 'View own API keys',
+    },
+    {
+      resource: 'api-keys',
+      action: 'create',
+      description: 'Create API keys',
+    },
+    {
+      resource: 'api-keys',
+      action: 'update',
+      description: 'Update API keys',
+    },
+    {
+      resource: 'api-keys',
+      action: 'delete',
+      description: 'Delete API keys',
+    },
+    {
+      resource: 'api-keys',
+      action: 'generate',
+      description: 'Generate new API keys',
+    },
+    {
+      resource: 'api-keys',
+      action: 'validate',
+      description: 'Validate API keys',
+    },
+    {
+      resource: 'api-keys',
+      action: 'revoke',
+      description: 'Revoke API keys',
+    },
+    {
+      resource: 'api-keys',
+      action: 'rotate',
+      description: 'Rotate API keys',
+    },
   ];
 
   // Insert permissions that don't already exist

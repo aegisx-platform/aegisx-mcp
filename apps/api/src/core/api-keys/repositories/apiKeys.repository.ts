@@ -1,4 +1,8 @@
-import { BaseRepository, BaseListQuery, PaginatedListResult } from '../../../shared/repositories/base.repository';
+import {
+  BaseRepository,
+  BaseListQuery,
+  PaginatedListResult,
+} from '../../../shared/repositories/base.repository';
 import type { Knex } from 'knex';
 import {
   type CreateApiKeys,
@@ -6,49 +10,39 @@ import {
   type ApiKeys,
   type GetApiKeysQuery,
   type ListApiKeysQuery,
-  type ApiKeysEntity
+  type ApiKeysEntity,
 } from '../types/apiKeys.types';
 
 export interface ApiKeysListQuery extends BaseListQuery {
   // Add specific filters for ApiKeys
 
   user_id?: string;
-  
 
   name?: string;
-  
 
   key_hash?: string;
-  
 
   key_prefix?: string;
-  
-
-
 
   last_used_ip?: string;
-  
 
   is_active?: boolean;
-  
-
 }
 
-export class ApiKeysRepository extends BaseRepository<ApiKeys, CreateApiKeys, UpdateApiKeys> {
-
+export class ApiKeysRepository extends BaseRepository<
+  ApiKeys,
+  CreateApiKeys,
+  UpdateApiKeys
+> {
   constructor(knex: Knex) {
-    super(
-      knex,
-      'api_keys',
-      [
-        // Define searchable fields
-        '.user_id',
-        '.name',
-        '.key_hash',
-        '.key_prefix',
-        '.last_used_ip',
-      ]
-    );
+    super(knex, 'api_keys', [
+      // Define searchable fields
+      'user_id',
+      'name',
+      'key_hash',
+      'key_prefix',
+      'last_used_ip',
+    ]);
   }
 
   // Transform database row to entity
@@ -67,7 +61,7 @@ export class ApiKeysRepository extends BaseRepository<ApiKeys, CreateApiKeys, Up
       expires_at: dbRow.expires_at,
       is_active: dbRow.is_active,
       created_at: dbRow.created_at,
-      updated_at: dbRow.updated_at
+      updated_at: dbRow.updated_at,
     };
   }
 
@@ -91,13 +85,19 @@ export class ApiKeysRepository extends BaseRepository<ApiKeys, CreateApiKeys, Up
       transformed.scopes = dto.scopes;
     }
     if ('last_used_at' in dto && dto.last_used_at !== undefined) {
-      transformed.last_used_at = typeof dto.last_used_at === 'string' ? new Date(dto.last_used_at) : dto.last_used_at;
+      transformed.last_used_at =
+        typeof dto.last_used_at === 'string'
+          ? new Date(dto.last_used_at)
+          : dto.last_used_at;
     }
     if ('last_used_ip' in dto && dto.last_used_ip !== undefined) {
       transformed.last_used_ip = dto.last_used_ip;
     }
     if ('expires_at' in dto && dto.expires_at !== undefined) {
-      transformed.expires_at = typeof dto.expires_at === 'string' ? new Date(dto.expires_at) : dto.expires_at;
+      transformed.expires_at =
+        typeof dto.expires_at === 'string'
+          ? new Date(dto.expires_at)
+          : dto.expires_at;
     }
     if ('is_active' in dto && dto.is_active !== undefined) {
       transformed.is_active = dto.is_active;
@@ -109,65 +109,82 @@ export class ApiKeysRepository extends BaseRepository<ApiKeys, CreateApiKeys, Up
 
   // Custom query with joins if needed
   getJoinQuery() {
-    return this.knex('api_keys')
-      .select('api_keys.*');
-      // Add joins here if needed
-      // .leftJoin('other_table', 'api_keys.foreign_key', 'other_table.id')
+    return this.knex('api_keys').select('api_keys.*');
+    // Add joins here if needed
+    // .leftJoin('other_table', 'api_keys.foreign_key', 'other_table.id')
   }
 
   // Apply custom filters
   protected applyCustomFilters(query: any, filters: ApiKeysListQuery): void {
-    // Apply base filters first
-    super.applyCustomFilters(query, filters);
+    // Handle includeExpired BEFORE passing to super to prevent it being treated as a column
+    const includeExpired = filters.includeExpired;
+
+    // Remove includeExpired from filters object before passing to super
+    const { includeExpired: _removed, ...baseFilters } = filters as any;
+
+    // Apply base filters first (without includeExpired)
+    super.applyCustomFilters(query, baseFilters);
+
+    // Apply includeExpired logic: if false (default), exclude expired keys
+    if (includeExpired === false || includeExpired === undefined) {
+      query.where(function (this: any) {
+        this.whereNull('api_keys.expires_at').orWhere(
+          'api_keys.expires_at',
+          '>',
+          new Date().toISOString(),
+        );
+      });
+    }
+    // If includeExpired is true, don't add any filter (include all keys)
 
     // Apply specific ApiKeys filters
     if (filters.user_id !== undefined) {
-      query.where('.user_id', filters.user_id);
+      query.where('api_keys.user_id', filters.user_id);
     }
     if (filters.name !== undefined) {
-      query.where('.name', filters.name);
+      query.where('api_keys.name', filters.name);
     }
     if (filters.key_hash !== undefined) {
-      query.where('.key_hash', filters.key_hash);
+      query.where('api_keys.key_hash', filters.key_hash);
     }
     if (filters.key_prefix !== undefined) {
-      query.where('.key_prefix', filters.key_prefix);
+      query.where('api_keys.key_prefix', filters.key_prefix);
     }
     if (filters.scopes !== undefined) {
-      query.where('.scopes', filters.scopes);
+      query.where('api_keys.scopes', filters.scopes);
     }
     if (filters.last_used_at !== undefined) {
-      query.where('.last_used_at', filters.last_used_at);
+      query.where('api_keys.last_used_at', filters.last_used_at);
     }
     if (filters.last_used_ip !== undefined) {
-      query.where('.last_used_ip', filters.last_used_ip);
+      query.where('api_keys.last_used_ip', filters.last_used_ip);
     }
     if (filters.expires_at !== undefined) {
-      query.where('.expires_at', filters.expires_at);
+      query.where('api_keys.expires_at', filters.expires_at);
     }
     if (filters.is_active !== undefined) {
-      query.where('.is_active', filters.is_active);
+      query.where('api_keys.is_active', filters.is_active);
     }
     if (filters.updated_at !== undefined) {
-      query.where('.updated_at', filters.updated_at);
+      query.where('api_keys.updated_at', filters.updated_at);
     }
   }
 
   // Custom sort fields mapping
   protected getSortField(sortBy: string): string {
     const sortFields: Record<string, string> = {
-      id: '.id',
-      userId: '.user_id',
-      name: '.name',
-      keyHash: '.key_hash',
-      keyPrefix: '.key_prefix',
-      scopes: '.scopes',
-      lastUsedAt: '.last_used_at',
-      lastUsedIp: '.last_used_ip',
-      expiresAt: '.expires_at',
-      isActive: '.is_active',
-      createdAt: '.created_at',
-      updatedAt: '.updated_at'
+      id: 'api_keys.id',
+      userId: 'api_keys.user_id',
+      name: 'api_keys.name',
+      keyHash: 'api_keys.key_hash',
+      keyPrefix: 'api_keys.key_prefix',
+      scopes: 'api_keys.scopes',
+      lastUsedAt: 'api_keys.last_used_at',
+      lastUsedIp: 'api_keys.last_used_ip',
+      expiresAt: 'api_keys.expires_at',
+      isActive: 'api_keys.is_active',
+      createdAt: 'api_keys.created_at',
+      updatedAt: 'api_keys.updated_at',
     };
 
     return sortFields[sortBy] || 'api_keys.id';
@@ -176,15 +193,17 @@ export class ApiKeysRepository extends BaseRepository<ApiKeys, CreateApiKeys, Up
   // Extended find method with options
   async findById(
     id: number | string,
-    options: GetApiKeysQuery = {}
+    options: GetApiKeysQuery = {},
   ): Promise<ApiKeys | null> {
     let query = this.getJoinQuery();
     query = query.where('api_keys.id', id);
 
     // Handle include options
     if (options.include) {
-      const includes = Array.isArray(options.include) ? options.include : [options.include];
-      includes.forEach(relation => {
+      const includes = Array.isArray(options.include)
+        ? options.include
+        : [options.include];
+      includes.forEach((relation) => {
         // TODO: Add join logic for relationships
         // Example: if (relation === 'category') query.leftJoin('categories', 'items.category_id', 'categories.id');
       });
@@ -195,12 +214,14 @@ export class ApiKeysRepository extends BaseRepository<ApiKeys, CreateApiKeys, Up
   }
 
   // Extended list method with specific query type
-  async list(query: ApiKeysListQuery = {}): Promise<PaginatedListResult<ApiKeys>> {
+  async list(
+    query: ApiKeysListQuery = {},
+  ): Promise<PaginatedListResult<ApiKeys>> {
     return super.list(query);
   }
 
   // Additional business-specific methods
-  
+
   async findByUserId(userId: string): Promise<ApiKeys | null> {
     const query = this.getJoinQuery();
     const row = await query.where('api_keys.user_id', userId).first();
@@ -231,7 +252,6 @@ export class ApiKeysRepository extends BaseRepository<ApiKeys, CreateApiKeys, Up
     return row ? this.transformToEntity(row) : null;
   }
 
-
   // Statistics and aggregation methods
   async getStats(): Promise<{
     total: number;
@@ -240,7 +260,9 @@ export class ApiKeysRepository extends BaseRepository<ApiKeys, CreateApiKeys, Up
     const stats: any = await this.knex('api_keys')
       .select([
         this.knex.raw('COUNT(*) as total'),
-        this.knex.raw('COUNT(*) FILTER (WHERE is_active = true) as isActive_count')
+        this.knex.raw(
+          'COUNT(*) FILTER (WHERE is_active = true) as isActive_count',
+        ),
       ])
       .first();
 
@@ -252,16 +274,20 @@ export class ApiKeysRepository extends BaseRepository<ApiKeys, CreateApiKeys, Up
 
   // Bulk operations with better type safety
   async createMany(data: CreateApiKeys[]): Promise<ApiKeys[]> {
-    const transformedData = data.map(item => this.transformToDb(item));
-    const rows = await this.knex('api_keys').insert(transformedData).returning('*');
-    return rows.map(row => this.transformToEntity(row));
+    const transformedData = data.map((item) => this.transformToDb(item));
+    const rows = await this.knex('api_keys')
+      .insert(transformedData)
+      .returning('*');
+    return rows.map((row) => this.transformToEntity(row));
   }
 
   // Transaction support for complex operations
   async createWithTransaction(data: CreateApiKeys): Promise<ApiKeys> {
     return this.withTransaction(async (trx) => {
       const transformedData = this.transformToDb(data);
-      const [row] = await trx('api_keys').insert(transformedData).returning('*');
+      const [row] = await trx('api_keys')
+        .insert(transformedData)
+        .returning('*');
       return this.transformToEntity(row);
     });
   }

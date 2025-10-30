@@ -45,7 +45,7 @@ export default fp(
     // Register routes with controller dependency
     await fastify.register(apiKeysRoutes, {
       controller: apiKeysController,
-      prefix: options.prefix || '/apiKeys',
+      prefix: options.prefix || '/api-keys',
     });
 
     // Lifecycle hooks for monitoring
@@ -93,7 +93,6 @@ export type {
   RotateApiKey,
   UserApiKeysQuery,
   ApiKeyPreview,
-  UserApiKeysResponse,
 } from './schemas/apiKeys.schemas';
 
 // Re-export middleware

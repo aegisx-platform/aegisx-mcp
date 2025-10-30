@@ -19,7 +19,6 @@ import {
   type RotateApiKey,
   type UserApiKeysQuery,
   type ApiKeyPreview,
-  type UserApiKeysResponse,
 } from '../schemas/apiKeys.schemas';
 
 export {
@@ -42,7 +41,6 @@ export {
   type RotateApiKey,
   type UserApiKeysQuery,
   type ApiKeyPreview,
-  type UserApiKeysResponse,
 };
 
 // Additional type definitions

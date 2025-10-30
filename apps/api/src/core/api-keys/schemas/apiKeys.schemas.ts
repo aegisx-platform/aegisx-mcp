@@ -197,14 +197,14 @@ export const ApiKeyValidationResponseSchema = Type.Object({
 });
 
 // Revoke API Key Schema
+// Note: keyId is optional because ID comes from URL parameter /:id/revoke
 export const RevokeApiKeySchema = Type.Object({
-  keyId: Type.String({ format: 'uuid' }),
   reason: Type.Optional(Type.String({ maxLength: 255 })),
 });
 
 // Rotate API Key Schema
+// Note: keyId is optional because ID comes from URL parameter /:id/rotate
 export const RotateApiKeySchema = Type.Object({
-  keyId: Type.String({ format: 'uuid' }),
   newName: Type.Optional(
     Type.String({
       minLength: 1,
@@ -247,16 +247,6 @@ export const ApiKeyPreviewSchema = Type.Object({
   updated_at: Type.String({ format: 'date-time' }),
 });
 
-export const UserApiKeysResponseSchema = Type.Object({
-  data: Type.Array(ApiKeyPreviewSchema),
-  pagination: Type.Object({
-    page: Type.Number(),
-    limit: Type.Number(),
-    total: Type.Number(),
-    totalPages: Type.Number(),
-  }),
-});
-
 // Response Schemas
 export const GenerateApiKeyResponseSchema = ApiSuccessResponseSchema(
   GeneratedApiKeySchema,
@@ -264,8 +254,10 @@ export const GenerateApiKeyResponseSchema = ApiSuccessResponseSchema(
 export const ValidateApiKeyResponseSchema = ApiSuccessResponseSchema(
   ApiKeyValidationResponseSchema,
 );
+// ✅ Standard paginated response (same as users module)
+// reply.paginated() adds { success, data: Array, pagination, meta } wrapper automatically
 export const UserApiKeysListResponseSchema = ApiSuccessResponseSchema(
-  UserApiKeysResponseSchema,
+  Type.Array(ApiKeyPreviewSchema),
 );
 export const RevokeApiKeyResponseSchema = ApiSuccessResponseSchema(
   Type.Object({
@@ -290,4 +282,3 @@ export type RevokeApiKey = Static<typeof RevokeApiKeySchema>;
 export type RotateApiKey = Static<typeof RotateApiKeySchema>;
 export type UserApiKeysQuery = Static<typeof UserApiKeysQuerySchema>;
 export type ApiKeyPreview = Static<typeof ApiKeyPreviewSchema>;
-export type UserApiKeysResponse = Static<typeof UserApiKeysResponseSchema>;

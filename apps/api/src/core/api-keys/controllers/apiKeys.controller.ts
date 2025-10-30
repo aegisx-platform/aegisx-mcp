@@ -375,8 +375,6 @@ export class ApiKeysController {
         },
         message:
           'API key generated successfully. Store it securely - it will not be shown again!',
-        warning:
-          'This API key will only be displayed once. Make sure to copy and store it securely.',
       });
     } catch (error) {
       request.log.error(error, 'Error generating API key');
@@ -384,11 +382,12 @@ export class ApiKeysController {
       return reply.status(500).send({
         success: false,
         error: {
-          code: 'GENERATION_FAILED',
+          code: 'INTERNAL_SERVER_ERROR',
           message:
             error instanceof Error
               ? error.message
               : 'Failed to generate API key',
+          statusCode: 500,
         },
       });
     }
@@ -491,19 +490,37 @@ export class ApiKeysController {
         'User API keys fetched',
       );
 
-      return reply.send({
-        success: true,
-        data: result.data,
-        pagination: result.pagination,
-      });
+      // Transform data to match ApiKeyPreviewSchema
+      const transformedData = result.data.map((key) => ({
+        id: key.id,
+        name: key.name,
+        prefix: key.key_prefix, // Transform key_prefix → prefix
+        preview: key.preview,
+        scopes: key.scopes,
+        last_used_at: key.last_used_at,
+        last_used_ip: key.last_used_ip,
+        expires_at: key.expires_at,
+        is_active: key.is_active,
+        created_at: key.created_at,
+        updated_at: key.updated_at,
+      }));
+
+      // Use standard paginated response (same as users module)
+      return reply.paginated(
+        transformedData,
+        result.pagination.page,
+        result.pagination.limit,
+        result.pagination.total,
+      );
     } catch (error) {
       request.log.error(error, 'Error fetching user API keys');
 
       return reply.status(500).send({
         success: false,
         error: {
-          code: 'FETCH_FAILED',
+          code: 'INTERNAL_SERVER_ERROR',
           message: 'Failed to fetch API keys',
+          statusCode: 500,
         },
       });
     }
