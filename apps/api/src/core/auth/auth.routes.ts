@@ -126,4 +126,25 @@ export default async function authRoutes(fastify: FastifyInstance) {
     preHandler: [fastify.authenticateJWT],
     handler: authController.me,
   });
+
+  // GET /api/auth/permissions - Get user permissions
+  typedFastify.route({
+    method: 'GET',
+    url: '/auth/permissions',
+    schema: {
+      tags: ['Authentication'],
+      summary: 'Get current user permissions (aggregated from all roles)',
+      description:
+        'Returns array of permissions in format "resource:action" aggregated from all active user roles. ' +
+        'Real-time query from database - always up-to-date.',
+      security: [{ bearerAuth: [] }],
+      response: {
+        200: SchemaRefs.module('auth', 'permissionsResponse'),
+        401: SchemaRefs.Unauthorized,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preHandler: [fastify.authenticateJWT],
+    handler: authController.getPermissions,
+  });
 }

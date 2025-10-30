@@ -283,4 +283,24 @@ export class AuthService {
 
     return user;
   }
+
+  async getPermissions(userId: string): Promise<string[]> {
+    // Query user permissions from database (aggregated from all roles)
+    const permissionsResult = await this.app
+      .knex('users as u')
+      .select(
+        this.app.knex.raw(
+          "ARRAY_AGG(DISTINCT CONCAT(p.resource, ':', p.action)) as permissions",
+        ),
+      )
+      .join('user_roles as ur', 'u.id', 'ur.user_id')
+      .join('role_permissions as rp', 'ur.role_id', 'rp.role_id')
+      .join('permissions as p', 'rp.permission_id', 'p.id')
+      .where('u.id', userId)
+      .where('ur.is_active', true) // Only active role assignments
+      .groupBy('u.id')
+      .first();
+
+    return permissionsResult?.permissions || [];
+  }
 }

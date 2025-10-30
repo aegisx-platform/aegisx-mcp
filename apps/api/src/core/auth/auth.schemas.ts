@@ -93,6 +93,14 @@ export const ProfileResponseSchema = ApiSuccessResponseSchema(AuthUserSchema);
 
 export const LogoutResponseSchema = ApiSuccessResponseSchema(Type.Object({}));
 
+export const PermissionsResponseSchema = ApiSuccessResponseSchema(
+  Type.Object({
+    permissions: Type.Array(Type.String(), {
+      description: 'Array of user permissions in format "resource:action"',
+    }),
+  }),
+);
+
 // TypeScript Types
 export type AuthUser = Static<typeof AuthUserSchema>;
 export type RegisterRequest = Static<typeof RegisterRequestSchema>;
@@ -103,6 +111,7 @@ export type RegisterResponse = Static<typeof RegisterResponseSchema>;
 export type RefreshResponse = Static<typeof RefreshResponseSchema>;
 export type ProfileResponse = Static<typeof ProfileResponseSchema>;
 export type LogoutResponse = Static<typeof LogoutResponseSchema>;
+export type PermissionsResponse = Static<typeof PermissionsResponseSchema>;
 
 // Export schemas for registration
 export const authSchemas = {
@@ -115,6 +124,7 @@ export const authSchemas = {
   'refresh-response': RefreshResponseSchema,
   'profile-response': ProfileResponseSchema,
   'logout-response': LogoutResponseSchema,
+  'permissions-response': PermissionsResponseSchema,
 
   // Legacy compatibility
   authUser: AuthUserSchema,
@@ -126,4 +136,5 @@ export const authSchemas = {
   refreshResponse: RefreshResponseSchema,
   profileResponse: ProfileResponseSchema,
   logoutResponse: LogoutResponseSchema,
+  permissionsResponse: PermissionsResponseSchema,
 };

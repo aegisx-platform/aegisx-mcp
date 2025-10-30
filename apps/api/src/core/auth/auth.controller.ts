@@ -143,4 +143,27 @@ export const authController = {
       message: 'Profile retrieved successfully',
     });
   },
+
+  async getPermissions(request: FastifyRequest, reply: FastifyReply) {
+    const userId = request.user.id;
+    const permissions = await request.server.authService.getPermissions(userId);
+
+    return reply.send({
+      success: true,
+      data: {
+        permissions,
+      },
+      message: 'Permissions retrieved successfully',
+      meta: {
+        timestamp: new Date().toISOString(),
+        version: 'v1',
+        requestId: request.id,
+        environment: ['development', 'staging', 'production'].includes(
+          process.env.NODE_ENV || '',
+        )
+          ? (process.env.NODE_ENV as 'development' | 'staging' | 'production')
+          : 'development',
+      },
+    });
+  },
 };
