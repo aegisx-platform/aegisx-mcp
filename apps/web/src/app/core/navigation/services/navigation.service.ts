@@ -52,6 +52,7 @@ export class NavigationService {
 
   // Default navigation items (fallback)
   private readonly defaultNavigation: AxNavigationItem[] = [
+    // Main Group
     {
       id: 'main',
       title: 'Main',
@@ -73,6 +74,7 @@ export class NavigationService {
         },
       ],
     },
+    // Management Group
     {
       id: 'management',
       title: 'Management',
@@ -84,21 +86,7 @@ export class NavigationService {
           type: 'item',
           icon: 'heroicons_outline:users',
           link: '/users',
-          permission: 'users:read',
-        },
-        {
-          id: 'books',
-          title: 'Book Management',
-          type: 'item',
-          icon: 'heroicons_outline:document-text',
-          link: '/books',
-        },
-        {
-          id: 'authors',
-          title: 'Author Management',
-          type: 'item',
-          icon: 'heroicons_outline:document-text',
-          link: '/authors',
+          permissions: ['users:read', '*:*'],
         },
         {
           id: 'pdf-templates',
@@ -111,20 +99,86 @@ export class NavigationService {
             type: 'info',
           },
         },
+      ],
+    },
+    // RBAC Group (Collapsible)
+    {
+      id: 'rbac',
+      title: 'RBAC Management',
+      type: 'collapsible',
+      icon: 'heroicons_outline:shield-check',
+      permissions: ['dashboard:view', '*:*'],
+      children: [
         {
-          id: 'rbac',
-          title: 'RBAC Management',
+          id: 'rbac.dashboard',
+          title: 'Dashboard',
           type: 'item',
-          icon: 'heroicons_outline:shield-check',
-          link: '/rbac',
-          badge: {
-            content: 'Admin',
-            type: 'accent',
-          },
-          permission: 'dashboard:view',
+          icon: 'heroicons_outline:chart-bar',
+          link: '/rbac/dashboard',
+          permissions: ['dashboard:view', '*:*'],
+        },
+        {
+          id: 'rbac.roles',
+          title: 'Roles',
+          type: 'item',
+          icon: 'heroicons_outline:user-group',
+          link: '/rbac/roles',
+          permissions: ['roles:read', '*:*'],
+        },
+        {
+          id: 'rbac.permissions',
+          title: 'Permissions',
+          type: 'item',
+          icon: 'heroicons_outline:key',
+          link: '/rbac/permissions',
+          permissions: ['permissions:read', '*:*'],
+        },
+        {
+          id: 'rbac.user-roles',
+          title: 'User Assignments',
+          type: 'item',
+          icon: 'heroicons_outline:user-plus',
+          link: '/rbac/user-roles',
+          permissions: ['user-roles:read', '*:*'],
+        },
+        {
+          id: 'rbac.navigation',
+          title: 'Navigation',
+          type: 'item',
+          icon: 'heroicons_outline:bars-3',
+          link: '/rbac/navigation',
+          permissions: ['navigation:read', '*:*'],
         },
       ],
     },
+    // Settings Group
+    {
+      id: 'settings',
+      title: 'Settings',
+      type: 'group',
+      children: [
+        {
+          id: 'settings.general',
+          title: 'General Settings',
+          type: 'item',
+          icon: 'heroicons_outline:cog-6-tooth',
+          link: '/settings',
+          permissions: ['settings:view', '*:*'],
+        },
+        {
+          id: 'settings.api-keys',
+          title: 'API Keys',
+          type: 'item',
+          icon: 'heroicons_outline:key',
+          link: '/settings/api-keys',
+          badge: {
+            content: 'New',
+            type: 'accent',
+          },
+        },
+      ],
+    },
+    // Account Group
     {
       id: 'account',
       title: 'Account',
@@ -138,63 +192,6 @@ export class NavigationService {
           link: '/profile',
         },
         {
-          id: 'settings',
-          title: 'Settings',
-          type: 'item',
-          icon: 'heroicons_outline:cog-6-tooth',
-          link: '/settings',
-        },
-        {
-          id: 'file-upload',
-          title: 'File Upload',
-          type: 'item',
-          icon: 'heroicons_outline:cloud-arrow-up',
-          link: '/file-upload',
-        },
-        {
-          id: 'test-ax',
-          title: 'Test Ax Navigation',
-          type: 'item',
-          icon: 'heroicons_outline:beaker',
-          link: '/test-ax',
-        },
-        {
-          id: 'material-demo',
-          title: 'Material Components Demo',
-          type: 'item',
-          icon: 'heroicons_outline:cube',
-          link: '/material-demo',
-        },
-        ...(environment.features?.enableComponentShowcase
-          ? [
-              {
-                id: 'component-showcase',
-                title: 'Component Showcase',
-                type: 'item' as const,
-                icon: 'heroicons_outline:squares-2x2',
-                link: '/component-showcase',
-                badge: {
-                  content: 'New',
-                  type: 'accent' as const,
-                },
-              },
-            ]
-          : []),
-        {
-          id: 'file-upload-demo',
-          title: 'File Upload Demo',
-          type: 'item',
-          icon: 'heroicons_outline:beaker',
-          link: '/file-upload-demo',
-        },
-        {
-          id: 'test-rbac-websocket',
-          title: 'RBAC WebSocket Test',
-          type: 'item',
-          icon: 'heroicons_outline:wifi',
-          link: '/test-rbac-websocket',
-        },
-        {
           id: 'docs',
           title: 'Documentation',
           type: 'item',
@@ -205,6 +202,29 @@ export class NavigationService {
         },
       ],
     },
+    // Dev Tools Group (only in development)
+    ...(environment.production
+      ? []
+      : [
+          {
+            id: 'dev-tools',
+            title: 'Dev Tools',
+            type: 'group' as const,
+            children: [
+              {
+                id: 'dev',
+                title: 'Development Tools',
+                type: 'item' as const,
+                icon: 'heroicons_outline:beaker',
+                link: '/dev',
+                badge: {
+                  content: 'Dev',
+                  type: 'warn' as const,
+                },
+              },
+            ],
+          },
+        ]),
   ];
 
   // Signals for reactive state
@@ -428,18 +448,20 @@ export class NavigationService {
 
   /**
    * Filter navigation items based on user permissions
-   * Items without permission field are always visible
-   * Items with permission field are only visible if user has that permission
+   * Items without permissions field are always visible
+   * Items with permissions field are only visible if user has at least one of those permissions (OR logic)
    */
   filterNavigationByPermissions(items: AxNavigationItem[]): AxNavigationItem[] {
     return items
       .filter((item) => {
         // Always show items without permission requirement
-        if (!item.permission) {
+        if (!item.permissions) {
           return true;
         }
-        // Check if user has the required permission
-        return this.authService.hasPermission()(item.permission);
+        // Check if user has at least one of the required permissions (OR logic)
+        return item.permissions.some((permission) =>
+          this.authService.hasPermission()(permission),
+        );
       })
       .map((item) => {
         // Recursively filter children if they exist

@@ -24,7 +24,8 @@ export interface AxNavigationItem {
   exactMatch?: boolean;
   externalLink?: boolean;
   target?: '_blank' | '_self' | '_parent' | '_top';
-  permission?: string; // RBAC permission required to view this item
+  permission?: string; // @deprecated Use permissions array instead (backward compatibility)
+  permissions?: string[]; // RBAC permissions required to view this item (OR logic)
 }
 
 /**
