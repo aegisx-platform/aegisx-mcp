@@ -162,14 +162,28 @@ Keep commit messages clean and professional.
 
 ### PROJECT_STATUS.md Update Policy (MANDATORY)
 
-**🚨 CRITICAL: Keep Summary & Recommendations section updated and visible at the top**
+**🚨 CRITICAL: Keep file clean and maintainable with session archiving**
 
 **Why This Matters:**
 
 - `PROJECT_STATUS.md` is the session recovery document
-- New sessions append to the file, pushing content down
-- **Summary & Recommendations must stay at the top** for quick access
-- This section shows current project health and next steps at a glance
+- File becomes too large if all sessions are kept (2,800+ lines before archiving)
+- **Only keep 2-3 most recent sessions** for quick recovery
+- Old sessions archived to `docs/sessions/ARCHIVE_YYYY_QX.md`
+
+**File Structure:**
+
+```
+PROJECT_STATUS.md              # Main status file (~500 lines)
+├─ Summary & Recommendations   # Always at the top
+├─ Recent Sessions (2-3)       # Latest sessions for quick recovery
+└─ Reference to archives       # Link to docs/sessions/
+
+docs/sessions/
+├─ ARCHIVE_2024_Q4.md         # Sessions 38-46
+├─ ARCHIVE_2024_Q3.md         # Older sessions
+└─ SESSION_TEMPLATE.md        # Template for new sessions
+```
 
 **MANDATORY Rules:**
 
@@ -181,6 +195,12 @@ Keep commit messages clean and professional.
    - 📊 "Project Health Status" - Update metrics if changed
    - 🎉 "Current Project Status" - Update feature counts and capabilities
 
+4. **Session Management**:
+   - **Keep only 2-3 most recent sessions** in PROJECT_STATUS.md
+   - **Archive old sessions** when file exceeds ~800 lines
+   - **Use SESSION_TEMPLATE.md** for documenting new sessions
+   - **Reference archives** at bottom of PROJECT_STATUS.md
+
 **When to Update:**
 
 - ✅ After completing a feature
@@ -189,6 +209,12 @@ Keep commit messages clean and professional.
 - ✅ When starting a new major feature
 - ✅ At the end of each session if significant progress made
 
+**When to Archive:**
+
+- 📦 When PROJECT_STATUS.md exceeds ~800 lines
+- 📦 When you have more than 3 completed sessions
+- 📦 At end of each quarter (Q1, Q2, Q3, Q4)
+
 **How to Update:**
 
 ```bash
@@ -196,20 +222,34 @@ Keep commit messages clean and professional.
 # 2. Scroll to "Summary & Recommendations" section (near top)
 # 3. Update relevant subsections
 # 4. Update "Last Updated" date at bottom of section
-# 5. Commit changes with descriptive message
+# 5. Add new session using SESSION_TEMPLATE.md as reference
+# 6. Archive old sessions if needed
+# 7. Commit changes with descriptive message
 ```
 
-**Important Note:**
+**How to Archive Sessions:**
+
+```bash
+# 1. Identify sessions to archive (keep only 2-3 latest)
+# 2. Create/update docs/sessions/ARCHIVE_YYYY_QX.md
+# 3. Move old session content to archive file
+# 4. Update PROJECT_STATUS.md to reference archive
+# 5. Commit with message: "docs: archive sessions X-Y to ARCHIVE_YYYY_QX.md"
+```
+
+**Important Notes:**
 
 - ❌ **DO NOT** duplicate Summary & Recommendations at the bottom
 - ✅ **KEEP IT** at the top after "Implemented Features" section
-- ✅ **ADD NOTE** at bottom: "_📌 Note: Summary & Recommendations section is at the top of this file_"
+- ✅ **ADD NOTE** at bottom: "_📌 Note: For archived sessions, see [docs/sessions/](./docs/sessions/)_"
+- ✅ **USE TEMPLATE**: Copy from `docs/sessions/SESSION_TEMPLATE.md` for new sessions
 
 **Example Commit Messages:**
 
 - `docs(status): update project health status after CRUD generator v2.1.0 release`
 - `docs(status): add new completed features to recommendations`
 - `docs(status): update next steps priorities`
+- `docs(status): archive sessions 38-46 to ARCHIVE_2024_Q4.md`
 
 ### Feature Documentation Policy (MANDATORY)
 
