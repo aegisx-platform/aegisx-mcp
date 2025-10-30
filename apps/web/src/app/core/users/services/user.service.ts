@@ -15,8 +15,10 @@ export interface User {
   firstName: string;
   lastName: string;
   isActive: boolean;
-  role: string;
-  roleId: string;
+  role: string; // Deprecated: Use roles[] for multi-role support
+  roleId: string; // Deprecated: Use roleIds[] for multi-role support
+  roles?: string[]; // Multi-role support
+  roleIds?: string[]; // Multi-role support
   createdAt: string;
   updatedAt: string;
   lastLoginAt?: string;
@@ -135,7 +137,8 @@ export interface UserProfile {
   lastName?: string;
   bio?: string;
   avatar?: string;
-  role: string;
+  role: string; // Deprecated: Use roles[] for multi-role support
+  roles?: string[]; // Multi-role support
   status: string;
   emailVerified: boolean;
   createdAt: string;
@@ -235,20 +238,20 @@ export class UserService {
 
   // Computed for dropdown/select options (for CRUD generation)
   readonly userOptions = computed(() => {
-    return this.usersSignal().map(user => ({
+    return this.usersSignal().map((user) => ({
       value: user.id,
       label: `${user.firstName} ${user.lastName} (${user.email})`,
-      disabled: !user.isActive
+      disabled: !user.isActive,
     }));
   });
 
   readonly activeUserOptions = computed(() => {
     return this.usersSignal()
-      .filter(user => user.isActive)
-      .map(user => ({
+      .filter((user) => user.isActive)
+      .map((user) => ({
         value: user.id,
         label: `${user.firstName} ${user.lastName}`,
-        email: user.email
+        email: user.email,
       }));
   });
 
@@ -395,13 +398,13 @@ export class UserService {
 
   // Simple method to get user display name
   getUserDisplayName(userId: string): string {
-    const user = this.usersSignal().find(u => u.id === userId);
+    const user = this.usersSignal().find((u) => u.id === userId);
     return user ? `${user.firstName} ${user.lastName}` : 'Unknown User';
   }
 
   // Method to find user by ID from loaded list
   getUserById(userId: string): User | undefined {
-    return this.usersSignal().find(u => u.id === userId);
+    return this.usersSignal().find((u) => u.id === userId);
   }
 
   async deleteUser(id: string): Promise<boolean> {

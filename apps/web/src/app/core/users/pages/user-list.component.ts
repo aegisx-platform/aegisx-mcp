@@ -298,9 +298,24 @@ import { ConfirmDialogComponent } from '../../../shared/ui/components/confirm-di
 
               <!-- Role Column -->
               <ng-container matColumnDef="role">
-                <th mat-header-cell *matHeaderCellDef>Role</th>
+                <th mat-header-cell *matHeaderCellDef>Role(s)</th>
                 <td mat-cell *matCellDef="let user">
+                  <!-- Multi-role support: display all roles as chips -->
+                  <mat-chip-set *ngIf="user.roles && user.roles.length > 0">
+                    <mat-chip
+                      *ngFor="let role of user.roles"
+                      [ngClass]="{
+                        'bg-purple-100 text-purple-800': role === 'admin',
+                        'bg-blue-100 text-blue-800': role === 'manager',
+                        'bg-green-100 text-green-800': role === 'user',
+                      }"
+                    >
+                      {{ role | titlecase }}
+                    </mat-chip>
+                  </mat-chip-set>
+                  <!-- Fallback for backward compatibility (single role) -->
                   <mat-chip
+                    *ngIf="!user.roles || user.roles.length === 0"
                     [ngClass]="{
                       'bg-purple-100 text-purple-800': user.role === 'admin',
                       'bg-blue-100 text-blue-800': user.role === 'manager',
@@ -528,7 +543,13 @@ export class UserListComponent implements OnInit {
     }
 
     if (this.selectedRole) {
-      filtered = filtered.filter((user) => user.role === this.selectedRole);
+      // Multi-role support: check if selectedRole exists in roles[] or matches role (backward compat)
+      filtered = filtered.filter(
+        (user) =>
+          user.role === this.selectedRole ||
+          user.roles?.includes(this.selectedRole) ||
+          false,
+      );
     }
 
     if (this.selectedStatus) {

@@ -74,6 +74,8 @@ export interface User {
   first_name: string;
   last_name: string;
   is_active: boolean;
+  role?: string; // Deprecated: Use roles[] for multi-role support
+  roles?: string[]; // Multi-role support
   created_at: string;
   updated_at: string;
 }

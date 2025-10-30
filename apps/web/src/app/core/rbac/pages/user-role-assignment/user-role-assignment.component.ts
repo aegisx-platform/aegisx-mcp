@@ -289,9 +289,19 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
                   >
                     <mat-icon class="text-blue-600 text-base">person</mat-icon>
                   </div>
-                  <div>
-                    <div class="font-medium">
-                      {{ getUserDisplayName(assignment) }}
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2">
+                      <span class="font-medium">{{
+                        getUserDisplayName(assignment)
+                      }}</span>
+                      <!-- Multi-role indicator -->
+                      @if (getUserRoleCount(assignment) > 1) {
+                        <mat-chip
+                          class="!text-xs !bg-purple-100 !text-purple-800 dark:!bg-purple-900 dark:!text-purple-200 !h-5"
+                        >
+                          {{ getUserRoleCount(assignment) }} roles
+                        </mat-chip>
+                      }
                     </div>
                     <div class="text-sm text-gray-600 dark:text-gray-400">
                       {{ getUserEmail(assignment) }}
@@ -1067,6 +1077,13 @@ export class UserRoleAssignmentComponent implements OnInit {
     // This would normally come from the user data in the assignment
     // For now, we'll use a placeholder
     return `user.${assignment.user_id.substring(0, 8)}@example.com`;
+  }
+
+  getUserRoleCount(assignment: UserRole): number {
+    // Count how many roles this user has (multi-role support)
+    return this.userRoles().filter(
+      (ur) => ur.user_id === assignment.user_id && ur.is_active,
+    ).length;
   }
 
   formatDate(dateString: string): string {

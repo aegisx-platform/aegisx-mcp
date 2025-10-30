@@ -8,7 +8,8 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
-  role?: string;
+  role?: string; // Deprecated: Use roles[] for multi-role support
+  roles?: string[]; // Multi-role support
   permissions?: string[];
   avatar?: string;
   bio?: string;
@@ -68,7 +69,8 @@ export class AuthService {
 
   readonly hasRole = computed(() => (role: string) => {
     const user = this._currentUser();
-    return user?.role === role;
+    // Check both role (backward compat) and roles[] (multi-role support)
+    return user?.role === role || user?.roles?.includes(role) || false;
   });
 
   readonly hasPermission = computed(() => (permission: string) => {
@@ -189,7 +191,10 @@ export class AuthService {
               email: profile.email,
               firstName: profile.firstName || '',
               lastName: profile.lastName || '',
-              role: profile.role?.name || 'user',
+              role: profile.role?.name || profile.roles?.[0] || 'user', // Backward compat: first role
+              roles:
+                profile.roles ||
+                (profile.role?.name ? [profile.role.name] : ['user']), // Multi-role support
               permissions: profile.role?.permissions || [],
               avatar: profile.avatar,
               bio: profile.bio,
@@ -209,7 +214,9 @@ export class AuthService {
               email: payload.email || 'user@example.com',
               firstName: payload.firstName || 'User',
               lastName: payload.lastName || 'Name',
-              role: payload.role || 'user',
+              role: payload.role || payload.roles?.[0] || 'user', // Backward compat
+              roles:
+                payload.roles || (payload.role ? [payload.role] : ['user']), // Multi-role support
               permissions: payload.permissions || [],
             };
             this._currentUser.set(user);

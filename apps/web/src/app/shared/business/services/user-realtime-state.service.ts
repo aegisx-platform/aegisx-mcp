@@ -18,7 +18,8 @@ export interface User extends BaseEntity {
   lastName: string;
   avatar?: string;
   isActive: boolean;
-  role: string;
+  role: string; // Deprecated: Use roles[] for multi-role support
+  roles?: string[]; // Multi-role support
   createdAt: string;
   updatedAt: string;
   lastLoginAt?: string;
@@ -297,7 +298,10 @@ export class UserRealtimeStateService extends BaseRealtimeStateManager<User> {
   }
 
   public getUsersByRole(role: string): User[] {
-    return this.localState().filter((user) => user.role === role);
+    // Multi-role support: check both role (backward compat) and roles[] (multi-role)
+    return this.localState().filter(
+      (user) => user.role === role || user.roles?.includes(role) || false,
+    );
   }
 
   public getActiveUsers(): User[] {

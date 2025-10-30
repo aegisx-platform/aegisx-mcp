@@ -173,11 +173,17 @@ import {
           </h4>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div class="flex justify-between">
-              <span class="text-gray-600 dark:text-gray-400">Role:</span>
+              <span class="text-gray-600 dark:text-gray-400">Role(s):</span>
               <span
                 class="font-medium text-gray-900 dark:text-gray-100 capitalize"
               >
-                {{ userProfile?.role }}
+                <!-- Multi-role support: display all roles comma-separated -->
+                @if (userProfile?.roles && userProfile.roles.length > 0) {
+                  {{ formatRoles(userProfile.roles) }}
+                } @else {
+                  <!-- Fallback for backward compatibility (single role) -->
+                  {{ userProfile?.role }}
+                }
               </span>
             </div>
             <div class="flex justify-between">
@@ -348,6 +354,10 @@ export class ProfileInfoComponent implements OnChanges {
     } catch {
       return 'Unknown';
     }
+  }
+
+  formatRoles(roles: string[]): string {
+    return roles.map((r) => r.charAt(0).toUpperCase() + r.slice(1)).join(', ');
   }
 
   getBioLength(): number {
