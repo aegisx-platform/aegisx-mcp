@@ -1,3 +1,88 @@
+# Changelog Entry for v2.1.1
+
+## [2.1.1] - 2025-10-31
+
+### Changed
+
+#### Authorization Pattern Migration
+
+**Migrated from role-based to permission-based authorization** across all CRUD Generator backend templates.
+
+**Problem Solved**: The previous `authorize(['resource.action', 'admin'])` pattern required manually listing the 'admin' role in every route, creating maintenance burden and potential security gaps.
+
+**Solution - Permission-Based Authorization**:
+
+1. **Simplified Authorization Pattern**
+   - **Before**: `fastify.authorize(['{{moduleName}}.create', 'admin'])`
+   - **After**: `fastify.verifyPermission('{{moduleName}}', 'create')`
+   - **Impact**: Admin users automatically get access via `*:*` wildcard permission
+
+2. **Enhanced Security Features**
+   - Redis-cached permission checks for performance
+   - Database-backed permission validation
+   - Wildcard support: `*:*` (admin), `resource:*`, `*:action`
+   - Granular permission control per operation
+
+3. **Better RBAC Integration**
+   - Aligns with platform's multi-role RBAC system
+   - Supports dynamic permission assignment
+   - Enables fine-grained access control without code changes
+
+**Files Modified**:
+
+- `templates/backend/standard/routes.hbs` - 16 authorization points updated
+- `templates/backend/domain/route.hbs` - 17 authorization points updated (includes export)
+- `templates/backend/import-routes.hbs` - 3 authorization points updated
+- **Total**: 36 authorization points migrated across 3 templates
+
+**Migration Pattern**:
+
+```typescript
+// Standard CRUD operations
+create:   authorize(['resource.create', 'admin']) → verifyPermission('resource', 'create')
+read:     authorize(['resource.read', 'admin'])   → verifyPermission('resource', 'read')
+update:   authorize(['resource.update', 'admin']) → verifyPermission('resource', 'update')
+delete:   authorize(['resource.delete', 'admin']) → verifyPermission('resource', 'delete')
+
+// Enhanced operations (Enterprise/Full packages)
+export:   authorize(['resource.read', 'resource.export', 'admin']) → verifyPermission('resource', 'export')
+dropdown: authorize(['resource.read', 'admin'])   → verifyPermission('resource', 'read')
+validate: authorize(['resource.create', 'resource.update', 'admin']) → verifyPermission('resource', 'read')
+```
+
+**Benefits**:
+
+- ✅ **No Manual Admin Inclusion**: Admin role gets automatic access via wildcard permissions
+- 🔒 **Better Security**: Database-backed permission checks with Redis cache
+- 🎯 **Granular Control**: Fine-grained permissions without template changes
+- ⚡ **Performance**: Redis-cached permission lookups
+- 🏗️ **Scalable**: Easy to extend with new permission patterns
+
+**Backward Compatibility**:
+
+- `authorize` method still exists as alias for `verifyRole`
+- Existing generated code continues to work
+- Platform supports both patterns during transition
+- Regenerate modules to get new authorization pattern
+
+**Example Generated Code**:
+
+```typescript
+// Create route with new pattern
+fastify.post('/', {
+  schema: {
+    /* ... */
+  },
+  preValidation: [
+    fastify.authenticate,
+    fastify.verifyPermission('budgets', 'create'), // ✅ Simpler, more secure
+  ],
+  handler: controller.create.bind(controller),
+});
+```
+
+---
+
 # Changelog
 
 All notable changes to AegisX CRUD Generator will be documented in this file.
