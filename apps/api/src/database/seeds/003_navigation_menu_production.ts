@@ -433,37 +433,330 @@ export async function seed(knex: Knex): Promise<void> {
   }
 
   // ============================================================================
-  // ADD MISSING PERMISSIONS
+  // ADD COMPREHENSIVE PERMISSIONS
   // ============================================================================
 
-  console.log('📝 Adding missing permissions...');
+  console.log('📝 Adding comprehensive permissions...');
 
-  // Add templates permission if it doesn't exist
-  const templatesPerm = await knex('permissions')
-    .where({ resource: 'templates', action: 'read' })
-    .first();
+  // Define all necessary permissions
+  const permissionsToAdd = [
+    // Navigation permissions
+    {
+      resource: 'navigation',
+      action: 'view',
+      description: 'View navigation structure',
+    },
+    {
+      resource: 'navigation',
+      action: 'manage',
+      description: 'Manage navigation items',
+    },
 
-  if (!templatesPerm) {
-    await knex('permissions').insert({
+    // Dashboard permissions
+    { resource: 'dashboard', action: 'view', description: 'View dashboard' },
+
+    // Settings permissions
+    { resource: 'settings', action: 'view', description: 'View settings' },
+    { resource: 'settings', action: 'update', description: 'Update settings' },
+
+    // Profile permissions
+    {
+      resource: 'profile',
+      action: 'avatar',
+      description: 'Upload/delete avatar',
+    },
+    {
+      resource: 'profile',
+      action: 'preferences',
+      description: 'Update user preferences',
+    },
+
+    // RBAC Module - Complete Permission Set
+    {
+      resource: 'rbac',
+      action: 'stats:read',
+      description: 'View RBAC statistics and overview',
+    },
+    {
+      resource: 'rbac',
+      action: 'roles:list',
+      description: 'List and view all roles',
+    },
+    {
+      resource: 'rbac',
+      action: 'permissions:list',
+      description: 'List and view all permissions',
+    },
+    {
+      resource: 'rbac',
+      action: 'user-roles:list',
+      description: 'List and view user role assignments',
+    },
+    { resource: 'rbac', action: 'roles:read', description: 'View roles' },
+    { resource: 'rbac', action: 'roles:create', description: 'Create roles' },
+    { resource: 'rbac', action: 'roles:update', description: 'Update roles' },
+    { resource: 'rbac', action: 'roles:delete', description: 'Delete roles' },
+    {
+      resource: 'rbac',
+      action: 'permissions:read',
+      description: 'View permissions',
+    },
+    {
+      resource: 'rbac',
+      action: 'permissions:assign',
+      description: 'Assign permissions to roles',
+    },
+
+    // Roles Management
+    { resource: 'roles', action: 'read', description: 'View role details' },
+    { resource: 'roles', action: 'create', description: 'Create new roles' },
+    {
+      resource: 'roles',
+      action: 'update',
+      description: 'Update existing roles',
+    },
+    { resource: 'roles', action: 'delete', description: 'Delete roles' },
+
+    // Permissions Management
+    {
+      resource: 'permissions',
+      action: 'read',
+      description: 'View permission details',
+    },
+    {
+      resource: 'permissions',
+      action: 'create',
+      description: 'Create new permissions',
+    },
+    {
+      resource: 'permissions',
+      action: 'update',
+      description: 'Update existing permissions',
+    },
+    {
+      resource: 'permissions',
+      action: 'delete',
+      description: 'Delete permissions',
+    },
+    {
+      resource: 'permissions',
+      action: 'assign',
+      description: 'Assign permissions to roles',
+    },
+
+    // User Role Assignment
+    {
+      resource: 'user-roles',
+      action: 'read',
+      description: 'View user role assignments',
+    },
+    {
+      resource: 'user-roles',
+      action: 'assign',
+      description: 'Assign roles to users',
+    },
+    {
+      resource: 'user-roles',
+      action: 'revoke',
+      description: 'Revoke roles from users',
+    },
+    {
+      resource: 'user-roles',
+      action: 'bulk-assign',
+      description: 'Bulk assign roles to multiple users',
+    },
+    {
+      resource: 'user-roles',
+      action: 'set-expiry',
+      description: 'Set expiration for role assignments',
+    },
+
+    // Navigation Management
+    {
+      resource: 'navigation',
+      action: 'read',
+      description: 'View navigation items',
+    },
+    {
+      resource: 'navigation',
+      action: 'create',
+      description: 'Create new navigation items',
+    },
+    {
+      resource: 'navigation',
+      action: 'update',
+      description: 'Update existing navigation items',
+    },
+    {
+      resource: 'navigation',
+      action: 'delete',
+      description: 'Delete navigation items',
+    },
+    {
+      resource: 'navigation',
+      action: 'assign-permissions',
+      description: 'Assign permissions to navigation items',
+    },
+
+    // API Keys Management
+    {
+      resource: 'api-keys',
+      action: 'read',
+      description: 'View API keys',
+    },
+    {
+      resource: 'api-keys',
+      action: 'read:own',
+      description: 'View own API keys',
+    },
+    {
+      resource: 'api-keys',
+      action: 'create',
+      description: 'Create API keys',
+    },
+    {
+      resource: 'api-keys',
+      action: 'update',
+      description: 'Update API keys',
+    },
+    {
+      resource: 'api-keys',
+      action: 'delete',
+      description: 'Delete API keys',
+    },
+    {
+      resource: 'api-keys',
+      action: 'generate',
+      description: 'Generate new API keys',
+    },
+    {
+      resource: 'api-keys',
+      action: 'validate',
+      description: 'Validate API keys',
+    },
+    {
+      resource: 'api-keys',
+      action: 'revoke',
+      description: 'Revoke API keys',
+    },
+    {
+      resource: 'api-keys',
+      action: 'rotate',
+      description: 'Rotate API keys',
+    },
+
+    // PDF Templates
+    {
       resource: 'templates',
       action: 'read',
       description: 'View PDF templates',
-    });
-    console.log('✅ Added templates.read permission');
+    },
+  ];
 
-    // Assign to admin role
-    const adminRole = await knex('roles').where({ name: 'admin' }).first();
-    if (adminRole) {
-      const newPerm = await knex('permissions')
-        .where({ resource: 'templates', action: 'read' })
-        .first();
-      await knex('role_permissions').insert({
-        role_id: adminRole.id,
-        permission_id: newPerm.id,
-      });
-      console.log('✅ Assigned templates.read to admin role');
+  // Insert permissions that don't already exist
+  const addedPermissions = [];
+  for (const perm of permissionsToAdd) {
+    const existing = await knex('permissions')
+      .where({ resource: perm.resource, action: perm.action })
+      .first();
+
+    if (!existing) {
+      const [inserted] = await knex('permissions')
+        .insert(perm)
+        .returning(['id', 'resource', 'action']);
+      addedPermissions.push(inserted);
     }
   }
+
+  console.log(`✅ Added ${addedPermissions.length} new permissions`);
+
+  // ============================================================================
+  // ASSIGN PERMISSIONS TO ROLES
+  // ============================================================================
+
+  console.log('🔗 Assigning permissions to roles...');
+
+  // Get all permissions and roles
+  const allPermissions = await knex('permissions').select([
+    'id',
+    'resource',
+    'action',
+  ]);
+  const adminRole = await knex('roles').where({ name: 'admin' }).first();
+  const userRole = await knex('roles').where({ name: 'user' }).first();
+
+  if (!adminRole || !userRole) {
+    console.error('❌ Admin or User role not found!');
+    return;
+  }
+
+  // Assign all RBAC, roles, permissions, user-roles, navigation, api-keys permissions to admin
+  const adminResources = [
+    'rbac',
+    'roles',
+    'permissions',
+    'user-roles',
+    'navigation',
+    'api-keys',
+    'templates',
+  ];
+  const adminPermissions = allPermissions.filter((perm) =>
+    adminResources.includes(perm.resource),
+  );
+
+  let adminAssigned = 0;
+  for (const perm of adminPermissions) {
+    const existing = await knex('role_permissions')
+      .where({ role_id: adminRole.id, permission_id: perm.id })
+      .first();
+
+    if (!existing) {
+      await knex('role_permissions').insert({
+        role_id: adminRole.id,
+        permission_id: perm.id,
+      });
+      adminAssigned++;
+    }
+  }
+
+  console.log(
+    `✅ Assigned ${adminAssigned} permissions to admin role (total: ${adminPermissions.length})`,
+  );
+
+  // Assign limited permissions to user role
+  const userPermissionList = [
+    'navigation.view',
+    'dashboard.view',
+    'profile.read',
+    'profile.update',
+    'profile.avatar',
+    'profile.preferences',
+    'settings.view',
+    'settings.update',
+  ];
+
+  const userPermissions = allPermissions.filter((perm) =>
+    userPermissionList.includes(`${perm.resource}.${perm.action}`),
+  );
+
+  let userAssigned = 0;
+  for (const perm of userPermissions) {
+    const existing = await knex('role_permissions')
+      .where({ role_id: userRole.id, permission_id: perm.id })
+      .first();
+
+    if (!existing) {
+      await knex('role_permissions').insert({
+        role_id: userRole.id,
+        permission_id: perm.id,
+      });
+      userAssigned++;
+    }
+  }
+
+  console.log(
+    `✅ Assigned ${userAssigned} permissions to user role (total: ${userPermissions.length})`,
+  );
 
   // ============================================================================
   // LINK NAVIGATION ITEMS WITH PERMISSIONS
