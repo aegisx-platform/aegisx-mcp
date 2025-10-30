@@ -50,159 +50,124 @@ export class NavigationService {
   private authService = inject(AuthService);
   private readonly apiUrl = '/navigation';
 
-  // Default navigation items (fallback)
+  // Default navigation items (fallback when API fails)
+  // Simplified version aligned with seed data structure
   private readonly defaultNavigation: AxNavigationItem[] = [
-    // Main Group
+    // Dashboard
     {
-      id: 'main',
-      title: 'Main',
-      type: 'group',
-      children: [
-        {
-          id: 'dashboard',
-          title: 'Analytics Dashboard',
-          type: 'item',
-          icon: 'heroicons_outline:home',
-          link: '/dashboard',
-        },
-        {
-          id: 'dashboard.project',
-          title: 'Project Dashboard',
-          type: 'item',
-          icon: 'heroicons_outline:briefcase',
-          link: '/dashboards/project',
-        },
-      ],
+      id: 'dashboard',
+      title: 'Dashboard',
+      type: 'item',
+      icon: 'dashboard',
+      link: '/dashboard',
     },
-    // Management Group
+    // User Management
     {
-      id: 'management',
-      title: 'Management',
-      type: 'group',
+      id: 'user-management',
+      title: 'User Management',
+      type: 'collapsible',
+      icon: 'people',
       children: [
         {
-          id: 'users',
-          title: 'User Management',
+          id: 'users-list',
+          title: 'Users',
           type: 'item',
-          icon: 'heroicons_outline:users',
+          icon: 'group',
           link: '/users',
           permissions: ['users:read', '*:*'],
         },
         {
-          id: 'pdf-templates',
-          title: 'PDF Templates',
+          id: 'user-profile',
+          title: 'My Profile',
           type: 'item',
-          icon: 'heroicons_outline:document-duplicate',
-          link: '/pdf-templates',
-          badge: {
-            content: 'New',
-            type: 'info',
-          },
+          icon: 'account_circle',
+          link: '/profile',
         },
       ],
     },
-    // RBAC Group (Collapsible)
+    // RBAC Management
     {
-      id: 'rbac',
+      id: 'rbac-management',
       title: 'RBAC Management',
       type: 'collapsible',
-      icon: 'heroicons_outline:shield-check',
+      icon: 'security',
       permissions: ['dashboard:view', '*:*'],
       children: [
         {
-          id: 'rbac.dashboard',
-          title: 'Dashboard',
+          id: 'rbac-dashboard',
+          title: 'Overview',
           type: 'item',
-          icon: 'heroicons_outline:chart-bar',
+          icon: 'bar_chart',
           link: '/rbac/dashboard',
           permissions: ['dashboard:view', '*:*'],
         },
         {
-          id: 'rbac.roles',
+          id: 'rbac-roles',
           title: 'Roles',
           type: 'item',
-          icon: 'heroicons_outline:user-group',
+          icon: 'badge',
           link: '/rbac/roles',
           permissions: ['roles:read', '*:*'],
         },
         {
-          id: 'rbac.permissions',
+          id: 'rbac-permissions',
           title: 'Permissions',
           type: 'item',
-          icon: 'heroicons_outline:key',
+          icon: 'vpn_key',
           link: '/rbac/permissions',
           permissions: ['permissions:read', '*:*'],
         },
         {
-          id: 'rbac.user-roles',
+          id: 'rbac-user-roles',
           title: 'User Assignments',
           type: 'item',
-          icon: 'heroicons_outline:user-plus',
+          icon: 'person_add',
           link: '/rbac/user-roles',
           permissions: ['user-roles:read', '*:*'],
         },
         {
-          id: 'rbac.navigation',
+          id: 'rbac-navigation',
           title: 'Navigation',
           type: 'item',
-          icon: 'heroicons_outline:bars-3',
+          icon: 'menu',
           link: '/rbac/navigation',
           permissions: ['navigation:read', '*:*'],
         },
       ],
     },
-    // Settings Group
+    // System
     {
-      id: 'settings',
-      title: 'Settings',
-      type: 'group',
+      id: 'system-config',
+      title: 'System',
+      type: 'collapsible',
+      icon: 'settings',
       children: [
         {
-          id: 'settings.general',
-          title: 'General Settings',
+          id: 'settings',
+          title: 'Settings',
           type: 'item',
-          icon: 'heroicons_outline:cog-6-tooth',
+          icon: 'tune',
           link: '/settings',
           permissions: ['settings:view', '*:*'],
         },
         {
-          id: 'settings.api-keys',
-          title: 'API Keys',
+          id: 'pdf-templates',
+          title: 'PDF Templates',
           type: 'item',
-          icon: 'heroicons_outline:key',
-          link: '/settings/api-keys',
-          badge: {
-            content: 'New',
-            type: 'accent',
-          },
+          icon: 'description',
+          link: '/pdf-templates',
         },
       ],
     },
-    // Account Group
+    // Files
     {
-      id: 'account',
-      title: 'Account',
-      type: 'group',
-      children: [
-        {
-          id: 'profile',
-          title: 'My Profile',
-          type: 'item',
-          icon: 'heroicons_outline:user-circle',
-          link: '/profile',
-        },
-        {
-          id: 'docs',
-          title: 'Documentation',
-          type: 'item',
-          icon: 'heroicons_outline:book-open',
-          link: '/docs',
-          externalLink: true,
-          target: '_blank',
-        },
-      ],
+      id: 'file-management',
+      title: 'Files',
+      type: 'item',
+      icon: 'folder',
+      link: '/file-upload',
     },
-    // Dev Tools Group (only in development)
+    // Dev Tools (only in development)
     ...(environment.production
       ? []
       : [
@@ -215,7 +180,7 @@ export class NavigationService {
                 id: 'dev',
                 title: 'Development Tools',
                 type: 'item' as const,
-                icon: 'heroicons_outline:beaker',
+                icon: 'science',
                 link: '/dev',
                 badge: {
                   content: 'Dev',
