@@ -158,11 +158,7 @@ export class FontManagerService {
           const fontKey = `${fontFamily}-${variant}`;
           this.fontFiles.set(fontKey, fontBuffer);
           loadedCount++;
-          // Compact log showing only filename and size
-          const fileName = path.basename(fullPath);
-          console.log(
-            `   ✓ ${fileName} (${Math.round(fontBuffer.length / 1024)}KB)`,
-          );
+          // Silent loading - summary will be shown at the end
         } else {
           console.warn(`   ✗ Font variant not found: ${fontFamily}-${variant}`);
         }
