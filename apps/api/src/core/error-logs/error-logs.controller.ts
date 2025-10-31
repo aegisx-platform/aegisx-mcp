@@ -12,13 +12,18 @@ export class ErrorLogsController {
     try {
       const result = await this.service.findAll(request.query);
 
-      return reply.success({
+      const totalPages = Math.ceil(result.total / result.limit);
+      // Return data that matches PaginatedResponseSchema structure
+      return reply.send({
+        success: true,
         data: result.data,
         pagination: {
           page: result.page,
           limit: result.limit,
           total: result.total,
-          totalPages: Math.ceil(result.total / result.limit),
+          totalPages,
+          hasNext: result.page < totalPages,
+          hasPrev: result.page > 1,
         },
       });
     } catch (error: any) {

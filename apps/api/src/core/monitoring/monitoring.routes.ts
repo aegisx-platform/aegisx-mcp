@@ -182,35 +182,41 @@ async function monitoringRoutes(fastify: FastifyInstance) {
           200: {
             type: 'object',
             properties: {
-              cpu: {
+              success: { type: 'boolean' },
+              data: {
                 type: 'object',
                 properties: {
-                  usage: { type: 'number' },
-                  cores: { type: 'number' },
-                  loadAverage: {
-                    type: 'array',
-                    items: { type: 'number' },
+                  cpu: {
+                    type: 'object',
+                    properties: {
+                      usage: { type: 'number' },
+                      cores: { type: 'number' },
+                      loadAverage: {
+                        type: 'array',
+                        items: { type: 'number' },
+                      },
+                    },
                   },
+                  memory: {
+                    type: 'object',
+                    properties: {
+                      total: { type: 'number' },
+                      used: { type: 'number' },
+                      free: { type: 'number' },
+                      usagePercent: { type: 'number' },
+                    },
+                  },
+                  process: {
+                    type: 'object',
+                    properties: {
+                      memoryUsage: { type: 'number' },
+                      uptime: { type: 'number' },
+                      pid: { type: 'number' },
+                    },
+                  },
+                  timestamp: { type: 'string' },
                 },
               },
-              memory: {
-                type: 'object',
-                properties: {
-                  total: { type: 'number' },
-                  used: { type: 'number' },
-                  free: { type: 'number' },
-                  usagePercent: { type: 'number' },
-                },
-              },
-              process: {
-                type: 'object',
-                properties: {
-                  memoryUsage: { type: 'number' },
-                  uptime: { type: 'number' },
-                  pid: { type: 'number' },
-                },
-              },
-              timestamp: { type: 'string' },
             },
           },
         },
@@ -225,10 +231,16 @@ async function monitoringRoutes(fastify: FastifyInstance) {
         const freeMem = os.freemem();
         const usedMem = totalMem - freeMem;
 
+        // Calculate CPU usage as percentage from load average
+        const cores = os.cpus().length;
+        const loadAvg = os.loadavg()[0]; // 1-minute load average
+        const cpuPercent = (loadAvg / cores) * 100;
+
+        // Use reply.success() to wrap response in standard format
         return reply.success({
           cpu: {
-            usage: process.cpuUsage().user / 1000000, // Convert to seconds
-            cores: os.cpus().length,
+            usage: cpuPercent, // CPU usage as percentage
+            cores: cores,
             loadAverage: os.loadavg(),
           },
           memory: {
@@ -475,6 +487,182 @@ async function monitoringRoutes(fastify: FastifyInstance) {
     },
   );
 
+  // Database pool endpoint (for System Monitoring dashboard)
+  fastify.get(
+    '/database-pool',
+    {
+      schema: {
+        summary: 'Get database pool status',
+        description: 'Get database connection pool information',
+        tags: ['monitoring'],
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              data: {
+                type: 'object',
+                properties: {
+                  pool: {
+                    type: 'object',
+                    properties: {
+                      total: { type: 'number' },
+                      active: { type: 'number' },
+                      idle: { type: 'number' },
+                    },
+                  },
+                  queries: {
+                    type: 'object',
+                    properties: {
+                      total: { type: 'number' },
+                      slow: { type: 'number' },
+                    },
+                  },
+                  timestamp: { type: 'string' },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      try {
+        const pool = fastify.knex?.client?.pool;
+
+        return reply.success({
+          pool: {
+            total: pool?.max || 10,
+            active: pool?.numUsed?.() || 0,
+            idle: pool?.numFree?.() || pool?.max || 10,
+          },
+          queries: {
+            total: 0,
+            slow: 0,
+          },
+          timestamp: new Date().toISOString(),
+        });
+      } catch (error) {
+        fastify.logger.error('Failed to get database pool status', {
+          error: error.message,
+        });
+        return reply.error(
+          'METRICS_ERROR',
+          'Failed to get database pool status',
+          500,
+        );
+      }
+    },
+  );
+
+  // Cache stats endpoint (for System Monitoring dashboard)
+  fastify.get(
+    '/cache-stats',
+    {
+      schema: {
+        summary: 'Get cache statistics',
+        description: 'Get Redis cache hit rates and performance',
+        tags: ['monitoring'],
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              data: {
+                type: 'object',
+                properties: {
+                  cache: {
+                    type: 'object',
+                    properties: {
+                      hits: { type: 'number' },
+                      misses: { type: 'number' },
+                      hitRate: { type: 'number' },
+                      keys: { type: 'number' },
+                      memory: { type: 'number' },
+                    },
+                  },
+                  timestamp: { type: 'string' },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      try {
+        const redis = (fastify as any).redis;
+        const stats = {
+          hits: 0,
+          misses: 0,
+          hitRate: 0,
+          keys: 0,
+          memory: 0,
+        };
+
+        if (redis && typeof redis.info === 'function') {
+          try {
+            // Get stats section
+            const statsInfo = await redis.info('stats');
+            const lines = statsInfo.split('\r\n');
+            for (const line of lines) {
+              if (line.startsWith('keyspace_hits:')) {
+                stats.hits = parseInt(line.split(':')[1]) || 0;
+              } else if (line.startsWith('keyspace_misses:')) {
+                stats.misses = parseInt(line.split(':')[1]) || 0;
+              }
+            }
+
+            // Calculate hit rate
+            const total = stats.hits + stats.misses;
+            stats.hitRate = total > 0 ? (stats.hits / total) * 100 : 0;
+
+            // Get keyspace section for key count
+            const keyspaceInfo = await redis.info('keyspace');
+            const keyspaceLines = keyspaceInfo.split('\r\n');
+            for (const line of keyspaceLines) {
+              if (line.startsWith('db0:')) {
+                const match = line.match(/keys=(\d+)/);
+                if (match) {
+                  stats.keys = parseInt(match[1]) || 0;
+                }
+              }
+            }
+
+            // Get memory section
+            const memoryInfo = await redis.info('memory');
+            const memoryLines = memoryInfo.split('\r\n');
+            for (const line of memoryLines) {
+              if (line.startsWith('used_memory:')) {
+                stats.memory = parseInt(line.split(':')[1]) || 0;
+              }
+            }
+          } catch (redisError) {
+            fastify.logger.warn('Failed to get Redis stats', {
+              error: redisError.message,
+            });
+          }
+        }
+
+        return reply.success({
+          cache: {
+            hits: stats.hits,
+            misses: stats.misses,
+            hitRate: stats.hitRate,
+            keys: stats.keys,
+            memory: stats.memory,
+          },
+          timestamp: new Date().toISOString(),
+        });
+      } catch (error) {
+        fastify.logger.error('Failed to get cache stats', {
+          error: error.message,
+        });
+        return reply.error('METRICS_ERROR', 'Failed to get cache stats', 500);
+      }
+    },
+  );
+
   // Active sessions endpoint
   fastify.get(
     '/active-sessions',
@@ -507,6 +695,22 @@ async function monitoringRoutes(fastify: FastifyInstance) {
     },
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
+        // Check if sessions table exists
+        const tableExists = await fastify
+          .knex('information_schema.tables')
+          .where({ table_schema: 'public', table_name: 'sessions' })
+          .first();
+
+        if (!tableExists) {
+          // Table doesn't exist yet, return empty data
+          return reply.send({
+            total: 0,
+            users: 0,
+            sessions: [],
+            timestamp: new Date().toISOString(),
+          });
+        }
+
         // Query active sessions from database
         const activeSessions = await fastify
           .knex('sessions')
@@ -517,7 +721,7 @@ async function monitoringRoutes(fastify: FastifyInstance) {
 
         const uniqueUsers = new Set(activeSessions.map((s) => s.user_id)).size;
 
-        return reply.success({
+        return reply.send({
           total: activeSessions.length,
           users: uniqueUsers,
           sessions: activeSessions.map((s) => ({
@@ -526,7 +730,7 @@ async function monitoringRoutes(fastify: FastifyInstance) {
           })),
           timestamp: new Date().toISOString(),
         });
-      } catch (error) {
+      } catch (error: any) {
         fastify.logger.error('Failed to get active sessions', {
           error: error.message,
         });

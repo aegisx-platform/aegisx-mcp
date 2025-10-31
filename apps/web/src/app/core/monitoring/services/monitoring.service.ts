@@ -118,7 +118,7 @@ export class MonitoringService {
         success: true;
         data: DatabaseStats;
         message: string;
-      }>(`${this.baseUrl}/database-stats`)
+      }>(`${this.baseUrl}/database-pool`)
       .pipe(
         map((response) => response.data),
         tap((stats) => {
@@ -144,7 +144,7 @@ export class MonitoringService {
         success: true;
         data: RedisStats;
         message: string;
-      }>(`${this.baseUrl}/redis-stats`)
+      }>(`${this.baseUrl}/cache-stats`)
       .pipe(
         map((response) => response.data),
         tap((stats) => {

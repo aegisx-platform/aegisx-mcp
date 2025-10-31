@@ -369,9 +369,7 @@ export class SystemMonitoringComponent
         title: 'CPU Usage',
         icon: 'developer_board',
         color: 'blue',
-        value: system
-          ? `${((system.cpu.usage / 1000000) * 100).toFixed(1)}%`
-          : 'N/A',
+        value: system ? `${system.cpu.usage.toFixed(1)}%` : 'N/A',
         subtitle: system ? `${system.cpu.cores} cores` : undefined,
         trend: 'stable',
       },
@@ -502,7 +500,7 @@ export class SystemMonitoringComponent
         datasets: [
           {
             data: [
-              system ? (system.cpu.usage / 1000000) * 10 : 0,
+              system ? system.cpu.usage : 0,
               system ? system.memory.usagePercent : 0,
               system ? 100 - system.memory.usagePercent : 100,
             ],
@@ -639,7 +637,7 @@ export class SystemMonitoringComponent
     const system = this.systemMetrics();
     if (this.cpuMemoryChart && system) {
       this.cpuMemoryChart.data.datasets[0].data = [
-        (system.cpu.usage / 1000000) * 10,
+        system.cpu.usage,
         system.memory.usagePercent,
         100 - system.memory.usagePercent,
       ];
