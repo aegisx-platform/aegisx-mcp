@@ -1,703 +1,701 @@
-# System - Troubleshooting Guide
+# System - Troubleshooting
 
-> **Quick reference for resolving common issues and debugging**
+> **Common issues, debugging techniques, and solutions for System module problems**
 
 **Last Updated:** 2025-10-31
 **Version:** 1.0.0
-**Support Level:** Production
 
 ---
 
 ## 📋 Table of Contents
 
 - [Quick Diagnostics](#quick-diagnostics)
-- [Common Issues](#common-issues)
-- [Error Messages](#error-messages)
-- [Performance Issues](#performance-issues)
-- [Integration Issues](#integration-issues)
-- [Debug Procedures](#debug-procedures)
+- [Health Check Issues](#health-check-issues)
+- [Database Connection Problems](#database-connection-problems)
+- [Redis Connection Problems](#redis-connection-problems)
+- [Memory Issues](#memory-issues)
+- [Performance Problems](#performance-problems)
+- [Load Balancer Integration Issues](#load-balancer-integration-issues)
+- [Kubernetes Probe Failures](#kubernetes-probe-failures)
+- [Debugging Techniques](#debugging-techniques)
 - [Getting Help](#getting-help)
 
 ---
 
-## 🚨 Quick Diagnostics
+## Quick Diagnostics
 
-### Health Check Commands
+### First Steps When Something Goes Wrong
 
 ```bash
-# API health check
+# 1. Check if API is running
+curl http://localhost:3333/api/ping
+
+# 2. Check simple health
 curl http://localhost:3333/api/health
 
-# Check feature endpoint
-curl -X GET http://localhost:3333/api/system \
-  -H "Authorization: Bearer <token>"
+# 3. Check detailed status
+curl http://localhost:3333/api/status | jq .
 
-# Check database connection
-psql -h localhost -U postgres -d aegisx_dev \
-  -c "SELECT 1 FROM [table_name] LIMIT 1;"
-
-# Check Redis connection
-redis-cli ping
-
-# Check logs
-pm2 logs aegisx-api --lines 100
-# OR
-docker logs -f aegisx-api
+# 4. Check API logs
+docker logs aegisx-api  # Docker
+kubectl logs -l app=aegisx-api -n aegisx  # Kubernetes
 ```
 
-### Quick Fixes
+### Interpreting Status Responses
 
-| Symptom | Quick Fix | Details |
-|---------|-----------|---------|
-| API not responding | Restart service | `pm2 restart aegisx-api` or `docker restart aegisx-api` |
-| Database errors | Check migrations | `pnpm run knex migrate:status` |
-| Cache issues | Clear Redis | `redis-cli FLUSHDB` |
-| Port conflicts | Check port usage | `lsof -i :3333` (kill conflicting process) |
-| Build errors | Clean & rebuild | `pnpm nx reset && pnpm install` |
+| Response | Meaning | Next Step |
+|----------|---------|-----------|
+| **Connection refused** | API not running | Check process/container is running |
+| **Timeout** | API unresponsive | Check CPU/memory, database connectivity |
+| **status: "error"** | Critical failure | Check database connection |
+| **status: "degraded"** | Partial issues | Check Redis, memory, database performance |
+| **status: "healthy"** | All good | False alarm or intermittent issue |
 
 ---
 
-## 🐛 Common Issues
+## Health Check Issues
 
-### Issue 1: Feature Not Loading
+### Problem: `/api/health` Returns "error"
 
 **Symptoms:**
-- Blank page or loading spinner
-- Console errors: "Failed to fetch"
-- Network errors in DevTools
+```json
+{
+  "success": true,
+  "data": {
+    "status": "error",
+    "timestamp": "2025-10-31T12:00:00.000Z",
+    "version": "1.0.0"
+  }
+}
+```
 
-**Possible Causes:**
-1. Backend API not running
-2. Incorrect API URL configuration
-3. CORS issues
-4. Missing permissions
+**Causes:**
+1. Database is disconnected or unreachable
+2. Memory usage >90%
+3. Redis is down (if required)
+
+**Diagnosis:**
+```bash
+# Get detailed status
+curl -s http://localhost:3333/api/status | jq .
+
+# Check database status specifically
+curl -s http://localhost:3333/api/status | jq '.data.services.database'
+# Output: {"status": "error"} or {"status": "disconnected"}
+
+# Check memory
+curl -s http://localhost:3333/api/status | jq '.data.memory.percentage'
+# Output: 95 (meaning 95% used)
+```
 
 **Solutions:**
 
-**Step 1: Verify Backend is Running**
+**If database is down:**
 ```bash
-# Check API server status
-curl http://localhost:3333/api/health
+# Docker
+docker ps | grep postgres
+docker start aegisx-postgres
 
-# Expected response:
-# {"status":"healthy","timestamp":"..."}
+# Kubernetes
+kubectl get pods -n aegisx | grep postgres
+kubectl logs -n aegisx postgres-0
 
-# If not running:
-pnpm run dev:api
+# Check connectivity manually
+psql -h localhost -p 5432 -U aegisx_user -d aegisx_production
 ```
 
-**Step 2: Check API Configuration**
+**If memory is high:**
 ```bash
-# Frontend environment
-cat apps/web/src/environments/environment.ts
+# Restart API to clear memory
+docker restart aegisx-api  # Docker
+kubectl rollout restart deployment/aegisx-api -n aegisx  # Kubernetes
 
-# Should have:
-# apiUrl: 'http://localhost:3333/api'
-
-# Backend environment
-cat .env.local | grep API_PORT
-# Should match frontend URL port
+# Investigate memory leak
+# Check for growing memory in /api/status over time
 ```
 
-**Step 3: Verify CORS Settings**
-```typescript
-// apps/api/src/main.ts
-fastify.register(cors, {
-  origin: ['http://localhost:4200'], // Frontend URL
-  credentials: true,
-});
-```
-
-**Step 4: Check User Permissions**
+**If Redis is down:**
 ```bash
-# Query user permissions
-psql -h localhost -U postgres -d aegisx_dev \
-  -c "SELECT p.resource, p.action
-      FROM permissions p
-      JOIN user_role_permissions urp ON p.id = urp.permission_id
-      JOIN user_roles ur ON ur.id = urp.user_role_id
-      WHERE ur.user_id = '<user-uuid>';"
-```
+# Docker
+docker ps | grep redis
+docker start aegisx-redis
 
----
+# Kubernetes
+kubectl get pods -n aegisx | grep redis
+kubectl logs -n aegisx redis-0
 
-### Issue 2: Create/Update Operations Failing
-
-**Symptoms:**
-- Form submission returns 400/422 errors
-- Validation error messages
-- Data not saved to database
-
-**Possible Causes:**
-1. Schema validation failures
-2. Missing required fields
-3. Unique constraint violations
-4. Foreign key constraint errors
-
-**Solutions:**
-
-**Step 1: Check Request Payload**
-```bash
-# Open browser DevTools → Network tab
-# Find failed request → View request payload
-# Compare with schema definition
-
-# Check schema:
-cat apps/api/src/core/[feature]/schemas/[feature].schemas.ts
-```
-
-**Step 2: Test API Directly**
-```bash
-# Test with curl
-curl -X POST http://localhost:3333/api/[feature] \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Test Item",
-    "isActive": true
-  }'
-
-# Check response for detailed error
-```
-
-**Step 3: Check Database Constraints**
-```sql
--- List table constraints
-SELECT constraint_name, constraint_type
-FROM information_schema.table_constraints
-WHERE table_name = '[table_name]';
-
--- Check unique constraint violations
-SELECT * FROM [table_name]
-WHERE name = 'duplicate-name';
-```
-
-**Step 4: Review Backend Logs**
-```bash
-# PM2 logs
-pm2 logs aegisx-api --lines 50 --err
-
-# Docker logs
-docker logs aegisx-api --tail 50
-
-# Look for validation errors or database errors
+# Test Redis manually
+redis-cli -h localhost -p 6379 ping
+# Expected: PONG
 ```
 
 ---
 
-### Issue 3: Permission Denied (403 Errors)
+## Database Connection Problems
+
+### Problem: "Database status: disconnected"
 
 **Symptoms:**
-- "Access denied" or "Forbidden" errors
-- HTTP 403 responses
-- Features hidden or disabled in UI
-
-**Possible Causes:**
-1. User lacks required permissions
-2. Permission not seeded in database
-3. Wrong permission check in code
-4. Cache not invalidated after permission change
-
-**Solutions:**
-
-**Step 1: Verify Required Permission**
-```typescript
-// Check route permission requirement
-// apps/api/src/core/[feature]/routes/index.ts
-preValidation: [
-  fastify.authenticate,
-  fastify.verifyPermission('[feature]', 'read'), // Required permission
-]
-```
-
-**Step 2: Check User Has Permission**
-```sql
--- Check if permission exists
-SELECT * FROM permissions
-WHERE resource = '[feature]' AND action = 'read';
-
--- Check if user has permission
-SELECT u.email, r.name as role, p.resource, p.action
-FROM users u
-JOIN user_roles ur ON u.id = ur.user_id
-JOIN roles r ON ur.role_id = r.id
-JOIN user_role_permissions urp ON ur.id = urp.user_role_id
-JOIN permissions p ON urp.permission_id = p.id
-WHERE u.id = '<user-uuid>'
-  AND p.resource = '[feature]'
-  AND p.action = 'read';
-```
-
-**Step 3: Grant Permission if Missing**
-```sql
--- Find permission ID
-SELECT id FROM permissions
-WHERE resource = '[feature]' AND action = 'read';
-
--- Find user role ID
-SELECT id FROM user_roles
-WHERE user_id = '<user-uuid>' AND role_id = (
-  SELECT id FROM roles WHERE name = 'Admin'
-);
-
--- Grant permission
-INSERT INTO user_role_permissions (user_role_id, permission_id)
-VALUES ('<user-role-id>', '<permission-id>');
-```
-
-**Step 4: Clear Permission Cache**
 ```bash
-# Clear Redis permission cache
-redis-cli KEYS "permissions:*" | xargs redis-cli DEL
+curl -s http://localhost:3333/api/status | jq '.data.services.database'
+# Output: {"status": "disconnected"}
+```
 
-# OR flush entire cache
-redis-cli FLUSHDB
+**Common Causes:**
+
+#### 1. Wrong Database Credentials
+
+**Check:**
+```bash
+# View environment variables
+docker exec aegisx-api env | grep DB_
+# Or in Kubernetes:
+kubectl exec -n aegisx aegisx-api-xxx -- env | grep DB_
+```
+
+**Fix:**
+```bash
+# Update environment variables
+# Docker: Edit docker-compose.yml or .env file
+# Kubernetes: Update ConfigMap/Secret
+
+kubectl edit configmap api-config -n aegisx
+kubectl edit secret api-secrets -n aegisx
+
+# Restart after changes
+kubectl rollout restart deployment/aegisx-api -n aegisx
+```
+
+#### 2. Network Issues
+
+**Check:**
+```bash
+# Can API reach database?
+docker exec aegisx-api ping postgres
+docker exec aegisx-api nc -zv postgres 5432
+
+# Kubernetes
+kubectl exec -n aegisx aegisx-api-xxx -- nc -zv postgres-service 5432
+```
+
+**Fix:**
+- Ensure database service is in same network (Docker)
+- Check Kubernetes NetworkPolicies
+- Verify firewall rules
+
+#### 3. Database Not Running
+
+**Check:**
+```bash
+# Docker
+docker ps | grep postgres
+docker logs aegisx-postgres
+
+# Kubernetes
+kubectl get pods -n aegisx | grep postgres
+kubectl logs -n aegisx postgres-0
+```
+
+**Fix:**
+```bash
+# Start database
+docker start aegisx-postgres  # Docker
+kubectl get statefulset -n aegisx  # Kubernetes - check StatefulSet
+
+# Check if database data is corrupted
+docker exec -it aegisx-postgres psql -U aegisx_user -d aegisx_production -c "SELECT 1;"
+```
+
+#### 4. Too Many Connections
+
+**Symptoms:**
+```
+FATAL: remaining connection slots are reserved for non-replication superuser connections
+```
+
+**Check:**
+```sql
+-- Connect to PostgreSQL
+psql -h localhost -U postgres -d aegisx_production
+
+-- Check current connections
+SELECT count(*) FROM pg_stat_activity;
+
+-- Check max connections
+SHOW max_connections;
+
+-- See active connections
+SELECT pid, usename, application_name, client_addr, state
+FROM pg_stat_activity;
+```
+
+**Fix:**
+```bash
+# Reduce connection pool size
+# Edit environment variables:
+DB_POOL_MIN=2
+DB_POOL_MAX=5
+
+# Or increase PostgreSQL max_connections
+# Edit postgresql.conf:
+max_connections = 200
+
+# Restart PostgreSQL
+docker restart aegisx-postgres
 ```
 
 ---
 
-### Issue 4: Slow Performance
+## Redis Connection Problems
+
+### Problem: "Redis status: error"
 
 **Symptoms:**
-- Long loading times (>3 seconds)
-- High memory usage
-- Database timeouts
+```bash
+curl -s http://localhost:3333/api/status | jq '.data.services.redis'
+# Output: {"status": "error"} or field is missing
+```
 
-**Possible Causes:**
-1. Missing database indexes
-2. N+1 query problems
-3. Large result sets without pagination
-4. Cache not being used
+**Common Causes:**
+
+#### 1. Redis Not Running
+
+**Check:**
+```bash
+# Docker
+docker ps | grep redis
+
+# Kubernetes
+kubectl get pods -n aegisx | grep redis
+```
+
+**Fix:**
+```bash
+# Start Redis
+docker start aegisx-redis  # Docker
+kubectl scale statefulset/redis --replicas=1 -n aegisx  # Kubernetes
+```
+
+#### 2. Wrong Redis Password
+
+**Check:**
+```bash
+# Test Redis connection manually
+docker exec -it aegisx-redis redis-cli
+AUTH your-password
+PING
+# Expected: PONG
+```
+
+**Fix:**
+Update `REDIS_PASSWORD` environment variable to match Redis configuration.
+
+#### 3. Redis is Optional
+
+**Note:** If Redis is not required, the API should gracefully handle its absence:
+
+```bash
+# Redis field should be absent from response if not configured
+curl -s http://localhost:3333/api/status | jq '.data.services.redis'
+# Output: null (this is OK if Redis is not needed)
+```
+
+If API fails when Redis is down but shouldn't, check that `REDIS_HOST` is not set when Redis is optional.
+
+---
+
+## Memory Issues
+
+### Problem: Memory Usage >90%
+
+**Symptoms:**
+```bash
+curl -s http://localhost:3333/api/status | jq '.data.memory.percentage'
+# Output: 95
+```
+
+**Causes:**
+1. Memory leak in application code
+2. Too many requests/connections
+3. Insufficient container memory limits
+
+**Immediate Fix:**
+```bash
+# Restart API to clear memory
+docker restart aegisx-api  # Docker
+kubectl rollout restart deployment/aegisx-api -n aegisx  # Kubernetes
+```
+
+**Long-term Diagnosis:**
+
+**Monitor memory over time:**
+```bash
+# Watch memory usage
+watch -n 5 'curl -s http://localhost:3333/api/status | jq ".data.memory"'
+
+# Check if memory grows continuously
+# Growing memory = potential leak
+# Stable high memory = need more resources
+```
+
+**Check container limits:**
+```bash
+# Docker
+docker stats aegisx-api
+
+# Kubernetes
+kubectl top pods -n aegisx
+kubectl describe pod aegisx-api-xxx -n aegisx | grep -A 5 "Limits:"
+```
 
 **Solutions:**
 
-**Step 1: Identify Slow Queries**
-```sql
--- Enable query logging
-ALTER DATABASE aegisx_dev SET log_min_duration_statement = 100;
+1. **Increase memory limits:**
+```yaml
+# Kubernetes
+resources:
+  limits:
+    memory: "2Gi"  # Increase from 1Gi
+```
+
+2. **Investigate memory leak:**
+```bash
+# Enable Node.js heap snapshots
+# Add to API startup:
+NODE_OPTIONS="--max-old-space-size=1024 --heapsnapshot-signal=SIGUSR2"
+
+# Take heap snapshot when memory is high
+docker kill --signal=SIGUSR2 aegisx-api
+# Analyze heap snapshot with Chrome DevTools
+```
+
+---
+
+## Performance Problems
+
+### Problem: Slow Health Check Response Times
+
+**Symptoms:**
+```bash
+# Health check takes >1 second
+time curl http://localhost:3333/api/health
+# Output: real 0m1.523s
+```
+
+**Causes:**
+1. Slow database queries
+2. Network latency to database
+3. High CPU usage
+4. Too many concurrent requests
+
+**Diagnosis:**
+
+**Check database response time:**
+```bash
+curl -s http://localhost:3333/api/status | jq '.data.services.database.responseTime'
+# Output: 1500 (ms) - This is TOO SLOW
+```
+
+**Check system load:**
+```bash
+# Docker
+docker stats aegisx-api
+
+# Kubernetes
+kubectl top pods -n aegisx
+```
+
+**Solutions:**
+
+**If database is slow:**
+```bash
+# Check database queries
+psql -h localhost -U aegisx_user -d aegisx_production
 
 -- Check slow queries
-SELECT query, mean_exec_time, calls
-FROM pg_stat_statements
-WHERE mean_exec_time > 100
-ORDER BY mean_exec_time DESC
-LIMIT 10;
+SELECT pid, now() - pg_stat_activity.query_start AS duration, query
+FROM pg_stat_activity
+WHERE state = 'active' AND now() - pg_stat_activity.query_start > interval '1 second';
+
+-- Check database connections
+SELECT count(*) FROM pg_stat_activity;
 ```
 
-**Step 2: Add Missing Indexes**
-```sql
--- Check if indexes exist
-SELECT indexname, indexdef
-FROM pg_indexes
-WHERE tablename = '[table_name]';
+**If network latency is high:**
+```bash
+# Test latency to database
+docker exec aegisx-api ping -c 5 postgres
 
--- Add indexes for common queries
-CREATE INDEX idx_[table]_[field] ON [table_name]([field]);
-CREATE INDEX idx_[table]_created_at ON [table_name](created_at);
-CREATE INDEX idx_[table]_user_id ON [table_name](user_id);
+# Ensure API and database are in same region/datacenter
 ```
 
-**Step 3: Implement Pagination**
-```typescript
-// Backend: Always use pagination
-const { items, total } = await repository.findAll({
-  page: request.query.page || 1,
-  limit: Math.min(request.query.limit || 10, 100), // Max 100
-});
+**If CPU is maxed out:**
+```bash
+# Scale horizontally (add more instances)
+# Kubernetes
+kubectl scale deployment/aegisx-api --replicas=5 -n aegisx
 
-// Frontend: Implement pagination
-<mat-paginator
-  [length]="total()"
-  [pageSize]="10"
-  [pageSizeOptions]="[10, 25, 50]"
-  (page)="onPageChange($event)">
-</mat-paginator>
-```
-
-**Step 4: Enable Caching**
-```typescript
-// Backend service
-async findAll(): Promise<Feature[]> {
-  const cacheKey = 'features:all';
-
-  // Check cache first
-  let cached = await this.cacheService.get(cacheKey);
-  if (cached) return JSON.parse(cached);
-
-  // Query database
-  const features = await this.repository.findAll();
-
-  // Store in cache (1 hour)
-  await this.cacheService.setex(cacheKey, 3600, JSON.stringify(features));
-
-  return features;
-}
+# Docker Swarm
+docker service scale aegisx-api=5
 ```
 
 ---
 
-### Issue 5: WebSocket Events Not Working
+## Load Balancer Integration Issues
+
+### Problem: Load Balancer Marks Backend as Unhealthy
 
 **Symptoms:**
-- Real-time updates not appearing
-- Events not received in frontend
-- Console errors about WebSocket
+- Load balancer removes API instance from pool
+- Logs show repeated health check failures
 
-**Possible Causes:**
-1. Not subscribed to correct channel
-2. Event emission not implemented
-3. WebSocket connection dropped
-4. Incorrect event name
+**Diagnosis:**
 
-**Solutions:**
-
-**Step 1: Verify WebSocket Connection**
-```typescript
-// Check connection status in frontend
-this.wsService.connectionStatus$.subscribe(status => {
-  console.log('WebSocket status:', status); // Should be 'connected'
-});
-
-// Check socket instance
-console.log(this.wsService.socket?.connected); // Should be true
+**Check health check configuration:**
+```nginx
+# Nginx example
+check interval=5000 rise=2 fall=3 timeout=3000 type=http;
+check_http_send "GET /api/health HTTP/1.0\r\n\r\n";
+check_http_expect_alive http_2xx;
 ```
 
-**Step 2: Check Event Subscription**
-```typescript
-// Verify subscription
-this.wsService.subscribeToEvent('features', 'features', 'created')
-  .pipe(takeUntil(this.destroy$))
-  .subscribe((event) => {
-    console.log('Event received:', event);
-  });
+**Common Misconfigurations:**
 
-// Log all events for debugging
-this.wsService.socket?.onAny((eventName, ...args) => {
-  console.log('Event:', eventName, args);
-});
+1. **Timeout too short:**
+```nginx
+# Bad: timeout=1000 (1 second)
+timeout=5000;  # Good: 5 seconds
 ```
 
-**Step 3: Verify Backend Event Emission**
-```typescript
-// Check controller emits events
-await this.eventService
-  .for('features', 'features')
-  .emitCustom('created', feature, 'normal');
-
-// Add debug logging
-this.logger.info(`Event emitted: features:created`, { id: feature.id });
+2. **Wrong endpoint:**
+```nginx
+# Bad: check_http_send "GET /health HTTP/1.0\r\n\r\n"
+check_http_send "GET /api/health HTTP/1.0\r\n\r\n";  # Correct path
 ```
 
-**Step 4: Check Network Tab**
+3. **Expecting wrong response:**
+```nginx
+# Bad: check_http_expect_alive http_2xx http_3xx
+check_http_expect_alive http_2xx;  # Only expect 200-299
+```
+
+**Test health check manually from load balancer:**
 ```bash
-# Open browser DevTools → Network → WS (WebSocket)
-# Should see messages with:
-# Type: message
-# Data: {"event":"features:created","data":{...}}
+# SSH to load balancer
+ssh loadbalancer.example.com
+
+# Test health check
+curl -v http://api1.internal:3333/api/health
+# Should return 200 OK with {"success":true,"data":{"status":"ok",...}}
 ```
 
 ---
 
-## ⚠️ Error Messages
+## Kubernetes Probe Failures
 
-### Backend Errors
+### Problem: Pods Restarting Due to Liveness Probe Failures
 
-#### `ERROR: invalid input syntax for type uuid`
-
-**Meaning:** Invalid UUID format passed to PostgreSQL
-
-**Solution:**
-```typescript
-// Validate UUID before query
-import { validate as isValidUUID } from 'uuid';
-
-if (!isValidUUID(id)) {
-  throw new BadRequestError('Invalid ID format');
-}
-```
-
-#### `ERROR: duplicate key value violates unique constraint`
-
-**Meaning:** Trying to insert duplicate value in unique column
-
-**Solution:**
-```typescript
-// Handle gracefully
-try {
-  await repository.create(data);
-} catch (error) {
-  if (error.code === '23505') { // PostgreSQL unique violation
-    throw new ConflictError('Item with this name already exists');
-  }
-  throw error;
-}
-```
-
-#### `ERROR: relation "[table_name]" does not exist`
-
-**Meaning:** Database table not created (missing migration)
-
-**Solution:**
+**Symptoms:**
 ```bash
-# Check migration status
-pnpm run knex migrate:status
-
-# Run pending migrations
-pnpm run knex migrate:latest
-
-# Verify table exists
-psql -h localhost -U postgres -d aegisx_dev -c "\dt"
+kubectl get pods -n aegisx
+# Output shows pod with many restarts
+NAME                          READY   STATUS    RESTARTS   AGE
+aegisx-api-6b8f7d5c9-abc123   1/1     Running   15         2h
 ```
 
-#### `UnauthorizedError: No token provided`
+**Diagnosis:**
+```bash
+# Check probe configuration
+kubectl describe pod aegisx-api-xxx -n aegisx | grep -A 10 "Liveness:"
 
-**Meaning:** Missing Authorization header
+# Check recent events
+kubectl get events -n aegisx --sort-by='.lastTimestamp' | grep aegisx-api
+```
 
-**Solution:**
-```typescript
-// Ensure token is sent
-this.httpClient.get<Feature[]>(url, {
-  headers: {
-    Authorization: `Bearer ${this.authService.getToken()}`
-  }
-});
+**Common Issues:**
+
+**1. initialDelaySeconds too short:**
+```yaml
+# Bad: API takes 60s to start, but probe starts at 10s
+livenessProbe:
+  initialDelaySeconds: 10
+
+# Good: Allow enough time for startup
+livenessProbe:
+  initialDelaySeconds: 60
+```
+
+**2. failureThreshold too low:**
+```yaml
+# Bad: Restart after 1 failure
+livenessProbe:
+  failureThreshold: 1
+
+# Good: Allow transient failures
+livenessProbe:
+  failureThreshold: 3
+```
+
+**3. Database temporarily unavailable:**
+- Liveness probe checks database
+- Database briefly unavailable
+- Pod restarts unnecessarily
+
+**Solution:** Use startup probe for initial delays:
+```yaml
+# Startup probe allows longer initial delay
+startupProbe:
+  httpGet:
+    path: /api/health
+    port: 3333
+  initialDelaySeconds: 0
+  periodSeconds: 5
+  failureThreshold: 30  # 30 * 5s = 150s max startup time
+
+# Liveness probe only activates after startup succeeds
+livenessProbe:
+  httpGet:
+    path: /api/health
+    port: 3333
+  initialDelaySeconds: 0  # Startup probe handles initial delay
+  periodSeconds: 10
+  failureThreshold: 3
 ```
 
 ---
 
-### Frontend Errors
+## Debugging Techniques
 
-#### `NullInjectorError: No provider for FeatureService`
+### Enable Debug Logging
 
-**Meaning:** Service not provided in module
+**Temporarily enable debug logging:**
+```bash
+# Docker
+docker exec -it aegisx-api /bin/sh
+export LOG_LEVEL=debug
+# Restart API
 
-**Solution:**
-```typescript
-// Add to providers
-@Component({
-  providers: [FeatureService] // Provide at component level
-})
-// OR add providedIn: 'root' in service
-@Injectable({ providedIn: 'root' })
+# Kubernetes
+kubectl set env deployment/aegisx-api LOG_LEVEL=debug -n aegisx
 ```
 
-#### `ExpressionChangedAfterItHasBeenCheckedError`
+### Check Application Logs
 
-**Meaning:** Signal/state changed during change detection
+```bash
+# Docker
+docker logs -f aegisx-api
 
-**Solution:**
-```typescript
-// Use setTimeout to defer update
-setTimeout(() => {
-  this.signal.set(newValue);
-}, 0);
+# Kubernetes
+kubectl logs -f -n aegisx -l app=aegisx-api
 
-// OR use ChangeDetectorRef
-constructor(private cdr: ChangeDetectorRef) {}
-
-this.signal.set(newValue);
-this.cdr.detectChanges();
+# Search for errors
+docker logs aegisx-api 2>&1 | grep -i error
+kubectl logs -n aegisx -l app=aegisx-api | grep -i error
 ```
 
-#### `Cannot read property 'subscribe' of undefined`
+### Test Database Connection Manually
 
-**Meaning:** Trying to subscribe to undefined observable
+```bash
+# Inside API container
+docker exec -it aegisx-api /bin/sh
 
-**Solution:**
-```typescript
-// Add null check
-this.wsService.subscribeToEvent('features', 'features', 'created')
-  ?.pipe(takeUntil(this.destroy$))
-  .subscribe((event) => {
-    // Handle event
-  });
+# Install psql if not available
+apk add postgresql-client
 
-// OR check connection first
-if (this.wsService.socket?.connected) {
-  this.wsService.subscribeToEvent(...).subscribe(...);
-}
+# Test connection
+psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME
+# Enter password when prompted
+
+# Run simple query
+SELECT 1;
+```
+
+### Test Redis Connection Manually
+
+```bash
+# Inside API container
+docker exec -it aegisx-api /bin/sh
+
+# Install redis-cli if not available
+apk add redis
+
+# Test connection
+redis-cli -h $REDIS_HOST -p $REDIS_PORT
+AUTH $REDIS_PASSWORD
+PING
+# Expected: PONG
+```
+
+### Monitor Health Check in Real-Time
+
+```bash
+# Watch health status
+watch -n 1 'curl -s http://localhost:3333/api/health | jq .'
+
+# Watch detailed status
+watch -n 5 'curl -s http://localhost:3333/api/status | jq .'
+
+# Monitor specific metric
+watch -n 1 'curl -s http://localhost:3333/api/status | jq ".data.services.database.responseTime"'
+```
+
+### Trace Network Issues
+
+```bash
+# Inside API container
+docker exec -it aegisx-api /bin/sh
+
+# Install network tools
+apk add bind-tools netcat-openbsd
+
+# DNS lookup
+nslookup postgres
+
+# Port connectivity
+nc -zv postgres 5432
+
+# Trace route
+traceroute postgres
 ```
 
 ---
 
-## 🔍 Debug Procedures
+## Getting Help
 
-### Backend Debugging
+### Information to Provide
 
-**Step 1: Enable Debug Logging**
-```typescript
-// apps/api/src/main.ts
-const app = await NestFactory.create(AppModule, {
-  logger: ['error', 'warn', 'log', 'debug', 'verbose'],
-});
-```
+When seeking help, provide:
 
-**Step 2: Add Debug Breakpoints**
-```typescript
-// Use debugger statement
-async create(data: CreateFeature): Promise<Feature> {
-  debugger; // Will pause here if debugging
-  return this.repository.create(data);
-}
-```
-
-**Step 3: Check Database Queries**
-```typescript
-// Enable Knex debug mode
-const knex = Knex({
-  client: 'postgresql',
-  debug: true, // Log all SQL queries
-  connection: { /* config */ }
-});
-```
-
-### Frontend Debugging
-
-**Step 1: Check Signal Values**
-```typescript
-// Use effect to log signal changes
-effect(() => {
-  console.log('Features:', this.featuresSignal());
-  console.log('Loading:', this.loadingSignal());
-  console.log('Error:', this.errorSignal());
-});
-```
-
-**Step 2: Network Inspection**
+1. **Health status output:**
 ```bash
-# Open Chrome DevTools → Network tab
-# Filter by XHR/Fetch
-# Check request/response for each API call
+curl -s http://localhost:3333/api/status | jq . > status.json
 ```
 
-**Step 3: Angular DevTools**
+2. **Application logs:**
 ```bash
-# Install Angular DevTools extension
-# Open DevTools → Angular tab
-# Inspect component state and signals
+docker logs aegisx-api > api.log 2>&1
+# Or Kubernetes:
+kubectl logs -n aegisx aegisx-api-xxx > api.log
 ```
 
----
-
-## 📞 Getting Help
-
-### Self-Service Resources
-
-1. **Feature Documentation**: [README.md](./README.md)
-2. **API Reference**: [API_REFERENCE.md](./API_REFERENCE.md)
-3. **Developer Guide**: [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md)
-4. **Architecture**: [ARCHITECTURE.md](./ARCHITECTURE.md)
-
-### Contact Support
-
-- **Email**: support@aegisx.example.com
-- **Slack**: #feature-support
-- **GitHub Issues**: Create issue with logs and steps to reproduce
-
-### Reporting Bugs
-
-**Please include:**
-1. **Environment**: Development/Staging/Production
-2. **Steps to reproduce**: Exact steps that cause the issue
-3. **Expected result**: What should happen
-4. **Actual result**: What actually happened
-5. **Error logs**: Backend logs, frontend console errors
-6. **Screenshots**: If UI-related
-7. **Database state**: Relevant table data if applicable
-
-**Bug Report Template:**
-```markdown
-## Environment
-- Environment: Development
-- Node Version: 20.x
-- Browser: Chrome 120
-- OS: macOS Sonoma
-
-## Steps to Reproduce
-1. Navigate to Features page
-2. Click "Create New"
-3. Fill form and submit
-4. Error appears
-
-## Expected Result
-Feature should be created successfully
-
-## Actual Result
-500 Internal Server Error
-
-## Error Logs
-[Paste backend logs here]
-
-## Screenshots
-[Attach screenshots here]
-
-## Additional Context
-This started happening after [recent change]
-```
-
----
-
-## 🔧 Advanced Debugging
-
-### Database Query Analysis
-
-```sql
--- Check table statistics
-SELECT * FROM pg_stat_user_tables
-WHERE schemaname = 'public' AND relname = '[table_name]';
-
--- Explain query plan
-EXPLAIN ANALYZE
-SELECT * FROM [table_name]
-WHERE user_id = '<uuid>'
-ORDER BY created_at DESC
-LIMIT 10;
-
--- Check table size
-SELECT
-  relname AS table_name,
-  pg_size_pretty(pg_total_relation_size(relid)) AS total_size
-FROM pg_catalog.pg_statio_user_tables
-ORDER BY pg_total_relation_size(relid) DESC;
-```
-
-### Memory Profiling
-
+3. **Environment info:**
 ```bash
-# Node.js heap dump
-node --inspect apps/api/src/main.ts
-
-# Open Chrome → chrome://inspect
-# Click "Open dedicated DevTools for Node"
-# Take heap snapshot
-
-# PM2 memory monitoring
-pm2 monit
+docker exec aegisx-api env > environment.txt
 ```
 
-### Performance Profiling
-
+4. **Database status:**
 ```bash
-# Backend profiling with clinic
-pnpm add -D clinic
-clinic doctor -- node apps/api/src/main.ts
-
-# Frontend profiling
-# Chrome DevTools → Performance tab
-# Record → Perform actions → Stop → Analyze
+psql -h localhost -U aegisx_user -d aegisx_production -c "\conninfo" > db-info.txt
 ```
 
----
+### Support Channels
 
-## 📚 Related Documentation
-
-- [Developer Guide](./DEVELOPER_GUIDE.md) - Implementation details
-- [API Reference](./API_REFERENCE.md) - API documentation
-- [Architecture](./ARCHITECTURE.md) - System design
-- [Deployment Guide](./DEPLOYMENT_GUIDE.md) - Production setup
+- **Documentation:** [System Module README](./README.md)
+- **API Reference:** [Complete API documentation](./API_REFERENCE.md)
+- **Developer Guide:** [Technical details](./DEVELOPER_GUIDE.md)
+- **Architecture:** [System design](./ARCHITECTURE.md)
 
 ---
 
 **Last Updated:** 2025-10-31
-**Maintainer:** DevOps Team
-**Support Level:** Production
+**Version:** 1.0.0

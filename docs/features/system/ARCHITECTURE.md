@@ -1,452 +1,684 @@
 # System - Architecture
 
-> **System design, technical decisions, and architectural patterns**
+> **Deep dive into system design, technical decisions, and health check architecture**
 
 **Last Updated:** 2025-10-31
 **Version:** 1.0.0
-**Architects:** Development Team
 
 ---
 
 ## 📋 Table of Contents
 
-- [System Overview](#system-overview)
-- [Component Architecture](#component-architecture)
+- [Overview](#overview)
+- [System Design](#system-design)
+- [Health Check Architecture](#health-check-architecture)
+- [Component Breakdown](#component-breakdown)
 - [Data Flow](#data-flow)
-- [Design Decisions](#design-decisions)
-- [Trade-offs](#trade-offs)
-- [Security Considerations](#security-considerations)
+- [Technical Decisions](#technical-decisions)
+- [Design Patterns](#design-patterns)
 - [Performance Considerations](#performance-considerations)
-- [Future Improvements](#future-improvements)
+- [Security Model](#security-model)
+- [Extensibility](#extensibility)
 
 ---
 
-## 🏗️ System Overview
+## Overview
 
-### High-Level Architecture
+The System module is an **infrastructure module** providing foundational health monitoring, API information, and connectivity testing endpoints. Unlike feature modules, it has:
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        Frontend Layer                        │
-│  ┌────────────┐  ┌────────────┐  ┌────────────┐            │
-│  │ Components │  │  Services  │  │   Dialogs  │            │
-│  └────────────┘  └────────────┘  └────────────┘            │
-└────────────────────────┬────────────────────────────────────┘
-                        │ HTTP/WebSocket
-┌────────────────────────┴────────────────────────────────────┐
-│                       Backend Layer                          │
-│  ┌────────────┐  ┌────────────┐  ┌────────────┐            │
-│  │ Controller │─▶│  Service   │─▶│ Repository │            │
-│  └────────────┘  └────────────┘  └────────────┘            │
-└────────────────────────┬────────────────────────────────────┘
-                        │
-        ┌───────────────┼───────────────┐
-        │               │               │
-┌───────▼──────┐ ┌──────▼─────┐ ┌──────▼──────┐
-│  PostgreSQL  │ │   Redis    │ │  WebSocket  │
-│   Database   │ │   Cache    │ │   Events    │
-└──────────────┘ └────────────┘ └─────────────┘
-```
+- **No database tables** - Uses existing connections for health checks only
+- **No frontend** - Backend-only infrastructure
+- **Public endpoints** - No authentication required (except demo endpoints)
+- **Minimal overhead** - Fast, lightweight operations
 
-### Technology Stack
+### Design Goals
 
-**Frontend:**
-- Angular 19+ with Signals (reactive state)
-- Angular Material + TailwindCSS (UI)
-- RxJS (async operations)
-- TypeScript (type safety)
-
-**Backend:**
-- Fastify 4+ (web framework)
-- TypeBox (schema validation)
-- Knex.js (query builder)
-- Socket.io (WebSocket)
-
-**Infrastructure:**
-- PostgreSQL 15+ (primary database)
-- Redis (caching & sessions)
-- Docker (containerization)
+1. **Fast Response Times** - Target <100ms for most checks
+2. **Reliable Monitoring** - Never fail due to optional dependencies
+3. **Informative Errors** - Provide actionable debugging information
+4. **Load Balancer Compatible** - Standard health check patterns
+5. **Kubernetes Ready** - Liveness and readiness probe support
 
 ---
 
-## 🧩 Component Architecture
+## System Design
 
-### Backend Components
+### Architecture Layers
 
-#### 1. Controller Layer
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Load Balancer                        │
+│              (Nginx, AWS ALB, Kubernetes)               │
+└────────────────────┬────────────────────────────────────┘
+                     │ HTTP Requests
+                     ↓
+┌─────────────────────────────────────────────────────────┐
+│                  Fastify Routes Layer                   │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐    │
+│  │ /api/health │  │ /api/status │  │  /api/info  │    │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘    │
+└─────────┼────────────────┼────────────────┼────────────┘
+          │                │                │
+          ↓                ↓                ↓
+┌─────────────────────────────────────────────────────────┐
+│              DefaultController Layer                     │
+│  - Request validation                                    │
+│  - Response formatting                                   │
+│  - Error handling                                        │
+└────────────────────┬────────────────────────────────────┘
+                     │
+                     ↓
+┌─────────────────────────────────────────────────────────┐
+│              DefaultService Layer                        │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
+│  │   Database   │  │    Redis     │  │    Memory    │  │
+│  │    Check     │  │    Check     │  │    Check     │  │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  │
+└─────────┼──────────────────┼──────────────────┼──────────┘
+          │                  │                  │
+          ↓                  ↓                  ↓
+┌─────────────────────────────────────────────────────────┐
+│              External Dependencies                       │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
+│  │  PostgreSQL  │  │  Redis Cache │  │  Node.js VM  │  │
+│  └──────────────┘  └──────────────┘  └──────────────┘  │
+└─────────────────────────────────────────────────────────┘
+```
 
-**Responsibility:** Request handling and validation
+### Module Structure
+
+```
+apps/api/src/core/system/
+├── default.controller.ts    # Request handlers (84 lines)
+├── default.service.ts        # Business logic (209 lines)
+├── default.routes.ts         # Route registration (280 lines)
+├── default.schemas.ts        # TypeBox validation (203 lines)
+├── default.plugin.ts         # Fastify plugin (56 lines)
+├── test-websocket.routes.ts  # Test endpoints (dev only)
+└── __tests__/
+    ├── default.service.spec.ts       # 24 unit tests
+    ├── default.controller.spec.ts    # 17 unit tests
+    └── default.integration.spec.ts   # 25 integration tests
+```
+
+**Total:** 832 lines of code + 66 tests
+
+---
+
+## Health Check Architecture
+
+### Three-Tier Health Model
+
+The System module implements a sophisticated three-tier health determination model:
+
+#### 1. Service Status (Individual Checks)
 
 ```typescript
-class FeatureController {
-  // Handles HTTP requests
-  // Delegates to service layer
-  // Returns formatted responses
+type ServiceStatus = {
+  status: 'connected' | 'disconnected' | 'error';
+  responseTime?: number;
+  message?: string;
+};
+```
+
+**Purpose:** Track individual dependency health
+**Example:** Database check, Redis check
+
+#### 2. Overall Status (Aggregated)
+
+```typescript
+type OverallStatus = 'healthy' | 'degraded' | 'unhealthy';
+```
+
+**Purpose:** Determine system-wide health based on critical dependencies
+**Logic:**
+- **Unhealthy** = Critical failure (database down)
+- **Degraded** = Operational with issues (high memory, Redis down, slow DB)
+- **Healthy** = All systems nominal
+
+#### 3. Simple Health (External)
+
+```typescript
+type SimpleHealth = 'ok' | 'error';
+```
+
+**Purpose:** Fast load balancer checks (binary up/down)
+**Logic:** Map `unhealthy` → `error`, everything else → `ok`
+
+### Status Determination Flow
+
+```
+┌──────────────────────────────────────────────────────────┐
+│              Check All Dependencies                       │
+└────────────────┬─────────────────────────────────────────┘
+                 │
+        ┌────────┼────────┐
+        ↓        ↓        ↓
+   ┌─────────┐ ┌────────┐ ┌────────┐
+   │Database │ │ Redis  │ │ Memory │
+   │  Check  │ │ Check  │ │ Check  │
+   └────┬────┘ └────┬───┘ └────┬───┘
+        │           │          │
+        └───────────┼──────────┘
+                    ↓
+        ┌───────────────────────┐
+        │ Determine Overall     │
+        │ Status (Priority)     │
+        └───────────┬───────────┘
+                    │
+     ┌──────────────┼──────────────┐
+     ↓              ↓              ↓
+┌─────────┐   ┌──────────┐   ┌─────────┐
+│Database │   │  Memory  │   │  Redis  │
+│ ERROR?  │   │  > 90%?  │   │ ERROR?  │
+└────┬────┘   └─────┬────┘   └────┬────┘
+     │              │              │
+     ↓ Yes          ↓ Yes          ↓ Yes
+ UNHEALTHY      DEGRADED       DEGRADED
+     │              │              │
+     └──────────────┼──────────────┘
+                    ↓
+     ┌──────────────────────────┐
+     │ Database > 1000ms?       │
+     └──────────┬───────────────┘
+                ↓ Yes
+            DEGRADED
+                │
+                ↓ No
+             HEALTHY
+```
+
+### Priority Ranking
+
+Health checks are evaluated in priority order:
+
+1. **🔴 CRITICAL**: Database connectivity (unhealthy if down)
+2. **🟡 HIGH**: Memory usage (degraded if >90%)
+3. **🟡 MEDIUM**: Redis connectivity (degraded if down)
+4. **🟡 LOW**: Database performance (degraded if >1s)
+
+---
+
+## Component Breakdown
+
+### DefaultService (Business Logic)
+
+**Responsibilities:**
+- Perform health checks
+- Calculate memory usage
+- Determine overall status
+- Measure response times
+
+**Key Methods:**
+
+```typescript
+class DefaultService {
+  // Public API
+  getApiInfo(): Promise<ApiInfo>
+  getSystemStatus(): Promise<SystemStatus>
+  getHealthStatus(): Promise<HealthStatus>
+  
+  // Health Checks
+  private checkDatabase(): Promise<ServiceStatus>
+  private checkRedis(): Promise<ServiceStatus>
+  private getMemoryStatus(): MemoryStatus
+  
+  // Status Logic
+  private determineOverallStatus(
+    databaseStatus: ServiceStatus,
+    redisStatus: ServiceStatus | undefined,
+    memory: MemoryStatus
+  ): 'healthy' | 'degraded' | 'unhealthy'
 }
 ```
 
-**Principles:**
-- Thin controllers (no business logic)
-- Input validation via schemas
-- Output formatting
-- Error handling delegation
+**Design Patterns:**
+- **Dependency Injection**: Fastify instance injected
+- **Optional Dependencies**: Redis check gracefully skipped if not configured
+- **Error Isolation**: Each check catches its own errors
 
-#### 2. Service Layer
+### DefaultController (Request Handlers)
 
-**Responsibility:** Business logic and orchestration
+**Responsibilities:**
+- Validate requests
+- Call service methods
+- Format responses
+- Handle errors
+
+**Key Methods:**
 
 ```typescript
-class FeatureService {
-  // Business logic
-  // Multi-repository coordination
-  // Cache management
-  // Event emission
+class DefaultController {
+  getApiInfo(request, reply): Promise<void>
+  getSystemStatus(request, reply): Promise<void>
+  getHealthStatus(request, reply): Promise<void>
+  getPing(request, reply): Promise<void>
+  getWelcome(request, reply): Promise<void>
 }
 ```
 
-**Principles:**
-- Single responsibility
-- Dependency injection
-- Transaction management
-- Side effect handling
+**Error Handling:**
+- Try-catch around all service calls
+- Standardized error responses via reply.error()
+- Proper HTTP status codes
 
-#### 3. Repository Layer
+### DefaultRoutes (Route Registration)
 
-**Responsibility:** Data access and persistence
+**Responsibilities:**
+- Register routes with Fastify
+- Attach schemas for validation
+- Configure authentication (demo endpoints)
+- Protect test endpoints
 
-```typescript
-class FeatureRepository extends BaseRepository {
-  // CRUD operations
-  // Query building
-  // Data mapping
-}
-```
-
-**Principles:**
-- Abstraction over database
-- Reusable query patterns
-- Type safety
-- UUID validation
-
-### Frontend Components
-
-#### 1. Smart Components (Containers)
+**Route Categories:**
 
 ```typescript
-// Feature list component
-- Manages state
-- Handles user interactions
-- Coordinates child components
-```
+// Public routes (no auth)
+GET /api/health       → getHealthStatus
+GET /api/status       → getSystemStatus
+GET /api/info         → getApiInfo
+GET /api/ping         → getPing
+GET /                 → getWelcome
 
-#### 2. Presentation Components
+// Demo routes (API key or JWT)
+GET /api/protected-data     → protected (API key only)
+GET /api/hybrid-protected   → protected (API key OR JWT)
 
-```typescript
-// Form components, dialogs
-- Receives data via @Input
-- Emits events via @Output
-- No direct API calls
-```
-
-#### 3. Services
-
-```typescript
-// Feature service
-- API communication
-- State management (Signals)
-- WebSocket subscriptions
+// Test routes (dev only)
+GET /test/websocket/emit    → blocked in production
+GET /test/rbac/role         → blocked in production
 ```
 
 ---
 
-## 🔄 Data Flow
+## Data Flow
 
-### Create Operation Flow
-
-```
-User Action (Frontend)
-  │
-  ▼
-Component calls service.create()
-  │
-  ▼
-HTTP POST to backend API
-  │
-  ▼
-Controller validates request
-  │
-  ▼
-Service processes business logic
-  │
-  ▼
-Repository saves to database
-  │
-  ▼
-[Optional] Event emitted via Socket.io
-  │
-  ▼
-Response sent to frontend
-  │
-  ▼
-Frontend updates state (Signal)
-  │
-  ▼
-UI automatically re-renders
-```
-
-### Read Operation Flow (with Cache)
+### Health Check Request Flow
 
 ```
-Frontend requests data
-  │
-  ▼
-Backend checks Redis cache
-  │
-  ├─ Cache HIT ─▶ Return cached data
-  │
-  └─ Cache MISS
-      │
-      ▼
-  Query PostgreSQL
-      │
-      ▼
-  Store in Redis cache
-      │
-      ▼
-  Return data to frontend
+1. Load Balancer Request
+   GET /api/health
+         ↓
+2. Fastify Route Matching
+   /api/health → handler
+         ↓
+3. Schema Validation
+   (no params, no body)
+         ↓
+4. Controller.getHealthStatus()
+         ↓
+5. Service.getHealthStatus()
+   ├─→ Service.getSystemStatus()
+   │   ├─→ checkDatabase()
+   │   │   └─→ knex.raw('SELECT 1')
+   │   ├─→ checkRedis()
+   │   │   └─→ redis.ping()
+   │   └─→ getMemoryStatus()
+   │       └─→ process.memoryUsage()
+   └─→ determineOverallStatus()
+         ↓
+6. Map to SimpleHealth
+   unhealthy → 'error'
+   * → 'ok'
+         ↓
+7. Controller Response
+   reply.success(data, message)
+         ↓
+8. Response Handler Plugin
+   Format standard response
+         ↓
+9. HTTP Response
+   200 OK + JSON body
 ```
+
+**Performance:**
+- No database queries (SELECT 1 is minimal overhead)
+- Redis ping is microseconds
+- Memory check is synchronous (no I/O)
+- Total: <50ms typical
 
 ---
 
-## 🎯 Design Decisions
+## Technical Decisions
 
-### 1. Repository Pattern
+### 1. Why No Database Tables?
 
-**Decision:** Use repository pattern for data access
+**Decision:** System module uses existing database connection for health checks only
 
 **Rationale:**
-- ✅ Abstracts database implementation
-- ✅ Enables easy testing (mock repositories)
-- ✅ Centralizes data access logic
-- ✅ Supports multiple data sources
+- Infrastructure module should not store data
+- Health checks need minimal overhead
+- Simplifies deployment (no migrations needed)
+- Reduces attack surface (no data to leak)
 
-**Trade-offs:**
-- ❌ Extra layer of abstraction
-- ❌ Slightly more boilerplate code
+### 2. Why Public Endpoints?
 
-### 2. Signal-Based State Management
-
-**Decision:** Use Angular Signals for state
+**Decision:** All production endpoints are public (no authentication)
 
 **Rationale:**
-- ✅ Better performance (fine-grained reactivity)
-- ✅ Simpler API than RxJS
-- ✅ Built-in to Angular 19+
-- ✅ Automatic change detection
+- Load balancers need unauthenticated access
+- Kubernetes probes cannot inject tokens
+- Health data is not sensitive
+- Industry standard pattern
 
-**Trade-offs:**
-- ❌ Learning curve for team
-- ❌ Less ecosystem maturity vs RxJS
+### 3. Why Three Status Levels?
 
-### 3. TypeBox for Validation
-
-**Decision:** Use TypeBox instead of Zod or Joi
+**Decision:** Implement healthy/degraded/unhealthy instead of binary up/down
 
 **Rationale:**
-- ✅ Single source of truth (schema → types)
-- ✅ Better performance than Joi
-- ✅ Native TypeScript integration
-- ✅ OpenAPI schema generation
+- Load balancers can route away from degraded instances
+- Operators can debug before critical failure
+- Gradual degradation better than sudden death
+- Aligns with SRE best practices
 
-**Trade-offs:**
-- ❌ Smaller community than Zod
-- ❌ Less validation helpers
+### 4. Why Measure Response Times?
 
-### 4. Permission-Based Authorization
-
-**Decision:** Use `verifyPermission` instead of role-based
+**Decision:** Track and report database/Redis response times
 
 **Rationale:**
-- ✅ Fine-grained access control
-- ✅ Database-backed permissions
-- ✅ Redis caching for performance
-- ✅ Wildcard support (`*:*`)
+- Early warning of performance degradation
+- Helps identify slow queries
+- Useful for capacity planning
+- Minimal overhead (Date.now())
 
-**Trade-offs:**
-- ❌ Slightly more complex setup
-- ❌ Requires permission seeding
+### 5. Why Graceful Redis Degradation?
+
+**Decision:** System continues working if Redis is unconfigured or down
+
+**Rationale:**
+- Redis is optional dependency (caching only)
+- Core functionality should not require cache
+- Fail gracefully rather than crash
+- Allows running without Redis in dev
 
 ---
 
-## ⚖️ Trade-offs
+## Design Patterns
 
-### Monorepo vs Multi-Repo
+### 1. Plugin Architecture
 
-**Chose:** Nx Monorepo
-
-**Advantages:**
-- ✅ Code sharing easy
-- ✅ Atomic commits across features
-- ✅ Consistent tooling
-
-**Disadvantages:**
-- ❌ Larger repository size
-- ❌ Complex build configuration
-- ❌ Coordination overhead
-
-### REST vs GraphQL
-
-**Chose:** REST API
-
-**Advantages:**
-- ✅ Simpler implementation
-- ✅ Better caching
-- ✅ Easier debugging
-
-**Disadvantages:**
-- ❌ Over-fetching data
-- ❌ Multiple requests needed
-- ❌ No schema stitching
-
----
-
-## 🔒 Security Considerations
-
-### Authentication
-
-- JWT tokens with expiry
-- Refresh token rotation
-- Secure cookie storage
-
-### Authorization
-
-- Permission-based access control
-- Resource-level permissions
-- Admin wildcard support (`*:*`)
-
-### Data Protection
-
-- Input validation (TypeBox)
-- Output sanitization
-- SQL injection prevention (Knex)
-- XSS prevention (Angular)
-
-### API Security
-
-- Rate limiting (per IP/user)
-- CORS configuration
-- CSRF protection
-- Security headers
-
----
-
-## ⚡ Performance Considerations
-
-### Backend Optimization
-
-**1. Caching Strategy**
 ```typescript
-// Cache frequently accessed data
-const cacheKey = `features:${id}`;
-let data = await redis.get(cacheKey);
-
-if (!data) {
-  data = await db.query(...);
-  await redis.setex(cacheKey, 3600, data);
-}
+export default fastifyPlugin(async function systemPlugin(fastify) {
+  // Register dependencies
+  await fastify.register(knexPlugin);
+  await fastify.register(responseHandlerPlugin);
+  
+  // Instantiate service & controller
+  const service = new DefaultService(fastify);
+  const controller = new DefaultController(service);
+  
+  // Register routes
+  await fastify.register(defaultRoutes, { controller });
+});
 ```
 
-**2. Database Indexes**
-```sql
--- Add indexes for common queries
-CREATE INDEX idx_features_user_id ON features(user_id);
-CREATE INDEX idx_features_status ON features(status);
-CREATE INDEX idx_features_created_at ON features(created_at);
-```
+**Benefits:**
+- Clean dependency injection
+- Testable components
+- Reusable across apps
 
-**3. Query Optimization**
-- Use pagination for large datasets
-- Minimize N+1 queries
-- Use database joins strategically
+### 2. Service Layer Pattern
 
-### Frontend Optimization
-
-**1. Lazy Loading**
 ```typescript
-// Load feature module only when needed
-const routes = [
-  {
-    path: 'features',
-    loadChildren: () => import('./features/feature.module')
+class DefaultService {
+  constructor(private fastify: FastifyInstance) {}
+  
+  async getSystemStatus(): Promise<SystemStatus> {
+    const db = await this.checkDatabase();
+    const redis = await this.checkRedis();
+    const memory = this.getMemoryStatus();
+    
+    return {
+      status: this.determineOverallStatus(db, redis, memory),
+      services: { database: db, redis },
+      memory,
+      // ...
+    };
   }
-];
+}
 ```
 
-**2. Change Detection**
+**Benefits:**
+- Business logic isolated from HTTP layer
+- Easy to unit test (mock Fastify)
+- Reusable by other modules
+
+### 3. Schema-First Validation
+
 ```typescript
-// Use OnPush for better performance
-@Component({
-  changeDetection: ChangeDetectionStrategy.OnPush
-})
+export const HealthStatusSchema = Type.Object({
+  status: Type.Union([Type.Literal('ok'), Type.Literal('error')]),
+  timestamp: Type.String({ format: 'date-time' }),
+  version: Type.String(),
+});
+
+export type HealthStatus = Static<typeof HealthStatusSchema>;
 ```
 
-**3. Signal Benefits**
-- Fine-grained reactivity
-- Automatic dependency tracking
-- Minimal re-renders
+**Benefits:**
+- Runtime validation + TypeScript types
+- Auto-generated OpenAPI docs
+- Contract-driven development
+
+### 4. Dependency Injection
+
+```typescript
+class DefaultController {
+  constructor(private service: DefaultService) {}
+  
+  async getHealthStatus(req, reply) {
+    const status = await this.service.getHealthStatus();
+    return reply.success(status, 'API is healthy');
+  }
+}
+```
+
+**Benefits:**
+- Testable (inject mock service)
+- Loose coupling
+- Easy to swap implementations
 
 ---
 
-## 🚀 Future Improvements
+## Performance Considerations
 
-### Short Term (v1.1)
+### Response Time Targets
 
-- [ ] Add GraphQL gateway
-- [ ] Implement request batching
-- [ ] Enhanced caching strategy
-- [ ] Performance monitoring
+| Endpoint         | Target   | Typical | Max Acceptable |
+|------------------|----------|---------|----------------|
+| `/api/ping`      | <10ms    | 2-5ms   | 20ms          |
+| `/api/health`    | <50ms    | 5-10ms  | 100ms         |
+| `/api/info`      | <50ms    | 5-10ms  | 100ms         |
+| `/api/status`    | <200ms   | 50-100ms| 500ms         |
 
-### Medium Term (v1.2)
+### Optimization Strategies
 
-- [ ] Microservices split
-- [ ] Event-driven architecture
-- [ ] CQRS pattern for complex queries
-- [ ] Real-time collaboration
+#### 1. Parallel Checks
 
-### Long Term (v2.0)
+```typescript
+async getSystemStatus() {
+  const [db, redis, memory] = await Promise.all([
+    this.checkDatabase(),
+    this.checkRedis(),
+    Promise.resolve(this.getMemoryStatus())
+  ]);
+  // ...
+}
+```
 
-- [ ] Multi-tenancy support
-- [ ] Horizontal scaling
-- [ ] CDN integration
-- [ ] Advanced analytics
+**Benefit:** Check database and Redis concurrently
+
+#### 2. Minimal Queries
+
+```typescript
+await this.knex.raw('SELECT 1');
+```
+
+**Benefit:** Fastest possible database query
+
+#### 3. Connection Reuse
+
+```typescript
+const knex = this.fastify.knex; // Reuse existing connection
+```
+
+**Benefit:** No connection overhead
+
+#### 4. Synchronous Memory Check
+
+```typescript
+getMemoryStatus(): MemoryStatus {
+  const mem = process.memoryUsage();
+  return { used: mem.heapUsed, total: mem.heapTotal, ... };
+}
+```
+
+**Benefit:** No async overhead
+
+### Caching Considerations
+
+**Current:** No caching (always fresh data)
+
+**Future:** Could cache `/api/info` (rarely changes)
+
+**Trade-off:** Freshness vs. performance
 
 ---
 
-## 📊 Metrics & Monitoring
+## Security Model
 
-### Performance Metrics
+### Public Endpoints
 
-- API response time: < 100ms (p95)
-- Database query time: < 50ms (p95)
-- Cache hit rate: > 80%
-- WebSocket latency: < 50ms
+**Endpoints:** `/api/health`, `/api/status`, `/api/info`, `/api/ping`, `/`
 
-### Availability Metrics
+**Security Measures:**
+- ✅ No sensitive data exposed
+- ✅ Read-only operations
+- ✅ No user-controlled input
+- ⚠️ Consider rate limiting in production
 
-- Uptime SLA: 99.9%
-- Error rate: < 0.1%
-- Success rate: > 99.9%
+### Demo Endpoints
+
+**Endpoints:** `/api/protected-data`, `/api/hybrid-protected`
+
+**Security Measures:**
+- ✅ API key authentication required
+- ✅ JWT authentication supported
+- ✅ Only enabled if `ENABLE_API_KEY_DEMO=true`
+- ✅ Clearly marked as demo only
+
+### Test Endpoints
+
+**Endpoints:** `/test/*`
+
+**Security Measures:**
+- ✅ Blocked in production (`NODE_ENV !== 'development'`)
+- ✅ Automatic middleware protection
+- ✅ Cannot be accidentally exposed
+
+### Information Disclosure
+
+**Safe to expose:**
+- API version
+- Uptime
+- Environment name
+- Endpoint list
+
+**NEVER expose:**
+- Database credentials
+- Redis password
+- API keys
+- User data
+- Internal IP addresses
 
 ---
 
-## 📚 Related Documentation
+## Extensibility
 
-- [Developer Guide](./DEVELOPER_GUIDE.md) - Implementation details
-- [API Reference](./API_REFERENCE.md) - API documentation
+### Adding New Health Checks
+
+**Step 1:** Add check method to service
+```typescript
+private async checkExternalAPI(): Promise<ServiceStatus> {
+  try {
+    const start = Date.now();
+    await fetch('https://api.external.com/health');
+    return { status: 'connected', responseTime: Date.now() - start };
+  } catch {
+    return { status: 'error' };
+  }
+}
+```
+
+**Step 2:** Integrate into getSystemStatus
+```typescript
+const externalAPI = await this.checkExternalAPI();
+return {
+  status: this.determineOverallStatus(db, redis, memory, externalAPI),
+  services: { database: db, redis, externalAPI },
+  // ...
+};
+```
+
+**Step 3:** Update determineOverallStatus logic
+```typescript
+private determineOverallStatus(
+  db: ServiceStatus,
+  redis: ServiceStatus | undefined,
+  memory: MemoryStatus,
+  externalAPI?: ServiceStatus
+): 'healthy' | 'degraded' | 'unhealthy' {
+  // Existing logic...
+  
+  if (externalAPI?.status === 'error') {
+    return 'degraded';
+  }
+  
+  return 'healthy';
+}
+```
+
+**Step 4:** Update schema
+```typescript
+export const SystemStatusSchema = Type.Object({
+  services: Type.Object({
+    database: ServiceStatusSchema,
+    redis: Type.Optional(ServiceStatusSchema),
+    externalAPI: Type.Optional(ServiceStatusSchema), // NEW
+  }),
+  // ...
+});
+```
+
+**Step 5:** Add tests
+```typescript
+describe('checkExternalAPI', () => {
+  it('should return connected when API is reachable', async () => {
+    global.fetch = jest.fn().mockResolvedValue({ ok: true });
+    const result = await service['checkExternalAPI']();
+    expect(result.status).toBe('connected');
+  });
+});
+```
+
+### Future Enhancements
+
+**Planned (v1.1.0):**
+- Prometheus metrics export (`/api/metrics`)
+- Alerting integration (Slack, PagerDuty)
+- Settings module integration (dynamic version)
+
+**Possible (v1.2.0):**
+- Health check history and trends
+- Disk space monitoring
+- CPU usage monitoring
+- External API connectivity checks
+- Custom health check registration API
+
+---
+
+**See Also:**
+- [Developer Guide](./DEVELOPER_GUIDE.md) - Implementation patterns
+- [API Reference](./API_REFERENCE.md) - Complete API documentation
 - [Deployment Guide](./DEPLOYMENT_GUIDE.md) - Production setup
 
----
-
-**Architect:** Development Team
-**Last Review:** 2025-10-31
-**Next Review:** 2025-10-31 + 3 months

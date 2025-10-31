@@ -1,365 +1,268 @@
-# System - API Reference
+# System Module - API Reference
 
-> **Complete API endpoint documentation**
+> **Complete API documentation for all System module endpoints**
 
-**Base URL:** `/api/system`
 **Version:** 1.0.0
+**Base URL:** `http://localhost:3333`
 **Last Updated:** 2025-10-31
 
 ---
 
 ## 📋 Table of Contents
 
+- [Overview](#overview)
 - [Authentication](#authentication)
 - [Endpoints](#endpoints)
-- [Request/Response Examples](#requestresponse-examples)
+  - [GET /api/health](#get-apihealth)
+  - [GET /api/status](#get-apistatus)
+  - [GET /api/info](#get-apiinfo)
+  - [GET /api/ping](#get-apiping)
+  - [GET /](#get-)
+  - [GET /api/protected-data](#get-apiprotected-data)
+  - [GET /api/hybrid-protected](#get-apihybrid-protected)
+- [Response Format](#response-format)
 - [Error Codes](#error-codes)
-- [Rate Limits](#rate-limits)
+- [Examples](#examples)
 
 ---
 
-## 🔐 Authentication
+## Overview
 
-All API endpoints require authentication unless specified otherwise.
+The System module provides infrastructure endpoints for health monitoring, API information, and connectivity testing. All production endpoints are **public** (no authentication required) and designed for use by load balancers, monitoring systems, and API clients.
 
-### Headers Required
+### Endpoint Categories
 
-```http
-Authorization: Bearer <jwt_token>
-Content-Type: application/json
-```
-
-### Permissions Required
-
-| Endpoint | Permission Required |
-|----------|---------------------|
-| `POST /` | `feature-name:create` |
-| `GET /` | `feature-name:read` |
-| `GET /:id` | `feature-name:read` |
-| `PUT /:id` | `feature-name:update` |
-| `DELETE /:id` | `feature-name:delete` |
+| Category | Endpoints | Purpose |
+|----------|-----------|---------|
+| **Health** | `/api/health`, `/api/status` | System monitoring |
+| **Information** | `/api/info`, `/api/ping`, `/` | API information |
+| **Demo** | `/api/protected-data`, `/api/hybrid-protected` | Authentication examples |
 
 ---
 
-## 📡 Endpoints
+## Authentication
 
-### List All Items
+### Public Endpoints (No Authentication)
 
-```http
-GET /api/system
-```
+The following endpoints are **public** and do not require authentication:
 
-**Query Parameters:**
+- `GET /api/health`
+- `GET /api/status`
+- `GET /api/info`
+- `GET /api/ping`
+- `GET /`
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `page` | number | No | Page number (default: 1) |
-| `limit` | number | No | Items per page (default: 10, max: 100) |
-| `search` | string | No | Search query |
-| `sortBy` | string | No | Sort field (default: created_at) |
-| `sortOrder` | string | No | Sort order: asc/desc (default: desc) |
-| `filter[field]` | any | No | Filter by specific field |
+### Protected Endpoints (Demo Only)
 
-**Response:** `200 OK`
+Demo endpoints require authentication:
 
-```typescript
-{
-  success: true,
-  data: {
-    items: Feature[],
-    pagination: {
-      page: number,
-      limit: number,
-      total: number,
-      totalPages: number
-    }
-  }
-}
-```
+- `GET /api/protected-data` - Requires API key (`X-Api-Key` header)
+- `GET /api/hybrid-protected` - Accepts JWT token OR API key
 
 ---
 
-### Get Single Item
+## Endpoints
 
-```http
-GET /api/system/:id
-```
+### GET /api/health
 
-**Path Parameters:**
+Simple health check endpoint designed for load balancers and monitoring systems.
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | uuid | Yes | Feature ID |
+**Purpose:** Quick check if API is responsive (OK/ERROR only)
 
-**Response:** `200 OK`
-
-```typescript
-{
-  success: true,
-  data: Feature
-}
-```
-
-**Error Responses:**
-- `404` - Feature not found
-- `403` - Access denied
-
----
-
-### Create Item
-
-```http
-POST /api/system
-```
-
-**Request Body:**
-
-```typescript
-{
-  name: string,              // Required, 1-255 chars
-  description?: string,      // Optional
-  isActive?: boolean,        // Optional, default: true
-  // ... other fields
-}
-```
-
-**Response:** `201 Created`
-
-```typescript
-{
-  success: true,
-  data: Feature
-}
-```
-
-**Error Responses:**
-- `400` - Validation error
-- `409` - Duplicate entry
-- `403` - Access denied
-
----
-
-### Update Item
-
-```http
-PUT /api/system/:id
-```
-
-**Path Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | uuid | Yes | Feature ID |
-
-**Request Body:** (All fields optional)
-
-```typescript
-{
-  name?: string,
-  description?: string,
-  isActive?: boolean,
-  // ... other fields
-}
-```
-
-**Response:** `200 OK`
-
-```typescript
-{
-  success: true,
-  data: Feature
-}
-```
-
-**Error Responses:**
-- `400` - Validation error
-- `404` - Feature not found
-- `409` - Duplicate entry
-- `403` - Access denied
-
----
-
-### Delete Item
-
-```http
-DELETE /api/system/:id
-```
-
-**Path Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | uuid | Yes | Feature ID |
-
-**Response:** `204 No Content`
-
-**Error Responses:**
-- `404` - Feature not found
-- `409` - Cannot delete (has dependencies)
-- `403` - Access denied
-
----
-
-### Bulk Operations
-
-#### Bulk Create
-
-```http
-POST /api/system/bulk
-```
-
-**Request Body:**
-
-```typescript
-{
-  items: CreateFeature[]  // Array of items to create
-}
-```
-
-**Response:** `201 Created`
-
-```typescript
-{
-  success: true,
-  data: {
-    created: Feature[],
-    failed: { item: CreateFeature, error: string }[]
-  }
-}
-```
-
-#### Bulk Delete
-
-```http
-DELETE /api/system/bulk
-```
-
-**Request Body:**
-
-```typescript
-{
-  ids: string[]  // Array of UUIDs to delete
-}
-```
-
-**Response:** `200 OK`
-
-```typescript
-{
-  success: true,
-  data: {
-    deleted: string[],    // Successfully deleted IDs
-    failed: string[]      // Failed to delete IDs
-  }
-}
-```
-
----
-
-### Export
-
-```http
-GET /api/system/export
-```
-
-**Query Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `format` | string | No | Export format: csv/xlsx (default: csv) |
-| `filter[field]` | any | No | Apply filters before export |
-
-**Response:** `200 OK`
-
-Headers:
-```http
-Content-Type: text/csv
-Content-Disposition: attachment; filename="features-2025-10-31.csv"
-```
-
----
-
-## 📝 Request/Response Examples
-
-### Create Feature Example
-
-**Request:**
+#### Request
 
 ```bash
-curl -X POST https://api.aegisx.example.com/api/features \
-  -H "Authorization: Bearer eyJ..." \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "New Feature",
-    "description": "Feature description",
-    "isActive": true
-  }'
+curl http://localhost:3333/api/health
 ```
 
-**Response:**
+**Headers:** None required
+
+**Query Parameters:** None
+
+#### Response (200 OK)
 
 ```json
 {
   "success": true,
   "data": {
-    "id": "550e8400-e29b-41d4-a716-446655440000",
-    "name": "New Feature",
-    "description": "Feature description",
-    "isActive": true,
-    "userId": "660e8400-e29b-41d4-a716-446655440000",
-    "createdAt": "2025-10-31T10:30:00.000Z",
-    "updatedAt": "2025-10-31T10:30:00.000Z"
-  }
+    "status": "ok",
+    "timestamp": "2025-10-31T12:00:00.000Z",
+    "version": "1.0.0"
+  },
+  "message": "API is healthy"
+}
+```
+
+#### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `status` | `"ok" \| "error"` | Health status |
+| `timestamp` | `string` | ISO 8601 timestamp |
+| `version` | `string` | API version |
+
+#### Performance
+
+- **Target:** <50ms
+- **Typical:** 5-10ms
+
+#### Use Cases
+
+- Load balancer health checks
+- Kubernetes liveness probes
+- Uptime monitoring services
+- Simple connectivity tests
+
+---
+
+### GET /api/status
+
+Detailed system status including database, Redis, and memory metrics.
+
+**Purpose:** Comprehensive system health information for debugging and monitoring
+
+#### Request
+
+```bash
+curl http://localhost:3333/api/status
+```
+
+**Headers:** None required
+
+**Query Parameters:** None
+
+#### Response (200 OK)
+
+```json
+{
+  "success": true,
+  "data": {
+    "status": "healthy",
+    "timestamp": "2025-10-31T12:00:00.000Z",
+    "uptime": 3600,
+    "version": "1.0.0",
+    "services": {
+      "database": {
+        "status": "connected",
+        "responseTime": 15
+      },
+      "redis": {
+        "status": "connected",
+        "responseTime": 5
+      }
+    },
+    "memory": {
+      "used": 52428800,
+      "total": 134217728,
+      "free": 81788928,
+      "percentage": 39
+    }
+  },
+  "message": "System status retrieved successfully"
+}
+```
+
+#### Health Status Determination
+
+| Status | Conditions |
+|--------|------------|
+| **🟢 Healthy** | Database connected, memory <90%, Redis OK (if configured) |
+| **🟡 Degraded** | High memory (>90%), Redis down, OR slow database (>1000ms) |
+| **🔴 Unhealthy** | Database disconnected or error |
+
+#### Performance
+
+- **Target:** <200ms
+- **Typical:** 50-100ms
+
+---
+
+### GET /api/info
+
+API information including version, environment, and uptime.
+
+#### Request
+
+```bash
+curl http://localhost:3333/api/info
+```
+
+#### Response (200 OK)
+
+```json
+{
+  "success": true,
+  "data": {
+    "name": "AegisX Platform API",
+    "version": "1.0.0",
+    "description": "Enterprise monorepo API for AegisX Platform",
+    "environment": "production",
+    "uptime": 86400,
+    "timestamp": "2025-10-31T12:00:00.000Z"
+  },
+  "message": "API information retrieved successfully"
 }
 ```
 
 ---
 
-## ⚠️ Error Codes
+### GET /api/ping
 
-### Standard Error Response Format
+Ultra-fast ping/pong endpoint for connectivity testing.
 
-```typescript
-{
-  success: false,
-  error: {
-    code: string,
-    message: string,
-    details?: any
-  }
-}
+#### Request
+
+```bash
+curl http://localhost:3333/api/ping
 ```
 
-### Common Error Codes
-
-| HTTP Status | Error Code | Description |
-|-------------|------------|-------------|
-| 400 | `VALIDATION_ERROR` | Request validation failed |
-| 401 | `UNAUTHORIZED` | Missing or invalid token |
-| 403 | `FORBIDDEN` | Insufficient permissions |
-| 404 | `NOT_FOUND` | Resource not found |
-| 409 | `CONFLICT` | Duplicate entry or constraint violation |
-| 422 | `BUSINESS_RULE_VIOLATION` | Business logic validation failed |
-| 429 | `RATE_LIMIT_EXCEEDED` | Too many requests |
-| 500 | `INTERNAL_SERVER_ERROR` | Unexpected server error |
-
-### Validation Error Example
+#### Response (200 OK)
 
 ```json
 {
-  "success": false,
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Request validation failed",
-    "details": [
-      {
-        "field": "name",
-        "message": "Name is required"
-      },
-      {
-        "field": "email",
-        "message": "Invalid email format"
-      }
+  "success": true,
+  "data": {
+    "message": "pong",
+    "timestamp": "2025-10-31T12:00:00.000Z"
+  },
+  "message": "Ping successful"
+}
+```
+
+---
+
+### GET /
+
+Welcome message with ASCII logo and endpoint directory.
+
+#### Request
+
+```bash
+curl http://localhost:3333/
+```
+
+#### Response (200 OK)
+
+```json
+{
+  "success": true,
+  "data": {
+    "message": "Welcome to AegisX Platform API",
+    "description": "Enterprise-Ready Full Stack Application",
+    "version": "1.1.1",
+    "environment": "production",
+    "timestamp": "2025-10-31T12:00:00.000Z",
+    "endpoints": {
+      "api": "/api",
+      "health": "/api/health",
+      "info": "/api/info",
+      "status": "/api/status",
+      "documentation": "/documentation"
+    },
+    "logo": [
+      "     █████╗ ███████╗ ██████╗ ██╗███████╗██╗  ██╗",
+      "    ██╔══██╗██╔════╝██╔════╝ ██║██╔════╝╚██╗██╔╝",
+      "..."
     ]
   }
 }
@@ -367,52 +270,136 @@ curl -X POST https://api.aegisx.example.com/api/features \
 
 ---
 
-## 🚦 Rate Limits
+### GET /api/protected-data
 
-### Default Limits
+**⚠️ Demo Endpoint** - Example of API key authentication
 
-- **Authenticated requests:** 1000 requests per hour
-- **Unauthenticated requests:** 100 requests per hour
+#### Request
 
-### Rate Limit Headers
-
-All responses include rate limit information:
-
-```http
-X-RateLimit-Limit: 1000
-X-RateLimit-Remaining: 999
-X-RateLimit-Reset: 1635724800
+```bash
+curl http://localhost:3333/api/protected-data \
+  -H "X-Api-Key: your-api-key-here"
 ```
 
-### Handling Rate Limits
-
-When rate limit is exceeded:
-
-**Response:** `429 Too Many Requests`
+#### Response (200 OK)
 
 ```json
 {
-  "success": false,
-  "error": {
-    "code": "RATE_LIMIT_EXCEEDED",
-    "message": "Rate limit exceeded. Try again in 3600 seconds",
-    "retryAfter": 3600
+  "success": true,
+  "data": {
+    "message": "This data is protected by API key authentication!",
+    "timestamp": "2025-10-31T12:00:00.000Z",
+    "authenticatedWith": "API Key",
+    "keyInfo": {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "name": "My API Key",
+      "prefix": "ak_test",
+      "userId": "650e8400-e29b-41d4-a716-446655440001"
+    }
   }
 }
 ```
 
-**Best Practice:** Implement exponential backoff in your client code.
+---
+
+### GET /api/hybrid-protected
+
+**⚠️ Demo Endpoint** - Example of hybrid authentication (JWT or API key)
+
+#### Request (JWT)
+
+```bash
+curl http://localhost:3333/api/hybrid-protected \
+  -H "Authorization: Bearer your-jwt-token-here"
+```
+
+#### Request (API Key)
+
+```bash
+curl http://localhost:3333/api/hybrid-protected \
+  -H "X-Api-Key: your-api-key-here"
+```
 
 ---
 
-## 📚 Related Documentation
+## Response Format
 
-- [Developer Guide](./DEVELOPER_GUIDE.md) - Implementation details
-- [User Guide](./USER_GUIDE.md) - Feature usage
-- [Troubleshooting](./TROUBLESHOOTING.md) - Common issues
+### Success Response
+
+```typescript
+{
+  success: true,
+  data: T,              // Endpoint-specific data
+  message: string       // Human-readable message
+}
+```
+
+### Error Response
+
+```typescript
+{
+  success: false,
+  error: {
+    code: string,       // Machine-readable error code
+    message: string     // Human-readable error message
+  }
+}
+```
 
 ---
 
-**API Version:** 1.0.0
+## Error Codes
+
+| HTTP Status | Error Code | Description |
+|-------------|------------|-------------|
+| `400` | `BAD_REQUEST` | Invalid request parameters |
+| `401` | `UNAUTHORIZED` | Missing or invalid authentication |
+| `403` | `FORBIDDEN` | Insufficient permissions |
+| `500` | `INTERNAL_SERVER_ERROR` | Server error |
+
+---
+
+## Examples
+
+### cURL
+
+```bash
+# Health check
+curl http://localhost:3333/api/health
+
+# System status with jq formatting
+curl -s http://localhost:3333/api/status | jq .
+
+# Monitor memory usage
+watch -n 5 'curl -s http://localhost:3333/api/status | jq .data.memory'
+```
+
+### JavaScript
+
+```javascript
+const response = await fetch('http://localhost:3333/api/status');
+const data = await response.json();
+
+if (data.success) {
+  console.log('Status:', data.data.status);
+  console.log('Memory:', data.data.memory.percentage + '%');
+}
+```
+
+### Python
+
+```python
+import requests
+
+response = requests.get('http://localhost:3333/api/status')
+data = response.json()
+
+if data['success']:
+    print(f"Status: {data['data']['status']}")
+    print(f"Memory: {data['data']['memory']['percentage']}%")
+```
+
+---
+
 **Last Updated:** 2025-10-31
-**Support:** api-support@aegisx.example.com
+**API Version:** 1.0.0
