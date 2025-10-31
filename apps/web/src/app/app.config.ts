@@ -21,17 +21,6 @@ import { provideGlobalErrorHandler } from './core/error-handling';
 import { httpErrorInterceptorProvider } from './core/http';
 import { authInterceptor } from './core/auth';
 import { baseUrlInterceptor } from './core/http';
-import { MonitoringService } from './core/monitoring';
-
-// Factory function to initialize monitoring service
-function initializeMonitoring() {
-  return () => {
-    const monitoringService = inject(MonitoringService);
-    monitoringService.initialize();
-    return Promise.resolve();
-  };
-}
-
 // Factory function to initialize icons
 function initializeIcons() {
   return () => {
@@ -53,13 +42,6 @@ export const appConfig: ApplicationConfig = {
     // Error handling and monitoring
     provideGlobalErrorHandler(),
     httpErrorInterceptorProvider,
-
-    // Initialize monitoring service
-    {
-      provide: APP_INITIALIZER,
-      useFactory: initializeMonitoring,
-      multi: true,
-    },
 
     // Initialize icons
     {

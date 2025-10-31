@@ -379,8 +379,14 @@ export class ErrorLogsComponent implements OnInit {
 
   // Breadcrumb items
   breadcrumbItems: AegisxNavigationItem[] = [
-    { link: '/', label: 'Home', icon: 'home' },
-    { link: '/monitoring/error-logs', label: 'Error Logs', icon: 'bug_report' },
+    { id: 'home', title: 'Home', type: 'basic', link: '/', icon: 'home' },
+    {
+      id: 'error-logs',
+      title: 'Error Logs',
+      type: 'basic',
+      link: '/monitoring/error-logs',
+      icon: 'bug_report',
+    },
   ];
 
   // Table columns

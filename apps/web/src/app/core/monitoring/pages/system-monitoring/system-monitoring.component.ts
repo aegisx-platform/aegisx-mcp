@@ -314,10 +314,12 @@ export class SystemMonitoringComponent
 
   // Breadcrumb items
   breadcrumbItems: AegisxNavigationItem[] = [
-    { link: '/', label: 'Home', icon: 'home' },
+    { id: 'home', title: 'Home', type: 'basic', link: '/', icon: 'home' },
     {
+      id: 'system-monitoring',
+      title: 'System Monitoring',
+      type: 'basic',
       link: '/monitoring/system',
-      label: 'System Monitoring',
       icon: 'monitoring',
     },
   ];
