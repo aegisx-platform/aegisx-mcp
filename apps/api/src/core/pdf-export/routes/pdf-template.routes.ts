@@ -53,7 +53,10 @@ export async function pdfTemplateRoutes(fastify: FastifyInstance) {
           },
         },
       },
-      preValidation: [fastify.authenticate],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('pdf-templates', 'create'),
+      ],
     },
     async (
       request: FastifyRequest<{ Body: Static<typeof CreatePdfTemplateSchema> }>,
@@ -113,7 +116,10 @@ export async function pdfTemplateRoutes(fastify: FastifyInstance) {
           },
         },
       },
-      preValidation: [fastify.authenticate],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('pdf-templates', 'read'),
+      ],
     },
     async (
       request: FastifyRequest<{
@@ -170,7 +176,10 @@ export async function pdfTemplateRoutes(fastify: FastifyInstance) {
           },
         },
       },
-      preValidation: [fastify.authenticate],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('pdf-templates', 'render'),
+      ],
     },
     async (
       request: FastifyRequest<{ Body: Static<typeof PdfRenderRequestSchema> }>,
@@ -251,7 +260,10 @@ export async function pdfTemplateRoutes(fastify: FastifyInstance) {
           },
         },
       },
-      preValidation: [fastify.authenticate],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('pdf-templates', 'validate'),
+      ],
     },
     async (
       request: FastifyRequest<{ Body: { template_data: PdfTemplateData } }>,
@@ -300,7 +312,10 @@ export async function pdfTemplateRoutes(fastify: FastifyInstance) {
           },
         },
       },
-      preValidation: [fastify.authenticate],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('pdf-templates', 'read'),
+      ],
     },
     async (
       request: FastifyRequest<{
@@ -348,7 +363,10 @@ export async function pdfTemplateRoutes(fastify: FastifyInstance) {
           },
         },
       },
-      preValidation: [fastify.authenticate],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('pdf-templates', 'read'),
+      ],
     },
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
@@ -389,7 +407,10 @@ export async function pdfTemplateRoutes(fastify: FastifyInstance) {
           },
         },
       },
-      preValidation: [fastify.authenticate],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('pdf-templates', 'read'),
+      ],
     },
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
@@ -430,7 +451,10 @@ export async function pdfTemplateRoutes(fastify: FastifyInstance) {
           },
         },
       },
-      preValidation: [fastify.authenticate],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('pdf-templates', 'read'),
+      ],
     },
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
@@ -471,7 +495,10 @@ export async function pdfTemplateRoutes(fastify: FastifyInstance) {
           },
         },
       },
-      preValidation: [fastify.authenticate],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('pdf-templates', 'read'),
+      ],
     },
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
@@ -512,7 +539,10 @@ export async function pdfTemplateRoutes(fastify: FastifyInstance) {
           },
         },
       },
-      preValidation: [fastify.authenticate],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('pdf-templates', 'read'),
+      ],
     },
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
@@ -554,7 +584,10 @@ export async function pdfTemplateRoutes(fastify: FastifyInstance) {
           },
         },
       },
-      preValidation: [fastify.authenticate],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('pdf-templates', 'read'),
+      ],
     },
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
@@ -605,7 +638,10 @@ export async function pdfTemplateRoutes(fastify: FastifyInstance) {
           },
         },
       },
-      preValidation: [fastify.authenticate],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('pdf-templates', 'read'),
+      ],
     },
     async (
       request: FastifyRequest<{
@@ -667,7 +703,10 @@ export async function pdfTemplateRoutes(fastify: FastifyInstance) {
           },
         },
       },
-      preValidation: [fastify.authenticate],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('pdf-templates', 'update'),
+      ],
     },
     async (
       request: FastifyRequest<{
@@ -733,7 +772,10 @@ export async function pdfTemplateRoutes(fastify: FastifyInstance) {
           },
         },
       },
-      preValidation: [fastify.authenticate],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('pdf-templates', 'delete'),
+      ],
     },
     async (
       request: FastifyRequest<{
@@ -815,7 +857,10 @@ export async function pdfTemplateRoutes(fastify: FastifyInstance) {
           },
         },
       },
-      preValidation: [fastify.authenticate],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('pdf-templates', 'preview'),
+      ],
     },
     async (
       request: FastifyRequest<{
@@ -878,7 +923,10 @@ export async function pdfTemplateRoutes(fastify: FastifyInstance) {
           },
         },
       },
-      preValidation: [fastify.authenticate],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('pdf-templates', 'duplicate'),
+      ],
     },
     async (
       request: FastifyRequest<{
@@ -945,7 +993,10 @@ export async function pdfTemplateRoutes(fastify: FastifyInstance) {
           },
         },
       },
-      preValidation: [fastify.authenticate],
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('pdf-templates', 'read'),
+      ],
     },
     async (
       request: FastifyRequest<{

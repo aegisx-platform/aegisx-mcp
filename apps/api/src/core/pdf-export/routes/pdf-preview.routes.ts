@@ -30,6 +30,10 @@ export async function pdfPreviewRoutes(fastify: FastifyInstance) {
   }>(
     '/generate',
     {
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('pdf-preview', 'generate'),
+      ],
       schema: {
         description: 'Generate PDF preview with template support',
         tags: ['PDF Preview'],
@@ -156,6 +160,10 @@ export async function pdfPreviewRoutes(fastify: FastifyInstance) {
   }>(
     '/:previewId',
     {
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('pdf-preview', 'read'),
+      ],
       schema: {
         description: 'Serve PDF preview file by ID',
         tags: ['PDF Preview'],
@@ -258,6 +266,10 @@ export async function pdfPreviewRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/templates',
     {
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('pdf-preview', 'read'),
+      ],
       schema: {
         description: 'Get list of available PDF templates',
         tags: ['PDF Preview'],
@@ -319,6 +331,10 @@ export async function pdfPreviewRoutes(fastify: FastifyInstance) {
   }>(
     '/templates/register',
     {
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('pdf-preview', 'manage'),
+      ],
       schema: {
         description: 'Register custom PDF template',
         tags: ['PDF Preview'],
@@ -394,6 +410,10 @@ export async function pdfPreviewRoutes(fastify: FastifyInstance) {
   fastify.delete(
     '/cleanup',
     {
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('pdf-preview', 'manage'),
+      ],
       schema: {
         description: 'Clean up old preview files',
         tags: ['PDF Preview'],

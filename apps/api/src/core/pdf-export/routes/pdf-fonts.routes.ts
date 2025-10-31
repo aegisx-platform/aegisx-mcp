@@ -16,6 +16,10 @@ export async function pdfFontsRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/available',
     {
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('pdf-fonts', 'read'),
+      ],
       schema: {
         description: 'Get list of available fonts for PDF generation',
         tags: ['PDF Fonts'],
@@ -94,6 +98,10 @@ export async function pdfFontsRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/status',
     {
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('pdf-fonts', 'read'),
+      ],
       schema: {
         description: 'Get font system status and diagnostics',
         tags: ['PDF Fonts'],
@@ -175,6 +183,10 @@ export async function pdfFontsRoutes(fastify: FastifyInstance) {
   }>(
     '/test',
     {
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('pdf-fonts', 'test'),
+      ],
       schema: {
         description: 'Test font rendering with sample text',
         tags: ['PDF Fonts'],
@@ -332,6 +344,10 @@ export async function pdfFontsRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/recommendations',
     {
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('pdf-fonts', 'read'),
+      ],
       schema: {
         description: 'Get font recommendations for different use cases',
         tags: ['PDF Fonts'],

@@ -645,11 +645,85 @@ export async function seed(knex: Knex): Promise<void> {
       description: 'Rotate API keys',
     },
 
-    // PDF Templates
+    // PDF Templates Permissions
     {
-      resource: 'templates',
+      resource: 'pdf-templates',
       action: 'read',
       description: 'View PDF templates',
+    },
+    {
+      resource: 'pdf-templates',
+      action: 'create',
+      description: 'Create PDF templates',
+    },
+    {
+      resource: 'pdf-templates',
+      action: 'update',
+      description: 'Update PDF templates',
+    },
+    {
+      resource: 'pdf-templates',
+      action: 'delete',
+      description: 'Delete PDF templates',
+    },
+    {
+      resource: 'pdf-templates',
+      action: 'render',
+      description: 'Render PDFs from templates',
+    },
+    {
+      resource: 'pdf-templates',
+      action: 'preview',
+      description: 'Preview PDF templates',
+    },
+    {
+      resource: 'pdf-templates',
+      action: 'validate',
+      description: 'Validate PDF templates',
+    },
+    {
+      resource: 'pdf-templates',
+      action: 'duplicate',
+      description: 'Duplicate PDF templates',
+    },
+    {
+      resource: 'pdf-templates',
+      action: 'manage',
+      description: 'Manage PDF templates (admin)',
+    },
+
+    // PDF Fonts Permissions
+    {
+      resource: 'pdf-fonts',
+      action: 'read',
+      description: 'View PDF font information',
+    },
+    {
+      resource: 'pdf-fonts',
+      action: 'test',
+      description: 'Test PDF font rendering',
+    },
+    {
+      resource: 'pdf-fonts',
+      action: 'manage',
+      description: 'Manage PDF fonts (admin)',
+    },
+
+    // PDF Preview Permissions
+    {
+      resource: 'pdf-preview',
+      action: 'generate',
+      description: 'Generate PDF previews',
+    },
+    {
+      resource: 'pdf-preview',
+      action: 'read',
+      description: 'View PDF previews',
+    },
+    {
+      resource: 'pdf-preview',
+      action: 'manage',
+      description: 'Manage PDF preview system (admin)',
     },
   ];
 
@@ -690,7 +764,7 @@ export async function seed(knex: Knex): Promise<void> {
     return;
   }
 
-  // Assign all RBAC, roles, permissions, user-roles, navigation, api-keys permissions to admin
+  // Assign all RBAC, roles, permissions, user-roles, navigation, api-keys, PDF permissions to admin
   const adminResources = [
     'rbac',
     'roles',
@@ -698,7 +772,9 @@ export async function seed(knex: Knex): Promise<void> {
     'user-roles',
     'navigation',
     'api-keys',
-    'templates',
+    'pdf-templates',
+    'pdf-fonts',
+    'pdf-preview',
   ];
   const adminPermissions = allPermissions.filter((perm) =>
     adminResources.includes(perm.resource),
