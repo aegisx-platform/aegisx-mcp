@@ -8,8 +8,13 @@ import {
   PerformanceMetric,
   UserAction,
 } from './monitoring.schemas';
+import { MetricsService } from './services/metrics.service';
+import { createSessionTracker } from './services/session-tracker.service';
 
 async function monitoringRoutes(fastify: FastifyInstance) {
+  // Initialize services
+  const metricsService = new MetricsService(fastify, 'prometheus');
+  const sessionTracker = createSessionTracker(fastify);
   // Client error logging endpoint
   fastify.post<{
     Body: ClientErrorsRequest;
@@ -695,41 +700,10 @@ async function monitoringRoutes(fastify: FastifyInstance) {
     },
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
-        // Check if sessions table exists
-        const tableExists = await fastify
-          .knex('information_schema.tables')
-          .where({ table_schema: 'public', table_name: 'sessions' })
-          .first();
+        // Get active sessions from Redis-based session tracker
+        const sessions = await sessionTracker.getActiveSessions();
 
-        if (!tableExists) {
-          // Table doesn't exist yet, return empty data
-          return reply.send({
-            total: 0,
-            users: 0,
-            sessions: [],
-            timestamp: new Date().toISOString(),
-          });
-        }
-
-        // Query active sessions from database
-        const activeSessions = await fastify
-          .knex('sessions')
-          .where('expires_at', '>', new Date())
-          .select('user_id', 'last_activity_at')
-          .orderBy('last_activity_at', 'desc')
-          .limit(100);
-
-        const uniqueUsers = new Set(activeSessions.map((s) => s.user_id)).size;
-
-        return reply.send({
-          total: activeSessions.length,
-          users: uniqueUsers,
-          sessions: activeSessions.map((s) => ({
-            userId: s.user_id,
-            lastActivity: s.last_activity_at,
-          })),
-          timestamp: new Date().toISOString(),
-        });
+        return reply.send(sessions);
       } catch (error: any) {
         fastify.logger.error('Failed to get active sessions', {
           error: error.message,
@@ -775,18 +749,11 @@ async function monitoringRoutes(fastify: FastifyInstance) {
     },
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
-        // TODO: Implement actual request metrics collection
-        // For now, returning mock data
-        return reply.success({
-          totalRequests: 15432,
-          byEndpoint: [
-            { endpoint: '/api/users', count: 5234, avgResponseTime: 42.3 },
-            { endpoint: '/api/auth/login', count: 823, avgResponseTime: 125.7 },
-            { endpoint: '/api/error-logs', count: 1543, avgResponseTime: 38.2 },
-          ],
-          timestamp: new Date().toISOString(),
-        });
-      } catch (error) {
+        // Get real request metrics from Prometheus-based metrics service
+        const metrics = await metricsService.getRequestMetrics();
+
+        return reply.success(metrics);
+      } catch (error: any) {
         fastify.logger.error('Failed to get request metrics', {
           error: error.message,
         });

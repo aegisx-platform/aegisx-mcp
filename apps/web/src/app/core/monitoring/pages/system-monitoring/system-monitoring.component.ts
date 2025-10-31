@@ -108,7 +108,7 @@ interface MetricCard {
       </div>
 
       <!-- Dashboard Content -->
-      <div *ngIf="!loading() && !error()" class="space-y-6">
+      <div [hidden]="loading() || error()" class="space-y-6">
         <!-- Summary Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <mat-card
@@ -412,7 +412,9 @@ export class SystemMonitoringComponent
     // Initialize charts after view is ready
     setTimeout(() => {
       this.initializeCharts();
-    });
+      // Update charts with loaded data if available
+      this.updateCharts();
+    }, 100); // Small delay to ensure ViewChild refs are ready
   }
 
   ngOnDestroy(): void {
@@ -473,10 +475,49 @@ export class SystemMonitoringComponent
   }
 
   private updateCharts(): void {
-    if (this.cpuMemoryChart) this.updateCpuMemoryChart();
-    if (this.databaseChart) this.updateDatabaseChart();
-    if (this.redisChart) this.updateRedisChart();
-    if (this.apiChart) this.updateApiChart();
+    console.log('🔄 updateCharts called', {
+      cpuChart: !!this.cpuMemoryChart,
+      dbChart: !!this.databaseChart,
+      redisChart: !!this.redisChart,
+      apiChart: !!this.apiChart,
+      cpuRef: !!this.cpuMemoryChartRef,
+      dbRef: !!this.databaseChartRef,
+      redisRef: !!this.redisChartRef,
+      apiRef: !!this.apiChartRef,
+    });
+
+    // If charts don't exist yet, try to create them
+    if (!this.cpuMemoryChart && this.cpuMemoryChartRef) {
+      console.log('📊 Creating CPU chart');
+      this.createCpuMemoryChart();
+    } else if (this.cpuMemoryChart) {
+      console.log('🔄 Updating CPU chart');
+      this.updateCpuMemoryChart();
+    }
+
+    if (!this.databaseChart && this.databaseChartRef) {
+      console.log('📊 Creating DB chart');
+      this.createDatabaseChart();
+    } else if (this.databaseChart) {
+      console.log('🔄 Updating DB chart');
+      this.updateDatabaseChart();
+    }
+
+    if (!this.redisChart && this.redisChartRef) {
+      console.log('📊 Creating Redis chart');
+      this.createRedisChart();
+    } else if (this.redisChart) {
+      console.log('🔄 Updating Redis chart');
+      this.updateRedisChart();
+    }
+
+    if (!this.apiChart && this.apiChartRef) {
+      console.log('📊 Creating API chart');
+      this.createApiChart();
+    } else if (this.apiChart) {
+      console.log('🔄 Updating API chart');
+      this.updateApiChart();
+    }
   }
 
   private destroyCharts(): void {
