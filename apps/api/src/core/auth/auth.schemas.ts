@@ -64,6 +64,12 @@ export const RefreshRequestSchema = Type.Object({
   ),
 });
 
+export const UnlockAccountRequestSchema = Type.Object({
+  identifier: Type.String({
+    description: 'Email address or username to unlock',
+  }),
+});
+
 // Response Schemas
 export const AuthResponseSchema = ApiSuccessResponseSchema(
   Type.Object({
@@ -101,17 +107,30 @@ export const PermissionsResponseSchema = ApiSuccessResponseSchema(
   }),
 );
 
+export const UnlockAccountResponseSchema = ApiSuccessResponseSchema(
+  Type.Object({
+    message: Type.String({
+      description: 'Success message',
+    }),
+    identifier: Type.String({
+      description: 'The unlocked identifier',
+    }),
+  }),
+);
+
 // TypeScript Types
 export type AuthUser = Static<typeof AuthUserSchema>;
 export type RegisterRequest = Static<typeof RegisterRequestSchema>;
 export type LoginRequest = Static<typeof LoginRequestSchema>;
 export type RefreshRequest = Static<typeof RefreshRequestSchema>;
+export type UnlockAccountRequest = Static<typeof UnlockAccountRequestSchema>;
 export type AuthResponse = Static<typeof AuthResponseSchema>;
 export type RegisterResponse = Static<typeof RegisterResponseSchema>;
 export type RefreshResponse = Static<typeof RefreshResponseSchema>;
 export type ProfileResponse = Static<typeof ProfileResponseSchema>;
 export type LogoutResponse = Static<typeof LogoutResponseSchema>;
 export type PermissionsResponse = Static<typeof PermissionsResponseSchema>;
+export type UnlockAccountResponse = Static<typeof UnlockAccountResponseSchema>;
 
 // Export schemas for registration
 export const authSchemas = {
@@ -119,22 +138,26 @@ export const authSchemas = {
   'register-request': RegisterRequestSchema,
   'login-request': LoginRequestSchema,
   'refresh-request': RefreshRequestSchema,
+  'unlock-account-request': UnlockAccountRequestSchema,
   'auth-response': AuthResponseSchema,
   'register-response': RegisterResponseSchema,
   'refresh-response': RefreshResponseSchema,
   'profile-response': ProfileResponseSchema,
   'logout-response': LogoutResponseSchema,
   'permissions-response': PermissionsResponseSchema,
+  'unlock-account-response': UnlockAccountResponseSchema,
 
   // Legacy compatibility
   authUser: AuthUserSchema,
   registerRequest: RegisterRequestSchema,
   loginRequest: LoginRequestSchema,
   refreshRequest: RefreshRequestSchema,
+  unlockAccountRequest: UnlockAccountRequestSchema,
   authResponse: AuthResponseSchema,
   registerResponse: RegisterResponseSchema,
   refreshResponse: RefreshResponseSchema,
   profileResponse: ProfileResponseSchema,
   logoutResponse: LogoutResponseSchema,
   permissionsResponse: PermissionsResponseSchema,
+  unlockAccountResponse: UnlockAccountResponseSchema,
 };

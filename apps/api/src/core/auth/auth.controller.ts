@@ -1,5 +1,10 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { RegisterRequest, LoginRequest, RefreshRequest } from './auth.types';
+import {
+  RegisterRequest,
+  LoginRequest,
+  RefreshRequest,
+  UnlockAccountRequest,
+} from './auth.types';
 
 export const authController = {
   async register(request: FastifyRequest, reply: FastifyReply) {
@@ -154,6 +159,31 @@ export const authController = {
         permissions,
       },
       message: 'Permissions retrieved successfully',
+      meta: {
+        timestamp: new Date().toISOString(),
+        version: 'v1',
+        requestId: request.id,
+        environment: ['development', 'staging', 'production'].includes(
+          process.env.NODE_ENV || '',
+        )
+          ? (process.env.NODE_ENV as 'development' | 'staging' | 'production')
+          : 'development',
+      },
+    });
+  },
+
+  async unlockAccount(request: FastifyRequest, reply: FastifyReply) {
+    const { identifier } = request.body as UnlockAccountRequest;
+
+    await request.server.authService.unlockAccount(identifier);
+
+    return reply.send({
+      success: true,
+      data: {
+        message: 'Account unlocked successfully',
+        identifier,
+      },
+      message: 'Account unlocked successfully',
       meta: {
         timestamp: new Date().toISOString(),
         version: 'v1',

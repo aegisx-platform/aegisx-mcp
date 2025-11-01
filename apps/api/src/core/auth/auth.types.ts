@@ -28,6 +28,10 @@ export interface RefreshRequest {
   refreshToken?: string;
 }
 
+export interface UnlockAccountRequest {
+  identifier: string;
+}
+
 export interface AuthTokens {
   accessToken: string;
   refreshToken: string;

@@ -178,4 +178,30 @@ export default async function authRoutes(fastify: FastifyInstance) {
     preHandler: [fastify.authenticateJWT],
     handler: authController.getPermissions,
   });
+
+  // POST /api/auth/unlock-account - Manually unlock a locked account (Admin only)
+  typedFastify.route({
+    method: 'POST',
+    url: '/auth/unlock-account',
+    schema: {
+      tags: ['Authentication'],
+      summary: 'Manually unlock a locked account',
+      description:
+        'Admin endpoint to manually unlock an account that has been locked due to failed login attempts. ' +
+        'Requires admin permission.',
+      security: [{ bearerAuth: [] }],
+      body: SchemaRefs.module('auth', 'unlockAccountRequest'),
+      response: {
+        200: SchemaRefs.module('auth', 'unlockAccountResponse'),
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preHandler: [
+      fastify.authenticateJWT,
+      fastify.verifyPermission('auth', 'unlock'),
+    ],
+    handler: authController.unlockAccount,
+  });
 }

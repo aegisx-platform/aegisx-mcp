@@ -376,4 +376,8 @@ export class AuthService {
 
     return permissionsResult?.permissions || [];
   }
+
+  async unlockAccount(identifier: string): Promise<void> {
+    await this.lockoutService.unlockAccount(identifier);
+  }
 }
