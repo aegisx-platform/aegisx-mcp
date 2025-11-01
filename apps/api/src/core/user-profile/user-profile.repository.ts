@@ -6,7 +6,7 @@ import {
   DatabaseUser,
   DatabaseUserPreferences,
   AvatarFile,
-  UserPreferencesUpdateRequest
+  UserPreferencesUpdateRequest,
 } from './user-profile.types';
 
 export class UserProfileRepository {
@@ -50,7 +50,7 @@ export class UserProfileRepository {
         'user_preferences.notifications_sound',
         'user_preferences.navigation_collapsed',
         'user_preferences.navigation_type',
-        'user_preferences.navigation_position'
+        'user_preferences.navigation_position',
       )
       .where('users.id', id)
       .where('users.deleted_at', null)
@@ -59,7 +59,6 @@ export class UserProfileRepository {
     if (!result) {
       return null;
     }
-
 
     // Get role permissions
     const permissions: string[] = [];
@@ -72,10 +71,13 @@ export class UserProfileRepository {
     return this.transformToUserProfile(result, permissions);
   }
 
-  async updateUserProfile(userId: string, updates: Partial<DatabaseUser>): Promise<boolean> {
+  async updateUserProfile(
+    userId: string,
+    updates: Partial<DatabaseUser>,
+  ): Promise<boolean> {
     const updateData: any = {
       ...updates,
-      updated_at: new Date()
+      updated_at: new Date(),
     };
 
     const updated = await this.knex('users')
@@ -98,7 +100,10 @@ export class UserProfileRepository {
     return this.transformToUserPreferences(preferences);
   }
 
-  async updateUserPreferences(userId: string, updates: UserPreferencesUpdateRequest): Promise<boolean> {
+  async updateUserPreferences(
+    userId: string,
+    updates: UserPreferencesUpdateRequest,
+  ): Promise<boolean> {
     // Check if preferences exist
     const existing = await this.knex('user_preferences')
       .where('user_id', userId)
@@ -110,7 +115,7 @@ export class UserProfileRepository {
         user_id: userId,
         ...this.transformPreferencesToDb(updates),
         created_at: new Date(),
-        updated_at: new Date()
+        updated_at: new Date(),
       });
       return true;
     }
@@ -118,7 +123,7 @@ export class UserProfileRepository {
     // Update existing preferences
     const updateData = {
       ...this.transformPreferencesToDb(updates),
-      updated_at: new Date()
+      updated_at: new Date(),
     };
 
     const updated = await this.knex('user_preferences')
@@ -128,7 +133,9 @@ export class UserProfileRepository {
     return updated > 0;
   }
 
-  async createAvatarFile(avatarData: Omit<AvatarFile, 'id' | 'createdAt' | 'updatedAt'>): Promise<AvatarFile> {
+  async createAvatarFile(
+    avatarData: Omit<AvatarFile, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<AvatarFile> {
     const [avatar] = await this.knex('avatar_files')
       .insert({
         user_id: avatarData.userId,
@@ -138,7 +145,7 @@ export class UserProfileRepository {
         storage_path: avatarData.storagePath,
         thumbnails: JSON.stringify(avatarData.thumbnails),
         created_at: new Date(),
-        updated_at: new Date()
+        updated_at: new Date(),
       })
       .returning('*');
 
@@ -151,7 +158,7 @@ export class UserProfileRepository {
       .where('deleted_at', null)
       .update({
         avatar_url: avatarUrl,
-        updated_at: new Date()
+        updated_at: new Date(),
       });
 
     return updated > 0;
@@ -168,20 +175,16 @@ export class UserProfileRepository {
 
   async deleteUserAvatar(userId: string): Promise<boolean> {
     const trx = await this.knex.transaction();
-    
+
     try {
       // Delete avatar file record
-      await trx('avatar_files')
-        .where('user_id', userId)
-        .del();
+      await trx('avatar_files').where('user_id', userId).del();
 
       // Remove avatar URL from user
-      await trx('users')
-        .where('id', userId)
-        .update({
-          avatar_url: null,
-          updated_at: new Date()
-        });
+      await trx('users').where('id', userId).update({
+        avatar_url: null,
+        updated_at: new Date(),
+      });
 
       await trx.commit();
       return true;
@@ -191,9 +194,11 @@ export class UserProfileRepository {
     }
   }
 
-  async deleteOldAvatarFiles(userId: string, excludeId?: string): Promise<void> {
-    let query = this.knex('avatar_files')
-      .where('user_id', userId);
+  async deleteOldAvatarFiles(
+    userId: string,
+    excludeId?: string,
+  ): Promise<void> {
+    let query = this.knex('avatar_files').where('user_id', userId);
 
     if (excludeId) {
       query = query.whereNot('id', excludeId);
@@ -210,76 +215,82 @@ export class UserProfileRepository {
       .where('role_permissions.role_id', roleId)
       .select('permissions.resource', 'permissions.action');
 
-    return permissions.map(p => `${p.resource}.${p.action}`);
+    return permissions.map((p) => `${p.resource}:${p.action}`);
   }
 
-  private transformToUserProfile(dbResult: any, permissions: string[]): UserProfile {
-    try {
-      const role: UserRole = {
-        id: dbResult.role_id || 'role_user',
-        name: dbResult.role_name || 'User',
-        permissions
-      };
+  private transformToUserProfile(
+    dbResult: any,
+    permissions: string[],
+  ): UserProfile {
+    const role: UserRole = {
+      id: dbResult.role_id || 'role_user',
+      name: dbResult.role_name || 'User',
+      permissions,
+    };
 
-      const preferences: UserPreferences = {
-        theme: dbResult.theme || 'default',
-        scheme: dbResult.scheme || 'light',
-        layout: dbResult.layout || 'classic',
-        language: dbResult.language || 'en',
-        timezone: dbResult.timezone || 'UTC',
-        dateFormat: dbResult.date_format || 'MM/DD/YYYY',
-        timeFormat: dbResult.time_format || '12h',
-        notifications: {
-          email: dbResult.notifications_email ?? true,
-          push: dbResult.notifications_push ?? false,
-          desktop: dbResult.notifications_desktop ?? true,
-          sound: dbResult.notifications_sound ?? true
-        },
-        navigation: {
-          collapsed: dbResult.navigation_collapsed ?? false,
-          type: dbResult.navigation_type || 'default',
-          position: dbResult.navigation_position || 'left'
-        }
-      };
+    const preferences: UserPreferences = {
+      theme: dbResult.theme || 'default',
+      scheme: dbResult.scheme || 'light',
+      layout: dbResult.layout || 'classic',
+      language: dbResult.language || 'en',
+      timezone: dbResult.timezone || 'UTC',
+      dateFormat: dbResult.date_format || 'MM/DD/YYYY',
+      timeFormat: dbResult.time_format || '12h',
+      notifications: {
+        email: dbResult.notifications_email ?? true,
+        push: dbResult.notifications_push ?? false,
+        desktop: dbResult.notifications_desktop ?? true,
+        sound: dbResult.notifications_sound ?? true,
+      },
+      navigation: {
+        collapsed: dbResult.navigation_collapsed ?? false,
+        type: dbResult.navigation_type || 'default',
+        position: dbResult.navigation_position || 'left',
+      },
+    };
 
-      // Build full avatar URL with base API URL
-      let avatarUrl = null;
-      if (dbResult.avatar_url) {
-        const baseUrl = process.env.API_BASE_URL || 'http://localhost:4200';
-        // If already absolute URL, use as is, otherwise prepend base URL
-        if (dbResult.avatar_url.startsWith('http://') || dbResult.avatar_url.startsWith('https://')) {
-          avatarUrl = dbResult.avatar_url;
-        } else {
-          avatarUrl = `${baseUrl}${dbResult.avatar_url}`;
-        }
+    // Build full avatar URL with base API URL
+    let avatarUrl = null;
+    if (dbResult.avatar_url) {
+      const baseUrl = process.env.API_BASE_URL || 'http://localhost:4200';
+      // If already absolute URL, use as is, otherwise prepend base URL
+      if (
+        dbResult.avatar_url.startsWith('http://') ||
+        dbResult.avatar_url.startsWith('https://')
+      ) {
+        avatarUrl = dbResult.avatar_url;
+      } else {
+        avatarUrl = `${baseUrl}${dbResult.avatar_url}`;
       }
-
-      const profile = {
-        id: dbResult.id,
-        email: dbResult.email,
-        username: dbResult.username,
-        name: dbResult.name || `${dbResult.first_name || ''} ${dbResult.last_name || ''}`.trim(),
-        firstName: dbResult.first_name,
-        lastName: dbResult.last_name,
-        bio: dbResult.bio,
-        avatar: avatarUrl,
-        role,
-        preferences,
-        createdAt: dbResult.created_at?.toISOString(),
-        updatedAt: dbResult.updated_at?.toISOString(),
-        lastLoginAt: dbResult.last_login_at?.toISOString(),
-        status: dbResult.status,
-        emailVerified: dbResult.email_verified || false,
-        twoFactorEnabled: dbResult.two_factor_enabled || false
-      };
-
-      return profile;
-    } catch (error) {
-      throw error;
     }
+
+    const profile = {
+      id: dbResult.id,
+      email: dbResult.email,
+      username: dbResult.username,
+      name:
+        dbResult.name ||
+        `${dbResult.first_name || ''} ${dbResult.last_name || ''}`.trim(),
+      firstName: dbResult.first_name,
+      lastName: dbResult.last_name,
+      bio: dbResult.bio,
+      avatar: avatarUrl,
+      role,
+      preferences,
+      createdAt: dbResult.created_at?.toISOString(),
+      updatedAt: dbResult.updated_at?.toISOString(),
+      lastLoginAt: dbResult.last_login_at?.toISOString(),
+      status: dbResult.status,
+      emailVerified: dbResult.email_verified || false,
+      twoFactorEnabled: dbResult.two_factor_enabled || false,
+    };
+
+    return profile;
   }
 
-  private transformToUserPreferences(dbPrefs: DatabaseUserPreferences): UserPreferences {
+  private transformToUserPreferences(
+    dbPrefs: DatabaseUserPreferences,
+  ): UserPreferences {
     return {
       theme: dbPrefs.theme as any,
       scheme: dbPrefs.scheme as any,
@@ -292,13 +303,13 @@ export class UserProfileRepository {
         email: dbPrefs.notifications_email,
         push: dbPrefs.notifications_push,
         desktop: dbPrefs.notifications_desktop,
-        sound: dbPrefs.notifications_sound
+        sound: dbPrefs.notifications_sound,
       },
       navigation: {
         collapsed: dbPrefs.navigation_collapsed,
         type: dbPrefs.navigation_type as any,
-        position: dbPrefs.navigation_position as any
-      }
+        position: dbPrefs.navigation_position as any,
+      },
     };
   }
 
@@ -314,16 +325,23 @@ export class UserProfileRepository {
     if (prefs.timeFormat !== undefined) dbData.time_format = prefs.timeFormat;
 
     if (prefs.notifications) {
-      if (prefs.notifications.email !== undefined) dbData.notifications_email = prefs.notifications.email;
-      if (prefs.notifications.push !== undefined) dbData.notifications_push = prefs.notifications.push;
-      if (prefs.notifications.desktop !== undefined) dbData.notifications_desktop = prefs.notifications.desktop;
-      if (prefs.notifications.sound !== undefined) dbData.notifications_sound = prefs.notifications.sound;
+      if (prefs.notifications.email !== undefined)
+        dbData.notifications_email = prefs.notifications.email;
+      if (prefs.notifications.push !== undefined)
+        dbData.notifications_push = prefs.notifications.push;
+      if (prefs.notifications.desktop !== undefined)
+        dbData.notifications_desktop = prefs.notifications.desktop;
+      if (prefs.notifications.sound !== undefined)
+        dbData.notifications_sound = prefs.notifications.sound;
     }
 
     if (prefs.navigation) {
-      if (prefs.navigation.collapsed !== undefined) dbData.navigation_collapsed = prefs.navigation.collapsed;
-      if (prefs.navigation.type !== undefined) dbData.navigation_type = prefs.navigation.type;
-      if (prefs.navigation.position !== undefined) dbData.navigation_position = prefs.navigation.position;
+      if (prefs.navigation.collapsed !== undefined)
+        dbData.navigation_collapsed = prefs.navigation.collapsed;
+      if (prefs.navigation.type !== undefined)
+        dbData.navigation_type = prefs.navigation.type;
+      if (prefs.navigation.position !== undefined)
+        dbData.navigation_position = prefs.navigation.position;
     }
 
     return dbData;
@@ -337,11 +355,12 @@ export class UserProfileRepository {
       mimeType: dbAvatar.mime_type,
       fileSize: dbAvatar.file_size,
       storagePath: dbAvatar.storage_path,
-      thumbnails: typeof dbAvatar.thumbnails === 'string' 
-        ? JSON.parse(dbAvatar.thumbnails)
-        : dbAvatar.thumbnails,
+      thumbnails:
+        typeof dbAvatar.thumbnails === 'string'
+          ? JSON.parse(dbAvatar.thumbnails)
+          : dbAvatar.thumbnails,
       createdAt: dbAvatar.created_at,
-      updatedAt: dbAvatar.updated_at
+      updatedAt: dbAvatar.updated_at,
     };
   }
 }
