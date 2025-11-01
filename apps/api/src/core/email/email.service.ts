@@ -32,7 +32,16 @@ export class EmailService {
 
     // Initialize SMTP transporter if credentials are provided
     if (this.shouldUseSMTP()) {
+      console.log('[EMAIL_SERVICE] SMTP credentials found, initializing...');
+      this.fastify.log.info(
+        'SMTP credentials found, initializing email service...',
+      );
       this.initializeTransporter();
+    } else {
+      console.log('[EMAIL_SERVICE] No SMTP credentials, using console logging');
+      this.fastify.log.warn(
+        'SMTP credentials not found, emails will be logged to console only',
+      );
     }
   }
 
@@ -85,14 +94,25 @@ export class EmailService {
       from = process.env.FROM_EMAIL || 'noreply@aegisx.local',
     } = options;
 
+    console.log('[EMAIL_SERVICE] sendEmail called:', {
+      to,
+      subject,
+      hasTransporter: !!this.transporter,
+      isDevelopment: this.isDevelopment,
+    });
+
     // In development/test without SMTP, just log to console
     if (this.isDevelopment && !this.transporter) {
+      console.log(
+        '[EMAIL_SERVICE] Development mode without SMTP - logging to console',
+      );
       this.logEmailToConsole({ to, subject, text, html, from });
       return true;
     }
 
     // If SMTP is not configured, log warning and return
     if (!this.transporter) {
+      console.log('[EMAIL_SERVICE] No transporter configured - email not sent');
       this.fastify.log.warn({
         msg: 'Email service not configured. Email not sent.',
         to,
@@ -102,6 +122,7 @@ export class EmailService {
     }
 
     try {
+      console.log('[EMAIL_SERVICE] Attempting to send email via SMTP...');
       const info = await this.transporter.sendMail({
         from,
         to: Array.isArray(to) ? to.join(', ') : to,
@@ -110,6 +131,10 @@ export class EmailService {
         html,
       });
 
+      console.log('[EMAIL_SERVICE] Email sent successfully!', {
+        messageId: info.messageId,
+        to,
+      });
       this.fastify.log.info({
         msg: 'Email sent successfully',
         messageId: info.messageId,
@@ -119,6 +144,7 @@ export class EmailService {
 
       return true;
     } catch (error) {
+      console.error('[EMAIL_SERVICE] Failed to send email:', error);
       this.fastify.log.error({
         msg: 'Failed to send email',
         error,
