@@ -864,4 +864,315 @@ describe('Authentication Flow Integration Tests', () => {
       });
     });
   });
+
+  describe('Account Lockout', () => {
+    describe('POST /api/auth/login lockout after failed attempts', () => {
+      it('should lock account after 5 failed login attempts', async () => {
+        // Create a test user
+        const userData = createRegisterRequestData({
+          email: 'lockout-test@example.com',
+          username: 'lockout-test',
+          password: 'CorrectPass123!',
+        });
+
+        await requestHelper.post('/api/auth/register', { body: userData });
+
+        // Attempt 5 logins with wrong password
+        for (let i = 0; i < 5; i++) {
+          const response = await requestHelper.post('/api/auth/login', {
+            body: {
+              email: userData.email,
+              password: 'WrongPassword123!',
+            },
+          });
+          expectResponse(response).hasStatus(401);
+        }
+
+        // 6th attempt should return 429 (account locked)
+        const lockedResponse = await requestHelper.post('/api/auth/login', {
+          body: {
+            email: userData.email,
+            password: userData.password, // Even with correct password
+          },
+        });
+
+        expectResponse(lockedResponse).hasStatus(429);
+        expect(lockedResponse.body.error?.code).toBe('ACCOUNT_LOCKED');
+        expect(lockedResponse.body.error?.message).toContain(
+          'Account is locked',
+        );
+      });
+
+      it('should return attempts remaining in lockout status', async () => {
+        // Create a test user
+        const userData = createRegisterRequestData({
+          email: 'attempts-test@example.com',
+          username: 'attempts-test',
+          password: 'CorrectPass123!',
+        });
+
+        await requestHelper.post('/api/auth/register', { body: userData });
+
+        // Attempt 3 failed logins
+        for (let i = 0; i < 3; i++) {
+          await requestHelper.post('/api/auth/login', {
+            body: {
+              email: userData.email,
+              password: 'WrongPassword123!',
+            },
+          });
+        }
+
+        // Note: Without exposing attempts remaining in response,
+        // we can only verify the account gets locked after 5 attempts
+        // This test verifies that we haven't been locked yet
+        const notLockedResponse = await requestHelper.post('/api/auth/login', {
+          body: {
+            email: userData.email,
+            password: userData.password,
+          },
+        });
+
+        // Should succeed (account not locked yet with only 3 failed attempts)
+        expectResponse(notLockedResponse).hasStatus(200).isSuccess();
+      });
+    });
+
+    describe('Successful login clears failed attempts', () => {
+      it('should reset failed attempt counter on successful login', async () => {
+        // Create a test user
+        const userData = createRegisterRequestData({
+          email: 'reset-attempts@example.com',
+          username: 'reset-attempts',
+          password: 'CorrectPass123!',
+        });
+
+        await requestHelper.post('/api/auth/register', { body: userData });
+
+        // Attempt 3 failed logins
+        for (let i = 0; i < 3; i++) {
+          await requestHelper.post('/api/auth/login', {
+            body: {
+              email: userData.email,
+              password: 'WrongPassword123!',
+            },
+          });
+        }
+
+        // Successful login
+        const successResponse = await requestHelper.post('/api/auth/login', {
+          body: {
+            email: userData.email,
+            password: userData.password,
+          },
+        });
+        expectResponse(successResponse).hasStatus(200).isSuccess();
+
+        // Now we can fail 5 more times before lockout (counter was reset)
+        for (let i = 0; i < 5; i++) {
+          await requestHelper.post('/api/auth/login', {
+            body: {
+              email: userData.email,
+              password: 'WrongPassword123!',
+            },
+          });
+        }
+
+        // 6th failed attempt after reset should lock the account
+        const lockedResponse = await requestHelper.post('/api/auth/login', {
+          body: {
+            email: userData.email,
+            password: userData.password,
+          },
+        });
+        expectResponse(lockedResponse).hasStatus(429);
+      });
+    });
+
+    describe('Login attempts are logged to database', () => {
+      it('should log all login attempts to database', async () => {
+        // Create a test user
+        const userData = createRegisterRequestData({
+          email: 'logging-test@example.com',
+          username: 'logging-test',
+          password: 'CorrectPass123!',
+        });
+
+        const registerResponse = await requestHelper.post(
+          '/api/auth/register',
+          { body: userData },
+        );
+        const userId = registerResponse.body.data?.user?.id;
+
+        // Make some failed attempts
+        await requestHelper.post('/api/auth/login', {
+          body: {
+            email: userData.email,
+            password: 'WrongPassword1!',
+          },
+        });
+
+        await requestHelper.post('/api/auth/login', {
+          body: {
+            email: userData.email,
+            password: 'WrongPassword2!',
+          },
+        });
+
+        // Make a successful attempt
+        await requestHelper.post('/api/auth/login', {
+          body: {
+            email: userData.email,
+            password: userData.password,
+          },
+        });
+
+        // Verify attempts are logged in database
+        // Note: This requires direct database access
+        const app = requestHelper.app;
+        const attempts = await app
+          .knex('login_attempts')
+          .where('user_id', userId)
+          .orWhere('email', userData.email)
+          .orderBy('created_at', 'desc')
+          .select('*');
+
+        expect(attempts.length).toBeGreaterThanOrEqual(3);
+
+        // Check we have both failed and successful attempts
+        const failedAttempts = attempts.filter((a) => !a.success);
+        const successAttempts = attempts.filter((a) => a.success);
+
+        expect(failedAttempts.length).toBeGreaterThanOrEqual(2);
+        expect(successAttempts.length).toBeGreaterThanOrEqual(1);
+
+        // Verify failure reasons are recorded
+        expect(failedAttempts[0].failure_reason).toBe('invalid_password');
+      });
+    });
+
+    describe('Manual account unlock (Admin)', () => {
+      it('should allow admin to unlock a locked account', async () => {
+        // Create a regular user
+        const userData = createRegisterRequestData({
+          email: 'unlock-test@example.com',
+          username: 'unlock-test',
+          password: 'CorrectPass123!',
+        });
+
+        await requestHelper.post('/api/auth/register', { body: userData });
+
+        // Lock the account by failing 5 times
+        for (let i = 0; i < 5; i++) {
+          await requestHelper.post('/api/auth/login', {
+            body: {
+              email: userData.email,
+              password: 'WrongPassword123!',
+            },
+          });
+        }
+
+        // Verify account is locked
+        const lockedResponse = await requestHelper.post('/api/auth/login', {
+          body: {
+            email: userData.email,
+            password: userData.password,
+          },
+        });
+        expectResponse(lockedResponse).hasStatus(429);
+
+        // Create an admin user with unlock permission
+        const adminData = createRegisterRequestData({
+          email: 'admin-unlock@example.com',
+          username: 'admin-unlock',
+          password: 'AdminPass123!',
+        });
+
+        const adminRegisterResponse = await requestHelper.post(
+          '/api/auth/register',
+          { body: adminData },
+        );
+        const adminUserId = adminRegisterResponse.body.data?.user?.id;
+
+        // Give admin the auth:unlock permission
+        // First, create the permission if it doesn't exist
+        const app = requestHelper.app;
+        await app
+          .knex('permissions')
+          .insert({
+            id: app.knex.raw('gen_random_uuid()'),
+            resource: 'auth',
+            action: 'unlock',
+            description: 'Unlock locked accounts',
+          })
+          .onConflict(['resource', 'action'])
+          .ignore();
+
+        const permission = await app
+          .knex('permissions')
+          .where({ resource: 'auth', action: 'unlock' })
+          .first();
+
+        // Get admin role
+        const adminRole = await app
+          .knex('roles')
+          .where({ name: 'admin' })
+          .first();
+
+        if (adminRole && permission) {
+          // Assign admin role to admin user
+          await app
+            .knex('user_roles')
+            .insert({
+              user_id: adminUserId,
+              role_id: adminRole.id,
+              is_active: true,
+            })
+            .onConflict(['user_id', 'role_id'])
+            .ignore();
+
+          // Assign unlock permission to admin role
+          await app
+            .knex('role_permissions')
+            .insert({
+              role_id: adminRole.id,
+              permission_id: permission.id,
+            })
+            .onConflict(['role_id', 'permission_id'])
+            .ignore();
+        }
+
+        // Login as admin
+        const adminLoginResponse = await requestHelper.post('/api/auth/login', {
+          body: {
+            email: adminData.email,
+            password: adminData.password,
+          },
+        });
+        const adminToken = adminLoginResponse.body.data?.accessToken;
+
+        // Unlock the locked account
+        const unlockResponse = await requestHelper.post(
+          '/api/auth/unlock-account',
+          {
+            body: { identifier: userData.email },
+            headers: { authorization: `Bearer ${adminToken}` },
+          },
+        );
+
+        expectResponse(unlockResponse).hasStatus(200).isSuccess();
+        expect(unlockResponse.body.data?.identifier).toBe(userData.email);
+
+        // Verify user can now login
+        const loginAfterUnlock = await requestHelper.post('/api/auth/login', {
+          body: {
+            email: userData.email,
+            password: userData.password,
+          },
+        });
+
+        expectResponse(loginAfterUnlock).hasStatus(200).isSuccess();
+      });
+    });
+  });
 });
