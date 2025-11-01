@@ -1,6 +1,9 @@
 import { FastifyInstance } from 'fastify';
 import { randomBytes } from 'crypto';
 import { AuthRepository } from '../auth.repository';
+import { AccountLockoutService } from './account-lockout.service';
+import { EmailVerificationService } from './email-verification.service';
+import { PasswordResetService } from './password-reset.service';
 
 interface RegisterInput {
   email: string;
@@ -17,9 +20,15 @@ interface LoginInput {
 
 export class AuthService {
   private authRepository: AuthRepository;
+  private lockoutService: AccountLockoutService;
+  private emailVerificationService: EmailVerificationService;
+  private passwordResetService: PasswordResetService;
 
   constructor(private readonly app: FastifyInstance) {
     this.authRepository = new AuthRepository(app.knex);
+    this.lockoutService = new AccountLockoutService(app, app.knex, app.redis);
+    this.emailVerificationService = new EmailVerificationService(app, app.knex);
+    this.passwordResetService = new PasswordResetService(app, app.knex);
   }
 
   async register(input: RegisterInput) {
@@ -84,6 +93,18 @@ export class AuthService {
         ip_address: undefined,
       });
 
+      // Create email verification token and send email
+      const verificationToken =
+        await this.emailVerificationService.createVerificationToken(
+          user.id,
+          user.email,
+        );
+      await this.emailVerificationService.sendVerificationEmail(
+        user.email,
+        verificationToken,
+        `${firstName || ''} ${lastName || ''}`.trim(),
+      );
+
       // Remove password from response
       const { password: _, ...userWithoutPassword } = user;
 
@@ -103,6 +124,29 @@ export class AuthService {
 
   async login(input: LoginInput, userAgent?: string, ipAddress?: string) {
     const { email, password } = input;
+    const identifier = email; // Can be email or username
+
+    // Check if account is locked
+    const lockoutStatus = await this.lockoutService.isAccountLocked(identifier);
+    if (lockoutStatus.isLocked) {
+      // Record the blocked attempt
+      await this.lockoutService.recordAttempt(identifier, {
+        email: email.includes('@') ? email : null,
+        username: !email.includes('@') ? email : null,
+        ipAddress: ipAddress || 'unknown',
+        userAgent,
+        success: false,
+        failureReason: 'account_locked',
+      });
+
+      const error = new Error(
+        `Account is locked. Try again after ${lockoutStatus.lockoutEndsAt?.toLocaleString()}`,
+      );
+      (error as any).statusCode = 429;
+      (error as any).code = 'ACCOUNT_LOCKED';
+      (error as any).lockoutEndsAt = lockoutStatus.lockoutEndsAt;
+      throw error;
+    }
 
     // Find user by email or username
     let user;
@@ -135,6 +179,16 @@ export class AuthService {
     }
 
     if (!user || !user.password) {
+      // Record failed attempt - user not found
+      await this.lockoutService.recordAttempt(identifier, {
+        email: email.includes('@') ? email : null,
+        username: !email.includes('@') ? email : null,
+        ipAddress: ipAddress || 'unknown',
+        userAgent,
+        success: false,
+        failureReason: 'user_not_found',
+      });
+
       const error = new Error('Invalid credentials');
       (error as any).statusCode = 401;
       (error as any).code = 'INVALID_CREDENTIALS';
@@ -147,6 +201,17 @@ export class AuthService {
       user.password,
     );
     if (!isValid) {
+      // Record failed attempt - invalid password
+      await this.lockoutService.recordAttempt(identifier, {
+        userId: user.id,
+        email: user.email,
+        username: user.username,
+        ipAddress: ipAddress || 'unknown',
+        userAgent,
+        success: false,
+        failureReason: 'invalid_password',
+      });
+
       const error = new Error('Invalid credentials');
       (error as any).statusCode = 401;
       (error as any).code = 'INVALID_CREDENTIALS';
@@ -155,11 +220,32 @@ export class AuthService {
 
     // Check if user is active
     if (!user.isActive) {
+      // Record failed attempt - account disabled
+      await this.lockoutService.recordAttempt(identifier, {
+        userId: user.id,
+        email: user.email,
+        username: user.username,
+        ipAddress: ipAddress || 'unknown',
+        userAgent,
+        success: false,
+        failureReason: 'account_disabled',
+      });
+
       const error = new Error('Account is disabled');
       (error as any).statusCode = 403;
       (error as any).code = 'ACCOUNT_DISABLED';
       throw error;
     }
+
+    // Record successful login attempt
+    await this.lockoutService.recordAttempt(identifier, {
+      userId: user.id,
+      email: user.email,
+      username: user.username,
+      ipAddress: ipAddress || 'unknown',
+      userAgent,
+      success: true,
+    });
 
     // Load user permissions
     const permissionsResult = await this.app
@@ -307,5 +393,55 @@ export class AuthService {
       .first();
 
     return permissionsResult?.permissions || [];
+  }
+
+  async unlockAccount(identifier: string): Promise<void> {
+    await this.lockoutService.unlockAccount(identifier);
+  }
+
+  async verifyEmail(token: string, ipAddress?: string) {
+    return await this.emailVerificationService.verifyEmail(token, ipAddress);
+  }
+
+  async resendVerification(userId: string) {
+    const token =
+      await this.emailVerificationService.resendVerification(userId);
+
+    // Get user details to send email
+    const user = await this.authRepository.findUserById(userId);
+    if (user) {
+      await this.emailVerificationService.sendVerificationEmail(
+        user.email,
+        token,
+        `${user.firstName} ${user.lastName}`.trim(),
+      );
+    }
+
+    return { success: true, message: 'Verification email resent' };
+  }
+
+  /**
+   * Request password reset - sends reset email
+   */
+  async requestPasswordReset(email: string) {
+    return await this.passwordResetService.requestPasswordReset(email);
+  }
+
+  /**
+   * Verify password reset token
+   */
+  async verifyResetToken(token: string) {
+    return await this.passwordResetService.verifyResetToken(token);
+  }
+
+  /**
+   * Reset password using token
+   */
+  async resetPassword(token: string, newPassword: string, ipAddress?: string) {
+    return await this.passwordResetService.resetPassword(
+      token,
+      newPassword,
+      ipAddress,
+    );
   }
 }

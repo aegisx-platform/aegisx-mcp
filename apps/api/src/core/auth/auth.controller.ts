@@ -1,5 +1,15 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { RegisterRequest, LoginRequest, RefreshRequest } from './auth.types';
+import {
+  RegisterRequest,
+  LoginRequest,
+  RefreshRequest,
+  UnlockAccountRequest,
+  VerifyEmailRequest,
+  ResendVerificationRequest,
+  RequestPasswordResetRequest,
+  VerifyResetTokenRequest,
+  ResetPasswordRequest,
+} from './auth.types';
 
 export const authController = {
   async register(request: FastifyRequest, reply: FastifyReply) {
@@ -154,6 +164,244 @@ export const authController = {
         permissions,
       },
       message: 'Permissions retrieved successfully',
+      meta: {
+        timestamp: new Date().toISOString(),
+        version: 'v1',
+        requestId: request.id,
+        environment: ['development', 'staging', 'production'].includes(
+          process.env.NODE_ENV || '',
+        )
+          ? (process.env.NODE_ENV as 'development' | 'staging' | 'production')
+          : 'development',
+      },
+    });
+  },
+
+  async unlockAccount(request: FastifyRequest, reply: FastifyReply) {
+    const { identifier } = request.body as UnlockAccountRequest;
+
+    await request.server.authService.unlockAccount(identifier);
+
+    return reply.send({
+      success: true,
+      data: {
+        message: 'Account unlocked successfully',
+        identifier,
+      },
+      message: 'Account unlocked successfully',
+      meta: {
+        timestamp: new Date().toISOString(),
+        version: 'v1',
+        requestId: request.id,
+        environment: ['development', 'staging', 'production'].includes(
+          process.env.NODE_ENV || '',
+        )
+          ? (process.env.NODE_ENV as 'development' | 'staging' | 'production')
+          : 'development',
+      },
+    });
+  },
+
+  async verifyEmail(request: FastifyRequest, reply: FastifyReply) {
+    const { token } = request.body as VerifyEmailRequest;
+
+    const result = await request.server.authService.verifyEmail(
+      token,
+      request.ip,
+    );
+
+    if (!result.success) {
+      return reply.code(400).send({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: result.message,
+          details: [
+            {
+              field: 'token',
+              message: result.message,
+              code: 'EMAIL_VERIFICATION_FAILED',
+            },
+          ],
+          statusCode: 400,
+        },
+        meta: {
+          timestamp: new Date().toISOString(),
+          version: 'v1',
+          requestId: request.id,
+          environment: ['development', 'staging', 'production'].includes(
+            process.env.NODE_ENV || '',
+          )
+            ? (process.env.NODE_ENV as 'development' | 'staging' | 'production')
+            : 'development',
+        },
+      });
+    }
+
+    return reply.send({
+      success: true,
+      data: {
+        emailVerified: result.emailVerified || false,
+      },
+      message: result.message,
+      meta: {
+        timestamp: new Date().toISOString(),
+        version: 'v1',
+        requestId: request.id,
+        environment: ['development', 'staging', 'production'].includes(
+          process.env.NODE_ENV || '',
+        )
+          ? (process.env.NODE_ENV as 'development' | 'staging' | 'production')
+          : 'development',
+      },
+    });
+  },
+
+  async resendVerification(request: FastifyRequest, reply: FastifyReply) {
+    const userId = request.user.id;
+
+    const result = await request.server.authService.resendVerification(userId);
+
+    return reply.send({
+      success: true,
+      data: {
+        message: result.message,
+      },
+      message: result.message,
+      meta: {
+        timestamp: new Date().toISOString(),
+        version: 'v1',
+        requestId: request.id,
+        environment: ['development', 'staging', 'production'].includes(
+          process.env.NODE_ENV || '',
+        )
+          ? (process.env.NODE_ENV as 'development' | 'staging' | 'production')
+          : 'development',
+      },
+    });
+  },
+
+  async requestPasswordReset(request: FastifyRequest, reply: FastifyReply) {
+    const { email } = request.body as RequestPasswordResetRequest;
+
+    const result = await request.server.authService.requestPasswordReset(email);
+
+    return reply.send({
+      success: true,
+      data: {
+        message: result.message,
+      },
+      message: result.message,
+      meta: {
+        timestamp: new Date().toISOString(),
+        version: 'v1',
+        requestId: request.id,
+        environment: ['development', 'staging', 'production'].includes(
+          process.env.NODE_ENV || '',
+        )
+          ? (process.env.NODE_ENV as 'development' | 'staging' | 'production')
+          : 'development',
+      },
+    });
+  },
+
+  async verifyResetToken(request: FastifyRequest, reply: FastifyReply) {
+    const { token } = request.body as VerifyResetTokenRequest;
+
+    const result = await request.server.authService.verifyResetToken(token);
+
+    if (!result.success) {
+      return reply.code(400).send({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: result.message,
+          details: [
+            {
+              field: 'token',
+              message: result.message,
+              code: 'INVALID_TOKEN',
+            },
+          ],
+          statusCode: 400,
+        },
+        meta: {
+          timestamp: new Date().toISOString(),
+          version: 'v1',
+          requestId: request.id,
+          environment: ['development', 'staging', 'production'].includes(
+            process.env.NODE_ENV || '',
+          )
+            ? (process.env.NODE_ENV as 'development' | 'staging' | 'production')
+            : 'development',
+        },
+      });
+    }
+
+    return reply.send({
+      success: true,
+      data: {
+        message: result.message,
+        valid: true,
+      },
+      message: result.message,
+      meta: {
+        timestamp: new Date().toISOString(),
+        version: 'v1',
+        requestId: request.id,
+        environment: ['development', 'staging', 'production'].includes(
+          process.env.NODE_ENV || '',
+        )
+          ? (process.env.NODE_ENV as 'development' | 'staging' | 'production')
+          : 'development',
+      },
+    });
+  },
+
+  async resetPassword(request: FastifyRequest, reply: FastifyReply) {
+    const { token, newPassword } = request.body as ResetPasswordRequest;
+    const ipAddress = request.ip;
+
+    const result = await request.server.authService.resetPassword(
+      token,
+      newPassword,
+      ipAddress,
+    );
+
+    if (!result.success) {
+      return reply.code(400).send({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: result.message,
+          details: [
+            {
+              field: 'token',
+              message: result.message,
+              code: 'PASSWORD_RESET_FAILED',
+            },
+          ],
+          statusCode: 400,
+        },
+        meta: {
+          timestamp: new Date().toISOString(),
+          version: 'v1',
+          requestId: request.id,
+          environment: ['development', 'staging', 'production'].includes(
+            process.env.NODE_ENV || '',
+          )
+            ? (process.env.NODE_ENV as 'development' | 'staging' | 'production')
+            : 'development',
+        },
+      });
+    }
+
+    return reply.send({
+      success: true,
+      data: {
+        message: result.message,
+      },
+      message: result.message,
       meta: {
         timestamp: new Date().toISOString(),
         version: 'v1',

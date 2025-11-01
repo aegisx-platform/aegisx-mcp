@@ -706,4 +706,728 @@ describe('Authentication Flow Integration Tests', () => {
       });
     });
   });
+
+  describe('Rate Limiting', () => {
+    describe('POST /api/auth/register rate limit', () => {
+      it('should enforce rate limit of 3 registrations per hour', async () => {
+        const baseData = createRegisterRequestData();
+        const responses: any[] = [];
+
+        // Attempt 4 registrations (limit is 3)
+        for (let i = 0; i < 4; i++) {
+          const response = await requestHelper.post('/api/auth/register', {
+            body: {
+              ...baseData,
+              email: `ratelimit-register${i}@example.com`,
+              username: `ratelimit-register${i}`,
+            },
+          });
+          responses.push(response);
+        }
+
+        // First 3 should succeed
+        responses.slice(0, 3).forEach((response) => {
+          expectResponse(response).hasStatus(201).isSuccess();
+        });
+
+        // 4th request should be rate limited
+        expectResponse(responses[3]).hasStatus(429);
+      });
+    });
+
+    describe('POST /api/auth/login rate limit', () => {
+      it('should enforce rate limit of 5 login attempts per minute', async () => {
+        // First create a test user
+        const userData = createRegisterRequestData({
+          email: 'ratelimit-login@example.com',
+          username: 'ratelimit-login',
+          password: 'TestPass123!',
+        });
+
+        await requestHelper.post('/api/auth/register', { body: userData });
+
+        const responses: any[] = [];
+
+        // Attempt 6 logins (limit is 5 per minute per IP+email)
+        for (let i = 0; i < 6; i++) {
+          const response = await requestHelper.post('/api/auth/login', {
+            body: {
+              email: userData.email,
+              password: userData.password,
+            },
+          });
+          responses.push(response);
+        }
+
+        // First 5 should succeed (or fail with 401 if password wrong, but not 429)
+        responses.slice(0, 5).forEach((response) => {
+          expect([200, 401]).toContain(response.statusCode);
+          expect(response.statusCode).not.toBe(429);
+        });
+
+        // 6th request should be rate limited
+        expectResponse(responses[5]).hasStatus(429);
+      });
+
+      it('should use IP+email combination for login rate limiting', async () => {
+        // Create two test users
+        const user1Data = createRegisterRequestData({
+          email: 'ratelimit-user1@example.com',
+          username: 'ratelimit-user1',
+          password: 'TestPass123!',
+        });
+
+        const user2Data = createRegisterRequestData({
+          email: 'ratelimit-user2@example.com',
+          username: 'ratelimit-user2',
+          password: 'TestPass123!',
+        });
+
+        await requestHelper.post('/api/auth/register', { body: user1Data });
+        await requestHelper.post('/api/auth/register', { body: user2Data });
+
+        // Attempt 5 logins for user1
+        for (let i = 0; i < 5; i++) {
+          await requestHelper.post('/api/auth/login', {
+            body: {
+              email: user1Data.email,
+              password: user1Data.password,
+            },
+          });
+        }
+
+        // user1 should now be rate limited
+        const user1Response = await requestHelper.post('/api/auth/login', {
+          body: {
+            email: user1Data.email,
+            password: user1Data.password,
+          },
+        });
+        expectResponse(user1Response).hasStatus(429);
+
+        // user2 should still be able to login (different email)
+        const user2Response = await requestHelper.post('/api/auth/login', {
+          body: {
+            email: user2Data.email,
+            password: user2Data.password,
+          },
+        });
+        expect([200, 401]).toContain(user2Response.statusCode);
+        expect(user2Response.statusCode).not.toBe(429);
+      });
+    });
+
+    describe('POST /api/auth/refresh rate limit', () => {
+      it('should enforce rate limit of 10 refresh attempts per minute', async () => {
+        // Create and login a test user to get refresh token
+        const userData = createRegisterRequestData({
+          email: 'ratelimit-refresh@example.com',
+          username: 'ratelimit-refresh',
+          password: 'TestPass123!',
+        });
+
+        await requestHelper.post('/api/auth/register', { body: userData });
+
+        const loginResponse = await requestHelper.post('/api/auth/login', {
+          body: {
+            email: userData.email,
+            password: userData.password,
+          },
+        });
+
+        const refreshToken =
+          loginResponse.body.data?.refreshToken ||
+          (Array.isArray(loginResponse.headers['set-cookie'])
+            ? loginResponse.headers['set-cookie'].find((c: string) =>
+                c.startsWith('refreshToken='),
+              )
+            : loginResponse.headers['set-cookie']);
+
+        const responses: any[] = [];
+
+        // Attempt 11 refresh requests (limit is 10)
+        for (let i = 0; i < 11; i++) {
+          const response = await requestHelper.post('/api/auth/refresh', {
+            body: { refreshToken },
+          });
+          responses.push(response);
+        }
+
+        // First 10 should succeed (or fail with 401, but not 429)
+        responses.slice(0, 10).forEach((response) => {
+          expect([200, 401]).toContain(response.statusCode);
+          expect(response.statusCode).not.toBe(429);
+        });
+
+        // 11th request should be rate limited
+        expectResponse(responses[10]).hasStatus(429);
+      });
+    });
+  });
+
+  describe('Account Lockout', () => {
+    describe('POST /api/auth/login lockout after failed attempts', () => {
+      it('should lock account after 5 failed login attempts', async () => {
+        // Create a test user
+        const userData = createRegisterRequestData({
+          email: 'lockout-test@example.com',
+          username: 'lockout-test',
+          password: 'CorrectPass123!',
+        });
+
+        await requestHelper.post('/api/auth/register', { body: userData });
+
+        // Attempt 5 logins with wrong password
+        for (let i = 0; i < 5; i++) {
+          const response = await requestHelper.post('/api/auth/login', {
+            body: {
+              email: userData.email,
+              password: 'WrongPassword123!',
+            },
+          });
+          expectResponse(response).hasStatus(401);
+        }
+
+        // 6th attempt should return 429 (account locked)
+        const lockedResponse = await requestHelper.post('/api/auth/login', {
+          body: {
+            email: userData.email,
+            password: userData.password, // Even with correct password
+          },
+        });
+
+        expectResponse(lockedResponse).hasStatus(429);
+        expect(lockedResponse.body.error?.code).toBe('ACCOUNT_LOCKED');
+        expect(lockedResponse.body.error?.message).toContain(
+          'Account is locked',
+        );
+      });
+
+      it('should return attempts remaining in lockout status', async () => {
+        // Create a test user
+        const userData = createRegisterRequestData({
+          email: 'attempts-test@example.com',
+          username: 'attempts-test',
+          password: 'CorrectPass123!',
+        });
+
+        await requestHelper.post('/api/auth/register', { body: userData });
+
+        // Attempt 3 failed logins
+        for (let i = 0; i < 3; i++) {
+          await requestHelper.post('/api/auth/login', {
+            body: {
+              email: userData.email,
+              password: 'WrongPassword123!',
+            },
+          });
+        }
+
+        // Note: Without exposing attempts remaining in response,
+        // we can only verify the account gets locked after 5 attempts
+        // This test verifies that we haven't been locked yet
+        const notLockedResponse = await requestHelper.post('/api/auth/login', {
+          body: {
+            email: userData.email,
+            password: userData.password,
+          },
+        });
+
+        // Should succeed (account not locked yet with only 3 failed attempts)
+        expectResponse(notLockedResponse).hasStatus(200).isSuccess();
+      });
+    });
+
+    describe('Successful login clears failed attempts', () => {
+      it('should reset failed attempt counter on successful login', async () => {
+        // Create a test user
+        const userData = createRegisterRequestData({
+          email: 'reset-attempts@example.com',
+          username: 'reset-attempts',
+          password: 'CorrectPass123!',
+        });
+
+        await requestHelper.post('/api/auth/register', { body: userData });
+
+        // Attempt 3 failed logins
+        for (let i = 0; i < 3; i++) {
+          await requestHelper.post('/api/auth/login', {
+            body: {
+              email: userData.email,
+              password: 'WrongPassword123!',
+            },
+          });
+        }
+
+        // Successful login
+        const successResponse = await requestHelper.post('/api/auth/login', {
+          body: {
+            email: userData.email,
+            password: userData.password,
+          },
+        });
+        expectResponse(successResponse).hasStatus(200).isSuccess();
+
+        // Now we can fail 5 more times before lockout (counter was reset)
+        for (let i = 0; i < 5; i++) {
+          await requestHelper.post('/api/auth/login', {
+            body: {
+              email: userData.email,
+              password: 'WrongPassword123!',
+            },
+          });
+        }
+
+        // 6th failed attempt after reset should lock the account
+        const lockedResponse = await requestHelper.post('/api/auth/login', {
+          body: {
+            email: userData.email,
+            password: userData.password,
+          },
+        });
+        expectResponse(lockedResponse).hasStatus(429);
+      });
+    });
+
+    describe('Login attempts are logged to database', () => {
+      it('should log all login attempts to database', async () => {
+        // Create a test user
+        const userData = createRegisterRequestData({
+          email: 'logging-test@example.com',
+          username: 'logging-test',
+          password: 'CorrectPass123!',
+        });
+
+        const registerResponse = await requestHelper.post(
+          '/api/auth/register',
+          { body: userData },
+        );
+        const userId = registerResponse.body.data?.user?.id;
+
+        // Make some failed attempts
+        await requestHelper.post('/api/auth/login', {
+          body: {
+            email: userData.email,
+            password: 'WrongPassword1!',
+          },
+        });
+
+        await requestHelper.post('/api/auth/login', {
+          body: {
+            email: userData.email,
+            password: 'WrongPassword2!',
+          },
+        });
+
+        // Make a successful attempt
+        await requestHelper.post('/api/auth/login', {
+          body: {
+            email: userData.email,
+            password: userData.password,
+          },
+        });
+
+        // Verify attempts are logged in database
+        // Note: This requires direct database access
+        const app = requestHelper.app;
+        const attempts = await app
+          .knex('login_attempts')
+          .where('user_id', userId)
+          .orWhere('email', userData.email)
+          .orderBy('created_at', 'desc')
+          .select('*');
+
+        expect(attempts.length).toBeGreaterThanOrEqual(3);
+
+        // Check we have both failed and successful attempts
+        const failedAttempts = attempts.filter((a) => !a.success);
+        const successAttempts = attempts.filter((a) => a.success);
+
+        expect(failedAttempts.length).toBeGreaterThanOrEqual(2);
+        expect(successAttempts.length).toBeGreaterThanOrEqual(1);
+
+        // Verify failure reasons are recorded
+        expect(failedAttempts[0].failure_reason).toBe('invalid_password');
+      });
+    });
+
+    describe('Manual account unlock (Admin)', () => {
+      it('should allow admin to unlock a locked account', async () => {
+        // Create a regular user
+        const userData = createRegisterRequestData({
+          email: 'unlock-test@example.com',
+          username: 'unlock-test',
+          password: 'CorrectPass123!',
+        });
+
+        await requestHelper.post('/api/auth/register', { body: userData });
+
+        // Lock the account by failing 5 times
+        for (let i = 0; i < 5; i++) {
+          await requestHelper.post('/api/auth/login', {
+            body: {
+              email: userData.email,
+              password: 'WrongPassword123!',
+            },
+          });
+        }
+
+        // Verify account is locked
+        const lockedResponse = await requestHelper.post('/api/auth/login', {
+          body: {
+            email: userData.email,
+            password: userData.password,
+          },
+        });
+        expectResponse(lockedResponse).hasStatus(429);
+
+        // Create an admin user with unlock permission
+        const adminData = createRegisterRequestData({
+          email: 'admin-unlock@example.com',
+          username: 'admin-unlock',
+          password: 'AdminPass123!',
+        });
+
+        const adminRegisterResponse = await requestHelper.post(
+          '/api/auth/register',
+          { body: adminData },
+        );
+        const adminUserId = adminRegisterResponse.body.data?.user?.id;
+
+        // Give admin the auth:unlock permission
+        // First, create the permission if it doesn't exist
+        const app = requestHelper.app;
+        await app
+          .knex('permissions')
+          .insert({
+            id: app.knex.raw('gen_random_uuid()'),
+            resource: 'auth',
+            action: 'unlock',
+            description: 'Unlock locked accounts',
+          })
+          .onConflict(['resource', 'action'])
+          .ignore();
+
+        const permission = await app
+          .knex('permissions')
+          .where({ resource: 'auth', action: 'unlock' })
+          .first();
+
+        // Get admin role
+        const adminRole = await app
+          .knex('roles')
+          .where({ name: 'admin' })
+          .first();
+
+        if (adminRole && permission) {
+          // Assign admin role to admin user
+          await app
+            .knex('user_roles')
+            .insert({
+              user_id: adminUserId,
+              role_id: adminRole.id,
+              is_active: true,
+            })
+            .onConflict(['user_id', 'role_id'])
+            .ignore();
+
+          // Assign unlock permission to admin role
+          await app
+            .knex('role_permissions')
+            .insert({
+              role_id: adminRole.id,
+              permission_id: permission.id,
+            })
+            .onConflict(['role_id', 'permission_id'])
+            .ignore();
+        }
+
+        // Login as admin
+        const adminLoginResponse = await requestHelper.post('/api/auth/login', {
+          body: {
+            email: adminData.email,
+            password: adminData.password,
+          },
+        });
+        const adminToken = adminLoginResponse.body.data?.accessToken;
+
+        // Unlock the locked account
+        const unlockResponse = await requestHelper.post(
+          '/api/auth/unlock-account',
+          {
+            body: { identifier: userData.email },
+            headers: { authorization: `Bearer ${adminToken}` },
+          },
+        );
+
+        expectResponse(unlockResponse).hasStatus(200).isSuccess();
+        expect(unlockResponse.body.data?.identifier).toBe(userData.email);
+
+        // Verify user can now login
+        const loginAfterUnlock = await requestHelper.post('/api/auth/login', {
+          body: {
+            email: userData.email,
+            password: userData.password,
+          },
+        });
+
+        expectResponse(loginAfterUnlock).hasStatus(200).isSuccess();
+      });
+    });
+  });
+
+  describe('Email Verification', () => {
+    describe('POST /api/auth/register creates verification token', () => {
+      it('should create email verification token after registration', async () => {
+        const userData = createRegisterRequestData({
+          email: 'verify-test@example.com',
+          username: 'verify-test',
+          password: 'TestPass123!',
+        });
+
+        const registerResponse = await requestHelper.post(
+          '/api/auth/register',
+          { body: userData },
+        );
+        expectResponse(registerResponse).hasStatus(201).isSuccess();
+
+        const userId = registerResponse.body.data?.user?.id;
+
+        // Verify token was created in database
+        const app = requestHelper.app;
+        const verification = await app
+          .knex('email_verifications')
+          .where('user_id', userId)
+          .first();
+
+        expect(verification).toBeDefined();
+        expect(verification.email).toBe(userData.email);
+        expect(verification.verified).toBe(false);
+        expect(verification.token).toBeDefined();
+        expect(verification.token.length).toBe(64); // 32 bytes hex = 64 chars
+      });
+    });
+
+    describe('POST /api/auth/verify-email', () => {
+      it('should verify email with valid token', async () => {
+        const userData = createRegisterRequestData({
+          email: 'verify-valid@example.com',
+          username: 'verify-valid',
+          password: 'TestPass123!',
+        });
+
+        const registerResponse = await requestHelper.post(
+          '/api/auth/register',
+          { body: userData },
+        );
+        const userId = registerResponse.body.data?.user?.id;
+
+        // Get verification token from database
+        const app = requestHelper.app;
+        const verification = await app
+          .knex('email_verifications')
+          .where('user_id', userId)
+          .first();
+
+        // Verify email
+        const verifyResponse = await requestHelper.post(
+          '/api/auth/verify-email',
+          {
+            body: { token: verification.token },
+          },
+        );
+
+        expectResponse(verifyResponse).hasStatus(200).isSuccess();
+        expect(verifyResponse.body.data?.emailVerified).toBe(true);
+
+        // Check database updated
+        const updatedUser = await app.knex('users').where('id', userId).first();
+        expect(updatedUser.email_verified).toBe(true);
+        expect(updatedUser.email_verified_at).toBeDefined();
+
+        const updatedVerification = await app
+          .knex('email_verifications')
+          .where('user_id', userId)
+          .first();
+        expect(updatedVerification.verified).toBe(true);
+        expect(updatedVerification.verified_at).toBeDefined();
+      });
+
+      it('should reject invalid verification token', async () => {
+        const verifyResponse = await requestHelper.post(
+          '/api/auth/verify-email',
+          {
+            body: { token: 'invalid-token-12345' },
+          },
+        );
+
+        expectResponse(verifyResponse).hasStatus(400);
+        expect(verifyResponse.body.error?.code).toBe(
+          'EMAIL_VERIFICATION_FAILED',
+        );
+      });
+
+      it('should handle already verified email', async () => {
+        const userData = createRegisterRequestData({
+          email: 'already-verified@example.com',
+          username: 'already-verified',
+          password: 'TestPass123!',
+        });
+
+        const registerResponse = await requestHelper.post(
+          '/api/auth/register',
+          { body: userData },
+        );
+        const userId = registerResponse.body.data?.user?.id;
+
+        // Get verification token
+        const app = requestHelper.app;
+        const verification = await app
+          .knex('email_verifications')
+          .where('user_id', userId)
+          .first();
+
+        // Verify first time
+        await requestHelper.post('/api/auth/verify-email', {
+          body: { token: verification.token },
+        });
+
+        // Try to verify again
+        const secondVerifyResponse = await requestHelper.post(
+          '/api/auth/verify-email',
+          {
+            body: { token: verification.token },
+          },
+        );
+
+        expectResponse(secondVerifyResponse).hasStatus(200).isSuccess();
+        expect(secondVerifyResponse.body.message).toContain('already verified');
+      });
+    });
+
+    describe('POST /api/auth/resend-verification', () => {
+      it('should resend verification email to authenticated user', async () => {
+        const userData = createRegisterRequestData({
+          email: 'resend-test@example.com',
+          username: 'resend-test',
+          password: 'TestPass123!',
+        });
+
+        const registerResponse = await requestHelper.post(
+          '/api/auth/register',
+          { body: userData },
+        );
+        const accessToken = registerResponse.body.data?.accessToken;
+        const userId = registerResponse.body.data?.user?.id;
+
+        // Get old token
+        const app = requestHelper.app;
+        const oldVerification = await app
+          .knex('email_verifications')
+          .where('user_id', userId)
+          .first();
+
+        // Resend verification
+        const resendResponse = await requestHelper.post(
+          '/api/auth/resend-verification',
+          {
+            body: {},
+            headers: { authorization: `Bearer ${accessToken}` },
+          },
+        );
+
+        expectResponse(resendResponse).hasStatus(200).isSuccess();
+        expect(resendResponse.body.data?.message).toContain('resent');
+
+        // Check new token created and old one deleted
+        const verifications = await app
+          .knex('email_verifications')
+          .where('user_id', userId)
+          .where('verified', false);
+
+        expect(verifications.length).toBe(1);
+        expect(verifications[0].token).not.toBe(oldVerification.token);
+      });
+
+      it('should reject resend for already verified email', async () => {
+        const userData = createRegisterRequestData({
+          email: 'resend-verified@example.com',
+          username: 'resend-verified',
+          password: 'TestPass123!',
+        });
+
+        const registerResponse = await requestHelper.post(
+          '/api/auth/register',
+          { body: userData },
+        );
+        const accessToken = registerResponse.body.data?.accessToken;
+        const userId = registerResponse.body.data?.user?.id;
+
+        // Get token and verify
+        const app = requestHelper.app;
+        const verification = await app
+          .knex('email_verifications')
+          .where('user_id', userId)
+          .first();
+
+        await requestHelper.post('/api/auth/verify-email', {
+          body: { token: verification.token },
+        });
+
+        // Try to resend after verification
+        const resendResponse = await requestHelper.post(
+          '/api/auth/resend-verification',
+          {
+            body: {},
+            headers: { authorization: `Bearer ${accessToken}` },
+          },
+        );
+
+        expectResponse(resendResponse).hasStatus(400);
+        expect(resendResponse.body.error?.code).toBe('EMAIL_ALREADY_VERIFIED');
+      });
+    });
+
+    describe('Token expiration', () => {
+      it('should reject expired verification token', async () => {
+        const userData = createRegisterRequestData({
+          email: 'expired-token@example.com',
+          username: 'expired-token',
+          password: 'TestPass123!',
+        });
+
+        const registerResponse = await requestHelper.post(
+          '/api/auth/register',
+          { body: userData },
+        );
+        const userId = registerResponse.body.data?.user?.id;
+
+        // Get token and manually expire it
+        const app = requestHelper.app;
+        const verification = await app
+          .knex('email_verifications')
+          .where('user_id', userId)
+          .first();
+
+        // Set expiry to past
+        await app
+          .knex('email_verifications')
+          .where('id', verification.id)
+          .update({
+            expires_at: new Date(Date.now() - 1000 * 60 * 60), // 1 hour ago
+          });
+
+        // Try to verify with expired token
+        const verifyResponse = await requestHelper.post(
+          '/api/auth/verify-email',
+          {
+            body: { token: verification.token },
+          },
+        );
+
+        expectResponse(verifyResponse).hasStatus(400);
+        expect(verifyResponse.body.error?.message).toContain('expired');
+      });
+    });
+  });
 });

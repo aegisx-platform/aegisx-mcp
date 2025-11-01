@@ -28,6 +28,18 @@ export interface RefreshRequest {
   refreshToken?: string;
 }
 
+export interface UnlockAccountRequest {
+  identifier: string;
+}
+
+export interface VerifyEmailRequest {
+  token: string;
+}
+
+export interface ResendVerificationRequest {
+  email?: string;
+}
+
 export interface AuthTokens {
   accessToken: string;
   refreshToken: string;
@@ -36,4 +48,17 @@ export interface AuthTokens {
 
 export interface RefreshTokenResponse {
   accessToken: string;
+}
+
+export interface RequestPasswordResetRequest {
+  email: string;
+}
+
+export interface VerifyResetTokenRequest {
+  token: string;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  newPassword: string;
 }
