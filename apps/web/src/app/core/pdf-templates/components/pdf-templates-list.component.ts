@@ -1,60 +1,60 @@
+import { CommonModule } from '@angular/common';
 import {
   Component,
-  OnInit,
   computed,
-  signal,
   inject,
   OnDestroy,
+  OnInit,
+  signal,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 
 // Angular Material imports
-import { MatTableModule } from '@angular/material/table';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatBadgeModule } from '@angular/material/badge';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatOptionModule } from '@angular/material/core';
+import { MatDialog } from '@angular/material/dialog';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatDialog } from '@angular/material/dialog';
-import { MatCardModule } from '@angular/material/card';
-import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSelectModule } from '@angular/material/select';
-import { MatOptionModule, MatRippleModule } from '@angular/material/core';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatBadgeModule } from '@angular/material/badge';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatTableModule } from '@angular/material/table';
+import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatDividerModule } from '@angular/material/divider';
 
 import { PdfTemplateService } from '../services/pdf-templates.service';
 import {
-  PdfTemplate,
   ListPdfTemplateQuery,
+  PdfTemplate,
 } from '../types/pdf-templates.types';
 import { PdfTemplateCreateDialogComponent } from './pdf-templates-create.dialog';
+import {
+  PdfTemplateDuplicateDialog,
+  PdfTemplateDuplicateDialogData,
+} from './pdf-templates-duplicate.dialog';
 import {
   PdfTemplateEditDialogComponent,
   PdfTemplateEditDialogData,
 } from './pdf-templates-edit.dialog';
 import {
-  PdfTemplateViewDialogComponent,
-  PdfTemplateViewDialogData,
-} from './pdf-templates-view.dialog';
-import {
   PdfTemplatePreviewDialog,
   PdfTemplatePreviewDialogData,
 } from './pdf-templates-preview.dialog';
 import {
-  PdfTemplateDuplicateDialog,
-  PdfTemplateDuplicateDialogData,
-} from './pdf-templates-duplicate.dialog';
+  PdfTemplateViewDialogComponent,
+  PdfTemplateViewDialogData,
+} from './pdf-templates-view.dialog';
 
 @Component({
   selector: 'app-pdf-templates-list',
@@ -132,7 +132,11 @@ import {
         <mat-card-content>
           <div class="search-filters-wrapper">
             <!-- Search Field -->
-            <mat-form-field appearance="outline" class="search-field">
+            <mat-form-field
+              subscriptSizing="dynamic"
+              appearance="outline"
+              class="search-field"
+            >
               <mat-label>Search</mat-label>
               <input
                 matInput
@@ -154,7 +158,11 @@ import {
             </mat-form-field>
 
             <!-- Category Filter -->
-            <mat-form-field appearance="outline" class="filter-field">
+            <mat-form-field
+              subscriptSizing="dynamic"
+              appearance="outline"
+              class="filter-field"
+            >
               <mat-label>Category</mat-label>
               <mat-select
                 [(ngModel)]="selectedCategory"
@@ -171,7 +179,11 @@ import {
             </mat-form-field>
 
             <!-- Status Filter -->
-            <mat-form-field appearance="outline" class="filter-field">
+            <mat-form-field
+              subscriptSizing="dynamic"
+              appearance="outline"
+              class="filter-field"
+            >
               <mat-label>Status</mat-label>
               <mat-select
                 [(ngModel)]="quickFilter"

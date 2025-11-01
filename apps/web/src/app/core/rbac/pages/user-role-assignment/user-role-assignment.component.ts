@@ -1,3 +1,4 @@
+import { AegisxNavigationItem, BreadcrumbComponent } from '@aegisx/ui';
 import { SelectionModel } from '@angular/cdk/collections';
 import { CommonModule } from '@angular/common';
 import {
@@ -30,18 +31,17 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute } from '@angular/router';
-import { BreadcrumbComponent, AegisxNavigationItem } from '@aegisx/ui';
 import { ConfirmDialogComponent } from '../../../../shared/ui/components/confirm-dialog.component';
-import { Role, UserRole, UserRoleFilters } from '../../models/rbac.interfaces';
-import { RbacService } from '../../services/rbac.service';
 import { BulkAssignDialogComponent } from '../../dialogs/bulk-assign-dialog/bulk-assign-dialog.component';
+import { BulkSetExpiryDialogComponent } from '../../dialogs/bulk-set-expiry-dialog/bulk-set-expiry-dialog.component';
+import { SetExpiryDialogComponent } from '../../dialogs/set-expiry-dialog/set-expiry-dialog.component';
+import { UserOverviewDialogComponent } from '../../dialogs/user-overview-dialog/user-overview-dialog.component';
+import { UserPermissionsDialogComponent } from '../../dialogs/user-permissions-dialog/user-permissions-dialog.component';
 import { UserRoleAssignDialogComponent } from '../../dialogs/user-role-assign-dialog/user-role-assign-dialog.component';
 import { UserRolesDialogComponent } from '../../dialogs/user-roles-dialog/user-roles-dialog.component';
-import { UserPermissionsDialogComponent } from '../../dialogs/user-permissions-dialog/user-permissions-dialog.component';
-import { UserOverviewDialogComponent } from '../../dialogs/user-overview-dialog/user-overview-dialog.component';
-import { SetExpiryDialogComponent } from '../../dialogs/set-expiry-dialog/set-expiry-dialog.component';
-import { BulkSetExpiryDialogComponent } from '../../dialogs/bulk-set-expiry-dialog/bulk-set-expiry-dialog.component';
 import { HasPermissionDirective } from '../../directives/has-permission.directive';
+import { Role, UserRole, UserRoleFilters } from '../../models/rbac.interfaces';
+import { RbacService } from '../../services/rbac.service';
 
 @Component({
   selector: 'app-user-role-assignment',
@@ -163,7 +163,11 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
       <mat-card>
         <mat-card-content class="p-6">
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <mat-form-field appearance="outline" class="w-full">
+            <mat-form-field
+              subscriptSizing="dynamic"
+              appearance="outline"
+              class="w-full"
+            >
               <mat-label>Search users</mat-label>
               <input
                 matInput
@@ -174,7 +178,11 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
               <mat-icon matSuffix>search</mat-icon>
             </mat-form-field>
 
-            <mat-form-field appearance="outline" class="w-full">
+            <mat-form-field
+              subscriptSizing="dynamic"
+              appearance="outline"
+              class="w-full"
+            >
               <mat-label>Role</mat-label>
               <mat-select
                 [(ngModel)]="filters.roleId"
@@ -190,7 +198,11 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
               </mat-select>
             </mat-form-field>
 
-            <mat-form-field appearance="outline" class="w-full">
+            <mat-form-field
+              subscriptSizing="dynamic"
+              appearance="outline"
+              class="w-full"
+            >
               <mat-label>Status</mat-label>
               <mat-select
                 [(ngModel)]="filters.isActive"
@@ -202,7 +214,11 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
               </mat-select>
             </mat-form-field>
 
-            <mat-form-field appearance="outline" class="w-full">
+            <mat-form-field
+              subscriptSizing="dynamic"
+              appearance="outline"
+              class="w-full"
+            >
               <mat-label>Expiry Status</mat-label>
               <mat-select
                 [(ngModel)]="filters.expiryStatus"

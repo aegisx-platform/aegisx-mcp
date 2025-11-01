@@ -1,7 +1,8 @@
+import { AegisxNavigationItem, BreadcrumbComponent } from '@aegisx/ui';
 import { SelectionModel } from '@angular/cdk/collections';
 import {
-  DragDropModule,
   CdkDragDrop,
+  DragDropModule,
   moveItemInArray,
 } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
@@ -32,20 +33,19 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { BreadcrumbComponent, AegisxNavigationItem } from '@aegisx/ui';
 import { ConfirmDialogComponent } from '../../../../shared/ui/components/confirm-dialog.component';
+import { NavigationItemDialogComponent } from '../../dialogs/navigation-item-dialog/navigation-item-dialog.component';
+import { HasPermissionDirective } from '../../directives/has-permission.directive';
+import {
+  getPermissionName,
+  Permission,
+  Role,
+} from '../../models/rbac.interfaces';
 import {
   NavigationItem,
   NavigationItemsService,
 } from '../../services/navigation-items.service';
-import { HasPermissionDirective } from '../../directives/has-permission.directive';
-import { NavigationItemDialogComponent } from '../../dialogs/navigation-item-dialog/navigation-item-dialog.component';
 import { RbacService } from '../../services/rbac.service';
-import {
-  Role,
-  Permission,
-  getPermissionName,
-} from '../../models/rbac.interfaces';
 
 interface NavigationFilters {
   search: string;
@@ -125,7 +125,11 @@ interface NavigationFilters {
       <mat-card>
         <mat-card-content class="p-6">
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <mat-form-field appearance="outline" class="w-full">
+            <mat-form-field
+              subscriptSizing="dynamic"
+              appearance="outline"
+              class="w-full"
+            >
               <mat-label>Search navigation items</mat-label>
               <input
                 matInput
@@ -136,7 +140,11 @@ interface NavigationFilters {
               <mat-icon matSuffix>search</mat-icon>
             </mat-form-field>
 
-            <mat-form-field appearance="outline" class="w-full">
+            <mat-form-field
+              subscriptSizing="dynamic"
+              appearance="outline"
+              class="w-full"
+            >
               <mat-label>Type</mat-label>
               <mat-select
                 [ngModel]="filters().type"
@@ -151,7 +159,11 @@ interface NavigationFilters {
               </mat-select>
             </mat-form-field>
 
-            <mat-form-field appearance="outline" class="w-full">
+            <mat-form-field
+              subscriptSizing="dynamic"
+              appearance="outline"
+              class="w-full"
+            >
               <mat-label>Status</mat-label>
               <mat-select
                 [ngModel]="filters().disabled"
@@ -163,7 +175,11 @@ interface NavigationFilters {
               </mat-select>
             </mat-form-field>
 
-            <mat-form-field appearance="outline" class="w-full">
+            <mat-form-field
+              subscriptSizing="dynamic"
+              appearance="outline"
+              class="w-full"
+            >
               <mat-label>Visibility</mat-label>
               <mat-select
                 [ngModel]="filters().hidden"
