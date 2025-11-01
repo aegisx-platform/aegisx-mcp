@@ -191,6 +191,14 @@ import { ErrorLogsService } from '../../services/error-logs.service';
         class="border border-slate-200 bg-white rounded-xl !mb-0"
       >
         <mat-card-content class="p-6">
+          <!-- Filter Header -->
+          <div class="flex items-center gap-2 mb-4">
+            <mat-icon class="text-blue-600">filter_alt</mat-icon>
+            <h3 class="text-base font-semibold text-slate-900 !mb-0">
+              Filter Error Logs
+            </h3>
+          </div>
+
           <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-start">
             <mat-form-field
               appearance="outline"
@@ -204,6 +212,7 @@ import { ErrorLogsService } from '../../services/error-logs.service';
                 [formControl]="searchControl"
               />
               <mat-icon matPrefix>search</mat-icon>
+              <mat-hint>Search by error message text</mat-hint>
             </mat-form-field>
 
             <mat-form-field
@@ -218,6 +227,7 @@ import { ErrorLogsService } from '../../services/error-logs.service';
                 <mat-option value="warn">Warning</mat-option>
                 <mat-option value="info">Info</mat-option>
               </mat-select>
+              <mat-hint>Filter by error severity</mat-hint>
             </mat-form-field>
 
             <mat-form-field
@@ -235,13 +245,14 @@ import { ErrorLogsService } from '../../services/error-logs.service';
                 <mat-option value="backend">Backend</mat-option>
                 <mat-option value="system">System</mat-option>
               </mat-select>
+              <mat-hint>Filter by error source type</mat-hint>
             </mat-form-field>
 
-            <div class="flex gap-2 h-14">
+            <div class="flex gap-2 items-start pt-1">
               <button
                 mat-flat-button
                 (click)="applyFilters()"
-                class="flex-1 bg-blue-900 hover:bg-blue-800 text-white h-full"
+                class="flex-1 bg-blue-900 hover:bg-blue-800 text-white"
               >
                 <mat-icon>filter_list</mat-icon>
                 Apply
@@ -249,11 +260,49 @@ import { ErrorLogsService } from '../../services/error-logs.service';
               <button
                 mat-stroked-button
                 (click)="clearFilters()"
-                class="flex-1 border-slate-300 text-slate-700 hover:bg-slate-50 h-full"
+                class="flex-1 border-slate-300 text-slate-700 hover:bg-slate-50"
               >
                 <mat-icon>clear</mat-icon>
                 Clear
               </button>
+            </div>
+          </div>
+
+          <!-- Active Filters Preview -->
+          <div
+            *ngIf="hasActiveFilters()"
+            class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200"
+          >
+            <div class="flex items-start gap-2">
+              <mat-icon class="text-blue-600 text-lg mt-0.5">info</mat-icon>
+              <div class="flex-1">
+                <div class="text-sm font-medium text-blue-800 mb-1">
+                  Active Filters:
+                </div>
+                <div class="flex flex-wrap gap-2">
+                  <mat-chip
+                    *ngIf="searchControl.value"
+                    class="!bg-blue-100 !text-blue-800"
+                  >
+                    <mat-icon class="!text-base">search</mat-icon>
+                    "{{ searchControl.value }}"
+                  </mat-chip>
+                  <mat-chip
+                    *ngIf="levelControl.value"
+                    class="!bg-blue-100 !text-blue-800"
+                  >
+                    <mat-icon class="!text-base">priority_high</mat-icon>
+                    Level: {{ levelControl.value | uppercase }}
+                  </mat-chip>
+                  <mat-chip
+                    *ngIf="typeControl.value"
+                    class="!bg-blue-100 !text-blue-800"
+                  >
+                    <mat-icon class="!text-base">category</mat-icon>
+                    Type: {{ typeControl.value }}
+                  </mat-chip>
+                </div>
+              </div>
             </div>
           </div>
         </mat-card-content>
@@ -580,6 +629,14 @@ export class ErrorLogsComponent implements OnInit {
     this.typeControl.setValue(null);
     this.loadErrorLogs();
     this.pageIndex.set(0);
+  }
+
+  hasActiveFilters(): boolean {
+    return !!(
+      this.searchControl.value ||
+      this.levelControl.value ||
+      this.typeControl.value
+    );
   }
 
   onPageChange(event: PageEvent): void {
