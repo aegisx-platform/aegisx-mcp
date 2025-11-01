@@ -649,4 +649,35 @@ export class ApiKeysController {
       });
     }
   }
+
+  /**
+   * Get API keys statistics
+   * GET /api-keys/stats
+   */
+  async getStats(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      request.log.info('Fetching API keys statistics');
+
+      const stats = await this.apiKeysService.getStats();
+
+      return reply.send({
+        success: true,
+        data: stats,
+        message: 'API keys statistics retrieved successfully',
+      });
+    } catch (error) {
+      request.log.error(error, 'Error fetching API keys statistics');
+
+      return reply.status(500).send({
+        success: false,
+        error: {
+          code: 'STATS_FETCH_FAILED',
+          message:
+            error instanceof Error
+              ? error.message
+              : 'Failed to fetch API keys statistics',
+        },
+      });
+    }
+  }
 }

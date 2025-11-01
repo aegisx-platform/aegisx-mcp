@@ -567,6 +567,82 @@ export class ApiKeysService extends BaseService<
   }
 
   // ===== BUSINESS LOGIC HOOKS =====
+  /**
+   * Get API keys statistics
+   * Returns overview stats for dashboard widget
+   */
+  async getStats(): Promise<{
+    totalKeys: number;
+    activeKeys: number;
+    inactiveKeys: number;
+    expiredKeys: number;
+    recentlyUsedKeys: number;
+    keysByUser: Array<{ userId: string; count: number }>;
+    usageToday: number;
+  }> {
+    const knex = this.apiKeysRepository['knex'];
+
+    // Get total and active/inactive counts
+    const [totalResult, activeResult, inactiveResult] = await Promise.all([
+      knex('api_keys').count('* as count').first(),
+      knex('api_keys').where('is_active', true).count('* as count').first(),
+      knex('api_keys').where('is_active', false).count('* as count').first(),
+    ]);
+
+    const totalKeys = parseInt(totalResult?.count as string) || 0;
+    const activeKeys = parseInt(activeResult?.count as string) || 0;
+    const inactiveKeys = parseInt(inactiveResult?.count as string) || 0;
+
+    // Get expired keys count
+    const expiredResult = await knex('api_keys')
+      .where('is_active', true)
+      .where('expires_at', '<', new Date().toISOString())
+      .count('* as count')
+      .first();
+    const expiredKeys = parseInt(expiredResult?.count as string) || 0;
+
+    // Get recently used keys (last 24 hours)
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const recentlyUsedResult = await knex('api_keys')
+      .where('last_used_at', '>=', twentyFourHoursAgo.toISOString())
+      .count('* as count')
+      .first();
+    const recentlyUsedKeys = parseInt(recentlyUsedResult?.count as string) || 0;
+
+    // Get keys by user (top 10 users with most keys)
+    const keysByUser = await knex('api_keys')
+      .select('user_id as userId')
+      .count('* as count')
+      .groupBy('user_id')
+      .orderBy('count', 'desc')
+      .limit(10);
+
+    // Format keysByUser results
+    const formattedKeysByUser = keysByUser.map((row: any) => ({
+      userId: row.userId,
+      count: parseInt(row.count as string) || 0,
+    }));
+
+    // Get usage today (keys used today)
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const usageTodayResult = await knex('api_keys')
+      .where('last_used_at', '>=', todayStart.toISOString())
+      .count('* as count')
+      .first();
+    const usageToday = parseInt(usageTodayResult?.count as string) || 0;
+
+    return {
+      totalKeys,
+      activeKeys,
+      inactiveKeys,
+      expiredKeys,
+      recentlyUsedKeys,
+      keysByUser: formattedKeysByUser,
+      usageToday,
+    };
+  }
+
   // Override these methods in child classes for custom validation/processing
 
   /**

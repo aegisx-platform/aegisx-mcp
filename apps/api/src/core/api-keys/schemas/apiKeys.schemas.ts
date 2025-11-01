@@ -282,3 +282,32 @@ export type RevokeApiKey = Static<typeof RevokeApiKeySchema>;
 export type RotateApiKey = Static<typeof RotateApiKeySchema>;
 export type UserApiKeysQuery = Static<typeof UserApiKeysQuerySchema>;
 export type ApiKeyPreview = Static<typeof ApiKeyPreviewSchema>;
+
+// API Keys Statistics Schema
+export const ApiKeysStatsSchema = Type.Object({
+  totalKeys: Type.Number({ description: 'Total number of API keys' }),
+  activeKeys: Type.Number({ description: 'Number of active API keys' }),
+  inactiveKeys: Type.Number({ description: 'Number of inactive API keys' }),
+  expiredKeys: Type.Number({ description: 'Number of expired API keys' }),
+  recentlyUsedKeys: Type.Number({
+    description: 'Number of keys used in last 24 hours',
+  }),
+  keysByUser: Type.Array(
+    Type.Object({
+      userId: Type.String({ format: 'uuid' }),
+      count: Type.Number(),
+    }),
+    { description: 'Top 10 users with most API keys' },
+  ),
+  usageToday: Type.Number({
+    description: 'Number of keys used today',
+  }),
+});
+
+// API Keys Statistics Response Schema
+export const ApiKeysStatsResponseSchema =
+  ApiSuccessResponseSchema(ApiKeysStatsSchema);
+
+// Export stats types
+export type ApiKeysStats = Static<typeof ApiKeysStatsSchema>;
+export type ApiKeysStatsResponse = Static<typeof ApiKeysStatsResponseSchema>;

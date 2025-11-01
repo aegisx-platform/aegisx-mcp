@@ -15,6 +15,10 @@ import {
   StatsCardDataNew,
   StatsCardNewComponent,
 } from './widgets/stats-card-new.component';
+import { ApiKeysStatsWidget } from './widgets/api-keys-stats.widget';
+import { SystemMetricsWidget } from './widgets/system-metrics.widget';
+import { SystemAlertsBannerWidget } from './widgets/system-alerts-banner.widget';
+import { DatabasePerformanceWidget } from './widgets/database-performance.widget';
 
 @Component({
   selector: 'ax-dashboard',
@@ -27,6 +31,10 @@ import {
     ActivityTimelineComponent,
     ProgressWidgetComponent,
     QuickActionsComponent,
+    ApiKeysStatsWidget,
+    SystemMetricsWidget,
+    SystemAlertsBannerWidget,
+    DatabasePerformanceWidget,
   ],
   template: `
     <div class="w-full h-full overflow-y-auto overflow-x-hidden bg-gray-50">
@@ -69,15 +77,19 @@ import {
 
       <!-- Main Content -->
       <div class="p-6 sm:p-8 space-y-8">
-        <!-- Stats Cards Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          @for (stat of statsData(); track stat.title) {
-            <ax-stats-card-new
-              [data]="stat"
-              [showSparkline]="true"
-              [actionLabel]="'View Details'"
-            ></ax-stats-card-new>
-          }
+        <!-- System Alerts Banner (Top Priority) -->
+        <ax-system-alerts-banner></ax-system-alerts-banner>
+
+        <!-- New Platform Widgets Grid (3 columns) -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- API Keys Statistics -->
+          <ax-api-keys-stats-widget></ax-api-keys-stats-widget>
+
+          <!-- System Metrics (Real-time) -->
+          <ax-system-metrics-widget></ax-system-metrics-widget>
+
+          <!-- Database Performance -->
+          <ax-database-performance-widget></ax-database-performance-widget>
         </div>
 
         <!-- Custom Tab Section - Tremor Style -->

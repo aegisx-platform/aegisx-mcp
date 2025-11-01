@@ -18,6 +18,7 @@ import {
   RotateApiKeyResponseSchema,
   UserApiKeysQuerySchema,
   UserApiKeysListResponseSchema,
+  ApiKeysStatsResponseSchema,
 } from '../schemas/apiKeys.schemas';
 import { ApiErrorResponseSchema as ErrorResponseSchema } from '../../../schemas/base.schemas';
 import { SchemaRefs } from '../../../schemas/registry';
@@ -81,6 +82,28 @@ export async function apiKeysRoutes(
   });
 
   // ===== API KEY MANAGEMENT ROUTES (before parameterized routes) =====
+
+  // Get API keys statistics
+  fastify.get('/stats', {
+    preValidation: [
+      fastify.authenticate,
+      fastify.verifyPermission('api-keys', 'read'),
+    ],
+    schema: {
+      tags: ['API Key Management'],
+      summary: 'Get API keys statistics',
+      description:
+        'Get overview statistics for API keys (total, active, inactive, usage metrics)',
+      security: [{ bearerAuth: [] }],
+      response: {
+        200: ApiKeysStatsResponseSchema,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    handler: controller.getStats.bind(controller),
+  });
 
   // Generate new API key
   fastify.post('/generate', {
