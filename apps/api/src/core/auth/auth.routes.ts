@@ -143,10 +143,11 @@ export default async function authRoutes(fastify: FastifyInstance) {
     schema: {
       tags: ['Authentication'],
       summary: 'Logout and clear session',
-      security: [{ bearerAuth: [] }],
+      description:
+        'Logs out user by clearing refresh token cookie. ' +
+        'Does not require valid JWT token - allows logout even if token is expired/invalid.',
       response: {
         200: SchemaRefs.module('auth', 'logoutResponse'),
-        401: SchemaRefs.Unauthorized,
         500: SchemaRefs.ServerError,
       },
       // activityLog: {
@@ -157,7 +158,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
       //   async: true, // Logout events can be async
       // },
     },
-    preHandler: [fastify.authenticateJWT],
+    // No authentication required - allow logout even with expired/invalid token
     handler: authController.logout,
   });
 

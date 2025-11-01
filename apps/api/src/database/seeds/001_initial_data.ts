@@ -64,6 +64,173 @@ export async function seed(knex: Knex): Promise<void> {
         action: 'update',
         description: 'Update own profile',
       },
+
+      // System monitoring permissions
+      {
+        resource: 'system',
+        action: 'monitoring:read',
+        description: 'View system monitoring data',
+      },
+
+      // Error logs permissions
+      {
+        resource: 'error-logs',
+        action: 'read',
+        description: 'View error logs',
+      },
+      {
+        resource: 'error-logs',
+        action: 'delete',
+        description: 'Delete error logs',
+      },
+      {
+        resource: 'error-logs',
+        action: 'export',
+        description: 'Export error logs',
+      },
+
+      // Navigation management permissions
+      {
+        resource: 'navigation',
+        action: 'read',
+        description: 'View navigation items',
+      },
+      {
+        resource: 'navigation',
+        action: 'create',
+        description: 'Create navigation items',
+      },
+      {
+        resource: 'navigation',
+        action: 'update',
+        description: 'Update navigation items',
+      },
+      {
+        resource: 'navigation',
+        action: 'delete',
+        description: 'Delete navigation items',
+      },
+      {
+        resource: 'navigation',
+        action: 'view',
+        description: 'View user navigation menu',
+      },
+      {
+        resource: 'navigation',
+        action: 'assign-permissions',
+        description: 'Assign permissions to navigation items',
+      },
+
+      // File upload permissions
+      {
+        resource: 'files',
+        action: 'upload',
+        description: 'Upload files',
+      },
+      {
+        resource: 'files',
+        action: 'read',
+        description: 'View files',
+      },
+      {
+        resource: 'files',
+        action: 'update',
+        description: 'Update file metadata',
+      },
+      {
+        resource: 'files',
+        action: 'delete',
+        description: 'Delete files',
+      },
+      {
+        resource: 'files',
+        action: 'read-config',
+        description: 'View storage configuration',
+      },
+      {
+        resource: 'files',
+        action: 'cleanup',
+        description: 'Cleanup deleted files',
+      },
+
+      // Settings permissions
+      {
+        resource: 'settings',
+        action: 'read',
+        description: 'View settings',
+      },
+      {
+        resource: 'settings',
+        action: 'create',
+        description: 'Create settings',
+      },
+      {
+        resource: 'settings',
+        action: 'update',
+        description: 'Update settings',
+      },
+      {
+        resource: 'settings',
+        action: 'delete',
+        description: 'Delete settings',
+      },
+      {
+        resource: 'settings',
+        action: 'update-value',
+        description: 'Update setting values',
+      },
+      {
+        resource: 'settings',
+        action: 'bulk-update',
+        description: 'Bulk update settings',
+      },
+      {
+        resource: 'settings',
+        action: 'read-history',
+        description: 'View settings history',
+      },
+      {
+        resource: 'settings',
+        action: 'user:read',
+        description: 'View user settings',
+      },
+      {
+        resource: 'settings',
+        action: 'user:update',
+        description: 'Update user settings',
+      },
+      {
+        resource: 'settings',
+        action: 'user:delete',
+        description: 'Delete user settings',
+      },
+
+      // User role assignment permissions
+      {
+        resource: 'user-roles',
+        action: 'read',
+        description: 'View user role assignments',
+      },
+      {
+        resource: 'user-roles',
+        action: 'assign',
+        description: 'Assign roles to users',
+      },
+      {
+        resource: 'user-roles',
+        action: 'revoke',
+        description: 'Revoke roles from users',
+      },
+      {
+        resource: 'user-roles',
+        action: 'bulk-assign',
+        description: 'Bulk assign roles',
+      },
+      {
+        resource: 'user-roles',
+        action: 'set-expiry',
+        description: 'Set role expiration',
+      },
     ])
     .returning(['id', 'resource', 'action']);
 

@@ -30,19 +30,15 @@ export async function seed(knex: Knex): Promise<void> {
   console.log('📝 Adding monitoring & error-logs permissions...');
 
   const permissionsToAdd = [
-    // Monitoring permissions
+    // System Monitoring permissions (matches backend routes)
     {
-      resource: 'monitoring',
-      action: 'view',
-      description: 'View system monitoring dashboard',
-    },
-    {
-      resource: 'monitoring',
-      action: 'export',
-      description: 'Export monitoring data',
+      resource: 'system',
+      action: 'monitoring:read',
+      description: 'View system monitoring data',
     },
 
-    // Error Logs permissions
+    // Error Logs permissions (already added in 001_initial_data.ts)
+    // Kept here for reference, but will be skipped if already exists
     {
       resource: 'error-logs',
       action: 'read',
@@ -88,9 +84,14 @@ export async function seed(knex: Knex): Promise<void> {
 
   console.log('🔗 Assigning permissions to admin role...');
 
-  // Get all monitoring and error-logs permissions
+  // Get all system and error-logs permissions
   const allPermissions = await knex('permissions')
-    .whereIn('resource', ['monitoring', 'error-logs'])
+    .where(function () {
+      this.where({ resource: 'system', action: 'monitoring:read' }).orWhere(
+        'resource',
+        'error-logs',
+      );
+    })
     .select(['id', 'resource', 'action']);
 
   const adminRole = await knex('roles').where({ name: 'admin' }).first();
@@ -207,8 +208,8 @@ export async function seed(knex: Knex): Promise<void> {
 
   // Define navigation-permission mappings
   const navigationPermissionMappings = [
-    { nav_key: 'monitoring', permission: 'monitoring.view' },
-    { nav_key: 'system-monitoring', permission: 'monitoring.view' },
+    { nav_key: 'monitoring', permission: 'system.monitoring:read' },
+    { nav_key: 'system-monitoring', permission: 'system.monitoring:read' },
     { nav_key: 'error-logs', permission: 'error-logs.read' },
   ];
 

@@ -22,6 +22,7 @@ async function monitoringRoutes(fastify: FastifyInstance) {
   }>(
     '/client-errors',
     {
+      preValidation: [fastify.authenticate],
       schema: {
         summary: 'Log client errors',
         description: 'Log client-side errors from the frontend application',
@@ -30,6 +31,7 @@ async function monitoringRoutes(fastify: FastifyInstance) {
         response: {
           200: SchemaRefs.module('monitoring', 'client-errors-response'),
           400: SchemaRefs.ServerError,
+          401: SchemaRefs.ServerError,
           500: SchemaRefs.ServerError,
         },
       },
@@ -95,6 +97,7 @@ async function monitoringRoutes(fastify: FastifyInstance) {
   }>(
     '/client-monitoring',
     {
+      preValidation: [fastify.authenticate],
       schema: {
         summary: 'Log monitoring data',
         description:
@@ -104,6 +107,7 @@ async function monitoringRoutes(fastify: FastifyInstance) {
         response: {
           200: SchemaRefs.module('monitoring', 'client-monitoring-response'),
           400: SchemaRefs.ServerError,
+          401: SchemaRefs.ServerError,
           500: SchemaRefs.ServerError,
         },
       },
@@ -179,6 +183,10 @@ async function monitoringRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/system-metrics',
     {
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('system', 'monitoring:read'),
+      ],
       schema: {
         summary: 'Get system metrics',
         description: 'Get current system metrics (CPU, memory, disk usage)',
@@ -278,6 +286,10 @@ async function monitoringRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/api-performance',
     {
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('system', 'monitoring:read'),
+      ],
       schema: {
         summary: 'Get API performance metrics',
         description: 'Get API response times and throughput',
@@ -377,6 +389,10 @@ async function monitoringRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/database-stats',
     {
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('system', 'monitoring:read'),
+      ],
       schema: {
         summary: 'Get database statistics',
         description: 'Get database connection pool and query performance',
@@ -440,6 +456,10 @@ async function monitoringRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/redis-stats',
     {
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('system', 'monitoring:read'),
+      ],
       schema: {
         summary: 'Get Redis statistics',
         description: 'Get Redis cache hit rates and memory usage',
@@ -533,6 +553,10 @@ async function monitoringRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/database-pool',
     {
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('system', 'monitoring:read'),
+      ],
       schema: {
         summary: 'Get database pool status',
         description: 'Get database connection pool information',
@@ -601,6 +625,10 @@ async function monitoringRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/cache-stats',
     {
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('system', 'monitoring:read'),
+      ],
       schema: {
         summary: 'Get cache statistics',
         description: 'Get Redis cache hit rates and performance',
@@ -709,6 +737,10 @@ async function monitoringRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/active-sessions',
     {
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('system', 'monitoring:read'),
+      ],
       schema: {
         summary: 'Get active sessions',
         description: 'Get current active user sessions count',
@@ -766,6 +798,10 @@ async function monitoringRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/request-metrics',
     {
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('system', 'monitoring:read'),
+      ],
       schema: {
         summary: 'Get request metrics',
         description: 'Get request counts by endpoint',

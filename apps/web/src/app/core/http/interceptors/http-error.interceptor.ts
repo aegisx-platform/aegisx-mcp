@@ -9,11 +9,13 @@ import {
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { GlobalErrorHandler } from '../../error-handling/services/error-handler.service';
 
 @Injectable()
 export class HttpErrorInterceptor implements HttpInterceptor {
   private errorHandler = inject(GlobalErrorHandler);
+  private snackBar = inject(MatSnackBar);
 
   intercept(
     req: HttpRequest<any>,
@@ -155,6 +157,18 @@ export class HttpErrorInterceptor implements HttpInterceptor {
         break;
       case 403:
         console.warn('Forbidden - insufficient permissions');
+        // Show user-friendly toaster notification
+        this.snackBar.open(
+          error.error?.message ||
+            'Access denied. You do not have permission to perform this action.',
+          'Close',
+          {
+            duration: 5000,
+            horizontalPosition: 'end',
+            verticalPosition: 'top',
+            panelClass: ['snackbar-error'],
+          },
+        );
         break;
       case 404:
         console.warn('Resource not found');
