@@ -367,17 +367,29 @@ import { ErrorLogsService } from '../../services/error-logs.service';
               <ng-container matColumnDef="level">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header>Level</th>
                 <td mat-cell *matCellDef="let log">
-                  <mat-chip
+                  <span
                     [class]="
-                      log.level === 'error'
-                        ? 'bg-rose-50 text-rose-700'
+                      'inline-flex items-center whitespace-nowrap rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset gap-2 ' +
+                      (log.level === 'error'
+                        ? 'bg-rose-50 text-rose-900 ring-rose-600/20 dark:bg-rose-400/10 dark:text-rose-500 dark:ring-rose-400/20'
                         : log.level === 'warn'
-                          ? 'bg-orange-50 text-orange-700'
-                          : 'bg-blue-50 text-blue-700'
+                          ? 'bg-amber-50 text-amber-900 ring-amber-600/20 dark:bg-amber-400/10 dark:text-amber-500 dark:ring-amber-400/20'
+                          : 'bg-blue-50 text-blue-900 ring-blue-600/20 dark:bg-blue-400/10 dark:text-blue-500 dark:ring-blue-400/20')
                     "
                   >
+                    <span
+                      [class]="
+                        'size-2 rounded-sm ' +
+                        (log.level === 'error'
+                          ? 'bg-rose-500 dark:bg-rose-500'
+                          : log.level === 'warn'
+                            ? 'bg-amber-500 dark:bg-amber-500'
+                            : 'bg-blue-500 dark:bg-blue-500')
+                      "
+                      aria-hidden="true"
+                    ></span>
                     {{ log.level | uppercase }}
-                  </mat-chip>
+                  </span>
                 </td>
               </ng-container>
 
