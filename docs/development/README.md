@@ -84,6 +84,48 @@ Advanced standards for production-ready enterprise applications:
 
 **When to use:** All data modifications, sensitive data access, user management
 
+### [Multi-User Concurrency Standards](./multi-user-concurrency-standards.md)
+
+**NEW** - Handle concurrent data access safely:
+
+- Optimistic locking (version-based)
+- Pessimistic locking (row-level locks)
+- Transaction isolation levels
+- Deadlock prevention
+- Race condition prevention
+- Distributed locking with Redis
+- Concurrency testing patterns
+
+**When to use:** Features with shared data access (inventory, orders, financial transactions)
+
+### [Integration Patterns](./integration-patterns.md)
+
+**NEW** - Enterprise system integration:
+
+- REST API integration patterns
+- WebSocket real-time communication
+- Third-party API integration
+- Webhook patterns with signature verification
+- Circuit breaker pattern
+- Retry logic with exponential backoff
+- API versioning strategies
+
+**When to use:** Features integrating with external systems or real-time communication
+
+### [Advanced Validation Patterns](./advanced-validation-patterns.md)
+
+**NEW** - Robust data validation:
+
+- TypeBox validation patterns
+- Complex validation rules
+- Custom validators
+- Cross-field validation
+- Async validation (uniqueness, external APIs)
+- Frontend validation with Angular
+- Error message customization
+
+**When to use:** All features with data input (forms, APIs, imports)
+
 ---
 
 ## 🛠️ Specialized Standards
@@ -148,6 +190,30 @@ Reference for common CLI commands.
 4. Implement user consent management
 5. Generate compliance reports
 
+### Handling Concurrent Data Access
+
+1. Review [Multi-User Concurrency Standards](./multi-user-concurrency-standards.md)
+2. Add version column for optimistic locking
+3. Use pessimistic locking for high-conflict scenarios
+4. Prevent deadlocks with consistent lock ordering
+5. Test concurrent operations
+
+### Integrating External Systems
+
+1. Follow [Integration Patterns](./integration-patterns.md)
+2. Implement circuit breaker for resilience
+3. Add retry logic with exponential backoff
+4. Verify webhook signatures
+5. Monitor integration health
+
+### Implementing Data Validation
+
+1. Follow [Advanced Validation Patterns](./advanced-validation-patterns.md)
+2. Define TypeBox schemas for all inputs
+3. Implement custom validators for business rules
+4. Add async validation for uniqueness
+5. Test validation with valid and invalid data
+
 ### Before Committing
 
 1. Run [QA Checklist](./qa-checklist.md) completely
@@ -169,7 +235,9 @@ Reference for common CLI commands.
 
 **Week 1:** 4. Read [Security Best Practices](./security-best-practices.md) 5. Read [Performance & Scalability Guidelines](./performance-scalability-guidelines.md) 6. Read [Audit & Compliance Framework](./audit-compliance-framework.md)
 
-**Ongoing:** 7. Reference standards as needed during development 8. Keep checklists handy 9. Ask questions when unclear
+**Week 2:** 7. Read [Multi-User Concurrency Standards](./multi-user-concurrency-standards.md) 8. Read [Integration Patterns](./integration-patterns.md) 9. Read [Advanced Validation Patterns](./advanced-validation-patterns.md)
+
+**Ongoing:** 10. Reference standards as needed during development 11. Keep checklists handy 12. Ask questions when unclear
 
 ### For Experienced Developers
 
@@ -178,6 +246,9 @@ Reference for common CLI commands.
 - [Performance patterns](./performance-scalability-guidelines.md) - Cache, optimize queries, paginate
 - [Security patterns](./security-best-practices.md) - Validate input, hash passwords, check permissions
 - [Audit patterns](./audit-compliance-framework.md) - Log all CRUD, track changes, ensure retention
+- [Concurrency patterns](./multi-user-concurrency-standards.md) - Optimistic/pessimistic locking, prevent deadlocks
+- [Integration patterns](./integration-patterns.md) - Circuit breaker, retry logic, webhooks
+- [Validation patterns](./advanced-validation-patterns.md) - TypeBox schemas, custom validators, async validation
 
 ---
 
@@ -191,6 +262,9 @@ Reference for common CLI commands.
 | Performance Guidelines | ✅       | ✅      | ✅       | ❌       | ⚠️      | ❌         |
 | Security Practices     | ⚠️       | ✅      | ⚠️       | ✅       | ✅      | ⚠️         |
 | Audit Framework        | ✅       | ✅      | ❌       | ⚠️       | ⚠️      | ✅         |
+| Concurrency Standards  | ✅       | ✅      | ⚠️       | ❌       | ✅      | ❌         |
+| Integration Patterns   | ❌       | ✅      | ⚠️       | ⚠️       | ✅      | ❌         |
+| Validation Patterns    | ❌       | ✅      | ✅       | ⚠️       | ✅      | ❌         |
 
 ✅ Comprehensive | ⚠️ Partial | ❌ Not Covered
 
