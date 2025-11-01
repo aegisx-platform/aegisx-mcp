@@ -14,11 +14,10 @@ export const rbacRoutes: Routes = [
       import('./pages/rbac-dashboard/rbac-dashboard.component').then(
         (m) => m.RbacDashboardComponent,
       ),
-    canActivate: [AuthGuard, PermissionGuard],
+    canActivate: [AuthGuard],
     data: {
       title: 'RBAC Dashboard',
       description: 'Overview of roles, permissions, and user assignments',
-      permissions: ['dashboard:view', '*:*'],
     },
   },
   {
@@ -75,6 +74,6 @@ export const rbacRoutes: Routes = [
   },
   {
     path: '**',
-    redirectTo: 'dashboard',
+    redirectTo: '/rbac/dashboard',
   },
 ];
