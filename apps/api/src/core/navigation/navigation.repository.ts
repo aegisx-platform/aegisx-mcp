@@ -27,7 +27,7 @@ export class NavigationRepository {
       .select([
         'ni.*',
         this.knex.raw(
-          "ARRAY_AGG(DISTINCT CONCAT(p.resource, '.', p.action)) FILTER (WHERE p.id IS NOT NULL) as permissions",
+          "ARRAY_AGG(DISTINCT CONCAT(p.resource, ':', p.action)) FILTER (WHERE p.id IS NOT NULL) as permissions",
         ),
       ])
       .leftJoin(
@@ -79,7 +79,7 @@ export class NavigationRepository {
       .select([
         'ni.*',
         this.knex.raw(
-          "ARRAY_AGG(DISTINCT CONCAT(p.resource, '.', p.action)) FILTER (WHERE p.id IS NOT NULL) as permissions",
+          "ARRAY_AGG(DISTINCT CONCAT(p.resource, ':', p.action)) FILTER (WHERE p.id IS NOT NULL) as permissions",
         ),
         'unp.hidden as user_hidden',
         'unp.custom_sort_order as user_sort_order',
@@ -133,7 +133,7 @@ export class NavigationRepository {
     const permissions = await this.knex('users as u')
       .select(
         this.knex.raw(
-          "ARRAY_AGG(DISTINCT CONCAT(p.resource, '.', p.action)) as permissions",
+          "ARRAY_AGG(DISTINCT CONCAT(p.resource, ':', p.action)) as permissions",
         ),
       )
       .join('user_roles as ur', 'u.id', 'ur.user_id')
