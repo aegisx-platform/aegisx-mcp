@@ -1,0 +1,47 @@
+# Prometheus Configuration for AegisX API Monitoring
+# This configuration scrapes metrics from the /metrics endpoint
+
+global:
+  scrape_interval: 15s # Scrape targets every 15 seconds
+  evaluation_interval: 15s # Evaluate rules every 15 seconds
+  external_labels:
+    cluster: 'aegisx-production'
+    environment: 'production'
+
+# Alertmanager configuration (optional - uncomment when ready)
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets:
+#           - 'alertmanager:9093'
+
+# Load rules once and periodically evaluate them
+# rule_files:
+#   - "/etc/prometheus/alerts/*.yml"
+
+# Scrape configurations
+scrape_configs:
+  # AegisX API - Main application metrics
+  - job_name: 'aegisx-api'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['host.docker.internal:3383']
+        labels:
+          app: 'aegisx-api'
+          instance: 'api-1'
+          service: 'backend'
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          app: 'prometheus'
+          service: 'monitoring'
+# Storage configuration (handled via command-line flags in docker-compose.yml)
+# - '--storage.tsdb.path=/prometheus'
+# - '--storage.tsdb.retention.time=30d'
+# - '--storage.tsdb.retention.size=10GB'
