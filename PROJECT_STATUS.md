@@ -1,7 +1,7 @@
 # AegisX Project Status
 
-**Last Updated:** 2025-11-01 (Session 56a & 56b - Monitoring Dashboard + Password Reset)
-**Current Task:** ✅ Session 56 Complete - Dashboard redesign & Password Reset implementation
+**Last Updated:** 2025-11-01 (Session 58 - Error Logs Improvements + Navigation Permissions)
+**Current Task:** ✅ Session 58 Complete - Error Logs enhancements & Permission organization
 **Git Repository:** git@github.com:aegisx-platform/aegisx-starter.git
 **CRUD Generator Version:** v2.1.1 (Published to npm)
 
@@ -221,7 +221,7 @@ The AegisX Starter monorepo is a clean, focused, enterprise-ready platform with:
 - Team scaling
 - Enterprise use cases
 
-**Last Updated:** 2025-11-01 (Session 56 - Password Reset Implementation)
+**Last Updated:** 2025-11-01 (Session 58 - Error Logs Improvements + Navigation Permissions)
 
 ---
 
@@ -229,7 +229,97 @@ The AegisX Starter monorepo is a clean, focused, enterprise-ready platform with:
 
 > **📦 For older sessions (38-46), see [Session Archive](./docs/sessions/ARCHIVE_2024_Q4.md)**
 
-### Current Session 56a (2025-11-01) ✅ COMPLETED
+### Current Session 58 (2025-11-01) ✅ COMPLETED
+
+**Session Focus:** Error Logs Feature Improvements + Navigation Permission Organization
+
+**Main Achievements:**
+
+- ✅ **Error Log Dialog Header Fix** - Fixed Material dialog structure where header was incorrectly scrolling with content
+- ✅ **Delete Single Error Log** - Complete DELETE endpoint implementation with Material confirmation dialog
+- ✅ **Cleanup Functionality Fix** - Changed from date string to number of days, added Material dialog with validation
+- ✅ **Material Confirmation Dialogs** - Created reusable CleanupDialogComponent and ConfirmDialogComponent
+- ✅ **Material Icon Fix** - Changed "monitoring" icon to "speed" (monitoring doesn't exist in Material Icons core set)
+- ✅ **Navigation Permission Organization** - Restructured seed files for role-based navigation access
+
+**Technical Implementation:**
+
+1. **Error Log Dialog Structure:**
+   - Fixed header scrolling issue by restructuring to proper Material Dialog pattern
+   - Pattern: Fixed header → Scrollable content → Fixed footer
+   - File: `error-log-detail-dialog.component.ts`
+
+2. **Delete Endpoint (Full Stack):**
+   - Backend: Added DELETE `/:id` route with UUID validation
+   - Controller: `delete()` method with error handling
+   - Service: `delete()` method with NOT_FOUND error
+   - Repository: `delete()` method
+   - Frontend: Material confirmation dialog with error/success snackbars
+
+3. **Cleanup Functionality:**
+   - Fixed API schema: `Type.String` → `Type.Number` (days instead of date)
+   - Created CleanupDialogComponent: Material dialog with 1-365 days validation
+   - Updated frontend types: `olderThan: string` → `olderThan: number`
+   - Changed response field: `deleted` → `deletedCount` for consistency
+
+4. **Reusable Confirmation Dialog:**
+   - Created ConfirmDialogComponent with Material design
+   - Supports custom title, message, button text, and colors
+   - Used for both delete and cleanup operations
+
+5. **Material Icon Update:**
+   - Changed icon from "monitoring" (non-existent) to "speed" (speedometer)
+   - Updated both seed file (008_monitoring_navigation.ts) and frontend (navigation.service.ts)
+   - Material Icons core set (~2,000 icons) vs Material Symbols extended set
+
+6. **Navigation Permission Organization:**
+   - Added `dashboard.view` permission to base permissions (001_initial_data.ts)
+   - Updated manager role: Dashboard + Profile + User Management
+   - Updated user role: Dashboard + Profile only
+   - Admin role: All core features (unchanged)
+
+**Files Modified (11 files):**
+
+**Backend (5 files):**
+
+- `apps/api/src/core/error-logs/error-logs.routes.ts` - Added DELETE /:id endpoint
+- `apps/api/src/core/error-logs/error-logs.controller.ts` - Added delete() method
+- `apps/api/src/core/error-logs/error-logs.service.ts` - Added delete() method
+- `apps/api/src/core/error-logs/error-logs.repository.ts` - Added delete() method
+- `apps/api/src/core/error-logs/error-logs.schemas.ts` - Fixed CleanupQuerySchema (string → number)
+
+**Frontend (4 files):**
+
+- `apps/web/src/app/core/monitoring/components/error-log-detail-dialog/` - Fixed dialog structure
+- `apps/web/src/app/core/monitoring/components/cleanup-dialog/cleanup-dialog.component.ts` - NEW component
+- `apps/web/src/app/core/monitoring/components/confirm-dialog/confirm-dialog.component.ts` - NEW component
+- `apps/web/src/app/core/monitoring/models/monitoring.types.ts` - Fixed CleanupQuery interface
+
+**Seeds & Navigation (4 files):**
+
+- `apps/api/src/database/seeds/001_initial_data.ts` - Added dashboard.view permission
+- `apps/api/src/database/seeds/003_navigation_menu.ts` - Added manager role permissions
+- `apps/api/src/database/seeds/008_monitoring_navigation.ts` - Changed icon to "speed"
+- `apps/web/src/app/core/navigation/services/navigation.service.ts` - Changed icon to "speed"
+
+**Impact:**
+
+- ✅ **Better UX** - Material dialogs replace browser confirm(), proper validation, error feedback
+- ✅ **Type Safety** - API schema matches TypeScript interfaces exactly
+- ✅ **Secure Delete** - Confirmation dialog prevents accidental deletions
+- ✅ **Organized Permissions** - Clear separation of what each role can access
+- ✅ **Icon Compatibility** - Using Material Icons core set (no additional dependencies)
+- ✅ **Production Ready** - All builds passing, 0 TypeScript errors
+
+**Key Learning:**
+
+- Material Icons (core ~2,000 icons) vs Material Symbols (extended ~2,500+ icons)
+- TypeBox validation: API schema must match frontend TypeScript interfaces
+- Material Dialog best practices: Fixed header/footer, scrollable content only
+
+---
+
+### Previous Session 56a (2025-11-01) ✅ COMPLETED
 
 **Session Focus:** Monitoring Dashboard Design Refinement - Tremor Color Palette
 
