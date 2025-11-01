@@ -71,6 +71,27 @@ export interface SystemAlert {
   acknowledged: boolean;
 }
 
+// Active Sessions
+export interface ActiveSessionsStats {
+  total: number;
+  users: number;
+  sessions: Array<{
+    userId: string;
+    lastActivity: string;
+  }>;
+  timestamp: string;
+}
+
+// Error Log
+export interface ErrorLog {
+  id: string;
+  level: 'error' | 'warning' | 'info';
+  message: string;
+  timestamp: string;
+  userId?: string;
+  endpoint?: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -115,6 +136,33 @@ export class DashboardService {
     return this.http.get<{ success: boolean; data: CacheStats }>(
       `${this.apiUrl}/monitoring/cache-stats`,
     );
+  }
+
+  /**
+   * Get active sessions
+   */
+  getActiveSessions(): Observable<{
+    success: boolean;
+    data: ActiveSessionsStats;
+  }> {
+    return this.http.get<{ success: boolean; data: ActiveSessionsStats }>(
+      `${this.apiUrl}/monitoring/active-sessions`,
+    );
+  }
+
+  /**
+   * Get recent error logs
+   */
+  getRecentErrorLogs(): Observable<{
+    success: boolean;
+    data: ErrorLog[];
+    total: number;
+  }> {
+    return this.http.get<{
+      success: boolean;
+      data: ErrorLog[];
+      total: number;
+    }>(`${this.apiUrl}/error-logs?limit=10&sort=timestamp:desc`);
   }
 
   /**
