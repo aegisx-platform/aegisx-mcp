@@ -169,9 +169,38 @@ export const appRoutes: Route[] = [
         },
       ]),
 
-  // Fallback
+  // Error pages (no authentication required)
+  {
+    path: '401',
+    loadComponent: () =>
+      import('./pages/errors/unauthorized.page').then(
+        (m) => m.UnauthorizedPage,
+      ),
+  },
+  {
+    path: '403',
+    loadComponent: () =>
+      import('./pages/errors/forbidden.page').then((m) => m.ForbiddenPage),
+  },
+  {
+    path: '404',
+    loadComponent: () =>
+      import('./pages/errors/not-found.page').then((m) => m.NotFoundPage),
+  },
+  {
+    path: '429',
+    loadComponent: () =>
+      import('./pages/errors/rate-limit.page').then((m) => m.RateLimitPage),
+  },
+  {
+    path: '500',
+    loadComponent: () =>
+      import('./pages/errors/server-error.page').then((m) => m.ServerErrorPage),
+  },
+
+  // Fallback - redirect unknown routes to 404
   {
     path: '**',
-    redirectTo: 'dashboard',
+    redirectTo: '404',
   },
 ];

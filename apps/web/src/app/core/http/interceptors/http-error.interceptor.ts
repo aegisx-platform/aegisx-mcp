@@ -7,6 +7,7 @@ import {
   HttpErrorResponse,
   HttpResponse,
 } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -16,6 +17,7 @@ import { GlobalErrorHandler } from '../../error-handling/services/error-handler.
 export class HttpErrorInterceptor implements HttpInterceptor {
   private errorHandler = inject(GlobalErrorHandler);
   private snackBar = inject(MatSnackBar);
+  private router = inject(Router);
 
   intercept(
     req: HttpRequest<any>,
@@ -147,20 +149,8 @@ export class HttpErrorInterceptor implements HttpInterceptor {
       case 0:
         // Network error
         console.error('Network error - check your connection');
-        break;
-      case 400:
-        console.warn('Bad Request:', error.error?.message || error.message);
-        break;
-      case 401:
-        console.warn('Unauthorized - redirecting to login');
-        // Error handler will handle the redirect
-        break;
-      case 403:
-        console.warn('Forbidden - insufficient permissions');
-        // Show user-friendly toaster notification
         this.snackBar.open(
-          error.error?.message ||
-            'Access denied. You do not have permission to perform this action.',
+          'Network error. Please check your connection.',
           'Close',
           {
             duration: 5000,
@@ -170,35 +160,95 @@ export class HttpErrorInterceptor implements HttpInterceptor {
           },
         );
         break;
+      case 400:
+        console.warn('Bad Request:', error.error?.message || error.message);
+        this.snackBar.open(
+          error.error?.message || 'Bad request. Please check your input.',
+          'Close',
+          {
+            duration: 5000,
+            horizontalPosition: 'end',
+            verticalPosition: 'top',
+            panelClass: ['snackbar-error'],
+          },
+        );
+        break;
+      case 401:
+        console.warn('Unauthorized - redirecting to login');
+        this.router.navigate(['/401']);
+        break;
+      case 403:
+        console.warn('Forbidden - navigating to error page');
+        this.router.navigate(['/403']);
+        break;
       case 404:
-        console.warn('Resource not found');
+        console.warn('Resource not found - navigating to error page');
+        // Only navigate for API 404s, not route 404s
+        if (error.url?.includes('/api/')) {
+          this.router.navigate(['/404']);
+        }
         break;
       case 409:
         console.warn('Conflict:', error.error?.message || error.message);
+        this.snackBar.open(
+          error.error?.message || 'Conflict. The resource already exists.',
+          'Close',
+          {
+            duration: 5000,
+            horizontalPosition: 'end',
+            verticalPosition: 'top',
+            panelClass: ['snackbar-error'],
+          },
+        );
         break;
       case 422:
         console.warn(
           'Validation error:',
           error.error?.message || error.message,
         );
+        this.snackBar.open(
+          error.error?.message || 'Validation error. Please check your input.',
+          'Close',
+          {
+            duration: 5000,
+            horizontalPosition: 'end',
+            verticalPosition: 'top',
+            panelClass: ['snackbar-error'],
+          },
+        );
         break;
       case 429:
-        console.warn('Rate limit exceeded - please slow down');
+        console.warn('Rate limit exceeded - navigating to error page');
+        this.router.navigate(['/429']);
         break;
       case 500:
-        console.error('Internal server error');
+        console.error('Internal server error - navigating to error page');
+        this.router.navigate(['/500']);
         break;
       case 502:
         console.error('Bad gateway - server is unreachable');
+        this.router.navigate(['/500']);
         break;
       case 503:
         console.error('Service unavailable - server is temporarily down');
+        this.router.navigate(['/500']);
         break;
       case 504:
         console.error('Gateway timeout - request took too long');
+        this.router.navigate(['/500']);
         break;
       default:
         console.error(`HTTP error ${error.status}:`, error.message);
+        this.snackBar.open(
+          error.error?.message || `An error occurred (${error.status})`,
+          'Close',
+          {
+            duration: 5000,
+            horizontalPosition: 'end',
+            verticalPosition: 'top',
+            panelClass: ['snackbar-error'],
+          },
+        );
     }
   }
 
