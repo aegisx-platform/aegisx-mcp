@@ -278,7 +278,7 @@ export class AppComponent implements OnInit {
 
         // Load navigation only when entering protected routes
         if (!shouldHideLayout && this.authService.isAuthenticated()) {
-          this.navigationService.loadNavigation().subscribe();
+          this.navigationService.loadUserNavigation().subscribe();
         }
       });
 
@@ -297,7 +297,7 @@ export class AppComponent implements OnInit {
 
     // Load navigation for initial protected route
     if (!shouldHideLayout && this.authService.isAuthenticated()) {
-      this.navigationService.loadNavigation().subscribe();
+      this.navigationService.loadUserNavigation().subscribe();
     }
 
     // Initialize WebSocket connection for authenticated users
