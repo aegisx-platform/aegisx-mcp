@@ -17,8 +17,10 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { BreadcrumbComponent, AegisxNavigationItem } from '@aegisx/ui';
 import { MonitoringService } from '../../services/monitoring.service';
+import { MetricsGuideDialogComponent } from '../../components/metrics-guide-dialog/metrics-guide-dialog.component';
 import Chart from 'chart.js/auto';
 
 interface MetricCard {
@@ -43,6 +45,7 @@ interface MetricCard {
     MatTooltipModule,
     MatBadgeModule,
     MatDividerModule,
+    MatDialogModule,
     BreadcrumbComponent,
   ],
   template: `
@@ -64,6 +67,15 @@ interface MetricCard {
         </div>
 
         <div class="flex flex-wrap gap-2">
+          <button
+            mat-raised-button
+            color="accent"
+            (click)="openGuide()"
+            matTooltip="เปิดคู่มือการใช้งานฉบับภาษาไทย"
+          >
+            <mat-icon>school</mat-icon>
+            คู่มือการใช้งาน
+          </button>
           <button
             mat-raised-button
             [color]="autoRefresh() ? 'accent' : 'primary'"
@@ -166,6 +178,12 @@ interface MetricCard {
               <mat-card-title class="flex items-center gap-2">
                 <mat-icon class="text-blue-500">memory</mat-icon>
                 CPU & Memory Usage
+                <mat-icon
+                  class="text-gray-400 text-lg cursor-help"
+                  [matTooltip]="cpuMemoryTooltip"
+                  matTooltipPosition="right"
+                  >info</mat-icon
+                >
               </mat-card-title>
             </mat-card-header>
             <mat-card-content>
@@ -181,6 +199,12 @@ interface MetricCard {
               <mat-card-title class="flex items-center gap-2">
                 <mat-icon class="text-green-500">storage</mat-icon>
                 Database Connection Pool
+                <mat-icon
+                  class="text-gray-400 text-lg cursor-help"
+                  [matTooltip]="databaseTooltip"
+                  matTooltipPosition="right"
+                  >info</mat-icon
+                >
               </mat-card-title>
             </mat-card-header>
             <mat-card-content>
@@ -196,6 +220,12 @@ interface MetricCard {
               <mat-card-title class="flex items-center gap-2">
                 <mat-icon class="text-red-500">cached</mat-icon>
                 Redis Cache Performance
+                <mat-icon
+                  class="text-gray-400 text-lg cursor-help"
+                  [matTooltip]="redisTooltip"
+                  matTooltipPosition="right"
+                  >info</mat-icon
+                >
               </mat-card-title>
             </mat-card-header>
             <mat-card-content>
@@ -211,6 +241,12 @@ interface MetricCard {
               <mat-card-title class="flex items-center gap-2">
                 <mat-icon class="text-purple-500">speed</mat-icon>
                 API Response Times
+                <mat-icon
+                  class="text-gray-400 text-lg cursor-help"
+                  [matTooltip]="apiResponseTooltip"
+                  matTooltipPosition="right"
+                  >info</mat-icon
+                >
               </mat-card-title>
             </mat-card-header>
             <mat-card-content>
@@ -228,6 +264,12 @@ interface MetricCard {
               <mat-card-title class="flex items-center gap-2">
                 <mat-icon class="text-orange-500">people</mat-icon>
                 Active Sessions
+                <mat-icon
+                  class="text-gray-400 text-lg cursor-help"
+                  [matTooltip]="activeSessionsTooltip"
+                  matTooltipPosition="right"
+                  >info</mat-icon
+                >
               </mat-card-title>
             </mat-card-header>
             <mat-card-content>
@@ -254,13 +296,26 @@ interface MetricCard {
               <mat-card-title class="flex items-center gap-2">
                 <mat-icon class="text-teal-500">analytics</mat-icon>
                 Request Throughput
+                <mat-icon
+                  class="text-gray-400 text-lg cursor-help"
+                  [matTooltip]="requestThroughputTooltip"
+                  matTooltipPosition="right"
+                  >info</mat-icon
+                >
               </mat-card-title>
             </mat-card-header>
             <mat-card-content>
               <div class="space-y-4">
                 <div class="flex justify-between items-center">
+                  <span class="text-gray-600">Requests/Second</span>
+                  <span class="text-2xl font-bold text-indigo-600">{{
+                    apiPerformance()?.throughput?.requestsPerSecond || 0
+                  }}</span>
+                </div>
+                <mat-divider></mat-divider>
+                <div class="flex justify-between items-center">
                   <span class="text-gray-600">Requests/Minute</span>
-                  <span class="text-2xl font-bold text-gray-900">{{
+                  <span class="text-xl font-semibold text-gray-700">{{
                     apiPerformance()?.throughput?.requestsPerMinute || 0
                   }}</span>
                 </div>
@@ -311,6 +366,7 @@ export class SystemMonitoringComponent
   implements OnInit, OnDestroy, AfterViewInit
 {
   private monitoringService = inject(MonitoringService);
+  private dialog = inject(MatDialog);
 
   // Breadcrumb items
   breadcrumbItems: AegisxNavigationItem[] = [
@@ -339,6 +395,39 @@ export class SystemMonitoringComponent
   private databaseChart?: Chart;
   private redisChart?: Chart;
   private apiChart?: Chart;
+
+  // Tooltip explanations for info icons
+  readonly cpuMemoryTooltip = `System Resource Usage:
+• CPU Usage: % of processing capacity in use
+• Memory Usage: % of RAM allocated to applications
+• Available: % of system resources still free`;
+
+  readonly databaseTooltip = `Database Connection Pool Status:
+• Active: Connections currently executing queries
+• Idle: Available connections ready for use
+• Total: Maximum configured connections (Active + Idle)`;
+
+  readonly redisTooltip = `Redis Cache Performance Metrics:
+• Hits: Requests served from cache (fast)
+• Misses: Requests requiring database lookup (slower)
+• Hit Rate: % of cache hits (higher is better, target >90%)`;
+
+  readonly apiResponseTooltip = `API Response Time Statistics (milliseconds):
+• Min: Fastest request (best-case scenario)
+• Average: Mean response time (affected by outliers)
+• Median (P50): Middle value, 50% faster/50% slower
+• P95: 95% of requests are faster than this
+• P99: 99% of requests are faster (worst-case threshold)
+• Max: Slowest request (absolute worst-case)`;
+
+  readonly activeSessionsTooltip = `Active User Session Tracking:
+• Total Sessions: Number of active user sessions across all devices
+• Unique Users: Number of individual users currently logged in`;
+
+  readonly requestThroughputTooltip = `API Request Performance Metrics:
+• Requests/Second: Number of API requests processed per second (primary metric)
+• Requests/Minute: Total API requests processed per minute
+• Avg Response Time: Average time to process and respond to requests`;
 
   // State signals
   loading = signal<boolean>(false);
@@ -467,6 +556,16 @@ export class SystemMonitoringComponent
     }
   }
 
+  openGuide(): void {
+    this.dialog.open(MetricsGuideDialogComponent, {
+      width: '90vw',
+      maxWidth: '900px',
+      maxHeight: '90vh',
+      autoFocus: false,
+      restoreFocus: true,
+    });
+  }
+
   private initializeCharts(): void {
     this.createCpuMemoryChart();
     this.createDatabaseChart();
@@ -530,6 +629,12 @@ export class SystemMonitoringComponent
   private createCpuMemoryChart(): void {
     if (!this.cpuMemoryChartRef) return;
 
+    // Destroy existing chart if it exists
+    if (this.cpuMemoryChart) {
+      this.cpuMemoryChart.destroy();
+      this.cpuMemoryChart = undefined;
+    }
+
     const ctx = this.cpuMemoryChartRef.nativeElement.getContext('2d');
     if (!ctx) return;
 
@@ -563,6 +668,12 @@ export class SystemMonitoringComponent
 
   private createDatabaseChart(): void {
     if (!this.databaseChartRef) return;
+
+    // Destroy existing chart if it exists
+    if (this.databaseChart) {
+      this.databaseChart.destroy();
+      this.databaseChart = undefined;
+    }
 
     const ctx = this.databaseChartRef.nativeElement.getContext('2d');
     if (!ctx) return;
@@ -604,6 +715,12 @@ export class SystemMonitoringComponent
   private createRedisChart(): void {
     if (!this.redisChartRef) return;
 
+    // Destroy existing chart if it exists
+    if (this.redisChart) {
+      this.redisChart.destroy();
+      this.redisChart = undefined;
+    }
+
     const ctx = this.redisChartRef.nativeElement.getContext('2d');
     if (!ctx) return;
 
@@ -633,6 +750,12 @@ export class SystemMonitoringComponent
 
   private createApiChart(): void {
     if (!this.apiChartRef) return;
+
+    // Destroy existing chart if it exists
+    if (this.apiChart) {
+      this.apiChart.destroy();
+      this.apiChart = undefined;
+    }
 
     const ctx = this.apiChartRef.nativeElement.getContext('2d');
     if (!ctx) return;
