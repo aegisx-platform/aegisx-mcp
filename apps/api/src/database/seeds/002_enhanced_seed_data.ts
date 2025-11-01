@@ -3,11 +3,9 @@ import * as bcrypt from 'bcryptjs';
 
 export async function seed(knex: Knex): Promise<void> {
   // Clear existing data in dependency order
+  // Note: Navigation is managed by seed 003, don't delete it here
   await knex('session_security_events').del();
   await knex('session_activity').del();
-  await knex('user_navigation_preferences').del();
-  await knex('navigation_permissions').del();
-  await knex('navigation_items').del();
   await knex('user_settings').del();
   await knex('themes').del();
   await knex('user_preferences').del();
@@ -79,93 +77,7 @@ export async function seed(knex: Knex): Promise<void> {
   // Note: System-wide settings are now managed via app_settings table
   // (migration 010_create_settings_table.ts) with access_level: 'system'
 
-  // Get existing permissions for navigation
-  const dashboardPerm = await knex('permissions')
-    .where({ resource: 'profile', action: 'read' })
-    .first();
-  const _usersPerm = await knex('permissions')
-    .where({ resource: 'users', action: 'read' })
-    .first();
-  const _rolesPerm = await knex('permissions')
-    .where({ resource: 'roles', action: 'read' })
-    .first();
-
-  // Create navigation structure
-  const navItems = await knex('navigation_items')
-    .insert([
-      {
-        key: 'dashboard',
-        title: 'Dashboard',
-        type: 'item',
-        icon: 'heroicons_outline:chart-pie',
-        link: '/dashboard',
-        sort_order: 1,
-      },
-      {
-        key: 'user-management',
-        title: 'User Management',
-        type: 'collapsible',
-        icon: 'heroicons_outline:users',
-        sort_order: 2,
-      },
-      {
-        key: 'rbac-management',
-        title: 'RBAC Management',
-        type: 'item',
-        icon: 'heroicons_outline:shield-check',
-        link: '/rbac',
-        sort_order: 3,
-      },
-      {
-        key: 'settings',
-        title: 'Settings',
-        type: 'item',
-        icon: 'heroicons_outline:cog-6-tooth',
-        link: '/settings',
-        sort_order: 4,
-        show_in_compact: false,
-      },
-      {
-        key: 'divider-1',
-        title: '',
-        type: 'divider',
-        sort_order: 5,
-        show_in_horizontal: false,
-      },
-    ])
-    .returning(['id', 'key']);
-
-  // Create only necessary child navigation items
-  const parentUserMgmt = navItems.find(
-    (item) => item.key === 'user-management',
-  );
-
-  if (parentUserMgmt) {
-    await knex('navigation_items').insert([
-      {
-        parent_id: parentUserMgmt.id,
-        key: 'users-list',
-        title: 'Users',
-        type: 'item',
-        icon: 'heroicons_outline:user-group',
-        link: '/users',
-        sort_order: 1,
-      },
-    ]);
-  }
-
-  // Settings is a single page component, no child items needed
-
-  // Link navigation items with permissions
-  const dashboardNav = navItems.find((item) => item.key === 'dashboard');
-  if (dashboardNav && dashboardPerm) {
-    await knex('navigation_permissions').insert({
-      navigation_item_id: dashboardNav.id,
-      permission_id: dashboardPerm.id,
-    });
-  }
-
-  console.log('✅ Created navigation structure');
+  // Note: Navigation structure is managed by seed 003_navigation_menu.ts
 
   // Update existing admin user with enhanced profile
   const adminUser = await knex('users')
@@ -219,49 +131,7 @@ export async function seed(knex: Knex): Promise<void> {
     console.log('✅ Enhanced admin user profile');
   }
 
-  // Create a demo regular user
-  const demoUserPassword = await bcrypt.hash('Demo123!', 10);
-  const [demoUser] = await knex('users')
-    .insert({
-      email: 'demo@aegisx.local',
-      username: 'demo',
-      password: demoUserPassword,
-      first_name: 'Demo',
-      last_name: 'User',
-      name: 'Demo User',
-      status: 'active',
-      email_verified: true,
-      email_verified_at: knex.fn.now(),
-      is_active: true,
-      timezone: 'America/New_York',
-      language: 'en',
-    })
-    .returning(['id']);
+  // Note: Users (admin, manager, demo) are created by seed 001_initial_data.ts
 
-  // Assign user role to demo user
-  const userRole = await knex('roles').where({ name: 'user' }).first();
-  if (userRole && demoUser) {
-    await knex('user_roles').insert({
-      user_id: demoUser.id,
-      role_id: userRole.id,
-    });
-
-    // Create preferences for demo user
-    await knex('user_preferences').insert({
-      user_id: demoUser.id,
-      theme: 'dark',
-      scheme: 'dark',
-      layout: 'compact',
-      language: 'en',
-      timezone: 'America/New_York',
-      notifications_email: false,
-      notifications_desktop: true,
-    });
-  }
-
-  console.log('✅ Created demo user');
-  console.log('📧 Demo user: demo@aegisx.local');
-  console.log('🔑 Password: Demo123!');
-  console.log('');
   console.log('✅ Enhanced seed data created successfully');
 }

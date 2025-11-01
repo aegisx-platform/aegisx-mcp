@@ -902,7 +902,9 @@ export async function seed(knex: Knex): Promise<void> {
     { nav_key: 'settings', permission: 'settings.view' },
     { nav_key: 'pdf-templates', permission: 'templates.read' },
 
-    // Files - No specific permission required (all authenticated users)
+    // Files - Require files:upload permission (admin and manager only)
+    { nav_key: 'file-management', permission: 'files.upload' },
+
     // Components - No permissions required (optional demo section)
   ];
 

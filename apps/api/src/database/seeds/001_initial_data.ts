@@ -241,10 +241,14 @@ export async function seed(knex: Knex): Promise<void> {
   }));
   await knex('role_permissions').insert(adminPermissions);
 
-  // Assign dashboard + user management permissions to manager role
+  // Assign dashboard + user management + profile + files permissions to manager role
   const managerPermissions = permissions
     .filter(
-      (perm) => perm.resource === 'dashboard' || perm.resource === 'users',
+      (perm) =>
+        perm.resource === 'dashboard' ||
+        perm.resource === 'users' ||
+        perm.resource === 'profile' ||
+        perm.resource === 'files',
     )
     .map((perm) => ({
       role_id: managerRole.id,
