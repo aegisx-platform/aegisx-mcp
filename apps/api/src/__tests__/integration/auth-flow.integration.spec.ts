@@ -706,4 +706,162 @@ describe('Authentication Flow Integration Tests', () => {
       });
     });
   });
+
+  describe('Rate Limiting', () => {
+    describe('POST /api/auth/register rate limit', () => {
+      it('should enforce rate limit of 3 registrations per hour', async () => {
+        const baseData = createRegisterRequestData();
+        const responses: any[] = [];
+
+        // Attempt 4 registrations (limit is 3)
+        for (let i = 0; i < 4; i++) {
+          const response = await requestHelper.post('/api/auth/register', {
+            body: {
+              ...baseData,
+              email: `ratelimit-register${i}@example.com`,
+              username: `ratelimit-register${i}`,
+            },
+          });
+          responses.push(response);
+        }
+
+        // First 3 should succeed
+        responses.slice(0, 3).forEach((response) => {
+          expectResponse(response).hasStatus(201).isSuccess();
+        });
+
+        // 4th request should be rate limited
+        expectResponse(responses[3]).hasStatus(429);
+      });
+    });
+
+    describe('POST /api/auth/login rate limit', () => {
+      it('should enforce rate limit of 5 login attempts per minute', async () => {
+        // First create a test user
+        const userData = createRegisterRequestData({
+          email: 'ratelimit-login@example.com',
+          username: 'ratelimit-login',
+          password: 'TestPass123!',
+        });
+
+        await requestHelper.post('/api/auth/register', { body: userData });
+
+        const responses: any[] = [];
+
+        // Attempt 6 logins (limit is 5 per minute per IP+email)
+        for (let i = 0; i < 6; i++) {
+          const response = await requestHelper.post('/api/auth/login', {
+            body: {
+              email: userData.email,
+              password: userData.password,
+            },
+          });
+          responses.push(response);
+        }
+
+        // First 5 should succeed (or fail with 401 if password wrong, but not 429)
+        responses.slice(0, 5).forEach((response) => {
+          expect([200, 401]).toContain(response.statusCode);
+          expect(response.statusCode).not.toBe(429);
+        });
+
+        // 6th request should be rate limited
+        expectResponse(responses[5]).hasStatus(429);
+      });
+
+      it('should use IP+email combination for login rate limiting', async () => {
+        // Create two test users
+        const user1Data = createRegisterRequestData({
+          email: 'ratelimit-user1@example.com',
+          username: 'ratelimit-user1',
+          password: 'TestPass123!',
+        });
+
+        const user2Data = createRegisterRequestData({
+          email: 'ratelimit-user2@example.com',
+          username: 'ratelimit-user2',
+          password: 'TestPass123!',
+        });
+
+        await requestHelper.post('/api/auth/register', { body: user1Data });
+        await requestHelper.post('/api/auth/register', { body: user2Data });
+
+        // Attempt 5 logins for user1
+        for (let i = 0; i < 5; i++) {
+          await requestHelper.post('/api/auth/login', {
+            body: {
+              email: user1Data.email,
+              password: user1Data.password,
+            },
+          });
+        }
+
+        // user1 should now be rate limited
+        const user1Response = await requestHelper.post('/api/auth/login', {
+          body: {
+            email: user1Data.email,
+            password: user1Data.password,
+          },
+        });
+        expectResponse(user1Response).hasStatus(429);
+
+        // user2 should still be able to login (different email)
+        const user2Response = await requestHelper.post('/api/auth/login', {
+          body: {
+            email: user2Data.email,
+            password: user2Data.password,
+          },
+        });
+        expect([200, 401]).toContain(user2Response.statusCode);
+        expect(user2Response.statusCode).not.toBe(429);
+      });
+    });
+
+    describe('POST /api/auth/refresh rate limit', () => {
+      it('should enforce rate limit of 10 refresh attempts per minute', async () => {
+        // Create and login a test user to get refresh token
+        const userData = createRegisterRequestData({
+          email: 'ratelimit-refresh@example.com',
+          username: 'ratelimit-refresh',
+          password: 'TestPass123!',
+        });
+
+        await requestHelper.post('/api/auth/register', { body: userData });
+
+        const loginResponse = await requestHelper.post('/api/auth/login', {
+          body: {
+            email: userData.email,
+            password: userData.password,
+          },
+        });
+
+        const refreshToken =
+          loginResponse.body.data?.refreshToken ||
+          (Array.isArray(loginResponse.headers['set-cookie'])
+            ? loginResponse.headers['set-cookie'].find((c: string) =>
+                c.startsWith('refreshToken='),
+              )
+            : loginResponse.headers['set-cookie']);
+
+        const responses: any[] = [];
+
+        // Attempt 11 refresh requests (limit is 10)
+        for (let i = 0; i < 11; i++) {
+          const response = await requestHelper.post('/api/auth/refresh', {
+            body: { refreshToken },
+          });
+          responses.push(response);
+        }
+
+        // First 10 should succeed (or fail with 401, but not 429)
+        responses.slice(0, 10).forEach((response) => {
+          expect([200, 401]).toContain(response.statusCode);
+          expect(response.statusCode).not.toBe(429);
+        });
+
+        // 11th request should be rate limited
+        expectResponse(responses[10]).hasStatus(429);
+      });
+    });
+  });
 });
