@@ -14,6 +14,13 @@ export default async function authRoutes(fastify: FastifyInstance) {
     typedFastify.route({
       method: 'POST',
       url: '/auth/register',
+      config: {
+        rateLimit: {
+          max: 3, // 3 registrations
+          timeWindow: '1 hour', // per hour per IP
+          keyGenerator: (req) => req.ip || 'unknown',
+        },
+      },
       schema: {
         tags: ['Authentication'],
         summary: 'Register a new user account',
@@ -22,6 +29,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
           201: responseSchema,
           400: SchemaRefs.ValidationError,
           409: SchemaRefs.Conflict,
+          429: SchemaRefs.ServerError, // Rate limit exceeded
           500: SchemaRefs.ServerError,
         },
         // activityLog: {
@@ -45,6 +53,20 @@ export default async function authRoutes(fastify: FastifyInstance) {
   typedFastify.route({
     method: 'POST',
     url: '/auth/login',
+    config: {
+      rateLimit: {
+        max: 5, // 5 login attempts
+        timeWindow: '1 minute', // per minute
+        keyGenerator: (req) => {
+          // Rate limit by IP + email combination to prevent brute force on specific users
+          const email =
+            (req.body as any)?.email ||
+            (req.body as any)?.username ||
+            'unknown';
+          return `${req.ip}:${email}`;
+        },
+      },
+    },
     schema: {
       tags: ['Authentication'],
       summary: 'Login with email and password',
@@ -52,6 +74,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
       response: {
         200: SchemaRefs.module('auth', 'authResponse'),
         401: SchemaRefs.Unauthorized,
+        429: SchemaRefs.ServerError, // Rate limit exceeded
         500: SchemaRefs.ServerError,
       },
       // activityLog: {
@@ -71,6 +94,13 @@ export default async function authRoutes(fastify: FastifyInstance) {
   typedFastify.route({
     method: 'POST',
     url: '/auth/refresh',
+    config: {
+      rateLimit: {
+        max: 10, // 10 refresh attempts
+        timeWindow: '1 minute', // per minute per IP
+        keyGenerator: (req) => req.ip || 'unknown',
+      },
+    },
     schema: {
       tags: ['Authentication'],
       summary: 'Refresh access token using refresh token',
@@ -78,6 +108,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
       response: {
         200: SchemaRefs.module('auth', 'refreshResponse'),
         401: SchemaRefs.Unauthorized,
+        429: SchemaRefs.ServerError, // Rate limit exceeded
         500: SchemaRefs.ServerError,
       },
     },
