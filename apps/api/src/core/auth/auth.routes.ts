@@ -16,9 +16,20 @@ export default async function authRoutes(fastify: FastifyInstance) {
       url: '/auth/register',
       config: {
         rateLimit: {
-          max: 3, // 3 registrations
-          timeWindow: '1 hour', // per hour per IP
+          // Generous rate limiting to allow fixing validation errors
+          // While still preventing spam and enumeration attacks
+          max: 100, // 100 total registration attempts
+          timeWindow: '5 minutes', // per 5 minutes per IP
           keyGenerator: (req) => req.ip || 'unknown',
+          errorResponseBuilder: () => ({
+            success: false,
+            error: {
+              code: 'TOO_MANY_ATTEMPTS',
+              message:
+                'Too many registration attempts. Please try again in a few minutes.',
+              statusCode: 429,
+            },
+          }),
         },
       },
       schema: {
@@ -55,8 +66,9 @@ export default async function authRoutes(fastify: FastifyInstance) {
     url: '/auth/login',
     config: {
       rateLimit: {
-        max: 5, // 5 login attempts
-        timeWindow: '1 minute', // per minute
+        // Balanced rate limiting for better UX while preventing brute force
+        max: 15, // 15 login attempts
+        timeWindow: '5 minutes', // per 5 minutes
         keyGenerator: (req) => {
           // Rate limit by IP + email combination to prevent brute force on specific users
           const email =
@@ -65,6 +77,15 @@ export default async function authRoutes(fastify: FastifyInstance) {
             'unknown';
           return `${req.ip}:${email}`;
         },
+        errorResponseBuilder: () => ({
+          success: false,
+          error: {
+            code: 'TOO_MANY_LOGIN_ATTEMPTS',
+            message:
+              'Too many login attempts. Please try again in a few minutes.',
+            statusCode: 429,
+          },
+        }),
       },
     },
     schema: {
@@ -302,9 +323,19 @@ export default async function authRoutes(fastify: FastifyInstance) {
     url: '/auth/reset-password',
     config: {
       rateLimit: {
-        max: 5, // 5 reset attempts
-        timeWindow: '1 minute', // per minute per IP
+        // Generous limit to allow password validation retries
+        max: 10, // 10 reset attempts
+        timeWindow: '5 minutes', // per 5 minutes per IP
         keyGenerator: (req) => req.ip || 'unknown',
+        errorResponseBuilder: () => ({
+          success: false,
+          error: {
+            code: 'TOO_MANY_RESET_ATTEMPTS',
+            message:
+              'Too many password reset attempts. Please try again in a few minutes.',
+            statusCode: 429,
+          },
+        }),
       },
     },
     schema: {

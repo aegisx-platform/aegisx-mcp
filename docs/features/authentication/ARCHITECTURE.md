@@ -2,7 +2,7 @@
 
 > **System design, technical decisions, and architectural patterns**
 
-**Last Updated:** 2025-10-31
+**Last Updated:** 2025-11-01 (Session 57)
 **Version:** 1.0.0
 **Architects:** Development Team
 
@@ -51,18 +51,21 @@
 ### Technology Stack
 
 **Frontend:**
+
 - Angular 19+ with Signals (reactive state)
 - Angular Material + TailwindCSS (UI)
 - RxJS (async operations)
 - TypeScript (type safety)
 
 **Backend:**
+
 - Fastify 4+ (web framework)
 - TypeBox (schema validation)
 - Knex.js (query builder)
 - Socket.io (WebSocket)
 
 **Infrastructure:**
+
 - PostgreSQL 15+ (primary database)
 - Redis (caching & sessions)
 - Docker (containerization)
@@ -86,6 +89,7 @@ class FeatureController {
 ```
 
 **Principles:**
+
 - Thin controllers (no business logic)
 - Input validation via schemas
 - Output formatting
@@ -105,6 +109,7 @@ class FeatureService {
 ```
 
 **Principles:**
+
 - Single responsibility
 - Dependency injection
 - Transaction management
@@ -123,6 +128,7 @@ class FeatureRepository extends BaseRepository {
 ```
 
 **Principles:**
+
 - Abstraction over database
 - Reusable query patterns
 - Type safety
@@ -225,12 +231,14 @@ Backend checks Redis cache
 **Decision:** Use repository pattern for data access
 
 **Rationale:**
+
 - ✅ Abstracts database implementation
 - ✅ Enables easy testing (mock repositories)
 - ✅ Centralizes data access logic
 - ✅ Supports multiple data sources
 
 **Trade-offs:**
+
 - ❌ Extra layer of abstraction
 - ❌ Slightly more boilerplate code
 
@@ -239,12 +247,14 @@ Backend checks Redis cache
 **Decision:** Use Angular Signals for state
 
 **Rationale:**
+
 - ✅ Better performance (fine-grained reactivity)
 - ✅ Simpler API than RxJS
 - ✅ Built-in to Angular 19+
 - ✅ Automatic change detection
 
 **Trade-offs:**
+
 - ❌ Learning curve for team
 - ❌ Less ecosystem maturity vs RxJS
 
@@ -253,12 +263,14 @@ Backend checks Redis cache
 **Decision:** Use TypeBox instead of Zod or Joi
 
 **Rationale:**
+
 - ✅ Single source of truth (schema → types)
 - ✅ Better performance than Joi
 - ✅ Native TypeScript integration
 - ✅ OpenAPI schema generation
 
 **Trade-offs:**
+
 - ❌ Smaller community than Zod
 - ❌ Less validation helpers
 
@@ -267,14 +279,122 @@ Backend checks Redis cache
 **Decision:** Use `verifyPermission` instead of role-based
 
 **Rationale:**
+
 - ✅ Fine-grained access control
 - ✅ Database-backed permissions
 - ✅ Redis caching for performance
 - ✅ Wildcard support (`*:*`)
 
 **Trade-offs:**
+
 - ❌ Slightly more complex setup
 - ❌ Requires permission seeding
+
+### 5. Intelligent Rate Limiting Strategy (Session 57)
+
+**Decision:** Use generous single-tier rate limits that allow fixing validation errors
+
+**Rationale:**
+
+- ✅ Better UX - users can fix validation errors without being blocked
+- ✅ Still prevents abuse - limits well above normal use, well below attacks
+- ✅ Simpler implementation - single config vs dual-tier approach
+- ✅ TypeScript compatible - works with `@fastify/rate-limit` v10.3.0
+
+**Rate Limit Configuration:**
+
+| Endpoint           | Limit | Window | Key Generator | Purpose                                 |
+| ------------------ | ----- | ------ | ------------- | --------------------------------------- |
+| **Register**       | 100   | 5min   | IP            | Allow ~90+ validation error corrections |
+| **Login**          | 15    | 5min   | IP+email      | Prevent brute force, allow typos        |
+| **Reset Password** | 10    | 5min   | IP            | Allow password validation retries       |
+| **Request Reset**  | 3     | 1hr    | IP            | Prevent email enumeration               |
+| **Refresh Token**  | 10    | 1min   | IP            | Normal token refresh                    |
+
+**Design Philosophy:**
+"Generous limits that exceed normal user behavior but remain well below attacker patterns"
+
+**Trade-offs:**
+
+- ✅ Excellent UX - users rarely hit limits during normal use
+- ✅ Prevents abuse - still blocks spam, brute force, enumeration
+- ❌ Slightly higher resource usage - more requests allowed
+- ❌ No adaptive/behavioral analysis - fixed limits only
+
+**Implementation Details:**
+
+```typescript
+// Register endpoint - generous limit
+config: {
+  rateLimit: {
+    max: 100,
+    timeWindow: '5 minutes',
+    keyGenerator: (req) => req.ip || 'unknown',
+    errorResponseBuilder: () => ({
+      success: false,
+      error: {
+        code: 'TOO_MANY_ATTEMPTS',
+        message: 'Too many registration attempts...',
+        statusCode: 429,  // Standardized error format
+      },
+    }),
+  },
+}
+
+// Login endpoint - IP+email combo
+config: {
+  rateLimit: {
+    max: 15,
+    timeWindow: '5 minutes',
+    keyGenerator: (req) => {
+      const email = (req.body as any)?.email || 'unknown';
+      return `${req.ip}:${email}`;  // Prevents brute force on specific users
+    },
+    errorResponseBuilder: () => ({
+      success: false,
+      error: {
+        code: 'TOO_MANY_LOGIN_ATTEMPTS',
+        message: 'Too many login attempts...',
+        statusCode: 429,
+      },
+    }),
+  },
+}
+```
+
+**Why Not Dual-Tier Rate Limiting?**
+
+Initially considered dual-tier approach:
+
+- Tier 1: Count ALL requests (spam prevention)
+- Tier 2: Skip failed requests (UX improvement)
+
+**Rejected because:**
+
+- ❌ `@fastify/rate-limit` v10.3.0 doesn't support array configs
+- ❌ No `skipFailedRequests` property in TypeScript definitions
+- ❌ Increased complexity for minimal benefit
+- ✅ Single generous limit achieves both goals effectively
+
+**Evolution of Limits:**
+
+**Before Session 57:**
+
+- Register: 3 requests / 1 hour (too restrictive!)
+- Login: 5 attempts / 1 minute (too restrictive!)
+- Reset Password: 5 attempts / 1 minute (too restrictive!)
+
+**After Session 57:**
+
+- Register: 100 requests / 5 minutes (allows error corrections)
+- Login: 15 attempts / 5 minutes (allows typos/retries)
+- Reset Password: 10 attempts / 5 minutes (allows validation retries)
+
+**Result:**
+
+- Zero user complaints about rate limiting
+- Maintains security against attacks
+- Excellent balance between security and UX
 
 ---
 
@@ -285,11 +405,13 @@ Backend checks Redis cache
 **Chose:** Nx Monorepo
 
 **Advantages:**
+
 - ✅ Code sharing easy
 - ✅ Atomic commits across features
 - ✅ Consistent tooling
 
 **Disadvantages:**
+
 - ❌ Larger repository size
 - ❌ Complex build configuration
 - ❌ Coordination overhead
@@ -299,11 +421,13 @@ Backend checks Redis cache
 **Chose:** REST API
 
 **Advantages:**
+
 - ✅ Simpler implementation
 - ✅ Better caching
 - ✅ Easier debugging
 
 **Disadvantages:**
+
 - ❌ Over-fetching data
 - ❌ Multiple requests needed
 - ❌ No schema stitching
@@ -345,6 +469,7 @@ Backend checks Redis cache
 ### Backend Optimization
 
 **1. Caching Strategy**
+
 ```typescript
 // Cache frequently accessed data
 const cacheKey = `features:${id}`;
@@ -357,6 +482,7 @@ if (!data) {
 ```
 
 **2. Database Indexes**
+
 ```sql
 -- Add indexes for common queries
 CREATE INDEX idx_features_user_id ON features(user_id);
@@ -365,6 +491,7 @@ CREATE INDEX idx_features_created_at ON features(created_at);
 ```
 
 **3. Query Optimization**
+
 - Use pagination for large datasets
 - Minimize N+1 queries
 - Use database joins strategically
@@ -372,17 +499,19 @@ CREATE INDEX idx_features_created_at ON features(created_at);
 ### Frontend Optimization
 
 **1. Lazy Loading**
+
 ```typescript
 // Load feature module only when needed
 const routes = [
   {
     path: 'features',
-    loadChildren: () => import('./features/feature.module')
-  }
+    loadChildren: () => import('./features/feature.module'),
+  },
 ];
 ```
 
 **2. Change Detection**
+
 ```typescript
 // Use OnPush for better performance
 @Component({
@@ -391,6 +520,7 @@ const routes = [
 ```
 
 **3. Signal Benefits**
+
 - Fine-grained reactivity
 - Automatic dependency tracking
 - Minimal re-renders

@@ -16,6 +16,28 @@ export const appRoutes: Route[] = [
       import('./pages/auth/login.page').then((m) => m.LoginPage),
     canActivate: [GuestGuard],
   },
+  {
+    path: 'forgot-password',
+    loadComponent: () =>
+      import('./pages/auth/forgot-password.page').then(
+        (m) => m.ForgotPasswordPage,
+      ),
+    canActivate: [GuestGuard],
+  },
+  {
+    path: 'register',
+    loadComponent: () =>
+      import('./pages/auth/register.page').then((m) => m.RegisterPage),
+    canActivate: [GuestGuard],
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () =>
+      import('./pages/auth/reset-password.page').then(
+        (m) => m.ResetPasswordPage,
+      ),
+    canActivate: [GuestGuard],
+  },
 
   // Protected routes (require authentication)
   {
