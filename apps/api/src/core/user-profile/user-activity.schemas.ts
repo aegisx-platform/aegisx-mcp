@@ -108,6 +108,51 @@ export const GetActivityLogsQuerySchema = Type.Object({
   ),
 });
 
+// Admin: Get all activity logs query parameters (with user filter)
+export const GetAllActivityLogsQuerySchema = Type.Object({
+  page: Type.Optional(Type.Integer({ minimum: 1, default: 1 })),
+  limit: Type.Optional(
+    Type.Integer({ minimum: 1, maximum: 1000, default: 20 }),
+  ),
+  user_id: Type.Optional(
+    Type.String({
+      format: 'uuid',
+      description: 'Filter by user ID (admin only)',
+    }),
+  ),
+  action: Type.Optional(
+    Type.String({
+      description: 'Filter by action type',
+    }),
+  ),
+  severity: Type.Optional(
+    Type.Union([
+      Type.Literal('info'),
+      Type.Literal('warning'),
+      Type.Literal('error'),
+      Type.Literal('critical'),
+    ]),
+  ),
+  from_date: Type.Optional(
+    Type.String({
+      format: 'date',
+      description: 'Start date for filtering (YYYY-MM-DD)',
+    }),
+  ),
+  to_date: Type.Optional(
+    Type.String({
+      format: 'date',
+      description: 'End date for filtering (YYYY-MM-DD)',
+    }),
+  ),
+  search: Type.Optional(
+    Type.String({
+      minLength: 1,
+      description: 'Search in description or user email',
+    }),
+  ),
+});
+
 // Activity logs response with pagination
 export const ActivityLogsResponseSchema = Type.Object({
   success: Type.Boolean(),
@@ -232,6 +277,9 @@ export const ACTIVITY_ACTIONS = {
 export type ActivityLog = Static<typeof ActivityLogSchema>;
 export type CreateActivityLog = Static<typeof CreateActivityLogSchema>;
 export type GetActivityLogsQuery = Static<typeof GetActivityLogsQuerySchema>;
+export type GetAllActivityLogsQuery = Static<
+  typeof GetAllActivityLogsQuerySchema
+>;
 export type ActivityLogsResponse = Static<typeof ActivityLogsResponseSchema>;
 export type ActivitySession = Static<typeof ActivitySessionSchema>;
 export type ActivitySessionsResponse = Static<

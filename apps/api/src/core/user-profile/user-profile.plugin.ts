@@ -9,6 +9,7 @@ import { UserActivityService } from './user-activity.service';
 import { UserActivityController } from './user-activity.controller';
 import { DeleteAccountController } from './delete-account.controller';
 import { userProfileRoutes } from './user-profile.routes';
+import activityLogsRoutes from './activity-logs.routes';
 import { userProfileSchemas } from './user-profile.schemas';
 import { UsersService } from '../../core/users/users.service';
 
@@ -67,6 +68,12 @@ async function userProfilePlugin(
     activityController,
     deleteAccountController,
     prefix: options.prefix,
+  });
+
+  // Register admin activity logs routes at /activity-logs
+  await fastify.register(activityLogsRoutes, {
+    controller: activityController,
+    prefix: '/activity-logs',
   });
 
   // Decorate fastify instance with services (optional, for testing or other modules)

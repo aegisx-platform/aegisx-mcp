@@ -1,6 +1,9 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { UserActivityService } from './user-activity.service';
-import { GetActivityLogsQuery } from './user-activity.schemas';
+import {
+  GetActivityLogsQuery,
+  GetAllActivityLogsQuery,
+} from './user-activity.schemas';
 
 export class UserActivityController {
   constructor(private userActivityService: UserActivityService) {}
@@ -10,10 +13,10 @@ export class UserActivityController {
    * GET /api/profile/activity
    */
   async getUserActivities(
-    request: FastifyRequest<{ 
-      Querystring: GetActivityLogsQuery 
-    }>, 
-    reply: FastifyReply
+    request: FastifyRequest<{
+      Querystring: GetActivityLogsQuery;
+    }>,
+    reply: FastifyReply,
   ) {
     try {
       // Validate user authentication
@@ -22,8 +25,8 @@ export class UserActivityController {
           success: false,
           error: {
             code: 'UNAUTHORIZED',
-            message: 'User not authenticated'
-          }
+            message: 'User not authenticated',
+          },
         });
       }
 
@@ -32,7 +35,10 @@ export class UserActivityController {
 
       request.log.info(`Getting activities for user: ${userId}`);
 
-      const result = await this.userActivityService.getUserActivities(userId, query);
+      const result = await this.userActivityService.getUserActivities(
+        userId,
+        query,
+      );
 
       request.log.info(`Found ${result.data.length} activities`);
 
@@ -42,7 +48,7 @@ export class UserActivityController {
           userId,
           'profile_view',
           'Viewed activity log',
-          request
+          request,
         );
       } catch (logError) {
         request.log.warn({ error: logError }, 'Failed to log activity view');
@@ -52,19 +58,19 @@ export class UserActivityController {
         success: true,
         data: {
           activities: result.data,
-          pagination: result.pagination
-        }
+          pagination: result.pagination,
+        },
       });
     } catch (error) {
       request.log.error({ error }, 'Failed to get user activities');
-      
+
       // Log the error
       if (request.user?.id) {
         await this.userActivityService.logApiError(
           request.user.id,
           error as Error,
           request,
-          '/api/profile/activity'
+          '/api/profile/activity',
         );
       }
 
@@ -72,8 +78,8 @@ export class UserActivityController {
         success: false,
         error: {
           message: 'Failed to retrieve activity logs',
-          code: 'ACTIVITY_FETCH_ERROR'
-        }
+          code: 'ACTIVITY_FETCH_ERROR',
+        },
       });
     }
   }
@@ -83,40 +89,40 @@ export class UserActivityController {
    * GET /api/profile/activity/sessions
    */
   async getUserActivitySessions(
-    request: FastifyRequest<{ 
-      Querystring: { 
-        page?: number; 
-        limit?: number; 
-      } 
-    }>, 
-    reply: FastifyReply
+    request: FastifyRequest<{
+      Querystring: {
+        page?: number;
+        limit?: number;
+      };
+    }>,
+    reply: FastifyReply,
   ) {
     try {
       const userId = request.user.id;
       const { page = 1, limit = 10 } = request.query;
 
       const result = await this.userActivityService.getUserActivitySessions(
-        userId, 
-        page, 
-        limit
+        userId,
+        page,
+        limit,
       );
 
       return reply.code(200).send({
         success: true,
         data: {
           sessions: result.data,
-          pagination: result.pagination
-        }
+          pagination: result.pagination,
+        },
       });
     } catch (error) {
       request.log.error({ error }, 'Failed to get user activity sessions');
-      
+
       if (request.user?.id) {
         await this.userActivityService.logApiError(
           request.user.id,
           error as Error,
           request,
-          '/api/profile/activity/sessions'
+          '/api/profile/activity/sessions',
         );
       }
 
@@ -124,8 +130,8 @@ export class UserActivityController {
         success: false,
         error: {
           message: 'Failed to retrieve activity sessions',
-          code: 'ACTIVITY_SESSIONS_ERROR'
-        }
+          code: 'ACTIVITY_SESSIONS_ERROR',
+        },
       });
     }
   }
@@ -134,10 +140,7 @@ export class UserActivityController {
    * Get user's activity statistics
    * GET /api/profile/activity/stats
    */
-  async getUserActivityStats(
-    request: FastifyRequest, 
-    reply: FastifyReply
-  ) {
+  async getUserActivityStats(request: FastifyRequest, reply: FastifyReply) {
     try {
       const userId = request.user.id;
 
@@ -145,17 +148,17 @@ export class UserActivityController {
 
       return reply.code(200).send({
         success: true,
-        data: stats
+        data: stats,
       });
     } catch (error) {
       request.log.error({ error }, 'Failed to get user activity stats');
-      
+
       if (request.user?.id) {
         await this.userActivityService.logApiError(
           request.user.id,
           error as Error,
           request,
-          '/api/profile/activity/stats'
+          '/api/profile/activity/stats',
         );
       }
 
@@ -163,8 +166,8 @@ export class UserActivityController {
         success: false,
         error: {
           message: 'Failed to retrieve activity statistics',
-          code: 'ACTIVITY_STATS_ERROR'
-        }
+          code: 'ACTIVITY_STATS_ERROR',
+        },
       });
     }
   }
@@ -174,15 +177,15 @@ export class UserActivityController {
    * POST /api/profile/activity/log
    */
   async logActivity(
-    request: FastifyRequest<{ 
+    request: FastifyRequest<{
       Body: {
         action: string;
         description: string;
         severity?: 'info' | 'warning' | 'error' | 'critical';
         metadata?: Record<string, any>;
-      }
-    }>, 
-    reply: FastifyReply
+      };
+    }>,
+    reply: FastifyReply,
   ) {
     try {
       const userId = request.user.id;
@@ -193,22 +196,88 @@ export class UserActivityController {
         action as any, // Type assertion since we validate in schema
         description,
         request,
-        { severity, metadata }
+        { severity, metadata },
       );
 
       return reply.code(201).send({
         success: true,
-        data: activity
+        data: activity,
       });
     } catch (error) {
       request.log.error({ error }, 'Failed to log activity');
-      
+
       return reply.code(500).send({
         success: false,
         error: {
           message: 'Failed to log activity',
-          code: 'ACTIVITY_LOG_ERROR'
-        }
+          code: 'ACTIVITY_LOG_ERROR',
+        },
+      });
+    }
+  }
+
+  /**
+   * Admin: Get all users' activity logs
+   * GET /api/activity-logs
+   */
+  async getAllActivities(
+    request: FastifyRequest<{
+      Querystring: GetAllActivityLogsQuery;
+    }>,
+    reply: FastifyReply,
+  ) {
+    try {
+      const query = request.query;
+
+      request.log.info("Admin: Getting all users' activities");
+
+      const result = await this.userActivityService.getAllActivities(query);
+
+      request.log.info(`Found ${result.data.length} activities`);
+
+      return reply.code(200).send({
+        success: true,
+        data: {
+          activities: result.data,
+          pagination: result.pagination,
+        },
+      });
+    } catch (error) {
+      request.log.error({ error }, 'Failed to get all activities');
+
+      return reply.code(500).send({
+        success: false,
+        error: {
+          message: 'Failed to retrieve activity logs',
+          code: 'ACTIVITY_FETCH_ERROR',
+        },
+      });
+    }
+  }
+
+  /**
+   * Admin: Get system-wide activity statistics
+   * GET /api/activity-logs/stats
+   */
+  async getAdminStats(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      request.log.info('Admin: Getting system-wide activity stats');
+
+      const stats = await this.userActivityService.getAdminStats();
+
+      return reply.code(200).send({
+        success: true,
+        data: stats,
+      });
+    } catch (error) {
+      request.log.error({ error }, 'Failed to get admin activity stats');
+
+      return reply.code(500).send({
+        success: false,
+        error: {
+          message: 'Failed to retrieve activity statistics',
+          code: 'ACTIVITY_STATS_ERROR',
+        },
       });
     }
   }
