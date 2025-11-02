@@ -75,10 +75,10 @@ import { UserActivityTimelineWidget } from './widgets/user-activity-timeline.wid
 
         <!-- Row 3: Activities (2 columns) -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <!-- Auth Activity (Mock data) -->
+          <!-- Auth Activity (Real data) -->
           <ax-auth-activity-widget></ax-auth-activity-widget>
 
-          <!-- User Activity Timeline (Mock data) -->
+          <!-- User Activity Timeline (Real data) -->
           <ax-user-activity-timeline-widget></ax-user-activity-timeline-widget>
         </div>
       </div>

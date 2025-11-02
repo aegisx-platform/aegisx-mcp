@@ -1,9 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
+import { ActivityLogService } from '../../../core/user-profile/components/activity-log/activity-log.service';
+import { ActivityLog } from '../../../core/user-profile/components/activity-log/activity-log.types';
 
 interface Activity {
-  id: number;
+  id: string;
   user: string;
   action: string;
   description: string;
@@ -34,11 +36,6 @@ interface Activity {
             </h3>
             <p class="text-xs text-slate-600">Recent user actions</p>
           </div>
-        </div>
-        <div
-          class="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs font-medium"
-        >
-          MOCK DATA
         </div>
       </div>
 
@@ -150,90 +147,82 @@ interface Activity {
   ],
 })
 export class UserActivityTimelineWidget implements OnInit {
+  private activityLogService = inject(ActivityLogService);
   activities = signal<Activity[]>([]);
 
   ngOnInit() {
-    this.loadMockData();
+    this.loadUserActivity();
   }
 
-  loadMockData() {
-    // Mock data - will be replaced with real API call
-    const mockActivities: Activity[] = [
-      {
-        id: 1,
-        user: 'admin',
-        action: 'User Created',
-        description: 'Created new user account for john.doe@example.com',
-        timestamp: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
-        icon: 'person_add',
-        color: 'success',
-      },
-      {
-        id: 2,
-        user: 'manager',
-        action: 'Role Updated',
-        description: 'Changed role from User to Manager for jane.smith',
-        timestamp: new Date(Date.now() - 25 * 60 * 1000).toISOString(),
-        icon: 'admin_panel_settings',
-        color: 'info',
-      },
-      {
-        id: 3,
-        user: 'admin',
-        action: 'Settings Modified',
-        description: 'Updated system configuration settings',
-        timestamp: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
-        icon: 'settings',
-        color: 'primary',
-      },
-      {
-        id: 4,
-        user: 'developer',
-        action: 'API Key Generated',
-        description: 'Created new API key for external integration',
-        timestamp: new Date(Date.now() - 90 * 60 * 1000).toISOString(),
-        icon: 'key',
-        color: 'success',
-      },
-      {
-        id: 5,
-        user: 'admin',
-        action: 'Error Log Cleanup',
-        description: 'Cleared error logs older than 30 days',
-        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-        icon: 'delete_sweep',
-        color: 'warning',
-      },
-      {
-        id: 6,
-        user: 'manager',
-        action: 'Navigation Updated',
-        description: 'Modified navigation menu structure',
-        timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-        icon: 'menu',
-        color: 'info',
-      },
-      {
-        id: 7,
-        user: 'admin',
-        action: 'Permission Assigned',
-        description: 'Granted file upload permission to Manager role',
-        timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-        icon: 'shield',
-        color: 'primary',
-      },
-      {
-        id: 8,
-        user: 'developer',
-        action: 'Profile Updated',
-        description: 'Changed profile information and avatar',
-        timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-        icon: 'account_circle',
-        color: 'info',
-      },
-    ];
+  loadUserActivity() {
+    this.activityLogService
+      .loadActivities({
+        limit: 10,
+        page: 1,
+      })
+      .subscribe({
+        next: (response) => {
+          const activities: Activity[] = response.activities.map((log) =>
+            this.mapActivityLogToActivity(log),
+          );
+          this.activities.set(activities);
+        },
+        error: (error) => {
+          console.error('Failed to load user activity:', error);
+          // Keep empty array on error
+          this.activities.set([]);
+        },
+      });
+  }
 
-    this.activities.set(mockActivities);
+  private mapActivityLogToActivity(log: ActivityLog): Activity {
+    return {
+      id: log.id,
+      user: 'User', // API doesn't return user name, would need to fetch from user_id
+      action: this.formatAction(log.action),
+      description: log.description,
+      timestamp: log.created_at,
+      icon: this.getIconForAction(log.action),
+      color: this.getColorForSeverity(log.severity),
+    };
+  }
+
+  private formatAction(action: string): string {
+    // Convert snake_case to Title Case
+    return action
+      .split('_')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
+  private getIconForAction(action: string): string {
+    const iconMap: Record<string, string> = {
+      profile_view: 'visibility',
+      profile_update: 'account_circle',
+      password_change: 'lock',
+      login: 'login',
+      logout: 'logout',
+      api_access: 'api',
+      api_error: 'error',
+      settings_change: 'settings',
+      avatar_update: 'account_circle',
+      preferences_update: 'tune',
+      security_event: 'shield',
+    };
+    return iconMap[action] || 'info';
+  }
+
+  private getColorForSeverity(
+    severity: 'info' | 'warning' | 'error' | 'critical',
+  ): 'primary' | 'success' | 'warning' | 'info' {
+    const colorMap: Record<string, 'primary' | 'success' | 'warning' | 'info'> =
+      {
+        info: 'info',
+        warning: 'warning',
+        error: 'warning',
+        critical: 'warning',
+      };
+    return colorMap[severity] || 'info';
   }
 
   timeAgo(timestamp: string): string {

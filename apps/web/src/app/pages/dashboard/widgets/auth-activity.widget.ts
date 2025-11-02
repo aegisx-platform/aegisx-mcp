@@ -1,9 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
+import { LoginAttemptsService } from '../../../core/audit/services/login-attempts.service';
+import { LoginAttempt } from '../../../core/audit/models/audit.types';
 
 interface AuthActivity {
-  id: number;
+  id: string;
   type: 'login' | 'logout' | 'failed_login' | 'register';
   user: string;
   email?: string;
@@ -34,11 +36,6 @@ interface AuthActivity {
             </h3>
             <p class="text-xs text-slate-600">Recent auth events</p>
           </div>
-        </div>
-        <div
-          class="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs font-medium"
-        >
-          MOCK DATA
         </div>
       </div>
 
@@ -154,90 +151,49 @@ interface AuthActivity {
   ],
 })
 export class AuthActivityWidget implements OnInit {
+  private loginAttemptsService = inject(LoginAttemptsService);
   activities = signal<AuthActivity[]>([]);
 
   ngOnInit() {
-    this.loadMockData();
+    this.loadAuthActivity();
   }
 
-  loadMockData() {
-    // Mock data - will be replaced with real API call
-    const mockActivities: AuthActivity[] = [
-      {
-        id: 1,
-        type: 'login',
-        user: 'admin',
-        email: 'admin@aegisx.local',
-        timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-        ip: '192.168.1.100',
-        success: true,
-      },
-      {
-        id: 2,
-        type: 'failed_login',
-        user: 'unknown',
-        email: 'test@example.com',
-        timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
-        ip: '10.0.0.25',
-        success: false,
-      },
-      {
-        id: 3,
-        type: 'register',
-        user: 'newuser',
-        email: 'newuser@example.com',
-        timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-        ip: '192.168.1.50',
-        success: true,
-      },
-      {
-        id: 4,
-        type: 'logout',
-        user: 'admin',
-        email: 'admin@aegisx.local',
-        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-        ip: '192.168.1.100',
-        success: true,
-      },
-      {
-        id: 5,
-        type: 'login',
-        user: 'manager',
-        email: 'manager@aegisx.local',
-        timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-        ip: '192.168.1.75',
-        success: true,
-      },
-      {
-        id: 6,
-        type: 'failed_login',
-        user: 'admin',
-        email: 'admin@aegisx.local',
-        timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-        ip: '203.0.113.45',
-        success: false,
-      },
-      {
-        id: 7,
-        type: 'login',
-        user: 'developer',
-        email: 'dev@aegisx.local',
-        timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-        ip: '192.168.1.120',
-        success: true,
-      },
-      {
-        id: 8,
-        type: 'logout',
-        user: 'manager',
-        email: 'manager@aegisx.local',
-        timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
-        ip: '192.168.1.75',
-        success: true,
-      },
-    ];
+  loadAuthActivity() {
+    // Get login attempts from last 24 hours
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
 
-    this.activities.set(mockActivities);
+    this.loginAttemptsService
+      .getLoginAttempts({
+        limit: 10,
+        sortBy: 'createdAt',
+        sortOrder: 'desc',
+      })
+      .subscribe({
+        next: ({ data }) => {
+          const activities: AuthActivity[] = data.map((attempt) =>
+            this.mapLoginAttemptToActivity(attempt),
+          );
+          this.activities.set(activities);
+        },
+        error: (error) => {
+          console.error('Failed to load auth activity:', error);
+          // Keep empty array on error
+          this.activities.set([]);
+        },
+      });
+  }
+
+  private mapLoginAttemptToActivity(attempt: LoginAttempt): AuthActivity {
+    return {
+      id: attempt.id,
+      type: attempt.success ? 'login' : 'failed_login',
+      user: attempt.email || attempt.username || 'Unknown',
+      email: attempt.email,
+      timestamp: attempt.createdAt,
+      ip: attempt.ipAddress,
+      success: attempt.success,
+    };
   }
 
   getActivityTitle(activity: AuthActivity): string {
