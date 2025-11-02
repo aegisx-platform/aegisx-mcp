@@ -1,5 +1,6 @@
-import { Component, inject, signal } from '@angular/core';
+import { Clipboard } from '@angular/cdk/clipboard';
 import { CommonModule } from '@angular/common';
+import { Component, inject, signal } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -8,16 +9,15 @@ import {
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatDividerModule } from '@angular/material/divider';
-import { ApiKeysService } from '../services/api-keys.service';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { GeneratedApiKey } from '../models/api-keys.types';
-import { Clipboard } from '@angular/cdk/clipboard';
+import { ApiKeysService } from '../services/api-keys.service';
 
 @Component({
   selector: 'app-generate-key-dialog',
@@ -141,8 +141,10 @@ import { Clipboard } from '@angular/cdk/clipboard';
               ></mat-spinner>
               <span>Generating...</span>
             } @else {
-              <mat-icon class="mr-1">vpn_key</mat-icon>
-              <span>Generate API Key</span>
+              <ng-container>
+                <mat-icon class="mr-1">vpn_key</mat-icon>
+                <span>Generate API Key</span>
+              </ng-container>
             }
           </button>
         </mat-dialog-actions>

@@ -1,5 +1,10 @@
 /* You can add global styles to this file, and also import other style files */
 
+/* Import Material Theme Configuration - MUST be before other rules */
+@use 'styles/material-theme-config' as *;
+@use 'styles/components/material-fixes' as *;
+@use 'styles/components/form-utilities' as *;
+
 /* Import Tailwind CSS */
 @tailwind base;
 
@@ -330,9 +335,6 @@
 /* Import Angular Material Theme BEFORE any custom styles */
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
 
-/* Import Material Theme Configuration */
-@import 'styles/material-theme-config';
-
 /* Fix Material outline input border issue with Tailwind */
 /* The issue is Tailwind sets border-style: solid globally, causing the notch to show borders */
 .mdc-notched-outline__notch {
@@ -508,10 +510,6 @@ body {
 /* Note: Detailed Angular Material fixes are now handled in separate component files:
    - styles/components/_material-fixes.scss for core Material Design fixes
    - styles/components/_form-utilities.scss for form utility classes */
-
-/* Import Component Styles */
-@import 'styles/components/material-fixes';
-@import 'styles/components/form-utilities';
 
 /* Dark mode support for Material inputs */
 .dark {
