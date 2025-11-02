@@ -166,14 +166,27 @@ async function errorHandlerPlugin(
     ) {
       return reply.error('ACCOUNT_DISABLED', 'Account is disabled', 403);
     }
+    if (
+      errorCode === 'ACCOUNT_LOCKED' ||
+      error.message?.includes('Account is locked')
+    ) {
+      return reply.error('ACCOUNT_LOCKED', message, 429);
+    }
 
     // If we reach here, no specific error was handled, proceed to generic handler
 
-    // Rate limit errors
-    if (statusCode === 429) {
+    // Rate limit errors - check both statusCode and error code
+    if (
+      statusCode === 429 ||
+      error.code === 'FST_ERR_RATE_LIMIT' ||
+      errorCode === 'TOO_MANY_LOGIN_ATTEMPTS' ||
+      errorCode === 'TOO_MANY_ATTEMPTS' ||
+      errorCode === 'TOO_MANY_RESET_ATTEMPTS' ||
+      error.message?.includes('Too many')
+    ) {
       return reply.error(
-        'RATE_LIMIT_EXCEEDED',
-        'Too many requests, please try again later',
+        errorCode || 'RATE_LIMIT_EXCEEDED',
+        message || 'Too many requests, please try again later',
         429,
       );
     }
