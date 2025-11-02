@@ -1,272 +1,241 @@
-# Audit System Documentation
+# Audit System
 
-## 📚 Overview
+**Enterprise-Grade Security Audit & Compliance Tracking**
 
-The AegisX Audit System provides comprehensive tracking and monitoring of user actions, security events, and system operations. It's built on a modular, extensible architecture that makes it easy to add new audit logs for any feature.
+Version: 1.0.0
+Last Updated: 2025-11-02
 
----
+## Overview
 
-## 📖 Complete Documentation
+The Audit System provides comprehensive security monitoring and compliance tracking by recording and analyzing:
 
-### [🎯 IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md)
+- **Login Attempts** - Track authentication events (successful/failed logins)
+- **File Activity** - Monitor all file operations (upload, download, delete, view, update)
 
-**The complete implementation guide for the Audit System.**
+This system enables security teams to:
 
-This guide covers everything you need to know:
+- Detect suspicious authentication patterns
+- Track file access and modifications
+- Meet compliance requirements (SOC 2, ISO 27001, GDPR)
+- Generate audit reports for regulatory reviews
+- Respond quickly to security incidents
 
-#### Contents:
+## Quick Start
 
-1. **📊 Overview**
-   - 3 existing audit tables (error_logs, login_attempts, file_audit_logs)
-   - Architecture and design patterns
+### For End Users
 
-2. **🏗️ Architecture**
-   - Base classes (BaseAuditRepository, BaseAuditService)
-   - Module structure and inheritance pattern
-   - Component organization
+1. **Access the Audit System**
+   - Navigate to **Audit** in the main menu
+   - Choose **Login Attempts** or **File Activity**
 
-3. **🔄 Data Flow**
-   - Request flow for read operations
-   - Write flow for logging operations
-   - Integration with business logic
+2. **View Login Attempts**
+   - See all authentication attempts (successful and failed)
+   - Filter by user email, status, date range
+   - Export data for compliance reports
 
-4. **📋 Database Schema Requirements**
-   - Required columns for ALL audit tables
-   - Why both `timestamp` and `created_at`?
-   - Index strategies
+3. **View File Activity**
+   - Monitor file uploads, downloads, and deletions
+   - Track who accessed which files and when
+   - Filter by operation type, user, or filename
 
-5. **🚀 Step-by-Step Implementation Guide**
-   - Step 1: Create Migration
-   - Step 2: Create TypeBox Schemas
-   - Step 3: Create Repository
-   - Step 4: Create Service
-   - Step 5: Create Controller
-   - Step 6: Create Routes
-   - Step 7: Create Plugin
-   - Step 8: Register Plugin
-   - Step 9: Usage Examples
+4. **Export Audit Data**
+   - Click **Export** button to download CSV reports
+   - Use **Cleanup** to delete old audit logs
 
-6. **📝 Best Practices**
-   - Schema patterns (Type.String() vs Type.Literal())
-   - Field mapping (snake_case ↔ camelCase)
-   - Required columns
-   - Indexes
-   - Error handling
-   - Fire-and-forget logging
+For detailed usage instructions, see [USER_GUIDE.md](./USER_GUIDE.md)
 
-7. **🔍 Testing**
-   - Integration test examples
-   - Test patterns
-
-8. **🎯 Quick Checklist**
-   - All steps required for new audit log
-
----
-
-## 🚀 Quick Start
-
-### Adding a New Audit Log in 9 Steps:
+### For Developers
 
 ```bash
-# 1. Create migration
-pnpm knex migrate:make create_user_actions_table
+# Database Migration (already run in Session 60)
+pnpm run db:migrate
 
-# 2. Create module directory
-mkdir -p apps/api/src/core/audit-system/user-actions
+# Seed Test Data (already seeded)
+pnpm run db:seed
 
-# 3. Create files
-cd apps/api/src/core/audit-system/user-actions
-touch user-actions.schemas.ts
-touch user-actions.repository.ts
-touch user-actions.service.ts
-touch user-actions.controller.ts
-touch user-actions.routes.ts
-touch user-actions.plugin.ts
-touch index.ts
-
-# 4. Follow the guide in IMPLEMENTATION_GUIDE.md
+# Access Endpoints
+GET /api/login-attempts        # List login attempts
+GET /api/login-attempts/stats  # Get statistics
+GET /api/file-audit            # List file operations
+GET /api/file-audit/stats      # Get file activity stats
 ```
 
----
+For integration details, see [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md)
 
-## 📊 Current Audit Tables
+## Architecture Overview
 
-| Table           | Purpose                        | Location                            |
-| --------------- | ------------------------------ | ----------------------------------- |
-| error_logs      | Client & server error tracking | `core/error-logs/`                  |
-| login_attempts  | Authentication monitoring      | `core/audit-system/login-attempts/` |
-| file_audit_logs | File operation tracking        | `core/audit-system/file-audit/`     |
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     Audit System Architecture                    │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  Frontend (Angular)          Backend (Fastify)        Database   │
+│  ┌──────────────────┐       ┌────────────────┐      ┌─────────┐ │
+│  │ Login Attempts   │────►  │ Login Attempts │────► │ login_  │ │
+│  │ Component        │       │ Plugin         │      │ attempts│ │
+│  │                  │       │                │      └─────────┘ │
+│  │ - Table View     │       │ - Authentication      │          │ │
+│  │ - Filters        │       │   Tracking            │          │ │
+│  │ - Export         │       │ - Rate Limiting       │          │ │
+│  │ - Cleanup        │       │ - IP Detection        │          │ │
+│  └──────────────────┘       └────────────────┘                  │
+│                                                                   │
+│  ┌──────────────────┐       ┌────────────────┐      ┌─────────┐ │
+│  │ File Activity    │────►  │ File Audit     │────► │ file_   │ │
+│  │ Component        │       │ Plugin         │      │ audit_  │ │
+│  │                  │       │                │      │ logs    │ │
+│  │ - Table View     │       │ - File Operation      │          │ │
+│  │ - Filters        │       │   Tracking            │          │ │
+│  │ - Export         │       │ - Error Logging       │          │ │
+│  │ - Cleanup        │       │ - Metadata Capture    │          │ │
+│  └──────────────────┘       └────────────────┘      └─────────┘ │
+│                                                                   │
+│  Signal-Based State          RESTful API             PostgreSQL  │
+│  + RxJS Observables          + TypeBox Validation    + Indexes   │
+└─────────────────────────────────────────────────────────────────┘
+```
 
----
+For detailed architecture, see [ARCHITECTURE.md](./ARCHITECTURE.md)
 
-## 🛠️ Common Patterns
+## Key Features
 
-### 1. Log User Action (Fire-and-Forget)
+### Login Attempts Tracking
+
+- **Comprehensive Logging** - Records every authentication attempt
+- **Failure Analysis** - Categorizes failure reasons (invalid_password, user_not_found, etc.)
+- **IP Address Tracking** - Detects suspicious access patterns
+- **User Agent Detection** - Identifies browsers and devices
+- **Real-Time Statistics** - Dashboard metrics for security monitoring
+
+### File Activity Monitoring
+
+- **Operation Tracking** - Upload, download, delete, view, update
+- **Metadata Capture** - File size, MIME type, path information
+- **Error Logging** - Detailed error messages for failed operations
+- **User Attribution** - Links file operations to specific users
+- **Comprehensive Search** - Filter by filename, operation type, status
+
+### Security & Compliance
+
+- **Audit Trail** - Immutable records for compliance requirements
+- **Data Export** - CSV export for regulatory reviews
+- **Data Retention** - Configurable cleanup policies
+- **Access Control** - Role-based permissions via RBAC system
+- **GDPR Compliant** - Supports data retention and deletion policies
+
+## Technology Stack
+
+- **Frontend**: Angular 19 + Angular Material + TailwindCSS
+- **Backend**: Fastify 4 + TypeBox validation
+- **Database**: PostgreSQL 15 with optimized indexes
+- **State Management**: Angular Signals + RxJS
+- **Testing**: Jest (unit) + Playwright (E2E)
+
+## Documentation Structure
+
+| Document                                           | Purpose                 | Audience      |
+| -------------------------------------------------- | ----------------------- | ------------- |
+| [README.md](./README.md)                           | Overview & quick start  | Everyone      |
+| [USER_GUIDE.md](./USER_GUIDE.md)                   | End-user instructions   | End Users     |
+| [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md)         | Integration guide       | Developers    |
+| [API_REFERENCE.md](./API_REFERENCE.md)             | API endpoints & schemas | Developers    |
+| [ARCHITECTURE.md](./ARCHITECTURE.md)               | System design           | Architects    |
+| [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)       | Production setup        | DevOps        |
+| [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)         | Common issues           | Support Teams |
+| [DOCUMENTATION_INDEX.md](./DOCUMENTATION_INDEX.md) | Navigation guide        | Everyone      |
+
+## Quick Reference
+
+### Common Tasks
+
+**View Recent Failed Logins:**
 
 ```typescript
-// ✅ Don't block business logic
-await userRepository.update(userId, data);
-
-userActionsService
-  .logAction({
-    userId,
-    action: 'update_profile',
-    resourceType: 'user',
-    resourceId: userId,
-  })
-  .catch((error) => {
-    fastify.log.error('Failed to log action', error);
-  });
+// Navigate to: /audit/login-attempts
+// Filter: Status = Failed
+// Sort: By timestamp (newest first)
 ```
 
-### 2. Query with Pagination
+**Export Last 30 Days of File Activity:**
 
 ```typescript
-const result = await service.findAll({
-  page: 1,
-  limit: 25,
-  startDate: '2025-11-01T00:00:00Z',
-  endDate: '2025-11-02T23:59:59Z',
-  userId: 'some-user-id',
-});
+// Navigate to: /audit/file-audit
+// Click: Export button
+// File: file-audit-YYYY-MM-DD.csv
 ```
 
-### 3. Get Statistics
+**Cleanup Old Audit Logs:**
 
 ```typescript
-const stats = await service.getStats(7); // Last 7 days
-// Returns: { total, recent24h, byAction, successRate }
+// Click: Cleanup button
+// Confirm: Delete logs older than X days
+// System: Removes historical data
 ```
 
-### 4. Export to CSV
+### API Endpoints
 
-```typescript
-const csv = await service.exportToCSV({
-  startDate: '2025-11-01T00:00:00Z',
-  endDate: '2025-11-02T23:59:59Z',
-});
-```
+| Endpoint                      | Method | Description         |
+| ----------------------------- | ------ | ------------------- |
+| `/api/login-attempts`         | GET    | List login attempts |
+| `/api/login-attempts/stats`   | GET    | Get statistics      |
+| `/api/login-attempts/:id`     | GET    | Get single attempt  |
+| `/api/login-attempts/:id`     | DELETE | Delete attempt      |
+| `/api/login-attempts/cleanup` | DELETE | Bulk cleanup        |
+| `/api/login-attempts/export`  | GET    | Export CSV          |
+| `/api/file-audit`             | GET    | List file logs      |
+| `/api/file-audit/stats`       | GET    | Get statistics      |
+| `/api/file-audit/:id`         | GET    | Get single log      |
+| `/api/file-audit/:id`         | DELETE | Delete log          |
+| `/api/file-audit/cleanup`     | DELETE | Bulk cleanup        |
+| `/api/file-audit/export`      | GET    | Export CSV          |
 
-### 5. Cleanup Old Records
+For complete API documentation, see [API_REFERENCE.md](./API_REFERENCE.md)
 
-```typescript
-const result = await service.cleanup({ olderThan: 30 }); // Delete older than 30 days
-// Returns: { deletedCount, message }
-```
+## Security Considerations
+
+### Data Protection
+
+- **Access Control** - Only authorized users can view audit logs
+- **Data Integrity** - Audit records are immutable (no updates, only create/delete)
+- **Sensitive Data** - Passwords are NEVER logged (only failure reasons)
+- **IP Privacy** - IP addresses stored for security analysis only
+
+### Compliance
+
+- **GDPR Article 30** - Records of processing activities
+- **SOC 2** - Security monitoring and access control
+- **ISO 27001** - Audit trail requirements
+- **HIPAA** - Access logging for protected health information
+
+## Performance
+
+- **Database Indexes** - Optimized for fast queries on common filters
+- **Pagination** - Efficient handling of millions of records
+- **Signal-Based UI** - Reactive updates without full page reloads
+- **Lazy Loading** - Components loaded on-demand
+
+## Getting Help
+
+- **User Questions**: See [USER_GUIDE.md](./USER_GUIDE.md)
+- **Developer Questions**: See [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md)
+- **Issues/Bugs**: See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)
+- **API Details**: See [API_REFERENCE.md](./API_REFERENCE.md)
+
+## Related Features
+
+- **RBAC System** - Role-based access control for audit access
+- **User Management** - User authentication and authorization
+- **File Upload** - File operations that trigger audit logs
+- **Monitoring Dashboard** - Real-time system health metrics
+
+## License
+
+Copyright © 2025 AegisX Platform. All rights reserved.
 
 ---
 
-## 🔑 Key Concepts
+**Next Steps:**
 
-### Base Classes Inheritance
-
-All audit modules extend base classes for consistency:
-
-```
-BaseAuditRepository → Your custom Repository
-BaseAuditService → Your custom Service
-```
-
-### Required Database Columns
-
-Every audit table MUST have:
-
-```sql
-id           UUID PRIMARY KEY
-timestamp    TIMESTAMP NOT NULL  -- For filtering/queries
-created_at   TIMESTAMP NOT NULL  -- Record creation time
-```
-
-### TypeBox Schema Pattern
-
-```typescript
-// ✅ CORRECT: Flexible string fields
-failureReason: Type.Optional(Type.String({ maxLength: 100 }));
-
-// ❌ WRONG: Type.Literal causes serialization issues
-failureReason: Type.Optional(Type.Literal('invalid_credentials'));
-```
-
----
-
-## 📁 Module Structure
-
-Every audit module follows this structure:
-
-```
-user-actions/
-├── index.ts                    # Exports
-├── user-actions.schemas.ts     # TypeBox schemas
-├── user-actions.repository.ts  # Data access layer
-├── user-actions.service.ts     # Business logic
-├── user-actions.controller.ts  # Request handling
-├── user-actions.routes.ts      # Route definitions
-└── user-actions.plugin.ts      # Fastify plugin
-```
-
----
-
-## 🎯 When to Use Audit Logs
-
-### ✅ Good Use Cases:
-
-- **Security Events**: Login attempts, password changes, permission changes
-- **Data Changes**: CRUD operations on important resources
-- **File Operations**: Upload, download, delete, share
-- **User Actions**: Profile updates, settings changes
-- **API Usage**: Rate limiting, API key usage
-- **Compliance**: GDPR access logs, audit trails
-
-### ❌ Don't Use For:
-
-- High-frequency events (use metrics/analytics instead)
-- Debug logging (use application logs)
-- Real-time monitoring (use monitoring tools)
-- Temporary data (use cache)
-
----
-
-## 🔍 Troubleshooting
-
-### Common Issues:
-
-1. **Missing `timestamp` column**
-   - **Error**: `"timestamp" is required!`
-   - **Fix**: Add `timestamp` column to migration
-
-2. **Schema serialization error**
-   - **Error**: `The value of [...] does not match schema definition`
-   - **Fix**: Change `Type.Literal()` to `Type.String()`
-
-3. **Field mapping issues**
-   - **Error**: `undefined` fields in response
-   - **Fix**: Check `getSelectFields()` mapping
-
-4. **Port configuration**
-   - **Error**: Wrong port (4250 vs 3384)
-   - **Fix**: Check `.env.local`, use correct API port
-
----
-
-## 📚 Additional Resources
-
-- [TypeBox Schema Standard](../../05c-typebox-schema-standard.md)
-- [API-First Workflow](../../development/api-first-workflow.md)
-- [Testing Strategy](../../testing/testing-strategy.md)
-- [BaseAuditRepository Source](../../../apps/api/src/core/audit-system/base/base.repository.ts)
-- [BaseAuditService Source](../../../apps/api/src/core/audit-system/base/base.service.ts)
-
----
-
-## 🤝 Contributing
-
-When adding new audit logs:
-
-1. Follow the [IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md) step-by-step
-2. Use the existing modules as reference (login-attempts, error-logs)
-3. Test all endpoints before committing
-4. Update this README if adding significant patterns
-
----
-
-**Last Updated:** 2025-11-02 (Session 60)
+- 📖 Read the [USER_GUIDE.md](./USER_GUIDE.md) for detailed usage instructions
+- 👨‍💻 See [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md) for integration examples
+- 🏗️ Review [ARCHITECTURE.md](./ARCHITECTURE.md) for system design details
