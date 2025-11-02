@@ -207,6 +207,67 @@ export interface CleanupQuery {
 }
 
 // ============================================================================
+// Activity Log Types
+// ============================================================================
+
+export interface ActivityLog {
+  id: string;
+  user_id: string;
+  action: string;
+  description: string;
+  severity: 'info' | 'warning' | 'error' | 'critical';
+  ip_address?: string;
+  user_agent?: string;
+  session_id?: string;
+  request_id?: string;
+  device_info?: {
+    browser?: string;
+    os?: string;
+    device?: string;
+    isMobile?: boolean;
+    isDesktop?: boolean;
+    isTablet?: boolean;
+  };
+  location_info?: {
+    country?: string;
+    city?: string;
+    timezone?: string;
+  };
+  metadata?: Record<string, any>;
+  created_at: string;
+}
+
+export interface ActivityLogsQuery {
+  page?: number;
+  limit?: number;
+  user_id?: string; // Admin only: Filter by user ID
+  action?: string;
+  severity?: 'info' | 'warning' | 'error' | 'critical';
+  from_date?: string; // YYYY-MM-DD format
+  to_date?: string; // YYYY-MM-DD format
+  search?: string; // Search in description or user email
+}
+
+export interface ActivityStats {
+  total_activities: number;
+  activities_by_action: Record<string, number>;
+  activities_by_severity: {
+    info: number;
+    warning: number;
+    error: number;
+    critical: number;
+  };
+  recent_activities_count: {
+    today: number;
+    this_week: number;
+    this_month: number;
+  };
+  unique_devices: number;
+  unique_locations: number;
+  last_activity?: string; // ISO timestamp
+}
+
+// ============================================================================
 // API Response Types
 // ============================================================================
 
@@ -241,6 +302,31 @@ export interface CleanupResponse {
   message: string;
 }
 
+export interface ActivityLogResponse {
+  success: true;
+  data: ActivityLog;
+}
+
+export interface ActivityLogsListResponse {
+  success: true;
+  data: {
+    activities: ActivityLog[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      pages: number;
+      hasNext: boolean;
+      hasPrev: boolean;
+    };
+  };
+}
+
+export interface ActivityStatsResponse {
+  success: true;
+  data: ActivityStats;
+}
+
 // ============================================================================
 // Service State Types
 // ============================================================================
@@ -265,6 +351,21 @@ export interface ErrorLogsState {
     total: number;
     limit: number;
     offset: number;
+  } | null;
+}
+
+export interface ActivityLogsState {
+  activityLogs: ActivityLog[];
+  activityStats: ActivityStats | null;
+  loading: boolean;
+  error: string | null;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
   } | null;
 }
 
