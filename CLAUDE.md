@@ -407,6 +407,7 @@ See **[Universal Full-Stack Standard](./docs/development/universal-fullstack-sta
 3. **🧪 TEST API ENDPOINTS** - Test actual API calls before implementing frontend logic
 4. **📝 VALIDATE SCHEMAS** - Ensure request/response schemas match TypeBox definitions
 5. **🔄 UPDATE DOCUMENTATION** - Update API docs if any changes are needed
+6. **🎯 FOLLOW API CALLING STANDARD** - See [API Calling Standard](./docs/development/API_CALLING_STANDARD.md) for correct URL patterns
 
 **API Spec Verification Rules:**
 
@@ -603,6 +604,7 @@ These are shortcut commands that can be used to trigger common workflows. When y
 - **[🏗️ Project Setup](./docs/getting-started/project-setup.md)** - Bootstrap guide
 - **[🔄 Development Workflow](./docs/development/development-workflow.md)** - Step-by-step workflows
 - **[🎯 API-First Workflow](./docs/development/api-first-workflow.md)** - Recommended development approach
+- **[📡 API Calling Standard](./docs/development/API_CALLING_STANDARD.md)** - **MANDATORY** How to call APIs correctly
 - **[🏛️ Architecture](./docs/architecture/architecture-overview.md)** - Frontend/Backend patterns
 - **[🧪 Testing Strategy](./docs/testing/testing-strategy.md)** - E2E with Playwright MCP
 - **[🤖 MCP Integration](./docs/development/mcp-integration.md)** - Nx MCP & Playwright MCP usage
