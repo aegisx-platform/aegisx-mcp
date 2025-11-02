@@ -68,6 +68,7 @@ export class LoginAttemptsRepository extends BaseAuditRepository<
       this.knex.raw('user_agent as "userAgent"'),
       'success',
       this.knex.raw('failure_reason as "failureReason"'),
+      'timestamp',
       this.knex.raw('created_at as "createdAt"'),
     ];
   }
