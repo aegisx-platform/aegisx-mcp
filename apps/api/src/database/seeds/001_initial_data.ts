@@ -89,6 +89,23 @@ export async function seed(knex: Knex): Promise<void> {
         description: 'Export error logs',
       },
 
+      // Activity logs permissions
+      {
+        resource: 'activity-logs',
+        action: 'read',
+        description: 'View activity logs',
+      },
+      {
+        resource: 'activity-logs',
+        action: 'delete',
+        description: 'Delete activity logs',
+      },
+      {
+        resource: 'activity-logs',
+        action: 'export',
+        description: 'Export activity logs',
+      },
+
       // Navigation management permissions
       {
         resource: 'navigation',

@@ -1,13 +1,17 @@
 import { FastifyRequest } from 'fastify';
-import { UserActivityRepository, PaginationResult } from './user-activity.repository';
-import { 
-  ActivityLog, 
-  CreateActivityLog, 
-  GetActivityLogsQuery, 
+import {
+  UserActivityRepository,
+  PaginationResult,
+} from './user-activity.repository';
+import {
+  ActivityLog,
+  CreateActivityLog,
+  GetActivityLogsQuery,
+  GetAllActivityLogsQuery,
   ActivitySession,
   ActivityStats,
   ACTIVITY_ACTIONS,
-  ActivityAction
+  ActivityAction,
 } from './user-activity.schemas';
 
 // Device info parser (simple implementation)
@@ -40,15 +44,15 @@ export class UserActivityService {
     options?: {
       severity?: 'info' | 'warning' | 'error' | 'critical';
       metadata?: Record<string, any>;
-    }
+    },
   ): Promise<ActivityLog> {
     const requestInfo = request ? this.extractRequestInfo(request) : undefined;
-    
+
     const activityData: CreateActivityLog = {
       action,
       description,
       severity: options?.severity || 'info',
-      metadata: options?.metadata
+      metadata: options?.metadata,
     };
 
     return this.repository.createActivityLog(userId, activityData, requestInfo);
@@ -57,41 +61,54 @@ export class UserActivityService {
   /**
    * Log authentication events
    */
-  async logLogin(userId: string, request: FastifyRequest, success: boolean = true): Promise<ActivityLog> {
-    const action = success ? ACTIVITY_ACTIONS.LOGIN : ACTIVITY_ACTIONS.LOGIN_FAILED;
-    const description = success 
-      ? 'User successfully logged in' 
+  async logLogin(
+    userId: string,
+    request: FastifyRequest,
+    success: boolean = true,
+  ): Promise<ActivityLog> {
+    const action = success
+      ? ACTIVITY_ACTIONS.LOGIN
+      : ACTIVITY_ACTIONS.LOGIN_FAILED;
+    const description = success
+      ? 'User successfully logged in'
       : 'Failed login attempt';
     const severity = success ? 'info' : 'warning';
 
-    return this.logActivity(userId, action, description, request, { 
+    return this.logActivity(userId, action, description, request, {
       severity,
-      metadata: { success, timestamp: new Date().toISOString() }
+      metadata: { success, timestamp: new Date().toISOString() },
     });
   }
 
-  async logLogout(userId: string, request: FastifyRequest): Promise<ActivityLog> {
+  async logLogout(
+    userId: string,
+    request: FastifyRequest,
+  ): Promise<ActivityLog> {
     return this.logActivity(
-      userId, 
-      ACTIVITY_ACTIONS.LOGOUT, 
-      'User logged out', 
+      userId,
+      ACTIVITY_ACTIONS.LOGOUT,
+      'User logged out',
       request,
-      { metadata: { timestamp: new Date().toISOString() } }
+      { metadata: { timestamp: new Date().toISOString() } },
     );
   }
 
-  async logSessionCreated(userId: string, sessionId: string, request: FastifyRequest): Promise<ActivityLog> {
+  async logSessionCreated(
+    userId: string,
+    sessionId: string,
+    request: FastifyRequest,
+  ): Promise<ActivityLog> {
     return this.logActivity(
       userId,
       ACTIVITY_ACTIONS.SESSION_CREATED,
       'New session created',
       request,
-      { 
-        metadata: { 
+      {
+        metadata: {
           session_id: sessionId,
-          timestamp: new Date().toISOString()
-        }
-      }
+          timestamp: new Date().toISOString(),
+        },
+      },
     );
   }
 
@@ -99,39 +116,45 @@ export class UserActivityService {
    * Log profile-related events
    */
   async logProfileUpdate(
-    userId: string, 
-    request: FastifyRequest, 
-    fields: string[]
+    userId: string,
+    request: FastifyRequest,
+    fields: string[],
   ): Promise<ActivityLog> {
     return this.logActivity(
       userId,
       ACTIVITY_ACTIONS.PROFILE_UPDATE,
       `Profile updated: ${fields.join(', ')}`,
       request,
-      { metadata: { fields_updated: fields } }
+      { metadata: { fields_updated: fields } },
     );
   }
 
-  async logPasswordChange(userId: string, request: FastifyRequest): Promise<ActivityLog> {
+  async logPasswordChange(
+    userId: string,
+    request: FastifyRequest,
+  ): Promise<ActivityLog> {
     return this.logActivity(
       userId,
       ACTIVITY_ACTIONS.PASSWORD_CHANGE,
       'Password changed successfully',
       request,
-      { 
+      {
         severity: 'warning', // Password changes are security events
-        metadata: { timestamp: new Date().toISOString() }
-      }
+        metadata: { timestamp: new Date().toISOString() },
+      },
     );
   }
 
-  async logAvatarUpload(userId: string, request: FastifyRequest): Promise<ActivityLog> {
+  async logAvatarUpload(
+    userId: string,
+    request: FastifyRequest,
+  ): Promise<ActivityLog> {
     return this.logActivity(
       userId,
       ACTIVITY_ACTIONS.AVATAR_UPLOAD,
       'Profile avatar uploaded',
       request,
-      { metadata: { timestamp: new Date().toISOString() } }
+      { metadata: { timestamp: new Date().toISOString() } },
     );
   }
 
@@ -139,26 +162,30 @@ export class UserActivityService {
    * Log preferences events
    */
   async logPreferencesUpdate(
-    userId: string, 
-    request: FastifyRequest, 
-    preferences: string[]
+    userId: string,
+    request: FastifyRequest,
+    preferences: string[],
   ): Promise<ActivityLog> {
     return this.logActivity(
       userId,
       ACTIVITY_ACTIONS.PREFERENCES_UPDATE,
       `Preferences updated: ${preferences.join(', ')}`,
       request,
-      { metadata: { preferences_updated: preferences } }
+      { metadata: { preferences_updated: preferences } },
     );
   }
 
-  async logThemeChange(userId: string, newTheme: string, request: FastifyRequest): Promise<ActivityLog> {
+  async logThemeChange(
+    userId: string,
+    newTheme: string,
+    request: FastifyRequest,
+  ): Promise<ActivityLog> {
     return this.logActivity(
       userId,
       ACTIVITY_ACTIONS.THEME_CHANGE,
       `Theme changed to ${newTheme}`,
       request,
-      { metadata: { new_theme: newTheme } }
+      { metadata: { new_theme: newTheme } },
     );
   }
 
@@ -166,23 +193,23 @@ export class UserActivityService {
    * Log security events
    */
   async logSuspiciousActivity(
-    userId: string, 
-    reason: string, 
-    request: FastifyRequest
+    userId: string,
+    reason: string,
+    request: FastifyRequest,
   ): Promise<ActivityLog> {
     return this.logActivity(
       userId,
       ACTIVITY_ACTIONS.SUSPICIOUS_ACTIVITY,
       `Suspicious activity detected: ${reason}`,
       request,
-      { 
+      {
         severity: 'critical',
-        metadata: { 
+        metadata: {
           reason,
           timestamp: new Date().toISOString(),
-          requires_review: true
-        }
-      }
+          requires_review: true,
+        },
+      },
     );
   }
 
@@ -190,24 +217,24 @@ export class UserActivityService {
    * Log API errors
    */
   async logApiError(
-    userId: string, 
-    error: Error, 
+    userId: string,
+    error: Error,
     request: FastifyRequest,
-    endpoint?: string
+    endpoint?: string,
   ): Promise<ActivityLog> {
     return this.logActivity(
       userId,
       ACTIVITY_ACTIONS.API_ERROR,
       `API error occurred: ${error.message}`,
       request,
-      { 
+      {
         severity: 'error',
-        metadata: { 
+        metadata: {
           error_message: error.message,
           endpoint: endpoint || request.method + ' ' + (request.url || ''),
-          stack: error.stack
-        }
-      }
+          stack: error.stack,
+        },
+      },
     );
   }
 
@@ -215,8 +242,8 @@ export class UserActivityService {
    * Get user's activity logs with filtering
    */
   async getUserActivities(
-    userId: string, 
-    query: GetActivityLogsQuery = {}
+    userId: string,
+    query: GetActivityLogsQuery = {},
   ): Promise<PaginationResult<ActivityLog>> {
     return this.repository.getUserActivities(userId, query);
   }
@@ -225,9 +252,9 @@ export class UserActivityService {
    * Get user's activity sessions
    */
   async getUserActivitySessions(
-    userId: string, 
-    page: number = 1, 
-    limit: number = 10
+    userId: string,
+    page: number = 1,
+    limit: number = 10,
   ): Promise<PaginationResult<ActivitySession>> {
     return this.repository.getUserActivitySessions(userId, page, limit);
   }
@@ -237,6 +264,22 @@ export class UserActivityService {
    */
   async getUserActivityStats(userId: string): Promise<ActivityStats> {
     return this.repository.getUserActivityStats(userId);
+  }
+
+  /**
+   * Admin: Get all users' activity logs with filtering
+   */
+  async getAllActivities(
+    query: GetAllActivityLogsQuery = {},
+  ): Promise<PaginationResult<ActivityLog>> {
+    return this.repository.getAllActivities(query);
+  }
+
+  /**
+   * Admin: Get system-wide activity statistics
+   */
+  async getAdminStats(): Promise<ActivityStats> {
+    return this.repository.getAdminStats();
   }
 
   /**
@@ -254,14 +297,14 @@ export class UserActivityService {
     const user_agent = request.headers['user-agent'];
     const session_id = this.extractSessionId(request);
     const request_id = request.id;
-    
+
     return {
       ip_address,
       user_agent,
       session_id,
       request_id,
       device_info: user_agent ? this.parseUserAgent(user_agent) : undefined,
-      location_info: undefined // Would need IP geolocation service
+      location_info: undefined, // Would need IP geolocation service
     };
   }
 
@@ -273,12 +316,12 @@ export class UserActivityService {
     if (forwarded && typeof forwarded === 'string') {
       return forwarded.split(',')[0].trim();
     }
-    
+
     const realIp = request.headers['x-real-ip'];
     if (realIp && typeof realIp === 'string') {
       return realIp;
     }
-    
+
     return request.ip;
   }
 
@@ -287,11 +330,12 @@ export class UserActivityService {
    */
   private extractSessionId(request: FastifyRequest): string | undefined {
     // Try to get session ID from cookies
-    const sessionCookie = request.cookies?.sessionId || request.cookies?.['session-id'];
+    const sessionCookie =
+      request.cookies?.sessionId || request.cookies?.['session-id'];
     if (sessionCookie) {
       return sessionCookie;
     }
-    
+
     // Try to get from Authorization header (JWT sessions)
     const authHeader = request.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -300,7 +344,7 @@ export class UserActivityService {
       const token = authHeader.substring(7);
       return this.hashString(token).substring(0, 16);
     }
-    
+
     return undefined;
   }
 
@@ -309,9 +353,9 @@ export class UserActivityService {
    */
   private parseUserAgent(userAgent: string): DeviceInfo {
     const ua = userAgent.toLowerCase();
-    
+
     const deviceInfo: DeviceInfo = {};
-    
+
     // Browser detection
     if (ua.includes('chrome')) {
       deviceInfo.browser = 'Chrome';
@@ -322,7 +366,7 @@ export class UserActivityService {
     } else if (ua.includes('edge')) {
       deviceInfo.browser = 'Edge';
     }
-    
+
     // OS detection
     if (ua.includes('windows')) {
       deviceInfo.os = 'Windows';
@@ -335,12 +379,13 @@ export class UserActivityService {
     } else if (ua.includes('iphone') || ua.includes('ipad')) {
       deviceInfo.os = 'iOS';
     }
-    
+
     // Device type detection
-    deviceInfo.isMobile = ua.includes('mobile') || ua.includes('android') || ua.includes('iphone');
+    deviceInfo.isMobile =
+      ua.includes('mobile') || ua.includes('android') || ua.includes('iphone');
     deviceInfo.isTablet = ua.includes('tablet') || ua.includes('ipad');
     deviceInfo.isDesktop = !deviceInfo.isMobile && !deviceInfo.isTablet;
-    
+
     if (deviceInfo.isMobile) {
       deviceInfo.device = 'Mobile';
     } else if (deviceInfo.isTablet) {
@@ -348,7 +393,7 @@ export class UserActivityService {
     } else {
       deviceInfo.device = 'Desktop';
     }
-    
+
     return deviceInfo;
   }
 
@@ -359,7 +404,7 @@ export class UserActivityService {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return Math.abs(hash).toString(16);

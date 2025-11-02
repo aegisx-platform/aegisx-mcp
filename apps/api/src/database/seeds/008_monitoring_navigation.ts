@@ -1,16 +1,18 @@
 import type { Knex } from 'knex';
 
 /**
- * Monitoring & Error Logs Navigation Seed Data
+ * Monitoring & Error Logs & Activity Logs Navigation Seed Data
  *
  * This seed adds navigation menu items and permissions for:
  * 1. System Monitoring Dashboard
  * 2. Error Log Viewer
+ * 3. Activity Log Viewer
  *
  * Navigation Structure:
  * - Monitoring (collapsible parent)
  *   ├─ System Monitoring
- *   └─ Error Logs
+ *   ├─ Error Logs
+ *   └─ Activity Logs
  *
  * Permissions:
  * - monitoring:view - View monitoring dashboard
@@ -18,6 +20,9 @@ import type { Knex } from 'knex';
  * - error-logs:read - View error logs
  * - error-logs:delete - Delete error logs
  * - error-logs:export - Export error logs
+ * - activity-logs:read - View activity logs
+ * - activity-logs:delete - Delete activity logs
+ * - activity-logs:export - Export activity logs
  */
 
 export async function seed(knex: Knex): Promise<void> {
@@ -54,6 +59,24 @@ export async function seed(knex: Knex): Promise<void> {
       action: 'export',
       description: 'Export error logs',
     },
+
+    // Activity Logs permissions (already added in 001_initial_data.ts)
+    // Kept here for reference, but will be skipped if already exists
+    {
+      resource: 'activity-logs',
+      action: 'read',
+      description: 'View activity logs',
+    },
+    {
+      resource: 'activity-logs',
+      action: 'delete',
+      description: 'Delete activity logs',
+    },
+    {
+      resource: 'activity-logs',
+      action: 'export',
+      description: 'Export activity logs',
+    },
   ];
 
   // Insert permissions that don't already exist
@@ -84,13 +107,12 @@ export async function seed(knex: Knex): Promise<void> {
 
   console.log('🔗 Assigning permissions to admin role...');
 
-  // Get all system and error-logs permissions
+  // Get all system, error-logs, and activity-logs permissions
   const allPermissions = await knex('permissions')
     .where(function () {
-      this.where({ resource: 'system', action: 'monitoring:read' }).orWhere(
-        'resource',
-        'error-logs',
-      );
+      this.where({ resource: 'system', action: 'monitoring:read' })
+        .orWhere('resource', 'error-logs')
+        .orWhere('resource', 'activity-logs');
     })
     .select(['id', 'resource', 'action']);
 
@@ -192,9 +214,25 @@ export async function seed(knex: Knex): Promise<void> {
         hidden: false,
         exact_match: false,
       },
+      {
+        parent_id: monitoringParent.id,
+        key: 'activity-logs',
+        title: 'Activity Logs',
+        type: 'item',
+        icon: 'history',
+        link: '/monitoring/activity-logs',
+        sort_order: 3,
+        show_in_default: true,
+        show_in_compact: true,
+        show_in_horizontal: true,
+        show_in_mobile: true,
+        disabled: false,
+        hidden: false,
+        exact_match: false,
+      },
     ]);
 
-    console.log('✅ Created Monitoring child items (2 items)');
+    console.log('✅ Created Monitoring child items (3 items)');
   }
 
   // ============================================================================
@@ -211,6 +249,7 @@ export async function seed(knex: Knex): Promise<void> {
     { nav_key: 'monitoring', permission: 'system.monitoring:read' },
     { nav_key: 'system-monitoring', permission: 'system.monitoring:read' },
     { nav_key: 'error-logs', permission: 'error-logs.read' },
+    { nav_key: 'activity-logs', permission: 'activity-logs.read' },
   ];
 
   // Create navigation-permission links
