@@ -2,6 +2,7 @@ import { AegisxNavigationItem, BreadcrumbComponent } from '@aegisx/ui';
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -17,6 +18,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { UserOption, UserService } from '../../../users/services/user.service';
+import { ActivityLogDetailDialogComponent } from '../../components/activity-log-detail-dialog/activity-log-detail-dialog.component';
 import { CleanupDialogComponent } from '../../components/cleanup-dialog/cleanup-dialog.component';
 import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog.component';
 import { ActivityLog, ActivityLogsQuery } from '../../models/monitoring.types';
@@ -43,6 +46,7 @@ import { ActivityLogsService } from '../../services/activity-logs.service';
     MatChipsModule,
     MatBadgeModule,
     MatDialogModule,
+    MatAutocompleteModule,
     BreadcrumbComponent,
   ],
   template: `
@@ -199,7 +203,9 @@ import { ActivityLogsService } from '../../services/activity-logs.service';
             </h3>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+          <div
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-start"
+          >
             <mat-form-field
               appearance="outline"
               subscriptSizing="dynamic"
@@ -240,6 +246,83 @@ import { ActivityLogsService } from '../../services/activity-logs.service';
                 placeholder="e.g., login, logout"
                 [formControl]="actionControl"
               />
+            </mat-form-field>
+
+            <mat-form-field
+              appearance="outline"
+              subscriptSizing="dynamic"
+              class="w-full"
+            >
+              <mat-label>User</mat-label>
+              <input
+                matInput
+                placeholder="Search user by name or email (min 2 characters)"
+                [formControl]="userSearchControl"
+                [matAutocomplete]="userAuto"
+                (input)="onUserSearchChange($event)"
+              />
+              <mat-icon matPrefix>person</mat-icon>
+              @if (selectedUserId) {
+                <button
+                  matSuffix
+                  mat-icon-button
+                  (click)="clearUserSelection()"
+                  matTooltip="Clear selection"
+                >
+                  <mat-icon>close</mat-icon>
+                </button>
+              }
+              <mat-autocomplete
+                #userAuto="matAutocomplete"
+                [displayWith]="displayUser"
+                (optionSelected)="onUserSelected($event)"
+              >
+                @if (isSearchingUsers()) {
+                  <mat-option disabled>
+                    <div class="flex items-center gap-2">
+                      <mat-spinner diameter="20"></mat-spinner>
+                      <span>Searching users...</span>
+                    </div>
+                  </mat-option>
+                }
+                @for (user of userSearchResults(); track user.value) {
+                  <mat-option [value]="user">
+                    <div class="flex items-center gap-2">
+                      <mat-icon class="text-slate-400">person</mat-icon>
+                      <div>
+                        <div class="font-medium">{{ user.label }}</div>
+                        @if (user.email) {
+                          <div class="text-xs text-slate-500">
+                            {{ user.email }}
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  </mat-option>
+                }
+                @if (
+                  userSearchResults().length === 0 &&
+                  !isSearchingUsers() &&
+                  userSearchQuery().length >= 2
+                ) {
+                  <mat-option disabled>
+                    <div class="flex items-center gap-2 text-slate-500">
+                      <mat-icon>search_off</mat-icon>
+                      <span>No users found</span>
+                    </div>
+                  </mat-option>
+                }
+                @if (
+                  userSearchQuery().length > 0 && userSearchQuery().length < 2
+                ) {
+                  <mat-option disabled>
+                    <div class="flex items-center gap-2 text-slate-500">
+                      <mat-icon>info</mat-icon>
+                      <span>Type at least 2 characters to search</span>
+                    </div>
+                  </mat-option>
+                }
+              </mat-autocomplete>
             </mat-form-field>
           </div>
 
@@ -491,6 +574,7 @@ import { ActivityLogsService } from '../../services/activity-logs.service';
 })
 export class ActivityLogsComponent implements OnInit {
   private activityLogsService = inject(ActivityLogsService);
+  private userService = inject(UserService);
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
 
@@ -520,6 +604,13 @@ export class ActivityLogsComponent implements OnInit {
   searchControl = new FormControl<string>('');
   severityControl = new FormControl<string | null>(null);
   actionControl = new FormControl<string>('');
+  userSearchControl = new FormControl<string>('');
+  selectedUserId: string | null = null;
+
+  // User search state
+  userSearchResults = signal<UserOption[]>([]);
+  isSearchingUsers = signal<boolean>(false);
+  userSearchQuery = signal<string>('');
 
   // State signals
   loading = signal<boolean>(false);
@@ -534,6 +625,60 @@ export class ActivityLogsComponent implements OnInit {
     this.loadActivityLogs();
     this.loadActivityStats();
   }
+
+  // Handle user search input
+  onUserSearchChange(event: any): void {
+    const query = event.target.value;
+    this.userSearchQuery.set(query);
+
+    if (query.length >= 2) {
+      this.searchUsers(query);
+    } else {
+      this.userSearchResults.set([]);
+    }
+  }
+
+  // Search users via API
+  async searchUsers(query: string): Promise<void> {
+    this.isSearchingUsers.set(true);
+    try {
+      const results = await this.userService
+        .getUsersDropdownOptions(query)
+        .toPromise();
+
+      if (results && Array.isArray(results)) {
+        this.userSearchResults.set(results);
+      } else {
+        this.userSearchResults.set([]);
+      }
+    } catch (error) {
+      console.error('Failed to search users:', error);
+      this.userSearchResults.set([]);
+    } finally {
+      this.isSearchingUsers.set(false);
+    }
+  }
+
+  // Handle user selection from autocomplete
+  onUserSelected(event: any): void {
+    const option = event.option.value as UserOption;
+    this.selectedUserId = option.value;
+    this.userSearchControl.setValue(option.label);
+  }
+
+  // Clear user selection
+  clearUserSelection(): void {
+    this.selectedUserId = null;
+    this.userSearchControl.setValue('');
+    this.userSearchResults.set([]);
+  }
+
+  // Display function for autocomplete
+  displayUser = (option: UserOption | string): string => {
+    if (!option) return '';
+    if (typeof option === 'string') return option;
+    return option.label || '';
+  };
 
   loadActivityLogs(query?: ActivityLogsQuery): void {
     this.loading.set(true);
@@ -564,6 +709,7 @@ export class ActivityLogsComponent implements OnInit {
       search: this.searchControl.value || undefined,
       severity: this.severityControl.value as any,
       action: this.actionControl.value || undefined,
+      user_id: this.selectedUserId || undefined,
       page: 1,
       limit: 20,
     };
@@ -585,6 +731,8 @@ export class ActivityLogsComponent implements OnInit {
     this.searchControl.setValue('');
     this.severityControl.setValue(null);
     this.actionControl.setValue('');
+    this.userSearchControl.setValue('');
+    this.selectedUserId = null;
     this.loadActivityLogs();
   }
 
@@ -595,17 +743,28 @@ export class ActivityLogsComponent implements OnInit {
       search: this.searchControl.value || undefined,
       severity: this.severityControl.value as any,
       action: this.actionControl.value || undefined,
+      user_id: this.selectedUserId || undefined,
     };
 
     this.loadActivityLogs(query);
   }
 
   viewLogDetails(log: ActivityLog): void {
-    // TODO: Implement activity log detail dialog
-    this.snackBar.open('Activity detail view coming soon', 'Close', {
-      duration: 2000,
-      horizontalPosition: 'center',
-      verticalPosition: 'bottom',
+    const dialogRef = this.dialog.open(ActivityLogDetailDialogComponent, {
+      width: '800px',
+      maxWidth: '90vw',
+      maxHeight: '90vh',
+      data: log,
+      autoFocus: false,
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === true) {
+        // User clicked "Copy to Clipboard"
+        this.snackBar.open('Activity details copied to clipboard', 'Close', {
+          duration: 2000,
+        });
+      }
     });
   }
 
@@ -614,6 +773,7 @@ export class ActivityLogsComponent implements OnInit {
       search: this.searchControl.value || undefined,
       severity: this.severityControl.value as any,
       action: this.actionControl.value || undefined,
+      user_id: this.selectedUserId || undefined,
     };
 
     this.activityLogsService.exportLogs(query).subscribe({
@@ -635,6 +795,7 @@ export class ActivityLogsComponent implements OnInit {
       search: this.searchControl.value || undefined,
       severity: this.severityControl.value as any,
       action: this.actionControl.value || undefined,
+      user_id: this.selectedUserId || undefined,
       page: this.pagination()?.page || 1,
       limit: this.pagination()?.limit || 20,
     };

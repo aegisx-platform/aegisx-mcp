@@ -38,6 +38,12 @@ export const appRoutes: Route[] = [
       ),
     canActivate: [GuestGuard],
   },
+  {
+    path: 'verify-email',
+    loadComponent: () =>
+      import('./pages/auth/verify-email.page').then((m) => m.VerifyEmailPage),
+    canActivate: [GuestGuard],
+  },
 
   // Protected routes (require authentication)
   {

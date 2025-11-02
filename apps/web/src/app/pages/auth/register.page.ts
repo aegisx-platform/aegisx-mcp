@@ -573,13 +573,15 @@ export class RegisterPage {
       .subscribe({
         next: () => {
           this.isLoading.set(false);
-          this.successMessage.set('Account created successfully!');
+          this.successMessage.set(
+            'Account created successfully! Please check your email to verify your account.',
+          );
           this.registerForm.reset();
 
-          // Redirect to dashboard after 2 seconds
+          // Redirect to dashboard after 3 seconds
           setTimeout(() => {
             this.router.navigate(['/dashboard']);
-          }, 2000);
+          }, 3000);
         },
         error: (error) => {
           this.isLoading.set(false);

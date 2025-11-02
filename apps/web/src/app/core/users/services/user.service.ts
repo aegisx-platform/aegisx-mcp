@@ -396,6 +396,31 @@ export class UserService {
     }
   }
 
+  // Get users dropdown options with search support
+  getUsersDropdownOptions(search?: string): Observable<UserOption[]> {
+    let params = new HttpParams();
+    if (search) {
+      params = params.set('search', search);
+    }
+    params = params.set('limit', '50');
+
+    return this.http
+      .get<
+        ApiResponse<{
+          options: UserOption[];
+          total: number;
+        }>
+      >(`${this.baseUrl}/dropdown`, { params })
+      .pipe(
+        map((response) => {
+          if (response?.success && response.data?.options) {
+            return response.data.options;
+          }
+          return [];
+        }),
+      );
+  }
+
   // Simple method to get user display name
   getUserDisplayName(userId: string): string {
     const user = this.usersSignal().find((u) => u.id === userId);
