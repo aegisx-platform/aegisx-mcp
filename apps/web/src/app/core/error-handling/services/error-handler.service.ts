@@ -23,7 +23,7 @@ export class GlobalErrorHandler implements ErrorHandler {
   private router = inject(Router);
   private errorQueue: ErrorLogEntry[] = [];
   private readonly maxQueueSize = 50;
-  private readonly logEndpoint = '/api/client-errors';
+  private readonly logEndpoint = '/api/monitoring/client-errors';
 
   handleError(error: any): void {
     console.error('Global error caught:', error);
