@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from '../auth/guards/auth.guard';
+import { AuthGuard } from '../auth/guards/auth.guard';
 
 export const auditRoutes: Routes = [
   {
@@ -8,7 +8,7 @@ export const auditRoutes: Routes = [
       import('./pages/login-attempts/login-attempts.component').then(
         (m) => m.LoginAttemptsComponent,
       ),
-    canActivate: [authGuard],
+    canActivate: [AuthGuard],
     title: 'Login Attempts',
   },
   {
@@ -17,7 +17,7 @@ export const auditRoutes: Routes = [
       import('./pages/file-audit/file-audit.component').then(
         (m) => m.FileAuditComponent,
       ),
-    canActivate: [authGuard],
+    canActivate: [AuthGuard],
     title: 'File Activity',
   },
 ];
