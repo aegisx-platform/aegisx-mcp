@@ -585,6 +585,87 @@ These are shortcut commands that can be used to trigger common workflows. When y
 
 ---
 
+## 🤖 CRUD Generator Quick Commands
+
+### Basic Generation
+
+```bash
+# Generate basic CRUD (no import, no events)
+pnpm aegisx-crud books --package
+
+# Generate with import functionality
+pnpm aegisx-crud budgets --package --with-import
+
+# Generate with WebSocket events
+pnpm aegisx-crud notifications --package --with-events
+
+# Generate with both import and events
+pnpm aegisx-crud products --package --with-import --with-events
+```
+
+### Advanced Options
+
+```bash
+# Dry run (preview without creating files)
+pnpm aegisx-crud articles --package --dry-run
+
+# Force overwrite existing files
+pnpm aegisx-crud users --package --force
+
+# Combine all flags
+pnpm aegisx-crud inventory --package --with-import --with-events --force
+```
+
+### Common Workflows
+
+**1. New Feature with Import:**
+
+```bash
+# Generate CRUD with import dialog
+pnpm aegisx-crud budgets --package --with-import
+
+# Files created:
+# - Backend: controller, service, repository, routes, schemas, tests
+# - Frontend: list, create/edit/view dialogs, import dialog, service, types
+# - Database: Migration file
+```
+
+**2. Real-Time Feature with Events:**
+
+```bash
+# Generate CRUD with WebSocket events
+pnpm aegisx-crud notifications --package --with-events
+
+# Backend includes:
+# - EventService integration
+# - Event emission on create/update/delete
+# - Bulk operation events (bulk_started, bulk_progress, bulk_completed)
+```
+
+**3. Regenerate Existing Feature:**
+
+```bash
+# Review changes first
+pnpm aegisx-crud books --package --dry-run
+
+# Force regenerate if satisfied
+pnpm aegisx-crud books --package --force
+```
+
+### Flag Reference
+
+| Flag            | Description                                | Use Case                          |
+| --------------- | ------------------------------------------ | --------------------------------- |
+| `--package`     | Use `.crudgen.json` config                 | ✅ ALWAYS use this flag           |
+| `--with-import` | Add import dialog + backend import service | Bulk data import features         |
+| `--with-events` | Add WebSocket real-time events             | Live updates, notifications       |
+| `--dry-run`     | Preview changes without creating files     | Review before generation          |
+| `--force`       | Overwrite existing files                   | Regenerate after template updates |
+
+**📚 Complete Documentation:** See `docs/crud-generator/` for comprehensive guides
+
+---
+
 ## 📚 Quick Navigation
 
 ### 🚀 Start Here
