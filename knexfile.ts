@@ -15,11 +15,21 @@ const config: { [key: string]: Knex.Config } = {
   development: {
     client: 'postgresql',
     connection: {
-      host: process.env.DATABASE_HOST || 'localhost',
-      port: parseInt(process.env.DATABASE_PORT || '5432'),
-      database: process.env.DATABASE_NAME || 'aegisx_db',
-      user: process.env.DATABASE_USER || 'postgres',
-      password: process.env.DATABASE_PASSWORD || 'postgres',
+      // Note: POSTGRES_* variables are used by Docker PostgreSQL image during local development
+      // In production, only DATABASE_* variables will be available
+      host:
+        process.env.DATABASE_HOST || process.env.POSTGRES_HOST || 'localhost',
+      port: parseInt(
+        process.env.DATABASE_PORT || process.env.POSTGRES_PORT || '5432',
+      ),
+      database:
+        process.env.DATABASE_NAME || process.env.POSTGRES_DB || 'aegisx_db',
+      user:
+        process.env.DATABASE_USER || process.env.POSTGRES_USER || 'postgres',
+      password:
+        process.env.DATABASE_PASSWORD ||
+        process.env.POSTGRES_PASSWORD ||
+        'postgres',
     },
     pool: {
       min: 2,
@@ -37,11 +47,19 @@ const config: { [key: string]: Knex.Config } = {
   test: {
     client: 'postgresql',
     connection: {
-      host: process.env.DATABASE_HOST || 'localhost',
-      port: parseInt(process.env.DATABASE_PORT || '5432'),
-      database: process.env.DATABASE_NAME || 'aegisx_test',
-      user: process.env.DATABASE_USER || 'postgres',
-      password: process.env.DATABASE_PASSWORD || 'postgres',
+      host:
+        process.env.DATABASE_HOST || process.env.POSTGRES_HOST || 'localhost',
+      port: parseInt(
+        process.env.DATABASE_PORT || process.env.POSTGRES_PORT || '5432',
+      ),
+      database:
+        process.env.DATABASE_NAME || process.env.POSTGRES_DB || 'aegisx_test',
+      user:
+        process.env.DATABASE_USER || process.env.POSTGRES_USER || 'postgres',
+      password:
+        process.env.DATABASE_PASSWORD ||
+        process.env.POSTGRES_PASSWORD ||
+        'postgres',
     },
     migrations: {
       directory: './apps/api/src/database/migrations',
@@ -56,15 +74,15 @@ const config: { [key: string]: Knex.Config } = {
     client: 'postgresql',
     connection: process.env.DATABASE_URL || {
       host:
-        process.env.POSTGRES_HOST || process.env.DATABASE_HOST || 'postgres',
+        process.env.DATABASE_HOST || process.env.POSTGRES_HOST || 'postgres',
       port: parseInt(
-        process.env.POSTGRES_PORT || process.env.DATABASE_PORT || '5432',
+        process.env.DATABASE_PORT || process.env.POSTGRES_PORT || '5432',
       ),
       database:
-        process.env.POSTGRES_DB || process.env.DATABASE_NAME || 'aegisx_db',
+        process.env.DATABASE_NAME || process.env.POSTGRES_DB || 'aegisx_db',
       user:
-        process.env.POSTGRES_USER || process.env.DATABASE_USER || 'postgres',
-      password: process.env.POSTGRES_PASSWORD || process.env.DATABASE_PASSWORD,
+        process.env.DATABASE_USER || process.env.POSTGRES_USER || 'postgres',
+      password: process.env.DATABASE_PASSWORD || process.env.POSTGRES_PASSWORD,
       ssl:
         process.env.NODE_ENV === 'production'
           ? { rejectUnauthorized: false }

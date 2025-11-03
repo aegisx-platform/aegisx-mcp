@@ -180,7 +180,16 @@ INSTANCE_NAME=$INSTANCE_NAME
 FOLDER_NAME=$FOLDER_NAME
 
 # Database Configuration
+# DATABASE_* variables: Used by Node.js tools (Knex, migrations, CRUD generator)
 DATABASE_URL=postgresql://postgres:postgres@localhost:$POSTGRES_PORT/aegisx_db
+DATABASE_HOST=localhost
+DATABASE_PORT=$POSTGRES_PORT
+DATABASE_NAME=aegisx_db
+DATABASE_USER=postgres
+DATABASE_PASSWORD=postgres
+
+# POSTGRES_* variables: Required by Docker PostgreSQL image (local development only)
+# Note: Production environments use DATABASE_* only
 POSTGRES_HOST=localhost
 POSTGRES_PORT=$POSTGRES_PORT
 POSTGRES_USER=postgres
