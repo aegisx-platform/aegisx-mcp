@@ -30,6 +30,14 @@ export class EmailService {
     this.isDevelopment =
       process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
 
+    // Debug: Check what environment variables are loaded
+    console.log('[EMAIL_SERVICE] Environment check:', {
+      SMTP_USER: process.env.SMTP_USER ? '✅ SET' : '❌ MISSING',
+      SMTP_PASSWORD: process.env.SMTP_PASSWORD ? '✅ SET' : '❌ MISSING',
+      SMTP_HOST: process.env.SMTP_HOST || 'NOT SET',
+      SMTP_PORT: process.env.SMTP_PORT || 'NOT SET',
+    });
+
     // Initialize SMTP transporter if credentials are provided
     if (this.shouldUseSMTP()) {
       console.log('[EMAIL_SERVICE] SMTP credentials found, initializing...');
@@ -187,7 +195,7 @@ export class EmailService {
     token: string,
     userName?: string,
   ): Promise<boolean> {
-    const verificationUrl = `${process.env.WEB_URL || 'http://localhost:4200'}/auth/verify-email?token=${token}`;
+    const verificationUrl = `${process.env.WEB_URL || 'http://localhost:4200'}/verify-email?token=${token}`;
 
     const html = `
       <!DOCTYPE html>
@@ -258,7 +266,7 @@ If you didn't create an account, you can safely ignore this email.
     token: string,
     userName?: string,
   ): Promise<boolean> {
-    const resetUrl = `${process.env.WEB_URL || 'http://localhost:4200'}/auth/reset-password?token=${token}`;
+    const resetUrl = `${process.env.WEB_URL || 'http://localhost:4200'}/reset-password?token=${token}`;
 
     const html = `
       <!DOCTYPE html>

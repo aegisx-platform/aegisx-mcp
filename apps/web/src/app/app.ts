@@ -270,6 +270,7 @@ export class AppComponent implements OnInit {
           '/register',
           '/forgot-password',
           '/reset-password',
+          '/verify-email',
         ];
         const shouldHideLayout = authRoutes.some((route) =>
           event.url.startsWith(route),
@@ -289,6 +290,7 @@ export class AppComponent implements OnInit {
       '/register',
       '/forgot-password',
       '/reset-password',
+      '/verify-email',
     ];
     const shouldHideLayout = authRoutes.some((route) =>
       currentUrl.startsWith(route),
