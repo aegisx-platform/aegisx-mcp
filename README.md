@@ -10,7 +10,7 @@
 
 ### ✅ Core Platform Features
 
-- **🤖 CRUD Generator v2.1.1** - Professional code generation with HIS Mode (data accuracy first), published to npm
+- **🤖 CRUD Generator v2.2.0** - Material Dialog structure + Optional chaining (100% platform alignment, ready for npm publish)
 - **🔐 Enterprise RBAC** - Complete role-based access control with multi-role support
   - Navigation Management (✅ Complete with UI)
   - Permission Management
