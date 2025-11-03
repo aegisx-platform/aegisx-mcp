@@ -5,7 +5,7 @@ import {
   DashboardService,
   DatabasePoolStats,
   CacheStats,
-} from '../services/dashboard.service';
+} from '../../../services/dashboard.service';
 import { interval, Subscription, forkJoin } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 

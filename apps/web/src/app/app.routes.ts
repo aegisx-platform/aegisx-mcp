@@ -3,12 +3,6 @@ import { AuthGuard, GuestGuard } from './core/auth';
 import { environment } from '../environments/environment';
 
 export const appRoutes: Route[] = [
-  {
-    path: '',
-    redirectTo: 'dashboard',
-    pathMatch: 'full',
-  },
-
   // Authentication routes (guest only)
   {
     path: 'login',
@@ -47,9 +41,9 @@ export const appRoutes: Route[] = [
 
   // Protected routes (require authentication)
   {
-    path: 'dashboard',
+    path: '',
     loadComponent: () =>
-      import('./pages/dashboard/dashboard.page').then((m) => m.DashboardPage),
+      import('./pages/welcome/home.page').then((m) => m.HomePage),
     canActivate: [AuthGuard],
   },
   {

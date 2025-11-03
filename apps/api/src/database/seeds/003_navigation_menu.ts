@@ -10,7 +10,7 @@ import type { Knex } from 'knex';
  * - Complete permission mappings
  *
  * Navigation Structure:
- * 1. Dashboard
+ * 1. Home
  * 2. User Management (collapsible)
  *    ├─ Users List
  *    └─ My Profile
@@ -52,13 +52,13 @@ export async function seed(knex: Knex): Promise<void> {
   // ============================================================================
 
   const primaryNavItems = await insertNavItems([
-    // 1. Dashboard
+    // 1. Home
     {
-      key: 'dashboard',
-      title: 'Dashboard',
+      key: 'home',
+      title: 'Home',
       type: 'item',
-      icon: 'dashboard',
-      link: '/dashboard',
+      icon: 'home',
+      link: '/',
       sort_order: 1,
       show_in_default: true,
       show_in_compact: true,
@@ -765,7 +765,7 @@ export async function seed(knex: Knex): Promise<void> {
     return;
   }
 
-  // Assign all RBAC, roles, permissions, user-roles, navigation, api-keys, PDF permissions to admin
+  // Assign all RBAC, roles, permissions, user-roles, navigation, api-keys, PDF, settings, files permissions to admin
   const adminResources = [
     'rbac',
     'roles',
@@ -776,6 +776,8 @@ export async function seed(knex: Knex): Promise<void> {
     'pdf-templates',
     'pdf-fonts',
     'pdf-preview',
+    'settings',
+    'files',
   ];
   const adminPermissions = allPermissions.filter((perm) =>
     adminResources.includes(perm.resource),
@@ -881,8 +883,7 @@ export async function seed(knex: Knex): Promise<void> {
 
   // Define navigation-permission mappings
   const navigationPermissionMappings = [
-    // Dashboard
-    { nav_key: 'dashboard', permission: 'dashboard.view' },
+    // Home - No permission required (accessible to all authenticated users)
 
     // User Management
     { nav_key: 'user-management', permission: 'users.read' },

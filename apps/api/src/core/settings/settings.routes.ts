@@ -43,7 +43,7 @@ export async function settingsRoutes(fastify: FastifyInstance) {
     controller.getSettings,
   );
 
-  // Get grouped settings
+  // Get grouped settings (admin only)
   server.get(
     '/grouped',
     {
@@ -51,7 +51,7 @@ export async function settingsRoutes(fastify: FastifyInstance) {
         tags: ['Settings'],
         summary: 'Get settings grouped by category',
         description:
-          'Get settings organized by category and group for UI display',
+          'Get settings organized by category and group for UI display (admin only)',
         querystring: {
           type: 'object',
           properties: {
@@ -61,10 +61,14 @@ export async function settingsRoutes(fastify: FastifyInstance) {
         response: {
           200: GroupedSettingsResponseSchema,
           401: SchemaRefs.Unauthorized,
+          403: SchemaRefs.Forbidden,
           500: SchemaRefs.ServerError,
         },
       },
-      // Optional authentication - user gets personalized settings if authenticated
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('settings', 'view'),
+      ],
     },
     controller.getGroupedSettings,
   );

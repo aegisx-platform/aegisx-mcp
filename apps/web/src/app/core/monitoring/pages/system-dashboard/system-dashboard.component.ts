@@ -11,7 +11,7 @@ import { AuthActivityWidget } from './widgets/auth-activity.widget';
 import { UserActivityTimelineWidget } from './widgets/user-activity-timeline.widget';
 
 @Component({
-  selector: 'ax-dashboard',
+  selector: 'ax-system-dashboard',
   standalone: true,
   imports: [
     CommonModule,
@@ -37,10 +37,11 @@ import { UserActivityTimelineWidget } from './widgets/user-activity-timeline.wid
               <h1
                 class="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight"
               >
-                Platform Dashboard
+                System Monitoring Dashboard
               </h1>
               <p class="text-sm text-slate-600 mt-1">
-                Real-time platform metrics and system health monitoring
+                Real-time system metrics, performance monitoring, and health
+                status
               </p>
             </div>
           </div>

@@ -139,7 +139,7 @@ export class AuthService {
           this._isLoading.set(false);
           if (response.success && response.data) {
             this.setAuthData(response.data);
-            this.router.navigate(['/dashboard']);
+            this.router.navigate(['/']);
           }
         }),
         catchError((error) => {
@@ -154,7 +154,7 @@ export class AuthService {
       tap((response) => {
         if (response.success && response.data) {
           this.setAuthData(response.data);
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/']);
         }
       }),
       catchError(this.handleAuthError.bind(this)),

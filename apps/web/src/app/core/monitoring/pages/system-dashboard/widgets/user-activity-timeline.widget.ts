@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { ActivityLogService } from '../../../core/user-profile/components/activity-log/activity-log.service';
-import { ActivityLog } from '../../../core/user-profile/components/activity-log/activity-log.types';
+import { ActivityLogService } from '../../../../user-profile/components/activity-log/activity-log.service';
+import { ActivityLog } from '../../../../user-profile/components/activity-log/activity-log.types';
 
 interface Activity {
   id: string;

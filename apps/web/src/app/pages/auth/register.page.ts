@@ -67,7 +67,7 @@ import { AuthService } from '../../core/auth/services/auth.service';
                     {{ successMessage() }}
                   </p>
                   <p class="mt-1 text-xs text-green-700">
-                    Redirecting to dashboard...
+                    Redirecting to home...
                   </p>
                 </div>
               </div>
@@ -578,9 +578,9 @@ export class RegisterPage {
           );
           this.registerForm.reset();
 
-          // Redirect to dashboard after 3 seconds
+          // Redirect to home after 3 seconds
           setTimeout(() => {
-            this.router.navigate(['/dashboard']);
+            this.router.navigate(['/']);
           }, 3000);
         },
         error: (error) => {

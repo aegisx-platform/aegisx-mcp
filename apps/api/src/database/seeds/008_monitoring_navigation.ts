@@ -9,7 +9,8 @@ import type { Knex } from 'knex';
  *
  * Navigation Structure:
  * - Monitoring (collapsible parent)
- *   ├─ System Monitoring
+ *   ├─ System Dashboard
+ *   ├─ System Metrics
  *   └─ Error Logs
  *
  * Permissions:
@@ -143,7 +144,7 @@ export async function seed(knex: Knex): Promise<void> {
       key: 'monitoring',
       title: 'Monitoring',
       type: 'collapsible',
-      icon: 'bar_chart',
+      icon: 'speed',
       sort_order: nextSortOrder,
       show_in_default: true,
       show_in_compact: true,
@@ -162,12 +163,28 @@ export async function seed(knex: Knex): Promise<void> {
     await knex('navigation_items').insert([
       {
         parent_id: monitoringParent.id,
-        key: 'system-monitoring',
-        title: 'System Monitoring',
+        key: 'monitoring-dashboard',
+        title: 'System Dashboard',
         type: 'item',
-        icon: 'speed',
-        link: '/monitoring/system',
+        icon: 'dashboard',
+        link: '/monitoring/dashboard',
         sort_order: 1,
+        show_in_default: true,
+        show_in_compact: true,
+        show_in_horizontal: true,
+        show_in_mobile: true,
+        disabled: false,
+        hidden: false,
+        exact_match: false,
+      },
+      {
+        parent_id: monitoringParent.id,
+        key: 'system-monitoring',
+        title: 'System Metrics',
+        type: 'item',
+        icon: 'bar_chart',
+        link: '/monitoring/system',
+        sort_order: 2,
         show_in_default: true,
         show_in_compact: true,
         show_in_horizontal: true,
@@ -183,7 +200,7 @@ export async function seed(knex: Knex): Promise<void> {
         type: 'item',
         icon: 'bug_report',
         link: '/monitoring/error-logs',
-        sort_order: 2,
+        sort_order: 3,
         show_in_default: true,
         show_in_compact: true,
         show_in_horizontal: true,
@@ -194,7 +211,7 @@ export async function seed(knex: Knex): Promise<void> {
       },
     ]);
 
-    console.log('✅ Created Monitoring child items (2 items)');
+    console.log('✅ Created Monitoring child items (3 items)');
   }
 
   // ============================================================================
@@ -209,6 +226,7 @@ export async function seed(knex: Knex): Promise<void> {
   // Define navigation-permission mappings
   const navigationPermissionMappings = [
     { nav_key: 'monitoring', permission: 'system.monitoring:read' },
+    { nav_key: 'monitoring-dashboard', permission: 'system.monitoring:read' },
     { nav_key: 'system-monitoring', permission: 'system.monitoring:read' },
     { nav_key: 'error-logs', permission: 'error-logs.read' },
   ];

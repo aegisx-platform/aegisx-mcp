@@ -1,7 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { DashboardService, SystemMetrics } from '../services/dashboard.service';
+import {
+  DashboardService,
+  SystemMetrics,
+} from '../../../services/dashboard.service';
 import { interval, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 

@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { LoginAttemptsService } from '../../../core/audit/services/login-attempts.service';
-import { LoginAttempt } from '../../../core/audit/models/audit.types';
+import { LoginAttemptsService } from '../../../../audit/services/login-attempts.service';
+import { LoginAttempt } from '../../../../audit/models/audit.types';
 
 interface AuthActivity {
   id: string;

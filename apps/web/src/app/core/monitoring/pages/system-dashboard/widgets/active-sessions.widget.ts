@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { DashboardService } from '../services/dashboard.service';
+import { DashboardService } from '../../../services/dashboard.service';
 import { interval, Subscription, switchMap } from 'rxjs';
 
 interface ActiveSessionsStats {

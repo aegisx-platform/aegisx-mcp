@@ -2,7 +2,10 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
-import { DashboardService, ApiKeysStats } from '../services/dashboard.service';
+import {
+  DashboardService,
+  ApiKeysStats,
+} from '../../../services/dashboard.service';
 
 @Component({
   selector: 'ax-api-keys-stats-widget',

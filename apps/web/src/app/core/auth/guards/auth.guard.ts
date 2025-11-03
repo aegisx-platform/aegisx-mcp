@@ -45,8 +45,8 @@ export class GuestGuard implements CanActivate {
     const isAuthenticated = await this.authService.waitForAuthState();
 
     if (isAuthenticated && !this.authService.isTokenExpired()) {
-      // User is authenticated, redirect to dashboard
-      this.router.navigate(['/dashboard']);
+      // User is authenticated, redirect to home
+      this.router.navigate(['/']);
       return false;
     }
 

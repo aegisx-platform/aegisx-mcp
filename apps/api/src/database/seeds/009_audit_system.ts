@@ -234,6 +234,11 @@ export async function seed(knex: Knex): Promise<void> {
 
   const linkItems = [
     {
+      key: 'audit-logs', // Parent menu
+      resource: 'login-attempts',
+      action: 'read',
+    },
+    {
       key: 'audit.login-attempts',
       resource: 'login-attempts',
       action: 'read',
