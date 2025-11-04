@@ -387,17 +387,20 @@ POSTGRES_DATABASE=aegisx_db
 **Technical Details:**
 
 **Problem Identified:**
+
 - Login response (POST /auth/login) doesn't include avatar field
 - Navigation footer used login response data → No avatar displayed
 - Page reload worked because it calls GET /api/profile → Has avatar
 
 **Root Cause:**
+
 ```typescript
 // apps/web/src/app/core/auth/services/auth.service.ts:139
 login() → setAuthData(response.data)  // ❌ No avatar in login response
 ```
 
 **Solution Applied:**
+
 ```typescript
 // Line 139-143: Added loadUserProfile() after login
 login() {
@@ -415,18 +418,21 @@ register() {
 ```
 
 **Authentication Flow (Updated):**
+
 1. POST /auth/login → Basic user data (no avatar)
 2. setAuthData() → Set access token + basic user info
 3. loadUserProfile() → GET /api/profile → Full profile with avatar ✅
 4. currentUser updated → Navigation footer displays avatar ✅
 
 **Debug Logs Added:**
+
 - `🔐 [AuthService] setAuthData - avatar:` - Track login response data
 - `🔄 [AuthService] Loading full profile from /api/profile...` - Profile loading start
 - `✅ [AuthService] Profile loaded successfully` - Profile loading complete
 - `🖼️ [AuthService] Profile avatar:` - Avatar URL verification
 
 **Files Changed:**
+
 - `apps/web/src/app/core/auth/services/auth.service.ts` (3 methods updated)
   - login() - Line 139-143
   - register() - Line 159-161
@@ -434,24 +440,26 @@ register() {
   - setAuthData() - Line 293-294
 
 **Key Learning:**
+
 - **Single Source of Truth**: `/api/profile` endpoint should be the primary source for user profile data
 - **Separation of Concerns**: Authentication endpoint (login) provides tokens, profile endpoint provides user data
 - **Consistency**: Both login flow and reload flow now use same profile loading mechanism
 
 **Testing:**
+
 1. Logout → Clear localStorage
 2. Login with admin@aegisx.local
 3. Avatar displays immediately in navigation footer ✅
 4. Page reload → Avatar persists ✅
 
 **Impact:**
+
 - 🎯 **Better UX** - User sees their avatar immediately after login
 - 📊 **Consistent Data** - Single source of truth for profile data
 - 🔧 **Maintainable** - Clear separation between auth and profile data
 - 🚀 **Reliable** - Works for both new login and page reload scenarios
 
 ---
-
 
 ### Session 63b (2025-01-03) ✅ COMPLETED
 

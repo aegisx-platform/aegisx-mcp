@@ -69,8 +69,7 @@ interface Notification {
               <!-- Avatar (always visible) -->
               <img
                 [src]="
-                  currentUser()?.avatar ||
-                  '/assets/images/avatars/default.png'
+                  currentUser()?.avatar || '/assets/images/avatars/default.png'
                 "
                 [alt]="currentUser()?.name || 'User'"
                 class="nav-footer-avatar w-10 h-10 rounded-full object-cover flex-shrink-0"
