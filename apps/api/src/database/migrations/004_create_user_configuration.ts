@@ -262,6 +262,29 @@ export async function up(knex: Knex): Promise<void> {
     table.index('changed_by');
   });
 
+  // Create avatar_files table (from 004_extend_users_table)
+  await knex.schema.createTable('avatar_files', (table) => {
+    table.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));
+    table.uuid('user_id').notNullable();
+    table.string('original_filename', 255).notNullable();
+    table.string('mime_type', 100).notNullable();
+    table.integer('file_size').notNullable();
+    table.string('storage_path', 500).notNullable();
+    table.json('thumbnails').nullable(); // Store thumbnail URLs and metadata
+    table.timestamps(true, true);
+
+    // Foreign key
+    table
+      .foreign('user_id')
+      .references('id')
+      .inTable('users')
+      .onDelete('CASCADE');
+
+    // Indexes
+    table.index('user_id');
+    table.index('mime_type');
+  });
+
   // Create indexes for better query performance (from 012_add_settings_performance_indexes)
   await knex.raw(
     'CREATE INDEX idx_app_settings_namespace_category ON app_settings(namespace, category)',
@@ -299,4 +322,5 @@ export async function down(knex: Knex): Promise<void> {
   await knex.schema.dropTableIfExists('themes');
   await knex.schema.dropTableIfExists('user_settings');
   await knex.schema.dropTableIfExists('user_preferences');
+  await knex.schema.dropTableIfExists('avatar_files');
 }
