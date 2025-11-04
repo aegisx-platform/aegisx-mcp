@@ -268,20 +268,8 @@ export class {{ModuleName}}Repository extends BaseRepository<{{ModuleName}}, Cre
     return super.list(query);
   }
 
-  // Additional business-specific methods
-  
-  {{#each columns}}
-  {{#unless (or isPrimaryKey (eq name 'created_at') (eq name 'updated_at'))}}
-  {{#if (eq tsType 'string')}}
-  async findBy{{toPascalCase name}}({{toCamelCase name}}: string): Promise<{{@root.ModuleName}} | null> {
-    const query = this.getJoinQuery();
-    const row = await query.where('{{@root.tableName}}.{{name}}', {{toCamelCase name}}).first();
-    return row ? this.transformToEntity(row) : null;
-  }
-
-  {{/if}}
-  {{/unless}}
-  {{/each}}
+  // Business-specific methods for non-unique string fields are handled
+  // together with unique constraint detection in ERROR HANDLING section below
 
   // ===== ERROR HANDLING: DUPLICATE DETECTION METHODS =====
   {{#if hasUniqueConstraints}}

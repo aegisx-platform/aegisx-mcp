@@ -247,22 +247,8 @@ export class AuthService {
       success: true,
     });
 
-    // Load user permissions
-    const permissionsResult = await this.app
-      .knex('users as u')
-      .select(
-        this.app.knex.raw(
-          "ARRAY_AGG(DISTINCT CONCAT(p.resource, ':', p.action)) as permissions",
-        ),
-      )
-      .join('user_roles as ur', 'u.id', 'ur.user_id')
-      .join('role_permissions as rp', 'ur.role_id', 'rp.role_id')
-      .join('permissions as p', 'rp.permission_id', 'p.id')
-      .where('u.id', user.id)
-      .groupBy('u.id')
-      .first();
-
-    const permissions = permissionsResult?.permissions || [];
+    // Load user permissions (including inherited from parent roles)
+    const permissions = await this.getPermissions(user.id);
 
     // Generate tokens
     const accessToken = this.app.jwt.sign(
@@ -327,22 +313,8 @@ export class AuthService {
       throw error;
     }
 
-    // Load user permissions (same as login)
-    const permissionsResult = await this.app
-      .knex('users as u')
-      .select(
-        this.app.knex.raw(
-          "ARRAY_AGG(DISTINCT CONCAT(p.resource, ':', p.action)) as permissions",
-        ),
-      )
-      .join('user_roles as ur', 'u.id', 'ur.user_id')
-      .join('role_permissions as rp', 'ur.role_id', 'rp.role_id')
-      .join('permissions as p', 'rp.permission_id', 'p.id')
-      .where('u.id', user.id)
-      .groupBy('u.id')
-      .first();
-
-    const permissions = permissionsResult?.permissions || [];
+    // Load user permissions (including inherited from parent roles)
+    const permissions = await this.getPermissions(user.id);
 
     // Generate new access token with permissions
     const accessToken = this.app.jwt.sign(
@@ -375,24 +347,80 @@ export class AuthService {
     return user;
   }
 
+  /**
+   * Get all role IDs including parent roles (recursive through hierarchy)
+   *
+   * Uses recursive CTE to traverse role hierarchy from child to parent.
+   * Returns all role IDs that a user has either directly or through inheritance.
+   */
+  private async getRoleTreeIds(roleId: string): Promise<string[]> {
+    const result = await this.app.knex.raw(
+      `
+      WITH RECURSIVE role_tree AS (
+        -- Start with the given role
+        SELECT id, parent_id
+        FROM roles
+        WHERE id = ?
+
+        UNION ALL
+
+        -- Recursively get parent roles
+        SELECT r.id, r.parent_id
+        FROM roles r
+        INNER JOIN role_tree rt ON r.id = rt.parent_id
+        WHERE rt.parent_id IS NOT NULL
+      )
+      SELECT id FROM role_tree
+    `,
+      [roleId],
+    );
+
+    return result.rows.map((row: any) => row.id);
+  }
+
+  /**
+   * Get all permissions for a user, including inherited permissions from parent roles
+   *
+   * Traverses the role hierarchy for each user role and aggregates all permissions.
+   */
   async getPermissions(userId: string): Promise<string[]> {
-    // Query user permissions from database (aggregated from all roles)
+    // Get all roles assigned to user (direct assignments only)
+    const userRoles = await this.app
+      .knex('user_roles as ur')
+      .join('roles as r', 'ur.role_id', 'r.id')
+      .where('ur.user_id', userId)
+      .where('ur.is_active', true) // Only active role assignments
+      .select('r.id');
+
+    if (userRoles.length === 0) {
+      return [];
+    }
+
+    // For each user role, get all inherited roles (including parent roles)
+    const allRoleIds = new Set<string>();
+    for (const userRole of userRoles) {
+      const roleTree = await this.getRoleTreeIds(userRole.id);
+      roleTree.forEach((id) => allRoleIds.add(id));
+    }
+
+    // Query permissions for all roles (direct and inherited)
     const permissionsResult = await this.app
-      .knex('users as u')
+      .knex('permissions as p')
       .select(
         this.app.knex.raw(
           "ARRAY_AGG(DISTINCT CONCAT(p.resource, ':', p.action)) as permissions",
         ),
       )
-      .join('user_roles as ur', 'u.id', 'ur.user_id')
-      .join('role_permissions as rp', 'ur.role_id', 'rp.role_id')
-      .join('permissions as p', 'rp.permission_id', 'p.id')
-      .where('u.id', userId)
-      .where('ur.is_active', true) // Only active role assignments
-      .groupBy('u.id')
+      .join('role_permissions as rp', 'p.id', 'rp.permission_id')
+      .whereIn('rp.role_id', Array.from(allRoleIds))
+      .groupByRaw('p.resource, p.action') // Group by resource:action to ensure distinct
       .first();
 
-    return permissionsResult?.permissions || [];
+    // Extract just the permission strings
+    const allPermissions = permissionsResult?.permissions || [];
+
+    // Return deduplicated permissions
+    return Array.from(new Set(allPermissions));
   }
 
   async unlockAccount(identifier: string): Promise<void> {

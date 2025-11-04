@@ -1,6 +1,42 @@
 import type { Knex } from 'knex';
 import * as bcrypt from 'bcryptjs';
 
+/**
+ * Link all permissions for a resource to the admin role
+ */
+async function linkAdminPermissions(
+  knex: Knex,
+  resource: string,
+): Promise<void> {
+  console.log(`🔗 Linking ${resource} permissions to admin role...`);
+
+  const adminRole = await knex('roles').where('name', 'admin').first();
+  if (!adminRole) {
+    throw new Error('Admin role not found - run base migrations first');
+  }
+
+  const permissions = await knex('permissions')
+    .where('resource', resource)
+    .select('id', 'action');
+
+  if (permissions.length === 0) {
+    console.log(`⚠️  No permissions found for resource: ${resource}`);
+    return;
+  }
+
+  const rolePermissions = permissions.map((p) => ({
+    role_id: adminRole.id,
+    permission_id: p.id,
+  }));
+
+  await knex('role_permissions')
+    .insert(rolePermissions)
+    .onConflict(['role_id', 'permission_id'])
+    .ignore();
+
+  console.log(`✅ Linked ${permissions.length} permissions to admin role`);
+}
+
 export async function seed(knex: Knex): Promise<void> {
   // Clear existing data in reverse order due to foreign keys
   await knex('user_sessions').del();
@@ -8,16 +44,34 @@ export async function seed(knex: Knex): Promise<void> {
   await knex('role_permissions').del();
   await knex('users').del();
   await knex('permissions').del();
-  await knex('roles').del();
+  // Don't delete roles - they're created in migration 001
 
-  // Insert roles
-  const [adminRole, managerRole, userRole] = await knex('roles')
+  // Get system roles by name (created by migration 001)
+  const adminRole = await knex('roles').where('name', 'admin').first();
+  const userRole = await knex('roles').where('name', 'user').first();
+  const moderatorRole = await knex('roles').where('name', 'moderator').first();
+
+  if (!adminRole || !userRole || !moderatorRole) {
+    throw new Error('System roles not found - run migrations first');
+  }
+
+  // Insert additional roles if needed (manager role)
+  const managerRoles = await knex('roles')
     .insert([
-      { name: 'admin', description: 'Administrator with full access' },
-      { name: 'manager', description: 'Manager with user management access' },
-      { name: 'user', description: 'Regular user with limited access' },
+      {
+        name: 'manager',
+        description: 'Manager with user management access',
+      },
     ])
+    .onConflict(['name'])
+    .ignore()
     .returning(['id', 'name']);
+
+  // If manager role already existed, get it from the database
+  let managerRole = managerRoles[0];
+  if (!managerRole) {
+    managerRole = await knex('roles').where('name', 'manager').first();
+  }
 
   // Insert permissions
   const permissions = await knex('permissions')
@@ -257,6 +311,9 @@ export async function seed(knex: Knex): Promise<void> {
     permission_id: perm.id,
   }));
   await knex('role_permissions').insert(adminPermissions);
+
+  // Link testProducts permissions to admin role (from migration)
+  await linkAdminPermissions(knex, 'testProducts');
 
   // Assign dashboard + user management + profile + files permissions to manager role
   const managerPermissions = permissions

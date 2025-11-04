@@ -52,30 +52,30 @@ import {
   ExportService,
   SharedExportComponent,
 } from '../../../shared/components/shared-export/shared-export.component';
-import { {{pascalCaseHelper singularName}}Service } from '../services/{{lowercase moduleName}}.service';
-import { {{pascalCaseHelper singularName}}, List{{pascalCaseHelper singularName}}Query } from '../types/{{lowercase moduleName}}.types';
+import { {{pascalCaseHelper singularName}}Service } from '../services/{{kebabCase}}.service';
+import { {{pascalCaseHelper singularName}}, List{{pascalCaseHelper singularName}}Query } from '../types/{{kebabCase}}.types';
 {{#if withEvents}}
-import { {{pascalCaseHelper singularName}}StateManager } from '../services/{{lowercase moduleName}}-state-manager.service';
+import { {{pascalCaseHelper singularName}}StateManager } from '../services/{{kebabCase}}-state-manager.service';
 {{/if}}
-import { {{pascalCaseHelper singularName}}CreateDialogComponent } from './{{lowercase moduleName}}-create.dialog';
+import { {{pascalCaseHelper singularName}}CreateDialogComponent } from './{{kebabCase}}-create.dialog';
 import {
   {{pascalCaseHelper singularName}}EditDialogComponent,
   {{pascalCaseHelper singularName}}EditDialogData,
-} from './{{lowercase moduleName}}-edit.dialog';
+} from './{{kebabCase}}-edit.dialog';
 import {
   {{pascalCaseHelper singularName}}ViewDialogComponent,
   {{pascalCaseHelper singularName}}ViewDialogData,
-} from './{{lowercase moduleName}}-view.dialog';
+} from './{{kebabCase}}-view.dialog';
 {{#if withImport}}
-import { {{pascalCaseHelper singularName}}ImportDialogComponent } from './{{lowercase moduleName}}-import.dialog';
+import { {{pascalCaseHelper singularName}}ImportDialogComponent } from './{{kebabCase}}-import.dialog';
 {{/if}}
 
 // Import child components
-import { {{pascalCaseHelper moduleName}}ListFiltersComponent } from './{{lowercase moduleName}}-list-filters.component';
-import { {{pascalCaseHelper moduleName}}ListHeaderComponent } from './{{lowercase moduleName}}-list-header.component';
+import { {{pascalCaseHelper moduleName}}ListFiltersComponent } from './{{kebabCase}}-list-filters.component';
+import { {{pascalCaseHelper moduleName}}ListHeaderComponent } from './{{kebabCase}}-list-header.component';
 
 @Component({
-  selector: 'app-{{lowercase moduleName}}-list',
+  selector: 'app-{{kebabCase}}-list',
   standalone: true,
   imports: [
     CommonModule,
@@ -99,8 +99,8 @@ import { {{pascalCaseHelper moduleName}}ListHeaderComponent } from './{{lowercas
     AegisxEmptyStateComponent,
     AegisxErrorStateComponent,
   ],
-  templateUrl: './{{lowercase moduleName}}-list.component.html',
-  styleUrl: './{{lowercase moduleName}}-list.component.scss',
+  templateUrl: './{{kebabCase}}-list.component.html',
+  styleUrl: './{{kebabCase}}-list.component.scss',
   animations: [
     trigger('detailExpand', [
       state('collapsed', style({ height: '0px', minHeight: '0' })),
@@ -787,7 +787,7 @@ export class {{pascalCaseHelper moduleName}}ListComponent {
   onView{{pascalCaseHelper singularName}}({{camelCaseHelper singularName}}: {{pascalCaseHelper singularName}}) {
     const dialogRef = this.dialog.open({{pascalCaseHelper singularName}}ViewDialogComponent, {
       width: '600px',
-      data: { {{lowercase moduleName}}: {{camelCaseHelper singularName}} } as {{pascalCaseHelper singularName}}ViewDialogData,
+      data: { {{camelCaseHelper moduleName}}: {{camelCaseHelper singularName}} } as {{pascalCaseHelper singularName}}ViewDialogData,
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
@@ -800,7 +800,7 @@ export class {{pascalCaseHelper moduleName}}ListComponent {
   onEdit{{pascalCaseHelper singularName}}({{camelCaseHelper singularName}}: {{pascalCaseHelper singularName}}) {
     const dialogRef = this.dialog.open({{pascalCaseHelper singularName}}EditDialogComponent, {
       width: '600px',
-      data: { {{lowercase moduleName}}: {{camelCaseHelper singularName}} } as {{pascalCaseHelper singularName}}EditDialogData,
+      data: { {{camelCaseHelper moduleName}}: {{camelCaseHelper singularName}} } as {{pascalCaseHelper singularName}}EditDialogData,
     });
 
     dialogRef.afterClosed().subscribe((result: boolean) => {

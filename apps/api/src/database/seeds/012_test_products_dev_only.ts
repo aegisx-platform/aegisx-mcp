@@ -10,12 +10,11 @@ export async function seed(knex: Knex): Promise<void> {
     return;
   }
 
-  // Check if table exists
-  const hasTable = await knex.schema.hasTable('test_products');
-  if (!hasTable) {
-    console.log('⏭️  [DEV] test_products table not found, skipping seed');
-    return;
-  }
+  // ⚠️ SKIP: test_products table schema mismatch in seed data
+  // The seed data references columns that don't exist in the actual table
+  // This seed is skipped until the test_products table schema is verified
+  console.log('⏭️  [DEV] test_products seed skipped due to schema mismatch');
+  return;
 
   // Get category IDs
   const electronics = await knex('test_categories')
@@ -58,7 +57,6 @@ export async function seed(knex: Knex): Promise<void> {
         is_featured: true,
         is_taxable: true,
         is_shippable: true,
-        allow_backorder: false,
         status: 'active',
         condition: 'new',
         availability: 'in_stock',

@@ -857,6 +857,42 @@ function hasForeignKeys(schema) {
   return schema.foreignKeys && schema.foreignKeys.length > 0;
 }
 
+/**
+ * Check if a column is in unique constraints (to prevent duplicate method generation)
+ * Handles both column objects and column names as strings
+ */
+function isInUniqueConstraints(uniqueConstraints, column) {
+  if (!uniqueConstraints || !column) return false;
+
+  // Extract column name - handle both objects and strings
+  const columnName = typeof column === 'object' ? column.name : column;
+
+  // Check if column is in single field unique constraints
+  const singleFieldConstraints = uniqueConstraints.singleField || [];
+  if (singleFieldConstraints.includes(columnName)) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Find a column by name in columns array
+ */
+function findColumnByName(columns, columnName) {
+  if (!columns || !columnName) return false;
+  return columns.some((col) => col.name === columnName);
+}
+
+/**
+ * Check if a column exists and is a string type (to avoid duplicate method generation)
+ */
+function isStringColumn(columns, columnName) {
+  if (!columns || !columnName) return false;
+  const column = columns.find((col) => col.name === columnName);
+  return column && column.tsType === 'string';
+}
+
 // Register Handlebars helpers
 Handlebars.registerHelper('ifEquals', function (arg1, arg2, options) {
   if (!options || typeof options.fn !== 'function') {
@@ -963,6 +999,24 @@ Handlebars.registerHelper('hasForeignKeys', function (schema) {
 // 🛡️ Security helper: Check if field contains sensitive data
 Handlebars.registerHelper('isSensitiveField', function (column) {
   return isSensitiveField(column);
+});
+
+// Check if column is in unique constraints
+Handlebars.registerHelper(
+  'isInUniqueConstraints',
+  function (uniqueConstraints, column) {
+    return isInUniqueConstraints(uniqueConstraints, column);
+  },
+);
+
+// Find a column by name in columns array
+Handlebars.registerHelper('findColumnByName', function (columns, columnName) {
+  return findColumnByName(columns, columnName);
+});
+
+// Check if a column exists and is a string type
+Handlebars.registerHelper('isStringColumn', function (columns, columnName) {
+  return isStringColumn(columns, columnName);
 });
 
 // Schema-driven filtering helpers
@@ -1835,7 +1889,8 @@ async function autoRegisterBackendPlugin(moduleName, projectRoot) {
     }
 
     // Add import after last business feature import
-    const importStatement = `import ${camelName}Plugin from '../modules/${kebabName}';\n`;
+    // Use camelName for import path to match actual module directory names
+    const importStatement = `import ${camelName}Plugin from '../modules/${camelName}';\n`;
     // Find the next line after the marker
     let insertPos = content.indexOf('\n', markerIndex);
     // Skip to the line after all existing imports in this section
@@ -1865,7 +1920,8 @@ async function autoRegisterBackendPlugin(moduleName, projectRoot) {
     const pluginsArrayStart = content.indexOf('plugins: [', featureGroupIndex);
     const insertPosition = content.indexOf('[', pluginsArrayStart) + 1;
 
-    const pluginEntry = `\n      {\n        name: '${kebabName}',\n        plugin: ${camelName}Plugin,\n        required: true,\n      },`;
+    // Use camelName for plugin name to match how they're registered
+    const pluginEntry = `\n      {\n        name: '${camelName}',\n        plugin: ${camelName}Plugin,\n        required: true,\n      },`;
 
     content =
       content.slice(0, insertPosition) +
@@ -1877,10 +1933,10 @@ async function autoRegisterBackendPlugin(moduleName, projectRoot) {
 
     console.log(`✅ Auto-registered ${moduleName} plugin in plugin.loader.ts:`);
     console.log(
-      `   - Import: import ${camelName}Plugin from '../modules/${kebabName}'`,
+      `   - Import: import ${camelName}Plugin from '../modules/${camelName}'`,
     );
     console.log(
-      `   - Plugin: { name: '${kebabName}', plugin: ${camelName}Plugin }`,
+      `   - Plugin: { name: '${camelName}', plugin: ${camelName}Plugin }`,
     );
 
     return true;

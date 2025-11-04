@@ -600,7 +600,7 @@ export class {{ModuleName}}Service extends BaseService<{{ModuleName}}, Create{{M
   /**
    * Check field uniqueness
    */
-  async checkUniqueness(field: string, options: { value: string; excludeId?: string | number }): Promise<{
+  async checkUniqueness(field: string, options: { value: string | number | Date; excludeId?: string | number }): Promise<{
     unique: boolean;
     exists?: any;
   }> {

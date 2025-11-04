@@ -37,7 +37,9 @@ import {
 {{#if hasForeignKeys}}
 // CRUD-GENERATOR-TAG: Foreign Key Service Import
 {{#each foreignKeys}}
+{{#if this.referencedModule}}
 import { {{pascalCaseHelper this.referencedModule}}Service } from '../../{{kebabCaseHelper this.referencedModule}}/services/{{kebabCaseHelper this.referencedModule}}.service';
+{{/if}}
 {{/each}}
 {{/if}}
 {{#if hasDateFields}}
@@ -99,6 +101,7 @@ export interface {{pascalCaseHelper singularName}}FormData {
         {{/if}}
       </mat-form-field>
       {{else if (eq this.inputType 'select')}}
+      {{#if this.referencedModule}}
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>{{this.label}}</mat-label>
         <mat-select
@@ -129,6 +132,23 @@ export interface {{pascalCaseHelper singularName}}FormData {
           No {{lowercase this.referencedModule}} available
         </mat-hint>
       </mat-form-field>
+      {{else}}
+      <!-- FK reference not found, render as plain text input -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{this.label}}</mat-label>
+        <input
+          matInput
+          type="text"
+          formControlName="{{this.name}}"
+          placeholder="Enter {{lowercase this.label}}"
+        />
+        {{#if this.required}}
+        <mat-error *ngIf="{{../camelCase}}Form.get('{{this.name}}')?.hasError('required')">
+          {{this.label}} is required
+        </mat-error>
+        {{/if}}
+      </mat-form-field>
+      {{/if}}
       {{else if (eq this.inputType 'checkbox')}}
       <div class="checkbox-field">
         <mat-checkbox formControlName="{{this.name}}"> {{this.label}} </mat-checkbox>
@@ -295,7 +315,9 @@ export class {{pascalCaseHelper singularName}}FormComponent implements OnInit, O
   {{#if hasForeignKeys}}
   // CRUD-GENERATOR-TAG: Foreign Key Service Injection
   {{#each foreignKeys}}
+  {{#if this.referencedModule}}
   private {{camelCaseHelper this.referencedModule}}Service = inject({{pascalCaseHelper this.referencedModule}}Service);
+  {{/if}}
   {{/each}}
   {{/if}}
 
@@ -310,8 +332,10 @@ export class {{pascalCaseHelper singularName}}FormComponent implements OnInit, O
   {{#if hasForeignKeys}}
   // CRUD-GENERATOR-TAG: Foreign Key Options State
   {{#each foreignKeys}}
+  {{#if this.referencedModule}}
   {{camelCaseHelper this.referencedModule}}ServiceOptions = signal<any[]>([]);
   loading{{pascalCaseHelper this.referencedModule}}Service = signal<boolean>(false);
+  {{/if}}
   {{/each}}
   {{/if}}
 
@@ -325,7 +349,9 @@ export class {{pascalCaseHelper singularName}}FormComponent implements OnInit, O
     {{#if hasForeignKeys}}
     // CRUD-GENERATOR-TAG: Load Foreign Key Options
     {{#each foreignKeys}}
+    {{#if this.referencedModule}}
     this.load{{pascalCaseHelper this.referencedModule}}();
+    {{/if}}
     {{/each}}
     {{/if}}
     if (this.mode === 'edit' && this.initialData) {
@@ -335,6 +361,7 @@ export class {{pascalCaseHelper singularName}}FormComponent implements OnInit, O
 
   {{#if hasForeignKeys}}
   {{#each foreignKeys}}
+  {{#if this.referencedModule}}
   // CRUD-GENERATOR-TAG: Foreign Key Data Loading Method
   private async load{{pascalCaseHelper this.referencedModule}}() {
     this.loading{{pascalCaseHelper this.referencedModule}}Service.set(true);
@@ -349,6 +376,7 @@ export class {{pascalCaseHelper singularName}}FormComponent implements OnInit, O
     }
   }
 
+  {{/if}}
   {{/each}}
   {{/if}}
   ngOnChanges(changes: SimpleChanges) {

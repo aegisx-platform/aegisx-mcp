@@ -1,6 +1,6 @@
 import type { Knex } from 'knex';
 
-export async function up(knex: any): Promise<void> {
+export async function up(knex: Knex): Promise<void> {
   // Create users table
   await knex.schema.createTable('users', (table) => {
     table.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));
@@ -19,10 +19,14 @@ export async function up(knex: any): Promise<void> {
     table.index('is_active');
   });
 
-  // Create user_roles junction table
+  // Create user_roles junction table with RBAC enhancements
   await knex.schema.createTable('user_roles', (table) => {
     table.uuid('user_id').notNullable();
     table.uuid('role_id').notNullable();
+    table.boolean('is_active').defaultTo(true).notNullable();
+    table.timestamp('assigned_at').defaultTo(knex.fn.now()).notNullable();
+    table.uuid('assigned_by');
+    table.timestamp('expires_at');
     table.timestamps(true, true);
 
     // Foreign keys
@@ -36,13 +40,23 @@ export async function up(knex: any): Promise<void> {
       .references('id')
       .inTable('roles')
       .onDelete('CASCADE');
+    table
+      .foreign('assigned_by')
+      .references('id')
+      .inTable('users')
+      .onDelete('SET NULL');
 
     // Composite primary key
     table.primary(['user_id', 'role_id']);
+
+    // Indexes for performance
+    table.index('is_active');
+    table.index('assigned_at');
+    table.index('expires_at');
   });
 }
 
-export async function down(knex: any): Promise<void> {
+export async function down(knex: Knex): Promise<void> {
   await knex.schema.dropTableIfExists('user_roles');
   await knex.schema.dropTableIfExists('users');
 }

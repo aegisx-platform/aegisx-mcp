@@ -40,41 +40,18 @@ export interface TestProductsRepository {
 // Database entity type (matches database table structure exactly)
 export interface TestProductsEntity {
   id: string;
-  sku: string;
+  code: string;
   name: string;
-  barcode: string | null;
-  manufacturer: string | null;
+  slug: string;
   description: string | null;
-  long_description: string | null;
-  specifications: string | null;
-  quantity: number | null;
-  min_quantity: number | null;
-  max_quantity: number | null;
-  price: number;
-  cost: number | null;
-  weight: number | null;
-  discount_percentage: number | null;
   is_active: boolean | null;
   is_featured: boolean | null;
-  is_taxable: boolean | null;
-  is_shippable: boolean | null;
-  allow_backorder: boolean | null;
+  display_order: number | null;
+  item_count: number | null;
+  discount_rate: number | null;
+  metadata: Record<string, any> | null;
+  settings: Record<string, any> | null;
   status: string | null;
-  condition: string | null;
-  availability: string | null;
-  launch_date: Date | null;
-  discontinued_date: Date | null;
-  last_stock_check: Date | null;
-  next_restock_date: Date | null;
-  attributes: Record<string, any> | null;
-  tags: Record<string, any> | null;
-  images: Record<string, any> | null;
-  pricing_tiers: Record<string, any> | null;
-  dimensions: Record<string, any> | null;
-  seo_metadata: Record<string, any> | null;
-  category_id: string;
-  parent_product_id: string | null;
-  supplier_id: string | null;
   created_by: string | null;
   updated_by: string | null;
   deleted_at: Date | null;
@@ -93,19 +70,12 @@ export enum TestProductsErrorCode {
   VALIDATION_ERROR = 'TEST_PRODUCTS_VALIDATION_ERROR',
 
   // Duplicate errors (409 Conflict)
-  DUPLICATE_SKU = 'TEST_PRODUCTS_DUPLICATE_SKU',
-
-  // Delete validation errors (422 Unprocessable Entity)
-  CANNOT_DELETE_HAS_REFERENCES = 'TEST_PRODUCTS_CANNOT_DELETE_HAS_REFERENCES',
-  CANNOT_DELETE_HAS_TEST_PRODUCTS = 'TEST_PRODUCTS_CANNOT_DELETE_HAS_TEST_PRODUCTS',
+  DUPLICATE_CODE = 'TEST_PRODUCTS_DUPLICATE_CODE',
+  DUPLICATE_NAME = 'TEST_PRODUCTS_DUPLICATE_NAME',
 
   // Business rule validation errors (422)
-  INVALID_VALUE_QUANTITY = 'TEST_PRODUCTS_INVALID_VALUE_QUANTITY',
-  INVALID_VALUE_MIN_QUANTITY = 'TEST_PRODUCTS_INVALID_VALUE_MIN_QUANTITY',
-  INVALID_VALUE_MAX_QUANTITY = 'TEST_PRODUCTS_INVALID_VALUE_MAX_QUANTITY',
-  INVALID_VALUE_PRICE = 'TEST_PRODUCTS_INVALID_VALUE_PRICE',
-  INVALID_VALUE_COST = 'TEST_PRODUCTS_INVALID_VALUE_COST',
-  INVALID_VALUE_DISCOUNT_PERCENTAGE = 'TEST_PRODUCTS_INVALID_VALUE_DISCOUNT_PERCENTAGE',
+  INVALID_VALUE_ITEM_COUNT = 'TEST_PRODUCTS_INVALID_VALUE_ITEM_COUNT',
+  INVALID_VALUE_DISCOUNT_RATE = 'TEST_PRODUCTS_INVALID_VALUE_DISCOUNT_RATE',
 }
 
 /**
@@ -117,25 +87,12 @@ export const TestProductsErrorMessages: Record<TestProductsErrorCode, string> =
     [TestProductsErrorCode.VALIDATION_ERROR]: 'TestProducts validation failed',
 
     // Duplicate error messages
-    [TestProductsErrorCode.DUPLICATE_SKU]: 'Sku already exists',
-
-    // Delete validation messages
-    [TestProductsErrorCode.CANNOT_DELETE_HAS_REFERENCES]:
-      'Cannot delete testProducts - has related records',
-    [TestProductsErrorCode.CANNOT_DELETE_HAS_TEST_PRODUCTS]:
-      'Cannot delete testProducts - has test_products references',
+    [TestProductsErrorCode.DUPLICATE_CODE]: 'Code already exists',
+    [TestProductsErrorCode.DUPLICATE_NAME]: 'Name already exists',
 
     // Business rule messages
-    [TestProductsErrorCode.INVALID_VALUE_QUANTITY]:
-      'quantity must be a positive number',
-    [TestProductsErrorCode.INVALID_VALUE_MIN_QUANTITY]:
-      'min_quantity must be a positive number',
-    [TestProductsErrorCode.INVALID_VALUE_MAX_QUANTITY]:
-      'max_quantity must be a positive number',
-    [TestProductsErrorCode.INVALID_VALUE_PRICE]:
-      'price must be a positive number',
-    [TestProductsErrorCode.INVALID_VALUE_COST]:
-      'cost must be a positive number',
-    [TestProductsErrorCode.INVALID_VALUE_DISCOUNT_PERCENTAGE]:
-      'discount_percentage must be a positive number',
+    [TestProductsErrorCode.INVALID_VALUE_ITEM_COUNT]:
+      'item_count must be a positive number',
+    [TestProductsErrorCode.INVALID_VALUE_DISCOUNT_RATE]:
+      'discount_rate must be a positive number',
   };

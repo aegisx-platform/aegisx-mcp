@@ -12,7 +12,6 @@ interface Permission {
   resource: string;
   action: string;
   description: string;
-  category?: string;
 }
 
 export async function seed(knex: Knex): Promise<void> {
@@ -28,25 +27,21 @@ export async function seed(knex: Knex): Promise<void> {
       resource: 'login-attempts',
       action: 'read',
       description: 'View login attempts and security logs',
-      category: 'audit',
     },
     {
       resource: 'login-attempts',
       action: 'export',
       description: 'Export login attempts data',
-      category: 'audit',
     },
     {
       resource: 'login-attempts',
       action: 'delete',
       description: 'Delete login attempt records',
-      category: 'audit',
     },
     {
       resource: 'login-attempts',
       action: 'cleanup',
       description: 'Cleanup old login attempts',
-      category: 'audit',
     },
 
     // File Audit Permissions
@@ -54,25 +49,21 @@ export async function seed(knex: Knex): Promise<void> {
       resource: 'file-audit',
       action: 'read',
       description: 'View file audit logs and activity',
-      category: 'audit',
     },
     {
       resource: 'file-audit',
       action: 'export',
       description: 'Export file audit data',
-      category: 'audit',
     },
     {
       resource: 'file-audit',
       action: 'delete',
       description: 'Delete file audit records',
-      category: 'audit',
     },
     {
       resource: 'file-audit',
       action: 'cleanup',
       description: 'Cleanup old file audit logs',
-      category: 'audit',
     },
   ];
 
@@ -89,7 +80,6 @@ export async function seed(knex: Knex): Promise<void> {
         resource: perm.resource,
         action: perm.action,
         description: perm.description,
-        category: perm.category,
         created_at: knex.fn.now(),
         updated_at: knex.fn.now(),
       });

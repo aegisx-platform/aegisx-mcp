@@ -54,6 +54,7 @@ import userProfilePlugin from '../core/user-profile/user-profile.plugin';
 // Business feature modules (ready for HIS, Inventory, etc.)
 import websocketPlugin from '../shared/websocket/websocket.plugin';
 import testProductsPlugin from '../modules/testProducts';
+import testCategoriesPlugin from '../modules/testCategories';
 
 /**
  * Plugin registration group interface
@@ -359,6 +360,11 @@ export function createFeaturePluginGroup(apiPrefix: string): PluginGroup {
     name: 'business-features',
     description: 'Business feature modules (ready for HIS, Inventory, etc.)',
     plugins: [
+      {
+        name: 'test-categories',
+        plugin: testCategoriesPlugin,
+        required: true,
+      },
       {
         name: 'test-products',
         plugin: testProductsPlugin,

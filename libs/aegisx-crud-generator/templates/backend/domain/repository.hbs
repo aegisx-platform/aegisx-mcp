@@ -180,20 +180,7 @@ export class {{ModuleName}}Repository extends BaseRepository<{{ModuleName}}, Cre
   }
 
 
-  // Business-specific methods for unique/important fields
-  
-  {{#each columns}}
-  {{#unless (or isPrimaryKey (eq name 'created_at') (eq name 'updated_at'))}}
-  {{#if (isDisplayField this)}}
-  async findBy{{toPascalCase name}}({{toCamelCase name}}: {{tsType}}): Promise<{{@root.ModuleName}} | null> {
-    const query = this.getJoinQuery();
-    const row = await query.where('{{@root.tableName}}.{{name}}', {{toCamelCase name}}).first();
-    return row ? this.transformToEntity(row) : null;
-  }
-
-  {{/if}}
-  {{/unless}}
-  {{/each}}
+  // Business-specific methods are merged with unique constraint detection below
 
   // ===== ERROR HANDLING: DUPLICATE DETECTION METHODS =====
   {{#if hasUniqueConstraints}}

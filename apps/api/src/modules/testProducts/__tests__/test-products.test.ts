@@ -10,7 +10,7 @@ import {
  *
  * Integration tests for test_products domain functionality.
  *
- * Generated on: 2025-11-03T04:45:09.777Z
+ * Generated on: 2025-11-04T13:43:35.696Z
  */
 
 describe('TestProducts Domain', () => {
@@ -29,10 +29,10 @@ describe('TestProducts Domain', () => {
 
     // Test data factory
     const createTestProductsData = (): TestProductsCreate => ({
-      sku: `SKU-${Date.now()}`,
+      // TODO: Add actual test data based on your schema
       name: `Test TestProducts ${Date.now()}`,
-      price: 99.99,
-      category_id: '00000000-0000-0000-0000-000000000001', // Placeholder UUID
+      description: 'Test description',
+      is_active: 'true',
     });
 
     describe('POST /core', () => {
@@ -96,7 +96,7 @@ describe('TestProducts Domain', () => {
       it('should filter core by query parameters', async () => {
         const response = await app.inject({
           method: 'GET',
-          url: '/core?is_active=true&status=draft&#x27;&name=Test',
+          url: '/core?is_active=true&&name=Test',
         });
 
         expect(response.statusCode).toBe(200);

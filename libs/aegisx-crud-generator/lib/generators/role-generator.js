@@ -96,33 +96,33 @@ async function generateMigrationFile(moduleName, options = {}) {
             },
           ];
 
-      const rolePermissions = {};
-      roles.forEach((role) => {
-        const key = multipleRoles
-          ? role.name.includes('admin')
-            ? 'admin'
-            : role.name.includes('editor')
-              ? 'editor'
-              : 'viewer'
-          : 'main';
-
+      // Template expects an array of objects with UPPER_ROLE_NAME and permissions array
+      const rolePermissions = roles.map((role) => {
         const actions = role.permissions.map((permName) => {
           const parts = permName.split('.');
           return parts[parts.length - 1];
         });
 
-        rolePermissions[key] = {
+        const upperRoleName = role.name
+          .toUpperCase()
+          .replace(/[^A-Z0-9]/g, '_');
+
+        return {
           roleName: role.name,
-          permissionActions: JSON.stringify(actions),
+          UPPER_ROLE_NAME: upperRoleName,
+          moduleName, // Include moduleName for template to access in nested loops
+          permissions: actions.map((action) => ({ action })),
         };
       });
 
       const newContext = {
         moduleName,
         ModuleName: moduleName.charAt(0).toUpperCase() + moduleName.slice(1),
+        UPPER_MODULE_NAME: moduleName.toUpperCase().replace(/[^A-Z0-9]/g, '_'),
         permissions,
         roles,
         rolePermissions,
+        permissionGroup: moduleName,
         timestamp: new Date().toISOString(),
       };
 
@@ -251,34 +251,33 @@ async function generateMigrationFile(moduleName, options = {}) {
       ];
 
   // Prepare role permissions data for template
-  const rolePermissions = {};
-  roles.forEach((role, index) => {
-    const key = multipleRoles
-      ? role.name.includes('admin')
-        ? 'admin'
-        : role.name.includes('editor')
-          ? 'editor'
-          : 'viewer'
-      : 'main';
-
+  // Template expects an array of objects with UPPER_ROLE_NAME and permissions array
+  const rolePermissions = roles.map((role) => {
     // Extract actions from permission names (e.g., 'authors.create' -> 'create')
     const actions = role.permissions.map((permName) => {
       const parts = permName.split('.');
       return parts[parts.length - 1]; // Get last part after dot
     });
 
-    rolePermissions[key] = {
+    // Convert role name to UPPER_SNAKE_CASE for SYSTEM_ROLE_IDS lookup
+    const upperRoleName = role.name.toUpperCase().replace(/[^A-Z0-9]/g, '_');
+
+    return {
       roleName: role.name,
-      permissionActions: JSON.stringify(actions), // Array of actions like ['create', 'read', 'update', 'delete']
+      UPPER_ROLE_NAME: upperRoleName,
+      moduleName, // Include moduleName for template to access in nested loops
+      permissions: actions.map((action) => ({ action })), // Array of {action: 'create'}, {action: 'read'}, etc.
     };
   });
 
   const context = {
     moduleName,
     ModuleName: moduleName.charAt(0).toUpperCase() + moduleName.slice(1),
+    UPPER_MODULE_NAME: moduleName.toUpperCase().replace(/[^A-Z0-9]/g, '_'),
     permissions,
     roles,
     rolePermissions,
+    permissionGroup: moduleName,
     timestamp: new Date().toISOString(),
   };
 

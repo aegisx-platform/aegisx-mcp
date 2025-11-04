@@ -4,7 +4,7 @@
     <ax-breadcrumb [items]="breadcrumbItems" [showIcons]="true"></ax-breadcrumb>
 
     <!-- Header with Stats (hide stats when permission error) -->
-    <app-{{lowercase moduleName}}-list-header
+    <app-{{kebabCase}}-list-header
       [stats]="stats()"
       [loading]="{{camelCaseHelper moduleName}}Service.loading()"
       [permissionError]="{{camelCaseHelper moduleName}}Service.permissionError()"
@@ -14,11 +14,11 @@
       (importClicked)="openImportDialog()"
 {{/if}}
       (clearPermissionError)="{{camelCaseHelper moduleName}}Service.clearPermissionError()"
-    ></app-{{lowercase moduleName}}-list-header>
+    ></app-{{kebabCase}}-list-header>
 
     <!-- Filters Panel (hide when any error exists) -->
     @if (!{{camelCaseHelper moduleName}}Service.error()) {
-      <app-{{lowercase moduleName}}-list-filters
+      <app-{{kebabCase}}-list-filters
         [activeFilterCount]="getActiveFilterCount()"
         [loading]="{{camelCaseHelper moduleName}}Service.loading()"
         [(searchTerm)]="searchTerm"
@@ -104,7 +104,7 @@
           }
           {{/each}}
         </div>
-      </app-{{lowercase moduleName}}-list-filters>
+      </app-{{kebabCase}}-list-filters>
     }
 
     <!-- Content Area: Show based on state priority -->
