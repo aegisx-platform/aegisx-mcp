@@ -22,8 +22,24 @@ export async function up(knex: Knex): Promise<void> {
     table.string('timezone', 100).defaultTo('UTC');
     table.string('language', 10).defaultTo('en');
 
-    // Soft delete support (for tracking deleted users)
+    // Profile and avatar fields (from old 004_extend_users_table)
+    table.string('avatar_url', 500).nullable();
+    table.string('name', 200).nullable(); // Full name computed from first_name + last_name or set directly
+    table.text('bio').nullable();
+    table.date('date_of_birth').nullable();
+    table.string('phone', 20).nullable();
+
+    // Two-factor authentication (from old 004_extend_users_table)
+    table.boolean('two_factor_enabled').defaultTo(false);
+    table.string('two_factor_secret', 255).nullable();
+    table.json('two_factor_backup_codes').nullable();
+
+    // Soft delete support with tracking (for tracking deleted users)
     table.timestamp('deleted_at').nullable();
+    table.text('deletion_reason').nullable(); // From old 015_add_user_deletion_fields
+    table.timestamp('recovery_deadline').nullable(); // From old 015_add_user_deletion_fields
+    table.string('deleted_by_ip', 45).nullable(); // Track IP that initiated deletion
+    table.text('deleted_by_user_agent').nullable(); // Track user agent
 
     table.timestamps(true, true);
 
@@ -32,6 +48,32 @@ export async function up(knex: Knex): Promise<void> {
     table.index('username');
     table.index('status');
     table.index('email_verified');
+    table.index('two_factor_enabled');
+    table.index('deleted_at');
+    table.index('recovery_deadline'); // For cleanup jobs
+  });
+
+  // Create avatar_files table for storing avatar metadata and thumbnails
+  await knex.schema.createTable('avatar_files', (table) => {
+    table.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));
+    table.uuid('user_id').notNullable();
+    table.string('original_filename', 255).notNullable();
+    table.string('mime_type', 100).notNullable();
+    table.integer('file_size').notNullable();
+    table.string('storage_path', 500).notNullable();
+    table.json('thumbnails').nullable(); // Store thumbnail URLs and metadata
+    table.timestamps(true, true);
+
+    // Foreign key
+    table
+      .foreign('user_id')
+      .references('id')
+      .inTable('users')
+      .onDelete('CASCADE');
+
+    // Indexes
+    table.index('user_id');
+    table.index('mime_type');
   });
 
   // Create user_roles junction table with RBAC enhancements
@@ -73,5 +115,6 @@ export async function up(knex: Knex): Promise<void> {
 
 export async function down(knex: Knex): Promise<void> {
   await knex.schema.dropTableIfExists('user_roles');
+  await knex.schema.dropTableIfExists('avatar_files');
   await knex.schema.dropTableIfExists('users');
 }

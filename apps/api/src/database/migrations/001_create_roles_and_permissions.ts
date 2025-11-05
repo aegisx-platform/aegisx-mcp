@@ -10,6 +10,16 @@ export async function up(knex: Knex): Promise<void> {
     table.boolean('is_system_role').defaultTo(false).notNullable();
     table.string('category', 50);
     table.integer('hierarchy_level').defaultTo(0).notNullable();
+
+    // Role hierarchy support - allows parent-child relationships between roles
+    table
+      .uuid('parent_id')
+      .nullable()
+      .references('id')
+      .inTable('roles')
+      .onDelete('SET NULL')
+      .comment('Parent role ID for role hierarchy/inheritance');
+
     table.timestamps(true, true);
 
     // Indexes for performance
@@ -17,6 +27,7 @@ export async function up(knex: Knex): Promise<void> {
     table.index('is_system_role');
     table.index('category');
     table.index('hierarchy_level');
+    table.index('parent_id');
   });
 
   // Insert system roles - UUID will be auto-generated
