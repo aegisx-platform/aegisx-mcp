@@ -177,7 +177,7 @@ export class SecureAuthService {
 
       // Get user
       const user = await this.authRepository.findUserById(validSession.user_id);
-      if (!user || !user.isActive) {
+      if (!user || user.status !== 'active') {
         throw new Error('User not found or inactive');
       }
 

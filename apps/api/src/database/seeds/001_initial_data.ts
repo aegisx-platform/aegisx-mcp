@@ -350,7 +350,7 @@ export async function seed(knex: Knex): Promise<void> {
       password: hashedPassword,
       first_name: 'System',
       last_name: 'Administrator',
-      is_active: true,
+      status: 'active',
     })
     .returning(['id']);
 
@@ -369,7 +369,7 @@ export async function seed(knex: Knex): Promise<void> {
       password: hashedManagerPassword,
       first_name: 'Manager',
       last_name: 'User',
-      is_active: true,
+      status: 'active',
     })
     .returning(['id']);
 
@@ -388,7 +388,7 @@ export async function seed(knex: Knex): Promise<void> {
       password: hashedDemoPassword,
       first_name: 'Demo',
       last_name: 'User',
-      is_active: true,
+      status: 'active',
     })
     .returning(['id']);
 

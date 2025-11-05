@@ -171,7 +171,7 @@ export class AuthService {
 
         user = {
           ...userResult,
-          isActive: userResult.is_active,
+          status: userResult.status,
           role: roles[0] || 'user', // Keep backward compatibility with 'role'
           roles: roles.length > 0 ? roles : ['user'], // New multi-role support
         };
@@ -218,8 +218,8 @@ export class AuthService {
       throw error;
     }
 
-    // Check if user is active
-    if (!user.isActive) {
+    // Check if user is active (status must be 'active')
+    if (user.status !== 'active') {
       // Record failed attempt - account disabled
       await this.lockoutService.recordAttempt(identifier, {
         userId: user.id,
@@ -306,7 +306,7 @@ export class AuthService {
 
     // Get user
     const user = await this.authRepository.findUserById(session.user_id);
-    if (!user || !user.isActive) {
+    if (!user || user.status !== 'active') {
       const error = new Error('User not found or inactive');
       (error as any).statusCode = 401;
       (error as any).code = 'USER_NOT_FOUND_OR_INACTIVE';

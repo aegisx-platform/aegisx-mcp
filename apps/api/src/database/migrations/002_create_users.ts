@@ -9,7 +9,6 @@ export async function up(knex: Knex): Promise<void> {
     table.string('password', 255).notNullable();
     table.string('first_name', 100);
     table.string('last_name', 100);
-    table.boolean('is_active').defaultTo(true);
     table.timestamp('last_login_at');
 
     // Account status and verification (from old 004_extend_users_table)
@@ -23,12 +22,14 @@ export async function up(knex: Knex): Promise<void> {
     table.string('timezone', 100).defaultTo('UTC');
     table.string('language', 10).defaultTo('en');
 
+    // Soft delete support (for tracking deleted users)
+    table.timestamp('deleted_at').nullable();
+
     table.timestamps(true, true);
 
     // Indexes for performance
     table.index('email');
     table.index('username');
-    table.index('is_active');
     table.index('status');
     table.index('email_verified');
   });

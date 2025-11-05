@@ -8,7 +8,7 @@ export interface User {
   password?: string;
   firstName: string;
   lastName: string;
-  isActive: boolean;
+  status: 'active' | 'inactive' | 'suspended' | 'pending';
   role?: string; // Deprecated: Use roles[] for multi-role support
   roles?: string[]; // Multi-role support
   createdAt: Date;
@@ -22,7 +22,7 @@ export interface DBUser {
   password?: string;
   first_name: string;
   last_name: string;
-  is_active: boolean;
+  status: 'active' | 'inactive' | 'suspended' | 'pending';
   role?: string; // Deprecated: Use roles[] for multi-role support
   roles?: string[]; // Multi-role support
   created_at: Date;
@@ -47,7 +47,6 @@ export class AuthRepository {
     const user = await this.knex('users')
       .select('users.*')
       .where('users.email', email)
-      .whereNull('users.deleted_at') // Exclude deleted users
       .first();
 
     if (!user) return null;
@@ -76,12 +75,11 @@ export class AuthRepository {
         'users.username',
         'users.first_name',
         'users.last_name',
-        'users.is_active',
+        'users.status',
         'users.created_at',
         'users.updated_at',
       )
       .where('users.id', id)
-      .whereNull('users.deleted_at') // Exclude deleted users
       .first();
 
     if (!user) return null;
@@ -142,7 +140,7 @@ export class AuthRepository {
             password: hashedPassword,
             first_name: userData.first_name,
             last_name: userData.last_name,
-            is_active: true,
+            status: 'pending',
             created_at: new Date(),
             updated_at: new Date(),
           })
@@ -269,7 +267,7 @@ export class AuthRepository {
       password: dbUser.password,
       firstName: dbUser.first_name || '',
       lastName: dbUser.last_name || '',
-      isActive: dbUser.is_active,
+      status: dbUser.status,
       role: dbUser.role || 'user',
       roles: dbUser.roles || ['user'], // Include roles array for multi-role support
       createdAt: dbUser.created_at,
