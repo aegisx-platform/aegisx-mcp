@@ -191,14 +191,11 @@ function analyzeImportFields(schema, tableName, moduleName, ModuleName) {
       fieldConfig.hasTransformer = true;
       fieldConfig.transformerName = `transform${toPascalCase(fieldName)}`;
 
-      if (
-        !transformers.find((t) => t.transformerName === 'transformJsonField')
-      ) {
-        transformers.push({
-          name: 'jsonField',
-          transformerName: 'transformJsonField',
-          returnType: 'any',
-          transformLogic: `
+      transformers.push({
+        name: fieldName,
+        transformerName: fieldConfig.transformerName,
+        returnType: 'any',
+        transformLogic: `
     if (!value) return undefined;
     if (typeof value === 'object') return value;
     if (typeof value === 'string') {
@@ -210,8 +207,7 @@ function analyzeImportFields(schema, tableName, moduleName, ModuleName) {
       }
     }
     return undefined;`,
-        });
-      }
+      });
     }
 
     // Add error messages if validators exist
