@@ -376,10 +376,20 @@ Run `nx build aegisx-ui` to build the library.
 
 ## Requirements
 
-- Angular 19+
-- Angular Material 19+
+- Angular 17 - 20
+- Angular Material 17 - 20
 - TailwindCSS 3.x
-- @angular/cdk 19+
+- @angular/cdk 17 - 20
+- @angular/animations 17 - 20
+- @angular/forms 17 - 20 (optional)
+- @angular/router 17 - 20 (optional)
+
+## Package Information
+
+- **Current Version**: 0.1.0
+- **Package Name**: @aegisx/ui
+- **NPM Registry**: https://www.npmjs.com/package/@aegisx/ui
+- **License**: MIT
 
 ## License
 
