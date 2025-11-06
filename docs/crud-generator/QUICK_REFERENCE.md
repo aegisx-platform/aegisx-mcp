@@ -1,368 +1,378 @@
-# CRUD Generator Quick Reference
+# CRUD Generator - Quick Reference
 
-Complete command reference for the AegisX CRUD Generator.
-
-## Basic Generation
-
-### Generate Basic CRUD (No Import, No Events)
-
-```bash
-pnpm aegisx-crud books --package
-```
-
-Creates:
-
-- Backend: controller, service, repository, routes, schemas, tests
-- Frontend: list, create/edit/view dialogs, service, types
-- Database: Migration file
-
-### Generate with Import Functionality
-
-```bash
-pnpm aegisx-crud budgets --package --with-import
-```
-
-Adds:
-
-- Backend import service with Excel/CSV support
-- Frontend import dialog component
-- Validation and error handling
-- Progress tracking
-
-### Generate with WebSocket Events
-
-```bash
-pnpm aegisx-crud notifications --package --with-events
-```
-
-Adds:
-
-- EventService integration
-- Event emission on create/update/delete
-- Bulk operation events (bulk_started, bulk_progress, bulk_completed)
-- Real-time updates via WebSocket
-
-### Generate with Both Import and Events
-
-```bash
-pnpm aegisx-crud products --package --with-import --with-events
-```
-
-Full-featured CRUD with both import dialog and real-time events.
-
-## Advanced Options
-
-### Dry Run (Preview Without Creating Files)
-
-```bash
-pnpm aegisx-crud articles --package --dry-run
-```
-
-Shows what files would be created/modified without actually creating them.
-
-### Force Overwrite Existing Files
-
-```bash
-pnpm aegisx-crud users --package --force
-```
-
-Overwrites existing files. Use when regenerating after template updates.
-
-### Combine All Flags
-
-```bash
-pnpm aegisx-crud inventory --package --with-import --with-events --force
-```
-
-Generate with all features and force overwrite existing files.
-
-## Common Workflows
-
-### 1. New Feature with Import
-
-```bash
-# Generate CRUD with import dialog
-pnpm aegisx-crud budgets --package --with-import
-
-# Files created:
-# Backend:
-#   - apps/api/src/modules/budgets/budgets.controller.ts
-#   - apps/api/src/modules/budgets/budgets.service.ts
-#   - apps/api/src/modules/budgets/budgets.repository.ts
-#   - apps/api/src/modules/budgets/budgets.routes.ts
-#   - apps/api/src/modules/budgets/budgets.schemas.ts
-#   - apps/api/src/modules/budgets/budgets.spec.ts
-#
-# Frontend:
-#   - apps/web/src/app/features/budgets/budgets-list.component.ts
-#   - apps/web/src/app/features/budgets/budget-dialog.component.ts
-#   - apps/web/src/app/features/budgets/budget-import-dialog.component.ts
-#   - apps/web/src/app/features/budgets/budgets.service.ts
-#   - apps/web/src/app/features/budgets/budgets.types.ts
-#
-# Database:
-#   - apps/api/src/database/migrations/XXX_create_budgets_table.ts
-```
-
-### 2. Real-Time Feature with Events
-
-```bash
-# Generate CRUD with WebSocket events
-pnpm aegisx-crud notifications --package --with-events
-
-# Backend includes:
-# - EventService integration in controller
-# - Event emission on create/update/delete operations
-# - Bulk operation events with progress tracking
-# - Proper error handling for event failures
-#
-# Frontend can subscribe to:
-# - notification:created
-# - notification:updated
-# - notification:deleted
-# - notifications:bulk_started
-# - notifications:bulk_progress
-# - notifications:bulk_completed
-```
-
-### 3. Regenerate Existing Feature
-
-```bash
-# Review changes first
-pnpm aegisx-crud books --package --dry-run
-
-# Check what files would be modified
-# Review the changes carefully
-
-# Force regenerate if satisfied
-pnpm aegisx-crud books --package --force
-```
-
-Useful when:
-
-- Template updates available
-- Need to apply new patterns to existing code
-- Want to standardize older implementations
-
-## Flag Reference
-
-| Flag            | Description                                | Use Case                          |
-| --------------- | ------------------------------------------ | --------------------------------- |
-| `--package`     | Use `.crudgen.json` config                 | ✅ ALWAYS use this flag           |
-| `--with-import` | Add import dialog + backend import service | Bulk data import features         |
-| `--with-events` | Add WebSocket real-time events             | Live updates, notifications       |
-| `--dry-run`     | Preview changes without creating files     | Review before generation          |
-| `--force`       | Overwrite existing files                   | Regenerate after template updates |
-
-## Configuration File
-
-The generator uses `.crudgen.json` in the project root for configuration:
-
-```json
-{
-  "outputDir": "apps/api/src/modules",
-  "frontendOutputDir": "apps/web/src/app/features",
-  "migrationDir": "apps/api/src/database/migrations",
-  "templateDir": "libs/aegisx-crud-generator/templates",
-  "namingConvention": "kebab-case",
-  "features": {
-    "import": false,
-    "events": false,
-    "audit": true,
-    "softDelete": true
-  }
-}
-```
-
-### Configuration Options
-
-- **outputDir**: Backend module output directory
-- **frontendOutputDir**: Frontend feature output directory
-- **migrationDir**: Database migration output directory
-- **templateDir**: Custom template directory (optional)
-- **namingConvention**: File naming convention (kebab-case, camelCase, PascalCase)
-- **features**: Default feature flags
-  - **import**: Enable import functionality by default
-  - **events**: Enable WebSocket events by default
-  - **audit**: Enable audit logging (created_at, updated_at, created_by, updated_by)
-  - **softDelete**: Enable soft delete (deleted_at field)
-
-## Generated File Structure
-
-### Backend Structure
-
-```
-apps/api/src/modules/[entity-name]/
-├── [entity-name].controller.ts    # HTTP endpoints
-├── [entity-name].service.ts       # Business logic
-├── [entity-name].repository.ts    # Database queries
-├── [entity-name].routes.ts        # Route definitions
-├── [entity-name].schemas.ts       # TypeBox schemas
-└── [entity-name].spec.ts          # Unit tests
-```
-
-### Frontend Structure
-
-```
-apps/web/src/app/features/[entity-name]/
-├── [entity-name]-list.component.ts         # List view with table
-├── [entity-name]-dialog.component.ts       # Create/Edit/View dialog
-├── [entity-name]-import-dialog.component.ts # Import dialog (with --with-import)
-├── [entity-name].service.ts                # HTTP service
-└── [entity-name].types.ts                  # TypeScript interfaces
-```
-
-### Database Migration
-
-```
-apps/api/src/database/migrations/
-└── [timestamp]_create_[entity_name]_table.ts
-```
-
-## Best Practices
-
-### 1. Always Use --package Flag
-
-```bash
-# ✅ Correct
-pnpm aegisx-crud books --package
-
-# ❌ Wrong (ignores .crudgen.json config)
-pnpm aegisx-crud books
-```
-
-### 2. Review with Dry Run First
-
-```bash
-# Preview changes first
-pnpm aegisx-crud articles --package --dry-run
-
-# Then generate if satisfied
-pnpm aegisx-crud articles --package
-```
-
-### 3. Use Flags for Specific Features Only
-
-```bash
-# Only add flags when you need them
-pnpm aegisx-crud users --package --with-import
-
-# Don't add unnecessary flags
-pnpm aegisx-crud simple-lookup --package  # No import/events needed
-```
-
-### 4. Backup Before Force Regeneration
-
-```bash
-# Commit your changes first
-git add .
-git commit -m "feat: add custom validations to books module"
-
-# Then force regenerate
-pnpm aegisx-crud books --package --force
-
-# Review changes
-git diff
-
-# If needed, cherry-pick your customizations back
-```
-
-## Troubleshooting
-
-### Error: ".crudgen.json not found"
-
-**Solution**: Ensure you're in the project root directory where `.crudgen.json` exists.
-
-```bash
-# Check current directory
-pwd
-
-# Should be in project root
-cd /path/to/aegisx-starter
-
-# Verify config exists
-cat .crudgen.json
-```
-
-### Error: "Table already exists"
-
-**Solution**: The migration has already been run. Either:
-
-1. Rollback the migration first
-2. Use `--force` to overwrite files (won't re-run migration)
-
-```bash
-# Option 1: Rollback migration
-pnpm db:rollback
-
-# Option 2: Force regenerate (keeps existing table)
-pnpm aegisx-crud books --package --force
-```
-
-### Generated Files Not Matching Expected Pattern
-
-**Solution**: Check your `.crudgen.json` configuration:
-
-```bash
-# Verify config
-cat .crudgen.json
-
-# Check template directory
-ls libs/aegisx-crud-generator/templates/
-```
-
-### Import Dialog Not Generated
-
-**Solution**: Ensure you used the `--with-import` flag:
-
-```bash
-# Regenerate with import flag
-pnpm aegisx-crud products --package --with-import --force
-```
-
-## Examples by Use Case
-
-### Simple Lookup Table
-
-```bash
-# No import, no events - just basic CRUD
-pnpm aegisx-crud categories --package
-```
-
-### Master Data with Import
-
-```bash
-# Enable import for bulk data loading
-pnpm aegisx-crud products --package --with-import
-```
-
-### Real-Time Notifications
-
-```bash
-# Enable events for live updates
-pnpm aegisx-crud notifications --package --with-events
-```
-
-### Full-Featured Transaction Module
-
-```bash
-# Both import and events
-pnpm aegisx-crud invoices --package --with-import --with-events
-```
-
-### Quick Prototype
-
-```bash
-# Dry run to see what would be generated
-pnpm aegisx-crud prototypes --package --dry-run
-```
-
-## Related Documentation
-
-- **[Git Workflow](./GIT_WORKFLOW.md)** - Version release and NPM publishing
-- **[Complete Guide](./README.md)** - Full CRUD generator documentation
-- **[Templates](../../libs/aegisx-crud-generator/templates/)** - Template customization
+Complete command reference for AegisX CRUD Generator (v2.2.0)
 
 ---
 
-**📚 For complete documentation, see `docs/crud-generator/` directory**
+## 🚀 Quick Start
+
+### Most Common Commands
+
+```bash
+# Basic CRUD
+pnpm run crud -- TABLE_NAME --force
+
+# With import
+pnpm run crud:import -- TABLE_NAME --force
+
+# With events
+pnpm run crud:events -- TABLE_NAME --force
+
+# Full package (all features)
+pnpm run crud:full -- TABLE_NAME --force
+```
+
+**CRITICAL**: Always use `--` separator with pnpm scripts!
+
+---
+
+## 📦 Package Scripts
+
+Available scripts in `package.json`:
+
+| Script                             | Command                 | Description                  |
+| ---------------------------------- | ----------------------- | ---------------------------- |
+| `pnpm run crud -- TABLE`           | `./bin/cli.js generate` | Basic CRUD generation        |
+| `pnpm run crud:import -- TABLE`    | + `--with-import`       | With bulk import (Excel/CSV) |
+| `pnpm run crud:events -- TABLE`    | + `--with-events`       | With WebSocket events        |
+| `pnpm run crud:full -- TABLE`      | + `--package full`      | Full feature package         |
+| `pnpm run crud:list`               | `list-tables`           | List database tables         |
+| `pnpm run crud:validate -- MODULE` | `validate`              | Validate module              |
+
+---
+
+## 💻 Direct CLI Usage
+
+Use direct CLI for advanced features or multiple flags:
+
+```bash
+./bin/cli.js generate TABLE_NAME [OPTIONS]
+
+# Or full path
+./libs/aegisx-crud-generator/bin/cli.js generate TABLE_NAME [OPTIONS]
+```
+
+### Examples
+
+```bash
+# Backend with multiple features
+./bin/cli.js generate products --with-import --with-events --force
+
+# Frontend (after backend)
+./bin/cli.js generate products --target frontend --force
+
+# Frontend with import dialog
+./bin/cli.js generate products --target frontend --with-import --force
+
+# Dry run to preview
+./bin/cli.js generate products --dry-run
+
+# Custom output directory
+./bin/cli.js generate products --output ./custom/path --force
+```
+
+---
+
+## 🎯 Available Flags
+
+### Target Selection
+
+| Flag           | Options               | Default   | Description      |
+| -------------- | --------------------- | --------- | ---------------- |
+| `-t, --target` | `backend`, `frontend` | `backend` | What to generate |
+| `-a, --app`    | `api`, `web`, `admin` | `api`     | Target app       |
+| `-o, --output` | `<dir>`               | Auto      | Custom output    |
+
+**Important**: Generate backend FIRST, then frontend
+
+### Feature Package
+
+| Flag        | Options                          | Default    | Description   |
+| ----------- | -------------------------------- | ---------- | ------------- |
+| `--package` | `standard`, `enterprise`, `full` | `standard` | Feature level |
+
+**Packages**:
+
+- **standard**: Basic CRUD
+- **enterprise**: + bulk ops, dropdown API, export
+- **full**: + validation, uniqueness check, advanced search
+
+### Features
+
+| Flag                | Default | Description                            |
+| ------------------- | ------- | -------------------------------------- |
+| `-e, --with-events` | `false` | WebSocket real-time events             |
+| `--with-import`     | `false` | Excel/CSV import                       |
+| `--smart-stats`     | `false` | Auto-detect stats fields               |
+| `--multiple-roles`  | `false` | Generate 3 roles (admin/editor/viewer) |
+
+### Generation Control
+
+| Flag            | Default | Description                    |
+| --------------- | ------- | ------------------------------ |
+| `-f, --force`   | `false` | Overwrite files without prompt |
+| `-d, --dry-run` | `false` | Preview files only             |
+| `--flat`        | `false` | Use flat structure             |
+| `--no-register` | `false` | Skip auto-registration         |
+| `--no-format`   | `false` | Skip prettier                  |
+| `--no-roles`    | `false` | Skip role generation           |
+
+---
+
+## 📋 Common Workflows
+
+### 1. Basic Feature (Backend + Frontend)
+
+```bash
+# Step 1: Backend
+pnpm run crud -- products --force
+
+# Step 2: Frontend
+./bin/cli.js generate products --target frontend --force
+```
+
+### 2. With Import Functionality
+
+```bash
+# Step 1: Backend with import service
+pnpm run crud:import -- budgets --force
+
+# Step 2: Frontend with import dialog
+./bin/cli.js generate budgets --target frontend --with-import --force
+```
+
+### 3. Real-Time Feature
+
+```bash
+# Step 1: Backend with events
+pnpm run crud:events -- notifications --force
+
+# Step 2: Frontend with event handling
+./bin/cli.js generate notifications --target frontend --with-events --force
+```
+
+### 4. Full-Featured Module
+
+```bash
+# Backend - all features
+./bin/cli.js generate orders --package full --with-import --with-events --force
+
+# Frontend - all features
+./bin/cli.js generate orders --target frontend --package full --with-import --with-events --force
+```
+
+### 5. Regenerate After Changes
+
+```bash
+# Preview
+pnpm run crud -- products --dry-run
+
+# Apply
+pnpm run crud -- products --force
+```
+
+---
+
+## 🏷️ Table Name Conventions
+
+Database table names are converted automatically:
+
+| Database Table  | Module Folder    | TypeScript Types | API Routes           |
+| --------------- | ---------------- | ---------------- | -------------------- |
+| `test_products` | `test-products/` | `TestProducts`   | `/api/test-products` |
+| `user_profiles` | `user-profiles/` | `UserProfiles`   | `/api/user-profiles` |
+| `blog_posts`    | `blog-posts/`    | `BlogPosts`      | `/api/blog-posts`    |
+
+```bash
+# Input: database table (snake_case)
+pnpm run crud -- test_products --force
+
+# Generates:
+# - Folder: apps/api/src/modules/test-products/
+# - Types: TestProducts, CreateTestProducts, UpdateTestProducts
+# - Routes: /api/test-products
+```
+
+---
+
+## ✅ Before Generating
+
+```bash
+# 1. List available tables
+pnpm run crud:list
+
+# 2. Run migrations if needed
+pnpm run db:migrate
+
+# 3. Preview with dry run
+pnpm run crud -- TABLE_NAME --dry-run
+
+# 4. Generate with force
+pnpm run crud -- TABLE_NAME --force
+```
+
+---
+
+## ❌ Common Mistakes
+
+### Missing `--` Separator
+
+```bash
+# ❌ WRONG - Arguments ignored
+pnpm run crud products --force
+
+# ✅ CORRECT - With double dash
+pnpm run crud -- products --force
+```
+
+### Non-existent Command
+
+```bash
+# ❌ WRONG - Command doesn't exist
+pnpm aegisx-crud products
+
+# ✅ CORRECT - Use pnpm run crud
+pnpm run crud -- products --force
+```
+
+### Double Command
+
+```bash
+# ❌ WRONG - Causes "generate generate"
+pnpm run crud generate products --force
+
+# ✅ CORRECT
+pnpm run crud -- products --force
+```
+
+### Both Targets at Once
+
+```bash
+# ❌ WRONG - Can't do both
+./bin/cli.js generate products --target backend --target frontend
+
+# ✅ CORRECT - Run twice
+pnpm run crud -- products --force
+./bin/cli.js generate products --target frontend --force
+```
+
+### Missing `--force`
+
+```bash
+# Without --force, you'll get prompted
+pnpm run crud -- products
+
+# Add --force to skip prompts
+pnpm run crud -- products --force
+```
+
+---
+
+## 🔧 Troubleshooting
+
+### Error: "Table not found"
+
+```bash
+# Check if table exists
+pnpm run crud:list
+
+# Ensure migrations ran
+pnpm run db:migrate
+```
+
+### Error: "Arguments not recognized"
+
+Check for missing `--` separator:
+
+```bash
+# ❌ WRONG
+pnpm run crud products --force
+
+# ✅ CORRECT
+pnpm run crud -- products --force
+```
+
+### Frontend files not generated
+
+Backend must exist first:
+
+```bash
+# 1. Backend
+pnpm run crud -- products --force
+
+# 2. Then frontend
+./bin/cli.js generate products --target frontend --force
+```
+
+### Files not auto-registered
+
+Check if auto-registration succeeded:
+
+```bash
+# Re-generate with force to trigger registration
+pnpm run crud -- products --force
+```
+
+---
+
+## 📚 Command Reference
+
+### All Available Commands
+
+```bash
+# GENERATE commands
+generate [TABLE]             # Generate CRUD module
+domain <NAME>                # Generate domain module
+route <DOMAIN/ROUTE>         # Add route to domain
+
+# INFORMATION commands
+list-tables                  # List database tables
+packages                     # Show feature packages
+validate <MODULE>            # Validate module
+
+# TEMPLATE commands
+templates list [TYPE]        # List templates
+templates set-default        # Set default template
+templates add                # Add custom template
+templates remove             # Remove custom template
+
+# CONFIG commands
+config init                  # Initialize .crudgen.json
+config show                  # Show current config
+```
+
+---
+
+## 🎓 Key Takeaways
+
+✅ **DO:**
+
+- Use `pnpm run crud -- TABLE` for basic generation
+- Use `pnpm run crud:import --` for import features
+- Use `./bin/cli.js generate` for advanced options
+- Generate **backend FIRST**, then frontend
+- Use table names in `snake_case` (e.g., `test_products`)
+- Add `--force` to avoid prompts
+- Check `pnpm run crud:list` before generating
+
+❌ **DON'T:**
+
+- Use `pnpm aegisx-crud` (doesn't exist)
+- Forget the `--` separator with pnpm scripts
+- Use `--entity` flag (doesn't exist)
+- Generate frontend without backend
+- Use PascalCase or kebab-case for table names
+- Assume `--target frontend` is default (it's not)
+
+---
+
+## 📖 Complete Guides
+
+- [README.md](./README.md) - Full documentation
+- [GIT_WORKFLOW.md](./GIT_WORKFLOW.md) - Version release & NPM publishing
+
+---
+
+**Generator Version**: 2.2.0
+**Last Updated**: November 6, 2025
+**Status**: ✅ Production Ready
