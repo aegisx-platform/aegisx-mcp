@@ -39,7 +39,7 @@ function analyzeImportFields(schema, tableName, moduleName, ModuleName) {
 
     // Detect field characteristics
     const fieldType = detectFieldType(column);
-    const isUnique = detectUniqueField(column, fieldName);
+    const isUnique = detectUniqueField(column, fieldName, schema);
     const isEmail = detectEmailField(fieldName, column);
     const isPhone = detectPhoneField(fieldName);
     const isUrl = detectUrlField(fieldName);
@@ -272,28 +272,23 @@ function detectFieldType(column) {
 
 /**
  * Detect if field should have uniqueness validation
+ * Only checks actual database schema constraints - NO guessing from field names
  */
-function detectUniqueField(column, fieldName) {
-  // Check database unique constraint
-  if (column.unique === true) {
+function detectUniqueField(column, fieldName, schema) {
+  // Check ONLY from database schema unique constraints
+  // This is the source of truth for which fields are actually unique
+  if (schema.uniqueConstraints?.singleField?.includes(fieldName)) {
     return true;
   }
 
-  // Check common unique field patterns
-  const uniquePatterns = [
-    'email',
-    'username',
-    'code',
-    'slug',
-    'sku',
-    'isbn',
-    'serial',
-    'license',
-  ];
+  // Check composite unique constraints (single-field part of composite key)
+  if (schema.uniqueConstraints?.composite) {
+    return schema.uniqueConstraints.composite.some(
+      (fields) => fields.length === 1 && fields[0] === fieldName,
+    );
+  }
 
-  return uniquePatterns.some((pattern) =>
-    fieldName.toLowerCase().includes(pattern),
-  );
+  return false;
 }
 
 /**
