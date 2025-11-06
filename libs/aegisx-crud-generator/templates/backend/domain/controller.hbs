@@ -275,10 +275,10 @@ export class {{ModuleName}}Controller {
     {{#if withEvents}}
 
     // Emit bulk created event for real-time updates
-    if (result.successful && result.successful.length > 0) {
+    if (result.created && result.created.length > 0) {
       this.eventService.for('{{moduleName}}', 'bulk').emitCustom('bulkCreated', {
         count: result.summary.successful,
-        items: result.successful
+        items: result.created
       }, 'normal');
     }
     {{/if}}
@@ -308,10 +308,10 @@ export class {{ModuleName}}Controller {
     {{#if withEvents}}
 
     // Emit bulk updated event for real-time updates
-    if (result.successful && result.successful.length > 0) {
+    if (result.updated && result.updated.length > 0) {
       this.eventService.for('{{moduleName}}', 'bulk').emitCustom('bulkUpdated', {
         count: result.summary.successful,
-        items: result.successful
+        items: result.updated
       }, 'normal');
     }
     {{/if}}
@@ -333,10 +333,10 @@ export class {{ModuleName}}Controller {
     {{#if withEvents}}
 
     // Emit bulk deleted event for real-time updates
-    if (result.successful && result.successful.length > 0) {
+    if (result.deleted && result.deleted.length > 0) {
       this.eventService.for('{{moduleName}}', 'bulk').emitCustom('bulkDeleted', {
         count: result.summary.successful,
-        ids: result.successful
+        ids: result.deleted
       }, 'normal');
     }
     {{/if}}
@@ -370,11 +370,11 @@ export class {{ModuleName}}Controller {
     {{#if withEvents}}
 
     // Emit bulk status updated event for real-time updates
-    if (result.successful && result.successful.length > 0) {
+    if (result.updated && result.updated.length > 0) {
       this.eventService.for('{{moduleName}}', 'bulk').emitCustom('bulkStatusUpdated', {
         count: result.summary.successful,
         status: statusData.status,
-        items: result.successful
+        items: result.updated
       }, 'normal');
     }
     {{/if}}
