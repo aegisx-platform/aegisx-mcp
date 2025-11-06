@@ -122,6 +122,7 @@ async function generateCrudModule(tableName, options = {}) {
     tableName,
     moduleName: toCamelCase(tableName),
     ModuleName: toPascalCase(tableName),
+    moduleNameKebab: toKebabCase(tableName),
     schema,
     withEvents: withEvents || options.withImport || false, // Auto-enable events when using import
     withImport: options.withImport || false,
@@ -261,11 +262,11 @@ async function generateCrudModule(tableName, options = {}) {
     templates.push(
       {
         template: 'backend/import-service.hbs',
-        output: `${context.moduleName}/services/${context.moduleName}-import.service.ts`,
+        output: `${context.moduleName}/services/${context.moduleNameKebab}-import.service.ts`,
       },
       {
         template: 'backend/import-routes.hbs',
-        output: `${context.moduleName}/routes/${context.moduleName}-import.routes.ts`,
+        output: `${context.moduleName}/routes/${context.moduleNameKebab}-import.routes.ts`,
       },
     );
   }
@@ -1362,6 +1363,7 @@ async function generateDomainModule(domainName, options = {}) {
     domainName,
     moduleName: toCamelCase(domainName),
     ModuleName: toPascalCase(domainName),
+    moduleNameKebab: toKebabCase(domainName),
     schema,
     withEvents: withEvents || options.withImport || false, // Auto-enable events when using import
     withImport: options.withImport || false,
@@ -1514,11 +1516,11 @@ async function generateDomainModule(domainName, options = {}) {
     templates.push(
       {
         template: 'backend/import-service.hbs',
-        output: `${context.moduleName}/services/${context.moduleName}-import.service.ts`,
+        output: `${context.moduleName}/services/${context.moduleNameKebab}-import.service.ts`,
       },
       {
         template: 'backend/import-routes.hbs',
-        output: `${context.moduleName}/routes/${context.moduleName}-import.routes.ts`,
+        output: `${context.moduleName}/routes/${context.moduleNameKebab}-import.routes.ts`,
       },
     );
   }
@@ -1756,6 +1758,7 @@ async function addRouteToDomain(domainName, routeName, options = {}) {
     domainName,
     moduleName: toCamelCase(domainName),
     ModuleName: toPascalCase(domainName),
+    moduleNameKebab: toKebabCase(domainName),
     currentRoute: {
       name: routeName,
       camelName: toCamelCase(routeName),
