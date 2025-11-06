@@ -45,6 +45,7 @@ function analyzeImportFields(schema, tableName, moduleName, ModuleName) {
     const isUrl = detectUrlField(fieldName);
     const isBoolean = column.type === 'boolean';
     const isDate = column.type === 'date' || column.type === 'timestamp';
+    const isJson = column.type === 'json' || column.type === 'jsonb';
 
     // Create base field config
     const fieldConfig = {
@@ -181,6 +182,34 @@ function analyzeImportFields(schema, tableName, moduleName, ModuleName) {
       if (!isNaN(parsed.getTime())) return parsed;
     }
     return null;`,
+        });
+      }
+    }
+
+    // Handle JSON fields (add transformer)
+    if (isJson) {
+      fieldConfig.hasTransformer = true;
+      fieldConfig.transformerName = `transform${toPascalCase(fieldName)}`;
+
+      if (
+        !transformers.find((t) => t.transformerName === 'transformJsonField')
+      ) {
+        transformers.push({
+          name: 'jsonField',
+          transformerName: 'transformJsonField',
+          returnType: 'any',
+          transformLogic: `
+    if (!value) return undefined;
+    if (typeof value === 'object') return value;
+    if (typeof value === 'string') {
+      try {
+        return JSON.parse(value);
+      } catch {
+        // If not valid JSON, treat as empty object
+        return undefined;
+      }
+    }
+    return undefined;`,
         });
       }
     }
