@@ -412,7 +412,7 @@ export class AuthService {
 
     // Extract and format permission strings (resource:action)
     const allPermissions = permissionsResult.map(
-      (row: any) => `${row.resource}:${row.action}`
+      (row: any) => `${row.resource}:${row.action}`,
     );
 
     // Return deduplicated permissions

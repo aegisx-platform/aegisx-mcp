@@ -14,7 +14,7 @@ import {
   TestProduct,
   UpdateTestProductRequest,
 } from '../types/test-products.types';
-import { TestProductStateManager } from '../services/test-products-state-manager.service';
+// import { TestProductStateManager } from '../services/test-products-state-manager.service';
 import {
   TestProductFormComponent,
   TestProductFormData,
@@ -178,7 +178,7 @@ export interface TestProductEditDialogData {
 })
 export class TestProductEditDialogComponent implements OnInit {
   private testProductsService = inject(TestProductService);
-  private testProductStateManager = inject(TestProductStateManager);
+  // private testProductStateManager = inject(TestProductStateManager);
   private snackBar = inject(MatSnackBar);
   private dialogRef = inject(MatDialogRef<TestProductEditDialogComponent>);
   public data = inject<TestProductEditDialogData>(MAT_DIALOG_DATA);

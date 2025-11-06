@@ -71,7 +71,7 @@ export async function up(knex: Knex): Promise<void> {
     knex,
     'testProducts',
     'TestProducts module role',
-    'admin'
+    'admin',
   );
 
   // Step 2: Create permissions and assign to testProducts role
@@ -85,7 +85,9 @@ export async function up(knex: Knex): Promise<void> {
     ],
   });
 
-  console.log('[Migration] TestProducts role and permissions created successfully');
+  console.log(
+    '[Migration] TestProducts role and permissions created successfully',
+  );
 }
 
 /**

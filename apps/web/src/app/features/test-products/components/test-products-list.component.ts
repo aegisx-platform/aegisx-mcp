@@ -53,8 +53,11 @@ import {
   SharedExportComponent,
 } from '../../../shared/components/shared-export/shared-export.component';
 import { TestProductService } from '../services/test-products.service';
-import { TestProduct, ListTestProductQuery } from '../types/test-products.types';
-import { TestProductStateManager } from '../services/test-products-state-manager.service';
+import {
+  TestProduct,
+  ListTestProductQuery,
+} from '../types/test-products.types';
+// import { TestProductStateManager } from '../services/test-products-state-manager.service';
 import { TestProductCreateDialogComponent } from './test-products-create.dialog';
 import {
   TestProductEditDialogComponent,
@@ -110,7 +113,7 @@ import { TestProductsListHeaderComponent } from './test-products-list-header.com
 })
 export class TestProductsListComponent {
   testProductsService = inject(TestProductService);
-  testProductStateManager = inject(TestProductStateManager);
+  // testProductStateManager = inject(TestProductStateManager);
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
   private axDialog = inject(AxDialogService);
@@ -348,7 +351,6 @@ export class TestProductsListComponent {
     this.is_featuredInputSignal.set(value);
   }
 
-
   // Stats from API (should come from dedicated stats endpoint)
   stats = computed(() => ({
     total: this.testProductsService.totalTestProduct(),
@@ -359,7 +361,11 @@ export class TestProductsListComponent {
 
   // Export configuration
   exportServiceAdapter: ExportService = {
-    export: (options: ExportOptions) => this.testProductsService.exportTestProduct(options),
+    export: (options: ExportOptions) => {
+      // TODO: exportTestProduct() method not yet implemented
+      // this.testProductsService.exportTestProduct(options),
+      throw new Error('Export functionality coming soon');
+    },
   };
 
   availableExportFields = [
@@ -391,7 +397,8 @@ export class TestProductsListComponent {
   // --- Effect: reload test_products on sort/page/search/filter change ---
   constructor() {
     // Initialize real-time state manager
-    this.testProductStateManager.initialize();
+    // TODO: testProductStateManager not yet implemented
+    // this.testProductStateManager.initialize();
 
     // 🔧 OPTIONAL: Uncomment for real-time CRUD updates
     // By default, list uses reload trigger for data accuracy (HIS mode)
@@ -733,16 +740,23 @@ export class TestProductsListComponent {
   }
 
   onDeleteTestProduct(testProduct: TestProduct) {
-    const itemName = (testProduct as any).name || (testProduct as any).title || 'testproduct';
+    const itemName =
+      (testProduct as any).name || (testProduct as any).title || 'testproduct';
     this.axDialog.confirmDelete(itemName).subscribe(async (confirmed) => {
       if (confirmed) {
         try {
           // Use state manager's optimistic delete for real-time UI updates
-          await this.testProductStateManager.optimisticDelete(testProduct.id);
+          // TODO: testProductStateManager not yet implemented
+          // await this.testProductStateManager.optimisticDelete(testProduct.id);
+
+          // For now, call delete directly and reload
+          await this.testProductsService.deleteTestProduct(testProduct.id);
+
           this.snackBar.open('TestProduct deleted successfully', 'Close', {
             duration: 3000,
           });
-          // No need to reload - state manager auto-updates dataSource via effect
+          // Reload the list to reflect the deletion
+          this.reloadTrigger.update((n) => n + 1);
         } catch {
           this.snackBar.open('Failed to delete testproduct', 'Close', {
             duration: 3000,

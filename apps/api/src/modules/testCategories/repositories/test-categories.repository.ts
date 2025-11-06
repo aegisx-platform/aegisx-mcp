@@ -1,4 +1,8 @@
-import { BaseRepository, BaseListQuery, PaginatedListResult } from '../../../shared/repositories/base.repository';
+import {
+  BaseRepository,
+  BaseListQuery,
+  PaginatedListResult,
+} from '../../../shared/repositories/base.repository';
 import type { Knex } from 'knex';
 import {
   type CreateTestCategories,
@@ -6,7 +10,7 @@ import {
   type TestCategories,
   type GetTestCategoriesQuery,
   type ListTestCategoriesQuery,
-  type TestCategoriesEntity
+  type TestCategoriesEntity,
 } from '../types/test-categories.types';
 
 export interface TestCategoriesListQuery extends BaseListQuery {
@@ -31,8 +35,11 @@ export interface TestCategoriesListQuery extends BaseListQuery {
   updated_by?: string;
 }
 
-export class TestCategoriesRepository extends BaseRepository<TestCategories, CreateTestCategories, UpdateTestCategories> {
-
+export class TestCategoriesRepository extends BaseRepository<
+  TestCategories,
+  CreateTestCategories,
+  UpdateTestCategories
+> {
   constructor(knex: Knex) {
     super(
       knex,
@@ -49,7 +56,7 @@ export class TestCategoriesRepository extends BaseRepository<TestCategories, Cre
         hasUpdatedAt: true,
         hasCreatedBy: true,
         hasUpdatedBy: true,
-      }
+      },
     );
   }
 
@@ -75,12 +82,14 @@ export class TestCategoriesRepository extends BaseRepository<TestCategories, Cre
       updated_by: dbRow.updated_by,
       deleted_at: dbRow.deleted_at,
       created_at: dbRow.created_at,
-      updated_at: dbRow.updated_at
+      updated_at: dbRow.updated_at,
     };
   }
 
   // Transform DTO to database format
-  transformToDb(dto: CreateTestCategories | UpdateTestCategories): Partial<TestCategoriesEntity> {
+  transformToDb(
+    dto: CreateTestCategories | UpdateTestCategories,
+  ): Partial<TestCategoriesEntity> {
     const transformed: Partial<TestCategoriesEntity> = {};
 
     if ('code' in dto && dto.code !== undefined) {
@@ -126,7 +135,10 @@ export class TestCategoriesRepository extends BaseRepository<TestCategories, Cre
       transformed.updated_by = dto.updated_by;
     }
     if ('deleted_at' in dto && dto.deleted_at !== undefined) {
-      transformed.deleted_at = typeof dto.deleted_at === 'string' ? new Date(dto.deleted_at) : dto.deleted_at;
+      transformed.deleted_at =
+        typeof dto.deleted_at === 'string'
+          ? new Date(dto.deleted_at)
+          : dto.deleted_at;
     }
     // updated_at is handled automatically by database
 
@@ -135,14 +147,16 @@ export class TestCategoriesRepository extends BaseRepository<TestCategories, Cre
 
   // Custom query with joins if needed
   getJoinQuery() {
-    return this.knex('test_categories')
-      .select('test_categories.*');
-      // Add joins here if needed
-      // .leftJoin('other_table', 'test_categories.foreign_key', 'other_table.id')
+    return this.knex('test_categories').select('test_categories.*');
+    // Add joins here if needed
+    // .leftJoin('other_table', 'test_categories.foreign_key', 'other_table.id')
   }
 
   // Apply custom filters
-  protected applyCustomFilters(query: any, filters: TestCategoriesListQuery): void {
+  protected applyCustomFilters(
+    query: any,
+    filters: TestCategoriesListQuery,
+  ): void {
     // Apply base filters first
     super.applyCustomFilters(query, filters);
 
@@ -169,10 +183,18 @@ export class TestCategoriesRepository extends BaseRepository<TestCategories, Cre
       query.where('test_categories.display_order', filters.display_order);
     }
     if (filters.display_order_min !== undefined) {
-      query.where('test_categories.display_order', '>=', filters.display_order_min);
+      query.where(
+        'test_categories.display_order',
+        '>=',
+        filters.display_order_min,
+      );
     }
     if (filters.display_order_max !== undefined) {
-      query.where('test_categories.display_order', '<=', filters.display_order_max);
+      query.where(
+        'test_categories.display_order',
+        '<=',
+        filters.display_order_max,
+      );
     }
     if (filters.item_count !== undefined) {
       query.where('test_categories.item_count', filters.item_count);
@@ -187,10 +209,18 @@ export class TestCategoriesRepository extends BaseRepository<TestCategories, Cre
       query.where('test_categories.discount_rate', filters.discount_rate);
     }
     if (filters.discount_rate_min !== undefined) {
-      query.where('test_categories.discount_rate', '>=', filters.discount_rate_min);
+      query.where(
+        'test_categories.discount_rate',
+        '>=',
+        filters.discount_rate_min,
+      );
     }
     if (filters.discount_rate_max !== undefined) {
-      query.where('test_categories.discount_rate', '<=', filters.discount_rate_max);
+      query.where(
+        'test_categories.discount_rate',
+        '<=',
+        filters.discount_rate_max,
+      );
     }
     if (filters.status !== undefined) {
       query.where('test_categories.status', filters.status);
@@ -209,17 +239,19 @@ export class TestCategoriesRepository extends BaseRepository<TestCategories, Cre
       if (sort.includes(',')) {
         // Multiple sort format: field1:desc,field2:asc,field3:desc
         const sortPairs = sort.split(',');
-        sortPairs.forEach(pair => {
+        sortPairs.forEach((pair) => {
           const [field, direction] = pair.split(':');
           const mappedField = this.getSortField(field.trim());
-          const sortDirection = direction?.trim().toLowerCase() === 'asc' ? 'asc' : 'desc';
+          const sortDirection =
+            direction?.trim().toLowerCase() === 'asc' ? 'asc' : 'desc';
           query.orderBy(mappedField, sortDirection);
         });
       } else {
         // Single sort field
         const [field, direction] = sort.split(':');
         const mappedField = this.getSortField(field.trim());
-        const sortDirection = direction?.trim().toLowerCase() === 'asc' ? 'asc' : 'desc';
+        const sortDirection =
+          direction?.trim().toLowerCase() === 'asc' ? 'asc' : 'desc';
         query.orderBy(mappedField, sortDirection);
       }
     } else {
@@ -248,7 +280,7 @@ export class TestCategoriesRepository extends BaseRepository<TestCategories, Cre
       updatedBy: 'test_categories.updated_by',
       deletedAt: 'test_categories.deleted_at',
       createdAt: 'test_categories.created_at',
-      updatedAt: 'test_categories.updated_at'
+      updatedAt: 'test_categories.updated_at',
     };
 
     return sortFields[sortBy] || 'test_categories.id';
@@ -257,15 +289,17 @@ export class TestCategoriesRepository extends BaseRepository<TestCategories, Cre
   // Extended find method with options
   async findById(
     id: number | string,
-    options: GetTestCategoriesQuery = {}
+    options: GetTestCategoriesQuery = {},
   ): Promise<TestCategories | null> {
     let query = this.getJoinQuery();
     query = query.where('test_categories.id', id);
 
     // Handle include options
     if (options.include) {
-      const includes = Array.isArray(options.include) ? options.include : [options.include];
-      includes.forEach(relation => {
+      const includes = Array.isArray(options.include)
+        ? options.include
+        : [options.include];
+      includes.forEach((relation) => {
         // TODO: Add join logic for relationships
         // Example: if (relation === 'category') query.leftJoin('categories', 'items.category_id', 'categories.id');
       });
@@ -276,10 +310,11 @@ export class TestCategoriesRepository extends BaseRepository<TestCategories, Cre
   }
 
   // Extended list method with specific query type
-  async list(query: TestCategoriesListQuery = {}): Promise<PaginatedListResult<TestCategories>> {
+  async list(
+    query: TestCategoriesListQuery = {},
+  ): Promise<PaginatedListResult<TestCategories>> {
     return super.list(query);
   }
-
 
   // Business-specific methods are merged with unique constraint detection below
 
@@ -305,7 +340,6 @@ export class TestCategoriesRepository extends BaseRepository<TestCategories, Cre
     return row ? this.transformToEntity(row) : null;
   }
 
-
   // ===== ERROR HANDLING: DELETE VALIDATION METHODS =====
 
   // Basic Statistics - count only
@@ -313,9 +347,7 @@ export class TestCategoriesRepository extends BaseRepository<TestCategories, Cre
     total: number;
   }> {
     const stats: any = await this.knex('test_categories')
-      .select([
-        this.knex.raw('COUNT(*) as total')
-      ])
+      .select([this.knex.raw('COUNT(*) as total')])
       .first();
 
     return {
@@ -325,16 +357,22 @@ export class TestCategoriesRepository extends BaseRepository<TestCategories, Cre
 
   // Bulk operations with better type safety
   async createMany(data: CreateTestCategories[]): Promise<TestCategories[]> {
-    const transformedData = data.map(item => this.transformToDb(item));
-    const rows = await this.knex('test_categories').insert(transformedData).returning('*');
-    return rows.map(row => this.transformToEntity(row));
+    const transformedData = data.map((item) => this.transformToDb(item));
+    const rows = await this.knex('test_categories')
+      .insert(transformedData)
+      .returning('*');
+    return rows.map((row) => this.transformToEntity(row));
   }
 
   // Transaction support for complex operations
-  async createWithTransaction(data: CreateTestCategories): Promise<TestCategories> {
+  async createWithTransaction(
+    data: CreateTestCategories,
+  ): Promise<TestCategories> {
     return this.withTransaction(async (trx) => {
       const transformedData = this.transformToDb(data);
-      const [row] = await trx('test_categories').insert(transformedData).returning('*');
+      const [row] = await trx('test_categories')
+        .insert(transformedData)
+        .returning('*');
       return this.transformToEntity(row);
     });
   }

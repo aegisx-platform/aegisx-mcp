@@ -7,7 +7,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { TestProductService } from '../services/test-products.service';
 import { CreateTestProductRequest } from '../types/test-products.types';
-import { TestProductStateManager } from '../services/test-products-state-manager.service';
+// import { TestProductStateManager } from '../services/test-products-state-manager.service';
 import {
   TestProductFormComponent,
   TestProductFormData,
@@ -166,7 +166,7 @@ import {
 })
 export class TestProductCreateDialogComponent {
   private testProductsService = inject(TestProductService);
-  private testProductStateManager = inject(TestProductStateManager);
+  // private testProductStateManager = inject(TestProductStateManager);
   private snackBar = inject(MatSnackBar);
   private dialogRef = inject(MatDialogRef<TestProductCreateDialogComponent>);
 

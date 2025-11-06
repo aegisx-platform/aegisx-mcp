@@ -4,7 +4,7 @@ const client = new pg.Client({
   port: 5432,
   database: 'aegisx_db',
   user: 'postgres',
-  password: 'postgres'
+  password: 'postgres',
 });
 
 client.connect(async (err) => {
@@ -23,7 +23,7 @@ client.connect(async (err) => {
     console.log('─'.repeat(50));
     const roleResult = await client.query(
       'SELECT id, name, description, parent_id FROM roles WHERE name = $1',
-      ['testProducts']
+      ['testProducts'],
     );
 
     if (roleResult.rows.length > 0) {
@@ -37,7 +37,7 @@ client.connect(async (err) => {
       if (role.parent_id) {
         const parentResult = await client.query(
           'SELECT name FROM roles WHERE id = $1',
-          [role.parent_id]
+          [role.parent_id],
         );
         if (parentResult.rows.length > 0) {
           console.log(`   Parent Role: ${parentResult.rows[0].name} ✓`);
@@ -52,7 +52,7 @@ client.connect(async (err) => {
     console.log('─'.repeat(50));
     const permResult = await client.query(
       'SELECT id, resource, action, description FROM permissions WHERE resource = $1 ORDER BY action',
-      ['testProducts']
+      ['testProducts'],
     );
 
     if (permResult.rows.length > 0) {
@@ -83,7 +83,7 @@ client.connect(async (err) => {
     if (mappingResult.rows.length > 0) {
       console.log(`✅ Mappings created: ${mappingResult.rows.length}`);
       const groupedByRole = {};
-      mappingResult.rows.forEach(row => {
+      mappingResult.rows.forEach((row) => {
         if (!groupedByRole[row.role_name]) {
           groupedByRole[row.role_name] = [];
         }
@@ -92,7 +92,7 @@ client.connect(async (err) => {
 
       Object.entries(groupedByRole).forEach(([roleName, permissions]) => {
         console.log(`\n   Role: ${roleName}`);
-        permissions.forEach(perm => {
+        permissions.forEach((perm) => {
           console.log(`      ✓ ${perm}`);
         });
       });
@@ -105,12 +105,12 @@ client.connect(async (err) => {
     console.log('─'.repeat(50));
     const migResult = await client.query(
       'SELECT batch, name FROM knex_migrations WHERE name LIKE $1 ORDER BY id DESC',
-      ['%testProducts%']
+      ['%testProducts%'],
     );
 
     if (migResult.rows.length > 0) {
       console.log(`✅ Migration recorded:`);
-      migResult.rows.forEach(row => {
+      migResult.rows.forEach((row) => {
         console.log(`   Batch ${row.batch}: ${row.name}`);
       });
     }
@@ -124,7 +124,6 @@ client.connect(async (err) => {
     console.log(`  ✓ Permissions created: ${permResult.rows.length}`);
     console.log(`  ✓ Role-Permission mappings: ${mappingResult.rows.length}`);
     console.log(`  ✓ Role hierarchy: testProducts → admin`);
-
   } catch (error) {
     console.error('Error:', error.message);
   } finally {

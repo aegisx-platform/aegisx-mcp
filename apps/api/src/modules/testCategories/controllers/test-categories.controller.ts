@@ -1,13 +1,16 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { Static } from '@sinclair/typebox';
 import { TestCategoriesService } from '../services/test-categories.service';
-import { CreateTestCategories, UpdateTestCategories } from '../types/test-categories.types';
+import {
+  CreateTestCategories,
+  UpdateTestCategories,
+} from '../types/test-categories.types';
 import {
   CreateTestCategoriesSchema,
   UpdateTestCategoriesSchema,
   TestCategoriesIdParamSchema,
   GetTestCategoriesQuerySchema,
-  ListTestCategoriesQuerySchema
+  ListTestCategoriesQuerySchema,
 } from '../schemas/test-categories.schemas';
 import { TestCategoriesImportService } from '../services/test-categories-import.service';
 import {
@@ -22,7 +25,7 @@ import { EventService } from '../../../shared/websocket/event.service';
  * TestCategories Controller
  * Package: standard
  * Has Status Field: true
- * 
+ *
  * Following Fastify controller patterns:
  * - Proper request/reply typing with Static<typeof Schema>
  * - Schema-based validation integration
@@ -33,7 +36,7 @@ export class TestCategoriesController {
   constructor(
     private testCategoriesService: TestCategoriesService,
     private importService: TestCategoriesImportService,
-    private eventService: EventService
+    private eventService: EventService,
   ) {}
 
   /**
@@ -41,8 +44,10 @@ export class TestCategoriesController {
    * POST /testCategories
    */
   async create(
-    request: FastifyRequest<{ Body: Static<typeof CreateTestCategoriesSchema> }>,
-    reply: FastifyReply
+    request: FastifyRequest<{
+      Body: Static<typeof CreateTestCategoriesSchema>;
+    }>,
+    reply: FastifyReply,
   ) {
     request.log.info({ body: request.body }, 'Creating testCategories');
 
@@ -58,9 +63,14 @@ export class TestCategoriesController {
       .for('test-categories', 'test-categories')
       .emitCustom('created', testCategories, 'normal');
 
-    request.log.info({ testCategoriesId: testCategories.id }, 'TestCategories created successfully');
+    request.log.info(
+      { testCategoriesId: testCategories.id },
+      'TestCategories created successfully',
+    );
 
-    return reply.code(201).success(testCategories, 'TestCategories created successfully');
+    return reply
+      .code(201)
+      .success(testCategories, 'TestCategories created successfully');
   }
 
   /**
@@ -72,12 +82,15 @@ export class TestCategoriesController {
       Params: Static<typeof TestCategoriesIdParamSchema>;
       Querystring: Static<typeof GetTestCategoriesQuerySchema>;
     }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ) {
     const { id } = request.params;
     request.log.info({ testCategoriesId: id }, 'Fetching testCategories');
 
-    const testCategories = await this.testCategoriesService.findById(id, request.query);
+    const testCategories = await this.testCategoriesService.findById(
+      id,
+      request.query,
+    );
 
     return reply.success(testCategories);
   }
@@ -88,50 +101,100 @@ export class TestCategoriesController {
    * Supports: ?fields=id,name&limit=100 (Security hardened)
    */
   async findMany(
-    request: FastifyRequest<{ Querystring: Static<typeof ListTestCategoriesQuerySchema> }>,
-    reply: FastifyReply
+    request: FastifyRequest<{
+      Querystring: Static<typeof ListTestCategoriesQuerySchema>;
+    }>,
+    reply: FastifyReply,
   ) {
     request.log.info({ query: request.query }, 'Fetching testCategories list');
 
     // 🛡️ Security: Extract and validate parameters
     const { fields, ...queryParams } = request.query;
-    
+
     // 🛡️ Security: Define allowed fields by role
     const SAFE_FIELDS = {
       public: ['id', 'code', 'created_at'],
-      user: ['id', 'code', 'id', 'code', 'name', 'slug', 'description', 'is_active', 'is_featured', 'display_order', 'item_count', 'discount_rate', 'metadata', 'settings', 'status', 'created_by', 'updated_by', 'created_at', 'updated_at', 'created_at'],
-      admin: ['id', 'code', 'name', 'slug', 'description', 'is_active', 'is_featured', 'display_order', 'item_count', 'discount_rate', 'metadata', 'settings', 'status', 'created_by', 'updated_by', 'deleted_at', 'created_at', 'updated_at', ]
+      user: [
+        'id',
+        'code',
+        'id',
+        'code',
+        'name',
+        'slug',
+        'description',
+        'is_active',
+        'is_featured',
+        'display_order',
+        'item_count',
+        'discount_rate',
+        'metadata',
+        'settings',
+        'status',
+        'created_by',
+        'updated_by',
+        'created_at',
+        'updated_at',
+        'created_at',
+      ],
+      admin: [
+        'id',
+        'code',
+        'name',
+        'slug',
+        'description',
+        'is_active',
+        'is_featured',
+        'display_order',
+        'item_count',
+        'discount_rate',
+        'metadata',
+        'settings',
+        'status',
+        'created_by',
+        'updated_by',
+        'deleted_at',
+        'created_at',
+        'updated_at',
+      ],
     };
-    
+
     // 🛡️ Security: Get user role (default to public for safety)
     const userRole = request.user?.role || 'public';
     const allowedFields = SAFE_FIELDS[userRole] || SAFE_FIELDS.public;
-    
+
     // 🛡️ Security: Filter requested fields against whitelist
-    const safeFields = fields ? fields.filter(field => allowedFields.includes(field)) : undefined;
-    
+    const safeFields = fields
+      ? fields.filter((field) => allowedFields.includes(field))
+      : undefined;
+
     // 🛡️ Security: Log suspicious requests
-    if (fields && fields.some(field => !allowedFields.includes(field))) {
-      request.log.warn({
-        user: request.user?.id,
-        requestedFields: fields,
-        allowedFields,
-        ip: request.ip
-      }, 'Suspicious field access attempt detected');
+    if (fields && fields.some((field) => !allowedFields.includes(field))) {
+      request.log.warn(
+        {
+          user: request.user?.id,
+          requestedFields: fields,
+          allowedFields,
+          ip: request.ip,
+        },
+        'Suspicious field access attempt detected',
+      );
     }
 
     // Get testCategories list with field filtering
     const result = await this.testCategoriesService.findMany({
       ...queryParams,
-      fields: safeFields
+      fields: safeFields,
     });
 
-    request.log.info({ 
-      count: result.data.length, 
-      total: result.pagination.total,
-      fieldsRequested: fields?.length || 0,
-      fieldsAllowed: safeFields?.length || 'all'
-    }, 'TestCategories list fetched');
+    request.log.info(
+      {
+        count: result.data.length,
+        total: result.pagination.total,
+        fieldsRequested: fields?.length || 0,
+        fieldsAllowed: safeFields?.length || 'all',
+      },
+      'TestCategories list fetched',
+    );
 
     // Use raw send to match FlexibleSchema
     return reply.send({
@@ -156,22 +219,31 @@ export class TestCategoriesController {
       Params: Static<typeof TestCategoriesIdParamSchema>;
       Body: Static<typeof UpdateTestCategoriesSchema>;
     }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ) {
     const { id } = request.params;
-    request.log.info({ testCategoriesId: id, body: request.body }, 'Updating testCategories');
+    request.log.info(
+      { testCategoriesId: id, body: request.body },
+      'Updating testCategories',
+    );
 
     // Transform API schema to domain model
     const updateData = this.transformUpdateSchema(request.body, request);
 
-    const testCategories = await this.testCategoriesService.update(id, updateData);
+    const testCategories = await this.testCategoriesService.update(
+      id,
+      updateData,
+    );
 
     // 🔥 Emit updated event for event-driven architecture
     this.eventService
       .for('test-categories', 'test-categories')
       .emitCustom('updated', { id, ...testCategories }, 'normal');
 
-    request.log.info({ testCategoriesId: id }, 'TestCategories updated successfully');
+    request.log.info(
+      { testCategoriesId: id },
+      'TestCategories updated successfully',
+    );
 
     return reply.success(testCategories, 'TestCategories updated successfully');
   }
@@ -181,8 +253,10 @@ export class TestCategoriesController {
    * DELETE /testCategories/:id
    */
   async delete(
-    request: FastifyRequest<{ Params: Static<typeof TestCategoriesIdParamSchema> }>,
-    reply: FastifyReply
+    request: FastifyRequest<{
+      Params: Static<typeof TestCategoriesIdParamSchema>;
+    }>,
+    reply: FastifyReply,
   ) {
     const { id } = request.params;
     request.log.info({ testCategoriesId: id }, 'Deleting testCategories');
@@ -198,23 +272,30 @@ export class TestCategoriesController {
       .for('test-categories', 'test-categories')
       .emitCustom('deleted', { id }, 'normal');
 
-    request.log.info({ testCategoriesId: id }, 'TestCategories deleted successfully');
+    request.log.info(
+      { testCategoriesId: id },
+      'TestCategories deleted successfully',
+    );
 
     // Return operation result using standard success response
-    return reply.success({
-      id,
-      deleted: true
-    }, 'TestCategories deleted successfully');
+    return reply.success(
+      {
+        id,
+        deleted: true,
+      },
+      'TestCategories deleted successfully',
+    );
   }
-
-
 
   // ===== PRIVATE TRANSFORMATION METHODS =====
 
   /**
    * Transform API create schema to domain model
    */
-  private transformCreateSchema(schema: Static<typeof CreateTestCategoriesSchema>, request: FastifyRequest) {
+  private transformCreateSchema(
+    schema: Static<typeof CreateTestCategoriesSchema>,
+    request: FastifyRequest,
+  ) {
     const result: any = {
       // Transform snake_case API fields to camelCase domain fields
       code: schema.code,
@@ -241,11 +322,14 @@ export class TestCategoriesController {
   }
 
   /**
-   * Transform API update schema to domain model  
+   * Transform API update schema to domain model
    */
-  private transformUpdateSchema(schema: Static<typeof UpdateTestCategoriesSchema>, request: FastifyRequest) {
+  private transformUpdateSchema(
+    schema: Static<typeof UpdateTestCategoriesSchema>,
+    request: FastifyRequest,
+  ) {
     const updateData: any = {};
-    
+
     if (schema.code !== undefined) {
       updateData.code = schema.code;
     }
@@ -293,7 +377,6 @@ export class TestCategoriesController {
 
     return updateData;
   }
-
 
   // ===== IMPORT METHODS =====
 
@@ -419,7 +502,9 @@ export class TestCategoriesController {
       );
 
       // Get session and config to access ALL validated rows and transformer
-      const session = (this.importService as any).sessions.get(result.sessionId);
+      const session = (this.importService as any).sessions.get(
+        result.sessionId,
+      );
       const validatedRows = session?.validatedRows || [];
       const config = (this.importService as any).config;
 
@@ -458,9 +543,10 @@ export class TestCategoriesController {
         ),
         // Preview: Transform raw data to match frontend expectations
         preview: validatedRows.slice(0, 10).map((rowValidation, index) => {
-          const transformedData = config.rowTransformer && rowValidation.data
-            ? config.rowTransformer(rowValidation.data)
-            : rowValidation.data;
+          const transformedData =
+            config.rowTransformer && rowValidation.data
+              ? config.rowTransformer(rowValidation.data)
+              : rowValidation.data;
 
           return {
             rowNumber: rowValidation.row,
@@ -506,10 +592,7 @@ export class TestCategoriesController {
     const userId = (request.user as any)?.id;
 
     try {
-      request.log.info(
-        { sessionId, options, userId },
-        'Executing import job',
-      );
+      request.log.info({ sessionId, options, userId }, 'Executing import job');
 
       // Execute import and get job result
       const result = await this.importService.executeImport({

@@ -38,7 +38,9 @@ async function linkAdminPermissions(
     );
   }
 
-  console.log(`✅ Linked ${permissions.length} ${resource} permissions to admin role`);
+  console.log(
+    `✅ Linked ${permissions.length} ${resource} permissions to admin role`,
+  );
 }
 
 export async function seed(knex: Knex): Promise<void> {

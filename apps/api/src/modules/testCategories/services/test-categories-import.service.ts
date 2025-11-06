@@ -53,11 +53,16 @@ export class TestCategoriesImportService extends BaseImportService<TestCategorie
         maxLength: 50,
         description: 'Code value (max 50 characters)',
         defaultExample: 'ABC123',
-        
-        validators: [TestCategoriesImportService.validateCodeUniqueness(testCategoriesRepository)],
-        
+
+        validators: [
+          TestCategoriesImportService.validateCodeUniqueness(
+            testCategoriesRepository,
+          ),
+        ],
+
         errorMessages: {
-          unique: TestCategoriesErrorMessages[TestCategoriesErrorCode.DUPLICATE_CODE],
+          unique:
+            TestCategoriesErrorMessages[TestCategoriesErrorCode.DUPLICATE_CODE],
         },
       },
       {
@@ -92,78 +97,58 @@ export class TestCategoriesImportService extends BaseImportService<TestCategorie
         label: 'Description',
         required: false,
         type: 'string',
-        
+
         description: 'Description value',
         defaultExample: 'Sample description text',
-        
-        
-        
-        
       },
       {
         name: 'is_active',
         label: 'Is Active',
         required: false,
         type: 'boolean',
-        
+
         description: 'Is Active value',
         defaultExample: 'true',
-        
-        
+
         transformer: TestCategoriesImportService.transformIsActive,
-        
       },
       {
         name: 'is_featured',
         label: 'Is Featured',
         required: false,
         type: 'boolean',
-        
+
         description: 'Is Featured value',
         defaultExample: 'true',
-        
-        
+
         transformer: TestCategoriesImportService.transformIsFeatured,
-        
       },
       {
         name: 'display_order',
         label: 'Display Order',
         required: false,
         type: 'number',
-        
+
         description: 'Display Order value',
         defaultExample: '1',
-        
-        
-        
-        
       },
       {
         name: 'item_count',
         label: 'Item Count',
         required: false,
         type: 'number',
-        
+
         description: 'Item Count value',
         defaultExample: '10',
-        
-        
-        
-        
       },
       {
         name: 'discount_rate',
         label: 'Discount Rate',
         required: false,
         type: 'number',
-        
+
         description: 'Discount Rate value',
         defaultExample: '10',
-        
-        
-        
-        
       },
       {
         name: 'metadata',
@@ -190,13 +175,9 @@ export class TestCategoriesImportService extends BaseImportService<TestCategorie
         label: 'Status',
         required: false,
         type: 'string',
-        
+
         description: 'Status value',
         defaultExample: 'Sample value',
-        
-        
-        
-        
       },
     ];
 
@@ -222,11 +203,7 @@ export class TestCategoriesImportService extends BaseImportService<TestCategorie
     row: any,
     index: number,
   ) => Promise<ImportValidationError | null> {
-    return async (
-      value: any,
-      _row: any,
-      _index: number,
-    ) => {
+    return async (value: any, _row: any, _index: number) => {
       if (!value) return null;
 
       try {
@@ -234,7 +211,10 @@ export class TestCategoriesImportService extends BaseImportService<TestCategorie
         if (existing) {
           return {
             field: 'code',
-            message: TestCategoriesErrorMessages[TestCategoriesErrorCode.DUPLICATE_CODE],
+            message:
+              TestCategoriesErrorMessages[
+                TestCategoriesErrorCode.DUPLICATE_CODE
+              ],
             code: TestCategoriesErrorCode.DUPLICATE_CODE,
             severity: ImportValidationSeverity.ERROR,
             value,
@@ -273,7 +253,10 @@ export class TestCategoriesImportService extends BaseImportService<TestCategorie
         if (existing) {
           return {
             field: 'name',
-            message: TestCategoriesErrorMessages[TestCategoriesErrorCode.DUPLICATE_NAME],
+            message:
+              TestCategoriesErrorMessages[
+                TestCategoriesErrorCode.DUPLICATE_NAME
+              ],
             code: TestCategoriesErrorCode.DUPLICATE_NAME,
             severity: ImportValidationSeverity.ERROR,
             value,
@@ -298,7 +281,6 @@ export class TestCategoriesImportService extends BaseImportService<TestCategorie
    * Transform is_active field values
    */
   private static transformIsActive(value: any, _row: any): boolean {
-    
     if (typeof value === 'boolean') return value;
     if (typeof value === 'string') {
       const lower = value.toLowerCase().trim();
@@ -313,7 +295,6 @@ export class TestCategoriesImportService extends BaseImportService<TestCategorie
    * Transform is_featured field values
    */
   private static transformIsFeatured(value: any, _row: any): boolean {
-
     if (typeof value === 'boolean') return value;
     if (typeof value === 'string') {
       const lower = value.toLowerCase().trim();
@@ -367,8 +348,14 @@ export class TestCategoriesImportService extends BaseImportService<TestCategorie
       name: row.name,
       slug: row.slug,
       description: row.description,
-      is_active: TestCategoriesImportService.transformIsActive(row.is_active, row),
-      is_featured: TestCategoriesImportService.transformIsFeatured(row.is_featured, row),
+      is_active: TestCategoriesImportService.transformIsActive(
+        row.is_active,
+        row,
+      ),
+      is_featured: TestCategoriesImportService.transformIsFeatured(
+        row.is_featured,
+        row,
+      ),
       display_order: row.display_order
         ? parseInt(row.display_order, 10)
         : undefined,
@@ -376,8 +363,14 @@ export class TestCategoriesImportService extends BaseImportService<TestCategorie
       discount_rate: row.discount_rate
         ? parseFloat(row.discount_rate)
         : undefined,
-      metadata: TestCategoriesImportService.transformMetadata(row.metadata, row),
-      settings: TestCategoriesImportService.transformSettings(row.settings, row),
+      metadata: TestCategoriesImportService.transformMetadata(
+        row.metadata,
+        row,
+      ),
+      settings: TestCategoriesImportService.transformSettings(
+        row.settings,
+        row,
+      ),
       status: row.status,
     };
   }
@@ -386,7 +379,9 @@ export class TestCategoriesImportService extends BaseImportService<TestCategorie
    * Insert batch of testCategories into database
    * Required implementation from BaseImportService
    */
-  protected async insertBatch(batch: Partial<TestCategories>[]): Promise<TestCategories[]> {
+  protected async insertBatch(
+    batch: Partial<TestCategories>[],
+  ): Promise<TestCategories[]> {
     const results: TestCategories[] = [];
 
     for (const data of batch) {
