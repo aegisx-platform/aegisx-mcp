@@ -1,33 +1,33 @@
 import { FastifyInstance } from 'fastify';
-import { {{ModuleName}}Controller } from '../controllers/{{kebabCaseHelper moduleName}}.controller';
+import { TestProductsController } from '../controllers/test-products.controller';
 import {
   ValidateImportApiResponseSchema,
   ExecuteImportApiResponseSchema,
   ExecuteImportRequestSchema,
   ImportStatusApiResponseSchema,
-} from '../schemas/{{kebabCaseHelper moduleName}}.schemas';
+} from '../schemas/test-products.schemas';
 import { StandardRouteResponses } from '../../../schemas/base.schemas';
 
-export interface {{ModuleName}}ImportRoutesOptions {
-  controller: {{ModuleName}}Controller;
+export interface TestProductsImportRoutesOptions {
+  controller: TestProductsController;
 }
 
 /**
- * Register {{moduleName}} import routes
+ * Register testProducts import routes
  */
-export async function {{moduleName}}ImportRoutes(
+export async function testProductsImportRoutes(
   fastify: FastifyInstance,
-  options: {{ModuleName}}ImportRoutesOptions,
+  options: TestProductsImportRoutesOptions,
 ) {
   const { controller } = options;
 
   // Download import template
   fastify.get('/import/template', {
     schema: {
-      tags: ['{{ModuleName}}', 'Import'],
+      tags: ['TestProducts', 'Import'],
       summary: 'Download import template',
       description:
-        'Download Excel/CSV template for {{moduleName}} import with field instructions and example data',
+        'Download Excel/CSV template for testProducts import with field instructions and example data',
       querystring: {
         type: 'object',
         properties: {
@@ -59,7 +59,7 @@ export async function {{moduleName}}ImportRoutes(
     },
     preHandler: [
       fastify.authenticate,
-      fastify.verifyPermission('{{moduleName}}', 'create'),
+      fastify.verifyPermission('testProducts', 'create'),
     ],
     handler: controller.downloadImportTemplate.bind(controller),
   });
@@ -67,7 +67,7 @@ export async function {{moduleName}}ImportRoutes(
   // Validate import file
   fastify.post('/import/validate', {
     schema: {
-      tags: ['{{ModuleName}}', 'Import'],
+      tags: ['TestProducts', 'Import'],
       summary: 'Validate import file',
       description:
         'Upload and validate Excel/CSV file before import. Returns detailed validation results with row-by-row errors and warnings. Use multipart/form-data with file field.',
@@ -98,7 +98,7 @@ export async function {{moduleName}}ImportRoutes(
     },
     preHandler: [
       fastify.authenticate,
-      fastify.verifyPermission('{{moduleName}}', 'create'),
+      fastify.verifyPermission('testProducts', 'create'),
     ],
     handler: controller.validateImport.bind(controller),
   });
@@ -106,10 +106,10 @@ export async function {{moduleName}}ImportRoutes(
   // Execute import
   fastify.post('/import/execute', {
     schema: {
-      tags: ['{{ModuleName}}', 'Import'],
+      tags: ['TestProducts', 'Import'],
       summary: 'Execute import',
       description:
-        'Execute validated import using session ID from validate endpoint. Creates/updates {{moduleName}} in database.',
+        'Execute validated import using session ID from validate endpoint. Creates/updates testProducts in database.',
       body: ExecuteImportRequestSchema,
       response: {
         202: ExecuteImportApiResponseSchema,
@@ -122,7 +122,7 @@ export async function {{moduleName}}ImportRoutes(
     },
     preHandler: [
       fastify.authenticate,
-      fastify.verifyPermission('{{moduleName}}', 'create'),
+      fastify.verifyPermission('testProducts', 'create'),
     ],
     handler: controller.executeImport.bind(controller),
   });
@@ -130,7 +130,7 @@ export async function {{moduleName}}ImportRoutes(
   // Get import job status (optional - for tracking progress)
   fastify.get('/import/status/:jobId', {
     schema: {
-      tags: ['{{ModuleName}}', 'Import'],
+      tags: ['TestProducts', 'Import'],
       summary: 'Get import job status',
       description: 'Get current status and progress of an import job',
       params: {
