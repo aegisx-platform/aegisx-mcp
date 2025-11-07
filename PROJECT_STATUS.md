@@ -1,6 +1,6 @@
 # AegisX Project Status
 
-**Last Updated:** 2025-11-07 (Session 66 - Bulk User Permissions Fix & System Maintenance)
+**Last Updated:** 2025-11-07 (Session 67 - Navigation Active State Fix)
 **Current Status:** ✅ **PLATFORM COMPLETE** - All core features implemented, tested, and production-ready
 **Git Repository:** git@github.com:aegisx-platform/aegisx-starter.git
 **CRUD Generator Version:** v2.2.0 (Ready for npm publish)
@@ -285,6 +285,86 @@ The AegisX Starter monorepo is a clean, focused, enterprise-ready platform with:
 ## 🚀 Recent Development Sessions
 
 > **📦 For older sessions (38-46), see [Session Archive](./docs/sessions/ARCHIVE_2024_Q4.md)**
+
+### Session 67 (2025-11-07) ✅ COMPLETED
+
+**Session Focus:** Navigation Active State Fix - Root Path Prefix Matching Issue
+
+**Main Achievements:**
+
+- ✅ **Fixed Navigation Active State Issue** - Home menu item no longer stays active on non-home routes
+- ✅ **Root Cause Identified** - Angular's `routerLinkActive` uses prefix matching; `/` matches ALL routes
+- ✅ **Architectural Solution** - Changed home route from `path: ''` to `path: 'home'` with redirect
+- ✅ **Backend Query Fix** - Repository explicit column selection ensures `exact_match` always included
+- ✅ **Type Safety Complete** - All type definitions and mappings in place across backend/frontend
+- ✅ **Database Updated** - Home navigation link changed from `/` to `/home`
+- ✅ **Cache Cleared** - Redis flushed for fresh navigation data
+
+**Technical Implementation:**
+
+1. **Route Configuration Fix** (`apps/web/src/app/app.routes.ts`):
+   - Changed home route from `path: ''` → `path: 'home'`
+   - Added redirect: `path: ''` → `redirectTo: 'home'` with `pathMatch: 'full'`
+   - Eliminates root path prefix matching that was causing issues
+
+2. **Backend Repository Query** (`navigation.repository.ts`):
+   - Replaced wildcard `'ni.*'` with explicit column selection (23 columns)
+   - Ensures `exact_match` field properly retrieved for all items
+   - Critical fix for complex JOIN queries
+
+3. **Type Definitions & Mappings**:
+   - Added `exact_match?: boolean` to backend NavigationItem interface
+   - Added `exact_match?: boolean` to frontend ApiNavigationItem interface
+   - Added transformations in both backend service and frontend service
+
+4. **Database Seed Update** (`003_navigation_menu.ts`):
+   - Changed home link from `/` → `/home`
+   - Aligns navigation data with new route structure
+
+**Verification Results:**
+
+- ✅ Database: home link confirmed as `/home` with `exact_match: false`
+- ✅ Routes: home at `path: 'home'` with redirect from root
+- ✅ Repository: explicit column selection includes `exact_match`
+- ✅ Frontend: `exact_match` property in API types and service mapping
+- ✅ Cache: Redis cleared for fresh navigation responses
+- ✅ Seed: Database migration executed successfully
+
+**How It Works:**
+
+**Before (Broken):**
+
+```
+User navigates to /users
+└─ Angular checks routerLinkActive for home link (/)
+   └─ / matches /users as prefix → Home stays highlighted ❌
+```
+
+**After (Fixed):**
+
+```
+User navigates to /users
+└─ Angular checks routerLinkActive for home link (/home)
+   └─ /home does NOT match /users → Home correctly deactivates ✅
+```
+
+**Files Modified (2 commits):**
+
+**Commit 56a41a6** - Type definitions and transformations (4 files)
+**Commit d690beb** - Route architecture and repository fix (3 files)
+
+**Git Status:**
+
+- 2 commits ahead of origin/develop
+- All changes committed and ready for push
+
+**Key Learning:**
+
+`★ Insight ─────────────────────────────────────`
+Angular's `routerLinkActive` uses prefix matching by default. When using `/` as a route path, it creates an unavoidable match conflict because `/` is a substring of every route. By moving the home route to `/home`, we create an unambiguous relationship where `/home` only matches when exactly on that route. The `pathMatch: 'full'` ensures the redirect applies only at the root, not on every route.
+`─────────────────────────────────────────────────`
+
+---
 
 ### Session 66 (2025-11-07) ✅ COMPLETED
 
