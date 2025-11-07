@@ -58,7 +58,7 @@ export async function seed(knex: Knex): Promise<void> {
       title: 'Home',
       type: 'item',
       icon: 'home',
-      link: '/',
+      link: '/home',
       sort_order: 1,
       show_in_default: true,
       show_in_compact: true,
@@ -66,7 +66,7 @@ export async function seed(knex: Knex): Promise<void> {
       show_in_mobile: true,
       disabled: false,
       hidden: false,
-      exact_match: true,
+      exact_match: false,
     },
 
     // 2. User Management (Parent)

@@ -41,10 +41,17 @@ export const appRoutes: Route[] = [
 
   // Protected routes (require authentication)
   {
-    path: '',
+    path: 'home',
     loadComponent: () =>
       import('./pages/welcome/home.page').then((m) => m.HomePage),
     canActivate: [AuthGuard],
+  },
+
+  // Redirect root to home
+  {
+    path: '',
+    redirectTo: 'home',
+    pathMatch: 'full',
   },
   {
     path: 'dashboards/project',
