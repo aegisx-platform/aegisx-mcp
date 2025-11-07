@@ -13,6 +13,9 @@ import {
   BulkChangeStatusRequest,
   BulkUserIdsRequest,
   BulkRoleChangeRequest,
+  AssignRolesToUserRequest,
+  RemoveRoleFromUserRequest,
+  UpdateRoleExpiryRequest,
 } from './users.schemas';
 import { DropdownQuery } from '../../schemas/base.schemas';
 
@@ -323,6 +326,23 @@ export class UsersController {
         'Bulk activate operation completed',
       );
 
+      // Emit WebSocket events for successfully updated users
+      for (const item of result.results) {
+        if (item.success) {
+          try {
+            const updatedUser = await this.usersService.getUserById(
+              item.userId,
+            );
+            this.userEvents.emitUpdated(updatedUser);
+          } catch (error) {
+            request.log.warn(
+              { userId: item.userId, error },
+              'Failed to emit event for bulk activated user',
+            );
+          }
+        }
+      }
+
       return reply.success(result, 'Bulk activation completed');
     } catch (error) {
       request.log.error(
@@ -369,6 +389,23 @@ export class UsersController {
         'Bulk deactivate operation completed',
       );
 
+      // Emit WebSocket events for successfully updated users
+      for (const item of result.results) {
+        if (item.success) {
+          try {
+            const updatedUser = await this.usersService.getUserById(
+              item.userId,
+            );
+            this.userEvents.emitUpdated(updatedUser);
+          } catch (error) {
+            request.log.warn(
+              { userId: item.userId, error },
+              'Failed to emit event for bulk deactivated user',
+            );
+          }
+        }
+      }
+
       return reply.success(result, 'Bulk deactivation completed');
     } catch (error) {
       request.log.error(
@@ -414,6 +451,23 @@ export class UsersController {
         },
         'Bulk delete operation completed',
       );
+
+      // Emit WebSocket events for successfully deleted users
+      for (const item of result.results) {
+        if (item.success) {
+          try {
+            const deletedUser = await this.usersService.getUserById(
+              item.userId,
+            );
+            this.userEvents.emitDeleted(item.userId);
+          } catch (error) {
+            request.log.warn(
+              { userId: item.userId, error },
+              'Failed to emit event for bulk deleted user',
+            );
+          }
+        }
+      }
 
       return reply.success(result, 'Bulk deletion completed');
     } catch (error) {
@@ -463,6 +517,23 @@ export class UsersController {
         },
         'Bulk role change operation completed',
       );
+
+      // Emit WebSocket events for successfully updated users
+      for (const item of result.results) {
+        if (item.success) {
+          try {
+            const updatedUser = await this.usersService.getUserById(
+              item.userId,
+            );
+            this.userEvents.emitUpdated(updatedUser);
+          } catch (error) {
+            request.log.warn(
+              { userId: item.userId, error },
+              'Failed to emit event for bulk role-changed user',
+            );
+          }
+        }
+      }
 
       return reply.success(result, 'Bulk role change completed');
     } catch (error) {
@@ -514,6 +585,23 @@ export class UsersController {
         'Bulk change status operation completed',
       );
 
+      // Emit WebSocket events for successfully updated users
+      for (const item of result.results) {
+        if (item.success) {
+          try {
+            const updatedUser = await this.usersService.getUserById(
+              item.userId,
+            );
+            this.userEvents.emitUpdated(updatedUser);
+          } catch (error) {
+            request.log.warn(
+              { userId: item.userId, error },
+              'Failed to emit event for bulk status-changed user',
+            );
+          }
+        }
+      }
+
       return reply.success(result, 'Bulk status change completed');
     } catch (error) {
       request.log.error(
@@ -535,7 +623,10 @@ export class UsersController {
     request: FastifyRequest<{ Querystring: DropdownQuery }>,
     reply: FastifyReply,
   ) {
-    request.log.info({ query: request.query }, 'Fetching users dropdown options');
+    request.log.info(
+      { query: request.query },
+      'Fetching users dropdown options',
+    );
 
     try {
       const result = await this.usersService.getDropdownOptions(request.query);
@@ -546,7 +637,140 @@ export class UsersController {
     } catch (error) {
       request.log.error(
         { error, query: request.query },
-        'Error fetching users dropdown options'
+        'Error fetching users dropdown options',
+      );
+      throw error;
+    }
+  }
+
+  // ===== MULTI-ROLE MANAGEMENT ENDPOINTS =====
+
+  async getUserRoles(
+    request: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply,
+  ) {
+    try {
+      const roles = await this.usersService.getUserRoles(request.params.id);
+      return reply.success(roles);
+    } catch (error) {
+      request.log.error(
+        { error, userId: request.params.id },
+        'Error getting user roles',
+      );
+      throw error;
+    }
+  }
+
+  async assignRolesToUser(
+    request: FastifyRequest<{
+      Params: { id: string };
+      Body: AssignRolesToUserRequest;
+    }>,
+    reply: FastifyReply,
+  ) {
+    try {
+      const currentUserId = request.user.id;
+      request.log.info(
+        {
+          userId: request.params.id,
+          roleIds: request.body.roleIds,
+          requestedBy: currentUserId,
+        },
+        'Assigning roles to user',
+      );
+
+      const user = await this.usersService.assignRolesToUser(
+        request.params.id,
+        request.body.roleIds,
+        currentUserId,
+        request.body.expiresAt ? new Date(request.body.expiresAt) : undefined,
+      );
+
+      // Emit WebSocket event
+      this.userEvents.emitUpdated(user);
+
+      return reply.success(user, 'Roles assigned successfully');
+    } catch (error) {
+      request.log.error(
+        { error, userId: request.params.id, roleIds: request.body.roleIds },
+        'Error assigning roles to user',
+      );
+      throw error;
+    }
+  }
+
+  async removeRoleFromUser(
+    request: FastifyRequest<{
+      Params: { id: string };
+      Body: RemoveRoleFromUserRequest;
+    }>,
+    reply: FastifyReply,
+  ) {
+    try {
+      const currentUserId = request.user.id;
+      request.log.info(
+        {
+          userId: request.params.id,
+          roleId: request.body.roleId,
+          requestedBy: currentUserId,
+        },
+        'Removing role from user',
+      );
+
+      const user = await this.usersService.removeRoleFromUser(
+        request.params.id,
+        request.body.roleId,
+      );
+
+      // Emit WebSocket event
+      this.userEvents.emitUpdated(user);
+
+      return reply.success({
+        message: 'Role removed successfully',
+        userId: request.params.id,
+      });
+    } catch (error) {
+      request.log.error(
+        { error, userId: request.params.id, roleId: request.body.roleId },
+        'Error removing role from user',
+      );
+      throw error;
+    }
+  }
+
+  async updateRoleExpiry(
+    request: FastifyRequest<{
+      Params: { id: string };
+      Body: UpdateRoleExpiryRequest;
+    }>,
+    reply: FastifyReply,
+  ) {
+    try {
+      const currentUserId = request.user.id;
+      request.log.info(
+        {
+          userId: request.params.id,
+          roleId: request.body.roleId,
+          expiresAt: request.body.expiresAt,
+          requestedBy: currentUserId,
+        },
+        'Updating role expiry for user',
+      );
+
+      const user = await this.usersService.updateRoleExpiry(
+        request.params.id,
+        request.body.roleId,
+        request.body.expiresAt ? new Date(request.body.expiresAt) : undefined,
+      );
+
+      // Emit WebSocket event
+      this.userEvents.emitUpdated(user);
+
+      return reply.success(user, 'Role expiry updated successfully');
+    } catch (error) {
+      request.log.error(
+        { error, userId: request.params.id, roleId: request.body.roleId },
+        'Error updating role expiry',
       );
       throw error;
     }
