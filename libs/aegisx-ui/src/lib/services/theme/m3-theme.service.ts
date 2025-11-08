@@ -19,44 +19,44 @@ export class M3ThemeService {
 
   /**
    * Pre-defined Material 3 themes
-   * These represent the available theme options with seed colors
+   * Maps to SCSS theme classes defined in user-themes.scss
    */
   private readonly themes: Record<string, M3Theme> = {
-    blue: {
-      id: 'blue',
-      name: 'Blue',
-      seedColor: '#1976d2',
-      description: 'Material Blue - Default theme',
-    },
-    purple: {
-      id: 'purple',
-      name: 'Purple',
-      seedColor: '#9c27b0',
-      description: 'Material Purple',
-    },
-    green: {
-      id: 'green',
-      name: 'Green',
-      seedColor: '#4caf50',
-      description: 'Material Green',
-    },
-    orange: {
-      id: 'orange',
-      name: 'Orange',
-      seedColor: '#ff9800',
-      description: 'Material Orange',
-    },
-    pink: {
-      id: 'pink',
-      name: 'Pink',
-      seedColor: '#e91e63',
-      description: 'Material Pink',
+    brand: {
+      id: 'brand',
+      name: 'Blue (Brand)',
+      seedColor: '#2196f3',
+      description: 'Brand Blue theme',
     },
     teal: {
       id: 'teal',
       name: 'Teal',
-      seedColor: '#009688',
+      seedColor: '#14b8a6',
       description: 'Material Teal',
+    },
+    rose: {
+      id: 'rose',
+      name: 'Rose',
+      seedColor: '#f43f5e',
+      description: 'Material Rose',
+    },
+    purple: {
+      id: 'purple',
+      name: 'Purple',
+      seedColor: '#a855f7',
+      description: 'Material Purple',
+    },
+    amber: {
+      id: 'amber',
+      name: 'Amber',
+      seedColor: '#f59e0b',
+      description: 'Material Amber',
+    },
+    default: {
+      id: 'default',
+      name: 'Indigo',
+      seedColor: '#4f46e5',
+      description: 'Default Indigo theme',
     },
   };
 
@@ -171,69 +171,15 @@ export class M3ThemeService {
     root.classList.remove('light', 'dark');
     root.classList.add(this.scheme());
 
-    // Apply theme-specific class for Material components
-    root.setAttribute('data-theme', this.currentTheme());
+    // Remove all existing theme classes
+    root.classList.forEach((className) => {
+      if (className.startsWith('theme-')) {
+        root.classList.remove(className);
+      }
+    });
 
-    // Generate and apply M3 color variables
-    this.applyM3Variables(theme.seedColor);
-  }
-
-  /**
-   * Apply Material 3 CSS variables to document root
-   */
-  private applyM3Variables(seedColor: string): void {
-    const root = this.document.documentElement;
-    const isDark = this.isDarkMode();
-
-    // Generate color palette from seed
-    const palette = generateM3Palette(seedColor);
-
-    // Set primary color variables
-    root.style.setProperty('--md-sys-color-primary', seedColor);
-    root.style.setProperty('--md-sys-color-primary-light', palette.light);
-    root.style.setProperty(
-      '--md-sys-color-primary-container',
-      palette.container,
-    );
-    root.style.setProperty(
-      '--md-sys-color-primary-dark',
-      isDark ? palette.darkContainer || palette.dark : palette.dark,
-    );
-
-    // Set complementary colors based on seed
-    const secondary = this.generateComplementaryColor(seedColor);
-    root.style.setProperty('--md-sys-color-secondary', secondary);
-    root.style.setProperty(
-      '--md-sys-color-secondary-light',
-      lightenColor(secondary, 0.2),
-    );
-    root.style.setProperty(
-      '--md-sys-color-secondary-container',
-      lightenColor(secondary, 0.3),
-    );
-
-    // Set error/warning colors
-    const error = '#B3261E';
-    root.style.setProperty('--md-sys-color-error', error);
-    root.style.setProperty(
-      '--md-sys-color-error-container',
-      lightenColor(error, 0.3),
-    );
-
-    // Set surface/background colors
-    if (isDark) {
-      root.style.setProperty('--md-sys-color-background', '#121212');
-      root.style.setProperty('--md-sys-color-surface', '#1e1e1e');
-      root.style.setProperty('--md-sys-color-surface-dim', '#0f1419');
-      root.style.setProperty('--md-sys-color-on-background', '#e1e1e6');
-      root.style.setProperty('--md-sys-color-on-surface', '#e1e1e6');
-    } else {
-      root.style.setProperty('--md-sys-color-background', '#fffbfe');
-      root.style.setProperty('--md-sys-color-surface', '#fff8fb');
-      root.style.setProperty('--md-sys-color-surface-dim', '#ece4ec');
-      root.style.setProperty('--md-sys-color-on-background', '#1d1b20');
-      root.style.setProperty('--md-sys-color-on-surface', '#1d1b20');
-    }
+    // Apply theme-specific class (maps to SCSS theme classes in user-themes.scss)
+    root.classList.add(`theme-${this.currentTheme()}`);
   }
 
   /**
