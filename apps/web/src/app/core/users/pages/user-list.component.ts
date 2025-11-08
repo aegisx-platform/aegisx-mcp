@@ -24,6 +24,7 @@ import { ConfirmDialogComponent } from '../../../shared/ui/components/confirm-di
 import { BulkRoleChangeDialogComponent } from '../components/bulk-role-change-dialog.component';
 import { BulkStatusChangeDialogComponent } from '../components/bulk-status-change-dialog.component';
 import { UserFormDialogComponent } from '../components/user-form-dialog.component';
+import { RoleAssignmentInfoModalComponent } from '../components/role-assignment-info-modal.component';
 import { UserService, UserStatus } from '../services/user.service';
 
 @Component({
@@ -52,6 +53,7 @@ import { UserService, UserStatus } from '../services/user.service';
     AegisxCardComponent,
     BulkStatusChangeDialogComponent,
     BulkRoleChangeDialogComponent,
+    RoleAssignmentInfoModalComponent,
   ],
   template: `
     <div class="container mx-auto px-4 py-8">
@@ -363,6 +365,65 @@ import { UserService, UserStatus } from '../services/user.service';
         </ax-card>
       }
 
+      <!-- Bulk Progress Indicator -->
+      @if (bulkLoading() && bulkProgress().total > 0) {
+        <ax-card [appearance]="'elevated'" class="mb-3 bg-green-50 border-green-200">
+          <div class="flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3 flex-1">
+              <mat-icon class="text-green-600 animate-spin">hourglass_empty</mat-icon>
+              <div class="flex-1">
+                <p class="font-medium text-green-800">
+                  Processing
+                  <strong>{{ bulkProgress().current }}/{{ bulkProgress().total }}</strong>
+                  user(s)...
+                </p>
+                <p class="text-sm text-green-700 mt-1">
+                  Please wait while roles are being updated
+                </p>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="inline-flex items-center justify-center w-16 h-16">
+                <svg class="w-full h-full" viewBox="0 0 36 36">
+                  <circle
+                    cx="18"
+                    cy="18"
+                    r="16"
+                    fill="none"
+                    stroke="#e5e7eb"
+                    stroke-width="2"
+                  ></circle>
+                  <circle
+                    cx="18"
+                    cy="18"
+                    r="16"
+                    fill="none"
+                    stroke="#16a34a"
+                    stroke-width="2"
+                    [attr.stroke-dasharray]="
+                      ((bulkProgress().current / bulkProgress().total) * 100.5) +
+                      ', 100.5'
+                    "
+                    stroke-linecap="round"
+                    [style.transform]="'rotate(-90deg)'"
+                    [style.transform-origin]="'50% 50%'"
+                    style="transition: stroke-dasharray 0.3s ease"
+                  ></circle>
+                </svg>
+                <div class="absolute text-center">
+                  <span class="text-sm font-bold text-green-800">
+                    {{
+                      ((bulkProgress().current / bulkProgress().total) * 100)
+                        | number: '1.0-0'
+                    }}%
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ax-card>
+      }
+
       <!-- Users Table -->
       <ax-card [appearance]="'elevated'">
         @if (loading()) {
@@ -440,10 +501,28 @@ import { UserService, UserStatus } from '../services/user.service';
                         {{ getInitials(user) }}
                       </span>
                     </div>
-                    <div>
-                      <p class="font-medium text-gray-900 dark:text-gray-100">
-                        {{ user.firstName }} {{ user.lastName }}
-                      </p>
+                    <div class="flex-1">
+                      <div class="flex items-center gap-2">
+                        <p class="font-medium text-gray-900 dark:text-gray-100">
+                          {{ user.firstName }} {{ user.lastName }}
+                        </p>
+                        <!-- Role Count Badge -->
+                        <span
+                          *ngIf="getRoleCount(user) > 0"
+                          [matTooltip]="'Click to view role details'"
+                          matTooltipPosition="above"
+                          (click)="$event.stopPropagation(); openRoleAssignmentInfoModal(user)"
+                          [ngClass]="{
+                            'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200':
+                              getRoleCount(user) === 1,
+                            'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200':
+                              getRoleCount(user) > 1,
+                          }"
+                          class="inline-flex items-center justify-center rounded-full text-xs font-semibold h-6 w-6 cursor-pointer hover:opacity-80 transition-opacity"
+                        >
+                          {{ getRoleCount(user) }}
+                        </span>
+                      </div>
                       <p class="text-sm text-gray-600 dark:text-gray-400">
                         {{ user.email }}
                       </p>
@@ -456,10 +535,12 @@ import { UserService, UserStatus } from '../services/user.service';
               <ng-container matColumnDef="role">
                 <th mat-header-cell *matHeaderCellDef>Role(s)</th>
                 <td mat-cell *matCellDef="let user">
-                  <!-- Multi-role support: display all roles as chips -->
+                  <!-- Multi-role support: display all roles as chips with tooltips -->
                   <mat-chip-set *ngIf="user.roles && user.roles.length > 0">
                     <mat-chip
                       *ngFor="let role of user.roles"
+                      [matTooltip]="formatRoleTooltip(role)"
+                      matTooltipPosition="above"
                       [ngClass]="{
                         'bg-purple-100 text-purple-800':
                           role.roleName === 'admin',
@@ -474,6 +555,8 @@ import { UserService, UserStatus } from '../services/user.service';
                   <!-- Fallback for backward compatibility (single role) -->
                   <mat-chip
                     *ngIf="!user.roles || user.roles.length === 0"
+                    [matTooltip]="'Single role assignment'"
+                    matTooltipPosition="above"
                     [ngClass]="{
                       'bg-purple-100 text-purple-800': user.role === 'admin',
                       'bg-blue-100 text-blue-800': user.role === 'manager',
@@ -700,6 +783,7 @@ export class UserListComponent implements OnInit {
   // Selection
   selectedUsers = signal<any[]>([]);
   bulkLoading = signal(false);
+  bulkProgress = signal<{ current: number; total: number }>({ current: 0, total: 0 });
 
   // Table columns
   displayedColumns: string[] = [
@@ -987,6 +1071,18 @@ export class UserListComponent implements OnInit {
     });
   }
 
+  openRoleAssignmentInfoModal(user: any): void {
+    this.dialog.open(RoleAssignmentInfoModalComponent, {
+      width: '800px',
+      maxWidth: '90vw',
+      data: {
+        userName: `${user.firstName} ${user.lastName}`,
+        userEmail: user.email,
+        roles: user.roles || [],
+      },
+    });
+  }
+
   // Bulk actions
   async bulkActivate(): Promise<void> {
     if (this.selectedUsers().length === 0) return;
@@ -1069,12 +1165,31 @@ export class UserListComponent implements OnInit {
       return;
 
     this.bulkLoading.set(true);
+    const totalUsers = this.selectedUsers().length;
+
+    // Show initial progress
+    this.bulkProgress.set({ current: 0, total: totalUsers });
+
     try {
       const userIds = this.selectedUsers().map((user) => user.id);
+
+      // Simulate progress during the operation
+      const progressInterval = setInterval(() => {
+        const current = this.bulkProgress().current;
+        if (current < totalUsers - 1) {
+          this.bulkProgress.set({ current: current + 1, total: totalUsers });
+        }
+      }, 200);
+
       const result = await this.userService.bulkChangeUserRoles(
         userIds,
         roleIds,
       );
+
+      clearInterval(progressInterval);
+
+      // Update progress to 100%
+      this.bulkProgress.set({ current: totalUsers, total: totalUsers });
 
       this.showBulkOperationResult(result, 'Role Change');
       this.selectedUsers.set([]);
@@ -1086,6 +1201,10 @@ export class UserListComponent implements OnInit {
       );
     } finally {
       this.bulkLoading.set(false);
+      // Reset progress after a delay
+      setTimeout(() => {
+        this.bulkProgress.set({ current: 0, total: 0 });
+      }, 1000);
     }
   }
 
@@ -1159,5 +1278,51 @@ export class UserListComponent implements OnInit {
       hour: '2-digit',
       minute: '2-digit',
     });
+  }
+
+  formatRoleTooltip(role: any): string {
+    if (!role) return 'Role information';
+
+    const lines: string[] = [];
+
+    // Role name and status
+    const statusLabel = role.isActive ? 'Active' : 'Inactive';
+    lines.push(`${role.roleName} (${statusLabel})`);
+
+    // Assigned date
+    if (role.assignedAt) {
+      const assignedDate = new Date(role.assignedAt).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
+      lines.push(`Assigned: ${assignedDate}`);
+    }
+
+    // Assigned by (if available)
+    if (role.assignedBy) {
+      lines.push(`By: ${role.assignedBy}`);
+    }
+
+    // Expiry date (if applicable)
+    if (role.expiresAt) {
+      const expiryDate = new Date(role.expiresAt).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
+      lines.push(`Expires: ${expiryDate}`);
+    }
+
+    return lines.join('\n');
+  }
+
+  getRoleCount(user: any): number {
+    // Return count of roles assigned to the user
+    // Supports both multi-role (user.roles array) and single-role (user.role string)
+    if (user.roles && Array.isArray(user.roles)) {
+      return user.roles.length;
+    }
+    return user.role ? 1 : 0;
   }
 }

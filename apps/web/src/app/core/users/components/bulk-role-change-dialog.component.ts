@@ -57,11 +57,11 @@ interface BulkRoleChangeDialogData {
         </mat-form-field>
       </form>
 
-      <div class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded text-sm">
-        <mat-icon class="text-amber-600 align-top">info</mat-icon>
-        <span class="ml-2"
-          >All existing roles will be replaced with the selected roles. Users
-          will need to re-authenticate to apply the new permissions.</span
+      <div class="mt-4 p-3 bg-red-50 border border-red-300 rounded text-sm">
+        <mat-icon class="text-red-600 align-top font-bold">warning</mat-icon>
+        <span class="ml-2 font-medium text-red-800"
+          ><strong>⚠️ CRITICAL:</strong> All existing roles will be <strong>PERMANENTLY REPLACED</strong> with the selected roles only.
+          Users will lose all current permissions and must re-authenticate. This action cannot be undone.</span
         >
       </div>
     </mat-dialog-content>
