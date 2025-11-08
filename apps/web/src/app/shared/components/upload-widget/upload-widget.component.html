@@ -61,23 +61,20 @@
         >
           <!-- Primary Action: Browse Files -->
           <button
+            mat-raised-button
+            color="primary"
             type="button"
             (click)="fileInput.click()"
-            class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-lg transition-colors duration-150 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed min-w-[140px]"
           >
-            <mat-icon class="icon-size-5">folder_open</mat-icon>
-            <span>Browse Files</span>
+            <mat-icon>folder_open</mat-icon>
+            Browse Files
           </button>
 
           <!-- Secondary Action: Take Photo -->
           @if (showCameraButton()) {
-            <button
-              type="button"
-              (click)="openCamera()"
-              class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600 border border-gray-300 dark:border-gray-600 rounded-lg transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed min-w-[140px]"
-            >
-              <mat-icon class="icon-size-5">camera_alt</mat-icon>
-              <span>Take Photo</span>
+            <button mat-stroked-button type="button" (click)="openCamera()">
+              <mat-icon>camera_alt</mat-icon>
+              Take Photo
             </button>
           }
         </div>
@@ -209,37 +206,38 @@
       <div class="flex flex-col sm:flex-row justify-end gap-3">
         <!-- Clear Button -->
         <button
+          mat-stroked-button
           type="button"
           (click)="clearFiles()"
           [disabled]="isUploading()"
-          class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <mat-icon class="icon-size-5">clear</mat-icon>
-          <span>Clear</span>
+          <mat-icon>clear</mat-icon>
+          Clear
         </button>
 
         <!-- Add More Button -->
         @if (!enableDragDrop || mode === 'multiple') {
           <button
+            mat-stroked-button
             type="button"
             (click)="fileInput.click()"
             [disabled]="isUploading() || selectedFiles().length >= maxFiles"
-            class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <mat-icon class="icon-size-5">add</mat-icon>
-            <span>Add More</span>
+            <mat-icon>add</mat-icon>
+            Add More
           </button>
         }
 
         <!-- Upload Button (Primary) -->
         <button
+          mat-raised-button
+          color="primary"
           type="button"
           (click)="startUpload()"
           [disabled]="!canUpload()"
-          class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-lg transition-colors duration-150 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <mat-icon class="icon-size-5">cloud_upload</mat-icon>
-          <span>{{ isUploading() ? 'Uploading...' : 'Upload' }}</span>
+          <mat-icon>cloud_upload</mat-icon>
+          {{ isUploading() ? 'Uploading...' : 'Upload' }}
         </button>
       </div>
     </div>
