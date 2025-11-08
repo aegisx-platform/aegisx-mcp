@@ -5,12 +5,44 @@ import {
   UserUpdateData,
   UserListOptions,
   UserWithRole,
+  UserRole,
   BulkOperationResult,
 } from './users.types';
 import { AppError } from '../../core/errors/app-error';
 
 export class UsersService {
   constructor(private usersRepository: UsersRepository) {}
+
+  /**
+   * Helper method to populate user roles array for a single user
+   * Fetches all active roles assigned to the user
+   */
+  private async populateUserRoles(user: UserWithRole): Promise<UserWithRole> {
+    try {
+      const roles = await this.usersRepository.getUserRoles(user.id);
+      return {
+        ...user,
+        roles: roles,
+        primaryRole: roles.length > 0 ? roles[0] : undefined,
+      };
+    } catch (error) {
+      // If role population fails, return user with empty roles array
+      return {
+        ...user,
+        roles: [],
+        primaryRole: undefined,
+      };
+    }
+  }
+
+  /**
+   * Helper method to populate user roles for multiple users
+   */
+  private async populateUsersRoles(
+    users: UserWithRole[],
+  ): Promise<UserWithRole[]> {
+    return Promise.all(users.map((user) => this.populateUserRoles(user)));
+  }
 
   async listUsers(options: UserListOptions): Promise<{
     users: UserWithRole[];
@@ -24,8 +56,11 @@ export class UsersService {
     const { users, total } = await this.usersRepository.findAll(options);
     const { page = 1, limit = 10 } = options;
 
+    // Populate roles for all users
+    const usersWithRoles = await this.populateUsersRoles(users);
+
     return {
-      users,
+      users: usersWithRoles,
       pagination: {
         page,
         limit,
@@ -42,7 +77,8 @@ export class UsersService {
       throw new AppError('User not found', 404, 'USER_NOT_FOUND');
     }
 
-    return user;
+    // Populate user roles
+    return this.populateUserRoles(user);
   }
 
   async createUser(data: UserCreateData): Promise<UserWithRole> {
@@ -99,7 +135,8 @@ export class UsersService {
       password: hashedPassword,
     });
 
-    return user;
+    // Populate user roles
+    return this.populateUserRoles(user);
   }
 
   async updateUser(
@@ -156,7 +193,8 @@ export class UsersService {
       throw new AppError('Failed to update user', 500, 'UPDATE_FAILED');
     }
 
-    return updatedUser;
+    // Populate user roles
+    return this.populateUserRoles(updatedUser);
   }
 
   async changeUserPassword(id: string, newPassword: string): Promise<void> {
@@ -413,13 +451,22 @@ export class UsersService {
   private async executeBulkOperation(
     userIds: string[],
     currentUserId: string,
-    operationType: 'activate' | 'deactivate' | 'delete' | 'role-change' | 'status-change',
+    operationType:
+      | 'activate'
+      | 'deactivate'
+      | 'delete'
+      | 'role-change'
+      | 'status-change',
     options: {
       validateCurrentState: (user: UserWithRole) => boolean;
       stateErrorCode: string;
       stateErrorMessage: string;
       operation: (userId: string) => Promise<void>;
-      allowSelfModification?: (user: UserWithRole, userId: string, currentUserId: string) => boolean;
+      allowSelfModification?: (
+        user: UserWithRole,
+        userId: string,
+        currentUserId: string,
+      ) => boolean;
     },
   ): Promise<BulkOperationResult> {
     const results: BulkOperationResult['results'] = [];
@@ -625,12 +672,7 @@ export class UsersService {
     }>;
     total: number;
   }> {
-    const {
-      limit = 100,
-      search,
-      active = true,
-      exclude = [],
-    } = options;
+    const { limit = 100, search, active = true, exclude = [] } = options;
 
     // Build query for active users
     const query: any = {
@@ -651,8 +693,8 @@ export class UsersService {
 
     // Transform to dropdown format
     const dropdownOptions = result.users
-      .filter(user => !exclude.includes(user.id))
-      .map(user => ({
+      .filter((user) => !exclude.includes(user.id))
+      .map((user) => ({
         value: user.id,
         label: `${user.firstName} ${user.lastName} (${user.email})`,
         disabled: (user as any).status !== 'active',
@@ -662,5 +704,112 @@ export class UsersService {
       options: dropdownOptions,
       total: result.total,
     };
+  }
+
+  // ===== MULTI-ROLE MANAGEMENT METHODS =====
+
+  /**
+   * Get all roles assigned to a user
+   */
+  async getUserRoles(userId: string): Promise<UserRole[]> {
+    const user = await this.usersRepository.findById(userId);
+    if (!user) {
+      throw new AppError('User not found', 404, 'USER_NOT_FOUND');
+    }
+
+    return this.usersRepository.getUserRoles(userId);
+  }
+
+  /**
+   * Assign one or more roles to a user
+   */
+  async assignRolesToUser(
+    userId: string,
+    roleIds: string[],
+    assignedBy?: string,
+    expiresAt?: Date,
+  ): Promise<{ message: string; userId: string }> {
+    // Check if user exists
+    const user = await this.usersRepository.findById(userId);
+    if (!user) {
+      throw new AppError('User not found', 404, 'USER_NOT_FOUND');
+    }
+
+    // Validate roles exist
+    const allRoles = await this.usersRepository.getRoles();
+    for (const roleId of roleIds) {
+      if (!allRoles.find((r) => r.id === roleId)) {
+        throw new AppError(
+          `Role with ID ${roleId} not found`,
+          400,
+          'ROLE_NOT_FOUND',
+        );
+      }
+    }
+
+    // Assign roles (deduplication handled at repository level)
+    await this.usersRepository.assignRoles(
+      userId,
+      roleIds,
+      assignedBy,
+      expiresAt,
+    );
+
+    // Return success message with userId as per schema
+    return {
+      message: `Successfully assigned ${roleIds.length} role(s) to user`,
+      userId,
+    };
+  }
+
+  /**
+   * Remove a role from a user
+   */
+  async removeRoleFromUser(
+    userId: string,
+    roleId: string,
+  ): Promise<UserWithRole> {
+    // Check if user exists
+    const user = await this.usersRepository.findById(userId);
+    if (!user) {
+      throw new AppError('User not found', 404, 'USER_NOT_FOUND');
+    }
+
+    // Remove role
+    await this.usersRepository.removeRole(userId, roleId);
+
+    // Return updated user with populated roles
+    const updatedUser = await this.usersRepository.findById(userId);
+    if (!updatedUser) {
+      throw new AppError('Failed to fetch updated user', 500, 'UPDATE_FAILED');
+    }
+
+    return this.populateUserRoles(updatedUser);
+  }
+
+  /**
+   * Update role expiration date for a user
+   */
+  async updateRoleExpiry(
+    userId: string,
+    roleId: string,
+    expiresAt?: Date,
+  ): Promise<UserWithRole> {
+    // Check if user exists
+    const user = await this.usersRepository.findById(userId);
+    if (!user) {
+      throw new AppError('User not found', 404, 'USER_NOT_FOUND');
+    }
+
+    // Update role expiry
+    await this.usersRepository.updateRoleExpiry(userId, roleId, expiresAt);
+
+    // Return updated user with populated roles
+    const updatedUser = await this.usersRepository.findById(userId);
+    if (!updatedUser) {
+      throw new AppError('Failed to fetch updated user', 500, 'UPDATE_FAILED');
+    }
+
+    return this.populateUserRoles(updatedUser);
   }
 }

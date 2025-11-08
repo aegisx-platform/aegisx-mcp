@@ -19,12 +19,30 @@ const UserEntitySchema = Type.Object({
   updatedAt: Type.String({ format: 'date-time' }),
 });
 
-// User with role information
+// User role assignment details (for multi-role support)
+const UserRoleSchema = Type.Object({
+  id: Type.String({ format: 'uuid' }),
+  roleId: Type.String({ format: 'uuid' }),
+  roleName: Type.String(),
+  assignedAt: Type.String({ format: 'date-time' }),
+  assignedBy: Type.Optional(Type.String({ format: 'uuid' })),
+  expiresAt: Type.Optional(Type.String({ format: 'date-time' })),
+  isActive: Type.Boolean(),
+});
+
+// User with role information (backward compatible with single-role, extended with multi-role)
 const UserWithRoleSchema = Type.Intersect([
   UserEntitySchema,
   Type.Object({
+    // Backward compatibility - primary role (first role in list)
     role: Type.String(), // Role name from joined table
     roleId: Type.String({ format: 'uuid' }), // Role ID from joined table
+
+    // Multi-role support
+    roles: Type.Array(UserRoleSchema, {
+      description: 'Array of all roles assigned to the user',
+    }),
+    primaryRole: Type.Optional(UserRoleSchema),
   }),
 ]);
 
@@ -72,7 +90,7 @@ const CreateUserRequestSchema = Type.Object({
       Type.Literal('inactive'),
       Type.Literal('suspended'),
       Type.Literal('pending'),
-    ])
+    ]),
   ),
 });
 
@@ -92,7 +110,7 @@ const UpdateUserRequestSchema = Type.Object({
       Type.Literal('inactive'),
       Type.Literal('suspended'),
       Type.Literal('pending'),
-    ])
+    ]),
   ),
 });
 
@@ -171,6 +189,42 @@ const ListRolesResponseSchema = ApiSuccessResponseSchema(
   Type.Array(RoleSchema),
 );
 
+// ===== MULTI-ROLE MANAGEMENT SCHEMAS =====
+
+// Assign roles to user request
+const AssignRolesToUserRequestSchema = Type.Object({
+  roleIds: Type.Array(Type.String({ format: 'uuid' }), {
+    minItems: 1,
+    maxItems: 10,
+    description: 'Array of role IDs to assign to the user (max 10)',
+  }),
+  expiresAt: Type.Optional(Type.String({ format: 'date-time' })),
+});
+
+// Remove role from user request
+const RemoveRoleFromUserRequestSchema = Type.Object({
+  roleId: Type.String({ format: 'uuid', description: 'Role ID to remove' }),
+});
+
+// Update role expiry request
+const UpdateRoleExpiryRequestSchema = Type.Object({
+  roleId: Type.String({ format: 'uuid', description: 'Role ID to update' }),
+  expiresAt: Type.Optional(Type.String({ format: 'date-time' })),
+});
+
+// Get user roles response
+const GetUserRolesResponseSchema = ApiSuccessResponseSchema(
+  Type.Array(UserRoleSchema),
+);
+
+// Success response for role operations
+const RoleOperationResponseSchema = ApiSuccessResponseSchema(
+  Type.Object({
+    message: Type.String(),
+    userId: Type.String({ format: 'uuid' }),
+  }),
+);
+
 // Export schemas for registration
 // Bulk operations schemas
 
@@ -193,12 +247,15 @@ const BulkChangeStatusRequestSchema = Type.Object({
     maxItems: 100,
     description: 'Array of user IDs to change status for (max 100)',
   }),
-  status: Type.Union([
-    Type.Literal('active'),
-    Type.Literal('inactive'),
-    Type.Literal('suspended'),
-    Type.Literal('pending'),
-  ], { description: 'Target status to change users to' }),
+  status: Type.Union(
+    [
+      Type.Literal('active'),
+      Type.Literal('inactive'),
+      Type.Literal('suspended'),
+      Type.Literal('pending'),
+    ],
+    { description: 'Target status to change users to' },
+  ),
 });
 
 // Bulk role change request
@@ -272,6 +329,13 @@ export const usersSchemas = {
   'update-profile-response': UpdateProfileResponseSchema,
   'success-message-response': OperationResultResponseSchema,
   'list-roles-response': ListRolesResponseSchema,
+  // Multi-role management schemas
+  'user-role': UserRoleSchema,
+  'assign-roles-to-user-request': AssignRolesToUserRequestSchema,
+  'remove-role-from-user-request': RemoveRoleFromUserRequestSchema,
+  'update-role-expiry-request': UpdateRoleExpiryRequestSchema,
+  'get-user-roles-response': GetUserRolesResponseSchema,
+  'role-operation-response': RoleOperationResponseSchema,
   // Bulk operation schemas
   'bulk-user-ids-request': BulkUserIdsRequestSchema,
   'bulk-status-change-request': BulkStatusChangeRequestSchema,
@@ -305,12 +369,28 @@ export type UpdateProfileResponse = Static<typeof UpdateProfileResponseSchema>;
 export type Role = Static<typeof RoleSchema>;
 export type ListRolesResponse = Static<typeof ListRolesResponseSchema>;
 
+// Multi-role management types
+export type UserRole = Static<typeof UserRoleSchema>;
+export type AssignRolesToUserRequest = Static<
+  typeof AssignRolesToUserRequestSchema
+>;
+export type RemoveRoleFromUserRequest = Static<
+  typeof RemoveRoleFromUserRequestSchema
+>;
+export type UpdateRoleExpiryRequest = Static<
+  typeof UpdateRoleExpiryRequestSchema
+>;
+export type GetUserRolesResponse = Static<typeof GetUserRolesResponseSchema>;
+export type RoleOperationResponse = Static<typeof RoleOperationResponseSchema>;
+
 // Bulk operation types
 export type BulkUserIdsRequest = Static<typeof BulkUserIdsRequestSchema>;
 export type BulkStatusChangeRequest = Static<
   typeof BulkStatusChangeRequestSchema
 >;
-export type BulkChangeStatusRequest = Static<typeof BulkChangeStatusRequestSchema>;
+export type BulkChangeStatusRequest = Static<
+  typeof BulkChangeStatusRequestSchema
+>;
 export type BulkRoleChangeRequest = Static<typeof BulkRoleChangeRequestSchema>;
 export type BulkOperationResponse = Static<typeof BulkOperationResponseSchema>;
 export type BulkOperationResult = Static<typeof BulkOperationResultSchema>;

@@ -16,9 +16,25 @@ export interface User {
   isEmailVerified?: boolean;
 }
 
+// Role assignment details for multi-role support
+export interface UserRole {
+  id: string;
+  roleId: string;
+  roleName: string;
+  assignedAt: Date;
+  assignedBy?: string | null;
+  expiresAt?: Date | null;
+  isActive: boolean;
+}
+
 export interface UserWithRole extends User {
+  // Backward compatibility - primary role (first role in list)
   role: string;
   roleId: string;
+
+  // Multi-role support
+  roles: UserRole[];
+  primaryRole?: UserRole;
 }
 
 export interface UserCreateData {

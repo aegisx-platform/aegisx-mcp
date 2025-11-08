@@ -34,7 +34,7 @@ export async function usersRoutes(
           403: SchemaRefs.Forbidden,
           500: SchemaRefs.ServerError,
         },
-      }
+      },
     },
     controller.listUsers.bind(controller),
   );
@@ -228,6 +228,121 @@ export async function usersRoutes(
 
   // ===== PROFILE ROUTES =====
   // NOTE: Profile routes moved to user-profile module
+
+  // ===== MULTI-ROLE MANAGEMENT =====
+
+  // Get user roles
+  typedFastify.get(
+    '/users/:id/roles',
+    {
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('users', 'read'),
+      ],
+      schema: {
+        description: 'Get all roles assigned to a user',
+        tags: ['Users', 'Multi-Role Management'],
+        summary: 'Retrieve user roles',
+        security: [{ bearerAuth: [] }],
+        params: SchemaRefs.UuidParam,
+        response: {
+          200: SchemaRefs.module('users', 'get-user-roles-response'),
+          401: SchemaRefs.Unauthorized,
+          403: SchemaRefs.Forbidden,
+          404: SchemaRefs.NotFound,
+          500: SchemaRefs.ServerError,
+        },
+      },
+    },
+    controller.getUserRoles.bind(controller),
+  );
+
+  // Assign roles to user
+  typedFastify.post(
+    '/users/:id/roles/assign',
+    {
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('users', 'update'),
+      ],
+      schema: {
+        description: 'Assign one or more roles to a user',
+        tags: ['Users', 'Multi-Role Management'],
+        summary: 'Assign roles to user',
+        security: [{ bearerAuth: [] }],
+        params: SchemaRefs.UuidParam,
+        body: SchemaRefs.module('users', 'assign-roles-to-user-request'),
+        response: {
+          200: SchemaRefs.module('users', 'role-operation-response'),
+          400: SchemaRefs.ValidationError,
+          401: SchemaRefs.Unauthorized,
+          403: SchemaRefs.Forbidden,
+          404: SchemaRefs.NotFound,
+          422: SchemaRefs.ValidationError,
+          500: SchemaRefs.ServerError,
+        },
+      },
+    },
+    controller.assignRolesToUser.bind(controller),
+  );
+
+  // Remove role from user
+  typedFastify.post(
+    '/users/:id/roles/remove',
+    {
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('users', 'update'),
+      ],
+      schema: {
+        description: 'Remove a role from a user',
+        tags: ['Users', 'Multi-Role Management'],
+        summary: 'Remove role from user',
+        security: [{ bearerAuth: [] }],
+        params: SchemaRefs.UuidParam,
+        body: SchemaRefs.module('users', 'remove-role-from-user-request'),
+        response: {
+          200: SchemaRefs.module('users', 'role-operation-response'),
+          400: SchemaRefs.ValidationError,
+          401: SchemaRefs.Unauthorized,
+          403: SchemaRefs.Forbidden,
+          404: SchemaRefs.NotFound,
+          422: SchemaRefs.ValidationError,
+          500: SchemaRefs.ServerError,
+        },
+      },
+    },
+    controller.removeRoleFromUser.bind(controller),
+  );
+
+  // Update role expiry
+  typedFastify.post(
+    '/users/:id/roles/expiry',
+    {
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('users', 'update'),
+      ],
+      schema: {
+        description: 'Update the expiry date of a user role assignment',
+        tags: ['Users', 'Multi-Role Management'],
+        summary: 'Update role expiry date',
+        security: [{ bearerAuth: [] }],
+        params: SchemaRefs.UuidParam,
+        body: SchemaRefs.module('users', 'update-role-expiry-request'),
+        response: {
+          200: SchemaRefs.module('users', 'role-operation-response'),
+          400: SchemaRefs.ValidationError,
+          401: SchemaRefs.Unauthorized,
+          403: SchemaRefs.Forbidden,
+          404: SchemaRefs.NotFound,
+          422: SchemaRefs.ValidationError,
+          500: SchemaRefs.ServerError,
+        },
+      },
+    },
+    controller.updateRoleExpiry.bind(controller),
+  );
 
   // ===== BULK OPERATIONS =====
 
@@ -447,7 +562,10 @@ export async function usersRoutes(
         },
       },
       onError: (request, _reply, error) => {
-        request.log.error({ err: error }, 'Error in bulk change status endpoint');
+        request.log.error(
+          { err: error },
+          'Error in bulk change status endpoint',
+        );
       },
     },
     controller.bulkChangeUserStatus.bind(controller),
