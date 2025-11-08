@@ -168,6 +168,8 @@ export interface ActivityResponse {
 export class ActivityTabComponent implements OnInit {
   @Input() userId!: string;
 
+  private http = inject(HttpClient);
+
   activities = signal<ActivityLog[]>([]);
   loading = signal(false);
   pagination = signal({
@@ -185,8 +187,7 @@ export class ActivityTabComponent implements OnInit {
     this.loading.set(true);
 
     // Use HttpClient to fetch user activities from the API
-    const http = inject(HttpClient);
-    http
+    this.http
       .get<any>(`/api/profile/activity`, {
         params: { page: page.toString(), limit: limit.toString() },
       })
