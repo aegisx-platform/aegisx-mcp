@@ -1,34 +1,30 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { MatTableModule } from '@angular/material/table';
-import { MatPaginatorModule } from '@angular/material/paginator';
-import { MatSortModule } from '@angular/material/sort';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { AegisxCardComponent } from '@aegisx/ui';
-import {
-  UserService,
-  BulkOperationResult,
-  UserStatus,
-} from '../services/user.service';
-import { UserFormDialogComponent } from '../components/user-form-dialog.component';
-import { BulkStatusChangeDialogComponent } from '../components/bulk-status-change-dialog.component';
-import { BulkRoleChangeDialogComponent } from '../components/bulk-role-change-dialog.component';
+import { CommonModule } from '@angular/common';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSortModule } from '@angular/material/sort';
+import { MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { Router } from '@angular/router';
 import { ConfirmDialogComponent } from '../../../shared/ui/components/confirm-dialog.component';
+import { BulkRoleChangeDialogComponent } from '../components/bulk-role-change-dialog.component';
+import { BulkStatusChangeDialogComponent } from '../components/bulk-status-change-dialog.component';
+import { UserFormDialogComponent } from '../components/user-form-dialog.component';
+import { UserService, UserStatus } from '../services/user.service';
 
 @Component({
   selector: 'ax-user-list',
@@ -76,75 +72,218 @@ import { ConfirmDialogComponent } from '../../../shared/ui/components/confirm-di
       </div>
 
       <!-- Filters Card -->
-      <ax-card [appearance]="'outlined'" class="mb-3 form-compact">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Search</mat-label>
-            <input
-              matInput
-              [(ngModel)]="searchTerm"
-              (ngModelChange)="applyFilters()"
-              placeholder="Search by name or email"
-            />
-            <mat-icon matPrefix>search</mat-icon>
-            @if (searchTerm) {
-              <button
-                mat-icon-button
-                matSuffix
-                (click)="searchTerm = ''; applyFilters()"
+      <ax-card [appearance]="'outlined'" class="mb-3">
+        <div class="flex flex-col lg:flex-row gap-4 items-stretch lg:items-end">
+          <!-- LEFT GROUP: Filters (Primary User Intent) -->
+          <div
+            class="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+          >
+            <!-- Search Field with Integrated Clear Button -->
+            <mat-form-field
+              appearance="outline"
+              subscriptSizing="dynamic"
+              class="w-full"
+            >
+              <mat-label>Search Users</mat-label>
+              <input
+                matInput
+                [(ngModel)]="searchTerm"
+                (keyup.enter)="applyFilters()"
+                placeholder="Name or email"
+                aria-label="Search users by name or email"
+              />
+              <mat-icon matPrefix>search</mat-icon>
+              @if (searchTerm) {
+                <button
+                  mat-icon-button
+                  matSuffix
+                  (click)="searchTerm = ''; applyFilters()"
+                  matTooltip="Clear search"
+                  aria-label="Clear search field"
+                >
+                  <mat-icon>close</mat-icon>
+                </button>
+              }
+            </mat-form-field>
+
+            <!-- Role Filter -->
+            <mat-form-field
+              appearance="outline"
+              subscriptSizing="dynamic"
+              class="w-full"
+            >
+              <mat-label>Role</mat-label>
+              <mat-select
+                [(ngModel)]="selectedRole"
+                (ngModelChange)="applyFilters()"
+                aria-label="Filter by role"
               >
-                <mat-icon>close</mat-icon>
+                <mat-option value="">All Roles</mat-option>
+                <mat-option value="admin">
+                  <mat-icon class="text-purple-600 align-middle mr-2"
+                    >admin_panel_settings</mat-icon
+                  >
+                  Admin
+                </mat-option>
+                <mat-option value="manager">
+                  <mat-icon class="text-blue-600 align-middle mr-2"
+                    >manage_accounts</mat-icon
+                  >
+                  Manager
+                </mat-option>
+                <mat-option value="user">
+                  <mat-icon class="text-green-600 align-middle mr-2"
+                    >person</mat-icon
+                  >
+                  User
+                </mat-option>
+              </mat-select>
+              @if (selectedRole) {
+                <mat-icon matSuffix class="text-primary-600"
+                  >filter_alt</mat-icon
+                >
+              }
+            </mat-form-field>
+
+            <!-- Status Filter -->
+            <mat-form-field
+              appearance="outline"
+              subscriptSizing="dynamic"
+              class="w-full"
+            >
+              <mat-label>Status</mat-label>
+              <mat-select
+                [(ngModel)]="selectedStatus"
+                (ngModelChange)="applyFilters()"
+                aria-label="Filter by status"
+              >
+                <mat-option value="">All Status</mat-option>
+                <mat-option value="active">
+                  <mat-icon class="text-green-600 align-middle mr-2"
+                    >check_circle</mat-icon
+                  >
+                  Active
+                </mat-option>
+                <mat-option value="inactive">
+                  <mat-icon class="text-gray-500 align-middle mr-2"
+                    >cancel</mat-icon
+                  >
+                  Inactive
+                </mat-option>
+                <mat-option value="suspended">
+                  <mat-icon class="text-red-600 align-middle mr-2"
+                    >block</mat-icon
+                  >
+                  Suspended
+                </mat-option>
+                <mat-option value="pending">
+                  <mat-icon class="text-yellow-600 align-middle mr-2"
+                    >schedule</mat-icon
+                  >
+                  Pending
+                </mat-option>
+              </mat-select>
+              @if (selectedStatus) {
+                <mat-icon matSuffix class="text-primary-600"
+                  >filter_alt</mat-icon
+                >
+              }
+            </mat-form-field>
+          </div>
+
+          <!-- RIGHT GROUP: Actions (Secondary Intent) -->
+          <div class="flex gap-2 flex-shrink-0">
+            <!-- Search Button (Raised style - primary emphasis) -->
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="applyFilters()"
+              class="whitespace-nowrap"
+              matTooltip="Search users"
+              aria-label="Search users"
+            >
+              <mat-icon>search</mat-icon>
+              <span class="hidden sm:inline">Search</span>
+            </button>
+
+            <!-- Reset Filters Button (Text style - low emphasis) -->
+            @if (hasActiveFilters()) {
+              <button
+                mat-button
+                (click)="resetFilters()"
+                class="whitespace-nowrap"
+                matTooltip="Clear all filters"
+                aria-label="Clear all filters"
+              >
+                <mat-icon>filter_alt_off</mat-icon>
+                <span class="hidden sm:inline">Reset</span>
               </button>
             }
-          </mat-form-field>
 
-          <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Role</mat-label>
-            <mat-select
-              [(ngModel)]="selectedRole"
-              (ngModelChange)="applyFilters()"
-            >
-              <mat-option value="">All Roles</mat-option>
-              <mat-option value="admin">Admin</mat-option>
-              <mat-option value="manager">Manager</mat-option>
-              <mat-option value="user">User</mat-option>
-            </mat-select>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Status</mat-label>
-            <mat-select
-              [(ngModel)]="selectedStatus"
-              (ngModelChange)="applyFilters()"
-            >
-              <mat-option value="">All Status</mat-option>
-              <mat-option value="active">Active</mat-option>
-              <mat-option value="inactive">Inactive</mat-option>
-              <mat-option value="suspended">Suspended</mat-option>
-              <mat-option value="pending">Pending</mat-option>
-            </mat-select>
-          </mat-form-field>
-
-          <div class="flex items-start space-x-2">
-            <button
-              mat-stroked-button
-              (click)="resetFilters()"
-              class="h-[56px]"
-            >
-              <mat-icon>clear</mat-icon>
-              <span>Reset</span>
-            </button>
+            <!-- Export Button (Stroked style - medium emphasis) -->
             <button
               mat-stroked-button
               color="primary"
               (click)="exportUsers()"
-              class="h-[56px]"
+              [disabled]="filteredUsers().length === 0"
+              class="whitespace-nowrap"
+              matTooltip="Export filtered users to CSV"
+              aria-label="Export filtered users"
             >
               <mat-icon>download</mat-icon>
-              <span>Export</span>
+              <span class="hidden sm:inline">Export</span>
             </button>
           </div>
         </div>
+
+        <!-- Active Filters Indicator -->
+        @if (hasActiveFilters()) {
+          <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span
+                class="text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
+                Active filters:
+              </span>
+
+              @if (searchTerm) {
+                <mat-chip
+                  [removable]="true"
+                  (removed)="searchTerm = ''; applyFilters()"
+                  aria-label="Remove search filter"
+                >
+                  <mat-icon matChipAvatar>search</mat-icon>
+                  {{ searchTerm }}
+                  <mat-icon matChipRemove>cancel</mat-icon>
+                </mat-chip>
+              }
+
+              @if (selectedRole) {
+                <mat-chip
+                  [removable]="true"
+                  (removed)="selectedRole = ''; applyFilters()"
+                  aria-label="Remove role filter"
+                >
+                  <mat-icon matChipAvatar>work</mat-icon>
+                  {{ selectedRole | titlecase }}
+                  <mat-icon matChipRemove>cancel</mat-icon>
+                </mat-chip>
+              }
+
+              @if (selectedStatus) {
+                <mat-chip
+                  [removable]="true"
+                  (removed)="selectedStatus = ''; applyFilters()"
+                  aria-label="Remove status filter"
+                >
+                  <mat-icon matChipAvatar>info</mat-icon>
+                  {{ selectedStatus | titlecase }}
+                  <mat-icon matChipRemove>cancel</mat-icon>
+                </mat-chip>
+              }
+            </div>
+          </div>
+        }
       </ax-card>
 
       <!-- Bulk Actions Bar -->
@@ -601,6 +740,11 @@ export class UserListComponent implements OnInit {
     }
 
     return filtered;
+  });
+
+  // Check if any filters are currently active
+  hasActiveFilters = computed(() => {
+    return !!(this.searchTerm || this.selectedRole || this.selectedStatus);
   });
 
   ngOnInit() {
