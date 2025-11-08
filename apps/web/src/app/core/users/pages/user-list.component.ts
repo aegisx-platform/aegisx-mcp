@@ -367,14 +367,23 @@ import { UserService, UserStatus } from '../services/user.service';
 
       <!-- Bulk Progress Indicator -->
       @if (bulkLoading() && bulkProgress().total > 0) {
-        <ax-card [appearance]="'elevated'" class="mb-3 bg-green-50 border-green-200">
+        <ax-card
+          [appearance]="'elevated'"
+          class="mb-3 bg-green-50 border-green-200"
+        >
           <div class="flex items-center justify-between gap-4">
             <div class="flex items-center gap-3 flex-1">
-              <mat-icon class="text-green-600 animate-spin">hourglass_empty</mat-icon>
+              <mat-icon class="text-green-600 animate-spin"
+                >hourglass_empty</mat-icon
+              >
               <div class="flex-1">
                 <p class="font-medium text-green-800">
                   Processing
-                  <strong>{{ bulkProgress().current }}/{{ bulkProgress().total }}</strong>
+                  <strong
+                    >{{ bulkProgress().current }}/{{
+                      bulkProgress().total
+                    }}</strong
+                  >
                   user(s)...
                 </p>
                 <p class="text-sm text-green-700 mt-1">
@@ -401,7 +410,7 @@ import { UserService, UserStatus } from '../services/user.service';
                     stroke="#16a34a"
                     stroke-width="2"
                     [attr.stroke-dasharray]="
-                      ((bulkProgress().current / bulkProgress().total) * 100.5) +
+                      (bulkProgress().current / bulkProgress().total) * 100.5 +
                       ', 100.5'
                     "
                     stroke-linecap="round"
@@ -413,7 +422,7 @@ import { UserService, UserStatus } from '../services/user.service';
                 <div class="absolute text-center">
                   <span class="text-sm font-bold text-green-800">
                     {{
-                      ((bulkProgress().current / bulkProgress().total) * 100)
+                      (bulkProgress().current / bulkProgress().total) * 100
                         | number: '1.0-0'
                     }}%
                   </span>
@@ -511,7 +520,10 @@ import { UserService, UserStatus } from '../services/user.service';
                           *ngIf="getRoleCount(user) > 0"
                           [matTooltip]="'Click to view role details'"
                           matTooltipPosition="above"
-                          (click)="$event.stopPropagation(); openRoleAssignmentInfoModal(user)"
+                          (click)="
+                            $event.stopPropagation();
+                            openRoleAssignmentInfoModal(user)
+                          "
                           [ngClass]="{
                             'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200':
                               getRoleCount(user) === 1,
@@ -783,7 +795,10 @@ export class UserListComponent implements OnInit {
   // Selection
   selectedUsers = signal<any[]>([]);
   bulkLoading = signal(false);
-  bulkProgress = signal<{ current: number; total: number }>({ current: 0, total: 0 });
+  bulkProgress = signal<{ current: number; total: number }>({
+    current: 0,
+    total: 0,
+  });
 
   // Table columns
   displayedColumns: string[] = [
@@ -1291,11 +1306,14 @@ export class UserListComponent implements OnInit {
 
     // Assigned date
     if (role.assignedAt) {
-      const assignedDate = new Date(role.assignedAt).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      });
+      const assignedDate = new Date(role.assignedAt).toLocaleDateString(
+        'en-US',
+        {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        },
+      );
       lines.push(`Assigned: ${assignedDate}`);
     }
 

@@ -100,7 +100,7 @@ interface RoleAssignmentInfoData {
                     </div>
                     <div class="role-id-copy">
                       <code class="role-id" [title]="role.roleId">
-                        {{ role.roleId | slice: 0:8 }}...
+                        {{ role.roleId | slice: 0 : 8 }}...
                       </code>
                       <button
                         mat-icon-button
@@ -167,7 +167,9 @@ interface RoleAssignmentInfoData {
                           <mat-icon class="detail-icon">access_time</mat-icon>
                           Expires At
                         </div>
-                        <div class="detail-value text-gray-500 dark:text-gray-400">
+                        <div
+                          class="detail-value text-gray-500 dark:text-gray-400"
+                        >
                           No expiration
                         </div>
                       </div>
@@ -181,7 +183,7 @@ interface RoleAssignmentInfoData {
                       </div>
                       <div class="detail-value">
                         <code class="assignment-id" [title]="role.id">
-                          {{ role.id | slice: 0:8 }}...
+                          {{ role.id | slice: 0 : 8 }}...
                         </code>
                       </div>
                     </div>
@@ -220,11 +222,7 @@ interface RoleAssignmentInfoData {
         padding: 1.5rem;
         border-bottom: 1px solid #e5e7eb;
         margin: 0;
-        background: linear-gradient(
-          135deg,
-          #f3f4f6 0%,
-          #f9fafb 100%
-        );
+        background: linear-gradient(135deg, #f3f4f6 0%, #f9fafb 100%);
       }
 
       .header-icon {
@@ -497,11 +495,7 @@ interface RoleAssignmentInfoData {
 
       /* Dark Mode */
       :host-context(.dark-mode) .modal-header {
-        background: linear-gradient(
-          135deg,
-          #1f2937 0%,
-          #111827 100%
-        );
+        background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
         border-bottom-color: #374151;
       }
 
