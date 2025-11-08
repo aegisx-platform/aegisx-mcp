@@ -848,4 +848,96 @@ export class RbacRepository {
       expiring_user_roles: parseInt((expiringRoles as any).expiring_user_roles),
     };
   }
+
+  // ===== ROLE ASSIGNMENT HISTORY =====
+
+  async recordRoleAssignment(
+    userId: string,
+    roleId: string,
+    action: 'assigned' | 'removed' | 'expired',
+    performedBy: string | null,
+    expiresAt: Date | null = null,
+    metadata: any = null,
+  ): Promise<void> {
+    await this.db('role_assignment_history').insert({
+      user_id: userId,
+      role_id: roleId,
+      action,
+      performed_by: performedBy,
+      expires_at: expiresAt,
+      metadata,
+      performed_at: new Date(),
+      created_at: new Date(),
+    });
+  }
+
+  async getRoleAssignmentHistory(
+    query: any,
+  ): Promise<{ history: any[]; pagination: any }> {
+    const { page = 1, limit = 20 } = query;
+    const offset = (page - 1) * limit;
+
+    let queryBuilder = this.db('role_assignment_history');
+
+    // Apply filters
+    if (query.user_id) {
+      queryBuilder = queryBuilder.where('user_id', query.user_id);
+    }
+    if (query.role_id) {
+      queryBuilder = queryBuilder.where('role_id', query.role_id);
+    }
+    if (query.action) {
+      queryBuilder = queryBuilder.where('action', query.action);
+    }
+    if (query.from_date) {
+      queryBuilder = queryBuilder.where(
+        'performed_at',
+        '>=',
+        new Date(query.from_date),
+      );
+    }
+    if (query.to_date) {
+      queryBuilder = queryBuilder.where(
+        'performed_at',
+        '<=',
+        new Date(query.to_date),
+      );
+    }
+
+    // Get total count
+    const countResult = await queryBuilder.clone().count('*', { as: 'total' });
+    const total = parseInt((countResult[0] as any).total);
+
+    // Get paginated results
+    const history = await queryBuilder
+      .orderBy('performed_at', 'desc')
+      .offset(offset)
+      .limit(limit);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      history,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+      },
+    };
+  }
+
+  async getUserRoleHistory(
+    userId: string,
+    limit = 50,
+  ): Promise<{ history: any[] }> {
+    const history = await this.db('role_assignment_history')
+      .where('user_id', userId)
+      .orderBy('performed_at', 'desc')
+      .limit(limit);
+
+    return { history };
+  }
 }
