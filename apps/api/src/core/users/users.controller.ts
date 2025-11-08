@@ -686,6 +686,9 @@ export class UsersController {
         request.body.expiresAt ? new Date(request.body.expiresAt) : undefined,
       );
 
+      // ✅ Invalidate user's permission cache after role assignment
+      await request.server.permissionCache.invalidate(request.params.id);
+
       // Emit WebSocket event
       this.userEvents.emitUpdated(user);
 
@@ -721,6 +724,9 @@ export class UsersController {
         request.params.id,
         request.body.roleId,
       );
+
+      // ✅ Invalidate user's permission cache after role removal
+      await request.server.permissionCache.invalidate(request.params.id);
 
       // Emit WebSocket event
       this.userEvents.emitUpdated(user);
@@ -762,6 +768,9 @@ export class UsersController {
         request.body.roleId,
         request.body.expiresAt ? new Date(request.body.expiresAt) : undefined,
       );
+
+      // ✅ Invalidate user's permission cache after role expiry update
+      await request.server.permissionCache.invalidate(request.params.id);
 
       // Emit WebSocket event
       this.userEvents.emitUpdated(user);

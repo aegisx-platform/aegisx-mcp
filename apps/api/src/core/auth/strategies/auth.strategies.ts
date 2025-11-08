@@ -67,8 +67,12 @@ async function authStrategiesPlugin(fastify: FastifyInstance) {
         resourceParam
       ];
 
-      // Check if user owns resource or is admin
-      if (user.role !== 'admin' && user.id !== resourceId) {
+      // Support both multi-role (roles array) and single role (backward compatibility)
+      const userRoles = user.roles || (user.role ? [user.role] : []);
+
+      // Check if user owns resource or has admin role
+      const isAdmin = userRoles.includes('admin');
+      if (!isAdmin && user.id !== resourceId) {
         return reply.forbidden('Access denied to this resource');
       }
     };

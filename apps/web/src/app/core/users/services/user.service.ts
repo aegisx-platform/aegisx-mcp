@@ -17,10 +17,12 @@ export interface User {
   firstName: string;
   lastName: string;
   status: UserStatus;
-  role: string; // Deprecated: Use roles[] for multi-role support
-  roleId: string; // Deprecated: Use roleIds[] for multi-role support
-  roles?: string[]; // Multi-role support
-  roleIds?: string[]; // Multi-role support
+  // Backward compatibility - primary role (first role in list)
+  role: string;
+  roleId: string;
+  // Multi-role support (required, not optional)
+  roles: UserRole[]; // Full role details with metadata
+  primaryRole?: UserRole; // Explicitly marked primary role
   createdAt: string;
   updatedAt: string;
   lastLoginAt?: string;
@@ -169,8 +171,10 @@ export interface UserProfile {
   lastName?: string;
   bio?: string;
   avatar?: string;
-  role: string; // Deprecated: Use roles[] for multi-role support
-  roles?: string[]; // Multi-role support
+  // Backward compatibility - primary role (first role in list)
+  role: string;
+  // Multi-role support (required, not optional)
+  roles: UserRole[]; // Full role details with metadata
   status: string;
   emailVerified: boolean;
   createdAt: string;

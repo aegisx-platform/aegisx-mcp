@@ -422,6 +422,241 @@ export const ResourceListResponseSchema = Type.Object({
 });
 ```
 
+## 🔄 Multi-Role Management Endpoints
+
+### 1. Assign Roles to User
+
+```http
+POST /api/users/:id/roles/assign
+```
+
+#### Path Parameters
+
+- `id` (string, required): User UUID
+
+#### Request Schema
+
+```typescript
+{
+  roleIds: string[]; // Array of role UUIDs to assign
+  expiresAt?: string; // Optional ISO 8601 date when roles expire
+}
+```
+
+#### Request Example
+
+```json
+{
+  "roleIds": ["role-uuid-1", "role-uuid-2"],
+  "expiresAt": "2025-12-31T23:59:59Z"
+}
+```
+
+#### Response Schema
+
+```typescript
+{
+  success: boolean;
+  data: {
+    message: string;
+    userId: string;
+  }
+  meta: {
+    requestId: string;
+    timestamp: string;
+    version: string;
+  }
+}
+```
+
+#### Notes
+
+- ✅ **Cache Invalidation**: User's permission cache is automatically invalidated
+- ✅ **Multi-Role Support**: Multiple roles can be assigned to a single user
+- ✅ **Expiry Support**: Roles can have optional expiration dates
+
+---
+
+### 2. Remove Role from User
+
+```http
+POST /api/users/:id/roles/remove
+```
+
+#### Path Parameters
+
+- `id` (string, required): User UUID
+
+#### Request Schema
+
+```typescript
+{
+  roleId: string; // UUID of role to remove
+}
+```
+
+#### Request Example
+
+```json
+{
+  "roleId": "role-uuid-1"
+}
+```
+
+#### Response Schema
+
+```typescript
+{
+  success: boolean;
+  data: {
+    message: string;
+    userId: string;
+  }
+  meta: {
+    requestId: string;
+    timestamp: string;
+    version: string;
+  }
+}
+```
+
+#### Notes
+
+- ✅ **Cache Invalidation**: User's permission cache is automatically invalidated
+- ⚠️ **Validation**: User must have at least one role (cannot remove all roles)
+
+---
+
+### 3. Update Role Expiry
+
+```http
+POST /api/users/:id/roles/expiry
+```
+
+#### Path Parameters
+
+- `id` (string, required): User UUID
+
+#### Request Schema
+
+```typescript
+{
+  roleId: string; // UUID of role to update
+  expiresAt?: string; // ISO 8601 date for expiration (null to remove expiry)
+}
+```
+
+#### Request Example
+
+```json
+{
+  "roleId": "role-uuid-1",
+  "expiresAt": "2025-12-31T23:59:59Z"
+}
+```
+
+#### Response Schema
+
+```typescript
+{
+  success: boolean;
+  data: {
+    message: string;
+    userId: string;
+  }
+  meta: {
+    requestId: string;
+    timestamp: string;
+    version: string;
+  }
+}
+```
+
+#### Notes
+
+- ✅ **Cache Invalidation**: User's permission cache is automatically invalidated
+- ✅ **Flexible Expiry**: Can set, update, or remove role expiration
+
+---
+
+### 4. Get User Roles
+
+```http
+GET /api/users/:id/roles
+```
+
+#### Path Parameters
+
+- `id` (string, required): User UUID
+
+#### Query Parameters
+
+- `include_role` (boolean, optional): Include full role objects with permissions (default: false)
+- `limit` (number, optional): Maximum results (default: 100)
+- `offset` (number, optional): Result offset for pagination (default: 0)
+
+#### Response Schema
+
+```typescript
+{
+  success: boolean;
+  data: {
+    id: string;
+    roleId: string;
+    roleName: string;
+    assignedAt: string;
+    assignedBy?: string;
+    expiresAt?: string;
+    isActive: boolean;
+  }[];
+  meta: {
+    requestId: string;
+    timestamp: string;
+    version: string;
+  };
+}
+```
+
+#### Response Example
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "user-role-uuid-1",
+      "roleId": "role-uuid-1",
+      "roleName": "admin",
+      "assignedAt": "2025-09-15T10:30:00Z",
+      "assignedBy": "admin-user-id",
+      "expiresAt": "2025-12-31T23:59:59Z",
+      "isActive": true
+    },
+    {
+      "id": "user-role-uuid-2",
+      "roleId": "role-uuid-2",
+      "roleName": "editor",
+      "assignedAt": "2025-09-15T11:00:00Z",
+      "expiresAt": null,
+      "isActive": true
+    }
+  ],
+  "meta": {
+    "requestId": "req_123456",
+    "timestamp": "2025-11-08T12:30:00Z",
+    "version": "1.0"
+  }
+}
+```
+
+#### Notes
+
+- ✅ **Active Roles Only**: By default returns only active role assignments
+- ✅ **Expiry Handling**: Roles with past expiry dates are marked as inactive
+- ✅ **Metadata Included**: Shows who assigned the role and when
+
+---
+
 ## 🧪 Test Cases
 
 ### Unit Test Cases

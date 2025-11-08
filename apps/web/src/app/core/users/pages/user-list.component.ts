@@ -726,11 +726,11 @@ export class UserListComponent implements OnInit {
     }
 
     if (this.selectedRole) {
-      // Multi-role support: check if selectedRole exists in roles[] or matches role (backward compat)
+      // Multi-role support: check if selectedRole exists in user's roles
       filtered = filtered.filter(
         (user) =>
           user.role === this.selectedRole ||
-          user.roles?.includes(this.selectedRole) ||
+          user.roles?.some((r) => r.roleName === this.selectedRole) ||
           false,
       );
     }
