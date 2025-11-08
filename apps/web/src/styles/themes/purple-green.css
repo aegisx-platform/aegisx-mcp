@@ -1,0 +1,30 @@
+/**
+ * Angular Material Prebuilt Theme: Purple Green
+ * Material Design theme with purple primary and green accent
+ */
+
+@import '@angular/material/prebuilt-themes/purple-green.css';
+
+:root {
+  --mat-theme-primary: #9c27b0;
+  --mat-theme-primary-lighter: #f3e5f5;
+  --mat-theme-primary-darker: #7b1fa2;
+  --mat-theme-accent: #4caf50;
+  --mat-theme-accent-lighter: #e8f5e9;
+  --mat-theme-accent-darker: #388e3c;
+  --mat-theme-warn: #f44336;
+  --mat-theme-warn-lighter: #ffcdd2;
+  --mat-theme-warn-darker: #d32f2f;
+}
+
+.dark {
+  --mat-theme-primary: #ce93d8;
+  --mat-theme-primary-lighter: #f3e5f5;
+  --mat-theme-primary-darker: #ba68c8;
+  --mat-theme-accent: #81c784;
+  --mat-theme-accent-lighter: #e8f5e9;
+  --mat-theme-accent-darker: #66bb6a;
+  --mat-theme-warn: #ff5252;
+  --mat-theme-warn-lighter: #ffebee;
+  --mat-theme-warn-darker: #e53935;
+}

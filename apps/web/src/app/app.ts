@@ -12,6 +12,7 @@ import { filter } from 'rxjs/operators';
 import { AuthService } from './core/auth';
 import { NavigationService } from './core/navigation';
 import { WebSocketService } from './shared/business/services/websocket.service';
+import { ThemeLoaderComponent, ThemeSwitcherComponent } from './core/theme';
 
 interface Notification {
   id: number;
@@ -33,9 +34,14 @@ interface Notification {
     MatDividerModule,
     MatTooltipModule,
     AxCompactLayoutComponent,
+    ThemeLoaderComponent,
+    ThemeSwitcherComponent,
   ],
   selector: 'ax-root',
   template: `
+    <!-- Theme Loader - loads Material theme CSS dynamically -->
+    <ax-theme-loader></ax-theme-loader>
+
     @if (shouldShowLayout()) {
       <ax-compact-layout
         [navigation]="navigation()"
@@ -103,17 +109,8 @@ interface Notification {
 
         <!-- Toolbar Actions -->
         <ng-template #toolbarActions>
-          <!-- Theme Toggle -->
-          <button
-            mat-icon-button
-            matTooltip="Toggle theme"
-            (click)="toggleTheme()"
-            class="mr-1"
-          >
-            <mat-icon>
-              {{ isDarkMode() ? 'light_mode' : 'dark_mode' }}
-            </mat-icon>
-          </button>
+          <!-- Theme Switcher -->
+          <ax-theme-switcher></ax-theme-switcher>
 
           <!-- Notifications -->
           <button

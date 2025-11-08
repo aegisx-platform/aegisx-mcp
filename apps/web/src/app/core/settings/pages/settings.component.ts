@@ -9,10 +9,12 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatDividerModule } from '@angular/material/divider';
 import { Subject, takeUntil } from 'rxjs';
 import { AegisxCardComponent, AegisxAlertComponent } from '@aegisx/ui';
 import { SettingsService } from '../services/settings.service';
 import { GroupedSettings, SettingChangeEvent } from '../models/settings.types';
+import { ThemeSwitcherComponent } from '../../theme';
 
 @Component({
   selector: 'ax-settings',
@@ -28,8 +30,10 @@ import { GroupedSettings, SettingChangeEvent } from '../models/settings.types';
     MatSlideToggleModule,
     MatFormFieldModule,
     MatInputModule,
+    MatDividerModule,
     AegisxCardComponent,
     AegisxAlertComponent,
+    ThemeSwitcherComponent,
   ],
   template: `
     <div class="container mx-auto px-4 py-8">
@@ -86,7 +90,51 @@ import { GroupedSettings, SettingChangeEvent } from '../models/settings.types';
             animationDuration="200ms"
             class="settings-tabs"
           >
-            <!-- Security Tab (Always First) -->
+            <!-- Appearance Tab (Always First) -->
+            <mat-tab>
+              <ng-template mat-tab-label>
+                <mat-icon class="mr-2">palette</mat-icon>
+                <span>Appearance</span>
+              </ng-template>
+              <div class="tab-content">
+                <div class="space-y-6">
+                  <!-- Theme Selection Card -->
+                  <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
+                    <h3
+                      class="text-lg font-medium mb-4 text-gray-900 dark:text-gray-100"
+                    >
+                      Theme & Color
+                    </h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-6">
+                      Customize your application theme and appearance
+                      preferences
+                    </p>
+
+                    <!-- Theme Switcher Component -->
+                    <div
+                      class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-700"
+                    >
+                      <ax-theme-switcher></ax-theme-switcher>
+                    </div>
+
+                    <!-- Theme Info -->
+                    <div
+                      class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800"
+                    >
+                      <p class="text-sm text-blue-800 dark:text-blue-200">
+                        <mat-icon class="inline-block w-5 h-5 mr-2"
+                          >info</mat-icon
+                        >
+                        Your theme preference will be saved and synchronized
+                        across all your devices.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </mat-tab>
+
+            <!-- Security Tab -->
             <mat-tab>
               <ng-template mat-tab-label>
                 <mat-icon class="mr-2">security</mat-icon>

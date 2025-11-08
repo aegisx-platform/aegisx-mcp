@@ -11,7 +11,11 @@ interface QuickAction {
   description: string;
   icon: string;
   route: string;
-  color: string;
+  color: 'blue' | 'green' | 'purple' | 'amber';
+  bgClass: string; // e.g., 'bg-blue-50'
+  hoverBgClass: string; // e.g., 'hover:bg-blue-100'
+  borderHoverClass: string; // e.g., 'hover:border-blue-300'
+  textColorClass: string; // e.g., 'text-blue-600'
   permissions?: string[]; // Optional - if not specified, visible to all
 }
 
@@ -72,19 +76,20 @@ interface Feature {
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             @for (action of filteredQuickActions(); track action.title) {
               <div
-                class="bg-white rounded-xl p-6 border border-slate-200 hover:border-{{
-                  action.color
-                }}-300 hover:shadow-lg transition-all cursor-pointer group"
+                [ngClass]="[
+                  'bg-white rounded-xl p-6 border border-slate-200 hover:shadow-lg transition-all cursor-pointer group',
+                  action.borderHoverClass,
+                ]"
                 (click)="navigateTo(action.route)"
               >
                 <div
-                  class="w-12 h-12 rounded-lg bg-{{
-                    action.color
-                  }}-50 flex items-center justify-center mb-4 group-hover:bg-{{
-                    action.color
-                  }}-100 transition-colors"
+                  [ngClass]="[
+                    'w-12 h-12 rounded-lg flex items-center justify-center mb-4 transition-colors',
+                    action.bgClass,
+                    action.hoverBgClass,
+                  ]"
                 >
-                  <mat-icon class="text-{{ action.color }}-600 !text-2xl">{{
+                  <mat-icon [ngClass]="['!text-2xl', action.textColorClass]">{{
                     action.icon
                   }}</mat-icon>
                 </div>
@@ -199,59 +204,6 @@ interface Feature {
         width: 100%;
         height: 100%;
       }
-
-      // Custom hover effects for dynamic colors
-      .hover-border-blue-300:hover {
-        border-color: rgb(147 197 253);
-      }
-      .hover-border-green-300:hover {
-        border-color: rgb(134 239 172);
-      }
-      .hover-border-purple-300:hover {
-        border-color: rgb(216 180 254);
-      }
-      .hover-border-amber-300:hover {
-        border-color: rgb(252 211 77);
-      }
-
-      .bg-blue-50 {
-        background-color: rgb(239 246 255);
-      }
-      .bg-green-50 {
-        background-color: rgb(240 253 244);
-      }
-      .bg-purple-50 {
-        background-color: rgb(250 245 255);
-      }
-      .bg-amber-50 {
-        background-color: rgb(255 251 235);
-      }
-
-      .hover-bg-blue-100:hover {
-        background-color: rgb(219 234 254);
-      }
-      .hover-bg-green-100:hover {
-        background-color: rgb(220 252 231);
-      }
-      .hover-bg-purple-100:hover {
-        background-color: rgb(243 232 255);
-      }
-      .hover-bg-amber-100:hover {
-        background-color: rgb(254 243 199);
-      }
-
-      .text-blue-600 {
-        color: rgb(37 99 235);
-      }
-      .text-green-600 {
-        color: rgb(22 163 74);
-      }
-      .text-purple-600 {
-        color: rgb(147 51 234);
-      }
-      .text-amber-600 {
-        color: rgb(217 119 6);
-      }
     `,
   ],
 })
@@ -266,6 +218,10 @@ export class HomePage implements OnInit {
       icon: 'account_circle',
       route: '/profile',
       color: 'blue',
+      bgClass: 'bg-blue-50',
+      hoverBgClass: 'hover:bg-blue-100',
+      borderHoverClass: 'hover:border-blue-300',
+      textColorClass: 'text-blue-600',
       // No permissions required - everyone can see their profile
     },
     {
@@ -274,6 +230,10 @@ export class HomePage implements OnInit {
       icon: 'people',
       route: '/users',
       color: 'green',
+      bgClass: 'bg-green-50',
+      hoverBgClass: 'hover:bg-green-100',
+      borderHoverClass: 'hover:border-green-300',
+      textColorClass: 'text-green-600',
       permissions: ['users:read', '*:*'], // Admin or users with user management permission
     },
     {
@@ -282,6 +242,10 @@ export class HomePage implements OnInit {
       icon: 'settings',
       route: '/settings',
       color: 'purple',
+      bgClass: 'bg-purple-50',
+      hoverBgClass: 'hover:bg-purple-100',
+      borderHoverClass: 'hover:border-purple-300',
+      textColorClass: 'text-purple-600',
       permissions: ['settings:view', '*:*'], // Admin only
     },
     {
@@ -290,6 +254,10 @@ export class HomePage implements OnInit {
       icon: 'key',
       route: '/settings/api-keys',
       color: 'amber',
+      bgClass: 'bg-amber-50',
+      hoverBgClass: 'hover:bg-amber-100',
+      borderHoverClass: 'hover:border-amber-300',
+      textColorClass: 'text-amber-600',
       permissions: ['api-keys:read', '*:*'], // Admin only
     },
   ]);

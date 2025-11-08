@@ -1,0 +1,284 @@
+/**
+ * Unified Theme CSS Variables
+ *
+ * This file defines all theme-related CSS variables that work across both
+ * Material Design and TailwindCSS. Variables are organized by semantic purpose.
+ *
+ * Theme Structure:
+ * - Color tokens: Primary, accent, warn colors
+ * - Semantic colors: Background, surface, text colors
+ * - State colors: Hover, focus, disabled states
+ * - Text colors: Primary, secondary, hint, disabled
+ */
+
+/* ==================== LIGHT THEME (Default) ==================== */
+:root {
+  /* Primary Color - Indigo (Material Design default) */
+  --color-primary: #3f51b5;
+  --color-primary-light: #5e72e4;
+  --color-primary-lighter: #c5cae9;
+  --color-primary-dark: #303f9f;
+  --color-primary-darker: #1a237e;
+  --color-on-primary: #ffffff;
+
+  /* Accent Color - Pink */
+  --color-accent: #ff4081;
+  --color-accent-light: #ff7a8a;
+  --color-accent-lighter: #ff80ab;
+  --color-accent-dark: #f50057;
+  --color-accent-darker: #c51162;
+  --color-on-accent: #ffffff;
+
+  /* Warn Color - Red */
+  --color-warn: #f44336;
+  --color-warn-light: #ef5350;
+  --color-warn-lighter: #ffcdd2;
+  --color-warn-dark: #d32f2f;
+  --color-warn-darker: #b71c1c;
+  --color-on-warn: #ffffff;
+
+  /* Success Color - Green */
+  --color-success: #4caf50;
+  --color-success-light: #66bb6a;
+  --color-success-lighter: #c8e6c9;
+  --color-success-dark: #388e3c;
+  --color-success-darker: #1b5e20;
+  --color-on-success: #ffffff;
+
+  /* Info Color - Blue */
+  --color-info: #2196f3;
+  --color-info-light: #42a5f5;
+  --color-info-lighter: #bbdefb;
+  --color-info-dark: #1976d2;
+  --color-info-darker: #0d47a1;
+  --color-on-info: #ffffff;
+
+  /* Background & Surface */
+  --color-background: #ffffff;
+  --color-surface: #f5f5f5;
+  --color-surface-variant: #eeeeee;
+  --color-surface-dim: #e0e0e0;
+  --color-on-background: #1e1e1e;
+  --color-on-surface: #1e1e1e;
+
+  /* Text & Content */
+  --color-text-primary: rgba(0, 0, 0, 0.87);
+  --color-text-secondary: rgba(0, 0, 0, 0.6);
+  --color-text-tertiary: rgba(0, 0, 0, 0.38);
+  --color-text-disabled: rgba(0, 0, 0, 0.38);
+  --color-text-hint: rgba(0, 0, 0, 0.38);
+
+  /* Outline & Divider */
+  --color-outline: rgba(0, 0, 0, 0.12);
+  --color-outline-variant: rgba(0, 0, 0, 0.08);
+  --color-divider: rgba(0, 0, 0, 0.12);
+
+  /* Interactive States */
+  --color-hover: rgba(0, 0, 0, 0.04);
+  --color-focus: rgba(0, 0, 0, 0.04);
+  --color-pressed: rgba(0, 0, 0, 0.08);
+  --color-disabled: rgba(0, 0, 0, 0.38);
+
+  /* Shadow */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.15);
+  --shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.18);
+
+  /* RGB Values for Tailwind opacity */
+  --color-primary-rgb: 63, 81, 181;
+  --color-accent-rgb: 255, 64, 129;
+  --color-warn-rgb: 244, 67, 54;
+  --color-success-rgb: 76, 175, 80;
+  --color-info-rgb: 33, 150, 243;
+}
+
+/* ==================== DARK THEME ==================== */
+.dark,
+html[data-theme='dark'] {
+  /* Primary Color - Lightened for dark backgrounds */
+  --color-primary: #7986cb;
+  --color-primary-light: #9fa8da;
+  --color-primary-lighter: #e8eaf6;
+  --color-primary-dark: #5c6bc0;
+  --color-primary-darker: #3949ab;
+  --color-on-primary: #000000;
+
+  /* Accent Color - Adjusted for dark */
+  --color-accent: #ff80ab;
+  --color-accent-light: #ffb2d9;
+  --color-accent-lighter: #ffc1e3;
+  --color-accent-dark: #ff5983;
+  --color-accent-darker: #e91e63;
+  --color-on-accent: #000000;
+
+  /* Warn Color - Adjusted for dark */
+  --color-warn: #ff5252;
+  --color-warn-light: #ff7e7e;
+  --color-warn-lighter: #ffebee;
+  --color-warn-dark: #e53935;
+  --color-warn-darker: #c62828;
+  --color-on-warn: #000000;
+
+  /* Success Color - Adjusted for dark */
+  --color-success: #81c784;
+  --color-success-light: #a5d6a7;
+  --color-success-lighter: #e8f5e9;
+  --color-success-dark: #558b2f;
+  --color-success-darker: #33691e;
+  --color-on-success: #000000;
+
+  /* Info Color - Adjusted for dark */
+  --color-info: #64b5f6;
+  --color-info-light: #90caf9;
+  --color-info-lighter: #e3f2fd;
+  --color-info-dark: #1e88e5;
+  --color-info-darker: #0d47a1;
+  --color-on-info: #000000;
+
+  /* Background & Surface */
+  --color-background: #121212;
+  --color-surface: #1e1e1e;
+  --color-surface-variant: #2c2c2c;
+  --color-surface-dim: #1e1e1e;
+  --color-on-background: #ffffff;
+  --color-on-surface: #ffffff;
+
+  /* Text & Content */
+  --color-text-primary: rgba(255, 255, 255, 0.87);
+  --color-text-secondary: rgba(255, 255, 255, 0.6);
+  --color-text-tertiary: rgba(255, 255, 255, 0.38);
+  --color-text-disabled: rgba(255, 255, 255, 0.38);
+  --color-text-hint: rgba(255, 255, 255, 0.38);
+
+  /* Outline & Divider */
+  --color-outline: rgba(255, 255, 255, 0.12);
+  --color-outline-variant: rgba(255, 255, 255, 0.08);
+  --color-divider: rgba(255, 255, 255, 0.12);
+
+  /* Interactive States */
+  --color-hover: rgba(255, 255, 255, 0.04);
+  --color-focus: rgba(255, 255, 255, 0.04);
+  --color-pressed: rgba(255, 255, 255, 0.08);
+  --color-disabled: rgba(255, 255, 255, 0.38);
+
+  /* Shadow */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.6);
+
+  /* RGB Values for Tailwind opacity */
+  --color-primary-rgb: 121, 134, 203;
+  --color-accent-rgb: 255, 128, 171;
+  --color-warn-rgb: 255, 82, 82;
+  --color-success-rgb: 129, 199, 132;
+  --color-info-rgb: 100, 181, 246;
+}
+
+/* ==================== ALTERNATIVE THEMES ==================== */
+
+/* Deep Purple + Amber theme */
+html[data-theme='deeppurple-amber'] {
+  --color-primary: #673ab7;
+  --color-primary-light: #9575cd;
+  --color-primary-lighter: #ede7f6;
+  --color-primary-dark: #512da8;
+  --color-primary-darker: #311b92;
+
+  --color-accent: #ffc107;
+  --color-accent-light: #ffeb3b;
+  --color-accent-lighter: #fff9c4;
+  --color-accent-dark: #ff8f00;
+  --color-accent-darker: #ff6f00;
+
+  --color-primary-rgb: 103, 58, 183;
+  --color-accent-rgb: 255, 193, 7;
+}
+
+html[data-theme='deeppurple-amber'].dark {
+  --color-primary: #b39ddb;
+  --color-primary-light: #ce93d8;
+  --color-primary-lighter: #f3e5f5;
+  --color-primary-dark: #9575cd;
+  --color-primary-darker: #7e57c2;
+
+  --color-accent: #ffd54f;
+  --color-accent-light: #ffeb3b;
+  --color-accent-lighter: #fff9c4;
+  --color-accent-dark: #ffb300;
+  --color-accent-darker: #ff8a80;
+
+  --color-primary-rgb: 179, 157, 219;
+  --color-accent-rgb: 255, 213, 79;
+}
+
+/* Pink + Blue Grey theme */
+html[data-theme='pink-bluegrey'] {
+  --color-primary: #e91e63;
+  --color-primary-light: #f06292;
+  --color-primary-lighter: #fce4ec;
+  --color-primary-dark: #c2185b;
+  --color-primary-darker: #880e4f;
+
+  --color-accent: #607d8b;
+  --color-accent-light: #78909c;
+  --color-accent-lighter: #eceff1;
+  --color-accent-dark: #455a64;
+  --color-accent-darker: #263238;
+
+  --color-primary-rgb: 233, 30, 99;
+  --color-accent-rgb: 96, 125, 139;
+}
+
+html[data-theme='pink-bluegrey'].dark {
+  --color-primary: #f48fb1;
+  --color-primary-light: #f8bbd0;
+  --color-primary-lighter: #fce4ec;
+  --color-primary-dark: #ec407a;
+  --color-primary-darker: #e91e63;
+
+  --color-accent: #90a4ae;
+  --color-accent-light: #b0bec5;
+  --color-accent-lighter: #cfd8dc;
+  --color-accent-dark: #78909c;
+  --color-accent-darker: #546e7a;
+
+  --color-primary-rgb: 244, 143, 177;
+  --color-accent-rgb: 144, 164, 174;
+}
+
+/* Purple + Green theme */
+html[data-theme='purple-green'] {
+  --color-primary: #9c27b0;
+  --color-primary-light: #ba68c8;
+  --color-primary-lighter: #f3e5f5;
+  --color-primary-dark: #7b1fa2;
+  --color-primary-darker: #4a148c;
+
+  --color-accent: #4caf50;
+  --color-accent-light: #81c784;
+  --color-accent-lighter: #e8f5e9;
+  --color-accent-dark: #388e3c;
+  --color-accent-darker: #1b5e20;
+
+  --color-primary-rgb: 156, 39, 176;
+  --color-accent-rgb: 76, 175, 80;
+}
+
+html[data-theme='purple-green'].dark {
+  --color-primary: #ce93d8;
+  --color-primary-light: #e1bee7;
+  --color-primary-lighter: #f3e5f5;
+  --color-primary-dark: #ba68c8;
+  --color-primary-darker: #ab47bc;
+
+  --color-accent: #81c784;
+  --color-accent-light: #a5d6a7;
+  --color-accent-lighter: #e8f5e9;
+  --color-accent-dark: #66bb6a;
+  --color-accent-darker: #558b2f;
+
+  --color-primary-rgb: 206, 147, 216;
+  --color-accent-rgb: 129, 199, 132;
+}

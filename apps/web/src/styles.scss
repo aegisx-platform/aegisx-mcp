@@ -1,6 +1,9 @@
 /* You can add global styles to this file, and also import other style files */
 
-/* Import Material Theme Configuration - MUST be before other rules */
+/* Import Unified Theme Variables - MUST be before other rules */
+@use 'styles/theme-variables' as *;
+
+/* Import Material Theme Configuration */
 @use 'styles/material-theme-config' as *;
 @use 'styles/components/material-fixes' as *;
 @use 'styles/components/form-utilities' as *;
