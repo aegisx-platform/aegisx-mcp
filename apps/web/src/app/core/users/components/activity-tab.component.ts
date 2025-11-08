@@ -7,7 +7,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AegisxCardComponent } from '@aegisx/ui';
-import { UserService } from '../services/user.service';
 
 export interface ActivityLog {
   id: string;
@@ -168,8 +167,6 @@ export interface ActivityResponse {
 })
 export class ActivityTabComponent implements OnInit {
   @Input() userId!: string;
-
-  private userService = inject(UserService);
 
   activities = signal<ActivityLog[]>([]);
   loading = signal(false);
