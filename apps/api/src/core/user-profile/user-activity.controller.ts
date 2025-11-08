@@ -253,6 +253,59 @@ export class UserActivityController {
   }
 
   /**
+   * Admin: Get specific user's activity sessions
+   * GET /api/activity-logs/sessions?user_id=uuid&page=1&limit=10
+   */
+  async getAdminActivitySessions(
+    request: FastifyRequest<{
+      Querystring: { user_id: string; page?: number; limit?: number };
+    }>,
+    reply: FastifyReply,
+  ) {
+    try {
+      const { user_id, page = 1, limit = 10 } = request.query;
+
+      if (!user_id) {
+        return reply.code(400).send({
+          success: false,
+          error: {
+            code: 'MISSING_PARAM',
+            message: 'user_id parameter is required',
+          },
+        });
+      }
+
+      request.log.info(
+        { user_id },
+        'Admin: Getting activity sessions for specific user',
+      );
+
+      const result = await this.userActivityService.getUserActivitySessions(
+        user_id,
+        page,
+        limit,
+      );
+
+      return reply.code(200).send({
+        success: true,
+        data: result.data,
+        pagination: result.pagination,
+      });
+    } catch (error) {
+      request.log.error({ error }, 'Failed to get admin activity sessions');
+
+      return reply.code(500).send({
+        success: false,
+        error: {
+          message: 'Failed to retrieve activity sessions',
+          code: 'ACTIVITY_SESSIONS_ERROR',
+          statusCode: 500,
+        },
+      });
+    }
+  }
+
+  /**
    * Admin: Get activity statistics (system-wide or user-specific)
    * GET /api/activity-logs/stats?user_id=optional-uuid
    */

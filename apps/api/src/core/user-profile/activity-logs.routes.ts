@@ -14,6 +14,31 @@ async function activityLogsRoutes(
   const { controller } = options;
   const typedFastify = fastify.withTypeProvider<TypeBoxTypeProvider>();
 
+  // GET /activity-logs/sessions - Get specific user's activity sessions (Admin only)
+  typedFastify.get(
+    '/sessions',
+    {
+      schema: {
+        summary: 'Get user activity sessions',
+        description:
+          'Get paginated list of sessions for a specific user with pagination. Requires user_id query parameter (Admin only)',
+        tags: ['Activity Logs'],
+        response: {
+          200: SchemaRefs.module('user-profile', 'activity-sessions-response'),
+          400: SchemaRefs.ServerError,
+          401: SchemaRefs.Unauthorized,
+          403: SchemaRefs.Forbidden,
+          500: SchemaRefs.ServerError,
+        },
+      },
+      preValidation: [
+        fastify.verifyJWT,
+        fastify.verifyPermission('activity-logs', 'read'),
+      ],
+    },
+    controller.getAdminActivitySessions.bind(controller),
+  );
+
   // GET /activity-logs/stats - Get activity statistics (system-wide or user-specific)
   typedFastify.get(
     '/stats',
