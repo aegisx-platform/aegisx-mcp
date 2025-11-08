@@ -58,7 +58,7 @@ export async function seed(knex: Knex): Promise<void> {
       title: 'Home',
       type: 'item',
       icon: 'home',
-      link: '/',
+      link: '/home',
       sort_order: 1,
       show_in_default: true,
       show_in_compact: true,

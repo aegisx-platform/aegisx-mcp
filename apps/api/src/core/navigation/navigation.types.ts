@@ -39,6 +39,7 @@ export interface NavigationItem {
   target?: NavigationTarget;
   disabled?: boolean;
   hidden?: boolean;
+  exact_match?: boolean;
   badge?: NavigationBadge;
   permissions?: string[];
   children?: NavigationItem[];

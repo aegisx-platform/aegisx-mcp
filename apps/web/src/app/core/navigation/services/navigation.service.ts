@@ -19,6 +19,7 @@ interface ApiNavigationItem {
   target?: '_blank' | '_self' | '_parent' | '_top';
   disabled?: boolean;
   hidden?: boolean;
+  exact_match?: boolean;
   permissions?: string[];
   children?: ApiNavigationItem[];
 }
@@ -428,6 +429,8 @@ export class NavigationService {
     // New API fields
     if (apiItem.disabled !== undefined) navItem.disabled = apiItem.disabled;
     if (apiItem.hidden !== undefined) navItem.hidden = apiItem.hidden;
+    if (apiItem.exact_match !== undefined)
+      navItem.exactMatch = apiItem.exact_match;
 
     // Note: permissions are handled at API level, not passed to UI
     // The API should filter navigation items based on user permissions

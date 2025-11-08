@@ -209,6 +209,8 @@ export class NavigationService {
     if (item.link) transformed.link = item.link;
     if (item.target && item.target !== '_self')
       transformed.target = item.target;
+    if (item.exact_match !== undefined)
+      transformed.exact_match = item.exact_match;
 
     // Add badge information
     if (item.badge_title) {
