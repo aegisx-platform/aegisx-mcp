@@ -155,6 +155,30 @@ export const BulkAssignRolesRequestSchema = Type.Object({
   ),
 });
 
+// ===== MULTI-ROLE MANAGEMENT SCHEMAS =====
+
+// Bulk assign multiple roles to a single user
+export const BulkAssignRolesToUserRequestSchema = Type.Object({
+  role_ids: Type.Array(Type.String({ format: 'uuid' }), {
+    minItems: 1,
+    maxItems: 10,
+  }),
+  expires_at: Type.Optional(
+    Type.Union([Type.String({ format: 'date-time' }), Type.Null()]),
+  ),
+});
+
+// Replace all roles for a user with a new set
+export const ReplaceUserRolesRequestSchema = Type.Object({
+  role_ids: Type.Array(Type.String({ format: 'uuid' }), {
+    minItems: 1,
+    maxItems: 10,
+  }),
+  expires_at: Type.Optional(
+    Type.Union([Type.String({ format: 'date-time' }), Type.Null()]),
+  ),
+});
+
 export const UserRoleQuerySchema = Type.Object({
   // Pagination parameters (inline instead of using PaginationQuerySchema)
   page: Type.Optional(Type.Number({ minimum: 1, default: 1 })),
@@ -276,4 +300,60 @@ export type BulkPermissionUpdateRequest = Static<
 >;
 export type BulkOperationResponse = Static<typeof BulkOperationResponseSchema>;
 
+// Multi-role management types
+export type BulkAssignRolesToUserRequest = Static<
+  typeof BulkAssignRolesToUserRequestSchema
+>;
+export type ReplaceUserRolesRequest = Static<
+  typeof ReplaceUserRolesRequestSchema
+>;
+
 export type RbacStats = Static<typeof RbacStatsSchema>;
+
+// ===== ROLE ASSIGNMENT HISTORY SCHEMAS =====
+
+export const RoleAssignmentHistorySchema = Type.Object({
+  id: Type.String({ format: 'uuid' }),
+  user_id: Type.String({ format: 'uuid' }),
+  role_id: Type.String({ format: 'uuid' }),
+  action: Type.Union([
+    Type.Literal('assigned'),
+    Type.Literal('removed'),
+    Type.Literal('expired'),
+  ]),
+  performed_by: Type.Union([Type.String({ format: 'uuid' }), Type.Null()]),
+  performed_at: Type.String({ format: 'date-time' }),
+  expires_at: Type.Union([Type.String({ format: 'date-time' }), Type.Null()]),
+  metadata: Type.Union([Type.Any(), Type.Null()]),
+  created_at: Type.String({ format: 'date-time' }),
+});
+
+export const RoleAssignmentHistoryQuerySchema = Type.Object({
+  page: Type.Optional(Type.Number({ minimum: 1, default: 1 })),
+  limit: Type.Optional(Type.Number({ minimum: 1, maximum: 1000, default: 20 })),
+  user_id: Type.Optional(Type.String({ format: 'uuid' })),
+  role_id: Type.Optional(Type.String({ format: 'uuid' })),
+  action: Type.Optional(
+    Type.Union([
+      Type.Literal('assigned'),
+      Type.Literal('removed'),
+      Type.Literal('expired'),
+    ]),
+  ),
+  from_date: Type.Optional(Type.String({ format: 'date-time' })),
+  to_date: Type.Optional(Type.String({ format: 'date-time' })),
+  include_user: Type.Optional(Type.Boolean()),
+  include_role: Type.Optional(Type.Boolean()),
+});
+
+export const RoleAssignmentHistoryResponseSchema = ApiSuccessResponseSchema(
+  RoleAssignmentHistorySchema,
+);
+export const RoleAssignmentHistoryListResponseSchema = PaginatedResponseSchema(
+  RoleAssignmentHistorySchema,
+);
+
+export type RoleAssignmentHistory = Static<typeof RoleAssignmentHistorySchema>;
+export type RoleAssignmentHistoryQuery = Static<
+  typeof RoleAssignmentHistoryQuerySchema
+>;

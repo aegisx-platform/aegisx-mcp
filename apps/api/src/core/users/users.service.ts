@@ -399,27 +399,101 @@ export class UsersService {
 
   /**
    * Bulk change user roles with proper error handling and business rules
+   * Now supports assigning multiple roles to each user
    */
   async bulkChangeUserRoles(
     userIds: string[],
-    roleId: string,
+    roleIds: string[],
     currentUserId: string,
   ): Promise<BulkOperationResult> {
-    // Validate role exists first
+    // Validate all roles exist first
     const roles = await this.usersRepository.getRoles();
-    const targetRole = roles.find((r) => r.id === roleId);
-    if (!targetRole) {
-      throw new AppError('Target role not found', 400, 'ROLE_NOT_FOUND');
+    const targetRoles: Array<{ id: string; name: string }> = [];
+
+    for (const roleId of roleIds) {
+      const targetRole = roles.find((r) => r.id === roleId);
+      if (!targetRole) {
+        throw new AppError(
+          `Target role with ID ${roleId} not found`,
+          400,
+          'ROLE_NOT_FOUND',
+        );
+      }
+      targetRoles.push(targetRole);
     }
 
-    return this.executeBulkOperation(userIds, currentUserId, 'role-change', {
-      validateCurrentState: (user) => user.roleId !== roleId,
-      stateErrorCode: 'USER_ALREADY_HAS_ROLE',
-      stateErrorMessage: `User already has role: ${targetRole.name}`,
-      operation: async (userId) => {
-        await this.usersRepository.update(userId, { roleId });
+    const results: BulkOperationResult['results'] = [];
+    let successCount = 0;
+    let failureCount = 0;
+
+    // Remove duplicates and validate input
+    const uniqueUserIds = [...new Set(userIds)];
+
+    for (const userId of uniqueUserIds) {
+      try {
+        // Check if user exists
+        const user = await this.usersRepository.findById(userId);
+        if (!user) {
+          results.push({
+            userId,
+            success: false,
+            error: {
+              code: 'USER_NOT_FOUND',
+              message: 'User not found',
+            },
+          });
+          failureCount++;
+          continue;
+        }
+
+        // Business rule: Check if self-modification is allowed for this operation
+        if (userId === currentUserId) {
+          results.push({
+            userId,
+            success: false,
+            error: {
+              code: 'CANNOT_CHANGE_OWN_ROLE',
+              message: 'Cannot change your own roles',
+            },
+          });
+          failureCount++;
+          continue;
+        }
+
+        // Replace all roles for the user using the replaceRoles method
+        // This removes ALL existing roles and assigns ONLY the specified roles
+        // Semantics: bulk role change should be a "replace" operation, not "add"
+        await this.usersRepository.replaceRoles(userId, roleIds);
+
+        results.push({
+          userId,
+          success: true,
+        });
+        successCount++;
+      } catch (error) {
+        results.push({
+          userId,
+          success: false,
+          error: {
+            code: 'OPERATION_FAILED',
+            message:
+              error instanceof Error ? error.message : 'Unknown error occurred',
+          },
+        });
+        failureCount++;
+      }
+    }
+
+    return {
+      totalRequested: uniqueUserIds.length,
+      successCount,
+      failureCount,
+      results,
+      summary: {
+        message: `Bulk role change completed with ${successCount} successes and ${failureCount} failures`,
+        hasFailures: failureCount > 0,
       },
-    });
+    };
   }
 
   /**

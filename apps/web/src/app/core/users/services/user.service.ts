@@ -741,7 +741,7 @@ export class UserService {
 
   async bulkChangeUserRoles(
     userIds: string[],
-    roleId: string,
+    roleIds: string[],
   ): Promise<BulkOperationResult> {
     try {
       const response = await this.http
@@ -749,7 +749,7 @@ export class UserService {
           `${this.baseUrl}/bulk/role-change`,
           {
             userIds,
-            roleId,
+            roleIds,
           },
         )
         .toPromise();

@@ -129,6 +129,18 @@ export interface BulkAssignRolesRequest {
   expires_at?: string | null;
 }
 
+// ===== MULTI-ROLE MANAGEMENT REQUESTS =====
+
+export interface BulkAssignRolesToUserRequest {
+  role_ids: string[];
+  expires_at?: string | null;
+}
+
+export interface ReplaceUserRolesRequest {
+  role_ids: string[];
+  expires_at?: string | null;
+}
+
 export interface BulkRoleUpdateRequest {
   role_ids: string[];
   updates: {

@@ -434,6 +434,46 @@ export class UsersRepository {
   }
 
   /**
+   * Replace all roles for a user with a new set of roles
+   * This removes ALL existing roles and assigns ONLY the specified roles
+   * Used for bulk role change operations where semantics should be "replace" not "add"
+   */
+  async replaceRoles(
+    userId: string,
+    roleIds: string[],
+    assignedBy?: string,
+    expiresAt?: Date,
+  ): Promise<UserRole[]> {
+    const trx = await this.knex.transaction();
+
+    try {
+      // Delete ALL existing role assignments for this user
+      await trx('user_roles').where('user_id', userId).delete();
+
+      // Insert new role assignments
+      if (roleIds.length > 0) {
+        const assignments = roleIds.map((roleId) => ({
+          user_id: userId,
+          role_id: roleId,
+          assigned_by: assignedBy || null,
+          expires_at: expiresAt || null,
+          is_active: true,
+        }));
+
+        await trx('user_roles').insert(assignments);
+      }
+
+      await trx.commit();
+
+      // Return updated roles
+      return this.getUserRoles(userId);
+    } catch (error) {
+      await trx.rollback();
+      throw error;
+    }
+  }
+
+  /**
    * Remove a role from a user
    */
   async removeRole(userId: string, roleId: string): Promise<boolean> {

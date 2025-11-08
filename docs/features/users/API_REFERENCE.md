@@ -31,12 +31,12 @@ Content-Type: application/json
 
 ### Permissions Required
 
-| Endpoint | Permission Required |
-|----------|---------------------|
-| `POST /` | `feature-name:create` |
-| `GET /` | `feature-name:read` |
-| `GET /:id` | `feature-name:read` |
-| `PUT /:id` | `feature-name:update` |
+| Endpoint      | Permission Required   |
+| ------------- | --------------------- |
+| `POST /`      | `feature-name:create` |
+| `GET /`       | `feature-name:read`   |
+| `GET /:id`    | `feature-name:read`   |
+| `PUT /:id`    | `feature-name:update` |
 | `DELETE /:id` | `feature-name:delete` |
 
 ---
@@ -51,14 +51,14 @@ GET /api/users
 
 **Query Parameters:**
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `page` | number | No | Page number (default: 1) |
-| `limit` | number | No | Items per page (default: 10, max: 100) |
-| `search` | string | No | Search query |
-| `sortBy` | string | No | Sort field (default: created_at) |
-| `sortOrder` | string | No | Sort order: asc/desc (default: desc) |
-| `filter[field]` | any | No | Filter by specific field |
+| Parameter       | Type   | Required | Description                            |
+| --------------- | ------ | -------- | -------------------------------------- |
+| `page`          | number | No       | Page number (default: 1)               |
+| `limit`         | number | No       | Items per page (default: 10, max: 100) |
+| `search`        | string | No       | Search query                           |
+| `sortBy`        | string | No       | Sort field (default: created_at)       |
+| `sortOrder`     | string | No       | Sort order: asc/desc (default: desc)   |
+| `filter[field]` | any    | No       | Filter by specific field               |
 
 **Response:** `200 OK`
 
@@ -88,8 +88,8 @@ GET /api/users/:id
 **Path Parameters:**
 
 | Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | uuid | Yes | Feature ID |
+| --------- | ---- | -------- | ----------- |
+| `id`      | uuid | Yes      | Feature ID  |
 
 **Response:** `200 OK`
 
@@ -101,6 +101,7 @@ GET /api/users/:id
 ```
 
 **Error Responses:**
+
 - `404` - Feature not found
 - `403` - Access denied
 
@@ -133,6 +134,7 @@ POST /api/users
 ```
 
 **Error Responses:**
+
 - `400` - Validation error
 - `409` - Duplicate entry
 - `403` - Access denied
@@ -148,8 +150,8 @@ PUT /api/users/:id
 **Path Parameters:**
 
 | Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | uuid | Yes | Feature ID |
+| --------- | ---- | -------- | ----------- |
+| `id`      | uuid | Yes      | Feature ID  |
 
 **Request Body:** (All fields optional)
 
@@ -172,6 +174,7 @@ PUT /api/users/:id
 ```
 
 **Error Responses:**
+
 - `400` - Validation error
 - `404` - Feature not found
 - `409` - Duplicate entry
@@ -188,12 +191,13 @@ DELETE /api/users/:id
 **Path Parameters:**
 
 | Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | uuid | Yes | Feature ID |
+| --------- | ---- | -------- | ----------- |
+| `id`      | uuid | Yes      | Feature ID  |
 
 **Response:** `204 No Content`
 
 **Error Responses:**
+
 - `404` - Feature not found
 - `409` - Cannot delete (has dependencies)
 - `403` - Access denied
@@ -227,6 +231,151 @@ POST /api/users/bulk
   }
 }
 ```
+
+#### Bulk Change Status
+
+```http
+POST /api/users/bulk/change-status
+```
+
+**Request Body:**
+
+```typescript
+{
+  userIds: string[],           // Array of user UUIDs to change status for (1-100)
+  status: 'active' | 'inactive' | 'suspended' | 'pending'  // Target status
+}
+```
+
+**Response:** `200 OK`
+
+```typescript
+{
+  success: true,
+  data: {
+    totalRequested: number,
+    successCount: number,
+    failureCount: number,
+    results: Array<{
+      userId: string,
+      success: boolean,
+      error?: { code: string, message: string }
+    }>,
+    summary: {
+      message: string,
+      hasFailures: boolean
+    }
+  }
+}
+```
+
+**Notes:**
+
+- Cannot change own status
+- Cannot change admin user status
+- Returns per-user success/failure details
+
+---
+
+#### Bulk Change Roles (NEW - Multiple Roles)
+
+```http
+POST /api/users/bulk/change-roles
+```
+
+**Request Body:**
+
+```typescript
+{
+  userIds: string[],      // Array of user UUIDs to change roles for (1-100)
+  roleIds: string[]       // Array of role UUIDs to assign to the users (1-10)
+}
+```
+
+**Response:** `200 OK`
+
+```typescript
+{
+  success: true,
+  data: {
+    totalRequested: number,
+    successCount: number,
+    failureCount: number,
+    results: Array<{
+      userId: string,
+      success: boolean,
+      error?: { code: string, message: string }
+    }>,
+    summary: {
+      message: string,
+      hasFailures: boolean
+    }
+  }
+}
+```
+
+**Example Request:**
+
+```bash
+curl -X POST https://api.aegisx.example.com/api/users/bulk/change-roles \
+  -H "Authorization: Bearer <jwt_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "userIds": [
+      "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+      "a1234567-58cc-4372-a567-0e02b2c3d479"
+    ],
+    "roleIds": [
+      "role-editor-uuid",
+      "role-viewer-uuid"
+    ]
+  }'
+```
+
+**Example Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "totalRequested": 2,
+    "successCount": 2,
+    "failureCount": 0,
+    "results": [
+      {
+        "userId": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+        "success": true
+      },
+      {
+        "userId": "a1234567-58cc-4372-a567-0e02b2c3d479",
+        "success": true
+      }
+    ],
+    "summary": {
+      "message": "Bulk role change completed with 2 successes and 0 failures",
+      "hasFailures": false
+    }
+  }
+}
+```
+
+**Features:**
+
+- ✅ Assign multiple roles to multiple users in single operation
+- ✅ Each user receives ALL specified roles
+- ✅ Deduplication handled at repository level
+- ✅ Per-user success/failure tracking
+- ✅ Cannot change own roles (security constraint)
+- ✅ Validates all roles exist before processing
+
+**Error Codes:**
+
+- `ROLE_NOT_FOUND` - One or more specified role IDs don't exist
+- `USER_NOT_FOUND` - One or more specified user IDs don't exist
+- `CANNOT_CHANGE_OWN_ROLE` - Cannot change own roles
+- `OPERATION_FAILED` - Unexpected error during role assignment
+
+---
 
 #### Bulk Delete
 
@@ -264,14 +413,15 @@ GET /api/users/export
 
 **Query Parameters:**
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `format` | string | No | Export format: csv/xlsx (default: csv) |
-| `filter[field]` | any | No | Apply filters before export |
+| Parameter       | Type   | Required | Description                            |
+| --------------- | ------ | -------- | -------------------------------------- |
+| `format`        | string | No       | Export format: csv/xlsx (default: csv) |
+| `filter[field]` | any    | No       | Apply filters before export            |
 
 **Response:** `200 OK`
 
 Headers:
+
 ```http
 Content-Type: text/csv
 Content-Disposition: attachment; filename="features-2025-10-31.csv"
@@ -332,16 +482,16 @@ curl -X POST https://api.aegisx.example.com/api/features \
 
 ### Common Error Codes
 
-| HTTP Status | Error Code | Description |
-|-------------|------------|-------------|
-| 400 | `VALIDATION_ERROR` | Request validation failed |
-| 401 | `UNAUTHORIZED` | Missing or invalid token |
-| 403 | `FORBIDDEN` | Insufficient permissions |
-| 404 | `NOT_FOUND` | Resource not found |
-| 409 | `CONFLICT` | Duplicate entry or constraint violation |
-| 422 | `BUSINESS_RULE_VIOLATION` | Business logic validation failed |
-| 429 | `RATE_LIMIT_EXCEEDED` | Too many requests |
-| 500 | `INTERNAL_SERVER_ERROR` | Unexpected server error |
+| HTTP Status | Error Code                | Description                             |
+| ----------- | ------------------------- | --------------------------------------- |
+| 400         | `VALIDATION_ERROR`        | Request validation failed               |
+| 401         | `UNAUTHORIZED`            | Missing or invalid token                |
+| 403         | `FORBIDDEN`               | Insufficient permissions                |
+| 404         | `NOT_FOUND`               | Resource not found                      |
+| 409         | `CONFLICT`                | Duplicate entry or constraint violation |
+| 422         | `BUSINESS_RULE_VIOLATION` | Business logic validation failed        |
+| 429         | `RATE_LIMIT_EXCEEDED`     | Too many requests                       |
+| 500         | `INTERNAL_SERVER_ERROR`   | Unexpected server error                 |
 
 ### Validation Error Example
 

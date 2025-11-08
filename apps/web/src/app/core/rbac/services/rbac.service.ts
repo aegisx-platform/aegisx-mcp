@@ -15,6 +15,8 @@ import {
   BulkAssignRolesRequest,
   BulkRoleUpdateRequest,
   BulkPermissionUpdateRequest,
+  BulkAssignRolesToUserRequest,
+  ReplaceUserRolesRequest,
   RoleQuery,
   PermissionQuery,
   getPermissionName,
@@ -328,6 +330,36 @@ export class RbacService {
       .post<
         ApiResponse<BulkOperationResponse>
       >(`${this.baseUrl}/bulk/assign-roles`, assignData)
+      .pipe(catchError(this.handleError));
+  }
+
+  // ===== MULTI-ROLE MANAGEMENT METHODS =====
+
+  /**
+   * Assign multiple roles to a single user
+   */
+  bulkAssignRolesToUser(
+    userId: string,
+    assignData: BulkAssignRolesToUserRequest,
+  ): Observable<ApiResponse<UserRole[]>> {
+    return this.http
+      .post<
+        ApiResponse<UserRole[]>
+      >(`${this.baseUrl}/users/${userId}/roles/bulk`, assignData)
+      .pipe(catchError(this.handleError));
+  }
+
+  /**
+   * Replace all user roles with a new set
+   */
+  replaceUserRoles(
+    userId: string,
+    roleData: ReplaceUserRolesRequest,
+  ): Observable<ApiResponse<UserRole[]>> {
+    return this.http
+      .put<
+        ApiResponse<UserRole[]>
+      >(`${this.baseUrl}/users/${userId}/roles`, roleData)
       .pipe(catchError(this.handleError));
   }
 

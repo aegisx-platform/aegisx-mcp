@@ -258,14 +258,18 @@ const BulkChangeStatusRequestSchema = Type.Object({
   ),
 });
 
-// Bulk role change request
+// Bulk role change request - now supports multiple roleIds
 const BulkRoleChangeRequestSchema = Type.Object({
   userIds: Type.Array(Type.String({ format: 'uuid' }), {
     minItems: 1,
     maxItems: 100,
     description: 'Array of user IDs to change roles for (max 100)',
   }),
-  roleId: Type.String({ format: 'uuid', description: 'New role ID to assign' }),
+  roleIds: Type.Array(Type.String({ format: 'uuid' }), {
+    minItems: 1,
+    maxItems: 10,
+    description: 'Array of role IDs to assign to the selected users (max 10)',
+  }),
 });
 
 // Individual bulk operation result

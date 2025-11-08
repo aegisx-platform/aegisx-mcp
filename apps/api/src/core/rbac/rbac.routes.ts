@@ -23,6 +23,10 @@ import {
   BulkPermissionUpdateRequestSchema,
   BulkOperationSuccessResponseSchema,
   RbacStatsResponseSchema,
+  BulkAssignRolesToUserRequestSchema,
+  ReplaceUserRolesRequestSchema,
+  RoleAssignmentHistoryQuerySchema,
+  RoleAssignmentHistoryListResponseSchema,
 } from './rbac.schemas';
 import { Type } from '@sinclair/typebox';
 
@@ -429,6 +433,70 @@ export async function rbacRoutes(
     controller.updateUserRoleExpiry.bind(controller),
   );
 
+  // ===== MULTI-ROLE MANAGEMENT ROUTES =====
+
+  // Bulk assign multiple roles to a single user
+  typedFastify.post(
+    '/rbac/users/:id/roles/bulk',
+    {
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('rbac', 'user-roles:assign'),
+      ],
+      schema: {
+        description: 'Assign multiple roles to a single user',
+        tags: ['RBAC', 'User Roles'],
+        summary: 'Assign multiple roles to user in one request',
+        security: [{ bearerAuth: [] }],
+        params: SchemaRefs.UuidParam,
+        body: BulkAssignRolesToUserRequestSchema,
+        response: {
+          201: {
+            type: 'array',
+            items: UserRoleResponseSchema,
+          },
+          400: SchemaRefs.ValidationError,
+          401: SchemaRefs.Unauthorized,
+          403: SchemaRefs.Forbidden,
+          404: SchemaRefs.NotFound,
+          500: SchemaRefs.ServerError,
+        },
+      },
+    },
+    controller.bulkAssignRolesToUser.bind(controller),
+  );
+
+  // Replace all user roles with a new set
+  typedFastify.put(
+    '/rbac/users/:id/roles',
+    {
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('rbac', 'user-roles:assign'),
+      ],
+      schema: {
+        description: 'Replace all user roles with a new set',
+        tags: ['RBAC', 'User Roles'],
+        summary: 'Replace user roles (removes all existing, assigns new ones)',
+        security: [{ bearerAuth: [] }],
+        params: SchemaRefs.UuidParam,
+        body: ReplaceUserRolesRequestSchema,
+        response: {
+          200: {
+            type: 'array',
+            items: UserRoleResponseSchema,
+          },
+          400: SchemaRefs.ValidationError,
+          401: SchemaRefs.Unauthorized,
+          403: SchemaRefs.Forbidden,
+          404: SchemaRefs.NotFound,
+          500: SchemaRefs.ServerError,
+        },
+      },
+    },
+    controller.replaceUserRoles.bind(controller),
+  );
+
   // ===== BULK OPERATIONS =====
 
   // Bulk assign roles
@@ -632,5 +700,66 @@ export async function rbacRoutes(
       },
     },
     controller.getUserEffectivePermissions.bind(controller),
+  );
+
+  // ===== ROLE ASSIGNMENT HISTORY ROUTES =====
+
+  // Get role assignment history (paginated)
+  typedFastify.get(
+    '/rbac/history',
+    {
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('rbac', 'history:read'),
+      ],
+      schema: {
+        description: 'Get role assignment audit history',
+        tags: ['RBAC', 'History'],
+        summary: 'Get paginated role assignment history',
+        security: [{ bearerAuth: [] }],
+        querystring: RoleAssignmentHistoryQuerySchema,
+        response: {
+          200: RoleAssignmentHistoryListResponseSchema,
+          401: SchemaRefs.Unauthorized,
+          403: SchemaRefs.Forbidden,
+          500: SchemaRefs.ServerError,
+        },
+      },
+    },
+    controller.getRoleAssignmentHistory.bind(controller),
+  );
+
+  // Get user's role assignment history
+  typedFastify.get(
+    '/rbac/users/:id/history',
+    {
+      preValidation: [
+        fastify.authenticate,
+        fastify.verifyPermission('rbac', 'history:read'),
+      ],
+      schema: {
+        description: 'Get role assignment history for a specific user',
+        tags: ['RBAC', 'History'],
+        summary: 'Get role assignment history for user',
+        security: [{ bearerAuth: [] }],
+        params: SchemaRefs.UuidParam,
+        response: {
+          200: Type.Object({
+            success: Type.Boolean(),
+            data: Type.Array(Type.Any()), // RoleAssignmentHistory array
+            meta: Type.Object({
+              requestId: Type.String(),
+              timestamp: Type.String(),
+              version: Type.String(),
+            }),
+          }),
+          401: SchemaRefs.Unauthorized,
+          403: SchemaRefs.Forbidden,
+          404: SchemaRefs.NotFound,
+          500: SchemaRefs.ServerError,
+        },
+      },
+    },
+    controller.getUserRoleHistory.bind(controller),
   );
 }

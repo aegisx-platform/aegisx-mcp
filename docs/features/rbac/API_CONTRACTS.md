@@ -689,6 +689,217 @@ GET /api/users/:id/roles
    - Returns 404 for non-existent resource
    - Handles cascade deletions
 
+## 🆕 Multi-Role Management Endpoints
+
+### Bulk Assign Multiple Roles to Single User
+
+```http
+POST /rbac/users/:id/roles/bulk
+```
+
+#### Request Body
+
+```typescript
+{
+  role_ids: string[];        // Array of role UUIDs (required, max 10)
+  expires_at?: string;       // ISO 8601 datetime (optional)
+}
+```
+
+#### Response
+
+**Status: 201 Created**
+
+```typescript
+{
+  success: true;
+  data: UserRole[];          // Array of newly assigned roles
+  meta: {
+    requestId: string;
+    timestamp: string;
+    version: string;
+  };
+}
+```
+
+#### Example
+
+```bash
+curl -X POST http://localhost:3333/rbac/users/{userId}/roles/bulk \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "role_ids": ["role-id-1", "role-id-2", "role-id-3"],
+    "expires_at": "2025-12-31T23:59:59Z"
+  }'
+```
+
+---
+
+### Replace All User Roles
+
+```http
+PUT /rbac/users/:id/roles
+```
+
+#### Request Body
+
+```typescript
+{
+  role_ids: string[];        // Array of role UUIDs (required, max 10)
+  expires_at?: string;       // ISO 8601 datetime (optional)
+}
+```
+
+#### Behavior
+
+- Removes all existing user roles
+- Assigns the new set of roles
+- All roles get the same expiry date if specified
+- Invalidates permission cache for the user
+
+#### Response
+
+**Status: 200 OK**
+
+```typescript
+{
+  success: true;
+  data: UserRole[];          // Array of all newly assigned roles
+  meta: {
+    requestId: string;
+    timestamp: string;
+    version: string;
+  };
+}
+```
+
+#### Example
+
+```bash
+curl -X PUT http://localhost:3333/rbac/users/{userId}/roles \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "role_ids": ["admin-id", "manager-id"],
+    "expires_at": "2026-06-30T23:59:59Z"
+  }'
+```
+
+---
+
+## 📊 Role Assignment History Endpoints
+
+### Get Role Assignment History (Audit Log)
+
+```http
+GET /rbac/history
+```
+
+#### Query Parameters
+
+```typescript
+{
+  page?: number;             // Page number (default: 1)
+  limit?: number;            // Items per page (default: 20, max: 1000)
+  user_id?: string;          // Filter by user UUID (optional)
+  role_id?: string;          // Filter by role UUID (optional)
+  action?: 'assigned' | 'removed' | 'expired';  // Action type (optional)
+  from_date?: string;        // Start date ISO 8601 (optional)
+  to_date?: string;          // End date ISO 8601 (optional)
+  include_user?: boolean;    // Include user data (optional)
+  include_role?: boolean;    // Include role data (optional)
+}
+```
+
+#### Response
+
+**Status: 200 OK**
+
+```typescript
+{
+  success: true;
+  data: RoleAssignmentHistory[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+  meta: {
+    requestId: string;
+    timestamp: string;
+    version: string;
+  };
+}
+```
+
+#### RoleAssignmentHistory Schema
+
+```typescript
+{
+  id: string;                // UUID
+  user_id: string;           // UUID
+  role_id: string;           // UUID
+  action: 'assigned' | 'removed' | 'expired';
+  performed_by?: string;     // User UUID who performed action
+  performed_at: string;      // ISO 8601
+  expires_at?: string;       // ISO 8601
+  metadata?: object;         // Additional context
+  created_at: string;        // ISO 8601
+}
+```
+
+#### Example
+
+```bash
+curl "http://localhost:3333/rbac/history?page=1&limit=20&action=assigned&from_date=2025-11-01T00:00:00Z" \
+  -H "Authorization: Bearer {token}"
+```
+
+---
+
+### Get User's Role Assignment History
+
+```http
+GET /rbac/users/:id/history
+```
+
+#### Path Parameters
+
+- `id` (string, required): User UUID
+
+#### Query Parameters
+
+- `limit` (number, optional): Max items to return (default: 50)
+
+#### Response
+
+**Status: 200 OK**
+
+```typescript
+{
+  success: true;
+  data: RoleAssignmentHistory[];
+  meta: {
+    requestId: string;
+    timestamp: string;
+    version: string;
+  };
+}
+```
+
+#### Example
+
+```bash
+curl "http://localhost:3333/rbac/users/{userId}/history?limit=50" \
+  -H "Authorization: Bearer {token}"
+```
+
+---
+
 ### Integration Test Cases
 
 1. **Complete CRUD workflow**
@@ -696,6 +907,8 @@ GET /api/users/:id/roles
 3. **Error handling**
 4. **Performance under load**
 5. **Concurrent operations**
+6. **Multi-role assignment and replacement**
+7. **History tracking and audit logging**
 
 ## 📋 Implementation Checklist
 

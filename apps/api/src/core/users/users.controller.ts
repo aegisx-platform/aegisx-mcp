@@ -494,7 +494,7 @@ export class UsersController {
       request.log.info(
         {
           userIds: request.body.userIds,
-          roleId: request.body.roleId,
+          roleIds: request.body.roleIds,
           requestedBy: currentUserId,
           operation: 'bulk_role_change',
         },
@@ -503,7 +503,7 @@ export class UsersController {
 
       const result = await this.usersService.bulkChangeUserRoles(
         request.body.userIds,
-        request.body.roleId,
+        request.body.roleIds,
         currentUserId,
       );
 
@@ -512,7 +512,7 @@ export class UsersController {
           totalRequested: result.totalRequested,
           successCount: result.successCount,
           failureCount: result.failureCount,
-          roleId: request.body.roleId,
+          roleIds: request.body.roleIds,
           operation: 'bulk_role_change',
         },
         'Bulk role change operation completed',
@@ -543,7 +543,7 @@ export class UsersController {
           errorMessage:
             error instanceof Error ? error.message : 'Unknown error',
           userIds: request.body.userIds,
-          roleId: request.body.roleId,
+          roleIds: request.body.roleIds,
           operation: 'bulk_role_change',
         },
         'Error in bulk role change',

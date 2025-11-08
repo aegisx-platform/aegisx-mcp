@@ -16,6 +16,10 @@ import {
   BulkPermissionUpdateRequest,
   BulkOperationResponse,
   RbacStats,
+  BulkAssignRolesToUserRequest,
+  ReplaceUserRolesRequest,
+  RoleAssignmentHistory,
+  RoleAssignmentHistoryQuery,
 } from './rbac.schemas';
 import { PaginationMeta } from '../../shared/pagination.utils';
 
@@ -501,6 +505,122 @@ export class RbacService {
     return results;
   }
 
+  // ===== MULTI-ROLE MANAGEMENT SERVICES =====
+
+  async bulkAssignRolesToUser(
+    userId: string,
+    data: BulkAssignRolesToUserRequest,
+    assignedBy: string,
+  ): Promise<UserRole[]> {
+    // Validate user exists
+    const user = await this.rbacRepository
+      .db('users')
+      .where('id', userId)
+      .first();
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Validate all roles exist and are active
+    const roles = (await this.rbacRepository
+      .db('roles')
+      .whereIn('id', data.role_ids as string[])
+      .where('is_active', true)) as Array<{ id: string }>;
+
+    if (roles.length !== (data.role_ids as string[]).length) {
+      throw new Error('One or more roles not found or inactive');
+    }
+
+    // Validate expiration date if provided
+    if (data.expires_at) {
+      const expirationDate = new Date(data.expires_at as string);
+      if (expirationDate <= new Date()) {
+        throw new Error('Expiration date must be in the future');
+      }
+    }
+
+    // Assign each role to the user
+    const assignedRoles: UserRole[] = [];
+
+    for (const roleId of data.role_ids as string[]) {
+      try {
+        const userRole = await this.rbacRepository.assignRoleToUser(
+          userId,
+          {
+            role_id: roleId,
+            expires_at: data.expires_at,
+          },
+          assignedBy,
+        );
+        assignedRoles.push(userRole);
+      } catch (error) {
+        // If assignment fails for one role, we might want to handle this
+        // For now, we'll throw the error
+        throw new Error(
+          `Failed to assign role ${roleId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
+      }
+    }
+
+    return assignedRoles;
+  }
+
+  async replaceUserRoles(
+    userId: string,
+    data: ReplaceUserRolesRequest,
+    assignedBy: string,
+  ): Promise<UserRole[]> {
+    // Validate user exists
+    const user = await this.rbacRepository
+      .db('users')
+      .where('id', userId)
+      .first();
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Validate all new roles exist and are active
+    const roles = (await this.rbacRepository
+      .db('roles')
+      .whereIn('id', data.role_ids as string[])
+      .where('is_active', true)) as Array<{ id: string }>;
+
+    if (roles.length !== (data.role_ids as string[]).length) {
+      throw new Error('One or more roles not found or inactive');
+    }
+
+    // Validate expiration date if provided
+    if (data.expires_at) {
+      const expirationDate = new Date(data.expires_at as string);
+      if (expirationDate <= new Date()) {
+        throw new Error('Expiration date must be in the future');
+      }
+    }
+
+    // Remove all existing roles
+    const existingRoles = await this.getUserRolesByUserId(userId);
+    for (const userRole of existingRoles) {
+      await this.removeRoleFromUser(userId, userRole.role_id);
+    }
+
+    // Assign new roles
+    const assignedRoles: UserRole[] = [];
+
+    for (const roleId of data.role_ids as string[]) {
+      const userRole = await this.rbacRepository.assignRoleToUser(
+        userId,
+        {
+          role_id: roleId,
+          expires_at: data.expires_at,
+        },
+        assignedBy,
+      );
+      assignedRoles.push(userRole);
+    }
+
+    return assignedRoles;
+  }
+
   // ===== BULK OPERATIONS =====
 
   async bulkUpdateRoles(
@@ -620,5 +740,38 @@ export class RbacService {
       .groupBy('permissions.id'); // Remove duplicates
 
     return permissions;
+  }
+
+  // ===== ROLE ASSIGNMENT HISTORY =====
+
+  async getRoleAssignmentHistory(
+    query: RoleAssignmentHistoryQuery,
+  ): Promise<{ history: RoleAssignmentHistory[]; pagination: PaginationMeta }> {
+    return await this.rbacRepository.getRoleAssignmentHistory(query);
+  }
+
+  async getUserRoleHistory(
+    userId: string,
+    limit = 50,
+  ): Promise<{ history: RoleAssignmentHistory[] }> {
+    return await this.rbacRepository.getUserRoleHistory(userId, limit);
+  }
+
+  async recordRoleAssignment(
+    userId: string,
+    roleId: string,
+    action: 'assigned' | 'removed' | 'expired',
+    performedBy: string | null,
+    expiresAt?: Date,
+    metadata?: any,
+  ): Promise<void> {
+    await this.rbacRepository.recordRoleAssignment(
+      userId,
+      roleId,
+      action,
+      performedBy,
+      expiresAt || null,
+      metadata,
+    );
   }
 }

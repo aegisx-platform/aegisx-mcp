@@ -39,6 +39,7 @@ import { UserOverviewDialogComponent } from '../../dialogs/user-overview-dialog/
 import { UserPermissionsDialogComponent } from '../../dialogs/user-permissions-dialog/user-permissions-dialog.component';
 import { UserRoleAssignDialogComponent } from '../../dialogs/user-role-assign-dialog/user-role-assign-dialog.component';
 import { UserRolesDialogComponent } from '../../dialogs/user-roles-dialog/user-roles-dialog.component';
+import { UserRolesManagementDialogComponent } from '../../dialogs/user-roles-management-dialog/user-roles-management-dialog.component';
 import { HasPermissionDirective } from '../../directives/has-permission.directive';
 import { Role, UserRole, UserRoleFilters } from '../../models/rbac.interfaces';
 import { RbacService } from '../../services/rbac.service';
@@ -327,22 +328,28 @@ import { RbacService } from '../../services/rbac.service';
               </td>
             </ng-container>
 
-            <!-- Role Column -->
+            <!-- Roles Column (Chips) -->
             <ng-container matColumnDef="role">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header>Role</th>
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Roles</th>
               <td mat-cell *matCellDef="let assignment">
-                <div class="flex items-center gap-2">
-                  <span class="font-medium">{{ assignment.role.name }}</span>
-                  <mat-chip
-                    *ngIf="assignment.role.is_system_role"
-                    class="!bg-blue-100 !text-blue-800 dark:!bg-blue-900 dark:!text-blue-200"
-                  >
-                    System
+                <mat-chip-set>
+                  <mat-chip class="role-chip">
+                    <mat-icon matChipAvatar class="!text-sm">shield</mat-icon>
+                    {{ assignment.role.name }}
+                    @if (assignment.expires_at && isExpiringSoon(assignment)) {
+                      <mat-icon
+                        matChipTrailingIcon
+                        class="expiring-warning !text-sm"
+                        >schedule</mat-icon
+                      >
+                    }
                   </mat-chip>
-                </div>
-                <div class="text-sm text-gray-600 dark:text-gray-400">
-                  {{ assignment.role.category }}
-                </div>
+                </mat-chip-set>
+                @if (getUserRoleCount(assignment) > 1) {
+                  <div class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                    + {{ getUserRoleCount(assignment) - 1 }} more role(s)
+                  </div>
+                }
               </td>
             </ng-container>
 
@@ -427,6 +434,14 @@ import { RbacService } from '../../services/rbac.service';
                 </button>
 
                 <mat-menu #actionMenu="matMenu">
+                  <button
+                    *hasPermission="'roles:update'"
+                    mat-menu-item
+                    (click)="openManageRolesDialog(assignment)"
+                  >
+                    <mat-icon class="text-blue-600">manage_accounts</mat-icon>
+                    Manage Roles
+                  </button>
                   <button mat-menu-item (click)="viewUserOverview(assignment)">
                     <mat-icon>account_circle</mat-icon>
                     View Overview
@@ -456,7 +471,7 @@ import { RbacService } from '../../services/rbac.service';
                     class="text-red-600"
                   >
                     <mat-icon class="text-red-600">person_remove</mat-icon>
-                    Remove Role
+                    Remove This Role
                   </button>
                 </mat-menu>
               </td>
@@ -559,6 +574,21 @@ import { RbacService } from '../../services/rbac.service';
         color: white;
         font-weight: 600;
         font-size: 14px;
+      }
+
+      .role-chip {
+        background-color: #e3f2fd !important;
+        color: #1976d2 !important;
+        font-size: 12px !important;
+      }
+
+      :host-context(.dark) .role-chip {
+        background-color: #1e3a5f !important;
+        color: #90caf9 !important;
+      }
+
+      .expiring-warning {
+        color: #f57c00 !important;
       }
     `,
   ],
@@ -948,6 +978,24 @@ export class UserRoleAssignmentComponent implements OnInit {
       if (result?.action === 'manage') {
         // Could navigate to user management page or open role assignment dialog
         this.openAssignDialog();
+      }
+    });
+  }
+
+  openManageRolesDialog(assignment: UserRole): void {
+    const dialogRef = this.dialog.open(UserRolesManagementDialogComponent, {
+      width: '800px',
+      maxWidth: '90vw',
+      data: {
+        userId: assignment.user_id,
+        userName: this.getUserDisplayName(assignment),
+        availableRoles: this.availableRoles(),
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.refreshAssignments();
       }
     });
   }
