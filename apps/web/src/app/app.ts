@@ -1,4 +1,8 @@
-import { AxCompactLayoutComponent } from '@aegisx/ui';
+import {
+  AxCompactLayoutComponent,
+  AxThemeSwitcherComponent,
+  M3ThemeService,
+} from '@aegisx/ui';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { MatBadgeModule } from '@angular/material/badge';
@@ -12,7 +16,6 @@ import { filter } from 'rxjs/operators';
 import { AuthService } from './core/auth';
 import { NavigationService } from './core/navigation';
 import { WebSocketService } from './shared/business/services/websocket.service';
-import { ThemeLoaderComponent, ThemeSwitcherComponent } from './core/theme';
 
 interface Notification {
   id: number;
@@ -34,20 +37,15 @@ interface Notification {
     MatDividerModule,
     MatTooltipModule,
     AxCompactLayoutComponent,
-    ThemeLoaderComponent,
-    ThemeSwitcherComponent,
+    AxThemeSwitcherComponent,
   ],
   selector: 'ax-root',
   template: `
-    <!-- Theme Loader - loads Material theme CSS dynamically -->
-    <ax-theme-loader></ax-theme-loader>
-
     @if (shouldShowLayout()) {
       <ax-compact-layout
         [navigation]="navigation()"
         [appName]="'AegisX Platform'"
         [appVersion]="'v2.0'"
-        [isDarkMode]="isDarkMode()"
       >
         <!-- Navigation Header -->
         <ng-template #navigationHeader>
@@ -109,7 +107,7 @@ interface Notification {
 
         <!-- Toolbar Actions -->
         <ng-template #toolbarActions>
-          <!-- Theme Switcher -->
+          <!-- Theme Switcher (from @aegisx/ui) -->
           <ax-theme-switcher></ax-theme-switcher>
 
           <!-- Notifications -->
@@ -335,8 +333,8 @@ export class AppComponent implements OnInit {
   private router = inject(Router);
   private navigationService = inject(NavigationService);
   private websocketService = inject(WebSocketService);
+  private themeService = inject(M3ThemeService);
 
-  isDarkMode = signal(false);
   shouldShowLayout = signal(true);
   currentUser = computed(() => {
     const user = this.authService.currentUser();
@@ -390,10 +388,8 @@ export class AppComponent implements OnInit {
   });
 
   ngOnInit() {
-    // Load theme preference
-    const savedTheme = localStorage.getItem('theme');
-    this.isDarkMode.set(savedTheme === 'dark');
-    this.applyTheme();
+    // Theme is now managed by M3ThemeService from @aegisx/ui
+    // No manual theme loading needed - the service handles it automatically
 
     // Check routes to determine if layout should be shown
     this.router.events
@@ -469,18 +465,6 @@ export class AppComponent implements OnInit {
         type: 'info',
       },
     ]);
-  }
-
-  toggleTheme() {
-    this.isDarkMode.update((value) => !value);
-    this.applyTheme();
-  }
-
-  private applyTheme() {
-    const theme = this.isDarkMode() ? 'dark' : 'light';
-    document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.classList.add(theme);
-    localStorage.setItem('theme', theme);
   }
 
   getNotificationClass(type: string): string {

@@ -184,7 +184,7 @@
   left: 0;
   right: 0;
   height: 2px;
-  background-color: #3f51b5;
+  background-color: var(--mdc-theme-primary, #3f51b5);
   transform: scaleX(0);
   transition: transform 180ms cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -211,7 +211,12 @@
   max-width: 100%;
   vertical-align: bottom;
   text-align: inherit;
-  caret-color: #3f51b5;
+  caret-color: var(--mdc-theme-primary, #3f51b5);
+}
+
+/* Dark mode input text color */
+.dark .mat-mdc-input-element {
+  color: rgba(255, 255, 255, 0.87);
 }
 
 /* ==========================================================================
@@ -227,12 +232,12 @@
 }
 
 .mat-mdc-form-field.mat-focused .mat-mdc-form-field-label {
-  color: #3f51b5;
+  color: var(--mdc-theme-primary, #3f51b5);
 }
 
 /* Error state */
 .mat-mdc-form-field-invalid .mat-mdc-form-field-label {
-  color: #f44336;
+  color: var(--mdc-theme-error, #f44336);
 }
 
 /* Fix form field subscript positioning */
@@ -247,7 +252,7 @@
   font-size: 0.75rem;
   line-height: 1.2;
   margin-top: 0.25rem;
-  color: #f44336;
+  color: var(--mdc-theme-error, #f44336);
 }
 
 /* Hint */
@@ -375,7 +380,7 @@ textarea.mat-mdc-input-element {
 .mat-mdc-form-field-appearance-outline.mat-focused:not(.mat-form-field-invalid)
   .mdc-notched-outline
   .mdc-notched-outline__trailing {
-  border-color: #3f51b5 !important;
+  border-color: var(--mdc-theme-primary, #3f51b5) !important;
   border-width: 2px !important;
 }
 
@@ -389,7 +394,7 @@ textarea.mat-mdc-input-element {
 .mat-mdc-form-field-appearance-outline.mat-form-field-invalid
   .mdc-notched-outline
   .mdc-notched-outline__trailing {
-  border-color: #f44336 !important;
+  border-color: var(--mdc-theme-error, #f44336) !important;
 }
 
 /* Remove default Material backgrounds */

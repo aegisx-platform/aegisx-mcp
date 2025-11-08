@@ -6,3 +6,7 @@ export * from './loading/loading.service';
 export * from './icon.service';
 export * from './ax-media-watcher.service';
 export * from './ax-dialog.service';
+
+// Material 3 Theme Service
+export * from './theme/m3-theme.service';
+export * from './theme/m3-theme.types';

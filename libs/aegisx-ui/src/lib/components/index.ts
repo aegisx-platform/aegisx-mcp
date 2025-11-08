@@ -22,3 +22,6 @@ export * from './dialogs';
 // State Components
 export * from './empty-state/empty-state.component';
 export * from './error-state/error-state.component';
+
+// Theme Switcher Component
+export { AxThemeSwitcherComponent } from './theme-switcher/theme-switcher.component';

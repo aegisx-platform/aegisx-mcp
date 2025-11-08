@@ -1,0 +1,82 @@
+/**
+ * Material Design Theme: Purple + Green
+ * Uses Material 3 CSS variables for MDC components
+ */
+
+/* Light mode (default) */
+:root[data-theme='purple-green'],
+:root[data-theme='purple-green'].light {
+  /* Only apply when explicitly set to this theme */
+  /* MDC Primary Color: Purple */
+  --mdc-theme-primary: #9c27b0;
+  --mdc-theme-on-primary: #ffffff;
+  --mdc-theme-primary-container: #f3e5f5;
+  --mdc-theme-on-primary-container: #4a0080;
+
+  /* MDC Secondary Color: Green */
+  --mdc-theme-secondary: #4caf50;
+  --mdc-theme-on-secondary: #ffffff;
+  --mdc-theme-secondary-container: #c8e6c9;
+  --mdc-theme-on-secondary-container: #1b5e20;
+
+  /* MDC Tertiary Color: Teal */
+  --mdc-theme-tertiary: #009688;
+  --mdc-theme-on-tertiary: #ffffff;
+  --mdc-theme-tertiary-container: #b2ebf2;
+  --mdc-theme-on-tertiary-container: #00363a;
+
+  /* MDC Error Color */
+  --mdc-theme-error: #b3261e;
+  --mdc-theme-on-error: #ffffff;
+  --mdc-theme-error-container: #f9dedc;
+  --mdc-theme-on-error-container: #410e0b;
+
+  /* MDC Surface Colors */
+  --mdc-theme-background: #fffbfe;
+  --mdc-theme-on-background: #1d1b20;
+  --mdc-theme-surface: #fffbfe;
+  --mdc-theme-on-surface: #1d1b20;
+  --mdc-theme-surface-variant: #ece6f0;
+  --mdc-theme-on-surface-variant: #49454e;
+
+  /* MDC Outline Color */
+  --mdc-theme-outline: #79747e;
+}
+
+/* Dark mode */
+:root[data-theme='purple-green'].dark {
+  /* MDC Primary Color: Purple (lighter for dark mode) */
+  --mdc-theme-primary: #e1bee7;
+  --mdc-theme-on-primary: #4a0080;
+  --mdc-theme-primary-container: #7b1fa2;
+  --mdc-theme-on-primary-container: #f3e5f5;
+
+  /* MDC Secondary Color: Green (lighter for dark mode) */
+  --mdc-theme-secondary: #81c784;
+  --mdc-theme-on-secondary: #1b5e20;
+  --mdc-theme-secondary-container: #388e3c;
+  --mdc-theme-on-secondary-container: #c8e6c9;
+
+  /* MDC Tertiary Color: Teal */
+  --mdc-theme-tertiary: #80deea;
+  --mdc-theme-on-tertiary: #00363a;
+  --mdc-theme-tertiary-container: #00505a;
+  --mdc-theme-on-tertiary-container: #b2ebf2;
+
+  /* MDC Error Color */
+  --mdc-theme-error: #f2b8b5;
+  --mdc-theme-on-error: #601410;
+  --mdc-theme-error-container: #8c1d18;
+  --mdc-theme-on-error-container: #f9dedc;
+
+  /* MDC Surface Colors */
+  --mdc-theme-background: #1d1b20;
+  --mdc-theme-on-background: #e6e0e9;
+  --mdc-theme-surface: #1d1b20;
+  --mdc-theme-on-surface: #e6e0e9;
+  --mdc-theme-surface-variant: #49454e;
+  --mdc-theme-on-surface-variant: #c4c7c5;
+
+  /* MDC Outline Color */
+  --mdc-theme-outline: #79747e;
+}

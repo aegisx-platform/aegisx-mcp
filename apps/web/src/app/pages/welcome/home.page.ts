@@ -52,7 +52,6 @@ interface Feature {
                 mat-raised-button
                 color="primary"
                 (click)="navigateTo('/profile')"
-                class="!bg-blue-600 hover:!bg-blue-700"
               >
                 <mat-icon class="mr-2">person</mat-icon>
                 View Profile

@@ -1,10 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
 
-/* Import Unified Theme Variables - MUST be before other rules */
-@use 'styles/theme-variables' as *;
-
-/* Import Material Theme Configuration */
-@use 'styles/material-theme-config' as *;
+/* Material Design fixes and form utilities (keep essential styles) */
 @use 'styles/components/material-fixes' as *;
 @use 'styles/components/form-utilities' as *;
 
@@ -335,8 +331,8 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Import Angular Material Theme BEFORE any custom styles */
-@import '@angular/material/prebuilt-themes/indigo-pink.css';
+/* Material themes are now loaded dynamically by ThemeLoaderComponent
+   based on user selection and persisted in localStorage */
 
 /* Fix Material outline input border issue with Tailwind */
 /* The issue is Tailwind sets border-style: solid globally, causing the notch to show borders */

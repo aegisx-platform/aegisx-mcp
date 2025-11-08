@@ -3,7 +3,8 @@
 
 <!-- Navigation -->
 <ax-simple-vertical-navigation
-  class="dark bg-gray-900 print:hidden"
+  [class.dark]="isDarkMode"
+  class="bg-gray-900 print:hidden"
   [mode]="isScreenSmall ? 'over' : 'side'"
   [navigation]="navigation"
   [opened]="!isScreenSmall"

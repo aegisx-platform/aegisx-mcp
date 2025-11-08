@@ -11,10 +11,13 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDividerModule } from '@angular/material/divider';
 import { Subject, takeUntil } from 'rxjs';
-import { AegisxCardComponent, AegisxAlertComponent } from '@aegisx/ui';
+import {
+  AegisxCardComponent,
+  AegisxAlertComponent,
+  AxThemeSwitcherComponent,
+} from '@aegisx/ui';
 import { SettingsService } from '../services/settings.service';
 import { GroupedSettings, SettingChangeEvent } from '../models/settings.types';
-import { ThemeSwitcherComponent } from '../../theme';
 
 @Component({
   selector: 'ax-settings',
@@ -33,7 +36,7 @@ import { ThemeSwitcherComponent } from '../../theme';
     MatDividerModule,
     AegisxCardComponent,
     AegisxAlertComponent,
-    ThemeSwitcherComponent,
+    AxThemeSwitcherComponent,
   ],
   template: `
     <div class="container mx-auto px-4 py-8">
