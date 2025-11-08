@@ -5,6 +5,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { FormsModule } from '@angular/forms';
 import { AegisxCardComponent } from '@aegisx/ui';
 import { UserService } from '../services/user.service';
 
@@ -17,6 +22,11 @@ export interface UserRole {
   isActive: boolean;
 }
 
+export interface AvailableRole {
+  id: string;
+  name: string;
+}
+
 @Component({
   selector: 'ax-permissions-tab',
   standalone: true,
@@ -26,11 +36,26 @@ export interface UserRole {
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatSelectModule,
+    MatFormFieldModule,
+    MatCheckboxModule,
+    FormsModule,
     AegisxCardComponent,
   ],
   template: `
     <ax-card [appearance]="'elevated'" class="mt-6">
-      <h3 class="text-lg font-semibold mb-4">Assigned Roles</h3>
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold">Assigned Roles</h3>
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="openAssignRolesDialog()"
+          [disabled]="loading()"
+        >
+          <mat-icon>add</mat-icon>
+          <span>Assign New Role</span>
+        </button>
+      </div>
 
       @if (loading()) {
         <div class="flex items-center justify-center h-64">
@@ -165,6 +190,7 @@ export class PermissionsTabComponent implements OnInit {
 
   private userService = inject(UserService);
   private snackBar = inject(MatSnackBar);
+  private dialog = inject(MatDialog);
 
   roles = signal<UserRole[]>([]);
   loading = signal(false);
@@ -213,5 +239,134 @@ export class PermissionsTabComponent implements OnInit {
           },
         );
     }
+  }
+
+  openAssignRolesDialog() {
+    const dialogRef = this.dialog.open(AssignRolesDialogComponent, {
+      width: '500px',
+      disableClose: false,
+    });
+
+    dialogRef.afterClosed().subscribe((selectedRoleId: string | null) => {
+      if (selectedRoleId) {
+        this.assignRole(selectedRoleId);
+      }
+    });
+  }
+
+  private assignRole(roleId: string) {
+    this.loading.set(true);
+    this.userService.assignRolesToUser(this.userId, { roleIds: [roleId] }).then(
+      () => {
+        this.snackBar.open('Role assigned successfully', 'Close', {
+          duration: 3000,
+        });
+        this.loadRoles();
+      },
+      () => {
+        this.snackBar.open('Failed to assign role', 'Close', {
+          duration: 3000,
+          panelClass: ['error-snackbar'],
+        });
+        this.loading.set(false);
+      },
+    );
+  }
+}
+
+@Component({
+  selector: 'ax-assign-roles-dialog',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    FormsModule,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+  ],
+  template: `
+    <div class="p-6">
+      <h2 class="text-xl font-semibold mb-4">Assign New Roles</h2>
+
+      @if (loadingRoles()) {
+        <div class="flex justify-center py-4">
+          <mat-spinner [diameter]="32"></mat-spinner>
+        </div>
+      } @else {
+        <mat-form-field class="w-full">
+          <mat-label>Select Role to Assign</mat-label>
+          <mat-select [(ngModel)]="selectedRoleId">
+            @for (role of availableRoles(); track role.id) {
+              <mat-option [value]="role.id">{{ role.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <div class="flex justify-end gap-2 mt-6">
+          <button mat-stroked-button (click)="onCancel()">Cancel</button>
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="onAssign()"
+            [disabled]="!selectedRoleId || assigning()"
+          >
+            Assign Role
+          </button>
+        </div>
+      }
+    </div>
+  `,
+  styles: [
+    `
+      mat-form-field {
+        width: 100%;
+      }
+    `,
+  ],
+})
+export class AssignRolesDialogComponent {
+  availableRoles = signal<AvailableRole[]>([]);
+  loadingRoles = signal(false);
+  selectedRoleId = '';
+  assigning = signal(false);
+
+  constructor(
+    public dialogRef: MatDialogRef<AssignRolesDialogComponent>,
+    private userService: UserService,
+  ) {
+    this.loadAvailableRoles();
+  }
+
+  private loadAvailableRoles() {
+    this.loadingRoles.set(true);
+    this.userService.getRoles().then(
+      (response: any) => {
+        if (Array.isArray(response)) {
+          this.availableRoles.set(
+            response.map((r: any) => ({ id: r.id, name: r.name })),
+          );
+        } else if (response && Array.isArray(response.data)) {
+          this.availableRoles.set(
+            response.data.map((r: any) => ({ id: r.id, name: r.name })),
+          );
+        }
+        this.loadingRoles.set(false);
+      },
+      () => {
+        this.loadingRoles.set(false);
+      },
+    );
+  }
+
+  onAssign() {
+    if (this.selectedRoleId) {
+      this.dialogRef.close(this.selectedRoleId);
+    }
+  }
+
+  onCancel() {
+    this.dialogRef.close(null);
   }
 }

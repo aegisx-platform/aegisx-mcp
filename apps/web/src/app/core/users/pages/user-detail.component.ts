@@ -7,10 +7,12 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AegisxCardComponent } from '@aegisx/ui';
-import { UserService, User } from '../services/user.service';
+import { UserService, User, UserRole } from '../services/user.service';
 import { UserFormDialogComponent } from '../components/user-form-dialog.component';
 import { ConfirmDialogComponent } from '../../../shared/ui/components/confirm-dialog.component';
 import { ActivityTabComponent } from '../components/activity-tab.component';
@@ -28,6 +30,8 @@ import { SessionsTabComponent } from '../components/sessions-tab.component';
     MatListModule,
     MatDividerModule,
     MatProgressSpinnerModule,
+    MatChipsModule,
+    MatTooltipModule,
     AegisxCardComponent,
     ActivityTabComponent,
     PermissionsTabComponent,
@@ -101,8 +105,9 @@ import { SessionsTabComponent } from '../components/sessions-tab.component';
         <mat-tab-group>
           <!-- Profile Tab -->
           <mat-tab label="Profile">
+            <!-- Basic Information Card -->
             <ax-card [appearance]="'elevated'" class="mt-6">
-              <h3 class="text-lg font-semibold mb-4">User Information</h3>
+              <h3 class="text-lg font-semibold mb-4">Basic Information</h3>
               <mat-list>
                 <mat-list-item>
                   <span matListItemTitle>Username</span>
@@ -117,10 +122,54 @@ import { SessionsTabComponent } from '../components/sessions-tab.component';
                 <mat-divider></mat-divider>
 
                 <mat-list-item>
-                  <span matListItemTitle>Role</span>
-                  <span matListItemMeta class="capitalize">{{
-                    user()!.role
-                  }}</span>
+                  <span matListItemTitle>Full Name</span>
+                  <span matListItemMeta>
+                    {{ user()!.firstName }} {{ user()!.lastName }}
+                  </span>
+                </mat-list-item>
+              </mat-list>
+            </ax-card>
+
+            <!-- Roles and Status Card -->
+            <ax-card [appearance]="'elevated'" class="mt-6">
+              <h3 class="text-lg font-semibold mb-4">Access Control</h3>
+              <mat-list>
+                <mat-list-item>
+                  <span matListItemTitle>Assigned Roles</span>
+                  <span matListItemMeta>
+                    @if (user()!.roles && user()!.roles.length > 0) {
+                      <div class="flex flex-wrap gap-2">
+                        @for (role of user()!.roles; track role.id) {
+                          <mat-chip
+                            [matTooltip]="formatRoleTooltip(role)"
+                            (click)="viewRoleDetails(role)"
+                            [class]="getRoleChipClass(role)"
+                            class="cursor-pointer"
+                          >
+                            {{ role.roleName }}
+                            @if (isPrimaryRole(role)) {
+                              <mat-icon class="ml-1 text-sm">star</mat-icon>
+                            }
+                            @if (isExpired(role.expiresAt)) {
+                              <mat-icon
+                                class="ml-1 text-sm"
+                                matTooltip="Role has expired"
+                                >error</mat-icon
+                              >
+                            } @else if (isExpiringWithin7Days(role.expiresAt)) {
+                              <mat-icon
+                                class="ml-1 text-sm"
+                                matTooltip="Role expires soon"
+                                >warning</mat-icon
+                              >
+                            }
+                          </mat-chip>
+                        }
+                      </div>
+                    } @else {
+                      <span class="text-gray-400">No roles assigned</span>
+                    }
+                  </span>
                 </mat-list-item>
                 <mat-divider></mat-divider>
 
@@ -128,7 +177,7 @@ import { SessionsTabComponent } from '../components/sessions-tab.component';
                   <span matListItemTitle>Status</span>
                   <span matListItemMeta>
                     <span
-                      class="px-2 py-1 text-xs font-medium rounded-full"
+                      class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full"
                       [ngClass]="{
                         'bg-green-100 text-green-800':
                           user()!.status === 'active',
@@ -140,34 +189,72 @@ import { SessionsTabComponent } from '../components/sessions-tab.component';
                           user()!.status === 'pending',
                       }"
                     >
+                      <mat-icon
+                        class="mr-1 text-sm"
+                        [ngSwitch]="user()!.status"
+                      >
+                        @switch (user()!.status) {
+                          @case ('active') {
+                            check_circle
+                          }
+                          @case ('inactive') {
+                            cancel
+                          }
+                          @case ('suspended') {
+                            block
+                          }
+                          @case ('pending') {
+                            schedule
+                          }
+                        }
+                      </mat-icon>
                       {{ user()!.status | titlecase }}
                     </span>
+                  </span>
+                </mat-list-item>
+              </mat-list>
+            </ax-card>
+
+            <!-- Audit Information Card -->
+            <ax-card [appearance]="'elevated'" class="mt-6">
+              <h3 class="text-lg font-semibold mb-4">Account Activity</h3>
+              <mat-list>
+                <mat-list-item>
+                  <span matListItemTitle>Created At</span>
+                  <span matListItemMeta>
+                    <span class="text-sm">{{
+                      formatDate(user()!.createdAt)
+                    }}</span>
                   </span>
                 </mat-list-item>
                 <mat-divider></mat-divider>
 
                 <mat-list-item>
-                  <span matListItemTitle>Created At</span>
-                  <span matListItemMeta>{{
-                    formatDate(user()!.createdAt)
-                  }}</span>
-                </mat-list-item>
-                <mat-divider></mat-divider>
-
-                <mat-list-item>
                   <span matListItemTitle>Last Updated</span>
-                  <span matListItemMeta>{{
-                    formatDate(user()!.updatedAt)
-                  }}</span>
+                  <span matListItemMeta>
+                    <span class="text-sm">{{
+                      formatDate(user()!.updatedAt)
+                    }}</span>
+                  </span>
                 </mat-list-item>
 
                 @if (user()!.lastLoginAt) {
                   <mat-divider></mat-divider>
                   <mat-list-item>
                     <span matListItemTitle>Last Login</span>
-                    <span matListItemMeta>{{
-                      formatDate(user()!.lastLoginAt!)
-                    }}</span>
+                    <span matListItemMeta>
+                      <span class="text-sm">{{
+                        formatDate(user()!.lastLoginAt!)
+                      }}</span>
+                    </span>
+                  </mat-list-item>
+                } @else {
+                  <mat-divider></mat-divider>
+                  <mat-list-item>
+                    <span matListItemTitle>Last Login</span>
+                    <span matListItemMeta>
+                      <span class="text-gray-400 text-sm">Never logged in</span>
+                    </span>
                   </mat-list-item>
                 }
               </mat-list>
@@ -204,6 +291,136 @@ import { SessionsTabComponent } from '../components/sessions-tab.component';
 
       ::ng-deep .mat-mdc-list-item-meta {
         @apply text-gray-600 dark:text-gray-400;
+      }
+
+      /* Card Styling Enhancements */
+      ax-card {
+        @apply transition-all duration-200 ease-in-out;
+
+        &:hover {
+          @apply shadow-lg;
+        }
+      }
+
+      /* Role Chips Styling */
+      mat-chip {
+        @apply font-medium transition-all duration-200 ease-in-out;
+
+        &.expired-role {
+          @apply bg-red-50 text-red-700 dark:bg-red-900 dark:text-red-200;
+        }
+
+        &.expiring-soon-role {
+          @apply bg-yellow-50 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200;
+        }
+      }
+
+      /* Material Icons - Consolidated Styling */
+      mat-icon {
+        font-size: inherit;
+        width: auto;
+        height: auto;
+
+        &.text-sm {
+          font-size: 18px;
+        }
+
+        &.ml-1 {
+          margin-left: 0.25rem;
+        }
+
+        &.mr-1 {
+          margin-right: 0.25rem;
+        }
+      }
+
+      /* Status Badge Styling */
+      .status-badge {
+        @apply inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-full transition-all duration-200;
+      }
+
+      /* Improved Spacing for Card Titles */
+      h3 {
+        @apply text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4;
+      }
+
+      /* User Header Styling */
+      .user-header {
+        @apply bg-gradient-to-r from-primary-50 to-primary-100 dark:from-primary-900 dark:to-primary-800 rounded-lg p-6 mb-8;
+      }
+
+      .avatar-circle {
+        @apply w-20 h-20 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center shadow-md;
+      }
+
+      .avatar-initials {
+        @apply text-2xl font-bold text-white;
+      }
+
+      /* Tab Content Spacing */
+      mat-tab-group {
+        ::ng-deep .mat-mdc-tab-body-wrapper {
+          @apply pt-4;
+        }
+      }
+
+      /* Role Chip Container */
+      .roles-container {
+        @apply flex flex-wrap gap-2.5;
+      }
+
+      /* Empty State Styling */
+      .empty-state {
+        @apply text-center py-8;
+
+        mat-icon {
+          height: 64px;
+          width: 64px;
+          font-size: 64px;
+          @apply text-gray-300 dark:text-gray-600 mb-4;
+        }
+
+        p {
+          @apply text-gray-500 dark:text-gray-400 text-sm;
+        }
+      }
+
+      /* List Item Hover Effect */
+      mat-list-item {
+        @apply transition-colors duration-150;
+
+        &:hover {
+          @apply bg-gray-50 dark:bg-gray-800;
+        }
+      }
+
+      /* Better List Divider */
+      mat-divider {
+        @apply my-0;
+      }
+
+      /* Action Buttons */
+      button[mat-stroked-button],
+      button[mat-raised-button] {
+        @apply transition-all duration-200;
+
+        &:hover:not(:disabled) {
+          @apply shadow-md;
+        }
+
+        &:disabled {
+          @apply opacity-50 cursor-not-allowed;
+        }
+      }
+
+      /* Header Buttons Container */
+      .header-actions {
+        @apply flex gap-2;
+      }
+
+      /* Font Sizes and Line Heights */
+      ::ng-deep .mat-mdc-list-item-title {
+        @apply font-medium text-gray-700 dark:text-gray-300;
       }
     `,
   ],
@@ -310,5 +527,65 @@ export class UserDetailComponent implements OnInit {
       hour: '2-digit',
       minute: '2-digit',
     });
+  }
+
+  formatRoleTooltip(role: UserRole): string {
+    const lines: string[] = [role.roleName];
+
+    if (role.assignedAt) {
+      lines.push(`Assigned: ${this.formatDate(role.assignedAt)}`);
+    }
+
+    if (role.assignedBy) {
+      lines.push(`Assigned by: ${role.assignedBy}`);
+    }
+
+    if (role.expiresAt) {
+      lines.push(`Expires: ${this.formatDate(role.expiresAt)}`);
+      if (this.isExpired(role.expiresAt)) {
+        lines.push('⚠️ Expired');
+      }
+    } else {
+      lines.push('No expiration');
+    }
+
+    lines.push(`Status: ${role.isActive ? 'Active' : 'Inactive'}`);
+
+    return lines.join('\n');
+  }
+
+  isPrimaryRole(role: UserRole): boolean {
+    const user = this.user();
+    if (!user) return false;
+    return user.roleId === role.roleId;
+  }
+
+  isExpired(expiryDate: string | null | undefined): boolean {
+    if (!expiryDate) return false;
+    return new Date(expiryDate) < new Date();
+  }
+
+  isExpiringWithin7Days(expiryDate: string | null | undefined): boolean {
+    if (!expiryDate) return false;
+    const expiryTime = new Date(expiryDate).getTime();
+    const nowTime = new Date().getTime();
+    const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
+    const diffTime = expiryTime - nowTime;
+    return diffTime > 0 && diffTime <= sevenDaysInMs;
+  }
+
+  getRoleChipClass(role: UserRole): string {
+    if (this.isExpired(role.expiresAt)) {
+      return 'expired-role';
+    }
+    if (this.isExpiringWithin7Days(role.expiresAt)) {
+      return 'expiring-soon-role';
+    }
+    return '';
+  }
+
+  viewRoleDetails(role: UserRole): void {
+    // This can be extended to open a modal with full role details
+    // For now, show tooltip on click is sufficient
   }
 }
