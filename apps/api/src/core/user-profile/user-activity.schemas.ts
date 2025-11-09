@@ -190,19 +190,17 @@ export const ActivitySessionSchema = Type.Object({
   is_active: Type.Boolean(),
 });
 
-// Get activity sessions response
+// Get activity sessions response (using standard paginated format)
 export const ActivitySessionsResponseSchema = Type.Object({
   success: Type.Boolean(),
-  data: Type.Object({
-    sessions: Type.Array(ActivitySessionSchema),
-    pagination: Type.Object({
-      page: Type.Integer(),
-      limit: Type.Integer(),
-      total: Type.Integer(),
-      pages: Type.Integer(),
-      hasNext: Type.Boolean(),
-      hasPrev: Type.Boolean(),
-    }),
+  data: Type.Array(ActivitySessionSchema),
+  pagination: Type.Object({
+    page: Type.Integer(),
+    limit: Type.Integer(),
+    total: Type.Integer(),
+    pages: Type.Integer(),
+    hasNext: Type.Boolean(),
+    hasPrev: Type.Boolean(),
   }),
 });
 
