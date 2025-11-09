@@ -458,47 +458,18 @@ table {
 }
 
 /* ==========================================================================
-   Card Styles - Remove borders to match Material Design 3
+   Card Styles - Use Material Design 3 defaults
    ========================================================================== */
 
-/* Remove borders from Material cards - override all border properties */
-.mat-mdc-card,
-mat-card,
-.mat-card,
-.mdc-card {
-  border: none !important;
-  border-color: transparent !important;
-  border-width: 0 !important;
-  --tw-border-opacity: 0 !important;
-  outline: none !important;
-}
-
-/* Ensure cards maintain clean appearance across themes */
-.mat-mdc-card-header,
-mat-card-header,
-.mat-card-header {
-  border: none !important;
-  border-color: transparent !important;
-  border-width: 0 !important;
-  --tw-border-opacity: 0 !important;
-}
-
-.mat-mdc-card-content,
-mat-card-content,
-.mat-card-content {
-  border: none !important;
-  border-color: transparent !important;
-  border-width: 0 !important;
-  --tw-border-opacity: 0 !important;
-}
-
-/* Remove borders from all card children */
-.mat-mdc-card *,
-mat-card *,
-.mat-card *,
-.mdc-card * {
-  border-color: transparent !important;
-}
+/*
+ * Material Design 3 cards display with:
+ * - Outlined appearance (border with system outline color)
+ * - Subtle elevation and shadows
+ * - Proper padding and spacing
+ *
+ * No overrides - let Material Design 3 control card appearance naturally
+ * Individual cards can still customize via appearance="filled" or other variants
+ */
 
 /* ==========================================================================
    Dialog Alignment Fixes
