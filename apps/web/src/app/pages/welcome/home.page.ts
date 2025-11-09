@@ -94,11 +94,12 @@ interface Feature {
           </div>
         </section>
 
-        <!-- Info Cards -->
+
         <section class="section">
           <div class="info-cards-grid">
             <!-- Getting Started -->
-            <mat-card class="info-card info-card--primary">
+    <!-- Info Cards -->
+          <mat-card class="info-card info-card--primary">
               <mat-card-content>
                 <div class="info-icon-wrapper">
                   <mat-icon>rocket_launch</mat-icon>
@@ -327,7 +328,7 @@ interface Feature {
       }
 
       .info-card {
-        background-color: var(--md-sys-color-surface, #fffbfe);
+
 
         mat-card-content {
           padding: 24px;
@@ -337,7 +338,7 @@ interface Feature {
         }
 
         &.info-card--primary {
-          background-color: var(--md-sys-color-primary-container, #eaddff);
+
 
           .info-title {
             color: var(--md-sys-color-on-primary-container, #21005e);
@@ -353,7 +354,7 @@ interface Feature {
         }
 
         &.info-card--accent {
-          background-color: var(--md-sys-color-tertiary-container, #ffd8e4);
+
 
           .info-title {
             color: var(--md-sys-color-on-tertiary-container, #370b1e);

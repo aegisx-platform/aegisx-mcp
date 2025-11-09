@@ -36,8 +36,7 @@
   /* Apply preset styling to cards and containers */
   .mat-mdc-card,
   mat-card,
-  .card,
-  [class*='card'] {
+  .card {
     border-radius: var(--preset-border-radius-lg, calc(12px * 1.5));
     box-shadow: var(--preset-shadow, 0 10px 15px rgba(0, 0, 0, 0.1));
     transition: var(--preset-transition, all 300ms ease-in-out);
