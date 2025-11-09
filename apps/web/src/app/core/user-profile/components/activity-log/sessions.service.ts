@@ -196,7 +196,7 @@ export class SessionsService {
     }
 
     return this.http
-      .get<ApiResponse<SessionStats>>(`${this.adminBaseUrl}/stats`, {
+      .get<ApiResponse<SessionStats>>('/activity-logs/stats', {
         params: httpParams,
       })
       .pipe(
