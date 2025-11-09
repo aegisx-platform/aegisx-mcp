@@ -32,19 +32,10 @@ import { ActivityLog } from '../../user-profile/components/activity-log/activity
     AegisxCardComponent,
   ],
   template: `
-    <div class="session-details-dialog">
-      <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold">Session Details</h2>
-        <button
-          mat-icon-button
-          (click)="onClose()"
-          class="text-gray-500 hover:text-gray-700"
-        >
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
+    <h2 mat-dialog-title class="text-2xl font-bold">Session Details</h2>
 
-      <mat-tab-group class="mt-4">
+    <mat-dialog-content class="session-content">
+      <mat-tab-group class="mt-0">
         <!-- Session Info Tab -->
         <mat-tab label="Session Information">
           <div class="p-6">
@@ -358,17 +349,17 @@ import { ActivityLog } from '../../user-profile/components/activity-log/activity
           </div>
         </mat-tab>
       </mat-tab-group>
+    </mat-dialog-content>
 
-      <div class="flex justify-end gap-2 mt-6 pt-4 border-t">
-        <button mat-stroked-button (click)="onClose()">Close</button>
-      </div>
-    </div>
+    <mat-dialog-actions align="end">
+      <button mat-button (click)="onClose()">Close</button>
+    </mat-dialog-actions>
   `,
   styles: [
     `
-      .session-details-dialog {
-        min-width: 500px;
-        max-width: 800px;
+      mat-dialog-content.session-content {
+        overflow-y: auto;
+        max-height: calc(100vh - 200px);
       }
 
       ::ng-deep .mat-mdc-tab-list {
