@@ -1,9 +1,9 @@
-import { Component, signal, inject, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth/services/auth.service';
 
 interface QuickAction {
@@ -11,11 +11,6 @@ interface QuickAction {
   description: string;
   icon: string;
   route: string;
-  color: 'blue' | 'green' | 'purple' | 'amber';
-  bgClass: string; // e.g., 'bg-blue-50'
-  hoverBgClass: string; // e.g., 'hover:bg-blue-100'
-  borderHoverClass: string; // e.g., 'hover:border-blue-300'
-  textColorClass: string; // e.g., 'text-blue-600'
   permissions?: string[]; // Optional - if not specified, visible to all
 }
 
@@ -30,170 +25,116 @@ interface Feature {
   standalone: true,
   imports: [CommonModule, MatButtonModule, MatIconModule, MatCardModule],
   template: `
-    <div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div class="home-container">
       <!-- Hero Section -->
-      <div class="relative overflow-hidden bg-white border-b border-slate-200">
-        <div
-          class="absolute inset-0 bg-gradient-to-r from-blue-50 to-purple-50 opacity-50"
-        ></div>
-        <div
-          class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24"
-        >
-          <div class="text-center">
-            <h1 class="text-4xl sm:text-5xl font-bold text-slate-900 mb-4">
-              Welcome back, {{ getUserName() }}! 👋
-            </h1>
-            <p class="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto">
-              Your enterprise platform for building scalable applications with
-              modern technology stack.
-            </p>
-            <div class="mt-8 flex justify-center gap-4">
-              <button
-                mat-raised-button
-                color="primary"
-                (click)="navigateTo('/profile')"
-              >
-                <mat-icon class="mr-2">person</mat-icon>
-                View Profile
+      <section class="hero-section">
+        <div class="hero-content">
+          <h1 class="hero-title">Welcome back, {{ getUserName() }}! 👋</h1>
+          <p class="hero-subtitle">
+            Your enterprise platform for building scalable applications with
+            modern technology stack.
+          </p>
+          <div class="hero-actions">
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="navigateTo('/profile')"
+            >
+              <mat-icon>person</mat-icon>
+              View Profile
+            </button>
+            @if (hasSettingsPermission()) {
+              <button mat-stroked-button (click)="navigateTo('/settings')">
+                <mat-icon>settings</mat-icon>
+                Settings
               </button>
-              @if (hasSettingsPermission()) {
-                <button mat-stroked-button (click)="navigateTo('/settings')">
-                  <mat-icon class="mr-2">settings</mat-icon>
-                  Settings
-                </button>
-              }
-            </div>
+            }
           </div>
         </div>
-      </div>
+      </section>
 
       <!-- Main Content -->
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main class="main-content">
         <!-- Quick Actions -->
-        <div class="mb-12">
-          <h2 class="text-2xl font-bold text-slate-900 mb-6">Quick Actions</h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <section class="section">
+          <h2 class="section-title">Quick Actions</h2>
+          <div class="quick-actions-grid">
             @for (action of filteredQuickActions(); track action.title) {
-              <div
-                [ngClass]="[
-                  'bg-white rounded-xl p-6 border border-slate-200 hover:shadow-lg transition-all cursor-pointer group',
-                  action.borderHoverClass,
-                ]"
+              <mat-card
+                class="quick-action-card"
                 (click)="navigateTo(action.route)"
               >
-                <div
-                  [ngClass]="[
-                    'w-12 h-12 rounded-lg flex items-center justify-center mb-4 transition-colors',
-                    action.bgClass,
-                    action.hoverBgClass,
-                  ]"
-                >
-                  <mat-icon [ngClass]="['!text-2xl', action.textColorClass]">{{
-                    action.icon
-                  }}</mat-icon>
-                </div>
-                <h3 class="text-lg font-semibold text-slate-900 mb-2">
-                  {{ action.title }}
-                </h3>
-                <p class="text-sm text-slate-600">{{ action.description }}</p>
-              </div>
+                <mat-card-content>
+                  <div class="action-icon-wrapper">
+                    <mat-icon>{{ action.icon }}</mat-icon>
+                  </div>
+                  <h3 class="action-title">{{ action.title }}</h3>
+                  <p class="action-description">{{ action.description }}</p>
+                </mat-card-content>
+              </mat-card>
             }
           </div>
-        </div>
+        </section>
 
         <!-- Features Highlight -->
-        <div class="mb-12">
-          <h2 class="text-2xl font-bold text-slate-900 mb-6">
-            Platform Features
-          </h2>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <section class="section">
+          <h2 class="section-title">Platform Features</h2>
+          <div class="features-grid">
             @for (feature of features(); track feature.title) {
-              <div class="bg-white rounded-xl p-6 border border-slate-200">
-                <div class="flex items-start gap-4">
-                  <div
-                    class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center flex-shrink-0"
-                  >
-                    <mat-icon class="text-blue-600">{{
-                      feature.icon
-                    }}</mat-icon>
+              <mat-card class="feature-card">
+                <mat-card-content>
+                  <div class="feature-icon-wrapper">
+                    <mat-icon>{{ feature.icon }}</mat-icon>
                   </div>
-                  <div>
-                    <h3 class="text-lg font-semibold text-slate-900 mb-2">
-                      {{ feature.title }}
-                    </h3>
-                    <p class="text-sm text-slate-600">
-                      {{ feature.description }}
-                    </p>
-                  </div>
-                </div>
-              </div>
+                  <h3 class="feature-title">{{ feature.title }}</h3>
+                  <p class="feature-description">{{ feature.description }}</p>
+                </mat-card-content>
+              </mat-card>
             }
           </div>
-        </div>
+        </section>
 
         <!-- Info Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Getting Started -->
-          <div
-            class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200"
-          >
-            <div class="flex items-start gap-4">
-              <div
-                class="w-12 h-12 rounded-lg bg-white flex items-center justify-center flex-shrink-0"
-              >
-                <mat-icon class="text-blue-600 !text-2xl"
-                  >rocket_launch</mat-icon
-                >
-              </div>
-              <div>
-                <h3 class="text-lg font-semibold text-blue-900 mb-2">
-                  Getting Started
-                </h3>
-                <p class="text-sm text-blue-700 mb-4">
+        <section class="section">
+          <div class="info-cards-grid">
+            <!-- Getting Started -->
+            <mat-card class="info-card info-card--primary">
+              <mat-card-content>
+                <div class="info-icon-wrapper">
+                  <mat-icon>rocket_launch</mat-icon>
+                </div>
+                <h3 class="info-title">Getting Started</h3>
+                <p class="info-description">
                   New to the platform? Check out our quick start guide to learn
                   about key features.
                 </p>
-                <button mat-button class="!text-blue-700 !font-medium" disabled>
-                  <mat-icon class="mr-2">menu_book</mat-icon>
+                <button mat-button disabled class="info-button">
+                  <mat-icon>menu_book</mat-icon>
                   View Documentation (Coming Soon)
                 </button>
-              </div>
-            </div>
-          </div>
+              </mat-card-content>
+            </mat-card>
 
-          <!-- Need Help? -->
-          <div
-            class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200"
-          >
-            <div class="flex items-start gap-4">
-              <div
-                class="w-12 h-12 rounded-lg bg-white flex items-center justify-center flex-shrink-0"
-              >
-                <mat-icon class="text-purple-600 !text-2xl"
-                  >support_agent</mat-icon
-                >
-              </div>
-              <div>
-                <h3 class="text-lg font-semibold text-purple-900 mb-2">
-                  Need Help?
-                </h3>
-                <p class="text-sm text-purple-700 mb-4">
+            <!-- Need Help? -->
+            <mat-card class="info-card info-card--accent">
+              <mat-card-content>
+                <div class="info-icon-wrapper">
+                  <mat-icon>support_agent</mat-icon>
+                </div>
+                <h3 class="info-title">Need Help?</h3>
+                <p class="info-description">
                   Our support team is here to help you with any questions or
                   issues.
                 </p>
-                <button
-                  mat-button
-                  class="!text-purple-700 !font-medium"
-                  disabled
-                >
-                  <mat-icon class="mr-2">email</mat-icon>
+                <button mat-button disabled class="info-button">
+                  <mat-icon>email</mat-icon>
                   Contact Support (Coming Soon)
                 </button>
-              </div>
-            </div>
+              </mat-card-content>
+            </mat-card>
           </div>
-        </div>
-      </div>
+        </section>
+      </main>
     </div>
   `,
   styles: [
@@ -202,6 +143,303 @@ interface Feature {
         display: block;
         width: 100%;
         height: 100%;
+      }
+
+      .home-container {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        min-height: 100%;
+        background-color: var(--md-sys-color-background, #fffbfe);
+      }
+
+      /* ===== HERO SECTION ===== */
+      .hero-section {
+        background-color: var(--md-sys-color-surface, #fffbfe);
+        border-bottom: 1px solid var(--md-sys-color-outline-variant, #cac4d0);
+        padding: 48px 24px;
+      }
+
+      .hero-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        text-align: center;
+      }
+
+      .hero-title {
+        margin: 0 0 8px 0;
+        font-size: 32px;
+        font-weight: 600;
+        color: var(--md-sys-color-on-background, #1c1b1f);
+        letter-spacing: -0.5px;
+      }
+
+      .hero-subtitle {
+        margin: 0 0 32px 0;
+        font-size: 16px;
+        color: var(--md-sys-color-on-surface-variant, #49454e);
+        max-width: 640px;
+        line-height: 1.5;
+      }
+
+      .hero-actions {
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      /* ===== MAIN CONTENT ===== */
+      .main-content {
+        flex: 1;
+        max-width: 1200px;
+        margin: 0 auto;
+        width: 100%;
+        padding: 48px 24px;
+      }
+
+      .section {
+        margin-bottom: 48px;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+
+      .section-title {
+        margin: 0 0 24px 0;
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--md-sys-color-on-background, #1c1b1f);
+        letter-spacing: -0.5px;
+      }
+
+      /* ===== QUICK ACTIONS GRID ===== */
+      .quick-actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 16px;
+      }
+
+      .quick-action-card {
+        cursor: pointer;
+        transition: all 200ms cubic-bezier(0.2, 0, 0, 1);
+        background-color: var(--md-sys-color-surface, #fffbfe);
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+        }
+
+        mat-card-content {
+          padding: 24px;
+          text-align: center;
+        }
+      }
+
+      .action-icon-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        margin: 0 auto 16px;
+        background-color: var(--md-sys-color-primary-container, #eaddff);
+        border-radius: 12px;
+
+        mat-icon {
+          color: var(--md-sys-color-primary, #6750a4);
+          font-size: 24px;
+          width: 24px;
+          height: 24px;
+        }
+      }
+
+      .action-title {
+        margin: 0 0 8px 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--md-sys-color-on-surface, #1c1b1f);
+      }
+
+      .action-description {
+        margin: 0;
+        font-size: 14px;
+        color: var(--md-sys-color-on-surface-variant, #49454e);
+        line-height: 1.4;
+      }
+
+      /* ===== FEATURES GRID ===== */
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 16px;
+      }
+
+      .feature-card {
+        background-color: var(--md-sys-color-surface, #fffbfe);
+
+        mat-card-content {
+          padding: 24px;
+          display: flex;
+          gap: 16px;
+          align-items: flex-start;
+        }
+      }
+
+      .feature-icon-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+        background-color: var(--md-sys-color-secondary-container, #e8def8);
+        border-radius: 8px;
+
+        mat-icon {
+          color: var(--md-sys-color-secondary, #625b71);
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
+      }
+
+      .feature-title {
+        margin: 0 0 4px 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--md-sys-color-on-surface, #1c1b1f);
+      }
+
+      .feature-description {
+        margin: 0;
+        font-size: 14px;
+        color: var(--md-sys-color-on-surface-variant, #49454e);
+        line-height: 1.4;
+      }
+
+      /* ===== INFO CARDS GRID ===== */
+      .info-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 16px;
+      }
+
+      .info-card {
+        background-color: var(--md-sys-color-surface, #fffbfe);
+
+        mat-card-content {
+          padding: 24px;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        &.info-card--primary {
+          background-color: var(--md-sys-color-primary-container, #eaddff);
+
+          .info-title {
+            color: var(--md-sys-color-on-primary-container, #21005e);
+          }
+
+          .info-description {
+            color: var(--md-sys-color-on-primary-container, #21005e);
+          }
+
+          .info-button {
+            color: var(--md-sys-color-primary, #6750a4);
+          }
+        }
+
+        &.info-card--accent {
+          background-color: var(--md-sys-color-tertiary-container, #ffd8e4);
+
+          .info-title {
+            color: var(--md-sys-color-on-tertiary-container, #370b1e);
+          }
+
+          .info-description {
+            color: var(--md-sys-color-on-tertiary-container, #370b1e);
+          }
+
+          .info-button {
+            color: var(--md-sys-color-tertiary, #7d5260);
+          }
+        }
+      }
+
+      .info-icon-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        background-color: rgba(255, 255, 255, 0.6);
+        border-radius: 12px;
+
+        mat-icon {
+          font-size: 24px;
+          width: 24px;
+          height: 24px;
+        }
+      }
+
+      .info-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+      }
+
+      .info-description {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .info-button {
+        align-self: flex-start;
+        text-transform: none;
+
+        mat-icon {
+          margin-right: 8px;
+        }
+      }
+
+      /* ===== RESPONSIVE ===== */
+      @media (max-width: 768px) {
+        .hero-section {
+          padding: 32px 16px;
+        }
+
+        .hero-title {
+          font-size: 24px;
+        }
+
+        .hero-subtitle {
+          font-size: 14px;
+        }
+
+        .main-content {
+          padding: 32px 16px;
+        }
+
+        .section-title {
+          font-size: 20px;
+        }
+
+        .quick-actions-grid {
+          grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+          gap: 12px;
+        }
+
+        .features-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .info-cards-grid {
+          grid-template-columns: 1fr;
+        }
       }
     `,
   ],
@@ -216,48 +454,27 @@ export class HomePage implements OnInit {
       description: 'View and update your profile information',
       icon: 'account_circle',
       route: '/profile',
-      color: 'blue',
-      bgClass: 'bg-blue-50',
-      hoverBgClass: 'hover:bg-blue-100',
-      borderHoverClass: 'hover:border-blue-300',
-      textColorClass: 'text-blue-600',
-      // No permissions required - everyone can see their profile
     },
     {
       title: 'User Management',
       description: 'Manage users, roles and permissions',
       icon: 'people',
       route: '/users',
-      color: 'green',
-      bgClass: 'bg-green-50',
-      hoverBgClass: 'hover:bg-green-100',
-      borderHoverClass: 'hover:border-green-300',
-      textColorClass: 'text-green-600',
-      permissions: ['users:read', '*:*'], // Admin or users with user management permission
+      permissions: ['users:read', '*:*'],
     },
     {
       title: 'Settings',
       description: 'Configure system preferences',
       icon: 'settings',
       route: '/settings',
-      color: 'purple',
-      bgClass: 'bg-purple-50',
-      hoverBgClass: 'hover:bg-purple-100',
-      borderHoverClass: 'hover:border-purple-300',
-      textColorClass: 'text-purple-600',
-      permissions: ['settings:view', '*:*'], // Admin only
+      permissions: ['settings:view', '*:*'],
     },
     {
       title: 'API Keys',
       description: 'Manage your API keys and tokens',
       icon: 'key',
       route: '/settings/api-keys',
-      color: 'amber',
-      bgClass: 'bg-amber-50',
-      hoverBgClass: 'hover:bg-amber-100',
-      borderHoverClass: 'hover:border-amber-300',
-      textColorClass: 'text-amber-600',
-      permissions: ['api-keys:read', '*:*'], // Admin only
+      permissions: ['api-keys:read', '*:*'],
     },
   ]);
 

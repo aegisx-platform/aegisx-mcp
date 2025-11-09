@@ -1,5 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
 
+/* Material Design fixes and form utilities from aegisx-ui */
+@use '../../../libs/aegisx-ui/src/lib/styles/components/material-fixes' as *;
+
 /* Import Tailwind CSS */
 @tailwind base;
 

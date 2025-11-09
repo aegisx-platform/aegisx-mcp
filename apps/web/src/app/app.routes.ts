@@ -133,6 +133,20 @@ export const appRoutes: Route[] = [
       ),
     canActivate: [AuthGuard],
   },
+
+  // Theme Showcase - Material Components & Theme Testing
+  {
+    path: 'theme-showcase',
+    loadComponent: () =>
+      import('./pages/theme-showcase/theme-showcase.page').then(
+        (m) => m.ThemeShowcasePage,
+      ),
+    canActivate: [AuthGuard],
+    data: {
+      title: 'Theme Showcase',
+      description: 'Material Components & Theme Testing',
+    },
+  },
   {
     path: 'components',
     canActivate: [AuthGuard],

@@ -175,7 +175,7 @@
   left: 0;
   right: 0;
   height: 1px;
-  background-color: rgba(0, 0, 0, 0.42);
+  background-color: var(--md-sys-color-outline, rgba(0, 0, 0, 0.42));
 }
 
 .mat-mdc-form-field-appearance-fill .mat-mdc-form-field-ripple {
@@ -184,7 +184,7 @@
   left: 0;
   right: 0;
   height: 2px;
-  background-color: var(--mdc-theme-primary, #3f51b5);
+  background-color: var(--md-sys-color-primary, #6750a4);
   transform: scaleX(0);
   transition: transform 180ms cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -197,11 +197,11 @@
    Input Element Styles
    ========================================================================== */
 
-/* Input element styles */
+/* Input element styles - Material Design 3 tokens */
 .mat-mdc-input-element {
   font-size: 1rem;
   line-height: 1.5;
-  color: rgba(0, 0, 0, 0.87);
+  color: var(--md-sys-color-on-surface, rgba(0, 0, 0, 0.87));
   background: transparent;
   border: none;
   outline: none;
@@ -211,33 +211,33 @@
   max-width: 100%;
   vertical-align: bottom;
   text-align: inherit;
-  caret-color: var(--mdc-theme-primary, #3f51b5);
+  caret-color: var(--md-sys-color-primary, #6750a4);
 }
 
-/* Dark mode input text color */
+/* Dark mode input text color - uses Material Design 3 token */
 .dark .mat-mdc-input-element {
-  color: rgba(255, 255, 255, 0.87);
+  color: var(--md-sys-color-on-surface, rgba(255, 255, 255, 0.87));
 }
 
 /* ==========================================================================
    Labels and States
    ========================================================================== */
 
-/* Label and placeholder */
+/* Label and placeholder - Material Design 3 tokens */
 .mat-mdc-form-field-label {
-  color: rgba(0, 0, 0, 0.6);
+  color: var(--md-sys-color-on-surface-variant, rgba(0, 0, 0, 0.6));
   font-size: 1rem;
   font-weight: 400;
   letter-spacing: 0.009375em;
 }
 
 .mat-mdc-form-field.mat-focused .mat-mdc-form-field-label {
-  color: var(--mdc-theme-primary, #3f51b5);
+  color: var(--md-sys-color-primary, #6750a4);
 }
 
 /* Error state */
 .mat-mdc-form-field-invalid .mat-mdc-form-field-label {
-  color: var(--mdc-theme-error, #f44336);
+  color: var(--md-sys-color-error, #b3261e);
 }
 
 /* Fix form field subscript positioning */
@@ -252,7 +252,7 @@
   font-size: 0.75rem;
   line-height: 1.2;
   margin-top: 0.25rem;
-  color: var(--mdc-theme-error, #f44336);
+  color: var(--md-sys-color-error, #b3261e);
 }
 
 /* Hint */
@@ -260,7 +260,7 @@
   font-size: 0.75rem;
   line-height: 1.2;
   margin-top: 0.25rem;
-  color: rgba(0, 0, 0, 0.6);
+  color: var(--md-sys-color-on-surface-variant, rgba(0, 0, 0, 0.6));
 }
 
 /* ==========================================================================
@@ -358,7 +358,7 @@ textarea.mat-mdc-input-element {
    Border Colors and Focus States
    ========================================================================== */
 
-/* Ensure proper outline colors for Material form fields */
+/* Ensure proper outline colors for Material form fields - Material Design 3 tokens */
 .mat-mdc-form-field-appearance-outline:not(.mat-form-field-invalid)
   .mdc-notched-outline
   .mdc-notched-outline__leading,
@@ -368,7 +368,7 @@ textarea.mat-mdc-input-element {
 .mat-mdc-form-field-appearance-outline:not(.mat-form-field-invalid)
   .mdc-notched-outline
   .mdc-notched-outline__trailing {
-  border-color: rgba(0, 0, 0, 0.38) !important;
+  border-color: var(--md-sys-color-outline, rgba(0, 0, 0, 0.38)) !important;
 }
 
 .mat-mdc-form-field-appearance-outline.mat-focused:not(.mat-form-field-invalid)
@@ -380,11 +380,11 @@ textarea.mat-mdc-input-element {
 .mat-mdc-form-field-appearance-outline.mat-focused:not(.mat-form-field-invalid)
   .mdc-notched-outline
   .mdc-notched-outline__trailing {
-  border-color: var(--mdc-theme-primary, #3f51b5) !important;
+  border-color: var(--md-sys-color-primary, #6750a4) !important;
   border-width: 2px !important;
 }
 
-/* Fix for form field with errors */
+/* Fix for form field with errors - Material Design 3 tokens */
 .mat-mdc-form-field-appearance-outline.mat-form-field-invalid
   .mdc-notched-outline
   .mdc-notched-outline__leading,
@@ -394,7 +394,7 @@ textarea.mat-mdc-input-element {
 .mat-mdc-form-field-appearance-outline.mat-form-field-invalid
   .mdc-notched-outline
   .mdc-notched-outline__trailing {
-  border-color: var(--mdc-theme-error, #f44336) !important;
+  border-color: var(--md-sys-color-error, #b3261e) !important;
 }
 
 /* Remove default Material backgrounds */
@@ -455,6 +455,49 @@ table {
 
 .mat-column-select {
   overflow: initial;
+}
+
+/* ==========================================================================
+   Card Styles - Remove borders to match Material Design 3
+   ========================================================================== */
+
+/* Remove borders from Material cards - override all border properties */
+.mat-mdc-card,
+mat-card,
+.mat-card,
+.mdc-card {
+  border: none !important;
+  border-color: transparent !important;
+  border-width: 0 !important;
+  --tw-border-opacity: 0 !important;
+  outline: none !important;
+}
+
+/* Ensure cards maintain clean appearance across themes */
+.mat-mdc-card-header,
+mat-card-header,
+.mat-card-header {
+  border: none !important;
+  border-color: transparent !important;
+  border-width: 0 !important;
+  --tw-border-opacity: 0 !important;
+}
+
+.mat-mdc-card-content,
+mat-card-content,
+.mat-card-content {
+  border: none !important;
+  border-color: transparent !important;
+  border-width: 0 !important;
+  --tw-border-opacity: 0 !important;
+}
+
+/* Remove borders from all card children */
+.mat-mdc-card *,
+mat-card *,
+.mat-card *,
+.mdc-card * {
+  border-color: transparent !important;
 }
 
 /* ==========================================================================

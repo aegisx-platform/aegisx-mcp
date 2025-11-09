@@ -2,36 +2,43 @@
 // @ Import Ax Main Styles
 // -----------------------------------------------------------------------------------------------------
 
-// Import Ax navigation component styles
-@import './vendor/fuse/vertical.component.scss';
-@import './vendor/fuse/default.scss';
-@import './vendor/fuse/compact.scss';
-@import './vendor/fuse/dense.scss';
-@import './vendor/fuse/thin.scss';
+// ===================================================================================================
+// LEGACY FUSE FRAMEWORK STYLES - COMMENTED OUT FOR CLEANUP
+// Note: These are being phased out in favor of Material Design 3 theme system
+// Uncomment if needed for backward compatibility
+// ===================================================================================================
 
-// Import Ax loading bar styles
-@import './vendor/fuse/loading-bar.component.scss';
-
-// Import Ax card styles
-@import './vendor/fuse/card.component.scss';
-
-// Import Ax alert styles
-@import './vendor/fuse/alert.component.scss';
-
-// Import Ax drawer styles
-@import './vendor/fuse/drawer.component.scss';
-
-// Import highlight.js styles
-@import './vendor/fuse/overrides/highlightjs.scss';
-
-// Import perfect scrollbar styles
-@import './vendor/fuse/overrides/perfect-scrollbar.scss';
-
-// Import Angular Material overrides
-@import './vendor/fuse/overrides/angular-material.scss';
-
-// Import Ax utility classes
-@import './vendor/fuse/tailwind.scss';
+// // Import Ax navigation component styles
+// @import './vendor/fuse/vertical.component.scss';
+// @import './vendor/fuse/default.scss';
+// @import './vendor/fuse/compact.scss';
+// @import './vendor/fuse/dense.scss';
+// @import './vendor/fuse/thin.scss';
+//
+// // Import Ax loading bar styles
+// @import './vendor/fuse/loading-bar.component.scss';
+//
+// // Import Ax card styles
+// @import './vendor/fuse/card.component.scss';
+//
+// // Import Ax alert styles
+// @import './vendor/fuse/alert.component.scss';
+//
+// // Import Ax drawer styles
+// @import './vendor/fuse/drawer.component.scss';
+//
+// // Import highlight.js styles
+// @import './vendor/fuse/overrides/highlightjs.scss';
+//
+// // Import perfect scrollbar styles
+// @import './vendor/fuse/overrides/perfect-scrollbar.scss';
+//
+// // Import Angular Material overrides (LARGE FILE - 1,519 lines)
+// // TODO: Merge this into Material Design 3 theme system
+// @import './vendor/fuse/overrides/angular-material.scss';
+//
+// // Import Ax utility classes
+// @import './vendor/fuse/tailwind.scss';
 
 // -----------------------------------------------------------------------------------------------------
 // @ Ax Vertical Navigation Overlays

@@ -6,16 +6,17 @@
  */
 
 import {
+  DOCUMENT,
   Injectable,
+  afterNextRender,
+  computed,
   inject,
   signal,
-  computed,
-  DOCUMENT,
-  afterNextRender,
 } from '@angular/core';
 import { AegisxConfigService } from '../config/config.service';
-import { M3Theme, M3ThemeState } from './m3-theme.types';
-import { generateM3Palette, lightenColor, darkenColor } from './m3-color-utils';
+import { darkenColor, lightenColor } from './m3-color-utils';
+import { M3Theme } from './m3-theme.types';
+import { StylePresetService } from './style-preset.service';
 
 @Injectable({
   providedIn: 'root',
@@ -23,6 +24,7 @@ import { generateM3Palette, lightenColor, darkenColor } from './m3-color-utils';
 export class M3ThemeService {
   private readonly document = inject(DOCUMENT);
   private readonly configService = inject(AegisxConfigService);
+  private readonly stylePresetService = inject(StylePresetService);
   private themeStyleElement: HTMLStyleElement | null = null;
 
   /**
@@ -33,7 +35,7 @@ export class M3ThemeService {
     brand: {
       id: 'brand',
       name: 'Blue (Brand)',
-      seedColor: '#2196f3',
+      seedColor: '#0c5df4',
       description: 'Brand Blue theme',
     },
     teal: {
@@ -197,7 +199,7 @@ export class M3ThemeService {
 
   /**
    * Inject theme CSS dynamically into the document
-   * This ensures Material components get the correct colors
+   * This ensures Material components get the correct colors and style presets are applied
    */
   private injectThemeCss(theme: M3Theme): void {
     // Remove old theme style if it exists
@@ -205,10 +207,20 @@ export class M3ThemeService {
       this.themeStyleElement.parentNode.removeChild(this.themeStyleElement);
     }
 
-    // Create new style element with theme CSS
+    // Create new style element with combined theme and preset CSS
     const styleElement = this.document.createElement('style');
     styleElement.id = 'dynamic-theme-styles';
-    styleElement.textContent = this.generateThemeCss(theme);
+
+    // Combine color theme CSS with style preset CSS
+    const themeCss = this.generateThemeCss(theme);
+    const currentPreset = this.stylePresetService.getPreset(
+      this.stylePresetService.currentPreset(),
+    );
+    const presetCss = currentPreset
+      ? this.stylePresetService.generatePresetCSS(currentPreset)
+      : '';
+
+    styleElement.textContent = themeCss + presetCss;
 
     // Inject into document head
     this.document.head.appendChild(styleElement);
@@ -217,44 +229,103 @@ export class M3ThemeService {
 
   /**
    * Generate CSS for the given theme
-   * Uses the theme's seed color to define Material Design colors
+   * Separates CSS Custom Properties (Variables) from Color Rules
    */
   private generateThemeCss(theme: M3Theme): string {
-    // Extract primary color from theme seed
     const primaryColor = theme.seedColor;
+    const primaryDark = darkenColor(primaryColor, 0.15);
+    const primaryLight = lightenColor(primaryColor, 0.15);
+    const accentColor = this.getAccentColor(theme);
 
-    // For now, use the material color palettes that are already defined
-    // This is a fallback CSS that targets Material components specifically
-    const css = `
-      /* Dynamic Theme: ${theme.name} */
+    // ⭐ PART 1: CSS VARIABLES (for components to use)
+    const cssVariables = `
+      /* ⭐ CSS CUSTOM PROPERTIES - Global Theme Variables */
+      :root {
+        /* Primary Colors */
+        --theme-primary: ${primaryColor};
+        --theme-primary-dark: ${primaryDark};
+        --theme-primary-light: ${primaryLight};
+
+        /* Accent Color */
+        --theme-accent: ${accentColor};
+
+        /* Semantic Colors */
+        --theme-success: #10b981;
+        --theme-warning: #f59e0b;
+        --theme-danger: #ef4444;
+        --theme-info: #3b82f6;
+
+        /* Text Colors (Light Mode) */
+        --theme-text-primary: #1f2937;
+        --theme-text-secondary: #6b7280;
+        --theme-text-tertiary: #9ca3af;
+
+        /* Surface Colors (Light Mode) */
+        --theme-surface-bg: #ffffff;
+        --theme-surface-border: #e5e7eb;
+        --theme-surface-hover: #f3f4f6;
+
+        /* Shadows */
+        --theme-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+        --theme-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --theme-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Dark Mode Variants */
+      [data-theme="dark"],
+      .dark {
+        --theme-text-primary: #f3f4f6;
+        --theme-text-secondary: #d1d5db;
+        --theme-text-tertiary: #9ca3af;
+        --theme-surface-bg: #1f2937;
+        --theme-surface-border: #374151;
+        --theme-surface-hover: #111827;
+      }
+    `;
+
+    // ⭐ PART 2: MATERIAL COMPONENT COLORS (specific rules)
+    const materialColors = `
+      /* ⭐ MATERIAL COMPONENTS - Color Rules */
       .theme-${theme.id} button[mat-raised-button][color="primary"],
       .theme-${theme.id} button[mat-button][color="primary"],
       .theme-${theme.id} .mdc-button--raised:not(.mdc-button--outlined) {
-        --mdc-theme-primary: ${primaryColor};
         background-color: ${primaryColor} !important;
         color: #ffffff !important;
       }
 
       .theme-${theme.id} button[mat-stroked-button][color="primary"],
       .theme-${theme.id} .mdc-button--outlined {
-        --mdc-theme-primary: ${primaryColor};
         border-color: ${primaryColor} !important;
         color: ${primaryColor} !important;
       }
 
       .theme-${theme.id} mat-form-field.mat-focused .mat-form-field-label,
       .theme-${theme.id} .mdc-text-field--filled.mdc-text-field--focused {
-        --mdc-theme-primary: ${primaryColor};
         color: ${primaryColor} !important;
       }
 
-      /* Ensure Material MDC components use theme color */
       .theme-${theme.id} .mdc-button {
         --mdc-theme-primary: ${primaryColor};
       }
     `;
 
-    return css;
+    return cssVariables + materialColors;
+  }
+
+  /**
+   * Get accent color based on theme
+   * Provides a complementary color for accent elements
+   */
+  private getAccentColor(theme: M3Theme): string {
+    const accentMap: Record<string, string> = {
+      brand: '#6366f1',    // Indigo
+      teal: '#06b6d4',     // Cyan
+      rose: '#ec4899',     // Pink
+      purple: '#a855f7',   // Purple
+      amber: '#f59e0b',    // Amber
+      default: '#8b5cf6',  // Violet
+    };
+    return accentMap[theme.id] || '#6366f1';
   }
 
   /**
@@ -288,6 +359,17 @@ export class M3ThemeService {
   }
 
   /**
+   * Re-apply theme when style preset changes
+   * Called by StylePresetService when user selects a different preset
+   */
+  reapplyTheme(): void {
+    const theme = this.themes[this.currentTheme()];
+    if (theme) {
+      this.applyTheme();
+    }
+  }
+
+  /**
    * Sync theme state with AegisxConfigService
    */
   private syncWithConfig(): void {
@@ -314,10 +396,10 @@ export class M3ThemeService {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result
       ? {
-          r: parseInt(result[1], 16),
-          g: parseInt(result[2], 16),
-          b: parseInt(result[3], 16),
-        }
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
       : null;
   }
 

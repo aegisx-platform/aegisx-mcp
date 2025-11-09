@@ -1,67 +1,118 @@
 /* You can add global styles to this file, and also import other style files */
 
-/* Material Design fixes and form utilities (keep essential styles) */
-@use 'styles/components/material-fixes' as *;
+/* Material Design fixes and form utilities from aegisx-ui */
+@use '../../../libs/aegisx-ui/src/lib/styles/components/material-fixes' as *;
 @use 'styles/components/form-utilities' as *;
 
 /* Import Tailwind CSS */
 @tailwind base;
 
-/* Fuse Base Styles Layer */
+/* ⭐ STYLE PRESET GLOBAL STYLES - Apply preset variables to components */
+@layer base {
+  /* Apply preset styling to Material buttons */
+  button[mat-raised-button],
+  button[mat-stroked-button],
+  button[mat-button],
+  button[mat-flat-button],
+  button[mat-icon-button],
+  .mdc-button {
+    border-radius: var(--preset-border-radius, 12px);
+    transition: var(--preset-transition, all 300ms ease-in-out);
+    padding: var(--preset-spacing-md, 12px) var(--preset-spacing-base, 24px);
+  }
+
+  /* Apply preset styling to forms and inputs */
+  input,
+  textarea,
+  select,
+  .mat-mdc-form-field,
+  .mdc-text-field {
+    border-radius: var(--preset-border-radius, 12px);
+    transition: var(--preset-transition, all 300ms ease-in-out);
+    font-size: var(--preset-font-size-base, 14px);
+    line-height: var(--preset-line-height, 1.6);
+  }
+
+  /* Apply preset styling to cards and containers */
+  .mat-mdc-card,
+  mat-card,
+  .card,
+  [class*='card'] {
+    border-radius: var(--preset-border-radius-lg, calc(12px * 1.5));
+    box-shadow: var(--preset-shadow, 0 10px 15px rgba(0, 0, 0, 0.1));
+    transition: var(--preset-transition, all 300ms ease-in-out);
+  }
+
+  /* Apply preset spacing */
+  .mat-mdc-card-content,
+  mat-card-content,
+  .card-content {
+    padding: var(--preset-spacing-base, 24px);
+  }
+
+  /* Apply preset styling to dialogs */
+  .mat-mdc-dialog-container,
+  .dialog {
+    border-radius: var(--preset-border-radius-lg, calc(12px * 1.5));
+    box-shadow: var(--preset-shadow, 0 10px 15px rgba(0, 0, 0, 0.1));
+  }
+
+  /* Apply preset styling to chips and badges */
+  .mat-mdc-chip,
+  [matChip],
+  .chip,
+  .badge {
+    border-radius: var(--preset-border-radius, 12px);
+    padding: var(--preset-spacing-sm, 6px) var(--preset-spacing-md, 12px);
+    transition: var(--preset-transition, all 300ms ease-in-out);
+    font-size: var(--preset-font-size-sm, 12.25px);
+  }
+
+  /* Apply preset styling to menu items */
+  .mat-mdc-menu-item,
+  [matMenuItem],
+  .menu-item {
+    border-radius: var(--preset-border-radius-sm, 6px);
+    transition: var(--preset-transition, all 300ms ease-in-out);
+  }
+
+  /* Apply preset styling to buttons in general */
+  [class*='button'] {
+    transition: var(--preset-transition, all 300ms ease-in-out);
+  }
+
+  /* Apply preset shadows */
+  .shadow-sm {
+    box-shadow: var(--preset-shadow, 0 10px 15px rgba(0, 0, 0, 0.1)) !important;
+  }
+
+  /* Typography with preset line-height */
+  p, span, div {
+    line-height: var(--preset-line-height, 1.6);
+  }
+}
+
+/* Essential Base Styles Layer - Material Design 3 + Tailwind */
 @layer base {
   * {
-    /* Text rendering */
+    /* Text rendering optimization */
     text-rendering: optimizeLegibility;
-    -o-text-rendering: optimizeLegibility;
-    -ms-text-rendering: optimizeLegibility;
-    -moz-text-rendering: optimizeLegibility;
-    -webkit-text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: auto;
     -webkit-tap-highlight-color: transparent;
-
-    /* Remove the focus ring */
-    &:focus {
-      outline: none !important;
-    }
   }
 
   /* HTML and Body default styles */
-  html,
+  html {
+    font-size: 16px;
+  }
+
   body {
     display: flex;
     flex-direction: column;
     flex: 1 1 auto;
     width: 100%;
     min-height: 100%;
-    -webkit-font-smoothing: auto;
-    -moz-osx-font-smoothing: auto;
-  }
-
-  /* Font size */
-  html {
-    font-size: 16px;
-  }
-
-  body {
     font-size: 0.875rem;
-    font-feature-settings: 'salt';
-  }
-
-  /* Better spacing and border for horizontal rule */
-  hr {
-    margin: 32px 0;
-    border-bottom-width: 1px;
-  }
-
-  /* Make images and videos to take up all the available space */
-  img {
-    width: 100%;
-    vertical-align: top;
-  }
-
-  /* Fix: Disabled placeholder color is too faded on Safari */
-  input[disabled] {
-    opacity: 1;
-    -webkit-text-fill-color: currentColor;
   }
 
   /* Set the background and foreground colors */
@@ -71,27 +122,14 @@
     @apply text-default bg-default #{'!important'};
   }
 
-  /* Set the border color - exclude Material components including notch and dialog */
-  body
-    *:not(.mdc-notched-outline__leading):not(.mdc-notched-outline__notch):not(
-      .mdc-notched-outline__trailing
-    ):not(.mat-mdc-form-field *):not(.mdc-notched-outline):not(
-      .mat-mdc-dialog-container
-    ):not(.mat-mdc-dialog-surface),
-  body
-    *:not(.mat-mdc-form-field *):not(.mdc-notched-outline *):not(
-      .mat-mdc-dialog-container *
-    ):not(.mat-mdc-dialog-surface *)::before,
-  body
-    *:not(.mat-mdc-form-field *):not(.mdc-notched-outline *):not(
-      .mat-mdc-dialog-container *
-    ):not(.mat-mdc-dialog-surface *)::after {
-    --tw-border-opacity: 1 !important;
-    border-color: rgba(var(--fuse-border-rgb), var(--tw-border-opacity));
+  /* Material Design 3 border colors for non-Material components */
+  /* Let Tailwind handle base borders, only override when necessary */
+  body * {
+    --tw-border-color: var(--md-sys-color-outline, rgba(0, 0, 0, 0.12)) !important;
+  }
 
-    .dark & {
-      --tw-border-opacity: 0.12 !important;
-    }
+  .dark {
+    --tw-border-color: var(--md-sys-color-outline, rgba(255, 255, 255, 0.12)) !important;
   }
 
   /* Style scrollbars on platforms other than MacOS and iOS */
