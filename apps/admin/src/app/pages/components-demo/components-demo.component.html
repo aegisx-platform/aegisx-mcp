@@ -1,0 +1,2299 @@
+<!-- Components Demo Container -->
+<div class="flex flex-col gap-6 p-6">
+  <!-- Page Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1
+        class="text-3xl font-bold"
+        style="color: var(--tremor-content-strong)"
+      >
+        Material Components Demo
+      </h1>
+      <p class="mt-1 text-sm" style="color: var(--tremor-content-default)">
+        Explore all Angular Material components with Tremor theme styling
+      </p>
+    </div>
+  </div>
+
+  <!-- Tabs for Different Component Categories -->
+  <mat-card appearance="outlined">
+    <mat-card-content class="p-0">
+      <mat-tab-group>
+        <!-- Form Inputs Tab -->
+        <mat-tab label="Form Inputs">
+          <div class="p-6">
+            <h2
+              class="text-xl font-semibold mb-4"
+              style="color: var(--tremor-content-strong)"
+            >
+              Text Inputs
+            </h2>
+            <div
+              class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6"
+            >
+              <mat-form-field appearance="outline">
+                <mat-label>Text Input</mat-label>
+                <input matInput placeholder="Enter text" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Email</mat-label>
+                <input matInput type="email" placeholder="email@example.com" />
+                <mat-icon matSuffix>email</mat-icon>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Password</mat-label>
+                <input matInput type="password" />
+                <mat-icon matSuffix>lock</mat-icon>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Number</mat-label>
+                <input matInput type="number" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Date</mat-label>
+                <input matInput type="date" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Select</mat-label>
+                <mat-select>
+                  <mat-option value="option1">Option 1</mat-option>
+                  <mat-option value="option2">Option 2</mat-option>
+                  <mat-option value="option3">Option 3</mat-option>
+                </mat-select>
+                <mat-icon matPrefix>category</mat-icon>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="lg:col-span-3">
+                <mat-label>Textarea</mat-label>
+                <textarea
+                  matInput
+                  rows="3"
+                  placeholder="Enter long text..."
+                ></textarea>
+              </mat-form-field>
+            </div>
+
+            <h2
+              class="text-xl font-semibold mb-4"
+              style="color: var(--tremor-content-strong)"
+            >
+              Checkboxes & Radios
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <h3
+                  class="text-sm font-medium mb-2"
+                  style="color: var(--tremor-content-default)"
+                >
+                  Checkboxes
+                </h3>
+                <div class="flex flex-col gap-2">
+                  <mat-checkbox>Option 1</mat-checkbox>
+                  <mat-checkbox>Option 2</mat-checkbox>
+                  <mat-checkbox checked>Option 3 (checked)</mat-checkbox>
+                  <mat-checkbox disabled>Disabled option</mat-checkbox>
+                </div>
+              </div>
+
+              <div>
+                <h3
+                  class="text-sm font-medium mb-2"
+                  style="color: var(--tremor-content-default)"
+                >
+                  Radio Buttons
+                </h3>
+                <mat-radio-group class="flex flex-col gap-2">
+                  <mat-radio-button value="1">Option 1</mat-radio-button>
+                  <mat-radio-button value="2">Option 2</mat-radio-button>
+                  <mat-radio-button value="3" checked
+                    >Option 3 (checked)</mat-radio-button
+                  >
+                </mat-radio-group>
+              </div>
+            </div>
+
+            <h2
+              class="text-xl font-semibold mb-4"
+              style="color: var(--tremor-content-strong)"
+            >
+              Toggles & Sliders
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="flex flex-col gap-4">
+                <mat-slide-toggle>Slide toggle</mat-slide-toggle>
+                <mat-slide-toggle checked>Checked toggle</mat-slide-toggle>
+                <mat-slide-toggle disabled>Disabled toggle</mat-slide-toggle>
+              </div>
+
+              <div class="flex flex-col gap-4">
+                <label
+                  class="text-sm"
+                  style="color: var(--tremor-content-default)"
+                  >Volume</label
+                >
+                <mat-slider min="0" max="100" step="1">
+                  <input matSliderThumb value="50" />
+                </mat-slider>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Buttons Tab -->
+        <mat-tab label="Buttons">
+          <div class="p-6">
+            <h2
+              class="text-xl font-semibold mb-4"
+              style="color: var(--tremor-content-strong)"
+            >
+              Button Styles
+            </h2>
+            <section class="section">
+              <div class="example-label">Text</div>
+              <div class="example-button-row">
+                <button matButton>Basic</button>
+                <button matButton disabled>Disabled</button>
+                <a matButton href="https://www.google.com/" target="_blank"
+                  >Link</a
+                >
+              </div>
+            </section>
+            <mat-divider />
+            <section class="section">
+              <div class="example-label">Elevated</div>
+              <div class="example-button-row">
+                <button matButton="elevated">Basic</button>
+                <button matButton="elevated" disabled>Disabled</button>
+                <a
+                  matButton="elevated"
+                  href="https://www.google.com/"
+                  target="_blank"
+                  >Link</a
+                >
+              </div>
+            </section>
+            <mat-divider />
+            <section class="section">
+              <div class="example-label">Outlined</div>
+              <div class="example-button-row">
+                <button matButton="outlined">Basic</button>
+                <button matButton="outlined" disabled>Disabled</button>
+                <a
+                  matButton="outlined"
+                  href="https://www.google.com/"
+                  target="_blank"
+                  >Link</a
+                >
+              </div>
+            </section>
+            <mat-divider />
+            <section class="section">
+              <div class="example-label">Filled</div>
+              <div class="example-button-row">
+                <button matButton="filled">Basic</button>
+                <button matButton="filled" disabled>Disabled</button>
+                <a
+                  matButton="filled"
+                  href="https://www.google.com/"
+                  target="_blank"
+                  >Link</a
+                >
+              </div>
+            </section>
+            <mat-divider />
+            <section class="section">
+              <div class="example-label">Tonal</div>
+              <div class="example-button-row">
+                <button matButton="tonal">Basic</button>
+                <button matButton="tonal" disabled>Disabled</button>
+                <a
+                  matButton="tonal"
+                  href="https://www.google.com/"
+                  target="_blank"
+                  >Link</a
+                >
+              </div>
+            </section>
+            <mat-divider />
+            <section class="section">
+              <div class="example-label">Icon</div>
+              <div class="example-button-row">
+                <div class="example-flex-container">
+                  <button
+                    matIconButton
+                    aria-label="Example icon button with a vertical three dot icon"
+                  >
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <button
+                    matIconButton
+                    disabled
+                    aria-label="Example icon button with a open in new tab icon"
+                  >
+                    <mat-icon>open_in_new</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </section>
+            <mat-divider />
+            <section class="section">
+              <div class="example-label">Floating Action Button (FAB)</div>
+              <div class="example-button-row">
+                <div class="example-flex-container">
+                  <button
+                    matFab
+                    aria-label="Example icon button with a delete icon"
+                  >
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                  <button
+                    matFab
+                    disabled
+                    aria-label="Example icon button with a heart icon"
+                  >
+                    <mat-icon>favorite</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </section>
+            <mat-divider />
+            <section class="section">
+              <div class="example-label">Mini FAB</div>
+              <div class="example-button-row">
+                <div class="example-flex-container">
+                  <button
+                    matMiniFab
+                    aria-label="Example icon button with a menu icon"
+                  >
+                    <mat-icon>menu</mat-icon>
+                  </button>
+                  <button
+                    matMiniFab
+                    disabled
+                    aria-label="Example icon button with a home icon"
+                  >
+                    <mat-icon>home</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </section>
+            <mat-divider />
+            <section class="section">
+              <div class="example-label">Extended FAB</div>
+              <div class="example-button-row">
+                <div class="example-flex-container">
+                  <button matFab extended>
+                    <mat-icon>favorite</mat-icon>
+                    Basic
+                  </button>
+                  <button matFab extended disabled>
+                    <mat-icon>favorite</mat-icon>
+                    Disabled
+                  </button>
+                  <a matFab extended routerLink=".">
+                    <mat-icon>favorite</mat-icon>
+                    Link
+                  </a>
+                </div>
+              </div>
+            </section>
+            <mat-divider class="mb-6"></mat-divider>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+              <div>
+                <h3
+                  class="text-sm font-medium mb-3"
+                  style="color: var(--tremor-content-default)"
+                >
+                  Raised Buttons
+                </h3>
+                <div class="flex flex-col gap-2">
+                  <button mat-raised-button>Basic</button>
+                  <button mat-raised-button color="primary">Primary</button>
+                  <button mat-raised-button color="accent">Accent</button>
+                  <button mat-raised-button color="warn">Warn</button>
+                  <button mat-raised-button disabled>Disabled</button>
+                </div>
+              </div>
+
+              <div>
+                <h3
+                  class="text-sm font-medium mb-3"
+                  style="color: var(--tremor-content-default)"
+                >
+                  Flat Buttons
+                </h3>
+                <div class="flex flex-col gap-2">
+                  <button mat-button>Basic</button>
+                  <button mat-button color="primary">Primary</button>
+                  <button mat-button color="accent">Accent</button>
+                  <button mat-button color="warn">Warn</button>
+                </div>
+              </div>
+
+              <div>
+                <h3
+                  class="text-sm font-medium mb-3"
+                  style="color: var(--tremor-content-default)"
+                >
+                  Stroked Buttons
+                </h3>
+                <div class="flex flex-col gap-2">
+                  <button mat-stroked-button>Basic</button>
+                  <button mat-stroked-button color="primary">Primary</button>
+                  <button mat-stroked-button color="accent">Accent</button>
+                  <button mat-stroked-button color="warn">Warn</button>
+                </div>
+              </div>
+
+              <div>
+                <h3
+                  class="text-sm font-medium mb-3"
+                  style="color: var(--tremor-content-default)"
+                >
+                  Icon Buttons
+                </h3>
+                <div class="flex gap-2">
+                  <button mat-icon-button>
+                    <mat-icon>favorite</mat-icon>
+                  </button>
+                  <button mat-icon-button color="primary">
+                    <mat-icon>home</mat-icon>
+                  </button>
+                  <button mat-icon-button color="accent">
+                    <mat-icon>settings</mat-icon>
+                  </button>
+                  <button mat-icon-button color="warn">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <h3
+                  class="text-sm font-medium mb-3"
+                  style="color: var(--tremor-content-default)"
+                >
+                  FAB Buttons
+                </h3>
+                <div class="flex gap-2">
+                  <button mat-fab color="primary">
+                    <mat-icon>add</mat-icon>
+                  </button>
+                  <button mat-mini-fab color="accent">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <h3
+                  class="text-sm font-medium mb-3"
+                  style="color: var(--tremor-content-default)"
+                >
+                  Buttons with Icons
+                </h3>
+                <div class="flex flex-col gap-2">
+                  <button mat-raised-button color="primary">
+                    <mat-icon>save</mat-icon>
+                    Save
+                  </button>
+                  <button mat-stroked-button>
+                    <mat-icon>download</mat-icon>
+                    Download
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Lists & Tables Tab -->
+        <mat-tab label="Lists & Tables">
+          <div class="p-6">
+            <h2
+              class="text-xl font-semibold mb-4"
+              style="color: var(--tremor-content-strong)"
+            >
+              Simple Table
+            </h2>
+            <table mat-table [dataSource]="tableData" class="w-full mb-6">
+              <ng-container matColumnDef="position">
+                <th mat-header-cell *matHeaderCellDef>No.</th>
+                <td mat-cell *matCellDef="let element">
+                  {{ element.position }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>Name</th>
+                <td mat-cell *matCellDef="let element">{{ element.name }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="weight">
+                <th mat-header-cell *matHeaderCellDef>Weight</th>
+                <td mat-cell *matCellDef="let element">{{ element.weight }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="symbol">
+                <th mat-header-cell *matHeaderCellDef>Symbol</th>
+                <td mat-cell *matCellDef="let element">{{ element.symbol }}</td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+            </table>
+
+            <h2
+              class="text-xl font-semibold mb-4"
+              style="color: var(--tremor-content-strong)"
+            >
+              Lists
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <mat-card appearance="outlined">
+                <mat-card-header>
+                  <mat-card-title>Simple List</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <mat-list>
+                    <mat-list-item>
+                      <mat-icon matListItemIcon>folder</mat-icon>
+                      <span matListItemTitle>Photos</span>
+                      <span matListItemLine>Jan 9, 2025</span>
+                    </mat-list-item>
+                    <mat-divider></mat-divider>
+                    <mat-list-item>
+                      <mat-icon matListItemIcon>note</mat-icon>
+                      <span matListItemTitle>Documents</span>
+                      <span matListItemLine>Jan 10, 2025</span>
+                    </mat-list-item>
+                    <mat-divider></mat-divider>
+                    <mat-list-item>
+                      <mat-icon matListItemIcon>music_note</mat-icon>
+                      <span matListItemTitle>Music</span>
+                      <span matListItemLine>Jan 11, 2025</span>
+                    </mat-list-item>
+                  </mat-list>
+                </mat-card-content>
+              </mat-card>
+
+              <mat-card appearance="outlined">
+                <mat-card-header>
+                  <mat-card-title>Expansion List</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <mat-accordion>
+                    <mat-expansion-panel>
+                      <mat-expansion-panel-header>
+                        <mat-panel-title>Personal data</mat-panel-title>
+                      </mat-expansion-panel-header>
+                      <p>Type your name and age</p>
+                    </mat-expansion-panel>
+
+                    <mat-expansion-panel>
+                      <mat-expansion-panel-header>
+                        <mat-panel-title>Destination</mat-panel-title>
+                      </mat-expansion-panel-header>
+                      <p>Type the country name</p>
+                    </mat-expansion-panel>
+                  </mat-accordion>
+                </mat-card-content>
+              </mat-card>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Progress & Chips Tab -->
+        <mat-tab label="Progress & Chips">
+          <div class="p-6">
+            <h2
+              class="text-xl font-semibold mb-4"
+              style="color: var(--tremor-content-strong)"
+            >
+              Progress Indicators
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <h3
+                  class="text-sm font-medium mb-3"
+                  style="color: var(--tremor-content-default)"
+                >
+                  Progress Bars
+                </h3>
+                <div class="flex flex-col gap-4">
+                  <mat-progress-bar
+                    mode="determinate"
+                    value="40"
+                  ></mat-progress-bar>
+                  <mat-progress-bar
+                    mode="determinate"
+                    value="70"
+                    color="accent"
+                  ></mat-progress-bar>
+                  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+                </div>
+              </div>
+
+              <div>
+                <h3
+                  class="text-sm font-medium mb-3"
+                  style="color: var(--tremor-content-default)"
+                >
+                  Spinners
+                </h3>
+                <div class="flex gap-6">
+                  <mat-spinner diameter="50"></mat-spinner>
+                  <mat-spinner diameter="40" color="accent"></mat-spinner>
+                  <mat-spinner diameter="30" color="warn"></mat-spinner>
+                </div>
+              </div>
+            </div>
+
+            <h2
+              class="text-xl font-semibold mb-4"
+              style="color: var(--tremor-content-strong)"
+            >
+              Chips
+            </h2>
+            <div class="flex flex-wrap gap-2 mb-6">
+              <mat-chip-set>
+                <mat-chip>Basic chip</mat-chip>
+                <mat-chip highlighted>Highlighted</mat-chip>
+                <mat-chip disabled>Disabled</mat-chip>
+                <mat-chip>
+                  <mat-icon matChipAvatar>face</mat-icon>
+                  With avatar
+                </mat-chip>
+                <mat-chip>
+                  With icon
+                  <mat-icon matChipTrailingIcon>cancel</mat-icon>
+                </mat-chip>
+              </mat-chip-set>
+            </div>
+
+            <h2
+              class="text-xl font-semibold mb-4"
+              style="color: var(--tremor-content-strong)"
+            >
+              Badges
+            </h2>
+            <div class="flex gap-4">
+              <button mat-raised-button>
+                <mat-icon matBadge="4" matBadgeColor="primary"
+                  >notifications</mat-icon
+                >
+                Notifications
+              </button>
+              <button mat-raised-button>
+                <mat-icon matBadge="99+" matBadgeColor="warn">email</mat-icon>
+                Messages
+              </button>
+              <button mat-raised-button>
+                <mat-icon matBadge="!" matBadgeColor="accent"
+                  >shopping_cart</mat-icon
+                >
+                Cart
+              </button>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Navigation Components Tab -->
+        <mat-tab label="Navigation">
+          <div class="p-6">
+            <h2
+              class="text-xl font-semibold mb-4"
+              style="color: var(--tremor-content-strong)"
+            >
+              Menu
+            </h2>
+            <div class="mb-6">
+              <button
+                mat-raised-button
+                [matMenuTriggerFor]="menu"
+                color="primary"
+              >
+                <mat-icon>menu</mat-icon>
+                Open Menu
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item>
+                  <mat-icon>dialpad</mat-icon>
+                  <span>Redial</span>
+                </button>
+                <button mat-menu-item disabled>
+                  <mat-icon>voicemail</mat-icon>
+                  <span>Check voice mail</span>
+                </button>
+                <button mat-menu-item>
+                  <mat-icon>notifications_off</mat-icon>
+                  <span>Disable alerts</span>
+                </button>
+              </mat-menu>
+
+              <button
+                mat-raised-button
+                [matMenuTriggerFor]="nestedMenu"
+                class="ml-2"
+              >
+                <mat-icon>more_vert</mat-icon>
+                Nested Menu
+              </button>
+              <mat-menu #nestedMenu="matMenu">
+                <button mat-menu-item>Item 1</button>
+                <button mat-menu-item [matMenuTriggerFor]="subMenu">
+                  <mat-icon>chevron_right</mat-icon>
+                  Sub Menu
+                </button>
+                <button mat-menu-item>Item 3</button>
+              </mat-menu>
+              <mat-menu #subMenu="matMenu">
+                <button mat-menu-item>Sub Item 1</button>
+                <button mat-menu-item>Sub Item 2</button>
+              </mat-menu>
+            </div>
+
+            <h2
+              class="text-xl font-semibold mb-4"
+              style="color: var(--tremor-content-strong)"
+            >
+              Toolbar
+            </h2>
+            <mat-card appearance="outlined" class="mb-6">
+              <mat-toolbar color="primary">
+                <button mat-icon-button>
+                  <mat-icon>menu</mat-icon>
+                </button>
+                <span>My Application</span>
+                <span class="flex-1"></span>
+                <button mat-icon-button>
+                  <mat-icon>notifications</mat-icon>
+                </button>
+                <button mat-icon-button>
+                  <mat-icon>account_circle</mat-icon>
+                </button>
+              </mat-toolbar>
+            </mat-card>
+
+            <h2
+              class="text-xl font-semibold mb-4"
+              style="color: var(--tremor-content-strong)"
+            >
+              Button Toggle
+            </h2>
+            <div class="flex gap-4">
+              <mat-button-toggle-group>
+                <mat-button-toggle value="left">
+                  <mat-icon>format_align_left</mat-icon>
+                </mat-button-toggle>
+                <mat-button-toggle value="center">
+                  <mat-icon>format_align_center</mat-icon>
+                </mat-button-toggle>
+                <mat-button-toggle value="right">
+                  <mat-icon>format_align_right</mat-icon>
+                </mat-button-toggle>
+              </mat-button-toggle-group>
+
+              <mat-button-toggle-group multiple>
+                <mat-button-toggle value="bold">
+                  <mat-icon>format_bold</mat-icon>
+                </mat-button-toggle>
+                <mat-button-toggle value="italic">
+                  <mat-icon>format_italic</mat-icon>
+                </mat-button-toggle>
+                <mat-button-toggle value="underline">
+                  <mat-icon>format_underlined</mat-icon>
+                </mat-button-toggle>
+              </mat-button-toggle-group>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Layout Components Tab -->
+        <mat-tab label="Layout">
+          <div class="p-6">
+            <h2
+              class="text-xl font-semibold mb-4"
+              style="color: var(--tremor-content-strong)"
+            >
+              Stepper
+            </h2>
+            <mat-card appearance="outlined" class="mb-6">
+              <mat-card-content>
+                <mat-stepper>
+                  <mat-step label="Step 1" state="phone">
+                    <p class="py-4">Put down your phones.</p>
+                    <div class="flex gap-2">
+                      <button mat-raised-button matStepperNext color="primary">
+                        Next
+                      </button>
+                    </div>
+                  </mat-step>
+                  <mat-step label="Step 2" state="chat">
+                    <p class="py-4">Socialize with each other.</p>
+                    <div class="flex gap-2">
+                      <button mat-button matStepperPrevious>Back</button>
+                      <button mat-raised-button matStepperNext color="primary">
+                        Next
+                      </button>
+                    </div>
+                  </mat-step>
+                  <mat-step label="Step 3">
+                    <p class="py-4">You're welcome.</p>
+                    <div class="flex gap-2">
+                      <button mat-button matStepperPrevious>Back</button>
+                      <button mat-raised-button color="primary">Done</button>
+                    </div>
+                  </mat-step>
+                </mat-stepper>
+              </mat-card-content>
+            </mat-card>
+
+            <h2
+              class="text-xl font-semibold mb-4"
+              style="color: var(--tremor-content-strong)"
+            >
+              Divider
+            </h2>
+            <mat-card appearance="outlined" class="mb-6">
+              <mat-card-content>
+                <div class="flex flex-col gap-4">
+                  <div>Section 1</div>
+                  <mat-divider></mat-divider>
+                  <div>Section 2</div>
+                  <mat-divider [inset]="true"></mat-divider>
+                  <div>Section 3</div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <h2
+              class="text-xl font-semibold mb-4"
+              style="color: var(--tremor-content-strong)"
+            >
+              Grid List
+            </h2>
+            <mat-card appearance="outlined">
+              <mat-card-content>
+                <mat-grid-list cols="4" rowHeight="100px" gutterSize="10px">
+                  @for (tile of tiles; track tile) {
+                    <mat-grid-tile
+                      [colspan]="tile.cols"
+                      [rowspan]="tile.rows"
+                      [style.background]="tile.color"
+                    >
+                      {{ tile.text }}
+                    </mat-grid-tile>
+                  }
+                </mat-grid-list>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </mat-tab>
+
+        <!-- Popups & Modals Tab -->
+        <mat-tab label="Popups & Modals">
+          <div class="p-6">
+            <h2
+              class="text-xl font-semibold mb-4"
+              style="color: var(--tremor-content-strong)"
+            >
+              Dialog
+            </h2>
+            <div class="mb-6">
+              <button mat-raised-button color="primary" (click)="openDialog()">
+                <mat-icon>open_in_new</mat-icon>
+                Open Dialog
+              </button>
+            </div>
+
+            <h2
+              class="text-xl font-semibold mb-4"
+              style="color: var(--tremor-content-strong)"
+            >
+              Snackbar
+            </h2>
+            <div class="flex gap-2 mb-6">
+              <button
+                mat-raised-button
+                (click)="openSnackbar('Success!', 'success')"
+              >
+                <mat-icon>check_circle</mat-icon>
+                Success Message
+              </button>
+              <button
+                mat-raised-button
+                (click)="openSnackbar('Error occurred!', 'error')"
+              >
+                <mat-icon>error</mat-icon>
+                Error Message
+              </button>
+              <button
+                mat-raised-button
+                (click)="openSnackbar('Info message', 'info')"
+              >
+                <mat-icon>info</mat-icon>
+                Info Message
+              </button>
+            </div>
+
+            <h2
+              class="text-xl font-semibold mb-4"
+              style="color: var(--tremor-content-strong)"
+            >
+              Tooltip
+            </h2>
+            <div class="flex gap-2 mb-6">
+              <button
+                mat-raised-button
+                matTooltip="This is a tooltip"
+                matTooltipPosition="above"
+              >
+                Tooltip Above
+              </button>
+              <button
+                mat-raised-button
+                matTooltip="This is a tooltip"
+                matTooltipPosition="below"
+              >
+                Tooltip Below
+              </button>
+              <button
+                mat-raised-button
+                matTooltip="This is a tooltip"
+                matTooltipPosition="left"
+              >
+                Tooltip Left
+              </button>
+              <button
+                mat-raised-button
+                matTooltip="This is a tooltip"
+                matTooltipPosition="right"
+              >
+                Tooltip Right
+              </button>
+            </div>
+
+            <h2
+              class="text-xl font-semibold mb-4"
+              style="color: var(--tremor-content-strong)"
+            >
+              Bottom Sheet
+            </h2>
+            <div>
+              <button
+                mat-raised-button
+                color="accent"
+                (click)="openBottomSheet()"
+              >
+                <mat-icon>open_in_browser</mat-icon>
+                Open Bottom Sheet
+              </button>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Data Tables Advanced Tab -->
+        <mat-tab label="Data Tables">
+          <div class="p-6">
+            <h2
+              class="text-xl font-semibold mb-4"
+              style="color: var(--tremor-content-strong)"
+            >
+              Table with Sorting & Pagination
+            </h2>
+
+            <mat-card appearance="outlined">
+              <mat-card-content>
+                <!-- Search -->
+                <mat-form-field appearance="outline" class="w-full mb-4">
+                  <mat-label>Search</mat-label>
+                  <input
+                    matInput
+                    (keyup)="applyFilter($event)"
+                    placeholder="Ex. Hydrogen"
+                    #input
+                  />
+                  <mat-icon matSuffix>search</mat-icon>
+                </mat-form-field>
+
+                <!-- Table -->
+                <div class="mat-elevation-z0">
+                  <table
+                    mat-table
+                    [dataSource]="dataSource"
+                    matSort
+                    class="w-full"
+                  >
+                    <!-- Position Column -->
+                    <ng-container matColumnDef="position">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                        No.
+                      </th>
+                      <td mat-cell *matCellDef="let element">
+                        {{ element.position }}
+                      </td>
+                    </ng-container>
+
+                    <!-- Name Column -->
+                    <ng-container matColumnDef="name">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                        Name
+                      </th>
+                      <td mat-cell *matCellDef="let element">
+                        {{ element.name }}
+                      </td>
+                    </ng-container>
+
+                    <!-- Weight Column -->
+                    <ng-container matColumnDef="weight">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                        Weight
+                      </th>
+                      <td mat-cell *matCellDef="let element">
+                        {{ element.weight }}
+                      </td>
+                    </ng-container>
+
+                    <!-- Symbol Column -->
+                    <ng-container matColumnDef="symbol">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                        Symbol
+                      </th>
+                      <td mat-cell *matCellDef="let element">
+                        {{ element.symbol }}
+                      </td>
+                    </ng-container>
+
+                    <!-- Actions Column -->
+                    <ng-container matColumnDef="actions">
+                      <th mat-header-cell *matHeaderCellDef>Actions</th>
+                      <td mat-cell *matCellDef="let element">
+                        <button
+                          mat-icon-button
+                          [matMenuTriggerFor]="actionMenu"
+                        >
+                          <mat-icon>more_vert</mat-icon>
+                        </button>
+                        <mat-menu #actionMenu="matMenu">
+                          <button mat-menu-item>
+                            <mat-icon>edit</mat-icon>
+                            Edit
+                          </button>
+                          <button mat-menu-item>
+                            <mat-icon>delete</mat-icon>
+                            Delete
+                          </button>
+                        </mat-menu>
+                      </td>
+                    </ng-container>
+
+                    <tr
+                      mat-header-row
+                      *matHeaderRowDef="displayedColumnsWithActions"
+                    ></tr>
+                    <tr
+                      mat-row
+                      *matRowDef="let row; columns: displayedColumnsWithActions"
+                    ></tr>
+
+                    <!-- Row shown when there is no matching data -->
+                    <tr class="mat-row" *matNoDataRow>
+                      <td
+                        class="mat-cell"
+                        [attr.colspan]="displayedColumnsWithActions.length"
+                      >
+                        No data matching the filter "{{ input.value }}"
+                      </td>
+                    </tr>
+                  </table>
+
+                  <!-- Paginator -->
+                  <mat-paginator
+                    [pageSizeOptions]="[5, 10, 20]"
+                    showFirstLastButtons
+                  ></mat-paginator>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <h2
+              class="text-xl font-semibold mb-4 mt-6"
+              style="color: var(--tremor-content-strong)"
+            >
+              Table with Selection
+            </h2>
+
+            <mat-card appearance="outlined">
+              <mat-card-content>
+                <table mat-table [dataSource]="selectionData" class="w-full">
+                  <!-- Checkbox Column -->
+                  <ng-container matColumnDef="select">
+                    <th mat-header-cell *matHeaderCellDef>
+                      <mat-checkbox
+                        (change)="$event ? toggleAllRows() : null"
+                        [checked]="selection.hasValue() && isAllSelected()"
+                        [indeterminate]="
+                          selection.hasValue() && !isAllSelected()
+                        "
+                      >
+                      </mat-checkbox>
+                    </th>
+                    <td mat-cell *matCellDef="let row">
+                      <mat-checkbox
+                        (click)="$event.stopPropagation()"
+                        (change)="$event ? selection.toggle(row) : null"
+                        [checked]="selection.isSelected(row)"
+                      >
+                      </mat-checkbox>
+                    </td>
+                  </ng-container>
+
+                  <!-- Position Column -->
+                  <ng-container matColumnDef="position">
+                    <th mat-header-cell *matHeaderCellDef>No.</th>
+                    <td mat-cell *matCellDef="let element">
+                      {{ element.position }}
+                    </td>
+                  </ng-container>
+
+                  <!-- Name Column -->
+                  <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef>Name</th>
+                    <td mat-cell *matCellDef="let element">
+                      {{ element.name }}
+                    </td>
+                  </ng-container>
+
+                  <!-- Weight Column -->
+                  <ng-container matColumnDef="weight">
+                    <th mat-header-cell *matHeaderCellDef>Weight</th>
+                    <td mat-cell *matCellDef="let element">
+                      {{ element.weight }}
+                    </td>
+                  </ng-container>
+
+                  <!-- Symbol Column -->
+                  <ng-container matColumnDef="symbol">
+                    <th mat-header-cell *matHeaderCellDef>Symbol</th>
+                    <td mat-cell *matCellDef="let element">
+                      {{ element.symbol }}
+                    </td>
+                  </ng-container>
+
+                  <tr
+                    mat-header-row
+                    *matHeaderRowDef="displayedColumnsWithSelect"
+                  ></tr>
+                  <tr
+                    mat-row
+                    *matRowDef="let row; columns: displayedColumnsWithSelect"
+                    (click)="selection.toggle(row)"
+                  ></tr>
+                </table>
+
+                <!-- Selection info -->
+                <div
+                  class="mt-4 text-sm"
+                  style="color: var(--tremor-content-default)"
+                >
+                  {{ selection.selected.length }} row(s) selected
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </mat-tab>
+
+        <!-- Date & Time Tab -->
+        <mat-tab label="Date & Time">
+          <div class="p-6">
+            <h2
+              class="text-xl font-semibold mb-4"
+              style="color: var(--tremor-content-strong)"
+            >
+              Datepicker Examples
+            </h2>
+
+            <!-- 1. Basic Datepicker -->
+            <h3
+              class="text-lg font-medium mb-3"
+              style="color: var(--tremor-content-emphasis)"
+            >
+              Basic Datepicker
+            </h3>
+            <mat-card appearance="outlined" class="mb-6">
+              <mat-card-content>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Choose a date</mat-label>
+                    <input matInput [matDatepicker]="picker1" />
+                    <mat-datepicker-toggle
+                      matIconSuffix
+                      [for]="picker1"
+                    ></mat-datepicker-toggle>
+                    <mat-datepicker #picker1></mat-datepicker>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Disabled datepicker</mat-label>
+                    <input matInput [matDatepicker]="picker3" disabled />
+                    <mat-datepicker-toggle
+                      matIconSuffix
+                      [for]="picker3"
+                    ></mat-datepicker-toggle>
+                    <mat-datepicker #picker3></mat-datepicker>
+                  </mat-form-field>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- 2. Date Range Picker -->
+            <h3
+              class="text-lg font-medium mb-3"
+              style="color: var(--tremor-content-emphasis)"
+            >
+              Date Range Picker
+            </h3>
+            <mat-card appearance="outlined" class="mb-6">
+              <mat-card-content>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Date range</mat-label>
+                    <mat-date-range-input [rangePicker]="rangePicker">
+                      <input matStartDate placeholder="Start date" />
+                      <input matEndDate placeholder="End date" />
+                    </mat-date-range-input>
+                    <mat-datepicker-toggle
+                      matIconSuffix
+                      [for]="rangePicker"
+                    ></mat-datepicker-toggle>
+                    <mat-date-range-picker #rangePicker></mat-date-range-picker>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Date range with validation</mat-label>
+                    <mat-date-range-input [rangePicker]="validationRangePicker">
+                      <input matStartDate placeholder="Start date" required />
+                      <input matEndDate placeholder="End date" required />
+                    </mat-date-range-input>
+                    <mat-datepicker-toggle
+                      matIconSuffix
+                      [for]="validationRangePicker"
+                    ></mat-datepicker-toggle>
+                    <mat-date-range-picker
+                      #validationRangePicker
+                    ></mat-date-range-picker>
+                    <mat-error>Start and end dates are required</mat-error>
+                  </mat-form-field>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- 3. Datepicker with Min/Max -->
+            <h3
+              class="text-lg font-medium mb-3"
+              style="color: var(--tremor-content-emphasis)"
+            >
+              Datepicker with Min/Max Dates
+            </h3>
+            <mat-card appearance="outlined" class="mb-6">
+              <mat-card-content>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Choose a date (2020-2025)</mat-label>
+                    <input
+                      matInput
+                      [matDatepicker]="picker2"
+                      [min]="minDate"
+                      [max]="maxDate"
+                    />
+                    <mat-datepicker-toggle
+                      matIconSuffix
+                      [for]="picker2"
+                    ></mat-datepicker-toggle>
+                    <mat-datepicker #picker2></mat-datepicker>
+                    <mat-hint>MM/DD/YYYY</mat-hint>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Date range with min/max</mat-label>
+                    <mat-date-range-input [rangePicker]="minMaxRangePicker">
+                      <input
+                        matStartDate
+                        placeholder="Start date"
+                        [min]="minDate"
+                        [max]="maxDate"
+                      />
+                      <input
+                        matEndDate
+                        placeholder="End date"
+                        [min]="minDate"
+                        [max]="maxDate"
+                      />
+                    </mat-date-range-input>
+                    <mat-datepicker-toggle
+                      matIconSuffix
+                      [for]="minMaxRangePicker"
+                    ></mat-datepicker-toggle>
+                    <mat-date-range-picker
+                      #minMaxRangePicker
+                    ></mat-date-range-picker>
+                  </mat-form-field>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- 4. Datepicker with Filter -->
+            <h3
+              class="text-lg font-medium mb-3"
+              style="color: var(--tremor-content-emphasis)"
+            >
+              Datepicker with Filter (Weekends Disabled)
+            </h3>
+            <mat-card appearance="outlined" class="mb-6">
+              <mat-card-content>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Choose a weekday</mat-label>
+                    <input
+                      matInput
+                      [matDatepicker]="filterPicker"
+                      [matDatepickerFilter]="weekendFilter"
+                    />
+                    <mat-datepicker-toggle
+                      matIconSuffix
+                      [for]="filterPicker"
+                    ></mat-datepicker-toggle>
+                    <mat-datepicker #filterPicker></mat-datepicker>
+                    <mat-hint>Weekends are disabled</mat-hint>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Choose an even date</mat-label>
+                    <input
+                      matInput
+                      [matDatepicker]="evenDatePicker"
+                      [matDatepickerFilter]="evenDateFilter"
+                    />
+                    <mat-datepicker-toggle
+                      matIconSuffix
+                      [for]="evenDatePicker"
+                    ></mat-datepicker-toggle>
+                    <mat-datepicker #evenDatePicker></mat-datepicker>
+                    <mat-hint>Only even dates are allowed</mat-hint>
+                  </mat-form-field>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- 5. Datepicker Start View -->
+            <h3
+              class="text-lg font-medium mb-3"
+              style="color: var(--tremor-content-emphasis)"
+            >
+              Datepicker with Different Start Views
+            </h3>
+            <mat-card appearance="outlined" class="mb-6">
+              <mat-card-content>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Start at month view</mat-label>
+                    <input matInput [matDatepicker]="monthPicker" />
+                    <mat-datepicker-toggle
+                      matIconSuffix
+                      [for]="monthPicker"
+                    ></mat-datepicker-toggle>
+                    <mat-datepicker
+                      #monthPicker
+                      startView="month"
+                    ></mat-datepicker>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Start at year view</mat-label>
+                    <input matInput [matDatepicker]="yearPicker" />
+                    <mat-datepicker-toggle
+                      matIconSuffix
+                      [for]="yearPicker"
+                    ></mat-datepicker-toggle>
+                    <mat-datepicker
+                      #yearPicker
+                      startView="year"
+                    ></mat-datepicker>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Start at multi-year view</mat-label>
+                    <input matInput [matDatepicker]="multiYearPicker" />
+                    <mat-datepicker-toggle
+                      matIconSuffix
+                      [for]="multiYearPicker"
+                    ></mat-datepicker-toggle>
+                    <mat-datepicker
+                      #multiYearPicker
+                      startView="multi-year"
+                    ></mat-datepicker>
+                  </mat-form-field>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- 6. Datepicker Touch UI -->
+            <h3
+              class="text-lg font-medium mb-3"
+              style="color: var(--tremor-content-emphasis)"
+            >
+              Datepicker with Touch UI (Mobile Optimized)
+            </h3>
+            <mat-card appearance="outlined" class="mb-6">
+              <mat-card-content>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Touch UI datepicker</mat-label>
+                    <input matInput [matDatepicker]="touchPicker" />
+                    <mat-datepicker-toggle
+                      matIconSuffix
+                      [for]="touchPicker"
+                    ></mat-datepicker-toggle>
+                    <mat-datepicker #touchPicker touchUi></mat-datepicker>
+                    <mat-hint>Opens in fullscreen dialog</mat-hint>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Touch UI date range</mat-label>
+                    <mat-date-range-input [rangePicker]="touchRangePicker">
+                      <input matStartDate placeholder="Start date" />
+                      <input matEndDate placeholder="End date" />
+                    </mat-date-range-input>
+                    <mat-datepicker-toggle
+                      matIconSuffix
+                      [for]="touchRangePicker"
+                    ></mat-datepicker-toggle>
+                    <mat-date-range-picker
+                      #touchRangePicker
+                      touchUi
+                    ></mat-date-range-picker>
+                  </mat-form-field>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- 7. Datepicker with Actions -->
+            <h3
+              class="text-lg font-medium mb-3"
+              style="color: var(--tremor-content-emphasis)"
+            >
+              Datepicker with Custom Actions
+            </h3>
+            <mat-card appearance="outlined" class="mb-6">
+              <mat-card-content>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Datepicker with actions</mat-label>
+                    <input matInput [matDatepicker]="actionsPicker" />
+                    <mat-datepicker-toggle
+                      matIconSuffix
+                      [for]="actionsPicker"
+                    ></mat-datepicker-toggle>
+                    <mat-datepicker #actionsPicker>
+                      <mat-datepicker-actions>
+                        <button mat-button matDatepickerCancel>Cancel</button>
+                        <button
+                          mat-raised-button
+                          color="primary"
+                          matDatepickerApply
+                        >
+                          Apply
+                        </button>
+                      </mat-datepicker-actions>
+                    </mat-datepicker>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Date range with actions</mat-label>
+                    <mat-date-range-input [rangePicker]="actionsRangePicker">
+                      <input matStartDate placeholder="Start date" />
+                      <input matEndDate placeholder="End date" />
+                    </mat-date-range-input>
+                    <mat-datepicker-toggle
+                      matIconSuffix
+                      [for]="actionsRangePicker"
+                    ></mat-datepicker-toggle>
+                    <mat-date-range-picker #actionsRangePicker>
+                      <mat-datepicker-actions>
+                        <button mat-button matDatepickerCancel>Cancel</button>
+                        <button
+                          mat-raised-button
+                          color="primary"
+                          matDatepickerApply
+                        >
+                          Apply
+                        </button>
+                      </mat-datepicker-actions>
+                    </mat-date-range-picker>
+                  </mat-form-field>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- 8. Inline Calendar -->
+            <h3
+              class="text-lg font-medium mb-3"
+              style="color: var(--tremor-content-emphasis)"
+            >
+              Inline Calendar (Always Open)
+            </h3>
+            <mat-card appearance="outlined" class="mb-6">
+              <mat-card-content>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p
+                      class="text-sm mb-2"
+                      style="color: var(--tremor-content-default)"
+                    >
+                      Single date calendar
+                    </p>
+                    <mat-calendar></mat-calendar>
+                  </div>
+
+                  <div>
+                    <p
+                      class="text-sm mb-2"
+                      style="color: var(--tremor-content-default)"
+                    >
+                      Calendar with min/max dates
+                    </p>
+                    <mat-calendar
+                      [minDate]="minDate"
+                      [maxDate]="maxDate"
+                    ></mat-calendar>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- 9. Month/Year Pickers -->
+            <h3
+              class="text-lg font-medium mb-3"
+              style="color: var(--tremor-content-emphasis)"
+            >
+              Month and Year Pickers
+            </h3>
+            <mat-card appearance="outlined" class="mb-6">
+              <mat-card-content>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Choose a month and year</mat-label>
+                    <input matInput [matDatepicker]="monthYearPicker" />
+                    <mat-datepicker-toggle
+                      matIconSuffix
+                      [for]="monthYearPicker"
+                    ></mat-datepicker-toggle>
+                    <mat-datepicker
+                      #monthYearPicker
+                      startView="year"
+                      (monthSelected)="setMonthAndYear($event, monthYearPicker)"
+                    ></mat-datepicker>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Choose a year</mat-label>
+                    <input matInput [matDatepicker]="yearOnlyPicker" />
+                    <mat-datepicker-toggle
+                      matIconSuffix
+                      [for]="yearOnlyPicker"
+                    ></mat-datepicker-toggle>
+                    <mat-datepicker
+                      #yearOnlyPicker
+                      startView="multi-year"
+                      (yearSelected)="setYear($event, yearOnlyPicker)"
+                    ></mat-datepicker>
+                  </mat-form-field>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- 10. Datepicker with Validation -->
+            <h3
+              class="text-lg font-medium mb-3"
+              style="color: var(--tremor-content-emphasis)"
+            >
+              Datepicker with Validation
+            </h3>
+            <mat-card appearance="outlined" class="mb-6">
+              <mat-card-content>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Required date</mat-label>
+                    <input matInput [matDatepicker]="requiredPicker" required />
+                    <mat-datepicker-toggle
+                      matIconSuffix
+                      [for]="requiredPicker"
+                    ></mat-datepicker-toggle>
+                    <mat-datepicker #requiredPicker></mat-datepicker>
+                    <mat-error>Date is required</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Date with format validation</mat-label>
+                    <input
+                      matInput
+                      [matDatepicker]="formatPicker"
+                      placeholder="MM/DD/YYYY"
+                    />
+                    <mat-datepicker-toggle
+                      matIconSuffix
+                      [for]="formatPicker"
+                    ></mat-datepicker-toggle>
+                    <mat-datepicker #formatPicker></mat-datepicker>
+                    <mat-hint>Enter date in MM/DD/YYYY format</mat-hint>
+                  </mat-form-field>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </mat-tab>
+
+        <!-- Autocomplete & Advanced Inputs Tab -->
+        <mat-tab label="Advanced Inputs">
+          <div class="p-6">
+            <h2
+              class="text-xl font-semibold mb-4"
+              style="color: var(--tremor-content-strong)"
+            >
+              Autocomplete
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <mat-form-field appearance="outline">
+                <mat-label>Select a state</mat-label>
+                <input
+                  type="text"
+                  matInput
+                  [formControl]="stateControl"
+                  [matAutocomplete]="auto"
+                />
+                <mat-autocomplete #auto="matAutocomplete">
+                  @for (state of filteredStates$ | async; track state) {
+                    <mat-option [value]="state">{{ state }}</mat-option>
+                  }
+                </mat-autocomplete>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Search with icon</mat-label>
+                <input
+                  type="text"
+                  matInput
+                  [formControl]="countryControl"
+                  [matAutocomplete]="autoIcon"
+                />
+                <mat-icon matSuffix>search</mat-icon>
+                <mat-autocomplete #autoIcon="matAutocomplete">
+                  @for (country of filteredCountries$ | async; track country) {
+                    <mat-option [value]="country">{{ country }}</mat-option>
+                  }
+                </mat-autocomplete>
+              </mat-form-field>
+            </div>
+
+            <h2
+              class="text-xl font-semibold mb-4 mt-8"
+              style="color: var(--tremor-content-strong)"
+            >
+              Multiple Select
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <mat-form-field appearance="outline">
+                <mat-label>Favorite foods</mat-label>
+                <mat-select multiple>
+                  <mat-option value="pizza">Pizza</mat-option>
+                  <mat-option value="burger">Burger</mat-option>
+                  <mat-option value="sushi">Sushi</mat-option>
+                  <mat-option value="tacos">Tacos</mat-option>
+                  <mat-option value="pasta">Pasta</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>With search</mat-label>
+                <mat-select multiple>
+                  <mat-select-trigger> Selected items </mat-select-trigger>
+                  <mat-option value="item1">Item 1</mat-option>
+                  <mat-option value="item2">Item 2</mat-option>
+                  <mat-option value="item3">Item 3</mat-option>
+                  <mat-option value="item4">Item 4</mat-option>
+                  <mat-option value="item5">Item 5</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Chips Tab -->
+        <mat-tab label="Chips">
+          <div class="p-6">
+            <h2
+              class="text-xl font-semibold mb-4"
+              style="color: var(--tremor-content-strong)"
+            >
+              Chips Examples
+            </h2>
+
+            <!-- Basic Chips -->
+            <h3
+              class="text-lg font-medium mb-3"
+              style="color: var(--tremor-content-emphasis)"
+            >
+              Basic Chips
+            </h3>
+            <mat-card appearance="outlined" class="mb-6">
+              <mat-card-content>
+                <mat-chip-set aria-label="Basic chips">
+                  <mat-chip>One</mat-chip>
+                  <mat-chip>Two</mat-chip>
+                  <mat-chip>Three</mat-chip>
+                  <mat-chip disabled>Disabled</mat-chip>
+                </mat-chip-set>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Chips with Avatar/Icons -->
+            <h3
+              class="text-lg font-medium mb-3"
+              style="color: var(--tremor-content-emphasis)"
+            >
+              Chips with Avatar
+            </h3>
+            <mat-card appearance="outlined" class="mb-6">
+              <mat-card-content>
+                <mat-chip-set aria-label="Chips with avatars">
+                  <mat-chip>
+                    <mat-icon matChipAvatar>home</mat-icon>
+                    Home
+                  </mat-chip>
+                  <mat-chip>
+                    <mat-icon matChipAvatar>work</mat-icon>
+                    Work
+                  </mat-chip>
+                  <mat-chip>
+                    <mat-icon matChipAvatar>favorite</mat-icon>
+                    Favorite
+                  </mat-chip>
+                  <mat-chip>
+                    <mat-icon matChipAvatar>shopping_cart</mat-icon>
+                    Shopping
+                  </mat-chip>
+                </mat-chip-set>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Selectable Chips -->
+            <h3
+              class="text-lg font-medium mb-3"
+              style="color: var(--tremor-content-emphasis)"
+            >
+              Selectable Chips (Single Selection)
+            </h3>
+            <mat-card appearance="outlined" class="mb-6">
+              <mat-card-content>
+                <p
+                  class="text-sm mb-3"
+                  style="color: var(--tremor-content-default)"
+                >
+                  Selected: {{ selectedChip || 'None' }}
+                </p>
+                <mat-chip-listbox
+                  [(ngModel)]="selectedChip"
+                  aria-label="Single selection"
+                >
+                  <mat-chip-option value="small">Small</mat-chip-option>
+                  <mat-chip-option value="medium">Medium</mat-chip-option>
+                  <mat-chip-option value="large">Large</mat-chip-option>
+                  <mat-chip-option value="xlarge">X-Large</mat-chip-option>
+                </mat-chip-listbox>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Multi-Select Chips -->
+            <h3
+              class="text-lg font-medium mb-3"
+              style="color: var(--tremor-content-emphasis)"
+            >
+              Selectable Chips (Multiple Selection)
+            </h3>
+            <mat-card appearance="outlined" class="mb-6">
+              <mat-card-content>
+                <p
+                  class="text-sm mb-3"
+                  style="color: var(--tremor-content-default)"
+                >
+                  Selected: {{ selectedFruits.join(', ') || 'None' }}
+                </p>
+                <mat-chip-listbox
+                  [(ngModel)]="selectedFruits"
+                  aria-label="Multiple selection"
+                  multiple
+                >
+                  <mat-chip-option value="apple">Apple</mat-chip-option>
+                  <mat-chip-option value="banana">Banana</mat-chip-option>
+                  <mat-chip-option value="orange">Orange</mat-chip-option>
+                  <mat-chip-option value="grape">Grape</mat-chip-option>
+                  <mat-chip-option value="mango">Mango</mat-chip-option>
+                </mat-chip-listbox>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Chips with Remove Button (Stacked) -->
+            <h3
+              class="text-lg font-medium mb-3"
+              style="color: var(--tremor-content-emphasis)"
+            >
+              Chips with Remove Button (Stacked)
+            </h3>
+            <mat-card appearance="outlined" class="mb-6">
+              <mat-card-content>
+                <mat-chip-set aria-label="Removable chips">
+                  @for (keyword of keywords; track keyword) {
+                    <mat-chip (removed)="removeKeyword(keyword)">
+                      {{ keyword }}
+                      <button matChipRemove aria-label="Remove keyword">
+                        <mat-icon>cancel</mat-icon>
+                      </button>
+                    </mat-chip>
+                  }
+                </mat-chip-set>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Chips with Input (Stacked) -->
+            <h3
+              class="text-lg font-medium mb-3"
+              style="color: var(--tremor-content-emphasis)"
+            >
+              Chips with Input (Stacked)
+            </h3>
+            <mat-card appearance="outlined" class="mb-6">
+              <mat-card-content>
+                <mat-form-field appearance="outline" class="w-full">
+                  <mat-label>Enter keywords</mat-label>
+                  <mat-chip-grid #chipGrid2>
+                    @for (keyword of inputKeywords; track keyword) {
+                      <mat-chip-row (removed)="removeInputKeyword(keyword)">
+                        {{ keyword }}
+                        <button matChipRemove>
+                          <mat-icon>cancel</mat-icon>
+                        </button>
+                      </mat-chip-row>
+                    }
+                  </mat-chip-grid>
+                  <input
+                    placeholder="Add keyword..."
+                    [matChipInputFor]="chipGrid2"
+                    (matChipInputTokenEnd)="addKeyword($event)"
+                  />
+                </mat-form-field>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Chips Autocomplete -->
+            <h3
+              class="text-lg font-medium mb-3"
+              style="color: var(--tremor-content-emphasis)"
+            >
+              Chips with Autocomplete
+            </h3>
+            <mat-card appearance="outlined" class="mb-6">
+              <mat-card-content>
+                <mat-form-field appearance="outline" class="w-full">
+                  <mat-label>Add tags</mat-label>
+                  <mat-chip-grid #chipGrid>
+                    @for (tag of selectedTags; track tag) {
+                      <mat-chip-row (removed)="removeTag(tag)">
+                        {{ tag }}
+                        <button matChipRemove>
+                          <mat-icon>cancel</mat-icon>
+                        </button>
+                      </mat-chip-row>
+                    }
+                  </mat-chip-grid>
+                  <input
+                    [matChipInputFor]="chipGrid"
+                    [matAutocomplete]="autoTags"
+                    [(ngModel)]="tagInput"
+                    (matChipInputTokenEnd)="addTag($event)"
+                  />
+                  <mat-autocomplete
+                    #autoTags="matAutocomplete"
+                    (optionSelected)="selectTag($event)"
+                  >
+                    @for (tag of availableTags; track tag) {
+                      <mat-option [value]="tag">{{ tag }}</mat-option>
+                    }
+                  </mat-autocomplete>
+                </mat-form-field>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Chips with Highlighted -->
+            <h3
+              class="text-lg font-medium mb-3"
+              style="color: var(--tremor-content-emphasis)"
+            >
+              Highlighted Chips
+            </h3>
+            <mat-card appearance="outlined" class="mb-6">
+              <mat-card-content>
+                <mat-chip-listbox aria-label="Highlighted chips">
+                  <mat-chip-option highlighted>Highlighted</mat-chip-option>
+                  <mat-chip-option>Normal</mat-chip-option>
+                  <mat-chip-option highlighted>Highlighted</mat-chip-option>
+                  <mat-chip-option>Normal</mat-chip-option>
+                </mat-chip-listbox>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </mat-tab>
+
+        <!-- Cards Tab -->
+        <mat-tab label="Cards">
+          <div class="p-6">
+            <h2
+              class="text-xl font-semibold mb-4"
+              style="color: var(--tremor-content-strong)"
+            >
+              Card Examples
+            </h2>
+
+            <!-- Basic Cards -->
+            <h3
+              class="text-lg font-medium mb-3"
+              style="color: var(--tremor-content-emphasis)"
+            >
+              Basic Cards
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <mat-card appearance="outlined">
+                <mat-card-header>
+                  <mat-card-title>Outlined Card</mat-card-title>
+                  <mat-card-subtitle>With border</mat-card-subtitle>
+                </mat-card-header>
+                <mat-card-content>
+                  <p>
+                    This is an outlined card with a border. Recommended for
+                    Tremor style.
+                  </p>
+                </mat-card-content>
+                <mat-card-actions>
+                  <button mat-button>Action</button>
+                </mat-card-actions>
+              </mat-card>
+
+              <mat-card>
+                <mat-card-header>
+                  <mat-card-title>Elevated Card</mat-card-title>
+                  <mat-card-subtitle>With shadow (default)</mat-card-subtitle>
+                </mat-card-header>
+                <mat-card-content>
+                  <p>
+                    This is an elevated card with shadow elevation (default
+                    appearance).
+                  </p>
+                </mat-card-content>
+                <mat-card-actions>
+                  <button mat-button>Action</button>
+                </mat-card-actions>
+              </mat-card>
+
+              <mat-card appearance="outlined">
+                <mat-card-header>
+                  <mat-card-title>Card with Icon</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="flex items-center gap-3">
+                    <mat-icon color="primary" class="text-4xl">info</mat-icon>
+                    <p>Card content with icon</p>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            </div>
+
+            <!-- Cards with Images -->
+            <h3
+              class="text-lg font-medium mb-3"
+              style="color: var(--tremor-content-emphasis)"
+            >
+              Cards with Images
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <mat-card appearance="outlined">
+                <img
+                  mat-card-image
+                  src="https://via.placeholder.com/400x200"
+                  alt="Placeholder image"
+                />
+                <mat-card-content>
+                  <mat-card-title>Card with Image</mat-card-title>
+                  <mat-card-subtitle>Image at the top</mat-card-subtitle>
+                  <p>This card has an image at the top followed by content.</p>
+                </mat-card-content>
+                <mat-card-actions>
+                  <button mat-button>Share</button>
+                  <button mat-button>Learn More</button>
+                </mat-card-actions>
+              </mat-card>
+
+              <mat-card appearance="outlined">
+                <mat-card-header>
+                  <mat-card-title>Header First</mat-card-title>
+                  <mat-card-subtitle>Then image</mat-card-subtitle>
+                </mat-card-header>
+                <img
+                  mat-card-image
+                  src="https://via.placeholder.com/400x150"
+                  alt="Placeholder image"
+                />
+                <mat-card-content>
+                  <p>This card has header first, then image.</p>
+                </mat-card-content>
+              </mat-card>
+            </div>
+
+            <!-- Interactive Cards -->
+            <h3
+              class="text-lg font-medium mb-3"
+              style="color: var(--tremor-content-emphasis)"
+            >
+              Interactive Cards
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <mat-card
+                appearance="outlined"
+                class="cursor-pointer hover:shadow-lg transition-shadow"
+              >
+                <mat-card-content class="text-center">
+                  <mat-icon class="text-5xl mb-2" color="primary"
+                    >account_circle</mat-icon
+                  >
+                  <h3 class="text-lg font-semibold mb-1">Profile</h3>
+                  <p class="text-sm text-gray-600">View profile</p>
+                </mat-card-content>
+              </mat-card>
+
+              <mat-card
+                appearance="outlined"
+                class="cursor-pointer hover:shadow-lg transition-shadow"
+              >
+                <mat-card-content class="text-center">
+                  <mat-icon class="text-5xl mb-2" color="accent"
+                    >settings</mat-icon
+                  >
+                  <h3 class="text-lg font-semibold mb-1">Settings</h3>
+                  <p class="text-sm text-gray-600">Manage settings</p>
+                </mat-card-content>
+              </mat-card>
+
+              <mat-card
+                appearance="outlined"
+                class="cursor-pointer hover:shadow-lg transition-shadow"
+              >
+                <mat-card-content class="text-center">
+                  <mat-icon class="text-5xl mb-2" color="warn"
+                    >notifications</mat-icon
+                  >
+                  <h3 class="text-lg font-semibold mb-1">Alerts</h3>
+                  <p class="text-sm text-gray-600">View alerts</p>
+                </mat-card-content>
+              </mat-card>
+
+              <mat-card
+                appearance="outlined"
+                class="cursor-pointer hover:shadow-lg transition-shadow"
+              >
+                <mat-card-content class="text-center">
+                  <mat-icon class="text-5xl mb-2" color="primary"
+                    >analytics</mat-icon
+                  >
+                  <h3 class="text-lg font-semibold mb-1">Reports</h3>
+                  <p class="text-sm text-gray-600">View reports</p>
+                </mat-card-content>
+              </mat-card>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Tremor Examples Tab -->
+        <mat-tab label="Tremor Examples">
+          <div class="p-6">
+            <!-- Stat Cards Section -->
+            <section class="mb-8">
+              <h2
+                class="text-2xl font-bold mb-2"
+                style="color: var(--tremor-content-strong)"
+              >
+                Stat Cards
+              </h2>
+              <p
+                class="text-sm mb-4"
+                style="color: var(--tremor-content-default)"
+              >
+                Using Material <code>mat-card</code> with Tailwind layout
+                utilities
+              </p>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Total Users Card -->
+                <mat-card
+                  appearance="outlined"
+                  class="cursor-pointer hover:shadow-md transition-shadow"
+                >
+                  <mat-card-header
+                    class="flex items-center justify-between pb-3"
+                  >
+                    <mat-card-title
+                      class="text-sm font-medium"
+                      style="color: var(--tremor-content-default)"
+                    >
+                      Total Users
+                    </mat-card-title>
+                    <mat-icon color="primary">people</mat-icon>
+                  </mat-card-header>
+                  <mat-card-content>
+                    <div
+                      class="text-3xl font-bold mb-2"
+                      style="color: var(--tremor-content-strong)"
+                    >
+                      2,543
+                    </div>
+                    <div class="flex items-center gap-1 text-sm">
+                      <mat-icon class="text-base text-green-600"
+                        >trending_up</mat-icon
+                      >
+                      <span class="font-medium text-green-600">+12.5%</span>
+                      <span style="color: var(--tremor-content-subtle)"
+                        >vs last week</span
+                      >
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+
+                <!-- Revenue Card -->
+                <mat-card
+                  appearance="outlined"
+                  class="cursor-pointer hover:shadow-md transition-shadow"
+                >
+                  <mat-card-header
+                    class="flex items-center justify-between pb-3"
+                  >
+                    <mat-card-title
+                      class="text-sm font-medium"
+                      style="color: var(--tremor-content-default)"
+                    >
+                      Revenue
+                    </mat-card-title>
+                    <mat-icon color="primary">attach_money</mat-icon>
+                  </mat-card-header>
+                  <mat-card-content>
+                    <div
+                      class="text-3xl font-bold mb-2"
+                      style="color: var(--tremor-content-strong)"
+                    >
+                      $45,231
+                    </div>
+                    <div class="flex items-center gap-1 text-sm">
+                      <mat-icon class="text-base text-green-600"
+                        >trending_up</mat-icon
+                      >
+                      <span class="font-medium text-green-600">+20.1%</span>
+                      <span style="color: var(--tremor-content-subtle)"
+                        >vs last month</span
+                      >
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+
+                <!-- Orders Card -->
+                <mat-card
+                  appearance="outlined"
+                  class="cursor-pointer hover:shadow-md transition-shadow"
+                >
+                  <mat-card-header
+                    class="flex items-center justify-between pb-3"
+                  >
+                    <mat-card-title
+                      class="text-sm font-medium"
+                      style="color: var(--tremor-content-default)"
+                    >
+                      Orders
+                    </mat-card-title>
+                    <mat-icon color="primary">shopping_cart</mat-icon>
+                  </mat-card-header>
+                  <mat-card-content>
+                    <div
+                      class="text-3xl font-bold mb-2"
+                      style="color: var(--tremor-content-strong)"
+                    >
+                      1,329
+                    </div>
+                    <div class="flex items-center gap-1 text-sm">
+                      <mat-icon class="text-base text-red-600"
+                        >trending_down</mat-icon
+                      >
+                      <span class="font-medium text-red-600">-5.2%</span>
+                      <span style="color: var(--tremor-content-subtle)"
+                        >vs last week</span
+                      >
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+
+                <!-- Active Sessions Card -->
+                <mat-card
+                  appearance="outlined"
+                  class="cursor-pointer hover:shadow-md transition-shadow"
+                >
+                  <mat-card-header
+                    class="flex items-center justify-between pb-3"
+                  >
+                    <mat-card-title
+                      class="text-sm font-medium"
+                      style="color: var(--tremor-content-default)"
+                    >
+                      Active Sessions
+                    </mat-card-title>
+                    <mat-icon color="primary">activity</mat-icon>
+                  </mat-card-header>
+                  <mat-card-content>
+                    <div
+                      class="text-3xl font-bold mb-2"
+                      style="color: var(--tremor-content-strong)"
+                    >
+                      573
+                    </div>
+                    <div class="flex items-center gap-1 text-sm">
+                      <mat-icon class="text-base text-green-600"
+                        >trending_up</mat-icon
+                      >
+                      <span class="font-medium text-green-600">+8.3%</span>
+                      <span style="color: var(--tremor-content-subtle)"
+                        >right now</span
+                      >
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+              </div>
+            </section>
+
+            <!-- Status Badges Section -->
+            <section class="mb-8">
+              <h2
+                class="text-2xl font-bold mb-2"
+                style="color: var(--tremor-content-strong)"
+              >
+                Status Badges
+              </h2>
+              <p
+                class="text-sm mb-4"
+                style="color: var(--tremor-content-default)"
+              >
+                Using Material <code>mat-chip</code> for status indicators
+              </p>
+
+              <div class="flex flex-wrap gap-2">
+                <mat-chip class="bg-green-100 text-green-800">
+                  <mat-icon class="text-base">check_circle</mat-icon>
+                  Active
+                </mat-chip>
+                <mat-chip class="bg-yellow-100 text-yellow-800">
+                  <mat-icon class="text-base">schedule</mat-icon>
+                  Pending
+                </mat-chip>
+                <mat-chip class="bg-red-100 text-red-800">
+                  <mat-icon class="text-base">cancel</mat-icon>
+                  Inactive
+                </mat-chip>
+                <mat-chip class="bg-blue-100 text-blue-800">
+                  <mat-icon class="text-base">info</mat-icon>
+                  In Review
+                </mat-chip>
+                <mat-chip class="bg-purple-100 text-purple-800">
+                  <mat-icon class="text-base">verified</mat-icon>
+                  Verified
+                </mat-chip>
+              </div>
+            </section>
+
+            <!-- Chart Card Section -->
+            <section>
+              <h2
+                class="text-2xl font-bold mb-2"
+                style="color: var(--tremor-content-strong)"
+              >
+                Chart Card
+              </h2>
+              <p
+                class="text-sm mb-4"
+                style="color: var(--tremor-content-default)"
+              >
+                Using Material <code>mat-card</code> for chart wrappers
+              </p>
+
+              <mat-card appearance="outlined">
+                <mat-card-header>
+                  <mat-card-title style="color: var(--tremor-content-strong)">
+                    Revenue Overview
+                  </mat-card-title>
+                  <mat-card-subtitle
+                    style="color: var(--tremor-content-default)"
+                  >
+                    Monthly performance for 2024
+                  </mat-card-subtitle>
+                </mat-card-header>
+                <mat-card-content class="p-6">
+                  <!-- Chart Placeholder -->
+                  <div
+                    class="h-64 rounded flex items-center justify-center text-center"
+                    style="background: var(--tremor-background-subtle)"
+                  >
+                    <div>
+                      <mat-icon
+                        class="text-6xl mb-2"
+                        style="color: var(--tremor-content-subtle)"
+                      >
+                        insert_chart
+                      </mat-icon>
+                      <p style="color: var(--tremor-content-default)">
+                        Chart placeholder - integrate with your favorite
+                        charting library
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- Chart Footer -->
+                  <div
+                    class="flex justify-between items-center text-sm mt-4 pt-4"
+                    style="border-top: 1px solid var(--tremor-border-default)"
+                  >
+                    <span style="color: var(--tremor-content-default)"
+                      >Jan - Dec 2024</span
+                    >
+                    <span
+                      class="font-medium"
+                      style="color: var(--tremor-brand-default)"
+                    >
+                      Total: $124,500
+                    </span>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            </section>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card-content>
+  </mat-card>
+</div>
