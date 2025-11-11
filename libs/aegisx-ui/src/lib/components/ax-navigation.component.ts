@@ -19,16 +19,24 @@ import {
   AxNavigationConfig,
 } from '../types/ax-navigation.types';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatListModule } from '@angular/material/list';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'ax-navigation',
   standalone: true,
-  imports: [CommonModule, RouterModule, MatIconModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatIconModule,
+    MatSidenavModule,
+    MatListModule,
+  ],
   template: `
-    <nav
-      class="ax-navigation"
+    <aside
+      class="ax-navigation mat-drawer mat-drawer-side"
       [class.ax-navigation--collapsed]="state === 'collapsed'"
       [class.ax-navigation--expanded]="state === 'expanded'"
       [class.ax-navigation--side]="config.mode === 'side'"
@@ -81,7 +89,7 @@ import { filter } from 'rxjs/operators';
           <ng-content select="[navigation-footer]"></ng-content>
         </div>
       }
-    </nav>
+    </aside>
 
     <!-- Navigation Item Template -->
     <ng-template #navigationItem let-item="item" let-level="level">
@@ -275,6 +283,11 @@ export class AxNavigationComponent implements OnInit {
   // Getters for template
   get state() {
     return this.config.state;
+  }
+
+  // Map position from 'left'|'right' to Material's 'start'|'end'
+  get drawerPosition(): 'start' | 'end' {
+    return this.config.position === 'right' ? 'end' : 'start';
   }
 
   get isOpen() {

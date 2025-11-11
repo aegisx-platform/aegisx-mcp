@@ -101,9 +101,9 @@ export class AxCompactLayoutComponent implements OnInit, OnDestroy {
     // Then subscribe to media changes
     this._mediaWatcher.onMediaChange$
       .pipe(takeUntil(this._unsubscribeAll))
-      .subscribe(({ matchingAliases }: { matchingAliases: string[] }) => {
+      .subscribe((result) => {
         const wasScreenSmall = this.isScreenSmall;
-        this.isScreenSmall = !matchingAliases.includes('md');
+        this.isScreenSmall = result.matches; // matches = true when on mobile/tablet
 
         // If transitioning to small screen, collapse navigation
         if (!wasScreenSmall && this.isScreenSmall) {

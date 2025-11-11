@@ -152,6 +152,3 @@ export const aegisxAnimations = [
   routerTransition,
   shake,
 ];
-
-// Export legacy fuse animations (temporary)
-export * from './ax-animations';

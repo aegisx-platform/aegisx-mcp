@@ -7,7 +7,6 @@ import {
 } from '../services/config/config.service';
 import { AegisxNavigationService } from '../services/navigation/navigation.service';
 import { AegisxMediaWatcherService } from '../services/media-watcher/media-watcher.service';
-import { AegisxLoadingService } from '../services/loading/loading.service';
 
 /**
  * Core module providing essential AegisX services
@@ -19,7 +18,6 @@ import { AegisxLoadingService } from '../services/loading/loading.service';
     AegisxConfigService,
     AegisxNavigationService,
     AegisxMediaWatcherService,
-    AegisxLoadingService,
   ],
 })
 export class AegisxCoreModule {

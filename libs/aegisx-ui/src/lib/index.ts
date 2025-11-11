@@ -32,7 +32,6 @@ export * from './types';
 // =============================================================================
 export * from './animations';
 export * from './utils';
-export * from './directives';
 
 // =============================================================================
 // LEGACY EXPORTS (Backward Compatibility)
