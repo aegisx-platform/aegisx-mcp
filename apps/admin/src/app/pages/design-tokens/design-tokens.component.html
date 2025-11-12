@@ -215,6 +215,156 @@
     </mat-card>
   </div>
 
+  <!-- Button Color Examples -->
+  <div class="button-examples-section">
+    <mat-card appearance="outlined" class="examples-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar color="primary">smart_button</mat-icon>
+        <mat-card-title>Material Button Color Examples</mat-card-title>
+        <mat-card-subtitle
+          >Preview of button styles with semantic colors</mat-card-subtitle
+        >
+      </mat-card-header>
+
+      <mat-card-content>
+        <!-- Raised/Filled Buttons -->
+        <div class="button-group">
+          <h4>
+            <mat-icon>crop_square</mat-icon>
+            Raised Buttons (Filled)
+          </h4>
+          <div class="button-row">
+            <div class="button-demo">
+              <button mat-raised-button>Basic</button>
+              <span class="button-label">Basic (No color)</span>
+            </div>
+            <div class="button-demo">
+              <button mat-raised-button color="primary">Primary</button>
+              <span class="button-label">Primary (Brand)</span>
+            </div>
+            <div class="button-demo">
+              <button mat-raised-button color="accent">Accent</button>
+              <span class="button-label">Accent</span>
+            </div>
+            <div class="button-demo">
+              <button mat-raised-button color="warn">Warn</button>
+              <span class="button-label">Warn (Danger)</span>
+            </div>
+            <div class="button-demo">
+              <button mat-raised-button disabled>Disabled</button>
+              <span class="button-label">Disabled State</span>
+            </div>
+          </div>
+        </div>
+
+        <mat-divider class="button-divider"></mat-divider>
+
+        <!-- Stroked/Outlined Buttons -->
+        <div class="button-group">
+          <h4>
+            <mat-icon>check_box_outline_blank</mat-icon>
+            Stroked Buttons (Outlined)
+          </h4>
+          <div class="button-row">
+            <div class="button-demo">
+              <button mat-stroked-button>Basic</button>
+              <span class="button-label">Basic (No color)</span>
+            </div>
+            <div class="button-demo">
+              <button mat-stroked-button color="primary">Primary</button>
+              <span class="button-label">Primary (Brand)</span>
+            </div>
+            <div class="button-demo">
+              <button mat-stroked-button color="accent">Accent</button>
+              <span class="button-label">Accent</span>
+            </div>
+            <div class="button-demo">
+              <button mat-stroked-button color="warn">Warn</button>
+              <span class="button-label">Warn (Danger)</span>
+            </div>
+            <div class="button-demo">
+              <button mat-stroked-button disabled>Disabled</button>
+              <span class="button-label">Disabled State</span>
+            </div>
+          </div>
+        </div>
+
+        <mat-divider class="button-divider"></mat-divider>
+
+        <!-- Flat/Text Buttons -->
+        <div class="button-group">
+          <h4>
+            <mat-icon>text_fields</mat-icon>
+            Flat Buttons (Text Only)
+          </h4>
+          <div class="button-row">
+            <div class="button-demo">
+              <button mat-button>Basic</button>
+              <span class="button-label">Basic (No color)</span>
+            </div>
+            <div class="button-demo">
+              <button mat-button color="primary">Primary</button>
+              <span class="button-label">Primary (Brand)</span>
+            </div>
+            <div class="button-demo">
+              <button mat-button color="accent">Accent</button>
+              <span class="button-label">Accent</span>
+            </div>
+            <div class="button-demo">
+              <button mat-button color="warn">Warn</button>
+              <span class="button-label">Warn (Danger)</span>
+            </div>
+            <div class="button-demo">
+              <button mat-button disabled>Disabled</button>
+              <span class="button-label">Disabled State</span>
+            </div>
+          </div>
+        </div>
+
+        <mat-divider class="button-divider"></mat-divider>
+
+        <!-- Color Mapping Info -->
+        <div class="color-mapping-info">
+          <h4>
+            <mat-icon>palette</mat-icon>
+            Semantic Color Mapping
+          </h4>
+          <div class="mapping-grid">
+            <div class="mapping-item">
+              <mat-chip>Basic</mat-chip>
+              <span class="mapping-desc"
+                >Default theme colors (no custom color applied)</span
+              >
+              <code>--aegisx-background-*, --aegisx-text-*</code>
+            </div>
+            <div class="mapping-item">
+              <mat-chip color="primary">Primary</mat-chip>
+              <span class="mapping-desc">Brand colors for main actions</span>
+              <code>--aegisx-brand-default</code>
+            </div>
+            <div class="mapping-item">
+              <mat-chip color="accent">Accent</mat-chip>
+              <span class="mapping-desc">Secondary accent for highlights</span>
+              <code>--aegisx-info-default</code>
+            </div>
+            <div class="mapping-item">
+              <mat-chip>Warn</mat-chip>
+              <span class="mapping-desc"
+                >Warning/danger for destructive actions</span
+              >
+              <code>--aegisx-danger-default</code>
+            </div>
+            <div class="mapping-item">
+              <mat-chip disabled>Disabled</mat-chip>
+              <span class="mapping-desc">Inactive state for all buttons</span>
+              <code>--aegisx-text-disabled</code>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
   <!-- Token Categories -->
   <div class="categories-container">
     @for (category of filteredCategories; track category.id) {
