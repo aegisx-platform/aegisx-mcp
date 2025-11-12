@@ -1,0 +1,195 @@
+<!-- Dashboard Container -->
+<div class="flex flex-col gap-6 p-6">
+  <!-- Page Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-3xl font-bold" style="color: var(--aegisx-text-strong)">
+        Dashboard
+      </h1>
+      <p class="mt-1 text-sm" style="color: var(--aegisx-text-body)">
+        Welcome back! Here's what's happening today.
+      </p>
+    </div>
+
+    <button mat-raised-button color="primary">
+      <mat-icon>refresh</mat-icon>
+      Refresh Data
+    </button>
+  </div>
+
+  <!-- Stats Cards Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <mat-card *ngFor="let stat of stats" class="stat-card">
+      <mat-card-content>
+        <div class="flex items-start justify-between">
+          <div class="flex-1">
+            <p
+              class="text-sm font-medium"
+              style="color: var(--aegisx-text-body)"
+            >
+              {{ stat.title }}
+            </p>
+            <h3
+              class="text-3xl font-bold mt-2"
+              style="color: var(--aegisx-text-strong)"
+            >
+              {{ stat.value }}
+            </h3>
+            <div class="flex items-center gap-1 mt-2">
+              <mat-icon
+                class="text-sm"
+                [style.color]="
+                  stat.changeType === 'increase' ? '#10b981' : '#ef4444'
+                "
+              >
+                {{
+                  stat.changeType === 'increase'
+                    ? 'trending_up'
+                    : 'trending_down'
+                }}
+              </mat-icon>
+              <span
+                class="text-sm font-medium"
+                [style.color]="
+                  stat.changeType === 'increase' ? '#10b981' : '#ef4444'
+                "
+              >
+                {{ stat.change }}
+              </span>
+              <span class="text-sm" style="color: var(--aegisx-text-subtle)">
+                from last month
+              </span>
+            </div>
+          </div>
+
+          <div
+            class="stat-icon"
+            [style.background-color]="stat.iconColor + '15'"
+          >
+            <mat-icon [style.color]="stat.iconColor">{{ stat.icon }}</mat-icon>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Content Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Recent Activities (takes 2 columns) -->
+    <mat-card class="lg:col-span-2">
+      <mat-card-header>
+        <mat-card-title class="flex items-center justify-between w-full">
+          <div class="flex items-center gap-2">
+            <mat-icon style="color: var(--aegisx-brand-default)"
+              >history</mat-icon
+            >
+            <span>Recent Activities</span>
+          </div>
+          <button mat-button color="primary">View All</button>
+        </mat-card-title>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="space-y-4">
+          <div
+            *ngFor="let activity of recentActivities"
+            class="activity-item flex items-start gap-4 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <div
+              class="status-indicator"
+              [style.background-color]="getStatusColor(activity.status)"
+            >
+              <mat-icon class="text-white">
+                {{
+                  activity.status === 'success'
+                    ? 'check'
+                    : activity.status === 'warning'
+                      ? 'warning'
+                      : 'error'
+                }}
+              </mat-icon>
+            </div>
+
+            <div class="flex-1">
+              <div class="flex items-center justify-between">
+                <p class="font-medium" style="color: var(--aegisx-text-strong)">
+                  {{ activity.user }}
+                </p>
+                <span class="text-sm" style="color: var(--aegisx-text-subtle)">
+                  {{ getRelativeTime(activity.timestamp) }}
+                </span>
+              </div>
+              <p class="text-sm mt-1" style="color: var(--aegisx-text-body)">
+                {{ activity.action }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Quick Actions -->
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title class="flex items-center gap-2">
+          <mat-icon style="color: var(--aegisx-brand-default)">bolt</mat-icon>
+          <span>Quick Actions</span>
+        </mat-card-title>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="space-y-3">
+          <button
+            *ngFor="let action of quickActions"
+            mat-stroked-button
+            [color]="action.color"
+            class="w-full justify-start"
+          >
+            <mat-icon>{{ action.icon }}</mat-icon>
+            {{ action.label }}
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Performance Chart Placeholder -->
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title class="flex items-center justify-between w-full">
+        <div class="flex items-center gap-2">
+          <mat-icon style="color: var(--aegisx-brand-default)"
+            >show_chart</mat-icon
+          >
+          <span>Performance Overview</span>
+        </div>
+
+        <div class="flex gap-2">
+          <button mat-button>Week</button>
+          <button mat-raised-button color="primary">Month</button>
+          <button mat-button>Year</button>
+        </div>
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Chart placeholder -->
+      <div class="chart-placeholder flex items-center justify-center">
+        <div class="text-center">
+          <mat-icon
+            class="text-6xl mb-4"
+            style="color: var(--aegisx-text-subtle)"
+          >
+            insert_chart
+          </mat-icon>
+          <p style="color: var(--aegisx-text-body)">
+            Chart visualization will be displayed here
+          </p>
+          <p class="text-sm mt-2" style="color: var(--aegisx-text-subtle)">
+            Integrate with Chart.js, Recharts, or other charting libraries
+          </p>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

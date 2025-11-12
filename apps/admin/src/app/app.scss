@@ -1,0 +1,41 @@
+/* ============================================
+   Admin App Styling with ax-navigation
+   ============================================ */
+
+/* Main Container */
+.main-content {
+  padding: 1.5rem;
+  background-color: var(--aegisx-background-muted);
+  min-height: 100%;
+}
+
+/* Custom Navigation Header Styles */
+.logo-icon {
+  width: 40px;
+  height: 40px;
+  background-color: var(--aegisx-brand-faint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* User Profile in Navigation Footer */
+.user-profile {
+  background-color: transparent; // Ensure no background overlay
+
+  .user-avatar {
+    transition: transform 0.2s ease;
+  }
+
+  &:hover .user-avatar {
+    transform: scale(1.05);
+  }
+}
+
+/* Toolbar Styling */
+.toolbar-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--aegisx-content-strong);
+  margin-left: 0.5rem;
+}

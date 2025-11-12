@@ -1,0 +1,60 @@
+/* ============================================================
+   AegisX Light Theme - Angular Material 20 (Material Design 3)
+   Official theming approach using mat.theme() mixin
+   Based on Material blue palette, customized with AegisX design tokens
+   ============================================================ */
+
+@use '@angular/material' as mat;
+@use './aegisx-tokens' as *;
+@use './material-overrides' as *;
+@use '../components/form-utilities' as *;
+
+/* ============================================================
+   Theme Configuration
+   Using Material's built-in blue palette (closest to Tremor)
+   ============================================================ */
+
+:root {
+  @include mat.theme(
+    (
+      color: (
+        theme-type: light,
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+      ),
+      typography: (
+        brand-family:
+          'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+        plain-family:
+          'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+      ),
+      density: (
+        scale: -1,
+      ),
+    )
+  );
+
+  /* Material Design 3 System Colors - Light Mode */
+  --md-sys-color-background: #ffffff;
+  --md-sys-color-on-background: #111827;
+  --md-sys-color-surface: #f9fafb;
+  --md-sys-color-on-surface: #1f2937;
+  --md-sys-color-surface-container-lowest: #ffffff;
+  --md-sys-color-surface-container-low: #f9fafb;
+  --md-sys-color-surface-container: #f3f4f6;
+  --md-sys-color-surface-container-high: #e5e7eb;
+  --md-sys-color-surface-container-highest: #d1d5db;
+}
+
+/* ============================================================
+   AegisX Design Tokens (Custom Properties)
+   See _aegisx-tokens.scss for token definitions
+   ============================================================ */
+
+// Include AegisX light theme tokens
+@include aegisx-light-theme;
+
+/* ============================================================
+   Light Theme Specific Overrides
+   (Add any light-theme-only customizations here)
+   ============================================================ */

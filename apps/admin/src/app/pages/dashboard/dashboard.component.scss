@@ -1,0 +1,59 @@
+// Dashboard Component Styles
+
+.stat-card {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--aegisx-shadow-md) !important;
+  }
+
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--aegisx-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  mat-icon.text-sm {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.activity-item {
+  .status-indicator {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+.chart-placeholder {
+  min-height: 300px;
+  background: var(--aegisx-background-subtle);
+  border-radius: var(--aegisx-radius-md);
+  border: 2px dashed var(--aegisx-border-default);
+}

@@ -1,0 +1,60 @@
+/* ============================================================
+   AegisX Dark Theme - Angular Material 20 (Material Design 3)
+   Official theming approach using mat.theme() mixin
+   Based on Material blue palette, customized with AegisX design tokens
+   ============================================================ */
+
+@use '@angular/material' as mat;
+@use './aegisx-tokens' as *;
+@use './material-overrides' as *;
+@use '../components/form-utilities' as *;
+
+/* ============================================================
+   Theme Configuration
+   Using Material's built-in blue palette (closest to Tremor)
+   ============================================================ */
+
+:root {
+  @include mat.theme(
+    (
+      color: (
+        theme-type: dark,
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+      ),
+      typography: (
+        brand-family:
+          'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+        plain-family:
+          'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+      ),
+      density: (
+        scale: -1,
+      ),
+    )
+  );
+
+  /* Material Design 3 System Colors - Dark Mode */
+  --md-sys-color-background: #111827;
+  --md-sys-color-on-background: #f9fafb;
+  --md-sys-color-surface: #1f2937;
+  --md-sys-color-on-surface: #e5e7eb;
+  --md-sys-color-surface-container-lowest: #111827;
+  --md-sys-color-surface-container-low: #1c2536;
+  --md-sys-color-surface-container: #1f2937;
+  --md-sys-color-surface-container-high: #374151;
+  --md-sys-color-surface-container-highest: #4b5563;
+}
+
+/* ============================================================
+   AegisX Design Tokens (Custom Properties) - Dark Mode
+   See _aegisx-tokens.scss for token definitions
+   ============================================================ */
+
+// Include AegisX dark theme tokens
+@include aegisx-dark-theme;
+
+/* ============================================================
+   Dark Theme Specific Overrides
+   (Add any dark-theme-only customizations here)
+   ============================================================ */

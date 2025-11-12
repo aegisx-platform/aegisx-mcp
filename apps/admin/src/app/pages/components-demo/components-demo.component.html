@@ -3,13 +3,10 @@
   <!-- Page Header -->
   <div class="flex items-center justify-between">
     <div>
-      <h1
-        class="text-3xl font-bold"
-        style="color: var(--tremor-content-strong)"
-      >
+      <h1 class="text-3xl font-bold" style="color: var(--aegisx-text-strong)">
         Material Components Demo
       </h1>
-      <p class="mt-1 text-sm" style="color: var(--tremor-content-default)">
+      <p class="mt-1 text-sm" style="color: var(--aegisx-text-body)">
         Explore all Angular Material components with Tremor theme styling
       </p>
     </div>
@@ -24,7 +21,7 @@
           <div class="p-6">
             <h2
               class="text-xl font-semibold mb-4"
-              style="color: var(--tremor-content-strong)"
+              style="color: var(--aegisx-text-strong)"
             >
               Text Inputs
             </h2>
@@ -80,7 +77,7 @@
 
             <h2
               class="text-xl font-semibold mb-4"
-              style="color: var(--tremor-content-strong)"
+              style="color: var(--aegisx-text-strong)"
             >
               Checkboxes & Radios
             </h2>
@@ -88,7 +85,7 @@
               <div>
                 <h3
                   class="text-sm font-medium mb-2"
-                  style="color: var(--tremor-content-default)"
+                  style="color: var(--aegisx-text-body)"
                 >
                   Checkboxes
                 </h3>
@@ -103,7 +100,7 @@
               <div>
                 <h3
                   class="text-sm font-medium mb-2"
-                  style="color: var(--tremor-content-default)"
+                  style="color: var(--aegisx-text-body)"
                 >
                   Radio Buttons
                 </h3>
@@ -119,7 +116,7 @@
 
             <h2
               class="text-xl font-semibold mb-4"
-              style="color: var(--tremor-content-strong)"
+              style="color: var(--aegisx-text-strong)"
             >
               Toggles & Sliders
             </h2>
@@ -131,9 +128,7 @@
               </div>
 
               <div class="flex flex-col gap-4">
-                <label
-                  class="text-sm"
-                  style="color: var(--tremor-content-default)"
+                <label class="text-sm" style="color: var(--aegisx-text-body)"
                   >Volume</label
                 >
                 <mat-slider min="0" max="100" step="1">
@@ -149,7 +144,7 @@
           <div class="p-6">
             <h2
               class="text-xl font-semibold mb-4"
-              style="color: var(--tremor-content-strong)"
+              style="color: var(--aegisx-text-strong)"
             >
               Button Styles
             </h2>
@@ -307,7 +302,7 @@
               <div>
                 <h3
                   class="text-sm font-medium mb-3"
-                  style="color: var(--tremor-content-default)"
+                  style="color: var(--aegisx-text-body)"
                 >
                   Raised Buttons
                 </h3>
@@ -323,7 +318,7 @@
               <div>
                 <h3
                   class="text-sm font-medium mb-3"
-                  style="color: var(--tremor-content-default)"
+                  style="color: var(--aegisx-text-body)"
                 >
                   Flat Buttons
                 </h3>
@@ -338,7 +333,7 @@
               <div>
                 <h3
                   class="text-sm font-medium mb-3"
-                  style="color: var(--tremor-content-default)"
+                  style="color: var(--aegisx-text-body)"
                 >
                   Stroked Buttons
                 </h3>
@@ -353,7 +348,7 @@
               <div>
                 <h3
                   class="text-sm font-medium mb-3"
-                  style="color: var(--tremor-content-default)"
+                  style="color: var(--aegisx-text-body)"
                 >
                   Icon Buttons
                 </h3>
@@ -376,7 +371,7 @@
               <div>
                 <h3
                   class="text-sm font-medium mb-3"
-                  style="color: var(--tremor-content-default)"
+                  style="color: var(--aegisx-text-body)"
                 >
                   FAB Buttons
                 </h3>
@@ -393,7 +388,7 @@
               <div>
                 <h3
                   class="text-sm font-medium mb-3"
-                  style="color: var(--tremor-content-default)"
+                  style="color: var(--aegisx-text-body)"
                 >
                   Buttons with Icons
                 </h3>
@@ -412,45 +407,12 @@
           </div>
         </mat-tab>
 
-        <!-- Lists & Tables Tab -->
-        <mat-tab label="Lists & Tables">
+        <!-- Lists Tab -->
+        <mat-tab label="Lists">
           <div class="p-6">
             <h2
               class="text-xl font-semibold mb-4"
-              style="color: var(--tremor-content-strong)"
-            >
-              Simple Table
-            </h2>
-            <table mat-table [dataSource]="tableData" class="w-full mb-6">
-              <ng-container matColumnDef="position">
-                <th mat-header-cell *matHeaderCellDef>No.</th>
-                <td mat-cell *matCellDef="let element">
-                  {{ element.position }}
-                </td>
-              </ng-container>
-
-              <ng-container matColumnDef="name">
-                <th mat-header-cell *matHeaderCellDef>Name</th>
-                <td mat-cell *matCellDef="let element">{{ element.name }}</td>
-              </ng-container>
-
-              <ng-container matColumnDef="weight">
-                <th mat-header-cell *matHeaderCellDef>Weight</th>
-                <td mat-cell *matCellDef="let element">{{ element.weight }}</td>
-              </ng-container>
-
-              <ng-container matColumnDef="symbol">
-                <th mat-header-cell *matHeaderCellDef>Symbol</th>
-                <td mat-cell *matCellDef="let element">{{ element.symbol }}</td>
-              </ng-container>
-
-              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-            </table>
-
-            <h2
-              class="text-xl font-semibold mb-4"
-              style="color: var(--tremor-content-strong)"
+              style="color: var(--aegisx-text-strong)"
             >
               Lists
             </h2>
@@ -513,7 +475,7 @@
           <div class="p-6">
             <h2
               class="text-xl font-semibold mb-4"
-              style="color: var(--tremor-content-strong)"
+              style="color: var(--aegisx-text-strong)"
             >
               Progress Indicators
             </h2>
@@ -521,7 +483,7 @@
               <div>
                 <h3
                   class="text-sm font-medium mb-3"
-                  style="color: var(--tremor-content-default)"
+                  style="color: var(--aegisx-text-body)"
                 >
                   Progress Bars
                 </h3>
@@ -542,21 +504,21 @@
               <div>
                 <h3
                   class="text-sm font-medium mb-3"
-                  style="color: var(--tremor-content-default)"
+                  style="color: var(--aegisx-text-body)"
                 >
                   Spinners
                 </h3>
                 <div class="flex gap-6">
                   <mat-spinner diameter="50"></mat-spinner>
                   <mat-spinner diameter="40" color="accent"></mat-spinner>
-                  <mat-spinner diameter="30" color="warn"></mat-spinner>
+                  <mat-spinner diameter="40" color="warn"></mat-spinner>
                 </div>
               </div>
             </div>
 
             <h2
               class="text-xl font-semibold mb-4"
-              style="color: var(--tremor-content-strong)"
+              style="color: var(--aegisx-text-strong)"
             >
               Chips
             </h2>
@@ -578,7 +540,7 @@
 
             <h2
               class="text-xl font-semibold mb-4"
-              style="color: var(--tremor-content-strong)"
+              style="color: var(--aegisx-text-strong)"
             >
               Badges
             </h2>
@@ -608,7 +570,7 @@
           <div class="p-6">
             <h2
               class="text-xl font-semibold mb-4"
-              style="color: var(--tremor-content-strong)"
+              style="color: var(--aegisx-text-strong)"
             >
               Menu
             </h2>
@@ -660,7 +622,7 @@
 
             <h2
               class="text-xl font-semibold mb-4"
-              style="color: var(--tremor-content-strong)"
+              style="color: var(--aegisx-text-strong)"
             >
               Toolbar
             </h2>
@@ -682,7 +644,7 @@
 
             <h2
               class="text-xl font-semibold mb-4"
-              style="color: var(--tremor-content-strong)"
+              style="color: var(--aegisx-text-strong)"
             >
               Button Toggle
             </h2>
@@ -719,7 +681,7 @@
           <div class="p-6">
             <h2
               class="text-xl font-semibold mb-4"
-              style="color: var(--tremor-content-strong)"
+              style="color: var(--aegisx-text-strong)"
             >
               Stepper
             </h2>
@@ -756,7 +718,7 @@
 
             <h2
               class="text-xl font-semibold mb-4"
-              style="color: var(--tremor-content-strong)"
+              style="color: var(--aegisx-text-strong)"
             >
               Divider
             </h2>
@@ -774,7 +736,7 @@
 
             <h2
               class="text-xl font-semibold mb-4"
-              style="color: var(--tremor-content-strong)"
+              style="color: var(--aegisx-text-strong)"
             >
               Grid List
             </h2>
@@ -801,7 +763,7 @@
           <div class="p-6">
             <h2
               class="text-xl font-semibold mb-4"
-              style="color: var(--tremor-content-strong)"
+              style="color: var(--aegisx-text-strong)"
             >
               Dialog
             </h2>
@@ -814,7 +776,7 @@
 
             <h2
               class="text-xl font-semibold mb-4"
-              style="color: var(--tremor-content-strong)"
+              style="color: var(--aegisx-text-strong)"
             >
               Snackbar
             </h2>
@@ -844,7 +806,7 @@
 
             <h2
               class="text-xl font-semibold mb-4"
-              style="color: var(--tremor-content-strong)"
+              style="color: var(--aegisx-text-strong)"
             >
               Tooltip
             </h2>
@@ -881,7 +843,7 @@
 
             <h2
               class="text-xl font-semibold mb-4"
-              style="color: var(--tremor-content-strong)"
+              style="color: var(--aegisx-text-strong)"
             >
               Bottom Sheet
             </h2>
@@ -898,17 +860,75 @@
           </div>
         </mat-tab>
 
-        <!-- Data Tables Advanced Tab -->
-        <mat-tab label="Data Tables">
+        <!-- Tables Tab -->
+        <mat-tab label="Tables">
           <div class="p-6">
             <h2
               class="text-xl font-semibold mb-4"
-              style="color: var(--tremor-content-strong)"
+              style="color: var(--aegisx-text-strong)"
+            >
+              Table Examples
+            </h2>
+            <p class="mb-6 text-sm" style="color: var(--aegisx-text-body)">
+              Angular Material tables with Tremor styling - clean borders,
+              subtle backgrounds, and minimal shadows
+            </p>
+
+            <!-- Basic Table -->
+            <h3
+              class="text-lg font-medium mb-3"
+              style="color: var(--aegisx-text-emphasis)"
+            >
+              Basic Table
+            </h3>
+            <mat-card appearance="outlined" class="mb-6">
+              <mat-card-content>
+                <table mat-table [dataSource]="tableData" class="w-full">
+                  <ng-container matColumnDef="position">
+                    <th mat-header-cell *matHeaderCellDef>No.</th>
+                    <td mat-cell *matCellDef="let element">
+                      {{ element.position }}
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef>Name</th>
+                    <td mat-cell *matCellDef="let element">
+                      {{ element.name }}
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="weight">
+                    <th mat-header-cell *matHeaderCellDef>Weight</th>
+                    <td mat-cell *matCellDef="let element">
+                      {{ element.weight }}
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="symbol">
+                    <th mat-header-cell *matHeaderCellDef>Symbol</th>
+                    <td mat-cell *matCellDef="let element">
+                      {{ element.symbol }}
+                    </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                  <tr
+                    mat-row
+                    *matRowDef="let row; columns: displayedColumns"
+                  ></tr>
+                </table>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Table with Sorting & Pagination -->
+            <h3
+              class="text-lg font-medium mb-3"
+              style="color: var(--aegisx-text-emphasis)"
             >
               Table with Sorting & Pagination
-            </h2>
-
-            <mat-card appearance="outlined">
+            </h3>
+            <mat-card appearance="outlined" class="mb-6">
               <mat-card-content>
                 <!-- Search -->
                 <mat-form-field appearance="outline" class="w-full mb-4">
@@ -1022,14 +1042,14 @@
               </mat-card-content>
             </mat-card>
 
-            <h2
-              class="text-xl font-semibold mb-4 mt-6"
-              style="color: var(--tremor-content-strong)"
+            <!-- Table with Selection -->
+            <h3
+              class="text-lg font-medium mb-3"
+              style="color: var(--aegisx-text-emphasis)"
             >
               Table with Selection
-            </h2>
-
-            <mat-card appearance="outlined">
+            </h3>
+            <mat-card appearance="outlined" class="mb-6">
               <mat-card-content>
                 <table mat-table [dataSource]="selectionData" class="w-full">
                   <!-- Checkbox Column -->
@@ -1100,10 +1120,70 @@
                 <!-- Selection info -->
                 <div
                   class="mt-4 text-sm"
-                  style="color: var(--tremor-content-default)"
+                  style="color: var(--aegisx-text-body)"
                 >
                   {{ selection.selected.length }} row(s) selected
                 </div>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Table with Status Badges -->
+            <h3
+              class="text-lg font-medium mb-3"
+              style="color: var(--aegisx-text-emphasis)"
+            >
+              Table with Status Badges
+            </h3>
+            <mat-card appearance="outlined">
+              <mat-card-content>
+                <table mat-table [dataSource]="tableData" class="w-full">
+                  <ng-container matColumnDef="position">
+                    <th mat-header-cell *matHeaderCellDef>No.</th>
+                    <td mat-cell *matCellDef="let element">
+                      {{ element.position }}
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef>Element</th>
+                    <td mat-cell *matCellDef="let element">
+                      <div class="flex items-center gap-2">
+                        <mat-icon class="text-lg">science</mat-icon>
+                        {{ element.name }}
+                      </div>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="weight">
+                    <th mat-header-cell *matHeaderCellDef>Weight</th>
+                    <td mat-cell *matCellDef="let element">
+                      {{ element.weight }}
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="symbol">
+                    <th mat-header-cell *matHeaderCellDef>Status</th>
+                    <td mat-cell *matCellDef="let element; let i = index">
+                      <mat-chip-set>
+                        <mat-chip [highlighted]="i % 3 === 0">
+                          {{
+                            i % 3 === 0
+                              ? 'Active'
+                              : i % 3 === 1
+                                ? 'Pending'
+                                : 'Inactive'
+                          }}
+                        </mat-chip>
+                      </mat-chip-set>
+                    </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                  <tr
+                    mat-row
+                    *matRowDef="let row; columns: displayedColumns"
+                  ></tr>
+                </table>
               </mat-card-content>
             </mat-card>
           </div>
@@ -1114,7 +1194,7 @@
           <div class="p-6">
             <h2
               class="text-xl font-semibold mb-4"
-              style="color: var(--tremor-content-strong)"
+              style="color: var(--aegisx-text-strong)"
             >
               Datepicker Examples
             </h2>
@@ -1122,7 +1202,7 @@
             <!-- 1. Basic Datepicker -->
             <h3
               class="text-lg font-medium mb-3"
-              style="color: var(--tremor-content-emphasis)"
+              style="color: var(--aegisx-text-emphasis)"
             >
               Basic Datepicker
             </h3>
@@ -1155,7 +1235,7 @@
             <!-- 2. Date Range Picker -->
             <h3
               class="text-lg font-medium mb-3"
-              style="color: var(--tremor-content-emphasis)"
+              style="color: var(--aegisx-text-emphasis)"
             >
               Date Range Picker
             </h3>
@@ -1197,7 +1277,7 @@
             <!-- 3. Datepicker with Min/Max -->
             <h3
               class="text-lg font-medium mb-3"
-              style="color: var(--tremor-content-emphasis)"
+              style="color: var(--aegisx-text-emphasis)"
             >
               Datepicker with Min/Max Dates
             </h3>
@@ -1251,7 +1331,7 @@
             <!-- 4. Datepicker with Filter -->
             <h3
               class="text-lg font-medium mb-3"
-              style="color: var(--tremor-content-emphasis)"
+              style="color: var(--aegisx-text-emphasis)"
             >
               Datepicker with Filter (Weekends Disabled)
             </h3>
@@ -1294,7 +1374,7 @@
             <!-- 5. Datepicker Start View -->
             <h3
               class="text-lg font-medium mb-3"
-              style="color: var(--tremor-content-emphasis)"
+              style="color: var(--aegisx-text-emphasis)"
             >
               Datepicker with Different Start Views
             </h3>
@@ -1346,7 +1426,7 @@
             <!-- 6. Datepicker Touch UI -->
             <h3
               class="text-lg font-medium mb-3"
-              style="color: var(--tremor-content-emphasis)"
+              style="color: var(--aegisx-text-emphasis)"
             >
               Datepicker with Touch UI (Mobile Optimized)
             </h3>
@@ -1386,7 +1466,7 @@
             <!-- 7. Datepicker with Actions -->
             <h3
               class="text-lg font-medium mb-3"
-              style="color: var(--tremor-content-emphasis)"
+              style="color: var(--aegisx-text-emphasis)"
             >
               Datepicker with Custom Actions
             </h3>
@@ -1444,7 +1524,7 @@
             <!-- 8. Inline Calendar -->
             <h3
               class="text-lg font-medium mb-3"
-              style="color: var(--tremor-content-emphasis)"
+              style="color: var(--aegisx-text-emphasis)"
             >
               Inline Calendar (Always Open)
             </h3>
@@ -1454,7 +1534,7 @@
                   <div>
                     <p
                       class="text-sm mb-2"
-                      style="color: var(--tremor-content-default)"
+                      style="color: var(--aegisx-text-body)"
                     >
                       Single date calendar
                     </p>
@@ -1464,7 +1544,7 @@
                   <div>
                     <p
                       class="text-sm mb-2"
-                      style="color: var(--tremor-content-default)"
+                      style="color: var(--aegisx-text-body)"
                     >
                       Calendar with min/max dates
                     </p>
@@ -1480,7 +1560,7 @@
             <!-- 9. Month/Year Pickers -->
             <h3
               class="text-lg font-medium mb-3"
-              style="color: var(--tremor-content-emphasis)"
+              style="color: var(--aegisx-text-emphasis)"
             >
               Month and Year Pickers
             </h3>
@@ -1521,7 +1601,7 @@
             <!-- 10. Datepicker with Validation -->
             <h3
               class="text-lg font-medium mb-3"
-              style="color: var(--tremor-content-emphasis)"
+              style="color: var(--aegisx-text-emphasis)"
             >
               Datepicker with Validation
             </h3>
@@ -1564,7 +1644,7 @@
           <div class="p-6">
             <h2
               class="text-xl font-semibold mb-4"
-              style="color: var(--tremor-content-strong)"
+              style="color: var(--aegisx-text-strong)"
             >
               Autocomplete
             </h2>
@@ -1603,7 +1683,7 @@
 
             <h2
               class="text-xl font-semibold mb-4 mt-8"
-              style="color: var(--tremor-content-strong)"
+              style="color: var(--aegisx-text-strong)"
             >
               Multiple Select
             </h2>
@@ -1639,7 +1719,7 @@
           <div class="p-6">
             <h2
               class="text-xl font-semibold mb-4"
-              style="color: var(--tremor-content-strong)"
+              style="color: var(--aegisx-text-strong)"
             >
               Chips Examples
             </h2>
@@ -1647,7 +1727,7 @@
             <!-- Basic Chips -->
             <h3
               class="text-lg font-medium mb-3"
-              style="color: var(--tremor-content-emphasis)"
+              style="color: var(--aegisx-text-emphasis)"
             >
               Basic Chips
             </h3>
@@ -1665,7 +1745,7 @@
             <!-- Chips with Avatar/Icons -->
             <h3
               class="text-lg font-medium mb-3"
-              style="color: var(--tremor-content-emphasis)"
+              style="color: var(--aegisx-text-emphasis)"
             >
               Chips with Avatar
             </h3>
@@ -1695,16 +1775,13 @@
             <!-- Selectable Chips -->
             <h3
               class="text-lg font-medium mb-3"
-              style="color: var(--tremor-content-emphasis)"
+              style="color: var(--aegisx-text-emphasis)"
             >
               Selectable Chips (Single Selection)
             </h3>
             <mat-card appearance="outlined" class="mb-6">
               <mat-card-content>
-                <p
-                  class="text-sm mb-3"
-                  style="color: var(--tremor-content-default)"
-                >
+                <p class="text-sm mb-3" style="color: var(--aegisx-text-body)">
                   Selected: {{ selectedChip || 'None' }}
                 </p>
                 <mat-chip-listbox
@@ -1722,16 +1799,13 @@
             <!-- Multi-Select Chips -->
             <h3
               class="text-lg font-medium mb-3"
-              style="color: var(--tremor-content-emphasis)"
+              style="color: var(--aegisx-text-emphasis)"
             >
               Selectable Chips (Multiple Selection)
             </h3>
             <mat-card appearance="outlined" class="mb-6">
               <mat-card-content>
-                <p
-                  class="text-sm mb-3"
-                  style="color: var(--tremor-content-default)"
-                >
+                <p class="text-sm mb-3" style="color: var(--aegisx-text-body)">
                   Selected: {{ selectedFruits.join(', ') || 'None' }}
                 </p>
                 <mat-chip-listbox
@@ -1751,7 +1825,7 @@
             <!-- Chips with Remove Button (Stacked) -->
             <h3
               class="text-lg font-medium mb-3"
-              style="color: var(--tremor-content-emphasis)"
+              style="color: var(--aegisx-text-emphasis)"
             >
               Chips with Remove Button (Stacked)
             </h3>
@@ -1773,7 +1847,7 @@
             <!-- Chips with Input (Stacked) -->
             <h3
               class="text-lg font-medium mb-3"
-              style="color: var(--tremor-content-emphasis)"
+              style="color: var(--aegisx-text-emphasis)"
             >
               Chips with Input (Stacked)
             </h3>
@@ -1803,7 +1877,7 @@
             <!-- Chips Autocomplete -->
             <h3
               class="text-lg font-medium mb-3"
-              style="color: var(--tremor-content-emphasis)"
+              style="color: var(--aegisx-text-emphasis)"
             >
               Chips with Autocomplete
             </h3>
@@ -1842,7 +1916,7 @@
             <!-- Chips with Highlighted -->
             <h3
               class="text-lg font-medium mb-3"
-              style="color: var(--tremor-content-emphasis)"
+              style="color: var(--aegisx-text-emphasis)"
             >
               Highlighted Chips
             </h3>
@@ -1864,7 +1938,7 @@
           <div class="p-6">
             <h2
               class="text-xl font-semibold mb-4"
-              style="color: var(--tremor-content-strong)"
+              style="color: var(--aegisx-text-strong)"
             >
               Card Examples
             </h2>
@@ -1872,7 +1946,7 @@
             <!-- Basic Cards -->
             <h3
               class="text-lg font-medium mb-3"
-              style="color: var(--tremor-content-emphasis)"
+              style="color: var(--aegisx-text-emphasis)"
             >
               Basic Cards
             </h3>
@@ -1925,7 +1999,7 @@
             <!-- Cards with Images -->
             <h3
               class="text-lg font-medium mb-3"
-              style="color: var(--tremor-content-emphasis)"
+              style="color: var(--aegisx-text-emphasis)"
             >
               Cards with Images
             </h3>
@@ -1966,7 +2040,7 @@
             <!-- Interactive Cards -->
             <h3
               class="text-lg font-medium mb-3"
-              style="color: var(--tremor-content-emphasis)"
+              style="color: var(--aegisx-text-emphasis)"
             >
               Interactive Cards
             </h3>
@@ -2029,18 +2103,410 @@
         <!-- Tremor Examples Tab -->
         <mat-tab label="Tremor Examples">
           <div class="p-6">
+            <!-- Tremor Agents-Style Page -->
+            <section class="mb-8">
+              <!-- Page Header with Divider (Tremor pattern) -->
+              <div class="tremor-page-header mb-6">
+                <h1 class="tremor-page-title">Agents</h1>
+                <p class="tremor-page-subtitle">
+                  Monitor agent performance and manage ticket generation
+                </p>
+              </div>
+
+              <!-- Divider -->
+              <div class="tremor-divider mb-6"></div>
+
+              <!-- Stats Overview with Donut Chart -->
+              <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <!-- Left: Stats Cards -->
+                <div class="lg:col-span-2 grid grid-cols-2 gap-4">
+                  <mat-card appearance="outlined">
+                    <mat-card-content>
+                      <div
+                        class="text-sm"
+                        style="color: var(--aegisx-text-body)"
+                      >
+                        Total Agents
+                      </div>
+                      <div
+                        class="text-2xl font-semibold mt-1"
+                        style="color: var(--aegisx-text-strong)"
+                      >
+                        102
+                      </div>
+                    </mat-card-content>
+                  </mat-card>
+
+                  <mat-card appearance="outlined">
+                    <mat-card-content>
+                      <div
+                        class="text-sm"
+                        style="color: var(--aegisx-text-body)"
+                      >
+                        Active Now
+                      </div>
+                      <div
+                        class="text-2xl font-semibold mt-1"
+                        style="color: var(--aegisx-text-strong)"
+                      >
+                        87
+                      </div>
+                    </mat-card-content>
+                  </mat-card>
+
+                  <mat-card appearance="outlined">
+                    <mat-card-content>
+                      <div
+                        class="text-sm"
+                        style="color: var(--aegisx-text-body)"
+                      >
+                        Avg Response Time
+                      </div>
+                      <div
+                        class="text-2xl font-semibold mt-1"
+                        style="color: var(--aegisx-text-strong)"
+                      >
+                        2.4m
+                      </div>
+                    </mat-card-content>
+                  </mat-card>
+
+                  <mat-card appearance="outlined">
+                    <mat-card-content>
+                      <div
+                        class="text-sm"
+                        style="color: var(--aegisx-text-body)"
+                      >
+                        Tickets Resolved
+                      </div>
+                      <div
+                        class="text-2xl font-semibold mt-1"
+                        style="color: var(--aegisx-text-strong)"
+                      >
+                        1,247
+                      </div>
+                    </mat-card-content>
+                  </mat-card>
+                </div>
+
+                <!-- Right: Donut Chart -->
+                <mat-card appearance="outlined">
+                  <mat-card-content
+                    class="flex flex-col items-center justify-center h-full"
+                  >
+                    <div
+                      class="text-sm mb-4"
+                      style="color: var(--aegisx-text-body)"
+                    >
+                      Agent Status Distribution
+                    </div>
+
+                    <!-- SVG Donut Chart -->
+                    <div class="relative" style="width: 200px; height: 200px">
+                      <svg viewBox="0 0 100 100" class="transform -rotate-90">
+                        <!-- Background circle -->
+                        <circle
+                          cx="50"
+                          cy="50"
+                          r="40"
+                          fill="none"
+                          stroke="var(--aegisx-background-subtle)"
+                          stroke-width="12"
+                        />
+
+                        <!-- Active segment (85%) -->
+                        <circle
+                          cx="50"
+                          cy="50"
+                          r="40"
+                          fill="none"
+                          stroke="var(--aegisx-brand-default)"
+                          stroke-width="12"
+                          stroke-dasharray="214 251"
+                          stroke-linecap="round"
+                        />
+
+                        <!-- Idle segment (10%) -->
+                        <circle
+                          cx="50"
+                          cy="50"
+                          r="40"
+                          fill="none"
+                          stroke="var(--aegisx-warning-default)"
+                          stroke-width="12"
+                          stroke-dasharray="25 251"
+                          stroke-dashoffset="-214"
+                          stroke-linecap="round"
+                        />
+
+                        <!-- Offline segment (5%) -->
+                        <circle
+                          cx="50"
+                          cy="50"
+                          r="40"
+                          fill="none"
+                          stroke="var(--aegisx-text-subtle)"
+                          stroke-width="12"
+                          stroke-dasharray="12 251"
+                          stroke-dashoffset="-239"
+                          stroke-linecap="round"
+                        />
+                      </svg>
+
+                      <!-- Center text -->
+                      <div
+                        class="absolute inset-0 flex flex-col items-center justify-center"
+                      >
+                        <div
+                          class="text-3xl font-bold"
+                          style="color: var(--aegisx-text-strong)"
+                        >
+                          87
+                        </div>
+                        <div
+                          class="text-xs"
+                          style="color: var(--aegisx-text-body)"
+                        >
+                          Active
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="mt-4 space-y-2 w-full">
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                          <div
+                            class="w-3 h-3 rounded-full"
+                            style="
+                              background-color: var(--aegisx-brand-default);
+                            "
+                          ></div>
+                          <span
+                            class="text-sm"
+                            style="color: var(--aegisx-text-body)"
+                            >Active</span
+                          >
+                        </div>
+                        <span
+                          class="text-sm font-medium"
+                          style="color: var(--aegisx-text-strong)"
+                          >87 (85%)</span
+                        >
+                      </div>
+
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                          <div
+                            class="w-3 h-3 rounded-full"
+                            style="
+                              background-color: var(--aegisx-warning-default);
+                            "
+                          ></div>
+                          <span
+                            class="text-sm"
+                            style="color: var(--aegisx-text-body)"
+                            >Idle</span
+                          >
+                        </div>
+                        <span
+                          class="text-sm font-medium"
+                          style="color: var(--aegisx-text-strong)"
+                          >10 (10%)</span
+                        >
+                      </div>
+
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                          <div
+                            class="w-3 h-3 rounded-full"
+                            style="background-color: var(--aegisx-text-subtle)"
+                          ></div>
+                          <span
+                            class="text-sm"
+                            style="color: var(--aegisx-text-body)"
+                            >Offline</span
+                          >
+                        </div>
+                        <span
+                          class="text-sm font-medium"
+                          style="color: var(--aegisx-text-strong)"
+                          >5 (5%)</span
+                        >
+                      </div>
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+              </div>
+
+              <!-- Agent Performance Table (Tremor-style with mini donut charts) -->
+              <mat-card appearance="outlined">
+                <mat-card-content>
+                  <table mat-table [dataSource]="agentsData" class="w-full">
+                    <!-- Agent Name Column -->
+                    <ng-container matColumnDef="name">
+                      <th mat-header-cell *matHeaderCellDef class="w-1/3">
+                        Agent Name
+                      </th>
+                      <td mat-cell *matCellDef="let agent">
+                        <div class="flex items-center gap-2">
+                          <mat-icon
+                            class="text-lg"
+                            style="color: var(--aegisx-brand-default)"
+                          >
+                            account_circle
+                          </mat-icon>
+                          <span
+                            class="font-medium"
+                            style="color: var(--aegisx-text-strong)"
+                          >
+                            {{ agent.name }}
+                          </span>
+                        </div>
+                      </td>
+                    </ng-container>
+
+                    <!-- Capacity Column with Mini Donut Chart -->
+                    <ng-container matColumnDef="capacity">
+                      <th mat-header-cell *matHeaderCellDef class="w-2/3">
+                        <div class="flex items-center gap-1">
+                          Capacity (mins)
+                          <mat-icon
+                            class="text-base"
+                            style="color: var(--aegisx-text-subtle)"
+                            >unfold_more</mat-icon
+                          >
+                        </div>
+                      </th>
+                      <td mat-cell *matCellDef="let agent">
+                        <div class="flex items-center gap-4">
+                          <!-- Mini Donut Chart -->
+                          <div
+                            class="relative flex-shrink-0"
+                            style="width: 48px; height: 48px"
+                          >
+                            <svg
+                              viewBox="0 0 100 100"
+                              class="transform -rotate-90"
+                            >
+                              <!-- Background circle -->
+                              <circle
+                                cx="50"
+                                cy="50"
+                                r="30"
+                                fill="none"
+                                stroke="var(--aegisx-background-subtle)"
+                                stroke-width="16"
+                              />
+
+                              <!-- Capacity segment -->
+                              <circle
+                                cx="50"
+                                cy="50"
+                                r="40"
+                                fill="none"
+                                [attr.stroke]="
+                                  agent.capacity > 70
+                                    ? 'var(--aegisx-error-default)'
+                                    : agent.capacity > 50
+                                      ? 'var(--aegisx-warning-default)'
+                                      : 'var(--aegisx-brand-default)'
+                                "
+                                stroke-width="16"
+                                [attr.stroke-dasharray]="
+                                  agent.capacity * 2.51 + ' 251'
+                                "
+                                stroke-linecap="round"
+                              />
+                            </svg>
+
+                            <!-- Center percentage -->
+                            <div
+                              class="absolute inset-0 flex items-center justify-center"
+                            >
+                              <span
+                                class="text-xs font-semibold"
+                                style="color: var(--aegisx-text-strong)"
+                              >
+                                {{ agent.capacity }}
+                              </span>
+                            </div>
+                          </div>
+
+                          <!-- Called and Booked Stats -->
+                          <div class="flex flex-col gap-1">
+                            <div
+                              class="text-sm"
+                              style="color: var(--aegisx-text-body)"
+                            >
+                              <span style="color: var(--aegisx-text-subtle)"
+                                >Called</span
+                              >
+                              <span
+                                class="font-semibold ml-1"
+                                style="color: var(--aegisx-text-strong)"
+                              >
+                                {{ agent.called.toLocaleString() }}
+                              </span>
+                            </div>
+                            <div
+                              class="text-sm"
+                              style="color: var(--aegisx-text-body)"
+                            >
+                              <span style="color: var(--aegisx-text-subtle)"
+                                >Booked</span
+                              >
+                              <span
+                                class="font-semibold ml-1"
+                                style="color: var(--aegisx-text-strong)"
+                              >
+                                {{ agent.booked.toLocaleString() }}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                    </ng-container>
+
+                    <tr
+                      mat-header-row
+                      *matHeaderRowDef="agentDisplayedColumns"
+                    ></tr>
+                    <tr
+                      mat-row
+                      *matRowDef="let row; columns: agentDisplayedColumns"
+                    ></tr>
+                  </table>
+
+                  <!-- Pagination Info -->
+                  <div class="mt-4 flex items-center justify-between">
+                    <div class="text-sm" style="color: var(--aegisx-text-body)">
+                      Showing 1-{{ agentsData.length }} of
+                      {{ agentsData.length }} agents
+                    </div>
+                    <div class="flex gap-2">
+                      <button mat-button disabled>Previous</button>
+                      <button mat-flat-button color="primary" disabled>
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            </section>
+
+            <!-- Divider -->
+            <div class="tremor-divider my-8"></div>
+
             <!-- Stat Cards Section -->
             <section class="mb-8">
               <h2
                 class="text-2xl font-bold mb-2"
-                style="color: var(--tremor-content-strong)"
+                style="color: var(--aegisx-text-strong)"
               >
                 Stat Cards
               </h2>
-              <p
-                class="text-sm mb-4"
-                style="color: var(--tremor-content-default)"
-              >
+              <p class="text-sm mb-4" style="color: var(--aegisx-text-body)">
                 Using Material <code>mat-card</code> with Tailwind layout
                 utilities
               </p>
@@ -2056,7 +2522,7 @@
                   >
                     <mat-card-title
                       class="text-sm font-medium"
-                      style="color: var(--tremor-content-default)"
+                      style="color: var(--aegisx-text-body)"
                     >
                       Total Users
                     </mat-card-title>
@@ -2065,7 +2531,7 @@
                   <mat-card-content>
                     <div
                       class="text-3xl font-bold mb-2"
-                      style="color: var(--tremor-content-strong)"
+                      style="color: var(--aegisx-text-strong)"
                     >
                       2,543
                     </div>
@@ -2074,7 +2540,7 @@
                         >trending_up</mat-icon
                       >
                       <span class="font-medium text-green-600">+12.5%</span>
-                      <span style="color: var(--tremor-content-subtle)"
+                      <span style="color: var(--aegisx-text-subtle)"
                         >vs last week</span
                       >
                     </div>
@@ -2091,7 +2557,7 @@
                   >
                     <mat-card-title
                       class="text-sm font-medium"
-                      style="color: var(--tremor-content-default)"
+                      style="color: var(--aegisx-text-body)"
                     >
                       Revenue
                     </mat-card-title>
@@ -2100,7 +2566,7 @@
                   <mat-card-content>
                     <div
                       class="text-3xl font-bold mb-2"
-                      style="color: var(--tremor-content-strong)"
+                      style="color: var(--aegisx-text-strong)"
                     >
                       $45,231
                     </div>
@@ -2109,7 +2575,7 @@
                         >trending_up</mat-icon
                       >
                       <span class="font-medium text-green-600">+20.1%</span>
-                      <span style="color: var(--tremor-content-subtle)"
+                      <span style="color: var(--aegisx-text-subtle)"
                         >vs last month</span
                       >
                     </div>
@@ -2126,7 +2592,7 @@
                   >
                     <mat-card-title
                       class="text-sm font-medium"
-                      style="color: var(--tremor-content-default)"
+                      style="color: var(--aegisx-text-body)"
                     >
                       Orders
                     </mat-card-title>
@@ -2135,7 +2601,7 @@
                   <mat-card-content>
                     <div
                       class="text-3xl font-bold mb-2"
-                      style="color: var(--tremor-content-strong)"
+                      style="color: var(--aegisx-text-strong)"
                     >
                       1,329
                     </div>
@@ -2144,7 +2610,7 @@
                         >trending_down</mat-icon
                       >
                       <span class="font-medium text-red-600">-5.2%</span>
-                      <span style="color: var(--tremor-content-subtle)"
+                      <span style="color: var(--aegisx-text-subtle)"
                         >vs last week</span
                       >
                     </div>
@@ -2161,7 +2627,7 @@
                   >
                     <mat-card-title
                       class="text-sm font-medium"
-                      style="color: var(--tremor-content-default)"
+                      style="color: var(--aegisx-text-body)"
                     >
                       Active Sessions
                     </mat-card-title>
@@ -2170,7 +2636,7 @@
                   <mat-card-content>
                     <div
                       class="text-3xl font-bold mb-2"
-                      style="color: var(--tremor-content-strong)"
+                      style="color: var(--aegisx-text-strong)"
                     >
                       573
                     </div>
@@ -2179,7 +2645,7 @@
                         >trending_up</mat-icon
                       >
                       <span class="font-medium text-green-600">+8.3%</span>
-                      <span style="color: var(--tremor-content-subtle)"
+                      <span style="color: var(--aegisx-text-subtle)"
                         >right now</span
                       >
                     </div>
@@ -2192,14 +2658,11 @@
             <section class="mb-8">
               <h2
                 class="text-2xl font-bold mb-2"
-                style="color: var(--tremor-content-strong)"
+                style="color: var(--aegisx-text-strong)"
               >
                 Status Badges
               </h2>
-              <p
-                class="text-sm mb-4"
-                style="color: var(--tremor-content-default)"
-              >
+              <p class="text-sm mb-4" style="color: var(--aegisx-text-body)">
                 Using Material <code>mat-chip</code> for status indicators
               </p>
 
@@ -2231,25 +2694,20 @@
             <section>
               <h2
                 class="text-2xl font-bold mb-2"
-                style="color: var(--tremor-content-strong)"
+                style="color: var(--aegisx-text-strong)"
               >
                 Chart Card
               </h2>
-              <p
-                class="text-sm mb-4"
-                style="color: var(--tremor-content-default)"
-              >
+              <p class="text-sm mb-4" style="color: var(--aegisx-text-body)">
                 Using Material <code>mat-card</code> for chart wrappers
               </p>
 
               <mat-card appearance="outlined">
                 <mat-card-header>
-                  <mat-card-title style="color: var(--tremor-content-strong)">
+                  <mat-card-title style="color: var(--aegisx-text-strong)">
                     Revenue Overview
                   </mat-card-title>
-                  <mat-card-subtitle
-                    style="color: var(--tremor-content-default)"
-                  >
+                  <mat-card-subtitle style="color: var(--aegisx-text-body)">
                     Monthly performance for 2024
                   </mat-card-subtitle>
                 </mat-card-header>
@@ -2257,16 +2715,16 @@
                   <!-- Chart Placeholder -->
                   <div
                     class="h-64 rounded flex items-center justify-center text-center"
-                    style="background: var(--tremor-background-subtle)"
+                    style="background: var(--aegisx-background-subtle)"
                   >
                     <div>
                       <mat-icon
                         class="text-6xl mb-2"
-                        style="color: var(--tremor-content-subtle)"
+                        style="color: var(--aegisx-text-subtle)"
                       >
                         insert_chart
                       </mat-icon>
-                      <p style="color: var(--tremor-content-default)">
+                      <p style="color: var(--aegisx-text-body)">
                         Chart placeholder - integrate with your favorite
                         charting library
                       </p>
@@ -2276,14 +2734,14 @@
                   <!-- Chart Footer -->
                   <div
                     class="flex justify-between items-center text-sm mt-4 pt-4"
-                    style="border-top: 1px solid var(--tremor-border-default)"
+                    style="border-top: 1px solid var(--aegisx-border-default)"
                   >
-                    <span style="color: var(--tremor-content-default)"
+                    <span style="color: var(--aegisx-text-body)"
                       >Jan - Dec 2024</span
                     >
                     <span
                       class="font-medium"
-                      style="color: var(--tremor-brand-default)"
+                      style="color: var(--aegisx-brand-default)"
                     >
                       Total: $124,500
                     </span>

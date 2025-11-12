@@ -1,0 +1,92 @@
+// Components Demo Styles
+.section {
+  display: flex;
+  align-items: center;
+}
+
+.example-label {
+  font-size: 14px;
+  margin: 0 16px 0 8px;
+  min-width: 120px;
+}
+
+.example-button-row {
+  max-width: 600px;
+}
+
+.example-button-row .mat-mdc-button-base {
+  margin: 8px 8px 8px 0;
+}
+
+.example-flex-container {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+// Override Material table styles for AegisX aesthetic
+::ng-deep {
+  .mat-mdc-table {
+    thead {
+      tr {
+        th {
+          font-weight: 600;
+          color: var(--aegisx-content-emphasis);
+          background: var(--aegisx-background-subtle);
+        }
+      }
+    }
+
+    tbody {
+      tr {
+        td {
+          border-bottom: 1px solid var(--aegisx-border-default);
+        }
+
+        &:hover {
+          background: var(--aegisx-background-muted);
+        }
+      }
+    }
+  }
+
+  // Custom Snackbar styles
+  .snackbar-success {
+    --mdc-snackbar-container-color: #10b981;
+    --mat-snack-bar-button-color: #ffffff;
+
+    .mdc-snackbar__surface {
+      background-color: #10b981 !important;
+    }
+
+    .mdc-snackbar__label {
+      color: #ffffff !important;
+    }
+  }
+
+  .snackbar-error {
+    --mdc-snackbar-container-color: #ef4444;
+    --mat-snack-bar-button-color: #ffffff;
+
+    .mdc-snackbar__surface {
+      background-color: #ef4444 !important;
+    }
+
+    .mdc-snackbar__label {
+      color: #ffffff !important;
+    }
+  }
+
+  .snackbar-info {
+    --mdc-snackbar-container-color: #3b82f6;
+    --mat-snack-bar-button-color: #ffffff;
+
+    .mdc-snackbar__surface {
+      background-color: #3b82f6 !important;
+    }
+
+    .mdc-snackbar__label {
+      color: #ffffff !important;
+    }
+  }
+}

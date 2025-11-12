@@ -1,0 +1,313 @@
+@use '@angular/material' as mat;
+
+/* ============================================
+   Material Component Overrides
+   Customize Material components to match AegisX's minimal aesthetic
+   Uses both Material Design 3 tokens and AegisX custom tokens
+   ============================================ */
+
+// ===== Cards - Tremor Style (minimal elevation, subtle borders) =====
+@include mat.card-overrides(
+  (
+    // Outlined card styling (with border)
+    elevated-container-color: var(--aegisx-background-default),
+    elevated-container-shape: var(--aegisx-radius-md),
+    elevated-container-elevation: var(--aegisx-shadow-sm),
+    outlined-container-color: var(--aegisx-background-default),
+    outlined-container-shape: var(--aegisx-radius-md),
+    outlined-outline-color: var(--aegisx-border-default),
+    outlined-outline-width: 1px,
+    outlined-container-elevation: var(--aegisx-shadow-sm)
+  )
+);
+
+// Card header border and content padding (using AegisX spacing tokens)
+.mat-mdc-card {
+  .mat-mdc-card-header {
+    border-bottom: 1px solid var(--aegisx-border-default);
+    padding-bottom: var(--aegisx-spacing-md) !important; // 16px
+  }
+
+  .mat-mdc-card-content {
+    padding-top: var(--aegisx-spacing-md) !important; // 16px
+  }
+}
+
+// ===== Buttons - Tremor Style (flatter, cleaner) =====
+// FAB buttons
+@include mat.fab-overrides(
+  (
+    // Shape
+    container-shape: var(--aegisx-radius-md),
+    small-container-shape: var(--aegisx-radius-md),
+    // Shadows
+    container-elevation-shadow: var(--aegisx-shadow-md),
+    hover-container-elevation-shadow: var(--aegisx-shadow-lg),
+    small-container-elevation-shadow: var(--aegisx-shadow-md),
+    small-hover-container-elevation-shadow: var(--aegisx-shadow-lg)
+  )
+);
+
+// Icon buttons
+@include mat.icon-button-overrides(
+  (
+    // Shape
+    container-shape: var(--aegisx-radius-md)
+  )
+);
+
+// Icons
+@include mat.icon-overrides(
+  (
+    // Use Tremor content color for icons
+    color: var(--aegisx-text-strong)
+  )
+);
+
+// Regular buttons (raised, outlined, text, etc.)
+@include mat.button-overrides(
+  (
+    // Protected (raised/elevated) buttons
+    protected-container-shape: var(--aegisx-radius-md),
+    protected-container-elevation-shadow: var(--aegisx-shadow-sm),
+    protected-hover-container-elevation-shadow: var(--aegisx-shadow-md),
+    protected-pressed-container-elevation-shadow: var(--aegisx-shadow-sm),
+    // Outlined buttons
+    outlined-container-shape: var(--aegisx-radius-md),
+    outlined-outline-color: var(--aegisx-border-default),
+    // Text buttons
+    text-container-shape: var(--aegisx-radius-md),
+    // Filled buttons
+    filled-container-shape: var(--aegisx-radius-md),
+    // Tonal buttons
+    tonal-container-shape: var(--aegisx-radius-md)
+  )
+);
+
+// ===== Form Fields - Tremor Style (clean borders) =====
+.mat-mdc-form-field {
+  // Outlined style
+  .mat-mdc-text-field-wrapper {
+    .mat-mdc-form-field-flex {
+      .mdc-notched-outline {
+        .mdc-notched-outline__leading,
+        .mdc-notched-outline__notch,
+        .mdc-notched-outline__trailing {
+          border-color: var(--aegisx-border-default) !important;
+        }
+      }
+    }
+  }
+
+  // Focus state
+  &.mat-focused {
+    .mdc-notched-outline {
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: var(--aegisx-brand-default) !important;
+        border-width: 2px !important;
+      }
+    }
+  }
+
+  // Error state
+  &.mat-form-field-invalid {
+    .mdc-notched-outline {
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: var(--md-sys-color-error) !important;
+      }
+    }
+  }
+}
+
+// Fix faint left border on form field notch
+.mat-mdc-form-field .mdc-notched-outline__notch {
+  border-left: none !important;
+}
+
+// Input elements
+.mat-mdc-input-element {
+  color: var(--aegisx-text-strong) !important;
+
+  &::placeholder {
+    color: var(--aegisx-text-subtle) !important;
+  }
+}
+
+// ===== Tables - Tremor Style =====
+@include mat.table-overrides(
+  (
+    // Background and borders
+    background-color: var(--aegisx-background-default),
+    row-item-outline-color: var(--aegisx-border-default),
+    row-item-outline-width: 1px,
+    // Text colors
+    header-headline-color: var(--aegisx-text-strong),
+    row-item-label-text-color: var(--aegisx-text-body)
+  )
+);
+
+// Additional table styling (no tokens available)
+.mat-mdc-table {
+  border-radius: var(--aegisx-radius-md);
+  overflow: hidden;
+
+  .mat-mdc-header-row {
+    background: var(--aegisx-background-subtle);
+  }
+
+  .mat-mdc-row {
+    &:hover {
+      background: var(--aegisx-background-muted);
+    }
+  }
+
+  .mat-mdc-cell,
+  .mat-mdc-header-cell {
+    border-right: 1px solid var(--aegisx-border-default);
+
+    &:last-child {
+      border-right: none;
+    }
+  }
+}
+
+// ===== Chips - Tremor Style =====
+// Using Angular Material chips-overrides mixin (official M3 approach)
+@include mat.chips-overrides(
+  (
+    // Outline (border) styling
+    outline-color: var(--aegisx-border-default),
+    outline-width: 1px,
+
+    // Container colors
+    elevated-container-color: var(--aegisx-background-subtle),
+    elevated-selected-container-color: var(--aegisx-brand-faint),
+    elevated-disabled-container-color: var(--aegisx-background-subtle),
+    // Label text colors
+    label-text-color: var(--aegisx-text-strong),
+    selected-label-text-color: var(--aegisx-brand-emphasis),
+    disabled-label-text-color: var(--aegisx-text-subtle),
+    // Disabled outline
+    disabled-outline-color: var(--aegisx-border-default),
+    // Shape (border radius)
+    container-shape-radius: var(--aegisx-radius-md),
+    // Selected outline width
+    flat-selected-outline-width: 1px
+  )
+);
+
+// ===== Dialogs - Tremor Style =====
+.mat-mdc-dialog-container {
+  .mdc-dialog__surface {
+    border-radius: var(--aegisx-radius-lg) !important;
+    border: 1px solid var(--aegisx-border-default) !important;
+    box-shadow: var(--aegisx-shadow-lg) !important;
+    background: var(--aegisx-background-default) !important;
+  }
+}
+
+// ===== Menus - Tremor Style =====
+.mat-mdc-menu-panel {
+  border: 1px solid var(--aegisx-border-default) !important;
+  border-radius: var(--aegisx-radius-md) !important;
+  box-shadow: var(--aegisx-shadow-md) !important;
+  background: var(--aegisx-background-default) !important;
+}
+
+.mat-mdc-menu-item {
+  &:hover:not([disabled]) {
+    background: var(--aegisx-background-subtle) !important;
+  }
+}
+
+// ===== Tabs - Tremor Style =====
+.mat-mdc-tab-group {
+  .mat-mdc-tab-header {
+    border-bottom: 1px solid var(--aegisx-border-default);
+  }
+
+  .mat-mdc-tab {
+    &:hover:not(.mat-mdc-tab-disabled) {
+      background: var(--aegisx-background-subtle);
+    }
+  }
+
+  .mat-mdc-tab-body-content {
+    padding: var(--aegisx-spacing-lg);
+  }
+}
+
+// ===== Expansion Panels - Tremor Style =====
+.mat-expansion-panel {
+  border: 1px solid var(--aegisx-border-default) !important;
+  border-radius: var(--aegisx-radius-md) !important;
+  box-shadow: none !important;
+  background: var(--aegisx-background-default) !important;
+
+  & + .mat-expansion-panel {
+    margin-top: var(--aegisx-spacing-sm);
+  }
+
+  &:not(.mat-expanded) {
+    .mat-expansion-panel-header:hover {
+      background: var(--aegisx-background-subtle) !important;
+    }
+  }
+}
+
+// ===== Progress Bars - Minimal =====
+.mat-mdc-progress-bar {
+  border-radius: var(--aegisx-radius-sm);
+  overflow: hidden;
+}
+
+// ===== Sliders - Clean style =====
+.mat-mdc-slider {
+  .mdc-slider__track {
+    border-radius: var(--aegisx-radius-sm);
+  }
+}
+
+// ===== Toolbar - Tremor Style =====
+.mat-toolbar {
+  border-bottom: 1px solid var(--aegisx-border-default);
+  box-shadow: var(--aegisx-shadow-sm);
+}
+
+// ===== Lists - Clean borders =====
+.mat-mdc-list {
+  .mat-mdc-list-item {
+    border-bottom: 1px solid var(--aegisx-border-default);
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover:not([disabled]) {
+      background: var(--aegisx-background-subtle);
+    }
+  }
+}
+
+// ===== Badges - Tremor Style =====
+.mat-badge-content {
+  border-radius: var(--aegisx-radius-sm);
+  box-shadow: var(--aegisx-shadow-sm);
+}
+
+// ===== Tooltips - Minimal =====
+.mat-mdc-tooltip {
+  border-radius: var(--aegisx-radius-sm);
+  box-shadow: var(--aegisx-shadow-md);
+}
+
+// ===== Snackbars - Tremor Style =====
+.mat-mdc-snack-bar-container {
+  border-radius: var(--aegisx-radius-md) !important;
+  border: 1px solid var(--aegisx-border-default) !important;
+  box-shadow: var(--aegisx-shadow-lg) !important;
+}
