@@ -20,9 +20,26 @@
           {
             "glob": "**/*",
             "input": "apps/admin/public"
+          },
+          {
+            "glob": "**/*.css",
+            "input": "node_modules/@angular/material/prebuilt-themes",
+            "output": "themes"
           }
         ],
-        "styles": ["apps/admin/src/styles.scss"]
+        "styles": [
+          "apps/admin/src/styles.scss",
+          {
+            "input": "libs/aegisx-ui/src/lib/styles/themes/aegisx-light.scss",
+            "bundleName": "aegisx-light",
+            "inject": false
+          },
+          {
+            "input": "libs/aegisx-ui/src/lib/styles/themes/aegisx-dark.scss",
+            "bundleName": "aegisx-dark",
+            "inject": false
+          }
+        ]
       },
       "configurations": {
         "production": {

@@ -1,2 +1,28 @@
-<ax-nx-welcome></ax-nx-welcome>
-<router-outlet></router-outlet>
+<ax-compact-layout
+  [navigation]="navigation"
+  [appName]="appName"
+  [appVersion]="appVersion"
+  [showFooter]="true"
+>
+  <!-- Toolbar Title -->
+  <ng-template #toolbarTitle>
+    <span class="text-lg font-semibold">{{ title }}</span>
+  </ng-template>
+
+  <!-- Toolbar Actions (Theme & Layout Switchers) -->
+  <ng-template #toolbarActions>
+    <ax-theme-switcher></ax-theme-switcher>
+    <ax-layout-switcher
+      (layoutChange)="onLayoutChange($event)"
+    ></ax-layout-switcher>
+    <button mat-icon-button>
+      <mat-icon>notifications</mat-icon>
+    </button>
+    <button mat-icon-button>
+      <mat-icon>settings</mat-icon>
+    </button>
+  </ng-template>
+
+  <!-- Main Content -->
+  <router-outlet></router-outlet>
+</ax-compact-layout>

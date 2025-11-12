@@ -1,0 +1,179 @@
+/**
+ * Tremor Custom Theme - Complete Material Design 3 Implementation
+ * Based on Tremor Blocks design system (https://blocks.tremor.so/)
+ *
+ * Color Palette:
+ * - Primary: Slate (neutral, professional)
+ * - Secondary/Accent: Blue (interactive, clean)
+ * - Surface: Light gray backgrounds
+ * - Minimal shadows, clean borders, modern typography
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+/* ============================================
+   Material Design 3 Color System
+   ============================================ */
+
+:root {
+  /* Primary Colors - Slate */
+  --md-sys-color-primary: #334155; /* slate-700 */
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #e2e8f0; /* slate-200 */
+  --md-sys-color-on-primary-container: #0f172a; /* slate-900 */
+
+  /* Secondary Colors - Blue */
+  --md-sys-color-secondary: #3b82f6; /* blue-500 */
+  --md-sys-color-on-secondary: #ffffff;
+  --md-sys-color-secondary-container: #dbeafe; /* blue-100 */
+  --md-sys-color-on-secondary-container: #1e3a8a; /* blue-900 */
+
+  /* Tertiary Colors */
+  --md-sys-color-tertiary: #2563eb; /* blue-600 */
+  --md-sys-color-on-tertiary: #ffffff;
+  --md-sys-color-tertiary-container: #bfdbfe; /* blue-200 */
+  --md-sys-color-on-tertiary-container: #1e40af; /* blue-800 */
+
+  /* Error Colors */
+  --md-sys-color-error: #dc2626; /* red-600 */
+  --md-sys-color-on-error: #ffffff;
+  --md-sys-color-error-container: #fee2e2; /* red-100 */
+  --md-sys-color-on-error-container: #7f1d1d; /* red-900 */
+
+  /* Surface Colors - Tremor aesthetic */
+  --md-sys-color-surface: #f8fafc; /* slate-50 */
+  --md-sys-color-on-surface: #0f172a; /* slate-900 */
+  --md-sys-color-surface-variant: #f1f5f9; /* slate-100 */
+  --md-sys-color-on-surface-variant: #475569; /* slate-600 */
+
+  /* Background */
+  --md-sys-color-background: #ffffff;
+  --md-sys-color-on-background: #0f172a; /* slate-900 */
+
+  /* Outline */
+  --md-sys-color-outline: #cbd5e1; /* slate-300 */
+  --md-sys-color-outline-variant: #e2e8f0; /* slate-200 */
+
+  /* MDC Theme Variables (for compatibility) */
+  --mdc-theme-primary: #334155;
+  --mdc-theme-secondary: #3b82f6;
+  --mdc-theme-error: #dc2626;
+  --mdc-theme-background: #ffffff;
+  --mdc-theme-surface: #f8fafc;
+  --mdc-theme-on-primary: #ffffff;
+  --mdc-theme-on-secondary: #ffffff;
+  --mdc-theme-on-error: #ffffff;
+  --mdc-theme-on-background: #0f172a;
+  --mdc-theme-on-surface: #0f172a;
+}
+
+/* ============================================
+   Component Specific Overrides
+   ============================================ */
+
+/* Buttons */
+.mat-mdc-button.mat-primary,
+.mat-mdc-raised-button.mat-primary,
+.mat-mdc-fab.mat-primary,
+.mat-mdc-mini-fab.mat-primary {
+  --mdc-filled-button-container-color: #334155;
+  --mdc-filled-button-label-text-color: #ffffff;
+  --mdc-protected-button-container-color: #334155;
+  --mdc-protected-button-label-text-color: #ffffff;
+}
+
+.mat-mdc-button.mat-accent,
+.mat-mdc-raised-button.mat-accent {
+  --mdc-filled-button-container-color: #3b82f6;
+  --mdc-filled-button-label-text-color: #ffffff;
+}
+
+/* Form Fields */
+.mat-mdc-form-field {
+  --mdc-outlined-text-field-label-text-color: #64748b;
+  --mdc-outlined-text-field-focus-label-text-color: #334155;
+  --mdc-outlined-text-field-focus-outline-color: #334155;
+  --mdc-outlined-text-field-outline-color: #cbd5e1;
+  --mdc-outlined-text-field-hover-outline-color: #94a3b8;
+}
+
+/* Checkboxes & Radios */
+.mat-mdc-checkbox.mat-primary,
+.mat-mdc-radio-button.mat-primary {
+  --mdc-checkbox-selected-checkmark-color: #ffffff;
+  --mdc-checkbox-selected-icon-color: #334155;
+  --mdc-checkbox-unselected-icon-color: #cbd5e1;
+  --mdc-radio-selected-icon-color: #334155;
+  --mdc-radio-unselected-icon-color: #cbd5e1;
+}
+
+/* Slide Toggles */
+.mat-mdc-slide-toggle.mat-primary {
+  --mdc-switch-selected-track-color: #334155;
+  --mdc-switch-selected-handle-color: #ffffff;
+}
+
+.mat-mdc-slide-toggle.mat-accent {
+  --mdc-switch-selected-track-color: #3b82f6;
+  --mdc-switch-selected-handle-color: #ffffff;
+}
+
+/* Sliders */
+.mat-mdc-slider.mat-primary {
+  --mdc-slider-active-track-color: #334155;
+  --mdc-slider-handle-color: #334155;
+}
+
+/* Tabs */
+.mat-mdc-tab-group.mat-primary .mat-mdc-tab {
+  --mat-tab-header-inactive-label-text-color: #64748b;
+  --mat-tab-header-active-label-text-color: #334155;
+  --mat-tab-header-active-ripple-color: #334155;
+}
+
+/* Cards - Tremor minimal style */
+.mat-mdc-card {
+  --mdc-elevated-card-container-color: #ffffff;
+  --mdc-elevated-card-container-elevation: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+/* Progress Bars */
+.mat-mdc-progress-bar.mat-primary {
+  --mdc-linear-progress-active-indicator-color: #334155;
+}
+
+/* Toolbar */
+.mat-toolbar.mat-primary {
+  --mat-toolbar-container-background-color: #334155;
+  --mat-toolbar-container-text-color: #ffffff;
+}
+
+/* ============================================
+   Global Typography (Tremor uses Inter-like fonts)
+   ============================================ */
+
+body {
+  background-color: #f8fafc;
+  color: #0f172a;
+  font-family:
+    'Inter',
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+}
+
+/* Minimal shadows for clean aesthetic */
+.mat-mdc-elevated-card {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
+.mat-mdc-dialog-container {
+  --mdc-dialog-container-elevation: 0px 8px 16px 0px rgba(0, 0, 0, 0.08);
+}

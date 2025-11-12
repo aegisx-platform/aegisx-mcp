@@ -15,12 +15,22 @@ import {
   provideAx,
 } from '@aegisx/ui';
 import { appRoutes } from './app.routes';
+import { TremorThemeService } from './services/tremor-theme.service';
 
 // Factory function to initialize icons
 function initializeIcons() {
   return () => {
     const iconService = inject(IconService);
     // Icons are registered in the constructor
+    return Promise.resolve();
+  };
+}
+
+// Factory function to initialize Tremor theme
+function initializeTremorTheme() {
+  return () => {
+    const themeService = inject(TremorThemeService);
+    // Theme is initialized in the constructor
     return Promise.resolve();
   };
 }
@@ -37,6 +47,13 @@ export const appConfig: ApplicationConfig = {
     {
       provide: APP_INITIALIZER,
       useFactory: initializeIcons,
+      multi: true,
+    },
+
+    // Initialize Tremor theme
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeTremorTheme,
       multi: true,
     },
 
@@ -64,5 +81,6 @@ export const appConfig: ApplicationConfig = {
     AegisxConfigService,
     AegisxNavigationService,
     IconService,
+    TremorThemeService,
   ],
 };

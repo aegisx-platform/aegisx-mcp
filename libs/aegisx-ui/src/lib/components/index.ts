@@ -15,5 +15,6 @@ export * from './ax-navigation.component';
 // Dialog Components
 export * from './dialogs';
 
-// Theme Switcher Component
-export { AxThemeSwitcherComponent } from './theme-switcher/theme-switcher.component';
+// Theme & Layout Switchers
+export * from './ax-theme-switcher.component';
+export * from './ax-layout-switcher.component';
