@@ -1,15 +1,17 @@
-import { Component, signal } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Component, computed, inject, signal } from '@angular/core';
+import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import {
   AxCompactLayoutComponent,
   AxNavigationItem,
-  AxThemeSwitcherComponent,
   AxLayoutSwitcherComponent,
   LayoutType,
 } from '@aegisx/ui';
+import { TremorThemeSwitcherComponent } from './components/tremor-theme-switcher.component';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { filter, map, startWith } from 'rxjs/operators';
 
 @Component({
   imports: [
@@ -18,7 +20,7 @@ import {
     MatButtonModule,
     MatIconModule,
     AxCompactLayoutComponent,
-    AxThemeSwitcherComponent,
+    TremorThemeSwitcherComponent,
     AxLayoutSwitcherComponent,
   ],
   selector: 'ax-root',
@@ -26,10 +28,28 @@ import {
   styleUrl: './app.scss',
 })
 export class App {
+  private readonly router = inject(Router);
+
   protected title = 'Theme Testing App';
   protected appName = 'AegisX Theme Testing';
   protected appVersion = 'v1.0';
   protected currentLayout = signal<LayoutType>('compact');
+
+  // Check if current route should show layout
+  protected readonly currentUrl = toSignal(
+    this.router.events.pipe(
+      filter((event) => event instanceof NavigationEnd),
+      map((event: NavigationEnd) => event.urlAfterRedirects),
+      startWith(this.router.url),
+    ),
+    { initialValue: this.router.url },
+  );
+
+  protected readonly showLayout = computed(() => {
+    const url = this.currentUrl();
+    // Don't show layout for standalone routes
+    return !url.startsWith('/login');
+  });
 
   // Navigation items for theme testing app
   navigation: AxNavigationItem[] = [
@@ -46,6 +66,13 @@ export class App {
       type: 'item',
       icon: 'widgets',
       link: '/components',
+    },
+    {
+      id: 'design-tokens',
+      title: 'Design Tokens',
+      type: 'item',
+      icon: 'color_lens',
+      link: '/design-tokens',
     },
     {
       id: 'aegisx-components',

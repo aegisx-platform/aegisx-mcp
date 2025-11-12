@@ -1,0 +1,514 @@
+<div class="design-tokens-page">
+  <!-- Header Section -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="title-section">
+        <h1 class="page-title">
+          <mat-icon class="title-icon">color_lens</mat-icon>
+          Design Tokens
+        </h1>
+        <p class="page-description">
+          AegisX Design System Reference - Complete token library with
+          {{ getTotalTokenCount() }}
+          design tokens
+        </p>
+      </div>
+
+      <div class="header-actions">
+        <!-- Theme Toggle -->
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="toggleTheme()"
+          class="theme-toggle"
+        >
+          <mat-icon>{{
+            themeService.themeId() === 'aegisx-dark'
+              ? 'light_mode'
+              : 'dark_mode'
+          }}</mat-icon>
+          Toggle Theme
+        </button>
+      </div>
+    </div>
+
+    <!-- Search Box -->
+    <mat-form-field class="search-field" appearance="outline">
+      <mat-label>Search tokens...</mat-label>
+      <input
+        matInput
+        [(ngModel)]="searchQuery"
+        placeholder="Try 'brand', 'spacing-md', or 'success'"
+      />
+      <mat-icon matPrefix>search</mat-icon>
+      @if (searchQuery) {
+        <button
+          matSuffix
+          mat-icon-button
+          (click)="searchQuery = ''"
+          aria-label="Clear search"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+    </mat-form-field>
+  </div>
+
+  <!-- Token Categories -->
+  <div class="categories-container">
+    @for (category of filteredCategories; track category.id) {
+      <section class="token-category" [id]="category.id">
+        <mat-card appearance="outlined" class="category-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>{{ category.icon }}</mat-icon>
+            <mat-card-title>{{ category.title }}</mat-card-title>
+            <mat-card-subtitle>{{ category.description }}</mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <!-- Colors Section -->
+            @if (category.id === 'colors') {
+              <div class="tokens-grid colors-grid">
+                @for (token of category.tokens; track token.cssVar) {
+                  <div class="token-card color-token">
+                    <div
+                      class="color-swatch"
+                      [style.backgroundColor]="getColorValue(token.cssVar)"
+                    ></div>
+                    <div class="token-info">
+                      <div class="token-name">{{ token.name }}</div>
+                      <div class="token-variable">
+                        <code>{{ token.cssVar }}</code>
+                        <button
+                          mat-icon-button
+                          class="copy-btn"
+                          (click)="copyToClipboard(token.cssVar)"
+                          [matTooltip]="
+                            copiedToken === token.cssVar
+                              ? 'Copied!'
+                              : 'Copy CSS variable'
+                          "
+                        >
+                          <mat-icon class="copy-icon">{{
+                            copiedToken === token.cssVar
+                              ? 'check'
+                              : 'content_copy'
+                          }}</mat-icon>
+                        </button>
+                      </div>
+                      <div class="token-value">{{ token.value || 'N/A' }}</div>
+                      <div class="token-description">
+                        {{ token.description }}
+                      </div>
+                      <mat-chip class="category-chip">{{
+                        token.category
+                      }}</mat-chip>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <!-- Code Examples for Colors -->
+              <div class="code-examples">
+                <h3>Usage Examples</h3>
+                <div class="example-tabs">
+                  <div class="example-code">
+                    <h4>HTML</h4>
+                    <pre><code>&lt;div style="color: var(--aegisx-brand-default)"&gt;
+  Brand colored text
+&lt;/div&gt;</code></pre>
+                  </div>
+                  <div class="example-code">
+                    <h4>SCSS</h4>
+                    <pre><code>.my-component &#123;
+  color: var(--aegisx-brand-default);
+  background: var(--aegisx-brand-faint);
+&#125;</code></pre>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Typography Section -->
+            @if (category.id === 'typography') {
+              <div class="tokens-list typography-list">
+                @for (token of category.tokens; track token.cssVar) {
+                  <div class="token-item typography-token">
+                    <div class="token-demo">
+                      @if (token.category === 'font-size') {
+                        <span
+                          class="type-sample"
+                          [style.fontSize]="getColorValue(token.cssVar)"
+                          >The quick brown fox jumps</span
+                        >
+                      }
+                      @if (token.category === 'font-weight') {
+                        <span
+                          class="type-sample"
+                          [style.fontWeight]="getColorValue(token.cssVar)"
+                          >The quick brown fox jumps</span
+                        >
+                      }
+                      @if (token.category === 'line-height') {
+                        <span
+                          class="type-sample multiline"
+                          [style.lineHeight]="getColorValue(token.cssVar)"
+                          >The quick brown fox jumps over the lazy dog. This is
+                          a multi-line sample to demonstrate line height.</span
+                        >
+                      }
+                    </div>
+                    <div class="token-details">
+                      <div class="token-name">{{ token.name }}</div>
+                      <div class="token-variable">
+                        <code>{{ token.cssVar }}</code>
+                        <button
+                          mat-icon-button
+                          class="copy-btn"
+                          (click)="copyToClipboard(token.cssVar)"
+                          [matTooltip]="
+                            copiedToken === token.cssVar
+                              ? 'Copied!'
+                              : 'Copy CSS variable'
+                          "
+                        >
+                          <mat-icon class="copy-icon">{{
+                            copiedToken === token.cssVar
+                              ? 'check'
+                              : 'content_copy'
+                          }}</mat-icon>
+                        </button>
+                      </div>
+                      <div class="token-value">{{ token.description }}</div>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <!-- Code Examples for Typography -->
+              <div class="code-examples">
+                <h3>Usage Examples</h3>
+                <div class="example-tabs">
+                  <div class="example-code">
+                    <h4>HTML</h4>
+                    <pre><code>&lt;h1 style="font-size: var(--aegisx-text-4xl); font-weight: var(--aegisx-font-bold)"&gt;
+  Heading
+&lt;/h1&gt;</code></pre>
+                  </div>
+                  <div class="example-code">
+                    <h4>SCSS</h4>
+                    <pre><code>.heading &#123;
+  font-size: var(--aegisx-text-4xl);
+  font-weight: var(--aegisx-font-bold);
+  line-height: var(--aegisx-leading-tight);
+&#125;</code></pre>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Spacing Section -->
+            @if (category.id === 'spacing') {
+              <div class="tokens-list spacing-list">
+                @for (token of category.tokens; track token.cssVar) {
+                  <div class="token-item spacing-token">
+                    <div class="spacing-visual">
+                      <div
+                        class="spacing-bar"
+                        [style.width]="getColorValue(token.cssVar)"
+                      ></div>
+                    </div>
+                    <div class="token-details">
+                      <div class="token-name">{{ token.name }}</div>
+                      <div class="token-variable">
+                        <code>{{ token.cssVar }}</code>
+                        <button
+                          mat-icon-button
+                          class="copy-btn"
+                          (click)="copyToClipboard(token.cssVar)"
+                          [matTooltip]="
+                            copiedToken === token.cssVar
+                              ? 'Copied!'
+                              : 'Copy CSS variable'
+                          "
+                        >
+                          <mat-icon class="copy-icon">{{
+                            copiedToken === token.cssVar
+                              ? 'check'
+                              : 'content_copy'
+                          }}</mat-icon>
+                        </button>
+                      </div>
+                      <div class="token-value">{{ token.description }}</div>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <!-- Code Examples for Spacing -->
+              <div class="code-examples">
+                <h3>Usage Examples</h3>
+                <div class="example-tabs">
+                  <div class="example-code">
+                    <h4>HTML</h4>
+                    <pre><code>&lt;div style="padding: var(--aegisx-spacing-md); margin: var(--aegisx-spacing-lg)"&gt;
+  Content
+&lt;/div&gt;</code></pre>
+                  </div>
+                  <div class="example-code">
+                    <h4>SCSS</h4>
+                    <pre><code>.card &#123;
+  padding: var(--aegisx-spacing-md);
+  margin-bottom: var(--aegisx-spacing-lg);
+&#125;</code></pre>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Components Section -->
+            @if (category.id === 'components') {
+              <div class="tokens-grid components-grid">
+                @for (token of category.tokens; track token.cssVar) {
+                  <div class="token-card component-token">
+                    <!-- Visual Demo based on token type -->
+                    @if (token.category === 'radius') {
+                      <div class="component-demo">
+                        <div
+                          class="radius-sample"
+                          [style.borderRadius]="getColorValue(token.cssVar)"
+                        ></div>
+                      </div>
+                    }
+                    @if (token.category === 'shadow') {
+                      <div class="component-demo">
+                        <div
+                          class="shadow-sample"
+                          [style.boxShadow]="getColorValue(token.cssVar)"
+                        ></div>
+                      </div>
+                    }
+                    @if (token.category === 'border-width') {
+                      <div class="component-demo">
+                        <div
+                          class="border-sample"
+                          [style.borderWidth]="getColorValue(token.cssVar)"
+                        ></div>
+                      </div>
+                    }
+                    @if (token.category === 'transition') {
+                      <div class="component-demo">
+                        <div
+                          class="transition-sample"
+                          [style.transition]="
+                            'all ' + getColorValue(token.cssVar) + ' ease'
+                          "
+                        ></div>
+                      </div>
+                    }
+
+                    <div class="token-info">
+                      <div class="token-name">{{ token.name }}</div>
+                      <div class="token-variable">
+                        <code>{{ token.cssVar }}</code>
+                        <button
+                          mat-icon-button
+                          class="copy-btn"
+                          (click)="copyToClipboard(token.cssVar)"
+                          [matTooltip]="
+                            copiedToken === token.cssVar
+                              ? 'Copied!'
+                              : 'Copy CSS variable'
+                          "
+                        >
+                          <mat-icon class="copy-icon">{{
+                            copiedToken === token.cssVar
+                              ? 'check'
+                              : 'content_copy'
+                          }}</mat-icon>
+                        </button>
+                      </div>
+                      <div class="token-value">{{ token.description }}</div>
+                      <mat-chip class="category-chip">{{
+                        token.category
+                      }}</mat-chip>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <!-- Code Examples for Components -->
+              <div class="code-examples">
+                <h3>Usage Examples</h3>
+                <div class="example-tabs">
+                  <div class="example-code">
+                    <h4>HTML</h4>
+                    <pre><code>&lt;button style="border-radius: var(--aegisx-radius-lg); box-shadow: var(--aegisx-shadow-md)"&gt;
+  Button
+&lt;/button&gt;</code></pre>
+                  </div>
+                  <div class="example-code">
+                    <h4>SCSS</h4>
+                    <pre><code>.button &#123;
+  border-radius: var(--aegisx-radius-lg);
+  box-shadow: var(--aegisx-shadow-md);
+  transition: all var(--aegisx-transition-base);
+&#125;</code></pre>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Layout Section -->
+            @if (category.id === 'layout') {
+              <div class="tokens-list layout-list">
+                @for (token of category.tokens; track token.cssVar) {
+                  <div class="token-item layout-token">
+                    <div class="token-details">
+                      <div class="token-name">{{ token.name }}</div>
+                      <div class="token-variable">
+                        <code>{{ token.cssVar }}</code>
+                        <button
+                          mat-icon-button
+                          class="copy-btn"
+                          (click)="copyToClipboard(token.cssVar)"
+                          [matTooltip]="
+                            copiedToken === token.cssVar
+                              ? 'Copied!'
+                              : 'Copy CSS variable'
+                          "
+                        >
+                          <mat-icon class="copy-icon">{{
+                            copiedToken === token.cssVar
+                              ? 'check'
+                              : 'content_copy'
+                          }}</mat-icon>
+                        </button>
+                      </div>
+                      <div class="token-value">{{ token.description }}</div>
+                      <mat-chip class="category-chip">{{
+                        token.category
+                      }}</mat-chip>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <!-- Code Examples for Layout -->
+              <div class="code-examples">
+                <h3>Usage Examples</h3>
+                <div class="example-tabs">
+                  <div class="example-code">
+                    <h4>HTML</h4>
+                    <pre><code>&lt;div class="container" style="max-width: var(--aegisx-container-lg)"&gt;
+  Content
+&lt;/div&gt;</code></pre>
+                  </div>
+                  <div class="example-code">
+                    <h4>SCSS</h4>
+                    <pre><code>.container &#123;
+  max-width: var(--aegisx-container-lg);
+
+  &#64;media (min-width: var(--aegisx-breakpoint-md)) &#123;
+    padding: var(--aegisx-spacing-xl);
+  &#125;
+&#125;</code></pre>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Effects Section -->
+            @if (category.id === 'effects') {
+              <div class="tokens-list effects-list">
+                @for (token of category.tokens; track token.cssVar) {
+                  <div class="token-item effects-token">
+                    <!-- Visual Demo based on token type -->
+                    @if (token.category === 'z-index') {
+                      <div class="effect-demo z-index-demo">
+                        <div class="z-layer">
+                          <span>{{ token.description }}</span>
+                        </div>
+                      </div>
+                    }
+                    @if (token.category === 'opacity') {
+                      <div class="effect-demo opacity-demo">
+                        <div
+                          class="opacity-sample"
+                          [style.opacity]="token.description"
+                        ></div>
+                      </div>
+                    }
+                    @if (token.category === 'focus-ring') {
+                      <div class="effect-demo focus-demo">
+                        <button class="focus-sample">Focusable</button>
+                      </div>
+                    }
+
+                    <div class="token-details">
+                      <div class="token-name">{{ token.name }}</div>
+                      <div class="token-variable">
+                        <code>{{ token.cssVar }}</code>
+                        <button
+                          mat-icon-button
+                          class="copy-btn"
+                          (click)="copyToClipboard(token.cssVar)"
+                          [matTooltip]="
+                            copiedToken === token.cssVar
+                              ? 'Copied!'
+                              : 'Copy CSS variable'
+                          "
+                        >
+                          <mat-icon class="copy-icon">{{
+                            copiedToken === token.cssVar
+                              ? 'check'
+                              : 'content_copy'
+                          }}</mat-icon>
+                        </button>
+                      </div>
+                      <div class="token-value">{{ token.description }}</div>
+                      <mat-chip class="category-chip">{{
+                        token.category
+                      }}</mat-chip>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <!-- Code Examples for Effects -->
+              <div class="code-examples">
+                <h3>Usage Examples</h3>
+                <div class="example-tabs">
+                  <div class="example-code">
+                    <h4>HTML</h4>
+                    <pre><code>&lt;div class="modal" style="z-index: var(--aegisx-z-modal)"&gt;
+  Modal Content
+&lt;/div&gt;</code></pre>
+                  </div>
+                  <div class="example-code">
+                    <h4>SCSS</h4>
+                    <pre><code>.button &#123;
+  &:focus &#123;
+    outline: var(--aegisx-focus-ring-width) solid var(--aegisx-focus-ring-color);
+    outline-offset: var(--aegisx-focus-ring-offset);
+    opacity: var(--aegisx-opacity-hover);
+  &#125;
+&#125;</code></pre>
+                  </div>
+                </div>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      </section>
+    }
+
+    @if (filteredCategories.length === 0) {
+      <div class="no-results">
+        <mat-icon class="no-results-icon">search_off</mat-icon>
+        <h3>No tokens found</h3>
+        <p>Try adjusting your search query</p>
+      </div>
+    }
+  </div>
+</div>

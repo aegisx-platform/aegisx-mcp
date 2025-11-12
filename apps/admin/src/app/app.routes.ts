@@ -1,6 +1,14 @@
 import { Route } from '@angular/router';
 
 export const appRoutes: Route[] = [
+  // Standalone routes (no layout)
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('./pages/login/login.component').then((m) => m.LoginComponent),
+  },
+
+  // Main routes (with layout)
   {
     path: '',
     redirectTo: 'dashboard',
@@ -25,6 +33,13 @@ export const appRoutes: Route[] = [
     loadComponent: () =>
       import('./pages/components-demo/components-demo.component').then(
         (m) => m.ComponentsDemoComponent,
+      ),
+  },
+  {
+    path: 'design-tokens',
+    loadComponent: () =>
+      import('./pages/design-tokens/design-tokens.component').then(
+        (m) => m.DesignTokensComponent,
       ),
   },
 ];
