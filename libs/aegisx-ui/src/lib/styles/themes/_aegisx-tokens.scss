@@ -70,34 +70,39 @@ $aegisx-light-info-default: #3b82f6;
 $aegisx-light-info-emphasis: #2563eb;
 $aegisx-light-info-inverted: #ffffff;
 
-// Background Variants (4 tokens) - Subtle background variations
-$aegisx-light-background-muted: #f9fafb;
-$aegisx-light-background-subtle: #f3f4f6;
-$aegisx-light-background-default: #ffffff;
-$aegisx-light-background-emphasis: #f9fafb;
+// Background Variants (4 tokens) - Subtle background variations (Tremor design)
+$aegisx-light-background-muted: #f9fafb; // Tremor: tremor-background-muted
+$aegisx-light-background-subtle: #f3f4f6; // Tremor: tremor-background-subtle
+$aegisx-light-background-default: #ffffff; // Tremor: tremor-background
+$aegisx-light-background-emphasis: #374151; // Tremor: tremor-background-emphasis
 
-// Text Hierarchy (5 tokens) - Text color scales
-$aegisx-light-text-subtle: #9ca3af;
-$aegisx-light-text-body: #6b7280;
-$aegisx-light-text-emphasis: #374151;
-$aegisx-light-text-strong: #111827;
-$aegisx-light-text-inverted: #ffffff;
+// Text Hierarchy (5 tokens) - Text color scales (Tremor design)
+$aegisx-light-text-subtle: #9ca3af; // Tremor: tremor-content-subtle
+$aegisx-light-text-body: #6b7280; // Tremor: tremor-content
+$aegisx-light-text-emphasis: #374151; // Tremor: tremor-content-emphasis
+$aegisx-light-text-strong: #111827; // Tremor: tremor-content-strong
+$aegisx-light-text-inverted: #ffffff; // Tremor: tremor-content-inverted
 
-// Border (1 token) - Default border color
-$aegisx-light-border-default: #e5e7eb;
+// Border (3 tokens) - Border color variants
+$aegisx-light-border-muted: #f3f4f6; // Subtle border
+$aegisx-light-border-default: #e5e7eb; // Standard border
+$aegisx-light-border-emphasis: #d1d5db; // Strong border
 
-// Brand/Primary (6 tokens) - Brand color palette (matches Material primary)
-$aegisx-light-brand-faint: #ffffff;
-$aegisx-light-brand-muted: #bfdbfe;
-$aegisx-light-brand-subtle: #60a5fa;
-$aegisx-light-brand-default: #3b82f6;
-$aegisx-light-brand-emphasis: #2563eb;
-$aegisx-light-brand-inverted: #ffffff;
+// Brand/Primary (6 tokens) - Brand color palette (matches Tremor design)
+$aegisx-light-brand-faint: #eff6ff; // Tremor: tremor-brand-faint
+$aegisx-light-brand-muted: #bfdbfe; // Tremor: tremor-brand-muted
+$aegisx-light-brand-subtle: #60a5fa; // Tremor: tremor-brand-subtle
+$aegisx-light-brand-default: #3b82f6; // Tremor: tremor-brand
+$aegisx-light-brand-emphasis: #1d4ed8; // Tremor: tremor-brand-emphasis
+$aegisx-light-brand-inverted: #ffffff; // Tremor: tremor-brand-inverted
 
-// Border Radius (3 tokens) - Corner rounding
-$aegisx-radius-sm: 0.25rem;
-$aegisx-radius-md: 0.375rem;
-$aegisx-radius-lg: 0.5rem;
+// Border Radius (6 tokens) - Corner rounding
+$aegisx-radius-sm: 0.25rem; // 4px - Small elements
+$aegisx-radius-md: 0.375rem; // 6px - Standard elements
+$aegisx-radius-lg: 0.5rem; // 8px - Large elements
+$aegisx-radius-xl: 0.75rem; // 12px - Extra large cards
+$aegisx-radius-2xl: 1rem; // 16px - Modals, dialogs
+$aegisx-radius-full: 9999px; // Fully rounded (pills, badges)
 
 // Shadows (3 tokens) - Box shadow values
 $aegisx-light-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -127,6 +132,59 @@ $aegisx-transition-fast: 150ms ease;
 $aegisx-transition-base: 200ms ease;
 $aegisx-transition-slow: 300ms ease;
 $aegisx-transition-slower: 400ms ease;
+
+// Responsive Breakpoints (4 tokens) - Match Material breakpoints
+$aegisx-breakpoint-sm: 600px;
+$aegisx-breakpoint-md: 960px;
+$aegisx-breakpoint-lg: 1280px;
+$aegisx-breakpoint-xl: 1440px;
+
+// Container Widths (4 tokens) - Max content widths
+$aegisx-container-sm: 640px;
+$aegisx-container-md: 960px;
+$aegisx-container-lg: 1280px;
+$aegisx-container-xl: 1440px;
+
+// Focus Ring (4 tokens) - Accessibility focus indicators
+$aegisx-focus-ring-width: 2px;
+$aegisx-focus-ring-offset: 2px;
+$aegisx-focus-ring-opacity: 0.5;
+$aegisx-focus-ring-color: #3b82f6; // Same as brand-default
+
+// Border Widths (3 tokens) - Border thickness variants
+$aegisx-border-thin: 1px;
+$aegisx-border-default: 1px;
+$aegisx-border-thick: 2px;
+
+// Grid System (2 tokens) - Layout grid
+$aegisx-grid-columns: 12;
+$aegisx-grid-gutter: 24px;
+
+/* ============================================================
+   TYPOGRAPHY SCALE (NEW)
+   Font sizes, weights, and line heights for consistent typography
+   ============================================================ */
+
+// Font Sizes (8 tokens) - Matches Tailwind typography scale
+$aegisx-text-xs: 0.75rem; // 12px
+$aegisx-text-sm: 0.875rem; // 14px
+$aegisx-text-base: 1rem; // 16px
+$aegisx-text-lg: 1.125rem; // 18px
+$aegisx-text-xl: 1.25rem; // 20px
+$aegisx-text-2xl: 1.5rem; // 24px
+$aegisx-text-3xl: 1.875rem; // 30px
+$aegisx-text-4xl: 2.25rem; // 36px
+
+// Font Weights (4 tokens) - Standard weight scale
+$aegisx-font-normal: 400;
+$aegisx-font-medium: 500;
+$aegisx-font-semibold: 600;
+$aegisx-font-bold: 700;
+
+// Line Heights (3 tokens) - Vertical rhythm
+$aegisx-leading-tight: 1.25;
+$aegisx-leading-normal: 1.5;
+$aegisx-leading-relaxed: 1.75;
 
 /* ============================================================
    DARK THEME TOKEN VALUES
@@ -166,21 +224,23 @@ $aegisx-dark-info-default: #3b82f6;
 $aegisx-dark-info-emphasis: #60a5fa;
 $aegisx-dark-info-inverted: #111827;
 
-// Background Variants - Dark mode backgrounds
-$aegisx-dark-background-muted: #131a2b;
-$aegisx-dark-background-subtle: #1c2536;
-$aegisx-dark-background-default: #111827;
-$aegisx-dark-background-emphasis: #1f2937;
+// Background Variants - Dark mode backgrounds (Tremor design)
+$aegisx-dark-background-muted: #131a2b; // Tremor: dark-tremor-background-muted
+$aegisx-dark-background-subtle: #1f2937; // Tremor: dark-tremor-background-subtle
+$aegisx-dark-background-default: #111827; // Tremor: dark-tremor-background
+$aegisx-dark-background-emphasis: #d1d5db; // Tremor: dark-tremor-background-emphasis
 
-// Text Hierarchy - Lighter text for dark backgrounds
-$aegisx-dark-text-subtle: #6b7280;
-$aegisx-dark-text-body: #9ca3af;
-$aegisx-dark-text-emphasis: #e5e7eb;
-$aegisx-dark-text-strong: #f9fafb;
-$aegisx-dark-text-inverted: #111827;
+// Text Hierarchy - Lighter text for dark backgrounds (Tremor design)
+$aegisx-dark-text-subtle: #4b5563; // Tremor: dark-tremor-content-subtle
+$aegisx-dark-text-body: #6b7280; // Tremor: dark-tremor-content
+$aegisx-dark-text-emphasis: #e5e7eb; // Tremor: dark-tremor-content-emphasis
+$aegisx-dark-text-strong: #f9fafb; // Tremor: dark-tremor-content-strong
+$aegisx-dark-text-inverted: #000000; // Tremor: dark-tremor-content-inverted
 
-// Border - Darker border for dark mode
-$aegisx-dark-border-default: #1f2937;
+// Border (3 tokens) - Darker borders for dark mode
+$aegisx-dark-border-muted: #1f2937; // Subtle border
+$aegisx-dark-border-default: #374151; // Standard border
+$aegisx-dark-border-emphasis: #4b5563; // Strong border
 
 // Shadows (3 tokens) - More subtle shadows for dark mode
 $aegisx-dark-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
@@ -191,13 +251,13 @@ $aegisx-dark-shadow-lg:
   0 10px 15px -3px rgb(0 0 0 / 0.5),
   0 4px 6px -4px rgb(0 0 0 / 0.4);
 
-// Brand/Primary - Lighter brand colors for dark mode
-$aegisx-dark-brand-faint: #1e3a8a;
-$aegisx-dark-brand-muted: #1e40af;
-$aegisx-dark-brand-subtle: #3b82f6;
-$aegisx-dark-brand-default: #60a5fa;
-$aegisx-dark-brand-emphasis: #93c5fd;
-$aegisx-dark-brand-inverted: #111827;
+// Brand/Primary - Lighter brand colors for dark mode (Tremor design)
+$aegisx-dark-brand-faint: #0b1229; // Tremor: dark-tremor-brand-faint
+$aegisx-dark-brand-muted: #172554; // Tremor: dark-tremor-brand-muted
+$aegisx-dark-brand-subtle: #1e40af; // Tremor: dark-tremor-brand-subtle
+$aegisx-dark-brand-default: #3b82f6; // Tremor: dark-tremor-brand
+$aegisx-dark-brand-emphasis: #60a5fa; // Tremor: dark-tremor-brand-emphasis
+$aegisx-dark-brand-inverted: #172554; // Tremor: dark-tremor-brand-inverted
 
 /* ============================================================
    LIGHT THEME MIXIN
@@ -252,13 +312,18 @@ $aegisx-dark-brand-inverted: #111827;
     --aegisx-text-strong: #{$aegisx-light-text-strong};
     --aegisx-text-inverted: #{$aegisx-light-text-inverted};
 
-    /* Border */
+    /* Border Variants */
+    --aegisx-border-muted: #{$aegisx-light-border-muted};
     --aegisx-border-default: #{$aegisx-light-border-default};
+    --aegisx-border-emphasis: #{$aegisx-light-border-emphasis};
 
     /* Border Radius (same for both themes) */
     --aegisx-radius-sm: #{$aegisx-radius-sm};
     --aegisx-radius-md: #{$aegisx-radius-md};
     --aegisx-radius-lg: #{$aegisx-radius-lg};
+    --aegisx-radius-xl: #{$aegisx-radius-xl};
+    --aegisx-radius-2xl: #{$aegisx-radius-2xl};
+    --aegisx-radius-full: #{$aegisx-radius-full};
 
     /* Shadows */
     --aegisx-shadow-sm: #{$aegisx-light-shadow-sm};
@@ -292,6 +357,75 @@ $aegisx-dark-brand-inverted: #111827;
     --aegisx-transition-base: #{$aegisx-transition-base};
     --aegisx-transition-slow: #{$aegisx-transition-slow};
     --aegisx-transition-slower: #{$aegisx-transition-slower};
+
+    /* Typography - Font Sizes */
+    --aegisx-text-xs: #{$aegisx-text-xs};
+    --aegisx-text-sm: #{$aegisx-text-sm};
+    --aegisx-text-base: #{$aegisx-text-base};
+    --aegisx-text-lg: #{$aegisx-text-lg};
+    --aegisx-text-xl: #{$aegisx-text-xl};
+    --aegisx-text-2xl: #{$aegisx-text-2xl};
+    --aegisx-text-3xl: #{$aegisx-text-3xl};
+    --aegisx-text-4xl: #{$aegisx-text-4xl};
+
+    /* Typography - Font Weights */
+    --aegisx-font-normal: #{$aegisx-font-normal};
+    --aegisx-font-medium: #{$aegisx-font-medium};
+    --aegisx-font-semibold: #{$aegisx-font-semibold};
+    --aegisx-font-bold: #{$aegisx-font-bold};
+
+    /* Typography - Line Heights */
+    --aegisx-leading-tight: #{$aegisx-leading-tight};
+    --aegisx-leading-normal: #{$aegisx-leading-normal};
+    --aegisx-leading-relaxed: #{$aegisx-leading-relaxed};
+
+    /* ============================================
+       MATERIAL DESIGN TOKEN OVERRIDES
+       Override Material's default tokens to match AegisX Design System
+       ============================================ */
+
+    /* Primary Color System - Override Material Purple → AegisX Blue */
+    --mat-sys-primary: var(--aegisx-brand-default);
+    --mat-sys-on-primary: var(--aegisx-brand-inverted);
+    --mat-sys-primary-container: var(--aegisx-brand-faint);
+    --mat-sys-on-primary-container: var(--aegisx-brand-emphasis);
+
+    /* Surface & Background Colors - Use AegisX backgrounds */
+    --mat-sys-surface: var(--aegisx-background-default);
+    --mat-sys-surface-dim: var(--aegisx-background-subtle);
+    --mat-sys-surface-bright: var(--aegisx-background-emphasis);
+    --mat-sys-surface-container: var(--aegisx-background-muted);
+    --mat-sys-surface-container-low: var(--aegisx-background-subtle);
+    --mat-sys-surface-container-lowest: var(--aegisx-background-default);
+    --mat-sys-surface-container-high: var(--aegisx-background-subtle);
+    --mat-sys-surface-container-highest: var(--aegisx-background-muted);
+
+    --mat-sys-on-surface: var(--aegisx-text-strong);
+    --mat-sys-on-surface-variant: var(--aegisx-text-body);
+
+    --mat-sys-background: var(--aegisx-background-default);
+    --mat-sys-on-background: var(--aegisx-text-strong);
+
+    /* Outline & Border Colors - Use AegisX borders */
+    --mat-sys-outline: var(--aegisx-border-default);
+    --mat-sys-outline-variant: var(--aegisx-border-default);
+
+    /* Elevation & Shadows - Use AegisX shadows */
+    --mat-sys-level0: none;
+    --mat-sys-level1: var(--aegisx-shadow-sm);
+    --mat-sys-level2: var(--aegisx-shadow-sm);
+    --mat-sys-level3: var(--aegisx-shadow-md);
+    --mat-sys-level4: var(--aegisx-shadow-md);
+    --mat-sys-level5: var(--aegisx-shadow-lg);
+
+    /* Shape & Border Radius - Use AegisX radius */
+    --mat-sys-corner-none: 0;
+    --mat-sys-corner-extra-small: var(--aegisx-radius-sm);
+    --mat-sys-corner-small: var(--aegisx-radius-sm);
+    --mat-sys-corner-medium: var(--aegisx-radius-md);
+    --mat-sys-corner-large: var(--aegisx-radius-lg);
+    --mat-sys-corner-extra-large: var(--aegisx-radius-xl);
+    --mat-sys-corner-full: var(--aegisx-radius-full);
   }
 }
 
@@ -348,13 +482,18 @@ $aegisx-dark-brand-inverted: #111827;
     --aegisx-text-strong: #{$aegisx-dark-text-strong};
     --aegisx-text-inverted: #{$aegisx-dark-text-inverted};
 
-    /* Border */
+    /* Border Variants */
+    --aegisx-border-muted: #{$aegisx-dark-border-muted};
     --aegisx-border-default: #{$aegisx-dark-border-default};
+    --aegisx-border-emphasis: #{$aegisx-dark-border-emphasis};
 
     /* Border Radius (same for both themes) */
     --aegisx-radius-sm: #{$aegisx-radius-sm};
     --aegisx-radius-md: #{$aegisx-radius-md};
     --aegisx-radius-lg: #{$aegisx-radius-lg};
+    --aegisx-radius-xl: #{$aegisx-radius-xl};
+    --aegisx-radius-2xl: #{$aegisx-radius-2xl};
+    --aegisx-radius-full: #{$aegisx-radius-full};
 
     /* Shadows */
     --aegisx-shadow-sm: #{$aegisx-dark-shadow-sm};
@@ -388,5 +527,74 @@ $aegisx-dark-brand-inverted: #111827;
     --aegisx-transition-base: #{$aegisx-transition-base};
     --aegisx-transition-slow: #{$aegisx-transition-slow};
     --aegisx-transition-slower: #{$aegisx-transition-slower};
+
+    /* Typography - Font Sizes */
+    --aegisx-text-xs: #{$aegisx-text-xs};
+    --aegisx-text-sm: #{$aegisx-text-sm};
+    --aegisx-text-base: #{$aegisx-text-base};
+    --aegisx-text-lg: #{$aegisx-text-lg};
+    --aegisx-text-xl: #{$aegisx-text-xl};
+    --aegisx-text-2xl: #{$aegisx-text-2xl};
+    --aegisx-text-3xl: #{$aegisx-text-3xl};
+    --aegisx-text-4xl: #{$aegisx-text-4xl};
+
+    /* Typography - Font Weights */
+    --aegisx-font-normal: #{$aegisx-font-normal};
+    --aegisx-font-medium: #{$aegisx-font-medium};
+    --aegisx-font-semibold: #{$aegisx-font-semibold};
+    --aegisx-font-bold: #{$aegisx-font-bold};
+
+    /* Typography - Line Heights */
+    --aegisx-leading-tight: #{$aegisx-leading-tight};
+    --aegisx-leading-normal: #{$aegisx-leading-normal};
+    --aegisx-leading-relaxed: #{$aegisx-leading-relaxed};
+
+    /* ============================================
+       MATERIAL DESIGN TOKEN OVERRIDES (Dark Theme)
+       Override Material's dark theme tokens to match AegisX Dark Design
+       ============================================ */
+
+    /* Primary Color System - Lighter blue for dark mode */
+    --mat-sys-primary: var(--aegisx-brand-default);
+    --mat-sys-on-primary: var(--aegisx-brand-inverted);
+    --mat-sys-primary-container: var(--aegisx-brand-faint);
+    --mat-sys-on-primary-container: var(--aegisx-brand-emphasis);
+
+    /* Surface & Background Colors - Dark mode surfaces */
+    --mat-sys-surface: var(--aegisx-background-default);
+    --mat-sys-surface-dim: var(--aegisx-background-subtle);
+    --mat-sys-surface-bright: var(--aegisx-background-emphasis);
+    --mat-sys-surface-container: var(--aegisx-background-muted);
+    --mat-sys-surface-container-low: var(--aegisx-background-subtle);
+    --mat-sys-surface-container-lowest: var(--aegisx-background-default);
+    --mat-sys-surface-container-high: var(--aegisx-background-subtle);
+    --mat-sys-surface-container-highest: var(--aegisx-background-muted);
+
+    --mat-sys-on-surface: var(--aegisx-text-strong);
+    --mat-sys-on-surface-variant: var(--aegisx-text-body);
+
+    --mat-sys-background: var(--aegisx-background-default);
+    --mat-sys-on-background: var(--aegisx-text-strong);
+
+    /* Outline & Border Colors - Dark mode borders */
+    --mat-sys-outline: var(--aegisx-border-default);
+    --mat-sys-outline-variant: var(--aegisx-border-default);
+
+    /* Elevation & Shadows - More subtle shadows for dark mode */
+    --mat-sys-level0: none;
+    --mat-sys-level1: var(--aegisx-shadow-sm);
+    --mat-sys-level2: var(--aegisx-shadow-sm);
+    --mat-sys-level3: var(--aegisx-shadow-md);
+    --mat-sys-level4: var(--aegisx-shadow-md);
+    --mat-sys-level5: var(--aegisx-shadow-lg);
+
+    /* Shape & Border Radius - Same as light theme */
+    --mat-sys-corner-none: 0;
+    --mat-sys-corner-extra-small: var(--aegisx-radius-sm);
+    --mat-sys-corner-small: var(--aegisx-radius-sm);
+    --mat-sys-corner-medium: var(--aegisx-radius-md);
+    --mat-sys-corner-large: var(--aegisx-radius-lg);
+    --mat-sys-corner-extra-large: var(--aegisx-radius-xl);
+    --mat-sys-corner-full: var(--aegisx-radius-full);
   }
 }
