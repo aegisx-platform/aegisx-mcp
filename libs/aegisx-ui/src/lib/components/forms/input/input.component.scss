@@ -75,13 +75,35 @@
     }
   }
 
-  // Readonly state
+  // Readonly state - Enhanced for display-oriented appearance
   &.ax-input-readonly {
-    background-color: var(--ax-background-subtle);
-    border-color: var(--ax-border-muted);
+    background-color: transparent;
+    border-color: transparent;
+    padding-left: 0;
+    padding-right: 0;
 
     .ax-input-field {
       cursor: default;
+      color: var(--ax-text-primary);
+      font-weight: var(--ax-font-weight-medium);
+    }
+
+    // Remove any interactive visual feedback
+    &:hover {
+      border-color: transparent;
+      background-color: transparent;
+    }
+
+    // No focus styles in readonly mode
+    &.ax-input-focused {
+      border-color: transparent;
+      outline: none;
+    }
+
+    // Prefix/suffix in readonly mode
+    .ax-input-prefix,
+    .ax-input-suffix {
+      color: var(--ax-text-secondary);
     }
   }
 }

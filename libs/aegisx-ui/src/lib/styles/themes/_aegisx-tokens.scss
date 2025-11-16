@@ -693,6 +693,108 @@ $aegisx-dark-brand-inverted: #1a237e; // Material Indigo 900 (dark)
     --ax-a11y-touch-target-min: #{$aegisx-a11y-touch-target-min};
     --ax-a11y-text-min-contrast: #{$aegisx-a11y-text-min-contrast};
     --ax-a11y-text-enhanced-contrast: #{$aegisx-a11y-text-enhanced-contrast};
+
+    /* ============================================================
+       COMPONENT COMPATIBILITY ALIASES
+       These aliases provide backward compatibility for components
+       using alternative naming conventions
+       ============================================================ */
+
+    /* Primary Color Aliases (Primary = Brand) */
+    --ax-primary: var(--ax-brand-default);
+    --ax-primary-default: var(--ax-brand-default);
+    --ax-primary-faint: var(--ax-brand-faint);
+    --ax-primary-muted: var(--ax-brand-muted);
+    --ax-primary-subtle: var(--ax-brand-subtle);
+    --ax-primary-emphasis: var(--ax-brand-emphasis);
+    --ax-primary-inverted: var(--ax-brand-inverted);
+    --ax-primary-dark: #{darken($aegisx-light-brand-default, 10%)};
+    --ax-primary-light: #{lighten($aegisx-light-brand-default, 20%)};
+
+    /* Semantic Color Shorthands */
+    --ax-success: var(--ax-success-default);
+    --ax-error: var(--ax-error-default);
+    --ax-warning: var(--ax-warning-default);
+    --ax-info: var(--ax-info-default);
+
+    /* Color Dark/Light Variants */
+    --ax-success-dark: #{darken($aegisx-light-success-default, 10%)};
+    --ax-success-light: #{lighten($aegisx-light-success-default, 20%)};
+    --ax-error-dark: #{darken($aegisx-light-error-default, 10%)};
+    --ax-error-light: #{lighten($aegisx-light-error-default, 20%)};
+    --ax-warning-dark: #{darken($aegisx-light-warning-default, 10%)};
+    --ax-warning-light: #{lighten($aegisx-light-warning-default, 20%)};
+    --ax-info-dark: #{darken($aegisx-light-info-default, 10%)};
+
+    /* RGB Color Variants (for opacity/rgba usage) */
+    --ax-success-rgb:
+      #{red($aegisx-light-success-default)},
+      #{green($aegisx-light-success-default)},
+      #{blue($aegisx-light-success-default)};
+    --ax-error-rgb:
+      #{red($aegisx-light-error-default)},
+      #{green($aegisx-light-error-default)},
+      #{blue($aegisx-light-error-default)};
+    --ax-warning-rgb:
+      #{red($aegisx-light-warning-default)},
+      #{green($aegisx-light-warning-default)},
+      #{blue($aegisx-light-warning-default)};
+    --ax-info-rgb:
+      #{red($aegisx-light-info-default)}, #{green($aegisx-light-info-default)},
+      #{blue($aegisx-light-info-default)};
+
+    /* White Color */
+    --ax-white: #ffffff;
+
+    /* Gray Scale (for UI elements like backgrounds, borders) */
+    --ax-gray-50: #f9fafb;
+    --ax-gray-100: #f3f4f6;
+    --ax-gray-200: #e5e7eb;
+    --ax-gray-300: #d1d5db;
+    --ax-gray-400: #9ca3af;
+    --ax-gray-500: #6b7280;
+    --ax-gray-600: #4b5563;
+    --ax-gray-700: #374151;
+    --ax-gray-800: #1f2937;
+    --ax-gray-900: #111827;
+
+    /* Font Family (sans-serif stack) */
+    --ax-font-family: Roboto, 'Helvetica Neue', sans-serif;
+    --ax-font-sans: Roboto, 'Helvetica Neue', sans-serif;
+
+    /* Font Size Aliases (font-size-* → text-*) */
+    --ax-font-size-xs: var(--ax-text-xs);
+    --ax-font-size-sm: var(--ax-text-sm);
+    --ax-font-size-base: var(--ax-text-base);
+    --ax-font-size-lg: var(--ax-text-lg);
+    --ax-font-size-xl: var(--ax-text-xl);
+
+    /* Font Weight Aliases (font-weight-* → font-*) */
+    --ax-font-weight-medium: var(--ax-font-medium);
+    --ax-font-weight-semibold: var(--ax-font-semibold);
+    --ax-font-weight-bold: var(--ax-font-bold);
+
+    /* Line Height Aliases (line-height-* → leading-*) */
+    --ax-line-height-tight: var(--ax-leading-tight);
+    --ax-line-height-normal: var(--ax-leading-normal);
+    --ax-line-height-relaxed: var(--ax-leading-relaxed);
+
+    /* Background & Border Shorthands */
+    --ax-bg: var(--ax-background-default);
+    --ax-border: var(--ax-border-default);
+    --ax-border-color: var(--ax-border-default);
+
+    /* Interactive State Backgrounds */
+    --ax-hover-bg: #{rgba($aegisx-light-brand-default, 0.08)};
+    --ax-active-bg: #{rgba($aegisx-light-brand-default, 0.12)};
+
+    /* Transition/Duration Aliases */
+    --ax-duration-fast: var(--ax-transition-fast);
+    --ax-easing-easeInOut: cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Navigation-Specific Transitions */
+    --ax-navigation-transition-duration: 300ms;
+    --ax-navigation-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
@@ -952,5 +1054,106 @@ $aegisx-dark-brand-inverted: #1a237e; // Material Indigo 900 (dark)
     --ax-a11y-touch-target-min: #{$aegisx-a11y-touch-target-min};
     --ax-a11y-text-min-contrast: #{$aegisx-a11y-text-min-contrast};
     --ax-a11y-text-enhanced-contrast: #{$aegisx-a11y-text-enhanced-contrast};
+
+    /* ============================================================
+       COMPONENT COMPATIBILITY ALIASES (Dark Theme)
+       These aliases provide backward compatibility for components
+       using alternative naming conventions
+       ============================================================ */
+
+    /* Primary Color Aliases (Primary = Brand) */
+    --ax-primary: var(--ax-brand-default);
+    --ax-primary-default: var(--ax-brand-default);
+    --ax-primary-faint: var(--ax-brand-faint);
+    --ax-primary-muted: var(--ax-brand-muted);
+    --ax-primary-subtle: var(--ax-brand-subtle);
+    --ax-primary-emphasis: var(--ax-brand-emphasis);
+    --ax-primary-inverted: var(--ax-brand-inverted);
+    --ax-primary-dark: #{darken($aegisx-dark-brand-default, 10%)};
+    --ax-primary-light: #{lighten($aegisx-dark-brand-default, 20%)};
+
+    /* Semantic Color Shorthands */
+    --ax-success: var(--ax-success-default);
+    --ax-error: var(--ax-error-default);
+    --ax-warning: var(--ax-warning-default);
+    --ax-info: var(--ax-info-default);
+
+    /* Color Dark/Light Variants */
+    --ax-success-dark: #{darken($aegisx-dark-success-default, 10%)};
+    --ax-success-light: #{lighten($aegisx-dark-success-default, 20%)};
+    --ax-error-dark: #{darken($aegisx-dark-error-default, 10%)};
+    --ax-error-light: #{lighten($aegisx-dark-error-default, 20%)};
+    --ax-warning-dark: #{darken($aegisx-dark-warning-default, 10%)};
+    --ax-warning-light: #{lighten($aegisx-dark-warning-default, 20%)};
+    --ax-info-dark: #{darken($aegisx-dark-info-default, 10%)};
+
+    /* RGB Color Variants (for opacity/rgba usage) */
+    --ax-success-rgb:
+      #{red($aegisx-dark-success-default)},
+      #{green($aegisx-dark-success-default)},
+      #{blue($aegisx-dark-success-default)};
+    --ax-error-rgb:
+      #{red($aegisx-dark-error-default)}, #{green($aegisx-dark-error-default)},
+      #{blue($aegisx-dark-error-default)};
+    --ax-warning-rgb:
+      #{red($aegisx-dark-warning-default)},
+      #{green($aegisx-dark-warning-default)},
+      #{blue($aegisx-dark-warning-default)};
+    --ax-info-rgb:
+      #{red($aegisx-dark-info-default)}, #{green($aegisx-dark-info-default)},
+      #{blue($aegisx-dark-info-default)};
+
+    /* White Color */
+    --ax-white: #ffffff;
+
+    /* Gray Scale (for dark theme UI elements) */
+    --ax-gray-50: #111827;
+    --ax-gray-100: #1f2937;
+    --ax-gray-200: #374151;
+    --ax-gray-300: #4b5563;
+    --ax-gray-400: #6b7280;
+    --ax-gray-500: #9ca3af;
+    --ax-gray-600: #d1d5db;
+    --ax-gray-700: #e5e7eb;
+    --ax-gray-800: #f3f4f6;
+    --ax-gray-900: #f9fafb;
+
+    /* Font Family (sans-serif stack) */
+    --ax-font-family: Roboto, 'Helvetica Neue', sans-serif;
+    --ax-font-sans: Roboto, 'Helvetica Neue', sans-serif;
+
+    /* Font Size Aliases (font-size-* → text-*) */
+    --ax-font-size-xs: var(--ax-text-xs);
+    --ax-font-size-sm: var(--ax-text-sm);
+    --ax-font-size-base: var(--ax-text-base);
+    --ax-font-size-lg: var(--ax-text-lg);
+    --ax-font-size-xl: var(--ax-text-xl);
+
+    /* Font Weight Aliases (font-weight-* → font-*) */
+    --ax-font-weight-medium: var(--ax-font-medium);
+    --ax-font-weight-semibold: var(--ax-font-semibold);
+    --ax-font-weight-bold: var(--ax-font-bold);
+
+    /* Line Height Aliases (line-height-* → leading-*) */
+    --ax-line-height-tight: var(--ax-leading-tight);
+    --ax-line-height-normal: var(--ax-leading-normal);
+    --ax-line-height-relaxed: var(--ax-leading-relaxed);
+
+    /* Background & Border Shorthands */
+    --ax-bg: var(--ax-background-default);
+    --ax-border: var(--ax-border-default);
+    --ax-border-color: var(--ax-border-default);
+
+    /* Interactive State Backgrounds */
+    --ax-hover-bg: #{rgba($aegisx-dark-brand-default, 0.08)};
+    --ax-active-bg: #{rgba($aegisx-dark-brand-default, 0.12)};
+
+    /* Transition/Duration Aliases */
+    --ax-duration-fast: var(--ax-transition-fast);
+    --ax-easing-easeInOut: cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Navigation-Specific Transitions */
+    --ax-navigation-transition-duration: 300ms;
+    --ax-navigation-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
   }
 }

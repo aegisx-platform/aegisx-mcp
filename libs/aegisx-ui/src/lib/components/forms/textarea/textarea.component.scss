@@ -58,9 +58,30 @@
   cursor: not-allowed;
 }
 
+// Readonly state - Enhanced for display-oriented appearance
 .ax-textarea-wrapper-readonly {
-  background-color: var(--ax-gray-50);
+  background-color: transparent;
+  border-color: transparent;
+  padding-left: 0;
+  padding-right: 0;
   cursor: default;
+
+  .ax-textarea-field {
+    color: var(--ax-text-primary);
+    font-weight: var(--ax-font-weight-medium);
+  }
+
+  // Remove any interactive visual feedback
+  &:hover {
+    border-color: transparent;
+    background-color: transparent;
+  }
+
+  // No focus styles in readonly mode
+  &:focus-within {
+    border-color: transparent;
+    outline: none;
+  }
 }
 
 // Sizes

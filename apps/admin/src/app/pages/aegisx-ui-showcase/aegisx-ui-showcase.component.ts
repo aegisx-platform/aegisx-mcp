@@ -21,6 +21,9 @@ import { AxListComponent, ListItem } from '@aegisx/ui';
 import { AxStatsCardComponent } from '@aegisx/ui';
 import { AxTimelineComponent, TimelineItem } from '@aegisx/ui';
 import { AxTableComponent, TableColumn } from '@aegisx/ui';
+import { AxFieldDisplayComponent } from '@aegisx/ui';
+import { AxDescriptionListComponent } from '@aegisx/ui';
+import { AxDataCardComponent } from '@aegisx/ui';
 
 // Feedback
 import { AxAlertComponent } from '@aegisx/ui';
@@ -29,7 +32,7 @@ import { TooltipDirective } from '@aegisx/ui';
 import { AxProgressComponent } from '@aegisx/ui';
 import { AxSkeletonComponent } from '@aegisx/ui';
 import { AxDialogComponent } from '@aegisx/ui';
-import { AxLoadingBarComponent } from '@aegisx/ui';
+import { AxLoadingBarComponent, LoadingBarService } from '@aegisx/ui';
 
 // Navigation
 import { AxBreadcrumbComponent, BreadcrumbItem } from '@aegisx/ui';
@@ -65,6 +68,9 @@ import { AxStepperComponent, Step } from '@aegisx/ui';
     AxStatsCardComponent,
     AxTimelineComponent,
     AxTableComponent,
+    AxFieldDisplayComponent,
+    AxDescriptionListComponent,
+    AxDataCardComponent,
     // Feedback
     AxAlertComponent,
     AxSnackbarContainerComponent,
@@ -88,6 +94,8 @@ import { AxStepperComponent, Step } from '@aegisx/ui';
   encapsulation: ViewEncapsulation.None,
 })
 export class AegisxUiShowcaseComponent {
+  constructor(private loadingBarService: LoadingBarService) {}
+
   // Form states
   checkboxValue = false;
   radioValue = 'option1';
@@ -106,6 +114,23 @@ export class AegisxUiShowcaseComponent {
   toggleValue = false;
   textareaValue = '';
   dateValue = new Date();
+  dateValueThai = new Date();
+  dateValueThaiGregorian = new Date();
+  dateValueThaiShort = new Date();
+  dateValueEnShort = new Date();
+  dateValueRestricted = new Date();
+  dateValueSundayStart = new Date();
+  dateValueMondayStart = new Date();
+  dateValueCustomFormat1 = new Date();
+  dateValueCustomFormat2 = new Date();
+  dateValueCustomFormat3 = new Date();
+  dateValueCustomFormat4 = new Date();
+  dateValueCustomFormat5 = new Date();
+  dateValueCustomFormat6 = new Date();
+  dateValueWithActions = new Date();
+  dateValueWithActionsRestricted: Date | null = null;
+  today = new Date();
+  maxDate = new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
 
   // Data Display
   listItems: ListItem[] = [
@@ -146,6 +171,35 @@ export class AegisxUiShowcaseComponent {
     { name: 'Jane Smith', email: 'jane@example.com', role: 'User' },
     { name: 'Bob Johnson', email: 'bob@example.com', role: 'Editor' },
   ];
+
+  // Display Components (NEW)
+  userProfile = {
+    fullName: 'Sathit Seethaphon',
+    email: 'sathit@example.com',
+    phone: '0991234567',
+    website: 'https://example.com',
+    role: 'Administrator',
+    department: 'Engineering',
+    joinDate: new Date('2024-01-15'),
+    salary: 85000,
+    performanceScore: 92.5,
+    isActive: true,
+  };
+
+  orderData = {
+    id: 'ORD-2024-001',
+    customer: 'John Doe',
+    email: 'john@example.com',
+    phone: '0881234567',
+    orderDate: new Date('2024-11-01'),
+    deliveryDate: new Date('2024-11-10'),
+    status: 'Delivered',
+    subtotal: 1250.0,
+    tax: 87.5,
+    shipping: 50.0,
+    total: 1387.5,
+    itemCount: 3,
+  };
 
   // Feedback
   showDialog = false;
@@ -202,5 +256,109 @@ export class AegisxUiShowcaseComponent {
 
   onPageChange(page: number): void {
     this.currentPage = page;
+  }
+
+  // ==========================================
+  // Loading Bar Demo Methods
+  // ==========================================
+
+  /**
+   * Demo 1: Simple indeterminate loading
+   */
+  demoSimpleLoading(): void {
+    this.loadingBarService.show('primary');
+    setTimeout(() => this.loadingBarService.hide(), 3000);
+  }
+
+  /**
+   * Demo 2: Success loading
+   */
+  demoSuccessLoading(): void {
+    this.loadingBarService.showSuccess('Operation successful!');
+    setTimeout(() => this.loadingBarService.hide(), 2000);
+  }
+
+  /**
+   * Demo 3: Error loading
+   */
+  demoErrorLoading(): void {
+    this.loadingBarService.showError('Something went wrong!');
+    setTimeout(() => this.loadingBarService.hide(), 2000);
+  }
+
+  /**
+   * Demo 4: Warning loading
+   */
+  demoWarningLoading(): void {
+    this.loadingBarService.showWarning('Please wait...');
+    setTimeout(() => this.loadingBarService.hide(), 2000);
+  }
+
+  /**
+   * Demo 5: Progress loading (simulated upload)
+   */
+  demoProgressLoading(): void {
+    this.loadingBarService.showProgress(0, 'primary', 'Uploading file...');
+
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 10;
+      this.loadingBarService.setProgress(progress);
+
+      if (progress >= 100) {
+        clearInterval(interval);
+        this.loadingBarService.complete(500);
+      }
+    }, 300);
+  }
+
+  /**
+   * Demo 6: Multi-step process
+   */
+  demoMultiStepProcess(): void {
+    this.loadingBarService.showProgress(0, 'primary', 'Step 1: Validating...');
+
+    setTimeout(() => {
+      this.loadingBarService.setProgress(33, 'Step 2: Processing...');
+    }, 1000);
+
+    setTimeout(() => {
+      this.loadingBarService.setProgress(66, 'Step 3: Finalizing...');
+    }, 2000);
+
+    setTimeout(() => {
+      this.loadingBarService.setProgress(100, 'Completed!');
+      this.loadingBarService.complete(500);
+    }, 3000);
+  }
+
+  /**
+   * Demo 7: Simulated API call with error handling
+   */
+  async demoApiCall(): Promise<void> {
+    this.loadingBarService.show('primary', 'Fetching data...');
+
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      this.loadingBarService.showSuccess('Data loaded successfully!');
+      setTimeout(() => this.loadingBarService.hide(), 1500);
+    } catch (_error) {
+      this.loadingBarService.showError('Failed to load data');
+      setTimeout(() => this.loadingBarService.hide(), 2000);
+    }
+  }
+
+  /**
+   * Demo 8: Auto-progress simulation
+   */
+  demoAutoProgress(): void {
+    this.loadingBarService.showProgress(0, 'success');
+    this.loadingBarService.simulateProgress(3000, 90);
+
+    setTimeout(() => {
+      this.loadingBarService.complete();
+    }, 3500);
   }
 }

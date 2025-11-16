@@ -92,6 +92,12 @@ export class AxSelectComponent<T = any> implements ControlValueAccessor {
   @Input() disabled = false;
 
   /**
+   * Readonly state
+   * @default false
+   */
+  @Input() readonly = false;
+
+  /**
    * Required field
    * @default false
    */
@@ -254,6 +260,10 @@ export class AxSelectComponent<T = any> implements ControlValueAccessor {
       classes.push('ax-select-disabled');
     }
 
+    if (this.readonly) {
+      classes.push('ax-select-readonly');
+    }
+
     return classes.join(' ');
   }
 
@@ -388,7 +398,7 @@ export class AxSelectComponent<T = any> implements ControlValueAccessor {
    * Toggle dropdown
    */
   toggleDropdown(): void {
-    if (this.disabled) {
+    if (this.disabled || this.readonly) {
       return;
     }
 
@@ -405,7 +415,7 @@ export class AxSelectComponent<T = any> implements ControlValueAccessor {
    * Open dropdown
    */
   openDropdown(): void {
-    if (!this.disabled) {
+    if (!this.disabled && !this.readonly) {
       this.isOpen = true;
     }
   }
@@ -453,7 +463,7 @@ export class AxSelectComponent<T = any> implements ControlValueAccessor {
   removeTag(option: SelectOption<T>, event: Event): void {
     event.stopPropagation();
 
-    if (this.disabled) {
+    if (this.disabled || this.readonly) {
       return;
     }
 

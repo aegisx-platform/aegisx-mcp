@@ -3,8 +3,15 @@
   <div class="docs-header">
     <h1 class="docs-title">AegisX UI Components Showcase</h1>
     <p class="docs-subtitle">
-      ตัวอย่างการใช้งาน Custom Components ทั้งหมด 31 ตัว ที่สร้างขึ้นใหม่สำหรับ
+      ตัวอย่างการใช้งาน Custom Components ทั้งหมด 34 ตัว ที่สร้างขึ้นใหม่สำหรับ
       AegisX Design System v1.0.0
+    </p>
+    <p
+      class="docs-subtitle"
+      style="color: var(--ax-success-default); font-weight: 600"
+    >
+      🆕 เพิ่ม Display Components 3 ตัวใหม่: Field Display, Description List,
+      และ Data Card
     </p>
   </div>
 
@@ -125,12 +132,85 @@
         label="Error"
         error="This field is required"
       ></ax-input>
-      <ax-input
-        placeholder="Read-only input"
-        label="Read-only"
-        [readonly]="true"
-        value="This is read-only"
-      ></ax-input>
+    </div>
+
+    <h4>State Comparison (Editable vs Disabled vs Readonly)</h4>
+    <div class="demo-container">
+      <div
+        style="
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 1.5rem;
+        "
+      >
+        <div>
+          <h5 style="color: var(--ax-text-secondary); margin-bottom: 0.5rem">
+            Editable
+          </h5>
+          <ax-input
+            label="Full Name"
+            [(ngModel)]="userProfile.fullName"
+            placeholder="Enter name"
+          >
+          </ax-input>
+          <br />
+          <ax-input
+            type="email"
+            label="Email"
+            [(ngModel)]="userProfile.email"
+            placeholder="Enter email"
+          >
+          </ax-input>
+        </div>
+        <div>
+          <h5 style="color: var(--ax-text-secondary); margin-bottom: 0.5rem">
+            Disabled
+          </h5>
+          <ax-input
+            label="Full Name"
+            [(ngModel)]="userProfile.fullName"
+            [disabled]="true"
+          >
+          </ax-input>
+          <br />
+          <ax-input
+            type="email"
+            label="Email"
+            [(ngModel)]="userProfile.email"
+            [disabled]="true"
+          >
+          </ax-input>
+        </div>
+        <div>
+          <h5 style="color: var(--ax-text-secondary); margin-bottom: 0.5rem">
+            Readonly
+          </h5>
+          <ax-input
+            label="Full Name"
+            [(ngModel)]="userProfile.fullName"
+            [readonly]="true"
+          >
+          </ax-input>
+          <br />
+          <ax-input
+            type="email"
+            label="Email"
+            [(ngModel)]="userProfile.email"
+            [readonly]="true"
+          >
+          </ax-input>
+        </div>
+      </div>
+      <p
+        style="
+          color: var(--ax-text-subtle);
+          font-size: 0.875rem;
+          margin-top: 1rem;
+        "
+      >
+        💡 <strong>Disabled:</strong> Gray background, cannot interact |
+        <strong>Readonly:</strong> Clean display with transparent background
+      </p>
     </div>
 
     <h4>With Icons</h4>
@@ -152,6 +232,8 @@
   <!-- 5. Select -->
   <div class="demo-section">
     <h3>5. Select Component</h3>
+
+    <h4>Basic Select</h4>
     <div class="demo-container">
       <ax-select
         [(ngModel)]="selectValue"
@@ -159,6 +241,72 @@
         placeholder="Select an option"
         label="Choose Option"
       ></ax-select>
+    </div>
+
+    <h4>State Comparison (Editable vs Disabled vs Readonly)</h4>
+    <div class="demo-container">
+      <div
+        style="
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 1.5rem;
+        "
+      >
+        <div>
+          <h5 style="color: var(--ax-text-secondary); margin-bottom: 0.5rem">
+            Editable
+          </h5>
+          <ax-select
+            label="Role"
+            [(ngModel)]="userProfile.role"
+            [options]="[
+              { label: 'Administrator', value: 'Administrator' },
+              { label: 'User', value: 'User' },
+            ]"
+          >
+          </ax-select>
+        </div>
+        <div>
+          <h5 style="color: var(--ax-text-secondary); margin-bottom: 0.5rem">
+            Disabled
+          </h5>
+          <ax-select
+            label="Role"
+            [(ngModel)]="userProfile.role"
+            [options]="[
+              { label: 'Administrator', value: 'Administrator' },
+              { label: 'User', value: 'User' },
+            ]"
+            [disabled]="true"
+          >
+          </ax-select>
+        </div>
+        <div>
+          <h5 style="color: var(--ax-text-secondary); margin-bottom: 0.5rem">
+            Readonly
+          </h5>
+          <ax-select
+            label="Role"
+            [(ngModel)]="userProfile.role"
+            [options]="[
+              { label: 'Administrator', value: 'Administrator' },
+              { label: 'User', value: 'User' },
+            ]"
+            [readonly]="true"
+          >
+          </ax-select>
+        </div>
+      </div>
+      <p
+        style="
+          color: var(--ax-text-subtle);
+          font-size: 0.875rem;
+          margin-top: 1rem;
+        "
+      >
+        💡 <strong>Disabled:</strong> Gray background, dropdown disabled |
+        <strong>Readonly:</strong> No dropdown arrow, transparent background
+      </p>
     </div>
   </div>
 
@@ -174,6 +322,8 @@
   <!-- 7. Textarea -->
   <div class="demo-section">
     <h3>7. Textarea Component</h3>
+
+    <h4>Basic Textarea</h4>
     <div class="demo-container">
       <ax-textarea
         [(ngModel)]="textareaValue"
@@ -181,22 +331,545 @@
         label="Message"
       ></ax-textarea>
     </div>
+
+    <h4>State Comparison (Editable vs Disabled vs Readonly)</h4>
+    <div class="demo-container">
+      <div
+        style="
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 1.5rem;
+        "
+      >
+        <div>
+          <h5 style="color: var(--ax-text-secondary); margin-bottom: 0.5rem">
+            Editable
+          </h5>
+          <ax-textarea
+            label="Comments"
+            [(ngModel)]="textareaValue"
+            placeholder="Enter comments..."
+            [rows]="4"
+          >
+          </ax-textarea>
+        </div>
+        <div>
+          <h5 style="color: var(--ax-text-secondary); margin-bottom: 0.5rem">
+            Disabled
+          </h5>
+          <ax-textarea
+            label="Comments"
+            [(ngModel)]="textareaValue"
+            [disabled]="true"
+            [rows]="4"
+          >
+          </ax-textarea>
+        </div>
+        <div>
+          <h5 style="color: var(--ax-text-secondary); margin-bottom: 0.5rem">
+            Readonly
+          </h5>
+          <ax-textarea
+            label="Comments"
+            [(ngModel)]="textareaValue"
+            [readonly]="true"
+            [rows]="4"
+          >
+          </ax-textarea>
+        </div>
+      </div>
+      <p
+        style="
+          color: var(--ax-text-subtle);
+          font-size: 0.875rem;
+          margin-top: 1rem;
+        "
+      >
+        💡 <strong>Disabled:</strong> Gray background, not editable |
+        <strong>Readonly:</strong> Clean display with transparent background
+      </p>
+    </div>
   </div>
 
   <!-- 8. Date Picker -->
   <div class="demo-section">
     <h3>8. Date Picker Component</h3>
+
     <div class="demo-container">
+      <h4 class="mb-4">English (Gregorian Calendar)</h4>
       <ax-date-picker
         [(ngModel)]="dateValue"
         label="Select Date"
-      ></ax-date-picker>
+        locale="en"
+        calendar="gregorian"
+      >
+      </ax-date-picker>
+    </div>
+
+    <div class="demo-container mt-4">
+      <h4 class="mb-4">ภาษาไทย (พุทธศักราช)</h4>
+      <ax-date-picker
+        [(ngModel)]="dateValueThai"
+        label="เลือกวันที่"
+        placeholder="เลือกวันที่"
+        locale="th"
+        calendar="buddhist"
+        helperText="คลิกที่หัวข้อเพื่อเลือกเดือนและปี"
+      >
+      </ax-date-picker>
+    </div>
+
+    <div class="demo-container mt-4">
+      <h4 class="mb-4">ภาษาไทย (ค.ศ.)</h4>
+      <ax-date-picker
+        [(ngModel)]="dateValueThaiGregorian"
+        label="เลือกวันที่"
+        placeholder="เลือกวันที่"
+        locale="th"
+        calendar="gregorian"
+      >
+      </ax-date-picker>
+    </div>
+
+    <div class="demo-container mt-4">
+      <h4 class="mb-4">ภาษาไทย (แบบย่อ)</h4>
+      <ax-date-picker
+        [(ngModel)]="dateValueThaiShort"
+        label="เลือกวันที่"
+        placeholder="เลือกวันที่"
+        locale="th"
+        calendar="buddhist"
+        monthFormat="short"
+        helperText="เดือนแสดงแบบย่อ: ม.ค., ก.พ., มี.ค."
+      >
+      </ax-date-picker>
+    </div>
+
+    <div class="demo-container mt-4">
+      <h4 class="mb-4">English (Short Format)</h4>
+      <ax-date-picker
+        [(ngModel)]="dateValueEnShort"
+        label="Select Date"
+        placeholder="Select date"
+        locale="en"
+        calendar="gregorian"
+        monthFormat="short"
+        helperText="Months shown in short format: Jan, Feb, Mar"
+      >
+      </ax-date-picker>
+    </div>
+
+    <div class="demo-container mt-4">
+      <h4 class="mb-4">With Min/Max Dates</h4>
+      <ax-date-picker
+        [(ngModel)]="dateValueRestricted"
+        label="Select Date (Next 30 days only)"
+        [minDate]="today"
+        [maxDate]="maxDate"
+        helperText="You can only select dates within the next 30 days"
+      >
+      </ax-date-picker>
+    </div>
+
+    <div class="demo-container mt-4">
+      <h4 class="mb-4">First Day of Week Configuration</h4>
+      <div class="grid grid-cols-2 gap-4">
+        <ax-date-picker
+          [(ngModel)]="dateValueSundayStart"
+          label="Week starts on Sunday (Default)"
+          [firstDayOfWeek]="0"
+          helperText="Su Mo Tu We Th Fr Sa"
+        >
+        </ax-date-picker>
+        <ax-date-picker
+          [(ngModel)]="dateValueMondayStart"
+          label="Week starts on Monday"
+          [firstDayOfWeek]="1"
+          helperText="Mo Tu We Th Fr Sa Su"
+        >
+        </ax-date-picker>
+      </div>
+    </div>
+
+    <div class="demo-container mt-4">
+      <h4 class="mb-4">Custom Date Formats</h4>
+      <div class="grid grid-cols-2 gap-4">
+        <ax-date-picker
+          [(ngModel)]="dateValueCustomFormat1"
+          label="DD/MM/YYYY Format"
+          dateFormat="DD/MM/YYYY"
+          helperText="European format: 15/01/2024"
+        >
+        </ax-date-picker>
+        <ax-date-picker
+          [(ngModel)]="dateValueCustomFormat2"
+          label="MM-DD-YYYY Format"
+          dateFormat="MM-DD-YYYY"
+          helperText="US format: 01-15-2024"
+        >
+        </ax-date-picker>
+        <ax-date-picker
+          [(ngModel)]="dateValueCustomFormat3"
+          label="DD MMM YYYY Format"
+          dateFormat="DD MMM YYYY"
+          helperText="Short month: 15 Jan 2024"
+        >
+        </ax-date-picker>
+        <ax-date-picker
+          [(ngModel)]="dateValueCustomFormat4"
+          label="D MMMM YYYY Format"
+          dateFormat="D MMMM YYYY"
+          helperText="Full month: 15 January 2024"
+        >
+        </ax-date-picker>
+        <ax-date-picker
+          [(ngModel)]="dateValueCustomFormat5"
+          label="YYYY-MM-DD Format (ISO)"
+          dateFormat="YYYY-MM-DD"
+          helperText="ISO format: 2024-01-15"
+        >
+        </ax-date-picker>
+        <ax-date-picker
+          [(ngModel)]="dateValueCustomFormat6"
+          label="Thai: DD/MM/YYYY"
+          dateFormat="DD/MM/YYYY"
+          locale="th"
+          calendar="buddhist"
+          helperText="Thai Buddhist: 15/01/2567"
+        >
+        </ax-date-picker>
+      </div>
+    </div>
+
+    <div class="demo-container mt-4">
+      <h4 class="mb-4">Action Buttons (Today & Clear)</h4>
+      <div class="grid grid-cols-2 gap-4">
+        <ax-date-picker
+          [(ngModel)]="dateValueWithActions"
+          label="With Action Buttons"
+          [showActionButtons]="true"
+          helperText="Click to see Today and Clear buttons"
+        >
+        </ax-date-picker>
+        <ax-date-picker
+          [(ngModel)]="dateValueWithActionsRestricted"
+          label="With Actions + Date Restrictions"
+          [showActionButtons]="true"
+          [minDate]="today"
+          [maxDate]="maxDate"
+          helperText="Today button disabled if outside range"
+        >
+        </ax-date-picker>
+      </div>
+    </div>
+
+    <div class="demo-container mt-4">
+      <h4 class="mb-4">State Comparison (Editable vs Disabled vs Readonly)</h4>
+      <div
+        style="
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 1.5rem;
+        "
+      >
+        <div>
+          <h5 style="color: var(--ax-text-secondary); margin-bottom: 0.5rem">
+            Editable
+          </h5>
+          <ax-date-picker label="Join Date" [(ngModel)]="userProfile.joinDate">
+          </ax-date-picker>
+        </div>
+        <div>
+          <h5 style="color: var(--ax-text-secondary); margin-bottom: 0.5rem">
+            Disabled
+          </h5>
+          <ax-date-picker
+            label="Join Date"
+            [(ngModel)]="userProfile.joinDate"
+            [disabled]="true"
+          >
+          </ax-date-picker>
+        </div>
+        <div>
+          <h5 style="color: var(--ax-text-secondary); margin-bottom: 0.5rem">
+            Readonly
+          </h5>
+          <ax-date-picker
+            label="Join Date"
+            [(ngModel)]="userProfile.joinDate"
+            [readonly]="true"
+          >
+          </ax-date-picker>
+        </div>
+      </div>
+      <p
+        style="
+          color: var(--ax-text-subtle);
+          font-size: 0.875rem;
+          margin-top: 1rem;
+        "
+      >
+        💡 <strong>Disabled:</strong> Gray background, calendar disabled |
+        <strong>Readonly:</strong> No calendar icon, transparent background
+      </p>
+    </div>
+  </div>
+
+  <!-- Data Display Module -->
+  <div class="demo-section">
+    <h3>🔒 Readonly Forms (Enhanced Display-Oriented Styling)</h3>
+    <p style="color: var(--ax-text-secondary); margin-bottom: 1rem">
+      Form components with [readonly]="true" now have enhanced styling that
+      makes them look like display fields instead of disabled inputs. Compare
+      with dedicated ax-field-display components in the Data Display section
+      below.
+    </p>
+
+    <div
+      class="demo-container"
+      style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem"
+    >
+      <!-- Editable vs Readonly Comparison -->
+      <div>
+        <h4 style="margin-bottom: 1rem">Editable (Default)</h4>
+        <ax-input
+          label="Full Name"
+          [(ngModel)]="userProfile.fullName"
+          placeholder="Enter name"
+        >
+        </ax-input>
+        <br />
+        <ax-select
+          label="Role"
+          [(ngModel)]="userProfile.role"
+          [options]="[
+            { label: 'Administrator', value: 'Administrator' },
+            { label: 'User', value: 'User' },
+          ]"
+        >
+        </ax-select>
+        <br />
+        <ax-date-picker label="Join Date" [(ngModel)]="userProfile.joinDate">
+        </ax-date-picker>
+      </div>
+
+      <div>
+        <h4 style="margin-bottom: 1rem">Readonly (Display-Oriented)</h4>
+        <ax-input
+          label="Full Name"
+          [(ngModel)]="userProfile.fullName"
+          [readonly]="true"
+        >
+        </ax-input>
+        <br />
+        <ax-select
+          label="Role"
+          [(ngModel)]="userProfile.role"
+          [options]="[
+            { label: 'Administrator', value: 'Administrator' },
+            { label: 'User', value: 'User' },
+          ]"
+          [readonly]="true"
+        >
+        </ax-select>
+        <br />
+        <ax-date-picker
+          label="Join Date"
+          [(ngModel)]="userProfile.joinDate"
+          [readonly]="true"
+        >
+        </ax-date-picker>
+      </div>
+    </div>
+
+    <div
+      style="
+        margin-top: 2rem;
+        padding: 1rem;
+        background: var(--ax-primary-faint);
+        border-radius: var(--ax-radius-md);
+      "
+    >
+      <h4 style="margin-bottom: 0.5rem">✨ Key Improvements</h4>
+      <ul
+        style="color: var(--ax-text-secondary); margin: 0; padding-left: 1.5rem"
+      >
+        <li>Transparent background and no borders for cleaner look</li>
+        <li>Medium font weight to emphasize the value</li>
+        <li>No interactive indicators (dropdowns, clear buttons hidden)</li>
+        <li>Maintains form structure for easier form/display mode switching</li>
+      </ul>
+    </div>
+
+    <!-- More Input Examples with Readonly -->
+    <div class="demo-container" style="margin-top: 2rem">
+      <h4 style="margin-bottom: 1rem">📝 Different Input Types (Readonly)</h4>
+      <div
+        style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem"
+      >
+        <ax-input
+          type="email"
+          label="Email"
+          [(ngModel)]="userProfile.email"
+          [readonly]="true"
+        >
+        </ax-input>
+
+        <ax-input
+          type="tel"
+          label="Phone"
+          [(ngModel)]="userProfile.phone"
+          [readonly]="true"
+        >
+        </ax-input>
+
+        <ax-input
+          type="url"
+          label="Website"
+          [(ngModel)]="userProfile.website"
+          [readonly]="true"
+        >
+        </ax-input>
+
+        <ax-input
+          type="text"
+          label="Salary"
+          [ngModel]="userProfile.salary.toLocaleString('th-TH')"
+          [readonly]="true"
+        >
+        </ax-input>
+      </div>
+    </div>
+
+    <!-- Textarea Readonly Example -->
+    <div class="demo-container" style="margin-top: 2rem">
+      <h4 style="margin-bottom: 1rem">📄 Textarea (Readonly)</h4>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem">
+        <div>
+          <h5 style="color: var(--ax-text-secondary); margin-bottom: 0.5rem">
+            Editable
+          </h5>
+          <ax-textarea
+            label="Comments"
+            [(ngModel)]="textareaValue"
+            placeholder="Enter comments..."
+            [rows]="4"
+          >
+          </ax-textarea>
+        </div>
+        <div>
+          <h5 style="color: var(--ax-text-secondary); margin-bottom: 0.5rem">
+            Readonly
+          </h5>
+          <ax-textarea
+            label="Comments"
+            [(ngModel)]="textareaValue"
+            [readonly]="true"
+            [rows]="4"
+          >
+          </ax-textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Complete Form Example -->
+    <div class="demo-container" style="margin-top: 2rem">
+      <h4 style="margin-bottom: 1rem">📋 Complete Form (Review Mode)</h4>
+      <div
+        style="
+          max-width: 600px;
+          padding: 1.5rem;
+          background: var(--ax-background-subtle);
+          border-radius: var(--ax-radius-lg);
+        "
+      >
+        <h5 style="margin-bottom: 1rem">User Profile Review</h5>
+
+        <ax-input
+          label="Full Name"
+          [(ngModel)]="userProfile.fullName"
+          [readonly]="true"
+        >
+        </ax-input>
+        <br />
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem">
+          <ax-input
+            type="email"
+            label="Email"
+            [(ngModel)]="userProfile.email"
+            [readonly]="true"
+          >
+          </ax-input>
+
+          <ax-input
+            type="tel"
+            label="Phone"
+            [(ngModel)]="userProfile.phone"
+            [readonly]="true"
+          >
+          </ax-input>
+        </div>
+        <br />
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem">
+          <ax-select
+            label="Role"
+            [(ngModel)]="userProfile.role"
+            [options]="[
+              { label: 'Administrator', value: 'Administrator' },
+              { label: 'User', value: 'User' },
+            ]"
+            [readonly]="true"
+          >
+          </ax-select>
+
+          <ax-select
+            label="Department"
+            [(ngModel)]="userProfile.department"
+            [options]="[
+              { label: 'Engineering', value: 'Engineering' },
+              { label: 'Sales', value: 'Sales' },
+            ]"
+            [readonly]="true"
+          >
+          </ax-select>
+        </div>
+        <br />
+
+        <ax-date-picker
+          label="Join Date"
+          [(ngModel)]="userProfile.joinDate"
+          [readonly]="true"
+        >
+        </ax-date-picker>
+
+        <div
+          style="
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--ax-border-default);
+          "
+        >
+          <p
+            style="
+              color: var(--ax-text-secondary);
+              font-size: 0.875rem;
+              margin: 0;
+            "
+          >
+            💡 <strong>Tip:</strong> Toggle between editable and readonly modes
+            by changing the <code>[readonly]</code> property. Perfect for form
+            review pages and approval workflows.
+          </p>
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- Data Display Module -->
   <div class="section-divider">
-    <h2 class="section-title">📊 Data Display Module (8 Components)</h2>
+    <h2 class="section-title">📊 Data Display Module (11 Components) 🆕</h2>
   </div>
 
   <!-- 9. Card -->
@@ -307,6 +980,548 @@
     <h3>16. Table Component</h3>
     <div class="demo-container">
       <ax-table [columns]="tableColumns" [data]="tableData"></ax-table>
+    </div>
+  </div>
+
+  <!-- 17. Field Display Component (NEW) -->
+  <div class="demo-section">
+    <h3>17. Field Display Component 🆕</h3>
+    <p class="demo-description">
+      Display field values in read-only format with automatic type-based
+      formatting.
+    </p>
+
+    <h4>Basic Text Display</h4>
+    <div class="demo-container" style="max-width: 600px">
+      <ax-field-display
+        label="Full Name"
+        [value]="userProfile.fullName"
+      ></ax-field-display>
+      <ax-field-display
+        label="Role"
+        [value]="userProfile.role"
+      ></ax-field-display>
+      <ax-field-display
+        label="Department"
+        [value]="userProfile.department"
+      ></ax-field-display>
+    </div>
+
+    <h4>Type-Based Formatting</h4>
+    <div class="demo-container" style="max-width: 600px">
+      <ax-field-display
+        label="Join Date"
+        [value]="userProfile.joinDate"
+        type="date"
+      >
+      </ax-field-display>
+
+      <ax-field-display
+        label="Salary"
+        [value]="userProfile.salary"
+        type="currency"
+        [formatOptions]="{ currency: 'THB', decimals: 2 }"
+      >
+      </ax-field-display>
+
+      <ax-field-display
+        label="Performance Score"
+        [value]="userProfile.performanceScore"
+        type="percentage"
+      >
+      </ax-field-display>
+
+      <ax-field-display
+        label="Active Status"
+        [value]="userProfile.isActive"
+        type="boolean"
+      >
+      </ax-field-display>
+    </div>
+
+    <h4>Clickable Links</h4>
+    <div class="demo-container" style="max-width: 600px">
+      <ax-field-display label="Email" [value]="userProfile.email" type="email">
+      </ax-field-display>
+
+      <ax-field-display label="Phone" [value]="userProfile.phone" type="phone">
+      </ax-field-display>
+
+      <ax-field-display
+        label="Website"
+        [value]="userProfile.website"
+        type="url"
+      >
+      </ax-field-display>
+    </div>
+
+    <h4>Sizes</h4>
+    <div class="demo-container" style="max-width: 600px">
+      <ax-field-display label="Small" [value]="userProfile.fullName" size="sm">
+      </ax-field-display>
+
+      <ax-field-display
+        label="Medium (Default)"
+        [value]="userProfile.fullName"
+        size="md"
+      >
+      </ax-field-display>
+
+      <ax-field-display label="Large" [value]="userProfile.fullName" size="lg">
+      </ax-field-display>
+    </div>
+
+    <h4>Vertical Orientation</h4>
+    <div class="demo-container" style="max-width: 600px">
+      <ax-field-display
+        label="Description"
+        value="This is a longer text that looks better in vertical orientation. The label appears above the value instead of beside it."
+        orientation="vertical"
+      >
+      </ax-field-display>
+    </div>
+
+    <h4>Empty State</h4>
+    <div class="demo-container" style="max-width: 600px">
+      <ax-field-display
+        label="Middle Name"
+        [value]="null"
+        emptyText="Not specified"
+      >
+      </ax-field-display>
+
+      <ax-field-display
+        label="Nickname"
+        [value]="''"
+        emptyDisplay="placeholder"
+      >
+      </ax-field-display>
+    </div>
+  </div>
+
+  <!-- 18. Description List Component (NEW) -->
+  <div class="demo-section">
+    <h3>18. Description List Component 🆕</h3>
+    <p class="demo-description">
+      Container for organizing multiple field-display components in structured
+      layouts.
+    </p>
+
+    <h4>Horizontal Layout (Default)</h4>
+    <div class="demo-container">
+      <ax-description-list style="max-width: 600px">
+        <ax-field-display
+          label="Full Name"
+          [value]="userProfile.fullName"
+        ></ax-field-display>
+        <ax-field-display
+          label="Email"
+          [value]="userProfile.email"
+          type="email"
+        ></ax-field-display>
+        <ax-field-display
+          label="Department"
+          [value]="userProfile.department"
+        ></ax-field-display>
+        <ax-field-display
+          label="Join Date"
+          [value]="userProfile.joinDate"
+          type="date"
+        ></ax-field-display>
+      </ax-description-list>
+    </div>
+
+    <h4>Grid Layout (2 Columns)</h4>
+    <div class="demo-container">
+      <ax-description-list layout="grid" [columns]="2">
+        <ax-field-display
+          label="Full Name"
+          [value]="userProfile.fullName"
+        ></ax-field-display>
+        <ax-field-display
+          label="Email"
+          [value]="userProfile.email"
+          type="email"
+        ></ax-field-display>
+        <ax-field-display
+          label="Phone"
+          [value]="userProfile.phone"
+          type="phone"
+        ></ax-field-display>
+        <ax-field-display
+          label="Department"
+          [value]="userProfile.department"
+        ></ax-field-display>
+        <ax-field-display
+          label="Role"
+          [value]="userProfile.role"
+        ></ax-field-display>
+        <ax-field-display
+          label="Join Date"
+          [value]="userProfile.joinDate"
+          type="date"
+        ></ax-field-display>
+      </ax-description-list>
+    </div>
+
+    <h4>Grid Layout (3 Columns)</h4>
+    <div class="demo-container">
+      <ax-description-list layout="grid" [columns]="3">
+        <ax-field-display
+          label="Order ID"
+          [value]="orderData.id"
+        ></ax-field-display>
+        <ax-field-display
+          label="Customer"
+          [value]="orderData.customer"
+        ></ax-field-display>
+        <ax-field-display
+          label="Status"
+          [value]="orderData.status"
+        ></ax-field-display>
+        <ax-field-display
+          label="Order Date"
+          [value]="orderData.orderDate"
+          type="date"
+        ></ax-field-display>
+        <ax-field-display
+          label="Delivery Date"
+          [value]="orderData.deliveryDate"
+          type="date"
+        ></ax-field-display>
+        <ax-field-display
+          label="Items"
+          [value]="orderData.itemCount"
+          type="number"
+        ></ax-field-display>
+      </ax-description-list>
+    </div>
+
+    <h4>With Dividers (Default: Small Spacing)</h4>
+    <div class="demo-container">
+      <ax-description-list [divider]="true" style="max-width: 600px">
+        <ax-field-display
+          label="Order ID"
+          [value]="orderData.id"
+        ></ax-field-display>
+        <ax-field-display
+          label="Customer"
+          [value]="orderData.customer"
+        ></ax-field-display>
+        <ax-field-display
+          label="Status"
+          [value]="orderData.status"
+        ></ax-field-display>
+        <ax-field-display
+          label="Total"
+          [value]="orderData.total"
+          type="currency"
+          [formatOptions]="{ currency: 'THB' }"
+        ></ax-field-display>
+      </ax-description-list>
+    </div>
+
+    <h4>Divider Size Variants</h4>
+    <div class="demo-container">
+      <div
+        style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem"
+      >
+        <!-- Small (Dense) -->
+        <div>
+          <h5
+            style="
+              margin-bottom: 0.5rem;
+              color: var(--ax-text-secondary);
+              font-size: 0.875rem;
+            "
+          >
+            Small (8px total)
+          </h5>
+          <ax-description-list [divider]="true" size="sm">
+            <ax-field-display
+              label="Order ID"
+              [value]="orderData.id"
+            ></ax-field-display>
+            <ax-field-display
+              label="Customer"
+              [value]="orderData.customer"
+            ></ax-field-display>
+            <ax-field-display
+              label="Status"
+              [value]="orderData.status"
+            ></ax-field-display>
+          </ax-description-list>
+        </div>
+
+        <!-- Medium (Comfortable) -->
+        <div>
+          <h5
+            style="
+              margin-bottom: 0.5rem;
+              color: var(--ax-text-secondary);
+              font-size: 0.875rem;
+            "
+          >
+            Medium (16px total)
+          </h5>
+          <ax-description-list [divider]="true" size="md">
+            <ax-field-display
+              label="Order ID"
+              [value]="orderData.id"
+            ></ax-field-display>
+            <ax-field-display
+              label="Customer"
+              [value]="orderData.customer"
+            ></ax-field-display>
+            <ax-field-display
+              label="Status"
+              [value]="orderData.status"
+            ></ax-field-display>
+          </ax-description-list>
+        </div>
+
+        <!-- Large (Spacious) -->
+        <div>
+          <h5
+            style="
+              margin-bottom: 0.5rem;
+              color: var(--ax-text-secondary);
+              font-size: 0.875rem;
+            "
+          >
+            Large (24px total)
+          </h5>
+          <ax-description-list [divider]="true" size="lg">
+            <ax-field-display
+              label="Order ID"
+              [value]="orderData.id"
+            ></ax-field-display>
+            <ax-field-display
+              label="Customer"
+              [value]="orderData.customer"
+            ></ax-field-display>
+            <ax-field-display
+              label="Status"
+              [value]="orderData.status"
+            ></ax-field-display>
+          </ax-description-list>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 19. Data Card Component (NEW) -->
+  <div class="demo-section">
+    <h3>19. Data Card Component 🆕</h3>
+    <p class="demo-description">
+      Card container for displaying data with header, actions, and optional
+      footer.
+    </p>
+
+    <h4>Basic Data Card</h4>
+    <div class="demo-container">
+      <ax-data-card title="User Profile" style="max-width: 700px">
+        <ax-description-list layout="grid" [columns]="2">
+          <ax-field-display
+            label="Full Name"
+            [value]="userProfile.fullName"
+          ></ax-field-display>
+          <ax-field-display
+            label="Email"
+            [value]="userProfile.email"
+            type="email"
+          ></ax-field-display>
+          <ax-field-display
+            label="Phone"
+            [value]="userProfile.phone"
+            type="phone"
+          ></ax-field-display>
+          <ax-field-display
+            label="Department"
+            [value]="userProfile.department"
+          ></ax-field-display>
+          <ax-field-display
+            label="Role"
+            [value]="userProfile.role"
+          ></ax-field-display>
+          <ax-field-display
+            label="Join Date"
+            [value]="userProfile.joinDate"
+            type="date"
+          ></ax-field-display>
+        </ax-description-list>
+      </ax-data-card>
+    </div>
+
+    <h4>With Actions</h4>
+    <div class="demo-container">
+      <ax-data-card
+        title="Account Information"
+        subtitle="Personal details and contact info"
+        style="max-width: 700px"
+      >
+        <ax-button actions variant="ghost" color="primary" size="sm"
+          >Edit</ax-button
+        >
+        <ax-button actions variant="ghost" color="neutral" size="sm"
+          >Download PDF</ax-button
+        >
+
+        <ax-description-list [divider]="true">
+          <ax-field-display
+            label="Full Name"
+            [value]="userProfile.fullName"
+          ></ax-field-display>
+          <ax-field-display
+            label="Email"
+            [value]="userProfile.email"
+            type="email"
+          ></ax-field-display>
+          <ax-field-display
+            label="Role"
+            [value]="userProfile.role"
+          ></ax-field-display>
+          <ax-field-display
+            label="Department"
+            [value]="userProfile.department"
+          ></ax-field-display>
+        </ax-description-list>
+      </ax-data-card>
+    </div>
+
+    <h4>Order Summary with Footer</h4>
+    <div class="demo-container">
+      <ax-data-card title="Order Details" style="max-width: 700px">
+        <ax-description-list layout="grid" [columns]="2">
+          <ax-field-display
+            label="Order ID"
+            [value]="orderData.id"
+          ></ax-field-display>
+          <ax-field-display
+            label="Customer"
+            [value]="orderData.customer"
+          ></ax-field-display>
+          <ax-field-display
+            label="Email"
+            [value]="orderData.email"
+            type="email"
+          ></ax-field-display>
+          <ax-field-display
+            label="Phone"
+            [value]="orderData.phone"
+            type="phone"
+          ></ax-field-display>
+          <ax-field-display
+            label="Order Date"
+            [value]="orderData.orderDate"
+            type="date"
+          ></ax-field-display>
+          <ax-field-display
+            label="Delivery Date"
+            [value]="orderData.deliveryDate"
+            type="date"
+          ></ax-field-display>
+          <ax-field-display
+            label="Status"
+            [value]="orderData.status"
+          ></ax-field-display>
+          <ax-field-display
+            label="Items"
+            [value]="orderData.itemCount"
+            type="number"
+          ></ax-field-display>
+        </ax-description-list>
+
+        <div footer style="padding: 1rem 0">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              margin-bottom: 0.5rem;
+            "
+          >
+            <span>Subtotal:</span>
+            <ax-field-display
+              [value]="orderData.subtotal"
+              type="currency"
+              [formatOptions]="{ currency: 'THB' }"
+            ></ax-field-display>
+          </div>
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              margin-bottom: 0.5rem;
+            "
+          >
+            <span>Tax:</span>
+            <ax-field-display
+              [value]="orderData.tax"
+              type="currency"
+              [formatOptions]="{ currency: 'THB' }"
+            ></ax-field-display>
+          </div>
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              margin-bottom: 0.5rem;
+            "
+          >
+            <span>Shipping:</span>
+            <ax-field-display
+              [value]="orderData.shipping"
+              type="currency"
+              [formatOptions]="{ currency: 'THB' }"
+            ></ax-field-display>
+          </div>
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              font-weight: 600;
+              font-size: 1.125rem;
+              border-top: 2px solid var(--ax-border-emphasis);
+              padding-top: 0.5rem;
+              margin-top: 0.5rem;
+            "
+          >
+            <span>Total:</span>
+            <ax-field-display
+              [value]="orderData.total"
+              type="currency"
+              [formatOptions]="{ currency: 'THB' }"
+            ></ax-field-display>
+          </div>
+        </div>
+      </ax-data-card>
+    </div>
+
+    <h4>Elevation Variants</h4>
+    <div class="demo-container">
+      <div
+        style="
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 1rem;
+        "
+      >
+        <ax-data-card title="Flat (Elevation 0)" [elevation]="0">
+          <p style="margin: 0">No shadow, with border</p>
+        </ax-data-card>
+
+        <ax-data-card title="Subtle (Elevation 1)" [elevation]="1">
+          <p style="margin: 0">Subtle shadow (default)</p>
+        </ax-data-card>
+
+        <ax-data-card title="Medium (Elevation 2)" [elevation]="2">
+          <p style="margin: 0">Medium shadow</p>
+        </ax-data-card>
+
+        <ax-data-card title="High (Elevation 3)" [elevation]="3">
+          <p style="margin: 0">High shadow</p>
+        </ax-data-card>
+      </div>
     </div>
   </div>
 
@@ -530,8 +1745,126 @@
   <!-- 23. Loading Bar -->
   <div class="demo-section">
     <h3>23. Loading Bar Component</h3>
-    <div class="demo-container">
-      <ax-loading-bar></ax-loading-bar>
+    <p class="demo-description">
+      Fully controllable loading bar with service-based architecture. Control
+      from any component in your app!
+    </p>
+
+    <div class="demo-grid">
+      <!-- Row 1: Basic Loading States -->
+      <div class="demo-item">
+        <h4>Simple Loading (Indeterminate)</h4>
+        <ax-button
+          (click)="demoSimpleLoading()"
+          variant="solid"
+          color="primary"
+        >
+          Show Loading (3s)
+        </ax-button>
+        <code class="demo-code">loadingBarService.show('primary')</code>
+      </div>
+
+      <div class="demo-item">
+        <h4>Success Loading</h4>
+        <ax-button
+          (click)="demoSuccessLoading()"
+          variant="solid"
+          color="success"
+        >
+          Show Success (2s)
+        </ax-button>
+        <code class="demo-code">loadingBarService.showSuccess('Success!')</code>
+      </div>
+
+      <div class="demo-item">
+        <h4>Error Loading</h4>
+        <ax-button (click)="demoErrorLoading()" variant="solid" color="error">
+          Show Error (2s)
+        </ax-button>
+        <code class="demo-code">loadingBarService.showError('Error!')</code>
+      </div>
+
+      <div class="demo-item">
+        <h4>Warning Loading</h4>
+        <ax-button
+          (click)="demoWarningLoading()"
+          variant="solid"
+          color="warning"
+        >
+          Show Warning (2s)
+        </ax-button>
+        <code class="demo-code">loadingBarService.showWarning('Warning!')</code>
+      </div>
+
+      <!-- Row 2: Progress Loading -->
+      <div class="demo-item">
+        <h4>Progress Loading (Simulated Upload)</h4>
+        <ax-button
+          (click)="demoProgressLoading()"
+          variant="solid"
+          color="primary"
+        >
+          Simulate Upload
+        </ax-button>
+        <code class="demo-code"
+          >loadingBarService.showProgress(0)<br />setProgress(percent)</code
+        >
+      </div>
+
+      <div class="demo-item">
+        <h4>Multi-Step Process</h4>
+        <ax-button
+          (click)="demoMultiStepProcess()"
+          variant="solid"
+          color="primary"
+        >
+          3-Step Process
+        </ax-button>
+        <code class="demo-code"
+          >setProgress(33/66/100)<br />with step messages</code
+        >
+      </div>
+
+      <div class="demo-item">
+        <h4>Simulated API Call</h4>
+        <ax-button (click)="demoApiCall()" variant="solid" color="primary">
+          Fetch Data
+        </ax-button>
+        <code class="demo-code">async/await with<br />try/catch handling</code>
+      </div>
+
+      <div class="demo-item">
+        <h4>Auto-Progress Simulation</h4>
+        <ax-button (click)="demoAutoProgress()" variant="solid" color="success">
+          Auto Progress
+        </ax-button>
+        <code class="demo-code">simulateProgress(3000, 90)</code>
+      </div>
+    </div>
+
+    <div class="demo-info">
+      <h4>💡 How it Works</h4>
+      <p>
+        The loading bar uses <code>LoadingBarService</code> for centralized
+        control. Inject the service in any component to control the loading bar
+        in the layout!
+      </p>
+      <ul>
+        <li>
+          <strong>Service-based:</strong> Injectable via dependency injection
+        </li>
+        <li>
+          <strong>Reactive:</strong> Uses RxJS BehaviorSubject for state
+          management
+        </li>
+        <li>
+          <strong>Type-safe:</strong> Full TypeScript support with interfaces
+        </li>
+        <li><strong>Flexible:</strong> Indeterminate & Determinate modes</li>
+        <li>
+          <strong>Colors:</strong> primary, success, warning, error, neutral
+        </li>
+      </ul>
     </div>
   </div>
 

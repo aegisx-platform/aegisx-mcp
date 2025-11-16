@@ -10,7 +10,15 @@
   }
 
   <!-- Input Wrapper -->
-  <div [class]="wrapperClasses" (click)="toggleDropdown()">
+  <div
+    [class]="wrapperClasses"
+    (click)="toggleDropdown()"
+    (keydown)="onInputKeydown($event)"
+    tabindex="0"
+    role="combobox"
+    [attr.aria-expanded]="isOpen"
+    aria-haspopup="dialog"
+  >
     <!-- Display Value -->
     <div class="ax-date-picker-display">
       @if (displayValue) {
@@ -21,103 +29,289 @@
     </div>
 
     <!-- Icons -->
-    <div class="ax-date-picker-icons">
-      <!-- Clear Button -->
-      @if (displayValue && !disabled) {
-        <button
-          type="button"
-          class="ax-date-picker-clear"
-          (click)="clearValue(); $event.stopPropagation()"
-          tabindex="-1"
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    @if (!readonly) {
+      <div class="ax-date-picker-icons">
+        <!-- Clear Button -->
+        @if (displayValue && !disabled) {
+          <button
+            type="button"
+            class="ax-date-picker-clear"
+            (click)="clearValue(); $event.stopPropagation()"
+            tabindex="-1"
+            aria-label="Clear date"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M12 4L4 12M4 4L12 12"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+        }
+
+        <!-- Calendar Icon -->
+        <div class="ax-date-picker-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
             <path
-              d="M12 4L4 12M4 4L12 12"
+              d="M6 2V4M14 2V4M3 8H17M5 4H15C16.1046 4 17 4.89543 17 6V16C17 17.1046 16.1046 18 15 18H5C3.89543 18 3 17.1046 3 16V6C3 4.89543 3.89543 4 5 4Z"
               stroke="currentColor"
-              stroke-width="2"
+              stroke-width="1.5"
               stroke-linecap="round"
+              stroke-linejoin="round"
             />
           </svg>
-        </button>
-      }
-
-      <!-- Calendar Icon -->
-      <div class="ax-date-picker-icon">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <path
-            d="M6 2V4M14 2V4M3 8H17M5 4H15C16.1046 4 17 4.89543 17 6V16C17 17.1046 16.1046 18 15 18H5C3.89543 18 3 17.1046 3 16V6C3 4.89543 3.89543 4 5 4Z"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
+        </div>
       </div>
-    </div>
+    }
   </div>
 
   <!-- Calendar Dropdown -->
   @if (isOpen) {
-    <div class="ax-date-picker-dropdown">
+    <div
+      class="ax-date-picker-dropdown"
+      (keydown)="onCalendarKeydown($event)"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-label]="'Choose date' + (label ? ' for ' + label : '')"
+      tabindex="-1"
+    >
       <!-- Header -->
-      <div class="ax-date-picker-header">
-        <button
-          type="button"
-          class="ax-date-picker-nav-btn"
-          (click)="previousMonth()"
-        >
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path
-              d="M12.5 15L7.5 10L12.5 5"
-              stroke="currentColor"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </button>
-        <div class="ax-date-picker-month-year">{{ currentMonthYear }}</div>
-        <button
-          type="button"
-          class="ax-date-picker-nav-btn"
-          (click)="nextMonth()"
-        >
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path
-              d="M7.5 5L12.5 10L7.5 15"
-              stroke="currentColor"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </button>
-      </div>
-
-      <!-- Week Days -->
-      <div class="ax-date-picker-weekdays">
-        @for (day of weekDays; track day) {
-          <div class="ax-date-picker-weekday">{{ day }}</div>
-        }
-      </div>
-
-      <!-- Calendar Grid -->
-      <div class="ax-date-picker-days">
-        @for (day of calendarDays; track day.date) {
+      <div
+        class="ax-date-picker-header"
+        role="toolbar"
+        aria-label="Calendar navigation"
+      >
+        @if (viewMode === 'year') {
           <button
             type="button"
-            class="ax-date-picker-day"
-            [class.ax-date-picker-day-other-month]="!day.isCurrentMonth"
-            [class.ax-date-picker-day-today]="day.isToday"
-            [class.ax-date-picker-day-selected]="day.isSelected"
-            [class.ax-date-picker-day-disabled]="day.isDisabled"
-            [disabled]="day.isDisabled"
-            (click)="selectDate(day)"
+            class="ax-date-picker-nav-btn"
+            (click)="previousYearRange()"
+            aria-label="Previous 12 years"
           >
-            {{ day.day }}
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M12.5 15L7.5 10L12.5 5"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+        } @else {
+          <button
+            type="button"
+            class="ax-date-picker-nav-btn"
+            (click)="previousMonth()"
+            aria-label="Previous month"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M12.5 15L7.5 10L12.5 5"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+        }
+
+        <button
+          type="button"
+          class="ax-date-picker-month-year"
+          (click)="toggleViewMode()"
+          [attr.aria-label]="
+            viewMode === 'year' ? 'Switch to month view' : 'Switch to year view'
+          "
+        >
+          @if (viewMode === 'year') {
+            <span>{{ years[0] }} - {{ years[11] }}</span>
+          } @else {
+            <span>{{ currentMonthYear }}</span>
+          }
+        </button>
+
+        @if (viewMode === 'year') {
+          <button
+            type="button"
+            class="ax-date-picker-nav-btn"
+            (click)="nextYearRange()"
+            aria-label="Next 12 years"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M7.5 5L12.5 10L7.5 15"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+        } @else {
+          <button
+            type="button"
+            class="ax-date-picker-nav-btn"
+            (click)="nextMonth()"
+            aria-label="Next month"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M7.5 5L12.5 10L7.5 15"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
           </button>
         }
       </div>
+
+      <!-- Day View -->
+      @if (viewMode === 'day') {
+        <!-- Week Days -->
+        <div class="ax-date-picker-weekdays">
+          @for (day of weekDays; track day) {
+            <div class="ax-date-picker-weekday">{{ day }}</div>
+          }
+        </div>
+
+        <!-- Calendar Grid -->
+        <div
+          class="ax-date-picker-days"
+          role="grid"
+          aria-label="Calendar dates"
+        >
+          @for (day of calendarDays; track day.date) {
+            <button
+              type="button"
+              class="ax-date-picker-day"
+              role="gridcell"
+              [class.ax-date-picker-day-other-month]="!day.isCurrentMonth"
+              [class.ax-date-picker-day-today]="day.isToday"
+              [class.ax-date-picker-day-selected]="day.isSelected"
+              [class.ax-date-picker-day-focused]="day.isFocused"
+              [class.ax-date-picker-day-disabled]="day.isDisabled"
+              [disabled]="day.isDisabled"
+              [attr.aria-label]="getDateAriaLabel(day.date)"
+              [attr.aria-selected]="day.isSelected"
+              [attr.aria-disabled]="day.isDisabled"
+              [attr.aria-current]="day.isToday ? 'date' : null"
+              (click)="selectDate(day)"
+            >
+              {{ day.day }}
+            </button>
+          }
+        </div>
+      }
+
+      <!-- Month View -->
+      @if (viewMode === 'month') {
+        <div
+          class="ax-date-picker-months"
+          role="grid"
+          aria-label="Select month"
+        >
+          @for (month of months; track $index) {
+            <button
+              type="button"
+              class="ax-date-picker-month"
+              role="gridcell"
+              [class.ax-date-picker-month-selected]="
+                currentMonth.getMonth() === $index
+              "
+              [attr.aria-label]="month"
+              [attr.aria-selected]="currentMonth.getMonth() === $index"
+              (click)="selectMonth($index)"
+            >
+              {{ month }}
+            </button>
+          }
+        </div>
+      }
+
+      <!-- Year View -->
+      @if (viewMode === 'year') {
+        <div class="ax-date-picker-years" role="grid" aria-label="Select year">
+          @for (year of years; track year) {
+            <button
+              type="button"
+              class="ax-date-picker-year"
+              role="gridcell"
+              [class.ax-date-picker-year-selected]="
+                currentMonth.getFullYear() === year
+              "
+              [attr.aria-label]="
+                calendar === 'buddhist' && locale === 'th'
+                  ? (year + 543).toString()
+                  : year.toString()
+              "
+              [attr.aria-selected]="currentMonth.getFullYear() === year"
+              (click)="selectYear(year)"
+            >
+              {{
+                calendar === 'buddhist' && locale === 'th' ? year + 543 : year
+              }}
+            </button>
+          }
+        </div>
+      }
+
+      <!-- Action Buttons Footer -->
+      @if (showActionButtons) {
+        <div class="ax-date-picker-footer">
+          <button
+            type="button"
+            class="ax-date-picker-action-btn ax-date-picker-action-btn-secondary"
+            (click)="clearValue()"
+            aria-label="Clear selection"
+          >
+            Clear
+          </button>
+          <button
+            type="button"
+            class="ax-date-picker-action-btn ax-date-picker-action-btn-primary"
+            (click)="selectToday()"
+            aria-label="Select today's date"
+          >
+            Today
+          </button>
+        </div>
+      }
     </div>
   }
 

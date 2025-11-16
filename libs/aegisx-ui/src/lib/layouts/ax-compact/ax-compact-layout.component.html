@@ -1,5 +1,10 @@
-<!-- Loading bar -->
-<ax-loading-bar></ax-loading-bar>
+<!-- Loading bar - Connected to LoadingBarService -->
+<ax-loading-bar
+  [visible]="loadingBarState().visible"
+  [mode]="loadingBarState().mode"
+  [progress]="loadingBarState().progress"
+  [color]="loadingBarState().color"
+></ax-loading-bar>
 
 <!-- Navigation Overlay for mobile -->
 @if (isScreenSmall && isNavigationExpanded()) {

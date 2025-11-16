@@ -21,7 +21,12 @@ import {
 } from '../../types/ax-navigation.types';
 import { AxLoadingBarComponent } from '../../components/ax-loading-bar.component';
 import { AxMediaWatcherService } from '../../services/ax-media-watcher.service';
+import {
+  LoadingBarService,
+  LoadingBarState,
+} from '../../components/feedback/loading-bar/loading-bar.service';
 import { Subject, takeUntil } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'ax-compact-layout',
@@ -72,6 +77,21 @@ export class AxCompactLayoutComponent implements OnInit, OnDestroy {
 
   private _unsubscribeAll = new Subject<void>();
   private _mediaWatcher = inject(AxMediaWatcherService);
+  private _loadingBarService = inject(LoadingBarService);
+
+  // Expose loading bar state as a signal for reactive template binding
+  protected readonly loadingBarState = toSignal(
+    this._loadingBarService.state$,
+    {
+      initialValue: {
+        visible: false,
+        mode: 'indeterminate' as const,
+        progress: 0,
+        color: 'primary' as const,
+        message: undefined,
+      },
+    },
+  );
 
   ngOnInit(): void {
     // Check initial screen size immediately
