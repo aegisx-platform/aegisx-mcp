@@ -1,49 +1,99 @@
 /* ============================================================
    AegisX Light Theme - Angular Material 20 (Material Design 3)
-   Official theming approach using mat.theme() mixin
-   Based on Material blue palette, customized with AegisX design tokens
+   Palette: Azure Blue (mat.$azure-palette)
+   Standardized across light and dark themes for brand consistency
    ============================================================ */
 
 @use '@angular/material' as mat;
 @use './aegisx-tokens' as *;
-@use './material-overrides' as *;
+@use './material-overrides' as *; // Re-enabled: Apply AegisX custom styles
 @use '../components/form-utilities' as *;
 
 /* ============================================================
    Theme Configuration
-   Using Material's built-in blue palette (closest to Tremor)
+   Azure Blue palette - Standardized across light and dark themes
    ============================================================ */
 
-:root {
-  @include mat.theme(
-    (
-      color: (
-        theme-type: light,
-        primary: mat.$azure-palette,
-        tertiary: mat.$blue-palette,
-      ),
-      typography: (
-        brand-family:
-          'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-        plain-family:
-          'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-      ),
-      density: (
-        scale: -1,
-      ),
-    )
-  );
+// ===== Create Light Theme (Material 3) =====
+// Using Azure Blue palette for brand consistency
+$aegisx-light-theme: mat.define-theme(
+  (
+    color: (
+      theme-type: light,
+      primary: mat.$azure-palette,
+      // Azure Blue for primary
+      tertiary: mat.$violet-palette,
+      // Violet for tertiary
+    ),
+    typography: (
+      plain-family:
+        'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+      brand-family:
+        'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+    ),
+    density: (
+      scale: -1,
+    ),
+  )
+);
 
-  /* Material Design 3 System Colors - Light Mode */
-  --md-sys-color-background: #ffffff;
-  --md-sys-color-on-background: #111827;
-  --md-sys-color-surface: #f9fafb;
-  --md-sys-color-on-surface: #1f2937;
-  --md-sys-color-surface-container-lowest: #ffffff;
-  --md-sys-color-surface-container-low: #f9fafb;
-  --md-sys-color-surface-container: #f3f4f6;
-  --md-sys-color-surface-container-high: #e5e7eb;
-  --md-sys-color-surface-container-highest: #d1d5db;
+// ===== Apply Theme =====
+:root {
+  @include mat.all-component-themes($aegisx-light-theme);
+
+  // Enable backwards compatibility for Material 2 color variants (accent, warn)
+  @include mat.color-variants-backwards-compatibility($aegisx-light-theme);
+
+  /* Fix: Filled buttons with color attributes using Material 3 mixins */
+  .mat-mdc-raised-button.mat-primary {
+    @include mat.button-color($aegisx-light-theme, $color-variant: primary);
+  }
+  .mat-mdc-raised-button.mat-accent {
+    @include mat.button-color($aegisx-light-theme, $color-variant: tertiary);
+  }
+  .mat-mdc-raised-button.mat-warn {
+    @include mat.button-color($aegisx-light-theme, $color-variant: error);
+  }
+
+  /* Material 3 Card Color Overrides - All cards white background */
+  /* Raised/Elevated Card */
+  --mat-card-elevated-container-color: var(--aegisx-background-default);
+  --mdc-elevated-card-container-color: var(--aegisx-background-default);
+
+  /* Outlined Card */
+  --mat-card-outlined-container-color: var(--aegisx-background-default);
+  --mdc-outlined-card-container-color: var(--aegisx-background-default);
+
+  /* Filled Card */
+  --mat-card-filled-container-color: var(--aegisx-background-default);
+  --mdc-filled-card-container-color: var(--aegisx-background-default);
+
+  /* Generic card container */
+  --mat-card-container-color: var(--aegisx-background-default);
+
+  /* Card Border Color - Use AegisX border token */
+  --mat-card-outlined-outline-color: var(--aegisx-border-default);
+  --mdc-outlined-card-outline-color: var(--aegisx-border-default);
+
+  /* Button Shape - Use AegisX radius token for all button types */
+  --mat-button-filled-container-shape: var(--aegisx-radius-sm);
+  --mdc-filled-button-container-shape: var(--aegisx-radius-sm);
+  --mat-button-outlined-container-shape: var(--aegisx-radius-sm);
+  --mdc-outlined-button-container-shape: var(--aegisx-radius-sm);
+  --mat-button-text-container-shape: var(--aegisx-radius-sm);
+  --mdc-text-button-container-shape: var(--aegisx-radius-sm);
+
+  /* Button Text Color - Use AegisX text tokens */
+  --mat-button-outlined-label-text-color: var(--aegisx-text-emphasis);
+  --mdc-outlined-button-label-text-color: var(--aegisx-text-emphasis);
+
+  /* Button Outline/Border Color - Use AegisX border tokens */
+  --mat-button-outlined-outline-color: var(--aegisx-border-default);
+  --mdc-outlined-button-outline-color: var(--aegisx-border-default);
+
+  /* Filled Button Background Color - Use AegisX brand token */
+  --mat-button-filled-container-color: var(--aegisx-brand-default);
+  --mdc-filled-button-container-color: var(--aegisx-brand-default);
 }
 
 /* ============================================================

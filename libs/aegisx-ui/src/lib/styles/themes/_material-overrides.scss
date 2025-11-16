@@ -64,26 +64,6 @@
   )
 );
 
-// Regular buttons (raised, outlined, text, etc.)
-@include mat.button-overrides(
-  (
-    // Protected (raised/elevated) buttons
-    protected-container-shape: var(--aegisx-radius-md),
-    protected-container-elevation-shadow: var(--aegisx-shadow-sm),
-    protected-hover-container-elevation-shadow: var(--aegisx-shadow-md),
-    protected-pressed-container-elevation-shadow: var(--aegisx-shadow-sm),
-    // Outlined buttons
-    outlined-container-shape: var(--aegisx-radius-md),
-    outlined-outline-color: var(--aegisx-border-default),
-    // Text buttons
-    text-container-shape: var(--aegisx-radius-md),
-    // Filled buttons
-    filled-container-shape: var(--aegisx-radius-md),
-    // Tonal buttons
-    tonal-container-shape: var(--aegisx-radius-md)
-  )
-);
-
 // ===== Form Fields - Tremor Style (clean borders) =====
 .mat-mdc-form-field {
   // Outlined style
@@ -137,62 +117,123 @@
   }
 }
 
-// ===== Tables - Tremor Style =====
+// ===== Tables - Minimal Clean Style =====
 @include mat.table-overrides(
   (
-    // Background and borders
-    background-color: var(--aegisx-background-default),
-    row-item-outline-color: var(--aegisx-border-default),
+    // Background - Pure white/default (no gray backgrounds)
+    background-color: transparent,
+    // Borders - Ultra subtle (#eeeeee)
+    row-item-outline-color: #eeeeee,
     row-item-outline-width: 1px,
     // Text colors
-    header-headline-color: var(--aegisx-text-strong),
-    row-item-label-text-color: var(--aegisx-text-body)
+    header-headline-color: #111827,
+    row-item-label-text-color: #4b5563
   )
 );
 
-// Additional table styling (no tokens available)
+// Force override Material table CSS variables
+:root {
+  --mat-table-row-item-outline-color: #eeeeee !important;
+  --mat-table-background-color: transparent !important;
+  --mat-table-row-item-outline-width: 1px !important;
+}
+
+// Additional table styling - Minimal Material Design (subtle hierarchy)
 .mat-mdc-table {
-  border-radius: var(--aegisx-radius-md);
-  overflow: hidden;
+  border-radius: 0;
+  overflow: auto;
+  border: none;
+  background: transparent !important;
+  box-shadow: none !important; // Remove elevation shadow
 
+  // Header - Pure white with subtle border
   .mat-mdc-header-row {
-    background: var(--aegisx-background-subtle);
-  }
+    background: transparent !important; // Pure white
+    border-bottom: 1px solid #eeeeee; // Ultra subtle divider
 
-  .mat-mdc-row {
-    &:hover {
-      background: var(--aegisx-background-muted);
+    .mat-mdc-header-cell {
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: #111827;
+      padding: 0.875rem 1rem;
+      text-align: left;
+      background: transparent !important;
     }
   }
 
+  // Rows - Pure white, NO backgrounds, NO hover
+  .mat-mdc-row {
+    background: transparent !important;
+    background-color: transparent !important;
+
+    // Force remove zebra striping
+    &:nth-child(odd),
+    &:nth-child(even) {
+      background: transparent !important;
+      background-color: transparent !important;
+    }
+
+    // Remove hover effect
+    &:hover {
+      background: transparent !important;
+      background-color: transparent !important;
+    }
+
+    .mat-mdc-cell {
+      padding: 1rem; // p-4
+      font-size: 0.875rem; // text-sm
+      color: #4b5563; // Tremor: text-gray-600
+      background: transparent !important;
+      background-color: transparent !important;
+    }
+  }
+
+  // Remove ALL vertical borders (Tremor uses divide-y only)
   .mat-mdc-cell,
   .mat-mdc-header-cell {
-    border-right: 1px solid var(--aegisx-border-default);
+    border-right: none;
+    border-left: none;
+  }
+
+  // Horizontal dividers between rows - Ultra subtle
+  .mat-mdc-row {
+    border-bottom: 1px solid #eeeeee; // Ultra subtle: lighter than gray-200
 
     &:last-child {
-      border-right: none;
+      border-bottom: none;
     }
   }
 }
 
-// ===== Chips - Tremor Style =====
-// Using Angular Material chips-overrides mixin (official M3 approach)
+// Remove table elevation shadows
+.mat-mdc-table,
+.mat-elevation-z8 {
+  box-shadow: none !important;
+}
+
+// Paginator styling - Clean white background
+.mat-mdc-paginator {
+  background-color: white !important;
+  border-top: 1px solid #eeeeee;
+}
+
+// ===== Chips - Minimal Style (Ultra Subtle Borders) =====
 @include mat.chips-overrides(
   (
-    // Outline (border) styling
-    outline-color: var(--aegisx-border-default),
+    // Outline (border) styling - Ultra subtle
+    outline-color: #eeeeee,
     outline-width: 1px,
 
     // Container colors
-    elevated-container-color: var(--aegisx-background-subtle),
+    elevated-container-color: transparent,
     elevated-selected-container-color: var(--aegisx-brand-faint),
     elevated-disabled-container-color: var(--aegisx-background-subtle),
     // Label text colors
     label-text-color: var(--aegisx-text-strong),
     selected-label-text-color: var(--aegisx-brand-emphasis),
     disabled-label-text-color: var(--aegisx-text-subtle),
-    // Disabled outline
-    disabled-outline-color: var(--aegisx-border-default),
+    // Disabled outline - Ultra subtle
+    disabled-outline-color: #eeeeee,
     // Shape (border radius)
     container-shape-radius: var(--aegisx-radius-md),
     // Selected outline width
@@ -310,4 +351,26 @@
   border-radius: var(--aegisx-radius-md) !important;
   border: 1px solid var(--aegisx-border-default) !important;
   box-shadow: var(--aegisx-shadow-lg) !important;
+}
+
+// ===== Button Toggle - Tremor Style =====
+.mat-button-toggle-group {
+  box-shadow: none !important;
+  border: 1px solid var(--aegisx-border-default) !important;
+  border-radius: var(--aegisx-radius-md) !important;
+  overflow: hidden;
+
+  .mat-button-toggle {
+    color: var(--aegisx-text-body);
+
+    // Clean divider between buttons
+    &:not(:last-child) {
+      border-right: 1px solid var(--aegisx-border-default) !important;
+    }
+
+    // Remove Material's default borders except the divider
+    border-top: none !important;
+    border-bottom: none !important;
+    border-left: none !important;
+  }
 }

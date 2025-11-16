@@ -20,51 +20,49 @@ export interface ThemeOption {
 })
 export class TremorThemeService {
   private readonly STORAGE_KEY = 'selected-theme';
-  private readonly THEME_LINK_ID = 'app-theme';
+  private readonly THEME_LINK_ID = 'aegisx-theme-link';
 
-  // Available themes (Tremor + Material prebuilt)
+  // Available themes (AegisX themes generated from SCSS)
   readonly themes: ThemeOption[] = [
-    // Tremor Custom Themes
-    { id: 'tremor-light', name: 'Tremor Light', path: 'tremor-light.css' },
-    { id: 'tremor-dark', name: 'Tremor Dark', path: 'tremor-dark.css' },
+    // AegisX Themes
+    { id: 'aegisx-light', name: 'AegisX Light', path: 'aegisx-light.css' },
+    { id: 'aegisx-dark', name: 'AegisX Dark', path: 'aegisx-dark.css' },
 
-    // Material Prebuilt Themes
+    // Material 3 Prebuilt Themes
     {
-      id: 'indigo-pink',
-      name: 'Indigo & Pink',
+      id: 'material-indigo-pink',
+      name: 'Material 3 Indigo-Pink',
       path: 'themes/indigo-pink.css',
     },
     {
-      id: 'deeppurple-amber',
-      name: 'Deep Purple & Amber',
+      id: 'material-deeppurple-amber',
+      name: 'Material 3 Deep Purple-Amber',
       path: 'themes/deeppurple-amber.css',
     },
     {
-      id: 'pink-bluegrey',
-      name: 'Pink & Blue Grey',
-      path: 'themes/pink-bluegrey.css',
+      id: 'material-azure-blue',
+      name: 'Material 3 Azure-Blue',
+      path: 'themes/azure-blue.css',
     },
     {
-      id: 'purple-green',
-      name: 'Purple & Green',
-      path: 'themes/purple-green.css',
-    },
-    { id: 'azure-blue', name: 'Azure Blue', path: 'themes/azure-blue.css' },
-    {
-      id: 'cyan-orange',
-      name: 'Cyan & Orange',
+      id: 'material-cyan-orange',
+      name: 'Material 3 Cyan-Orange',
       path: 'themes/cyan-orange.css',
     },
     {
-      id: 'magenta-violet',
-      name: 'Magenta & Violet',
-      path: 'themes/magenta-violet.css',
+      id: 'material-pink-bluegrey',
+      name: 'Material 3 Pink-Blue Grey',
+      path: 'themes/pink-bluegrey.css',
     },
-    { id: 'rose-red', name: 'Rose & Red', path: 'themes/rose-red.css' },
+    {
+      id: 'material-purple-green',
+      name: 'Material 3 Purple-Green',
+      path: 'themes/purple-green.css',
+    },
   ];
 
   // Reactive state
-  private currentThemeId = signal<string>('tremor-light');
+  private currentThemeId = signal<string>('aegisx-light');
 
   // Public readonly signals
   readonly themeId = this.currentThemeId.asReadonly();
@@ -111,7 +109,7 @@ export class TremorThemeService {
       this.setTheme(savedThemeId);
     } else {
       // Use default theme
-      this.setTheme('tremor-light');
+      this.setTheme('aegisx-light');
     }
   }
 
@@ -133,6 +131,16 @@ export class TremorThemeService {
 
     // Add to document head
     document.head.appendChild(linkElement);
+
+    // Apply dark/light class to HTML root for TailwindCSS dark mode
+    const root = document.documentElement;
+    if (theme.id.includes('dark')) {
+      root.classList.remove('light');
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+      root.classList.add('light');
+    }
   }
 
   /**
