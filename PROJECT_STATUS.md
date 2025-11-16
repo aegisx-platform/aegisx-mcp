@@ -202,6 +202,13 @@ aegisx-starter/
     - **Border & Radius Variants**: Extended variants for flexible UI design
     - **Theme-Aware**: Separate light and dark theme values with consistent naming
     - **Single Source of Truth**: All tokens use variable references, no hard-coded values
+31. **Complete Error Color Tokens & KPI Card Dark Mode** - Full error color palette and UI fixes (Session 69 Continuation):
+    - **6 Error Color Variants**: faint, muted, subtle, default, emphasis, inverted
+    - **Light Theme**: Red-100 (#fee2e2) to Red-600 (#dc2626) for error states
+    - **Dark Theme**: Red-900 (#7f1d1d) to Red-400 (#f87171) for better dark mode contrast
+    - **Semantic Classes**: bg-error, text-error, border-error work correctly in both themes
+    - **KPI Cards Fixed**: Donut chart colors optimized (Slate 200), visual indicators corrected
+    - **Full Dark Mode Support**: All error states properly visible in dark theme
 
 ### 🎯 Optional Platform Enhancements
 
