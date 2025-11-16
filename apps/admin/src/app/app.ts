@@ -30,9 +30,9 @@ import { filter, map, startWith } from 'rxjs/operators';
 export class App {
   private readonly router = inject(Router);
 
-  protected title = 'Theme Testing App';
-  protected appName = 'AegisX Theme Testing';
-  protected appVersion = 'v1.0';
+  protected title = 'AegisX Design System';
+  protected appName = 'AegisX Admin';
+  protected appVersion = 'v1.0.0';
   protected currentLayout = signal<LayoutType>('compact');
 
   // Check if current route should show layout
@@ -51,94 +51,157 @@ export class App {
     return !url.startsWith('/login');
   });
 
-  // Navigation items for theme testing app
+  // Navigation items - Tremor-style hierarchical structure
   navigation: AxNavigationItem[] = [
+    // Getting Started Section
     {
-      id: 'dashboard',
-      title: 'Dashboard',
-      type: 'item',
-      icon: 'dashboard',
-      link: '/dashboard',
+      id: 'getting-started',
+      title: 'Getting Started',
+      type: 'collapsible',
+      icon: 'rocket_launch',
+      children: [
+        {
+          id: 'introduction',
+          title: 'Introduction',
+          type: 'item',
+          icon: 'home',
+          link: '/introduction',
+        },
+        {
+          id: 'installation',
+          title: 'Installation',
+          type: 'item',
+          icon: 'download',
+          link: '/installation',
+        },
+        {
+          id: 'quick-start',
+          title: 'Quick Start',
+          type: 'item',
+          icon: 'speed',
+          link: '/quick-start',
+        },
+      ],
     },
+
+    // Foundation Section
     {
-      id: 'components',
+      id: 'foundation',
+      title: 'Foundation',
+      type: 'collapsible',
+      icon: 'architecture',
+      children: [
+        {
+          id: 'design-tokens',
+          title: 'Design Tokens',
+          type: 'item',
+          icon: 'color_lens',
+          link: '/design-tokens',
+        },
+        {
+          id: 'typography',
+          title: 'Typography',
+          type: 'item',
+          icon: 'text_fields',
+          link: '/typography',
+        },
+      ],
+    },
+
+    // Material Components Section
+    {
+      id: 'material-components',
       title: 'Material Components',
-      type: 'item',
+      type: 'collapsible',
       icon: 'widgets',
-      link: '/components',
+      children: [
+        {
+          id: 'components',
+          title: 'Components Demo',
+          type: 'item',
+          icon: 'view_module',
+          link: '/components',
+        },
+      ],
     },
-    {
-      id: 'design-tokens',
-      title: 'Design Tokens',
-      type: 'item',
-      icon: 'color_lens',
-      link: '/design-tokens',
-    },
+
+    // AegisX Components Section (Tremor-inspired)
     {
       id: 'aegisx-components',
       title: 'AegisX Components',
-      type: 'item',
+      type: 'collapsible',
       icon: 'extension',
-      link: '/aegisx-components',
-    },
-    {
-      id: 'layouts',
-      title: 'Layouts',
-      type: 'collapsible',
-      icon: 'view_quilt',
       children: [
         {
-          id: 'layout-compact',
-          title: 'Compact Layout',
+          id: 'card-examples',
+          title: 'KPI Cards',
           type: 'item',
-          link: '/layouts/compact',
+          icon: 'analytics',
+          link: '/card-examples',
         },
         {
-          id: 'layout-enterprise',
-          title: 'Enterprise Layout',
+          id: 'spark-charts',
+          title: 'Spark Charts',
           type: 'item',
-          link: '/layouts/enterprise',
+          icon: 'show_chart',
+          link: '/spark-charts',
         },
         {
-          id: 'layout-empty',
-          title: 'Empty Layout',
+          id: 'badges',
+          title: 'Badges',
           type: 'item',
-          link: '/layouts/empty',
+          icon: 'label',
+          link: '/badges',
         },
       ],
     },
+
+    // Form Patterns Section
     {
-      id: 'themes',
-      title: 'Themes',
+      id: 'form-patterns',
+      title: 'Form Patterns',
       type: 'collapsible',
-      icon: 'palette',
+      icon: 'article',
       children: [
         {
-          id: 'theme-material',
-          title: 'Material Design 3',
+          id: 'form-sizes',
+          title: 'Form Sizes',
           type: 'item',
-          link: '/themes/material',
+          icon: 'height',
+          link: '/form-sizes',
         },
         {
-          id: 'theme-tremor',
-          title: 'Tremor',
+          id: 'form-layouts',
+          title: 'Form Layouts',
           type: 'item',
-          link: '/themes/tremor',
-        },
-        {
-          id: 'theme-custom',
-          title: 'Custom Themes',
-          type: 'item',
-          link: '/themes/custom',
+          icon: 'view_module',
+          link: '/form-layouts',
         },
       ],
     },
+
+    // Examples Section
     {
-      id: 'users',
-      title: 'User Management',
-      type: 'item',
-      icon: 'people',
-      link: '/users',
+      id: 'examples',
+      title: 'Examples',
+      type: 'collapsible',
+      icon: 'apps',
+      children: [
+        {
+          id: 'dashboard',
+          title: 'Dashboard',
+          type: 'item',
+          icon: 'dashboard',
+          link: '/dashboard',
+        },
+        {
+          id: 'users',
+          title: 'User Management',
+          type: 'item',
+          icon: 'people',
+          link: '/users',
+        },
+      ],
     },
   ];
 

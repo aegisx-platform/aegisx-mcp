@@ -1,3 +1,10 @@
+<!-- Standalone routes (no layout) -->
+@if (!showLayout()) {
+<router-outlet></router-outlet>
+}
+
+<!-- Main routes (with layout) -->
+@if (showLayout()) {
 <ax-compact-layout
   [navigation]="navigation"
   [appName]="appName"
@@ -11,7 +18,7 @@
 
   <!-- Toolbar Actions (Theme & Layout Switchers) -->
   <ng-template #toolbarActions>
-    <ax-theme-switcher></ax-theme-switcher>
+    <ax-tremor-theme-switcher></ax-tremor-theme-switcher>
     <ax-layout-switcher
       (layoutChange)="onLayoutChange($event)"
     ></ax-layout-switcher>
@@ -26,3 +33,4 @@
   <!-- Main Content -->
   <router-outlet></router-outlet>
 </ax-compact-layout>
+}
