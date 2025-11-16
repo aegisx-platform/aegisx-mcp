@@ -1,0 +1,463 @@
+/* ============================================
+   Badge Base Styles - Tremor Inspired
+   ============================================ */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: var(--aegisx-radius-sm);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* ============================================
+   Badge Sizes
+   ============================================ */
+
+.badge-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.badge-md {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8125rem;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.badge-lg {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* Default to medium size */
+.badge:not(.badge-sm):not(.badge-md):not(.badge-lg) {
+  padding: 0.375rem 0.75rem;
+}
+
+/* ============================================
+   Badge Variants - Outlined (Ring Style)
+   ============================================ */
+
+.badge-outlined {
+  background: transparent;
+  border: 1px solid;
+
+  &.badge-success {
+    color: var(--aegisx-success-default);
+    border-color: var(--aegisx-success-default);
+
+    &:hover {
+      background: var(--aegisx-success-faint);
+    }
+  }
+
+  &.badge-error {
+    color: var(--aegisx-error-default);
+    border-color: var(--aegisx-error-default);
+
+    &:hover {
+      background: var(--aegisx-error-faint);
+    }
+  }
+
+  &.badge-warning {
+    color: var(--aegisx-warning-default);
+    border-color: var(--aegisx-warning-default);
+
+    &:hover {
+      background: var(--aegisx-warning-faint);
+    }
+  }
+
+  &.badge-info {
+    color: var(--aegisx-info-default);
+    border-color: var(--aegisx-info-default);
+
+    &:hover {
+      background: var(--aegisx-info-faint);
+    }
+  }
+
+  &.badge-neutral {
+    color: var(--aegisx-text-secondary);
+    border-color: var(--aegisx-border-default);
+
+    &:hover {
+      background: var(--aegisx-bg-page);
+    }
+  }
+}
+
+/* ============================================
+   Badge Variants - Soft (Filled)
+   ============================================ */
+
+.badge-soft {
+  border: none;
+
+  &.badge-success {
+    background: var(--aegisx-success-faint);
+    color: var(--aegisx-success-emphasis);
+
+    &:hover {
+      background: var(--aegisx-success-muted);
+    }
+  }
+
+  &.badge-error {
+    background: var(--aegisx-error-faint);
+    color: var(--aegisx-error-emphasis);
+
+    &:hover {
+      background: var(--aegisx-error-muted);
+    }
+  }
+
+  &.badge-warning {
+    background: var(--aegisx-warning-faint);
+    color: var(--aegisx-warning-emphasis);
+
+    &:hover {
+      background: var(--aegisx-warning-muted);
+    }
+  }
+
+  &.badge-info {
+    background: var(--aegisx-info-faint);
+    color: var(--aegisx-info-emphasis);
+
+    &:hover {
+      background: var(--aegisx-info-muted);
+    }
+  }
+
+  &.badge-neutral {
+    background: var(--aegisx-bg-page);
+    color: var(--aegisx-text-secondary);
+    border: 1px solid var(--aegisx-border-subtle);
+
+    &:hover {
+      background: var(--aegisx-bg-surface);
+    }
+  }
+}
+
+/* ============================================
+   Badge Variants - Outlined Strong
+   ============================================ */
+
+.badge-outlined-strong {
+  background: var(--aegisx-bg-surface);
+  border: 2px solid;
+
+  &.badge-success {
+    color: var(--aegisx-success-default);
+    border-color: var(--aegisx-success-default);
+
+    &:hover {
+      background: var(--aegisx-success-faint);
+    }
+  }
+
+  &.badge-error {
+    color: var(--aegisx-error-default);
+    border-color: var(--aegisx-error-default);
+
+    &:hover {
+      background: var(--aegisx-error-faint);
+    }
+  }
+
+  &.badge-warning {
+    color: var(--aegisx-warning-default);
+    border-color: var(--aegisx-warning-default);
+
+    &:hover {
+      background: var(--aegisx-warning-faint);
+    }
+  }
+
+  &.badge-info {
+    color: var(--aegisx-info-default);
+    border-color: var(--aegisx-info-default);
+
+    &:hover {
+      background: var(--aegisx-info-faint);
+    }
+  }
+
+  &.badge-neutral {
+    color: var(--aegisx-text-secondary);
+    border-color: var(--aegisx-border-default);
+
+    &:hover {
+      background: var(--aegisx-bg-page);
+    }
+  }
+}
+
+/* ============================================
+   Badge with Icons
+   ============================================ */
+
+.badge-icon {
+  mat-icon {
+    margin-left: -0.125rem;
+  }
+}
+
+/* ============================================
+   Badge with Dot
+   ============================================ */
+
+.badge-dot {
+  gap: 0.5rem;
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  &.badge-success .dot {
+    background: var(--aegisx-success-default, #10b981) !important;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2) !important;
+  }
+
+  &.badge-error .dot {
+    background: var(--aegisx-error-default, #ef4444) !important;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
+    opacity: 1 !important;
+    display: block !important;
+  }
+
+  &.badge-warning .dot {
+    background: var(--aegisx-warning-default, #f59e0b) !important;
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2) !important;
+  }
+
+  &.badge-info .dot {
+    background: var(--aegisx-info-default, #3b82f6) !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+  }
+
+  &.badge-neutral .dot {
+    background: var(--aegisx-text-secondary, #6b7280) !important;
+    box-shadow: 0 0 0 2px rgba(107, 114, 128, 0.2) !important;
+  }
+}
+
+/* ============================================
+   Removable Badges (Tags)
+   ============================================ */
+
+.badge-removable {
+  padding-right: 0.25rem;
+
+  .badge-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.125rem;
+    margin-left: 0.25rem;
+    background: transparent;
+    border: none;
+    border-radius: var(--aegisx-radius-sm);
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    mat-icon {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+      color: currentColor;
+      opacity: 0.6;
+    }
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.1);
+
+      mat-icon {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+/* ============================================
+   Counter Badges
+   ============================================ */
+
+.badge-counter {
+  gap: 0.5rem;
+
+  .badge-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.25rem;
+    padding: 0.125rem 0.375rem;
+    border-radius: var(--aegisx-radius-sm);
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  &.badge-soft {
+    &.badge-success .badge-count {
+      background: var(--aegisx-success-default);
+      color: white;
+    }
+
+    &.badge-error .badge-count {
+      background: var(--aegisx-error-default);
+      color: white;
+    }
+
+    &.badge-warning .badge-count {
+      background: var(--aegisx-warning-default);
+      color: white;
+    }
+
+    &.badge-info .badge-count {
+      background: var(--aegisx-info-default);
+      color: white;
+    }
+
+    &.badge-neutral .badge-count {
+      background: var(--aegisx-text-secondary);
+      color: white;
+    }
+  }
+
+  &.badge-outlined {
+    &.badge-success .badge-count {
+      background: var(--aegisx-success-default, #10b981) !important;
+      color: white !important;
+    }
+
+    &.badge-error .badge-count {
+      background: var(--aegisx-error-default, #ef4444) !important;
+      color: white !important;
+      opacity: 1 !important;
+      display: inline-flex !important;
+      visibility: visible !important;
+    }
+
+    &.badge-warning .badge-count {
+      background: var(--aegisx-warning-default, #f59e0b) !important;
+      color: white !important;
+    }
+
+    &.badge-info .badge-count {
+      background: var(--aegisx-info-default, #3b82f6) !important;
+      color: white !important;
+    }
+
+    &.badge-neutral .badge-count {
+      background: var(--aegisx-text-secondary, #6b7280) !important;
+      color: white !important;
+    }
+  }
+}
+
+/* ============================================
+   Demo Layout
+   ============================================ */
+
+.demo-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  background: var(--aegisx-bg-surface);
+  border: 1px solid var(--aegisx-border-default);
+  border-radius: var(--aegisx-radius-md);
+}
+
+.demo-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+/* Best Practices List */
+.best-practices-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--aegisx-border-subtle);
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    mat-icon {
+      flex-shrink: 0;
+      margin-top: 0.125rem;
+
+      &.success-icon {
+        color: var(--aegisx-success-default);
+      }
+    }
+
+    strong {
+      color: var(--aegisx-text-heading);
+    }
+  }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .demo-grid {
+    padding: 1rem;
+  }
+
+  .badge {
+    font-size: 0.75rem;
+
+    mat-icon {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+    }
+  }
+}

@@ -1,0 +1,181 @@
+/* ============================================
+   Typography Showcase Component Styles
+   Uses Tailwind for layout, SCSS only for complex component-specific styles
+   ============================================ */
+
+// Blog Post Example - Typography demonstration
+.blog-post {
+  .example-display {
+    font-size: var(--aegisx-type-display-small);
+    font-weight: var(--aegisx-type-display-small-weight);
+    line-height: var(--aegisx-type-display-small-line-height);
+    color: var(--aegisx-text-heading);
+    margin: 0 0 1rem 0;
+  }
+
+  .example-meta {
+    font-size: var(--aegisx-type-body-medium);
+    color: var(--aegisx-text-subtle);
+    margin: 0 0 2rem 0;
+  }
+
+  .example-headline {
+    font-size: var(--aegisx-type-headline-medium);
+    font-weight: var(--aegisx-type-headline-medium-weight);
+    line-height: var(--aegisx-type-headline-medium-line-height);
+    color: var(--aegisx-text-heading);
+    margin: 2rem 0 1rem 0;
+  }
+
+  .example-title {
+    font-size: var(--aegisx-type-title-large);
+    font-weight: var(--aegisx-type-title-large-weight);
+    line-height: var(--aegisx-type-title-large-line-height);
+    color: var(--aegisx-text-heading);
+    margin: 1.5rem 0 0.75rem 0;
+  }
+
+  .example-body {
+    font-size: var(--aegisx-type-body-large);
+    font-weight: var(--aegisx-type-body-large-weight);
+    line-height: var(--aegisx-type-body-large-line-height);
+    color: var(--aegisx-text-primary);
+    margin: 0 0 1rem 0;
+  }
+
+  .example-caption {
+    font-size: var(--aegisx-type-body-small);
+    font-weight: var(--aegisx-type-body-small-weight);
+    line-height: var(--aegisx-type-body-small-line-height);
+    color: var(--aegisx-text-subtle);
+    font-style: italic;
+    margin: 1rem 0;
+  }
+}
+
+// Dashboard Card Example
+.dashboard-card {
+  padding: 1.5rem;
+  background-color: var(--aegisx-background-muted);
+  border-radius: var(--aegisx-radius-lg);
+  border: 1px solid var(--aegisx-border-default);
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .card-title {
+    font-size: var(--aegisx-type-title-medium);
+    font-weight: var(--aegisx-type-title-medium-weight);
+    color: var(--aegisx-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+  }
+
+  .card-badge {
+    font-size: var(--aegisx-type-label-medium);
+    font-weight: var(--aegisx-type-label-medium-weight);
+    padding: 0.375rem 0.75rem;
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--aegisx-success-700);
+    border-radius: var(--aegisx-radius-full);
+  }
+
+  .card-value {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: var(--aegisx-text-heading);
+    margin-bottom: 0.5rem;
+  }
+
+  .card-subtitle {
+    font-size: var(--aegisx-type-body-medium);
+    color: var(--aegisx-text-subtle);
+    margin-bottom: 1rem;
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--aegisx-border-default);
+
+    .footer-label {
+      font-size: var(--aegisx-type-label-small);
+      font-weight: var(--aegisx-type-label-small-weight);
+      color: var(--aegisx-text-subtle);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .footer-time {
+      font-size: var(--aegisx-type-body-small);
+      color: var(--aegisx-text-secondary);
+    }
+  }
+}
+
+// Form Example
+.example-form {
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-label {
+    display: block;
+    font-size: var(--aegisx-type-label-large);
+    font-weight: var(--aegisx-type-label-large-weight);
+    color: var(--aegisx-text-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: var(--aegisx-type-body-medium);
+    color: var(--aegisx-text-primary);
+    background-color: var(--aegisx-background-default);
+    border: 1px solid var(--aegisx-border-default);
+    border-radius: var(--aegisx-radius-md);
+    transition: border-color var(--aegisx-transition-fast);
+
+    &::placeholder {
+      color: var(--aegisx-text-disabled);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--aegisx-brand-default);
+    }
+  }
+
+  .form-hint {
+    display: block;
+    font-size: var(--aegisx-type-body-small);
+    color: var(--aegisx-text-subtle);
+    margin-top: 0.375rem;
+  }
+
+  .form-error {
+    display: block;
+    font-size: var(--aegisx-type-body-small);
+    color: var(--aegisx-error-default);
+    margin-top: 0.375rem;
+  }
+}
+
+// Responsive Adjustments
+@media (max-width: 768px) {
+  .blog-post .example-display {
+    font-size: 2rem;
+  }
+
+  .dashboard-card .card-value {
+    font-size: 1.875rem;
+  }
+}

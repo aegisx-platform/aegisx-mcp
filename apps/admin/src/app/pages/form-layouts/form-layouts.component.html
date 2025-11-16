@@ -1,0 +1,976 @@
+<!-- Form Layouts Demo (Tremor Style) -->
+<div class="docs-page">
+  <!-- Page Header -->
+  <div class="docs-header">
+    <div class="docs-breadcrumb">
+      <a routerLink="/components" mat-button>
+        <mat-icon>arrow_back</mat-icon>
+        Components
+      </a>
+      <mat-icon>chevron_right</mat-icon>
+      <span>Form Layouts</span>
+    </div>
+    <h1 class="docs-title">Form Layouts</h1>
+    <p class="docs-subtitle">
+      Common form layout patterns following Tremor design principles.
+    </p>
+  </div>
+
+  <!-- Form Layout Examples -->
+  <div class="section-header">
+    <h2>Layout Examples</h2>
+    <p>
+      Common form layout patterns for different use cases including login,
+      dialogs, and multi-step forms.
+    </p>
+  </div>
+
+  <mat-card appearance="outlined">
+    <mat-card-content class="p-0">
+      <mat-tab-group>
+        <!-- Single Column Form -->
+        <mat-tab label="Single Column">
+          <div class="tab-content p-6">
+            <div class="max-w-2xl mx-auto">
+              <div class="mb-6">
+                <h2
+                  class="text-xl font-bold"
+                  style="color: var(--aegisx-text-strong)"
+                >
+                  Create Account
+                </h2>
+                <p class="mt-1 text-sm" style="color: var(--aegisx-text-body)">
+                  Enter your details to create a new account.
+                </p>
+              </div>
+
+              <div class="form-compact">
+                <form class="flex flex-col gap-4">
+                  <!-- Full Name -->
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>
+                      Full Name
+                      <span class="required-asterisk">*</span>
+                    </mat-label>
+                    <mat-icon matPrefix>person</mat-icon>
+                    <input matInput placeholder="John Doe" required />
+                  </mat-form-field>
+
+                  <!-- Email -->
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>
+                      Email
+                      <span class="required-asterisk">*</span>
+                    </mat-label>
+                    <mat-icon matPrefix>email</mat-icon>
+                    <input
+                      matInput
+                      type="email"
+                      placeholder="john@example.com"
+                      required
+                    />
+                  </mat-form-field>
+
+                  <!-- Password -->
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>
+                      Password
+                      <span class="required-asterisk">*</span>
+                    </mat-label>
+                    <mat-icon matPrefix>lock</mat-icon>
+                    <input
+                      matInput
+                      type="password"
+                      placeholder="••••••••"
+                      required
+                    />
+                    <mat-hint class="helper-text"
+                      >Must be at least 8 characters</mat-hint
+                    >
+                  </mat-form-field>
+
+                  <!-- Confirm Password -->
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>
+                      Confirm Password
+                      <span class="required-asterisk">*</span>
+                    </mat-label>
+                    <mat-icon matPrefix>lock</mat-icon>
+                    <input
+                      matInput
+                      type="password"
+                      placeholder="••••••••"
+                      required
+                    />
+                  </mat-form-field>
+
+                  <!-- Terms -->
+                  <mat-checkbox class="mb-2">
+                    <span
+                      class="text-sm"
+                      style="color: var(--aegisx-text-body)"
+                    >
+                      I agree to the
+                      <a href="#" class="link-text">Terms and Conditions</a>
+                    </span>
+                  </mat-checkbox>
+
+                  <!-- Actions -->
+                  <div class="flex gap-2 pt-2">
+                    <button
+                      matButton="filled"
+                      color="primary"
+                      type="submit"
+                      class="flex-1"
+                    >
+                      Create Account
+                    </button>
+                    <button matButton="outlined" type="button">Cancel</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Multi-Column Form -->
+        <mat-tab label="Multi-Column">
+          <div class="tab-content p-6">
+            <div class="mb-6">
+              <h2
+                class="text-xl font-bold"
+                style="color: var(--aegisx-text-strong)"
+              >
+                Account Settings
+              </h2>
+              <p class="mt-1 text-sm" style="color: var(--aegisx-text-body)">
+                Manage your account information and preferences.
+              </p>
+            </div>
+
+            <div class="form-compact">
+              <form>
+                <!-- Personal Information Section -->
+                <div class="form-section">
+                  <h3 class="section-title">Personal Information</h3>
+                  <p class="section-description">
+                    Update your personal details and contact information.
+                  </p>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <mat-form-field appearance="outline">
+                      <mat-label>First Name</mat-label>
+                      <input matInput placeholder="John" />
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                      <mat-label>Last Name</mat-label>
+                      <input matInput placeholder="Doe" />
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="md:col-span-2">
+                      <mat-label>Email Address</mat-label>
+                      <mat-icon matPrefix>email</mat-icon>
+                      <input
+                        matInput
+                        type="email"
+                        placeholder="john@example.com"
+                      />
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                      <mat-label>Phone Number</mat-label>
+                      <mat-icon matPrefix>phone</mat-icon>
+                      <input matInput placeholder="+1 (555) 000-0000" />
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                      <mat-label>Country</mat-label>
+                      <mat-icon matPrefix>public</mat-icon>
+                      <mat-select>
+                        <mat-option
+                          *ngFor="let country of countries"
+                          [value]="country"
+                        >
+                          {{ country }}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+                </div>
+
+                <mat-divider class="my-8"></mat-divider>
+
+                <!-- Workspace Settings Section -->
+                <div class="form-section">
+                  <h3 class="section-title">Workspace Settings</h3>
+                  <p class="section-description">
+                    Configure your workspace preferences and defaults.
+                  </p>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <mat-form-field appearance="outline">
+                      <mat-label>Workspace Name</mat-label>
+                      <mat-icon matPrefix>business</mat-icon>
+                      <input matInput placeholder="My Workspace" />
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                      <mat-label>Team Size</mat-label>
+                      <mat-icon matPrefix>groups</mat-icon>
+                      <mat-select>
+                        <mat-option value="1-10">1-10 members</mat-option>
+                        <mat-option value="11-50">11-50 members</mat-option>
+                        <mat-option value="51-200">51-200 members</mat-option>
+                        <mat-option value="201+">201+ members</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="md:col-span-2">
+                      <mat-label>Website</mat-label>
+                      <mat-icon matPrefix>link</mat-icon>
+                      <input matInput placeholder="https://example.com" />
+                    </mat-form-field>
+                  </div>
+                </div>
+
+                <mat-divider class="my-8"></mat-divider>
+
+                <!-- Notification Settings Section -->
+                <div class="form-section">
+                  <h3 class="section-title">Notification Preferences</h3>
+                  <p class="section-description">
+                    Choose how you want to receive updates and notifications.
+                  </p>
+
+                  <div class="flex flex-col gap-3 mt-4">
+                    <mat-checkbox>
+                      <span class="checkbox-label"
+                        >Email notifications for new messages</span
+                      >
+                    </mat-checkbox>
+                    <mat-checkbox>
+                      <span class="checkbox-label">Weekly summary reports</span>
+                    </mat-checkbox>
+                    <mat-checkbox checked>
+                      <span class="checkbox-label"
+                        >Security alerts and updates</span
+                      >
+                    </mat-checkbox>
+                    <mat-checkbox>
+                      <span class="checkbox-label"
+                        >Product updates and announcements</span
+                      >
+                    </mat-checkbox>
+                  </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex justify-end gap-2 mt-8">
+                  <button matButton="outlined" type="button">Cancel</button>
+                  <button matButton="filled" color="primary" type="submit">
+                    Save Changes
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Inline Form with Plan Selection -->
+        <mat-tab label="With Plan Selection">
+          <div class="tab-content p-6">
+            <div class="mb-6">
+              <h2
+                class="text-xl font-bold"
+                style="color: var(--aegisx-text-strong)"
+              >
+                Choose Your Plan
+              </h2>
+              <p class="mt-1 text-sm" style="color: var(--aegisx-text-body)">
+                Select a plan and complete your registration.
+              </p>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-6">
+              <!-- Plan Selection -->
+              <div class="lg:col-span-1">
+                <h3 class="section-title mb-4">Select Plan</h3>
+
+                <div class="form-compact">
+                  <mat-radio-group
+                    [(ngModel)]="selectedPlan"
+                    class="flex flex-col gap-3"
+                  >
+                    <mat-card
+                      appearance="outlined"
+                      class="plan-card"
+                      [class.selected]="selectedPlan === 'basic'"
+                    >
+                      <mat-radio-button value="basic" class="plan-radio">
+                        <div class="plan-content">
+                          <div class="plan-header">
+                            <span class="plan-name">Basic</span>
+                            <span class="plan-price">$9/mo</span>
+                          </div>
+                          <p class="plan-description">
+                            Perfect for individuals and small projects
+                          </p>
+                          <ul class="plan-features">
+                            <li>
+                              <mat-icon class="feature-icon">check</mat-icon> Up
+                              to 5 projects
+                            </li>
+                            <li>
+                              <mat-icon class="feature-icon">check</mat-icon>
+                              10GB storage
+                            </li>
+                            <li>
+                              <mat-icon class="feature-icon">check</mat-icon>
+                              Email support
+                            </li>
+                          </ul>
+                        </div>
+                      </mat-radio-button>
+                    </mat-card>
+
+                    <mat-card
+                      appearance="outlined"
+                      class="plan-card"
+                      [class.selected]="selectedPlan === 'pro'"
+                    >
+                      <mat-radio-button value="pro" class="plan-radio">
+                        <div class="plan-content">
+                          <div class="plan-header">
+                            <span class="plan-name">Pro</span>
+                            <span class="plan-price">$29/mo</span>
+                          </div>
+                          <div class="recommended-badge">Recommended</div>
+                          <p class="plan-description">
+                            Best for growing teams and businesses
+                          </p>
+                          <ul class="plan-features">
+                            <li>
+                              <mat-icon class="feature-icon">check</mat-icon>
+                              Unlimited projects
+                            </li>
+                            <li>
+                              <mat-icon class="feature-icon">check</mat-icon>
+                              100GB storage
+                            </li>
+                            <li>
+                              <mat-icon class="feature-icon">check</mat-icon>
+                              Priority support
+                            </li>
+                          </ul>
+                        </div>
+                      </mat-radio-button>
+                    </mat-card>
+
+                    <mat-card
+                      appearance="outlined"
+                      class="plan-card"
+                      [class.selected]="selectedPlan === 'enterprise'"
+                    >
+                      <mat-radio-button value="enterprise" class="plan-radio">
+                        <div class="plan-content">
+                          <div class="plan-header">
+                            <span class="plan-name">Enterprise</span>
+                            <span class="plan-price">Custom</span>
+                          </div>
+                          <p class="plan-description">
+                            For large organizations with custom needs
+                          </p>
+                          <ul class="plan-features">
+                            <li>
+                              <mat-icon class="feature-icon">check</mat-icon>
+                              Everything in Pro
+                            </li>
+                            <li>
+                              <mat-icon class="feature-icon">check</mat-icon>
+                              Custom storage
+                            </li>
+                            <li>
+                              <mat-icon class="feature-icon">check</mat-icon>
+                              Dedicated support
+                            </li>
+                          </ul>
+                        </div>
+                      </mat-radio-button>
+                    </mat-card>
+                  </mat-radio-group>
+                </div>
+              </div>
+
+              <!-- Registration Form -->
+              <div class="lg:col-span-2">
+                <h3 class="section-title mb-4">Account Information</h3>
+
+                <div class="form-compact">
+                  <form class="flex flex-col gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <mat-form-field appearance="outline">
+                        <mat-label
+                          >First Name
+                          <span class="required-asterisk">*</span></mat-label
+                        >
+                        <input matInput placeholder="John" required />
+                      </mat-form-field>
+
+                      <mat-form-field appearance="outline">
+                        <mat-label
+                          >Last Name
+                          <span class="required-asterisk">*</span></mat-label
+                        >
+                        <input matInput placeholder="Doe" required />
+                      </mat-form-field>
+                    </div>
+
+                    <mat-form-field appearance="outline">
+                      <mat-label
+                        >Email
+                        <span class="required-asterisk">*</span></mat-label
+                      >
+                      <mat-icon matPrefix>email</mat-icon>
+                      <input
+                        matInput
+                        type="email"
+                        placeholder="john@example.com"
+                        required
+                      />
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                      <mat-label>Company Name</mat-label>
+                      <mat-icon matPrefix>business</mat-icon>
+                      <input matInput placeholder="Acme Corporation" />
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                      <mat-label
+                        >Password
+                        <span class="required-asterisk">*</span></mat-label
+                      >
+                      <mat-icon matPrefix>lock</mat-icon>
+                      <input
+                        matInput
+                        type="password"
+                        placeholder="••••••••"
+                        required
+                      />
+                      <mat-hint>Must be at least 8 characters</mat-hint>
+                    </mat-form-field>
+
+                    <mat-checkbox>
+                      <span class="checkbox-label">
+                        I agree to the Terms of Service and Privacy Policy
+                      </span>
+                    </mat-checkbox>
+
+                    <!-- Summary -->
+                    <div class="summary-box">
+                      <div class="summary-row">
+                        <span class="summary-label">Selected Plan:</span>
+                        <span class="summary-value">{{
+                          selectedPlan | titlecase
+                        }}</span>
+                      </div>
+                      <div class="summary-row">
+                        <span class="summary-label">Billing:</span>
+                        <span class="summary-value">Monthly</span>
+                      </div>
+                      <mat-divider class="my-3"></mat-divider>
+                      <div class="summary-row total">
+                        <span class="summary-label">Total:</span>
+                        <span class="summary-value">
+                          {{
+                            selectedPlan === 'basic'
+                              ? '$9'
+                              : selectedPlan === 'pro'
+                                ? '$29'
+                                : 'Contact Sales'
+                          }}/mo
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex gap-2 pt-2">
+                      <button
+                        matButton="filled"
+                        color="primary"
+                        type="submit"
+                        class="flex-1"
+                      >
+                        Start Free Trial
+                      </button>
+                      <button matButton="outlined" type="button">Cancel</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Login Form -->
+        <mat-tab label="Login Form">
+          <div class="tab-content p-6">
+            <div class="max-w-md mx-auto">
+              <div class="mb-6 text-center">
+                <h2
+                  class="text-2xl font-bold"
+                  style="color: var(--aegisx-text-strong)"
+                >
+                  Welcome Back
+                </h2>
+                <p class="mt-2 text-sm" style="color: var(--aegisx-text-body)">
+                  Sign in to your account to continue
+                </p>
+              </div>
+
+              <div class="form-compact">
+                <form class="flex flex-col gap-4">
+                  <!-- Email -->
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Email</mat-label>
+                    <mat-icon matPrefix>email</mat-icon>
+                    <input
+                      matInput
+                      type="email"
+                      placeholder="you@example.com"
+                      required
+                    />
+                  </mat-form-field>
+
+                  <!-- Password -->
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Password</mat-label>
+                    <mat-icon matPrefix>lock</mat-icon>
+                    <input
+                      matInput
+                      [type]="hidePassword ? 'password' : 'text'"
+                      placeholder="••••••••"
+                      required
+                    />
+                    <button
+                      mat-icon-button
+                      matSuffix
+                      (click)="hidePassword = !hidePassword"
+                      type="button"
+                    >
+                      <mat-icon>{{
+                        hidePassword ? 'visibility_off' : 'visibility'
+                      }}</mat-icon>
+                    </button>
+                  </mat-form-field>
+
+                  <!-- Remember me & Forgot password -->
+                  <div class="flex items-center justify-between">
+                    <mat-checkbox class="text-sm">
+                      <span style="color: var(--aegisx-text-body)"
+                        >Remember me</span
+                      >
+                    </mat-checkbox>
+                    <a href="#" class="link-text text-sm">Forgot password?</a>
+                  </div>
+
+                  <!-- Submit Button -->
+                  <button
+                    matButton="filled"
+                    color="primary"
+                    type="submit"
+                    class="w-full"
+                  >
+                    Sign In
+                  </button>
+
+                  <!-- Divider -->
+                  <div class="relative my-4">
+                    <mat-divider></mat-divider>
+                    <span
+                      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-2 bg-[var(--aegisx-bg-surface)] text-xs"
+                      style="color: var(--aegisx-text-subtle)"
+                    >
+                      or continue with
+                    </span>
+                  </div>
+
+                  <!-- Social Login Buttons -->
+                  <div class="grid grid-cols-2 gap-3">
+                    <button matButton="outlined" type="button" class="w-full">
+                      <mat-icon svgIcon="google" class="mr-2"></mat-icon>
+                      Google
+                    </button>
+                    <button matButton="outlined" type="button" class="w-full">
+                      <mat-icon svgIcon="github" class="mr-2"></mat-icon>
+                      GitHub
+                    </button>
+                  </div>
+
+                  <!-- Sign up link -->
+                  <p
+                    class="text-center text-sm mt-4"
+                    style="color: var(--aegisx-text-body)"
+                  >
+                    Don't have an account?
+                    <a href="#" class="link-text font-semibold">Sign up</a>
+                  </p>
+                </form>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Dialog Forms -->
+        <mat-tab label="Dialog Forms">
+          <div class="tab-content p-6">
+            <div class="mb-6">
+              <h2
+                class="text-xl font-bold"
+                style="color: var(--aegisx-text-strong)"
+              >
+                Dialog Form Examples
+              </h2>
+              <p class="mt-1 text-sm" style="color: var(--aegisx-text-body)">
+                Common dialog patterns for quick actions and focused tasks.
+              </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6">
+              <!-- Quick Add Dialog Example -->
+              <div>
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="section-title m-0">Quick Add Dialog</h3>
+                  <button
+                    matButton="filled"
+                    color="primary"
+                    (click)="openQuickAddDialog()"
+                  >
+                    <mat-icon>open_in_new</mat-icon>
+                    Open Dialog
+                  </button>
+                </div>
+                <mat-card appearance="outlined" class="dialog-preview">
+                  <mat-card-header class="dialog-header">
+                    <mat-card-title class="dialog-title">
+                      <mat-icon class="dialog-icon">add_circle</mat-icon>
+                      Add New Item
+                    </mat-card-title>
+                    <button mat-icon-button class="dialog-close">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </mat-card-header>
+                  <mat-card-content class="dialog-body">
+                    <div class="form-compact">
+                      <form class="flex flex-col gap-4">
+                        <mat-form-field appearance="outline" class="w-full">
+                          <mat-label
+                            >Item Name
+                            <span class="required-asterisk">*</span></mat-label
+                          >
+                          <input
+                            matInput
+                            placeholder="Enter item name"
+                            required
+                          />
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="w-full">
+                          <mat-label>Category</mat-label>
+                          <mat-select>
+                            <mat-option value="product">Product</mat-option>
+                            <mat-option value="service">Service</mat-option>
+                            <mat-option value="other">Other</mat-option>
+                          </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="w-full">
+                          <mat-label>Description</mat-label>
+                          <textarea
+                            matInput
+                            rows="3"
+                            placeholder="Optional description"
+                          ></textarea>
+                        </mat-form-field>
+                      </form>
+                    </div>
+                  </mat-card-content>
+                  <mat-card-actions class="dialog-actions">
+                    <button matButton="outlined">Cancel</button>
+                    <button matButton="filled" color="primary">Add Item</button>
+                  </mat-card-actions>
+                </mat-card>
+              </div>
+
+              <!-- Confirmation Dialog Example -->
+              <div>
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="section-title m-0">Confirmation Dialog</h3>
+                  <button
+                    matButton="filled"
+                    color="warn"
+                    (click)="openConfirmDeleteDialog()"
+                  >
+                    <mat-icon>open_in_new</mat-icon>
+                    Open Dialog
+                  </button>
+                </div>
+                <mat-card appearance="outlined" class="dialog-preview">
+                  <mat-card-header class="dialog-header">
+                    <mat-card-title class="dialog-title">
+                      <mat-icon class="dialog-icon warn-icon">warning</mat-icon>
+                      Confirm Deletion
+                    </mat-card-title>
+                    <button mat-icon-button class="dialog-close">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </mat-card-header>
+                  <mat-card-content class="dialog-body">
+                    <p
+                      class="text-sm mb-4"
+                      style="color: var(--aegisx-text-body)"
+                    >
+                      Are you sure you want to delete this item? This action
+                      cannot be undone.
+                    </p>
+
+                    <div class="warning-box">
+                      <mat-icon class="warning-icon">info</mat-icon>
+                      <div>
+                        <p class="warning-title">
+                          This will permanently delete:
+                        </p>
+                        <ul class="warning-list">
+                          <li>All associated data</li>
+                          <li>Related configurations</li>
+                          <li>Historical records</li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <div class="form-compact mt-4">
+                      <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Type "DELETE" to confirm</mat-label>
+                        <input matInput placeholder="DELETE" required />
+                        <mat-hint>This field is case-sensitive</mat-hint>
+                      </mat-form-field>
+                    </div>
+                  </mat-card-content>
+                  <mat-card-actions class="dialog-actions">
+                    <button matButton="outlined">Cancel</button>
+                    <button matButton="filled" color="warn">Delete</button>
+                  </mat-card-actions>
+                </mat-card>
+              </div>
+
+              <!-- Edit Dialog Example -->
+              <div>
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="section-title m-0">Edit Dialog</h3>
+                  <button
+                    matButton="filled"
+                    color="primary"
+                    (click)="openEditProfileDialog()"
+                  >
+                    <mat-icon>open_in_new</mat-icon>
+                    Open Dialog
+                  </button>
+                </div>
+                <mat-card appearance="outlined" class="dialog-preview">
+                  <mat-card-header class="dialog-header">
+                    <mat-card-title class="dialog-title">
+                      <mat-icon class="dialog-icon">edit</mat-icon>
+                      Edit Profile
+                    </mat-card-title>
+                    <button mat-icon-button class="dialog-close">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </mat-card-header>
+                  <mat-card-content class="dialog-body">
+                    <div class="form-compact">
+                      <form class="flex flex-col gap-4">
+                        <div class="grid grid-cols-2 gap-3">
+                          <mat-form-field appearance="outline">
+                            <mat-label>First Name</mat-label>
+                            <input matInput value="John" />
+                          </mat-form-field>
+                          <mat-form-field appearance="outline">
+                            <mat-label>Last Name</mat-label>
+                            <input matInput value="Doe" />
+                          </mat-form-field>
+                        </div>
+
+                        <mat-form-field appearance="outline" class="w-full">
+                          <mat-label>Email</mat-label>
+                          <mat-icon matPrefix>email</mat-icon>
+                          <input
+                            matInput
+                            type="email"
+                            value="john.doe@example.com"
+                          />
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="w-full">
+                          <mat-label>Role</mat-label>
+                          <mat-icon matPrefix>badge</mat-icon>
+                          <mat-select value="developer">
+                            <mat-option value="admin">Administrator</mat-option>
+                            <mat-option value="developer">Developer</mat-option>
+                            <mat-option value="user">User</mat-option>
+                          </mat-select>
+                        </mat-form-field>
+                      </form>
+                    </div>
+                  </mat-card-content>
+                  <mat-card-actions class="dialog-actions">
+                    <button matButton="outlined">Cancel</button>
+                    <button matButton="filled" color="primary">
+                      Save Changes
+                    </button>
+                  </mat-card-actions>
+                </mat-card>
+              </div>
+
+              <!-- Settings Dialog Example -->
+              <div>
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="section-title m-0">Settings Dialog</h3>
+                  <button
+                    matButton="filled"
+                    color="primary"
+                    (click)="openSettingsDialog()"
+                  >
+                    <mat-icon>open_in_new</mat-icon>
+                    Open Dialog
+                  </button>
+                </div>
+                <mat-card appearance="outlined" class="dialog-preview">
+                  <mat-card-header class="dialog-header">
+                    <mat-card-title class="dialog-title">
+                      <mat-icon class="dialog-icon">settings</mat-icon>
+                      Preferences
+                    </mat-card-title>
+                    <button mat-icon-button class="dialog-close">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </mat-card-header>
+                  <mat-card-content class="dialog-body">
+                    <div class="flex flex-col gap-4">
+                      <div class="settings-item">
+                        <div class="settings-info">
+                          <p class="settings-label">Email Notifications</p>
+                          <p class="settings-description">
+                            Receive email updates about your activity
+                          </p>
+                        </div>
+                        <mat-slide-toggle checked></mat-slide-toggle>
+                      </div>
+
+                      <mat-divider></mat-divider>
+
+                      <div class="settings-item">
+                        <div class="settings-info">
+                          <p class="settings-label">Dark Mode</p>
+                          <p class="settings-description">
+                            Use dark theme across the application
+                          </p>
+                        </div>
+                        <mat-slide-toggle></mat-slide-toggle>
+                      </div>
+
+                      <mat-divider></mat-divider>
+
+                      <div class="settings-item">
+                        <div class="settings-info">
+                          <p class="settings-label">Auto-save</p>
+                          <p class="settings-description">
+                            Automatically save changes as you work
+                          </p>
+                        </div>
+                        <mat-slide-toggle checked></mat-slide-toggle>
+                      </div>
+
+                      <mat-divider></mat-divider>
+
+                      <div class="form-compact">
+                        <mat-form-field appearance="outline" class="w-full">
+                          <mat-label>Language</mat-label>
+                          <mat-icon matPrefix>language</mat-icon>
+                          <mat-select value="en">
+                            <mat-option value="en">English</mat-option>
+                            <mat-option value="th">ไทย</mat-option>
+                            <mat-option value="ja">日本語</mat-option>
+                          </mat-select>
+                        </mat-form-field>
+                      </div>
+                    </div>
+                  </mat-card-content>
+                  <mat-card-actions class="dialog-actions">
+                    <button matButton="outlined">Reset to Defaults</button>
+                    <button matButton="filled" color="primary">Apply</button>
+                  </mat-card-actions>
+                </mat-card>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Best Practices -->
+  <div class="section-header">
+    <h2>Best Practices</h2>
+  </div>
+
+  <mat-card appearance="outlined">
+    <mat-card-content>
+      <ul class="best-practices-list">
+        <li>
+          <mat-icon class="success-icon">check_circle</mat-icon>
+          <span
+            >Use <code>.form-compact</code> wrapper for consistent Tremor-style
+            form sizing</span
+          >
+        </li>
+        <li>
+          <mat-icon class="success-icon">check_circle</mat-icon>
+          <span
+            >Mark required fields with red asterisks (<code
+              ><span class="required-asterisk">*</span></code
+            >)</span
+          >
+        </li>
+        <li>
+          <mat-icon class="success-icon">check_circle</mat-icon>
+          <span
+            >Use <code>mat-hint</code> for helper text below form fields</span
+          >
+        </li>
+        <li>
+          <mat-icon class="success-icon">check_circle</mat-icon>
+          <span
+            >Group related fields using grid layouts (<code
+              >grid grid-cols-1 md:grid-cols-2 gap-4</code
+            >)</span
+          >
+        </li>
+        <li>
+          <mat-icon class="success-icon">check_circle</mat-icon>
+          <span
+            >Separate sections with <code>mat-divider</code> and adequate
+            spacing (<code>my-8</code>)</span
+          >
+        </li>
+        <li>
+          <mat-icon class="success-icon">check_circle</mat-icon>
+          <span
+            >Place primary action on the right, secondary actions on the
+            left</span
+          >
+        </li>
+      </ul>
+    </mat-card-content>
+  </mat-card>
+</div>

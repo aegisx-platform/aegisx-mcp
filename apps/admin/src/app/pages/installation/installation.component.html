@@ -1,0 +1,225 @@
+<div class="docs-page">
+  <!-- Page Header -->
+  <div class="docs-header">
+    <div class="docs-breadcrumb">
+      <a routerLink="/introduction" mat-button>
+        <mat-icon>rocket_launch</mat-icon>
+        Getting Started
+      </a>
+      <mat-icon>chevron_right</mat-icon>
+      <span>Installation</span>
+    </div>
+    <h1 class="docs-title">Installation</h1>
+    <p class="docs-subtitle">
+      Get started with AegisX Design System by installing the required packages
+      and configuring your Angular application.
+    </p>
+  </div>
+
+  <!-- Requirements -->
+  <div class="section-header">
+    <h2>Requirements</h2>
+    <p>Before you begin, ensure you have the following installed:</p>
+  </div>
+
+  <mat-card>
+    <mat-card-content>
+      <div class="requirements-grid">
+        @for (req of requirements; track req.name) {
+          <div class="requirement-item">
+            <mat-icon>{{ req.icon }}</mat-icon>
+            <div class="req-info">
+              <h4>{{ req.name }}</h4>
+              <p>{{ req.version }}</p>
+            </div>
+          </div>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Installation Steps -->
+  <div class="section-header">
+    <h2>Installation Steps</h2>
+  </div>
+
+  <!-- Step 1: Install Packages -->
+  <div class="installation-step">
+    <div class="step-header">
+      <div class="step-number">1</div>
+      <div class="step-info">
+        <h3>Install Required Packages</h3>
+        <p>
+          Install AegisX UI library and Angular Material using your preferred
+          package manager.
+        </p>
+      </div>
+    </div>
+
+    <div class="step-content">
+      <h4>Using npm:</h4>
+      <ax-code-block [code]="npmInstall" language="bash" />
+
+      <h4>Using pnpm:</h4>
+      <ax-code-block [code]="pnpmInstall" language="bash" />
+    </div>
+  </div>
+
+  <!-- Step 2: Configure Angular -->
+  <div class="installation-step">
+    <div class="step-header">
+      <div class="step-number">2</div>
+      <div class="step-info">
+        <h3>Configure Angular Project</h3>
+        <p>Add the required styles to your <code>angular.json</code> file.</p>
+      </div>
+    </div>
+
+    <div class="step-content">
+      <ax-code-block
+        [code]="angularConfig"
+        language="typescript"
+        label="angular.json"
+      />
+    </div>
+  </div>
+
+  <!-- Step 3: Setup Animations -->
+  <div class="installation-step">
+    <div class="step-header">
+      <div class="step-number">3</div>
+      <div class="step-info">
+        <h3>Configure Animations</h3>
+        <p>
+          Enable Angular animations in your application configuration
+          (<code>app.config.ts</code>).
+        </p>
+      </div>
+    </div>
+
+    <div class="step-content">
+      <ax-code-block
+        [code]="appConfig"
+        language="typescript"
+        label="app.config.ts"
+      />
+    </div>
+  </div>
+
+  <!-- Step 4: Import Theme -->
+  <div class="installation-step">
+    <div class="step-header">
+      <div class="step-number">4</div>
+      <div class="step-info">
+        <h3>Import Theme Styles</h3>
+        <p>
+          Import AegisX theme styles in your global <code>styles.scss</code>
+          file.
+        </p>
+      </div>
+    </div>
+
+    <div class="step-content">
+      <ax-code-block [code]="themeImport" language="scss" label="styles.scss" />
+
+      <mat-card class="info-card">
+        <mat-card-content>
+          <div class="info-content">
+            <mat-icon>info</mat-icon>
+            <div>
+              <h4>Available Themes</h4>
+              <p>
+                AegisX provides both light and dark themes:
+                <code>aegisx-light.css</code> and <code>aegisx-dark.css</code>.
+                You can also customize the design tokens to match your brand.
+              </p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Step 5: Verify Installation -->
+  <div class="installation-step">
+    <div class="step-header">
+      <div class="step-number">5</div>
+      <div class="step-info">
+        <h3>Verify Installation</h3>
+        <p>Create a simple component to verify everything is working.</p>
+      </div>
+    </div>
+
+    <div class="step-content">
+      <ax-code-block
+        [code]="componentUsage"
+        language="typescript"
+        label="example.component.ts"
+      />
+    </div>
+  </div>
+
+  <!-- Next Steps -->
+  <div class="section-header">
+    <h2>Next Steps</h2>
+  </div>
+
+  <div class="next-steps-grid">
+    <mat-card class="next-step-card">
+      <mat-card-content>
+        <mat-icon class="step-icon">speed</mat-icon>
+        <h3>Quick Start</h3>
+        <p>Learn how to build your first page with AegisX components.</p>
+        <a mat-raised-button color="primary" routerLink="/quick-start">
+          Continue to Quick Start
+          <mat-icon>arrow_forward</mat-icon>
+        </a>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="next-step-card">
+      <mat-card-content>
+        <mat-icon class="step-icon">color_lens</mat-icon>
+        <h3>Design Tokens</h3>
+        <p>Explore the design tokens and learn how to customize them.</p>
+        <a mat-button routerLink="/design-tokens">
+          View Design Tokens
+          <mat-icon>arrow_forward</mat-icon>
+        </a>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="next-step-card">
+      <mat-card-content>
+        <mat-icon class="step-icon">widgets</mat-icon>
+        <h3>Components</h3>
+        <p>Browse all available Material and AegisX components.</p>
+        <a mat-button routerLink="/components">
+          View Components
+          <mat-icon>arrow_forward</mat-icon>
+        </a>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Troubleshooting -->
+  <mat-card class="help-card">
+    <mat-card-content>
+      <h3>Need Help?</h3>
+      <p>
+        If you encounter any issues during installation, check our
+        troubleshooting guide or report an issue on GitHub.
+      </p>
+      <div class="help-actions">
+        <a mat-button href="https://github.com/aegisx/issues" target="_blank">
+          <mat-icon>bug_report</mat-icon>
+          Report an Issue
+        </a>
+        <a mat-button routerLink="/introduction">
+          <mat-icon>arrow_back</mat-icon>
+          Back to Introduction
+        </a>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

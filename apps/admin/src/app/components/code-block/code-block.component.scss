@@ -1,0 +1,161 @@
+/* ============================================
+   Code Block Component Styles
+   Inherits from documentation-patterns.scss
+   ============================================ */
+
+.code-block-container {
+  position: relative;
+  border-radius: var(--aegisx-radius-md);
+  overflow: hidden;
+  margin: 1rem 0;
+}
+
+.code-block-label {
+  background-color: var(--aegisx-background-subtle);
+  border: 1px solid var(--aegisx-border-default);
+  border-bottom: none;
+  border-radius: var(--aegisx-radius-md) var(--aegisx-radius-md) 0 0;
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--aegisx-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.code-block {
+  background: #1e1e1e;
+  border-radius: var(--aegisx-radius-md);
+  padding: 1.25rem;
+  overflow-x: auto;
+  position: relative;
+  margin: 0;
+
+  // Adjust border radius if label exists
+  .code-block-label + & {
+    border-radius: 0 0 var(--aegisx-radius-md) var(--aegisx-radius-md);
+  }
+
+  pre {
+    margin: 0;
+    font-family: 'Fira Code', 'Courier New', Consolas, Monaco, monospace;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: #d4d4d4;
+
+    code {
+      font-family: inherit;
+      color: inherit;
+      display: block;
+    }
+  }
+
+  // Line numbers
+  :deep(.line-number) {
+    display: inline-block;
+    width: 3rem;
+    text-align: right;
+    padding-right: 1rem;
+    margin-right: 1rem;
+    color: #858585;
+    user-select: none;
+    border-right: 1px solid #3e3e3e;
+  }
+
+  // Syntax highlighting colors (VS Code Dark+ theme)
+  :deep(.keyword) {
+    color: #569cd6;
+  }
+
+  :deep(.string) {
+    color: #ce9178;
+  }
+
+  :deep(.comment) {
+    color: #6a9955;
+    font-style: italic;
+  }
+
+  :deep(.function) {
+    color: #dcdcaa;
+  }
+
+  :deep(.type) {
+    color: #4ec9b0;
+  }
+
+  :deep(.property) {
+    color: #9cdcfe;
+  }
+
+  :deep(.tag) {
+    color: #569cd6;
+  }
+
+  :deep(.attribute) {
+    color: #9cdcfe;
+  }
+
+  :deep(.selector) {
+    color: #d7ba7d;
+  }
+
+  :deep(.variable) {
+    color: #9cdcfe;
+  }
+
+  :deep(.number) {
+    color: #b5cea8;
+  }
+
+  :deep(.flag) {
+    color: #ce9178;
+  }
+
+  :deep(.punctuation) {
+    color: #d4d4d4;
+  }
+}
+
+.code-copy-button {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 10;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  color: #d4d4d4 !important;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  mat-icon {
+    font-size: 1.125rem;
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+}
+
+// Scrollbar styling for code blocks
+.code-block pre {
+  scrollbar-width: thin;
+  scrollbar-color: #424242 #1e1e1e;
+
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #1e1e1e;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #424242;
+    border-radius: 4px;
+
+    &:hover {
+      background: #4e4e4e;
+    }
+  }
+}

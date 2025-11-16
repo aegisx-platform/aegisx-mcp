@@ -1,0 +1,312 @@
+<div class="docs-page">
+  <!-- Page Header -->
+  <div class="docs-header">
+    <div class="docs-breadcrumb">
+      <a routerLink="/components" mat-button>
+        <mat-icon>arrow_back</mat-icon>
+        Components
+      </a>
+      <mat-icon>chevron_right</mat-icon>
+      <span>Badges</span>
+    </div>
+
+    <h1 class="docs-title">Badges</h1>
+    <p class="docs-subtitle">
+      Display status, labels, and metadata with customizable badge components.
+      Inspired by Tremor Blocks with Material Design integration.
+    </p>
+  </div>
+
+  <!-- Quick Navigation -->
+  <div class="section-header">
+    <h2>Jump to Section</h2>
+  </div>
+
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-8">
+    <button matButton="outlined" (click)="scrollToSection('basic-badges')">
+      <mat-icon>label</mat-icon>
+      Basic Badges
+    </button>
+    <button matButton="outlined" (click)="scrollToSection('soft-badges')">
+      <mat-icon>style</mat-icon>
+      Soft Style
+    </button>
+    <button matButton="outlined" (click)="scrollToSection('outlined-badges')">
+      <mat-icon>border_style</mat-icon>
+      Outlined
+    </button>
+    <button matButton="outlined" (click)="scrollToSection('icon-badges')">
+      <mat-icon>insert_emoticon</mat-icon>
+      With Icons
+    </button>
+    <button matButton="outlined" (click)="scrollToSection('dot-badges')">
+      <mat-icon>fiber_manual_record</mat-icon>
+      Dot Badges
+    </button>
+    <button matButton="outlined" (click)="scrollToSection('removable-badges')">
+      <mat-icon>close</mat-icon>
+      Removable
+    </button>
+    <button matButton="outlined" (click)="scrollToSection('counter-badges')">
+      <mat-icon>pin</mat-icon>
+      Counters
+    </button>
+    <button matButton="outlined" (click)="scrollToSection('sizes')">
+      <mat-icon>photo_size_select_small</mat-icon>
+      Sizes
+    </button>
+  </div>
+
+  <!-- ============================================
+       Basic Badges - Ring Style (Outlined)
+       ============================================ -->
+  <div id="basic-badges" class="section-header">
+    <h2>Basic Badges</h2>
+    <p>Simple badge with ring/outlined style for status indicators.</p>
+  </div>
+
+  <section>
+    <app-code-preview [code]="basicBadgeCode">
+      <div class="demo-row">
+        @for (badge of statusBadges; track badge.label) {
+          <span class="badge badge-outlined" [class]="'badge-' + badge.variant">
+            {{ badge.label }}
+          </span>
+        }
+      </div>
+    </app-code-preview>
+  </section>
+
+  <!-- ============================================
+       Soft Badges - Filled Background
+       ============================================ -->
+  <div id="soft-badges" class="section-header">
+    <h2>Soft Style Badges</h2>
+    <p>Filled background with soft colors for subtle emphasis.</p>
+  </div>
+
+  <section>
+    <app-code-preview [code]="softBadgeCode">
+      <div class="demo-row">
+        @for (badge of statusBadges; track badge.label) {
+          <span class="badge badge-soft" [class]="'badge-' + badge.variant">
+            {{ badge.label }}
+          </span>
+        }
+      </div>
+    </app-code-preview>
+  </section>
+
+  <!-- ============================================
+       Outlined Badges - Strong Border
+       ============================================ -->
+  <div id="outlined-badges" class="section-header">
+    <h2>Outlined Badges</h2>
+    <p>Strong border variant for high contrast.</p>
+  </div>
+
+  <section>
+    <app-code-preview [code]="outlinedBadgeCode">
+      <div class="demo-row">
+        @for (badge of statusBadges; track badge.label) {
+          <span
+            class="badge badge-outlined-strong"
+            [class]="'badge-' + badge.variant"
+          >
+            {{ badge.label }}
+          </span>
+        }
+      </div>
+    </app-code-preview>
+  </section>
+
+  <!-- ============================================
+       Icon Badges - With Directional Indicators
+       ============================================ -->
+  <div id="icon-badges" class="section-header">
+    <h2>Badges with Icons</h2>
+    <p>Display trends and status with icon indicators.</p>
+  </div>
+
+  <section>
+    <app-code-preview [code]="iconBadgeCode">
+      <div class="demo-row">
+        @for (badge of iconBadges; track badge.label) {
+          <span
+            class="badge badge-soft badge-icon"
+            [class]="'badge-' + badge.variant"
+          >
+            <mat-icon>{{ badge.icon }}</mat-icon>
+            <span>{{ badge.label }}</span>
+          </span>
+        }
+      </div>
+    </app-code-preview>
+  </section>
+
+  <!-- ============================================
+       Dot Badges - Status Indicators
+       ============================================ -->
+  <div id="dot-badges" class="section-header">
+    <h2>Dot Badges</h2>
+    <p>Status indicators with colored dots.</p>
+  </div>
+
+  <section>
+    <app-code-preview [code]="dotBadgeCode">
+      <div class="demo-row">
+        @for (badge of dotBadges; track badge.label) {
+          <span
+            class="badge badge-dot badge-soft"
+            [class]="'badge-' + badge.variant"
+          >
+            <span class="dot"></span>
+            <span>{{ badge.label }}</span>
+          </span>
+        }
+      </div>
+    </app-code-preview>
+  </section>
+
+  <!-- ============================================
+       Removable Badges - Tags with Close Button
+       ============================================ -->
+  <div id="removable-badges" class="section-header">
+    <h2>Removable Badges (Tags)</h2>
+    <p>Interactive badges that can be removed, useful for filters and tags.</p>
+  </div>
+
+  <section>
+    <app-code-preview [code]="removableBadgeCode">
+      <div class="demo-row">
+        <span class="badge badge-removable badge-soft badge-info">
+          <span>TypeScript</span>
+          <button class="badge-remove" type="button">
+            <mat-icon>close</mat-icon>
+          </button>
+        </span>
+        <span class="badge badge-removable badge-soft badge-error">
+          <span>Angular</span>
+          <button class="badge-remove" type="button">
+            <mat-icon>close</mat-icon>
+          </button>
+        </span>
+      </div>
+    </app-code-preview>
+  </section>
+
+  <!-- ============================================
+       Counter Badges - With Numeric Values
+       ============================================ -->
+  <div id="counter-badges" class="section-header">
+    <h2>Counter Badges</h2>
+    <p>Display counts and metrics with badge labels.</p>
+  </div>
+
+  <section>
+    <app-code-preview [code]="counterBadgeCode">
+      <div class="demo-row">
+        @for (badge of counterBadges; track badge.label) {
+          <span
+            class="badge badge-counter badge-outlined"
+            [class]="'badge-' + badge.variant"
+          >
+            <span>{{ badge.label }}</span>
+            <span class="badge-count">{{ badge.count }}</span>
+          </span>
+        }
+      </div>
+    </app-code-preview>
+  </section>
+
+  <!-- ============================================
+       Badge Sizes
+       ============================================ -->
+  <div id="sizes" class="section-header">
+    <h2>Badge Sizes</h2>
+    <p>Different sizes for various use cases.</p>
+  </div>
+
+  <section>
+    <app-code-preview [code]="sizeBadgeCode">
+      <div class="space-y-6">
+        <!-- Simple Badges -->
+        <div>
+          <p class="text-sm font-medium mb-3">Simple Badges</p>
+          <div class="demo-row">
+            <span class="badge badge-soft badge-info badge-sm">Small</span>
+            <span class="badge badge-soft badge-info badge-md">Medium</span>
+            <span class="badge badge-soft badge-info badge-lg">Large</span>
+          </div>
+        </div>
+
+        <!-- Badges with Icons -->
+        <div>
+          <p class="text-sm font-medium mb-3">With Icons</p>
+          <div class="demo-row">
+            <span class="badge badge-outlined badge-success badge-sm">
+              <mat-icon>check</mat-icon>
+              <span>Small</span>
+            </span>
+            <span class="badge badge-outlined badge-success badge-md">
+              <mat-icon>check</mat-icon>
+              <span>Medium</span>
+            </span>
+            <span class="badge badge-outlined badge-success badge-lg">
+              <mat-icon>check</mat-icon>
+              <span>Large</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </app-code-preview>
+  </section>
+
+  <!-- ============================================
+       Best Practices
+       ============================================ -->
+  <div class="section-header">
+    <h2>Best Practices</h2>
+    <p>Guidelines for effective badge usage</p>
+  </div>
+
+  <section>
+    <ul class="best-practices-list">
+      <li>
+        <mat-icon class="success-icon">check_circle</mat-icon>
+        <div>
+          <strong>Keep labels concise</strong> - Use short, descriptive text
+          (1-2 words)
+        </div>
+      </li>
+      <li>
+        <mat-icon class="success-icon">check_circle</mat-icon>
+        <div>
+          <strong>Use semantic colors</strong> - Green for success, red for
+          errors, yellow for warnings
+        </div>
+      </li>
+      <li>
+        <mat-icon class="success-icon">check_circle</mat-icon>
+        <div>
+          <strong>Choose appropriate variants</strong> - Outlined for subtle,
+          soft for emphasis
+        </div>
+      </li>
+      <li>
+        <mat-icon class="success-icon">check_circle</mat-icon>
+        <div>
+          <strong>Don't overuse</strong> - Too many badges can create visual
+          clutter
+        </div>
+      </li>
+      <li>
+        <mat-icon class="success-icon">check_circle</mat-icon>
+        <div>
+          <strong>Consistent sizing</strong> - Use the same size within a
+          section for visual harmony
+        </div>
+      </li>
+    </ul>
+  </section>
+</div>

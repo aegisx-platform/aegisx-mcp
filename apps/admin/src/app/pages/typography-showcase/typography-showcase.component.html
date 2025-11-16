@@ -1,0 +1,529 @@
+<!-- Typography Showcase Page -->
+<div class="docs-page">
+  <!-- Page Header -->
+  <div class="docs-header">
+    <div class="docs-breadcrumb">
+      <mat-icon>architecture</mat-icon>
+      <span>Foundation</span>
+    </div>
+    <h1 class="docs-title">Typography</h1>
+    <p class="docs-subtitle">
+      Complete typography scale based on Material Design 3 and Tremor design
+      principles. Lighter, more readable text colors for better user experience.
+    </p>
+  </div>
+
+  <!-- Quick Navigation -->
+  <mat-card>
+    <mat-card-content>
+      <div class="flex flex-wrap gap-3">
+        <button
+          mat-stroked-button
+          (click)="scrollToSection('type-scale')"
+          class="flex items-center gap-2"
+        >
+          <mat-icon>format_size</mat-icon>
+          Type Scale
+        </button>
+        <button
+          mat-stroked-button
+          (click)="scrollToSection('text-colors')"
+          class="flex items-center gap-2"
+        >
+          <mat-icon>palette</mat-icon>
+          Text Colors
+        </button>
+        <button
+          mat-stroked-button
+          (click)="scrollToSection('font-weights')"
+          class="flex items-center gap-2"
+        >
+          <mat-icon>format_bold</mat-icon>
+          Font Weights
+        </button>
+        <button
+          mat-stroked-button
+          (click)="scrollToSection('line-heights')"
+          class="flex items-center gap-2"
+        >
+          <mat-icon>format_line_spacing</mat-icon>
+          Line Heights
+        </button>
+        <button
+          mat-stroked-button
+          (click)="scrollToSection('examples')"
+          class="flex items-center gap-2"
+        >
+          <mat-icon>article</mat-icon>
+          Real Examples
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- ============================================
+       SECTION: Material 3 Type Scale
+       ============================================ -->
+  <section id="type-scale" class="mb-16 scroll-mt-8">
+    <div class="mb-6">
+      <h2 class="text-2xl font-semibold text-[var(--aegisx-text-heading)] mb-2">
+        Material Design 3 Type Scale
+      </h2>
+      <p class="text-base text-[var(--aegisx-text-secondary)] leading-relaxed">
+        Complete typographic hierarchy with 15 text styles from Display to
+        Label. Each style has specific size, weight, line height, and usage
+        guidelines.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6">
+      @for (type of m3TypeScale; track type.name) {
+        <mat-card
+          appearance="outlined"
+          class="border border-[var(--aegisx-border-muted)] shadow-sm"
+        >
+          <mat-card-content class="p-8">
+            <!-- Type Sample -->
+            <div
+              class="mb-6 p-4 bg-[var(--aegisx-background-muted)] rounded-md text-[var(--aegisx-text-primary)]"
+              [style.font-size]="'var(' + type.token + ')'"
+              [style.font-weight]="'var(' + type.token + '-weight)'"
+              [style.line-height]="'var(' + type.token + '-line-height)'"
+            >
+              {{ type.name }}
+            </div>
+
+            <!-- Type Details -->
+            <div>
+              <h4
+                class="text-lg font-semibold mb-4 text-[var(--aegisx-text-heading)]"
+              >
+                {{ type.name }}
+              </h4>
+
+              <div
+                class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 p-4 bg-[var(--aegisx-background-subtle)] rounded-md"
+              >
+                <div class="flex flex-col gap-1">
+                  <span
+                    class="text-xs font-medium uppercase tracking-wide text-[var(--aegisx-text-subtle)]"
+                    >Size</span
+                  >
+                  <span
+                    class="text-sm font-semibold font-mono text-[var(--aegisx-text-primary)]"
+                    >{{ type.size }}</span
+                  >
+                </div>
+                <div class="flex flex-col gap-1">
+                  <span
+                    class="text-xs font-medium uppercase tracking-wide text-[var(--aegisx-text-subtle)]"
+                    >Weight</span
+                  >
+                  <span
+                    class="text-sm font-semibold font-mono text-[var(--aegisx-text-primary)]"
+                    >{{ type.weight }}</span
+                  >
+                </div>
+                <div class="flex flex-col gap-1">
+                  <span
+                    class="text-xs font-medium uppercase tracking-wide text-[var(--aegisx-text-subtle)]"
+                    >Line Height</span
+                  >
+                  <span
+                    class="text-sm font-semibold font-mono text-[var(--aegisx-text-primary)]"
+                    >{{ type.lineHeight }}</span
+                  >
+                </div>
+                @if (type.letterSpacing) {
+                  <div class="flex flex-col gap-1">
+                    <span
+                      class="text-xs font-medium uppercase tracking-wide text-[var(--aegisx-text-subtle)]"
+                      >Letter Spacing</span
+                    >
+                    <span
+                      class="text-sm font-semibold font-mono text-[var(--aegisx-text-primary)]"
+                      >{{ type.letterSpacing }}</span
+                    >
+                  </div>
+                }
+              </div>
+
+              <div
+                class="mb-4 p-3 bg-[var(--aegisx-background-muted)] border-l-4 border-[var(--aegisx-brand-default)] rounded-sm text-sm text-[var(--aegisx-text-secondary)]"
+              >
+                <span class="font-semibold text-[var(--aegisx-text-primary)]"
+                  >Usage:</span
+                >
+                {{ type.usage }}
+              </div>
+
+              <button
+                matButton="outlined"
+                class="w-full flex items-center justify-center gap-2"
+                (click)="copyToClipboard(type.token)"
+              >
+                <mat-icon>content_copy</mat-icon>
+                Copy Token
+              </button>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  </section>
+
+  <mat-divider class="my-12"></mat-divider>
+
+  <!-- ============================================
+       SECTION: Text Colors
+       ============================================ -->
+  <section id="text-colors" class="mb-16 scroll-mt-8">
+    <div class="mb-6">
+      <h2 class="text-2xl font-semibold text-[var(--aegisx-text-heading)] mb-2">
+        Text Color Hierarchy
+      </h2>
+      <p class="text-base text-[var(--aegisx-text-secondary)] leading-relaxed">
+        Lighter, more readable text colors. Gray-700 (#374151) for body text
+        instead of the harsh near-black. Follows Tremor's approach for better
+        readability and reduced eye strain.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (color of textColors; track color.name) {
+        <mat-card
+          appearance="outlined"
+          class="border border-[var(--aegisx-border-muted)] shadow-sm"
+        >
+          <mat-card-content class="p-6">
+            <!-- Color Sample -->
+            <div class="flex items-center gap-4 mb-6">
+              <div
+                class="w-20 h-20 rounded-lg border border-[var(--aegisx-border-default)] flex items-center justify-center shrink-0"
+                [style.background-color]="'var(' + color.token + ')'"
+              >
+                <span
+                  class="text-2xl font-semibold"
+                  [class.text-[var(--aegisx-text-primary)]]="
+                    color.name === 'Inverted'
+                  "
+                  [style.color]="
+                    color.name === 'Inverted' ? '' : 'var(' + color.token + ')'
+                  "
+                >
+                  Aa
+                </span>
+              </div>
+              <div class="flex-1 flex flex-col gap-1">
+                <h4
+                  class="text-lg font-semibold m-0"
+                  [style.color]="'var(' + color.token + ')'"
+                >
+                  {{ color.name }}
+                </h4>
+                <code
+                  class="text-xs px-2 py-1 bg-[var(--aegisx-background-subtle)] rounded self-start"
+                  >{{ color.token }}</code
+                >
+                <span
+                  class="text-sm font-mono text-[var(--aegisx-text-subtle)]"
+                  >{{ color.hex }}</span
+                >
+              </div>
+            </div>
+
+            <!-- Sample Text -->
+            <div
+              class="mb-4 p-4 bg-[var(--aegisx-background-muted)] rounded-md"
+            >
+              <p
+                class="text-[0.9375rem] leading-relaxed m-0"
+                [style.color]="'var(' + color.token + ')'"
+              >
+                {{ sampleBody }}
+              </p>
+            </div>
+
+            <!-- Usage -->
+            <div class="mb-4 text-sm text-[var(--aegisx-text-secondary)]">
+              <span class="font-semibold text-[var(--aegisx-text-primary)]"
+                >Usage:</span
+              >
+              {{ color.usage }}
+            </div>
+
+            <button
+              matButton="outlined"
+              class="w-full flex items-center justify-center gap-2"
+              (click)="copyToClipboard(color.token)"
+            >
+              <mat-icon>content_copy</mat-icon>
+              Copy Token
+            </button>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  </section>
+
+  <mat-divider class="my-12"></mat-divider>
+
+  <!-- ============================================
+       SECTION: Font Weights
+       ============================================ -->
+  <section id="font-weights" class="mb-16 scroll-mt-8">
+    <div class="mb-6">
+      <h2 class="text-2xl font-semibold text-[var(--aegisx-text-heading)] mb-2">
+        Font Weights
+      </h2>
+      <p class="text-base text-[var(--aegisx-text-secondary)] leading-relaxed">
+        Four weight options from Normal (400) to Bold (700) for typographic
+        emphasis.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      @for (weight of fontWeights; track weight.name) {
+        <mat-card
+          appearance="outlined"
+          class="border border-[var(--aegisx-border-muted)] shadow-sm"
+        >
+          <mat-card-content class="p-6">
+            <h3
+              class="text-2xl leading-snug text-[var(--aegisx-text-primary)] mb-6 m-0"
+              [style.font-weight]="'var(' + weight.token + ')'"
+            >
+              {{ sampleHeading }}
+            </h3>
+
+            <div
+              class="mb-4 p-4 bg-[var(--aegisx-background-subtle)] rounded-md"
+            >
+              <h4
+                class="text-base font-semibold m-0 mb-2 text-[var(--aegisx-text-heading)]"
+              >
+                {{ weight.name }}
+              </h4>
+              <code
+                class="block text-xs text-[var(--aegisx-text-secondary)] mb-1"
+                >{{ weight.token }}</code
+              >
+              <span
+                class="block text-sm font-mono text-[var(--aegisx-text-subtle)] mb-2"
+                >{{ weight.value }}</span
+              >
+              <p class="text-sm text-[var(--aegisx-text-secondary)] m-0">
+                {{ weight.usage }}
+              </p>
+            </div>
+
+            <button
+              matButton="outlined"
+              class="w-full flex items-center justify-center gap-2"
+              (click)="copyToClipboard(weight.token)"
+            >
+              <mat-icon>content_copy</mat-icon>
+              Copy
+            </button>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  </section>
+
+  <mat-divider class="my-12"></mat-divider>
+
+  <!-- ============================================
+       SECTION: Line Heights
+       ============================================ -->
+  <section id="line-heights" class="mb-16 scroll-mt-8">
+    <div class="mb-6">
+      <h2 class="text-2xl font-semibold text-[var(--aegisx-text-heading)] mb-2">
+        Line Heights
+      </h2>
+      <p class="text-base text-[var(--aegisx-text-secondary)] leading-relaxed">
+        Vertical rhythm controls for different content types.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6">
+      @for (leading of lineHeights; track leading.name) {
+        <mat-card
+          appearance="outlined"
+          class="border border-[var(--aegisx-border-muted)] shadow-sm"
+        >
+          <mat-card-content class="p-6">
+            <p
+              class="text-base text-[var(--aegisx-text-primary)] mb-6 m-0"
+              [style.line-height]="'var(' + leading.token + ')'"
+            >
+              {{ sampleLongText }}
+            </p>
+
+            <div
+              class="mb-4 p-4 bg-[var(--aegisx-background-subtle)] rounded-md"
+            >
+              <h4
+                class="text-base font-semibold m-0 mb-2 text-[var(--aegisx-text-heading)]"
+              >
+                {{ leading.name }}
+              </h4>
+              <code
+                class="block text-xs text-[var(--aegisx-text-secondary)] mb-1"
+                >{{ leading.token }}</code
+              >
+              <span
+                class="block text-sm font-mono text-[var(--aegisx-text-subtle)] mb-2"
+                >{{ leading.value }}</span
+              >
+              <p class="text-sm text-[var(--aegisx-text-secondary)] m-0">
+                {{ leading.usage }}
+              </p>
+            </div>
+
+            <button
+              matButton="outlined"
+              class="w-full flex items-center justify-center gap-2"
+              (click)="copyToClipboard(leading.token)"
+            >
+              <mat-icon>content_copy</mat-icon>
+              Copy
+            </button>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  </section>
+
+  <mat-divider class="my-12"></mat-divider>
+
+  <!-- ============================================
+       SECTION: Real-World Examples
+       ============================================ -->
+  <section id="examples" class="mb-16 scroll-mt-8">
+    <div class="mb-6">
+      <h2 class="text-2xl font-semibold text-[var(--aegisx-text-heading)] mb-2">
+        Real-World Examples
+      </h2>
+      <p class="text-base text-[var(--aegisx-text-secondary)] leading-relaxed">
+        See how typography tokens work together in actual UI components.
+      </p>
+    </div>
+
+    <!-- Blog Post Example -->
+    <mat-card
+      appearance="outlined"
+      class="mb-8 border border-[var(--aegisx-border-muted)] shadow-sm"
+    >
+      <mat-card-header>
+        <mat-card-title>Example: Blog Post</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <article class="blog-post">
+          <h1 class="example-display">
+            Getting Started with Material Design 3
+          </h1>
+          <p class="example-meta">Published on January 14, 2025 · 5 min read</p>
+
+          <h2 class="example-headline">Introduction</h2>
+          <p class="example-body">
+            Material Design 3 introduces a more expressive and adaptive design
+            system built on Material You principles. The new type scale provides
+            greater flexibility and readability across all device sizes and
+            contexts.
+          </p>
+
+          <h3 class="example-title">Key Typography Principles</h3>
+          <p class="example-body">
+            Typography in Material 3 emphasizes three core principles:
+            expressiveness through dynamic type, accessibility through clear
+            hierarchy, and adaptability across platforms. The system scales
+            gracefully from mobile to desktop while maintaining visual
+            consistency.
+          </p>
+
+          <p class="example-caption">
+            Figure 1: Material Design 3 type scale spans from Display Large
+            (57px) to Label Small (11px)
+          </p>
+        </article>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Dashboard Card Example -->
+    <mat-card
+      appearance="outlined"
+      class="mb-8 border border-[var(--aegisx-border-muted)] shadow-sm"
+    >
+      <mat-card-header>
+        <mat-card-title>Example: Dashboard Card</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="dashboard-card">
+          <div class="card-header">
+            <h3 class="card-title">Total Revenue</h3>
+            <span class="card-badge">+12.5%</span>
+          </div>
+
+          <div class="card-value">$2,456,789</div>
+
+          <p class="card-subtitle">From last month</p>
+
+          <div class="card-footer">
+            <span class="footer-label">Updated</span>
+            <span class="footer-time">2 minutes ago</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Form Example -->
+    <mat-card
+      appearance="outlined"
+      class="mb-8 border border-[var(--aegisx-border-muted)] shadow-sm"
+    >
+      <mat-card-header>
+        <mat-card-title>Example: Form Layout</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form class="example-form">
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input
+              type="email"
+              class="form-input"
+              placeholder="you@example.com"
+            />
+            <span class="form-hint"
+              >We'll never share your email with anyone else.</span
+            >
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input
+              type="password"
+              class="form-input"
+              placeholder="Enter password"
+            />
+            <span class="form-error"
+              >Password must be at least 8 characters</span
+            >
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </section>
+
+  <!-- Back to Top -->
+  <div class="flex justify-center mt-12">
+    <button
+      matButton="outlined"
+      (click)="scrollToTop()"
+      class="flex items-center gap-2"
+    >
+      <mat-icon>arrow_upward</mat-icon>
+      Back to Top
+    </button>
+  </div>
+</div>

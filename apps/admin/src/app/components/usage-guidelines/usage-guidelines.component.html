@@ -1,0 +1,50 @@
+<div
+  class="usage-guidelines"
+  [class.usage-guidelines-stack]="layout() === 'stack'"
+>
+  <!-- Do's Column -->
+  @if (dos().length > 0) {
+    <div class="guidelines-column do-column">
+      <h3>
+        @if (showIcons()) {
+          <mat-icon>check_circle</mat-icon>
+        }
+        {{ doTitle() }}
+      </h3>
+
+      <ul>
+        @for (item of dos(); track $index) {
+          <li>
+            @if (showIcons()) {
+              <mat-icon>{{ getDoIcon(item) }}</mat-icon>
+            }
+            <span>{{ item.text }}</span>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+
+  <!-- Don'ts Column -->
+  @if (donts().length > 0) {
+    <div class="guidelines-column dont-column">
+      <h3>
+        @if (showIcons()) {
+          <mat-icon>cancel</mat-icon>
+        }
+        {{ dontTitle() }}
+      </h3>
+
+      <ul>
+        @for (item of donts(); track $index) {
+          <li>
+            @if (showIcons()) {
+              <mat-icon>{{ getDontIcon(item) }}</mat-icon>
+            }
+            <span>{{ item.text }}</span>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+</div>

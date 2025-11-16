@@ -1,0 +1,71 @@
+@if (title()) {
+  <div class="props-table-header">
+    <h3>{{ title() }}</h3>
+  </div>
+}
+
+<div class="props-table-container">
+  <table class="props-table">
+    <thead>
+      <tr>
+        <th class="col-prop">Property</th>
+        <th class="col-type">Type</th>
+        @if (showDefaults()) {
+          <th class="col-default">Default</th>
+        }
+        <th class="col-description">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (prop of properties(); track prop.name) {
+        <tr>
+          <!-- Property Name -->
+          <td class="prop-name">
+            <code>{{ prop.name }}</code>
+            @if (showRequired() && prop.required) {
+              <span class="required-badge">Required</span>
+            }
+          </td>
+
+          <!-- Type -->
+          <td class="prop-type">
+            <span
+              class="type-badge"
+              [ngClass]="getTypeBadgeClass(prop.type)"
+              [title]="getFullType(prop.type)"
+            >
+              {{ formatType(prop.type) }}
+            </span>
+          </td>
+
+          <!-- Default Value -->
+          @if (showDefaults()) {
+            <td class="prop-default">
+              @if (prop.default) {
+                <code>{{ prop.default }}</code>
+              } @else {
+                <span class="no-default">—</span>
+              }
+            </td>
+          }
+
+          <!-- Description -->
+          <td class="prop-description">
+            <div class="description-text">{{ prop.description }}</div>
+
+            @if (prop.values && prop.values.length > 0) {
+              <div class="prop-values">
+                <span class="values-label">Possible values:</span>
+                <div class="values-list">
+                  @for (value of prop.values; track value) {
+                    <code class="value-item">{{ value }}</code>
+                  }
+                </div>
+              </div>
+            }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

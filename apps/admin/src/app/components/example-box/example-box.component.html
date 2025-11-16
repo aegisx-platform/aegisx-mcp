@@ -1,0 +1,16 @@
+<div class="example-box-wrapper">
+  @if (title() || description()) {
+    <div class="example-box-header">
+      @if (title()) {
+        <h4 class="example-title">{{ title() }}</h4>
+      }
+      @if (description()) {
+        <p class="example-description">{{ description() }}</p>
+      }
+    </div>
+  }
+
+  <div [ngClass]="getContainerClasses()" [ngStyle]="getContainerStyles()">
+    <ng-content />
+  </div>
+</div>

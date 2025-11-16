@@ -1,0 +1,265 @@
+<div class="docs-page">
+  <!-- Page Header -->
+  <div class="docs-header">
+    <div class="docs-breadcrumb">
+      <a routerLink="/introduction" mat-button>
+        <mat-icon>rocket_launch</mat-icon>
+        Getting Started
+      </a>
+      <mat-icon>chevron_right</mat-icon>
+      <span>Quick Start</span>
+    </div>
+    <h1 class="docs-title">Quick Start</h1>
+    <p class="docs-subtitle">
+      Learn how to build your first page with AegisX Design System in minutes.
+      Follow these examples to get started quickly.
+    </p>
+  </div>
+
+  <!-- Prerequisites -->
+  <mat-card class="info-card">
+    <mat-card-content>
+      <div class="info-header">
+        <mat-icon>info</mat-icon>
+        <h3>Before You Begin</h3>
+      </div>
+      <p>
+        Make sure you've completed the
+        <a routerLink="/installation">installation steps</a> and have AegisX
+        Design System properly configured in your Angular project.
+      </p>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Quick Examples -->
+  <div class="section-header">
+    <h2>Quick Examples</h2>
+    <p>
+      Here are three common patterns to help you get started. Copy and paste
+      these examples into your components.
+    </p>
+  </div>
+
+  <!-- Example Cards -->
+  @for (example of examples; track example.title) {
+    <div class="example-section">
+      <div class="example-header">
+        <div class="example-icon-wrapper">
+          <mat-icon class="example-icon">{{ example.icon }}</mat-icon>
+        </div>
+        <div class="example-info">
+          <h3>{{ example.title }}</h3>
+          <p>{{ example.description }}</p>
+        </div>
+      </div>
+
+      <ax-code-block
+        [code]="example.code"
+        language="typescript"
+        [showLineNumbers]="false"
+      />
+    </div>
+  }
+
+  <!-- Key Concepts -->
+  <div class="section-header">
+    <h2>Key Concepts</h2>
+  </div>
+
+  <div class="concepts-grid">
+    <mat-card class="concept-card">
+      <mat-card-content>
+        <mat-icon class="concept-icon">palette</mat-icon>
+        <h3>Design Tokens</h3>
+        <p>
+          Use CSS custom properties for consistent styling across your
+          application. All colors, spacing, and typography are defined as design
+          tokens.
+        </p>
+        <a mat-button color="primary" routerLink="/design-tokens">
+          Learn More
+          <mat-icon>arrow_forward</mat-icon>
+        </a>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="concept-card">
+      <mat-card-content>
+        <mat-icon class="concept-icon">widgets</mat-icon>
+        <h3>Standalone Components</h3>
+        <p>
+          All AegisX components use Angular's standalone component API. Import
+          only what you need for optimal bundle size.
+        </p>
+        <a mat-button color="primary" routerLink="/components">
+          View Components
+          <mat-icon>arrow_forward</mat-icon>
+        </a>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="concept-card">
+      <mat-card-content>
+        <mat-icon class="concept-icon">text_fields</mat-icon>
+        <h3>Typography System</h3>
+        <p>
+          Follow Material Design 3 typography scales for consistent text
+          styling. Use predefined type scales for headings, body text, and
+          labels.
+        </p>
+        <a mat-button color="primary" routerLink="/typography">
+          View Typography
+          <mat-icon>arrow_forward</mat-icon>
+        </a>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="concept-card">
+      <mat-card-content>
+        <mat-icon class="concept-icon">article</mat-icon>
+        <h3>Form Patterns</h3>
+        <p>
+          Use consistent form layouts and validation patterns. AegisX provides
+          multiple form sizes and layout options.
+        </p>
+        <a mat-button color="primary" routerLink="/form-sizes">
+          View Form Patterns
+          <mat-icon>arrow_forward</mat-icon>
+        </a>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Best Practices -->
+  <div class="section-header">
+    <h2>Best Practices</h2>
+  </div>
+
+  <mat-card>
+    <mat-card-content>
+      <div class="best-practices">
+        <div class="practice-item">
+          <mat-icon class="practice-icon success">check_circle</mat-icon>
+          <div class="practice-content">
+            <h4>Use Design Tokens</h4>
+            <p>
+              Always use CSS custom properties (design tokens) instead of
+              hardcoded values for colors, spacing, and typography.
+            </p>
+          </div>
+        </div>
+
+        <div class="practice-item">
+          <mat-icon class="practice-icon success">check_circle</mat-icon>
+          <div class="practice-content">
+            <h4>Import Only What You Need</h4>
+            <p>
+              Take advantage of standalone components by importing only the
+              specific modules you use in each component.
+            </p>
+          </div>
+        </div>
+
+        <div class="practice-item">
+          <mat-icon class="practice-icon success">check_circle</mat-icon>
+          <div class="practice-content">
+            <h4>Follow Material Design Guidelines</h4>
+            <p>
+              Adhere to Material Design 3 principles for spacing, typography,
+              and component usage to maintain consistency.
+            </p>
+          </div>
+        </div>
+
+        <div class="practice-item">
+          <mat-icon class="practice-icon success">check_circle</mat-icon>
+          <div class="practice-content">
+            <h4>Use Semantic HTML</h4>
+            <p>
+              Always use proper HTML semantics and ARIA attributes for
+              accessibility. Material components handle most of this
+              automatically.
+            </p>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Next Steps -->
+  <div class="section-header">
+    <h2>Next Steps</h2>
+  </div>
+
+  <div class="next-steps-grid">
+    <mat-card class="next-step-card">
+      <mat-card-content>
+        <mat-icon class="step-icon">color_lens</mat-icon>
+        <h3>Explore Design Tokens</h3>
+        <p>
+          Learn about the complete design token system and how to customize
+          colors, spacing, and typography.
+        </p>
+        <a mat-raised-button color="primary" routerLink="/design-tokens">
+          View Design Tokens
+          <mat-icon>arrow_forward</mat-icon>
+        </a>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="next-step-card">
+      <mat-card-content>
+        <mat-icon class="step-icon">widgets</mat-icon>
+        <h3>Browse Components</h3>
+        <p>
+          Explore all available Material and AegisX components with live
+          examples and code snippets.
+        </p>
+        <a mat-raised-button color="primary" routerLink="/components">
+          View All Components
+          <mat-icon>arrow_forward</mat-icon>
+        </a>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="next-step-card">
+      <mat-card-content>
+        <mat-icon class="step-icon">analytics</mat-icon>
+        <h3>Build a Dashboard</h3>
+        <p>
+          See a complete dashboard example with KPI cards, charts, and data
+          visualizations.
+        </p>
+        <a mat-raised-button color="primary" routerLink="/dashboard">
+          View Dashboard Example
+          <mat-icon>arrow_forward</mat-icon>
+        </a>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Help -->
+  <mat-card class="help-card">
+    <mat-card-content>
+      <div class="help-content">
+        <div class="help-text">
+          <h3>Need More Help?</h3>
+          <p>
+            Explore our comprehensive documentation or reach out to the
+            community for support.
+          </p>
+        </div>
+        <div class="help-actions">
+          <a mat-button routerLink="/introduction">
+            <mat-icon>arrow_back</mat-icon>
+            Back to Introduction
+          </a>
+          <a mat-button href="https://github.com/aegisx" target="_blank">
+            <mat-icon>code</mat-icon>
+            View on GitHub
+          </a>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

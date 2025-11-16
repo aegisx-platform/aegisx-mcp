@@ -1,0 +1,294 @@
+<!-- Form Sizes Demo Page (Tremor Style - Component Documentation) -->
+<div class="docs-page">
+  <!-- Page Header -->
+  <div class="docs-header">
+    <div class="docs-breadcrumb">
+      <a routerLink="/components" mat-button>
+        <mat-icon>arrow_back</mat-icon>
+        Components
+      </a>
+      <mat-icon>chevron_right</mat-icon>
+      <span>Form Sizes</span>
+    </div>
+    <h1 class="docs-title">Form Size Utilities</h1>
+    <p class="docs-subtitle">
+      Four pre-configured form size variants to ensure consistent sizing across
+      your application.
+    </p>
+  </div>
+
+  <!-- Size Comparison -->
+  <div class="section-header">
+    <h2>Size Comparison</h2>
+  </div>
+
+  <mat-card appearance="outlined">
+    <mat-card-content>
+      <div class="table-wrapper">
+        <table mat-table [dataSource]="sizeVariants" class="comparison-table">
+          <!-- Variant Column -->
+          <ng-container matColumnDef="variant">
+            <th mat-header-cell *matHeaderCellDef>Variant</th>
+            <td mat-cell *matCellDef="let variant">
+              <span class="variant-name">{{ variant.name }}</span>
+              <span class="variant-class">{{ variant.className }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Form Height Column -->
+          <ng-container matColumnDef="formHeight">
+            <th mat-header-cell *matHeaderCellDef>Form Height</th>
+            <td mat-cell *matCellDef="let variant">{{ variant.formHeight }}</td>
+          </ng-container>
+
+          <!-- Button Height Column -->
+          <ng-container matColumnDef="buttonHeight">
+            <th mat-header-cell *matHeaderCellDef>Button Height</th>
+            <td mat-cell *matCellDef="let variant">
+              {{ variant.buttonHeight }}
+            </td>
+          </ng-container>
+
+          <!-- Font Size Column -->
+          <ng-container matColumnDef="fontSize">
+            <th mat-header-cell *matHeaderCellDef>Font Size</th>
+            <td mat-cell *matCellDef="let variant">{{ variant.fontSize }}</td>
+          </ng-container>
+
+          <!-- Use Case Column -->
+          <ng-container matColumnDef="useCase">
+            <th mat-header-cell *matHeaderCellDef>Best For</th>
+            <td mat-cell *matCellDef="let variant" class="use-case-cell">
+              {{ variant.useCase }}
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Interactive Examples -->
+  <div class="section-header">
+    <h2>Interactive Examples</h2>
+  </div>
+
+  <mat-card appearance="outlined">
+    <mat-card-content>
+      <mat-tab-group
+        [selectedIndex]="selectedTab()"
+        (selectedIndexChange)="setTab($event)"
+      >
+        <!-- Compact Tab -->
+        <mat-tab label="Compact (Recommended)">
+          <div class="tab-content">
+            <div class="grid lg:grid-cols-2 gap-4 pt-4">
+              <!-- Live Example -->
+              <div>
+                <h3 class="example-title">Live Example</h3>
+                <p class="example-subtitle">40px form fields, 36px buttons</p>
+                <div class="form-compact example-box">
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Search Query</mat-label>
+                    <mat-icon matPrefix>search</mat-icon>
+                    <input matInput value="Angular Material" />
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Filter By</mat-label>
+                    <mat-icon matPrefix>filter_list</mat-icon>
+                    <input matInput value="Active" />
+                  </mat-form-field>
+
+                  <div class="flex gap-2">
+                    <button matButton="filled" color="primary">
+                      <mat-icon>search</mat-icon>
+                      Search
+                    </button>
+                    <button matButton="outlined">Clear</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Code Example -->
+              <div>
+                <h3 class="example-title">Code</h3>
+                <p class="example-subtitle">HTML markup</p>
+                <div class="code-block">
+                  <pre><code>&lt;div class="form-compact"&gt;
+  &lt;mat-form-field appearance="outline"&gt;
+    &lt;mat-label&gt;Search Query&lt;/mat-label&gt;
+    &lt;mat-icon matPrefix&gt;search&lt;/mat-icon&gt;
+    &lt;input matInput&gt;
+  &lt;/mat-form-field&gt;
+
+  &lt;button matButton="filled" color="primary"&gt;
+    &lt;mat-icon&gt;search&lt;/mat-icon&gt;
+    Search
+  &lt;/button&gt;
+&lt;/div&gt;</code></pre>
+                </div>
+
+                <div class="specs-box recommended">
+                  <h4 class="specs-title">Specifications</h4>
+                  <ul class="specs-list">
+                    <li>
+                      <strong>Use Case:</strong> CRUD tables, Tremor style,
+                      dashboard widgets
+                    </li>
+                    <li><strong>Form Fields:</strong> 40px height</li>
+                    <li><strong>Buttons:</strong> 36px height</li>
+                    <li class="recommended-note">
+                      ✨ Recommended for dense interfaces
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Standard Tab -->
+        <mat-tab label="Standard">
+          <div class="tab-content">
+            <div class="grid lg:grid-cols-2 gap-4 pt-4">
+              <!-- Live Example -->
+              <div>
+                <h3 class="example-title">Live Example</h3>
+                <p class="example-subtitle">48px form fields, 40px buttons</p>
+                <div class="form-standard example-box">
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Full Name</mat-label>
+                    <mat-icon matPrefix>badge</mat-icon>
+                    <input matInput value="John Doe" />
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Company</mat-label>
+                    <mat-icon matPrefix>business</mat-icon>
+                    <input matInput value="Acme Corporation" />
+                  </mat-form-field>
+
+                  <div class="flex gap-2">
+                    <button matButton="filled" color="primary">
+                      <mat-icon>person_add</mat-icon>
+                      Add Contact
+                    </button>
+                    <button matButton="outlined">Cancel</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Code Example -->
+              <div>
+                <h3 class="example-title">Code</h3>
+                <p class="example-subtitle">HTML markup</p>
+                <div class="code-block">
+                  <pre><code>&lt;div class="form-standard"&gt;
+  &lt;mat-form-field appearance="outline"&gt;
+    &lt;mat-label&gt;Full Name&lt;/mat-label&gt;
+    &lt;mat-icon matPrefix&gt;badge&lt;/mat-icon&gt;
+    &lt;input matInput&gt;
+  &lt;/mat-form-field&gt;
+
+  &lt;button matButton="filled" color="primary"&gt;
+    &lt;mat-icon&gt;person_add&lt;/mat-icon&gt;
+    Add Contact
+  &lt;/button&gt;
+&lt;/div&gt;</code></pre>
+                </div>
+
+                <div class="specs-box">
+                  <h4 class="specs-title">Specifications</h4>
+                  <ul class="specs-list">
+                    <li>
+                      <strong>Use Case:</strong> General forms, settings pages
+                    </li>
+                    <li>
+                      <strong>Form Fields:</strong> 48px height (Material 3
+                      default)
+                    </li>
+                    <li><strong>Buttons:</strong> 40px height</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Usage Guidelines -->
+  <div class="section-header">
+    <h2>Usage Guidelines</h2>
+  </div>
+
+  <mat-card appearance="outlined">
+    <mat-card-content>
+      <div class="grid md:grid-cols-2 gap-4">
+        <!-- Best Practices -->
+        <div>
+          <h3 class="guideline-title">Best Practices</h3>
+          <ul class="guideline-list">
+            <li>
+              <mat-icon class="success-icon">check_circle</mat-icon>
+              <span
+                >Use <code>.form-compact</code> for Tremor-style CRUD
+                interfaces</span
+              >
+            </li>
+            <li>
+              <mat-icon class="success-icon">check_circle</mat-icon>
+              <span
+                >Use <code>.form-standard</code> as default for general
+                forms</span
+              >
+            </li>
+            <li>
+              <mat-icon class="success-icon">check_circle</mat-icon>
+              <span>Maintain consistency within the same feature or page</span>
+            </li>
+            <li>
+              <mat-icon class="success-icon">check_circle</mat-icon>
+              <span>Test on mobile devices (minimum 44px touch targets)</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Common Mistakes -->
+        <div>
+          <h3 class="guideline-title">Common Mistakes</h3>
+          <ul class="guideline-list">
+            <li>
+              <mat-icon class="error-icon">cancel</mat-icon>
+              <span>Mixing different sizes in the same form</span>
+            </li>
+            <li>
+              <mat-icon class="error-icon">cancel</mat-icon>
+              <span
+                >Using <code>.form-compact</code> for primary user input
+                forms</span
+              >
+            </li>
+            <li>
+              <mat-icon class="error-icon">cancel</mat-icon>
+              <span
+                >Using <code>.form-standard</code> for dense data tables</span
+              >
+            </li>
+            <li>
+              <mat-icon class="error-icon">cancel</mat-icon>
+              <span
+                >Ignoring accessibility requirements (minimum 44px touch targets
+                on mobile)</span
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

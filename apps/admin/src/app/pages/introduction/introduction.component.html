@@ -1,0 +1,162 @@
+<div class="docs-page">
+  <!-- Page Header -->
+  <div class="docs-header">
+    <div class="docs-breadcrumb">
+      <mat-icon>rocket_launch</mat-icon>
+      <span>Getting Started</span>
+    </div>
+    <h1 class="docs-title">AegisX Design System</h1>
+    <p class="docs-subtitle">
+      A comprehensive design system built with Angular Material 3 and inspired
+      by Tremor, providing everything you need to build modern, beautiful, and
+      consistent user interfaces.
+    </p>
+  </div>
+
+  <!-- Quick Actions -->
+  <mat-card class="quick-actions-card">
+    <mat-card-content>
+      <div class="quick-actions">
+        <a
+          mat-raised-button
+          color="primary"
+          routerLink="/installation"
+          class="action-button"
+        >
+          <mat-icon>download</mat-icon>
+          Get Started
+        </a>
+        <a mat-stroked-button routerLink="/components" class="action-button">
+          <mat-icon>widgets</mat-icon>
+          View Components
+        </a>
+        <a
+          mat-stroked-button
+          href="https://github.com/aegisx"
+          target="_blank"
+          class="action-button"
+        >
+          <mat-icon>code</mat-icon>
+          View on GitHub
+        </a>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Overview -->
+  <div class="section-header">
+    <h2>What is AegisX Design System?</h2>
+    <p>
+      AegisX is a modern design system that combines the best of Angular
+      Material 3 with custom Tremor-inspired components. It provides a complete
+      set of design tokens, components, and patterns to help you build
+      enterprise-grade applications quickly and consistently.
+    </p>
+  </div>
+
+  <!-- Key Features -->
+  <div class="section-header">
+    <h2>Key Features</h2>
+  </div>
+
+  <div class="quick-ref-grid">
+    @for (feature of features; track feature.title) {
+      <a [routerLink]="feature.link" class="quick-ref-card">
+        <mat-icon class="ref-icon">{{ feature.icon }}</mat-icon>
+        <h3 class="ref-title">{{ feature.title }}</h3>
+        <p class="ref-description">{{ feature.description }}</p>
+      </a>
+    }
+  </div>
+
+  <!-- Tech Stack -->
+  <div class="section-header">
+    <h2>Built With</h2>
+  </div>
+
+  <mat-card>
+    <mat-card-content>
+      <div class="tech-stack">
+        <div class="tech-item">
+          <mat-icon>code</mat-icon>
+          <div class="tech-info">
+            <h4>Angular 18+</h4>
+            <p>Modern standalone components with signals</p>
+          </div>
+        </div>
+        <div class="tech-item">
+          <mat-icon>palette</mat-icon>
+          <div class="tech-info">
+            <h4>Material Design 3</h4>
+            <p>Latest design guidelines and components</p>
+          </div>
+        </div>
+        <div class="tech-item">
+          <mat-icon>style</mat-icon>
+          <div class="tech-info">
+            <h4>SCSS</h4>
+            <p>Powerful styling with design tokens</p>
+          </div>
+        </div>
+        <div class="tech-item">
+          <mat-icon>accessibility</mat-icon>
+          <div class="tech-info">
+            <h4>Accessible</h4>
+            <p>WCAG 2.1 AA compliance</p>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Quick Links -->
+  <div class="section-header">
+    <h2>Quick Links</h2>
+  </div>
+
+  <div class="quick-links-grid">
+    @for (link of quickLinks; track link.title) {
+      <mat-card class="quick-link-card">
+        <mat-card-content>
+          <mat-icon class="link-icon">{{ link.icon }}</mat-icon>
+          <h3 class="link-title">{{ link.title }}</h3>
+          <p class="link-description">{{ link.description }}</p>
+          <a
+            mat-button
+            color="primary"
+            [routerLink]="link.link"
+            class="link-action"
+          >
+            Learn More
+            <mat-icon>arrow_forward</mat-icon>
+          </a>
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+
+  <!-- Getting Help -->
+  <mat-card class="help-card">
+    <mat-card-content>
+      <div class="help-content">
+        <div class="help-text">
+          <h3>Need Help?</h3>
+          <p>
+            Check out our documentation, browse examples, or get in touch with
+            the team.
+          </p>
+        </div>
+        <div class="help-actions">
+          <a mat-button routerLink="/quick-start">
+            <mat-icon>speed</mat-icon>
+            Quick Start Guide
+          </a>
+          <a mat-button href="https://github.com/aegisx/issues" target="_blank">
+            <mat-icon>bug_report</mat-icon>
+            Report an Issue
+          </a>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,19 @@
+<div class="code-block-container">
+  @if (label()) {
+    <div class="code-block-label">{{ label() }}</div>
+  }
+
+  <div class="code-block">
+    <button
+      mat-icon-button
+      class="code-copy-button"
+      (click)="copyCode()"
+      [matTooltip]="copied() ? 'Copied!' : 'Copy code'"
+      matTooltipPosition="left"
+    >
+      <mat-icon>{{ copied() ? 'check' : 'content_copy' }}</mat-icon>
+    </button>
+
+    <pre><code [innerHTML]="showLineNumbers() ? getCodeWithLineNumbers() : getFormattedCode()"></code></pre>
+  </div>
+</div>
