@@ -126,9 +126,10 @@
         error="This field is required"
       ></ax-input>
       <ax-input
-        placeholder="Success input"
-        label="Success"
-        [valid]="true"
+        placeholder="Read-only input"
+        label="Read-only"
+        [readonly]="true"
+        value="This is read-only"
       ></ax-input>
     </div>
 
@@ -425,8 +426,7 @@
       <ax-progress
         [value]="progressValue"
         variant="primary"
-        [showValue]="true"
-        label="Uploading..."
+        label="Uploading file..."
       ></ax-progress>
     </div>
   </div>
