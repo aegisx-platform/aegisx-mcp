@@ -4,6 +4,179 @@
 
 ## 🚨 Important Development Guidelines
 
+### 🚨 CRITICAL: Universal Work Rules (MANDATORY FOR ALL TASKS - NO EXCEPTIONS)
+
+**These rules apply to EVERY task, EVERY change, EVERY operation. No exceptions, no shortcuts, no assumptions.**
+
+#### 1. Read Documentation FIRST (MANDATORY)
+
+**BEFORE doing ANYTHING:**
+
+```bash
+# 1. Check if documentation exists for this task
+ls docs/
+grep -r "keyword" docs/
+
+# 2. Read ALL relevant documentation
+cat docs/path/to/relevant-doc.md
+
+# 3. Read project instructions
+cat CLAUDE.md | grep -A 20 "keyword"
+
+# 4. Only THEN start working
+```
+
+**NEVER:**
+
+- ❌ Start coding without reading docs
+- ❌ Assume you know the pattern
+- ❌ Skip reading existing code
+- ❌ Make changes based on assumptions
+
+#### 2. Thoroughness is MANDATORY (NO PARTIAL WORK)
+
+**When searching/modifying:**
+
+```bash
+# ❌ WRONG - Partial search
+grep "keyword" apps/admin/src/
+
+# ✅ CORRECT - Complete search across entire codebase
+grep -r "keyword" . --exclude-dir={node_modules,.git,dist}
+
+# ❌ WRONG - Only searching specific file types
+find . -name "*.ts" -exec grep "keyword" {} \;
+
+# ✅ CORRECT - Search ALL files including .md, .json, .html, .scss, etc.
+grep -r "keyword" . --exclude-dir={node_modules,.git,dist}
+```
+
+**Rules:**
+
+- ✅ **ALWAYS search entire codebase** - Use `grep -r` across all directories
+- ✅ **Check ALL file types** - .ts, .html, .scss, .json, .md, config files, EVERYTHING
+- ✅ **Verify completeness** - Count occurrences before and after changes
+- ✅ **List all affected files** - Show user complete list for verification
+- ❌ **NEVER do partial work** - Either complete 100% or don't start
+
+**Example - Complete search workflow:**
+
+```bash
+# 1. Find ALL occurrences
+grep -r "--aegisx-" . --exclude-dir={node_modules,.git,dist} | wc -l
+# Output: 855 occurrences
+
+# 2. List all affected files
+grep -rl "--aegisx-" . --exclude-dir={node_modules,.git,dist}
+# Lists every single file
+
+# 3. Fix ALL files
+# ... fix each file ...
+
+# 4. Verify ZERO occurrences remain
+grep -r "--aegisx-" . --exclude-dir={node_modules,.git,dist}
+# Output: (empty) = Success
+```
+
+#### 3. Test BEFORE Any Action (MANDATORY)
+
+**BEFORE making changes:**
+
+```bash
+# 1. Test current state
+pnpm run build  # Must pass
+pnpm run test   # Must pass (if applicable)
+
+# 2. Make changes
+
+# 3. Test again
+pnpm run build  # Must still pass
+pnpm run test   # Must still pass
+
+# 4. Only if tests pass, proceed
+```
+
+**NEVER:**
+
+- ❌ Skip testing
+- ❌ Commit without testing
+- ❌ Assume it works
+- ❌ Trust pre-commit hooks alone (they don't check TypeScript compilation)
+
+#### 4. Follow Existing Patterns (NO ASSUMPTIONS)
+
+**BEFORE writing code:**
+
+```bash
+# 1. Find similar existing code
+grep -r "similar-pattern" apps/
+
+# 2. Read and understand existing implementation
+cat apps/path/to/existing-file.ts
+
+# 3. Copy the exact pattern
+# Don't invent new patterns, follow existing ones
+
+# 4. Verify your code matches the pattern
+diff your-code.ts existing-code.ts
+```
+
+**NEVER:**
+
+- ❌ Invent new patterns without approval
+- ❌ Deviate from existing structure
+- ❌ Assume a better way exists
+- ❌ Create inconsistency
+
+#### 5. Verify and Double-Check (MANDATORY)
+
+**After ANY change:**
+
+```bash
+# 1. List what you changed
+git status
+git diff
+
+# 2. Verify each file manually
+cat path/to/changed-file.ts
+
+# 3. Check for side effects
+grep -r "affected-code" .
+
+# 4. Test everything
+pnpm run build
+pnpm run test
+
+# 5. Review one more time
+git diff --cached
+```
+
+#### 6. No Shortcuts, No Assumptions (ENTERPRISE LEVEL)
+
+**This is an enterprise-level project. Act accordingly:**
+
+- ✅ **Be thorough** - Check everything twice
+- ✅ **Be careful** - One mistake wastes hours
+- ✅ **Be detailed** - Document every step
+- ✅ **Be consistent** - Follow all existing patterns
+- ✅ **Be professional** - No hacks, no quick fixes
+- ❌ **No shortcuts** - Do it right the first time
+- ❌ **No assumptions** - Verify everything
+- ❌ **No guessing** - Read the code, read the docs
+- ❌ **No partial work** - Complete 100% or nothing
+
+#### 7. When in Doubt (ALWAYS)
+
+**If you're not 100% sure:**
+
+1. **STOP immediately**
+2. **Read the documentation again**
+3. **Check existing code for similar patterns**
+4. **Ask the user for clarification**
+5. **NEVER proceed with uncertainty**
+
+---
+
 ### 🚨 CRITICAL: Multi-Instance Port Configuration
 
 **This project uses AUTOMATIC port assignment based on folder name.**
@@ -96,6 +269,88 @@ cat .env.local | grep PORT
 - `Co-Authored-By: Claude <noreply@anthropic.com>`
 
 Keep commit messages clean and professional.
+
+### 🚨 CRITICAL: Git Commit Workflow (MANDATORY - NO EXCEPTIONS)
+
+**These rules are MANDATORY and MUST be followed for EVERY commit. Violation of these rules is unacceptable.**
+
+#### Before ANY Git Operation:
+
+1. **ALWAYS run `git status` first** - Know what files exist
+2. **NEVER use `git add -A` or `git add .`** - FORBIDDEN in enterprise projects
+3. **ONLY add specific files** - Use explicit paths only
+
+#### Mandatory Pre-Commit Steps:
+
+```bash
+# Step 1: Check what will be committed
+git status
+git diff
+
+# Step 2: Add ONLY specific files related to current task
+git add apps/admin/src/path/to/file.ts
+git add libs/aegisx-ui/src/path/to/file.scss
+# NEVER: git add -A
+# NEVER: git add .
+
+# Step 3: Verify what's staged
+git diff --cached
+
+# Step 4: TEST BUILD (MANDATORY - NO EXCEPTIONS)
+pnpm run build
+
+# Step 5: Only if build succeeds, commit
+git commit -m "type(scope): description"
+```
+
+#### Forbidden Actions:
+
+- ❌ **NEVER use `git add -A`**
+- ❌ **NEVER use `git add .`**
+- ❌ **NEVER commit without testing build**
+- ❌ **NEVER commit unfinished/broken code**
+- ❌ **NEVER assume pre-commit hook is sufficient** - It only checks lint, not TypeScript compilation
+
+#### Build Test Requirements:
+
+**MANDATORY: Must run and pass before ANY commit:**
+
+```bash
+pnpm run build
+```
+
+**If build fails:**
+
+- ❌ DO NOT commit
+- ✅ Fix errors first
+- ✅ Test build again
+- ✅ Only commit when build succeeds
+
+#### Example Correct Workflow:
+
+```bash
+# 1. Check status
+git status
+
+# 2. See you modified 3 files for CSS variable migration
+# modified: apps/admin/src/app/app.scss
+# modified: libs/aegisx-ui/src/lib/theme/light.scss
+# modified: docs/README.md
+
+# 3. Add ONLY these 3 files
+git add apps/admin/src/app/app.scss
+git add libs/aegisx-ui/src/lib/theme/light.scss
+git add docs/README.md
+
+# 4. Verify staged changes
+git diff --cached
+
+# 5. Test build
+pnpm run build
+
+# 6. If build passes, commit
+git commit -m "refactor(styles): migrate CSS variables to --ax- prefix"
+```
 
 ### 🚨 CRITICAL: Semantic Release Protection Policy
 
