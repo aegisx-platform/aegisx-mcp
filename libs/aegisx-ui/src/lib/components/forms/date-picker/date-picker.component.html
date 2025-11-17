@@ -93,7 +93,7 @@
           <button
             type="button"
             class="ax-date-picker-nav-btn"
-            (click)="previousYearRange()"
+            (click)="previousYearRange(); $event.stopPropagation()"
             aria-label="Previous 12 years"
           >
             <svg
@@ -116,7 +116,7 @@
           <button
             type="button"
             class="ax-date-picker-nav-btn"
-            (click)="previousMonth()"
+            (click)="previousMonth(); $event.stopPropagation()"
             aria-label="Previous month"
           >
             <svg
@@ -140,7 +140,7 @@
         <button
           type="button"
           class="ax-date-picker-month-year"
-          (click)="toggleViewMode()"
+          (click)="toggleViewMode(); $event.stopPropagation()"
           [attr.aria-label]="
             viewMode === 'year' ? 'Switch to month view' : 'Switch to year view'
           "
@@ -156,7 +156,7 @@
           <button
             type="button"
             class="ax-date-picker-nav-btn"
-            (click)="nextYearRange()"
+            (click)="nextYearRange(); $event.stopPropagation()"
             aria-label="Next 12 years"
           >
             <svg
@@ -179,7 +179,7 @@
           <button
             type="button"
             class="ax-date-picker-nav-btn"
-            (click)="nextMonth()"
+            (click)="nextMonth(); $event.stopPropagation()"
             aria-label="Next month"
           >
             <svg
@@ -226,12 +226,20 @@
               [class.ax-date-picker-day-selected]="day.isSelected"
               [class.ax-date-picker-day-focused]="day.isFocused"
               [class.ax-date-picker-day-disabled]="day.isDisabled"
+              [class.ax-date-picker-day-range-start]="day.isRangeStart"
+              [class.ax-date-picker-day-range-end]="day.isRangeEnd"
+              [class.ax-date-picker-day-in-range]="day.isInRange"
+              [class.ax-date-picker-day-range-hover]="day.isRangeHover"
               [disabled]="day.isDisabled"
               [attr.aria-label]="getDateAriaLabel(day.date)"
-              [attr.aria-selected]="day.isSelected"
+              [attr.aria-selected]="
+                day.isSelected || day.isRangeStart || day.isRangeEnd
+              "
               [attr.aria-disabled]="day.isDisabled"
               [attr.aria-current]="day.isToday ? 'date' : null"
-              (click)="selectDate(day)"
+              (click)="selectDate(day); $event.stopPropagation()"
+              (mouseenter)="onDayHover(day)"
+              (mouseleave)="onDayHoverEnd()"
             >
               {{ day.day }}
             </button>
@@ -256,7 +264,7 @@
               "
               [attr.aria-label]="month"
               [attr.aria-selected]="currentMonth.getMonth() === $index"
-              (click)="selectMonth($index)"
+              (click)="selectMonth($index); $event.stopPropagation()"
             >
               {{ month }}
             </button>
@@ -281,7 +289,7 @@
                   : year.toString()
               "
               [attr.aria-selected]="currentMonth.getFullYear() === year"
-              (click)="selectYear(year)"
+              (click)="selectYear(year); $event.stopPropagation()"
             >
               {{
                 calendar === 'buddhist' && locale === 'th' ? year + 543 : year
@@ -297,7 +305,7 @@
           <button
             type="button"
             class="ax-date-picker-action-btn ax-date-picker-action-btn-secondary"
-            (click)="clearValue()"
+            (click)="clearValue(); $event.stopPropagation()"
             aria-label="Clear selection"
           >
             Clear
@@ -305,7 +313,7 @@
           <button
             type="button"
             class="ax-date-picker-action-btn ax-date-picker-action-btn-primary"
-            (click)="selectToday()"
+            (click)="selectToday(); $event.stopPropagation()"
             aria-label="Select today's date"
           >
             Today

@@ -357,6 +357,58 @@
   }
 }
 
+// Range Mode Styles
+.ax-date-picker-day-range-start,
+.ax-date-picker-day-range-end {
+  background-color: #3b82f6 !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  position: relative;
+  z-index: 2;
+
+  &:hover {
+    background-color: #2563eb !important;
+  }
+}
+
+.ax-date-picker-day-range-start {
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.ax-date-picker-day-range-end {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+// Same day range (start and end are the same)
+.ax-date-picker-day-range-start.ax-date-picker-day-range-end {
+  border-radius: 6px;
+}
+
+.ax-date-picker-day-in-range {
+  background-color: rgba(59, 130, 246, 0.1) !important;
+  color: #3b82f6 !important;
+  border-radius: 0;
+
+  &:hover:not(.ax-date-picker-day-range-start):not(
+      .ax-date-picker-day-range-end
+    ) {
+    background-color: rgba(59, 130, 246, 0.2) !important;
+  }
+}
+
+.ax-date-picker-day-range-hover {
+  background-color: rgba(59, 130, 246, 0.05) !important;
+  border: 1px dashed #3b82f6;
+  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+}
+
 // Message
 .ax-date-picker-message {
   font-size: var(--ax-font-size-sm);

@@ -7,6 +7,7 @@ import {
   inject,
   OnChanges,
   SimpleChanges,
+  ChangeDetectorRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -22,6 +23,15 @@ export type DatePickerSize = 'sm' | 'md' | 'lg';
 export type DatePickerLocale = 'en' | 'th';
 export type DatePickerCalendar = 'gregorian' | 'buddhist';
 export type DatePickerMonthFormat = 'full' | 'short';
+export type DatePickerMode = 'single' | 'range';
+
+/**
+ * Date range value structure for range mode
+ */
+export interface DateRange {
+  startDate: Date | null;
+  endDate: Date | null;
+}
 
 interface CalendarDay {
   date: Date;
@@ -31,6 +41,11 @@ interface CalendarDay {
   isSelected: boolean;
   isDisabled: boolean;
   isFocused: boolean;
+  // Range mode properties
+  isRangeStart?: boolean;
+  isRangeEnd?: boolean;
+  isInRange?: boolean;
+  isRangeHover?: boolean;
 }
 
 const THAI_MONTHS = [
@@ -133,8 +148,13 @@ export class AxDatePickerComponent
   @Input() firstDayOfWeek: 0 | 1 | 2 | 3 | 4 | 5 | 6 = 0; // 0 = Sunday, 1 = Monday, etc.
   @Input() dateFormat?: string; // Custom date format (e.g., 'DD/MM/YYYY', 'MM-DD-YYYY', 'DD MMM YYYY')
   @Input() showActionButtons = false; // Show Today and Clear buttons in calendar footer
+  @Input() mode: DatePickerMode = 'single'; // Single date or date range mode
 
-  value: Date | null = null;
+  value: Date | DateRange | null = null;
+
+  // Range mode state
+  rangeSelectionState: 'start' | 'end' = 'start';
+  hoverDate: Date | null = null;
   isOpen = false;
   focused = false;
   viewMode: 'day' | 'month' | 'year' = 'day';
@@ -196,11 +216,27 @@ export class AxDatePickerComponent
     }
   }
 
+  // Helper getters for type-safe value access
+  get isRangeMode(): boolean {
+    return this.mode === 'range';
+  }
+
+  get rangeValue(): DateRange | null {
+    if (!this.isRangeMode || !this.value) return null;
+    return this.value as DateRange;
+  }
+
+  get singleValue(): Date | null {
+    if (this.isRangeMode || !this.value) return null;
+    return this.value as Date;
+  }
+
   private elementRef = inject(ElementRef);
 
   private onChange = (_value: unknown) => {}; // eslint-disable-line @typescript-eslint/no-empty-function
   private onTouched = () => {}; // eslint-disable-line @typescript-eslint/no-empty-function
   private onValidatorChange = () => {}; // eslint-disable-line @typescript-eslint/no-empty-function
+  private cdr = inject(ChangeDetectorRef);
 
   constructor() {
     this.generateCalendar();
@@ -279,7 +315,26 @@ export class AxDatePickerComponent
 
   get displayValue(): string {
     if (!this.value) return '';
-    return this.formatDate(this.value);
+
+    if (this.mode === 'single') {
+      return this.formatDate(this.value as Date);
+    } else {
+      // Range mode
+      const range = this.value as DateRange;
+      if (!range.startDate && !range.endDate) return '';
+
+      if (range.startDate && !range.endDate) {
+        // Only start date selected
+        return `${this.formatDate(range.startDate)} - ...`;
+      }
+
+      if (range.startDate && range.endDate) {
+        // Both dates selected
+        return `${this.formatDate(range.startDate)} - ${this.formatDate(range.endDate)}`;
+      }
+
+      return '';
+    }
   }
 
   get currentMonthYear(): string {
@@ -304,15 +359,41 @@ export class AxDatePickerComponent
 
     if (this.isOpen) {
       this.focused = true;
+
       // Initialize focused date for keyboard navigation
-      this.focusedDate = this.value || new Date();
-      if (this.value) {
-        this.currentMonth = new Date(
-          this.value.getFullYear(),
-          this.value.getMonth(),
-          1,
-        );
+      if (this.mode === 'single') {
+        this.focusedDate = this.singleValue || new Date();
+        if (this.singleValue) {
+          this.currentMonth = new Date(
+            this.singleValue.getFullYear(),
+            this.singleValue.getMonth(),
+            1,
+          );
+        }
+      } else {
+        // Range mode: focus on start date or today
+        const range = this.rangeValue;
+        this.focusedDate = range?.startDate || new Date();
+        if (range?.startDate) {
+          this.currentMonth = new Date(
+            range.startDate.getFullYear(),
+            range.startDate.getMonth(),
+            1,
+          );
+        }
+
+        // ALWAYS reset range selection state when opening dropdown
+        // This ensures we always start fresh from selecting the start date
+        this.rangeSelectionState = 'start';
+        this.hoverDate = null;
+
+        // Clear partial range (only startDate without endDate)
+        // This prevents confusion when reopening with incomplete selection
+        if (range?.startDate && !range?.endDate) {
+          this.value = null;
+        }
       }
+
       this.generateCalendar();
     } else if (wasOpen) {
       // Closing dropdown - mark as touched
@@ -324,12 +405,56 @@ export class AxDatePickerComponent
   selectDate(day: CalendarDay): void {
     if (day.isDisabled) return;
 
-    this.value = day.date;
+    if (this.mode === 'single') {
+      // Single mode: select date and close
+      this.value = day.date;
+      this.onChange(this.value);
+      this.onTouched();
+      this.isOpen = false;
+      this.focused = false;
+    } else {
+      // Range mode: dual-click selection
+      this.selectRangeDate(day.date);
+    }
+
+    this.generateCalendar();
+    this.cdr.detectChanges(); // Force change detection
+  }
+
+  private selectRangeDate(date: Date): void {
+    // Normalize date to date-only (remove time component)
+    const normalizedDate = new Date(date);
+    normalizedDate.setHours(0, 0, 0, 0);
+
+    const currentRange = this.rangeValue || { startDate: null, endDate: null };
+
+    // First click - select start date
+    // Always treat as first click if no start date exists
+    if (!currentRange.startDate || this.rangeSelectionState === 'start') {
+      this.value = { startDate: normalizedDate, endDate: null };
+      this.rangeSelectionState = 'end';
+      this.onChange(this.value);
+      // Keep dropdown OPEN for second selection
+      return;
+    }
+
+    // Second click - select end date
+    // Only reach here if startDate exists AND state is 'end'
+    const normalizedStart = new Date(currentRange.startDate.getTime());
+    normalizedStart.setHours(0, 0, 0, 0);
+
+    if (normalizedDate.getTime() < normalizedStart.getTime()) {
+      // If end date is before start, swap them
+      this.value = { startDate: normalizedDate, endDate: normalizedStart };
+    } else {
+      this.value = { ...currentRange, endDate: normalizedDate };
+    }
+
     this.onChange(this.value);
     this.onTouched();
-    this.isOpen = false;
+    this.isOpen = false; // Close after complete range selection
     this.focused = false;
-    this.generateCalendar();
+    this.rangeSelectionState = 'start'; // Reset for next selection
   }
 
   previousMonth(): void {
@@ -354,6 +479,13 @@ export class AxDatePickerComponent
     this.value = null;
     this.onChange(null);
     this.onTouched();
+
+    // Reset range selection state
+    if (this.isRangeMode) {
+      this.rangeSelectionState = 'start';
+      this.hoverDate = null;
+    }
+
     this.generateCalendar();
   }
 
@@ -366,14 +498,26 @@ export class AxDatePickerComponent
       return; // Don't select if today is disabled
     }
 
-    this.value = today;
-    this.onChange(this.value);
-    this.onTouched();
+    if (this.mode === 'single') {
+      // Single mode: select today
+      this.value = today;
+      this.onChange(this.value);
+      this.onTouched();
+      this.isOpen = false;
+      this.focused = false;
+    } else {
+      // Range mode: set both start and end to today (same day range)
+      this.value = { startDate: today, endDate: today };
+      this.onChange(this.value);
+      this.onTouched();
+      this.rangeSelectionState = 'start';
+      this.isOpen = false;
+      this.focused = false;
+    }
+
     this.currentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     this.viewMode = 'day';
     this.generateCalendar();
-    this.isOpen = false;
-    this.focused = false;
   }
 
   // Keyboard Navigation Methods
@@ -421,10 +565,15 @@ export class AxDatePickerComponent
 
     // Initialize focused date if not set
     if (!this.focusedDate) {
-      this.focusedDate = this.value || new Date();
+      if (this.mode === 'single') {
+        this.focusedDate = this.singleValue || new Date();
+      } else {
+        const range = this.rangeValue;
+        this.focusedDate = range?.startDate || new Date();
+      }
     }
 
-    const currentDate = new Date(this.focusedDate);
+    const currentDate = new Date(this.focusedDate!);
     let newDate: Date | null = null;
 
     switch (key) {
@@ -461,7 +610,7 @@ export class AxDatePickerComponent
         } else {
           // PageUp: Previous month
           this.previousMonth();
-          newDate = new Date(this.focusedDate);
+          newDate = new Date(this.focusedDate!);
         }
         break;
 
@@ -474,7 +623,7 @@ export class AxDatePickerComponent
         } else {
           // PageDown: Next month
           this.nextMonth();
-          newDate = new Date(this.focusedDate);
+          newDate = new Date(this.focusedDate!);
         }
         break;
 
@@ -696,25 +845,75 @@ export class AxDatePickerComponent
     const dateOnly = new Date(date);
     dateOnly.setHours(0, 0, 0, 0);
 
-    return {
+    const baseDay: CalendarDay = {
       date: dateOnly,
       day: date.getDate(),
       isCurrentMonth,
       isToday: dateOnly.getTime() === today.getTime(),
-      isSelected: this.value
-        ? dateOnly.getTime() === new Date(this.value).setHours(0, 0, 0, 0)
-        : false,
+      isSelected: false,
       isDisabled: this.isDateDisabled(dateOnly),
       isFocused: this.focusedDate
         ? dateOnly.getTime() === new Date(this.focusedDate).setHours(0, 0, 0, 0)
         : false,
     };
+
+    if (this.mode === 'single') {
+      // Single mode: simple selection
+      baseDay.isSelected = this.singleValue
+        ? dateOnly.getTime() === new Date(this.singleValue).setHours(0, 0, 0, 0)
+        : false;
+    } else {
+      // Range mode: calculate range properties
+      const range = this.rangeValue;
+      if (range) {
+        const startTime = range.startDate
+          ? new Date(range.startDate).setHours(0, 0, 0, 0)
+          : null;
+        const endTime = range.endDate
+          ? new Date(range.endDate).setHours(0, 0, 0, 0)
+          : null;
+        const currentTime = dateOnly.getTime();
+
+        baseDay.isRangeStart = startTime === currentTime;
+        baseDay.isRangeEnd = endTime === currentTime;
+        baseDay.isInRange =
+          startTime && endTime
+            ? currentTime >= startTime && currentTime <= endTime
+            : false;
+
+        // Hover preview (when start selected but not end)
+        if (startTime && !endTime && this.hoverDate) {
+          const hoverTime = new Date(this.hoverDate).setHours(0, 0, 0, 0);
+          const minTime = Math.min(startTime, hoverTime);
+          const maxTime = Math.max(startTime, hoverTime);
+          baseDay.isRangeHover =
+            currentTime >= minTime && currentTime <= maxTime;
+        }
+      }
+    }
+
+    return baseDay;
   }
 
   private isDateDisabled(date: Date): boolean {
     if (this.minDate && date < this.minDate) return true;
     if (this.maxDate && date > this.maxDate) return true;
     return false;
+  }
+
+  // Hover preview handlers for range mode
+  onDayHover(day: CalendarDay): void {
+    if (this.mode === 'range' && this.rangeSelectionState === 'end') {
+      this.hoverDate = day.date;
+      this.generateCalendar();
+    }
+  }
+
+  onDayHoverEnd(): void {
+    if (this.mode === 'range') {
+      this.hoverDate = null;
+      this.generateCalendar();
+    }
   }
 
   private formatDate(date: Date): string {
@@ -816,12 +1015,28 @@ export class AxDatePickerComponent
   }
 
   // ControlValueAccessor implementation
-  writeValue(value: Date | null): void {
+  writeValue(value: Date | DateRange | null): void {
     this.value = value;
-    if (value) {
-      this.currentMonth = new Date(value.getFullYear(), value.getMonth(), 1);
+
+    if (this.mode === 'single' && value) {
+      const date = value as Date;
+      this.currentMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+    } else if (this.mode === 'range' && value) {
+      const range = value as DateRange;
+      if (range.startDate) {
+        this.currentMonth = new Date(
+          range.startDate.getFullYear(),
+          range.startDate.getMonth(),
+          1,
+        );
+      }
     }
-    this.generateCalendar();
+
+    // Only regenerate calendar if dropdown is open
+    // This prevents unnecessary re-renders during range selection
+    if (this.isOpen) {
+      this.generateCalendar();
+    }
   }
 
   registerOnChange(fn: (_value: unknown) => void): void {
@@ -840,38 +1055,78 @@ export class AxDatePickerComponent
   validate(_control: AbstractControl): ValidationErrors | null {
     const errors: ValidationErrors = {};
 
-    // Required validation
-    if (this.required && !this.value) {
-      errors['required'] = true;
-    }
-
-    // Min date validation
-    if (this.value && this.minDate) {
-      const valueDate = new Date(this.value);
-      const minDate = new Date(this.minDate);
-      valueDate.setHours(0, 0, 0, 0);
-      minDate.setHours(0, 0, 0, 0);
-
-      if (valueDate < minDate) {
-        errors['minDate'] = {
-          minDate: this.formatDate(this.minDate),
-          actual: this.formatDate(this.value),
-        };
+    if (this.mode === 'single') {
+      // Single mode validation
+      if (this.required && !this.value) {
+        errors['required'] = true;
       }
-    }
 
-    // Max date validation
-    if (this.value && this.maxDate) {
-      const valueDate = new Date(this.value);
-      const maxDate = new Date(this.maxDate);
-      valueDate.setHours(0, 0, 0, 0);
-      maxDate.setHours(0, 0, 0, 0);
+      if (this.value && this.minDate) {
+        const valueDate = new Date(this.value as Date);
+        const minDate = new Date(this.minDate);
+        valueDate.setHours(0, 0, 0, 0);
+        minDate.setHours(0, 0, 0, 0);
 
-      if (valueDate > maxDate) {
-        errors['maxDate'] = {
-          maxDate: this.formatDate(this.maxDate),
-          actual: this.formatDate(this.value),
-        };
+        if (valueDate < minDate) {
+          errors['minDate'] = {
+            minDate: this.formatDate(this.minDate),
+            actual: this.formatDate(this.value as Date),
+          };
+        }
+      }
+
+      if (this.value && this.maxDate) {
+        const valueDate = new Date(this.value as Date);
+        const maxDate = new Date(this.maxDate);
+        valueDate.setHours(0, 0, 0, 0);
+        maxDate.setHours(0, 0, 0, 0);
+
+        if (valueDate > maxDate) {
+          errors['maxDate'] = {
+            maxDate: this.formatDate(this.maxDate),
+            actual: this.formatDate(this.value as Date),
+          };
+        }
+      }
+    } else {
+      // Range mode validation
+      const range = this.rangeValue;
+
+      if (this.required && (!range || !range.startDate || !range.endDate)) {
+        errors['required'] = true;
+      }
+
+      if (range && range.startDate && range.endDate) {
+        // Validate start is before or equal to end
+        const startTime = new Date(range.startDate).setHours(0, 0, 0, 0);
+        const endTime = new Date(range.endDate).setHours(0, 0, 0, 0);
+
+        if (startTime > endTime) {
+          errors['invalidRange'] = {
+            reason: 'Start date must be before or equal to end date',
+          };
+        }
+
+        // Validate against min/max dates
+        if (this.minDate) {
+          const minTime = new Date(this.minDate).setHours(0, 0, 0, 0);
+          if (startTime < minTime) {
+            errors['minDate'] = {
+              minDate: this.formatDate(this.minDate),
+              actual: this.formatDate(range.startDate),
+            };
+          }
+        }
+
+        if (this.maxDate) {
+          const maxTime = new Date(this.maxDate).setHours(0, 0, 0, 0);
+          if (endTime > maxTime) {
+            errors['maxDate'] = {
+              maxDate: this.formatDate(this.maxDate),
+              actual: this.formatDate(range.endDate),
+            };
+          }
+        }
       }
     }
 
