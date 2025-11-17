@@ -1,21 +1,19 @@
 @if (visible) {
   <div [class]="alertClasses" role="alert">
-    @if (icon) {
-      <div class="ax-alert-icon">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <path
-            [attr.d]="iconPath"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      </div>
-    }
+    <div class="ax-alert-icon">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <path
+          [attr.d]="iconPath"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </div>
 
     <div class="ax-alert-content">
       @if (title) {
@@ -28,23 +26,13 @@
 
     @if (closeable) {
       <button
-        type="button"
         class="ax-alert-close"
+        type="button"
+        title="Close"
         (click)="onClose()"
         aria-label="Close alert"
       >
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <path
-            d="M6 18L18 6M6 6l12 12"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
+        <mat-icon>close</mat-icon>
       </button>
     }
   </div>

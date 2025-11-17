@@ -1,23 +1,32 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  OnInit,
+  OnDestroy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
 
 export type AlertVariant = 'success' | 'error' | 'warning' | 'info' | 'default';
 
 @Component({
   selector: 'ax-alert',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MatIconModule],
   templateUrl: './alert.component.html',
   styleUrls: ['./alert.component.scss'],
 })
-export class AxAlertComponent {
+export class AxAlertComponent implements OnInit, OnDestroy {
   @Input() variant: AlertVariant = 'default';
   @Input() title = '';
   @Input() closeable = false;
-  @Input() icon = true;
+  @Input() duration?: number; // Auto-hide after duration (milliseconds)
   @Output() close = new EventEmitter<void>();
 
   visible = true;
+  private autoHideTimer?: ReturnType<typeof setTimeout>;
 
   get alertClasses(): string {
     const classes = ['ax-alert', `ax-alert-${this.variant}`];
@@ -39,7 +48,24 @@ export class AxAlertComponent {
     }
   }
 
+  ngOnInit(): void {
+    if (this.duration && this.duration > 0) {
+      this.autoHideTimer = setTimeout(() => {
+        this.onClose();
+      }, this.duration);
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.autoHideTimer) {
+      clearTimeout(this.autoHideTimer);
+    }
+  }
+
   onClose(): void {
+    if (this.autoHideTimer) {
+      clearTimeout(this.autoHideTimer);
+    }
     this.visible = false;
     this.close.emit();
   }

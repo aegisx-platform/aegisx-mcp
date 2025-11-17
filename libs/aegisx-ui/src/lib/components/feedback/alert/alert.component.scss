@@ -1,7 +1,7 @@
 .ax-alert {
   position: relative;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--ax-spacing-sm);
   padding: var(--ax-spacing-md);
   border-radius: var(--ax-radius-md);
@@ -39,30 +39,24 @@
   line-height: var(--ax-line-height-normal);
 }
 
-.ax-alert-close {
+button.ax-alert-close {
   flex-shrink: 0;
-  width: 20px;
-  height: 20px;
-  padding: 0;
-  background: none;
+  padding: 2px;
+  background-color: transparent;
   border: none;
+  border-radius: var(--ax-radius-sm);
   cursor: pointer;
-  opacity: 0.6;
-  transition: opacity 0.2s ease;
+  color: currentColor;
+  transition: all 0.2s ease;
+  margin-left: var(--ax-spacing-sm);
 
-  &:hover {
-    opacity: 1;
+  mat-icon {
+    pointer-events: none;
   }
 
   &:focus {
     outline: 2px solid currentColor;
     outline-offset: 2px;
-    border-radius: var(--ax-radius-sm);
-  }
-
-  svg {
-    width: 100%;
-    height: 100%;
   }
 }
 
@@ -75,6 +69,15 @@
   .ax-alert-icon {
     color: var(--ax-gray-600);
   }
+
+  button.ax-alert-close {
+    color: var(--ax-gray-600);
+
+    &:hover {
+      background-color: var(--ax-gray-100);
+      color: var(--ax-gray-900);
+    }
+  }
 }
 
 .ax-alert-success {
@@ -84,6 +87,15 @@
 
   .ax-alert-icon {
     color: var(--ax-success);
+  }
+
+  button.ax-alert-close {
+    color: var(--ax-success);
+
+    &:hover {
+      background-color: color-mix(in srgb, var(--ax-success) 15%, transparent);
+      color: var(--ax-success-dark);
+    }
   }
 }
 
@@ -95,6 +107,15 @@
   .ax-alert-icon {
     color: var(--ax-error);
   }
+
+  button.ax-alert-close {
+    color: var(--ax-error);
+
+    &:hover {
+      background-color: color-mix(in srgb, var(--ax-error) 15%, transparent);
+      color: var(--ax-error-dark);
+    }
+  }
 }
 
 .ax-alert-warning {
@@ -105,6 +126,15 @@
   .ax-alert-icon {
     color: var(--ax-warning);
   }
+
+  button.ax-alert-close {
+    color: var(--ax-warning);
+
+    &:hover {
+      background-color: color-mix(in srgb, var(--ax-warning) 15%, transparent);
+      color: var(--ax-warning-dark);
+    }
+  }
 }
 
 .ax-alert-info {
@@ -114,5 +144,14 @@
 
   .ax-alert-icon {
     color: var(--ax-info);
+  }
+
+  button.ax-alert-close {
+    color: var(--ax-info);
+
+    &:hover {
+      background-color: color-mix(in srgb, var(--ax-info) 15%, transparent);
+      color: var(--ax-info-dark);
+    }
   }
 }
