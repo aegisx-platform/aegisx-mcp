@@ -10,7 +10,7 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 
 // Forms
-import { AxDatePickerComponent, dateValidators } from '@aegisx/ui';
+import { AxDatePickerComponent, dateValidators, DateRange } from '@aegisx/ui';
 
 // Data Display
 import { AxCardComponent } from '@aegisx/ui';
@@ -27,6 +27,7 @@ import { AxLoadingBarComponent, LoadingBarService } from '@aegisx/ui';
 
 // Navigation
 import { AxBreadcrumbComponent, BreadcrumbItem } from '@aegisx/ui';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
   selector: 'app-aegisx-ui-showcase',
@@ -51,6 +52,7 @@ import { AxBreadcrumbComponent, BreadcrumbItem } from '@aegisx/ui';
     AxLoadingBarComponent,
     // Navigation
     AxBreadcrumbComponent,
+    MatIcon,
   ],
   templateUrl: './aegisx-ui-showcase.component.html',
   styleUrls: ['./aegisx-ui-showcase.component.scss'],
@@ -58,6 +60,11 @@ import { AxBreadcrumbComponent, BreadcrumbItem } from '@aegisx/ui';
 })
 export class AegisxUiShowcaseComponent {
   constructor(private loadingBarService: LoadingBarService) {}
+
+  // Alert demo states
+  showAutoHideAlert = false;
+  showAutoHideSuccess = false;
+  showAutoHideWarning = false;
 
   // Form states
   checkboxValue = false;
@@ -135,6 +142,30 @@ export class AegisxUiShowcaseComponent {
     ]),
   });
 
+  // ===========================================
+  // Date Range Examples (NEW)
+  // ===========================================
+
+  // Basic range
+  dateRangeBasic = new FormControl<DateRange | null>(null);
+
+  // Required range
+  dateRangeRequired = new FormControl<DateRange | null>(null, [
+    dateValidators.required(),
+  ]);
+
+  // Range with min/max dates (e.g., hotel booking)
+  dateRangeHotel = new FormControl<DateRange | null>(null);
+  hotelMinDate = new Date(); // Today
+  hotelMaxDate = new Date(new Date().getTime() + 365 * 24 * 60 * 60 * 1000); // 1 year from now
+
+  // Travel dates with constraints
+  travelDates = new FormControl<DateRange | null>(null, [
+    dateValidators.required(),
+  ]);
+  travelMinDate = new Date();
+  travelMaxDate = new Date(new Date().getTime() + 180 * 24 * 60 * 60 * 1000); // 6 months
+
   // Data Display
   listItems: ListItem[] = [
     { title: 'Item 1', description: 'Description 1', icon: '📄' },
@@ -161,18 +192,6 @@ export class AegisxUiShowcaseComponent {
       timestamp: '2024-01-03',
       color: 'var(--ax-info)',
     },
-  ];
-
-  tableColumns: TableColumn[] = [
-    { key: 'name', label: 'Name' },
-    { key: 'email', label: 'Email' },
-    { key: 'role', label: 'Role' },
-  ];
-
-  tableData = [
-    { name: 'John Doe', email: 'john@example.com', role: 'Admin' },
-    { name: 'Jane Smith', email: 'jane@example.com', role: 'User' },
-    { name: 'Bob Johnson', email: 'bob@example.com', role: 'Editor' },
   ];
 
   // Display Components (NEW)
@@ -330,5 +349,30 @@ export class AegisxUiShowcaseComponent {
     setTimeout(() => {
       this.loadingBarService.complete();
     }, 3500);
+  }
+
+  /**
+   * Alert auto-hide demos
+   */
+  showInfoAlert(): void {
+    this.showAutoHideAlert = true;
+  }
+
+  showSuccessAlert(): void {
+    this.showAutoHideSuccess = true;
+  }
+
+  showWarningAlert(): void {
+    this.showAutoHideWarning = true;
+  }
+
+  onAlertClose(alertType: string): void {
+    if (alertType === 'info') {
+      this.showAutoHideAlert = false;
+    } else if (alertType === 'success') {
+      this.showAutoHideSuccess = false;
+    } else if (alertType === 'warning') {
+      this.showAutoHideWarning = false;
+    }
   }
 }

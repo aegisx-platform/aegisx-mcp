@@ -6,9 +6,6 @@
       ตัวอย่างการใช้งาน Custom Components ทั้งหมด 11 ตัว ที่สร้างขึ้นสำหรับ
       AegisX Design System v1.0.0 (เน้น Buddhist calendar และ Data Display)
     </p>
-    <p class="docs-subtitle" style="color: var(--ax-info); font-weight: 600">
-      ⚡ ใช้ Angular Material เป็นหลัก - Custom components เฉพาะที่จำเป็น
-    </p>
   </div>
 
   <!-- Forms Module -->
@@ -23,7 +20,7 @@
     <!-- Basic Locales & Calendars -->
     <div class="demo-container feature-group">
       <h4>🌍 Locales & Calendar Systems</h4>
-      <div class="grid grid-cols-2 gap-14">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <ax-date-picker
           [(ngModel)]="dateValue"
           label="English (Gregorian Calendar)"
@@ -64,7 +61,7 @@
     <!-- Custom Date Formats -->
     <div class="demo-container feature-group">
       <h4>📅 Custom Date Formats</h4>
-      <div class="grid grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <ax-date-picker
           [(ngModel)]="dateValueCustomFormat1"
           label="DD/MM/YYYY Format"
@@ -115,7 +112,7 @@
     <!-- Date Restrictions & Configuration -->
     <div class="demo-container feature-group">
       <h4>⚙️ Date Restrictions & Week Configuration</h4>
-      <div class="grid grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <ax-date-picker
           [(ngModel)]="dateValueRestricted"
           label="With Min/Max Dates (Next 30 days)"
@@ -145,7 +142,7 @@
     <!-- Action Buttons -->
     <div class="demo-container feature-group">
       <h4>🔘 Action Buttons (Today & Clear)</h4>
-      <div class="grid grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <ax-date-picker
           [(ngModel)]="dateValueWithActions"
           label="With Action Buttons"
@@ -168,7 +165,7 @@
     <!-- Component States -->
     <div class="demo-container feature-group">
       <h4>🎨 Component States (Editable vs Disabled vs Readonly)</h4>
-      <div class="grid grid-cols-3 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div>
           <h5 style="color: var(--ax-text-secondary); margin-bottom: 0.5rem">
             Editable
@@ -232,7 +229,7 @@
     <div class="demo-container feature-group">
       <h4>📝 Template-Driven Forms (ngModel)</h4>
 
-      <div class="grid grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Required Validation -->
         <div>
           <ax-date-picker
@@ -290,7 +287,7 @@
     <div class="demo-container feature-group">
       <h4>⚡ Reactive Forms (FormControl)</h4>
 
-      <div class="grid grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Basic FormControl -->
         <div>
           <ax-date-picker
@@ -428,7 +425,7 @@
       </p>
 
       <div [formGroup]="appointmentForm">
-        <div class="grid grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <!-- Appointment Date -->
           <div>
             <ax-date-picker
@@ -577,6 +574,173 @@
         <div>• <code>dateValidators.weekendOnly()</code></div>
       </div>
     </div>
+
+    <!-- Date Range Mode (NEW) -->
+    <div class="demo-container feature-group" style="margin-top: 2rem">
+      <h4>📆 Date Range Mode 🆕</h4>
+      <p
+        style="
+          color: var(--ax-text-subtle);
+          margin-bottom: 1.5rem;
+          font-size: 0.875rem;
+        "
+      >
+        Select start and end dates with visual range highlighting. Perfect for
+        booking systems, report date ranges, and event planning.
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Basic Range -->
+        <div>
+          <ax-date-picker
+            mode="range"
+            label="Basic Date Range"
+            [formControl]="dateRangeBasic"
+            placeholder="Select date range"
+            helperText="Click once for start, click again for end"
+          ></ax-date-picker>
+          <div
+            style="
+              margin-top: 0.75rem;
+              padding: 0.75rem;
+              background: var(--ax-background-subtle);
+              border-radius: 0.375rem;
+              font-size: 0.875rem;
+            "
+          >
+            <strong>Selected Range:</strong>
+            <pre style="margin: 0.5rem 0 0 0; overflow-x: auto">{{
+              dateRangeBasic.value | json
+            }}</pre>
+          </div>
+        </div>
+
+        <!-- Required Range -->
+        <div>
+          <ax-date-picker
+            mode="range"
+            label="Required Date Range"
+            [formControl]="dateRangeRequired"
+            placeholder="Required field"
+            helperText="Both start and end dates are required"
+          ></ax-date-picker>
+          @if (dateRangeRequired.invalid && dateRangeRequired.touched) {
+            <p
+              style="
+                color: var(--ax-error);
+                font-size: 0.875rem;
+                margin-top: 0.5rem;
+              "
+            >
+              ❌ Please select both start and end dates
+            </p>
+          }
+        </div>
+
+        <!-- Hotel Booking Range -->
+        <div>
+          <ax-date-picker
+            mode="range"
+            label="Hotel Booking (1 Year Max)"
+            [formControl]="dateRangeHotel"
+            [minDate]="hotelMinDate"
+            [maxDate]="hotelMaxDate"
+            placeholder="Check-in to Check-out"
+            helperText="Today to 1 year from now"
+          ></ax-date-picker>
+          @if (
+            dateRangeHotel.value?.startDate && dateRangeHotel.value?.endDate
+          ) {
+            <div
+              style="
+                margin-top: 0.75rem;
+                padding: 0.75rem;
+                background: var(--ax-success-light, #d1fae5);
+                border-radius: 0.375rem;
+                color: var(--ax-success-dark);
+                font-size: 0.875rem;
+              "
+            >
+              ✅ {{ dateRangeHotel.value?.startDate | date: 'mediumDate' }} to
+              {{ dateRangeHotel.value?.endDate | date: 'mediumDate' }}
+            </div>
+          }
+        </div>
+
+        <!-- Travel Dates -->
+        <div>
+          <ax-date-picker
+            mode="range"
+            label="Travel Dates (Required)"
+            [formControl]="travelDates"
+            [minDate]="travelMinDate"
+            [maxDate]="travelMaxDate"
+            placeholder="Departure to Return"
+            helperText="Select your trip dates (max 6 months)"
+          ></ax-date-picker>
+          @if (travelDates.invalid && travelDates.touched) {
+            <p
+              style="
+                color: var(--ax-error);
+                font-size: 0.875rem;
+                margin-top: 0.5rem;
+              "
+            >
+              ❌ Both dates required
+            </p>
+          }
+        </div>
+      </div>
+
+      <!-- Range Features Info -->
+      <div
+        style="
+          margin-top: 1.5rem;
+          padding: 1.25rem;
+          background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+          border-left: 4px solid var(--ax-primary);
+          border-radius: 0.5rem;
+        "
+      >
+        <h5 style="margin-bottom: 0.75rem; color: var(--ax-text-heading)">
+          ✨ Range Features
+        </h5>
+        <ul
+          style="
+            margin: 0;
+            padding-left: 1.25rem;
+            color: var(--ax-text-body);
+            font-size: 0.875rem;
+            line-height: 1.75;
+          "
+        >
+          <li>
+            <strong>Dual-Click Selection:</strong> First click = start, second
+            click = end
+          </li>
+          <li>
+            <strong>Auto-Swap:</strong> Automatically swaps if end date is
+            before start
+          </li>
+          <li>
+            <strong>Hover Preview:</strong> Visual feedback showing range before
+            confirmation
+          </li>
+          <li>
+            <strong>Visual Highlighting:</strong> Blue endpoints, light blue
+            range, dashed hover
+          </li>
+          <li>
+            <strong>Keyboard Support:</strong> Full keyboard navigation
+            maintained
+          </li>
+          <li>
+            <strong>Validation:</strong> Ensures start ≤ end, respects min/max
+            constraints
+          </li>
+        </ul>
+      </div>
+    </div>
   </div>
 
   <!-- Data Display Module -->
@@ -587,55 +751,99 @@
   <!-- 9. Card -->
   <div class="demo-section">
     <h3>9. Card Component</h3>
-    <div class="demo-container">
-      <ax-card title="Card Title" subtitle="Card Subtitle">
-        <p>This is the card content area. You can place any content here.</p>
-      </ax-card>
+    <div class="demo-container feature-group">
+      <h4>📇 Card Examples</h4>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <ax-card title="User Profile" subtitle="Personal Information">
+          <p>This is the card content area. You can place any content here.</p>
+        </ax-card>
+
+        <ax-card title="Dashboard Stats" subtitle="Overview">
+          <p>Display statistics, charts, or important metrics in this area.</p>
+        </ax-card>
+
+        <ax-card title="Notifications" subtitle="Recent Activity">
+          <p>Show recent notifications, updates, or activity feeds here.</p>
+        </ax-card>
+      </div>
     </div>
   </div>
 
   <!-- 11. Avatar -->
   <div class="demo-section">
     <h3>11. Avatar Component</h3>
-    <div class="demo-container">
-      <ax-avatar text="JD" size="sm"></ax-avatar>
-      <ax-avatar text="AB" size="md"></ax-avatar>
-      <ax-avatar text="XY" size="lg"></ax-avatar>
+    <div class="demo-container feature-group">
+      <h4>👤 Avatar Sizes</h4>
+      <div class="flex items-center gap-6">
+        <div class="flex flex-col items-center gap-2">
+          <ax-avatar text="SM" size="sm"></ax-avatar>
+          <span class="text-xs text-gray-600">Small</span>
+        </div>
+        <div class="flex flex-col items-center gap-2">
+          <ax-avatar text="MD" size="md"></ax-avatar>
+          <span class="text-xs text-gray-600">Medium</span>
+        </div>
+        <div class="flex flex-col items-center gap-2">
+          <ax-avatar text="LG" size="lg"></ax-avatar>
+          <span class="text-xs text-gray-600">Large</span>
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- 13. List -->
   <div class="demo-section">
     <h3>13. List Component</h3>
-    <div class="demo-container">
-      <ax-list [items]="listItems"></ax-list>
+    <div class="demo-container feature-group">
+      <h4>📋 List Example</h4>
+      <div style="max-width: 500px">
+        <ax-list [items]="listItems"></ax-list>
+      </div>
     </div>
   </div>
 
   <!-- 14. Stats Card -->
   <div class="demo-section">
     <h3>14. Stats Card Component</h3>
-    <div class="demo-container">
-      <ax-stats-card
-        title="Total Users"
-        value="1,234"
-        change="+12.5%"
-        trend="up"
-      ></ax-stats-card>
-      <ax-stats-card
-        title="Revenue"
-        value="$45,678"
-        change="-3.2%"
-        trend="down"
-      ></ax-stats-card>
+    <div class="demo-container feature-group">
+      <h4>📈 Statistics Dashboard</h4>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <ax-stats-card
+          title="Total Users"
+          value="1,234"
+          change="+12.5%"
+          trend="up"
+        ></ax-stats-card>
+        <ax-stats-card
+          title="Revenue"
+          value="$45,678"
+          change="-3.2%"
+          trend="down"
+        ></ax-stats-card>
+        <ax-stats-card
+          title="Active Sessions"
+          value="567"
+          change="+8.1%"
+          trend="up"
+        ></ax-stats-card>
+        <ax-stats-card
+          title="Conversion Rate"
+          value="24.5%"
+          change="+2.3%"
+          trend="up"
+        ></ax-stats-card>
+      </div>
     </div>
   </div>
 
   <!-- 15. Timeline -->
   <div class="demo-section">
     <h3>15. Timeline Component</h3>
-    <div class="demo-container">
-      <ax-timeline [items]="timelineItems"></ax-timeline>
+    <div class="demo-container feature-group">
+      <h4>📅 Activity Timeline</h4>
+      <div style="max-width: 600px">
+        <ax-timeline [items]="timelineItems"></ax-timeline>
+      </div>
     </div>
   </div>
 
@@ -976,45 +1184,118 @@
     <h3>17. Alert Component</h3>
 
     <h4>Basic Variants</h4>
-    <div class="demo-container">
-      <ax-alert variant="default">This is a default alert message</ax-alert>
-      <ax-alert variant="info">This is an info alert message</ax-alert>
-      <ax-alert variant="success">Operation completed successfully!</ax-alert>
-      <ax-alert variant="warning">Please review this warning</ax-alert>
-      <ax-alert variant="error">An error has occurred</ax-alert>
+    <div class="demo-container feature-group">
+      <div
+        style="display: flex; flex-direction: column; gap: 1rem; width: 100%"
+      >
+        <ax-alert variant="success" style="width: 100%"
+          >Patient record saved successfully.</ax-alert
+        >
+        <ax-alert variant="info" style="width: 100%"
+          >A new software update is available for the system.</ax-alert
+        >
+        <ax-alert variant="warning" style="width: 100%"
+          >Patient's insurance information is about to expire.</ax-alert
+        >
+        <ax-alert variant="error" style="width: 100%"
+          >Failed to update lab results. Please try again.</ax-alert
+        >
+      </div>
     </div>
 
     <h4>With Titles</h4>
-    <div class="demo-container">
-      <ax-alert variant="info" title="Information">
-        This alert has a title and description
-      </ax-alert>
-      <ax-alert variant="success" title="Success!">
-        Your changes have been saved successfully
-      </ax-alert>
-      <ax-alert variant="warning" title="Warning">
-        This action cannot be undone
-      </ax-alert>
-      <ax-alert variant="error" title="Error">
-        Failed to process your request
-      </ax-alert>
+    <div class="demo-container feature-group">
+      <div
+        style="display: flex; flex-direction: column; gap: 1rem; width: 100%"
+      >
+        <ax-alert variant="info" title="Information" style="width: 100%">
+          This alert has a title and description
+        </ax-alert>
+        <ax-alert variant="success" title="Success!" style="width: 100%">
+          Your changes have been saved successfully
+        </ax-alert>
+        <ax-alert variant="warning" title="Warning" style="width: 100%">
+          This action cannot be undone
+        </ax-alert>
+        <ax-alert variant="error" title="Error" style="width: 100%">
+          Failed to process your request
+        </ax-alert>
+      </div>
     </div>
 
     <h4>Closeable Alerts</h4>
-    <div class="demo-container">
-      <ax-alert variant="info" [closeable]="true">
-        You can close this alert
-      </ax-alert>
-      <ax-alert variant="success" title="Closeable" [closeable]="true">
-        Click the X button to dismiss
-      </ax-alert>
+    <div class="demo-container feature-group">
+      <div
+        style="display: flex; flex-direction: column; gap: 1rem; width: 100%"
+      >
+        <ax-alert variant="info" [closeable]="true" style="width: 100%">
+          You can close this alert by clicking the X button
+        </ax-alert>
+        <ax-alert
+          variant="success"
+          title="Closeable"
+          [closeable]="true"
+          style="width: 100%"
+        >
+          Click the X button to dismiss this alert
+        </ax-alert>
+      </div>
     </div>
 
-    <h4>Without Icons</h4>
-    <div class="demo-container">
-      <ax-alert variant="info" [icon]="false">
-        This alert has no icon
-      </ax-alert>
+    <h4>Auto-Hide Alerts</h4>
+    <div class="demo-container feature-group">
+      <div
+        style="display: flex; flex-direction: column; gap: 1rem; width: 100%"
+      >
+        <div style="display: flex; gap: 1rem; margin-bottom: 1rem">
+          <button mat-raised-button color="primary" (click)="showInfoAlert()">
+            Show 3s Alert
+          </button>
+          <button mat-raised-button color="accent" (click)="showSuccessAlert()">
+            Show 5s Success
+          </button>
+          <button mat-raised-button (click)="showWarningAlert()">
+            Show 10s Warning
+          </button>
+        </div>
+
+        @if (showAutoHideAlert) {
+          <ax-alert
+            variant="info"
+            [duration]="3000"
+            (close)="onAlertClose('info')"
+            style="width: 100%"
+          >
+            This alert will auto-hide in 3 seconds
+          </ax-alert>
+        }
+
+        @if (showAutoHideSuccess) {
+          <ax-alert
+            variant="success"
+            title="Success!"
+            [closeable]="true"
+            [duration]="5000"
+            (close)="onAlertClose('success')"
+            style="width: 100%"
+          >
+            This alert will auto-hide in 5 seconds, or you can close it manually
+          </ax-alert>
+        }
+
+        @if (showAutoHideWarning) {
+          <ax-alert
+            variant="warning"
+            title="Warning"
+            [closeable]="true"
+            [duration]="10000"
+            (close)="onAlertClose('warning')"
+            style="width: 100%"
+          >
+            This alert will auto-hide in 10 seconds
+          </ax-alert>
+        }
+      </div>
     </div>
   </div>
 

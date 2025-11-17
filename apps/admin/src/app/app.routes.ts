@@ -75,13 +75,6 @@ export const appRoutes: Route[] = [
       ),
   },
   {
-    path: 'form-validation',
-    loadComponent: () =>
-      import(
-        './pages/form-validation-demo/form-validation-demo.component'
-      ).then((m) => m.FormValidationDemoComponent),
-  },
-  {
     path: 'card-examples',
     loadComponent: () =>
       import('./pages/card-examples/card-examples.component').then(
