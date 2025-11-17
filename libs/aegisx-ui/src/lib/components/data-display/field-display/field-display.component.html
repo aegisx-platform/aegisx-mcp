@@ -1,0 +1,33 @@
+<div [ngClass]="containerClasses">
+  <!-- Label -->
+  @if (label) {
+    <dt [ngClass]="labelClasses" [ngStyle]="labelStyle || {}">
+      {{ label }}
+    </dt>
+  }
+
+  <!-- Value -->
+  <dd [ngClass]="valueClasses">
+    @if (isEmpty) {
+      <!-- Empty state -->
+      <span class="ax-field-empty-text">{{ emptyDisplayText }}</span>
+    } @else {
+      @if (isLinkType && linkHref) {
+        <!-- Clickable link for email/phone/url -->
+        <a
+          [href]="linkHref"
+          class="ax-field-link"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {{ value | axFieldFormat: type : formatOptions }}
+        </a>
+      } @else {
+        <!-- Regular text value -->
+        <span class="ax-field-text">
+          {{ value | axFieldFormat: type : formatOptions }}
+        </span>
+      }
+    }
+  </dd>
+</div>

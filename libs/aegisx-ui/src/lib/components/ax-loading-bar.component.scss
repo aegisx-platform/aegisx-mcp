@@ -1,0 +1,176 @@
+// Container
+.ax-loading-bar-container {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  height: 4px;
+  overflow: hidden;
+  pointer-events: none;
+
+  &.ax-loading-bar-top {
+    top: 0;
+  }
+
+  &.ax-loading-bar-bottom {
+    bottom: 0;
+  }
+
+  &.ax-loading-bar-glow {
+    filter: drop-shadow(0 0 8px currentColor);
+  }
+
+  // Hidden state - keep in DOM but invisible
+  &.ax-loading-bar-hidden {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+// Track
+.ax-loading-bar-track {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+}
+
+// Determinate Mode - Progress Fill
+.ax-loading-bar-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  transition: width 0.3s ease-out;
+  border-radius: 0 2px 2px 0;
+
+  &.ax-loading-bar-color-primary {
+    background-color: var(--ax-primary);
+  }
+
+  &.ax-loading-bar-color-success {
+    background-color: var(--ax-success);
+  }
+
+  &.ax-loading-bar-color-warning {
+    background-color: var(--ax-warning);
+  }
+
+  &.ax-loading-bar-color-error {
+    background-color: var(--ax-error);
+  }
+
+  &.ax-loading-bar-color-neutral {
+    background-color: var(--ax-gray-500);
+  }
+}
+
+// Indeterminate Mode - Animated Bar
+.ax-loading-bar-indeterminate {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+
+  &.ax-loading-bar-color-primary {
+    .ax-loading-bar-indeterminate-inner {
+      background: linear-gradient(
+        90deg,
+        transparent,
+        var(--ax-primary) 50%,
+        transparent
+      );
+    }
+  }
+
+  &.ax-loading-bar-color-success {
+    .ax-loading-bar-indeterminate-inner {
+      background: linear-gradient(
+        90deg,
+        transparent,
+        var(--ax-success) 50%,
+        transparent
+      );
+    }
+  }
+
+  &.ax-loading-bar-color-warning {
+    .ax-loading-bar-indeterminate-inner {
+      background: linear-gradient(
+        90deg,
+        transparent,
+        var(--ax-warning) 50%,
+        transparent
+      );
+    }
+  }
+
+  &.ax-loading-bar-color-error {
+    .ax-loading-bar-indeterminate-inner {
+      background: linear-gradient(
+        90deg,
+        transparent,
+        var(--ax-error) 50%,
+        transparent
+      );
+    }
+  }
+
+  &.ax-loading-bar-color-neutral {
+    .ax-loading-bar-indeterminate-inner {
+      background: linear-gradient(
+        90deg,
+        transparent,
+        var(--ax-gray-500) 50%,
+        transparent
+      );
+    }
+  }
+}
+
+.ax-loading-bar-indeterminate-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  animation: ax-loading-bar-slide 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(-100%);
+}
+
+// Animation for Indeterminate Mode
+@keyframes ax-loading-bar-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+// Speed Variants for Indeterminate
+.ax-loading-bar-speed-0\.5 {
+  .ax-loading-bar-indeterminate-inner {
+    animation-duration: 4s;
+  }
+}
+
+.ax-loading-bar-speed-1 {
+  .ax-loading-bar-indeterminate-inner {
+    animation-duration: 2s;
+  }
+}
+
+.ax-loading-bar-speed-2 {
+  .ax-loading-bar-indeterminate-inner {
+    animation-duration: 1s;
+  }
+}
+
+.ax-loading-bar-speed-3 {
+  .ax-loading-bar-indeterminate-inner {
+    animation-duration: 0.67s;
+  }
+}

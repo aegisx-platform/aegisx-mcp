@@ -1,0 +1,194 @@
+// ============================================================================
+// Field Display Component Styles
+// ============================================================================
+// Uses AegisX design tokens for consistent styling
+// Following Material Design 3 principles
+
+// ----------------------------------------------------------------------------
+// Base Styles
+// ----------------------------------------------------------------------------
+
+.ax-field-display {
+  display: flex;
+  gap: var(--ax-spacing-md);
+  padding: var(--ax-spacing-sm) 0;
+  margin: 0;
+
+  // Horizontal layout (default)
+  &.ax-field-display-horizontal {
+    flex-direction: row;
+    align-items: baseline;
+  }
+
+  // Vertical layout
+  &.ax-field-display-vertical {
+    flex-direction: column;
+    gap: var(--ax-spacing-xs);
+  }
+}
+
+// ----------------------------------------------------------------------------
+// Label Styles
+// ----------------------------------------------------------------------------
+
+.ax-field-display-label {
+  // Typography - Use M3 Label tokens
+  font-size: var(--ax-type-label-large);
+  font-weight: var(--ax-type-label-large-weight);
+  line-height: var(--ax-type-label-large-line-height);
+  letter-spacing: var(--ax-type-label-large-tracking, 0);
+
+  // Colors
+  color: var(--ax-text-secondary);
+
+  // Layout
+  margin: 0;
+  flex-shrink: 0;
+
+  // Horizontal layout specific
+  .ax-field-display-horizontal & {
+    min-width: var(--label-width, 120px);
+    max-width: var(--label-width, 200px);
+  }
+
+  // Vertical layout specific
+  .ax-field-display-vertical & {
+    min-width: unset;
+    max-width: unset;
+  }
+}
+
+// ----------------------------------------------------------------------------
+// Value Styles
+// ----------------------------------------------------------------------------
+
+.ax-field-display-value {
+  // Typography - Use M3 Body tokens
+  font-size: var(--ax-type-body-large);
+  font-weight: var(--ax-type-body-large-weight);
+  line-height: var(--ax-type-body-large-line-height);
+  letter-spacing: var(--ax-type-body-large-tracking, 0);
+
+  // Colors
+  color: var(--ax-text-primary);
+
+  // Layout
+  margin: 0;
+  flex: 1;
+  word-break: break-word;
+}
+
+// Regular text value
+.ax-field-text {
+  display: inline;
+}
+
+// Link value (email, phone, url)
+.ax-field-link {
+  color: var(--ax-primary-default);
+  text-decoration: none;
+  transition: color var(--ax-duration-fast) var(--ax-easing-easeInOut);
+
+  &:hover {
+    color: var(--ax-primary-emphasis);
+    text-decoration: underline;
+  }
+
+  &:active {
+    color: var(--ax-primary-emphasis);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ax-primary-default);
+    outline-offset: 2px;
+    border-radius: var(--ax-radius-sm);
+  }
+}
+
+// Empty state text
+.ax-field-empty,
+.ax-field-empty-text {
+  color: var(--ax-text-disabled);
+  font-style: italic;
+}
+
+// ----------------------------------------------------------------------------
+// Size Variants
+// ----------------------------------------------------------------------------
+
+// Small size
+.ax-field-display-sm {
+  .ax-field-display-label {
+    font-size: var(--ax-type-label-medium);
+    line-height: var(--ax-type-label-medium-line-height);
+  }
+
+  .ax-field-display-value {
+    font-size: var(--ax-type-body-medium);
+    line-height: var(--ax-type-body-medium-line-height);
+  }
+}
+
+// Medium size (default) - already defined in base styles
+
+// Large size
+.ax-field-display-lg {
+  padding: var(--ax-spacing-md) 0;
+
+  .ax-field-display-label {
+    font-size: var(--ax-text-base);
+    font-weight: var(--ax-font-medium);
+  }
+
+  .ax-field-display-value {
+    font-size: var(--ax-text-lg);
+  }
+}
+
+// ----------------------------------------------------------------------------
+// Responsive Behavior
+// ----------------------------------------------------------------------------
+
+@media (max-width: 640px) {
+  // Stack horizontally oriented fields on mobile
+  .ax-field-display-horizontal {
+    flex-direction: column;
+    gap: var(--ax-spacing-xs);
+
+    .ax-field-display-label {
+      min-width: unset;
+      max-width: unset;
+    }
+  }
+}
+
+// ----------------------------------------------------------------------------
+// Accessibility
+// ----------------------------------------------------------------------------
+
+// Focus management for keyboard navigation
+.ax-field-display {
+  &:focus-within {
+    .ax-field-link {
+      // Link focus styles already defined above
+    }
+  }
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+  .ax-field-display-label {
+    font-weight: var(--ax-font-semibold);
+  }
+
+  .ax-field-link {
+    text-decoration: underline;
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  .ax-field-link {
+    transition: none;
+  }
+}

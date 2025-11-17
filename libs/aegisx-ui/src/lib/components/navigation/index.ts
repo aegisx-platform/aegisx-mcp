@@ -6,10 +6,3 @@
 
 // Components
 export * from './breadcrumb';
-export * from './menu';
-export * from './tabs';
-export * from './navbar';
-export * from './sidebar';
-export * from './drawer';
-export * from './pagination';
-export * from './stepper';

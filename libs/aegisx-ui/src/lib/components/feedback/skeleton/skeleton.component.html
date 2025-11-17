@@ -1,9 +1,0 @@
-@if (type === 'text' && rows > 1) {
-  <div class="ax-skeleton-text-group">
-    @for (row of rowsArray; track trackByIndex($index)) {
-      <div [class]="skeletonClasses" [ngStyle]="skeletonStyles"></div>
-    }
-  </div>
-} @else {
-  <div [class]="skeletonClasses" [ngStyle]="skeletonStyles"></div>
-}

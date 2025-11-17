@@ -21,6 +21,10 @@ export * from './navigation';
 // Individual Components (standardized names with actual component classes)
 export { AegisxCardComponent as AxCardComponent } from './card/card.component';
 
+// State Components (restored for CRUD Generator compatibility)
+export * from './empty-state';
+export * from './error-state';
+
 // Additional Components
 // Note: AxLoadingBarComponent is now exported from feedback module
 export * from './ax-navigation.component';

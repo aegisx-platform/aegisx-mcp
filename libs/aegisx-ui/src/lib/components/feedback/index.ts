@@ -6,9 +6,4 @@
 
 // Components
 export * from './alert';
-export * from './snackbar';
-export * from './tooltip';
-export * from './progress';
-export * from './skeleton';
-export * from './dialog';
 export * from './loading-bar';

@@ -1,0 +1,192 @@
+// ============================================================================
+// Description List Component Styles
+// ============================================================================
+// Container component for organizing multiple field-display components
+// Uses AegisX design tokens for consistent styling
+
+// ----------------------------------------------------------------------------
+// Base Styles
+// ----------------------------------------------------------------------------
+
+.ax-description-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+// ----------------------------------------------------------------------------
+// Layout Variants
+// ----------------------------------------------------------------------------
+
+// Horizontal layout (default)
+.ax-description-list-horizontal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ax-spacing-md);
+
+  // Child field-display components will use their default horizontal orientation
+}
+
+// Vertical layout
+.ax-description-list-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ax-spacing-lg);
+
+  // Child field-display components should use vertical orientation
+  // This is managed via CSS cascade or direct props
+}
+
+// Grid layout
+.ax-description-list-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--columns, 2), 1fr);
+  gap: var(--ax-spacing-lg) var(--ax-spacing-xl);
+  align-items: start;
+
+  // Responsive grid - stack on mobile
+  @media (max-width: 768px) {
+    &.ax-description-list-cols-3 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+    gap: var(--ax-spacing-md);
+  }
+}
+
+// Grid column variants (explicit classes for better control)
+.ax-description-list-cols-1 {
+  grid-template-columns: 1fr;
+}
+
+.ax-description-list-cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.ax-description-list-cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+// ----------------------------------------------------------------------------
+// Divider Styles
+// ----------------------------------------------------------------------------
+
+.ax-description-list-divider {
+  // Add dividers between child elements
+  // Default: sm spacing (4px + 4px = 8px total)
+  ::ng-deep ax-field-display:not(:last-child) {
+    border-bottom: 1px solid var(--ax-border-default);
+    padding-bottom: var(--ax-spacing-xs); // 4px
+    margin-bottom: var(--ax-spacing-xs); // 4px
+  }
+
+  // Size variants for divider spacing
+  &.ax-description-list-sm {
+    ::ng-deep ax-field-display:not(:last-child) {
+      padding-bottom: var(--ax-spacing-xs); // 4px
+      margin-bottom: var(--ax-spacing-xs); // 4px
+    }
+  }
+
+  &.ax-description-list-md {
+    ::ng-deep ax-field-display:not(:last-child) {
+      padding-bottom: var(--ax-spacing-sm); // 8px
+      margin-bottom: var(--ax-spacing-sm); // 8px
+    }
+  }
+
+  &.ax-description-list-lg {
+    ::ng-deep ax-field-display:not(:last-child) {
+      padding-bottom: var(--ax-spacing-md); // 12px
+      margin-bottom: var(--ax-spacing-md); // 12px
+    }
+  }
+
+  // No dividers in grid layout (doesn't make sense visually)
+  &.ax-description-list-grid {
+    ::ng-deep ax-field-display {
+      border-bottom: none;
+      padding-bottom: 0;
+      margin-bottom: 0;
+    }
+  }
+}
+
+// ----------------------------------------------------------------------------
+// Size Variants
+// ----------------------------------------------------------------------------
+
+// Small size
+.ax-description-list-sm {
+  gap: var(--ax-spacing-sm);
+
+  &.ax-description-list-grid {
+    gap: var(--ax-spacing-md) var(--ax-spacing-lg);
+  }
+
+  // Cascade size to child field-display components
+  ::ng-deep ax-field-display {
+    // Child components will inherit size via CSS
+    // Or can be set explicitly via component props
+  }
+}
+
+// Medium size (default) - already defined in base styles
+
+// Large size
+.ax-description-list-lg {
+  gap: var(--ax-spacing-lg);
+
+  &.ax-description-list-grid {
+    gap: var(--ax-spacing-xl) var(--ax-spacing-2xl);
+  }
+}
+
+// ----------------------------------------------------------------------------
+// Responsive Behavior
+// ----------------------------------------------------------------------------
+
+@media (max-width: 640px) {
+  .ax-description-list {
+    // Reduce spacing on mobile
+    gap: var(--ax-spacing-sm);
+
+    &.ax-description-list-divider {
+      ::ng-deep ax-field-display:not(:last-child) {
+        padding-bottom: var(--ax-spacing-sm);
+        margin-bottom: var(--ax-spacing-sm);
+      }
+    }
+  }
+}
+
+// ----------------------------------------------------------------------------
+// Accessibility
+// ----------------------------------------------------------------------------
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+  .ax-description-list-divider {
+    ::ng-deep ax-field-display:not(:last-child) {
+      border-bottom-width: 2px;
+    }
+  }
+}
+
+// ----------------------------------------------------------------------------
+// Print Styles
+// ----------------------------------------------------------------------------
+
+@media print {
+  .ax-description-list-grid {
+    // Force single column for printing
+    grid-template-columns: 1fr !important;
+  }
+
+  .ax-description-list {
+    gap: var(--ax-spacing-sm);
+  }
+}
