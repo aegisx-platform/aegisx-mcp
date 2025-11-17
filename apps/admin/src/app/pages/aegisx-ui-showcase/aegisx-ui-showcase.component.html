@@ -4,18 +4,22 @@
     <h1 class="docs-title">AegisX UI Components Showcase</h1>
     <p class="docs-subtitle">
       ตัวอย่างการใช้งาน Custom Components ทั้งหมด 11 ตัว ที่สร้างขึ้นสำหรับ
-      AegisX Design System v1.0.0 (เน้น Buddhist calendar และ Data Display)
+      AegisX Design System v1.0.0 จัดกลุ่มตามหมวดหมู่การใช้งาน: Form Inputs,
+      Content Display, Data Visualization, User Elements, Feedback & Status, และ
+      Navigation
     </p>
   </div>
 
-  <!-- Forms Module -->
+  <!-- ============================================== -->
+  <!-- 1. Form Inputs (1 Component) -->
+  <!-- ============================================== -->
   <div class="section-divider">
-    <h2 class="section-title">📝 Forms Module (1 Component)</h2>
+    <h2 class="section-title">📝 Form Inputs (1 Component)</h2>
   </div>
 
-  <!-- 8. Date Picker -->
+  <!-- Date Picker -->
   <div class="demo-section">
-    <h3>8. Date Picker Component</h3>
+    <h3>Date Picker Component</h3>
 
     <!-- Basic Locales & Calendars -->
     <div class="demo-container feature-group">
@@ -209,13 +213,7 @@
     </div>
   </div>
 
-  <!-- ============================================== -->
   <!-- Angular Forms Integration -->
-  <!-- ============================================== -->
-  <div class="section-divider">
-    <h2 class="section-title">📋 Angular Forms Integration</h2>
-  </div>
-
   <div class="demo-section">
     <h3>Angular Forms Support (Template-Driven & Reactive)</h3>
     <p style="color: var(--ax-text-secondary); margin-bottom: 1.5rem">
@@ -743,14 +741,16 @@
     </div>
   </div>
 
-  <!-- Data Display Module -->
+  <!-- ============================================== -->
+  <!-- 2. Content Display (4 Components) -->
+  <!-- ============================================== -->
   <div class="section-divider">
-    <h2 class="section-title">📊 Data Display Module (7 Components) 🆕</h2>
+    <h2 class="section-title">📇 Content Display (4 Components)</h2>
   </div>
 
-  <!-- 9. Card -->
+  <!-- Card Component -->
   <div class="demo-section">
-    <h3>9. Card Component</h3>
+    <h3>Card Component</h3>
     <div class="demo-container feature-group">
       <h4>📇 Card Examples</h4>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -769,31 +769,9 @@
     </div>
   </div>
 
-  <!-- 11. Avatar -->
+  <!-- List Component -->
   <div class="demo-section">
-    <h3>11. Avatar Component</h3>
-    <div class="demo-container feature-group">
-      <h4>👤 Avatar Sizes</h4>
-      <div class="flex items-center gap-6">
-        <div class="flex flex-col items-center gap-2">
-          <ax-avatar text="SM" size="sm"></ax-avatar>
-          <span class="text-xs text-gray-600">Small</span>
-        </div>
-        <div class="flex flex-col items-center gap-2">
-          <ax-avatar text="MD" size="md"></ax-avatar>
-          <span class="text-xs text-gray-600">Medium</span>
-        </div>
-        <div class="flex flex-col items-center gap-2">
-          <ax-avatar text="LG" size="lg"></ax-avatar>
-          <span class="text-xs text-gray-600">Large</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 13. List -->
-  <div class="demo-section">
-    <h3>13. List Component</h3>
+    <h3>List Component</h3>
     <div class="demo-container feature-group">
       <h4>📋 List Example</h4>
       <div style="max-width: 500px">
@@ -802,43 +780,9 @@
     </div>
   </div>
 
-  <!-- 14. Stats Card -->
+  <!-- Timeline Component -->
   <div class="demo-section">
-    <h3>14. Stats Card Component</h3>
-    <div class="demo-container feature-group">
-      <h4>📈 Statistics Dashboard</h4>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <ax-stats-card
-          title="Total Users"
-          value="1,234"
-          change="+12.5%"
-          trend="up"
-        ></ax-stats-card>
-        <ax-stats-card
-          title="Revenue"
-          value="$45,678"
-          change="-3.2%"
-          trend="down"
-        ></ax-stats-card>
-        <ax-stats-card
-          title="Active Sessions"
-          value="567"
-          change="+8.1%"
-          trend="up"
-        ></ax-stats-card>
-        <ax-stats-card
-          title="Conversion Rate"
-          value="24.5%"
-          change="+2.3%"
-          trend="up"
-        ></ax-stats-card>
-      </div>
-    </div>
-  </div>
-
-  <!-- 15. Timeline -->
-  <div class="demo-section">
-    <h3>15. Timeline Component</h3>
+    <h3>Timeline Component</h3>
     <div class="demo-container feature-group">
       <h4>📅 Activity Timeline</h4>
       <div style="max-width: 600px">
@@ -847,125 +791,9 @@
     </div>
   </div>
 
-  <!-- 17. Field Display Component (NEW) -->
+  <!-- Description List Component -->
   <div class="demo-section">
-    <h3>17. Field Display Component 🆕</h3>
-    <p class="demo-description">
-      Display field values in read-only format with automatic type-based
-      formatting.
-    </p>
-
-    <h4>Basic Text Display</h4>
-    <div class="demo-container" style="max-width: 600px">
-      <ax-field-display
-        label="Full Name"
-        [value]="userProfile.fullName"
-      ></ax-field-display>
-      <ax-field-display
-        label="Role"
-        [value]="userProfile.role"
-      ></ax-field-display>
-      <ax-field-display
-        label="Department"
-        [value]="userProfile.department"
-      ></ax-field-display>
-    </div>
-
-    <h4>Type-Based Formatting</h4>
-    <div class="demo-container" style="max-width: 600px">
-      <ax-field-display
-        label="Join Date"
-        [value]="userProfile.joinDate"
-        type="date"
-      >
-      </ax-field-display>
-
-      <ax-field-display
-        label="Salary"
-        [value]="userProfile.salary"
-        type="currency"
-        [formatOptions]="{ currency: 'THB', decimals: 2 }"
-      >
-      </ax-field-display>
-
-      <ax-field-display
-        label="Performance Score"
-        [value]="userProfile.performanceScore"
-        type="percentage"
-      >
-      </ax-field-display>
-
-      <ax-field-display
-        label="Active Status"
-        [value]="userProfile.isActive"
-        type="boolean"
-      >
-      </ax-field-display>
-    </div>
-
-    <h4>Clickable Links</h4>
-    <div class="demo-container" style="max-width: 600px">
-      <ax-field-display label="Email" [value]="userProfile.email" type="email">
-      </ax-field-display>
-
-      <ax-field-display label="Phone" [value]="userProfile.phone" type="phone">
-      </ax-field-display>
-
-      <ax-field-display
-        label="Website"
-        [value]="userProfile.website"
-        type="url"
-      >
-      </ax-field-display>
-    </div>
-
-    <h4>Sizes</h4>
-    <div class="demo-container" style="max-width: 600px">
-      <ax-field-display label="Small" [value]="userProfile.fullName" size="sm">
-      </ax-field-display>
-
-      <ax-field-display
-        label="Medium (Default)"
-        [value]="userProfile.fullName"
-        size="md"
-      >
-      </ax-field-display>
-
-      <ax-field-display label="Large" [value]="userProfile.fullName" size="lg">
-      </ax-field-display>
-    </div>
-
-    <h4>Vertical Orientation</h4>
-    <div class="demo-container" style="max-width: 600px">
-      <ax-field-display
-        label="Description"
-        value="This is a longer text that looks better in vertical orientation. The label appears above the value instead of beside it."
-        orientation="vertical"
-      >
-      </ax-field-display>
-    </div>
-
-    <h4>Empty State</h4>
-    <div class="demo-container" style="max-width: 600px">
-      <ax-field-display
-        label="Middle Name"
-        [value]="null"
-        emptyText="Not specified"
-      >
-      </ax-field-display>
-
-      <ax-field-display
-        label="Nickname"
-        [value]="''"
-        emptyDisplay="placeholder"
-      >
-      </ax-field-display>
-    </div>
-  </div>
-
-  <!-- 18. Description List Component (NEW) -->
-  <div class="demo-section">
-    <h3>18. Description List Component 🆕</h3>
+    <h3>Description List Component 🆕</h3>
     <p class="demo-description">
       Container for organizing multiple field-display components in structured
       layouts.
@@ -1174,14 +1002,202 @@
     </div>
   </div>
 
-  <!-- Feedback Module -->
+  <!-- ============================================== -->
+  <!-- 3. Data Visualization (2 Components) -->
+  <!-- ============================================== -->
   <div class="section-divider">
-    <h2 class="section-title">💬 Feedback Module (2 Components)</h2>
+    <h2 class="section-title">📊 Data Visualization (2 Components)</h2>
   </div>
 
-  <!-- 17. Alert -->
+  <!-- Stats Card Component -->
   <div class="demo-section">
-    <h3>17. Alert Component</h3>
+    <h3>Stats Card Component</h3>
+    <div class="demo-container feature-group">
+      <h4>📈 Statistics Dashboard</h4>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <ax-stats-card
+          title="Total Users"
+          value="1,234"
+          change="+12.5%"
+          trend="up"
+        ></ax-stats-card>
+        <ax-stats-card
+          title="Revenue"
+          value="$45,678"
+          change="-3.2%"
+          trend="down"
+        ></ax-stats-card>
+        <ax-stats-card
+          title="Active Sessions"
+          value="567"
+          change="+8.1%"
+          trend="up"
+        ></ax-stats-card>
+        <ax-stats-card
+          title="Conversion Rate"
+          value="24.5%"
+          change="+2.3%"
+          trend="up"
+        ></ax-stats-card>
+      </div>
+    </div>
+  </div>
+
+  <!-- Field Display Component -->
+  <div class="demo-section">
+    <h3>Field Display Component 🆕</h3>
+    <p class="demo-description">
+      Display field values in read-only format with automatic type-based
+      formatting.
+    </p>
+
+    <h4>Basic Text Display</h4>
+    <div class="demo-container" style="max-width: 600px">
+      <ax-field-display
+        label="Full Name"
+        [value]="userProfile.fullName"
+      ></ax-field-display>
+      <ax-field-display
+        label="Role"
+        [value]="userProfile.role"
+      ></ax-field-display>
+      <ax-field-display
+        label="Department"
+        [value]="userProfile.department"
+      ></ax-field-display>
+    </div>
+
+    <h4>Type-Based Formatting</h4>
+    <div class="demo-container" style="max-width: 600px">
+      <ax-field-display
+        label="Join Date"
+        [value]="userProfile.joinDate"
+        type="date"
+      >
+      </ax-field-display>
+
+      <ax-field-display
+        label="Salary"
+        [value]="userProfile.salary"
+        type="currency"
+        [formatOptions]="{ currency: 'THB', decimals: 2 }"
+      >
+      </ax-field-display>
+
+      <ax-field-display
+        label="Performance Score"
+        [value]="userProfile.performanceScore"
+        type="percentage"
+      >
+      </ax-field-display>
+
+      <ax-field-display
+        label="Active Status"
+        [value]="userProfile.isActive"
+        type="boolean"
+      >
+      </ax-field-display>
+    </div>
+
+    <h4>Clickable Links</h4>
+    <div class="demo-container" style="max-width: 600px">
+      <ax-field-display label="Email" [value]="userProfile.email" type="email">
+      </ax-field-display>
+
+      <ax-field-display label="Phone" [value]="userProfile.phone" type="phone">
+      </ax-field-display>
+
+      <ax-field-display
+        label="Website"
+        [value]="userProfile.website"
+        type="url"
+      >
+      </ax-field-display>
+    </div>
+
+    <h4>Sizes</h4>
+    <div class="demo-container" style="max-width: 600px">
+      <ax-field-display label="Small" [value]="userProfile.fullName" size="sm">
+      </ax-field-display>
+
+      <ax-field-display
+        label="Medium (Default)"
+        [value]="userProfile.fullName"
+        size="md"
+      >
+      </ax-field-display>
+
+      <ax-field-display label="Large" [value]="userProfile.fullName" size="lg">
+      </ax-field-display>
+    </div>
+
+    <h4>Vertical Orientation</h4>
+    <div class="demo-container" style="max-width: 600px">
+      <ax-field-display
+        label="Description"
+        value="This is a longer text that looks better in vertical orientation. The label appears above the value instead of beside it."
+        orientation="vertical"
+      >
+      </ax-field-display>
+    </div>
+
+    <h4>Empty State</h4>
+    <div class="demo-container" style="max-width: 600px">
+      <ax-field-display
+        label="Middle Name"
+        [value]="null"
+        emptyText="Not specified"
+      >
+      </ax-field-display>
+
+      <ax-field-display
+        label="Nickname"
+        [value]="''"
+        emptyDisplay="placeholder"
+      >
+      </ax-field-display>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- 4. User Elements (1 Component) -->
+  <!-- ============================================== -->
+  <div class="section-divider">
+    <h2 class="section-title">👤 User Elements (1 Component)</h2>
+  </div>
+
+  <!-- Avatar Component -->
+  <div class="demo-section">
+    <h3>Avatar Component</h3>
+    <div class="demo-container feature-group">
+      <h4>👤 Avatar Sizes</h4>
+      <div class="flex items-center gap-6">
+        <div class="flex flex-col items-center gap-2">
+          <ax-avatar text="SM" size="sm"></ax-avatar>
+          <span class="text-xs text-gray-600">Small</span>
+        </div>
+        <div class="flex flex-col items-center gap-2">
+          <ax-avatar text="MD" size="md"></ax-avatar>
+          <span class="text-xs text-gray-600">Medium</span>
+        </div>
+        <div class="flex flex-col items-center gap-2">
+          <ax-avatar text="LG" size="lg"></ax-avatar>
+          <span class="text-xs text-gray-600">Large</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- 5. Feedback & Status (2 Components) -->
+  <!-- ============================================== -->
+  <div class="section-divider">
+    <h2 class="section-title">💬 Feedback & Status (2 Components)</h2>
+  </div>
+
+  <!-- Alert Component -->
+  <div class="demo-section">
+    <h3>Alert Component</h3>
 
     <h4>Basic Variants</h4>
     <div class="demo-container feature-group">
@@ -1299,9 +1315,9 @@
     </div>
   </div>
 
-  <!-- 23. Loading Bar -->
+  <!-- Loading Bar Component -->
   <div class="demo-section">
-    <h3>23. Loading Bar Component</h3>
+    <h3>Loading Bar Component</h3>
     <p class="demo-description">
       Fully controllable loading bar with service-based architecture. Control
       from any component in your app!
@@ -1417,14 +1433,16 @@
     </div>
   </div>
 
-  <!-- Navigation Module -->
+  <!-- ============================================== -->
+  <!-- 6. Navigation (1 Component) -->
+  <!-- ============================================== -->
   <div class="section-divider">
-    <h2 class="section-title">🧭 Navigation Module (1 Component)</h2>
+    <h2 class="section-title">🧭 Navigation (1 Component)</h2>
   </div>
 
-  <!-- 24. Breadcrumb -->
+  <!-- Breadcrumb Component -->
   <div class="demo-section">
-    <h3>24. Breadcrumb Component</h3>
+    <h3>Breadcrumb Component</h3>
     <div class="demo-container">
       <ax-breadcrumb [items]="breadcrumbs"></ax-breadcrumb>
     </div>
