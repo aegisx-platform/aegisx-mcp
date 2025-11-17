@@ -301,6 +301,179 @@ export class AxDatePickerValidators {
       return null;
     };
   }
+
+  /**
+   * Validator that ensures the date represents a minimum age
+   * @param minAge - Minimum age in years
+   * @returns Validation error if age is less than minAge, null otherwise
+   */
+  static minAge(minAge: number): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+
+      if (!value || !(value instanceof Date)) {
+        return null; // Don't validate if empty
+      }
+
+      const today = new Date();
+      const birthDate = new Date(value);
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+
+      // Adjust age if birthday hasn't occurred yet this year
+      if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && today.getDate() < birthDate.getDate())
+      ) {
+        age--;
+      }
+
+      if (age < minAge) {
+        return {
+          minAge: {
+            required: minAge,
+            actual: age,
+          },
+        };
+      }
+
+      return null;
+    };
+  }
+
+  /**
+   * Validator that ensures the date represents a maximum age
+   * @param maxAge - Maximum age in years
+   * @returns Validation error if age is greater than maxAge, null otherwise
+   */
+  static maxAge(maxAge: number): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+
+      if (!value || !(value instanceof Date)) {
+        return null; // Don't validate if empty
+      }
+
+      const today = new Date();
+      const birthDate = new Date(value);
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+
+      // Adjust age if birthday hasn't occurred yet this year
+      if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && today.getDate() < birthDate.getDate())
+      ) {
+        age--;
+      }
+
+      if (age > maxAge) {
+        return {
+          maxAge: {
+            required: maxAge,
+            actual: age,
+          },
+        };
+      }
+
+      return null;
+    };
+  }
+
+  /**
+   * Validator that ensures date is a business day (excludes weekends and optional holidays)
+   * @param holidays - Optional array of holiday dates to exclude
+   * @returns Validation error if date is not a business day, null otherwise
+   */
+  static businessDays(holidays: Date[] = []): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+
+      if (!value || !(value instanceof Date)) {
+        return null; // Don't validate if empty
+      }
+
+      // Check if it's a weekend
+      const day = value.getDay();
+      if (day === 0 || day === 6) {
+        return {
+          businessDays: {
+            reason: 'weekend',
+            actual: value.toISOString(),
+          },
+        };
+      }
+
+      // Check if it's a holiday
+      const valueDate = new Date(value);
+      valueDate.setHours(0, 0, 0, 0);
+
+      for (const holiday of holidays) {
+        const holidayDate = new Date(holiday);
+        holidayDate.setHours(0, 0, 0, 0);
+
+        if (valueDate.getTime() === holidayDate.getTime()) {
+          return {
+            businessDays: {
+              reason: 'holiday',
+              actual: value.toISOString(),
+            },
+          };
+        }
+      }
+
+      return null;
+    };
+  }
+
+  /**
+   * Validator that ensures date follows a specific pattern (e.g., first day of month, last day of month)
+   * @param pattern - Pattern type: 'first-of-month' | 'last-of-month' | 'middle-of-month'
+   * @returns Validation error if date doesn't match pattern, null otherwise
+   */
+  static datePattern(
+    pattern: 'first-of-month' | 'last-of-month' | 'middle-of-month',
+  ): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+
+      if (!value || !(value instanceof Date)) {
+        return null; // Don't validate if empty
+      }
+
+      const date = value.getDate();
+      const lastDayOfMonth = new Date(
+        value.getFullYear(),
+        value.getMonth() + 1,
+        0,
+      ).getDate();
+
+      let isValid = false;
+
+      switch (pattern) {
+        case 'first-of-month':
+          isValid = date === 1;
+          break;
+        case 'last-of-month':
+          isValid = date === lastDayOfMonth;
+          break;
+        case 'middle-of-month':
+          isValid = date >= 14 && date <= 16;
+          break;
+      }
+
+      if (!isValid) {
+        return {
+          datePattern: {
+            pattern,
+            actual: date,
+          },
+        };
+      }
+
+      return null;
+    };
+  }
 }
 
 // Export as default for convenience
