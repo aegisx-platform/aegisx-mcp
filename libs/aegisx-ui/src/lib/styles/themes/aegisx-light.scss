@@ -5,9 +5,10 @@
    ============================================================ */
 
 @use '@angular/material' as mat;
-@use './aegisx-tokens' as *;
+@use './_aegisx-tokens' as *;
 @use './material-overrides' as *; // Re-enabled: Apply AegisX custom styles
 @use '../components/form-utilities' as *;
+@use '../components/dialog-shared'; // Dialog shared styles with theme support
 
 /* ============================================================
    Theme Configuration
@@ -65,8 +66,8 @@ $aegisx-light-theme: mat.define-theme(
   --mdc-outlined-card-container-color: var(--ax-background-default);
 
   /* Filled Card */
-  --mat-card-filled-container-color: var(--ax-background-default);
-  --mdc-filled-card-container-color: var(--ax-background-default);
+  --mat-card-filled-container-color: var(--ax-background-subtle);
+  --mdc-filled-card-container-color: var(--ax-background-subtle);
 
   /* Generic card container */
   --mat-card-container-color: var(--ax-background-default);
@@ -74,14 +75,6 @@ $aegisx-light-theme: mat.define-theme(
   /* Card Border Color - Use AegisX border token */
   --mat-card-outlined-outline-color: var(--ax-border-default);
   --mdc-outlined-card-outline-color: var(--ax-border-default);
-
-  /* Button Shape - Use AegisX radius token for all button types */
-  --mat-button-filled-container-shape: var(--ax-radius-sm);
-  --mdc-filled-button-container-shape: var(--ax-radius-sm);
-  --mat-button-outlined-container-shape: var(--ax-radius-sm);
-  --mdc-outlined-button-container-shape: var(--ax-radius-sm);
-  --mat-button-text-container-shape: var(--ax-radius-sm);
-  --mdc-text-button-container-shape: var(--ax-radius-sm);
 
   /* Button Text Color - Use AegisX text tokens */
   --mat-button-outlined-label-text-color: var(--ax-text-emphasis);
@@ -94,6 +87,36 @@ $aegisx-light-theme: mat.define-theme(
   /* Filled Button Background Color - Use AegisX brand token */
   --mat-button-filled-container-color: var(--ax-brand-default);
   --mdc-filled-button-container-color: var(--ax-brand-default);
+
+  /* Button Shape - Override all button border-radius to --ax-radius-sm (4px) */
+  /* Regular buttons - Material variants */
+  --mat-button-filled-container-shape: var(--ax-radius-sm);
+  --mat-button-outlined-container-shape: var(--ax-radius-sm);
+  --mat-button-text-container-shape: var(--ax-radius-sm);
+  --mat-button-tonal-container-shape: var(--ax-radius-sm);
+  --mat-button-protected-container-shape: var(--ax-radius-sm);
+
+  /* Regular buttons - MDC variants */
+  --mdc-filled-button-container-shape: var(--ax-radius-sm);
+  --mdc-outlined-button-container-shape: var(--ax-radius-sm);
+  --mdc-text-button-container-shape: var(--ax-radius-sm);
+  --mdc-protected-button-container-shape: var(--ax-radius-sm);
+
+  /* FAB buttons - Material variants */
+  --mat-fab-container-shape: var(--ax-radius-sm);
+  --mat-fab-small-container-shape: var(--ax-radius-sm);
+  --mat-fab-extended-container-shape: var(--ax-radius-sm);
+
+  /* FAB buttons - MDC variants */
+  --mdc-fab-container-shape: var(--ax-radius-sm);
+  --mdc-fab-small-container-shape: var(--ax-radius-sm);
+  --mdc-extended-fab-container-shape: var(--ax-radius-sm);
+
+  /* Icon buttons - Material variants */
+  --mat-icon-button-container-shape: var(--ax-radius-sm);
+
+  /* Icon buttons - MDC variants */
+  --mdc-icon-button-container-shape: var(--ax-radius-sm);
 }
 
 /* ============================================================

@@ -9,15 +9,24 @@
 // ===== Cards - Tremor Style (minimal elevation, subtle borders) =====
 @include mat.card-overrides(
   (
-    // Outlined card styling (with border)
+    // Elevated/Raised card (default) - Has shadow, no border
     elevated-container-color: var(--ax-background-default),
     elevated-container-shape: var(--ax-radius-md),
-    elevated-container-elevation: var(--ax-shadow-sm),
+    elevated-container-elevation: var(--ax-shadow-md),
+    // มี shadow
+    // Outlined card - Has border, NO shadow
     outlined-container-color: var(--ax-background-default),
     outlined-container-shape: var(--ax-radius-md),
     outlined-outline-color: var(--ax-border-default),
     outlined-outline-width: 1px,
-    outlined-container-elevation: var(--ax-shadow-sm)
+    outlined-container-elevation: none,
+
+    // ไม่มี shadow!
+    // Filled card - Has background fill, subtle shadow
+    filled-container-color: var(--ax-background-subtle),
+    // สีแตกต่าง
+    filled-container-shape: var(--ax-radius-md),
+    filled-container-elevation: var(--ax-shadow-sm)
   )
 );
 
@@ -33,13 +42,35 @@
   }
 }
 
+// EXPLICIT filled card background override (testing)
+.mat-mdc-card[appearance='filled'] {
+  background-color: var(--ax-background-subtle) !important;
+  // Also try the MDC variant
+  .mdc-card__content {
+    background-color: var(--ax-background-subtle) !important;
+  }
+}
+
 // ===== Buttons - Tremor Style (flatter, cleaner) =====
+// Regular buttons (filled, outlined, text, tonal, protected)
+@include mat.button-overrides(
+  (
+    // Shape - Apply consistent border radius for all button types (subtle rounding)
+    filled-container-shape: var(--ax-radius-sm),
+    outlined-container-shape: var(--ax-radius-sm),
+    text-container-shape: var(--ax-radius-sm),
+    tonal-container-shape: var(--ax-radius-sm),
+    protected-container-shape: var(--ax-radius-sm)
+  )
+);
+
 // FAB buttons
 @include mat.fab-overrides(
   (
     // Shape
-    container-shape: var(--ax-radius-md),
-    small-container-shape: var(--ax-radius-md),
+    container-shape: var(--ax-radius-sm),
+    small-container-shape: var(--ax-radius-sm),
+    extended-container-shape: var(--ax-radius-sm),
     // Shadows
     container-elevation-shadow: var(--ax-shadow-md),
     hover-container-elevation-shadow: var(--ax-shadow-lg),
@@ -52,7 +83,7 @@
 @include mat.icon-button-overrides(
   (
     // Shape
-    container-shape: var(--ax-radius-md)
+    container-shape: var(--ax-radius-sm)
   )
 );
 
@@ -122,18 +153,18 @@
   (
     // Background - Pure white/default (no gray backgrounds)
     background-color: transparent,
-    // Borders - Ultra subtle (#eeeeee)
-    row-item-outline-color: #eeeeee,
+    // Borders - Use theme variables
+    row-item-outline-color: var(--ax-border-default),
     row-item-outline-width: 1px,
-    // Text colors
-    header-headline-color: #111827,
-    row-item-label-text-color: #4b5563
+    // Text colors - Use theme variables
+    header-headline-color: var(--ax-text-strong),
+    row-item-label-text-color: var(--ax-text-body)
   )
 );
 
 // Force override Material table CSS variables
 :root {
-  --mat-table-row-item-outline-color: #eeeeee !important;
+  --mat-table-row-item-outline-color: var(--ax-border-default) !important;
   --mat-table-background-color: transparent !important;
   --mat-table-row-item-outline-width: 1px !important;
 }
@@ -148,13 +179,13 @@
 
   // Header - Pure white with subtle border
   .mat-mdc-header-row {
-    background: transparent !important; // Pure white
-    border-bottom: 1px solid #eeeeee; // Ultra subtle divider
+    background: transparent !important;
+    border-bottom: 1px solid var(--ax-border-default);
 
     .mat-mdc-header-cell {
       font-weight: 600;
       font-size: 0.875rem;
-      color: #111827;
+      color: var(--ax-text-strong);
       padding: 0.875rem 1rem;
       text-align: left;
       background: transparent !important;
@@ -182,7 +213,7 @@
     .mat-mdc-cell {
       padding: 1rem; // p-4
       font-size: 0.875rem; // text-sm
-      color: #4b5563; // Tremor: text-gray-600
+      color: var(--ax-text-body);
       background: transparent !important;
       background-color: transparent !important;
     }
@@ -195,9 +226,9 @@
     border-left: none;
   }
 
-  // Horizontal dividers between rows - Ultra subtle
+  // Horizontal dividers between rows - Use theme variable
   .mat-mdc-row {
-    border-bottom: 1px solid #eeeeee; // Ultra subtle: lighter than gray-200
+    border-bottom: 1px solid var(--ax-border-default);
 
     &:last-child {
       border-bottom: none;
@@ -211,17 +242,17 @@
   box-shadow: none !important;
 }
 
-// Paginator styling - Clean white background
+// Paginator styling - Use theme background
 .mat-mdc-paginator {
-  background-color: white !important;
-  border-top: 1px solid #eeeeee;
+  background-color: var(--ax-background-default) !important;
+  border-top: 1px solid var(--ax-border-default);
 }
 
 // ===== Chips - Minimal Style (Ultra Subtle Borders) =====
 @include mat.chips-overrides(
   (
-    // Outline (border) styling - Ultra subtle
-    outline-color: #eeeeee,
+    // Outline (border) styling - Use theme variable
+    outline-color: var(--ax-border-default),
     outline-width: 1px,
 
     // Container colors
@@ -232,8 +263,8 @@
     label-text-color: var(--ax-text-strong),
     selected-label-text-color: var(--ax-brand-emphasis),
     disabled-label-text-color: var(--ax-text-subtle),
-    // Disabled outline - Ultra subtle
-    disabled-outline-color: #eeeeee,
+    // Disabled outline - Use theme variable
+    disabled-outline-color: var(--ax-border-default),
     // Shape (border radius)
     container-shape-radius: var(--ax-radius-md),
     // Selected outline width
