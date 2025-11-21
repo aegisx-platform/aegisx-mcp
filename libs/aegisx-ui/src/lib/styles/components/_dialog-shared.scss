@@ -1,0 +1,376 @@
+/* ============================================================
+   AegisX UI - Material Dialog Global Configuration
+
+   STANDARD: Configure Material Dialog to work seamlessly with
+   AegisX design system. Developers use mat-dialog directives
+   + Tailwind classes without per-component overrides.
+
+   USAGE:
+   <h2 mat-dialog-title class="flex items-center gap-3 text-xl font-semibold">
+     <mat-icon>icon_name</mat-icon>
+     Title
+   </h2>
+   <mat-dialog-content>Content</mat-dialog-content>
+   <div mat-dialog-actions align="end" class="flex gap-2">
+     <button mat-button>Cancel</button>
+     <button mat-flat-button color="primary">Save</button>
+   </div>
+   ============================================================ */
+
+/* ============================================================
+   1. Container Configuration
+   ============================================================ */
+
+.mat-mdc-dialog-container {
+  // Container sizing
+  --mdc-dialog-container-min-width: 400px;
+  --mdc-dialog-container-max-width: 900px;
+  --mdc-dialog-container-shape: var(--ax-radius-lg); // Use AegisX token
+
+  // Padding using AegisX spacing tokens (format: top left/right bottom)
+  --mat-dialog-headline-padding: var(--ax-spacing-md) var(--ax-spacing-xl)
+    var(--ax-spacing-md);
+  --mat-dialog-supporting-text-padding: var(--ax-spacing-xl);
+  --mat-dialog-actions-padding: var(--ax-spacing-md) var(--ax-spacing-xl)
+    var(--ax-spacing-md);
+
+  // Actions alignment
+  --mat-dialog-actions-alignment: end;
+
+  @media (max-width: 768px) {
+    --mdc-dialog-container-min-width: 90vw;
+    --mdc-dialog-container-max-width: 95vw;
+    --mat-dialog-headline-padding: var(--ax-spacing-sm) var(--ax-spacing-lg)
+      var(--ax-spacing-sm);
+    --mat-dialog-supporting-text-padding: var(--ax-spacing-lg);
+    --mat-dialog-actions-padding: var(--ax-spacing-sm) var(--ax-spacing-lg)
+      var(--ax-spacing-sm);
+  }
+}
+
+/* ============================================================
+   2. Title Configuration (.mat-mdc-dialog-title)
+   Remove Material's default styling that conflicts with Tailwind
+   ============================================================ */
+
+.mat-mdc-dialog-title {
+  // Reset Material defaults
+  margin: 0 !important;
+  padding: var(--mat-dialog-headline-padding) !important;
+
+  // Allow Tailwind classes to work
+  line-height: inherit !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  color: inherit !important;
+}
+
+/* ============================================================
+   3. Content Configuration (.mat-mdc-dialog-content)
+   ============================================================ */
+
+.mat-mdc-dialog-content {
+  // Reset padding to use token
+  padding: var(--mat-dialog-supporting-text-padding) !important;
+  margin: 0 !important;
+
+  // Scrolling
+  max-height: calc(90vh - 200px);
+  overflow-y: auto;
+
+  // Remove Material's default max-height behavior
+  &:not(:has(> *)) {
+    padding: 0 !important;
+  }
+}
+
+/* ============================================================
+   4. Actions Configuration (.mat-mdc-dialog-actions)
+   ============================================================ */
+
+.mat-mdc-dialog-actions {
+  // Reset padding to use token
+  padding: var(--mat-dialog-actions-padding) !important;
+  margin: 0 !important;
+
+  // Alignment from token
+  justify-content: var(--mat-dialog-actions-alignment);
+
+  // Allow Tailwind gap classes to work
+  min-height: auto !important;
+
+  // Enhanced styling for CRUD dialogs
+  border-top: 1px solid var(--ax-border-subtle);
+  background-color: var(--ax-background-subtle);
+}
+
+/* ============================================================
+   5. Size Variants (Optional)
+   Usage: MatDialog.open(Component, { panelClass: 'dialog-lg' })
+   ============================================================ */
+
+.dialog-sm {
+  --mdc-dialog-container-max-width: 600px;
+}
+
+.dialog-md {
+  --mdc-dialog-container-max-width: 800px;
+}
+
+.dialog-lg {
+  --mdc-dialog-container-max-width: 1000px;
+}
+
+.dialog-xl {
+  --mdc-dialog-container-max-width: 1200px;
+}
+
+/* ============================================================
+   6. Remove Material Container Padding
+   Allow content to handle its own spacing
+   ============================================================ */
+
+.mdc-dialog__content {
+  padding: 20px;
+}
+
+/* ============================================================
+   USAGE TEMPLATE
+   ============================================================
+
+   @Component({
+     template: `
+       <h2 mat-dialog-title class="flex items-center gap-3 text-xl font-semibold text-slate-800">
+         <mat-icon class="text-blue-500">folder_open</mat-icon>
+         ข้อมูลเอกสาร
+       </h2>
+
+       <mat-dialog-content>
+         <app-form-component />
+       </mat-dialog-content>
+
+       <div mat-dialog-actions align="end" class="flex gap-2">
+         <button mat-button mat-dialog-close>ยกเลิก</button>
+         <button mat-flat-button color="primary">บันทึก</button>
+       </div>
+     `,
+     styles: [] // No styles needed!
+   })
+
+   ============================================================ */
+
+/* ============================================================
+   7. Enhanced Dialog Styles (for CRUD dialogs)
+   Usage: Create/Edit/View dialogs with icon, title, subtitle, close button
+   ============================================================ */
+
+/* Header with gradient background - Default (backward compatibility) */
+.ax-header-gradient {
+  background: linear-gradient(
+    to bottom,
+    var(--ax-background-default) 0%,
+    var(--ax-background-muted) 30%,
+    var(--ax-info-faint) 100%
+  );
+  border-bottom: 1px solid #c8e2ff;
+}
+
+/* Header gradient variants for different dialog types */
+.ax-header-gradient-info {
+  background-color: var(--ax-info-faint);
+  border-bottom: 1px solid #c8e2ff;
+}
+
+.ax-header-gradient-warning {
+  background: linear-gradient(
+    to bottom,
+    var(--ax-background-default) 0%,
+    var(--ax-background-muted) 30%,
+    var(--ax-warning-faint) 100%
+  );
+  border-bottom: 1px solid var(--ax-warning-muted);
+}
+
+.ax-header-gradient-success {
+  background: linear-gradient(
+    to bottom,
+    var(--ax-background-default) 0%,
+    var(--ax-background-muted) 30%,
+    var(--ax-success-faint) 100%
+  );
+  border-bottom: 1px solid var(--ax-success-muted);
+}
+
+.ax-header-gradient-error {
+  background: linear-gradient(
+    to bottom,
+    var(--ax-background-default) 0%,
+    var(--ax-background-muted) 30%,
+    var(--ax-error-faint) 100%
+  );
+  border-bottom: 1px solid var(--ax-error-muted);
+}
+
+.ax-header-gradient-neutral {
+  background: linear-gradient(
+    to bottom,
+    var(--ax-background-default) 0%,
+    var(--ax-background-muted) 30%,
+    var(--ax-gray-100) 100%
+  );
+  border-bottom: 1px solid var(--ax-border-subtle);
+}
+
+.ax-header-info {
+  background-color: var(--ax-info-surface);
+  border-bottom: 1px solid var(--ax-info-border);
+}
+
+.ax-header-warning {
+  background-color: var(--ax-warning-surface);
+  border-bottom: 1px solid var(--ax-warning-border);
+}
+
+.ax-header-success {
+  background-color: var(--ax-success-surface);
+  border-bottom: 1px solid var(--ax-success-border);
+}
+
+.ax-header-error {
+  background-color: var(--ax-error-surface);
+  border-bottom: 1px solid var(--ax-error-border);
+}
+
+.ax-header-neutral {
+  background-color: var(--ax-background-muted);
+  border-bottom: 1px solid var(--ax-border-default);
+}
+
+/* Icon wrapper variants with gradient */
+.ax-icon-info,
+.ax-icon-warning,
+.ax-icon-success,
+.ax-icon-error,
+.ax-icon-neutral {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--ax-radius-lg);
+}
+
+.ax-icon-info {
+  background: linear-gradient(
+    135deg,
+    var(--ax-info-default) 0%,
+    var(--ax-info-emphasis) 100%
+  );
+  color: var(--ax-info-inverted);
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+}
+
+.ax-icon-warning {
+  background: linear-gradient(
+    135deg,
+    var(--ax-warning-default) 0%,
+    var(--ax-warning-emphasis) 100%
+  );
+  color: var(--ax-warning-inverted);
+  box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.3);
+}
+
+.ax-icon-success {
+  background: linear-gradient(
+    135deg,
+    var(--ax-success-default) 0%,
+    var(--ax-success-emphasis) 100%
+  );
+  color: var(--ax-success-inverted);
+  box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
+}
+
+.ax-icon-error {
+  background: linear-gradient(
+    135deg,
+    var(--ax-error-default) 0%,
+    var(--ax-error-emphasis) 100%
+  );
+  color: var(--ax-error-inverted);
+  box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3);
+}
+
+.ax-icon-neutral {
+  background: linear-gradient(
+    135deg,
+    var(--ax-gray-400) 0%,
+    var(--ax-gray-600) 100%
+  );
+  color: #ffffff;
+  box-shadow: 0 4px 6px -1px rgba(107, 114, 128, 0.3);
+}
+
+/* Title text */
+.ax-title {
+  font-size: var(--ax-text-xl);
+  font-weight: var(--ax-font-semibold);
+  color: var(--ax-text-heading);
+  line-height: var(--ax-leading-tight);
+}
+
+/* Subtitle text */
+.ax-subtitle {
+  margin-top: var(--ax-spacing-xs);
+  font-size: var(--ax-text-sm);
+  color: var(--ax-text-secondary);
+  line-height: var(--ax-leading-normal);
+}
+
+/* ============================================================
+   8. Dialog Form Section Styles
+   Usage: Organize form fields into logical sections within dialogs
+   ============================================================ */
+
+/* Section container */
+.ax-dialog-section {
+  margin-bottom: var(--ax-spacing-lg);
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+/* Section title (h3) */
+.ax-dialog-section-title {
+  font-size: var(--ax-text-base);
+  font-weight: var(--ax-font-semibold);
+  color: var(--ax-text-heading);
+  margin: 0 0 var(--ax-spacing-md) 0;
+  padding-bottom: var(--ax-spacing-sm);
+  border-bottom: 1px solid var(--ax-border-subtle);
+}
+
+/* Section content wrapper */
+.ax-dialog-section-content {
+  // No specific styles - allows form fields to use their own spacing
+  // Child elements (form-grid, etc.) handle layout
+}
+
+/* Metadata section (read-only audit information) */
+.ax-dialog-section-metadata {
+  background-color: var(--ax-background-subtle);
+  border: 1px solid var(--ax-border-subtle);
+  border-radius: var(--ax-radius-md);
+  padding: var(--ax-spacing-md);
+
+  .ax-dialog-section-title {
+    border-bottom-color: var(--ax-border-default);
+  }
+
+  // Readonly field styling
+  .mat-mdc-form-field {
+    .mat-mdc-text-field-wrapper {
+      background-color: var(--ax-background-default);
+    }
+  }
+}
