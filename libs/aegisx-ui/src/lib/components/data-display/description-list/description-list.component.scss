@@ -40,7 +40,7 @@
 // Grid layout
 .ax-description-list-grid {
   display: grid;
-  grid-template-columns: repeat(var(--columns, 2), 1fr);
+  grid-template-columns: repeat(var(--ax-description-list-columns, 2), 1fr);
   gap: var(--ax-spacing-lg) var(--ax-spacing-xl);
   align-items: start;
 
