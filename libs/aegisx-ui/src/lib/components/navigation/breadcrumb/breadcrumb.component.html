@@ -9,7 +9,7 @@
             (click)="onItemClick(item, $event)"
           >
             @if (item.icon) {
-              <span class="ax-breadcrumb-icon">{{ item.icon }}</span>
+              <mat-icon class="ax-breadcrumb-icon">{{ item.icon }}</mat-icon>
             }
             <span>{{ item.label }}</span>
           </a>
@@ -19,7 +19,7 @@
             [attr.aria-current]="isLastItem($index) ? 'page' : null"
           >
             @if (item.icon) {
-              <span class="ax-breadcrumb-icon">{{ item.icon }}</span>
+              <mat-icon class="ax-breadcrumb-icon">{{ item.icon }}</mat-icon>
             }
             <span>{{ item.label }}</span>
           </span>
