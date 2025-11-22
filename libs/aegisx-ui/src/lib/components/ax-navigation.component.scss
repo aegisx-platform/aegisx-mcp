@@ -11,26 +11,19 @@
   --ax-navigation-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-// Main Navigation Container - dark theme by default
+// Main Navigation Container
 .ax-navigation {
   position: relative;
   display: flex;
   flex-direction: column;
   width: 100%;
   height: 100%;
-  // Default: Dark navigation background
-  background-color: #1e293b; // slate-800
-  color: #f8fafc; // slate-50
+  background-color: var(--ax-background-subtle);
+  color: var(--ax-text-primary);
   transition: all var(--ax-navigation-transition-duration)
     var(--ax-navigation-transition-timing);
   overflow: hidden;
   contain: layout style paint;
-
-  // Light theme support via CSS class
-  &.light-theme {
-    background-color: #fafafa;
-    color: rgba(0, 0, 0, 0.87);
-  }
 
   // Navigation Modes
   &--side {
@@ -43,7 +36,7 @@
     top: 0;
     bottom: 0;
     z-index: 999;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--ax-shadow-lg);
 
     &[data-position='left'] {
       left: 0;
@@ -63,10 +56,6 @@
     .ax-navigation__content {
       padding-top: 1rem;
     }
-  }
-
-  &--expanded {
-    // Width controlled by parent
   }
 }
 
@@ -90,7 +79,11 @@
       content: 'A';
       font-size: 2.5rem; // Larger when collapsed (2rem → 2.5rem)
       font-weight: 900;
-      background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+      background: linear-gradient(
+        135deg,
+        var(--ax-primary) 0%,
+        var(--ax-primary-light) 100%
+      );
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -133,8 +126,7 @@
   overflow-x: hidden;
   overflow-y: auto;
   scrollbar-width: thin;
-  // Default: light scrollbar on dark background
-  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  scrollbar-color: var(--ax-border-default) transparent;
   width: 100%;
   box-sizing: border-box;
 
@@ -147,23 +139,11 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.2);
+    background-color: var(--ax-border-default);
     border-radius: 3px;
 
     &:hover {
-      background-color: rgba(255, 255, 255, 0.3);
-    }
-  }
-
-  .ax-navigation.light-theme & {
-    scrollbar-color: rgba(0, 0, 0, 0.12) transparent;
-
-    &::-webkit-scrollbar-thumb {
-      background-color: rgba(0, 0, 0, 0.12);
-
-      &:hover {
-        background-color: rgba(0, 0, 0, 0.24);
-      }
+      background-color: var(--ax-border-emphasis);
     }
   }
 }
@@ -173,14 +153,9 @@
   flex: 0 0 auto;
   padding: 0.5rem 0.75rem; // Reduced padding for more compact footer
   background-color: transparent; // Inherit from parent .ax-navigation
-  // Default: light border on dark background
-  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-top: 1px solid var(--ax-border-muted) !important;
   transition: all var(--ax-navigation-transition-duration)
     var(--ax-navigation-transition-timing);
-
-  .ax-navigation.light-theme & {
-    border-top-color: rgba(0, 0, 0, 0.12) !important;
-  }
 
   // Wrapper for footer content
   .ax-nav-footer-wrapper {
@@ -225,12 +200,7 @@
 .ax-navigation__divider {
   margin: 0.75rem 0;
   height: 1px;
-  // Default: light divider on dark background
-  background-color: rgba(255, 255, 255, 0.1);
-
-  .ax-navigation.light-theme & {
-    background-color: rgba(0, 0, 0, 0.12);
-  }
+  background-color: var(--ax-border-muted);
 }
 
 // Group
@@ -252,11 +222,7 @@
         left: 0.75rem;
         right: 0.75rem;
         height: 1px;
-        background-color: rgba(255, 255, 255, 0.1);
-
-        .ax-navigation.light-theme & {
-          background-color: rgba(0, 0, 0, 0.12);
-        }
+        background-color: var(--ax-border-muted);
       }
     }
   }
@@ -269,14 +235,9 @@
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  // Default: muted text on dark background
-  color: rgba(148, 163, 184, 0.7); // slate-400 with opacity
+  color: var(--ax-text-subtle);
   transition: all var(--ax-navigation-transition-duration)
     var(--ax-navigation-transition-timing);
-
-  .ax-navigation.light-theme & {
-    color: rgba(0, 0, 0, 0.6);
-  }
 
   // First group title
   .ax-navigation__group:first-child & {
@@ -311,11 +272,11 @@
 
   &--active {
     > .ax-navigation__item-wrapper {
-      background-color: #3b82f6; // blue-500
-      color: #ffffff;
+      background-color: var(--ax-primary);
+      color: var(--ax-white);
 
       .ax-navigation__item-icon {
-        color: #ffffff;
+        color: var(--ax-white);
       }
     }
   }
@@ -335,10 +296,10 @@
   &--collapsible {
     &:has(.ax-navigation__item-children .router-active) {
       > .ax-navigation__item-wrapper {
-        color: #3b82f6; // blue-500
+        color: var(--ax-primary);
 
         .ax-navigation__item-icon {
-          color: #3b82f6; // blue-500
+          color: var(--ax-primary);
         }
       }
     }
@@ -355,8 +316,7 @@
   border: none;
   border-radius: 0.5rem;
   background-color: transparent;
-  // Default: white/light text on dark nav
-  color: rgba(248, 250, 252, 0.9); // slate-50 with 90% opacity
+  color: var(--ax-text-primary);
   font-family: inherit;
   font-size: 0.875rem;
   font-weight: 500;
@@ -371,30 +331,20 @@
   white-space: nowrap;
 
   &:hover:not(:disabled) {
-    // Lighter background on dark nav
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: var(--ax-hover-bg);
   }
 
   &:focus-visible {
-    box-shadow: 0 0 0 2px #3b82f6; // blue-500
+    box-shadow: 0 0 0 2px var(--ax-primary);
   }
 
   // Router active state
   &.router-active {
-    background-color: #3b82f6; // blue-500
-    color: #ffffff;
+    background-color: var(--ax-primary);
+    color: var(--ax-white);
 
     .ax-navigation__item-icon {
-      color: #ffffff;
-    }
-  }
-
-  // Light theme overrides
-  .ax-navigation.light-theme & {
-    color: rgba(0, 0, 0, 0.87);
-
-    &:hover:not(:disabled) {
-      background-color: rgba(0, 0, 0, 0.08);
+      color: var(--ax-white);
     }
   }
 
@@ -475,28 +425,28 @@
   white-space: nowrap;
 
   &[data-type='primary'] {
-    background-color: #3b82f6;
-    color: #ffffff;
+    background-color: var(--ax-primary);
+    color: var(--ax-white);
   }
 
   &[data-type='accent'] {
-    background-color: #8b5cf6;
-    color: #ffffff;
+    background-color: var(--ax-purple-default);
+    color: var(--ax-white);
   }
 
   &[data-type='warn'] {
-    background-color: #ef4444;
-    color: #ffffff;
+    background-color: var(--ax-error);
+    color: var(--ax-white);
   }
 
   &[data-type='success'] {
-    background-color: #10b981;
-    color: #ffffff;
+    background-color: var(--ax-success);
+    color: var(--ax-white);
   }
 
   &[data-type='info'] {
-    background-color: #06b6d4;
-    color: #ffffff;
+    background-color: var(--ax-info);
+    color: var(--ax-white);
   }
 }
 
@@ -504,7 +454,7 @@
 .ax-navigation__item-arrow {
   flex: 0 0 auto;
   margin-left: 0.5rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--ax-text-secondary);
   transition: transform 200ms ease;
 
   &--rotated {
@@ -516,7 +466,7 @@
 .ax-navigation__item-external {
   flex: 0 0 auto;
   margin-left: 0.5rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--ax-text-secondary);
 }
 
 // Item Children
@@ -540,7 +490,7 @@
       top: 0;
       bottom: 0;
       z-index: 999;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+      box-shadow: var(--ax-shadow-lg);
     }
   }
 }
@@ -549,10 +499,6 @@
 @supports (scrollbar-width: thin) {
   .ax-navigation__content {
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
-
-    .ax-navigation.light-theme & {
-      scrollbar-color: rgba(0, 0, 0, 0.12) transparent;
-    }
+    scrollbar-color: var(--ax-border-default) transparent;
   }
 }
