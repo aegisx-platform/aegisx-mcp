@@ -186,29 +186,27 @@ export interface ExportService {
       }
 
       .export-menu-content {
-        padding: 16px;
-        width: 100%;
-        max-width: 90vw;
+        padding: 12px;
+        width: 280px;
+        box-sizing: border-box;
       }
 
       .format-section,
       .options-section {
-        margin-bottom: 20px;
+        margin-bottom: 12px;
       }
 
       .format-section h4,
       .options-section h4 {
-        margin: 0 0 12px 0;
-        font-size: 14px;
+        margin: 0 0 8px 0;
+        font-size: 13px;
         font-weight: 500;
-        color: rgba(0, 0, 0, 0.87);
+        color: var(--ax-text-primary);
       }
 
       .format-buttons {
         display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        justify-content: center;
+        gap: 6px;
       }
 
       .format-btn {
@@ -216,55 +214,55 @@ export interface ExportService {
         flex-direction: column !important;
         align-items: center !important;
         justify-content: center !important;
-        gap: 8px;
-        padding: 14px 10px !important;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        background: white;
+        gap: 2px;
+        padding: 6px 4px !important;
+        border: 1px solid var(--ax-border-default);
+        border-radius: 4px;
+        background: var(--ax-background-default);
+        color: var(--ax-text-primary);
         transition: all 0.2s ease;
-        min-width: 90px;
-        max-width: 110px;
-        height: auto;
-        min-height: 80px;
         flex: 1;
-        font-size: 13px;
+        min-width: 0;
+        height: auto;
+        min-height: 48px;
+        font-size: 11px;
         font-weight: 500;
         line-height: 1.2;
-        overflow: hidden;
       }
 
       .format-btn:hover {
-        background: #f5f5f5 !important;
-        border-color: #ccc;
+        background: var(--ax-background-muted) !important;
+        border-color: var(--ax-border-emphasis);
       }
 
       .format-btn.selected {
-        background: #e3f2fd !important;
-        border-color: #2196f3;
-        color: #1976d2;
+        background: var(--ax-brand-faint) !important;
+        border-color: var(--ax-brand-default);
+        color: var(--ax-brand-emphasis);
       }
 
       .format-btn mat-icon {
-        font-size: 24px !important;
-        width: 24px !important;
-        height: 24px !important;
-        line-height: 24px !important;
+        font-size: 18px !important;
+        width: 18px !important;
+        height: 18px !important;
+        line-height: 18px !important;
         margin: 0 !important;
+        color: var(--ax-brand-default);
       }
 
       .option-checkbox {
         display: block;
-        margin: 8px 0;
+        margin: 6px 0;
       }
 
       .option-description {
-        font-size: 12px;
-        color: rgba(0, 0, 0, 0.6);
+        font-size: 11px;
+        color: var(--ax-text-subtle);
         margin-left: 4px;
       }
 
       .field-selection {
-        margin-top: 12px;
+        margin-top: 8px;
       }
 
       .field-select {
@@ -273,31 +271,34 @@ export interface ExportService {
 
       .action-buttons {
         display: flex;
-        justify-content: space-between;
-        gap: 12px;
-        margin-top: 20px;
-        padding-top: 16px;
-        border-top: 1px solid #e0e0e0;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--ax-border-default);
       }
 
       .cancel-btn {
-        color: rgba(0, 0, 0, 0.6);
-        min-width: 100px;
+        color: var(--ax-text-secondary);
       }
 
       .export-btn {
-        min-width: 180px;
         white-space: nowrap;
       }
 
-      .ml-1 {
-        margin-left: 4px;
-      }
       .ml-2 {
         margin-left: 8px;
       }
       .mr-1 {
         margin-right: 4px;
+      }
+
+      /* Menu panel width override */
+      ::ng-deep .export-menu-wide.mat-mdc-menu-panel {
+        min-width: 304px !important;
+        max-width: 304px !important;
+        background: var(--ax-background-default) !important;
+        border: 1px solid var(--ax-border-default);
       }
     `,
   ],
