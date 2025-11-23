@@ -1,8 +1,4 @@
-import {
-  AxCompactLayoutComponent,
-  AxThemeSwitcherComponent,
-  M3ThemeService,
-} from '@aegisx/ui';
+import { AxCompactLayoutComponent, AxThemeSwitcherComponent } from '@aegisx/ui';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { MatBadgeModule } from '@angular/material/badge';
@@ -52,7 +48,7 @@ interface Notification {
           <div class="flex   items-center   pb-0">
             <span
               style="letter-spacing: 3px;"
-              class="text-2xl font-bold  text-white"
+              class="text-2xl font-bold text-gray-900 dark:text-white"
               >AEGIS<span class="text-green-500">X</span></span
             >
             <span
@@ -81,7 +77,9 @@ interface Notification {
 
               <!-- User Info (hidden when collapsed) -->
               <div class="nav-footer-info flex-1 min-w-0">
-                <p class="text-sm font-medium text-white truncate mb-0.5 m-0">
+                <p
+                  class="text-sm font-medium text-gray-900 dark:text-white truncate mb-0.5 m-0"
+                >
                   {{ currentUser()?.name || 'Guest User' }}
                 </p>
                 <p class="text-xs text-gray-400 truncate m-0">
@@ -108,7 +106,7 @@ interface Notification {
         <!-- Toolbar Actions -->
         <ng-template #toolbarActions>
           <!-- Theme Switcher (from @aegisx/ui) -->
-          <ax-theme-switcher></ax-theme-switcher>
+          <ax-theme-switcher mode="dropdown"></ax-theme-switcher>
 
           <!-- Notifications -->
           <button
@@ -333,7 +331,6 @@ export class AppComponent implements OnInit {
   private router = inject(Router);
   private navigationService = inject(NavigationService);
   private websocketService = inject(WebSocketService);
-  private themeService = inject(M3ThemeService);
 
   shouldShowLayout = signal(true);
   currentUser = computed(() => {
@@ -388,7 +385,7 @@ export class AppComponent implements OnInit {
   });
 
   ngOnInit() {
-    // Theme is now managed by M3ThemeService from @aegisx/ui
+    // Theme is now managed by AxThemeService from @aegisx/ui
     // No manual theme loading needed - the service handles it automatically
 
     // Check routes to determine if layout should be shown
