@@ -2,15 +2,16 @@
  * Theme Showcase Page
  *
  * Comprehensive showcase of all Angular Material components
- * integrated with M3 Theme System and Style Presets.
+ * integrated with AegisX Theme System.
  *
  * Features:
  * - Live theme switching (6 color themes)
- * - Live preset switching (4 style presets)
  * - Dark/Light mode toggle
  * - Real-time preview of all Material components
  * - Organized by category with navigation
  * - Material Design 3 compliant UI
+ *
+ * Note: Style Presets feature temporarily removed (backed up for future use)
  *
  * Access via: /theme-showcase
  */
@@ -29,7 +30,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTabsModule } from '@angular/material/tabs';
 import { FormsModule } from '@angular/forms';
 
-import { M3ThemeService, StylePresetService } from '@aegisx/ui';
+import { AxThemeService } from '@aegisx/ui';
 
 import { FormControlsSection } from './sections/form-controls.section';
 import { ButtonsActionsSection } from './sections/buttons-actions.section';
@@ -77,33 +78,21 @@ interface Category {
         <div class="header-content">
           <div class="header-title">
             <h1>Material Component Showcase</h1>
-            <p>Real-time theme & style preset testing</p>
+            <p>Real-time theme testing with AegisX themes</p>
           </div>
 
           <!-- Theme Control Panel -->
           <div class="control-panel">
             <!-- Color Theme Selector -->
             <mat-form-field appearance="outline" class="control-field">
-              <mat-label>Color Theme</mat-label>
-              <mat-select [(ngModel)]="selectedThemeId" (selectionChange)="onThemeChange()">
+              <mat-label>Theme</mat-label>
+              <mat-select
+                [(ngModel)]="selectedThemeId"
+                (selectionChange)="onThemeChange()"
+              >
                 @for (theme of availableThemes(); track theme.id) {
                   <mat-option [value]="theme.id">
-                    <span class="option-label">
-                      <span class="color-swatch" [style.background-color]="theme.seedColor"></span>
-                      {{ theme.name }}
-                    </span>
-                  </mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-
-            <!-- Style Preset Selector -->
-            <mat-form-field appearance="outline" class="control-field">
-              <mat-label>Style Preset</mat-label>
-              <mat-select [(ngModel)]="selectedPresetId" (selectionChange)="onPresetChange()">
-                @for (preset of availablePresets(); track preset.id) {
-                  <mat-option [value]="preset.id">
-                    {{ preset.name }}
+                    {{ theme.name }}
                   </mat-option>
                 }
               </mat-select>
@@ -116,7 +105,9 @@ interface Category {
                 (change)="onDarkModeChange()"
                 matTooltip="Toggle dark/light mode"
               >
-                <mat-icon>{{ isDarkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
+                <mat-icon>{{
+                  isDarkMode ? 'light_mode' : 'dark_mode'
+                }}</mat-icon>
               </mat-slide-toggle>
             </div>
 
@@ -134,7 +125,7 @@ interface Category {
         <!-- Theme Info -->
         <div class="theme-info">
           <span class="info-badge">
-            {{ currentThemeName() }} + {{ currentPresetName() }}
+            {{ currentThemeName() }}
             @if (isDarkMode) {
               <span class="separator">•</span>
               <span>Dark Mode</span>
@@ -311,7 +302,10 @@ interface Category {
         align-items: center;
         gap: 4px;
         padding: 8px 16px;
-        background-color: rgba(var(--md-sys-color-primary-rgb, 57, 73, 171), 0.08);
+        background-color: rgba(
+          var(--md-sys-color-primary-rgb, 57, 73, 171),
+          0.08
+        );
         color: var(--md-sys-color-primary, #2196f3);
         border-radius: var(--preset-border-radius, 12px);
         font-size: 13px;
@@ -386,7 +380,10 @@ interface Category {
         }
 
         &.active {
-          background-color: rgba(var(--md-sys-color-primary-rgb, 57, 73, 171), 0.08);
+          background-color: rgba(
+            var(--md-sys-color-primary-rgb, 57, 73, 171),
+            0.08
+          );
           color: var(--md-sys-color-primary, #2196f3);
           border-right: 3px solid var(--md-sys-color-primary, #2196f3);
 
@@ -483,25 +480,19 @@ interface Category {
   ],
 })
 export class ThemeShowcasePage {
-  private readonly themeService = inject(M3ThemeService);
-  private readonly presetService = inject(StylePresetService);
+  private readonly themeService = inject(AxThemeService);
 
   selectedCategory = 'form-controls';
-  selectedThemeId = this.themeService.currentTheme();
-  selectedPresetId = this.presetService.currentPreset();
-  isDarkMode = this.themeService.isDarkMode();
+  selectedThemeId = this.themeService.themeId();
+  isDarkMode = this.themeService.themeId().includes('dark');
 
-  availableThemes = this.themeService.availableThemes;
-  availablePresets = this.presetService.availablePresets;
+  availableThemes = computed(() => this.themeService.themes);
 
   currentThemeName = computed(() => {
-    const theme = this.availableThemes().find((t: any) => t.id === this.selectedThemeId);
+    const theme = this.themeService.themes.find(
+      (t) => t.id === this.selectedThemeId,
+    );
     return theme?.name || 'Unknown';
-  });
-
-  currentPresetName = computed(() => {
-    const preset = this.availablePresets().find((p: any) => p.id === this.selectedPresetId);
-    return preset?.name || 'Unknown';
   });
 
   categories: Category[] = [
@@ -555,27 +546,32 @@ export class ThemeShowcasePage {
 
   onThemeChange(): void {
     this.themeService.setTheme(this.selectedThemeId);
-  }
-
-  onPresetChange(): void {
-    this.presetService.setPreset(this.selectedPresetId);
-    this.themeService.reapplyTheme();
+    this.isDarkMode = this.selectedThemeId.includes('dark');
   }
 
   onDarkModeChange(): void {
+    const currentTheme = this.themeService.themes.find(
+      (t) => t.id === this.selectedThemeId,
+    );
+    if (!currentTheme) return;
+
+    // Toggle between light and dark version of current theme
     if (this.isDarkMode) {
-      this.themeService.setScheme('dark');
+      // Switch to dark version
+      const darkId = currentTheme.id.replace('-light', '-dark');
+      this.selectedThemeId = darkId;
+      this.themeService.setTheme(darkId);
     } else {
-      this.themeService.setScheme('light');
+      // Switch to light version
+      const lightId = currentTheme.id.replace('-dark', '-light');
+      this.selectedThemeId = lightId;
+      this.themeService.setTheme(lightId);
     }
   }
 
   resetToDefaults(): void {
-    this.selectedThemeId = 'brand';
-    this.selectedPresetId = 'modern';
+    this.selectedThemeId = 'aegisx-light';
     this.isDarkMode = false;
-    (this.themeService as any).setTheme('brand');
-    (this.presetService as any).setPreset('modern');
-    (this.themeService as any).setScheme('light');
+    this.themeService.setTheme('aegisx-light');
   }
 }

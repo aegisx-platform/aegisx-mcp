@@ -10,9 +10,7 @@ export * from './ax-dialog.service';
 export { AegisxConfigService as AxConfigService } from './config/config.service';
 export { AegisxNavigationService as AxNavigationService } from './navigation/navigation.service';
 
-// Material 3 Theme Service
-export * from './theme/m3-theme.service';
-export * from './theme/m3-theme.types';
-// Note: Color utilities (hexToRgb, rgbToHex) are exported from ./utils instead
-export * from './theme/style-preset.service';
-export * from './theme/style-preset.types';
+// AegisX Theme Service
+export * from './theme/ax-theme.service';
+export * from './theme/ax-theme.types';
+// Note: M3ThemeService and StylePresetService backed up for future use (.backup.ts)

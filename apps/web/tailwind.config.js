@@ -40,6 +40,7 @@ module.exports = {
         'spin-slow': 'spin 3s linear infinite',
       },
       colors: {
+        // Material Angular colors (keep for compatibility)
         primary: {
           ...colors.indigo,
           DEFAULT: colors.indigo[600],
@@ -56,15 +57,125 @@ module.exports = {
           500: colors.red['50'],
         },
         gray: colors.slate,
-        card: 'var(--fuse-bg-card)',
-        'card-foreground': 'var(--fuse-text-default)',
-        default: 'var(--fuse-bg-default)',
-        secondary: 'var(--fuse-text-secondary)',
-        hint: 'var(--fuse-text-hint)',
-        disabled: 'var(--fuse-text-disabled)',
-        hover: 'var(--fuse-hover)',
-        divider: 'var(--fuse-divider)',
-        border: 'var(--fuse-border)',
+
+        // AegisX Design Tokens → Tailwind Classes
+        // Now you can use: text-brand, bg-brand-faint, border-brand-muted, etc.
+
+        // Brand/Primary Colors
+        brand: {
+          faint: 'var(--ax-brand-faint)',
+          muted: 'var(--ax-brand-muted)',
+          subtle: 'var(--ax-brand-subtle)',
+          DEFAULT: 'var(--ax-brand-default)',
+          emphasis: 'var(--ax-brand-emphasis)',
+          strong: 'var(--ax-brand-strong)',
+          inverted: 'var(--ax-brand-inverted)',
+        },
+
+        // Success Colors
+        success: {
+          faint: 'var(--ax-success-faint)',
+          muted: 'var(--ax-success-muted)',
+          subtle: 'var(--ax-success-subtle)',
+          DEFAULT: 'var(--ax-success-default)',
+          emphasis: 'var(--ax-success-emphasis)',
+          inverted: 'var(--ax-success-inverted)',
+        },
+
+        // Warning Colors
+        warning: {
+          faint: 'var(--ax-warning-faint)',
+          muted: 'var(--ax-warning-muted)',
+          subtle: 'var(--ax-warning-subtle)',
+          DEFAULT: 'var(--ax-warning-default)',
+          emphasis: 'var(--ax-warning-emphasis)',
+          inverted: 'var(--ax-warning-inverted)',
+        },
+
+        // Error/Danger Colors
+        error: {
+          faint: 'var(--ax-error-faint)',
+          muted: 'var(--ax-error-muted)',
+          subtle: 'var(--ax-error-subtle)',
+          DEFAULT: 'var(--ax-error-default)',
+          emphasis: 'var(--ax-error-emphasis)',
+          inverted: 'var(--ax-error-inverted)',
+        },
+
+        // Info Colors
+        info: {
+          faint: 'var(--ax-info-faint)',
+          muted: 'var(--ax-info-muted)',
+          subtle: 'var(--ax-info-subtle)',
+          DEFAULT: 'var(--ax-info-default)',
+          emphasis: 'var(--ax-info-emphasis)',
+          inverted: 'var(--ax-info-inverted)',
+        },
+
+        // Cyan Colors
+        cyan: {
+          faint: 'var(--ax-cyan-faint)',
+          muted: 'var(--ax-cyan-muted)',
+          subtle: 'var(--ax-cyan-subtle)',
+          DEFAULT: 'var(--ax-cyan-default)',
+          emphasis: 'var(--ax-cyan-emphasis)',
+          inverted: 'var(--ax-cyan-inverted)',
+        },
+
+        // Purple Colors
+        purple: {
+          faint: 'var(--ax-purple-faint)',
+          muted: 'var(--ax-purple-muted)',
+          subtle: 'var(--ax-purple-subtle)',
+          DEFAULT: 'var(--ax-purple-default)',
+          emphasis: 'var(--ax-purple-emphasis)',
+          inverted: 'var(--ax-purple-inverted)',
+        },
+
+        // Indigo Colors
+        indigo: {
+          faint: 'var(--ax-indigo-faint)',
+          muted: 'var(--ax-indigo-muted)',
+          subtle: 'var(--ax-indigo-subtle)',
+          DEFAULT: 'var(--ax-indigo-default)',
+          emphasis: 'var(--ax-indigo-emphasis)',
+          inverted: 'var(--ax-indigo-inverted)',
+        },
+
+        // Pink Colors
+        pink: {
+          faint: 'var(--ax-pink-faint)',
+          muted: 'var(--ax-pink-muted)',
+          subtle: 'var(--ax-pink-subtle)',
+          DEFAULT: 'var(--ax-pink-default)',
+          emphasis: 'var(--ax-pink-emphasis)',
+          inverted: 'var(--ax-pink-inverted)',
+        },
+
+        // Background Colors
+        background: {
+          muted: 'var(--ax-background-muted)',
+          subtle: 'var(--ax-background-subtle)',
+          DEFAULT: 'var(--ax-background-default)',
+          emphasis: 'var(--ax-background-emphasis)',
+        },
+
+        // Text Colors
+        text: {
+          disabled: 'var(--ax-text-disabled)',
+          subtle: 'var(--ax-text-subtle)',
+          secondary: 'var(--ax-text-secondary)',
+          primary: 'var(--ax-text-primary)',
+          heading: 'var(--ax-text-heading)',
+          inverted: 'var(--ax-text-inverted)',
+        },
+
+        // Border Colors
+        border: {
+          muted: 'var(--ax-border-muted)',
+          DEFAULT: 'var(--ax-border-default)',
+          emphasis: 'var(--ax-border-emphasis)',
+        },
       },
       fontFamily: {
         sans: ['Inter var', ...defaultTheme.fontFamily.sans],
@@ -132,25 +243,26 @@ module.exports = {
         480: '120rem',
       },
       backgroundImage: {
-        'gradient-radial': 'radial-gradient(50% 50% at 50% 50%, var(--tw-gradient-stops))',
+        'gradient-radial':
+          'radial-gradient(50% 50% at 50% 50%, var(--tw-gradient-stops))',
       },
       transitionProperty: {
-        'width': 'width',
-        'spacing': 'margin, padding',
+        width: 'width',
+        spacing: 'margin, padding',
       },
       transitionDuration: {
         400: '400ms',
       },
       transitionTimingFunction: {
-        'drawer': 'cubic-bezier(0.25, 0.8, 0.25, 1)',
+        drawer: 'cubic-bezier(0.25, 0.8, 0.25, 1)',
       },
       width: {
-        '128': '32rem',
-        '256': '64rem',
+        128: '32rem',
+        256: '64rem',
       },
       maxWidth: {
-        '128': '32rem',
-        '256': '64rem',
+        128: '32rem',
+        256: '64rem',
       },
     },
   },

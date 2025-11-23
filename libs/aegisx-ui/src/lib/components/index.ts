@@ -33,5 +33,5 @@ export * from './ax-navigation.component';
 export * from './dialogs';
 
 // Theme & Layout Switchers
-export * from './ax-theme-switcher.component';
+export * from './theme-switcher'; // NEW: Enhanced theme switcher with dropdown mode
 export * from './ax-layout-switcher.component';

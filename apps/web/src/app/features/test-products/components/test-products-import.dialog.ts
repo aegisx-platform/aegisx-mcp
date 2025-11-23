@@ -537,8 +537,8 @@ type ImportStep = 'upload' | 'review' | 'options' | 'progress' | 'complete';
         display: flex;
         align-items: center;
         padding: 1.5rem;
-        background: #f9fafb;
-        border-bottom: 1px solid #e5e7eb;
+        background: var(--ax-background-subtle);
+        border-bottom: 1px solid var(--ax-border-default);
       }
 
       .step {
@@ -552,8 +552,8 @@ type ImportStep = 'upload' | 'review' | 'options' | 'progress' | 'complete';
         width: 2rem;
         height: 2rem;
         border-radius: 50%;
-        background: #e5e7eb;
-        color: #6b7280;
+        background: var(--ax-background-muted);
+        color: var(--ax-text-secondary);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -562,35 +562,35 @@ type ImportStep = 'upload' | 'review' | 'options' | 'progress' | 'complete';
       }
 
       .step.active .step-number {
-        background: #10b981;
-        color: white;
+        background: var(--ax-success);
+        color: var(--ax-white);
       }
 
       .step.completed .step-number {
-        background: #10b981;
-        color: white;
+        background: var(--ax-success);
+        color: var(--ax-white);
       }
 
       .step span {
         font-size: 0.75rem;
-        color: #6b7280;
+        color: var(--ax-text-secondary);
         font-weight: 500;
       }
 
       .step.active span {
-        color: #10b981;
+        color: var(--ax-success);
         font-weight: 600;
       }
 
       .step-line {
         flex: 1;
         height: 2px;
-        background: #e5e7eb;
+        background: var(--ax-border-default);
         margin: 0 1rem;
       }
 
       .step-line.completed {
-        background: #10b981;
+        background: var(--ax-success);
       }
 
       .tremor-dialog-content {
@@ -604,24 +604,24 @@ type ImportStep = 'upload' | 'review' | 'options' | 'progress' | 'complete';
       }
 
       .upload-area {
-        border: 2px dashed #d1d5db;
-        border-radius: 0.5rem;
+        border: 2px dashed var(--ax-border-default);
+        border-radius: var(--ax-radius-md);
         padding: 3rem 2rem;
         text-align: center;
         cursor: pointer;
-        transition: all 0.2s;
+        transition: all var(--ax-duration-normal) var(--ax-easing-easeInOut);
       }
 
       .upload-area:hover {
-        border-color: #10b981;
-        background: #f0fdf4;
+        border-color: var(--ax-success);
+        background: var(--ax-success-faint);
       }
 
       .upload-icon {
         font-size: 4rem;
         width: 4rem;
         height: 4rem;
-        color: #10b981;
+        color: var(--ax-success);
         margin-bottom: 1rem;
       }
 
@@ -630,51 +630,51 @@ type ImportStep = 'upload' | 'review' | 'options' | 'progress' | 'complete';
         align-items: center;
         gap: 0.5rem;
         padding: 1rem;
-        background: #f0fdf4;
-        border-radius: 0.5rem;
+        background: var(--ax-success-faint);
+        border-radius: var(--ax-radius-md);
         margin-top: 1rem;
       }
 
       .stat-card {
         padding: 1rem;
-        background: white;
-        border-radius: 0.5rem;
-        border: 1px solid #e5e7eb;
+        background: var(--ax-background-default);
+        border-radius: var(--ax-radius-md);
+        border: 1px solid var(--ax-border-default);
         text-align: center;
       }
 
       .stat-card.stat-success {
-        background: #f0fdf4;
-        border-color: #10b981;
+        background: var(--ax-success-faint);
+        border-color: var(--ax-success);
       }
 
       .stat-card.stat-error {
-        background: #fef2f2;
-        border-color: #ef4444;
+        background: var(--ax-error-faint);
+        border-color: var(--ax-error);
       }
 
       .stat-card.stat-warning {
-        background: #fffbeb;
-        border-color: #f59e0b;
+        background: var(--ax-warning-faint);
+        border-color: var(--ax-warning);
       }
 
       .stat-value {
         font-size: 1.5rem;
         font-weight: 700;
-        color: #111827;
+        color: var(--ax-text-primary);
       }
 
       .stat-label {
         font-size: 0.875rem;
-        color: #6b7280;
+        color: var(--ax-text-secondary);
         margin-top: 0.25rem;
       }
 
       .table-container {
         max-height: 400px;
         overflow-y: auto;
-        border: 1px solid #e5e7eb;
-        border-radius: 0.5rem;
+        border: 1px solid var(--ax-border-default);
+        border-radius: var(--ax-radius-md);
       }
 
       .preview-table {
@@ -682,7 +682,7 @@ type ImportStep = 'upload' | 'review' | 'options' | 'progress' | 'complete';
       }
 
       .error-row {
-        background: #fef2f2 !important;
+        background: var(--ax-error-faint) !important;
       }
 
       .error-list,
@@ -699,14 +699,14 @@ type ImportStep = 'upload' | 'review' | 'options' | 'progress' | 'complete';
       }
 
       .error-icon {
-        color: #ef4444;
+        color: var(--ax-error);
         font-size: 1rem;
         width: 1rem;
         height: 1rem;
       }
 
       .warning-icon {
-        color: #f59e0b;
+        color: var(--ax-warning);
         font-size: 1rem;
         width: 1rem;
         height: 1rem;
@@ -714,24 +714,24 @@ type ImportStep = 'upload' | 'review' | 'options' | 'progress' | 'complete';
 
       .action-badge {
         padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
+        border-radius: var(--ax-radius-sm);
         font-size: 0.75rem;
         font-weight: 600;
       }
 
       .action-badge.create {
-        background: #dbeafe;
-        color: #1e40af;
+        background: var(--ax-info-faint);
+        color: var(--ax-info-dark);
       }
 
       .action-badge.update {
-        background: #fef3c7;
-        color: #92400e;
+        background: var(--ax-warning-faint);
+        color: var(--ax-warning-dark);
       }
 
       .action-badge.skip {
-        background: #f3f4f6;
-        color: #6b7280;
+        background: var(--ax-background-muted);
+        color: var(--ax-text-secondary);
       }
 
       .options-grid {
@@ -741,14 +741,14 @@ type ImportStep = 'upload' | 'review' | 'options' | 'progress' | 'complete';
 
       .option-item {
         padding: 1rem;
-        background: #f9fafb;
-        border-radius: 0.5rem;
+        background: var(--ax-background-subtle);
+        border-radius: var(--ax-radius-md);
       }
 
       .option-description {
         margin: 0.5rem 0 0 2rem;
         font-size: 0.875rem;
-        color: #6b7280;
+        color: var(--ax-text-secondary);
       }
 
       .progress-container,
@@ -761,7 +761,7 @@ type ImportStep = 'upload' | 'review' | 'options' | 'progress' | 'complete';
         font-size: 4rem;
         width: 4rem;
         height: 4rem;
-        color: #10b981;
+        color: var(--ax-success);
         margin-bottom: 1rem;
       }
 
@@ -786,26 +786,26 @@ type ImportStep = 'upload' | 'review' | 'options' | 'progress' | 'complete';
       }
 
       .complete-icon.success {
-        color: #10b981;
+        color: var(--ax-success);
       }
 
       .complete-icon.warning {
-        color: #f59e0b;
+        color: var(--ax-warning);
       }
 
       .result-summary {
         max-width: 400px;
         margin: 2rem auto;
         padding: 1rem;
-        background: #f9fafb;
-        border-radius: 0.5rem;
+        background: var(--ax-background-subtle);
+        border-radius: var(--ax-radius-md);
       }
 
       .result-row {
         display: flex;
         justify-content: space-between;
         padding: 0.5rem 0;
-        border-bottom: 1px solid #e5e7eb;
+        border-bottom: 1px solid var(--ax-border-default);
       }
 
       .result-row:last-child {
@@ -813,11 +813,11 @@ type ImportStep = 'upload' | 'review' | 'options' | 'progress' | 'complete';
       }
 
       .result-row.success {
-        color: #10b981;
+        color: var(--ax-success);
       }
 
       .result-row.error {
-        color: #ef4444;
+        color: var(--ax-error);
       }
 
       .tremor-dialog-footer {
@@ -825,8 +825,8 @@ type ImportStep = 'upload' | 'review' | 'options' | 'progress' | 'complete';
         justify-content: flex-end;
         gap: 0.5rem;
         padding: 1rem 1.5rem;
-        border-top: 1px solid #e5e7eb;
-        background: #f9fafb;
+        border-top: 1px solid var(--ax-border-default);
+        background: var(--ax-background-subtle);
       }
 
       /* Utility classes */
@@ -882,7 +882,7 @@ type ImportStep = 'upload' | 'review' | 'options' | 'progress' | 'complete';
         font-weight: 600;
       }
       .text-gray-600 {
-        color: #6b7280;
+        color: var(--ax-text-secondary);
       }
     `,
   ],
