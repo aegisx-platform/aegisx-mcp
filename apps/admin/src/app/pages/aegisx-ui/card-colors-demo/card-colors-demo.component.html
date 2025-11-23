@@ -50,7 +50,7 @@
                 [data]="projectProgress"
                 variant="line"
                 size="sm"
-                color="rgba(255,255,255,0.9)"
+                color="white"
                 [strokeWidth]="2"
                 [showValue]="false"
               />
@@ -86,7 +86,7 @@
                 [data]="[85, 88, 90, 92, 95, 97, 98, 99, 100, 100, 100, 100]"
                 variant="area"
                 size="sm"
-                color="rgba(255,255,255,0.9)"
+                color="white"
                 [fillOpacity]="0.2"
                 [showValue]="false"
               />
@@ -124,7 +124,7 @@
                 [data]="[20, 22, 25, 28, 30, 35, 38, 40, 42, 43, 44, 45]"
                 variant="line"
                 size="sm"
-                color="rgba(255,255,255,0.9)"
+                color="white"
                 [strokeWidth]="2"
                 [showValue]="false"
               />
@@ -160,7 +160,7 @@
                 [data]="[42, 40, 38, 35, 32, 28, 25, 22, 20, 18, 16, 15]"
                 variant="area"
                 size="sm"
-                color="rgba(255,255,255,0.9)"
+                color="white"
                 [fillOpacity]="0.2"
                 [showValue]="false"
               />
@@ -196,7 +196,7 @@
                 [data]="[10, 15, 20, 28, 35, 40, 45, 50, 52, 55, 58, 60]"
                 variant="line"
                 size="sm"
-                color="rgba(255,255,255,0.9)"
+                color="white"
                 [strokeWidth]="2"
                 [showValue]="false"
               />
@@ -227,14 +227,14 @@
             <div class="flex items-start justify-between">
               <div>
                 <h4 class="font-semibold text-base">API Development</h4>
-                <p class="text-sm text-gray-600 mt-1">REST endpoints</p>
+                <p class="text-sm opacity-75 mt-1">REST endpoints</p>
               </div>
-              <mat-icon class="text-blue-600">api</mat-icon>
+              <mat-icon>api</mat-icon>
             </div>
             <div class="space-y-2">
-              <div class="flex justify-between text-xs text-gray-600">
+              <div class="flex justify-between text-xs opacity-75">
                 <span>Implementation</span>
-                <span class="font-medium text-blue-700">65%</span>
+                <span class="font-medium opacity-100">65%</span>
               </div>
               <ax-sparkline
                 [data]="[25, 30, 35, 40, 45, 48, 52, 55, 58, 60, 62, 65]"
@@ -244,11 +244,9 @@
                 [strokeWidth]="2"
               />
             </div>
-            <div
-              class="flex items-center justify-between text-xs text-gray-600"
-            >
+            <div class="flex items-center justify-between text-xs opacity-75">
               <span>Due: Jan 2026</span>
-              <span class="text-blue-700">13/20 endpoints</span>
+              <span class="font-medium opacity-100">13/20 endpoints</span>
             </div>
           </div>
         </ax-card>
@@ -264,14 +262,14 @@
             <div class="flex items-start justify-between">
               <div>
                 <h4 class="font-semibold text-base">Testing Infrastructure</h4>
-                <p class="text-sm text-gray-600 mt-1">E2E with Playwright</p>
+                <p class="text-sm opacity-75 mt-1">E2E with Playwright</p>
               </div>
-              <mat-icon class="text-green-600">verified</mat-icon>
+              <mat-icon>verified</mat-icon>
             </div>
             <div class="space-y-2">
-              <div class="flex justify-between text-xs text-gray-600">
+              <div class="flex justify-between text-xs opacity-75">
                 <span>Test Coverage</span>
-                <span class="font-medium text-green-700">92%</span>
+                <span class="font-medium opacity-100">92%</span>
               </div>
               <ax-sparkline
                 [data]="[60, 65, 70, 74, 78, 82, 84, 86, 88, 89, 91, 92]"
@@ -281,11 +279,9 @@
                 [fillOpacity]="0.15"
               />
             </div>
-            <div
-              class="flex items-center justify-between text-xs text-gray-600"
-            >
+            <div class="flex items-center justify-between text-xs opacity-75">
               <span>Comprehensive</span>
-              <span class="text-green-700">184/200 tests</span>
+              <span class="font-medium opacity-100">184/200 tests</span>
             </div>
           </div>
         </ax-card>
@@ -301,14 +297,14 @@
             <div class="flex items-start justify-between">
               <div>
                 <h4 class="font-semibold text-base">UI Component Library</h4>
-                <p class="text-sm text-gray-600 mt-1">Design system</p>
+                <p class="text-sm opacity-75 mt-1">Design system</p>
               </div>
-              <mat-icon class="text-blue-600">palette</mat-icon>
+              <mat-icon>palette</mat-icon>
             </div>
             <div class="space-y-2">
-              <div class="flex justify-between text-xs text-gray-600">
+              <div class="flex justify-between text-xs opacity-75">
                 <span>Components</span>
-                <span class="font-medium text-blue-700">88%</span>
+                <span class="font-medium opacity-100">88%</span>
               </div>
               <ax-sparkline
                 [data]="[45, 52, 58, 62, 68, 72, 75, 78, 82, 84, 86, 88]"
@@ -318,11 +314,9 @@
                 [strokeWidth]="2"
               />
             </div>
-            <div
-              class="flex items-center justify-between text-xs text-gray-600"
-            >
+            <div class="flex items-center justify-between text-xs opacity-75">
               <span>Near Complete</span>
-              <span class="text-blue-700">44/50 components</span>
+              <span class="font-medium opacity-100">44/50 components</span>
             </div>
           </div>
         </ax-card>
@@ -369,15 +363,15 @@
         size="md"
       >
         <div class="flex items-start gap-3">
-          <mat-icon class="text-yellow-700">warning</mat-icon>
+          <mat-icon>warning</mat-icon>
           <div class="flex-1">
-            <h4 class="font-semibold text-base mb-1 text-yellow-900">
+            <h4 class="font-semibold text-base mb-1">
               High Memory Usage Detected
             </h4>
-            <p class="text-sm text-yellow-800 mb-3">
+            <p class="text-sm opacity-85 mb-3">
               API server consuming 85% memory. Consider scaling.
             </p>
-            <div class="text-xs text-yellow-700">15 minutes ago</div>
+            <div class="text-xs opacity-75">15 minutes ago</div>
           </div>
         </div>
       </ax-card>
@@ -411,15 +405,13 @@
       <!-- Info Status - Subtle -->
       <ax-card color="info" colorIntensity="subtle" variant="default" size="md">
         <div class="flex items-start gap-3">
-          <mat-icon class="text-blue-700">info</mat-icon>
+          <mat-icon>info</mat-icon>
           <div class="flex-1">
-            <h4 class="font-semibold text-base mb-1 text-blue-900">
-              Scheduled Maintenance
-            </h4>
-            <p class="text-sm text-blue-800 mb-3">
+            <h4 class="font-semibold text-base mb-1">Scheduled Maintenance</h4>
+            <p class="text-sm opacity-85 mb-3">
               System maintenance on Dec 25, 2025 from 2:00-4:00 AM UTC.
             </p>
-            <div class="text-xs text-blue-700">Planned for next week</div>
+            <div class="text-xs opacity-75">Planned for next week</div>
           </div>
         </div>
       </ax-card>
@@ -447,15 +439,14 @@
       >
         <div class="space-y-3">
           <div
-            class="w-12 h-12 rounded-lg bg-blue-600 flex items-center justify-center"
+            class="w-12 h-12 rounded-lg flex items-center justify-center"
+            style="background-color: var(--ax-brand-default)"
           >
             <mat-icon class="text-white">auto_awesome</mat-icon>
           </div>
           <div>
-            <h4 class="font-semibold text-lg text-blue-900">
-              AI-Powered Search
-            </h4>
-            <p class="text-sm text-blue-700 mt-2">
+            <h4 class="font-semibold text-lg">AI-Powered Search</h4>
+            <p class="text-sm opacity-75 mt-2">
               Intelligent semantic search with natural language queries.
             </p>
           </div>
@@ -478,21 +469,24 @@
       >
         <div class="space-y-3">
           <div
-            class="w-12 h-12 rounded-lg bg-green-600 flex items-center justify-center"
+            class="w-12 h-12 rounded-lg flex items-center justify-center"
+            style="background-color: var(--ax-success-default)"
           >
             <mat-icon class="text-white">security</mat-icon>
           </div>
           <div>
-            <h4 class="font-semibold text-lg text-green-900">
-              Enterprise Security
-            </h4>
-            <p class="text-sm text-green-700 mt-2">
+            <h4 class="font-semibold text-lg">Enterprise Security</h4>
+            <p class="text-sm opacity-75 mt-2">
               JWT authentication, RBAC, and comprehensive audit logs.
             </p>
           </div>
           <button
             mat-stroked-button
-            class="!text-xs !h-9 w-full !border-green-600 !text-green-700"
+            class="!text-xs !h-9 w-full"
+            style="
+              border-color: var(--ax-success-default);
+              color: var(--ax-success-default);
+            "
           >
             View Security
           </button>
@@ -508,21 +502,24 @@
       >
         <div class="space-y-3">
           <div
-            class="w-12 h-12 rounded-lg bg-blue-600 flex items-center justify-center"
+            class="w-12 h-12 rounded-lg flex items-center justify-center"
+            style="background-color: var(--ax-info-default)"
           >
             <mat-icon class="text-white">analytics</mat-icon>
           </div>
           <div>
-            <h4 class="font-semibold text-lg text-blue-900">
-              Real-Time Analytics
-            </h4>
-            <p class="text-sm text-blue-700 mt-2">
+            <h4 class="font-semibold text-lg">Real-Time Analytics</h4>
+            <p class="text-sm opacity-75 mt-2">
               Live dashboards with WebSocket updates and metrics tracking.
             </p>
           </div>
           <button
             mat-stroked-button
-            class="!text-xs !h-9 w-full !border-blue-600 !text-blue-700"
+            class="!text-xs !h-9 w-full"
+            style="
+              border-color: var(--ax-info-default);
+              color: var(--ax-info-default);
+            "
           >
             Explore Dashboard
           </button>
@@ -678,36 +675,36 @@
       <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
         <ax-card color="primary" colorIntensity="subtle" size="sm">
           <div class="text-center">
-            <div class="text-sm font-semibold text-blue-900">Primary</div>
-            <div class="text-xs text-blue-700 mt-1">Light background</div>
+            <div class="text-sm font-semibold">Primary</div>
+            <div class="text-xs opacity-75 mt-1">Light background</div>
           </div>
         </ax-card>
 
         <ax-card color="success" colorIntensity="subtle" size="sm">
           <div class="text-center">
-            <div class="text-sm font-semibold text-green-900">Success</div>
-            <div class="text-xs text-green-700 mt-1">Light background</div>
+            <div class="text-sm font-semibold">Success</div>
+            <div class="text-xs opacity-75 mt-1">Light background</div>
           </div>
         </ax-card>
 
         <ax-card color="warning" colorIntensity="subtle" size="sm">
           <div class="text-center">
-            <div class="text-sm font-semibold text-yellow-900">Warning</div>
-            <div class="text-xs text-yellow-700 mt-1">Light background</div>
+            <div class="text-sm font-semibold">Warning</div>
+            <div class="text-xs opacity-75 mt-1">Light background</div>
           </div>
         </ax-card>
 
         <ax-card color="error" colorIntensity="subtle" size="sm">
           <div class="text-center">
-            <div class="text-sm font-semibold text-red-900">Error</div>
-            <div class="text-xs text-red-700 mt-1">Light background</div>
+            <div class="text-sm font-semibold">Error</div>
+            <div class="text-xs opacity-75 mt-1">Light background</div>
           </div>
         </ax-card>
 
         <ax-card color="info" colorIntensity="subtle" size="sm">
           <div class="text-center">
-            <div class="text-sm font-semibold text-blue-900">Info</div>
-            <div class="text-xs text-blue-700 mt-1">Light background</div>
+            <div class="text-sm font-semibold">Info</div>
+            <div class="text-xs opacity-75 mt-1">Light background</div>
           </div>
         </ax-card>
       </div>
