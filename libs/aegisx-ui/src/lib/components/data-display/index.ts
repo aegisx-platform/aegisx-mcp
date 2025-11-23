@@ -10,6 +10,7 @@ export * from './kpi-card';
 export * from './segmented-progress';
 export * from './circular-progress';
 export * from './sparkline';
+export * from './badge';
 export * from './avatar';
 export * from './list';
 export * from './stats-card';

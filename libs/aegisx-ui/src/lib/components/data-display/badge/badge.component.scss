@@ -1,0 +1,428 @@
+// ============================================================================
+// Badge Component Styles
+// ============================================================================
+// Display status, labels, and metadata with customizable styling
+// Inspired by Tremor design patterns with Material Design integration
+// Uses AegisX design tokens for consistent theming
+
+// ----------------------------------------------------------------------------
+// Base Badge Styles
+// ----------------------------------------------------------------------------
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ax-spacing-2xs);
+  border-radius: var(--ax-radius-sm);
+  font-size: var(--ax-text-xs);
+  font-weight: var(--ax-font-semibold);
+  line-height: 1;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+// ----------------------------------------------------------------------------
+// Badge Sizes
+// ----------------------------------------------------------------------------
+
+.badge-sm {
+  padding: var(--ax-spacing-2xs) var(--ax-spacing-sm);
+  font-size: 0.75rem;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+  }
+}
+
+.badge-md {
+  padding: var(--ax-spacing-2xs) var(--ax-spacing-md);
+  font-size: var(--ax-text-xs);
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+  }
+}
+
+.badge-lg {
+  padding: var(--ax-spacing-sm) var(--ax-spacing-lg);
+  font-size: var(--ax-text-sm);
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+// ----------------------------------------------------------------------------
+// Badge Variants - Outlined (Ring Style)
+// ----------------------------------------------------------------------------
+
+.badge-outlined {
+  background: transparent;
+  border: 1px solid;
+
+  &.badge-success {
+    color: var(--ax-success-default);
+    border-color: var(--ax-success-default);
+
+    &:hover {
+      background: var(--ax-success-faint);
+    }
+  }
+
+  &.badge-error {
+    color: var(--ax-error-default);
+    border-color: var(--ax-error-default);
+
+    &:hover {
+      background: var(--ax-error-faint);
+    }
+  }
+
+  &.badge-warning {
+    color: var(--ax-warning-default);
+    border-color: var(--ax-warning-default);
+
+    &:hover {
+      background: var(--ax-warning-faint);
+    }
+  }
+
+  &.badge-info {
+    color: var(--ax-info-default);
+    border-color: var(--ax-info-default);
+
+    &:hover {
+      background: var(--ax-info-faint);
+    }
+  }
+
+  &.badge-neutral {
+    color: var(--ax-text-secondary);
+    border-color: var(--ax-border-default);
+
+    &:hover {
+      background: var(--ax-background-subtle);
+    }
+  }
+}
+
+// ----------------------------------------------------------------------------
+// Badge Variants - Soft (Filled)
+// ----------------------------------------------------------------------------
+
+.badge-soft {
+  border: none;
+
+  &.badge-success {
+    background: var(--ax-success-faint);
+    color: var(--ax-success-emphasis);
+
+    &:hover {
+      background: var(--ax-success-muted);
+    }
+  }
+
+  &.badge-error {
+    background: var(--ax-error-faint);
+    color: var(--ax-error-emphasis);
+
+    &:hover {
+      background: var(--ax-error-muted);
+    }
+  }
+
+  &.badge-warning {
+    background: var(--ax-warning-faint);
+    color: var(--ax-warning-emphasis);
+
+    &:hover {
+      background: var(--ax-warning-muted);
+    }
+  }
+
+  &.badge-info {
+    background: var(--ax-info-faint);
+    color: var(--ax-info-emphasis);
+
+    &:hover {
+      background: var(--ax-info-muted);
+    }
+  }
+
+  &.badge-neutral {
+    background: var(--ax-background-subtle);
+    color: var(--ax-text-secondary);
+    border: 1px solid var(--ax-border-default);
+
+    &:hover {
+      background: var(--ax-background-default);
+    }
+  }
+}
+
+// ----------------------------------------------------------------------------
+// Badge Variants - Outlined Strong
+// ----------------------------------------------------------------------------
+
+.badge-outlined-strong {
+  background: var(--ax-background-default);
+  border: 2px solid;
+
+  &.badge-success {
+    color: var(--ax-success-default);
+    border-color: var(--ax-success-default);
+
+    &:hover {
+      background: var(--ax-success-faint);
+    }
+  }
+
+  &.badge-error {
+    color: var(--ax-error-default);
+    border-color: var(--ax-error-default);
+
+    &:hover {
+      background: var(--ax-error-faint);
+    }
+  }
+
+  &.badge-warning {
+    color: var(--ax-warning-default);
+    border-color: var(--ax-warning-default);
+
+    &:hover {
+      background: var(--ax-warning-faint);
+    }
+  }
+
+  &.badge-info {
+    color: var(--ax-info-default);
+    border-color: var(--ax-info-default);
+
+    &:hover {
+      background: var(--ax-info-faint);
+    }
+  }
+
+  &.badge-neutral {
+    color: var(--ax-text-secondary);
+    border-color: var(--ax-border-default);
+
+    &:hover {
+      background: var(--ax-background-subtle);
+    }
+  }
+}
+
+// ----------------------------------------------------------------------------
+// Badge with Icon
+// ----------------------------------------------------------------------------
+
+.badge-icon {
+  mat-icon {
+    margin-left: calc(var(--ax-spacing-2xs) * -0.5);
+  }
+}
+
+// ----------------------------------------------------------------------------
+// Badge with Dot
+// ----------------------------------------------------------------------------
+
+.badge-dot {
+  gap: var(--ax-spacing-sm);
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  &.badge-success .dot {
+    background: var(--ax-success-default);
+    box-shadow: 0 0 0 2px var(--ax-success-faint);
+  }
+
+  &.badge-error .dot {
+    background: var(--ax-error-default);
+    box-shadow: 0 0 0 2px var(--ax-error-faint);
+  }
+
+  &.badge-warning .dot {
+    background: var(--ax-warning-default);
+    box-shadow: 0 0 0 2px var(--ax-warning-faint);
+  }
+
+  &.badge-info .dot {
+    background: var(--ax-info-default);
+    box-shadow: 0 0 0 2px var(--ax-info-faint);
+  }
+
+  &.badge-neutral .dot {
+    background: var(--ax-text-secondary);
+    box-shadow: 0 0 0 2px var(--ax-background-subtle);
+  }
+}
+
+// ----------------------------------------------------------------------------
+// Removable Badges (Tags)
+// ----------------------------------------------------------------------------
+
+.badge-removable {
+  padding-right: var(--ax-spacing-2xs);
+
+  .badge-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--ax-spacing-2xs);
+    margin-left: var(--ax-spacing-2xs);
+    background: transparent;
+    border: none;
+    border-radius: var(--ax-radius-sm);
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    mat-icon {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+      color: currentColor;
+      opacity: 0.6;
+    }
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.1);
+
+      mat-icon {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+// ----------------------------------------------------------------------------
+// Counter Badges
+// ----------------------------------------------------------------------------
+
+.badge-counter {
+  gap: var(--ax-spacing-sm);
+
+  .badge-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.25rem;
+    padding: var(--ax-spacing-2xs) var(--ax-spacing-2xs);
+    border-radius: var(--ax-radius-sm);
+    font-size: 0.75rem;
+    font-weight: var(--ax-font-bold);
+    line-height: 1;
+  }
+
+  &.badge-soft {
+    &.badge-success .badge-count {
+      background: var(--ax-success-default);
+      color: white;
+    }
+
+    &.badge-error .badge-count {
+      background: var(--ax-error-default);
+      color: white;
+    }
+
+    &.badge-warning .badge-count {
+      background: var(--ax-warning-default);
+      color: white;
+    }
+
+    &.badge-info .badge-count {
+      background: var(--ax-info-default);
+      color: white;
+    }
+
+    &.badge-neutral .badge-count {
+      background: var(--ax-text-secondary);
+      color: white;
+    }
+  }
+
+  &.badge-outlined,
+  &.badge-outlined-strong {
+    &.badge-success .badge-count {
+      background: var(--ax-success-default);
+      color: white;
+    }
+
+    &.badge-error .badge-count {
+      background: var(--ax-error-default);
+      color: white;
+    }
+
+    &.badge-warning .badge-count {
+      background: var(--ax-warning-default);
+      color: white;
+    }
+
+    &.badge-info .badge-count {
+      background: var(--ax-info-default);
+      color: white;
+    }
+
+    &.badge-neutral .badge-count {
+      background: var(--ax-text-secondary);
+      color: white;
+    }
+  }
+}
+
+// ----------------------------------------------------------------------------
+// Badge Label
+// ----------------------------------------------------------------------------
+
+.badge-label {
+  display: inline-block;
+}
+
+// ----------------------------------------------------------------------------
+// Dark Mode Adjustments
+// ----------------------------------------------------------------------------
+
+@media (prefers-color-scheme: dark) {
+  .badge {
+    // Design tokens handle this automatically
+  }
+
+  .badge-removable .badge-remove:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}

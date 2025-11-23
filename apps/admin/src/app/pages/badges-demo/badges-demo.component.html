@@ -69,9 +69,9 @@
     <app-code-preview [code]="basicBadgeCode">
       <div class="demo-row">
         @for (badge of statusBadges; track badge.label) {
-          <span class="badge badge-outlined" [class]="'badge-' + badge.variant">
+          <ax-badge variant="outlined" [type]="badge.variant">
             {{ badge.label }}
-          </span>
+          </ax-badge>
         }
       </div>
     </app-code-preview>
@@ -89,9 +89,9 @@
     <app-code-preview [code]="softBadgeCode">
       <div class="demo-row">
         @for (badge of statusBadges; track badge.label) {
-          <span class="badge badge-soft" [class]="'badge-' + badge.variant">
+          <ax-badge variant="soft" [type]="badge.variant">
             {{ badge.label }}
-          </span>
+          </ax-badge>
         }
       </div>
     </app-code-preview>
@@ -109,12 +109,9 @@
     <app-code-preview [code]="outlinedBadgeCode">
       <div class="demo-row">
         @for (badge of statusBadges; track badge.label) {
-          <span
-            class="badge badge-outlined-strong"
-            [class]="'badge-' + badge.variant"
-          >
+          <ax-badge variant="outlined-strong" [type]="badge.variant">
             {{ badge.label }}
-          </span>
+          </ax-badge>
         }
       </div>
     </app-code-preview>
@@ -132,13 +129,9 @@
     <app-code-preview [code]="iconBadgeCode">
       <div class="demo-row">
         @for (badge of iconBadges; track badge.label) {
-          <span
-            class="badge badge-soft badge-icon"
-            [class]="'badge-' + badge.variant"
-          >
-            <mat-icon>{{ badge.icon }}</mat-icon>
-            <span>{{ badge.label }}</span>
-          </span>
+          <ax-badge variant="soft" [type]="badge.variant" [icon]="badge.icon">
+            {{ badge.label }}
+          </ax-badge>
         }
       </div>
     </app-code-preview>
@@ -156,13 +149,9 @@
     <app-code-preview [code]="dotBadgeCode">
       <div class="demo-row">
         @for (badge of dotBadges; track badge.label) {
-          <span
-            class="badge badge-dot badge-soft"
-            [class]="'badge-' + badge.variant"
-          >
-            <span class="dot"></span>
-            <span>{{ badge.label }}</span>
-          </span>
+          <ax-badge variant="soft" [type]="badge.variant" [dot]="true">
+            {{ badge.label }}
+          </ax-badge>
         }
       </div>
     </app-code-preview>
@@ -179,18 +168,12 @@
   <section>
     <app-code-preview [code]="removableBadgeCode">
       <div class="demo-row">
-        <span class="badge badge-removable badge-soft badge-info">
-          <span>TypeScript</span>
-          <button class="badge-remove" type="button">
-            <mat-icon>close</mat-icon>
-          </button>
-        </span>
-        <span class="badge badge-removable badge-soft badge-error">
-          <span>Angular</span>
-          <button class="badge-remove" type="button">
-            <mat-icon>close</mat-icon>
-          </button>
-        </span>
+        <ax-badge variant="soft" type="info" [removable]="true">
+          TypeScript
+        </ax-badge>
+        <ax-badge variant="soft" type="error" [removable]="true">
+          Angular
+        </ax-badge>
       </div>
     </app-code-preview>
   </section>
@@ -207,13 +190,13 @@
     <app-code-preview [code]="counterBadgeCode">
       <div class="demo-row">
         @for (badge of counterBadges; track badge.label) {
-          <span
-            class="badge badge-counter badge-outlined"
-            [class]="'badge-' + badge.variant"
+          <ax-badge
+            variant="outlined"
+            [type]="badge.variant"
+            [counter]="badge.count"
           >
-            <span>{{ badge.label }}</span>
-            <span class="badge-count">{{ badge.count }}</span>
-          </span>
+            {{ badge.label }}
+          </ax-badge>
         }
       </div>
     </app-code-preview>
@@ -234,9 +217,9 @@
         <div>
           <p class="text-sm font-medium mb-3">Simple Badges</p>
           <div class="demo-row">
-            <span class="badge badge-soft badge-info badge-sm">Small</span>
-            <span class="badge badge-soft badge-info badge-md">Medium</span>
-            <span class="badge badge-soft badge-info badge-lg">Large</span>
+            <ax-badge variant="soft" type="info" size="sm">Small</ax-badge>
+            <ax-badge variant="soft" type="info" size="md">Medium</ax-badge>
+            <ax-badge variant="soft" type="info" size="lg">Large</ax-badge>
           </div>
         </div>
 
@@ -244,18 +227,15 @@
         <div>
           <p class="text-sm font-medium mb-3">With Icons</p>
           <div class="demo-row">
-            <span class="badge badge-outlined badge-success badge-sm">
-              <mat-icon>check</mat-icon>
-              <span>Small</span>
-            </span>
-            <span class="badge badge-outlined badge-success badge-md">
-              <mat-icon>check</mat-icon>
-              <span>Medium</span>
-            </span>
-            <span class="badge badge-outlined badge-success badge-lg">
-              <mat-icon>check</mat-icon>
-              <span>Large</span>
-            </span>
+            <ax-badge variant="outlined" type="success" size="sm" icon="check">
+              Small
+            </ax-badge>
+            <ax-badge variant="outlined" type="success" size="md" icon="check">
+              Medium
+            </ax-badge>
+            <ax-badge variant="outlined" type="success" size="lg" icon="check">
+              Large
+            </ax-badge>
           </div>
         </div>
       </div>

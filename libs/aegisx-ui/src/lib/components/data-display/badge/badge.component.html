@@ -1,0 +1,28 @@
+<span [class]="badgeClasses">
+  <!-- Dot indicator -->
+  @if (dot) {
+    <span class="dot"></span>
+  }
+
+  <!-- Icon -->
+  @if (icon) {
+    <mat-icon>{{ icon }}</mat-icon>
+  }
+
+  <!-- Label content -->
+  <span class="badge-label">
+    <ng-content></ng-content>
+  </span>
+
+  <!-- Counter -->
+  @if (counter !== undefined) {
+    <span class="badge-count">{{ counter }}</span>
+  }
+
+  <!-- Remove button -->
+  @if (removable) {
+    <button class="badge-remove" type="button" (click)="onRemoveClick($event)">
+      <mat-icon>close</mat-icon>
+    </button>
+  }
+</span>

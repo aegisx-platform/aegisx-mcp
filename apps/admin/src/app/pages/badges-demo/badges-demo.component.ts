@@ -4,6 +4,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { CodePreviewComponent } from '../../components/code-preview/code-preview.component';
+import { AxBadgeComponent } from '@aegisx/ui';
 
 interface BadgeExample {
   label: string;
@@ -21,6 +22,7 @@ interface BadgeExample {
     MatIconModule,
     MatButtonModule,
     CodePreviewComponent,
+    AxBadgeComponent,
   ],
   templateUrl: './badges-demo.component.html',
   styleUrl: './badges-demo.component.scss',
@@ -88,110 +90,58 @@ export class BadgesDemoComponent {
 
   // Code Examples
   basicBadgeCode = `<!-- Basic Badge - Outlined Style -->
-<span class="badge badge-outlined badge-success">Active</span>
-<span class="badge badge-outlined badge-warning">Pending</span>
-<span class="badge badge-outlined badge-error">Error</span>
-<span class="badge badge-outlined badge-info">Info</span>
-<span class="badge badge-outlined badge-neutral">Disabled</span>`;
+<ax-badge variant="outlined" type="success">Active</ax-badge>
+<ax-badge variant="outlined" type="warning">Pending</ax-badge>
+<ax-badge variant="outlined" type="error">Error</ax-badge>
+<ax-badge variant="outlined" type="info">Info</ax-badge>
+<ax-badge variant="outlined" type="neutral">Disabled</ax-badge>`;
 
   softBadgeCode = `<!-- Soft/Filled Style -->
-<span class="badge badge-soft badge-success">Active</span>
-<span class="badge badge-soft badge-warning">Pending</span>
-<span class="badge badge-soft badge-error">Error</span>
-<span class="badge badge-soft badge-info">Info</span>
-<span class="badge badge-soft badge-neutral">Disabled</span>`;
+<ax-badge variant="soft" type="success">Active</ax-badge>
+<ax-badge variant="soft" type="warning">Pending</ax-badge>
+<ax-badge variant="soft" type="error">Error</ax-badge>
+<ax-badge variant="soft" type="info">Info</ax-badge>
+<ax-badge variant="soft" type="neutral">Disabled</ax-badge>`;
 
   outlinedBadgeCode = `<!-- Outlined Strong Border -->
-<span class="badge badge-outlined-strong badge-success">Active</span>
-<span class="badge badge-outlined-strong badge-warning">Pending</span>
-<span class="badge badge-outlined-strong badge-error">Error</span>
-<span class="badge badge-outlined-strong badge-info">Info</span>
-<span class="badge badge-outlined-strong badge-neutral">Disabled</span>`;
+<ax-badge variant="outlined-strong" type="success">Active</ax-badge>
+<ax-badge variant="outlined-strong" type="warning">Pending</ax-badge>
+<ax-badge variant="outlined-strong" type="error">Error</ax-badge>
+<ax-badge variant="outlined-strong" type="info">Info</ax-badge>
+<ax-badge variant="outlined-strong" type="neutral">Disabled</ax-badge>`;
 
   iconBadgeCode = `<!-- Badge with Icon -->
-<span class="badge badge-soft badge-icon badge-success">
-  <mat-icon>trending_up</mat-icon>
-  <span>+9.3%</span>
-</span>
-<span class="badge badge-soft badge-icon badge-error">
-  <mat-icon>trending_down</mat-icon>
-  <span>-1.9%</span>
-</span>
-<span class="badge badge-soft badge-icon badge-success">
-  <mat-icon>arrow_upward</mat-icon>
-  <span>+5.1%</span>
-</span>
-<span class="badge badge-soft badge-icon badge-neutral">
-  <mat-icon>arrow_forward</mat-icon>
-  <span>0.6%</span>
-</span>`;
+<ax-badge variant="soft" type="success" icon="trending_up">+9.3%</ax-badge>
+<ax-badge variant="soft" type="error" icon="trending_down">-1.9%</ax-badge>
+<ax-badge variant="soft" type="success" icon="arrow_upward">+5.1%</ax-badge>
+<ax-badge variant="soft" type="neutral" icon="arrow_forward">0.6%</ax-badge>`;
 
   dotBadgeCode = `<!-- Badge with Dot -->
-<span class="badge badge-dot badge-soft badge-success">
-  <span class="dot"></span>
-  <span>Online</span>
-</span>
-<span class="badge badge-dot badge-soft badge-warning">
-  <span class="dot"></span>
-  <span>Away</span>
-</span>
-<span class="badge badge-dot badge-soft badge-error">
-  <span class="dot"></span>
-  <span>Busy</span>
-</span>
-<span class="badge badge-dot badge-soft badge-neutral">
-  <span class="dot"></span>
-  <span>Offline</span>
-</span>`;
+<ax-badge variant="soft" type="success" [dot]="true">Online</ax-badge>
+<ax-badge variant="soft" type="warning" [dot]="true">Away</ax-badge>
+<ax-badge variant="soft" type="error" [dot]="true">Busy</ax-badge>
+<ax-badge variant="soft" type="neutral" [dot]="true">Offline</ax-badge>`;
 
   removableBadgeCode = `<!-- Removable Badge -->
-<span class="badge badge-removable badge-soft badge-info">
-  <span>TypeScript</span>
-  <button class="badge-remove" type="button">
-    <mat-icon>close</mat-icon>
-  </button>
-</span>
-<span class="badge badge-removable badge-soft badge-error">
-  <span>Angular</span>
-  <button class="badge-remove" type="button">
-    <mat-icon>close</mat-icon>
-  </button>
-</span>`;
+<ax-badge variant="soft" type="info" [removable]="true" (remove)="onRemove()">
+  TypeScript
+</ax-badge>
+<ax-badge variant="soft" type="error" [removable]="true" (remove)="onRemove()">
+  Angular
+</ax-badge>`;
 
   counterBadgeCode = `<!-- Counter Badge -->
-<span class="badge badge-counter badge-outlined badge-info">
-  <span>Messages</span>
-  <span class="badge-count">12</span>
-</span>
-<span class="badge badge-counter badge-outlined badge-error">
-  <span>Notifications</span>
-  <span class="badge-count">5</span>
-</span>
-<span class="badge badge-counter badge-outlined badge-warning">
-  <span>Updates</span>
-  <span class="badge-count">99</span>
-</span>`;
+<ax-badge variant="outlined" type="info" [counter]="12">Messages</ax-badge>
+<ax-badge variant="outlined" type="error" [counter]="5">Notifications</ax-badge>
+<ax-badge variant="outlined" type="warning" [counter]="99">Updates</ax-badge>`;
 
   sizeBadgeCode = `<!-- Badge Sizes - Simple -->
-<div class="flex gap-3">
-  <span class="badge badge-soft badge-info badge-sm">Small</span>
-  <span class="badge badge-soft badge-info badge-md">Medium</span>
-  <span class="badge badge-soft badge-info badge-lg">Large</span>
-</div>
+<ax-badge variant="soft" type="info" size="sm">Small</ax-badge>
+<ax-badge variant="soft" type="info" size="md">Medium</ax-badge>
+<ax-badge variant="soft" type="info" size="lg">Large</ax-badge>
 
 <!-- Badge Sizes - With Icons -->
-<div class="flex gap-3 mt-6">
-  <span class="badge badge-outlined badge-success badge-sm">
-    <mat-icon>check</mat-icon>
-    <span>Small</span>
-  </span>
-  <span class="badge badge-outlined badge-success badge-md">
-    <mat-icon>check</mat-icon>
-    <span>Medium</span>
-  </span>
-  <span class="badge badge-outlined badge-success badge-lg">
-    <mat-icon>check</mat-icon>
-    <span>Large</span>
-  </span>
-</div>`;
+<ax-badge variant="outlined" type="success" size="sm" icon="check">Small</ax-badge>
+<ax-badge variant="outlined" type="success" size="md" icon="check">Medium</ax-badge>
+<ax-badge variant="outlined" type="success" size="lg" icon="check">Large</ax-badge>`;
 }
