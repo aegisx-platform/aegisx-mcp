@@ -1,0 +1,86 @@
+<div class="docs-page">
+  <!-- Page Header -->
+  <div class="docs-header">
+    <div class="docs-breadcrumb">
+      <a routerLink="/components" mat-button>
+        <mat-icon>arrow_back</mat-icon>
+        Components
+      </a>
+      <mat-icon>chevron_right</mat-icon>
+      <span>AegisX UI</span>
+    </div>
+
+    <h1 class="docs-title">AegisX UI Components</h1>
+    <p class="docs-subtitle">
+      Custom-built components for the AegisX Design System.
+      {{ totalComponents }} production-ready components organized by category.
+    </p>
+  </div>
+
+  <!-- Component Categories -->
+  @for (category of categories; track category.title) {
+    <section class="mb-8">
+      <div class="section-header mb-4">
+        <div class="flex items-center gap-3">
+          <mat-icon class="text-primary">{{ category.icon }}</mat-icon>
+          <div>
+            <h2 class="text-2xl font-semibold m-0">{{ category.title }}</h2>
+            <p class="text-sm text-secondary m-0 mt-1">
+              {{ category.description }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        @for (component of category.components; track component.route) {
+          <mat-card
+            class="component-card cursor-pointer hover:shadow-lg transition-shadow"
+            [routerLink]="component.route"
+          >
+            <mat-card-header>
+              <mat-card-title class="flex items-center justify-between">
+                <span>{{ component.name }}</span>
+                @if (component.badge) {
+                  <span class="badge badge-soft badge-info badge-sm">
+                    {{ component.badge }}
+                  </span>
+                }
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p class="text-sm text-secondary">{{ component.description }}</p>
+            </mat-card-content>
+            <mat-card-actions align="end">
+              <button mat-button color="primary">
+                View Examples
+                <mat-icon>arrow_forward</mat-icon>
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- Summary Footer -->
+  <div class="mt-12 p-6 bg-subtle rounded-lg">
+    <div class="flex items-start gap-4">
+      <mat-icon class="text-info text-4xl">info</mat-icon>
+      <div>
+        <h3 class="text-lg font-semibold m-0 mb-2">About AegisX UI</h3>
+        <p class="text-sm text-secondary m-0 mb-3">
+          All components are built with Angular 17+ standalone components, fully
+          typed with TypeScript, and follow Material Design 3 principles. They
+          integrate seamlessly with the AegisX Design System tokens.
+        </p>
+        <div class="flex gap-2">
+          <span class="badge badge-outlined badge-sm">Angular 17+</span>
+          <span class="badge badge-outlined badge-sm">TypeScript</span>
+          <span class="badge badge-outlined badge-sm">Material Design 3</span>
+          <span class="badge badge-outlined badge-sm">Design Tokens</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

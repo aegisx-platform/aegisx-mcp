@@ -30,8 +30,7 @@ export interface ProgressItem {
     <ax-card
       [title]="title"
       [subtitle]="subtitle"
-      [icon]="'donut_large'"
-      [appearance]="'elevated'"
+      [variant]="'elevated'"
       class="h-full"
     >
       <div class="space-y-4">

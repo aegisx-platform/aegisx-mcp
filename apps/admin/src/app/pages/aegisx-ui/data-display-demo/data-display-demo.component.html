@@ -1,0 +1,345 @@
+<div class="docs-page">
+  <!-- Page Header with back button -->
+  <div class="docs-header">
+    <div class="docs-breadcrumb">
+      <a routerLink="/aegisx-ui" mat-button>
+        <mat-icon>arrow_back</mat-icon>
+        AegisX UI
+      </a>
+      <mat-icon>chevron_right</mat-icon>
+      <span>Data Display</span>
+    </div>
+
+    <h1 class="docs-title">Data Display Components</h1>
+    <p class="docs-subtitle">
+      Display field values and structured data in read-only formats
+    </p>
+  </div>
+
+  <!-- Field Display Component -->
+  <div class="demo-section">
+    <h3>Field Display Component</h3>
+    <p class="demo-description">
+      Display field values in read-only format with automatic type-based
+      formatting.
+    </p>
+
+    <h4>Basic Text Display</h4>
+    <div class="demo-container" style="max-width: 600px">
+      <ax-field-display
+        label="Full Name"
+        [value]="userProfile.fullName"
+      ></ax-field-display>
+      <ax-field-display
+        label="Role"
+        [value]="userProfile.role"
+      ></ax-field-display>
+      <ax-field-display
+        label="Department"
+        [value]="userProfile.department"
+      ></ax-field-display>
+    </div>
+
+    <h4>Type-Based Formatting</h4>
+    <div class="demo-container" style="max-width: 600px">
+      <ax-field-display
+        label="Join Date"
+        [value]="userProfile.joinDate"
+        type="date"
+      >
+      </ax-field-display>
+
+      <ax-field-display
+        label="Salary"
+        [value]="userProfile.salary"
+        type="currency"
+        [formatOptions]="{ currency: 'THB', decimals: 2 }"
+      >
+      </ax-field-display>
+
+      <ax-field-display
+        label="Performance Score"
+        [value]="userProfile.performanceScore"
+        type="percentage"
+      >
+      </ax-field-display>
+
+      <ax-field-display
+        label="Active Status"
+        [value]="userProfile.isActive"
+        type="boolean"
+      >
+      </ax-field-display>
+    </div>
+
+    <h4>Clickable Links</h4>
+    <div class="demo-container" style="max-width: 600px">
+      <ax-field-display label="Email" [value]="userProfile.email" type="email">
+      </ax-field-display>
+
+      <ax-field-display label="Phone" [value]="userProfile.phone" type="phone">
+      </ax-field-display>
+
+      <ax-field-display
+        label="Website"
+        [value]="userProfile.website"
+        type="url"
+      >
+      </ax-field-display>
+    </div>
+
+    <h4>Sizes</h4>
+    <div class="demo-container" style="max-width: 600px">
+      <ax-field-display label="Small" [value]="userProfile.fullName" size="sm">
+      </ax-field-display>
+
+      <ax-field-display
+        label="Medium (Default)"
+        [value]="userProfile.fullName"
+        size="md"
+      >
+      </ax-field-display>
+
+      <ax-field-display label="Large" [value]="userProfile.fullName" size="lg">
+      </ax-field-display>
+    </div>
+
+    <h4>Vertical Orientation</h4>
+    <div class="demo-container" style="max-width: 600px">
+      <ax-field-display
+        label="Description"
+        value="This is a longer text that looks better in vertical orientation. The label appears above the value instead of beside it."
+        orientation="vertical"
+      >
+      </ax-field-display>
+    </div>
+
+    <h4>Empty State</h4>
+    <div class="demo-container" style="max-width: 600px">
+      <ax-field-display
+        label="Middle Name"
+        [value]="null"
+        emptyText="Not specified"
+      >
+      </ax-field-display>
+
+      <ax-field-display
+        label="Nickname"
+        [value]="''"
+        emptyDisplay="placeholder"
+      >
+      </ax-field-display>
+    </div>
+  </div>
+
+  <!-- Description List Component -->
+  <div class="demo-section">
+    <h3>Description List Component</h3>
+    <p class="demo-description">
+      Container for organizing multiple field-display components in structured
+      layouts.
+    </p>
+
+    <h4>Horizontal Layout (Default)</h4>
+    <div class="demo-container">
+      <ax-description-list style="max-width: 600px">
+        <ax-field-display
+          label="Full Name"
+          [value]="userProfile.fullName"
+        ></ax-field-display>
+        <ax-field-display
+          label="Email"
+          [value]="userProfile.email"
+          type="email"
+        ></ax-field-display>
+        <ax-field-display
+          label="Department"
+          [value]="userProfile.department"
+        ></ax-field-display>
+        <ax-field-display
+          label="Join Date"
+          [value]="userProfile.joinDate"
+          type="date"
+        ></ax-field-display>
+      </ax-description-list>
+    </div>
+
+    <h4>Grid Layout (2 Columns)</h4>
+    <div class="demo-container">
+      <ax-description-list layout="grid" [columns]="2">
+        <ax-field-display
+          label="Full Name"
+          [value]="userProfile.fullName"
+        ></ax-field-display>
+        <ax-field-display
+          label="Email"
+          [value]="userProfile.email"
+          type="email"
+        ></ax-field-display>
+        <ax-field-display
+          label="Phone"
+          [value]="userProfile.phone"
+          type="phone"
+        ></ax-field-display>
+        <ax-field-display
+          label="Department"
+          [value]="userProfile.department"
+        ></ax-field-display>
+        <ax-field-display
+          label="Role"
+          [value]="userProfile.role"
+        ></ax-field-display>
+        <ax-field-display
+          label="Join Date"
+          [value]="userProfile.joinDate"
+          type="date"
+        ></ax-field-display>
+      </ax-description-list>
+    </div>
+
+    <h4>Grid Layout (3 Columns)</h4>
+    <div class="demo-container">
+      <ax-description-list layout="grid" [columns]="3">
+        <ax-field-display
+          label="Order ID"
+          [value]="orderData.id"
+        ></ax-field-display>
+        <ax-field-display
+          label="Customer"
+          [value]="orderData.customer"
+        ></ax-field-display>
+        <ax-field-display
+          label="Status"
+          [value]="orderData.status"
+        ></ax-field-display>
+        <ax-field-display
+          label="Order Date"
+          [value]="orderData.orderDate"
+          type="date"
+        ></ax-field-display>
+        <ax-field-display
+          label="Delivery Date"
+          [value]="orderData.deliveryDate"
+          type="date"
+        ></ax-field-display>
+        <ax-field-display
+          label="Items"
+          [value]="orderData.itemCount"
+          type="number"
+        ></ax-field-display>
+      </ax-description-list>
+    </div>
+
+    <h4>With Dividers (Default: Small Spacing)</h4>
+    <div class="demo-container">
+      <ax-description-list [divider]="true" style="max-width: 600px">
+        <ax-field-display
+          label="Order ID"
+          [value]="orderData.id"
+        ></ax-field-display>
+        <ax-field-display
+          label="Customer"
+          [value]="orderData.customer"
+        ></ax-field-display>
+        <ax-field-display
+          label="Status"
+          [value]="orderData.status"
+        ></ax-field-display>
+        <ax-field-display
+          label="Total"
+          [value]="orderData.total"
+          type="currency"
+          [formatOptions]="{ currency: 'THB' }"
+        ></ax-field-display>
+      </ax-description-list>
+    </div>
+
+    <h4>Divider Size Variants</h4>
+    <div class="demo-container">
+      <div
+        style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem"
+      >
+        <!-- Small (Dense) -->
+        <div>
+          <h5
+            style="
+              margin-bottom: 0.5rem;
+              color: var(--ax-text-secondary);
+              font-size: 0.875rem;
+            "
+          >
+            Small (8px total)
+          </h5>
+          <ax-description-list [divider]="true" size="sm">
+            <ax-field-display
+              label="Order ID"
+              [value]="orderData.id"
+            ></ax-field-display>
+            <ax-field-display
+              label="Customer"
+              [value]="orderData.customer"
+            ></ax-field-display>
+            <ax-field-display
+              label="Status"
+              [value]="orderData.status"
+            ></ax-field-display>
+          </ax-description-list>
+        </div>
+
+        <!-- Medium (Comfortable) -->
+        <div>
+          <h5
+            style="
+              margin-bottom: 0.5rem;
+              color: var(--ax-text-secondary);
+              font-size: 0.875rem;
+            "
+          >
+            Medium (16px total)
+          </h5>
+          <ax-description-list [divider]="true" size="md">
+            <ax-field-display
+              label="Order ID"
+              [value]="orderData.id"
+            ></ax-field-display>
+            <ax-field-display
+              label="Customer"
+              [value]="orderData.customer"
+            ></ax-field-display>
+            <ax-field-display
+              label="Status"
+              [value]="orderData.status"
+            ></ax-field-display>
+          </ax-description-list>
+        </div>
+
+        <!-- Large (Spacious) -->
+        <div>
+          <h5
+            style="
+              margin-bottom: 0.5rem;
+              color: var(--ax-text-secondary);
+              font-size: 0.875rem;
+            "
+          >
+            Large (24px total)
+          </h5>
+          <ax-description-list [divider]="true" size="lg">
+            <ax-field-display
+              label="Order ID"
+              [value]="orderData.id"
+            ></ax-field-display>
+            <ax-field-display
+              label="Customer"
+              [value]="orderData.customer"
+            ></ax-field-display>
+            <ax-field-display
+              label="Status"
+              [value]="orderData.status"
+            ></ax-field-display>
+          </ax-description-list>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

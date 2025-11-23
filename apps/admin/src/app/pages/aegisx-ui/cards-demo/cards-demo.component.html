@@ -1,0 +1,73 @@
+<div class="docs-page">
+  <!-- Page Header with back button -->
+  <div class="docs-header">
+    <div class="docs-breadcrumb">
+      <a routerLink="/aegisx-ui" mat-button>
+        <mat-icon>arrow_back</mat-icon>
+        AegisX UI
+      </a>
+      <mat-icon>chevron_right</mat-icon>
+      <span>Cards</span>
+    </div>
+
+    <h1 class="docs-title">Card Components</h1>
+    <p class="docs-subtitle">
+      Display content and statistics in organized card layouts
+    </p>
+  </div>
+
+  <!-- Card Component -->
+  <div class="demo-section">
+    <h3>Card Component</h3>
+    <div class="demo-container feature-group">
+      <h4>📇 Card Examples</h4>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <ax-card title="User Profile" subtitle="Personal Information">
+          <p>This is the card content area. You can place any content here.</p>
+        </ax-card>
+
+        <ax-card title="Dashboard Stats" subtitle="Overview">
+          <p>Display statistics, charts, or important metrics in this area.</p>
+        </ax-card>
+
+        <ax-card title="Notifications" subtitle="Recent Activity">
+          <p>Show recent notifications, updates, or activity feeds here.</p>
+        </ax-card>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Card Component -->
+  <div class="demo-section">
+    <h3>Stats Card Component</h3>
+    <div class="demo-container feature-group">
+      <h4>📈 Statistics Dashboard</h4>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <ax-stats-card
+          title="Total Users"
+          value="1,234"
+          change="+12.5%"
+          trend="up"
+        ></ax-stats-card>
+        <ax-stats-card
+          title="Revenue"
+          value="$45,678"
+          change="-3.2%"
+          trend="down"
+        ></ax-stats-card>
+        <ax-stats-card
+          title="Active Sessions"
+          value="567"
+          change="+8.1%"
+          trend="up"
+        ></ax-stats-card>
+        <ax-stats-card
+          title="Conversion Rate"
+          value="24.5%"
+          change="+2.3%"
+          trend="up"
+        ></ax-stats-card>
+      </div>
+    </div>
+  </div>
+</div>

@@ -137,11 +137,61 @@ export const appRoutes: Route[] = [
         (m) => m.TypographyShowcaseComponent,
       ),
   },
+  // AegisX UI Components Routes
   {
     path: 'aegisx-ui',
     loadComponent: () =>
-      import('./pages/aegisx-ui-showcase/aegisx-ui-showcase.component').then(
-        (m) => m.AegisxUiShowcaseComponent,
+      import('./pages/aegisx-ui/aegisx-ui.component').then(
+        (m) => m.AegisxUiComponent,
       ),
+  },
+  {
+    path: 'aegisx-ui/date-picker',
+    loadComponent: () =>
+      import(
+        './pages/aegisx-ui/date-picker-demo/date-picker-demo.component'
+      ).then((m) => m.DatePickerDemoComponent),
+  },
+  {
+    path: 'aegisx-ui/cards',
+    loadComponent: () =>
+      import('./pages/aegisx-ui/cards-demo/cards-demo.component').then(
+        (m) => m.CardsDemoComponent,
+      ),
+  },
+  {
+    path: 'aegisx-ui/lists',
+    loadComponent: () =>
+      import('./pages/aegisx-ui/lists-demo/lists-demo.component').then(
+        (m) => m.ListsDemoComponent,
+      ),
+  },
+  {
+    path: 'aegisx-ui/data-display',
+    loadComponent: () =>
+      import(
+        './pages/aegisx-ui/data-display-demo/data-display-demo.component'
+      ).then((m) => m.DataDisplayDemoComponent),
+  },
+  {
+    path: 'aegisx-ui/avatar',
+    loadComponent: () =>
+      import('./pages/aegisx-ui/avatar-demo/avatar-demo.component').then(
+        (m) => m.AvatarDemoComponent,
+      ),
+  },
+  {
+    path: 'aegisx-ui/feedback',
+    loadComponent: () =>
+      import('./pages/aegisx-ui/feedback-demo/feedback-demo.component').then(
+        (m) => m.FeedbackDemoComponent,
+      ),
+  },
+  {
+    path: 'aegisx-ui/breadcrumb',
+    loadComponent: () =>
+      import(
+        './pages/aegisx-ui/breadcrumb-demo/breadcrumb-demo.component'
+      ).then((m) => m.BreadcrumbDemoComponent),
   },
 ];

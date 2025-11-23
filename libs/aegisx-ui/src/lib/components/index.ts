@@ -20,7 +20,6 @@ export * from './navigation';
 
 // Individual Components (standardized names with actual component classes)
 // NOTE: AxCardComponent is now exported from ./data-display module
-export { AegisxCardComponent } from './card/card.component'; // Legacy component with icon support
 
 // State Components (restored for CRUD Generator compatibility)
 export * from './empty-state';

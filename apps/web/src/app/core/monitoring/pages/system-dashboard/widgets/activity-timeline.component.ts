@@ -35,11 +35,10 @@ export interface ActivityItem {
     <ax-card
       [title]="title"
       [subtitle]="subtitle"
-      [icon]="'history'"
-      [appearance]="'elevated'"
+      [variant]="'elevated'"
       class="h-full"
     >
-      <div card-header-actions>
+      <div header-actions>
         <button mat-icon-button [matMenuTriggerFor]="menu">
           <mat-icon>more_vert</mat-icon>
         </button>

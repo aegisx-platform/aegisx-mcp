@@ -1,0 +1,256 @@
+<div class="docs-page">
+  <!-- Page Header with back button -->
+  <div class="docs-header">
+    <div class="docs-breadcrumb">
+      <a routerLink="/aegisx-ui" mat-button>
+        <mat-icon>arrow_back</mat-icon>
+        AegisX UI
+      </a>
+      <mat-icon>chevron_right</mat-icon>
+      <span>Feedback</span>
+    </div>
+
+    <h1 class="docs-title">Feedback Components</h1>
+    <p class="docs-subtitle">
+      Display alerts, notifications, and loading states to provide user feedback
+    </p>
+  </div>
+
+  <!-- Alert Component -->
+  <div class="demo-section">
+    <h3>Alert Component</h3>
+
+    <h4>Basic Variants</h4>
+    <div class="demo-container feature-group">
+      <div
+        style="display: flex; flex-direction: column; gap: 1rem; width: 100%"
+      >
+        <ax-alert variant="success" style="width: 100%"
+          >Patient record saved successfully.</ax-alert
+        >
+        <ax-alert variant="info" style="width: 100%"
+          >A new software update is available for the system.</ax-alert
+        >
+        <ax-alert variant="warning" style="width: 100%"
+          >Patient's insurance information is about to expire.</ax-alert
+        >
+        <ax-alert variant="error" style="width: 100%"
+          >Failed to update lab results. Please try again.</ax-alert
+        >
+      </div>
+    </div>
+
+    <h4>With Titles</h4>
+    <div class="demo-container feature-group">
+      <div
+        style="display: flex; flex-direction: column; gap: 1rem; width: 100%"
+      >
+        <ax-alert variant="info" title="Information" style="width: 100%">
+          This alert has a title and description
+        </ax-alert>
+        <ax-alert variant="success" title="Success!" style="width: 100%">
+          Your changes have been saved successfully
+        </ax-alert>
+        <ax-alert variant="warning" title="Warning" style="width: 100%">
+          This action cannot be undone
+        </ax-alert>
+        <ax-alert variant="error" title="Error" style="width: 100%">
+          Failed to process your request
+        </ax-alert>
+      </div>
+    </div>
+
+    <h4>Closeable Alerts</h4>
+    <div class="demo-container feature-group">
+      <div
+        style="display: flex; flex-direction: column; gap: 1rem; width: 100%"
+      >
+        <ax-alert variant="info" [closeable]="true" style="width: 100%">
+          You can close this alert by clicking the X button
+        </ax-alert>
+        <ax-alert
+          variant="success"
+          title="Closeable"
+          [closeable]="true"
+          style="width: 100%"
+        >
+          Click the X button to dismiss this alert
+        </ax-alert>
+      </div>
+    </div>
+
+    <h4>Auto-Hide Alerts</h4>
+    <div class="demo-container feature-group">
+      <div
+        style="display: flex; flex-direction: column; gap: 1rem; width: 100%"
+      >
+        <div style="display: flex; gap: 1rem; margin-bottom: 1rem">
+          <button mat-raised-button color="primary" (click)="showInfoAlert()">
+            Show 3s Alert
+          </button>
+          <button mat-raised-button color="accent" (click)="showSuccessAlert()">
+            Show 5s Success
+          </button>
+          <button mat-raised-button (click)="showWarningAlert()">
+            Show 10s Warning
+          </button>
+        </div>
+
+        @if (showAutoHideAlert) {
+          <ax-alert
+            variant="info"
+            [duration]="3000"
+            (close)="onAlertClose('info')"
+            style="width: 100%"
+          >
+            This alert will auto-hide in 3 seconds
+          </ax-alert>
+        }
+
+        @if (showAutoHideSuccess) {
+          <ax-alert
+            variant="success"
+            title="Success!"
+            [closeable]="true"
+            [duration]="5000"
+            (close)="onAlertClose('success')"
+            style="width: 100%"
+          >
+            This alert will auto-hide in 5 seconds, or you can close it manually
+          </ax-alert>
+        }
+
+        @if (showAutoHideWarning) {
+          <ax-alert
+            variant="warning"
+            title="Warning"
+            [closeable]="true"
+            [duration]="10000"
+            (close)="onAlertClose('warning')"
+            style="width: 100%"
+          >
+            This alert will auto-hide in 10 seconds
+          </ax-alert>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Bar Component -->
+  <div class="demo-section">
+    <h3>Loading Bar Component</h3>
+    <p class="demo-description">
+      Fully controllable loading bar with service-based architecture. Control
+      from any component in your app!
+    </p>
+
+    <div class="demo-grid">
+      <!-- Row 1: Basic Loading States -->
+      <div class="demo-item">
+        <h4>Simple Loading (Indeterminate)</h4>
+        <button mat-raised-button color="primary" (click)="demoSimpleLoading()">
+          Show Loading (3s)
+        </button>
+        <code class="demo-code">loadingBarService.show('primary')</code>
+      </div>
+
+      <div class="demo-item">
+        <h4>Success Loading</h4>
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="demoSuccessLoading()"
+        >
+          Show Success (2s)
+        </button>
+        <code class="demo-code">loadingBarService.showSuccess('Success!')</code>
+      </div>
+
+      <div class="demo-item">
+        <h4>Error Loading</h4>
+        <button mat-raised-button color="warn" (click)="demoErrorLoading()">
+          Show Error (2s)
+        </button>
+        <code class="demo-code">loadingBarService.showError('Error!')</code>
+      </div>
+
+      <div class="demo-item">
+        <h4>Warning Loading</h4>
+        <button mat-raised-button color="accent" (click)="demoWarningLoading()">
+          Show Warning (2s)
+        </button>
+        <code class="demo-code">loadingBarService.showWarning('Warning!')</code>
+      </div>
+
+      <!-- Row 2: Progress Loading -->
+      <div class="demo-item">
+        <h4>Progress Loading (Simulated Upload)</h4>
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="demoProgressLoading()"
+        >
+          Simulate Upload
+        </button>
+        <code class="demo-code"
+          >loadingBarService.showProgress(0)<br />setProgress(percent)</code
+        >
+      </div>
+
+      <div class="demo-item">
+        <h4>Multi-Step Process</h4>
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="demoMultiStepProcess()"
+        >
+          3-Step Process
+        </button>
+        <code class="demo-code"
+          >setProgress(33/66/100)<br />with step messages</code
+        >
+      </div>
+
+      <div class="demo-item">
+        <h4>Simulated API Call</h4>
+        <button mat-raised-button color="primary" (click)="demoApiCall()">
+          Fetch Data
+        </button>
+        <code class="demo-code">async/await with<br />try/catch handling</code>
+      </div>
+
+      <div class="demo-item">
+        <h4>Auto-Progress Simulation</h4>
+        <button mat-raised-button color="primary" (click)="demoAutoProgress()">
+          Auto Progress
+        </button>
+        <code class="demo-code">simulateProgress(3000, 90)</code>
+      </div>
+    </div>
+
+    <div class="demo-info">
+      <h4>💡 How it Works</h4>
+      <p>
+        The loading bar uses <code>LoadingBarService</code> for centralized
+        control. Inject the service in any component to control the loading bar
+        in the layout!
+      </p>
+      <ul>
+        <li>
+          <strong>Service-based:</strong> Injectable via dependency injection
+        </li>
+        <li>
+          <strong>Reactive:</strong> Uses RxJS BehaviorSubject for state
+          management
+        </li>
+        <li>
+          <strong>Type-safe:</strong> Full TypeScript support with interfaces
+        </li>
+        <li><strong>Flexible:</strong> Indeterminate & Determinate modes</li>
+        <li>
+          <strong>Colors:</strong> primary, success, warning, error, neutral
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

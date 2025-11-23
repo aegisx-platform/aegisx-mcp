@@ -1,0 +1,40 @@
+<div class="docs-page">
+  <!-- Page Header with back button -->
+  <div class="docs-header">
+    <div class="docs-breadcrumb">
+      <a routerLink="/aegisx-ui" mat-button>
+        <mat-icon>arrow_back</mat-icon>
+        AegisX UI
+      </a>
+      <mat-icon>chevron_right</mat-icon>
+      <span>Lists</span>
+    </div>
+
+    <h1 class="docs-title">List & Timeline Components</h1>
+    <p class="docs-subtitle">
+      Display ordered content and chronological events
+    </p>
+  </div>
+
+  <!-- List Component -->
+  <div class="demo-section">
+    <h3>List Component</h3>
+    <div class="demo-container feature-group">
+      <h4>📋 List Example</h4>
+      <div style="max-width: 500px">
+        <ax-list [items]="listItems"></ax-list>
+      </div>
+    </div>
+  </div>
+
+  <!-- Timeline Component -->
+  <div class="demo-section">
+    <h3>Timeline Component</h3>
+    <div class="demo-container feature-group">
+      <h4>📅 Activity Timeline</h4>
+      <div style="max-width: 600px">
+        <ax-timeline [items]="timelineItems"></ax-timeline>
+      </div>
+    </div>
+  </div>
+</div>

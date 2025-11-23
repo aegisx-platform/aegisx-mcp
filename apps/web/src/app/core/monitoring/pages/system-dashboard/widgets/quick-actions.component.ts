@@ -31,8 +31,7 @@ export interface QuickAction {
     <ax-card
       [title]="title"
       [subtitle]="subtitle"
-      [icon]="'flash_on'"
-      [appearance]="'elevated'"
+      [variant]="'elevated'"
       class="h-full"
     >
       <div
