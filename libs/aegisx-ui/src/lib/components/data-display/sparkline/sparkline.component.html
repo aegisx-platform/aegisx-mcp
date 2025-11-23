@@ -37,5 +37,29 @@
     [attr.fill]="color"
     class="ax-sparkline__dot"
     [class.ax-sparkline__dot--visible]="showDots"
+    (mouseenter)="onPointMouseEnter(point)"
+    (mouseleave)="onPointMouseLeave()"
   />
+
+  <!-- Tooltip -->
+  <g *ngIf="hoveredPoint && showValue" class="ax-sparkline__tooltip">
+    <!-- Tooltip background -->
+    <rect
+      [attr.x]="getTooltipRectX(hoveredPoint.x)"
+      [attr.y]="getTooltipRectY(hoveredPoint.y)"
+      width="60"
+      height="20"
+      rx="4"
+      class="ax-sparkline__tooltip-bg"
+    />
+    <!-- Tooltip text -->
+    <text
+      [attr.x]="getTooltipX(hoveredPoint.x)"
+      [attr.y]="getTooltipTextY(hoveredPoint.y)"
+      class="ax-sparkline__tooltip-text"
+      text-anchor="middle"
+    >
+      {{ formatValue(hoveredPoint.value) }}
+    </text>
+  </g>
 </svg>

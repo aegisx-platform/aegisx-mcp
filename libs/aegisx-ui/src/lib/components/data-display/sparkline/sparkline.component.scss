@@ -44,3 +44,24 @@
 .ax-sparkline:hover .ax-sparkline__dot {
   opacity: 1;
 }
+
+// Tooltip styles
+.ax-sparkline__tooltip {
+  pointer-events: none;
+}
+
+.ax-sparkline__tooltip-bg {
+  fill: var(--ax-background-inverse, #1f2937);
+  opacity: 0.9;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.ax-sparkline__tooltip-text {
+  fill: var(--ax-text-inverse, #ffffff);
+  font-size: 10px;
+  font-weight: 600;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
+}

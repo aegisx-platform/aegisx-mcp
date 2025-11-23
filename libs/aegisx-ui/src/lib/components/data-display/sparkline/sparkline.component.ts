@@ -64,12 +64,18 @@ export class AxSparklineComponent implements OnInit {
   /** Custom width (e.g., "200px", "50%"). If not set, defaults to 100% */
   @Input() customWidth?: string;
 
+  /** Show value tooltip on hover */
+  @Input() showValue = true;
+
   // SVG properties
   svgWidth = 0;
   svgHeight = 0;
   pathD = '';
   areaPathD = '';
-  points: { x: number; y: number }[] = [];
+  points: { x: number; y: number; value: number }[] = [];
+
+  // Tooltip properties
+  hoveredPoint: { x: number; y: number; value: number } | null = null;
 
   ngOnInit(): void {
     this.calculateDimensions();
@@ -119,7 +125,7 @@ export class AxSparklineComponent implements OnInit {
     this.points = this.data.map((value, index) => {
       const x = padding + (index / (this.data.length - 1)) * usableWidth;
       const y = padding + usableHeight - ((value - min) / range) * usableHeight;
-      return { x, y };
+      return { x, y, value };
     });
 
     // Generate line path
@@ -181,5 +187,89 @@ export class AxSparklineComponent implements OnInit {
    */
   getFillColor(): string {
     return this.color;
+  }
+
+  /**
+   * Handle mouse enter on data point
+   */
+  onPointMouseEnter(point: { x: number; y: number; value: number }): void {
+    if (this.showValue) {
+      this.hoveredPoint = point;
+    }
+  }
+
+  /**
+   * Handle mouse leave on data point
+   */
+  onPointMouseLeave(): void {
+    this.hoveredPoint = null;
+  }
+
+  /**
+   * Format value for display
+   */
+  formatValue(value: number): string {
+    // Format with commas for thousands
+    return value.toLocaleString('en-US', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    });
+  }
+
+  /**
+   * Get tooltip X position with boundary detection
+   */
+  getTooltipX(pointX: number): number {
+    const tooltipWidth = 60;
+    const tooltipHalfWidth = tooltipWidth / 2;
+
+    // Check if tooltip would overflow left edge
+    if (pointX - tooltipHalfWidth < 0) {
+      return tooltipHalfWidth;
+    }
+
+    // Check if tooltip would overflow right edge
+    if (pointX + tooltipHalfWidth > this.svgWidth) {
+      return this.svgWidth - tooltipHalfWidth;
+    }
+
+    // Center tooltip on point
+    return pointX;
+  }
+
+  /**
+   * Get tooltip rect X position
+   */
+  getTooltipRectX(pointX: number): number {
+    return this.getTooltipX(pointX) - 30;
+  }
+
+  /**
+   * Get tooltip Y position (always above the point)
+   */
+  getTooltipY(pointY: number): number {
+    const tooltipHeight = 25;
+
+    // If point is too close to top, show below
+    if (pointY < tooltipHeight) {
+      return pointY + 15; // Below the point
+    }
+
+    // Default: show above the point
+    return pointY - 25;
+  }
+
+  /**
+   * Get tooltip rect Y position
+   */
+  getTooltipRectY(pointY: number): number {
+    return this.getTooltipY(pointY);
+  }
+
+  /**
+   * Get tooltip text Y position (centered in rect)
+   */
+  getTooltipTextY(pointY: number): number {
+    return this.getTooltipY(pointY) + 13;
   }
 }
