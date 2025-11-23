@@ -175,11 +175,18 @@ export class App {
           link: '/aegisx-ui/avatar',
         },
         {
-          id: 'aegisx-ui-feedback',
-          title: 'Feedback',
+          id: 'aegisx-ui-alerts',
+          title: 'Alerts',
           type: 'item',
-          icon: 'feedback',
-          link: '/aegisx-ui/feedback',
+          icon: 'notifications',
+          link: '/aegisx-ui/alerts',
+        },
+        {
+          id: 'aegisx-ui-loading-bar',
+          title: 'Loading Bar',
+          type: 'item',
+          icon: 'hourglass_empty',
+          link: '/aegisx-ui/loading-bar',
         },
         {
           id: 'aegisx-ui-breadcrumb',
@@ -187,6 +194,13 @@ export class App {
           type: 'item',
           icon: 'arrow_forward',
           link: '/aegisx-ui/breadcrumb',
+        },
+        {
+          id: 'aegisx-ui-card-colors',
+          title: 'Card Colors',
+          type: 'item',
+          icon: 'palette',
+          link: '/aegisx-ui/card-colors',
         },
         {
           id: 'card-examples',
