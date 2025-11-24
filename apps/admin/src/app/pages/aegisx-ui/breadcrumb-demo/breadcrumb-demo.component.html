@@ -18,6 +18,109 @@
   </div>
 
   <!-- ============================================
+       Interactive Demo
+       ============================================ -->
+  <div class="demo-section">
+    <h3 class="heading-title-large">Interactive Demo</h3>
+    <p class="mb-4">
+      Try customizing the breadcrumb properties below to see how they work
+    </p>
+
+    <div
+      class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
+    >
+      <!-- Preview Area -->
+      <div class="p-8 border-b border-gray-200 dark:border-gray-700">
+        <ax-breadcrumb
+          [items]="interactiveBreadcrumbs"
+          [size]="interactiveSize"
+          [separator]="
+            interactiveSeparatorType === 'text' ? interactiveTextSeparator : '/'
+          "
+          [separatorIcon]="
+            interactiveSeparatorType === 'icon'
+              ? interactiveIconSeparator
+              : undefined
+          "
+          (itemClick)="onBreadcrumbClick($event)"
+        ></ax-breadcrumb>
+      </div>
+
+      <!-- Controls Area -->
+      <div class="p-6 bg-gray-50 dark:bg-gray-900">
+        <h4 class="heading-title-medium mb-4">Customize Properties</h4>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Size Control -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Size</mat-label>
+            <mat-select [(ngModel)]="interactiveSize">
+              <mat-option value="sm">Small</mat-option>
+              <mat-option value="md">Medium</mat-option>
+              <mat-option value="lg">Large</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Separator Type -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Separator Type</mat-label>
+            <mat-select [(ngModel)]="interactiveSeparatorType">
+              <mat-option value="text">Text</mat-option>
+              <mat-option value="icon">Icon</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Text Separator (shown when type is text) -->
+          @if (interactiveSeparatorType === 'text') {
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Text Separator</mat-label>
+              <mat-select [(ngModel)]="interactiveTextSeparator">
+                @for (sep of textSeparators; track sep) {
+                  <mat-option [value]="sep">{{ sep }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          }
+
+          <!-- Icon Separator (shown when type is icon) -->
+          @if (interactiveSeparatorType === 'icon') {
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Icon Separator</mat-label>
+              <mat-select [(ngModel)]="interactiveIconSeparator">
+                @for (icon of iconSeparators; track icon) {
+                  <mat-option [value]="icon">
+                    <div class="flex items-center gap-2">
+                      <mat-icon>{{ icon }}</mat-icon>
+                      <span>{{ icon }}</span>
+                    </div>
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          }
+
+          <!-- Show Icons Toggle -->
+          <div class="flex items-center">
+            <mat-slide-toggle [(ngModel)]="interactiveShowIcons">
+              Show Item Icons
+            </mat-slide-toggle>
+          </div>
+        </div>
+
+        <!-- Generated Code -->
+        <div class="mt-6">
+          <h5 class="type-body-medium font-semibold mb-3">Generated Code:</h5>
+          <div
+            class="bg-gray-900 dark:bg-black rounded p-4 overflow-x-auto font-mono text-sm text-green-400"
+          >
+            <pre>{{ interactiveCode }}</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
        Basic Breadcrumb
        ============================================ -->
   <div class="demo-section">

@@ -1,7 +1,11 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { RouterModule } from '@angular/router';
 import { AxBreadcrumbComponent, BreadcrumbItem } from '@aegisx/ui';
 import { CodePreviewComponent } from '../../../components/code-preview/code-preview.component';
@@ -11,8 +15,12 @@ import { CodePreviewComponent } from '../../../components/code-preview/code-prev
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     MatButtonModule,
     MatIconModule,
+    MatSelectModule,
+    MatFormFieldModule,
+    MatSlideToggleModule,
     RouterModule,
     AxBreadcrumbComponent,
     CodePreviewComponent,
@@ -21,6 +29,54 @@ import { CodePreviewComponent } from '../../../components/code-preview/code-prev
   styleUrls: ['./breadcrumb-demo.component.scss'],
 })
 export class BreadcrumbDemoComponent {
+  // Interactive demo properties
+  interactiveSize: 'sm' | 'md' | 'lg' = 'md';
+  interactiveSeparatorType: 'text' | 'icon' = 'icon';
+  interactiveTextSeparator = '/';
+  interactiveIconSeparator = 'chevron_right';
+  interactiveShowIcons = true;
+
+  textSeparators = ['/', '›', '>', '•', '-', '|'];
+  iconSeparators = [
+    'chevron_right',
+    'navigate_next',
+    'arrow_forward_ios',
+    'keyboard_arrow_right',
+  ];
+
+  get interactiveBreadcrumbs(): BreadcrumbItem[] {
+    if (this.interactiveShowIcons) {
+      return [
+        { label: 'Home', url: '/', icon: 'home' },
+        { label: 'Products', url: '/products', icon: 'inventory_2' },
+        { label: 'Electronics', url: '/products/electronics', icon: 'devices' },
+        { label: 'Smartphones' },
+      ];
+    }
+    return [
+      { label: 'Home', url: '/' },
+      { label: 'Products', url: '/products' },
+      { label: 'Electronics', url: '/products/electronics' },
+      { label: 'Smartphones' },
+    ];
+  }
+
+  get interactiveCode(): string {
+    const separator =
+      this.interactiveSeparatorType === 'icon'
+        ? `separatorIcon="${this.interactiveIconSeparator}"`
+        : `separator="${this.interactiveTextSeparator}"`;
+    const size =
+      this.interactiveSize !== 'md' ? `size="${this.interactiveSize}"` : '';
+    const withIcons = this.interactiveShowIcons ? ' (with icons)' : '';
+
+    return `<!-- Interactive Breadcrumb${withIcons} -->
+<ax-breadcrumb
+  [items]="breadcrumbs"
+  ${separator}${size ? '\n  ' + size : ''}
+  (itemClick)="onBreadcrumbClick($event)"
+></ax-breadcrumb>`;
+  }
   // Basic breadcrumb
   basicBreadcrumbs: BreadcrumbItem[] = [
     { label: 'Home', url: '/' },
