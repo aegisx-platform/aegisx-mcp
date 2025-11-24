@@ -60,6 +60,71 @@
   </div>
 
   <!-- ============================================
+       Size Variants
+       ============================================ -->
+  <div class="demo-section">
+    <h3 class="heading-title-large">Size Variants</h3>
+    <p class="mb-4">
+      Control the breadcrumb font size with the size property (sm, md, lg)
+    </p>
+
+    <app-code-preview [code]="sizeVariantsCode" language="html">
+      <div class="space-y-4">
+        <!-- Small Size -->
+        <div>
+          <p class="type-body-small mb-2 text-gray-600 dark:text-gray-400">
+            Small (sm)
+          </p>
+          <div
+            class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4"
+          >
+            <ax-breadcrumb
+              [items]="dashboardBreadcrumbs"
+              size="sm"
+              separatorIcon="chevron_right"
+              (itemClick)="onBreadcrumbClick($event)"
+            ></ax-breadcrumb>
+          </div>
+        </div>
+
+        <!-- Medium Size (Default) -->
+        <div>
+          <p class="type-body-small mb-2 text-gray-600 dark:text-gray-400">
+            Medium (md) - Default
+          </p>
+          <div
+            class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4"
+          >
+            <ax-breadcrumb
+              [items]="dashboardBreadcrumbs"
+              size="md"
+              separatorIcon="chevron_right"
+              (itemClick)="onBreadcrumbClick($event)"
+            ></ax-breadcrumb>
+          </div>
+        </div>
+
+        <!-- Large Size -->
+        <div>
+          <p class="type-body-small mb-2 text-gray-600 dark:text-gray-400">
+            Large (lg)
+          </p>
+          <div
+            class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4"
+          >
+            <ax-breadcrumb
+              [items]="dashboardBreadcrumbs"
+              size="lg"
+              separatorIcon="chevron_right"
+              (itemClick)="onBreadcrumbClick($event)"
+            ></ax-breadcrumb>
+          </div>
+        </div>
+      </div>
+    </app-code-preview>
+  </div>
+
+  <!-- ============================================
        Custom Separators
        ============================================ -->
   <div class="demo-section">
@@ -297,6 +362,16 @@
               <td class="p-2">
                 Material icon name for separator (e.g., 'chevron_right'). If
                 provided, overrides separator text
+              </td>
+            </tr>
+            <tr class="border-b border-gray-100 dark:border-gray-800">
+              <td class="p-2 font-mono text-blue-600 dark:text-blue-400">
+                size
+              </td>
+              <td class="p-2 font-mono text-xs">'sm' | 'md' | 'lg'</td>
+              <td class="p-2 font-mono text-xs">'md'</td>
+              <td class="p-2">
+                Size of the breadcrumb (controls font size and icon size)
               </td>
             </tr>
           </tbody>

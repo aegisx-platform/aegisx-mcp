@@ -27,7 +27,9 @@
         @if (!isLastItem($index)) {
           <span class="ax-breadcrumb-separator" aria-hidden="true">
             @if (separatorIcon) {
-              <mat-icon>{{ separatorIcon }}</mat-icon>
+              <mat-icon class="ax-breadcrumb-separator-icon">{{
+                separatorIcon
+              }}</mat-icon>
             } @else {
               {{ separator }}
             }

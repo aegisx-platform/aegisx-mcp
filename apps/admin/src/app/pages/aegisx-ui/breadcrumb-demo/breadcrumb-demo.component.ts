@@ -116,6 +116,28 @@ breadcrumbs: BreadcrumbItem[] = [
   { label: 'Smartphones' }
 ];`;
 
+  sizeVariantsCode = `<!-- Size Variants -->
+<!-- Small -->
+<ax-breadcrumb
+  [items]="breadcrumbs"
+  size="sm"
+  separatorIcon="chevron_right"
+></ax-breadcrumb>
+
+<!-- Medium (Default) -->
+<ax-breadcrumb
+  [items]="breadcrumbs"
+  size="md"
+  separatorIcon="chevron_right"
+></ax-breadcrumb>
+
+<!-- Large -->
+<ax-breadcrumb
+  [items]="breadcrumbs"
+  size="lg"
+  separatorIcon="chevron_right"
+></ax-breadcrumb>`;
+
   customSeparatorCode = `<!-- Custom Separator -->
 <ax-breadcrumb
   [items]="breadcrumbs"

@@ -8,6 +8,8 @@ export interface BreadcrumbItem {
   icon?: string;
 }
 
+export type BreadcrumbSize = 'sm' | 'md' | 'lg';
+
 @Component({
   selector: 'ax-breadcrumb',
   standalone: true,
@@ -19,10 +21,11 @@ export class AxBreadcrumbComponent {
   @Input() items: BreadcrumbItem[] = [];
   @Input() separator = '/';
   @Input() separatorIcon?: string; // Material icon name for separator (e.g., 'chevron_right')
+  @Input() size: BreadcrumbSize = 'md'; // Breadcrumb size (font size)
   @Output() itemClick = new EventEmitter<BreadcrumbItem>();
 
   get breadcrumbClasses(): string {
-    return 'ax-breadcrumb';
+    return `ax-breadcrumb ax-breadcrumb-${this.size}`;
   }
 
   onItemClick(item: BreadcrumbItem, event: MouseEvent): void {
