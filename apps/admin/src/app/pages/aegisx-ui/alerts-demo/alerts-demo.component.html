@@ -1,0 +1,398 @@
+<div class="docs-page">
+  <!-- Page Header with back button -->
+  <div class="docs-header">
+    <div class="docs-breadcrumb">
+      <a routerLink="/aegisx-ui" mat-button>
+        <mat-icon>arrow_back</mat-icon>
+        AegisX UI
+      </a>
+      <mat-icon>chevron_right</mat-icon>
+      <span>Alerts</span>
+    </div>
+
+    <h1 class="docs-title">Alert Component</h1>
+    <p class="docs-subtitle">
+      Display important messages and notifications to provide feedback to users
+    </p>
+  </div>
+
+  <!-- ============================================
+       Basic Alert Variants
+       ============================================ -->
+  <div class="demo-section">
+    <h3>Alert Variants</h3>
+    <div class="demo-container feature-group">
+      <h4>🎨 Four Semantic Colors</h4>
+      <p class="mb-4">
+        Use semantic colors to convey different types of messages: success,
+        info, warning, and error
+      </p>
+
+      <div class="space-y-4">
+        <ax-alert variant="success">
+          Patient record saved successfully.
+        </ax-alert>
+
+        <ax-alert variant="info">
+          A new software update is available for the system.
+        </ax-alert>
+
+        <ax-alert variant="warning">
+          Patient's insurance information is about to expire.
+        </ax-alert>
+
+        <ax-alert variant="error">
+          Failed to update lab results. Please try again.
+        </ax-alert>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       Alerts with Titles
+       ============================================ -->
+  <div class="demo-section">
+    <h3>Alerts with Titles</h3>
+    <div class="demo-container feature-group">
+      <h4>📋 Enhanced Context</h4>
+      <p class="mb-4">
+        Add titles to provide additional context and improve scannability
+      </p>
+
+      <div class="space-y-4">
+        <ax-alert variant="success" title="Success!">
+          Your changes have been saved successfully and are now live.
+        </ax-alert>
+
+        <ax-alert variant="info" title="Information">
+          This alert has a title and description to provide more context about
+          the notification.
+        </ax-alert>
+
+        <ax-alert variant="warning" title="Warning">
+          This action cannot be undone. Please review your changes before
+          proceeding.
+        </ax-alert>
+
+        <ax-alert variant="error" title="Error">
+          Failed to process your request. Please check your input and try again.
+        </ax-alert>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       Closeable Alerts
+       ============================================ -->
+  <div class="demo-section">
+    <h3>Closeable Alerts</h3>
+    <div class="demo-container feature-group">
+      <h4>❌ User Dismissible</h4>
+      <p class="mb-4">Allow users to dismiss alerts by adding a close button</p>
+
+      <div class="space-y-4">
+        @if (showCloseableInfo) {
+          <ax-alert
+            variant="info"
+            [closeable]="true"
+            (close)="onAlertClose('closeable-info')"
+          >
+            You can close this alert by clicking the X button.
+          </ax-alert>
+        }
+
+        @if (showCloseableSuccess) {
+          <ax-alert
+            variant="success"
+            title="Closeable Success"
+            [closeable]="true"
+            (close)="onAlertClose('closeable-success')"
+          >
+            Click the X button to dismiss this success alert.
+          </ax-alert>
+        }
+
+        @if (showCloseableWarning) {
+          <ax-alert
+            variant="warning"
+            title="Closeable Warning"
+            [closeable]="true"
+            (close)="onAlertClose('closeable-warning')"
+          >
+            This warning can be dismissed when you're ready.
+          </ax-alert>
+        }
+
+        @if (showCloseableError) {
+          <ax-alert
+            variant="error"
+            title="Closeable Error"
+            [closeable]="true"
+            (close)="onAlertClose('closeable-error')"
+          >
+            You can dismiss this error message after reading it.
+          </ax-alert>
+        }
+
+        <div class="mt-4">
+          <button mat-stroked-button (click)="resetCloseableAlerts()">
+            <mat-icon>refresh</mat-icon>
+            Reset All Alerts
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       Auto-Hide Alerts
+       ============================================ -->
+  <div class="demo-section">
+    <h3>Auto-Hide Alerts</h3>
+    <div class="demo-container feature-group">
+      <h4>⏱️ Automatic Dismissal</h4>
+      <p class="mb-4">
+        Alerts can automatically disappear after a specified duration
+      </p>
+
+      <div class="space-y-4">
+        <div class="flex gap-3 mb-4">
+          <button mat-raised-button color="primary" (click)="showInfoAlert()">
+            Show 3s Info Alert
+          </button>
+          <button
+            mat-raised-button
+            (click)="showSuccessAlert()"
+            style="background-color: var(--ax-success); color: white"
+          >
+            Show 5s Success
+          </button>
+          <button
+            mat-raised-button
+            (click)="showWarningAlert()"
+            style="background-color: var(--ax-warning); color: white"
+          >
+            Show 7s Warning
+          </button>
+          <button mat-raised-button color="warn" (click)="showErrorAlert()">
+            Show 10s Error
+          </button>
+        </div>
+
+        @if (showAutoHideInfo) {
+          <ax-alert
+            variant="info"
+            [duration]="3000"
+            (close)="onAlertClose('info')"
+          >
+            This alert will auto-hide in 3 seconds.
+          </ax-alert>
+        }
+
+        @if (showAutoHideSuccess) {
+          <ax-alert
+            variant="success"
+            title="Success!"
+            [closeable]="true"
+            [duration]="5000"
+            (close)="onAlertClose('success')"
+          >
+            This alert will auto-hide in 5 seconds, or you can close it
+            manually.
+          </ax-alert>
+        }
+
+        @if (showAutoHideWarning) {
+          <ax-alert
+            variant="warning"
+            title="Warning"
+            [closeable]="true"
+            [duration]="7000"
+            (close)="onAlertClose('warning')"
+          >
+            This alert will auto-hide in 7 seconds, but you can dismiss it
+            earlier.
+          </ax-alert>
+        }
+
+        @if (showAutoHideError) {
+          <ax-alert
+            variant="error"
+            title="Error"
+            [closeable]="true"
+            [duration]="10000"
+            (close)="onAlertClose('error')"
+          >
+            This alert will auto-hide in 10 seconds. You have time to read the
+            full message.
+          </ax-alert>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       Real-World Examples
+       ============================================ -->
+  <div class="demo-section">
+    <h3>Real-World Examples</h3>
+    <div class="demo-container feature-group">
+      <h4>🎯 Common Use Cases</h4>
+      <p class="mb-4">
+        Practical alert implementations for different scenarios
+      </p>
+
+      <div class="space-y-8">
+        <!-- Form Validation Success -->
+        <div>
+          <h5
+            class="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300"
+          >
+            Form Validation Success
+          </h5>
+          <ax-alert
+            variant="success"
+            title="Profile Updated"
+            [closeable]="true"
+          >
+            Your profile information has been successfully updated. Changes are
+            now visible to other users.
+          </ax-alert>
+        </div>
+
+        <!-- System Notification -->
+        <div>
+          <h5
+            class="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300"
+          >
+            System Notification
+          </h5>
+          <ax-alert variant="info" title="Scheduled Maintenance">
+            System maintenance is scheduled for Sunday, 2:00 AM - 4:00 AM PST.
+            Some features may be temporarily unavailable.
+          </ax-alert>
+        </div>
+
+        <!-- Data Loss Warning -->
+        <div>
+          <h5
+            class="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300"
+          >
+            Data Loss Warning
+          </h5>
+          <ax-alert variant="warning" title="Unsaved Changes">
+            You have unsaved changes. Please save your work before navigating
+            away from this page to prevent data loss.
+          </ax-alert>
+        </div>
+
+        <!-- API Error -->
+        <div>
+          <h5
+            class="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300"
+          >
+            API Error
+          </h5>
+          <ax-alert
+            variant="error"
+            title="Connection Failed"
+            [closeable]="true"
+          >
+            Unable to connect to the server. Please check your internet
+            connection and try again. If the problem persists, contact support.
+          </ax-alert>
+        </div>
+
+        <!-- Multiple Alerts Stack -->
+        <div>
+          <h5
+            class="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300"
+          >
+            Multiple Alerts (Stack)
+          </h5>
+          <div class="space-y-3">
+            <ax-alert variant="success" [closeable]="true">
+              File uploaded successfully: document.pdf
+            </ax-alert>
+            <ax-alert variant="info">
+              Processing file... This may take a few moments.
+            </ax-alert>
+            <ax-alert variant="warning" [closeable]="true">
+              Large file detected. Upload speed may be slower than usual.
+            </ax-alert>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       Best Practices
+       ============================================ -->
+  <div class="demo-section">
+    <h3>Best Practices</h3>
+    <div class="demo-container feature-group">
+      <h4>💡 Usage Guidelines</h4>
+
+      <div class="space-y-4 text-sm">
+        <div
+          class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4"
+        >
+          <h5 class="font-semibold text-blue-900 dark:text-blue-300 mb-2">
+            ✅ Do
+          </h5>
+          <ul class="space-y-2 text-blue-800 dark:text-blue-200">
+            <li>
+              • Use appropriate variant colors (success for confirmations, error
+              for failures)
+            </li>
+            <li>• Keep alert messages concise and actionable</li>
+            <li>• Use titles for complex or important alerts</li>
+            <li>• Make alerts closeable for non-critical messages</li>
+            <li>• Use auto-hide for temporary notifications (3-10 seconds)</li>
+            <li>• Stack multiple alerts vertically for better readability</li>
+          </ul>
+        </div>
+
+        <div
+          class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4"
+        >
+          <h5 class="font-semibold text-red-900 dark:text-red-300 mb-2">
+            ❌ Don't
+          </h5>
+          <ul class="space-y-2 text-red-800 dark:text-red-200">
+            <li>
+              • Don't use alerts for every minor action (causes alert fatigue)
+            </li>
+            <li>• Don't write long paragraphs in alerts (keep them brief)</li>
+            <li>
+              • Don't mix alert types inappropriately (e.g., success for errors)
+            </li>
+            <li>
+              • Don't make critical error alerts auto-hide (users need time to
+              read)
+            </li>
+            <li>• Don't show multiple alerts for the same event</li>
+            <li>
+              • Don't use alerts as primary navigation or content containers
+            </li>
+          </ul>
+        </div>
+
+        <div
+          class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4"
+        >
+          <h5 class="font-semibold text-gray-900 dark:text-gray-300 mb-2">
+            📊 Recommended Durations
+          </h5>
+          <ul class="space-y-2 text-gray-700 dark:text-gray-300">
+            <li>• Success messages: 3-5 seconds</li>
+            <li>• Info notifications: 5-7 seconds</li>
+            <li>• Warnings: 7-10 seconds</li>
+            <li>• Errors: Don't auto-hide (or 10+ seconds)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
