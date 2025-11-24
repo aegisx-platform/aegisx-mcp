@@ -116,7 +116,7 @@
 .info-card {
   margin-top: 1.5rem;
   background: var(--ax-background-subtle);
-  border: 1px solid var(--ax-border-muted);
+  border: 1px solid var(--ax-border-default);
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
@@ -160,7 +160,7 @@
 }
 
 .next-step-card {
-  border: 1px solid var(--ax-border-muted);
+  border: 1px solid var(--ax-border-default);
   background: var(--ax-background-default);
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
@@ -216,7 +216,7 @@
 // Help Card - Tremor Style
 .help-card {
   background: var(--ax-background-default);
-  border: 1px solid var(--ax-border-muted);
+  border: 1px solid var(--ax-border-default);
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 
   h3 {
