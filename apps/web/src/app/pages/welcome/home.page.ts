@@ -25,25 +25,6 @@ interface Feature {
   standalone: true,
   imports: [CommonModule, MatButtonModule, MatIconModule, MatCardModule],
   template: `
-    <mat-card appearance="outlined">
-      <mat-card-header>
-        <mat-card-title> Australian Shepherd</mat-card-title>
-        <mat-card-subtitle>Herding group</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-actions>
-        <button matButton>Learn More</button>
-      </mat-card-actions>
-    </mat-card>
-    <br />
-    <mat-card appearance="outlined">
-      <mat-card-header>
-        <mat-card-title>Poodle</mat-card-title>
-        <mat-card-subtitle>Non-sporting group</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-actions align="end">
-        <button matButton>Learn More</button>
-      </mat-card-actions>
-    </mat-card>
     <div class="home-container">
       <!-- Hero Section -->
       <section class="hero-section">
@@ -80,6 +61,7 @@ interface Feature {
           <div class="quick-actions-grid">
             @for (action of filteredQuickActions(); track action.title) {
               <mat-card
+                appearance="outlined"
                 class="quick-action-card"
                 (click)="navigateTo(action.route)"
               >
@@ -100,13 +82,15 @@ interface Feature {
           <h2 class="section-title">Platform Features</h2>
           <div class="features-grid">
             @for (feature of features(); track feature.title) {
-              <mat-card class="feature-card">
+              <mat-card appearance="outlined" class="feature-card">
                 <mat-card-content>
                   <div class="feature-icon-wrapper">
                     <mat-icon>{{ feature.icon }}</mat-icon>
                   </div>
-                  <h3 class="feature-title">{{ feature.title }}</h3>
-                  <p class="feature-description">{{ feature.description }}</p>
+                  <div>
+                    <h3 class="feature-title">{{ feature.title }}</h3>
+                    <p class="feature-description">{{ feature.description }}</p>
+                  </div>
                 </mat-card-content>
               </mat-card>
             }
@@ -116,8 +100,10 @@ interface Feature {
         <section class="section">
           <div class="info-cards-grid">
             <!-- Getting Started -->
-            <!-- Info Cards -->
-            <mat-card class="info-card info-card--primary">
+            <mat-card
+              appearance="outlined"
+              class="info-card info-card--primary"
+            >
               <mat-card-content>
                 <div class="info-icon-wrapper">
                   <mat-icon>rocket_launch</mat-icon>
@@ -135,7 +121,7 @@ interface Feature {
             </mat-card>
 
             <!-- Need Help? -->
-            <mat-card class="info-card info-card--accent">
+            <mat-card appearance="outlined" class="info-card info-card--accent">
               <mat-card-content>
                 <div class="info-icon-wrapper">
                   <mat-icon>support_agent</mat-icon>
@@ -169,14 +155,14 @@ interface Feature {
         flex-direction: column;
         width: 100%;
         min-height: 100%;
-        background-color: var(--md-sys-color-background, #fffbfe);
+        background-color: var(--ax-background-muted);
       }
 
       /* ===== HERO SECTION ===== */
       .hero-section {
-        background-color: var(--md-sys-color-surface, #fffbfe);
-        border-bottom: 1px solid var(--md-sys-color-outline-variant, #cac4d0);
-        padding: 48px 24px;
+        background-color: var(--ax-background-default);
+        border-bottom: 1px solid var(--ax-border-default);
+        padding: var(--ax-spacing-3xl) var(--ax-spacing-lg);
       }
 
       .hero-content {
@@ -186,25 +172,27 @@ interface Feature {
       }
 
       .hero-title {
-        margin: 0 0 8px 0;
-        font-size: 32px;
-        font-weight: 600;
-        color: var(--md-sys-color-on-background, #1c1b1f);
-        letter-spacing: -0.5px;
+        margin: 0 0 var(--ax-spacing-sm) 0;
+        font-size: var(--ax-font-size-3xl);
+        font-weight: var(--ax-font-weight-semibold);
+        color: var(--ax-text-heading);
+        letter-spacing: -0.02em;
       }
 
       .hero-subtitle {
-        margin: 0 0 32px 0;
-        font-size: 16px;
-        color: var(--md-sys-color-on-surface-variant, #49454e);
+        margin: 0 0 var(--ax-spacing-2xl) 0;
+        font-size: var(--ax-font-size-md);
+        color: var(--ax-text-subtle);
         max-width: 640px;
+        margin-left: auto;
+        margin-right: auto;
         line-height: 1.5;
       }
 
       .hero-actions {
         display: flex;
         justify-content: center;
-        gap: 16px;
+        gap: var(--ax-spacing-md);
         flex-wrap: wrap;
       }
 
@@ -214,11 +202,11 @@ interface Feature {
         max-width: 1200px;
         margin: 0 auto;
         width: 100%;
-        padding: 48px 24px;
+        padding: var(--ax-spacing-3xl) var(--ax-spacing-lg);
       }
 
       .section {
-        margin-bottom: 48px;
+        margin-bottom: var(--ax-spacing-3xl);
 
         &:last-child {
           margin-bottom: 0;
@@ -226,32 +214,34 @@ interface Feature {
       }
 
       .section-title {
-        margin: 0 0 24px 0;
-        font-size: 24px;
-        font-weight: 600;
-        color: var(--md-sys-color-on-background, #1c1b1f);
-        letter-spacing: -0.5px;
+        margin: 0 0 var(--ax-spacing-lg) 0;
+        font-size: var(--ax-font-size-2xl);
+        font-weight: var(--ax-font-weight-semibold);
+        color: var(--ax-text-heading);
+        letter-spacing: -0.02em;
       }
 
       /* ===== QUICK ACTIONS GRID ===== */
       .quick-actions-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-        gap: 16px;
+        gap: var(--ax-spacing-md);
       }
 
       .quick-action-card {
         cursor: pointer;
         transition: all 200ms cubic-bezier(0.2, 0, 0, 1);
-        background-color: var(--md-sys-color-surface, #fffbfe);
+        background-color: var(--ax-background-default);
+        border: 1px solid var(--ax-border-default);
 
         &:hover {
           transform: translateY(-2px);
-          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+          box-shadow: var(--ax-shadow-md);
+          border-color: var(--ax-brand-muted);
         }
 
-        mat-card-content {
-          padding: 24px;
+        ::ng-deep .mat-mdc-card-content {
+          padding: var(--ax-spacing-lg) !important;
           text-align: center;
         }
       }
@@ -262,12 +252,12 @@ interface Feature {
         justify-content: center;
         width: 48px;
         height: 48px;
-        margin: 0 auto 16px;
-        background-color: var(--md-sys-color-primary-container, #eaddff);
-        border-radius: 12px;
+        margin: 0 auto var(--ax-spacing-md);
+        background-color: var(--ax-brand-subtle);
+        border-radius: var(--ax-radius-lg);
 
         mat-icon {
-          color: var(--md-sys-color-primary, #6750a4);
+          color: var(--ax-brand-emphasis);
           font-size: 24px;
           width: 24px;
           height: 24px;
@@ -275,16 +265,16 @@ interface Feature {
       }
 
       .action-title {
-        margin: 0 0 8px 0;
-        font-size: 16px;
-        font-weight: 600;
-        color: var(--md-sys-color-on-surface, #1c1b1f);
+        margin: 0 0 var(--ax-spacing-xs) 0;
+        font-size: var(--ax-font-size-md);
+        font-weight: var(--ax-font-weight-semibold);
+        color: var(--ax-text-heading);
       }
 
       .action-description {
         margin: 0;
-        font-size: 14px;
-        color: var(--md-sys-color-on-surface-variant, #49454e);
+        font-size: var(--ax-font-size-sm);
+        color: var(--ax-text-subtle);
         line-height: 1.4;
       }
 
@@ -292,16 +282,17 @@ interface Feature {
       .features-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 16px;
+        gap: var(--ax-spacing-md);
       }
 
       .feature-card {
-        background-color: var(--md-sys-color-surface, #fffbfe);
+        background-color: var(--ax-background-default);
+        border: 1px solid var(--ax-border-default);
 
-        mat-card-content {
-          padding: 24px;
+        ::ng-deep .mat-mdc-card-content {
+          padding: var(--ax-spacing-lg) !important;
           display: flex;
-          gap: 16px;
+          gap: var(--ax-spacing-md);
           align-items: flex-start;
         }
       }
@@ -313,11 +304,11 @@ interface Feature {
         width: 40px;
         height: 40px;
         flex-shrink: 0;
-        background-color: var(--md-sys-color-secondary-container, #e8def8);
-        border-radius: 8px;
+        background-color: var(--ax-success-subtle);
+        border-radius: var(--ax-radius-md);
 
         mat-icon {
-          color: var(--md-sys-color-secondary, #625b71);
+          color: var(--ax-success-emphasis);
           font-size: 20px;
           width: 20px;
           height: 20px;
@@ -325,16 +316,16 @@ interface Feature {
       }
 
       .feature-title {
-        margin: 0 0 4px 0;
-        font-size: 16px;
-        font-weight: 600;
-        color: var(--md-sys-color-on-surface, #1c1b1f);
+        margin: 0 0 var(--ax-spacing-2xs) 0;
+        font-size: var(--ax-font-size-md);
+        font-weight: var(--ax-font-weight-semibold);
+        color: var(--ax-text-heading);
       }
 
       .feature-description {
         margin: 0;
-        font-size: 14px;
-        color: var(--md-sys-color-on-surface-variant, #49454e);
+        font-size: var(--ax-font-size-sm);
+        color: var(--ax-text-subtle);
         line-height: 1.4;
       }
 
@@ -342,42 +333,67 @@ interface Feature {
       .info-cards-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 16px;
+        gap: var(--ax-spacing-md);
       }
 
       .info-card {
-        mat-card-content {
-          padding: 24px;
+        background-color: var(--ax-background-default);
+        border: 1px solid var(--ax-border-default);
+
+        ::ng-deep .mat-mdc-card-content {
+          padding: var(--ax-spacing-lg) !important;
           display: flex;
           flex-direction: column;
-          gap: 12px;
+          gap: var(--ax-spacing-sm);
         }
 
         &.info-card--primary {
+          background-color: var(--ax-brand-subtle);
+          border-color: var(--ax-brand-muted);
+
           .info-title {
-            color: var(--md-sys-color-on-primary-container, #21005e);
+            color: var(--ax-brand-emphasis);
           }
 
           .info-description {
-            color: var(--md-sys-color-on-primary-container, #21005e);
+            color: var(--ax-text-default);
+          }
+
+          .info-icon-wrapper {
+            background-color: var(--ax-brand-muted);
+
+            mat-icon {
+              color: var(--ax-brand-emphasis);
+            }
           }
 
           .info-button {
-            color: var(--md-sys-color-primary, #6750a4);
+            color: var(--ax-brand-emphasis);
           }
         }
 
         &.info-card--accent {
+          background-color: var(--ax-info-subtle);
+          border-color: var(--ax-info-muted);
+
           .info-title {
-            color: var(--md-sys-color-on-tertiary-container, #370b1e);
+            color: var(--ax-info-emphasis);
           }
 
           .info-description {
-            color: var(--md-sys-color-on-tertiary-container, #370b1e);
+            color: var(--ax-text-default);
+          }
+
+          .info-icon-wrapper {
+            background-color: var(--ax-info-muted);
+
+            mat-icon {
+              color: var(--ax-info-emphasis);
+            }
           }
 
           .info-button {
-            color: var(--md-sys-color-tertiary, #7d5260);
+            color: var(--ax-info-emphasis);
           }
         }
       }
@@ -388,8 +404,7 @@ interface Feature {
         justify-content: center;
         width: 48px;
         height: 48px;
-        background-color: rgba(255, 255, 255, 0.6);
-        border-radius: 12px;
+        border-radius: var(--ax-radius-lg);
 
         mat-icon {
           font-size: 24px;
@@ -400,13 +415,13 @@ interface Feature {
 
       .info-title {
         margin: 0;
-        font-size: 18px;
-        font-weight: 600;
+        font-size: var(--ax-font-size-lg);
+        font-weight: var(--ax-font-weight-semibold);
       }
 
       .info-description {
         margin: 0;
-        font-size: 14px;
+        font-size: var(--ax-font-size-sm);
         line-height: 1.5;
       }
 
@@ -415,35 +430,35 @@ interface Feature {
         text-transform: none;
 
         mat-icon {
-          margin-right: 8px;
+          margin-right: var(--ax-spacing-xs);
         }
       }
 
       /* ===== RESPONSIVE ===== */
       @media (max-width: 768px) {
         .hero-section {
-          padding: 32px 16px;
+          padding: var(--ax-spacing-2xl) var(--ax-spacing-md);
         }
 
         .hero-title {
-          font-size: 24px;
+          font-size: var(--ax-font-size-2xl);
         }
 
         .hero-subtitle {
-          font-size: 14px;
+          font-size: var(--ax-font-size-sm);
         }
 
         .main-content {
-          padding: 32px 16px;
+          padding: var(--ax-spacing-2xl) var(--ax-spacing-md);
         }
 
         .section-title {
-          font-size: 20px;
+          font-size: var(--ax-font-size-xl);
         }
 
         .quick-actions-grid {
           grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-          gap: 12px;
+          gap: var(--ax-spacing-sm);
         }
 
         .features-grid {
