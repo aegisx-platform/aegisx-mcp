@@ -127,8 +127,8 @@ $aegisx-light-text-inverted: #ffffff; // White - Inverted text on dark backgroun
 
 // Border (3 tokens) - Border color variants
 $aegisx-light-border-muted: #f3f4f6; // Subtle border
-$aegisx-light-border-default: #e5e7eb; // Standard border
-$aegisx-light-border-emphasis: #d1d5db; // Strong border
+$aegisx-light-border-default: #d1d5db; // Standard border (increased visibility)
+$aegisx-light-border-emphasis: #9ca3af; // Strong border
 
 // Surface/Border Colors (8 tokens) - Dialog headers & containers
 $aegisx-light-info-surface: #f2f7ff; // Lightest info background
@@ -429,8 +429,8 @@ $aegisx-dark-text-inverted: #111827; // Gray-900 - Inverted text on light backgr
 
 // Border (3 tokens) - Darker borders for dark mode
 $aegisx-dark-border-muted: #1f2937; // Subtle border
-$aegisx-dark-border-default: #374151; // Standard border
-$aegisx-dark-border-emphasis: #4b5563; // Strong border
+$aegisx-dark-border-default: #4b5563; // Standard border (increased visibility)
+$aegisx-dark-border-emphasis: #6b7280; // Strong border
 
 // Surface/Border Colors (8 tokens) - Dialog headers & containers
 $aegisx-dark-info-surface: #1a2942; // Dark info background
