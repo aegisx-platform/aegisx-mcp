@@ -12,61 +12,472 @@
 
     <h1 class="docs-title">Card Components</h1>
     <p class="docs-subtitle">
-      Display content and statistics in organized card layouts
+      Display content and statistics in organized card layouts with multiple
+      variants and sizes
     </p>
   </div>
 
-  <!-- Card Component -->
+  <!-- ============================================
+       Card Component - Basic Examples
+       ============================================ -->
   <div class="demo-section">
-    <h3>Card Component</h3>
+    <h3>Card Component - Basic Usage</h3>
     <div class="demo-container feature-group">
-      <h4>📇 Card Examples</h4>
+      <h4>📇 Basic Cards</h4>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <ax-card title="User Profile" subtitle="Personal Information">
-          <p>This is the card content area. You can place any content here.</p>
+          <p>
+            This is the card content area. You can place any content here
+            including text, forms, or other components.
+          </p>
         </ax-card>
 
         <ax-card title="Dashboard Stats" subtitle="Overview">
-          <p>Display statistics, charts, or important metrics in this area.</p>
+          <p>
+            Display statistics, charts, or important metrics in this area. Cards
+            provide a clean container for your content.
+          </p>
         </ax-card>
 
         <ax-card title="Notifications" subtitle="Recent Activity">
-          <p>Show recent notifications, updates, or activity feeds here.</p>
+          <p>
+            Show recent notifications, updates, or activity feeds here. The card
+            automatically handles spacing and layout.
+          </p>
         </ax-card>
       </div>
     </div>
   </div>
 
-  <!-- Stats Card Component -->
+  <!-- ============================================
+       Card Variants
+       ============================================ -->
+  <div class="demo-section">
+    <h3>Card Variants</h3>
+    <div class="demo-container feature-group">
+      <h4>🎨 Visual Styles</h4>
+      <p class="mb-4">
+        Cards come in three variants: default (with border), outlined (thicker
+        border), and elevated (with shadow)
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Default Variant -->
+        <ax-card
+          title="Default Variant"
+          subtitle="Standard card with border"
+          variant="default"
+        >
+          <p>
+            This is the default card style with a subtle 1px border. Best for
+            general content display.
+          </p>
+        </ax-card>
+
+        <!-- Outlined Variant -->
+        <ax-card
+          title="Outlined Variant"
+          subtitle="Card with emphasized border"
+          variant="outlined"
+        >
+          <p>
+            Outlined cards have a thicker 2px border. Use this to draw more
+            attention to specific content.
+          </p>
+        </ax-card>
+
+        <!-- Elevated Variant -->
+        <ax-card
+          title="Elevated Variant"
+          subtitle="Card with shadow effect"
+          variant="elevated"
+        >
+          <p>
+            Elevated cards use shadow instead of border. Perfect for creating
+            visual hierarchy and depth.
+          </p>
+        </ax-card>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       Card Sizes
+       ============================================ -->
+  <div class="demo-section">
+    <h3>Card Sizes</h3>
+    <div class="demo-container feature-group">
+      <h4>📏 Padding Variations</h4>
+      <p class="mb-4">
+        Control the internal spacing of your cards with three size options
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Small Size -->
+        <ax-card
+          title="Small Card"
+          subtitle="Compact spacing"
+          size="sm"
+          variant="outlined"
+        >
+          <p>
+            Small cards have reduced padding. Perfect for dense layouts or when
+            you need to fit more information in limited space.
+          </p>
+        </ax-card>
+
+        <!-- Medium Size (Default) -->
+        <ax-card
+          title="Medium Card"
+          subtitle="Standard spacing"
+          size="md"
+          variant="outlined"
+        >
+          <p>
+            Medium is the default size with balanced padding. Provides good
+            readability while maintaining efficient use of space.
+          </p>
+        </ax-card>
+
+        <!-- Large Size -->
+        <ax-card
+          title="Large Card"
+          subtitle="Generous spacing"
+          size="lg"
+          variant="outlined"
+        >
+          <p>
+            Large cards offer more breathing room. Use when content needs
+            emphasis or when you want a more spacious, premium feel.
+          </p>
+        </ax-card>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       Card States
+       ============================================ -->
+  <div class="demo-section">
+    <h3>Interactive States</h3>
+    <div class="demo-container feature-group">
+      <h4>✨ Hover & Click Effects</h4>
+      <p class="mb-4">
+        Add interactivity to your cards with hoverable and clickable states
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Hoverable Card -->
+        <ax-card
+          title="Hoverable Card"
+          subtitle="Lifts on hover"
+          variant="default"
+          [hoverable]="true"
+        >
+          <p>
+            Hover over this card to see the lift animation. The card raises
+            slightly and shadow increases, providing visual feedback.
+          </p>
+        </ax-card>
+
+        <!-- Clickable Card -->
+        <ax-card
+          title="Clickable Card"
+          subtitle="Interactive feedback"
+          variant="default"
+          [clickable]="true"
+          (click)="onCardClick('clickable')"
+        >
+          <p>
+            Click this card to see the press effect. The border color changes
+            and the card scales slightly on active state.
+          </p>
+        </ax-card>
+
+        <!-- Combined States -->
+        <ax-card
+          title="Hoverable + Clickable"
+          subtitle="Full interactivity"
+          variant="default"
+          [hoverable]="true"
+          [clickable]="true"
+          (click)="onCardClick('combined')"
+        >
+          <p>
+            This card combines both effects - lifts on hover and provides
+            feedback when clicked. Best for navigation cards.
+          </p>
+        </ax-card>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       Loading State
+       ============================================ -->
+  <div class="demo-section">
+    <h3>Loading State</h3>
+    <div class="demo-container feature-group">
+      <h4>⏳ Loading Indicator</h4>
+      <p class="mb-4">Show loading states with built-in spinner overlay</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Loading Card -->
+        <ax-card
+          title="Loading Content"
+          subtitle="Fetching data..."
+          variant="elevated"
+          [loading]="true"
+        >
+          <p>
+            This content is being loaded. The card shows a spinner overlay and
+            prevents interaction until loading completes.
+          </p>
+        </ax-card>
+
+        <!-- Normal Card for Comparison -->
+        <ax-card
+          title="Loaded Content"
+          subtitle="Data ready"
+          variant="elevated"
+        >
+          <p>
+            This card has finished loading and displays its content normally.
+            Toggle loading state programmatically based on your data state.
+          </p>
+        </ax-card>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       Card with Actions & Footer
+       ============================================ -->
+  <div class="demo-section">
+    <h3>Card with Actions & Footer</h3>
+    <div class="demo-container feature-group">
+      <h4>🔧 Header Actions & Footer Content</h4>
+      <p class="mb-4">
+        Add action buttons to the header and footer content for enhanced
+        functionality
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Card with Header Actions -->
+        <ax-card
+          title="User Settings"
+          subtitle="Manage your preferences"
+          variant="outlined"
+        >
+          <div header-actions>
+            <button mat-icon-button>
+              <mat-icon>more_vert</mat-icon>
+            </button>
+          </div>
+
+          <p class="mb-4">
+            Configure your account settings and preferences here.
+          </p>
+          <div class="flex gap-2">
+            <mat-icon class="text-gray-400">person</mat-icon>
+            <span>John Doe</span>
+          </div>
+
+          <div footer>
+            <span class="text-sm text-gray-500">Last updated: Today</span>
+          </div>
+        </ax-card>
+
+        <!-- Card with Action Buttons -->
+        <ax-card
+          title="Project Details"
+          subtitle="Frontend Dashboard"
+          variant="outlined"
+        >
+          <div header-actions>
+            <button mat-icon-button>
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button>
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+
+          <p class="mb-4">
+            Active development project with multiple team members.
+          </p>
+          <div class="flex items-center gap-2 mb-2">
+            <mat-icon class="text-green-500">check_circle</mat-icon>
+            <span>85% Complete</span>
+          </div>
+
+          <div actions>
+            <button mat-button color="primary">View Details</button>
+            <button mat-stroked-button>Download</button>
+          </div>
+        </ax-card>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       Stats Card Component
+       ============================================ -->
   <div class="demo-section">
     <h3>Stats Card Component</h3>
     <div class="demo-container feature-group">
       <h4>📈 Statistics Dashboard</h4>
+      <p class="mb-4">Display key metrics with trend indicators</p>
+
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Positive Trend -->
         <ax-stats-card
           title="Total Users"
           value="1,234"
           change="+12.5%"
           trend="up"
-        ></ax-stats-card>
+        >
+        </ax-stats-card>
+
+        <!-- Negative Trend -->
         <ax-stats-card
           title="Revenue"
           value="$45,678"
           change="-3.2%"
           trend="down"
-        ></ax-stats-card>
+        >
+        </ax-stats-card>
+
+        <!-- Neutral Trend -->
         <ax-stats-card
-          title="Active Sessions"
-          value="567"
-          change="+8.1%"
-          trend="up"
-        ></ax-stats-card>
+          title="Pending Items"
+          value="42"
+          change="0.0%"
+          trend="neutral"
+        >
+        </ax-stats-card>
+
+        <!-- Large Growth -->
         <ax-stats-card
           title="Conversion Rate"
           value="24.5%"
-          change="+2.3%"
+          change="+8.1%"
           trend="up"
-        ></ax-stats-card>
+        >
+        </ax-stats-card>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       Combining Features
+       ============================================ -->
+  <div class="demo-section">
+    <h3>Real-World Examples</h3>
+    <div class="demo-container feature-group">
+      <h4>🎯 Practical Combinations</h4>
+      <p class="mb-4">Common patterns combining multiple features</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Product Card -->
+        <ax-card
+          title="Premium Plan"
+          subtitle="Most Popular"
+          variant="elevated"
+          size="lg"
+          [hoverable]="true"
+          [clickable]="true"
+        >
+          <div class="mb-4">
+            <div class="text-3xl font-bold text-blue-600 mb-2">$29/mo</div>
+            <ul class="space-y-2 text-sm">
+              <li class="flex items-center gap-2">
+                <mat-icon class="text-green-500">check</mat-icon>
+                Unlimited users
+              </li>
+              <li class="flex items-center gap-2">
+                <mat-icon class="text-green-500">check</mat-icon>
+                Advanced analytics
+              </li>
+              <li class="flex items-center gap-2">
+                <mat-icon class="text-green-500">check</mat-icon>
+                24/7 support
+              </li>
+            </ul>
+          </div>
+
+          <div actions>
+            <button mat-flat-button color="primary" class="w-full">
+              Get Started
+            </button>
+          </div>
+        </ax-card>
+
+        <!-- Notification Card -->
+        <ax-card
+          title="System Alert"
+          subtitle="2 minutes ago"
+          variant="outlined"
+          [clickable]="true"
+        >
+          <div header-actions>
+            <button mat-icon-button>
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+
+          <div class="flex items-start gap-3">
+            <mat-icon class="text-yellow-500">warning</mat-icon>
+            <div>
+              <p class="font-medium mb-1">Database backup required</p>
+              <p class="text-sm text-gray-600">
+                Your database hasn't been backed up in 7 days. Click to schedule
+                a backup now.
+              </p>
+            </div>
+          </div>
+
+          <div actions>
+            <button mat-button color="warn">Backup Now</button>
+            <button mat-button>Remind Later</button>
+          </div>
+        </ax-card>
+
+        <!-- Team Member Card -->
+        <ax-card
+          title="Sarah Johnson"
+          subtitle="Senior Developer"
+          variant="default"
+          [hoverable]="true"
+        >
+          <div header-actions>
+            <button mat-icon-button>
+              <mat-icon>email</mat-icon>
+            </button>
+          </div>
+
+          <div class="space-y-3">
+            <div class="flex items-center gap-2 text-sm">
+              <mat-icon class="text-gray-400">business</mat-icon>
+              <span>Engineering Team</span>
+            </div>
+            <div class="flex items-center gap-2 text-sm">
+              <mat-icon class="text-gray-400">location_on</mat-icon>
+              <span>San Francisco, CA</span>
+            </div>
+            <div class="flex gap-1 mt-2">
+              <span class="badge badge-soft badge-info badge-sm"
+                >TypeScript</span
+              >
+              <span class="badge badge-soft badge-info badge-sm">React</span>
+              <span class="badge badge-soft badge-info badge-sm">Node.js</span>
+            </div>
+          </div>
+
+          <div footer>
+            <span class="text-sm text-gray-500">Joined March 2023</span>
+          </div>
+        </ax-card>
       </div>
     </div>
   </div>

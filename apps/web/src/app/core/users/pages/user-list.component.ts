@@ -74,7 +74,7 @@ import { UserService, UserStatus } from '../services/user.service';
       </div>
 
       <!-- Filters Card -->
-      <ax-card [appearance]="'outlined'" class="mb-3">
+      <ax-card [variant]="'outlined'" class="mb-3">
         <div class="flex flex-col lg:flex-row gap-4 items-stretch lg:items-end">
           <!-- LEFT GROUP: Filters (Primary User Intent) -->
           <div
@@ -290,10 +290,7 @@ import { UserService, UserStatus } from '../services/user.service';
 
       <!-- Bulk Actions Bar -->
       @if (selectedUsers().length > 0) {
-        <ax-card
-          [appearance]="'elevated'"
-          class="mb-3 bg-blue-50 border-blue-200"
-        >
+        <ax-card [variant]="'elevated'" class="mb-3 bg-blue-50 border-blue-200">
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-4">
               <mat-icon class="text-blue-600">fact_check</mat-icon>
@@ -368,7 +365,7 @@ import { UserService, UserStatus } from '../services/user.service';
       <!-- Bulk Progress Indicator -->
       @if (bulkLoading() && bulkProgress().total > 0) {
         <ax-card
-          [appearance]="'elevated'"
+          [variant]="'elevated'"
           class="mb-3 bg-green-50 border-green-200"
         >
           <div class="flex items-center justify-between gap-4">
@@ -434,7 +431,7 @@ import { UserService, UserStatus } from '../services/user.service';
       }
 
       <!-- Users Table -->
-      <ax-card [appearance]="'elevated'">
+      <ax-card [variant]="'elevated'">
         @if (loading()) {
           <div class="flex items-center justify-center h-64">
             <mat-spinner [diameter]="40"></mat-spinner>

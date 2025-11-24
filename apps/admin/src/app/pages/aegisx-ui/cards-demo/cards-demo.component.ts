@@ -19,4 +19,8 @@ import { AxCardComponent, AxStatsCardComponent } from '@aegisx/ui';
   templateUrl: './cards-demo.component.html',
   styleUrls: ['./cards-demo.component.scss'],
 })
-export class CardsDemoComponent {}
+export class CardsDemoComponent {
+  onCardClick(cardType: string): void {
+    console.log(`${cardType} card clicked`);
+  }
+}

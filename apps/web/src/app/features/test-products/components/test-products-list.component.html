@@ -1,7 +1,9 @@
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
   <div class="max-w-7xl mx-auto space-y-6">
+
+
     <!-- Breadcrumb -->
-    <!-- <ax-breadcrumb [items]="breadcrumbItems"></ax-breadcrumb> -->
+    <ax-breadcrumb [items]="breadcrumbItems"></ax-breadcrumb>
 
     <!-- Header with Stats (hide stats when permission error) -->
     <app-test-products-list-header [stats]="stats()" [loading]="testProductsService.loading()"

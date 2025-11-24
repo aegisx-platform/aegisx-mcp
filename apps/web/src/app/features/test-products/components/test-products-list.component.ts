@@ -45,8 +45,8 @@ import {
   AxDialogService,
   AxEmptyStateComponent,
   AxErrorStateComponent,
-  AxNavigationItem,
   BreadcrumbComponent,
+  BreadcrumbItem,
 } from '@aegisx/ui';
 import {
   ExportOptions,
@@ -122,19 +122,13 @@ export class TestProductsListComponent {
   private cdr = inject(ChangeDetectorRef);
 
   // Breadcrumb configuration
-  breadcrumbItems: AxNavigationItem[] = [
+  breadcrumbItems: BreadcrumbItem[] = [
     {
-      id: 'home',
-      title: 'Home',
-      type: 'item',
-      icon: 'home',
-      link: '/',
+      label: 'Home',
+      url: '/',
     },
     {
-      id: 'test_products',
-      title: 'TestProducts',
-      type: 'item',
-      icon: 'menu_book',
+      label: 'TestProducts',
     },
   ];
 

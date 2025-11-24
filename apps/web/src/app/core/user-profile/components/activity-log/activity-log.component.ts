@@ -106,7 +106,7 @@ import {
       ></ax-activity-log-filter>
 
       <!-- Activity Table -->
-      <ax-card [appearance]="'elevated'">
+      <ax-card [variant]="'elevated'">
         <!-- Table Header -->
         <div class="p-4 border-b dark:border-gray-700">
           <div class="flex items-center justify-between">

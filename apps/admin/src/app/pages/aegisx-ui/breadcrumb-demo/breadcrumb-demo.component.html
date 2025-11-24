@@ -12,15 +12,428 @@
 
     <h1 class="docs-title">Breadcrumb Component</h1>
     <p class="docs-subtitle">
-      Display navigation hierarchy and current page location
+      Display navigation hierarchy and help users understand their current
+      location within the application
     </p>
   </div>
 
-  <!-- Breadcrumb Component -->
+  <!-- ============================================
+       Basic Breadcrumb
+       ============================================ -->
   <div class="demo-section">
-    <h3>Breadcrumb Component</h3>
-    <div class="demo-container">
-      <ax-breadcrumb [items]="breadcrumbs"></ax-breadcrumb>
+    <h3>Basic Breadcrumb</h3>
+    <div class="demo-container feature-group">
+      <h4>🔗 Simple Navigation Path</h4>
+      <p class="mb-4">
+        Display the current page's location within the navigation hierarchy
+      </p>
+
+      <div
+        class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6"
+      >
+        <ax-breadcrumb
+          [items]="basicBreadcrumbs"
+          (itemClick)="onBreadcrumbClick($event)"
+        ></ax-breadcrumb>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       Breadcrumb with Icons
+       ============================================ -->
+  <div class="demo-section">
+    <h3>Breadcrumb with Icons</h3>
+    <div class="demo-container feature-group">
+      <h4>🎨 Enhanced Visual Clarity</h4>
+      <p class="mb-4">
+        Add icons to breadcrumb items for better visual recognition and context
+      </p>
+
+      <div
+        class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6"
+      >
+        <ax-breadcrumb
+          [items]="iconBreadcrumbs"
+          (itemClick)="onBreadcrumbClick($event)"
+        ></ax-breadcrumb>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       Custom Separators
+       ============================================ -->
+  <div class="demo-section">
+    <h3>Custom Separators</h3>
+    <div class="demo-container feature-group">
+      <h4>➡️ Separator Options</h4>
+      <p class="mb-4">
+        Customize the separator character between breadcrumb items
+      </p>
+
+      <div class="space-y-4">
+        <!-- Default Separator (/) -->
+        <div>
+          <p class="text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+            Default Separator (/)
+          </p>
+          <div
+            class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4"
+          >
+            <ax-breadcrumb
+              [items]="dashboardBreadcrumbs"
+              separator="/"
+              (itemClick)="onBreadcrumbClick($event)"
+            ></ax-breadcrumb>
+          </div>
+        </div>
+
+        <!-- Arrow Separator (›) -->
+        <div>
+          <p class="text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+            Arrow Separator (›)
+          </p>
+          <div
+            class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4"
+          >
+            <ax-breadcrumb
+              [items]="dashboardBreadcrumbs"
+              separator="›"
+              (itemClick)="onBreadcrumbClick($event)"
+            ></ax-breadcrumb>
+          </div>
+        </div>
+
+        <!-- Chevron Separator (>) -->
+        <div>
+          <p class="text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+            Chevron Separator (>)
+          </p>
+          <div
+            class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4"
+          >
+            <ax-breadcrumb
+              [items]="dashboardBreadcrumbs"
+              separator=">"
+              (itemClick)="onBreadcrumbClick($event)"
+            ></ax-breadcrumb>
+          </div>
+        </div>
+
+        <!-- Dot Separator (•) -->
+        <div>
+          <p class="text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+            Dot Separator (•)
+          </p>
+          <div
+            class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4"
+          >
+            <ax-breadcrumb
+              [items]="dashboardBreadcrumbs"
+              separator="•"
+              (itemClick)="onBreadcrumbClick($event)"
+            ></ax-breadcrumb>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       Different Path Depths
+       ============================================ -->
+  <div class="demo-section">
+    <h3>Navigation Path Depths</h3>
+    <div class="demo-container feature-group">
+      <h4>📊 Varying Complexity</h4>
+      <p class="mb-4">
+        Examples showing breadcrumbs with different levels of navigation depth
+      </p>
+
+      <div class="space-y-4">
+        <!-- 2 Levels -->
+        <div>
+          <p class="text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+            2 Levels - Shallow Navigation
+          </p>
+          <div
+            class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4"
+          >
+            <ax-breadcrumb
+              [items]="[
+                { label: 'Dashboard', url: '/dashboard', icon: 'dashboard' },
+                { label: 'Overview' },
+              ]"
+              (itemClick)="onBreadcrumbClick($event)"
+            >
+            </ax-breadcrumb>
+          </div>
+        </div>
+
+        <!-- 3 Levels -->
+        <div>
+          <p class="text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+            3 Levels - Standard Navigation
+          </p>
+          <div
+            class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4"
+          >
+            <ax-breadcrumb
+              [items]="userManagementBreadcrumbs"
+              (itemClick)="onBreadcrumbClick($event)"
+            ></ax-breadcrumb>
+          </div>
+        </div>
+
+        <!-- 4 Levels -->
+        <div>
+          <p class="text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+            4 Levels - Deep Navigation
+          </p>
+          <div
+            class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4"
+          >
+            <ax-breadcrumb
+              [items]="settingsBreadcrumbs"
+              (itemClick)="onBreadcrumbClick($event)"
+            ></ax-breadcrumb>
+          </div>
+        </div>
+
+        <!-- 5 Levels -->
+        <div>
+          <p class="text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+            5 Levels - Complex Navigation
+          </p>
+          <div
+            class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4"
+          >
+            <ax-breadcrumb
+              [items]="ecommerceBreadcrumbs"
+              (itemClick)="onBreadcrumbClick($event)"
+            ></ax-breadcrumb>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       Real-World Examples
+       ============================================ -->
+  <div class="demo-section">
+    <h3>Real-World Examples</h3>
+    <div class="demo-container feature-group">
+      <h4>🎯 Common Use Cases</h4>
+      <p class="mb-4">
+        Practical breadcrumb implementations for different application types
+      </p>
+
+      <div class="space-y-8">
+        <!-- Dashboard Application -->
+        <div>
+          <h5
+            class="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300"
+          >
+            Dashboard Application
+          </h5>
+          <div
+            class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+          >
+            <div class="border-b border-gray-200 dark:border-gray-700 p-4">
+              <ax-breadcrumb
+                [items]="dashboardBreadcrumbs"
+                (itemClick)="onBreadcrumbClick($event)"
+              ></ax-breadcrumb>
+            </div>
+            <div class="p-6">
+              <h3
+                class="text-lg font-semibold text-gray-900 dark:text-white mb-2"
+              >
+                Q4 2024 Summary
+              </h3>
+              <p class="text-sm text-gray-600 dark:text-gray-400">
+                View comprehensive analytics and reports for the fourth quarter
+                of 2024.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- E-Commerce Product Page -->
+        <div>
+          <h5
+            class="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300"
+          >
+            E-Commerce Product Category
+          </h5>
+          <div
+            class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+          >
+            <div class="border-b border-gray-200 dark:border-gray-700 p-4">
+              <ax-breadcrumb
+                [items]="ecommerceBreadcrumbs"
+                (itemClick)="onBreadcrumbClick($event)"
+              ></ax-breadcrumb>
+            </div>
+            <div class="p-6">
+              <h3
+                class="text-lg font-semibold text-gray-900 dark:text-white mb-2"
+              >
+                Summer Collection 2024
+              </h3>
+              <p class="text-sm text-gray-600 dark:text-gray-400">
+                Explore our latest summer dresses collection featuring trendy
+                styles and vibrant colors.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Settings/Configuration -->
+        <div>
+          <h5
+            class="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300"
+          >
+            Settings Panel
+          </h5>
+          <div
+            class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+          >
+            <div class="border-b border-gray-200 dark:border-gray-700 p-4">
+              <ax-breadcrumb
+                [items]="settingsBreadcrumbs"
+                (itemClick)="onBreadcrumbClick($event)"
+              ></ax-breadcrumb>
+            </div>
+            <div class="p-6">
+              <h3
+                class="text-lg font-semibold text-gray-900 dark:text-white mb-2"
+              >
+                Two-Factor Authentication
+              </h3>
+              <p class="text-sm text-gray-600 dark:text-gray-400">
+                Enhance your account security by enabling two-factor
+                authentication.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Project Management -->
+        <div>
+          <h5
+            class="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300"
+          >
+            Project Management Tool
+          </h5>
+          <div
+            class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+          >
+            <div class="border-b border-gray-200 dark:border-gray-700 p-4">
+              <ax-breadcrumb
+                [items]="projectBreadcrumbs"
+                (itemClick)="onBreadcrumbClick($event)"
+              ></ax-breadcrumb>
+            </div>
+            <div class="p-6">
+              <h3
+                class="text-lg font-semibold text-gray-900 dark:text-white mb-2"
+              >
+                TASK-456: Update Header Component
+              </h3>
+              <div class="flex items-center gap-3 mb-3">
+                <span class="badge badge-soft badge-info badge-sm"
+                  >In Progress</span
+                >
+                <span class="text-xs text-gray-500"
+                  >Assigned to: Sarah Johnson</span
+                >
+              </div>
+              <p class="text-sm text-gray-600 dark:text-gray-400">
+                Refactor the header component to use the new design system
+                tokens and improve responsive behavior.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Admin Panel -->
+        <div>
+          <h5
+            class="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300"
+          >
+            Admin Panel
+          </h5>
+          <div
+            class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+          >
+            <div class="border-b border-gray-200 dark:border-gray-700 p-4">
+              <ax-breadcrumb
+                [items]="userManagementBreadcrumbs"
+                (itemClick)="onBreadcrumbClick($event)"
+              ></ax-breadcrumb>
+            </div>
+            <div class="p-6">
+              <h3
+                class="text-lg font-semibold text-gray-900 dark:text-white mb-2"
+              >
+                Edit User
+              </h3>
+              <p class="text-sm text-gray-600 dark:text-gray-400">
+                Modify user permissions, roles, and profile information.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       Best Practices
+       ============================================ -->
+  <div class="demo-section">
+    <h3>Best Practices</h3>
+    <div class="demo-container feature-group">
+      <h4>💡 Usage Guidelines</h4>
+
+      <div class="space-y-4 text-sm">
+        <div
+          class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4"
+        >
+          <h5 class="font-semibold text-blue-900 dark:text-blue-300 mb-2">
+            ✅ Do
+          </h5>
+          <ul class="space-y-2 text-blue-800 dark:text-blue-200">
+            <li>• Use breadcrumbs for multi-level navigation hierarchies</li>
+            <li>• Keep breadcrumb labels concise and meaningful</li>
+            <li>• Make all intermediate levels clickable</li>
+            <li>• Position breadcrumbs near the top of the page</li>
+            <li>• Use icons sparingly to avoid visual clutter</li>
+            <li>• Show the current page as the last item (non-clickable)</li>
+          </ul>
+        </div>
+
+        <div
+          class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4"
+        >
+          <h5 class="font-semibold text-red-900 dark:text-red-300 mb-2">
+            ❌ Don't
+          </h5>
+          <ul class="space-y-2 text-red-800 dark:text-red-200">
+            <li>• Use breadcrumbs for single-level navigation</li>
+            <li>• Include very long or technical labels</li>
+            <li>• Make the current page (last item) clickable</li>
+            <li>• Use breadcrumbs as the primary navigation method</li>
+            <li>• Show more than 5-6 levels (consider truncation)</li>
+            <li>
+              • Mix different separator styles within the same application
+            </li>
+          </ul>
+        </div>
+      </div>
     </div>
   </div>
 </div>

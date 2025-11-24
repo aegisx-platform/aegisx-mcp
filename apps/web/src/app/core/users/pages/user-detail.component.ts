@@ -34,7 +34,7 @@ import { ConfirmDialogComponent } from '../../../shared/ui/components/confirm-di
           <mat-spinner [diameter]="40"></mat-spinner>
         </div>
       } @else if (error()) {
-        <ax-card [appearance]="'elevated'" class="max-w-2xl mx-auto">
+        <ax-card [variant]="'elevated'" class="max-w-2xl mx-auto">
           <div class="text-center py-8">
             <mat-icon class="text-6xl text-red-500">error_outline</mat-icon>
             <p
@@ -95,7 +95,7 @@ import { ConfirmDialogComponent } from '../../../shared/ui/components/confirm-di
         <mat-tab-group>
           <!-- Profile Tab -->
           <mat-tab label="Profile">
-            <ax-card [appearance]="'elevated'" class="mt-6">
+            <ax-card [variant]="'elevated'" class="mt-6">
               <h3 class="text-lg font-semibold mb-4">User Information</h3>
               <mat-list>
                 <mat-list-item>
@@ -170,7 +170,7 @@ import { ConfirmDialogComponent } from '../../../shared/ui/components/confirm-di
 
           <!-- Activity Tab -->
           <mat-tab label="Activity">
-            <ax-card [appearance]="'elevated'" class="mt-6">
+            <ax-card [variant]="'elevated'" class="mt-6">
               <h3 class="text-lg font-semibold mb-4">Recent Activity</h3>
               <div class="text-center py-8 text-gray-500">
                 <mat-icon class="text-4xl">history</mat-icon>
@@ -181,7 +181,7 @@ import { ConfirmDialogComponent } from '../../../shared/ui/components/confirm-di
 
           <!-- Permissions Tab -->
           <mat-tab label="Permissions">
-            <ax-card [appearance]="'elevated'" class="mt-6">
+            <ax-card [variant]="'elevated'" class="mt-6">
               <h3 class="text-lg font-semibold mb-4">User Permissions</h3>
               <div class="text-center py-8 text-gray-500">
                 <mat-icon class="text-4xl">security</mat-icon>
@@ -192,7 +192,7 @@ import { ConfirmDialogComponent } from '../../../shared/ui/components/confirm-di
 
           <!-- Sessions Tab -->
           <mat-tab label="Sessions">
-            <ax-card [appearance]="'elevated'" class="mt-6">
+            <ax-card [variant]="'elevated'" class="mt-6">
               <h3 class="text-lg font-semibold mb-4">Active Sessions</h3>
               <div class="text-center py-8 text-gray-500">
                 <mat-icon class="text-4xl">devices</mat-icon>

@@ -87,7 +87,7 @@ import { GroupedSettings, SettingChangeEvent } from '../models/settings.types';
         }
 
         <!-- Settings Tabs -->
-        <ax-card [appearance]="'elevated'">
+        <ax-card [variant]="'elevated'">
           <mat-tab-group
             [(selectedIndex)]="selectedTabIndex"
             animationDuration="200ms"

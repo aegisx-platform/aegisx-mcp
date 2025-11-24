@@ -88,7 +88,7 @@ import {
         <form [formGroup]="preferencesForm" (ngSubmit)="savePreferences()">
           <div class="space-y-6">
             <!-- Appearance Section -->
-            <ax-card [appearance]="'outlined'">
+            <ax-card [variant]="'outlined'">
               <div class="card-header">
                 <h3 class="text-lg font-semibold flex items-center">
                   <mat-icon class="mr-2">palette</mat-icon>
@@ -143,7 +143,7 @@ import {
             </ax-card>
 
             <!-- Localization Section -->
-            <ax-card [appearance]="'outlined'">
+            <ax-card [variant]="'outlined'">
               <div class="card-header">
                 <h3 class="text-lg font-semibold flex items-center">
                   <mat-icon class="mr-2">language</mat-icon>
@@ -239,7 +239,7 @@ import {
             </ax-card>
 
             <!-- Notifications Section -->
-            <ax-card [appearance]="'outlined'">
+            <ax-card [variant]="'outlined'">
               <div class="card-header">
                 <h3 class="text-lg font-semibold flex items-center">
                   <mat-icon class="mr-2">notifications</mat-icon>
@@ -320,7 +320,7 @@ import {
             </ax-card>
 
             <!-- Navigation Section -->
-            <ax-card [appearance]="'outlined'">
+            <ax-card [variant]="'outlined'">
               <div class="card-header">
                 <h3 class="text-lg font-semibold flex items-center">
                   <mat-icon class="mr-2">menu</mat-icon>

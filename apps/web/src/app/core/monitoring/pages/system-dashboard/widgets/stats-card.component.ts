@@ -26,7 +26,7 @@ export interface StatsCardData {
     AxCardComponent,
   ],
   template: `
-    <ax-card [appearance]="'elevated'" class="relative overflow-hidden h-full">
+    <ax-card [variant]="'elevated'" class="relative overflow-hidden h-full">
       <div class="flex items-center justify-between">
         <div class="flex-1">
           <p class="text-sm font-medium text-gray-600 dark:text-gray-400">

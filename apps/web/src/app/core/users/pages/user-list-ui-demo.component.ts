@@ -86,7 +86,7 @@ interface MockUser {
       </div>
 
       <!-- Advanced Filters Card -->
-      <ax-card [appearance]="'outlined'" class="mb-4">
+      <ax-card [variant]="'outlined'" class="mb-4">
         <mat-expansion-panel
           [expanded]="filtersExpanded()"
           (expandedChange)="filtersExpanded.set($event)"
@@ -327,7 +327,7 @@ interface MockUser {
       <!-- Active Filter Tags -->
       @if (activeFilterCount() > 0 && !filtersExpanded()) {
         <ax-card
-          [appearance]="'outlined'"
+          [variant]="'outlined'"
           class="mb-4"
           style="background-color: var(--ax-background-subtle);"
         >
@@ -377,7 +377,7 @@ interface MockUser {
       <!-- Bulk Actions Bar -->
       @if (selectedUsers().length > 0) {
         <ax-card
-          [appearance]="'elevated'"
+          [variant]="'elevated'"
           class="mb-4"
           style="background-color: #dbeafe; border: 1px solid #3b82f6;"
         >
@@ -440,7 +440,7 @@ interface MockUser {
       }
 
       <!-- Users Table -->
-      <ax-card [appearance]="'elevated'">
+      <ax-card [variant]="'elevated'">
         <div class="overflow-x-auto">
           <table mat-table [dataSource]="paginatedUsers()" class="w-full">
             <!-- Checkbox Column -->

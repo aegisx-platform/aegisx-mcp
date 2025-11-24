@@ -11,26 +11,461 @@
     </div>
 
     <h1 class="docs-title">Avatar Component</h1>
-    <p class="docs-subtitle">Display user avatars in various sizes</p>
+    <p class="docs-subtitle">
+      Display user avatars with images, initials, or default icons in various
+      sizes and shapes
+    </p>
   </div>
 
-  <!-- Avatar Component -->
+  <!-- ============================================
+       Avatar Sizes
+       ============================================ -->
   <div class="demo-section">
-    <h3>Avatar Component</h3>
+    <h3>Avatar Sizes</h3>
     <div class="demo-container feature-group">
-      <h4>👤 Avatar Sizes</h4>
-      <div class="flex items-center gap-6">
+      <h4>📏 Size Variations</h4>
+      <p class="mb-4">
+        Five size options from extra small to extra large to suit different use
+        cases
+      </p>
+
+      <div class="flex items-end gap-8">
+        <div class="flex flex-col items-center gap-3">
+          <ax-avatar name="XS" size="xs"></ax-avatar>
+          <span class="text-xs text-gray-600 dark:text-gray-400"
+            >Extra Small (xs)</span
+          >
+        </div>
+        <div class="flex flex-col items-center gap-3">
+          <ax-avatar name="SM" size="sm"></ax-avatar>
+          <span class="text-xs text-gray-600 dark:text-gray-400"
+            >Small (sm)</span
+          >
+        </div>
+        <div class="flex flex-col items-center gap-3">
+          <ax-avatar name="MD" size="md"></ax-avatar>
+          <span class="text-xs text-gray-600 dark:text-gray-400"
+            >Medium (md)</span
+          >
+        </div>
+        <div class="flex flex-col items-center gap-3">
+          <ax-avatar name="LG" size="lg"></ax-avatar>
+          <span class="text-xs text-gray-600 dark:text-gray-400"
+            >Large (lg)</span
+          >
+        </div>
+        <div class="flex flex-col items-center gap-3">
+          <ax-avatar name="XL" size="xl"></ax-avatar>
+          <span class="text-xs text-gray-600 dark:text-gray-400"
+            >Extra Large (xl)</span
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       Avatar Shapes
+       ============================================ -->
+  <div class="demo-section">
+    <h3>Avatar Shapes</h3>
+    <div class="demo-container feature-group">
+      <h4>🔶 Shape Options</h4>
+      <p class="mb-4">
+        Choose between circular and square avatars to match your design system
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Circle Shape -->
+        <div>
+          <h5
+            class="text-sm font-semibold mb-4 text-gray-700 dark:text-gray-300"
+          >
+            Circle (Default)
+          </h5>
+          <div class="flex items-end gap-6">
+            <ax-avatar name="AB" size="xs" shape="circle"></ax-avatar>
+            <ax-avatar name="CD" size="sm" shape="circle"></ax-avatar>
+            <ax-avatar name="EF" size="md" shape="circle"></ax-avatar>
+            <ax-avatar name="GH" size="lg" shape="circle"></ax-avatar>
+          </div>
+        </div>
+
+        <!-- Square Shape -->
+        <div>
+          <h5
+            class="text-sm font-semibold mb-4 text-gray-700 dark:text-gray-300"
+          >
+            Square
+          </h5>
+          <div class="flex items-end gap-6">
+            <ax-avatar name="AB" size="xs" shape="square"></ax-avatar>
+            <ax-avatar name="CD" size="sm" shape="square"></ax-avatar>
+            <ax-avatar name="EF" size="md" shape="square"></ax-avatar>
+            <ax-avatar name="GH" size="lg" shape="square"></ax-avatar>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       Avatar Types
+       ============================================ -->
+  <div class="demo-section">
+    <h3>Avatar Types</h3>
+    <div class="demo-container feature-group">
+      <h4>🎨 Display Modes</h4>
+      <p class="mb-4">
+        Avatars automatically display images, initials from names, or default
+        icons
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Image Avatar -->
+        <div>
+          <h5
+            class="text-sm font-semibold mb-4 text-gray-700 dark:text-gray-300"
+          >
+            Image Avatar
+          </h5>
+          <div class="flex flex-col items-center gap-3">
+            <ax-avatar
+              src="https://i.pravatar.cc/150?img=1"
+              alt="User Avatar"
+              size="lg"
+            >
+            </ax-avatar>
+            <p class="text-xs text-gray-600 dark:text-gray-400 text-center">
+              Displays profile image when src provided
+            </p>
+          </div>
+        </div>
+
+        <!-- Initials Avatar -->
+        <div>
+          <h5
+            class="text-sm font-semibold mb-4 text-gray-700 dark:text-gray-300"
+          >
+            Initials Avatar
+          </h5>
+          <div class="flex flex-col items-center gap-3">
+            <ax-avatar name="Sarah Johnson" size="lg"> </ax-avatar>
+            <p class="text-xs text-gray-600 dark:text-gray-400 text-center">
+              Shows initials when name provided
+            </p>
+          </div>
+        </div>
+
+        <!-- Default Icon Avatar -->
+        <div>
+          <h5
+            class="text-sm font-semibold mb-4 text-gray-700 dark:text-gray-300"
+          >
+            Default Icon
+          </h5>
+          <div class="flex flex-col items-center gap-3">
+            <ax-avatar size="lg"></ax-avatar>
+            <p class="text-xs text-gray-600 dark:text-gray-400 text-center">
+              Fallback icon when no src or name
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       Initials Generation
+       ============================================ -->
+  <div class="demo-section">
+    <h3>Initials Generation</h3>
+    <div class="demo-container feature-group">
+      <h4>✍️ Smart Initials</h4>
+      <p class="mb-4">
+        Automatically generates initials from full names - first and last
+        initial for full names, first two characters for single names
+      </p>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
         <div class="flex flex-col items-center gap-2">
-          <ax-avatar text="SM" size="sm"></ax-avatar>
-          <span class="text-xs text-gray-600">Small</span>
+          <ax-avatar name="John Doe" size="lg"></ax-avatar>
+          <span class="text-sm text-gray-700 dark:text-gray-300">John Doe</span>
+          <span class="text-xs text-gray-500">→ JD</span>
         </div>
         <div class="flex flex-col items-center gap-2">
-          <ax-avatar text="MD" size="md"></ax-avatar>
-          <span class="text-xs text-gray-600">Medium</span>
+          <ax-avatar name="Sarah Johnson" size="lg"></ax-avatar>
+          <span class="text-sm text-gray-700 dark:text-gray-300"
+            >Sarah Johnson</span
+          >
+          <span class="text-xs text-gray-500">→ SJ</span>
         </div>
         <div class="flex flex-col items-center gap-2">
-          <ax-avatar text="LG" size="lg"></ax-avatar>
-          <span class="text-xs text-gray-600">Large</span>
+          <ax-avatar name="Alex" size="lg"></ax-avatar>
+          <span class="text-sm text-gray-700 dark:text-gray-300">Alex</span>
+          <span class="text-xs text-gray-500">→ AL</span>
+        </div>
+        <div class="flex flex-col items-center gap-2">
+          <ax-avatar name="Maria Garcia Lopez" size="lg"></ax-avatar>
+          <span class="text-sm text-gray-700 dark:text-gray-300"
+            >Maria Garcia Lopez</span
+          >
+          <span class="text-xs text-gray-500">→ ML</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       Image Fallback
+       ============================================ -->
+  <div class="demo-section">
+    <h3>Image Fallback</h3>
+    <div class="demo-container feature-group">
+      <h4>🔄 Graceful Degradation</h4>
+      <p class="mb-4">
+        When image fails to load, avatar automatically falls back to initials or
+        default icon
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="flex flex-col items-center gap-3">
+          <ax-avatar
+            src="https://i.pravatar.cc/150?img=5"
+            name="Valid Image"
+            size="lg"
+          >
+          </ax-avatar>
+          <span class="text-sm text-gray-700 dark:text-gray-300"
+            >Valid Image</span
+          >
+          <span class="text-xs text-gray-500">Shows image</span>
+        </div>
+        <div class="flex flex-col items-center gap-3">
+          <ax-avatar
+            src="https://invalid-url.com/image.jpg"
+            name="Image Error"
+            size="lg"
+          >
+          </ax-avatar>
+          <span class="text-sm text-gray-700 dark:text-gray-300"
+            >Broken Image URL</span
+          >
+          <span class="text-xs text-gray-500">Falls back to initials</span>
+        </div>
+        <div class="flex flex-col items-center gap-3">
+          <ax-avatar src="https://invalid-url.com/image.jpg" size="lg">
+          </ax-avatar>
+          <span class="text-sm text-gray-700 dark:text-gray-300"
+            >No Name Provided</span
+          >
+          <span class="text-xs text-gray-500">Falls back to icon</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       Real-World Examples
+       ============================================ -->
+  <div class="demo-section">
+    <h3>Real-World Examples</h3>
+    <div class="demo-container feature-group">
+      <h4>🎯 Common Use Cases</h4>
+      <p class="mb-4">
+        Practical examples showing avatars in real application contexts
+      </p>
+
+      <div class="space-y-8">
+        <!-- User Profile Header -->
+        <div>
+          <h5
+            class="text-sm font-semibold mb-4 text-gray-700 dark:text-gray-300"
+          >
+            User Profile Header
+          </h5>
+          <div
+            class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6"
+          >
+            <div class="flex items-center gap-4">
+              <ax-avatar
+                src="https://i.pravatar.cc/150?img=3"
+                name="Sarah Johnson"
+                size="xl"
+              >
+              </ax-avatar>
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                  Sarah Johnson
+                </h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                  Senior Developer
+                </p>
+                <p class="text-xs text-gray-500 dark:text-gray-500">
+                  sarah.johnson&#64;company.com
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- User List -->
+        <div>
+          <h5
+            class="text-sm font-semibold mb-4 text-gray-700 dark:text-gray-300"
+          >
+            Team Members List
+          </h5>
+          <div
+            class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 divide-y divide-gray-200 dark:divide-gray-700"
+          >
+            <div
+              class="p-4 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
+              <ax-avatar
+                src="https://i.pravatar.cc/150?img=1"
+                name="John Doe"
+                size="md"
+              ></ax-avatar>
+              <div class="flex-1">
+                <p class="text-sm font-medium text-gray-900 dark:text-white">
+                  John Doe
+                </p>
+                <p class="text-xs text-gray-600 dark:text-gray-400">
+                  Project Manager
+                </p>
+              </div>
+              <span class="text-xs text-gray-500">Active</span>
+            </div>
+            <div
+              class="p-4 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
+              <ax-avatar name="Alice Smith" size="md"></ax-avatar>
+              <div class="flex-1">
+                <p class="text-sm font-medium text-gray-900 dark:text-white">
+                  Alice Smith
+                </p>
+                <p class="text-xs text-gray-600 dark:text-gray-400">
+                  UX Designer
+                </p>
+              </div>
+              <span class="text-xs text-gray-500">Away</span>
+            </div>
+            <div
+              class="p-4 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
+              <ax-avatar
+                src="https://i.pravatar.cc/150?img=8"
+                name="Michael Chen"
+                size="md"
+              ></ax-avatar>
+              <div class="flex-1">
+                <p class="text-sm font-medium text-gray-900 dark:text-white">
+                  Michael Chen
+                </p>
+                <p class="text-xs text-gray-600 dark:text-gray-400">
+                  Backend Developer
+                </p>
+              </div>
+              <span class="text-xs text-gray-500">Active</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Avatar Group/Stack -->
+        <div>
+          <h5
+            class="text-sm font-semibold mb-4 text-gray-700 dark:text-gray-300"
+          >
+            Avatar Stack (Manual)
+          </h5>
+          <div
+            class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6"
+          >
+            <div class="flex items-center gap-4">
+              <div class="flex -space-x-3">
+                <ax-avatar
+                  src="https://i.pravatar.cc/150?img=1"
+                  name="User 1"
+                  size="md"
+                ></ax-avatar>
+                <ax-avatar
+                  src="https://i.pravatar.cc/150?img=2"
+                  name="User 2"
+                  size="md"
+                ></ax-avatar>
+                <ax-avatar name="User 3" size="md"></ax-avatar>
+                <ax-avatar
+                  src="https://i.pravatar.cc/150?img=4"
+                  name="User 4"
+                  size="md"
+                ></ax-avatar>
+                <div
+                  class="ax-avatar ax-avatar-md ax-avatar-circle bg-gray-300 dark:bg-gray-600 flex items-center justify-center"
+                >
+                  <span
+                    class="text-xs font-semibold text-gray-700 dark:text-gray-300"
+                    >+5</span
+                  >
+                </div>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-gray-900 dark:text-white">
+                  9 team members
+                </p>
+                <p class="text-xs text-gray-600 dark:text-gray-400">
+                  Collaborating on this project
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Comment Thread -->
+        <div>
+          <h5
+            class="text-sm font-semibold mb-4 text-gray-700 dark:text-gray-300"
+          >
+            Comment Thread
+          </h5>
+          <div
+            class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-4"
+          >
+            <div class="flex gap-3">
+              <ax-avatar
+                src="https://i.pravatar.cc/150?img=5"
+                name="Emma Wilson"
+                size="sm"
+              ></ax-avatar>
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                  <span
+                    class="text-sm font-semibold text-gray-900 dark:text-white"
+                    >Emma Wilson</span
+                  >
+                  <span class="text-xs text-gray-500">2 hours ago</span>
+                </div>
+                <p class="text-sm text-gray-700 dark:text-gray-300">
+                  Great work on the new feature! The UI looks much cleaner now.
+                </p>
+              </div>
+            </div>
+            <div class="flex gap-3">
+              <ax-avatar name="Robert Taylor" size="sm"></ax-avatar>
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                  <span
+                    class="text-sm font-semibold text-gray-900 dark:text-white"
+                    >Robert Taylor</span
+                  >
+                  <span class="text-xs text-gray-500">1 hour ago</span>
+                </div>
+                <p class="text-sm text-gray-700 dark:text-gray-300">
+                  Thanks! Should we add some animations too?
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
