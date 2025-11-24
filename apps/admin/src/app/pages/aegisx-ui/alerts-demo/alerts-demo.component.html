@@ -20,9 +20,9 @@
        Basic Alert Variants
        ============================================ -->
   <div class="demo-section">
-    <h3>Alert Variants</h3>
+    <h3 class="heading-title-large">Alert Variants</h3>
     <div class="demo-container feature-group">
-      <h4>🎨 Four Semantic Colors</h4>
+      <h4 class="heading-title-medium">🎨 Four Semantic Colors</h4>
       <p class="mb-4">
         Use semantic colors to convey different types of messages: success,
         info, warning, and error
@@ -52,9 +52,9 @@
        Alerts with Titles
        ============================================ -->
   <div class="demo-section">
-    <h3>Alerts with Titles</h3>
+    <h3 class="heading-title-large">Alerts with Titles</h3>
     <div class="demo-container feature-group">
-      <h4>📋 Enhanced Context</h4>
+      <h4 class="heading-title-medium">📋 Enhanced Context</h4>
       <p class="mb-4">
         Add titles to provide additional context and improve scannability
       </p>
@@ -85,9 +85,9 @@
        Closeable Alerts
        ============================================ -->
   <div class="demo-section">
-    <h3>Closeable Alerts</h3>
+    <h3 class="heading-title-large">Closeable Alerts</h3>
     <div class="demo-container feature-group">
-      <h4>❌ User Dismissible</h4>
+      <h4 class="heading-title-medium">❌ User Dismissible</h4>
       <p class="mb-4">Allow users to dismiss alerts by adding a close button</p>
 
       <div class="space-y-4">
@@ -148,9 +148,9 @@
        Auto-Hide Alerts
        ============================================ -->
   <div class="demo-section">
-    <h3>Auto-Hide Alerts</h3>
+    <h3 class="heading-title-large">Auto-Hide Alerts</h3>
     <div class="demo-container feature-group">
-      <h4>⏱️ Automatic Dismissal</h4>
+      <h4 class="heading-title-medium">⏱️ Automatic Dismissal</h4>
       <p class="mb-4">
         Alerts can automatically disappear after a specified duration
       </p>
@@ -235,9 +235,9 @@
        Real-World Examples
        ============================================ -->
   <div class="demo-section">
-    <h3>Real-World Examples</h3>
+    <h3 class="heading-title-large">Real-World Examples</h3>
     <div class="demo-container feature-group">
-      <h4>🎯 Common Use Cases</h4>
+      <h4 class="heading-title-medium">🎯 Common Use Cases</h4>
       <p class="mb-4">
         Practical alert implementations for different scenarios
       </p>
@@ -245,11 +245,7 @@
       <div class="space-y-8">
         <!-- Form Validation Success -->
         <div>
-          <h5
-            class="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300"
-          >
-            Form Validation Success
-          </h5>
+          <h5 class="type-body-small">Form Validation Success</h5>
           <ax-alert
             variant="success"
             title="Profile Updated"
@@ -262,11 +258,7 @@
 
         <!-- System Notification -->
         <div>
-          <h5
-            class="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300"
-          >
-            System Notification
-          </h5>
+          <h5 class="type-body-small">System Notification</h5>
           <ax-alert variant="info" title="Scheduled Maintenance">
             System maintenance is scheduled for Sunday, 2:00 AM - 4:00 AM PST.
             Some features may be temporarily unavailable.
@@ -275,11 +267,7 @@
 
         <!-- Data Loss Warning -->
         <div>
-          <h5
-            class="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300"
-          >
-            Data Loss Warning
-          </h5>
+          <h5 class="type-body-small">Data Loss Warning</h5>
           <ax-alert variant="warning" title="Unsaved Changes">
             You have unsaved changes. Please save your work before navigating
             away from this page to prevent data loss.
@@ -288,11 +276,7 @@
 
         <!-- API Error -->
         <div>
-          <h5
-            class="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300"
-          >
-            API Error
-          </h5>
+          <h5 class="type-body-small">API Error</h5>
           <ax-alert
             variant="error"
             title="Connection Failed"
@@ -305,11 +289,7 @@
 
         <!-- Multiple Alerts Stack -->
         <div>
-          <h5
-            class="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300"
-          >
-            Multiple Alerts (Stack)
-          </h5>
+          <h5 class="type-body-small">Multiple Alerts (Stack)</h5>
           <div class="space-y-3">
             <ax-alert variant="success" [closeable]="true">
               File uploaded successfully: document.pdf
@@ -330,17 +310,15 @@
        Best Practices
        ============================================ -->
   <div class="demo-section">
-    <h3>Best Practices</h3>
+    <h3 class="heading-title-large">Best Practices</h3>
     <div class="demo-container feature-group">
-      <h4>💡 Usage Guidelines</h4>
+      <h4 class="heading-title-medium">💡 Usage Guidelines</h4>
 
       <div class="space-y-4 text-sm">
         <div
           class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4"
         >
-          <h5 class="font-semibold text-blue-900 dark:text-blue-300 mb-2">
-            ✅ Do
-          </h5>
+          <h5 class="type-title-medium">✅ Do</h5>
           <ul class="space-y-2 text-blue-800 dark:text-blue-200">
             <li>
               • Use appropriate variant colors (success for confirmations, error
@@ -357,9 +335,7 @@
         <div
           class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4"
         >
-          <h5 class="font-semibold text-red-900 dark:text-red-300 mb-2">
-            ❌ Don't
-          </h5>
+          <h5 class="type-title-medium">❌ Don't</h5>
           <ul class="space-y-2 text-red-800 dark:text-red-200">
             <li>
               • Don't use alerts for every minor action (causes alert fatigue)
@@ -382,9 +358,7 @@
         <div
           class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4"
         >
-          <h5 class="font-semibold text-gray-900 dark:text-gray-300 mb-2">
-            📊 Recommended Durations
-          </h5>
+          <h5 class="type-title-medium">📊 Recommended Durations</h5>
           <ul class="space-y-2 text-gray-700 dark:text-gray-300">
             <li>• Success messages: 3-5 seconds</li>
             <li>• Info notifications: 5-7 seconds</li>

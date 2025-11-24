@@ -18,13 +18,13 @@
 
   <!-- Field Display Component -->
   <div class="demo-section">
-    <h3>Field Display Component</h3>
+    <h3 class="heading-title-large">Field Display Component</h3>
     <p class="demo-description">
       Display field values in read-only format with automatic type-based
       formatting.
     </p>
 
-    <h4>Basic Text Display</h4>
+    <h4 class="heading-title-medium">Basic Text Display</h4>
     <div class="demo-container" style="max-width: 600px">
       <ax-field-display
         label="Full Name"
@@ -40,7 +40,7 @@
       ></ax-field-display>
     </div>
 
-    <h4>Type-Based Formatting</h4>
+    <h4 class="heading-title-medium">Type-Based Formatting</h4>
     <div class="demo-container" style="max-width: 600px">
       <ax-field-display
         label="Join Date"
@@ -72,7 +72,7 @@
       </ax-field-display>
     </div>
 
-    <h4>Clickable Links</h4>
+    <h4 class="heading-title-medium">Clickable Links</h4>
     <div class="demo-container" style="max-width: 600px">
       <ax-field-display label="Email" [value]="userProfile.email" type="email">
       </ax-field-display>
@@ -88,7 +88,7 @@
       </ax-field-display>
     </div>
 
-    <h4>Sizes</h4>
+    <h4 class="heading-title-medium">Sizes</h4>
     <div class="demo-container" style="max-width: 600px">
       <ax-field-display label="Small" [value]="userProfile.fullName" size="sm">
       </ax-field-display>
@@ -104,7 +104,7 @@
       </ax-field-display>
     </div>
 
-    <h4>Vertical Orientation</h4>
+    <h4 class="heading-title-medium">Vertical Orientation</h4>
     <div class="demo-container" style="max-width: 600px">
       <ax-field-display
         label="Description"
@@ -114,7 +114,7 @@
       </ax-field-display>
     </div>
 
-    <h4>Empty State</h4>
+    <h4 class="heading-title-medium">Empty State</h4>
     <div class="demo-container" style="max-width: 600px">
       <ax-field-display
         label="Middle Name"
@@ -134,13 +134,13 @@
 
   <!-- Description List Component -->
   <div class="demo-section">
-    <h3>Description List Component</h3>
+    <h3 class="heading-title-large">Description List Component</h3>
     <p class="demo-description">
       Container for organizing multiple field-display components in structured
       layouts.
     </p>
 
-    <h4>Horizontal Layout (Default)</h4>
+    <h4 class="heading-title-medium">Horizontal Layout (Default)</h4>
     <div class="demo-container">
       <ax-description-list style="max-width: 600px">
         <ax-field-display
@@ -164,7 +164,7 @@
       </ax-description-list>
     </div>
 
-    <h4>Grid Layout (2 Columns)</h4>
+    <h4 class="heading-title-medium">Grid Layout (2 Columns)</h4>
     <div class="demo-container">
       <ax-description-list layout="grid" [columns]="2">
         <ax-field-display
@@ -197,7 +197,7 @@
       </ax-description-list>
     </div>
 
-    <h4>Grid Layout (3 Columns)</h4>
+    <h4 class="heading-title-medium">Grid Layout (3 Columns)</h4>
     <div class="demo-container">
       <ax-description-list layout="grid" [columns]="3">
         <ax-field-display
@@ -230,7 +230,7 @@
       </ax-description-list>
     </div>
 
-    <h4>With Dividers (Default: Small Spacing)</h4>
+    <h4 class="heading-title-medium">With Dividers (Default: Small Spacing)</h4>
     <div class="demo-container">
       <ax-description-list [divider]="true" style="max-width: 600px">
         <ax-field-display
@@ -254,7 +254,7 @@
       </ax-description-list>
     </div>
 
-    <h4>Divider Size Variants</h4>
+    <h4 class="heading-title-medium">Divider Size Variants</h4>
     <div class="demo-container">
       <div
         style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem"
