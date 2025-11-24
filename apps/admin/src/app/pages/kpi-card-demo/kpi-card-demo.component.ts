@@ -1,10 +1,10 @@
-import { Component } from '@angular/core';
+import { AxKpiCardComponent } from '@aegisx/ui';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
+import { Component } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { AxKpiCardComponent } from '@aegisx/ui';
 
 @Component({
   selector: 'app-kpi-card-demo',
@@ -22,7 +22,7 @@ import { AxKpiCardComponent } from '@aegisx/ui';
       <!-- Page Header -->
       <div class="docs-header">
         <div class="docs-breadcrumb">
-          <a routerLink="/card-examples" mat-button>
+          <a routerLink="/card-examples" mat-flat-button color="primary">
             <mat-icon>arrow_back</mat-icon>
             Card Examples
           </a>
