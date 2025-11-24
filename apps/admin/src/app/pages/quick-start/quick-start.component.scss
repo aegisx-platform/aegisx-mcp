@@ -25,8 +25,7 @@
   }
 
   h3 {
-    font-size: 1.125rem;
-    font-weight: 600;
+    font: var(--ax-type-title-large);
     color: var(--ax-text-heading);
     margin: 0;
   }
@@ -74,14 +73,13 @@
     flex: 1;
 
     h3 {
-      font-size: 1.5rem;
-      font-weight: 600;
+      font: var(--ax-type-headline-small);
       color: var(--ax-text-heading);
       margin: 0 0 0.5rem 0;
     }
 
     p {
-      font-size: 1rem;
+      font: var(--ax-type-body-large);
       color: var(--ax-text-secondary);
       margin: 0;
     }
@@ -125,18 +123,16 @@
   }
 
   h3 {
-    font-size: 1.125rem;
-    font-weight: 600;
+    font: var(--ax-type-title-large);
     color: var(--ax-text-heading);
     margin: 0 0 0.5rem 0;
   }
 
   p {
-    font-size: 0.9375rem;
+    font: var(--ax-type-body-medium);
     color: var(--ax-text-secondary);
     margin: 0 0 1.25rem 0;
     flex: 1;
-    line-height: 1.6;
   }
 
   a {
@@ -181,17 +177,15 @@
     flex: 1;
 
     h4 {
-      font-size: 1rem;
-      font-weight: 600;
+      font: var(--ax-type-title-medium);
       color: var(--ax-text-heading);
       margin: 0 0 0.5rem 0;
     }
 
     p {
-      font-size: 0.9375rem;
+      font: var(--ax-type-body-medium);
       color: var(--ax-text-secondary);
       margin: 0;
-      line-height: 1.6;
     }
   }
 }
@@ -233,14 +227,13 @@
   }
 
   h3 {
-    font-size: 1.125rem;
-    font-weight: 600;
+    font: var(--ax-type-title-large);
     color: var(--ax-text-heading);
     margin: 0 0 0.5rem 0;
   }
 
   p {
-    font-size: 0.9375rem;
+    font: var(--ax-type-body-medium);
     color: var(--ax-text-secondary);
     margin: 0 0 1.25rem 0;
     flex: 1;
@@ -275,14 +268,13 @@
 
   .help-text {
     h3 {
-      font-size: 1.25rem;
-      font-weight: 600;
+      font: var(--ax-type-title-large);
       color: var(--ax-text-heading);
       margin: 0 0 0.5rem 0;
     }
 
     p {
-      font-size: 1rem;
+      font: var(--ax-type-body-large);
       color: var(--ax-text-secondary);
       margin: 0;
     }
