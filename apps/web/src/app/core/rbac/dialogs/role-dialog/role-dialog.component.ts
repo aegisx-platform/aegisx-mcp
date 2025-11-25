@@ -58,30 +58,21 @@ import {
     MatTooltipModule,
   ],
   template: `
-    <div class="role-dialog">
-      <div
-        mat-dialog-title
-        class="flex items-center justify-between pb-4 border-b"
-      >
-        <div class="flex items-center gap-3">
-          <mat-icon class="!text-2xl">{{
-            data.mode === 'create' ? 'add_circle' : 'edit'
-          }}</mat-icon>
-          <h2 class="text-xl font-semibold m-0">
-            {{ data.mode === 'create' ? 'Create New Role' : 'Edit Role' }}
-          </h2>
-        </div>
-        <button mat-icon-button mat-dialog-close>
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
+    <h2 mat-dialog-title class="flex items-center gap-3 text-xl font-semibold">
+      <mat-icon class="text-brand">{{
+        data.mode === 'create' ? 'add_circle' : 'edit'
+      }}</mat-icon>
+      {{ data.mode === 'create' ? 'Create New Role' : 'Edit Role' }}
+    </h2>
 
-      <mat-dialog-content class="py-6 max-h-[600px] overflow-y-auto">
-        <form [formGroup]="roleForm" class="space-y-6">
+    <mat-dialog-content>
+      <div class="form-compact">
+        <form [formGroup]="roleForm" class="flex flex-col gap-4">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Role Name -->
             <mat-form-field appearance="outline" class="w-full">
-              <mat-label>Role Name *</mat-label>
+              <mat-label>Role Name <span class="text-error">*</span></mat-label>
+              <mat-icon matPrefix>badge</mat-icon>
               <input
                 matInput
                 formControlName="name"
@@ -97,7 +88,8 @@ import {
 
             <!-- Category -->
             <mat-form-field appearance="outline" class="w-full">
-              <mat-label>Category *</mat-label>
+              <mat-label>Category <span class="text-error">*</span></mat-label>
+              <mat-icon matPrefix>category</mat-icon>
               <mat-select formControlName="category">
                 <mat-option
                   *ngFor="let category of availableCategories()"
@@ -124,6 +116,7 @@ import {
           <!-- Description -->
           <mat-form-field appearance="outline" class="w-full">
             <mat-label>Description</mat-label>
+            <mat-icon matPrefix>description</mat-icon>
             <textarea
               matInput
               formControlName="description"
@@ -145,6 +138,7 @@ import {
           <!-- Parent Role -->
           <mat-form-field appearance="outline" class="w-full">
             <mat-label>Parent Role (Optional)</mat-label>
+            <mat-icon matPrefix>account_tree</mat-icon>
             <mat-select formControlName="parent_role_id">
               <mat-option [value]="null">No Parent Role</mat-option>
               <mat-option
@@ -166,13 +160,13 @@ import {
               <!-- Permission Search -->
               <mat-form-field appearance="outline" class="w-full mb-4">
                 <mat-label>Search permissions</mat-label>
+                <mat-icon matPrefix>search</mat-icon>
                 <input
                   matInput
                   [(ngModel)]="permissionSearch"
                   (ngModelChange)="filterPermissions()"
                   placeholder="Search by name, resource, or action"
                 />
-                <mat-icon matSuffix>search</mat-icon>
               </mat-form-field>
 
               <!-- Permission Selection Actions -->
@@ -223,13 +217,11 @@ import {
                 >
                   <!-- Category Header -->
                   <div
-                    class="bg-gray-50 dark:bg-gray-800 px-4 py-2 border-b flex items-center justify-between"
+                    class="px-4 py-2 border-b flex items-center justify-between"
                   >
                     <div class="flex items-center gap-2">
                       <h4 class="font-medium">{{ category.name }}</h4>
-                      <mat-chip
-                        class="!bg-blue-100 !text-blue-800 dark:!bg-blue-900 dark:!text-blue-200"
-                      >
+                      <mat-chip>
                         {{ category.permissions.length }}
                       </mat-chip>
                     </div>
@@ -250,7 +242,7 @@ import {
                         let permission of category.permissions;
                         trackBy: trackByPermission
                       "
-                      class="flex items-start gap-3 p-3 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
+                      class="flex items-start gap-3 p-3 border-b"
                     >
                       <mat-checkbox
                         [checked]="permissionSelection.isSelected(permission)"
@@ -263,31 +255,21 @@ import {
                         <div class="font-medium">
                           {{ permission.resource }}.{{ permission.action }}
                         </div>
-                        <div
-                          class="text-sm text-gray-600 dark:text-gray-400 mt-1"
-                        >
+                        <div class="text-sm mt-1">
                           {{ permission.description }}
                         </div>
                         <div class="flex gap-2 mt-2">
-                          <mat-chip
-                            class="!bg-gray-100 !text-gray-800 dark:!bg-gray-700 dark:!text-gray-200 !text-xs !mr-1 !mb-1"
-                          >
+                          <mat-chip class="!text-xs">
                             {{ permission.resource }}
                           </mat-chip>
-                          <mat-chip
-                            class="!bg-gray-100 !text-gray-800 dark:!bg-gray-700 dark:!text-gray-200 !text-xs !mr-1 !mb-1"
-                          >
+                          <mat-chip class="!text-xs">
                             {{ permission.action }}
                           </mat-chip>
                         </div>
                       </div>
 
                       <div *ngIf="permission.is_system_permission" class="mt-1">
-                        <mat-chip
-                          class="!bg-blue-100 !text-blue-800 dark:!bg-blue-900 dark:!text-blue-200"
-                        >
-                          System
-                        </mat-chip>
+                        <mat-chip>System</mat-chip>
                       </div>
                     </div>
                   </div>
@@ -296,7 +278,7 @@ import {
                 <!-- No Permissions Found -->
                 <div
                   *ngIf="groupedPermissions().length === 0"
-                  class="text-center py-8 text-gray-500"
+                  class="text-center py-8"
                 >
                   <mat-icon class="text-4xl mb-2 opacity-50"
                     >search_off</mat-icon
@@ -308,10 +290,10 @@ import {
               <!-- Selected Permissions Summary -->
               <div
                 *ngIf="permissionSelection.selected.length > 0"
-                class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg"
+                class="mt-4 p-4 rounded-lg border"
               >
                 <h4 class="font-medium mb-2 flex items-center gap-2">
-                  <mat-icon class="text-blue-600">verified_user</mat-icon>
+                  <mat-icon>verified_user</mat-icon>
                   Selected Permissions ({{
                     permissionSelection.selected.length
                   }})
@@ -324,17 +306,13 @@ import {
                         10
                       )
                     "
-                    class="!bg-blue-100 !text-blue-800 dark:!bg-blue-900 dark:!text-blue-200 !mr-2 !mb-2"
                     removable
                     (removed)="togglePermission(permission, false)"
                   >
                     {{ permission.resource }}.{{ permission.action }}
                     <mat-icon matChipRemove>cancel</mat-icon>
                   </mat-chip>
-                  <mat-chip
-                    *ngIf="permissionSelection.selected.length > 10"
-                    class="!bg-gray-100 !text-gray-800 dark:!bg-gray-700 dark:!text-gray-200 !mr-2 !mb-2"
-                  >
+                  <mat-chip *ngIf="permissionSelection.selected.length > 10">
                     +{{ permissionSelection.selected.length - 10 }} more
                   </mat-chip>
                 </div>
@@ -342,41 +320,31 @@ import {
             </div>
           </mat-tab>
         </mat-tab-group>
-      </mat-dialog-content>
+      </div>
+    </mat-dialog-content>
 
-      <mat-dialog-actions class="flex justify-end gap-2 pt-4 border-t">
-        <button mat-button mat-dialog-close [disabled]="isLoading()">
-          Cancel
-        </button>
-        <button
-          mat-raised-button
-          color="primary"
-          (click)="save()"
-          [disabled]="isLoading() || !roleForm.valid"
-        >
-          <mat-spinner
-            *ngIf="isLoading()"
-            diameter="20"
-            class="mr-2"
-          ></mat-spinner>
-          <mat-icon *ngIf="!isLoading()">save</mat-icon>
-          {{ data.mode === 'create' ? 'Create Role' : 'Update Role' }}
-        </button>
-      </mat-dialog-actions>
+    <div mat-dialog-actions align="end" class="flex gap-2">
+      <button mat-button mat-dialog-close [disabled]="isLoading()">
+        Cancel
+      </button>
+      <button
+        mat-flat-button
+        color="primary"
+        (click)="save()"
+        [disabled]="isLoading() || !roleForm.valid"
+      >
+        <mat-spinner
+          *ngIf="isLoading()"
+          diameter="20"
+          class="mr-2"
+        ></mat-spinner>
+        <mat-icon *ngIf="!isLoading()">save</mat-icon>
+        {{ data.mode === 'create' ? 'Create Role' : 'Update Role' }}
+      </button>
     </div>
   `,
   styles: [
     `
-      .role-dialog {
-        width: 100%;
-        max-width: 800px;
-      }
-
-      .mat-mdc-dialog-content {
-        max-height: 600px;
-        overflow-y: auto;
-      }
-
       .mat-mdc-chip {
         min-height: 24px;
         font-size: 12px;

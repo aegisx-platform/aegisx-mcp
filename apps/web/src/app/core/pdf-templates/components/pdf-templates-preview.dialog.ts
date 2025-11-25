@@ -31,15 +31,13 @@ export interface PdfTemplatePreviewDialogData {
   ],
   template: `
     <div class="preview-dialog">
-      <div class="dialog-header">
-        <h2 mat-dialog-title>
-          <mat-icon>visibility</mat-icon>
-          Preview: {{ data.template.display_name }}
-        </h2>
-        <button mat-icon-button (click)="dialogRef.close()">
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
+      <h2
+        mat-dialog-title
+        class="flex items-center gap-3 text-xl font-semibold"
+      >
+        <mat-icon class="text-brand">visibility</mat-icon>
+        Preview: {{ data.template.display_name }}
+      </h2>
 
       <mat-dialog-content class="dialog-content">
         @if (loading()) {
@@ -54,7 +52,7 @@ export interface PdfTemplatePreviewDialogData {
             <mat-icon class="error-icon">error</mat-icon>
             <h3>Preview Failed</h3>
             <p>{{ error() }}</p>
-            <button mat-raised-button color="primary" (click)="loadPreview()">
+            <button mat-flat-button color="primary" (click)="loadPreview()">
               <mat-icon>refresh</mat-icon>
               Retry
             </button>
@@ -88,15 +86,15 @@ export interface PdfTemplatePreviewDialogData {
         }
       </mat-dialog-content>
 
-      <mat-dialog-actions align="end">
+      <div mat-dialog-actions align="end" class="flex gap-2">
         <button mat-button (click)="dialogRef.close()">Close</button>
         @if (pdfUrl() && !loading()) {
-          <button mat-raised-button color="primary" (click)="downloadPdf()">
+          <button mat-flat-button color="primary" (click)="downloadPdf()">
             <mat-icon>download</mat-icon>
             Download
           </button>
         }
-      </mat-dialog-actions>
+      </div>
     </div>
   `,
   styles: [
@@ -106,23 +104,6 @@ export interface PdfTemplatePreviewDialogData {
         flex-direction: column;
         height: 100%;
         max-height: 90vh;
-      }
-
-      .dialog-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 16px 24px;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-
-        h2 {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          margin: 0;
-          font-size: 20px;
-          font-weight: 500;
-        }
       }
 
       .dialog-content {
@@ -145,7 +126,7 @@ export interface PdfTemplatePreviewDialogData {
 
         p {
           margin-top: 16px;
-          color: rgba(0, 0, 0, 0.6);
+          color: var(--mat-sys-on-surface-variant);
         }
       }
 
@@ -154,12 +135,12 @@ export interface PdfTemplatePreviewDialogData {
           font-size: 64px;
           width: 64px;
           height: 64px;
-          color: #f44336;
+          color: var(--mat-sys-error);
         }
 
         h3 {
           margin: 16px 0 8px;
-          color: #f44336;
+          color: var(--mat-sys-error);
         }
 
         button {
@@ -179,11 +160,6 @@ export interface PdfTemplatePreviewDialogData {
         height: 100%;
         border: none;
         flex: 1;
-      }
-
-      mat-dialog-actions {
-        padding: 16px 24px;
-        border-top: 1px solid rgba(0, 0, 0, 0.12);
       }
     `,
   ],

@@ -53,23 +53,18 @@ interface PermissionGroup {
   ],
   template: `
     <div class="user-overview-dialog">
-      <div
+      <h2
         mat-dialog-title
-        class="flex items-center justify-between pb-4 border-b"
+        class="flex items-center gap-3 text-xl font-semibold"
       >
-        <div class="flex items-center gap-3">
-          <mat-icon class="!text-2xl text-indigo-600">account_circle</mat-icon>
-          <div>
-            <h2 class="text-xl font-semibold m-0">User Access Overview</h2>
-            <p class="text-sm text-gray-600 dark:text-gray-400 m-0">
-              {{ data.userName }}
-            </p>
+        <mat-icon class="text-brand">account_circle</mat-icon>
+        <div>
+          <div>User Access Overview</div>
+          <div class="text-sm text-gray-600 dark:text-gray-400 font-normal">
+            {{ data.userName }}
           </div>
         </div>
-        <button mat-icon-button mat-dialog-close>
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
+      </h2>
 
       <mat-dialog-content class="max-h-[80vh] overflow-y-auto">
         <!-- Loading State -->
@@ -286,13 +281,10 @@ interface PermissionGroup {
         </div>
       </mat-dialog-content>
 
-      <mat-dialog-actions
-        align="end"
-        class="border-t border-gray-200 dark:border-gray-700 pt-4"
-      >
+      <div mat-dialog-actions align="end" class="flex gap-2">
         <button mat-button (click)="onClose()">Close</button>
         <button
-          mat-raised-button
+          mat-flat-button
           color="primary"
           (click)="onManageRoles()"
           [disabled]="isLoading()"
@@ -301,7 +293,7 @@ interface PermissionGroup {
           Manage Access
         </button>
         <button
-          mat-raised-button
+          mat-flat-button
           color="accent"
           (click)="onExportOverview()"
           [disabled]="isLoading()"
@@ -309,7 +301,7 @@ interface PermissionGroup {
           <mat-icon>download</mat-icon>
           Export
         </button>
-      </mat-dialog-actions>
+      </div>
     </div>
   `,
   styles: [

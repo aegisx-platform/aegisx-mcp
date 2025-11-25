@@ -107,9 +107,9 @@ export interface LogoUploadData {
         flex-direction: column;
         gap: 16px;
         padding: 16px;
-        background: rgba(0, 0, 0, 0.02);
+        background: var(--mat-sys-surface-container-low);
         border-radius: 8px;
-        border: 1px dashed rgba(0, 0, 0, 0.12);
+        border: 1px dashed var(--mat-sys-outline-variant);
       }
 
       .file-input {
@@ -137,8 +137,8 @@ export interface LogoUploadData {
         width: fit-content;
         max-width: 400px;
         padding: 16px;
-        background: white;
-        border: 1px solid rgba(0, 0, 0, 0.12);
+        background: var(--mat-sys-surface);
+        border: 1px solid var(--mat-sys-outline-variant);
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       }
@@ -154,7 +154,7 @@ export interface LogoUploadData {
         position: absolute;
         top: 8px;
         right: 8px;
-        background: white;
+        background: var(--mat-sys-surface);
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
       }
 
@@ -163,7 +163,7 @@ export interface LogoUploadData {
         flex-direction: column;
         gap: 4px;
         font-size: 14px;
-        color: rgba(0, 0, 0, 0.6);
+        color: var(--mat-sys-on-surface-variant);
       }
 
       .logo-info p {
@@ -171,13 +171,13 @@ export interface LogoUploadData {
       }
 
       .logo-error {
-        color: #f44336;
+        color: var(--mat-sys-error);
         font-size: 12px;
       }
 
       .logo-hint {
         font-size: 12px;
-        color: rgba(0, 0, 0, 0.6);
+        color: var(--mat-sys-on-surface-variant);
       }
 
       @media (max-width: 768px) {

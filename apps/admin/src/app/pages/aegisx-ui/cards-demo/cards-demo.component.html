@@ -18,34 +18,184 @@
   </div>
 
   <!-- ============================================
+       Card Properties Reference
+       ============================================ -->
+  <div class="demo-section">
+    <h3 class="h5">Component API Reference</h3>
+    <div class="demo-container">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b-2 border-gray-300">
+              <th class="text-left py-3 px-4 font-semibold">Property</th>
+              <th class="text-left py-3 px-4 font-semibold">Type</th>
+              <th class="text-left py-3 px-4 font-semibold">Default</th>
+              <th class="text-left py-3 px-4 font-semibold">Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b border-gray-200">
+              <td class="py-3 px-4 font-mono text-xs">variant</td>
+              <td class="py-3 px-4 font-mono text-xs">
+                'default' | 'outlined' | 'elevated'
+              </td>
+              <td class="py-3 px-4 font-mono text-xs">'default'</td>
+              <td class="py-3 px-4">
+                Visual style: default (1px border), outlined (2px border), or
+                elevated (shadow)
+              </td>
+            </tr>
+            <tr class="border-b border-gray-200 bg-gray-50">
+              <td class="py-3 px-4 font-mono text-xs">size</td>
+              <td class="py-3 px-4 font-mono text-xs">'sm' | 'md' | 'lg'</td>
+              <td class="py-3 px-4 font-mono text-xs">'md'</td>
+              <td class="py-3 px-4">
+                Controls internal padding: sm (compact), md (standard), lg
+                (spacious)
+              </td>
+            </tr>
+            <tr class="border-b border-gray-200">
+              <td class="py-3 px-4 font-mono text-xs">color</td>
+              <td class="py-3 px-4 font-mono text-xs">
+                'default' | 'primary' | 'info' | 'success' | 'warning' | 'error'
+                | 'neutral'
+              </td>
+              <td class="py-3 px-4 font-mono text-xs">'default'</td>
+              <td class="py-3 px-4">
+                Color variant for borders and backgrounds
+              </td>
+            </tr>
+            <tr class="border-b border-gray-200 bg-gray-50">
+              <td class="py-3 px-4 font-mono text-xs">colorIntensity</td>
+              <td class="py-3 px-4 font-mono text-xs">'filled' | 'subtle'</td>
+              <td class="py-3 px-4 font-mono text-xs">'filled'</td>
+              <td class="py-3 px-4">
+                Color intensity: filled (full color background) or subtle (light
+                tinted background)
+              </td>
+            </tr>
+            <tr class="border-b border-gray-200">
+              <td class="py-3 px-4 font-mono text-xs">borderWidth</td>
+              <td class="py-3 px-4 font-mono text-xs">
+                '1' | '2' | '3' | '4' | string
+              </td>
+              <td class="py-3 px-4 font-mono text-xs">'1'</td>
+              <td class="py-3 px-4">
+                Border thickness (predefined values or custom like "2.5px",
+                "0.125rem")
+              </td>
+            </tr>
+            <tr class="border-b border-gray-200 bg-gray-50">
+              <td class="py-3 px-4 font-mono text-xs">hoverable</td>
+              <td class="py-3 px-4 font-mono text-xs">boolean</td>
+              <td class="py-3 px-4 font-mono text-xs">false</td>
+              <td class="py-3 px-4">
+                Enables lift animation on hover with increased shadow
+              </td>
+            </tr>
+            <tr class="border-b border-gray-200">
+              <td class="py-3 px-4 font-mono text-xs">clickable</td>
+              <td class="py-3 px-4 font-mono text-xs">boolean</td>
+              <td class="py-3 px-4 font-mono text-xs">false</td>
+              <td class="py-3 px-4">
+                Adds pointer cursor, press effect, and keyboard accessibility
+                (Tab + Enter)
+              </td>
+            </tr>
+            <tr class="border-b border-gray-200 bg-gray-50">
+              <td class="py-3 px-4 font-mono text-xs">loading</td>
+              <td class="py-3 px-4 font-mono text-xs">boolean</td>
+              <td class="py-3 px-4 font-mono text-xs">false</td>
+              <td class="py-3 px-4">
+                Shows loading spinner overlay and prevents user interaction
+              </td>
+            </tr>
+            <tr class="border-b border-gray-200">
+              <td class="py-3 px-4 font-mono text-xs">title</td>
+              <td class="py-3 px-4 font-mono text-xs">string</td>
+              <td class="py-3 px-4 font-mono text-xs">''</td>
+              <td class="py-3 px-4">Card header title text</td>
+            </tr>
+            <tr class="border-b border-gray-200 bg-gray-50">
+              <td class="py-3 px-4 font-mono text-xs">subtitle</td>
+              <td class="py-3 px-4 font-mono text-xs">string</td>
+              <td class="py-3 px-4 font-mono text-xs">''</td>
+              <td class="py-3 px-4">Card header subtitle text</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <p class="text-sm font-semibold text-blue-900 mb-2">
+          Content Projection
+        </p>
+        <ul class="text-sm text-blue-700 space-y-1">
+          <li>
+            <code class="px-1 py-0.5 bg-blue-100 rounded"
+              >&lt;ng-content&gt;</code
+            >
+            - Main card body content (default slot)
+          </li>
+          <li>
+            <code class="px-1 py-0.5 bg-blue-100 rounded"
+              >&lt;div header-actions&gt;</code
+            >
+            - Actions displayed in card header (right side)
+          </li>
+          <li>
+            <code class="px-1 py-0.5 bg-blue-100 rounded"
+              >&lt;div footer&gt;</code
+            >
+            - Footer content below body
+          </li>
+          <li>
+            <code class="px-1 py-0.5 bg-blue-100 rounded"
+              >&lt;div actions&gt;</code
+            >
+            - Action buttons at card bottom
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
        Card Component - Basic Examples
        ============================================ -->
   <div class="demo-section">
-    <h3 class="h5">Card Component - Basic Usage</h3>
+    <h3 class="h5">Getting Started</h3>
     <div class="demo-container feature-group">
       <h4 class="h6">📇 Basic Cards</h4>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <ax-card title="User Profile" subtitle="Personal Information">
-          <p>
-            This is the card content area. You can place any content here
-            including text, forms, or other components.
-          </p>
-        </ax-card>
+      <p class="mb-4 text-gray-600">
+        Simple card layout with title, subtitle, and content. Perfect for
+        organizing information into digestible sections.
+      </p>
 
-        <ax-card title="Dashboard Stats" subtitle="Overview">
-          <p>
-            Display statistics, charts, or important metrics in this area. Cards
-            provide a clean container for your content.
-          </p>
-        </ax-card>
+      <app-code-preview [extractCode]="true">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <ax-card title="User Profile" subtitle="Personal Information">
+            <p>
+              This is the card content area. You can place any content here
+              including text, forms, or other components.
+            </p>
+          </ax-card>
 
-        <ax-card title="Notifications" subtitle="Recent Activity">
-          <p>
-            Show recent notifications, updates, or activity feeds here. The card
-            automatically handles spacing and layout.
-          </p>
-        </ax-card>
-      </div>
+          <ax-card title="Dashboard Stats" subtitle="Overview">
+            <p>
+              Display statistics, charts, or important metrics in this area.
+              Cards provide a clean container for your content.
+            </p>
+          </ax-card>
+
+          <ax-card title="Notifications" subtitle="Recent Activity">
+            <p>
+              Show recent notifications, updates, or activity feeds here. The
+              card automatically handles spacing and layout.
+            </p>
+          </ax-card>
+        </div>
+      </app-code-preview>
     </div>
   </div>
 
@@ -487,556 +637,577 @@
        ============================================ -->
   <div class="demo-section">
     <h3 class="h5">Stats Cards with Colored Borders</h3>
+    <p class="text-gray-600 mb-6">
+      Two professional design patterns for displaying key metrics and health
+      data. Each design showcases all available color variants with subtle
+      backgrounds and colored borders.
+    </p>
+
     <div class="demo-container feature-group">
       <h4 class="h6">📊 Design 1: Rounded Icon Style</h4>
-      <p class="mb-4">
-        Minimalist design with circular icons and thin borders. Perfect for
-        modern dashboards with clean aesthetics.
+      <p class="mb-4 text-gray-600">
+        Minimalist design with circular icons and thin borders (1px). Perfect
+        for modern dashboards with clean aesthetics and high information
+        density.
       </p>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Heart Rate - Info Blue -->
-        <ax-card color="info" colorIntensity="subtle" borderWidth="1">
-          <div class="flex items-start gap-4">
-            <div
-              class="w-12 h-12 rounded-full flex items-center justify-center"
-              style="background-color: var(--ax-info-faint)"
-            >
-              <mat-icon class="text-2xl" style="color: var(--ax-info-default)"
-                >favorite</mat-icon
+      <app-code-preview [extractCode]="true">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Heart Rate - Info Blue -->
+          <ax-card color="info" colorIntensity="subtle" borderWidth="1">
+            <div class="flex items-start gap-4">
+              <div
+                class="w-12 h-12 rounded-full flex items-center justify-center"
+                style="background-color: var(--ax-info-faint)"
               >
+                <mat-icon class="text-2xl" style="color: var(--ax-info-default)"
+                  >favorite</mat-icon
+                >
+              </div>
+              <div class="flex-1">
+                <p
+                  class="text-xs uppercase tracking-wide mb-1"
+                  style="color: var(--ax-text-secondary)"
+                >
+                  HEART RATE
+                </p>
+                <p
+                  class="text-3xl font-bold mb-1"
+                  style="color: var(--ax-text-heading)"
+                >
+                  85 <span class="text-base font-normal">bpm</span>
+                </p>
+                <p
+                  class="text-xs flex items-center gap-1"
+                  style="color: var(--ax-success-default)"
+                >
+                  <mat-icon class="text-xs">trending_up</mat-icon>
+                  +3.7% from last
+                </p>
+              </div>
             </div>
-            <div class="flex-1">
-              <p
-                class="text-xs uppercase tracking-wide mb-1"
-                style="color: var(--ax-text-secondary)"
-              >
-                HEART RATE
-              </p>
-              <p
-                class="text-3xl font-bold mb-1"
-                style="color: var(--ax-text-heading)"
-              >
-                85 <span class="text-base font-normal">bpm</span>
-              </p>
-              <p
-                class="text-xs flex items-center gap-1"
-                style="color: var(--ax-success-default)"
-              >
-                <mat-icon class="text-xs">trending_up</mat-icon>
-                +3.7% from last
-              </p>
-            </div>
-          </div>
-        </ax-card>
+          </ax-card>
 
-        <!-- Systolic BP - Success Green -->
-        <ax-card color="success" colorIntensity="subtle" borderWidth="1">
-          <div class="flex items-start gap-4">
-            <div
-              class="w-12 h-12 rounded-full flex items-center justify-center"
-              style="background-color: var(--ax-success-faint)"
-            >
-              <mat-icon
-                class="text-2xl"
-                style="color: var(--ax-success-default)"
-                >show_chart</mat-icon
+          <!-- Systolic BP - Success Green -->
+          <ax-card color="success" colorIntensity="subtle" borderWidth="1">
+            <div class="flex items-start gap-4">
+              <div
+                class="w-12 h-12 rounded-full flex items-center justify-center"
+                style="background-color: var(--ax-success-faint)"
               >
+                <mat-icon
+                  class="text-2xl"
+                  style="color: var(--ax-success-default)"
+                  >show_chart</mat-icon
+                >
+              </div>
+              <div class="flex-1">
+                <p
+                  class="text-xs uppercase tracking-wide mb-1"
+                  style="color: var(--ax-text-secondary)"
+                >
+                  SYSTOLIC BP
+                </p>
+                <p
+                  class="text-3xl font-bold mb-1"
+                  style="color: var(--ax-text-heading)"
+                >
+                  120 <span class="text-base font-normal">mmHg</span>
+                </p>
+                <p
+                  class="text-xs flex items-center gap-1"
+                  style="color: var(--ax-success-default)"
+                >
+                  <mat-icon class="text-xs">trending_up</mat-icon>
+                  +2.6% from last
+                </p>
+              </div>
             </div>
-            <div class="flex-1">
-              <p
-                class="text-xs uppercase tracking-wide mb-1"
-                style="color: var(--ax-text-secondary)"
-              >
-                SYSTOLIC BP
-              </p>
-              <p
-                class="text-3xl font-bold mb-1"
-                style="color: var(--ax-text-heading)"
-              >
-                120 <span class="text-base font-normal">mmHg</span>
-              </p>
-              <p
-                class="text-xs flex items-center gap-1"
-                style="color: var(--ax-success-default)"
-              >
-                <mat-icon class="text-xs">trending_up</mat-icon>
-                +2.6% from last
-              </p>
-            </div>
-          </div>
-        </ax-card>
+          </ax-card>
 
-        <!-- Temperature - Warning Orange -->
-        <ax-card color="warning" colorIntensity="subtle" borderWidth="1">
-          <div class="flex items-start gap-4">
-            <div
-              class="w-12 h-12 rounded-full flex items-center justify-center"
-              style="background-color: var(--ax-warning-faint)"
-            >
-              <mat-icon
-                class="text-2xl"
-                style="color: var(--ax-warning-default)"
-                >thermostat</mat-icon
+          <!-- Temperature - Warning Orange -->
+          <ax-card color="warning" colorIntensity="subtle" borderWidth="1">
+            <div class="flex items-start gap-4">
+              <div
+                class="w-12 h-12 rounded-full flex items-center justify-center"
+                style="background-color: var(--ax-warning-faint)"
               >
+                <mat-icon
+                  class="text-2xl"
+                  style="color: var(--ax-warning-default)"
+                  >thermostat</mat-icon
+                >
+              </div>
+              <div class="flex-1">
+                <p
+                  class="text-xs uppercase tracking-wide mb-1"
+                  style="color: var(--ax-text-secondary)"
+                >
+                  TEMPERATURE
+                </p>
+                <p
+                  class="text-3xl font-bold mb-1"
+                  style="color: var(--ax-text-heading)"
+                >
+                  36.4 <span class="text-base font-normal">°C</span>
+                </p>
+                <p
+                  class="text-xs flex items-center gap-1"
+                  style="color: var(--ax-text-secondary)"
+                >
+                  <mat-icon class="text-xs">trending_down</mat-icon>
+                  -0.3% from last
+                </p>
+              </div>
             </div>
-            <div class="flex-1">
-              <p
-                class="text-xs uppercase tracking-wide mb-1"
-                style="color: var(--ax-text-secondary)"
-              >
-                TEMPERATURE
-              </p>
-              <p
-                class="text-3xl font-bold mb-1"
-                style="color: var(--ax-text-heading)"
-              >
-                36.4 <span class="text-base font-normal">°C</span>
-              </p>
-              <p
-                class="text-xs flex items-center gap-1"
-                style="color: var(--ax-text-secondary)"
-              >
-                <mat-icon class="text-xs">trending_down</mat-icon>
-                -0.3% from last
-              </p>
-            </div>
-          </div>
-        </ax-card>
+          </ax-card>
 
-        <!-- Resp. Rate - Info Cyan -->
-        <ax-card color="info" colorIntensity="subtle" borderWidth="1">
-          <div class="flex items-start gap-4">
-            <div
-              class="w-12 h-12 rounded-full flex items-center justify-center"
-              style="background-color: var(--ax-info-faint)"
-            >
-              <mat-icon class="text-2xl" style="color: var(--ax-info-default)"
-                >air</mat-icon
+          <!-- Resp. Rate - Info Cyan -->
+          <ax-card color="info" colorIntensity="subtle" borderWidth="1">
+            <div class="flex items-start gap-4">
+              <div
+                class="w-12 h-12 rounded-full flex items-center justify-center"
+                style="background-color: var(--ax-info-faint)"
               >
+                <mat-icon class="text-2xl" style="color: var(--ax-info-default)"
+                  >air</mat-icon
+                >
+              </div>
+              <div class="flex-1">
+                <p
+                  class="text-xs uppercase tracking-wide mb-1"
+                  style="color: var(--ax-text-secondary)"
+                >
+                  RESP. RATE
+                </p>
+                <p
+                  class="text-3xl font-bold mb-1"
+                  style="color: var(--ax-text-heading)"
+                >
+                  14 <span class="text-base font-normal">/min</span>
+                </p>
+                <p
+                  class="text-xs flex items-center gap-1"
+                  style="color: var(--ax-text-secondary)"
+                >
+                  <mat-icon class="text-xs">trending_down</mat-icon>
+                  -6.7% from last
+                </p>
+              </div>
             </div>
-            <div class="flex-1">
-              <p
-                class="text-xs uppercase tracking-wide mb-1"
-                style="color: var(--ax-text-secondary)"
-              >
-                RESP. RATE
-              </p>
-              <p
-                class="text-3xl font-bold mb-1"
-                style="color: var(--ax-text-heading)"
-              >
-                14 <span class="text-base font-normal">/min</span>
-              </p>
-              <p
-                class="text-xs flex items-center gap-1"
-                style="color: var(--ax-text-secondary)"
-              >
-                <mat-icon class="text-xs">trending_down</mat-icon>
-                -6.7% from last
-              </p>
-            </div>
-          </div>
-        </ax-card>
+          </ax-card>
 
-        <!-- SPO2 - Success Green -->
-        <ax-card color="success" colorIntensity="subtle" borderWidth="1">
-          <div class="flex items-start gap-4">
-            <div
-              class="w-12 h-12 rounded-full flex items-center justify-center"
-              style="background-color: var(--ax-success-faint)"
-            >
-              <mat-icon
-                class="text-2xl"
-                style="color: var(--ax-success-default)"
-                >water_drop</mat-icon
+          <!-- SPO2 - Success Green -->
+          <ax-card color="success" colorIntensity="subtle" borderWidth="1">
+            <div class="flex items-start gap-4">
+              <div
+                class="w-12 h-12 rounded-full flex items-center justify-center"
+                style="background-color: var(--ax-success-faint)"
               >
+                <mat-icon
+                  class="text-2xl"
+                  style="color: var(--ax-success-default)"
+                  >water_drop</mat-icon
+                >
+              </div>
+              <div class="flex-1">
+                <p
+                  class="text-xs uppercase tracking-wide mb-1"
+                  style="color: var(--ax-text-secondary)"
+                >
+                  SPO2
+                </p>
+                <p
+                  class="text-3xl font-bold mb-1"
+                  style="color: var(--ax-text-heading)"
+                >
+                  98 <span class="text-base font-normal">%</span>
+                </p>
+                <p
+                  class="text-xs flex items-center gap-1"
+                  style="color: var(--ax-success-default)"
+                >
+                  <mat-icon class="text-xs">trending_up</mat-icon>
+                  +1% from last
+                </p>
+              </div>
             </div>
-            <div class="flex-1">
-              <p
-                class="text-xs uppercase tracking-wide mb-1"
-                style="color: var(--ax-text-secondary)"
-              >
-                SPO2
-              </p>
-              <p
-                class="text-3xl font-bold mb-1"
-                style="color: var(--ax-text-heading)"
-              >
-                98 <span class="text-base font-normal">%</span>
-              </p>
-              <p
-                class="text-xs flex items-center gap-1"
-                style="color: var(--ax-success-default)"
-              >
-                <mat-icon class="text-xs">trending_up</mat-icon>
-                +1% from last
-              </p>
-            </div>
-          </div>
-        </ax-card>
-      </div>
+          </ax-card>
+        </div>
+      </app-code-preview>
     </div>
 
     <div class="demo-container feature-group mt-8">
       <h4 class="h6">📊 Design 2: Gradient Box Icon Style</h4>
-      <p class="mb-4">
+      <p class="mb-4 text-gray-600">
         Bold design with gradient box icons and thicker borders (2px). Ideal for
-        emphasizing key metrics and creating visual hierarchy.
+        emphasizing key metrics, creating visual hierarchy, and drawing
+        attention to critical data points.
       </p>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Info Card - Blue (General Information) -->
-        <ax-card color="info" colorIntensity="subtle" borderWidth="2">
-          <div class="flex items-start gap-4">
-            <div
-              class="p-3 rounded-lg"
-              style="
-                background: linear-gradient(
-                  135deg,
-                  var(--ax-info-default) 0%,
-                  var(--ax-info-emphasis) 100%
-                );
-                box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
-              "
-            >
-              <mat-icon class="text-white">favorite</mat-icon>
-            </div>
-            <div class="flex-1">
-              <p
-                class="text-xs uppercase tracking-wide mb-1"
-                style="color: var(--ax-text-secondary)"
+      <app-code-preview [extractCode]="true">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Info Card - Blue (General Information) -->
+          <ax-card color="info" colorIntensity="subtle" borderWidth="2">
+            <div class="flex items-start gap-4">
+              <div
+                class="p-3 rounded-lg"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--ax-info-default) 0%,
+                    var(--ax-info-emphasis) 100%
+                  );
+                  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+                "
               >
-                HEART RATE
-              </p>
-              <p
-                class="text-3xl font-bold mb-1"
-                style="color: var(--ax-info-emphasis)"
-              >
-                85 <span class="text-base">bpm</span>
-              </p>
-              <p class="text-xs" style="color: var(--ax-success-default)">
-                ↗ +3.7% from last
-              </p>
-            </div>
-          </div>
-        </ax-card>
-
-        <!-- Success Card - Green (Positive Metrics) -->
-        <ax-card color="success" colorIntensity="subtle" borderWidth="2">
-          <div class="flex items-start gap-4">
-            <div
-              class="p-3 rounded-lg"
-              style="
-                background: linear-gradient(
-                  135deg,
-                  var(--ax-success-default) 0%,
-                  var(--ax-success-emphasis) 100%
-                );
-                box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
-              "
-            >
-              <mat-icon class="text-white">trending_up</mat-icon>
-            </div>
-            <div class="flex-1">
-              <p
-                class="text-xs uppercase tracking-wide mb-1"
-                style="color: var(--ax-text-secondary)"
-              >
-                SYSTOLIC BP
-              </p>
-              <p
-                class="text-3xl font-bold mb-1"
-                style="color: var(--ax-success-emphasis)"
-              >
-                120 <span class="text-base">mmHg</span>
-              </p>
-              <p class="text-xs" style="color: var(--ax-success-default)">
-                ✓ Normal range
-              </p>
-            </div>
-          </div>
-        </ax-card>
-
-        <!-- Warning Card - Orange (Caution Metrics) -->
-        <ax-card color="warning" colorIntensity="subtle" borderWidth="2">
-          <div class="flex items-start gap-4">
-            <div
-              class="p-3 rounded-lg"
-              style="
-                background: linear-gradient(
-                  135deg,
-                  var(--ax-warning-default) 0%,
-                  var(--ax-warning-emphasis) 100%
-                );
-                box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.3);
-              "
-            >
-              <mat-icon class="text-white">speed</mat-icon>
-            </div>
-            <div class="flex-1">
-              <p
-                class="text-xs uppercase tracking-wide mb-1"
-                style="color: var(--ax-text-secondary)"
-              >
-                TEMPERATURE
-              </p>
-              <p
-                class="text-3xl font-bold mb-1"
-                style="color: var(--ax-warning-emphasis)"
-              >
-                37.8 <span class="text-base">°C</span>
-              </p>
-              <p class="text-xs" style="color: var(--ax-warning-default)">
-                ⚠ Slightly elevated
-              </p>
-            </div>
-          </div>
-        </ax-card>
-
-        <!-- Error Card - Red (Critical Metrics) -->
-        <ax-card color="error" colorIntensity="subtle" borderWidth="2">
-          <div class="flex items-start gap-4">
-            <div
-              class="p-3 rounded-lg"
-              style="
-                background: linear-gradient(
-                  135deg,
-                  var(--ax-error-default) 0%,
-                  var(--ax-error-emphasis) 100%
-                );
-                box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3);
-              "
-            >
-              <mat-icon class="text-white">warning</mat-icon>
-            </div>
-            <div class="flex-1">
-              <p
-                class="text-xs uppercase tracking-wide mb-1"
-                style="color: var(--ax-text-secondary)"
-              >
-                BLOOD GLUCOSE
-              </p>
-              <p
-                class="text-3xl font-bold mb-1"
-                style="color: var(--ax-error-emphasis)"
-              >
-                180 <span class="text-base">mg/dL</span>
-              </p>
-              <p class="text-xs" style="color: var(--ax-error-default)">
-                ⚠ Above target range
-              </p>
-            </div>
-          </div>
-        </ax-card>
-
-        <!-- Neutral Card - Gray (Neutral Metrics) -->
-        <ax-card color="neutral" colorIntensity="subtle" borderWidth="2">
-          <div class="flex items-start gap-4">
-            <div
-              class="p-3 rounded-lg"
-              style="
-                background: linear-gradient(
-                  135deg,
-                  var(--ax-gray-400) 0%,
-                  var(--ax-gray-600) 100%
-                );
-                box-shadow: 0 4px 6px -1px rgba(107, 114, 128, 0.3);
-              "
-            >
-              <mat-icon class="text-white">schedule</mat-icon>
-            </div>
-            <div class="flex-1">
-              <p
-                class="text-xs uppercase tracking-wide mb-1"
-                style="color: var(--ax-text-secondary)"
-              >
-                SLEEP DURATION
-              </p>
-              <p
-                class="text-3xl font-bold mb-1"
-                style="color: var(--ax-text-heading)"
-              >
-                7.5 <span class="text-base">hours</span>
-              </p>
-              <p class="text-xs" style="color: var(--ax-text-secondary)">
-                → Within normal range
-              </p>
-            </div>
-          </div>
-        </ax-card>
-
-        <!-- Primary Card - Brand (Important Metrics) -->
-        <ax-card color="primary" colorIntensity="subtle" borderWidth="2">
-          <div class="flex items-start gap-4">
-            <div
-              class="p-3 rounded-lg"
-              style="
-                background: linear-gradient(
-                  135deg,
-                  var(--ax-brand-default) 0%,
-                  var(--ax-brand-emphasis) 100%
-                );
-                box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
-              "
-            >
-              <mat-icon class="text-white">monitor_weight</mat-icon>
-            </div>
-            <div class="flex-1">
-              <p
-                class="text-xs uppercase tracking-wide mb-1"
-                style="color: var(--ax-text-secondary)"
-              >
-                BODY WEIGHT
-              </p>
-              <p
-                class="text-3xl font-bold mb-1"
-                style="color: var(--ax-brand-emphasis)"
-              >
-                72.5 <span class="text-base">kg</span>
-              </p>
-              <p class="text-xs" style="color: var(--ax-brand-default)">
-                ↘ -0.5kg from last week
-              </p>
-            </div>
-          </div>
-        </ax-card>
-      </div>
-
-      <!-- Focus State Examples -->
-      <div class="mt-6">
-        <h5 class="text-sm font-semibold mb-3">
-          Focus State (Keyboard Navigation)
-        </h5>
-        <p class="text-sm text-gray-600 mb-4">
-          Cards with clickable or hoverable properties are keyboard accessible.
-          Press Tab to focus, Enter to click.
-        </p>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <!-- Clickable card with focus -->
-          <ax-card
-            color="info"
-            colorIntensity="subtle"
-            borderWidth="2"
-            [clickable]="true"
-            (click)="onCardClick('focus-demo-info')"
-          >
-            <div class="text-center py-3">
-              <mat-icon class="text-4xl mb-2 text-info-default"
-                >ads_click</mat-icon
-              >
-              <p class="text-sm font-semibold text-info-emphasis mb-1">
-                Clickable Card
-              </p>
-              <p class="text-xs text-gray-600">Press Tab then Enter</p>
+                <mat-icon class="text-white">favorite</mat-icon>
+              </div>
+              <div class="flex-1">
+                <p
+                  class="text-xs uppercase tracking-wide mb-1"
+                  style="color: var(--ax-text-secondary)"
+                >
+                  HEART RATE
+                </p>
+                <p
+                  class="text-3xl font-bold mb-1"
+                  style="color: var(--ax-info-emphasis)"
+                >
+                  85 <span class="text-base">bpm</span>
+                </p>
+                <p class="text-xs" style="color: var(--ax-success-default)">
+                  ↗ +3.7% from last
+                </p>
+              </div>
             </div>
           </ax-card>
 
-          <!-- Hoverable card with focus -->
-          <ax-card
-            color="success"
-            colorIntensity="subtle"
-            borderWidth="2"
-            [hoverable]="true"
-            [clickable]="true"
-            (click)="onCardClick('focus-demo-success')"
-          >
-            <div class="text-center py-3">
-              <mat-icon class="text-4xl mb-2 text-success-default"
-                >touch_app</mat-icon
+          <!-- Success Card - Green (Positive Metrics) -->
+          <ax-card color="success" colorIntensity="subtle" borderWidth="2">
+            <div class="flex items-start gap-4">
+              <div
+                class="p-3 rounded-lg"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--ax-success-default) 0%,
+                    var(--ax-success-emphasis) 100%
+                  );
+                  box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
+                "
               >
-              <p class="text-sm font-semibold text-success-emphasis mb-1">
-                Interactive Card
-              </p>
-              <p class="text-xs text-gray-600">Hover + Click + Focus</p>
+                <mat-icon class="text-white">trending_up</mat-icon>
+              </div>
+              <div class="flex-1">
+                <p
+                  class="text-xs uppercase tracking-wide mb-1"
+                  style="color: var(--ax-text-secondary)"
+                >
+                  SYSTOLIC BP
+                </p>
+                <p
+                  class="text-3xl font-bold mb-1"
+                  style="color: var(--ax-success-emphasis)"
+                >
+                  120 <span class="text-base">mmHg</span>
+                </p>
+                <p class="text-xs" style="color: var(--ax-success-default)">
+                  ✓ Normal range
+                </p>
+              </div>
             </div>
           </ax-card>
 
-          <!-- Another clickable card -->
-          <ax-card
-            color="warning"
-            colorIntensity="subtle"
-            borderWidth="2"
-            [clickable]="true"
-            (click)="onCardClick('focus-demo-warning')"
-          >
-            <div class="text-center py-3">
-              <mat-icon class="text-4xl mb-2 text-warning-default"
-                >keyboard</mat-icon
+          <!-- Warning Card - Orange (Caution Metrics) -->
+          <ax-card color="warning" colorIntensity="subtle" borderWidth="2">
+            <div class="flex items-start gap-4">
+              <div
+                class="p-3 rounded-lg"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--ax-warning-default) 0%,
+                    var(--ax-warning-emphasis) 100%
+                  );
+                  box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.3);
+                "
               >
-              <p class="text-sm font-semibold text-warning-emphasis mb-1">
-                Keyboard Accessible
-              </p>
-              <p class="text-xs text-gray-600">Full keyboard support</p>
+                <mat-icon class="text-white">speed</mat-icon>
+              </div>
+              <div class="flex-1">
+                <p
+                  class="text-xs uppercase tracking-wide mb-1"
+                  style="color: var(--ax-text-secondary)"
+                >
+                  TEMPERATURE
+                </p>
+                <p
+                  class="text-3xl font-bold mb-1"
+                  style="color: var(--ax-warning-emphasis)"
+                >
+                  37.8 <span class="text-base">°C</span>
+                </p>
+                <p class="text-xs" style="color: var(--ax-warning-default)">
+                  ⚠ Slightly elevated
+                </p>
+              </div>
+            </div>
+          </ax-card>
+
+          <!-- Error Card - Red (Critical Metrics) -->
+          <ax-card color="error" colorIntensity="subtle" borderWidth="2">
+            <div class="flex items-start gap-4">
+              <div
+                class="p-3 rounded-lg"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--ax-error-default) 0%,
+                    var(--ax-error-emphasis) 100%
+                  );
+                  box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3);
+                "
+              >
+                <mat-icon class="text-white">warning</mat-icon>
+              </div>
+              <div class="flex-1">
+                <p
+                  class="text-xs uppercase tracking-wide mb-1"
+                  style="color: var(--ax-text-secondary)"
+                >
+                  BLOOD GLUCOSE
+                </p>
+                <p
+                  class="text-3xl font-bold mb-1"
+                  style="color: var(--ax-error-emphasis)"
+                >
+                  180 <span class="text-base">mg/dL</span>
+                </p>
+                <p class="text-xs" style="color: var(--ax-error-default)">
+                  ⚠ Above target range
+                </p>
+              </div>
+            </div>
+          </ax-card>
+
+          <!-- Neutral Card - Gray (Neutral Metrics) -->
+          <ax-card color="neutral" colorIntensity="subtle" borderWidth="2">
+            <div class="flex items-start gap-4">
+              <div
+                class="p-3 rounded-lg"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--ax-gray-400) 0%,
+                    var(--ax-gray-600) 100%
+                  );
+                  box-shadow: 0 4px 6px -1px rgba(107, 114, 128, 0.3);
+                "
+              >
+                <mat-icon class="text-white">schedule</mat-icon>
+              </div>
+              <div class="flex-1">
+                <p
+                  class="text-xs uppercase tracking-wide mb-1"
+                  style="color: var(--ax-text-secondary)"
+                >
+                  SLEEP DURATION
+                </p>
+                <p
+                  class="text-3xl font-bold mb-1"
+                  style="color: var(--ax-text-heading)"
+                >
+                  7.5 <span class="text-base">hours</span>
+                </p>
+                <p class="text-xs" style="color: var(--ax-text-secondary)">
+                  → Within normal range
+                </p>
+              </div>
+            </div>
+          </ax-card>
+
+          <!-- Primary Card - Brand (Important Metrics) -->
+          <ax-card color="primary" colorIntensity="subtle" borderWidth="2">
+            <div class="flex items-start gap-4">
+              <div
+                class="p-3 rounded-lg"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    var(--ax-brand-default) 0%,
+                    var(--ax-brand-emphasis) 100%
+                  );
+                  box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
+                "
+              >
+                <mat-icon class="text-white">monitor_weight</mat-icon>
+              </div>
+              <div class="flex-1">
+                <p
+                  class="text-xs uppercase tracking-wide mb-1"
+                  style="color: var(--ax-text-secondary)"
+                >
+                  BODY WEIGHT
+                </p>
+                <p
+                  class="text-3xl font-bold mb-1"
+                  style="color: var(--ax-brand-emphasis)"
+                >
+                  72.5 <span class="text-base">kg</span>
+                </p>
+                <p class="text-xs" style="color: var(--ax-brand-default)">
+                  ↘ -0.5kg from last week
+                </p>
+              </div>
             </div>
           </ax-card>
         </div>
+      </app-code-preview>
+
+      <!-- Focus State Examples -->
+      <div class="mt-8">
+        <h4 class="h6">⌨️ Keyboard Navigation & Focus States</h4>
+        <p class="mb-4 text-gray-600">
+          Cards with clickable or hoverable properties are fully keyboard
+          accessible with color-matched focus rings. Press Tab to focus on
+          cards, then Enter to activate. Focus rings use a 2-layer design
+          matching each color variant.
+        </p>
+
+        <app-code-preview [extractCode]="true">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Clickable card with focus -->
+            <ax-card
+              color="info"
+              colorIntensity="subtle"
+              borderWidth="2"
+              [clickable]="true"
+              (click)="onCardClick('focus-demo-info')"
+            >
+              <div class="text-center py-3">
+                <mat-icon class="text-4xl mb-2 text-info-default"
+                  >ads_click</mat-icon
+                >
+                <p class="text-sm font-semibold text-info-emphasis mb-1">
+                  Clickable Card
+                </p>
+                <p class="text-xs text-gray-600">Press Tab then Enter</p>
+              </div>
+            </ax-card>
+
+            <!-- Hoverable card with focus -->
+            <ax-card
+              color="success"
+              colorIntensity="subtle"
+              borderWidth="2"
+              [hoverable]="true"
+              [clickable]="true"
+              (click)="onCardClick('focus-demo-success')"
+            >
+              <div class="text-center py-3">
+                <mat-icon class="text-4xl mb-2 text-success-default"
+                  >touch_app</mat-icon
+                >
+                <p class="text-sm font-semibold text-success-emphasis mb-1">
+                  Interactive Card
+                </p>
+                <p class="text-xs text-gray-600">Hover + Click + Focus</p>
+              </div>
+            </ax-card>
+
+            <!-- Another clickable card -->
+            <ax-card
+              color="warning"
+              colorIntensity="subtle"
+              borderWidth="2"
+              [clickable]="true"
+              (click)="onCardClick('focus-demo-warning')"
+            >
+              <div class="text-center py-3">
+                <mat-icon class="text-4xl mb-2 text-warning-default"
+                  >keyboard</mat-icon
+                >
+                <p class="text-sm font-semibold text-warning-emphasis mb-1">
+                  Keyboard Accessible
+                </p>
+                <p class="text-xs text-gray-600">Full keyboard support</p>
+              </div>
+            </ax-card>
+          </div>
+        </app-code-preview>
 
         <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
           <p class="text-sm font-semibold text-blue-900 mb-1">
-            ♿ Accessibility
+            ♿ WCAG 2.1 Accessibility
           </p>
           <p class="text-xs text-blue-700">
             Focus rings are automatically styled to match each card's color
             variant for better visual feedback. The focus outline uses a 2-layer
             design: inner layer (3px) matches the card's surface color, outer
-            layer (5px) matches the card's primary color.
+            layer (5px) matches the card's primary color. Compliant with WCAG
+            2.1 Level AA focus indicators.
           </p>
         </div>
       </div>
 
       <!-- Border Width Examples -->
-      <div class="mt-6">
-        <h5 class="text-sm font-semibold mb-3">Border Width Options</h5>
-        <p class="text-sm text-gray-600 mb-4">
-          Customize border width for different emphasis levels. Use thicker
-          borders to draw more attention.
+      <div class="mt-8">
+        <h4 class="h6">🎨 Border Width Customization</h4>
+        <p class="mb-4 text-gray-600">
+          Customize border thickness (1-4px) to create different emphasis
+          levels. Use thicker borders to draw attention to high-priority metrics
+          or critical information.
         </p>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <!-- 1px border -->
-          <ax-card color="info" colorIntensity="subtle" borderWidth="1">
-            <div class="text-center py-3">
-              <p class="text-xs text-gray-500 mb-1">borderWidth="1"</p>
-              <p class="text-lg font-bold text-info-emphasis">1px</p>
-              <p class="text-xs text-gray-600">Default / Subtle</p>
-            </div>
-          </ax-card>
 
-          <!-- 2px border -->
-          <ax-card color="success" colorIntensity="subtle" borderWidth="2">
-            <div class="text-center py-3">
-              <p class="text-xs text-gray-500 mb-1">borderWidth="2"</p>
-              <p class="text-lg font-bold text-success-emphasis">2px</p>
-              <p class="text-xs text-gray-600">Recommended</p>
-            </div>
-          </ax-card>
+        <app-code-preview [extractCode]="true">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <!-- 1px border -->
+            <ax-card color="info" colorIntensity="subtle" borderWidth="1">
+              <div class="text-center py-3">
+                <p class="text-xs text-gray-500 mb-1">borderWidth="1"</p>
+                <p class="text-lg font-bold text-info-emphasis">1px</p>
+                <p class="text-xs text-gray-600">Default / Subtle</p>
+              </div>
+            </ax-card>
 
-          <!-- 3px border -->
-          <ax-card color="warning" colorIntensity="subtle" borderWidth="3">
-            <div class="text-center py-3">
-              <p class="text-xs text-gray-500 mb-1">borderWidth="3"</p>
-              <p class="text-lg font-bold text-warning-emphasis">3px</p>
-              <p class="text-xs text-gray-600">Emphasized</p>
-            </div>
-          </ax-card>
+            <!-- 2px border -->
+            <ax-card color="success" colorIntensity="subtle" borderWidth="2">
+              <div class="text-center py-3">
+                <p class="text-xs text-gray-500 mb-1">borderWidth="2"</p>
+                <p class="text-lg font-bold text-success-emphasis">2px</p>
+                <p class="text-xs text-gray-600">Recommended</p>
+              </div>
+            </ax-card>
 
-          <!-- 4px border -->
-          <ax-card color="error" colorIntensity="subtle" borderWidth="4">
-            <div class="text-center py-3">
-              <p class="text-xs text-gray-500 mb-1">borderWidth="4"</p>
-              <p class="text-lg font-bold text-error-emphasis">4px</p>
-              <p class="text-xs text-gray-600">Strong Emphasis</p>
-            </div>
-          </ax-card>
-        </div>
+            <!-- 3px border -->
+            <ax-card color="warning" colorIntensity="subtle" borderWidth="3">
+              <div class="text-center py-3">
+                <p class="text-xs text-gray-500 mb-1">borderWidth="3"</p>
+                <p class="text-lg font-bold text-warning-emphasis">3px</p>
+                <p class="text-xs text-gray-600">Emphasized</p>
+              </div>
+            </ax-card>
+
+            <!-- 4px border -->
+            <ax-card color="error" colorIntensity="subtle" borderWidth="4">
+              <div class="text-center py-3">
+                <p class="text-xs text-gray-500 mb-1">borderWidth="4"</p>
+                <p class="text-lg font-bold text-error-emphasis">4px</p>
+                <p class="text-xs text-gray-600">Strong Emphasis</p>
+              </div>
+            </ax-card>
+          </div>
+        </app-code-preview>
 
         <!-- Custom border width example -->
         <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
           <p class="text-sm font-semibold text-blue-900 mb-1">
-            💡 Custom Border Width
+            💡 Custom Border Width Support
           </p>
           <p class="text-xs text-blue-700">
-            You can also use custom values like
+            Beyond predefined values (1-4px), you can also use custom border
+            widths like
             <code class="px-1 py-0.5 bg-blue-100 rounded"
               >borderWidth="2.5px"</code
             >
@@ -1044,7 +1215,7 @@
             <code class="px-1 py-0.5 bg-blue-100 rounded"
               >borderWidth="0.125rem"</code
             >
-            for more precise control.
+            for pixel-perfect design control.
           </p>
         </div>
       </div>

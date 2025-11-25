@@ -70,10 +70,8 @@ import { RbacService } from '../../services/rbac.service';
         class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
       >
         <div>
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
-            Role Management
-          </h1>
-          <p class="text-gray-600 dark:text-gray-400 mt-1">
+          <h1 class="heading-title">Role Management</h1>
+          <p class="subtitle-text">
             Create and manage system roles and their permissions
           </p>
         </div>
@@ -175,9 +173,9 @@ import { RbacService } from '../../services/rbac.service';
           <!-- Bulk Actions -->
           <div
             *ngIf="selection.hasValue()"
-            class="flex items-center gap-2 mt-4 pt-4 border-t"
+            class="flex items-center gap-2 mt-4 pt-4 bulk-actions-container"
           >
-            <span class="text-sm text-gray-600">
+            <span class="bulk-actions-count">
               {{ selection.selected.length }} role(s) selected
             </span>
             <button
@@ -243,11 +241,7 @@ import { RbacService } from '../../services/rbac.service';
                 <div class="flex items-center gap-2">
                   <span>{{ role.name }}</span>
                   <mat-chip-set *ngIf="role.is_system_role">
-                    <mat-chip
-                      class="!bg-blue-100 !text-blue-800 dark:!bg-blue-900 dark:!text-blue-200"
-                    >
-                      System
-                    </mat-chip>
+                    <mat-chip class="chip-info"> System </mat-chip>
                   </mat-chip-set>
                 </div>
               </td>
@@ -257,7 +251,7 @@ import { RbacService } from '../../services/rbac.service';
             <ng-container matColumnDef="description">
               <th mat-header-cell *matHeaderCellDef>Description</th>
               <td mat-cell *matCellDef="let role">
-                <span class="text-gray-600 dark:text-gray-400">
+                <span class="secondary-text">
                   {{ role.description || 'No description' }}
                 </span>
               </td>
@@ -270,9 +264,7 @@ import { RbacService } from '../../services/rbac.service';
               </th>
               <td mat-cell *matCellDef="let role">
                 <mat-chip-set>
-                  <mat-chip
-                    class="!bg-gray-100 !text-gray-800 dark:!bg-gray-700 dark:!text-gray-200"
-                  >
+                  <mat-chip class="chip-neutral">
                     {{ role.category }}
                   </mat-chip>
                 </mat-chip-set>
@@ -325,11 +317,7 @@ import { RbacService } from '../../services/rbac.service';
               <td mat-cell *matCellDef="let role">
                 <mat-chip-set>
                   <mat-chip
-                    [class]="
-                      role.is_active
-                        ? '!bg-green-100 !text-green-800 dark:!bg-green-900 dark:!text-green-200'
-                        : '!bg-red-100 !text-red-800 dark:!bg-red-900 dark:!text-red-200'
-                    "
+                    [class]="role.is_active ? 'chip-success' : 'chip-error'"
                   >
                     {{ role.is_active ? 'Active' : 'Inactive' }}
                   </mat-chip>
@@ -382,9 +370,9 @@ import { RbacService } from '../../services/rbac.service';
                     mat-menu-item
                     (click)="deleteRole(role)"
                     [disabled]="!canDeleteRole(role)"
-                    class="text-red-600"
+                    class="delete-action"
                   >
-                    <mat-icon class="text-red-600">delete</mat-icon>
+                    <mat-icon>delete</mat-icon>
                     Delete
                   </button>
                 </mat-menu>
@@ -396,7 +384,7 @@ import { RbacService } from '../../services/rbac.service';
               mat-row
               *matRowDef="let row; columns: displayedColumns"
               (click)="viewRoleDetails(row)"
-              class="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+              class="cursor-pointer table-row-hover"
             ></tr>
           </table>
         </div>
@@ -409,11 +397,11 @@ import { RbacService } from '../../services/rbac.service';
         <!-- Empty State -->
         <div
           *ngIf="!isLoading() && dataSource.data.length === 0"
-          class="flex flex-col items-center justify-center py-12 text-gray-500"
+          class="empty-state"
         >
-          <mat-icon class="text-6xl mb-4 opacity-50">people</mat-icon>
-          <h3 class="text-lg font-medium mb-2">No roles found</h3>
-          <p class="text-center mb-4">
+          <mat-icon class="empty-state-icon">people</mat-icon>
+          <h3 class="empty-state-title">No roles found</h3>
+          <p class="empty-state-message">
             {{
               hasActiveFilters()
                 ? 'Try adjusting your filters'
@@ -444,35 +432,129 @@ import { RbacService } from '../../services/rbac.service';
   `,
   styles: [
     `
+      /* Layout */
       .role-management {
         min-height: 100vh;
       }
 
+      /* Card styling with Material tokens */
       mat-card {
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        background: var(--mat-sys-surface-container);
+        border: 1px solid var(--mat-sys-outline-variant);
+        border-radius: var(--ax-radius-lg);
+        box-shadow: var(--mat-sys-level1);
       }
 
+      /* Typography */
+      .heading-title {
+        color: var(--mat-sys-on-surface);
+        font-size: var(--ax-text-3xl);
+        font-weight: var(--ax-font-bold);
+        line-height: var(--ax-leading-tight);
+      }
+
+      .subtitle-text {
+        color: var(--mat-sys-on-surface-variant);
+        font-size: var(--ax-text-base);
+        line-height: var(--ax-leading-normal);
+        margin-top: var(--ax-spacing-xs);
+      }
+
+      .secondary-text {
+        color: var(--mat-sys-on-surface-variant);
+        font-size: var(--ax-text-sm);
+      }
+
+      /* Bulk Actions */
+      .bulk-actions-container {
+        border-top: 1px solid var(--mat-sys-outline-variant);
+      }
+
+      .bulk-actions-count {
+        color: var(--mat-sys-on-surface-variant);
+        font-size: var(--ax-text-sm);
+      }
+
+      /* Table styling */
       .mat-mdc-table {
         background: transparent;
       }
 
-      .mat-mdc-row:hover {
-        background: rgba(0, 0, 0, 0.04);
+      .mat-mdc-header-cell {
+        color: var(--mat-sys-on-surface);
+        font-weight: var(--ax-font-semibold);
+        font-size: var(--ax-text-sm);
       }
 
-      :host-context(.dark) .mat-mdc-row:hover {
-        background: rgba(255, 255, 255, 0.04);
+      .table-row-hover:hover {
+        background: var(--mat-sys-surface-variant);
       }
 
+      /* Chips */
       .mat-mdc-chip {
         min-height: 24px;
-        font-size: 12px;
+        font-size: var(--ax-text-xs);
+        font-weight: var(--ax-font-medium);
       }
 
-      .mat-mdc-header-cell {
-        font-weight: 600;
-        color: var(--mdc-theme-on-surface);
+      .chip-info {
+        background: var(--ax-info-faint);
+        color: var(--ax-info-emphasis);
+      }
+
+      .chip-neutral {
+        background: var(--mat-sys-surface-variant);
+        color: var(--mat-sys-on-surface);
+      }
+
+      .chip-success {
+        background: var(--ax-success-faint);
+        color: var(--ax-success-emphasis);
+      }
+
+      .chip-error {
+        background: var(--ax-error-faint);
+        color: var(--ax-error-emphasis);
+      }
+
+      /* Delete action */
+      .delete-action {
+        color: var(--ax-error-default);
+      }
+
+      .delete-action mat-icon {
+        color: var(--ax-error-default);
+      }
+
+      /* Empty State */
+      .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: var(--ax-spacing-2xl) var(--ax-spacing-lg);
+        color: var(--mat-sys-on-surface-variant);
+      }
+
+      .empty-state-icon {
+        font-size: 72px;
+        width: 72px;
+        height: 72px;
+        opacity: 0.5;
+        margin-bottom: var(--ax-spacing-lg);
+      }
+
+      .empty-state-title {
+        color: var(--mat-sys-on-surface);
+        font-size: var(--ax-text-lg);
+        font-weight: var(--ax-font-medium);
+        margin-bottom: var(--ax-spacing-sm);
+      }
+
+      .empty-state-message {
+        text-align: center;
+        margin-bottom: var(--ax-spacing-lg);
+        font-size: var(--ax-text-base);
       }
     `,
   ],

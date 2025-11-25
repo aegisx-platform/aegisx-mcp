@@ -79,10 +79,8 @@ import { RbacService } from '../../services/rbac.service';
         class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
       >
         <div>
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
-            Permission Management
-          </h1>
-          <p class="text-gray-600 dark:text-gray-400 mt-1">
+          <h1 class="heading-title">Permission Management</h1>
+          <p class="subtitle-text">
             Manage system permissions and access controls
           </p>
         </div>
@@ -218,9 +216,9 @@ import { RbacService } from '../../services/rbac.service';
           <!-- Bulk Actions -->
           <div
             *ngIf="selection.hasValue()"
-            class="flex items-center gap-2 mt-4 pt-4 border-t"
+            class="flex items-center gap-2 mt-4 pt-4 bulk-actions-container"
           >
-            <span class="text-sm text-gray-600">
+            <span class="bulk-actions-count">
               {{ selection.selected.length }} permission(s) selected
             </span>
             <button
@@ -292,11 +290,7 @@ import { RbacService } from '../../services/rbac.service';
                   <div class="flex items-center gap-2">
                     <span>{{ getPermissionName(permission) }}</span>
                     <mat-chip-set *ngIf="permission.is_system_permission">
-                      <mat-chip
-                        class="!bg-blue-100 !text-blue-800 dark:!bg-blue-900 dark:!text-blue-200"
-                      >
-                        System
-                      </mat-chip>
+                      <mat-chip class="chip-info"> System </mat-chip>
                     </mat-chip-set>
                   </div>
                 </td>
@@ -306,7 +300,7 @@ import { RbacService } from '../../services/rbac.service';
               <ng-container matColumnDef="description">
                 <th mat-header-cell *matHeaderCellDef>Description</th>
                 <td mat-cell *matCellDef="let permission">
-                  <span class="text-gray-600 dark:text-gray-400 text-sm">
+                  <span class="secondary-text">
                     {{ permission.description }}
                   </span>
                 </td>
@@ -317,14 +311,10 @@ import { RbacService } from '../../services/rbac.service';
                 <th mat-header-cell *matHeaderCellDef>Resource & Action</th>
                 <td mat-cell *matCellDef="let permission">
                   <div class="flex gap-2">
-                    <mat-chip
-                      class="!bg-green-100 !text-green-800 dark:!bg-green-900 dark:!text-green-200 !text-xs"
-                    >
+                    <mat-chip class="chip-success !text-xs">
                       {{ permission.resource }}
                     </mat-chip>
-                    <mat-chip
-                      class="!bg-purple-100 !text-purple-800 dark:!bg-purple-900 dark:!text-purple-200 !text-xs"
-                    >
+                    <mat-chip class="chip-info !text-xs">
                       {{ permission.action }}
                     </mat-chip>
                   </div>
@@ -337,9 +327,7 @@ import { RbacService } from '../../services/rbac.service';
                   Category
                 </th>
                 <td mat-cell *matCellDef="let permission">
-                  <mat-chip
-                    class="!bg-gray-100 !text-gray-800 dark:!bg-gray-700 dark:!text-gray-200"
-                  >
+                  <mat-chip class="chip-neutral">
                     {{ permission.category }}
                   </mat-chip>
                 </td>
@@ -373,15 +361,15 @@ import { RbacService } from '../../services/rbac.service';
                   Status
                 </th>
                 <td mat-cell *matCellDef="let permission">
-                  <mat-chip
-                    [class]="
-                      permission.is_active
-                        ? '!bg-green-100 !text-green-800 dark:!bg-green-900 dark:!text-green-200'
-                        : '!bg-red-100 !text-red-800 dark:!bg-red-900 dark:!text-red-200'
-                    "
-                  >
-                    {{ permission.is_active ? 'Active' : 'Inactive' }}
-                  </mat-chip>
+                  <mat-chip-set>
+                    <mat-chip
+                      [class]="
+                        permission.is_active ? 'chip-success' : 'chip-error'
+                      "
+                    >
+                      {{ permission.is_active ? 'Active' : 'Inactive' }}
+                    </mat-chip>
+                  </mat-chip-set>
                 </td>
               </ng-container>
 
@@ -430,9 +418,9 @@ import { RbacService } from '../../services/rbac.service';
                       mat-menu-item
                       (click)="deletePermission(permission)"
                       [disabled]="!canDeletePermission(permission)"
-                      class="text-red-600"
+                      class="delete-action"
                     >
-                      <mat-icon class="text-red-600">delete</mat-icon>
+                      <mat-icon>delete</mat-icon>
                       Delete
                     </button>
                   </mat-menu>
@@ -444,19 +432,16 @@ import { RbacService } from '../../services/rbac.service';
                 mat-row
                 *matRowDef="let row; columns: displayedColumns"
                 (click)="viewPermissionDetails(row)"
-                class="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                class="cursor-pointer table-row-hover"
               ></tr>
             </table>
           </div>
 
           <!-- Empty State -->
-          <div
-            *ngIf="dataSource.data.length === 0"
-            class="flex flex-col items-center justify-center py-12 text-gray-500"
-          >
-            <mat-icon class="text-6xl mb-4 opacity-50">security</mat-icon>
-            <h3 class="text-lg font-medium mb-2">No permissions found</h3>
-            <p class="text-center mb-4">
+          <div *ngIf="dataSource.data.length === 0" class="empty-state">
+            <mat-icon class="empty-state-icon">security</mat-icon>
+            <h3 class="empty-state-title">No permissions found</h3>
+            <p class="empty-state-message">
               {{
                 hasActiveFilters()
                   ? 'Try adjusting your filters'
@@ -501,11 +486,9 @@ import { RbacService } from '../../services/rbac.service';
           >
             <mat-expansion-panel-header>
               <mat-panel-title class="flex items-center gap-3">
-                <mat-icon class="text-blue-600">folder</mat-icon>
+                <mat-icon class="text-brand">folder</mat-icon>
                 <span class="font-medium">{{ category.name }}</span>
-                <mat-chip
-                  class="!bg-blue-100 !text-blue-800 dark:!bg-blue-900 dark:!text-blue-200 !ml-2"
-                >
+                <mat-chip class="chip-info !ml-2">
                   {{ category.count }} permissions
                 </mat-chip>
               </mat-panel-title>
@@ -531,7 +514,7 @@ import { RbacService } from '../../services/rbac.service';
                     }}</span>
                     <mat-chip
                       *ngIf="permission.is_system_permission"
-                      class="!bg-blue-100 !text-blue-800 dark:!bg-blue-900 dark:!text-blue-200 !ml-2"
+                      class="chip-info !ml-2"
                     >
                       System
                     </mat-chip>
@@ -539,42 +522,36 @@ import { RbacService } from '../../services/rbac.service';
                 </mat-card-header>
 
                 <mat-card-content class="py-2">
-                  <p
-                    class="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2"
-                  >
+                  <p class="text-sm secondary-text mb-3 line-clamp-2">
                     {{ permission.description }}
                   </p>
 
                   <div class="flex flex-wrap gap-2 mb-3">
-                    <mat-chip
-                      class="!bg-green-100 !text-green-800 dark:!bg-green-900 dark:!text-green-200 !text-xs"
-                    >
+                    <mat-chip class="chip-success !text-xs">
                       {{ permission.resource }}
                     </mat-chip>
-                    <mat-chip
-                      class="!bg-purple-100 !text-purple-800 dark:!bg-purple-900 dark:!text-purple-200 !text-xs"
-                    >
+                    <mat-chip class="chip-info !text-xs">
                       {{ permission.action }}
                     </mat-chip>
                   </div>
 
                   <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                      <mat-icon class="text-sm text-gray-500">people</mat-icon>
-                      <span class="text-sm text-gray-600 dark:text-gray-400">
+                      <mat-icon class="text-sm">people</mat-icon>
+                      <span class="text-sm secondary-text">
                         {{ permission.role_count || 0 }} roles
                       </span>
                     </div>
 
-                    <mat-chip
-                      [class]="
-                        permission.is_active
-                          ? '!bg-green-100 !text-green-800 dark:!bg-green-900 dark:!text-green-200'
-                          : '!bg-red-100 !text-red-800 dark:!bg-red-900 dark:!text-red-200'
-                      "
-                    >
-                      {{ permission.is_active ? 'Active' : 'Inactive' }}
-                    </mat-chip>
+                    <mat-chip-set>
+                      <mat-chip
+                        [class]="
+                          permission.is_active ? 'chip-success' : 'chip-error'
+                        "
+                      >
+                        {{ permission.is_active ? 'Active' : 'Inactive' }}
+                      </mat-chip>
+                    </mat-chip-set>
                   </div>
                 </mat-card-content>
 
@@ -619,9 +596,9 @@ import { RbacService } from '../../services/rbac.service';
                       mat-menu-item
                       (click)="deletePermission(permission)"
                       [disabled]="!canDeletePermission(permission)"
-                      class="text-red-600"
+                      class="delete-action"
                     >
-                      <mat-icon class="text-red-600">delete</mat-icon>
+                      <mat-icon>delete</mat-icon>
                       Delete
                     </button>
                   </mat-menu>
@@ -632,14 +609,10 @@ import { RbacService } from '../../services/rbac.service';
         </mat-accordion>
 
         <ng-template #noCategoriesFound>
-          <div
-            class="flex flex-col items-center justify-center py-12 text-gray-500"
-          >
-            <mat-icon class="text-6xl mb-4 opacity-50">category</mat-icon>
-            <h3 class="text-lg font-medium mb-2">
-              No permission categories found
-            </h3>
-            <p class="text-center mb-4">
+          <div class="empty-state">
+            <mat-icon class="empty-state-icon">category</mat-icon>
+            <h3 class="empty-state-title">No permission categories found</h3>
+            <p class="empty-state-message">
               {{
                 hasActiveFilters()
                   ? 'Try adjusting your filters'
@@ -663,37 +636,132 @@ import { RbacService } from '../../services/rbac.service';
   `,
   styles: [
     `
+      /* Layout */
       .permission-management {
         min-height: 100vh;
       }
 
+      /* Card styling with Material tokens */
       mat-card {
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        background: var(--mat-sys-surface-container);
+        border: 1px solid var(--mat-sys-outline-variant);
+        border-radius: var(--ax-radius-lg);
+        box-shadow: var(--mat-sys-level1);
       }
 
+      /* Typography */
+      .heading-title {
+        color: var(--mat-sys-on-surface);
+        font-size: var(--ax-text-3xl);
+        font-weight: var(--ax-font-bold);
+        line-height: var(--ax-leading-tight);
+      }
+
+      .subtitle-text {
+        color: var(--mat-sys-on-surface-variant);
+        font-size: var(--ax-text-base);
+        line-height: var(--ax-leading-normal);
+        margin-top: var(--ax-spacing-xs);
+      }
+
+      .secondary-text {
+        color: var(--mat-sys-on-surface-variant);
+        font-size: var(--ax-text-sm);
+      }
+
+      /* Bulk Actions */
+      .bulk-actions-container {
+        border-top: 1px solid var(--mat-sys-outline-variant);
+      }
+
+      .bulk-actions-count {
+        color: var(--mat-sys-on-surface-variant);
+        font-size: var(--ax-text-sm);
+      }
+
+      /* Table styling */
       .mat-mdc-table {
         background: transparent;
       }
 
-      .mat-mdc-row:hover {
-        background: rgba(0, 0, 0, 0.04);
+      .mat-mdc-header-cell {
+        color: var(--mat-sys-on-surface);
+        font-weight: var(--ax-font-semibold);
+        font-size: var(--ax-text-sm);
       }
 
-      :host-context(.dark) .mat-mdc-row:hover {
-        background: rgba(255, 255, 255, 0.04);
+      .table-row-hover:hover {
+        background: var(--mat-sys-surface-variant);
       }
 
+      /* Chips */
       .mat-mdc-chip {
         min-height: 24px;
-        font-size: 12px;
+        font-size: var(--ax-text-xs);
+        font-weight: var(--ax-font-medium);
       }
 
-      .mat-mdc-header-cell {
-        font-weight: 600;
-        color: var(--mdc-theme-on-surface);
+      .chip-info {
+        background: var(--ax-info-faint);
+        color: var(--ax-info-emphasis);
       }
 
+      .chip-neutral {
+        background: var(--mat-sys-surface-variant);
+        color: var(--mat-sys-on-surface);
+      }
+
+      .chip-success {
+        background: var(--ax-success-faint);
+        color: var(--ax-success-emphasis);
+      }
+
+      .chip-error {
+        background: var(--ax-error-faint);
+        color: var(--ax-error-emphasis);
+      }
+
+      /* Delete action */
+      .delete-action {
+        color: var(--ax-error-default);
+      }
+
+      .delete-action mat-icon {
+        color: var(--ax-error-default);
+      }
+
+      /* Empty State */
+      .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: var(--ax-spacing-2xl) var(--ax-spacing-lg);
+        color: var(--mat-sys-on-surface-variant);
+      }
+
+      .empty-state-icon {
+        font-size: 72px;
+        width: 72px;
+        height: 72px;
+        opacity: 0.5;
+        margin-bottom: var(--ax-spacing-lg);
+      }
+
+      .empty-state-title {
+        color: var(--mat-sys-on-surface);
+        font-size: var(--ax-text-lg);
+        font-weight: var(--ax-font-medium);
+        margin-bottom: var(--ax-spacing-sm);
+      }
+
+      .empty-state-message {
+        text-align: center;
+        margin-bottom: var(--ax-spacing-lg);
+        font-size: var(--ax-text-base);
+      }
+
+      /* Utility classes */
       .line-clamp-2 {
         display: -webkit-box;
         -webkit-line-clamp: 2;

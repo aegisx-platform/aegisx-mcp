@@ -32,18 +32,23 @@ import { PdfTemplateSelectorComponent } from './pdf-template-selector.component'
   template: `
     <div class="create-dialog-container">
       <!-- Header -->
-      <div class="dialog-header">
-        <h2>
+      <h2
+        mat-dialog-title
+        class="flex items-center gap-3 text-xl font-semibold"
+      >
+        <mat-icon class="text-brand">
           @if (currentStep() === 1) {
-            Choose Template
+            layers
           } @else {
-            Create New PDF Template
+            add_circle
           }
-        </h2>
-        <button mat-icon-button (click)="onCancel()" matTooltip="Close">
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
+        </mat-icon>
+        @if (currentStep() === 1) {
+          Choose Template
+        } @else {
+          Create New PDF Template
+        }
+      </h2>
 
       <!-- Step Indicator -->
       <div class="step-indicator">
@@ -70,14 +75,15 @@ import { PdfTemplateSelectorComponent } from './pdf-template-selector.component'
             (templateSelected)="onTemplateSelected($event)"
           ></app-pdf-template-selector>
 
-          <div class="step-actions">
+          <div mat-dialog-actions align="end" class="step-actions flex gap-2">
             <button mat-button (click)="onCancel()">Cancel</button>
             <button
-              mat-raised-button
+              mat-flat-button
               color="primary"
               (click)="proceedToForm()"
               [disabled]="!selectedTemplate() && selectedTemplate() !== null"
             >
+              <mat-icon>arrow_forward</mat-icon>
               Next: Configure Template
             </button>
           </div>
@@ -108,24 +114,7 @@ import { PdfTemplateSelectorComponent } from './pdf-template-selector.component'
         height: 100vh;
         display: flex;
         flex-direction: column;
-        background: #fafafa;
-      }
-
-      .dialog-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 16px 24px;
-        background: white;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        z-index: 10;
-      }
-
-      .dialog-header h2 {
-        margin: 0;
-        font-size: 20px;
-        font-weight: 500;
+        background: var(--mat-sys-surface-container);
       }
 
       .step-indicator {
@@ -133,8 +122,8 @@ import { PdfTemplateSelectorComponent } from './pdf-template-selector.component'
         align-items: center;
         justify-content: center;
         padding: 24px;
-        background: white;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+        background: var(--mat-sys-surface);
+        border-bottom: 1px solid var(--mat-sys-outline-variant);
       }
 
       .step {
@@ -148,49 +137,49 @@ import { PdfTemplateSelectorComponent } from './pdf-template-selector.component'
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        border: 2px solid rgba(0, 0, 0, 0.12);
+        border: 2px solid var(--mat-sys-outline);
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: 500;
-        color: rgba(0, 0, 0, 0.38);
-        background: white;
+        color: var(--mat-sys-on-surface-variant);
+        background: var(--mat-sys-surface);
         transition: all 0.3s ease;
       }
 
       .step.active .step-number {
-        border-color: #1976d2;
-        background: #1976d2;
-        color: white;
+        border-color: var(--mat-sys-primary);
+        background: var(--mat-sys-primary);
+        color: var(--mat-sys-on-primary);
       }
 
       .step.completed .step-number {
-        border-color: #4caf50;
-        background: #4caf50;
+        border-color: var(--ax-success-500);
+        background: var(--ax-success-500);
         color: white;
       }
 
       .step-label {
         font-size: 12px;
-        color: rgba(0, 0, 0, 0.6);
+        color: var(--mat-sys-on-surface-variant);
         font-weight: 500;
       }
 
       .step.active .step-label {
-        color: #1976d2;
+        color: var(--mat-sys-primary);
       }
 
       .step-divider {
         width: 80px;
         height: 2px;
-        background: rgba(0, 0, 0, 0.12);
+        background: var(--mat-sys-outline-variant);
         margin: 0 16px;
       }
 
       .dialog-content {
         flex: 1;
         overflow-y: auto;
-        background: #fafafa;
+        background: var(--mat-sys-surface-container);
         padding: 24px;
         max-width: 1200px;
         margin: 0 auto;
@@ -198,12 +187,9 @@ import { PdfTemplateSelectorComponent } from './pdf-template-selector.component'
       }
 
       .step-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 12px;
         padding: 24px;
-        background: white;
-        border-top: 1px solid rgba(0, 0, 0, 0.12);
+        background: var(--mat-sys-surface);
+        border-top: 1px solid var(--mat-sys-outline-variant);
         position: sticky;
         bottom: 0;
         z-index: 10;
@@ -211,8 +197,8 @@ import { PdfTemplateSelectorComponent } from './pdf-template-selector.component'
 
       .back-button-container {
         padding: 16px 24px;
-        background: white;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+        background: var(--mat-sys-surface);
+        border-bottom: 1px solid var(--mat-sys-outline-variant);
       }
     `,
   ],

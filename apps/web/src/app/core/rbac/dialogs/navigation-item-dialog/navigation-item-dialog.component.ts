@@ -64,32 +64,25 @@ export interface NavigationItemDialogData {
   ],
   template: `
     <div class="navigation-item-dialog">
-      <div
+      <h2
         mat-dialog-title
-        class="flex items-center justify-between pb-4 border-b"
+        class="flex items-center gap-3 text-xl font-semibold"
       >
-        <div class="flex items-center gap-3">
-          <mat-icon class="!text-2xl">{{
-            data.mode === 'create'
-              ? 'add_circle'
-              : data.mode === 'edit'
-                ? 'edit'
-                : 'visibility'
-          }}</mat-icon>
-          <h2 class="text-xl font-semibold m-0">
-            {{
-              data.mode === 'create'
-                ? 'Create Navigation Item'
-                : data.mode === 'edit'
-                  ? 'Edit Navigation Item'
-                  : 'View Navigation Item'
-            }}
-          </h2>
-        </div>
-        <button mat-icon-button mat-dialog-close>
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
+        <mat-icon class="text-brand">{{
+          data.mode === 'create'
+            ? 'add_circle'
+            : data.mode === 'edit'
+              ? 'edit'
+              : 'visibility'
+        }}</mat-icon>
+        {{
+          data.mode === 'create'
+            ? 'Create Navigation Item'
+            : data.mode === 'edit'
+              ? 'Edit Navigation Item'
+              : 'View Navigation Item'
+        }}
+      </h2>
 
       <mat-dialog-content class="py-6 max-h-[600px] overflow-y-auto">
         <form [formGroup]="navigationForm" class="space-y-6">
@@ -552,13 +545,13 @@ export interface NavigationItemDialogData {
         </form>
       </mat-dialog-content>
 
-      <mat-dialog-actions class="flex justify-end gap-2 pt-4 border-t">
+      <div mat-dialog-actions align="end" class="flex gap-2">
         <button mat-button mat-dialog-close [disabled]="isLoading()">
           {{ data.mode === 'view' ? 'Close' : 'Cancel' }}
         </button>
         <button
           *ngIf="data.mode !== 'view'"
-          mat-raised-button
+          mat-flat-button
           color="primary"
           (click)="save()"
           [disabled]="isLoading() || !navigationForm.valid"
@@ -571,7 +564,7 @@ export interface NavigationItemDialogData {
           <mat-icon *ngIf="!isLoading()">save</mat-icon>
           {{ data.mode === 'create' ? 'Create Item' : 'Update Item' }}
         </button>
-      </mat-dialog-actions>
+      </div>
     </div>
   `,
   styles: [

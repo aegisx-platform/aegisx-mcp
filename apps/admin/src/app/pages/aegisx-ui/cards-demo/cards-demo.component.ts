@@ -4,6 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
 import { AxCardComponent, AxStatsCardComponent } from '@aegisx/ui';
+import { CodePreviewComponent } from '../../../components/code-preview/code-preview.component';
 
 @Component({
   selector: 'app-cards-demo',
@@ -15,6 +16,7 @@ import { AxCardComponent, AxStatsCardComponent } from '@aegisx/ui';
     RouterModule,
     AxCardComponent,
     AxStatsCardComponent,
+    CodePreviewComponent,
   ],
   templateUrl: './cards-demo.component.html',
   styleUrls: ['./cards-demo.component.scss'],

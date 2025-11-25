@@ -36,15 +36,13 @@ export interface PdfTemplateDuplicateDialogData {
     MatProgressSpinnerModule,
   ],
   template: `
-    <div class="duplicate-dialog">
-      <div class="dialog-header">
-        <h2 mat-dialog-title>
-          <mat-icon>content_copy</mat-icon>
-          Duplicate Template
-        </h2>
-      </div>
+    <h2 mat-dialog-title class="flex items-center gap-3 text-xl font-semibold">
+      <mat-icon class="text-brand">content_copy</mat-icon>
+      Duplicate Template
+    </h2>
 
-      <mat-dialog-content>
+    <mat-dialog-content>
+      <div class="form-compact">
         <div class="original-info">
           <mat-icon>info</mat-icon>
           <div>
@@ -53,9 +51,12 @@ export interface PdfTemplateDuplicateDialogData {
           </div>
         </div>
 
-        <form [formGroup]="duplicateForm" class="duplicate-form">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>New Template Name</mat-label>
+        <form [formGroup]="duplicateForm" class="flex flex-col gap-4">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label
+              >New Template Name <span class="text-error">*</span></mat-label
+            >
+            <mat-icon matPrefix>label</mat-icon>
             <input
               matInput
               formControlName="name"
@@ -90,65 +91,43 @@ export interface PdfTemplateDuplicateDialogData {
             <span>{{ error() }}</span>
           </div>
         }
-      </mat-dialog-content>
+      </div>
+    </mat-dialog-content>
 
-      <mat-dialog-actions align="end">
-        <button mat-button (click)="dialogRef.close()" [disabled]="loading()">
-          Cancel
-        </button>
-        <button
-          mat-raised-button
-          color="primary"
-          (click)="duplicate()"
-          [disabled]="duplicateForm.invalid || loading()"
-        >
-          @if (loading()) {
-            <mat-spinner diameter="20" class="inline-spinner"></mat-spinner>
-          }
-          <mat-icon>content_copy</mat-icon>
-          Duplicate
-        </button>
-      </mat-dialog-actions>
+    <div mat-dialog-actions align="end" class="flex gap-2">
+      <button mat-button mat-dialog-close [disabled]="loading()">Cancel</button>
+      <button
+        mat-flat-button
+        color="primary"
+        (click)="duplicate()"
+        [disabled]="duplicateForm.invalid || loading()"
+      >
+        @if (loading()) {
+          <mat-spinner diameter="20" class="inline-spinner"></mat-spinner>
+        }
+        <mat-icon>content_copy</mat-icon>
+        Duplicate
+      </button>
     </div>
   `,
   styles: [
     `
-      .duplicate-dialog {
-        min-width: 500px;
-        max-width: 600px;
-      }
-
-      .dialog-header {
-        h2 {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          margin: 0;
-          font-size: 20px;
-          font-weight: 500;
-        }
-      }
-
-      mat-dialog-content {
-        padding-top: 20px;
-      }
-
       .original-info {
         display: flex;
         gap: 12px;
         padding: 16px;
-        background: rgba(0, 0, 0, 0.04);
+        background: var(--mat-sys-surface-container-low);
         border-radius: 8px;
         margin-bottom: 24px;
 
         mat-icon {
-          color: rgba(0, 0, 0, 0.54);
+          color: var(--mat-sys-on-surface-variant);
         }
 
         .label {
           margin: 0 0 4px;
           font-size: 12px;
-          color: rgba(0, 0, 0, 0.6);
+          color: var(--mat-sys-on-surface-variant);
           text-transform: uppercase;
           letter-spacing: 0.5px;
         }
@@ -157,12 +136,7 @@ export interface PdfTemplateDuplicateDialogData {
           margin: 0;
           font-size: 14px;
           font-weight: 500;
-        }
-      }
-
-      .duplicate-form {
-        .full-width {
-          width: 100%;
+          color: var(--mat-sys-on-surface);
         }
       }
 
@@ -171,20 +145,20 @@ export interface PdfTemplateDuplicateDialogData {
         align-items: center;
         gap: 8px;
         padding: 12px 16px;
-        background: #ffebee;
-        border-left: 4px solid #f44336;
+        background: var(--mat-sys-error-container);
+        border-left: 4px solid var(--mat-sys-error);
         border-radius: 4px;
         margin-top: 16px;
 
         mat-icon {
-          color: #f44336;
+          color: var(--mat-sys-error);
           font-size: 20px;
           width: 20px;
           height: 20px;
         }
 
         span {
-          color: #c62828;
+          color: var(--mat-sys-on-error-container);
           font-size: 14px;
         }
       }
@@ -192,11 +166,6 @@ export interface PdfTemplateDuplicateDialogData {
       .inline-spinner {
         display: inline-block;
         margin-right: 8px;
-      }
-
-      mat-dialog-actions {
-        padding: 16px 24px;
-        margin: 0;
       }
     `,
   ],

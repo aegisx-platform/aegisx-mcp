@@ -31,11 +31,12 @@ export interface PdfTemplateViewDialogData {
   ],
   template: `
     <div class="view-dialog">
-      <h2 mat-dialog-title>
-        Pdf Templates Details
-        <button mat-icon-button class="close-button" (click)="onClose()">
-          <mat-icon>close</mat-icon>
-        </button>
+      <h2
+        mat-dialog-title
+        class="flex items-center gap-3 text-xl font-semibold"
+      >
+        <mat-icon class="text-brand">description</mat-icon>
+        PDF Template Details
       </h2>
 
       <mat-dialog-content>
@@ -196,13 +197,13 @@ export interface PdfTemplateViewDialogData {
         </div>
       </mat-dialog-content>
 
-      <mat-dialog-actions align="end">
+      <div mat-dialog-actions align="end" class="flex gap-2">
         <button mat-button (click)="onClose()">Close</button>
-        <button mat-raised-button color="primary" (click)="onEdit()">
+        <button mat-flat-button color="primary" (click)="onEdit()">
           <mat-icon>edit</mat-icon>
           Edit
         </button>
-      </mat-dialog-actions>
+      </div>
     </div>
   `,
   styles: [
@@ -210,20 +211,6 @@ export interface PdfTemplateViewDialogData {
       .view-dialog {
         min-width: 600px;
         max-width: 900px;
-      }
-
-      .close-button {
-        position: absolute;
-        right: 8px;
-        top: 8px;
-      }
-
-      mat-dialog-title {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 0;
-        padding-right: 40px;
       }
 
       .details-container {
@@ -239,7 +226,7 @@ export interface PdfTemplateViewDialogData {
 
       .detail-label {
         font-weight: 500;
-        color: rgba(0, 0, 0, 0.6);
+        color: var(--mat-sys-on-surface-variant);
         font-size: 14px;
         text-transform: uppercase;
         letter-spacing: 0.5px;
@@ -248,6 +235,7 @@ export interface PdfTemplateViewDialogData {
       .detail-value {
         font-size: 16px;
         line-height: 1.5;
+        color: var(--mat-sys-on-surface);
       }
 
       .text-content {
@@ -259,7 +247,7 @@ export interface PdfTemplateViewDialogData {
         display: inline-flex;
         align-items: center;
         gap: 4px;
-        color: #1976d2;
+        color: var(--mat-sys-primary);
         text-decoration: none;
       }
 
@@ -274,10 +262,10 @@ export interface PdfTemplateViewDialogData {
       }
 
       .json-content {
-        background: #f5f5f5;
+        background: var(--mat-sys-surface-container);
         border-radius: 4px;
         padding: 12px;
-        border-left: 4px solid #1976d2;
+        border-left: 4px solid var(--mat-sys-primary);
       }
 
       .json-content pre {
@@ -285,6 +273,7 @@ export interface PdfTemplateViewDialogData {
         font-family: 'Courier New', monospace;
         font-size: 12px;
         overflow-x: auto;
+        color: var(--mat-sys-on-surface);
       }
 
       .metadata-divider {
@@ -292,7 +281,7 @@ export interface PdfTemplateViewDialogData {
       }
 
       .metadata-section {
-        background: #fafafa;
+        background: var(--mat-sys-surface-container);
         border-radius: 8px;
         padding: 16px;
       }
@@ -301,7 +290,7 @@ export interface PdfTemplateViewDialogData {
         margin: 0 0 16px 0;
         font-size: 16px;
         font-weight: 500;
-        color: rgba(0, 0, 0, 0.7);
+        color: var(--mat-sys-on-surface);
       }
 
       .metadata-section .detail-row {
@@ -313,21 +302,21 @@ export interface PdfTemplateViewDialogData {
       }
 
       .id-code {
-        background: #e8eaf6;
+        background: var(--mat-sys-primary-container);
         padding: 4px 8px;
         border-radius: 4px;
         font-family: 'Courier New', monospace;
         font-size: 12px;
-        color: #3f51b5;
+        color: var(--mat-sys-on-primary-container);
       }
 
       .version-code {
-        background: #fff3e0;
+        background: var(--mat-sys-tertiary-container);
         padding: 4px 8px;
         border-radius: 4px;
         font-family: 'Courier New', monospace;
         font-size: 12px;
-        color: #f57c00;
+        color: var(--mat-sys-on-tertiary-container);
       }
 
       .info-section {
@@ -338,7 +327,7 @@ export interface PdfTemplateViewDialogData {
         margin: 0 0 16px 0;
         font-size: 16px;
         font-weight: 500;
-        color: rgba(0, 0, 0, 0.87);
+        color: var(--mat-sys-on-surface);
       }
 
       .section-divider {
@@ -347,28 +336,28 @@ export interface PdfTemplateViewDialogData {
 
       .category-chip,
       .type-chip {
-        background: #e3f2fd !important;
-        color: #1976d2 !important;
+        background: var(--mat-sys-primary-container) !important;
+        color: var(--mat-sys-on-primary-container) !important;
       }
 
       .active-chip {
-        background: #c8e6c9 !important;
-        color: #2e7d32 !important;
+        background: var(--ax-success-100) !important;
+        color: var(--ax-success-700) !important;
       }
 
       .inactive-chip {
-        background: #ffcdd2 !important;
-        color: #c62828 !important;
+        background: var(--mat-sys-error-container) !important;
+        color: var(--mat-sys-on-error-container) !important;
       }
 
       .starter-chip {
-        background: #ffe0b2 !important;
-        color: #e65100 !important;
+        background: var(--mat-sys-tertiary-container) !important;
+        color: var(--mat-sys-on-tertiary-container) !important;
       }
 
       .not-starter-chip {
-        background: #f5f5f5 !important;
-        color: #757575 !important;
+        background: var(--mat-sys-surface-container-high) !important;
+        color: var(--mat-sys-on-surface-variant) !important;
       }
 
       mat-chip mat-icon {
@@ -380,7 +369,7 @@ export interface PdfTemplateViewDialogData {
 
       .usage-count {
         font-weight: 500;
-        color: #1976d2;
+        color: var(--mat-sys-primary);
       }
 
       mat-dialog-content {

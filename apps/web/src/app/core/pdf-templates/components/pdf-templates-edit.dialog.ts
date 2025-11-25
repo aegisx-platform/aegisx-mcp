@@ -42,9 +42,15 @@ export interface PdfTemplateEditDialogData {
   template: `
     <div class="edit-dialog-container">
       <!-- Header -->
-      <div class="dialog-header">
-        <h2>Edit PDF Template: {{ data.pdfTemplates.display_name }}</h2>
-        <div class="header-actions">
+      <h2
+        mat-dialog-title
+        class="flex items-center justify-between gap-3 text-xl font-semibold"
+      >
+        <div class="flex items-center gap-3">
+          <mat-icon class="text-brand">edit</mat-icon>
+          <span>Edit PDF Template: {{ data.pdfTemplates.display_name }}</span>
+        </div>
+        <div class="header-actions flex gap-2">
           <button
             mat-icon-button
             (click)="togglePreview()"
@@ -62,11 +68,8 @@ export interface PdfTemplateEditDialogData {
           >
             <mat-icon>refresh</mat-icon>
           </button>
-          <button mat-icon-button (click)="onCancel()" matTooltip="Close">
-            <mat-icon>close</mat-icon>
-          </button>
         </div>
-      </div>
+      </h2>
 
       <!-- Split Screen Content -->
       <div class="split-content">
@@ -120,7 +123,7 @@ export interface PdfTemplateEditDialogData {
                   <h4>Preview Error</h4>
                   <p>{{ previewError() }}</p>
                   <button
-                    mat-raised-button
+                    mat-flat-button
                     color="primary"
                     (click)="refreshPreview()"
                   >
@@ -172,24 +175,7 @@ export interface PdfTemplateEditDialogData {
         height: 100vh;
         display: flex;
         flex-direction: column;
-        background: #fafafa;
-      }
-
-      .dialog-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 16px 24px;
-        background: white;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        z-index: 10;
-      }
-
-      .dialog-header h2 {
-        margin: 0;
-        font-size: 20px;
-        font-weight: 500;
+        background: var(--mat-sys-surface-container);
       }
 
       .header-actions {
@@ -206,7 +192,7 @@ export interface PdfTemplateEditDialogData {
       }
 
       .form-panel {
-        background: white;
+        background: var(--mat-sys-surface);
         overflow-y: auto;
         padding: 24px;
         flex-shrink: 0;
@@ -219,7 +205,7 @@ export interface PdfTemplateEditDialogData {
 
       .resize-handle {
         width: 16px;
-        background: rgba(0, 0, 0, 0.04);
+        background: var(--mat-sys-surface-container-high);
         cursor: col-resize;
         position: relative;
         flex-shrink: 0;
@@ -228,11 +214,11 @@ export interface PdfTemplateEditDialogData {
       }
 
       .resize-handle:hover {
-        background: rgba(25, 118, 210, 0.08);
+        background: var(--mat-sys-primary-container);
       }
 
       .resize-handle.dragging {
-        background: rgba(25, 118, 210, 0.15);
+        background: var(--mat-sys-primary-container);
       }
 
       .resize-handle-line {
@@ -242,17 +228,17 @@ export interface PdfTemplateEditDialogData {
         transform: translate(-50%, -50%);
         width: 2px;
         height: 40px;
-        background: rgba(0, 0, 0, 0.2);
+        background: var(--mat-sys-outline);
         border-radius: 1px;
       }
 
       .resize-handle:hover .resize-handle-line,
       .resize-handle.dragging .resize-handle-line {
-        background: rgba(255, 255, 255, 0.9);
+        background: var(--mat-sys-on-primary-container);
       }
 
       .preview-panel {
-        background: #f5f5f5;
+        background: var(--mat-sys-surface-container);
         display: flex;
         flex-direction: column;
         overflow: hidden;
@@ -265,14 +251,15 @@ export interface PdfTemplateEditDialogData {
         justify-content: space-between;
         align-items: center;
         padding: 16px 24px;
-        background: white;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+        background: var(--mat-sys-surface);
+        border-bottom: 1px solid var(--mat-sys-outline-variant);
       }
 
       .preview-header h3 {
         margin: 0;
         font-size: 16px;
         font-weight: 500;
+        color: var(--mat-sys-on-surface);
       }
 
       .preview-content {
@@ -306,29 +293,29 @@ export interface PdfTemplateEditDialogData {
         font-size: 64px;
         width: 64px;
         height: 64px;
-        color: rgba(0, 0, 0, 0.38);
+        color: var(--mat-sys-on-surface-variant);
         margin-bottom: 16px;
       }
 
       .preview-error mat-icon {
-        color: #f44336;
+        color: var(--mat-sys-error);
       }
 
       .preview-error h4 {
         margin: 0 0 8px 0;
         font-size: 18px;
-        color: #f44336;
+        color: var(--mat-sys-error);
       }
 
       .preview-error p {
         margin: 0 0 24px 0;
-        color: rgba(0, 0, 0, 0.6);
+        color: var(--mat-sys-on-surface-variant);
         max-width: 400px;
       }
 
       .preview-placeholder p {
         margin: 0;
-        color: rgba(0, 0, 0, 0.6);
+        color: var(--mat-sys-on-surface-variant);
         max-width: 300px;
       }
 
@@ -339,7 +326,7 @@ export interface PdfTemplateEditDialogData {
         }
 
         .resize-handle {
-          display: none; /* Hide resize handle on small screens */
+          display: none;
         }
 
         .form-panel,
@@ -351,7 +338,7 @@ export interface PdfTemplateEditDialogData {
 
         .form-panel {
           border-right: none;
-          border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+          border-bottom: 1px solid var(--mat-sys-outline-variant);
         }
 
         .preview-panel {

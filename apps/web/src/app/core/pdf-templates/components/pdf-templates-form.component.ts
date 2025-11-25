@@ -340,10 +340,10 @@ export interface PdfTemplateFormData {
 
       .section-title {
         margin: 24px 0 12px 0;
-        color: rgba(0, 0, 0, 0.87);
+        color: var(--mat-sys-on-surface);
         font-size: 16px;
         font-weight: 500;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+        border-bottom: 1px solid var(--mat-sys-outline-variant);
         padding-bottom: 8px;
       }
 
@@ -391,16 +391,16 @@ export interface PdfTemplateFormData {
         align-items: center;
         margin-bottom: 8px;
         padding: 12px 16px;
-        background: rgba(33, 150, 243, 0.05);
+        background: var(--mat-sys-primary-container);
         border-radius: 8px 8px 0 0;
-        border-bottom: 2px solid rgba(33, 150, 243, 0.2);
+        border-bottom: 2px solid var(--mat-sys-primary);
       }
 
       .sample-data-title {
         margin: 0;
         font-size: 14px;
         font-weight: 500;
-        color: rgba(0, 0, 0, 0.87);
+        color: var(--mat-sys-on-primary-container);
         text-transform: uppercase;
         letter-spacing: 0.5px;
       }
@@ -423,16 +423,16 @@ export interface PdfTemplateFormData {
         align-items: center;
         margin-bottom: 8px;
         padding: 12px 16px;
-        background: rgba(103, 58, 183, 0.05);
+        background: var(--mat-sys-tertiary-container);
         border-radius: 8px 8px 0 0;
-        border-bottom: 2px solid rgba(103, 58, 183, 0.2);
+        border-bottom: 2px solid var(--mat-sys-tertiary);
       }
 
       .schema-title {
         margin: 0;
         font-size: 14px;
         font-weight: 500;
-        color: rgba(0, 0, 0, 0.87);
+        color: var(--mat-sys-on-tertiary-container);
         text-transform: uppercase;
         letter-spacing: 0.5px;
       }
@@ -451,7 +451,7 @@ export interface PdfTemplateFormData {
         gap: 12px;
         margin-top: 16px;
         padding: 12px 0;
-        border-top: 1px solid rgba(0, 0, 0, 0.12);
+        border-top: 1px solid var(--mat-sys-outline-variant);
       }
 
       .inline-spinner {

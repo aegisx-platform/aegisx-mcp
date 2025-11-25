@@ -59,23 +59,18 @@ export interface UserRolesManagementDialogData {
   ],
   template: `
     <div class="user-roles-management-dialog">
-      <div
+      <h2
         mat-dialog-title
-        class="flex items-center justify-between pb-4 border-b"
+        class="flex items-center gap-3 text-xl font-semibold"
       >
-        <div class="flex items-center gap-3">
-          <mat-icon class="!text-2xl text-blue-600">manage_accounts</mat-icon>
-          <div>
-            <h2 class="text-xl font-semibold m-0">Manage User Roles</h2>
-            <p class="text-sm text-gray-600 dark:text-gray-400 m-0">
-              {{ data.userName }}
-            </p>
+        <mat-icon class="text-brand">manage_accounts</mat-icon>
+        <div>
+          <div>Manage User Roles</div>
+          <div class="text-sm text-gray-600 dark:text-gray-400 font-normal">
+            {{ data.userName }}
           </div>
         </div>
-        <button mat-icon-button mat-dialog-close>
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
+      </h2>
 
       <mat-dialog-content class="max-h-[600px] overflow-y-auto">
         <!-- Loading State -->
@@ -181,68 +176,74 @@ export interface UserRolesManagementDialogData {
               Add Roles
             </h3>
 
-            <form [formGroup]="addRolesForm" class="space-y-4">
-              <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Select Roles to Add</mat-label>
-                <mat-select formControlName="roleIds" multiple>
-                  <mat-option
-                    *ngFor="let role of availableRolesToAdd()"
-                    [value]="role.id"
+            <div class="form-compact">
+              <form [formGroup]="addRolesForm" class="flex flex-col gap-4">
+                <mat-form-field appearance="outline" class="w-full">
+                  <mat-label>Select Roles to Add</mat-label>
+                  <mat-icon matPrefix>group_add</mat-icon>
+                  <mat-select formControlName="roleIds" multiple>
+                    <mat-option
+                      *ngFor="let role of availableRolesToAdd()"
+                      [value]="role.id"
+                    >
+                      <div class="flex items-center gap-2">
+                        <span>{{ role.name }}</span>
+                        <mat-chip
+                          class="!bg-gray-100 !text-gray-800 dark:!bg-gray-700 dark:!text-gray-200 !text-xs !h-5"
+                        >
+                          {{ role.category }}
+                        </mat-chip>
+                      </div>
+                    </mat-option>
+                  </mat-select>
+                  <mat-hint
+                    >Only roles not currently assigned are shown</mat-hint
                   >
-                    <div class="flex items-center gap-2">
-                      <span>{{ role.name }}</span>
-                      <mat-chip
-                        class="!bg-gray-100 !text-gray-800 dark:!bg-gray-700 dark:!text-gray-200 !text-xs !h-5"
-                      >
-                        {{ role.category }}
-                      </mat-chip>
-                    </div>
-                  </mat-option>
-                </mat-select>
-                <mat-hint>Only roles not currently assigned are shown</mat-hint>
-              </mat-form-field>
+                </mat-form-field>
 
-              <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Expiry Date (Optional)</mat-label>
-                <input
-                  matInput
-                  [matDatepicker]="picker"
-                  formControlName="expiresAt"
-                  placeholder="Select expiry date"
-                />
-                <mat-datepicker-toggle
-                  matIconSuffix
-                  [for]="picker"
-                ></mat-datepicker-toggle>
-                <mat-datepicker #picker></mat-datepicker>
-                <mat-hint>Leave empty for permanent assignment</mat-hint>
-              </mat-form-field>
+                <mat-form-field appearance="outline" class="w-full">
+                  <mat-label>Expiry Date (Optional)</mat-label>
+                  <mat-icon matPrefix>event</mat-icon>
+                  <input
+                    matInput
+                    [matDatepicker]="picker"
+                    formControlName="expiresAt"
+                    placeholder="Select expiry date"
+                  />
+                  <mat-datepicker-toggle
+                    matIconSuffix
+                    [for]="picker"
+                  ></mat-datepicker-toggle>
+                  <mat-datepicker #picker></mat-datepicker>
+                  <mat-hint>Leave empty for permanent assignment</mat-hint>
+                </mat-form-field>
 
-              <button
-                mat-raised-button
-                color="primary"
-                (click)="addRoles()"
-                [disabled]="!canAddRoles() || isProcessing()"
-                class="w-full"
-              >
-                <mat-spinner
-                  *ngIf="isProcessing()"
-                  diameter="20"
-                  class="mr-2"
-                ></mat-spinner>
-                <mat-icon *ngIf="!isProcessing()">add</mat-icon>
-                Add Selected Roles
-              </button>
-            </form>
+                <button
+                  mat-flat-button
+                  color="primary"
+                  (click)="addRoles()"
+                  [disabled]="!canAddRoles() || isProcessing()"
+                  class="w-full"
+                >
+                  <mat-spinner
+                    *ngIf="isProcessing()"
+                    diameter="20"
+                    class="mr-2"
+                  ></mat-spinner>
+                  <mat-icon *ngIf="!isProcessing()">add</mat-icon>
+                  Add Selected Roles
+                </button>
+              </form>
+            </div>
           </div>
         </div>
       </mat-dialog-content>
 
-      <mat-dialog-actions align="end" class="border-t pt-4">
+      <div mat-dialog-actions align="end" class="flex gap-2">
         <button mat-button mat-dialog-close [disabled]="isProcessing()">
           Close
         </button>
-      </mat-dialog-actions>
+      </div>
     </div>
   `,
   styles: [

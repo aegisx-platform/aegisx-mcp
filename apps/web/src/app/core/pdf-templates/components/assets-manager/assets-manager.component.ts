@@ -175,7 +175,7 @@ export interface AssetInsertEvent {
         flex-direction: column;
         gap: 16px;
         padding: 16px;
-        background: rgba(0, 0, 0, 0.02);
+        background: var(--mat-sys-surface-container-low);
         border-radius: 8px;
       }
 
@@ -201,16 +201,16 @@ export interface AssetInsertEvent {
         align-items: center;
         gap: 12px;
         padding: 12px;
-        background: rgba(63, 81, 181, 0.1);
+        background: var(--mat-sys-primary-container);
         border-radius: 4px;
       }
 
       .upload-error {
         padding: 12px;
-        background: rgba(244, 67, 54, 0.1);
+        background: var(--mat-sys-error-container);
         border-radius: 4px;
         font-size: 14px;
-        color: #f44336;
+        color: var(--mat-sys-on-error-container);
       }
 
       .empty-state {
@@ -220,7 +220,7 @@ export interface AssetInsertEvent {
         justify-content: center;
         padding: 48px 24px;
         text-align: center;
-        color: rgba(0, 0, 0, 0.6);
+        color: var(--mat-sys-on-surface-variant);
       }
 
       .empty-icon {
@@ -275,7 +275,7 @@ export interface AssetInsertEvent {
         display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(0, 0, 0, 0.05);
+        background: var(--mat-sys-surface-container);
         border-radius: 4px;
         overflow: hidden;
       }
@@ -287,7 +287,7 @@ export interface AssetInsertEvent {
       }
 
       .asset-preview.file-icon {
-        background: rgba(0, 0, 0, 0.03);
+        background: var(--mat-sys-surface-container-low);
       }
 
       .asset-preview.file-icon mat-icon {
@@ -314,7 +314,7 @@ export interface AssetInsertEvent {
         display: flex;
         justify-content: space-between;
         padding: 8px !important;
-        border-top: 1px solid rgba(0, 0, 0, 0.12);
+        border-top: 1px solid var(--mat-sys-outline-variant);
       }
 
       @media (max-width: 768px) {

@@ -91,10 +91,8 @@ interface NavigationFilters {
         class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
       >
         <div>
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
-            Navigation Management
-          </h1>
-          <p class="text-gray-600 dark:text-gray-400 mt-1">
+          <h1 class="heading-title">Navigation Management</h1>
+          <p class="subtitle-text">
             Manage application navigation items and menu structure
           </p>
         </div>
@@ -195,9 +193,9 @@ interface NavigationFilters {
           <!-- Bulk Actions -->
           <div
             *ngIf="selection.hasValue()"
-            class="flex items-center gap-2 mt-4 pt-4 border-t"
+            class="flex items-center gap-2 mt-4 pt-4 bulk-actions-container"
           >
-            <span class="text-sm text-gray-600">
+            <span class="bulk-actions-count">
               {{ selection.selected.length }} item(s) selected
             </span>
             <button
@@ -236,9 +234,7 @@ interface NavigationFilters {
         <mat-card-header class="p-6 pb-4">
           <mat-card-title class="text-lg font-semibold">
             <div class="flex items-center gap-2">
-              <mat-icon class="text-primary-600 dark:text-primary-400"
-                >visibility</mat-icon
-              >
+              <mat-icon class="text-brand">visibility</mat-icon>
               <span>Role Preview Mode</span>
             </div>
           </mat-card-title>
@@ -295,41 +291,35 @@ interface NavigationFilters {
 
           <!-- Preview Mode Information -->
           @if (selectedRole()) {
-            <div
-              class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg"
-            >
+            <div class="mt-4 p-4 info-banner rounded-lg">
               <div class="flex items-start gap-3">
-                <mat-icon class="text-blue-600 dark:text-blue-400 mt-0.5"
-                  >info</mat-icon
-                >
+                <mat-icon class="info-banner-icon mt-0.5">info</mat-icon>
                 <div class="flex-1">
-                  <p
-                    class="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2"
-                  >
+                  <p class="text-sm font-medium info-banner-title mb-2">
                     Previewing as: {{ selectedRole()!.name }}
                   </p>
                   <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                     <div>
-                      <span class="text-blue-700 dark:text-blue-300 font-medium"
+                      <span class="info-banner-label font-medium"
                         >Visible Items:</span
                       >
-                      <span class="ml-2 text-blue-900 dark:text-blue-100">
+                      <span class="ml-2 info-banner-value">
                         {{ menuCount().visible }} of {{ menuCount().total }}
                       </span>
                     </div>
                     <div>
-                      <span class="text-blue-700 dark:text-blue-300 font-medium"
+                      <span class="info-banner-label font-medium"
                         >Permissions:</span
                       >
-                      <span class="ml-2 text-blue-900 dark:text-blue-100">
+                      <span class="ml-2 info-banner-value">
                         {{ rolePermissions().length }} total
                       </span>
                     </div>
                     <div>
-                      <span class="text-blue-700 dark:text-blue-300 font-medium"
+                      <span class="info-banner-label font-medium"
                         >Hidden Items:</span
                       >
-                      <span class="ml-2 text-blue-900 dark:text-blue-100">
+                      <span class="ml-2 info-banner-value">
                         {{ menuCount().total - menuCount().visible }}
                       </span>
                     </div>
@@ -344,20 +334,13 @@ interface NavigationFilters {
       <!-- Navigation Table -->
       <mat-card>
         <!-- Drag Info Banner -->
-        <div
-          *ngIf="!isDragEnabled()"
-          class="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 p-4 mb-4 flex items-start gap-3"
-        >
-          <mat-icon class="text-yellow-600 dark:text-yellow-400 mt-0.5"
-            >info</mat-icon
-          >
+        <div *ngIf="!isDragEnabled()" class="warning-banner">
+          <mat-icon class="warning-banner-icon mt-0.5">info</mat-icon>
           <div class="flex-1">
-            <p
-              class="text-sm text-yellow-800 dark:text-yellow-200 font-medium mb-1"
-            >
+            <p class="text-sm warning-banner-title font-medium mb-1">
               Drag-and-drop is disabled
             </p>
-            <p class="text-sm text-yellow-700 dark:text-yellow-300">
+            <p class="text-sm warning-banner-text">
               Clear all filters to enable drag-and-drop reordering. Items can
               only be reordered when viewing the complete list.
             </p>
@@ -365,47 +348,32 @@ interface NavigationFilters {
         </div>
 
         <!-- Preview Mode Banner -->
-        <div
-          *ngIf="previewMode() && selectedRole()"
-          class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mb-4 flex items-start gap-3"
-        >
-          <mat-icon class="text-blue-600 dark:text-blue-400 mt-0.5"
-            >visibility</mat-icon
-          >
+        <div *ngIf="previewMode() && selectedRole()" class="info-banner">
+          <mat-icon class="info-banner-icon mt-0.5">visibility</mat-icon>
           <div class="flex-1">
-            <p
-              class="text-sm text-blue-900 dark:text-blue-100 font-medium mb-1"
-            >
+            <p class="text-sm info-banner-title font-medium mb-1">
               Role Preview Mode Active - {{ selectedRole()!.name }}
             </p>
-            <p class="text-sm text-blue-700 dark:text-blue-300 mb-2">
+            <p class="text-sm info-banner-text mb-2">
               Showing {{ menuCount().visible }} of
               {{ menuCount().total }} navigation items visible to this role.
               Items are filtered based on role permissions.
             </p>
             <div class="flex flex-wrap gap-2 text-xs">
-              <span
-                class="px-2 py-1 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded"
-              >
-                Read-only mode
-              </span>
-              <span
-                class="px-2 py-1 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded"
-              >
+              <mat-chip class="chip-info"> Read-only mode </mat-chip>
+              <mat-chip class="chip-info">
                 {{ rolePermissions().length }} permissions
-              </span>
-              <span
-                class="px-2 py-1 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded"
-              >
+              </mat-chip>
+              <mat-chip class="chip-info">
                 {{ menuCount().total - menuCount().visible }} items hidden
-              </span>
+              </mat-chip>
             </div>
           </div>
           <button
             mat-icon-button
             (click)="exitPreviewMode()"
             matTooltip="Exit preview mode"
-            class="text-blue-600 dark:text-blue-400"
+            class="info-banner-icon"
           >
             <mat-icon>close</mat-icon>
           </button>
@@ -493,7 +461,7 @@ interface NavigationFilters {
             <ng-container matColumnDef="parent">
               <th mat-header-cell *matHeaderCellDef>Parent</th>
               <td mat-cell *matCellDef="let item">
-                <span class="text-gray-600 dark:text-gray-400 text-sm">
+                <span class="secondary-text">
                   {{ getParentName(item) }}
                 </span>
               </td>
@@ -504,7 +472,17 @@ interface NavigationFilters {
               <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
               <td mat-cell *matCellDef="let item">
                 <mat-chip-set>
-                  <mat-chip [class]="getTypeChipClass(item.type)">
+                  <mat-chip
+                    [class]="
+                      item.type === 'item'
+                        ? 'chip-info'
+                        : item.type === 'group'
+                          ? 'chip-success'
+                          : item.type === 'collapsible'
+                            ? 'chip-info'
+                            : 'chip-neutral'
+                    "
+                  >
                     {{ item.type }}
                   </mat-chip>
                 </mat-chip-set>
@@ -515,7 +493,7 @@ interface NavigationFilters {
             <ng-container matColumnDef="link">
               <th mat-header-cell *matHeaderCellDef>Link</th>
               <td mat-cell *matCellDef="let item">
-                <span class="text-gray-600 dark:text-gray-400 text-sm">
+                <span class="secondary-text">
                   {{ item.link || '-' }}
                 </span>
               </td>
@@ -552,21 +530,13 @@ interface NavigationFilters {
                 <div class="flex gap-1">
                   <mat-chip-set>
                     <mat-chip
-                      [class]="
-                        !item.disabled
-                          ? '!bg-green-100 !text-green-800 dark:!bg-green-900 dark:!text-green-200'
-                          : '!bg-red-100 !text-red-800 dark:!bg-red-900 dark:!text-red-200'
-                      "
+                      [class]="!item.disabled ? 'chip-success' : 'chip-error'"
                     >
                       {{ !item.disabled ? 'Enabled' : 'Disabled' }}
                     </mat-chip>
                   </mat-chip-set>
                   <mat-chip-set *ngIf="item.hidden">
-                    <mat-chip
-                      class="!bg-gray-100 !text-gray-800 dark:!bg-gray-700 dark:!text-gray-200"
-                    >
-                      Hidden
-                    </mat-chip>
+                    <mat-chip class="chip-neutral"> Hidden </mat-chip>
                   </mat-chip-set>
                 </div>
               </td>
@@ -623,9 +593,9 @@ interface NavigationFilters {
                       *hasPermission="'navigation:delete'"
                       mat-menu-item
                       (click)="deleteNavigationItem(item)"
-                      class="text-red-600"
+                      class="delete-action"
                     >
-                      <mat-icon class="text-red-600">delete</mat-icon>
+                      <mat-icon>delete</mat-icon>
                       Delete
                     </button>
                   }
@@ -633,9 +603,7 @@ interface NavigationFilters {
                   <!-- Show read-only message in preview mode -->
                   @if (previewMode()) {
                     <mat-divider></mat-divider>
-                    <div
-                      class="px-4 py-2 text-xs text-gray-500 dark:text-gray-400"
-                    >
+                    <div class="px-4 py-2 text-xs secondary-text">
                       <mat-icon class="text-sm align-middle mr-1"
                         >info</mat-icon
                       >
@@ -653,7 +621,7 @@ interface NavigationFilters {
               [cdkDragDisabled]="!isDragEnabled()"
               *matRowDef="let row; columns: displayedColumns"
               (click)="viewNavigationItem(row)"
-              class="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-transform"
+              class="cursor-pointer table-row-hover transition-transform"
               [class.cdk-drag-disabled]="!isDragEnabled()"
             ></tr>
           </table>
@@ -667,11 +635,11 @@ interface NavigationFilters {
         <!-- Empty State -->
         <div
           *ngIf="!isLoading() && dataSource.data.length === 0"
-          class="flex flex-col items-center justify-center py-12 text-gray-500"
+          class="empty-state"
         >
-          <mat-icon class="text-6xl mb-4 opacity-50">menu</mat-icon>
-          <h3 class="text-lg font-medium mb-2">No navigation items found</h3>
-          <p class="text-center mb-4">
+          <mat-icon class="empty-state-icon">menu</mat-icon>
+          <h3 class="empty-state-title">No navigation items found</h3>
+          <p class="empty-state-message">
             {{
               hasActiveFilters()
                 ? 'Try adjusting your filters'
@@ -703,57 +671,197 @@ interface NavigationFilters {
   `,
   styles: [
     `
+      /* Layout */
       .navigation-management {
         min-height: 100vh;
       }
 
+      /* Card styling with Material tokens */
       mat-card {
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        background: var(--mat-sys-surface-container);
+        border: 1px solid var(--mat-sys-outline-variant);
+        border-radius: var(--ax-radius-lg);
+        box-shadow: var(--mat-sys-level1);
       }
 
+      /* Typography */
+      .heading-title {
+        color: var(--mat-sys-on-surface);
+        font-size: var(--ax-text-3xl);
+        font-weight: var(--ax-font-bold);
+        line-height: var(--ax-leading-tight);
+      }
+
+      .subtitle-text {
+        color: var(--mat-sys-on-surface-variant);
+        font-size: var(--ax-text-base);
+        line-height: var(--ax-leading-normal);
+        margin-top: var(--ax-spacing-xs);
+      }
+
+      .secondary-text {
+        color: var(--mat-sys-on-surface-variant);
+        font-size: var(--ax-text-sm);
+      }
+
+      /* Bulk Actions */
+      .bulk-actions-container {
+        border-top: 1px solid var(--mat-sys-outline-variant);
+      }
+
+      .bulk-actions-count {
+        color: var(--mat-sys-on-surface-variant);
+        font-size: var(--ax-text-sm);
+      }
+
+      /* Banners */
+      .info-banner {
+        background: var(--ax-info-faint);
+        border-left: 4px solid var(--ax-info-emphasis);
+        padding: var(--ax-spacing-md);
+        margin-bottom: var(--ax-spacing-md);
+        display: flex;
+        align-items: flex-start;
+        gap: var(--ax-spacing-sm);
+      }
+
+      .info-banner-icon {
+        color: var(--ax-info-emphasis);
+      }
+
+      .info-banner-title {
+        color: var(--ax-info-emphasis);
+      }
+
+      .info-banner-text {
+        color: var(--ax-info-default);
+      }
+
+      .info-banner-label {
+        color: var(--ax-info-default);
+        font-weight: var(--ax-font-medium);
+      }
+
+      .info-banner-value {
+        margin-left: var(--ax-spacing-sm);
+        color: var(--ax-info-emphasis);
+      }
+
+      .warning-banner {
+        background: var(--ax-warning-faint);
+        border-left: 4px solid var(--ax-warning-emphasis);
+        padding: var(--ax-spacing-md);
+        margin-bottom: var(--ax-spacing-md);
+        display: flex;
+        align-items: flex-start;
+        gap: var(--ax-spacing-sm);
+      }
+
+      .warning-banner-icon {
+        color: var(--ax-warning-emphasis);
+      }
+
+      .warning-banner-title {
+        color: var(--ax-warning-emphasis);
+      }
+
+      .warning-banner-text {
+        color: var(--ax-warning-default);
+      }
+
+      /* Table styling */
       .mat-mdc-table {
         background: transparent;
       }
 
-      .mat-mdc-row:hover {
-        background: rgba(0, 0, 0, 0.04);
+      .mat-mdc-header-cell {
+        color: var(--mat-sys-on-surface);
+        font-weight: var(--ax-font-semibold);
+        font-size: var(--ax-text-sm);
       }
 
-      :host-context(.dark) .mat-mdc-row:hover {
-        background: rgba(255, 255, 255, 0.04);
+      .table-row-hover:hover {
+        background: var(--mat-sys-surface-variant);
       }
 
+      /* Chips */
       .mat-mdc-chip {
         min-height: 24px;
-        font-size: 12px;
+        font-size: var(--ax-text-xs);
+        font-weight: var(--ax-font-medium);
       }
 
-      .mat-mdc-header-cell {
-        font-weight: 600;
-        color: var(--mdc-theme-on-surface);
+      .chip-info {
+        background: var(--ax-info-faint);
+        color: var(--ax-info-emphasis);
+      }
+
+      .chip-neutral {
+        background: var(--mat-sys-surface-variant);
+        color: var(--mat-sys-on-surface);
+      }
+
+      .chip-success {
+        background: var(--ax-success-faint);
+        color: var(--ax-success-emphasis);
+      }
+
+      .chip-error {
+        background: var(--ax-error-faint);
+        color: var(--ax-error-emphasis);
+      }
+
+      /* Delete action */
+      .delete-action {
+        color: var(--ax-error-default);
+      }
+
+      .delete-action mat-icon {
+        color: var(--ax-error-default);
+      }
+
+      /* Empty State */
+      .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: var(--ax-spacing-2xl) var(--ax-spacing-lg);
+        color: var(--mat-sys-on-surface-variant);
+      }
+
+      .empty-state-icon {
+        font-size: 72px;
+        width: 72px;
+        height: 72px;
+        opacity: 0.5;
+        margin-bottom: var(--ax-spacing-lg);
+      }
+
+      .empty-state-title {
+        color: var(--mat-sys-on-surface);
+        font-size: var(--ax-text-lg);
+        font-weight: var(--ax-font-medium);
+        margin-bottom: var(--ax-spacing-sm);
+      }
+
+      .empty-state-message {
+        text-align: center;
+        margin-bottom: var(--ax-spacing-lg);
+        font-size: var(--ax-text-base);
       }
 
       /* Drag-drop styles */
       .cdk-drag-preview {
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        box-shadow: var(--mat-sys-level3);
         opacity: 0.9;
-        background: white;
-        border: 1px solid #ddd;
-      }
-
-      :host-context(.dark) .cdk-drag-preview {
-        background: #1e1e1e;
-        border-color: #444;
+        background: var(--mat-sys-surface-container);
+        border: 1px solid var(--mat-sys-outline-variant);
       }
 
       .cdk-drag-placeholder {
         opacity: 0.5;
-        background: #f0f0f0 !important;
-      }
-
-      :host-context(.dark) .cdk-drag-placeholder {
-        background: #2a2a2a !important;
+        background: var(--mat-sys-surface-variant) !important;
       }
 
       .cdk-drag-animating {
@@ -775,12 +883,12 @@ interface NavigationFilters {
 
       /* Hierarchy visual styles */
       .title-header {
-        font-weight: 700;
-        font-size: 0.95rem;
+        font-weight: var(--ax-font-bold);
+        font-size: var(--ax-text-base);
       }
 
       .title-cell {
-        font-size: 0.9rem;
+        font-size: var(--ax-text-sm);
       }
 
       .hierarchy-content {
@@ -791,26 +899,30 @@ interface NavigationFilters {
       .hierarchy-arrow {
         transition: transform 0.2s ease;
         user-select: none;
+        color: var(--mat-sys-primary);
       }
 
-      /* Hierarchy level indicators */
+      /* Hierarchy level indicators with design tokens */
       .hierarchy-level-0 {
-        background: rgba(59, 130, 246, 0.02);
+        background: color-mix(in srgb, var(--mat-sys-primary) 2%, transparent);
       }
 
       .hierarchy-level-1 {
-        background: rgba(59, 130, 246, 0.04);
-        border-left: 3px solid rgba(59, 130, 246, 0.3);
+        background: color-mix(in srgb, var(--mat-sys-primary) 4%, transparent);
+        border-left: 3px solid
+          color-mix(in srgb, var(--mat-sys-primary) 30%, transparent);
       }
 
       .hierarchy-level-2 {
-        background: rgba(59, 130, 246, 0.06);
-        border-left: 3px solid rgba(59, 130, 246, 0.5);
+        background: color-mix(in srgb, var(--mat-sys-primary) 6%, transparent);
+        border-left: 3px solid
+          color-mix(in srgb, var(--mat-sys-primary) 50%, transparent);
       }
 
       .hierarchy-level-3 {
-        background: rgba(59, 130, 246, 0.08);
-        border-left: 3px solid rgba(59, 130, 246, 0.7);
+        background: color-mix(in srgb, var(--mat-sys-primary) 8%, transparent);
+        border-left: 3px solid
+          color-mix(in srgb, var(--mat-sys-primary) 70%, transparent);
       }
 
       .hierarchy-level-4,
@@ -820,39 +932,9 @@ interface NavigationFilters {
       .hierarchy-level-8,
       .hierarchy-level-9,
       .hierarchy-level-10 {
-        background: rgba(59, 130, 246, 0.1);
-        border-left: 3px solid rgba(59, 130, 246, 0.9);
-      }
-
-      /* Dark mode hierarchy styles */
-      :host-context(.dark) .hierarchy-level-0 {
-        background: rgba(96, 165, 250, 0.02);
-      }
-
-      :host-context(.dark) .hierarchy-level-1 {
-        background: rgba(96, 165, 250, 0.04);
-        border-left-color: rgba(96, 165, 250, 0.3);
-      }
-
-      :host-context(.dark) .hierarchy-level-2 {
-        background: rgba(96, 165, 250, 0.06);
-        border-left-color: rgba(96, 165, 250, 0.5);
-      }
-
-      :host-context(.dark) .hierarchy-level-3 {
-        background: rgba(96, 165, 250, 0.08);
-        border-left-color: rgba(96, 165, 250, 0.7);
-      }
-
-      :host-context(.dark) .hierarchy-level-4,
-      :host-context(.dark) .hierarchy-level-5,
-      :host-context(.dark) .hierarchy-level-6,
-      :host-context(.dark) .hierarchy-level-7,
-      :host-context(.dark) .hierarchy-level-8,
-      :host-context(.dark) .hierarchy-level-9,
-      :host-context(.dark) .hierarchy-level-10 {
-        background: rgba(96, 165, 250, 0.1);
-        border-left-color: rgba(96, 165, 250, 0.9);
+        background: color-mix(in srgb, var(--mat-sys-primary) 10%, transparent);
+        border-left: 3px solid
+          color-mix(in srgb, var(--mat-sys-primary) 90%, transparent);
       }
 
       /* Permissions cell styles */
@@ -1469,21 +1551,6 @@ export class NavigationManagementComponent implements OnInit {
   // Utility methods
   refreshNavigationItems(): void {
     this.loadNavigationItems();
-  }
-
-  getTypeChipClass(type: string): string {
-    const classes: Record<string, string> = {
-      item: '!bg-blue-100 !text-blue-800 dark:!bg-blue-900 dark:!text-blue-200',
-      group:
-        '!bg-green-100 !text-green-800 dark:!bg-green-900 dark:!text-green-200',
-      collapsible:
-        '!bg-purple-100 !text-purple-800 dark:!bg-purple-900 dark:!text-purple-200',
-      divider:
-        '!bg-gray-100 !text-gray-800 dark:!bg-gray-700 dark:!text-gray-200',
-      spacer:
-        '!bg-gray-100 !text-gray-800 dark:!bg-gray-700 dark:!text-gray-200',
-    };
-    return classes[type] || classes['item'];
   }
 
   // Role Preview Mode Methods

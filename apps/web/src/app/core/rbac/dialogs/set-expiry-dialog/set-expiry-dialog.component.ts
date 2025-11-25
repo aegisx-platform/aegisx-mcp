@@ -51,23 +51,18 @@ export interface SetExpiryResult {
   ],
   template: `
     <div class="set-expiry-dialog">
-      <div
+      <h2
         mat-dialog-title
-        class="flex items-center justify-between pb-4 border-b"
+        class="flex items-center gap-3 text-xl font-semibold"
       >
-        <div class="flex items-center gap-3">
-          <mat-icon class="!text-2xl text-orange-600">schedule</mat-icon>
-          <div>
-            <h2 class="text-xl font-semibold m-0">Set Role Expiry</h2>
-            <p class="text-sm text-gray-600 dark:text-gray-400 m-0">
-              {{ data.userName }} - {{ data.userRole.role.name }}
-            </p>
+        <mat-icon class="text-brand">schedule</mat-icon>
+        <div>
+          <div>Set Role Expiry</div>
+          <div class="text-sm text-gray-600 dark:text-gray-400 font-normal">
+            {{ data.userName }} - {{ data.userRole.role.name }}
           </div>
         </div>
-        <button mat-icon-button mat-dialog-close>
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
+      </h2>
 
       <mat-dialog-content class="space-y-6">
         <!-- Current Status -->
@@ -258,13 +253,10 @@ export interface SetExpiryResult {
         </form>
       </mat-dialog-content>
 
-      <mat-dialog-actions
-        align="end"
-        class="border-t border-gray-200 dark:border-gray-700 pt-4"
-      >
+      <div mat-dialog-actions align="end" class="flex gap-2">
         <button mat-button (click)="onCancel()">Cancel</button>
         <button
-          mat-raised-button
+          mat-flat-button
           [color]="getActionButtonColor()"
           (click)="onConfirm()"
           [disabled]="!isFormValid()"
@@ -272,7 +264,7 @@ export interface SetExpiryResult {
           <mat-icon>{{ getActionButtonIcon() }}</mat-icon>
           {{ getActionButtonText() }}
         </button>
-      </mat-dialog-actions>
+      </div>
     </div>
   `,
   styles: [

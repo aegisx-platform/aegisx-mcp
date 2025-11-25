@@ -299,7 +299,7 @@ import {
               (click)="setQuickFilter('starters')"
             >
               <div class="summary-icon">
-                <mat-icon style="color: #ff9800;">stars</mat-icon>
+                <mat-icon class="warning-icon">stars</mat-icon>
               </div>
               <div class="summary-content">
                 <div class="summary-value">
@@ -312,7 +312,7 @@ import {
             <!-- Total Usage -->
             <div class="summary-item">
               <div class="summary-icon">
-                <mat-icon style="color: #9c27b0;">trending_up</mat-icon>
+                <mat-icon class="tertiary-icon">trending_up</mat-icon>
               </div>
               <div class="summary-content">
                 <div class="summary-value">{{ getTotalUsageCount() }}</div>
@@ -342,7 +342,7 @@ import {
             <!-- Most Used Template -->
             <div class="summary-item most-used">
               <div class="summary-header">
-                <mat-icon style="color: #4caf50;">emoji_events</mat-icon>
+                <mat-icon class="success-icon">emoji_events</mat-icon>
                 <span class="breakdown-title">Most Used</span>
               </div>
               <div class="most-used-content">
@@ -833,14 +833,14 @@ import {
 
       /* Delete Action in Menu */
       .delete-action {
-        color: #f44336 !important;
+        color: var(--mat-sys-error) !important;
       }
 
       /* Permission Error Banner */
       .permission-error-banner {
         margin-bottom: 16px;
-        background: #ffebee;
-        border-left: 4px solid #f44336;
+        background: var(--mat-sys-error-container);
+        border-left: 4px solid var(--mat-sys-error);
       }
 
       .permission-error-content {
@@ -860,7 +860,7 @@ import {
         font-size: 48px;
         width: 48px;
         height: 48px;
-        color: #f44336;
+        color: var(--mat-sys-error);
       }
 
       .error-message-section {
@@ -872,13 +872,13 @@ import {
         margin: 0 0 8px 0;
         font-size: 18px;
         font-weight: 500;
-        color: #c62828;
+        color: var(--mat-sys-on-error-container);
       }
 
       .error-message {
         margin: 0;
         font-size: 14px;
-        color: rgba(0, 0, 0, 0.87);
+        color: var(--mat-sys-on-error-container);
         line-height: 1.5;
       }
 
@@ -886,7 +886,7 @@ import {
         display: block;
         margin-top: 4px;
         font-size: 13px;
-        color: rgba(0, 0, 0, 0.6);
+        color: var(--mat-sys-on-surface-variant);
       }
 
       .error-actions-section {
@@ -946,14 +946,14 @@ import {
         gap: 16px;
         margin-bottom: 16px;
         padding: 12px 16px;
-        background-color: #f5f5f5;
+        background-color: var(--mat-sys-surface-container-low);
         border-radius: 8px;
-        border-left: 4px solid #1976d2;
+        border-left: 4px solid var(--mat-sys-primary);
       }
 
       .active-filters-label {
         font-weight: 500;
-        color: #1976d2;
+        color: var(--mat-sys-primary);
         margin-right: 8px;
         flex-shrink: 0;
       }
@@ -967,8 +967,8 @@ import {
       }
 
       .filter-chips mat-chip {
-        background-color: #e3f2fd;
-        color: #1976d2;
+        background-color: var(--mat-sys-primary-container);
+        color: var(--mat-sys-on-primary-container);
       }
 
       .clear-all-btn {
@@ -1105,7 +1105,7 @@ import {
 
       .loading-container p {
         margin-top: 16px;
-        color: #666;
+        color: var(--mat-sys-on-surface-variant);
       }
 
       .error-card {
@@ -1142,7 +1142,7 @@ import {
 
       .selection-info {
         font-weight: 500;
-        color: #1976d2;
+        color: var(--mat-sys-primary);
       }
 
       .bulk-buttons {
@@ -1172,12 +1172,12 @@ import {
 
       .empty-state h3 {
         margin: 0 0 8px 0;
-        color: #666;
+        color: var(--mat-sys-on-surface-variant);
       }
 
       .empty-state p {
         margin: 0 0 24px 0;
-        color: #999;
+        color: var(--mat-sys-on-surface-variant);
       }
 
       /* Summary Dashboard Styles */
@@ -1193,9 +1193,9 @@ import {
         align-items: center;
         gap: 12px;
         padding: 16px;
-        border: 1px solid rgba(0, 0, 0, 0.12);
+        border: 1px solid var(--mat-sys-outline-variant);
         border-radius: 8px;
-        background: rgba(0, 0, 0, 0.02);
+        background: var(--mat-sys-surface-container-low);
       }
 
       .summary-icon {
@@ -1205,7 +1205,7 @@ import {
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        background: rgba(0, 0, 0, 0.05);
+        background: var(--mat-sys-surface-container);
       }
 
       .summary-content {
@@ -1216,7 +1216,7 @@ import {
         font-size: 24px;
         font-weight: 600;
         line-height: 1.2;
-        color: rgba(0, 0, 0, 0.87);
+        color: var(--mat-sys-on-surface);
       }
 
       .summary-label {
@@ -1224,7 +1224,7 @@ import {
         font-weight: 500;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        color: rgba(0, 0, 0, 0.6);
+        color: var(--mat-sys-on-surface-variant);
         margin-top: 2px;
       }
 
@@ -1236,7 +1236,7 @@ import {
       .summary-item.clickable:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        background: rgba(0, 0, 0, 0.04);
+        background: var(--mat-sys-surface-container-high);
       }
 
       /* Category Breakdown Styles */
@@ -1256,7 +1256,7 @@ import {
       .breakdown-title {
         font-size: 14px;
         font-weight: 600;
-        color: rgba(0, 0, 0, 0.87);
+        color: var(--mat-sys-on-surface);
       }
 
       .category-list {
@@ -1271,28 +1271,28 @@ import {
         justify-content: space-between;
         align-items: center;
         padding: 8px 12px;
-        background: white;
+        background: var(--mat-sys-surface);
         border-radius: 6px;
-        border: 1px solid rgba(0, 0, 0, 0.08);
+        border: 1px solid var(--mat-sys-outline-variant);
         cursor: pointer;
         transition: all 0.2s ease;
       }
 
       .category-item:hover {
-        background: #f5f5f5;
-        border-color: #1976d2;
+        background: var(--mat-sys-surface-container-high);
+        border-color: var(--mat-sys-primary);
       }
 
       .category-name {
         font-size: 13px;
-        color: rgba(0, 0, 0, 0.87);
+        color: var(--mat-sys-on-surface);
       }
 
       .category-count {
         font-size: 13px;
         font-weight: 600;
-        color: #1976d2;
-        background: rgba(25, 118, 210, 0.1);
+        color: var(--mat-sys-on-primary-container);
+        background: var(--mat-sys-primary-container);
         padding: 2px 8px;
         border-radius: 12px;
       }
@@ -1310,27 +1310,27 @@ import {
 
       .template-info {
         padding: 12px;
-        background: white;
+        background: var(--mat-sys-surface);
         border-radius: 6px;
-        border: 1px solid rgba(0, 0, 0, 0.08);
+        border: 1px solid var(--mat-sys-outline-variant);
       }
 
       .template-name {
         font-size: 14px;
         font-weight: 600;
-        color: rgba(0, 0, 0, 0.87);
+        color: var(--mat-sys-on-surface);
         margin-bottom: 4px;
       }
 
       .template-usage {
         font-size: 12px;
-        color: rgba(0, 0, 0, 0.6);
+        color: var(--mat-sys-on-surface-variant);
       }
 
       .no-data {
         text-align: center;
         padding: 16px;
-        color: rgba(0, 0, 0, 0.38);
+        color: var(--mat-sys-on-surface-variant);
         font-size: 13px;
       }
 
@@ -1388,6 +1388,19 @@ import {
         .summary-item.most-used {
           grid-column: span 1;
         }
+      }
+
+      /* Icon color classes */
+      .warning-icon {
+        color: var(--ax-warning-500);
+      }
+
+      .success-icon {
+        color: var(--ax-success-500);
+      }
+
+      .tertiary-icon {
+        color: var(--mat-sys-tertiary);
       }
     `,
   ],
