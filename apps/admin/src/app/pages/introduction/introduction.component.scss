@@ -3,6 +3,13 @@
    Uses typography from aegisx-ui design system
    ============================================ */
 
+// Enhanced body text for better readability
+.body-text {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--ax-text-primary);
+}
+
 // Quick Actions Card
 .quick-actions-card {
   background: var(--ax-background-default);
