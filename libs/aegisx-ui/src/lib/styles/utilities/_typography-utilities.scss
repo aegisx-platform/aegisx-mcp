@@ -80,6 +80,72 @@
 }
 
 // -----------------------------------------------------------------------------
+// Shorthand Aliases (Easy to use, semantic naming)
+// -----------------------------------------------------------------------------
+.h1 {
+  font-size: var(--ax-type-display-small);
+  font-weight: var(--ax-type-display-small-weight);
+  line-height: var(--ax-type-display-small-line-height);
+  color: var(--ax-text-heading);
+}
+
+.h2 {
+  font-size: var(--ax-type-headline-large);
+  font-weight: var(--ax-type-headline-large-weight);
+  line-height: var(--ax-type-headline-large-line-height);
+  color: var(--ax-text-heading);
+}
+
+.h3 {
+  font-size: var(--ax-type-headline-medium);
+  font-weight: var(--ax-type-headline-medium-weight);
+  line-height: var(--ax-type-headline-medium-line-height);
+  color: var(--ax-text-heading);
+}
+
+.h4 {
+  font-size: var(--ax-type-headline-small);
+  font-weight: var(--ax-type-headline-small-weight);
+  line-height: var(--ax-type-headline-small-line-height);
+  color: var(--ax-text-heading);
+}
+
+.h5 {
+  font-size: var(--ax-type-title-large);
+  font-weight: var(--ax-type-title-large-weight);
+  line-height: var(--ax-type-title-large-line-height);
+  color: var(--ax-text-heading);
+}
+
+.h6 {
+  font-size: var(--ax-type-title-medium);
+  font-weight: var(--ax-type-title-medium-weight);
+  line-height: var(--ax-type-title-medium-line-height);
+  color: var(--ax-text-heading);
+}
+
+// Body text aliases
+.text-lg {
+  font-size: var(--ax-type-body-large);
+  line-height: var(--ax-line-height-normal);
+}
+
+.text-md {
+  font-size: var(--ax-type-body-medium);
+  line-height: var(--ax-line-height-normal);
+}
+
+.text-sm {
+  font-size: var(--ax-type-body-small);
+  line-height: var(--ax-line-height-normal);
+}
+
+.text-xs {
+  font-size: var(--ax-type-label-small);
+  line-height: var(--ax-line-height-normal);
+}
+
+// -----------------------------------------------------------------------------
 // Text Color Utilities
 // -----------------------------------------------------------------------------
 .text-heading {
@@ -125,31 +191,43 @@
 }
 
 .heading-headline-large {
-  font: var(--ax-type-headline-large);
+  font-size: var(--ax-type-headline-large);
+  font-weight: var(--ax-type-headline-large-weight);
+  line-height: var(--ax-type-headline-large-line-height);
   color: var(--ax-text-heading);
 }
 
 .heading-headline-medium {
-  font: var(--ax-type-headline-medium);
+  font-size: var(--ax-type-headline-medium);
+  font-weight: var(--ax-type-headline-medium-weight);
+  line-height: var(--ax-type-headline-medium-line-height);
   color: var(--ax-text-heading);
 }
 
 .heading-headline-small {
-  font: var(--ax-type-headline-small);
+  font-size: var(--ax-type-headline-small);
+  font-weight: var(--ax-type-headline-small-weight);
+  line-height: var(--ax-type-headline-small-line-height);
   color: var(--ax-text-heading);
 }
 
 .heading-title-large {
-  font: var(--ax-type-title-large);
+  font-size: var(--ax-type-title-large);
+  font-weight: var(--ax-type-title-large-weight);
+  line-height: var(--ax-type-title-large-line-height);
   color: var(--ax-text-heading);
 }
 
 .heading-title-medium {
-  font: var(--ax-type-title-medium);
+  font-size: var(--ax-type-title-medium);
+  font-weight: var(--ax-type-title-medium-weight);
+  line-height: var(--ax-type-title-medium-line-height);
   color: var(--ax-text-heading);
 }
 
 .heading-title-small {
-  font: var(--ax-type-title-small);
+  font-size: var(--ax-type-title-small);
+  font-weight: var(--ax-type-title-small-weight);
+  line-height: var(--ax-type-title-small-line-height);
   color: var(--ax-text-heading);
 }

@@ -183,10 +183,8 @@
   <section class="space-y-8">
     <!-- 1. Priority with Dots (Most Common) -->
     <div>
-      <h3 class="heading-title-large mb-2">
-        1. Priority with Dots (Circle) - Recommended
-      </h3>
-      <p class="type-body-medium text-secondary mb-4">
+      <h3 class="h5 mb-2">1. Priority with Dots (Circle) - Recommended</h3>
+      <p class="text-md text-secondary mb-4">
         <strong>Use Case:</strong> Task lists, ticket systems, project
         management dashboards
       </p>
@@ -203,10 +201,8 @@
 
     <!-- 2. Priority with Squares -->
     <div>
-      <h3 class="heading-title-large mb-2">
-        2. Priority with Squares - Alternative Style
-      </h3>
-      <p class="type-body-medium text-secondary mb-4">
+      <h3 class="h5 mb-2">2. Priority with Squares - Alternative Style</h3>
+      <p class="text-md text-secondary mb-4">
         <strong>Use Case:</strong> When you need visual distinction from status
         indicators (dots)
       </p>
@@ -223,8 +219,8 @@
 
     <!-- 3. Soft/Filled Background -->
     <div>
-      <h3 class="heading-title-large mb-2">3. Soft/Filled Background Style</h3>
-      <p class="type-body-medium text-secondary mb-4">
+      <h3 class="h5 mb-2">3. Soft/Filled Background Style</h3>
+      <p class="text-md text-secondary mb-4">
         <strong>Use Case:</strong> Cards, highlighted sections, more prominent
         display
       </p>
@@ -241,8 +237,8 @@
 
     <!-- 4. Priority with Icons -->
     <div>
-      <h3 class="heading-title-large mb-2">4. Priority with Icons</h3>
-      <p class="type-body-medium text-secondary mb-4">
+      <h3 class="h5 mb-2">4. Priority with Icons</h3>
+      <p class="text-md text-secondary mb-4">
         <strong>Use Case:</strong> When you need directional indicators or
         clearer visual hierarchy
       </p>
@@ -263,8 +259,8 @@
 
     <!-- 5. Different Sizes -->
     <div>
-      <h3 class="heading-title-large mb-2">5. Different Sizes</h3>
-      <p class="type-body-medium text-secondary mb-4">
+      <h3 class="h5 mb-2">5. Different Sizes</h3>
+      <p class="text-md text-secondary mb-4">
         <strong>Use Case:</strong> Adapt to your UI density and context
       </p>
       <app-code-preview [code]="prioritySizeCode" language="html">
@@ -331,7 +327,7 @@
 
     <!-- Quick Reference Table -->
     <div>
-      <h3 class="heading-title-large mb-4">Quick Reference</h3>
+      <h3 class="h5 mb-4">Quick Reference</h3>
       <div
         class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
       >
@@ -358,11 +354,11 @@
                   Emergency
                 </ax-badge>
               </td>
-              <td class="px-4 py-3 type-body-small">
+              <td class="px-4 py-3 text-sm">
                 <code class="text-error">type="error"</code>
               </td>
-              <td class="px-4 py-3 type-body-small">Red (#ef4444)</td>
-              <td class="px-4 py-3 type-body-small">
+              <td class="px-4 py-3 text-sm">Red (#ef4444)</td>
+              <td class="px-4 py-3 text-sm">
                 Critical bugs, system outages, security issues
               </td>
             </tr>
@@ -377,11 +373,11 @@
                   High
                 </ax-badge>
               </td>
-              <td class="px-4 py-3 type-body-small">
+              <td class="px-4 py-3 text-sm">
                 <code class="text-warning">type="warning"</code>
               </td>
-              <td class="px-4 py-3 type-body-small">Orange (#f59e0b)</td>
-              <td class="px-4 py-3 type-body-small">
+              <td class="px-4 py-3 text-sm">Orange (#f59e0b)</td>
+              <td class="px-4 py-3 text-sm">
                 Important features, urgent requests, deadline approaching
               </td>
             </tr>
@@ -396,11 +392,11 @@
                   Medium
                 </ax-badge>
               </td>
-              <td class="px-4 py-3 type-body-small">
+              <td class="px-4 py-3 text-sm">
                 <code class="text-secondary">type="neutral"</code>
               </td>
-              <td class="px-4 py-3 type-body-small">Gray (#6b7280)</td>
-              <td class="px-4 py-3 type-body-small">
+              <td class="px-4 py-3 text-sm">Gray (#6b7280)</td>
+              <td class="px-4 py-3 text-sm">
                 Standard tasks, normal priority work items
               </td>
             </tr>
@@ -415,11 +411,11 @@
                   Low
                 </ax-badge>
               </td>
-              <td class="px-4 py-3 type-body-small">
+              <td class="px-4 py-3 text-sm">
                 <code class="text-success">type="success"</code>
               </td>
-              <td class="px-4 py-3 type-body-small">Green (#10b981)</td>
-              <td class="px-4 py-3 type-body-small">
+              <td class="px-4 py-3 text-sm">Green (#10b981)</td>
+              <td class="px-4 py-3 text-sm">
                 Minor improvements, nice-to-have features, low impact bugs
               </td>
             </tr>
@@ -430,7 +426,7 @@
 
     <!-- Real-World Examples -->
     <div>
-      <h3 class="heading-title-large mb-4">Real-World Examples</h3>
+      <h3 class="h5 mb-4">Real-World Examples</h3>
       <div class="space-y-6">
         <!-- Task List Example -->
         <div>
@@ -448,11 +444,9 @@
                 >
                   Emergency
                 </ax-badge>
-                <span class="type-body-medium"
-                  >Fix database connection issue</span
-                >
+                <span class="text-md">Fix database connection issue</span>
               </div>
-              <span class="type-body-small text-secondary">2h ago</span>
+              <span class="text-sm text-secondary">2h ago</span>
             </div>
             <div class="p-4 flex items-center justify-between">
               <div class="flex items-center gap-3">
@@ -464,9 +458,9 @@
                 >
                   High
                 </ax-badge>
-                <span class="type-body-medium">Review pull request #234</span>
+                <span class="text-md">Review pull request #234</span>
               </div>
-              <span class="type-body-small text-secondary">5h ago</span>
+              <span class="text-sm text-secondary">5h ago</span>
             </div>
             <div class="p-4 flex items-center justify-between">
               <div class="flex items-center gap-3">
@@ -478,9 +472,9 @@
                 >
                   Medium
                 </ax-badge>
-                <span class="type-body-medium">Update user documentation</span>
+                <span class="text-md">Update user documentation</span>
               </div>
-              <span class="type-body-small text-secondary">1d ago</span>
+              <span class="text-sm text-secondary">1d ago</span>
             </div>
           </div>
         </div>
@@ -498,7 +492,7 @@
                   Emergency
                 </ax-badge>
               </div>
-              <p class="type-body-small text-secondary">
+              <p class="text-sm text-secondary">
                 System cannot process payments
               </p>
             </div>
@@ -516,7 +510,7 @@
                   Low
                 </ax-badge>
               </div>
-              <p class="type-body-small text-secondary">
+              <p class="text-sm text-secondary">
                 Add dark mode to settings page
               </p>
             </div>
@@ -535,9 +529,7 @@
         <!-- Do's -->
         <div>
           <h5 class="type-title-medium mb-3">✅ Do</h5>
-          <ul
-            class="space-y-2 type-body-small text-blue-800 dark:text-blue-200"
-          >
+          <ul class="space-y-2 text-sm text-blue-800 dark:text-blue-200">
             <li>
               • Use <strong>Emergency</strong> (red) sparingly - only for
               critical issues
@@ -563,9 +555,7 @@
         <!-- Don'ts -->
         <div>
           <h5 class="type-title-medium mb-3">❌ Don't</h5>
-          <ul
-            class="space-y-2 type-body-small text-blue-800 dark:text-blue-200"
-          >
+          <ul class="space-y-2 text-sm text-blue-800 dark:text-blue-200">
             <li>
               • Don't use too many Emergency badges - it dilutes their impact
             </li>
@@ -595,7 +585,7 @@
                 >
                   High
                 </ax-badge>
-                <span class="type-body-small text-secondary">+ size="sm"</span>
+                <span class="text-sm text-secondary">+ size="sm"</span>
               </div>
             </div>
             <div
@@ -606,9 +596,7 @@
                 <ax-badge variant="soft" type="error" [dot]="true">
                   Emergency
                 </ax-badge>
-                <span class="type-body-small text-secondary"
-                  >+ variant="soft"</span
-                >
+                <span class="text-sm text-secondary">+ variant="soft"</span>
               </div>
             </div>
           </div>
@@ -631,8 +619,8 @@
   <section class="space-y-8">
     <!-- Soft Variant with Squares -->
     <div>
-      <h3 class="heading-title-large mb-2">Soft Variant with Squares</h3>
-      <p class="type-body-medium text-secondary mb-4">
+      <h3 class="h5 mb-2">Soft Variant with Squares</h3>
+      <p class="text-md text-secondary mb-4">
         <strong>Use Case:</strong> When you need filled backgrounds with square
         indicators for better visual distinction
       </p>
@@ -649,8 +637,8 @@
 
     <!-- Outlined Strong Variants -->
     <div>
-      <h3 class="heading-title-large mb-2">Outlined Strong (Thick Border)</h3>
-      <p class="type-body-medium text-secondary mb-4">
+      <h3 class="h5 mb-2">Outlined Strong (Thick Border)</h3>
+      <p class="text-md text-secondary mb-4">
         <strong>Use Case:</strong> When you need high contrast and stronger
         visual emphasis with thicker borders
       </p>
@@ -708,8 +696,8 @@
 
     <!-- Counter with All Variants -->
     <div>
-      <h3 class="heading-title-large mb-2">Counter Badges - All Variants</h3>
-      <p class="type-body-medium text-secondary mb-4">
+      <h3 class="h5 mb-2">Counter Badges - All Variants</h3>
+      <p class="text-md text-secondary mb-4">
         <strong>Use Case:</strong> Display numeric values with different visual
         styles for various contexts
       </p>
@@ -768,8 +756,8 @@
 
     <!-- All Feature Combinations -->
     <div>
-      <h3 class="heading-title-large mb-2">All Feature Combinations</h3>
-      <p class="type-body-medium text-secondary mb-4">
+      <h3 class="h5 mb-2">All Feature Combinations</h3>
+      <p class="text-md text-secondary mb-4">
         <strong>Reference:</strong> Every possible badge feature and how to
         combine them
       </p>
@@ -916,7 +904,7 @@
 
     <!-- Feature Comparison Table -->
     <div>
-      <h3 class="heading-title-large mb-4">Feature Comparison Matrix</h3>
+      <h3 class="h5 mb-4">Feature Comparison Matrix</h3>
       <div
         class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
       >
@@ -935,86 +923,80 @@
           </thead>
           <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
             <tr>
-              <td class="px-4 py-3 type-body-medium">Variant</td>
-              <td class="px-4 py-3 type-body-small">
+              <td class="px-4 py-3 text-md">Variant</td>
+              <td class="px-4 py-3 text-sm">
                 <code>variant</code>
               </td>
-              <td class="px-4 py-3 type-body-small">
+              <td class="px-4 py-3 text-sm">
                 outlined | soft | outlined-strong
               </td>
-              <td class="px-4 py-3 type-body-small">
+              <td class="px-4 py-3 text-sm">
                 Controls visual style and emphasis level
               </td>
             </tr>
             <tr>
-              <td class="px-4 py-3 type-body-medium">Type</td>
-              <td class="px-4 py-3 type-body-small">
+              <td class="px-4 py-3 text-md">Type</td>
+              <td class="px-4 py-3 text-sm">
                 <code>type</code>
               </td>
-              <td class="px-4 py-3 type-body-small">
+              <td class="px-4 py-3 text-sm">
                 success | error | warning | info | neutral
               </td>
-              <td class="px-4 py-3 type-body-small">
-                Semantic meaning and color
-              </td>
+              <td class="px-4 py-3 text-sm">Semantic meaning and color</td>
             </tr>
             <tr>
-              <td class="px-4 py-3 type-body-medium">Size</td>
-              <td class="px-4 py-3 type-body-small">
+              <td class="px-4 py-3 text-md">Size</td>
+              <td class="px-4 py-3 text-sm">
                 <code>size</code>
               </td>
-              <td class="px-4 py-3 type-body-small">sm | md | lg</td>
-              <td class="px-4 py-3 type-body-small">
+              <td class="px-4 py-3 text-sm">sm | md | lg</td>
+              <td class="px-4 py-3 text-sm">
                 Adapt to UI density (tables, cards, dashboards)
               </td>
             </tr>
             <tr>
-              <td class="px-4 py-3 type-body-medium">Icon</td>
-              <td class="px-4 py-3 type-body-small">
+              <td class="px-4 py-3 text-md">Icon</td>
+              <td class="px-4 py-3 text-sm">
                 <code>icon</code>
               </td>
-              <td class="px-4 py-3 type-body-small">Material icon name</td>
-              <td class="px-4 py-3 type-body-small">
-                Trends, actions, directions
-              </td>
+              <td class="px-4 py-3 text-sm">Material icon name</td>
+              <td class="px-4 py-3 text-sm">Trends, actions, directions</td>
             </tr>
             <tr>
-              <td class="px-4 py-3 type-body-medium">Dot</td>
-              <td class="px-4 py-3 type-body-small">
+              <td class="px-4 py-3 text-md">Dot</td>
+              <td class="px-4 py-3 text-sm">
                 <code>[dot]="true"</code>
               </td>
-              <td class="px-4 py-3 type-body-small">boolean</td>
-              <td class="px-4 py-3 type-body-small">
+              <td class="px-4 py-3 text-sm">boolean</td>
+              <td class="px-4 py-3 text-sm">
                 Status indicators, priority levels
               </td>
             </tr>
             <tr>
-              <td class="px-4 py-3 type-body-medium">Square</td>
-              <td class="px-4 py-3 type-body-small">
+              <td class="px-4 py-3 text-md">Square</td>
+              <td class="px-4 py-3 text-sm">
                 <code>[square]="true"</code>
               </td>
-              <td class="px-4 py-3 type-body-small">boolean</td>
-              <td class="px-4 py-3 type-body-small">
+              <td class="px-4 py-3 text-sm">boolean</td>
+              <td class="px-4 py-3 text-sm">
                 Alternative to dots, visual distinction
               </td>
             </tr>
             <tr>
-              <td class="px-4 py-3 type-body-medium">Counter</td>
-              <td class="px-4 py-3 type-body-small">
+              <td class="px-4 py-3 text-md">Counter</td>
+              <td class="px-4 py-3 text-sm">
                 <code>[counter]="number"</code>
               </td>
-              <td class="px-4 py-3 type-body-small">number</td>
-              <td class="px-4 py-3 type-body-small">
-                Notifications, metrics, counts
-              </td>
+              <td class="px-4 py-3 text-sm">number</td>
+              <td class="px-4 py-3 text-sm">Notifications, metrics, counts</td>
             </tr>
             <tr>
-              <td class="px-4 py-3 type-body-medium">Removable</td>
-              <td class="px-4 py-3 type-body-small">
+              <td class="px-4 py-3 text-md">Removable</td>
+              <td class="px-4 py-3 text-sm">
                 <code>[removable]="true"</code>
               </td>
-              <td class="px-4 py-3 type-body-small">boolean</td>
-              <td class="px-4 py-3 type-body-small">
+              <td class="px-4 py-3 text-sm">boolean</td>
+              <td class="px-4 py-3 text-sm">
                 Tags, filters, temporary selections
               </td>
             </tr>
@@ -1041,7 +1023,7 @@
               <ax-badge variant="outlined" type="info" size="sm" class="mb-3">
                 Example
               </ax-badge>
-              <p class="type-body-small text-secondary">
+              <p class="text-sm text-secondary">
                 Default choice. Lightweight, subtle, works everywhere. Use 80%
                 of the time.
               </p>
@@ -1053,7 +1035,7 @@
               <ax-badge variant="soft" type="success" size="sm" class="mb-3">
                 Example
               </ax-badge>
-              <p class="type-body-small text-secondary">
+              <p class="text-sm text-secondary">
                 For emphasis. Use in cards, highlights, or when status needs to
                 stand out.
               </p>
@@ -1070,7 +1052,7 @@
               >
                 Example
               </ax-badge>
-              <p class="type-body-small text-secondary">
+              <p class="text-sm text-secondary">
                 High contrast. Use sparingly for critical information or alerts.
               </p>
             </div>
@@ -1080,9 +1062,7 @@
         <!-- Feature Combinations -->
         <div>
           <h5 class="type-title-medium mb-3">Smart Feature Combinations</h5>
-          <ul
-            class="space-y-2 type-body-small text-purple-800 dark:text-purple-200"
-          >
+          <ul class="space-y-2 text-sm text-purple-800 dark:text-purple-200">
             <li>
               • <strong>Icon + Size:</strong> Large icons (size="lg") for
               dashboard KPIs
@@ -1108,9 +1088,7 @@
         <!-- Don't Combine -->
         <div>
           <h5 class="type-title-medium mb-3">⚠️ Invalid Combinations</h5>
-          <ul
-            class="space-y-2 type-body-small text-purple-800 dark:text-purple-200"
-          >
+          <ul class="space-y-2 text-sm text-purple-800 dark:text-purple-200">
             <li>❌ Don't use dot AND square together - choose one</li>
             <li>❌ Don't use icon AND dot together - creates visual clutter</li>
             <li>
@@ -1284,7 +1262,7 @@
               <ax-badge variant="soft" type="success" rounded="none">
                 Sharp Corners
               </ax-badge>
-              <span class="type-body-small text-secondary">
+              <span class="text-sm text-secondary">
                 rounded="none" - Modern, geometric look
               </span>
             </div>
@@ -1292,7 +1270,7 @@
               <ax-badge variant="soft" type="success" rounded="sm">
                 Default Rounded
               </ax-badge>
-              <span class="type-body-small text-secondary">
+              <span class="text-sm text-secondary">
                 rounded="sm" - Balanced, professional (default)
               </span>
             </div>
@@ -1300,7 +1278,7 @@
               <ax-badge variant="soft" type="success" rounded="full">
                 Pill Shape
               </ax-badge>
-              <span class="type-body-small text-secondary">
+              <span class="text-sm text-secondary">
                 rounded="full" - Friendly, approachable
               </span>
             </div>

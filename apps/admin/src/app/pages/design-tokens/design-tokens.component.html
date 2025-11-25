@@ -60,8 +60,8 @@
             >
           </div>
           <div class="flex-1">
-            <h3 class="heading-title-medium m-0 mb-2">แนวทางที่ดีที่สุด</h3>
-            <p class="type-body-medium text-secondary m-0">
+            <h3 class="h6 m-0 mb-2">แนวทางที่ดีที่สุด</h3>
+            <p class="text-md text-secondary m-0">
               ใช้ <strong>Tailwind classes</strong> เป็นหลัก
               สำหรับความรวดเร็วและ autocomplete
             </p>
@@ -76,10 +76,10 @@
             <mat-icon class="text-[var(--ax-info-default)]">code</mat-icon>
           </div>
           <div class="flex-1">
-            <h3 class="heading-title-medium m-0 mb-2">CSS Variables</h3>
-            <p class="type-body-medium text-secondary m-0">
-              ใช้ <code class="type-body-small">var(--ax-*)</code> ใน inline
-              styles หรือ SCSS เท่าที่จำเป็น
+            <h3 class="h6 m-0 mb-2">CSS Variables</h3>
+            <p class="text-md text-secondary m-0">
+              ใช้ <code class="text-sm">var(--ax-*)</code> ใน inline styles หรือ
+              SCSS เท่าที่จำเป็น
             </p>
           </div>
         </div>
@@ -94,8 +94,8 @@
             >
           </div>
           <div class="flex-1">
-            <h3 class="heading-title-medium m-0 mb-2">Dark Mode</h3>
-            <p class="type-body-medium text-secondary m-0">
+            <h3 class="h6 m-0 mb-2">Dark Mode</h3>
+            <p class="text-md text-secondary m-0">
               ทุก token รองรับ <strong>dark mode อัตโนมัติ</strong> ไม่ต้อง
               config เพิ่ม
             </p>
@@ -110,8 +110,8 @@
             <mat-icon class="text-[var(--ax-brand-default)]">widgets</mat-icon>
           </div>
           <div class="flex-1">
-            <h3 class="heading-title-medium m-0 mb-2">Material UI</h3>
-            <p class="type-body-medium text-secondary m-0">
+            <h3 class="h6 m-0 mb-2">Material UI</h3>
+            <p class="text-md text-secondary m-0">
               ทำงานร่วมกับ <strong>Angular Material</strong> อย่างสมบูรณ์
             </p>
           </div>
@@ -120,32 +120,32 @@
 
       <!-- Quick Reference -->
       <div class="mt-6 p-4 bg-[var(--ax-background-subtle)] rounded-lg">
-        <h4 class="heading-title-small mb-3">ตัวอย่างการใช้งานด่วน:</h4>
+        <h4 class="h6 mb-3">ตัวอย่างการใช้งานด่วน:</h4>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div class="flex flex-col gap-2">
-            <span class="type-body-small text-subtle uppercase tracking-wide"
+            <span class="text-sm text-subtle uppercase tracking-wide"
               >Colors</span
             >
             <code
-              class="type-body-small bg-[var(--ax-background-default)] px-2 py-1 rounded"
+              class="text-sm bg-[var(--ax-background-default)] px-2 py-1 rounded"
               >class="text-brand bg-brand-faint"</code
             >
           </div>
           <div class="flex flex-col gap-2">
-            <span class="type-body-small text-subtle uppercase tracking-wide"
+            <span class="text-sm text-subtle uppercase tracking-wide"
               >Typography</span
             >
             <code
-              class="type-body-small bg-[var(--ax-background-default)] px-2 py-1 rounded"
+              class="text-sm bg-[var(--ax-background-default)] px-2 py-1 rounded"
               >class="text-2xl font-semibold"</code
             >
           </div>
           <div class="flex flex-col gap-2">
-            <span class="type-body-small text-subtle uppercase tracking-wide"
+            <span class="text-sm text-subtle uppercase tracking-wide"
               >Spacing</span
             >
             <code
-              class="type-body-small bg-[var(--ax-background-default)] px-2 py-1 rounded"
+              class="text-sm bg-[var(--ax-background-default)] px-2 py-1 rounded"
               >class="p-6 gap-4"</code
             >
           </div>
@@ -158,7 +158,7 @@
   <div
     class="sticky top-0 z-40 bg-[var(--ax-background-default)] pb-4 mb-2 border-b border-[var(--ax-border-default)] shadow-sm"
   >
-    <h2 class="heading-headline-small mb-4 pt-4">Quick Navigation</h2>
+    <h2 class="h4 mb-4 pt-4">Quick Navigation</h2>
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
       <button
         mat-stroked-button
@@ -221,7 +221,7 @@
 
   <!-- Color Palettes with Levels (50-900) -->
   <div id="color-palettes" class="mb-8">
-    <h2 class="heading-headline-medium mb-2">Color Palettes</h2>
+    <h2 class="h3 mb-2">Color Palettes</h2>
     <p class="text-sm text-[var(--ax-text-secondary)] mb-6">
       Complete color scales with 10 levels (50-900) + semantic aliases for
       flexible and accessible color usage.
@@ -243,7 +243,7 @@
             <div class="mb-8 last:mb-0">
               <!-- Color Palette Header -->
               <div class="flex items-center justify-between mb-4">
-                <h3 class="heading-title-large m-0">
+                <h3 class="h5 m-0">
                   {{ colorPalette.name }}
                 </h3>
                 <button
@@ -301,10 +301,7 @@
 
                       <!-- Label -->
                       <div class="text-center mb-2">
-                        <div
-                          class="heading-title-small"
-                          [class.font-bold]="level === 500"
-                        >
+                        <div class="h6" [class.font-bold]="level === 500">
                           {{
                             getSemanticName(level) ||
                               (level === 900 ? 'strong' : level)
@@ -359,9 +356,7 @@
                 >
                   <!-- All 10 Levels Grid -->
                   <div class="mb-6">
-                    <h4 class="heading-title-small mb-3">
-                      All Levels (50-900)
-                    </h4>
+                    <h4 class="h6 mb-3">All Levels (50-900)</h4>
                     <div class="grid grid-cols-5 md:grid-cols-10 gap-3">
                       @for (level of colorPalette.levels; track level.level) {
                         <div class="flex flex-col items-center">
@@ -396,9 +391,7 @@
 
                   <!-- Detailed Information Table -->
                   <div class="overflow-x-auto">
-                    <h4 class="heading-title-small mb-3">
-                      Detailed Information
-                    </h4>
+                    <h4 class="h6 mb-3">Detailed Information</h4>
                     <table class="w-full text-sm">
                       <thead class="bg-[var(--ax-background-subtle)]">
                         <tr>
@@ -1078,9 +1071,7 @@
                 <div
                   class="mt-6 p-4 bg-[var(--ax-background-default)] rounded-lg border border-[var(--ax-border-default)]"
                 >
-                  <h4 class="heading-title-small mb-3">
-                    Tailwind Color Classes ที่ใช้ได้:
-                  </h4>
+                  <h4 class="h6 mb-3">Tailwind Color Classes ที่ใช้ได้:</h4>
                   <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
                     <div>
                       <code
@@ -2447,7 +2438,7 @@
               >info</mat-icon
             >
             <div class="flex-1">
-              <h4 class="heading-title-small mb-2">Migration Strategy</h4>
+              <h4 class="h6 mb-2">Migration Strategy</h4>
               <ul
                 class="text-sm text-[var(--ax-text-secondary)] space-y-1 m-0 pl-4"
               >
@@ -2641,7 +2632,7 @@
             <mat-icon class="text-[var(--ax-brand-default)] text-2xl"
               >code</mat-icon
             >
-            <h4 class="heading-title-small m-0">Source Files</h4>
+            <h4 class="h6 m-0">Source Files</h4>
             <p class="text-xs text-[var(--ax-text-secondary)] m-0">
               Token definitions in SCSS files
             </p>
@@ -2657,7 +2648,7 @@
             <mat-icon class="text-[var(--ax-brand-default)] text-2xl"
               >palette</mat-icon
             >
-            <h4 class="heading-title-small m-0">Tailwind Config</h4>
+            <h4 class="h6 m-0">Tailwind Config</h4>
             <p class="text-xs text-[var(--ax-text-secondary)] m-0">
               Tailwind theme configuration
             </p>
@@ -2673,7 +2664,7 @@
             <mat-icon class="text-[var(--ax-brand-default)] text-2xl"
               >description</mat-icon
             >
-            <h4 class="heading-title-small m-0">Documentation</h4>
+            <h4 class="h6 m-0">Documentation</h4>
             <p class="text-xs text-[var(--ax-text-secondary)] m-0">
               Complete design system guide
             </p>
