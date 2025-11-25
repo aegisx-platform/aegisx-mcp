@@ -149,6 +149,25 @@
   }
 }
 
+// Neutral Color
+.ax-card-neutral.ax-card-filled {
+  background-color: var(--ax-gray-500);
+}
+
+.ax-card-neutral.ax-card-subtle {
+  background-color: var(--ax-background-muted);
+  border-color: var(--ax-border-default);
+
+  .ax-card-title {
+    color: var(--ax-text-heading);
+  }
+
+  .ax-card-subtitle,
+  .ax-card-body {
+    color: var(--ax-text-secondary);
+  }
+}
+
 // Sizes
 .ax-card-sm {
   .ax-card-body {
@@ -166,6 +185,23 @@
   .ax-card-body {
     padding: var(--ax-spacing-lg);
   }
+}
+
+// Border Width Variants
+.ax-card-border-1 {
+  border-width: 1px !important;
+}
+
+.ax-card-border-2 {
+  border-width: 2px !important;
+}
+
+.ax-card-border-3 {
+  border-width: 3px !important;
+}
+
+.ax-card-border-4 {
+  border-width: 4px !important;
 }
 
 // States
@@ -188,6 +224,58 @@
 
 .ax-card-loading {
   pointer-events: none;
+}
+
+// Focus State
+.ax-card:focus,
+.ax-card:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 3px var(--ax-brand-surface),
+    0 0 0 5px var(--ax-brand-default);
+}
+
+// Focus state for colored cards
+.ax-card-info:focus,
+.ax-card-info:focus-visible {
+  box-shadow:
+    0 0 0 3px var(--ax-info-surface),
+    0 0 0 5px var(--ax-info-default);
+}
+
+.ax-card-success:focus,
+.ax-card-success:focus-visible {
+  box-shadow:
+    0 0 0 3px var(--ax-success-surface),
+    0 0 0 5px var(--ax-success-default);
+}
+
+.ax-card-warning:focus,
+.ax-card-warning:focus-visible {
+  box-shadow:
+    0 0 0 3px var(--ax-warning-surface),
+    0 0 0 5px var(--ax-warning-default);
+}
+
+.ax-card-error:focus,
+.ax-card-error:focus-visible {
+  box-shadow:
+    0 0 0 3px var(--ax-error-surface),
+    0 0 0 5px var(--ax-error-default);
+}
+
+.ax-card-neutral:focus,
+.ax-card-neutral:focus-visible {
+  box-shadow:
+    0 0 0 3px var(--ax-background-muted),
+    0 0 0 5px var(--ax-gray-400);
+}
+
+.ax-card-primary:focus,
+.ax-card-primary:focus-visible {
+  box-shadow:
+    0 0 0 3px var(--ax-brand-surface),
+    0 0 0 5px var(--ax-brand-default);
 }
 
 // Loading Overlay

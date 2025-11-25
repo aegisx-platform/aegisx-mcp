@@ -1,4 +1,8 @@
-<div [class]="cardClasses">
+<div
+  [class]="cardClasses"
+  [ngStyle]="cardStyles"
+  [attr.tabindex]="clickable || hoverable ? 0 : null"
+>
   <!-- Loading Overlay -->
   @if (loading) {
     <div class="ax-card-loading-overlay">
