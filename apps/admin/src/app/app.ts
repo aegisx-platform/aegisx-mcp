@@ -196,13 +196,6 @@ export class App {
           link: '/aegisx-ui/breadcrumb',
         },
         {
-          id: 'aegisx-ui-card-colors',
-          title: 'Card Colors',
-          type: 'item',
-          icon: 'palette',
-          link: '/aegisx-ui/card-colors',
-        },
-        {
           id: 'card-examples',
           title: 'KPI Cards',
           type: 'item',

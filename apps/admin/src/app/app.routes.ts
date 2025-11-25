@@ -202,13 +202,6 @@ export const appRoutes: Route[] = [
       ).then((m) => m.BreadcrumbDemoComponent),
   },
   {
-    path: 'aegisx-ui/card-colors',
-    loadComponent: () =>
-      import(
-        './pages/aegisx-ui/card-colors-demo/card-colors-demo.component'
-      ).then((m) => m.CardColorsDemoComponent),
-  },
-  {
     path: 'aegisx-ui/dialogs',
     loadComponent: () =>
       import('./pages/aegisx-ui/dialogs-demo/dialogs-demo.component').then(

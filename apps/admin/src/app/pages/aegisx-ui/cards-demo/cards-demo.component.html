@@ -1,5 +1,5 @@
 <div class="docs-page">
-  <!-- Page Header with back button -->
+  <!-- Page Header -->
   <div class="docs-header">
     <div class="docs-breadcrumb">
       <a routerLink="/aegisx-ui" mat-button>
@@ -12,187 +12,37 @@
 
     <h1 class="docs-title">Card Components</h1>
     <p class="docs-subtitle">
-      Display content and statistics in organized card layouts with multiple
-      variants and sizes
+      Flexible container component with multiple variants, colors, and
+      real-world usage patterns
     </p>
   </div>
 
   <!-- ============================================
-       Card Properties Reference
+       Quick Start
        ============================================ -->
   <div class="demo-section">
-    <h3 class="h5">Component API Reference</h3>
+    <h3 class="h5">Quick Start</h3>
     <div class="demo-container">
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead>
-            <tr class="border-b-2 border-gray-300">
-              <th class="text-left py-3 px-4 font-semibold">Property</th>
-              <th class="text-left py-3 px-4 font-semibold">Type</th>
-              <th class="text-left py-3 px-4 font-semibold">Default</th>
-              <th class="text-left py-3 px-4 font-semibold">Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="border-b border-gray-200">
-              <td class="py-3 px-4 font-mono text-md">variant</td>
-              <td class="py-3 px-4 font-mono text-md">
-                'default' | 'outlined' | 'elevated'
-              </td>
-              <td class="py-3 px-4 font-mono text-md">'default'</td>
-              <td class="py-3 px-4">
-                Visual style: default (1px border), outlined (2px border), or
-                elevated (shadow)
-              </td>
-            </tr>
-            <tr class="border-b border-gray-200 bg-gray-50">
-              <td class="py-3 px-4 font-mono text-md">size</td>
-              <td class="py-3 px-4 font-mono text-md">'sm' | 'md' | 'lg'</td>
-              <td class="py-3 px-4 font-mono text-md">'md'</td>
-              <td class="py-3 px-4">
-                Controls internal padding: sm (compact), md (standard), lg
-                (spacious)
-              </td>
-            </tr>
-            <tr class="border-b border-gray-200">
-              <td class="py-3 px-4 font-mono text-md">color</td>
-              <td class="py-3 px-4 font-mono text-md">
-                'default' | 'primary' | 'info' | 'success' | 'warning' | 'error'
-                | 'neutral'
-              </td>
-              <td class="py-3 px-4 font-mono text-md">'default'</td>
-              <td class="py-3 px-4">
-                Color variant for borders and backgrounds
-              </td>
-            </tr>
-            <tr class="border-b border-gray-200 bg-gray-50">
-              <td class="py-3 px-4 font-mono text-md">colorIntensity</td>
-              <td class="py-3 px-4 font-mono text-md">'filled' | 'subtle'</td>
-              <td class="py-3 px-4 font-mono text-md">'filled'</td>
-              <td class="py-3 px-4">
-                Color intensity: filled (full color background) or subtle (light
-                tinted background)
-              </td>
-            </tr>
-            <tr class="border-b border-gray-200">
-              <td class="py-3 px-4 font-mono text-md">borderWidth</td>
-              <td class="py-3 px-4 font-mono text-md">
-                '1' | '2' | '3' | '4' | string
-              </td>
-              <td class="py-3 px-4 font-mono text-md">'1'</td>
-              <td class="py-3 px-4">
-                Border thickness (predefined values or custom like "2.5px",
-                "0.125rem")
-              </td>
-            </tr>
-            <tr class="border-b border-gray-200 bg-gray-50">
-              <td class="py-3 px-4 font-mono text-md">hoverable</td>
-              <td class="py-3 px-4 font-mono text-md">boolean</td>
-              <td class="py-3 px-4 font-mono text-md">false</td>
-              <td class="py-3 px-4">
-                Enables lift animation on hover with increased shadow
-              </td>
-            </tr>
-            <tr class="border-b border-gray-200">
-              <td class="py-3 px-4 font-mono text-md">clickable</td>
-              <td class="py-3 px-4 font-mono text-md">boolean</td>
-              <td class="py-3 px-4 font-mono text-md">false</td>
-              <td class="py-3 px-4">
-                Adds pointer cursor, press effect, and keyboard accessibility
-                (Tab + Enter)
-              </td>
-            </tr>
-            <tr class="border-b border-gray-200 bg-gray-50">
-              <td class="py-3 px-4 font-mono text-md">loading</td>
-              <td class="py-3 px-4 font-mono text-md">boolean</td>
-              <td class="py-3 px-4 font-mono text-md">false</td>
-              <td class="py-3 px-4">
-                Shows loading spinner overlay and prevents user interaction
-              </td>
-            </tr>
-            <tr class="border-b border-gray-200">
-              <td class="py-3 px-4 font-mono text-md">title</td>
-              <td class="py-3 px-4 font-mono text-md">string</td>
-              <td class="py-3 px-4 font-mono text-md">''</td>
-              <td class="py-3 px-4">Card header title text</td>
-            </tr>
-            <tr class="border-b border-gray-200 bg-gray-50">
-              <td class="py-3 px-4 font-mono text-md">subtitle</td>
-              <td class="py-3 px-4 font-mono text-md">string</td>
-              <td class="py-3 px-4 font-mono text-md">''</td>
-              <td class="py-3 px-4">Card header subtitle text</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <p class="text-sm font-semibold text-blue-900 mb-2">
-          Content Projection
-        </p>
-        <ul class="text-sm text-blue-700 space-y-1">
-          <li>
-            <code class="px-1 py-0.5 bg-blue-100 rounded"
-              >&lt;ng-content&gt;</code
-            >
-            - Main card body content (default slot)
-          </li>
-          <li>
-            <code class="px-1 py-0.5 bg-blue-100 rounded"
-              >&lt;div header-actions&gt;</code
-            >
-            - Actions displayed in card header (right side)
-          </li>
-          <li>
-            <code class="px-1 py-0.5 bg-blue-100 rounded"
-              >&lt;div footer&gt;</code
-            >
-            - Footer content below body
-          </li>
-          <li>
-            <code class="px-1 py-0.5 bg-blue-100 rounded"
-              >&lt;div actions&gt;</code
-            >
-            - Action buttons at card bottom
-          </li>
-        </ul>
-      </div>
-    </div>
-  </div>
-
-  <!-- ============================================
-       Card Component - Basic Examples
-       ============================================ -->
-  <div class="demo-section">
-    <h3 class="h5">Getting Started</h3>
-    <div class="demo-container feature-group">
-      <h4 class="h6">📇 Basic Cards</h4>
       <p class="mb-4 text-gray-600">
-        Simple card layout with title, subtitle, and content. Perfect for
-        organizing information into digestible sections.
+        Cards are versatile containers for displaying content, statistics, and
+        interactive elements. Import the component and start using it
+        immediately.
       </p>
 
       <app-code-preview [extractCode]="true">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <ax-card title="User Profile" subtitle="Personal Information">
-            <p>
-              This is the card content area. You can place any content here
-              including text, forms, or other components.
-            </p>
+            <p>Simple card with title and subtitle.</p>
           </ax-card>
 
-          <ax-card title="Dashboard Stats" subtitle="Overview">
-            <p>
-              Display statistics, charts, or important metrics in this area.
-              Cards provide a clean container for your content.
-            </p>
+          <ax-card variant="elevated" size="lg">
+            <h4 class="font-semibold mb-2">Custom Content</h4>
+            <p>Cards adapt to any content you provide.</p>
           </ax-card>
 
-          <ax-card title="Notifications" subtitle="Recent Activity">
-            <p>
-              Show recent notifications, updates, or activity feeds here. The
-              card automatically handles spacing and layout.
-            </p>
+          <ax-card color="primary" colorIntensity="subtle">
+            <p class="font-medium">Colored Cards</p>
+            <p class="text-sm opacity-75">Use semantic colors for context.</p>
           </ax-card>
         </div>
       </app-code-preview>
@@ -200,460 +50,502 @@
   </div>
 
   <!-- ============================================
-       Card Variants
+       Core Concepts
        ============================================ -->
   <div class="demo-section">
-    <h3 class="h5">Card Variants</h3>
+    <h3 class="h5">Core Concepts</h3>
+
+    <!-- Variants -->
     <div class="demo-container feature-group">
-      <h4 class="h6">🎨 Visual Styles</h4>
-      <p class="mb-4">
-        Cards come in three variants: default (with border), outlined (thicker
-        border), and elevated (with shadow)
+      <h4 class="h6">🎨 Variants</h4>
+      <p class="mb-4 text-gray-600">
+        Three visual styles for different hierarchy levels and design needs.
       </p>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Default Variant -->
-        <ax-card
-          title="Default Variant"
-          subtitle="Standard card with border"
-          variant="default"
-        >
-          <p>
-            This is the default card style with a subtle 1px border. Best for
-            general content display.
-          </p>
-        </ax-card>
+      <app-code-preview [extractCode]="true">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <ax-card title="Default" subtitle="1px border" variant="default">
+            <p>Subtle style for general content display.</p>
+          </ax-card>
 
-        <!-- Outlined Variant -->
-        <ax-card
-          title="Outlined Variant"
-          subtitle="Card with emphasized border"
-          variant="outlined"
-        >
-          <p>
-            Outlined cards have a thicker 2px border. Use this to draw more
-            attention to specific content.
-          </p>
-        </ax-card>
+          <ax-card title="Outlined" subtitle="2px border" variant="outlined">
+            <p>Emphasized border draws more attention.</p>
+          </ax-card>
 
-        <!-- Elevated Variant -->
-        <ax-card
-          title="Elevated Variant"
-          subtitle="Card with shadow effect"
-          variant="elevated"
-        >
-          <p>
-            Elevated cards use shadow instead of border. Perfect for creating
-            visual hierarchy and depth.
-          </p>
-        </ax-card>
-      </div>
+          <ax-card title="Elevated" subtitle="Shadow effect" variant="elevated">
+            <p>Creates visual depth and hierarchy.</p>
+          </ax-card>
+        </div>
+      </app-code-preview>
     </div>
-  </div>
 
-  <!-- ============================================
-       Card Sizes
-       ============================================ -->
-  <div class="demo-section">
-    <h3 class="h5">Card Sizes</h3>
-    <div class="demo-container feature-group">
-      <h4 class="h6">📏 Padding Variations</h4>
-      <p class="mb-4">
-        Control the internal spacing of your cards with three size options
+    <!-- Sizes -->
+    <div class="demo-container feature-group mt-6">
+      <h4 class="h6">📏 Sizes</h4>
+      <p class="mb-4 text-gray-600">
+        Control internal padding to match your layout density.
       </p>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Small Size -->
-        <ax-card
-          title="Small Card"
-          subtitle="Compact spacing"
-          size="sm"
-          variant="outlined"
-        >
-          <p>
-            Small cards have reduced padding. Perfect for dense layouts or when
-            you need to fit more information in limited space.
-          </p>
-        </ax-card>
+      <app-code-preview [extractCode]="true">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <ax-card title="Small" size="sm" variant="outlined">
+            <p>Compact padding for dense layouts.</p>
+          </ax-card>
 
-        <!-- Medium Size (Default) -->
-        <ax-card
-          title="Medium Card"
-          subtitle="Standard spacing"
-          size="md"
-          variant="outlined"
-        >
-          <p>
-            Medium is the default size with balanced padding. Provides good
-            readability while maintaining efficient use of space.
-          </p>
-        </ax-card>
+          <ax-card title="Medium" size="md" variant="outlined">
+            <p>Default size with balanced spacing.</p>
+          </ax-card>
 
-        <!-- Large Size -->
-        <ax-card
-          title="Large Card"
-          subtitle="Generous spacing"
-          size="lg"
-          variant="outlined"
-        >
-          <p>
-            Large cards offer more breathing room. Use when content needs
-            emphasis or when you want a more spacious, premium feel.
-          </p>
-        </ax-card>
-      </div>
+          <ax-card title="Large" size="lg" variant="outlined">
+            <p>Generous padding for emphasis.</p>
+          </ax-card>
+        </div>
+      </app-code-preview>
     </div>
   </div>
 
   <!-- ============================================
-       Card States
+       Color System
        ============================================ -->
   <div class="demo-section">
-    <h3 class="h5">Interactive States</h3>
+    <h3 class="h5">Color System</h3>
+    <p class="text-gray-600 mb-6">
+      Six semantic colors with two intensity levels (filled & subtle) provide
+      clear visual communication.
+    </p>
+
+    <!-- Color Overview -->
     <div class="demo-container feature-group">
-      <h4 class="h6">✨ Hover & Click Effects</h4>
-      <p class="mb-4">
-        Add interactivity to your cards with hoverable and clickable states
-      </p>
+      <h4 class="h6">🎨 Color Palette</h4>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Hoverable Card -->
-        <ax-card
-          title="Hoverable Card"
-          subtitle="Lifts on hover"
-          variant="default"
-          [hoverable]="true"
-        >
-          <p>
-            Hover over this card to see the lift animation. The card raises
-            slightly and shadow increases, providing visual feedback.
-          </p>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+        <ax-card color="primary" colorIntensity="filled" size="sm">
+          <div class="text-center">
+            <div class="font-medium">Primary</div>
+            <div class="text-md opacity-75">Main actions</div>
+          </div>
         </ax-card>
 
-        <!-- Clickable Card -->
-        <ax-card
-          title="Clickable Card"
-          subtitle="Interactive feedback"
-          variant="default"
-          [clickable]="true"
-          (click)="onCardClick('clickable')"
-        >
-          <p>
-            Click this card to see the press effect. The border color changes
-            and the card scales slightly on active state.
-          </p>
+        <ax-card color="info" colorIntensity="filled" size="sm">
+          <div class="text-center">
+            <div class="font-medium">Info</div>
+            <div class="text-md opacity-75">Information</div>
+          </div>
         </ax-card>
 
-        <!-- Combined States -->
-        <ax-card
-          title="Hoverable + Clickable"
-          subtitle="Full interactivity"
-          variant="default"
-          [hoverable]="true"
-          [clickable]="true"
-          (click)="onCardClick('combined')"
-        >
-          <p>
-            This card combines both effects - lifts on hover and provides
-            feedback when clicked. Best for navigation cards.
-          </p>
+        <ax-card color="success" colorIntensity="filled" size="sm">
+          <div class="text-center">
+            <div class="font-medium">Success</div>
+            <div class="text-md opacity-75">Positive</div>
+          </div>
         </ax-card>
+
+        <ax-card color="warning" colorIntensity="filled" size="sm">
+          <div class="text-center">
+            <div class="font-medium">Warning</div>
+            <div class="text-md opacity-75">Caution</div>
+          </div>
+        </ax-card>
+
+        <ax-card color="error" colorIntensity="filled" size="sm">
+          <div class="text-center">
+            <div class="font-medium">Error</div>
+            <div class="text-md opacity-75">Critical</div>
+          </div>
+        </ax-card>
+
+        <ax-card color="neutral" colorIntensity="filled" size="sm">
+          <div class="text-center">
+            <div class="font-medium">Neutral</div>
+            <div class="text-md opacity-75">Neutral</div>
+          </div>
+        </ax-card>
+      </div>
+
+      <!-- Intensity Comparison -->
+      <div class="mt-6">
+        <h5 class="text-sm font-semibold mb-3">Filled vs Subtle Intensity</h5>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <p class="text-md text-gray-600 mb-3">
+              Filled - Bold, high contrast
+            </p>
+            <ax-card color="info" colorIntensity="filled">
+              <div class="flex items-center gap-3">
+                <mat-icon>info</mat-icon>
+                <div>
+                  <div class="font-medium">System Update Available</div>
+                  <div class="text-md opacity-85">v2.1.0 ready to install</div>
+                </div>
+              </div>
+            </ax-card>
+          </div>
+
+          <div>
+            <p class="text-md text-gray-600 mb-3">
+              Subtle - Light, low contrast
+            </p>
+            <ax-card color="info" colorIntensity="subtle">
+              <div class="flex items-center gap-3">
+                <mat-icon>info</mat-icon>
+                <div>
+                  <div class="font-medium">System Update Available</div>
+                  <div class="text-md opacity-75">v2.1.0 ready to install</div>
+                </div>
+              </div>
+            </ax-card>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- ============================================
-       Loading State
-       ============================================ -->
-  <div class="demo-section">
-    <h3 class="h5">Loading State</h3>
-    <div class="demo-container feature-group">
-      <h4 class="h6">⏳ Loading Indicator</h4>
-      <p class="mb-4">Show loading states with built-in spinner overlay</p>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Loading Card -->
-        <ax-card
-          title="Loading Content"
-          subtitle="Fetching data..."
-          variant="elevated"
-          [loading]="true"
-        >
-          <p>
-            This content is being loaded. The card shows a spinner overlay and
-            prevents interaction until loading completes.
-          </p>
-        </ax-card>
-
-        <!-- Normal Card for Comparison -->
-        <ax-card
-          title="Loaded Content"
-          subtitle="Data ready"
-          variant="elevated"
-        >
-          <p>
-            This card has finished loading and displays its content normally.
-            Toggle loading state programmatically based on your data state.
-          </p>
-        </ax-card>
-      </div>
-    </div>
-  </div>
-
-  <!-- ============================================
-       Card with Actions & Footer
-       ============================================ -->
-  <div class="demo-section">
-    <h3 class="h5">Card with Actions & Footer</h3>
-    <div class="demo-container feature-group">
-      <h4 class="h6">🔧 Header Actions & Footer Content</h4>
-      <p class="mb-4">
-        Add action buttons to the header and footer content for enhanced
-        functionality
-      </p>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Card with Header Actions -->
-        <ax-card
-          title="User Settings"
-          subtitle="Manage your preferences"
-          variant="outlined"
-        >
-          <div header-actions>
-            <button mat-icon-button>
-              <mat-icon>more_vert</mat-icon>
-            </button>
-          </div>
-
-          <p class="mb-4">
-            Configure your account settings and preferences here.
-          </p>
-          <div class="flex gap-2">
-            <mat-icon class="text-gray-400">person</mat-icon>
-            <span>John Doe</span>
-          </div>
-
-          <div footer>
-            <span class="text-sm">Last updated: Today</span>
-          </div>
-        </ax-card>
-
-        <!-- Card with Action Buttons -->
-        <ax-card
-          title="Project Details"
-          subtitle="Frontend Dashboard"
-          variant="outlined"
-        >
-          <div header-actions>
-            <button mat-icon-button>
-              <mat-icon>edit</mat-icon>
-            </button>
-            <button mat-icon-button>
-              <mat-icon>delete</mat-icon>
-            </button>
-          </div>
-
-          <p class="mb-4">
-            Active development project with multiple team members.
-          </p>
-          <div class="flex items-center gap-2 mb-2">
-            <mat-icon class="text-green-500">check_circle</mat-icon>
-            <span>85% Complete</span>
-          </div>
-
-          <div actions>
-            <button mat-button color="primary">View Details</button>
-            <button mat-stroked-button>Download</button>
-          </div>
-        </ax-card>
-      </div>
-    </div>
-  </div>
-
-  <!-- ============================================
-       Stats Card Component
-       ============================================ -->
-  <div class="demo-section">
-    <h3 class="h5">Stats Card Component</h3>
-    <div class="demo-container feature-group">
-      <h4 class="h6">📈 Statistics Dashboard</h4>
-      <p class="mb-4">Display key metrics with trend indicators</p>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <!-- Positive Trend -->
-        <ax-stats-card
-          title="Total Users"
-          value="1,234"
-          change="+12.5%"
-          trend="up"
-        >
-        </ax-stats-card>
-
-        <!-- Negative Trend -->
-        <ax-stats-card
-          title="Revenue"
-          value="$45,678"
-          change="-3.2%"
-          trend="down"
-        >
-        </ax-stats-card>
-
-        <!-- Neutral Trend -->
-        <ax-stats-card
-          title="Pending Items"
-          value="42"
-          change="0.0%"
-          trend="neutral"
-        >
-        </ax-stats-card>
-
-        <!-- Large Growth -->
-        <ax-stats-card
-          title="Conversion Rate"
-          value="24.5%"
-          change="+8.1%"
-          trend="up"
-        >
-        </ax-stats-card>
-      </div>
-    </div>
-  </div>
-
-  <!-- ============================================
-       Combining Features
+       Real-World Examples
        ============================================ -->
   <div class="demo-section">
     <h3 class="h5">Real-World Examples</h3>
+    <p class="text-gray-600 mb-6">
+      Practical patterns for common use cases in production applications.
+    </p>
+
+    <!-- Status & Alerts -->
     <div class="demo-container feature-group">
-      <h4 class="h6">🎯 Practical Combinations</h4>
-      <p class="mb-4">Common patterns combining multiple features</p>
+      <h4 class="h6">📢 Status & Alert Cards</h4>
+      <p class="mb-4 text-gray-600">
+        System notifications, deployment status, and important messages.
+      </p>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Product Card -->
-        <ax-card
-          title="Premium Plan"
-          subtitle="Most Popular"
-          variant="elevated"
-          size="lg"
-          [hoverable]="true"
-          [clickable]="true"
-        >
-          <div class="mb-4">
-            <div class="h1">$29/mo</div>
-            <ul class="space-y-2 text-sm">
-              <li class="flex items-center gap-2">
-                <mat-icon class="text-green-500">check</mat-icon>
-                Unlimited users
-              </li>
-              <li class="flex items-center gap-2">
-                <mat-icon class="text-green-500">check</mat-icon>
-                Advanced analytics
-              </li>
-              <li class="flex items-center gap-2">
-                <mat-icon class="text-green-500">check</mat-icon>
-                24/7 support
-              </li>
-            </ul>
-          </div>
-
-          <div actions>
-            <button mat-flat-button color="primary" class="w-full">
-              Get Started
-            </button>
-          </div>
-        </ax-card>
-
-        <!-- Notification Card -->
-        <ax-card
-          title="System Alert"
-          subtitle="2 minutes ago"
-          variant="outlined"
-          [clickable]="true"
-        >
-          <div header-actions>
-            <button mat-icon-button>
-              <mat-icon>close</mat-icon>
-            </button>
-          </div>
-
-          <div class="flex items-start gap-3">
-            <mat-icon class="text-yellow-500">warning</mat-icon>
-            <div>
-              <p class="type-title-small">Database backup required</p>
-              <p class="text-sm">
-                Your database hasn't been backed up in 7 days. Click to schedule
-                a backup now.
-              </p>
+      <app-code-preview [extractCode]="true">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <ax-card color="success" colorIntensity="filled">
+            <div class="flex items-start gap-3">
+              <mat-icon class="opacity-90">check_circle</mat-icon>
+              <div class="flex-1">
+                <h4 class="font-semibold">Deployment Successful</h4>
+                <p class="text-md">
+                  v2.1.0 deployed to production. All systems operational.
+                </p>
+                <div class="text-md opacity-75 mt-1">2 minutes ago</div>
+              </div>
             </div>
-          </div>
+          </ax-card>
 
-          <div actions>
-            <button mat-button color="warn">Backup Now</button>
-            <button mat-button>Remind Later</button>
-          </div>
-        </ax-card>
-
-        <!-- Team Member Card -->
-        <ax-card
-          title="Sarah Johnson"
-          subtitle="Senior Developer"
-          variant="default"
-          [hoverable]="true"
-        >
-          <div header-actions>
-            <button mat-icon-button>
-              <mat-icon>email</mat-icon>
-            </button>
-          </div>
-
-          <div class="space-y-3">
-            <div class="flex items-center gap-2 text-sm">
-              <mat-icon class="text-gray-400">business</mat-icon>
-              <span>Engineering Team</span>
+          <ax-card color="warning" colorIntensity="subtle">
+            <div class="flex items-start gap-3">
+              <mat-icon>warning</mat-icon>
+              <div class="flex-1">
+                <h4 class="font-semibold">High Memory Usage</h4>
+                <p class="text-md">
+                  API server consuming 85% memory. Consider scaling.
+                </p>
+                <div class="text-md opacity-75 mt-1">15 minutes ago</div>
+              </div>
             </div>
-            <div class="flex items-center gap-2 text-sm">
-              <mat-icon class="text-gray-400">location_on</mat-icon>
-              <span>San Francisco, CA</span>
+          </ax-card>
+
+          <ax-card color="error" colorIntensity="filled">
+            <div class="flex items-start gap-3">
+              <mat-icon class="opacity-90">error</mat-icon>
+              <div class="flex-1">
+                <h4 class="font-semibold">Database Connection Failed</h4>
+                <p class="text-md">
+                  Unable to connect to PostgreSQL. Attempting reconnection.
+                </p>
+                <button
+                  mat-flat-button
+                  class="mt-2 !bg-white/20 hover:!bg-white/30 !text-white !text-md !h-8"
+                >
+                  View Details
+                </button>
+              </div>
             </div>
-            <div class="flex gap-1 mt-2">
-              <span class="badge badge-soft badge-info badge-sm"
-                >TypeScript</span
+          </ax-card>
+
+          <ax-card color="info" colorIntensity="subtle">
+            <div class="flex items-start gap-3">
+              <mat-icon>info</mat-icon>
+              <div class="flex-1">
+                <h4 class="font-semibold">Scheduled Maintenance</h4>
+                <p class="text-md">
+                  System maintenance on Dec 25 from 2:00-4:00 AM UTC.
+                </p>
+                <div class="text-md opacity-75 mt-1">Planned for next week</div>
+              </div>
+            </div>
+          </ax-card>
+        </div>
+      </app-code-preview>
+    </div>
+
+    <!-- Feature Highlights -->
+    <div class="demo-container feature-group mt-8">
+      <h4 class="h6">✨ Feature Highlights</h4>
+      <p class="mb-4 text-gray-600">
+        Showcase new features and product capabilities.
+      </p>
+
+      <app-code-preview [extractCode]="true">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <ax-card color="primary" colorIntensity="subtle" variant="elevated">
+            <div class="space-y-3">
+              <div
+                class="w-12 h-12 rounded-lg flex items-center justify-center"
+                style="background-color: var(--ax-brand-default)"
               >
-              <span class="badge badge-soft badge-info badge-sm">React</span>
-              <span class="badge badge-soft badge-info badge-sm">Node.js</span>
+                <mat-icon class="text-white">auto_awesome</mat-icon>
+              </div>
+              <div>
+                <h4 class="font-semibold text-lg">AI-Powered Search</h4>
+                <p class="text-md">
+                  Intelligent semantic search with natural language queries.
+                </p>
+              </div>
+              <button
+                mat-stroked-button
+                color="primary"
+                class="!text-md !h-9 w-full"
+              >
+                Learn More
+              </button>
             </div>
-          </div>
+          </ax-card>
 
-          <div footer>
-            <span class="text-sm">Joined March 2023</span>
-          </div>
-        </ax-card>
-      </div>
+          <ax-card color="success" colorIntensity="subtle" variant="elevated">
+            <div class="space-y-3">
+              <div
+                class="w-12 h-12 rounded-lg flex items-center justify-center"
+                style="background-color: var(--ax-success-default)"
+              >
+                <mat-icon class="text-white">security</mat-icon>
+              </div>
+              <div>
+                <h4 class="font-semibold text-lg">Enterprise Security</h4>
+                <p class="text-md">
+                  JWT authentication, RBAC, and comprehensive audit logs.
+                </p>
+              </div>
+              <button
+                mat-stroked-button
+                class="!text-md !h-9 w-full"
+                style="
+                  border-color: var(--ax-success-default);
+                  color: var(--ax-success-default);
+                "
+              >
+                View Security
+              </button>
+            </div>
+          </ax-card>
+
+          <ax-card color="info" colorIntensity="subtle" variant="elevated">
+            <div class="space-y-3">
+              <div
+                class="w-12 h-12 rounded-lg flex items-center justify-center"
+                style="background-color: var(--ax-info-default)"
+              >
+                <mat-icon class="text-white">analytics</mat-icon>
+              </div>
+              <div>
+                <h4 class="font-semibold text-lg">Real-Time Analytics</h4>
+                <p class="text-md">
+                  Live dashboards with WebSocket updates and metrics tracking.
+                </p>
+              </div>
+              <button
+                mat-stroked-button
+                class="!text-md !h-9 w-full"
+                style="
+                  border-color: var(--ax-info-default);
+                  color: var(--ax-info-default);
+                "
+              >
+                Explore Dashboard
+              </button>
+            </div>
+          </ax-card>
+        </div>
+      </app-code-preview>
+    </div>
+
+    <!-- Project/Task Cards -->
+    <div class="demo-container feature-group mt-8">
+      <h4 class="h6">📊 Project & Task Cards</h4>
+      <p class="mb-4 text-gray-600">
+        Track progress with visual indicators and status colors.
+      </p>
+
+      <app-code-preview [extractCode]="true">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <ax-card color="primary" colorIntensity="filled" variant="elevated">
+            <div class="space-y-3">
+              <div class="flex items-start justify-between">
+                <div>
+                  <h4 class="font-semibold">AegisX Platform v2.0</h4>
+                  <p class="text-md opacity-85 mt-1">Full-stack monorepo</p>
+                </div>
+                <mat-icon class="opacity-75">code</mat-icon>
+              </div>
+              <div class="space-y-2">
+                <div class="flex justify-between text-md opacity-90">
+                  <span>Progress</span>
+                  <span class="font-medium">75%</span>
+                </div>
+                <ax-sparkline
+                  [data]="projectProgress"
+                  variant="line"
+                  size="sm"
+                  color="white"
+                  [strokeWidth]="2"
+                />
+              </div>
+              <div class="flex items-center justify-between text-md opacity-85">
+                <span>Due: Dec 2025</span>
+                <span>12/16 tasks</span>
+              </div>
+            </div>
+          </ax-card>
+
+          <ax-card color="success" colorIntensity="filled" variant="elevated">
+            <div class="space-y-3">
+              <div class="flex items-start justify-between">
+                <div>
+                  <h4 class="font-semibold">Authentication Module</h4>
+                  <p class="text-md opacity-85 mt-1">JWT & RBAC system</p>
+                </div>
+                <mat-icon class="opacity-75">check_circle</mat-icon>
+              </div>
+              <div class="space-y-2">
+                <div class="flex justify-between text-md opacity-90">
+                  <span>Completion</span>
+                  <span class="font-medium">100%</span>
+                </div>
+                <ax-sparkline
+                  [data]="[85, 88, 90, 92, 95, 97, 98, 99, 100, 100, 100, 100]"
+                  variant="area"
+                  size="sm"
+                  color="white"
+                  [fillOpacity]="0.2"
+                />
+              </div>
+              <div class="flex items-center justify-between text-md opacity-85">
+                <span>Completed Nov 2025</span>
+                <span>18/18 tasks</span>
+              </div>
+            </div>
+          </ax-card>
+
+          <ax-card color="warning" colorIntensity="filled" variant="elevated">
+            <div class="space-y-3">
+              <div class="flex items-start justify-between">
+                <div>
+                  <h4 class="font-semibold">Performance Optimization</h4>
+                  <p class="text-md opacity-85 mt-1">Load time improvements</p>
+                </div>
+                <mat-icon class="opacity-75">speed</mat-icon>
+              </div>
+              <div class="space-y-2">
+                <div class="flex justify-between text-md opacity-90">
+                  <span>At Risk</span>
+                  <span class="font-medium">45%</span>
+                </div>
+                <ax-sparkline
+                  [data]="[20, 22, 25, 28, 30, 35, 38, 40, 42, 43, 44, 45]"
+                  variant="line"
+                  size="sm"
+                  color="white"
+                  [strokeWidth]="2"
+                />
+              </div>
+              <div class="flex items-center justify-between text-md opacity-85">
+                <span>Delayed 2 weeks</span>
+                <span>8/16 tasks</span>
+              </div>
+            </div>
+          </ax-card>
+        </div>
+      </app-code-preview>
+    </div>
+
+    <!-- Category Cards -->
+    <div class="demo-container feature-group mt-8">
+      <h4 class="h6">🏷️ Category Cards</h4>
+      <p class="mb-4 text-gray-600">
+        Organize content with visual distinction using compact cards.
+      </p>
+
+      <app-code-preview [extractCode]="true">
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <ax-card color="primary" colorIntensity="filled" size="sm">
+            <div class="text-center space-y-2">
+              <mat-icon class="!text-4xl !h-10 !w-10 opacity-90">code</mat-icon>
+              <h4 class="font-medium">Development</h4>
+              <p class="text-md opacity-75">24 resources</p>
+            </div>
+          </ax-card>
+
+          <ax-card color="success" colorIntensity="filled" size="sm">
+            <div class="text-center space-y-2">
+              <mat-icon class="!text-4xl !h-10 !w-10 opacity-90"
+                >verified</mat-icon
+              >
+              <h4 class="font-medium">Testing</h4>
+              <p class="text-md opacity-75">32 test suites</p>
+            </div>
+          </ax-card>
+
+          <ax-card color="warning" colorIntensity="filled" size="sm">
+            <div class="text-center space-y-2">
+              <mat-icon class="!text-4xl !h-10 !w-10 opacity-90"
+                >hourglass_empty</mat-icon
+              >
+              <h4 class="font-medium">Pending</h4>
+              <p class="text-md opacity-75">8 tasks</p>
+            </div>
+          </ax-card>
+
+          <ax-card color="error" colorIntensity="filled" size="sm">
+            <div class="text-center space-y-2">
+              <mat-icon class="!text-4xl !h-10 !w-10 opacity-90"
+                >priority_high</mat-icon
+              >
+              <h4 class="font-medium">Critical</h4>
+              <p class="text-md opacity-75">3 issues</p>
+            </div>
+          </ax-card>
+
+          <ax-card color="info" colorIntensity="filled" size="sm">
+            <div class="text-center space-y-2">
+              <mat-icon class="!text-4xl !h-10 !w-10 opacity-90"
+                >menu_book</mat-icon
+              >
+              <h4 class="font-medium">Docs</h4>
+              <p class="text-md opacity-75">156 pages</p>
+            </div>
+          </ax-card>
+        </div>
+      </app-code-preview>
     </div>
   </div>
 
   <!-- ============================================
-       Stats Cards with Colored Borders
+       Stats Cards
        ============================================ -->
   <div class="demo-section">
-    <h3 class="h5">Stats Cards with Colored Borders</h3>
+    <h3 class="h5">Stats Cards</h3>
     <p class="text-gray-600 mb-6">
-      Two professional design patterns for displaying key metrics and health
-      data. Each design showcases all available color variants with subtle
-      backgrounds and colored borders.
+      Two professional design patterns for displaying metrics and health data.
     </p>
 
+    <!-- Design 1: Rounded Icon -->
     <div class="demo-container feature-group">
       <h4 class="h6">📊 Design 1: Rounded Icon Style</h4>
       <p class="mb-4 text-gray-600">
-        Minimalist design with circular icons and thin borders (1px). Perfect
-        for modern dashboards with clean aesthetics and high information
-        density.
+        Minimalist design with circular icons and thin borders (1px).
       </p>
 
       <app-code-preview [extractCode]="true">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <!-- Heart Rate - Info Blue -->
           <ax-card color="info" colorIntensity="subtle" borderWidth="1">
             <div class="flex items-start gap-4">
               <div
@@ -688,7 +580,6 @@
             </div>
           </ax-card>
 
-          <!-- Systolic BP - Success Green -->
           <ax-card color="success" colorIntensity="subtle" borderWidth="1">
             <div class="flex items-start gap-4">
               <div
@@ -725,7 +616,6 @@
             </div>
           </ax-card>
 
-          <!-- Temperature - Warning Orange -->
           <ax-card color="warning" colorIntensity="subtle" borderWidth="1">
             <div class="flex items-start gap-4">
               <div
@@ -761,93 +651,19 @@
               </div>
             </div>
           </ax-card>
-
-          <!-- Resp. Rate - Info Cyan -->
-          <ax-card color="info" colorIntensity="subtle" borderWidth="1">
-            <div class="flex items-start gap-4">
-              <div
-                class="w-12 h-12 rounded-full flex items-center justify-center"
-                style="background-color: var(--ax-info-faint)"
-              >
-                <mat-icon class="text-2xl" style="color: var(--ax-info-default)"
-                  >air</mat-icon
-                >
-              </div>
-              <div class="flex-1">
-                <p
-                  class="text-md uppercase tracking-wide mb-1"
-                  style="color: var(--ax-text-secondary)"
-                >
-                  RESP. RATE
-                </p>
-                <p
-                  class="text-3xl font-bold mb-1"
-                  style="color: var(--ax-text-heading)"
-                >
-                  14 <span class="text-base font-normal">/min</span>
-                </p>
-                <p
-                  class="text-md flex items-center gap-1"
-                  style="color: var(--ax-text-secondary)"
-                >
-                  <mat-icon class="text-md">trending_down</mat-icon>
-                  -6.7% from last
-                </p>
-              </div>
-            </div>
-          </ax-card>
-
-          <!-- SPO2 - Success Green -->
-          <ax-card color="success" colorIntensity="subtle" borderWidth="1">
-            <div class="flex items-start gap-4">
-              <div
-                class="w-12 h-12 rounded-full flex items-center justify-center"
-                style="background-color: var(--ax-success-faint)"
-              >
-                <mat-icon
-                  class="text-2xl"
-                  style="color: var(--ax-success-default)"
-                  >water_drop</mat-icon
-                >
-              </div>
-              <div class="flex-1">
-                <p
-                  class="text-md uppercase tracking-wide mb-1"
-                  style="color: var(--ax-text-secondary)"
-                >
-                  SPO2
-                </p>
-                <p
-                  class="text-3xl font-bold mb-1"
-                  style="color: var(--ax-text-heading)"
-                >
-                  98 <span class="text-base font-normal">%</span>
-                </p>
-                <p
-                  class="text-md flex items-center gap-1"
-                  style="color: var(--ax-success-default)"
-                >
-                  <mat-icon class="text-md">trending_up</mat-icon>
-                  +1% from last
-                </p>
-              </div>
-            </div>
-          </ax-card>
         </div>
       </app-code-preview>
     </div>
 
+    <!-- Design 2: Gradient Box -->
     <div class="demo-container feature-group mt-8">
       <h4 class="h6">📊 Design 2: Gradient Box Icon Style</h4>
       <p class="mb-4 text-gray-600">
-        Bold design with gradient box icons and thicker borders (2px). Ideal for
-        emphasizing key metrics, creating visual hierarchy, and drawing
-        attention to critical data points.
+        Bold design with gradient box icons and thicker borders (2px).
       </p>
 
       <app-code-preview [extractCode]="true">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <!-- Info Card - Blue (General Information) -->
           <ax-card color="info" colorIntensity="subtle" borderWidth="2">
             <div class="flex items-start gap-4">
               <div
@@ -883,7 +699,6 @@
             </div>
           </ax-card>
 
-          <!-- Success Card - Green (Positive Metrics) -->
           <ax-card color="success" colorIntensity="subtle" borderWidth="2">
             <div class="flex items-start gap-4">
               <div
@@ -919,7 +734,6 @@
             </div>
           </ax-card>
 
-          <!-- Warning Card - Orange (Caution Metrics) -->
           <ax-card color="warning" colorIntensity="subtle" borderWidth="2">
             <div class="flex items-start gap-4">
               <div
@@ -954,347 +768,526 @@
               </div>
             </div>
           </ax-card>
+        </div>
+      </app-code-preview>
+    </div>
+  </div>
 
-          <!-- Error Card - Red (Critical Metrics) -->
-          <ax-card color="error" colorIntensity="subtle" borderWidth="2">
-            <div class="flex items-start gap-4">
-              <div
-                class="p-3 rounded-lg"
-                style="
-                  background: linear-gradient(
-                    135deg,
-                    var(--ax-error-default) 0%,
-                    var(--ax-error-emphasis) 100%
-                  );
-                  box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3);
-                "
-              >
-                <mat-icon class="text-white">warning</mat-icon>
-              </div>
-              <div class="flex-1">
-                <p
-                  class="text-md uppercase tracking-wide mb-1"
-                  style="color: var(--ax-text-secondary)"
-                >
-                  BLOOD GLUCOSE
-                </p>
-                <p
-                  class="text-3xl font-bold mb-1"
-                  style="color: var(--ax-error-emphasis)"
-                >
-                  180 <span class="text-base">mg/dL</span>
-                </p>
-                <p class="text-md" style="color: var(--ax-error-default)">
-                  ⚠ Above target range
-                </p>
-              </div>
+  <!-- ============================================
+       Interactive Features
+       ============================================ -->
+  <div class="demo-section">
+    <h3 class="h5">Interactive Features</h3>
+
+    <!-- Hoverable & Clickable -->
+    <div class="demo-container feature-group">
+      <h4 class="h6">✨ Hover & Click Effects</h4>
+      <p class="mb-4 text-gray-600">
+        Add interactivity with hoverable and clickable states.
+      </p>
+
+      <app-code-preview [extractCode]="true">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <ax-card
+            title="Hoverable Card"
+            subtitle="Lifts on hover"
+            [hoverable]="true"
+          >
+            <p>Hover to see lift animation with increased shadow.</p>
+          </ax-card>
+
+          <ax-card
+            title="Clickable Card"
+            subtitle="Interactive"
+            [clickable]="true"
+            (click)="onCardClick('clickable')"
+          >
+            <p>Click to see press effect and border color change.</p>
+          </ax-card>
+
+          <ax-card
+            title="Combined"
+            subtitle="Full interactivity"
+            [hoverable]="true"
+            [clickable]="true"
+            (click)="onCardClick('combined')"
+          >
+            <p>Lifts on hover and responds to clicks.</p>
+          </ax-card>
+        </div>
+      </app-code-preview>
+    </div>
+
+    <!-- Loading State -->
+    <div class="demo-container feature-group mt-6">
+      <h4 class="h6">⏳ Loading State</h4>
+      <p class="mb-4 text-gray-600">
+        Show loading states with built-in spinner overlay.
+      </p>
+
+      <app-code-preview [extractCode]="true">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <ax-card
+            title="Loading Content"
+            subtitle="Fetching data..."
+            variant="elevated"
+            [loading]="true"
+          >
+            <p>Card shows spinner and prevents interaction during loading.</p>
+          </ax-card>
+
+          <ax-card
+            title="Loaded Content"
+            subtitle="Data ready"
+            variant="elevated"
+          >
+            <p>Content displays normally when loading completes.</p>
+          </ax-card>
+        </div>
+      </app-code-preview>
+    </div>
+
+    <!-- Header Actions & Footer -->
+    <div class="demo-container feature-group mt-6">
+      <h4 class="h6">🔧 Header Actions & Footer</h4>
+      <p class="mb-4 text-gray-600">
+        Add action buttons to header and footer content.
+      </p>
+
+      <app-code-preview [extractCode]="true">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <ax-card
+            title="User Settings"
+            subtitle="Manage preferences"
+            variant="outlined"
+          >
+            <div header-actions>
+              <button mat-icon-button>
+                <mat-icon>more_vert</mat-icon>
+              </button>
+            </div>
+            <p class="mb-4">Configure your account settings here.</p>
+            <div class="flex gap-2">
+              <mat-icon class="text-gray-400">person</mat-icon>
+              <span>John Doe</span>
+            </div>
+            <div footer>
+              <span class="text-sm">Last updated: Today</span>
             </div>
           </ax-card>
 
-          <!-- Neutral Card - Gray (Neutral Metrics) -->
-          <ax-card color="neutral" colorIntensity="subtle" borderWidth="2">
-            <div class="flex items-start gap-4">
-              <div
-                class="p-3 rounded-lg"
-                style="
-                  background: linear-gradient(
-                    135deg,
-                    var(--ax-gray-400) 0%,
-                    var(--ax-gray-600) 100%
-                  );
-                  box-shadow: 0 4px 6px -1px rgba(107, 114, 128, 0.3);
-                "
-              >
-                <mat-icon class="text-white">schedule</mat-icon>
-              </div>
-              <div class="flex-1">
-                <p
-                  class="text-md uppercase tracking-wide mb-1"
-                  style="color: var(--ax-text-secondary)"
-                >
-                  SLEEP DURATION
-                </p>
-                <p
-                  class="text-3xl font-bold mb-1"
-                  style="color: var(--ax-text-heading)"
-                >
-                  7.5 <span class="text-base">hours</span>
-                </p>
-                <p class="text-md" style="color: var(--ax-text-secondary)">
-                  → Within normal range
-                </p>
-              </div>
+          <ax-card
+            title="Project Details"
+            subtitle="Frontend Dashboard"
+            variant="outlined"
+          >
+            <div header-actions>
+              <button mat-icon-button>
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button>
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+            <p class="mb-4">Active development project.</p>
+            <div class="flex items-center gap-2 mb-2">
+              <mat-icon class="text-green-500">check_circle</mat-icon>
+              <span>85% Complete</span>
+            </div>
+            <div actions>
+              <button mat-button color="primary">View Details</button>
+              <button mat-stroked-button>Download</button>
+            </div>
+          </ax-card>
+        </div>
+      </app-code-preview>
+    </div>
+  </div>
+
+  <!-- ============================================
+       Customization
+       ============================================ -->
+  <div class="demo-section">
+    <h3 class="h5">Customization</h3>
+
+    <!-- Focus States -->
+    <div class="demo-container feature-group">
+      <h4 class="h6">⌨️ Keyboard Navigation & Focus</h4>
+      <p class="mb-4 text-gray-600">
+        Cards are fully keyboard accessible with color-matched focus rings (WCAG
+        2.1 compliant).
+      </p>
+
+      <app-code-preview [extractCode]="true">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <ax-card
+            color="info"
+            colorIntensity="subtle"
+            borderWidth="2"
+            [clickable]="true"
+            (click)="onCardClick('focus-info')"
+          >
+            <div class="text-center py-3">
+              <mat-icon class="text-4xl mb-2">ads_click</mat-icon>
+              <p class="font-semibold mb-1">Clickable Card</p>
+              <p class="text-md text-gray-600">Press Tab then Enter</p>
             </div>
           </ax-card>
 
-          <!-- Primary Card - Brand (Important Metrics) -->
-          <ax-card color="primary" colorIntensity="subtle" borderWidth="2">
-            <div class="flex items-start gap-4">
-              <div
-                class="p-3 rounded-lg"
-                style="
-                  background: linear-gradient(
-                    135deg,
-                    var(--ax-brand-default) 0%,
-                    var(--ax-brand-emphasis) 100%
-                  );
-                  box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
-                "
-              >
-                <mat-icon class="text-white">monitor_weight</mat-icon>
-              </div>
-              <div class="flex-1">
-                <p
-                  class="text-md uppercase tracking-wide mb-1"
-                  style="color: var(--ax-text-secondary)"
-                >
-                  BODY WEIGHT
-                </p>
-                <p
-                  class="text-3xl font-bold mb-1"
-                  style="color: var(--ax-brand-emphasis)"
-                >
-                  72.5 <span class="text-base">kg</span>
-                </p>
-                <p class="text-md" style="color: var(--ax-brand-default)">
-                  ↘ -0.5kg from last week
-                </p>
-              </div>
+          <ax-card
+            color="success"
+            colorIntensity="subtle"
+            borderWidth="2"
+            [hoverable]="true"
+            [clickable]="true"
+            (click)="onCardClick('focus-success')"
+          >
+            <div class="text-center py-3">
+              <mat-icon class="text-4xl mb-2">touch_app</mat-icon>
+              <p class="font-semibold mb-1">Interactive Card</p>
+              <p class="text-md text-gray-600">Hover + Click + Focus</p>
+            </div>
+          </ax-card>
+
+          <ax-card
+            color="warning"
+            colorIntensity="subtle"
+            borderWidth="2"
+            [clickable]="true"
+            (click)="onCardClick('focus-warning')"
+          >
+            <div class="text-center py-3">
+              <mat-icon class="text-4xl mb-2">keyboard</mat-icon>
+              <p class="font-semibold mb-1">Keyboard Accessible</p>
+              <p class="text-md text-gray-600">Full keyboard support</p>
             </div>
           </ax-card>
         </div>
       </app-code-preview>
 
-      <!-- Focus State Examples -->
-      <div class="mt-8">
-        <h4 class="h6">⌨️ Keyboard Navigation & Focus States</h4>
-        <p class="mb-4 text-gray-600">
-          Cards with clickable or hoverable properties are fully keyboard
-          accessible with color-matched focus rings. Press Tab to focus on
-          cards, then Enter to activate. Focus rings use a 2-layer design
-          matching each color variant.
+      <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+        <p class="text-sm font-semibold text-blue-900 mb-1">
+          ♿ WCAG 2.1 Accessibility
         </p>
+        <p class="text-md text-blue-700">
+          Focus rings use a 2-layer design: inner layer (3px) matches surface
+          color, outer layer (5px) matches primary color. Compliant with WCAG
+          2.1 Level AA.
+        </p>
+      </div>
+    </div>
 
-        <app-code-preview [extractCode]="true">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <!-- Clickable card with focus -->
-            <ax-card
-              color="info"
-              colorIntensity="subtle"
-              borderWidth="2"
-              [clickable]="true"
-              (click)="onCardClick('focus-demo-info')"
-            >
-              <div class="text-center py-3">
-                <mat-icon class="text-4xl mb-2 text-info-default"
-                  >ads_click</mat-icon
-                >
-                <p class="text-sm font-semibold text-info-emphasis mb-1">
-                  Clickable Card
-                </p>
-                <p class="text-md text-gray-600">Press Tab then Enter</p>
-              </div>
-            </ax-card>
+    <!-- Border Width -->
+    <div class="demo-container feature-group mt-6">
+      <h4 class="h6">🎨 Border Width</h4>
+      <p class="mb-4 text-gray-600">
+        Customize border thickness (1-4px or custom values) for different
+        emphasis levels.
+      </p>
 
-            <!-- Hoverable card with focus -->
-            <ax-card
-              color="success"
-              colorIntensity="subtle"
-              borderWidth="2"
-              [hoverable]="true"
-              [clickable]="true"
-              (click)="onCardClick('focus-demo-success')"
-            >
-              <div class="text-center py-3">
-                <mat-icon class="text-4xl mb-2 text-success-default"
-                  >touch_app</mat-icon
-                >
-                <p class="text-sm font-semibold text-success-emphasis mb-1">
-                  Interactive Card
-                </p>
-                <p class="text-md text-gray-600">Hover + Click + Focus</p>
-              </div>
-            </ax-card>
+      <app-code-preview [extractCode]="true">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <ax-card color="info" colorIntensity="subtle" borderWidth="1">
+            <div class="text-center py-3">
+              <p class="text-md text-gray-500 mb-1">borderWidth="1"</p>
+              <p class="text-lg font-bold">1px</p>
+              <p class="text-md text-gray-600">Default / Subtle</p>
+            </div>
+          </ax-card>
 
-            <!-- Another clickable card -->
-            <ax-card
-              color="warning"
-              colorIntensity="subtle"
-              borderWidth="2"
-              [clickable]="true"
-              (click)="onCardClick('focus-demo-warning')"
+          <ax-card color="success" colorIntensity="subtle" borderWidth="2">
+            <div class="text-center py-3">
+              <p class="text-md text-gray-500 mb-1">borderWidth="2"</p>
+              <p class="text-lg font-bold">2px</p>
+              <p class="text-md text-gray-600">Recommended</p>
+            </div>
+          </ax-card>
+
+          <ax-card color="warning" colorIntensity="subtle" borderWidth="3">
+            <div class="text-center py-3">
+              <p class="text-md text-gray-500 mb-1">borderWidth="3"</p>
+              <p class="text-lg font-bold">3px</p>
+              <p class="text-md text-gray-600">Emphasized</p>
+            </div>
+          </ax-card>
+
+          <ax-card color="error" colorIntensity="subtle" borderWidth="4">
+            <div class="text-center py-3">
+              <p class="text-md text-gray-500 mb-1">borderWidth="4"</p>
+              <p class="text-lg font-bold">4px</p>
+              <p class="text-md text-gray-600">Strong Emphasis</p>
+            </div>
+          </ax-card>
+        </div>
+      </app-code-preview>
+
+      <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+        <p class="text-sm font-semibold text-blue-900 mb-1">💡 Custom Values</p>
+        <p class="text-md text-blue-700">
+          Use custom values like
+          <code class="px-1 py-0.5 bg-blue-100 rounded"
+            >borderWidth="2.5px"</code
+          >
+          or
+          <code class="px-1 py-0.5 bg-blue-100 rounded"
+            >borderWidth="0.125rem"</code
+          >
+          for precise control.
+        </p>
+      </div>
+    </div>
+
+    <!-- Color Guidelines -->
+    <div class="demo-container feature-group mt-6">
+      <h4 class="h6">🎨 Color Usage Guidelines</h4>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+        <div class="flex items-start gap-2">
+          <div
+            class="w-3 h-3 rounded-full mt-1"
+            style="background-color: var(--ax-brand-default)"
+          ></div>
+          <div>
+            <strong class="block">Primary (Brand)</strong>
+            <span class="text-gray-600"
+              >Main actions, key indicators, important metrics</span
             >
-              <div class="text-center py-3">
-                <mat-icon class="text-4xl mb-2 text-warning-default"
-                  >keyboard</mat-icon
-                >
-                <p class="text-sm font-semibold text-warning-emphasis mb-1">
-                  Keyboard Accessible
-                </p>
-                <p class="text-md text-gray-600">Full keyboard support</p>
-              </div>
-            </ax-card>
           </div>
-        </app-code-preview>
-
-        <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-          <p class="text-sm font-semibold text-blue-900 mb-1">
-            ♿ WCAG 2.1 Accessibility
-          </p>
-          <p class="text-md text-blue-700">
-            Focus rings are automatically styled to match each card's color
-            variant for better visual feedback. The focus outline uses a 2-layer
-            design: inner layer (3px) matches the card's surface color, outer
-            layer (5px) matches the card's primary color. Compliant with WCAG
-            2.1 Level AA focus indicators.
-          </p>
+        </div>
+        <div class="flex items-start gap-2">
+          <div
+            class="w-3 h-3 rounded-full mt-1"
+            style="background-color: var(--ax-info-default)"
+          ></div>
+          <div>
+            <strong class="block">Info (Blue)</strong>
+            <span class="text-gray-600">General information, neutral data</span>
+          </div>
+        </div>
+        <div class="flex items-start gap-2">
+          <div
+            class="w-3 h-3 rounded-full mt-1"
+            style="background-color: var(--ax-success-default)"
+          ></div>
+          <div>
+            <strong class="block">Success (Green)</strong>
+            <span class="text-gray-600"
+              >Positive indicators, completed tasks, healthy status</span
+            >
+          </div>
+        </div>
+        <div class="flex items-start gap-2">
+          <div
+            class="w-3 h-3 rounded-full mt-1"
+            style="background-color: var(--ax-warning-default)"
+          ></div>
+          <div>
+            <strong class="block">Warning (Orange)</strong>
+            <span class="text-gray-600"
+              >Caution needed, moderate concern, pending items</span
+            >
+          </div>
+        </div>
+        <div class="flex items-start gap-2">
+          <div
+            class="w-3 h-3 rounded-full mt-1"
+            style="background-color: var(--ax-error-default)"
+          ></div>
+          <div>
+            <strong class="block">Error (Red)</strong>
+            <span class="text-gray-600"
+              >Critical alerts, danger zones, failures</span
+            >
+          </div>
+        </div>
+        <div class="flex items-start gap-2">
+          <div
+            class="w-3 h-3 rounded-full mt-1"
+            style="background-color: var(--ax-gray-500)"
+          ></div>
+          <div>
+            <strong class="block">Neutral (Gray)</strong>
+            <span class="text-gray-600"
+              >Neutral data, secondary information</span
+            >
+          </div>
         </div>
       </div>
+    </div>
+  </div>
 
-      <!-- Border Width Examples -->
-      <div class="mt-8">
-        <h4 class="h6">🎨 Border Width Customization</h4>
-        <p class="mb-4 text-gray-600">
-          Customize border thickness (1-4px) to create different emphasis
-          levels. Use thicker borders to draw attention to high-priority metrics
-          or critical information.
-        </p>
+  <!-- ============================================
+       Stats Card Component
+       ============================================ -->
+  <div class="demo-section">
+    <h3 class="h5">Stats Card Component</h3>
+    <div class="demo-container feature-group">
+      <h4 class="h6">📈 Statistics Dashboard</h4>
+      <p class="mb-4 text-gray-600">
+        Dedicated component for displaying key metrics with trend indicators.
+      </p>
 
-        <app-code-preview [extractCode]="true">
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <!-- 1px border -->
-            <ax-card color="info" colorIntensity="subtle" borderWidth="1">
-              <div class="text-center py-3">
-                <p class="text-md text-gray-500 mb-1">borderWidth="1"</p>
-                <p class="text-lg font-bold text-info-emphasis">1px</p>
-                <p class="text-md text-gray-600">Default / Subtle</p>
-              </div>
-            </ax-card>
-
-            <!-- 2px border -->
-            <ax-card color="success" colorIntensity="subtle" borderWidth="2">
-              <div class="text-center py-3">
-                <p class="text-md text-gray-500 mb-1">borderWidth="2"</p>
-                <p class="text-lg font-bold text-success-emphasis">2px</p>
-                <p class="text-md text-gray-600">Recommended</p>
-              </div>
-            </ax-card>
-
-            <!-- 3px border -->
-            <ax-card color="warning" colorIntensity="subtle" borderWidth="3">
-              <div class="text-center py-3">
-                <p class="text-md text-gray-500 mb-1">borderWidth="3"</p>
-                <p class="text-lg font-bold text-warning-emphasis">3px</p>
-                <p class="text-md text-gray-600">Emphasized</p>
-              </div>
-            </ax-card>
-
-            <!-- 4px border -->
-            <ax-card color="error" colorIntensity="subtle" borderWidth="4">
-              <div class="text-center py-3">
-                <p class="text-md text-gray-500 mb-1">borderWidth="4"</p>
-                <p class="text-lg font-bold text-error-emphasis">4px</p>
-                <p class="text-md text-gray-600">Strong Emphasis</p>
-              </div>
-            </ax-card>
-          </div>
-        </app-code-preview>
-
-        <!-- Custom border width example -->
-        <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-          <p class="text-sm font-semibold text-blue-900 mb-1">
-            💡 Custom Border Width Support
-          </p>
-          <p class="text-md text-blue-700">
-            Beyond predefined values (1-4px), you can also use custom border
-            widths like
-            <code class="px-1 py-0.5 bg-blue-100 rounded"
-              >borderWidth="2.5px"</code
-            >
-            or
-            <code class="px-1 py-0.5 bg-blue-100 rounded"
-              >borderWidth="0.125rem"</code
-            >
-            for pixel-perfect design control.
-          </p>
+      <app-code-preview [extractCode]="true">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <ax-stats-card
+            title="Total Users"
+            value="1,234"
+            change="+12.5%"
+            trend="up"
+          />
+          <ax-stats-card
+            title="Revenue"
+            value="$45,678"
+            change="-3.2%"
+            trend="down"
+          />
+          <ax-stats-card
+            title="Pending Items"
+            value="42"
+            change="0.0%"
+            trend="neutral"
+          />
+          <ax-stats-card
+            title="Conversion Rate"
+            value="24.5%"
+            change="+8.1%"
+            trend="up"
+          />
         </div>
+      </app-code-preview>
+    </div>
+  </div>
+
+  <!-- ============================================
+       API Reference
+       ============================================ -->
+  <div class="demo-section">
+    <h3 class="h5">API Reference</h3>
+    <div class="demo-container">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b-2 border-gray-300">
+              <th class="text-left py-3 px-4 font-semibold">Property</th>
+              <th class="text-left py-3 px-4 font-semibold">Type</th>
+              <th class="text-left py-3 px-4 font-semibold">Default</th>
+              <th class="text-left py-3 px-4 font-semibold">Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b border-gray-200">
+              <td class="py-3 px-4 font-mono text-md">variant</td>
+              <td class="py-3 px-4 font-mono text-md">
+                'default' | 'outlined' | 'elevated'
+              </td>
+              <td class="py-3 px-4 font-mono text-md">'default'</td>
+              <td class="py-3 px-4">
+                Visual style: default (1px border), outlined (2px), elevated
+                (shadow)
+              </td>
+            </tr>
+            <tr class="border-b border-gray-200 bg-gray-50">
+              <td class="py-3 px-4 font-mono text-md">size</td>
+              <td class="py-3 px-4 font-mono text-md">'sm' | 'md' | 'lg'</td>
+              <td class="py-3 px-4 font-mono text-md">'md'</td>
+              <td class="py-3 px-4">
+                Internal padding: sm (compact), md (standard), lg (spacious)
+              </td>
+            </tr>
+            <tr class="border-b border-gray-200">
+              <td class="py-3 px-4 font-mono text-md">color</td>
+              <td class="py-3 px-4 font-mono text-md">
+                'default' | 'primary' | 'info' | 'success' | 'warning' | 'error'
+                | 'neutral'
+              </td>
+              <td class="py-3 px-4 font-mono text-md">'default'</td>
+              <td class="py-3 px-4">
+                Semantic color for borders and backgrounds
+              </td>
+            </tr>
+            <tr class="border-b border-gray-200 bg-gray-50">
+              <td class="py-3 px-4 font-mono text-md">colorIntensity</td>
+              <td class="py-3 px-4 font-mono text-md">'filled' | 'subtle'</td>
+              <td class="py-3 px-4 font-mono text-md">'filled'</td>
+              <td class="py-3 px-4">
+                Color intensity: filled (full color) or subtle (light tint)
+              </td>
+            </tr>
+            <tr class="border-b border-gray-200">
+              <td class="py-3 px-4 font-mono text-md">borderWidth</td>
+              <td class="py-3 px-4 font-mono text-md">
+                '1' | '2' | '3' | '4' | string
+              </td>
+              <td class="py-3 px-4 font-mono text-md">'1'</td>
+              <td class="py-3 px-4">
+                Border thickness (predefined or custom like "2.5px")
+              </td>
+            </tr>
+            <tr class="border-b border-gray-200 bg-gray-50">
+              <td class="py-3 px-4 font-mono text-md">hoverable</td>
+              <td class="py-3 px-4 font-mono text-md">boolean</td>
+              <td class="py-3 px-4 font-mono text-md">false</td>
+              <td class="py-3 px-4">Enables lift animation on hover</td>
+            </tr>
+            <tr class="border-b border-gray-200">
+              <td class="py-3 px-4 font-mono text-md">clickable</td>
+              <td class="py-3 px-4 font-mono text-md">boolean</td>
+              <td class="py-3 px-4 font-mono text-md">false</td>
+              <td class="py-3 px-4">
+                Adds pointer cursor, press effect, keyboard accessibility
+              </td>
+            </tr>
+            <tr class="border-b border-gray-200 bg-gray-50">
+              <td class="py-3 px-4 font-mono text-md">loading</td>
+              <td class="py-3 px-4 font-mono text-md">boolean</td>
+              <td class="py-3 px-4 font-mono text-md">false</td>
+              <td class="py-3 px-4">Shows loading spinner overlay</td>
+            </tr>
+            <tr class="border-b border-gray-200">
+              <td class="py-3 px-4 font-mono text-md">title</td>
+              <td class="py-3 px-4 font-mono text-md">string</td>
+              <td class="py-3 px-4 font-mono text-md">''</td>
+              <td class="py-3 px-4">Card header title text</td>
+            </tr>
+            <tr class="border-b border-gray-200 bg-gray-50">
+              <td class="py-3 px-4 font-mono text-md">subtitle</td>
+              <td class="py-3 px-4 font-mono text-md">string</td>
+              <td class="py-3 px-4 font-mono text-md">''</td>
+              <td class="py-3 px-4">Card header subtitle text</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
-      <!-- Color Legend -->
-      <div class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-        <h5 class="text-sm font-semibold mb-3">Color Usage Guidelines</h5>
-        <div
-          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm"
-        >
-          <div class="flex items-start gap-2">
-            <div
-              class="w-3 h-3 rounded-full mt-1"
-              style="background-color: var(--ax-info-default)"
-            ></div>
-            <div>
-              <strong class="block">Info (Blue)</strong>
-              <span class="text-gray-600"
-                >General metrics, informational data</span
-              >
-            </div>
-          </div>
-          <div class="flex items-start gap-2">
-            <div
-              class="w-3 h-3 rounded-full mt-1"
-              style="background-color: var(--ax-success-default)"
-            ></div>
-            <div>
-              <strong class="block">Success (Green)</strong>
-              <span class="text-gray-600"
-                >Positive indicators, healthy status</span
-              >
-            </div>
-          </div>
-          <div class="flex items-start gap-2">
-            <div
-              class="w-3 h-3 rounded-full mt-1"
-              style="background-color: var(--ax-warning-default)"
-            ></div>
-            <div>
-              <strong class="block">Warning (Orange)</strong>
-              <span class="text-gray-600">Caution, moderate concern</span>
-            </div>
-          </div>
-          <div class="flex items-start gap-2">
-            <div
-              class="w-3 h-3 rounded-full mt-1"
-              style="background-color: var(--ax-error-default)"
-            ></div>
-            <div>
-              <strong class="block">Error (Red)</strong>
-              <span class="text-gray-600">Critical alerts, danger zones</span>
-            </div>
-          </div>
-          <div class="flex items-start gap-2">
-            <div
-              class="w-3 h-3 rounded-full mt-1"
-              style="background-color: var(--ax-gray-500)"
-            ></div>
-            <div>
-              <strong class="block">Neutral (Gray)</strong>
-              <span class="text-gray-600"
-                >Neutral data, no special meaning</span
-              >
-            </div>
-          </div>
-          <div class="flex items-start gap-2">
-            <div
-              class="w-3 h-3 rounded-full mt-1"
-              style="background-color: var(--ax-brand-default)"
-            ></div>
-            <div>
-              <strong class="block">Primary (Brand)</strong>
-              <span class="text-gray-600"
-                >Important metrics, key indicators</span
-              >
-            </div>
-          </div>
-        </div>
+      <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <p class="text-sm font-semibold text-blue-900 mb-2">
+          Content Projection
+        </p>
+        <ul class="text-sm text-blue-700 space-y-1">
+          <li>
+            <code class="px-1 py-0.5 bg-blue-100 rounded"
+              >&lt;ng-content&gt;</code
+            >
+            - Main card body content
+          </li>
+          <li>
+            <code class="px-1 py-0.5 bg-blue-100 rounded"
+              >&lt;div header-actions&gt;</code
+            >
+            - Header actions (right side)
+          </li>
+          <li>
+            <code class="px-1 py-0.5 bg-blue-100 rounded"
+              >&lt;div footer&gt;</code
+            >
+            - Footer content below body
+          </li>
+          <li>
+            <code class="px-1 py-0.5 bg-blue-100 rounded"
+              >&lt;div actions&gt;</code
+            >
+            - Action buttons at bottom
+          </li>
+        </ul>
       </div>
     </div>
   </div>
