@@ -44,46 +44,14 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
   template: `
     <div class="rbac-dashboard">
       <!-- Breadcrumb -->
-      <ax-breadcrumb [items]="breadcrumbItems"></ax-breadcrumb>
+      <div class="breadcrumb-wrapper">
+        <ax-breadcrumb [items]="breadcrumbItems"></ax-breadcrumb>
+      </div>
 
       <!-- Header -->
       <div class="page-header">
-        <div class="header-content">
-          <h1 class="page-title">RBAC Management</h1>
-          <p class="page-subtitle">
-            Manage roles, permissions, and user access
-          </p>
-        </div>
-
-        <div class="header-actions">
-          <button
-            *hasPermission="'roles:read'"
-            mat-raised-button
-            color="primary"
-            (click)="navigateToRoles()"
-          >
-            <mat-icon>people</mat-icon>
-            Manage Roles
-          </button>
-          <button
-            *hasPermission="'permissions:read'"
-            mat-raised-button
-            color="primary"
-            (click)="navigateToPermissions()"
-          >
-            <mat-icon>security</mat-icon>
-            Manage Permissions
-          </button>
-          <button
-            *hasPermission="'roles:read'"
-            mat-raised-button
-            color="accent"
-            (click)="navigateToUserRoles()"
-          >
-            <mat-icon>assignment_ind</mat-icon>
-            User Assignments
-          </button>
-        </div>
+        <h1 class="page-title">RBAC Management</h1>
+        <p class="page-subtitle">Manage roles, permissions, and user access</p>
       </div>
 
       <!-- Loading State -->
@@ -118,7 +86,7 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
         <div class="actions-activity-grid">
           <!-- Quick Actions -->
           <div class="quick-actions-section">
-            <mat-card appearance="outlined">
+            <mat-card appearance="filled">
               <mat-card-header>
                 <mat-card-title class="section-card-title">
                   <mat-icon class="section-icon">flash_on</mat-icon>
@@ -185,7 +153,7 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
 
           <!-- Recent Activity -->
           <div class="recent-activity-section">
-            <mat-card appearance="outlined">
+            <mat-card appearance="filled">
               <mat-card-header>
                 <mat-card-title class="section-card-title-row">
                   <div class="section-title-with-icon">
@@ -274,24 +242,14 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
         margin: 0 auto;
       }
 
+      /* ===== BREADCRUMB ===== */
+      .breadcrumb-wrapper {
+        margin-bottom: var(--ax-spacing-xl);
+      }
+
       /* ===== PAGE HEADER ===== */
       .page-header {
-        display: flex;
-        flex-direction: column;
-        gap: var(--ax-spacing-lg);
         margin-bottom: var(--ax-spacing-2xl);
-      }
-
-      @media (min-width: 640px) {
-        .page-header {
-          flex-direction: row;
-          align-items: center;
-          justify-content: space-between;
-        }
-      }
-
-      .header-content {
-        flex: 1;
       }
 
       .page-title {
@@ -308,12 +266,6 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
         color: var(--mat-sys-on-surface-variant);
       }
 
-      .header-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--ax-spacing-sm);
-      }
-
       /* ===== LOADING STATE ===== */
       .loading-container {
         display: flex;
@@ -326,7 +278,7 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
       .dashboard-content {
         display: flex;
         flex-direction: column;
-        gap: var(--ax-spacing-xl);
+        gap: var(--ax-spacing-2xl);
       }
 
       /* ===== STATS GRID ===== */
@@ -418,23 +370,23 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
       }
 
       .activity-icon-green {
-        color: var(--ax-success-default);
+        color: var(--mat-sys-primary);
       }
 
       .activity-icon-blue {
-        color: var(--ax-primary-default);
+        color: var(--mat-sys-tertiary);
       }
 
       .activity-icon-red {
-        color: var(--ax-error-default);
+        color: var(--mat-sys-error);
       }
 
       .activity-icon-orange {
-        color: var(--ax-warning-default);
+        color: var(--mat-sys-tertiary);
       }
 
       .activity-icon-purple {
-        color: var(--ax-accent-default);
+        color: var(--mat-sys-primary);
       }
 
       .activity-icon-gray {
@@ -514,16 +466,13 @@ export class RbacDashboardComponent implements OnInit {
   breadcrumbItems: BreadcrumbItem[] = [
     {
       label: 'Dashboard',
-      icon: 'dashboard',
       url: '/',
     },
     {
       label: 'Management',
-      icon: 'settings',
     },
     {
       label: 'RBAC Management',
-      icon: 'security',
     },
   ];
 
@@ -703,15 +652,6 @@ export class RbacDashboardComponent implements OnInit {
   }
 
   // Utility methods
-  getCardIconClass(color: 'primary' | 'accent' | 'warn'): string {
-    const classMap = {
-      primary: 'stat-icon-primary',
-      accent: 'stat-icon-accent',
-      warn: 'stat-icon-warn',
-    };
-    return classMap[color];
-  }
-
   getActivityIcon(type: string): string {
     const iconMap: Record<string, string> = {
       role_created: 'add_circle',

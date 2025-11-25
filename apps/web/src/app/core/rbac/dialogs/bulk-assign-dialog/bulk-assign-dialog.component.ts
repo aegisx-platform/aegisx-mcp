@@ -61,20 +61,14 @@ import { RbacService } from '../../services/rbac.service';
     MatTabsModule,
   ],
   template: `
-    <div class="bulk-assign-dialog">
-      <div mat-dialog-title class="flex items-center justify-between pb-4 border-b">
-        <div class="flex items-center gap-3">
-          <mat-icon class="!text-2xl">group_add</mat-icon>
-          <h2 class="text-xl font-semibold m-0">Bulk Assign Role to Users</h2>
-        </div>
-        <button mat-icon-button mat-dialog-close>
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
+    <h2 mat-dialog-title class="flex items-center gap-3 text-xl font-semibold">
+      <mat-icon class="text-brand">group_add</mat-icon>
+      Bulk Assign Role to Users
+    </h2>
 
-      <mat-dialog-content class="py-6 max-h-[600px] overflow-y-auto">
-
-        <form [formGroup]="bulkAssignForm" class="space-y-6">
+      <mat-dialog-content>
+      <div class="form-compact">
+        <form [formGroup]="bulkAssignForm" class="flex flex-col gap-4">
           <mat-tab-group>
             <!-- User Selection Tab -->
             <mat-tab label="Select Users">
@@ -82,13 +76,13 @@ import { RbacService } from '../../services/rbac.service';
                 <!-- User Search -->
                 <mat-form-field appearance="outline" class="w-full">
                   <mat-label>Search Users</mat-label>
+                  <mat-icon matPrefix>search</mat-icon>
                   <input
                     matInput
                     [(ngModel)]="userSearchQuery"
                     (ngModelChange)="onUserSearchChange()"
                     placeholder="Search by name, email, or username"
                   >
-                  <mat-icon matSuffix>search</mat-icon>
                 </mat-form-field>
 
                 <!-- User Selection Actions -->
@@ -198,7 +192,8 @@ import { RbacService } from '../../services/rbac.service';
               <div class="py-4 space-y-4">
                 <!-- Role Selection -->
                 <mat-form-field appearance="outline" class="w-full">
-                  <mat-label>Select Role *</mat-label>
+                  <mat-label>Select Role <span class="text-error">*</span></mat-label>
+                  <mat-icon matPrefix>verified_user</mat-icon>
                   <mat-select formControlName="roleId">
                     <mat-option *ngFor="let role of data.availableRoles" [value]="role.id">
                       <div class="flex items-center justify-between">
@@ -256,6 +251,7 @@ import { RbacService } from '../../services/rbac.service';
                 <!-- Expiry Date (Optional) -->
                 <mat-form-field appearance="outline" class="w-full">
                   <mat-label>Expiry Date (Optional)</mat-label>
+                  <mat-icon matPrefix>event</mat-icon>
                   <input
                     matInput
                     [matDatepicker]="expiryPicker"
@@ -357,10 +353,11 @@ import { RbacService } from '../../services/rbac.service';
             </mat-tab>
           </mat-tab-group>
         </form>
+      </div>
       </mat-dialog-content>
 
-      <mat-dialog-actions class="flex justify-between items-center pt-4 border-t">
-        <div class="text-sm text-gray-600">
+      <div mat-dialog-actions class="flex justify-between items-center">
+        <div class="text-sm">
           {{ userSelection.selected.length }} users selected
         </div>
 
@@ -369,7 +366,7 @@ import { RbacService } from '../../services/rbac.service';
             Cancel
           </button>
           <button
-            mat-raised-button
+            mat-flat-button
             color="primary"
             (click)="bulkAssignRoles()"
             [disabled]="isLoading() || hasValidationErrors()"
@@ -379,27 +376,13 @@ import { RbacService } from '../../services/rbac.service';
             Assign Role to {{ userSelection.selected.length }} Users
           </button>
         </div>
-      </mat-dialog-actions>
-    </div>
+      </div>
   `,
   styles: [
     `
-      .bulk-assign-dialog {
-        width: 100%;
-        max-width: 700px;
-      }
-
-      .mat-mdc-dialog-content {
-        max-height: 600px;
-      }
-
       .mat-mdc-chip {
         min-height: 24px;
         font-size: 12px;
-      }
-
-      .mat-mdc-form-field {
-        width: 100%;
       }
 
       .mat-mdc-list-item {

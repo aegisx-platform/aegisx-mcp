@@ -52,33 +52,22 @@ import { RbacService } from '../../services/rbac.service';
     MatTooltipModule,
   ],
   template: `
-    <div class="permission-dialog">
-      <div
-        mat-dialog-title
-        class="flex items-center justify-between pb-4 border-b"
-      >
-        <div class="flex items-center gap-3">
-          <mat-icon class="!text-2xl">{{
-            data.mode === 'create' ? 'verified_user' : 'edit'
-          }}</mat-icon>
-          <h2 class="text-xl font-semibold m-0">
-            {{
-              data.mode === 'create'
-                ? 'Create New Permission'
-                : 'Edit Permission'
-            }}
-          </h2>
-        </div>
-        <button mat-icon-button mat-dialog-close>
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
+    <h2 mat-dialog-title class="flex items-center gap-3 text-xl font-semibold">
+      <mat-icon class="text-brand">{{
+        data.mode === 'create' ? 'verified_user' : 'edit'
+      }}</mat-icon>
+      {{ data.mode === 'create' ? 'Create New Permission' : 'Edit Permission' }}
+    </h2>
 
-      <mat-dialog-content class="py-6">
-        <form [formGroup]="permissionForm" class="space-y-6">
+    <mat-dialog-content>
+      <div class="form-compact">
+        <form [formGroup]="permissionForm" class="flex flex-col gap-4">
           <!-- Permission Name -->
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Permission Name *</mat-label>
+            <mat-label
+              >Permission Name <span class="text-error">*</span></mat-label
+            >
+            <mat-icon matPrefix>badge</mat-icon>
             <input
               matInput
               formControlName="name"
@@ -100,7 +89,8 @@ import { RbacService } from '../../services/rbac.service';
 
           <!-- Description -->
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Description *</mat-label>
+            <mat-label>Description <span class="text-error">*</span></mat-label>
+            <mat-icon matPrefix>description</mat-icon>
             <textarea
               matInput
               formControlName="description"
@@ -128,7 +118,8 @@ import { RbacService } from '../../services/rbac.service';
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Resource -->
             <mat-form-field appearance="outline">
-              <mat-label>Resource *</mat-label>
+              <mat-label>Resource <span class="text-error">*</span></mat-label>
+              <mat-icon matPrefix>storage</mat-icon>
               <mat-select
                 formControlName="resource"
                 (selectionChange)="onResourceChange()"
@@ -159,7 +150,8 @@ import { RbacService } from '../../services/rbac.service';
 
             <!-- Action -->
             <mat-form-field appearance="outline">
-              <mat-label>Action *</mat-label>
+              <mat-label>Action <span class="text-error">*</span></mat-label>
+              <mat-icon matPrefix>power_settings_new</mat-icon>
               <mat-select
                 formControlName="action"
                 (selectionChange)="onActionChange()"
@@ -191,7 +183,8 @@ import { RbacService } from '../../services/rbac.service';
 
           <!-- Category -->
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Category *</mat-label>
+            <mat-label>Category <span class="text-error">*</span></mat-label>
+            <mat-icon matPrefix>category</mat-icon>
             <mat-select formControlName="category">
               <mat-option
                 *ngFor="let category of data.availableCategories"
@@ -220,6 +213,7 @@ import { RbacService } from '../../services/rbac.service';
           <!-- Conditions (Optional) -->
           <mat-form-field appearance="outline" class="w-full">
             <mat-label>Conditions (Optional)</mat-label>
+            <mat-icon matPrefix>code</mat-icon>
             <textarea
               matInput
               formControlName="conditions"
@@ -327,50 +321,34 @@ import { RbacService } from '../../services/rbac.service';
             </div>
           </div>
         </form>
-      </mat-dialog-content>
+      </div>
+    </mat-dialog-content>
 
-      <mat-dialog-actions class="flex justify-end gap-2 pt-4 border-t">
-        <button mat-button mat-dialog-close [disabled]="isLoading()">
-          Cancel
-        </button>
-        <button
-          mat-raised-button
-          color="primary"
-          (click)="save()"
-          [disabled]="isLoading() || !permissionForm.valid"
-        >
-          <mat-spinner
-            *ngIf="isLoading()"
-            diameter="20"
-            class="mr-2"
-          ></mat-spinner>
-          <mat-icon *ngIf="!isLoading()">save</mat-icon>
-          {{
-            data.mode === 'create' ? 'Create Permission' : 'Update Permission'
-          }}
-        </button>
-      </mat-dialog-actions>
+    <div mat-dialog-actions align="end" class="flex gap-2">
+      <button mat-button mat-dialog-close [disabled]="isLoading()">
+        Cancel
+      </button>
+      <button
+        mat-flat-button
+        color="primary"
+        (click)="save()"
+        [disabled]="isLoading() || !permissionForm.valid"
+      >
+        <mat-spinner
+          *ngIf="isLoading()"
+          diameter="20"
+          class="mr-2"
+        ></mat-spinner>
+        <mat-icon *ngIf="!isLoading()">save</mat-icon>
+        {{ data.mode === 'create' ? 'Create Permission' : 'Update Permission' }}
+      </button>
     </div>
   `,
   styles: [
     `
-      .permission-dialog {
-        width: 100%;
-        max-width: 700px;
-      }
-
-      .mat-mdc-dialog-content {
-        max-height: 600px;
-        overflow-y: auto;
-      }
-
       .mat-mdc-chip {
         min-height: 24px;
         font-size: 12px;
-      }
-
-      .mat-mdc-form-field {
-        width: 100%;
       }
 
       .mat-mdc-stroked-button {

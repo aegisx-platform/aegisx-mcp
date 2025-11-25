@@ -55,25 +55,18 @@ import { RbacService } from '../../services/rbac.service';
     MatDividerModule,
   ],
   template: `
-    <div class="user-role-assign-dialog">
-      <div
-        mat-dialog-title
-        class="flex items-center justify-between pb-4 border-b"
-      >
-        <div class="flex items-center gap-3">
-          <mat-icon class="!text-2xl">person_add</mat-icon>
-          <h2 class="text-xl font-semibold m-0">Assign Role to User</h2>
-        </div>
-        <button mat-icon-button mat-dialog-close>
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
+    <h2 mat-dialog-title class="flex items-center gap-3 text-xl font-semibold">
+      <mat-icon class="text-brand">person_add</mat-icon>
+      Assign Role to User
+    </h2>
 
-      <mat-dialog-content>
-        <form [formGroup]="assignForm" class="space-y-6">
+    <mat-dialog-content>
+      <div class="form-compact">
+        <form [formGroup]="assignForm" class="flex flex-col gap-4">
           <!-- User Search -->
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Search User *</mat-label>
+            <mat-label>Search User <span class="text-error">*</span></mat-label>
+            <mat-icon matPrefix>search</mat-icon>
             <input
               matInput
               formControlName="userSearch"
@@ -81,7 +74,6 @@ import { RbacService } from '../../services/rbac.service';
               placeholder="Type user name or email"
               (input)="onUserSearchChange($event)"
             />
-            <mat-icon matSuffix>search</mat-icon>
             <mat-autocomplete
               #userAutocomplete="matAutocomplete"
               [displayWith]="displayUserFn"
@@ -164,7 +156,10 @@ import { RbacService } from '../../services/rbac.service';
 
           <!-- Role Selection -->
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Select Roles *</mat-label>
+            <mat-label
+              >Select Roles <span class="text-error">*</span></mat-label
+            >
+            <mat-icon matPrefix>verified_user</mat-icon>
             <mat-select formControlName="roleIds" multiple>
               <mat-option
                 *ngFor="let role of data.availableRoles"
@@ -242,6 +237,7 @@ import { RbacService } from '../../services/rbac.service';
           <!-- Expiry Date (Optional) -->
           <mat-form-field appearance="outline" class="w-full">
             <mat-label>Expiry Date (Optional)</mat-label>
+            <mat-icon matPrefix>event</mat-icon>
             <input
               matInput
               [matDatepicker]="expiryPicker"
@@ -315,43 +311,36 @@ import { RbacService } from '../../services/rbac.service';
             </div>
           </div>
         </form>
-      </mat-dialog-content>
+      </div>
+    </mat-dialog-content>
 
-      <mat-dialog-actions class="flex justify-end gap-2 pt-4 border-t">
-        <button mat-button mat-dialog-close [disabled]="isLoading()">
-          Cancel
-        </button>
-        <button
-          mat-raised-button
-          color="primary"
-          (click)="assignRole()"
-          [disabled]="
-            isLoading() ||
-            !assignForm.valid ||
-            !selectedUser() ||
-            selectedRoles().length === 0
-          "
-        >
-          <mat-spinner
-            *ngIf="isLoading()"
-            diameter="20"
-            class="mr-2"
-          ></mat-spinner>
-          <mat-icon *ngIf="!isLoading()">person_add</mat-icon>
-          {{ hasExistingAssignment() ? 'Update Assignments' : 'Assign Roles' }}
-        </button>
-      </mat-dialog-actions>
+    <div mat-dialog-actions align="end" class="flex gap-2">
+      <button mat-button mat-dialog-close [disabled]="isLoading()">
+        Cancel
+      </button>
+      <button
+        mat-flat-button
+        color="primary"
+        (click)="assignRole()"
+        [disabled]="
+          isLoading() ||
+          !assignForm.valid ||
+          !selectedUser() ||
+          selectedRoles().length === 0
+        "
+      >
+        <mat-spinner
+          *ngIf="isLoading()"
+          diameter="20"
+          class="mr-2"
+        ></mat-spinner>
+        <mat-icon *ngIf="!isLoading()">person_add</mat-icon>
+        {{ hasExistingAssignment() ? 'Update Assignments' : 'Assign Roles' }}
+      </button>
     </div>
   `,
   styles: [
     `
-      .user-role-assign-dialog {
-        width: 100%;
-        max-width: 600px;
-      }
-
-      /* Dialog styling now handled by aegisx-ui global styles */
-
       .mat-mdc-chip {
         min-height: 24px;
         font-size: 12px;
@@ -361,31 +350,8 @@ import { RbacService } from '../../services/rbac.service';
         min-height: 60px;
       }
 
-      .mat-mdc-form-field {
-        width: 100%;
-      }
-
       ::ng-deep .mat-mdc-select-panel {
         max-height: 300px;
-      }
-
-      /* Fix icon alignment */
-      mat-icon {
-        vertical-align: middle;
-        display: inline-flex;
-        align-items: center;
-      }
-
-      /* Dialog title icon alignment */
-      .mat-mdc-dialog-title mat-icon {
-        line-height: 1;
-      }
-
-      /* Close button styling now handled by aegisx-ui global styles */
-
-      /* Fix button icon alignment */
-      button mat-icon {
-        vertical-align: middle;
       }
     `,
   ],
