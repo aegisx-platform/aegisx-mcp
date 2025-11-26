@@ -1,6 +1,6 @@
 # AegisX Project Status
 
-**Last Updated:** 2025-11-25 (Session 71 - Material Dialog Size & Layout System)
+**Last Updated:** 2025-11-26 (Session 72 - Design Tokens Visual Examples)
 **Current Status:** ✅ **PLATFORM COMPLETE** - All core features implemented, tested, and production-ready with complete design system
 **Git Repository:** git@github.com:aegisx-platform/aegisx-starter.git
 **CRUD Generator Version:** v2.2.0 (Ready for npm publish)
@@ -365,6 +365,70 @@ The AegisX Starter monorepo is a clean, focused, enterprise-ready platform with:
 - Angular Material Dialog uses `panelClass` on CDK overlay pane, not container directly
 - Must target both `--mat-dialog-*` and `--mdc-dialog-*` CSS variables for full compatibility
 - `margin-top: auto` in flexbox is the standard pattern for sticky footers (from Stack Overflow community)
+
+---
+
+### Session 72 (2025-11-26) ✅ COMPLETED
+
+**Session Focus:** Design Tokens Visual Examples & Documentation Enhancement
+
+**Main Achievements:**
+
+- ✅ **Typography Visual Examples** - Added interactive demonstrations for all 8 font sizes with English and Thai samples
+- ✅ **Font Weight Examples** - Visual showcase of Normal (400), Medium (500), Semibold (600), Bold (700)
+- ✅ **Shadow Visual Examples** - Interactive cards showing all 6 elevation levels (XS → 2XL)
+- ✅ **Border Radius Visual Examples** - Complete demonstration of 6 radius levels with practical UI components
+- ✅ **Enhanced Expandable Sections** - Fixed and extended functionality for Brand Colors and Extended Color Palettes
+- ✅ **Fixed getSemanticColorLevels()** - Extended method to search across brand-colors, semantic-colors, and extended-colors categories
+
+**Technical Details:**
+
+**Problem Solved:**
+
+- Brand Colors expandable details showing empty table due to category search limitation
+- Extended Color Palettes (Cyan, Purple, Indigo, Pink) lacking expandable detail views
+- Documentation page lacked visual examples for token categories
+
+**Solution Implemented:**
+
+```typescript
+// Extended getSemanticColorLevels() to search multiple categories
+getSemanticColorLevels(colorName: string): ColorLevel[] {
+  for (const category of this.colorPaletteCategories) {
+    if (category.id === 'brand-colors' ||
+        category.id === 'semantic-colors' ||
+        category.id === 'extended-colors') {
+      const colorPalette = category.colors.find(
+        (c) => c.colorName.toLowerCase() === colorName.toLowerCase(),
+      );
+      if (colorPalette) {
+        return colorPalette.levels;
+      }
+    }
+  }
+  return [];
+}
+```
+
+**Visual Examples Added:**
+
+1. Typography: 8 font sizes with bilingual samples + 4 font weights
+2. Shadows: 6 elevation cards with clear visual hierarchy
+3. Border Radius: 6 radius levels + practical examples (Cards, Buttons, Avatars)
+
+**Files Modified:**
+
+- `apps/admin/src/app/pages/design-tokens/design-tokens.component.html` (+3,817 lines) - Added comprehensive visual demonstrations
+- `apps/admin/src/app/pages/design-tokens/design-tokens.component.ts` (+43 lines) - Extended search functionality
+
+**Benefits:**
+
+- Visual learning improves documentation UX significantly
+- Real rendered examples instead of just specifications
+- Better understanding of how design tokens work in practice
+- Consistent use of AegisX Design Tokens (--ax-\*) throughout examples
+
+**Commit:** `cb11b1e` - feat(design-tokens): add comprehensive visual examples for token categories
 
 ---
 
