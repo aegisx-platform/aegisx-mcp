@@ -23,7 +23,7 @@ export class AxAlertComponent implements OnInit, OnDestroy {
   @Input() title = '';
   @Input() closeable = false;
   @Input() duration?: number; // Auto-hide after duration (milliseconds)
-  @Output() close = new EventEmitter<void>();
+  @Output() closed = new EventEmitter<void>();
 
   visible = true;
   private autoHideTimer?: ReturnType<typeof setTimeout>;
@@ -67,6 +67,6 @@ export class AxAlertComponent implements OnInit, OnDestroy {
       clearTimeout(this.autoHideTimer);
     }
     this.visible = false;
-    this.close.emit();
+    this.closed.emit();
   }
 }

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { LoadingBarService } from './loading-bar.service';
@@ -24,7 +24,7 @@ export class AxLoadingBarComponent implements OnInit {
   loading$!: Observable<boolean>;
   progress$!: Observable<number>;
 
-  constructor(private loadingBarService: LoadingBarService) {}
+  private loadingBarService = inject(LoadingBarService);
 
   ngOnInit(): void {
     this.loading$ = this.loadingBarService.getLoading();

@@ -18,6 +18,7 @@
     role="combobox"
     [attr.aria-expanded]="isOpen"
     aria-haspopup="dialog"
+    aria-controls="datepicker-dropdown"
   >
     <!-- Display Value -->
     <div class="ax-date-picker-display">
@@ -76,6 +77,7 @@
   <!-- Calendar Dropdown -->
   @if (isOpen) {
     <div
+      id="datepicker-dropdown"
       class="ax-date-picker-dropdown"
       (keydown)="onCalendarKeydown($event)"
       role="dialog"
