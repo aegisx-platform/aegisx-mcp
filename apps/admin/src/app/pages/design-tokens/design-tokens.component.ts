@@ -84,6 +84,9 @@ export class DesignTokensComponent implements OnInit {
   // Track expanded state for each palette
   private expandedPalettes = new Set<string>();
 
+  // Track expanded state for semantic color details
+  expandedSemanticColors = new Set<string>();
+
   // Color Palette Categories (with levels 50-900)
   colorPaletteCategories: ColorPaletteCategory[] = [
     {
@@ -1008,6 +1011,46 @@ export class DesignTokensComponent implements OnInit {
       700: 'emphasis',
     };
     return semanticMap[level] || null;
+  }
+
+  /**
+   * Toggle expanded/collapsed state for semantic color details
+   */
+  toggleSemanticColorDetails(colorName: string): void {
+    if (this.expandedSemanticColors.has(colorName)) {
+      this.expandedSemanticColors.delete(colorName);
+    } else {
+      this.expandedSemanticColors.add(colorName);
+    }
+  }
+
+  /**
+   * Check if semantic color details are expanded
+   */
+  isSemanticColorExpanded(colorName: string): boolean {
+    return this.expandedSemanticColors.has(colorName);
+  }
+
+  /**
+   * Get color levels for a semantic color from the palette data
+   */
+  getSemanticColorLevels(colorName: string): ColorLevel[] {
+    // Search in brand-colors, semantic-colors, and extended-colors categories
+    for (const category of this.colorPaletteCategories) {
+      if (
+        category.id === 'brand-colors' ||
+        category.id === 'semantic-colors' ||
+        category.id === 'extended-colors'
+      ) {
+        const colorPalette = category.colors.find(
+          (c) => c.colorName.toLowerCase() === colorName.toLowerCase(),
+        );
+        if (colorPalette) {
+          return colorPalette.levels;
+        }
+      }
+    }
+    return [];
   }
 
   /**
