@@ -3,10 +3,11 @@
 /* Import AegisX Design System Theme - @use MUST be FIRST */
 @use '../../../libs/aegisx-ui/src/lib/styles/themes/aegisx-light.scss';
 
-/* Import IBM Plex Sans Thai Font */
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@100;200;300;400;500;600;700&family=IBM+Plex+Sans:wght@100;200;300;400;500;600;700&display=swap');
+/* Import Inter + Noto Sans Thai + JetBrains Mono Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap');
 
 /* Import Tailwind CSS */
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -15,6 +16,7 @@
 
 /* Import AegisX UI Utilities */
 @import '../../../libs/aegisx-ui/src/lib/styles/utilities/typography-utilities';
+@import '../../../libs/aegisx-ui/src/lib/styles/utilities/prose-typography';
 
 /* Import AegisX UI Components */
 @import '../../../libs/aegisx-ui/src/lib/styles/components/kpi-cards';
@@ -25,8 +27,8 @@ body {
   height: 100%;
   margin: 0;
   font-family:
-    'IBM Plex Sans Thai',
-    'IBM Plex Sans',
+    'Inter',
+    'Noto Sans Thai',
     -apple-system,
     BlinkMacSystemFont,
     sans-serif;

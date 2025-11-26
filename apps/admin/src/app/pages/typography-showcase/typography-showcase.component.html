@@ -1,565 +1,407 @@
-<!-- Typography Showcase Page -->
-<div class="docs-page">
-  <!-- Page Header -->
-  <div class="docs-header">
-    <div class="docs-breadcrumb">
-      <mat-icon>architecture</mat-icon>
-      <span>Foundation</span>
-    </div>
-    <h1 class="docs-title">Typography</h1>
-    <p class="docs-subtitle">
-      Complete typography scale based on Material Design 3 and Tremor design
-      principles. Lighter, more readable text colors for better user experience.
+<div class="page-container">
+  <div class="page-header">
+    <h1 class="h1">Typography Showcase</h1>
+    <p class="text-secondary">
+      Complete demonstration of the prose typography system with all available
+      classes and variants
     </p>
   </div>
 
-  <!-- Search Box -->
-  <mat-card appearance="outlined" class="mb-6">
-    <mat-card-content>
-      <mat-form-field class="w-full" appearance="outline">
-        <mat-label>Search typography styles...</mat-label>
-        <input
-          matInput
-          [(ngModel)]="searchQuery"
-          placeholder="Try 'Display', 'Heading', or 'Body'"
-        />
-        <mat-icon matPrefix>search</mat-icon>
-        @if (searchQuery) {
-          <button
-            matSuffix
-            mat-icon-button
-            (click)="searchQuery = ''"
-            aria-label="Clear search"
-          >
-            <mat-icon>close</mat-icon>
-          </button>
-        }
-      </mat-form-field>
-    </mat-card-content>
-  </mat-card>
-
-  <!-- Quick Navigation -->
-  <div
-    class="sticky top-0 z-40 bg-[var(--ax-background-default)] pb-4 mb-6 border-b border-[var(--ax-border-default)] shadow-sm"
-  >
-    <mat-card appearance="outlined">
+  <div class="prose-demo-container">
+    <!-- Prose Typography Example -->
+    <mat-card class="demo-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>article</mat-icon>
+          Prose Typography System
+        </mat-card-title>
+      </mat-card-header>
       <mat-card-content>
-        <div class="flex flex-wrap gap-3">
-          <button
-            mat-stroked-button
-            [color]="activeSection === 'type-scale' ? 'primary' : ''"
-            (click)="scrollToSection('type-scale')"
-            class="flex items-center gap-2"
-          >
-            <mat-icon>format_size</mat-icon>
-            Type Scale
-          </button>
-          <button
-            mat-stroked-button
-            [color]="activeSection === 'text-colors' ? 'primary' : ''"
-            (click)="scrollToSection('text-colors')"
-            class="flex items-center gap-2"
-          >
-            <mat-icon>palette</mat-icon>
-            Text Colors
-          </button>
-          <button
-            mat-stroked-button
-            [color]="activeSection === 'font-weights' ? 'primary' : ''"
-            (click)="scrollToSection('font-weights')"
-            class="flex items-center gap-2"
-          >
-            <mat-icon>format_bold</mat-icon>
-            Font Weights
-          </button>
-          <button
-            mat-stroked-button
-            [color]="activeSection === 'line-heights' ? 'primary' : ''"
-            (click)="scrollToSection('line-heights')"
-            class="flex items-center gap-2"
-          >
-            <mat-icon>format_line_spacing</mat-icon>
-            Line Heights
-          </button>
-          <button
-            mat-stroked-button
-            [color]="activeSection === 'examples' ? 'primary' : ''"
-            (click)="scrollToSection('examples')"
-            class="flex items-center gap-2"
-          >
-            <mat-icon>article</mat-icon>
-            Real Examples
-          </button>
+        <div class="prose">
+          <h1>Main Heading Level 1</h1>
+          <p class="lead">
+            This is a lead paragraph with larger text size (17px) and muted
+            color. It's perfect for introducing articles, blog posts, or
+            documentation sections with a brief summary that captures attention.
+          </p>
+
+          <p>
+            This is a regular paragraph using the prose typography system. The
+            font is Inter for Latin characters and Noto Sans Thai for Thai text.
+            The base font size is 15px with a line height of 1.7 for optimal
+            readability. Maximum width is set to 65 characters (~700-750px) for
+            comfortable reading.
+          </p>
+
+          <p>
+            Paragraphs support <strong>strong/bold text</strong>,
+            <em>emphasized/italic text</em>, and
+            <a href="#">inline links</a> with subtle underlines that become more
+            prominent on hover.
+          </p>
+
+          <h2>Secondary Heading with Border</h2>
+          <p>
+            H2 headings include a bottom border to clearly separate major
+            sections. They use 30px font size with semibold weight (600) and
+            snug line height (1.3) for compact yet readable section headers.
+          </p>
+
+          <h3>Tertiary Heading Level 3</h3>
+          <p>
+            H3 headings are 24px with semibold weight, perfect for subsections
+            within major sections. They maintain visual hierarchy while keeping
+            content scannable.
+          </p>
+
+          <h4>Heading Level 4 - Subsection</h4>
+          <p>
+            H4 headings use 20px size and are ideal for smaller subsections or
+            topic divisions within subsections.
+          </p>
+
+          <h5>Heading Level 5</h5>
+          <p>
+            H5 uses the base text size (15px) with semibold weight for subtle
+            section headers.
+          </p>
+
+          <h6>Heading Level 6</h6>
+          <p>
+            H6 is the smallest heading at 14px, useful for minor subsections or
+            labels.
+          </p>
+
+          <hr />
+
+          <h2>Code Examples</h2>
+          <p>
+            Inline code uses <code>monospace font</code> with a light background
+            for highlighting. Code blocks use JetBrains Mono font on a dark
+            background:
+          </p>
+
+          <pre><code>{{ sampleCode }}</code></pre>
+
+          <p>
+            Use inline <code>code</code> for short snippets like
+            <code>const x = 42;</code> or <code>npm install</code>.
+          </p>
+
+          <hr />
+
+          <h2>Lists and Organization</h2>
+          <p>Unordered lists for non-sequential items:</p>
+
+          <ul>
+            <li>
+              First list item with enough text to demonstrate how multi-line
+              list items wrap and maintain proper spacing
+            </li>
+            <li>Second list item</li>
+            <li>
+              Third list item with nested list:
+              <ul>
+                <li>Nested item one</li>
+                <li>Nested item two</li>
+                <li>Nested item three</li>
+              </ul>
+            </li>
+            <li>Fourth list item</li>
+          </ul>
+
+          <p>Ordered lists for sequential steps:</p>
+
+          <ol>
+            <li>Install dependencies with <code>pnpm install</code></li>
+            <li>Configure environment variables in <code>.env.local</code></li>
+            <li>
+              Run database migrations:
+              <ol>
+                <li>Check migration status</li>
+                <li>Run pending migrations</li>
+                <li>Verify database schema</li>
+              </ol>
+            </li>
+            <li>Start development server with <code>pnpm run dev</code></li>
+          </ol>
+
+          <hr />
+
+          <h2>Blockquotes</h2>
+          <blockquote>
+            <p>
+              This is a blockquote example. Blockquotes are styled with a left
+              border, muted text color, and italic font style. They're perfect
+              for highlighting quotes, important notes, or references from other
+              sources.
+            </p>
+            <p>
+              Blockquotes can contain multiple paragraphs and maintain
+              consistent styling throughout.
+            </p>
+          </blockquote>
+
+          <hr />
+
+          <h2>Tables</h2>
+          <p>Tables are styled with clean borders and hover effects:</p>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Element</th>
+                <th>Size</th>
+                <th>Weight</th>
+                <th>Line Height</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of tableData">
+                <td>
+                  <strong>{{ row.element }}</strong>
+                </td>
+                <td>
+                  <code>{{ row.size }}</code>
+                </td>
+                <td>{{ row.weight }}</td>
+                <td>{{ row.lineHeight }}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <hr />
+
+          <h2>Text Variants</h2>
+          <p>
+            Regular paragraph text uses the default body color (zinc-700) for
+            comfortable reading.
+          </p>
+
+          <p class="muted">
+            This is muted text using the .muted class. It uses zinc-500 color
+            and is perfect for secondary information, captions, or metadata.
+          </p>
+
+          <p>
+            <small
+              >This is small text using the &lt;small&gt; tag. Font size is 14px
+              with medium weight (500).</small
+            >
+          </p>
+
+          <hr />
+
+          <h2>Images and Figures</h2>
+          <figure>
+            <div
+              style="
+                width: 100%;
+                height: 200px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 1.25rem;
+                font-weight: 600;
+              "
+            >
+              Image Placeholder
+            </div>
+            <figcaption>
+              Figure 1: This is a figure caption demonstrating the styling for
+              image descriptions. Captions are centered, use small text (14px),
+              and have muted color.
+            </figcaption>
+          </figure>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Note Boxes Examples -->
+    <mat-card class="demo-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>info</mat-icon>
+          Note Boxes
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="prose">
+          <h2>Callout Boxes for Different Purposes</h2>
+
+          <div class="prose-note">
+            <strong>Default Note:</strong> This is a default note box without
+            any variant class. Use it for general information, tips, or
+            supplementary content that doesn't fit into specific categories.
+          </div>
+
+          <div class="prose-note info">
+            <strong>Info Note:</strong> This is an informational note box with
+            blue accent (class: .info). Use it for helpful information,
+            explanations, or additional context that enhances understanding.
+          </div>
+
+          <div class="prose-note warning">
+            <strong>Warning Note:</strong> This is a warning note box with
+            yellow accent (class: .warning). Use it for important cautions,
+            deprecation notices, or things users should be aware of before
+            proceeding.
+          </div>
+
+          <div class="prose-note error">
+            <strong>Error Note:</strong> This is an error note box with red
+            accent (class: .error). Use it for critical warnings, breaking
+            changes, or situations that could cause problems if not addressed.
+          </div>
+
+          <div class="prose-note success">
+            <strong>Success Note:</strong> This is a success note box with green
+            accent (class: .success). Use it for confirmations, best practices,
+            or positive outcomes users should expect.
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Prose Variants -->
+    <mat-card class="demo-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>view_column</mat-icon>
+          Prose Container Variants
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="variants-demo">
+          <h3 class="h3">Default Prose (65ch max-width)</h3>
+          <div class="prose">
+            <p>
+              The default .prose container has a maximum width of 65 characters
+              (~700-750px). This is the optimal line length for reading, based
+              on typography research. Lines that are too long make it difficult
+              for readers to track from the end of one line to the beginning of
+              the next.
+            </p>
+          </div>
+
+          <h3 class="h3">Wide Prose (75ch max-width)</h3>
+          <div class="prose prose-wide">
+            <p>
+              The .prose-wide variant increases the maximum width to 75
+              characters, providing slightly more horizontal space while still
+              maintaining readability. Use this for content that benefits from
+              wider columns, such as code-heavy documentation or comparison
+              tables.
+            </p>
+          </div>
+
+          <h3 class="h3">Full Width Prose (no max-width)</h3>
+          <div class="prose prose-full">
+            <p>
+              The .prose-full variant removes the maximum width constraint
+              entirely, allowing content to expand to fill its container. This
+              is useful for special layouts, dashboards, or when you want
+              complete control over the width through other means.
+            </p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Design Tokens Reference -->
+    <mat-card class="demo-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>palette</mat-icon>
+          Design Tokens Reference
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="tokens-reference">
+          <div class="token-section">
+            <h3 class="h4">Typography Tokens</h3>
+            <table class="tokens-table">
+              <thead>
+                <tr>
+                  <th>Token</th>
+                  <th>Value</th>
+                  <th>Usage</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>--prose-font-sans</code></td>
+                  <td>Inter, Noto Sans Thai</td>
+                  <td>Body text font family</td>
+                </tr>
+                <tr>
+                  <td><code>--prose-font-mono</code></td>
+                  <td>JetBrains Mono</td>
+                  <td>Code font family</td>
+                </tr>
+                <tr>
+                  <td><code>--prose-text-base</code></td>
+                  <td>15px</td>
+                  <td>Base body text size</td>
+                </tr>
+                <tr>
+                  <td><code>--prose-text-lg</code></td>
+                  <td>17px</td>
+                  <td>Lead text size</td>
+                </tr>
+                <tr>
+                  <td><code>--prose-text-4xl</code></td>
+                  <td>36px</td>
+                  <td>H1 heading size</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="token-section">
+            <h3 class="h4">Color Tokens</h3>
+            <table class="tokens-table">
+              <thead>
+                <tr>
+                  <th>Token</th>
+                  <th>Value</th>
+                  <th>Usage</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>--prose-text-heading</code></td>
+                  <td>#0a0a0a (zinc-900)</td>
+                  <td>Heading color</td>
+                </tr>
+                <tr>
+                  <td><code>--prose-text-body</code></td>
+                  <td>#3f3f46 (zinc-700)</td>
+                  <td>Body text color</td>
+                </tr>
+                <tr>
+                  <td><code>--prose-text-muted</code></td>
+                  <td>#71717a (zinc-500)</td>
+                  <td>Muted/secondary text</td>
+                </tr>
+                <tr>
+                  <td><code>--prose-bg-code</code></td>
+                  <td>#09090b (zinc-950)</td>
+                  <td>Code block background</td>
+                </tr>
+                <tr>
+                  <td><code>--prose-border</code></td>
+                  <td>#e4e4e7 (zinc-200)</td>
+                  <td>Border color</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </mat-card-content>
     </mat-card>
   </div>
-
-  <!-- ============================================
-       SECTION: Material 3 Type Scale
-       ============================================ -->
-  <section id="type-scale" class="mb-16 scroll-mt-8">
-    <div class="mb-6">
-      <h2 class="text-2xl font-semibold text-[var(--ax-text-heading)] mb-2">
-        Material Design 3 Type Scale
-      </h2>
-      <p class="text-base text-[var(--ax-text-secondary)] leading-relaxed">
-        Complete typographic hierarchy with 15 text styles from Display to
-        Label. Each style has specific size, weight, line height, and usage
-        guidelines.
-      </p>
-    </div>
-
-    <div class="grid grid-cols-1 gap-6">
-      @for (type of m3TypeScale; track type.name) {
-        <mat-card
-          appearance="outlined"
-          appearance="outlined"
-          class="border border-[var(--ax-border-muted)] shadow-sm"
-        >
-          <mat-card-content class="p-8">
-            <!-- Type Sample -->
-            <div
-              class="mb-6 p-4 bg-[var(--ax-background-muted)] rounded-md text-[var(--ax-text-primary)]"
-              [style.font-size]="'var(' + type.token + ')'"
-              [style.font-weight]="'var(' + type.token + '-weight)'"
-              [style.line-height]="'var(' + type.token + '-line-height)'"
-            >
-              {{ type.name }}
-            </div>
-
-            <!-- Type Details -->
-            <div>
-              <h4
-                class="text-lg font-semibold mb-4 text-[var(--ax-text-heading)]"
-              >
-                {{ type.name }}
-              </h4>
-
-              <div
-                class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 p-4 bg-[var(--ax-background-subtle)] rounded-md"
-              >
-                <div class="flex flex-col gap-1">
-                  <span
-                    class="text-xs font-medium uppercase tracking-wide text-[var(--ax-text-subtle)]"
-                    >Size</span
-                  >
-                  <span
-                    class="text-sm font-semibold font-mono text-[var(--ax-text-primary)]"
-                    >{{ type.size }}</span
-                  >
-                </div>
-                <div class="flex flex-col gap-1">
-                  <span
-                    class="text-xs font-medium uppercase tracking-wide text-[var(--ax-text-subtle)]"
-                    >Weight</span
-                  >
-                  <span
-                    class="text-sm font-semibold font-mono text-[var(--ax-text-primary)]"
-                    >{{ type.weight }}</span
-                  >
-                </div>
-                <div class="flex flex-col gap-1">
-                  <span
-                    class="text-xs font-medium uppercase tracking-wide text-[var(--ax-text-subtle)]"
-                    >Line Height</span
-                  >
-                  <span
-                    class="text-sm font-semibold font-mono text-[var(--ax-text-primary)]"
-                    >{{ type.lineHeight }}</span
-                  >
-                </div>
-                @if (type.letterSpacing) {
-                  <div class="flex flex-col gap-1">
-                    <span
-                      class="text-xs font-medium uppercase tracking-wide text-[var(--ax-text-subtle)]"
-                      >Letter Spacing</span
-                    >
-                    <span
-                      class="text-sm font-semibold font-mono text-[var(--ax-text-primary)]"
-                      >{{ type.letterSpacing }}</span
-                    >
-                  </div>
-                }
-              </div>
-
-              <div
-                class="mb-4 p-3 bg-[var(--ax-background-muted)] border-l-4 border-[var(--ax-brand-default)] rounded-sm text-sm text-[var(--ax-text-secondary)]"
-              >
-                <span class="font-semibold text-[var(--ax-text-primary)]"
-                  >Usage:</span
-                >
-                {{ type.usage }}
-              </div>
-
-              <button
-                matButton="outlined"
-                class="w-full flex items-center justify-center gap-2"
-                (click)="copyToClipboard(type.token)"
-              >
-                <mat-icon>content_copy</mat-icon>
-                Copy Token
-              </button>
-            </div>
-          </mat-card-content>
-        </mat-card>
-      }
-    </div>
-  </section>
-
-  <mat-divider class="my-12"></mat-divider>
-
-  <!-- ============================================
-       SECTION: Text Colors
-       ============================================ -->
-  <section id="text-colors" class="mb-16 scroll-mt-8">
-    <div class="mb-6">
-      <h2 class="text-2xl font-semibold text-[var(--ax-text-heading)] mb-2">
-        Text Color Hierarchy
-      </h2>
-      <p class="text-base text-[var(--ax-text-secondary)] leading-relaxed">
-        Lighter, more readable text colors. Gray-700 (#374151) for body text
-        instead of the harsh near-black. Follows Tremor's approach for better
-        readability and reduced eye strain.
-      </p>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      @for (color of textColors; track color.name) {
-        <mat-card
-          appearance="outlined"
-          appearance="outlined"
-          class="border border-[var(--ax-border-muted)] shadow-sm"
-        >
-          <mat-card-content class="p-6">
-            <!-- Color Sample -->
-            <div class="flex items-center gap-4 mb-6">
-              <div
-                class="w-20 h-20 rounded-lg border border-[var(--ax-border-default)] flex items-center justify-center shrink-0"
-                [style.background-color]="'var(' + color.token + ')'"
-              >
-                <span
-                  class="text-2xl font-semibold"
-                  [class.text-[var(--ax-text-primary)]]="
-                    color.name === 'Inverted'
-                  "
-                  [style.color]="
-                    color.name === 'Inverted' ? '' : 'var(' + color.token + ')'
-                  "
-                >
-                  Aa
-                </span>
-              </div>
-              <div class="flex-1 flex flex-col gap-1">
-                <h4
-                  class="text-lg font-semibold m-0"
-                  [style.color]="'var(' + color.token + ')'"
-                >
-                  {{ color.name }}
-                </h4>
-                <code
-                  class="text-xs px-2 py-1 bg-[var(--ax-background-subtle)] rounded self-start"
-                  >{{ color.token }}</code
-                >
-                <span class="text-sm font-mono text-[var(--ax-text-subtle)]">{{
-                  color.hex
-                }}</span>
-              </div>
-            </div>
-
-            <!-- Sample Text -->
-            <div class="mb-4 p-4 bg-[var(--ax-background-muted)] rounded-md">
-              <p
-                class="text-[0.9375rem] leading-relaxed m-0"
-                [style.color]="'var(' + color.token + ')'"
-              >
-                {{ sampleBody }}
-              </p>
-            </div>
-
-            <!-- Usage -->
-            <div class="mb-4 text-sm text-[var(--ax-text-secondary)]">
-              <span class="font-semibold text-[var(--ax-text-primary)]"
-                >Usage:</span
-              >
-              {{ color.usage }}
-            </div>
-
-            <button
-              matButton="outlined"
-              class="w-full flex items-center justify-center gap-2"
-              (click)="copyToClipboard(color.token)"
-            >
-              <mat-icon>content_copy</mat-icon>
-              Copy Token
-            </button>
-          </mat-card-content>
-        </mat-card>
-      }
-    </div>
-  </section>
-
-  <mat-divider class="my-12"></mat-divider>
-
-  <!-- ============================================
-       SECTION: Font Weights
-       ============================================ -->
-  <section id="font-weights" class="mb-16 scroll-mt-8">
-    <div class="mb-6">
-      <h2 class="text-2xl font-semibold text-[var(--ax-text-heading)] mb-2">
-        Font Weights
-      </h2>
-      <p class="text-base text-[var(--ax-text-secondary)] leading-relaxed">
-        Four weight options from Normal (400) to Bold (700) for typographic
-        emphasis.
-      </p>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      @for (weight of fontWeights; track weight.name) {
-        <mat-card
-          appearance="outlined"
-          appearance="outlined"
-          class="border border-[var(--ax-border-muted)] shadow-sm"
-        >
-          <mat-card-content class="p-6">
-            <h3
-              class="text-2xl leading-snug text-[var(--ax-text-primary)] mb-6 m-0"
-              [style.font-weight]="'var(' + weight.token + ')'"
-            >
-              {{ sampleHeading }}
-            </h3>
-
-            <div class="mb-4 p-4 bg-[var(--ax-background-subtle)] rounded-md">
-              <h4
-                class="text-base font-semibold m-0 mb-2 text-[var(--ax-text-heading)]"
-              >
-                {{ weight.name }}
-              </h4>
-              <code
-                class="block text-xs text-[var(--ax-text-secondary)] mb-1"
-                >{{ weight.token }}</code
-              >
-              <span
-                class="block text-sm font-mono text-[var(--ax-text-subtle)] mb-2"
-                >{{ weight.value }}</span
-              >
-              <p class="text-sm text-[var(--ax-text-secondary)] m-0">
-                {{ weight.usage }}
-              </p>
-            </div>
-
-            <button
-              matButton="outlined"
-              class="w-full flex items-center justify-center gap-2"
-              (click)="copyToClipboard(weight.token)"
-            >
-              <mat-icon>content_copy</mat-icon>
-              Copy
-            </button>
-          </mat-card-content>
-        </mat-card>
-      }
-    </div>
-  </section>
-
-  <mat-divider class="my-12"></mat-divider>
-
-  <!-- ============================================
-       SECTION: Line Heights
-       ============================================ -->
-  <section id="line-heights" class="mb-16 scroll-mt-8">
-    <div class="mb-6">
-      <h2 class="text-2xl font-semibold text-[var(--ax-text-heading)] mb-2">
-        Line Heights
-      </h2>
-      <p class="text-base text-[var(--ax-text-secondary)] leading-relaxed">
-        Vertical rhythm controls for different content types.
-      </p>
-    </div>
-
-    <div class="grid grid-cols-1 gap-6">
-      @for (leading of lineHeights; track leading.name) {
-        <mat-card
-          appearance="outlined"
-          appearance="outlined"
-          class="border border-[var(--ax-border-muted)] shadow-sm"
-        >
-          <mat-card-content class="p-6">
-            <p
-              class="text-base text-[var(--ax-text-primary)] mb-6 m-0"
-              [style.line-height]="'var(' + leading.token + ')'"
-            >
-              {{ sampleLongText }}
-            </p>
-
-            <div class="mb-4 p-4 bg-[var(--ax-background-subtle)] rounded-md">
-              <h4
-                class="text-base font-semibold m-0 mb-2 text-[var(--ax-text-heading)]"
-              >
-                {{ leading.name }}
-              </h4>
-              <code
-                class="block text-xs text-[var(--ax-text-secondary)] mb-1"
-                >{{ leading.token }}</code
-              >
-              <span
-                class="block text-sm font-mono text-[var(--ax-text-subtle)] mb-2"
-                >{{ leading.value }}</span
-              >
-              <p class="text-sm text-[var(--ax-text-secondary)] m-0">
-                {{ leading.usage }}
-              </p>
-            </div>
-
-            <button
-              matButton="outlined"
-              class="w-full flex items-center justify-center gap-2"
-              (click)="copyToClipboard(leading.token)"
-            >
-              <mat-icon>content_copy</mat-icon>
-              Copy
-            </button>
-          </mat-card-content>
-        </mat-card>
-      }
-    </div>
-  </section>
-
-  <mat-divider class="my-12"></mat-divider>
-
-  <!-- ============================================
-       SECTION: Real-World Examples
-       ============================================ -->
-  <section id="examples" class="mb-16 scroll-mt-8">
-    <div class="mb-6">
-      <h2 class="text-2xl font-semibold text-[var(--ax-text-heading)] mb-2">
-        Real-World Examples
-      </h2>
-      <p class="text-base text-[var(--ax-text-secondary)] leading-relaxed">
-        See how typography tokens work together in actual UI components.
-      </p>
-    </div>
-
-    <!-- Blog Post Example -->
-    <mat-card
-      appearance="outlined"
-      appearance="outlined"
-      class="mb-8 border border-[var(--ax-border-muted)] shadow-sm"
-    >
-      <mat-card-header>
-        <mat-card-title>Example: Blog Post</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <article class="blog-post">
-          <h1 class="example-display">
-            Getting Started with Material Design 3
-          </h1>
-          <p class="example-meta">Published on January 14, 2025 · 5 min read</p>
-
-          <h2 class="example-headline">Introduction</h2>
-          <p class="example-body">
-            Material Design 3 introduces a more expressive and adaptive design
-            system built on Material You principles. The new type scale provides
-            greater flexibility and readability across all device sizes and
-            contexts.
-          </p>
-
-          <h3 class="example-title">Key Typography Principles</h3>
-          <p class="example-body">
-            Typography in Material 3 emphasizes three core principles:
-            expressiveness through dynamic type, accessibility through clear
-            hierarchy, and adaptability across platforms. The system scales
-            gracefully from mobile to desktop while maintaining visual
-            consistency.
-          </p>
-
-          <p class="example-caption">
-            Figure 1: Material Design 3 type scale spans from Display Large
-            (57px) to Label Small (11px)
-          </p>
-        </article>
-      </mat-card-content>
-    </mat-card>
-
-    <!-- Dashboard Card Example -->
-    <mat-card
-      appearance="outlined"
-      appearance="outlined"
-      class="mb-8 border border-[var(--ax-border-muted)] shadow-sm"
-    >
-      <mat-card-header>
-        <mat-card-title>Example: Dashboard Card</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <div class="dashboard-card">
-          <div class="card-header">
-            <h3 class="card-title">Total Revenue</h3>
-            <span class="card-badge">+12.5%</span>
-          </div>
-
-          <div class="card-value">$2,456,789</div>
-
-          <p class="card-subtitle">From last month</p>
-
-          <div class="card-footer">
-            <span class="footer-label">Updated</span>
-            <span class="footer-time">2 minutes ago</span>
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
-
-    <!-- Form Example -->
-    <mat-card
-      appearance="outlined"
-      appearance="outlined"
-      class="mb-8 border border-[var(--ax-border-muted)] shadow-sm"
-    >
-      <mat-card-header>
-        <mat-card-title>Example: Form Layout</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <form class="example-form">
-          <div class="form-group">
-            <label class="form-label">Email Address</label>
-            <input
-              type="email"
-              class="form-input"
-              placeholder="you@example.com"
-            />
-            <span class="form-hint"
-              >We'll never share your email with anyone else.</span
-            >
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Password</label>
-            <input
-              type="password"
-              class="form-input"
-              placeholder="Enter password"
-            />
-            <span class="form-error"
-              >Password must be at least 8 characters</span
-            >
-          </div>
-        </form>
-      </mat-card-content>
-    </mat-card>
-  </section>
-
-  <!-- Back to Top Floating Button -->
-  @if (showBackToTop) {
-    <button
-      mat-fab
-      color="primary"
-      class="fixed bottom-6 right-6 z-50 shadow-lg"
-      (click)="scrollToTop()"
-      matTooltip="Back to top"
-      aria-label="Back to top"
-    >
-      <mat-icon>arrow_upward</mat-icon>
-    </button>
-  }
 </div>

@@ -1,0 +1,381 @@
+/* ==============================================
+   PROSE TYPOGRAPHY SYSTEM
+   Inspired by shadcn/ui & Tailwind Typography
+   For documentation, articles, blog posts
+   ============================================== */
+
+/* ===== PROSE DESIGN TOKENS ===== */
+:root {
+  /* Typography */
+  --prose-font-sans:
+    'Inter', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, sans-serif;
+  --prose-font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+
+  /* Font Sizes */
+  --prose-text-xs: 0.8125rem; /* 13px */
+  --prose-text-sm: 0.875rem; /* 14px */
+  --prose-text-base: 0.9375rem; /* 15px - body */
+  --prose-text-lg: 1.0625rem; /* 17px - lead */
+  --prose-text-xl: 1.25rem; /* 20px - H4 */
+  --prose-text-2xl: 1.5rem; /* 24px - H3 */
+  --prose-text-3xl: 1.875rem; /* 30px - H2 */
+  --prose-text-4xl: 2.25rem; /* 36px - H1 */
+
+  /* Line Heights */
+  --prose-leading-tight: 1.2;
+  --prose-leading-snug: 1.4;
+  --prose-leading-normal: 1.6;
+  --prose-leading-relaxed: 1.7;
+
+  /* Colors - Text (Zinc scale) */
+  --prose-text-heading: #0a0a0a; /* zinc-900 */
+  --prose-text-strong: #171717; /* zinc-900 */
+  --prose-text-body: #3f3f46; /* zinc-700 */
+  --prose-text-muted: #71717a; /* zinc-500 */
+  --prose-text-subtle: #a1a1aa; /* zinc-400 */
+  --prose-text-inverse: #fafafa; /* zinc-50 */
+
+  /* Colors - Background */
+  --prose-bg-primary: #ffffff;
+  --prose-bg-secondary: #fafafa; /* zinc-50 */
+  --prose-bg-tertiary: #f4f4f5; /* zinc-100 */
+  --prose-bg-code: #09090b; /* zinc-950 */
+  --prose-bg-hover: #f4f4f5; /* zinc-100 */
+
+  /* Colors - Border */
+  --prose-border: #e4e4e7; /* zinc-200 */
+  --prose-border-strong: #d4d4d8; /* zinc-300 */
+
+  /* Spacing */
+  --prose-space-1: 0.25rem; /* 4px */
+  --prose-space-2: 0.5rem; /* 8px */
+  --prose-space-3: 0.75rem; /* 12px */
+  --prose-space-4: 1rem; /* 16px */
+  --prose-space-6: 1.5rem; /* 24px */
+  --prose-space-8: 2rem; /* 32px */
+  --prose-space-10: 2.5rem; /* 40px */
+  --prose-space-12: 3rem; /* 48px */
+
+  /* Border Radius */
+  --prose-radius-sm: 0.25rem; /* 4px */
+  --prose-radius-md: 0.375rem; /* 6px */
+  --prose-radius-lg: 0.5rem; /* 8px */
+}
+
+/* ===== PROSE CONTAINER ===== */
+.prose {
+  font-family: var(--prose-font-sans);
+  font-size: var(--prose-text-base);
+  line-height: var(--prose-leading-relaxed);
+  color: var(--prose-text-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  max-width: 65ch; /* Optimal reading width */
+
+  /* ===== HEADINGS ===== */
+  h1 {
+    font-size: var(--prose-text-4xl);
+    font-weight: 700;
+    line-height: var(--prose-leading-tight);
+    letter-spacing: -0.01em;
+    color: var(--prose-text-heading);
+    margin: 0 0 var(--prose-space-4) 0;
+  }
+
+  h2 {
+    font-size: var(--prose-text-3xl);
+    font-weight: 600;
+    line-height: var(--prose-leading-snug);
+    letter-spacing: -0.01em;
+    color: var(--prose-text-heading);
+    margin: var(--prose-space-10) 0 var(--prose-space-4) 0;
+    padding-bottom: var(--prose-space-2);
+    border-bottom: 1px solid var(--prose-border);
+  }
+
+  h2:first-child {
+    margin-top: 0;
+  }
+
+  h3 {
+    font-size: var(--prose-text-2xl);
+    font-weight: 600;
+    line-height: var(--prose-leading-snug);
+    letter-spacing: -0.01em;
+    color: var(--prose-text-heading);
+    margin: var(--prose-space-8) 0 var(--prose-space-3) 0;
+  }
+
+  h3:first-child {
+    margin-top: 0;
+  }
+
+  h4 {
+    font-size: var(--prose-text-xl);
+    font-weight: 600;
+    line-height: var(--prose-leading-normal);
+    color: var(--prose-text-heading);
+    margin: var(--prose-space-6) 0 var(--prose-space-2) 0;
+  }
+
+  h5 {
+    font-size: var(--prose-text-base);
+    font-weight: 600;
+    line-height: var(--prose-leading-normal);
+    color: var(--prose-text-heading);
+    margin: var(--prose-space-4) 0 var(--prose-space-2) 0;
+  }
+
+  h6 {
+    font-size: var(--prose-text-sm);
+    font-weight: 600;
+    line-height: var(--prose-leading-normal);
+    color: var(--prose-text-heading);
+    margin: var(--prose-space-4) 0 var(--prose-space-2) 0;
+  }
+
+  /* ===== PARAGRAPHS ===== */
+  p {
+    margin: var(--prose-space-4) 0;
+  }
+
+  p:first-child {
+    margin-top: 0;
+  }
+
+  p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* ===== TEXT STYLES ===== */
+  strong,
+  b {
+    font-weight: 600;
+    color: var(--prose-text-strong);
+  }
+
+  em,
+  i {
+    font-style: italic;
+  }
+
+  /* Lead text */
+  .lead {
+    font-size: var(--prose-text-lg);
+    line-height: var(--prose-leading-relaxed);
+    color: var(--prose-text-muted);
+    margin: var(--prose-space-6) 0;
+  }
+
+  /* Small text */
+  small,
+  .small {
+    font-size: var(--prose-text-sm);
+    font-weight: 500;
+    color: var(--prose-text-body);
+  }
+
+  /* Muted text */
+  .muted {
+    font-size: var(--prose-text-sm);
+    color: var(--prose-text-muted);
+  }
+
+  /* ===== LINKS ===== */
+  a {
+    color: var(--prose-text-heading);
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-color: var(--prose-border);
+    text-underline-offset: 0.25rem;
+    transition: text-decoration-color 0.2s ease;
+  }
+
+  a:hover {
+    text-decoration-color: var(--prose-text-heading);
+  }
+
+  /* ===== CODE ===== */
+  code {
+    font-family: var(--prose-font-mono);
+    font-size: 0.875em;
+    font-weight: 500;
+    color: var(--prose-text-heading);
+    background-color: var(--prose-bg-tertiary);
+    padding: 0.125rem 0.375rem;
+    border-radius: var(--prose-radius-sm);
+  }
+
+  pre {
+    font-family: var(--prose-font-mono);
+    font-size: var(--prose-text-sm);
+    line-height: var(--prose-leading-relaxed);
+    background-color: var(--prose-bg-code);
+    color: var(--prose-text-inverse);
+    padding: var(--prose-space-4);
+    border-radius: var(--prose-radius-lg);
+    overflow-x: auto;
+    margin: var(--prose-space-4) 0;
+  }
+
+  pre code {
+    background: transparent;
+    padding: 0;
+    color: inherit;
+    font-weight: 400;
+  }
+
+  /* ===== LISTS ===== */
+  ul,
+  ol {
+    margin: var(--prose-space-4) 0;
+    padding-left: var(--prose-space-6);
+  }
+
+  li {
+    margin: var(--prose-space-2) 0;
+  }
+
+  ul {
+    list-style-type: disc;
+  }
+
+  ol {
+    list-style-type: decimal;
+  }
+
+  ul ul,
+  ul ol,
+  ol ul,
+  ol ol {
+    margin: var(--prose-space-2) 0;
+  }
+
+  /* ===== BLOCKQUOTE ===== */
+  blockquote {
+    margin: var(--prose-space-6) 0;
+    padding-left: var(--prose-space-4);
+    border-left: 2px solid var(--prose-border-strong);
+    color: var(--prose-text-muted);
+    font-style: italic;
+  }
+
+  blockquote p {
+    margin: var(--prose-space-2) 0;
+  }
+
+  /* ===== TABLES ===== */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--prose-text-base);
+    margin: var(--prose-space-6) 0;
+  }
+
+  thead {
+    border-bottom: 1px solid var(--prose-border-strong);
+  }
+
+  th {
+    text-align: left;
+    font-weight: 600;
+    color: var(--prose-text-heading);
+    padding: var(--prose-space-3) var(--prose-space-4);
+    background-color: var(--prose-bg-secondary);
+  }
+
+  td {
+    padding: var(--prose-space-3) var(--prose-space-4);
+    border-bottom: 1px solid var(--prose-border);
+  }
+
+  tbody tr:hover {
+    background-color: var(--prose-bg-hover);
+    transition: background-color 0.15s ease;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  /* ===== HORIZONTAL RULE ===== */
+  hr {
+    border: none;
+    border-top: 1px solid var(--prose-border);
+    margin: var(--prose-space-12) 0;
+  }
+
+  /* ===== IMAGES ===== */
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--prose-radius-lg);
+    margin: var(--prose-space-6) 0;
+  }
+
+  /* ===== FIGURE ===== */
+  figure {
+    margin: var(--prose-space-6) 0;
+  }
+
+  figcaption {
+    font-size: var(--prose-text-sm);
+    color: var(--prose-text-muted);
+    text-align: center;
+    margin-top: var(--prose-space-2);
+  }
+}
+
+/* ===== PROSE CONTAINER VARIANTS ===== */
+.prose-wide {
+  max-width: 75ch;
+}
+
+.prose-full {
+  max-width: none;
+}
+
+/* ===== PROSE NOTE BOXES ===== */
+.prose-note {
+  padding: var(--prose-space-4);
+  border-left: 3px solid var(--prose-text-heading);
+  background-color: var(--prose-bg-secondary);
+  border-radius: var(--prose-radius-md);
+  margin: var(--prose-space-4) 0;
+  font-size: var(--prose-text-sm);
+}
+
+.prose-note.info {
+  border-left-color: #3b82f6;
+}
+
+.prose-note.warning {
+  border-left-color: #eab308;
+}
+
+.prose-note.error {
+  border-left-color: #ef4444;
+}
+
+.prose-note.success {
+  border-left-color: #22c55e;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 640px) {
+  .prose {
+    font-size: var(--prose-text-sm);
+  }
+
+  .prose h1 {
+    font-size: var(--prose-text-3xl); /* 30px on mobile */
+  }
+
+  .prose h2 {
+    font-size: var(--prose-text-2xl); /* 24px on mobile */
+  }
+
+  .prose h3 {
+    font-size: var(--prose-text-xl); /* 20px on mobile */
+  }
+}

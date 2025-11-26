@@ -1,181 +1,144 @@
 /* ============================================
-   Typography Showcase Component Styles
-   Uses Tailwind for layout, SCSS only for complex component-specific styles
+   Typography Showcase Page Styles
    ============================================ */
 
-// Blog Post Example - Typography demonstration
-.blog-post {
-  .example-display {
-    font-size: var(--ax-type-display-small);
-    font-weight: var(--ax-type-display-small-weight);
-    line-height: var(--ax-type-display-small-line-height);
-    color: var(--ax-text-heading);
-    margin: 0 0 1rem 0;
-  }
-
-  .example-meta {
-    font-size: var(--ax-type-body-medium);
-    color: var(--ax-text-subtle);
-    margin: 0 0 2rem 0;
-  }
-
-  .example-headline {
-    font-size: var(--ax-type-headline-medium);
-    font-weight: var(--ax-type-headline-medium-weight);
-    line-height: var(--ax-type-headline-medium-line-height);
-    color: var(--ax-text-heading);
-    margin: 2rem 0 1rem 0;
-  }
-
-  .example-title {
-    font-size: var(--ax-type-title-large);
-    font-weight: var(--ax-type-title-large-weight);
-    line-height: var(--ax-type-title-large-line-height);
-    color: var(--ax-text-heading);
-    margin: 1.5rem 0 0.75rem 0;
-  }
-
-  .example-body {
-    font-size: var(--ax-type-body-large);
-    font-weight: var(--ax-type-body-large-weight);
-    line-height: var(--ax-type-body-large-line-height);
-    color: var(--ax-text-primary);
-    margin: 0 0 1rem 0;
-  }
-
-  .example-caption {
-    font-size: var(--ax-type-body-small);
-    font-weight: var(--ax-type-body-small-weight);
-    line-height: var(--ax-type-body-small-line-height);
-    color: var(--ax-text-subtle);
-    font-style: italic;
-    margin: 1rem 0;
-  }
+.page-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
 }
 
-// Dashboard Card Example
-.dashboard-card {
-  padding: 1.5rem;
-  background-color: var(--ax-background-muted);
-  border-radius: var(--ax-radius-lg);
-  border: 1px solid var(--ax-border-default);
+.page-header {
+  margin-bottom: 2rem;
 
-  .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
+  h1 {
+    margin-bottom: 0.5rem;
   }
 
-  .card-title {
-    font-size: var(--ax-type-title-medium);
-    font-weight: var(--ax-type-title-medium-weight);
-    color: var(--ax-text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+  p {
     margin: 0;
   }
+}
 
-  .card-badge {
-    font-size: var(--ax-type-label-medium);
-    font-weight: var(--ax-type-label-medium-weight);
-    padding: 0.375rem 0.75rem;
-    background-color: rgba(16, 185, 129, 0.1);
-    color: var(--ax-success-700);
-    border-radius: var(--ax-radius-full);
-  }
+.prose-demo-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
 
-  .card-value {
-    font-size: 2.25rem;
-    font-weight: 700;
-    color: var(--ax-text-heading);
-    margin-bottom: 0.5rem;
-  }
+.demo-card {
+  mat-card-header {
+    margin-bottom: 1.5rem;
 
-  .card-subtitle {
-    font-size: var(--ax-type-body-medium);
-    color: var(--ax-text-subtle);
-    margin-bottom: 1rem;
-  }
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.25rem;
+      font-weight: 600;
 
-  .card-footer {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--ax-border-default);
-
-    .footer-label {
-      font-size: var(--ax-type-label-small);
-      font-weight: var(--ax-type-label-small-weight);
-      color: var(--ax-text-subtle);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      mat-icon {
+        color: var(--ax-brand-default);
+      }
     }
+  }
 
-    .footer-time {
-      font-size: var(--ax-type-body-small);
-      color: var(--ax-text-secondary);
-    }
+  mat-card-content {
+    padding: 1.5rem 0;
   }
 }
 
-// Form Example
-.example-form {
-  .form-group {
-    margin-bottom: 1.5rem;
+// Variants Demo Styling
+.variants-demo {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+
+  h3 {
+    color: var(--ax-text-primary);
+    margin-bottom: 1rem;
   }
 
-  .form-label {
-    display: block;
-    font-size: var(--ax-type-label-large);
-    font-weight: var(--ax-type-label-large-weight);
-    color: var(--ax-text-primary);
-    margin-bottom: 0.5rem;
-  }
-
-  .form-input {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    font-size: var(--ax-type-body-medium);
-    color: var(--ax-text-primary);
-    background-color: var(--ax-background-default);
-    border: 1px solid var(--ax-border-default);
+  .prose {
+    background: var(--ax-background-subtle);
+    padding: 1.5rem;
     border-radius: var(--ax-radius-md);
-    transition: border-color var(--ax-transition-fast);
+    border: 1px solid var(--ax-border-default);
+  }
+}
 
-    &::placeholder {
-      color: var(--ax-text-disabled);
-    }
+// Design Tokens Reference Styling
+.tokens-reference {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
 
-    &:focus {
-      outline: none;
-      border-color: var(--ax-brand-default);
+.token-section {
+  h3 {
+    color: var(--ax-text-primary);
+    margin-bottom: 1rem;
+  }
+}
+
+.tokens-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+
+  thead {
+    background: var(--ax-background-subtle);
+    border-bottom: 2px solid var(--ax-border-default);
+
+    th {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      font-weight: 600;
+      color: var(--ax-text-primary);
     }
   }
 
-  .form-hint {
-    display: block;
-    font-size: var(--ax-type-body-small);
-    color: var(--ax-text-subtle);
-    margin-top: 0.375rem;
-  }
+  tbody {
+    tr {
+      border-bottom: 1px solid var(--ax-border-default);
+      transition: background-color 0.15s ease;
 
-  .form-error {
-    display: block;
-    font-size: var(--ax-type-body-small);
-    color: var(--ax-error-default);
-    margin-top: 0.375rem;
+      &:hover {
+        background: var(--ax-background-subtle);
+      }
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+
+    td {
+      padding: 0.75rem 1rem;
+
+      code {
+        font-family: var(--prose-font-mono);
+        font-size: 0.8125rem;
+        background: var(--ax-background-subtle);
+        padding: 0.125rem 0.375rem;
+        border-radius: var(--ax-radius-sm);
+        color: var(--ax-text-primary);
+      }
+    }
   }
 }
 
 // Responsive Adjustments
 @media (max-width: 768px) {
-  .blog-post .example-display {
-    font-size: 2rem;
+  .page-container {
+    padding: 1rem;
   }
 
-  .dashboard-card .card-value {
-    font-size: 1.875rem;
+  .tokens-table {
+    font-size: 0.8125rem;
+
+    thead th,
+    tbody td {
+      padding: 0.5rem 0.75rem;
+    }
   }
 }
