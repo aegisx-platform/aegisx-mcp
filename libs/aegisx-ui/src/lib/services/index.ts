@@ -14,3 +14,6 @@ export { AegisxNavigationService as AxNavigationService } from './navigation/nav
 export * from './theme/ax-theme.service';
 export * from './theme/ax-theme.types';
 // Note: M3ThemeService and StylePresetService backed up for future use (.backup.ts)
+
+// AegisX Toast Service
+export * from './toast';
