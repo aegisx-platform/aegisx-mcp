@@ -163,6 +163,13 @@ export const appRoutes: Route[] = [
         './pages/docs/components/aegisx/forms/date-picker/date-picker-doc.component'
       ).then((m) => m.DatePickerDocComponent),
   },
+  {
+    path: 'docs/components/aegisx/forms/file-upload',
+    loadComponent: () =>
+      import(
+        './pages/docs/components/aegisx/forms/file-upload/file-upload-doc.component'
+      ).then((m) => m.FileUploadDocComponent),
+  },
 
   // --- Components > AegisX > Feedback ---
   {
@@ -186,6 +193,20 @@ export const appRoutes: Route[] = [
         './pages/docs/components/aegisx/feedback/dialogs/dialogs-doc.component'
       ).then((m) => m.DialogsDocComponent),
   },
+  {
+    path: 'docs/components/aegisx/feedback/toast',
+    loadComponent: () =>
+      import(
+        './pages/docs/components/aegisx/feedback/toast/toast-doc.component'
+      ).then((m) => m.ToastDocComponent),
+  },
+  {
+    path: 'docs/components/aegisx/feedback/skeleton',
+    loadComponent: () =>
+      import(
+        './pages/docs/components/aegisx/feedback/skeleton/skeleton-doc.component'
+      ).then((m) => m.SkeletonDocComponent),
+  },
 
   // --- Components > AegisX > Navigation ---
   {
@@ -194,6 +215,22 @@ export const appRoutes: Route[] = [
       import(
         './pages/docs/components/aegisx/navigation/breadcrumb/breadcrumb-doc.component'
       ).then((m) => m.BreadcrumbDocComponent),
+  },
+  {
+    path: 'docs/components/aegisx/navigation/stepper',
+    loadComponent: () =>
+      import(
+        './pages/docs/components/aegisx/navigation/stepper/stepper-doc.component'
+      ).then((m) => m.StepperDocComponent),
+  },
+
+  // --- Components > AegisX > Layout ---
+  {
+    path: 'docs/components/aegisx/layout/drawer',
+    loadComponent: () =>
+      import(
+        './pages/docs/components/aegisx/layout/drawer/drawer-doc.component'
+      ).then((m) => m.DrawerDocComponent),
   },
 
   // --- Components > Material (placeholder for future) ---
