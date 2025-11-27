@@ -47,39 +47,52 @@ import { MatIconModule } from '@angular/material/icon';
       }
 
       .ax-card {
-        @apply transition-shadow duration-200;
+        transition: box-shadow var(--ax-transition-base);
 
         &:not(.ax-card-flat) {
-          @apply shadow-sm hover:shadow-md;
+          box-shadow: var(--ax-shadow-sm);
+
+          &:hover {
+            box-shadow: var(--ax-shadow-md);
+          }
         }
 
         &.ax-card-flat {
           box-shadow: none !important;
-          border: 1px solid rgba(0, 0, 0, 0.12);
+          border: 1px solid var(--ax-border-default);
         }
 
         &.ax-card-outlined {
           box-shadow: none !important;
-          @apply border-2 border-gray-200 dark:border-gray-700;
+          border: 2px solid var(--ax-border-default);
         }
 
         &.ax-card-elevated {
-          @apply shadow-lg hover:shadow-xl;
+          box-shadow: var(--ax-shadow-lg);
+
+          &:hover {
+            box-shadow: var(--ax-shadow-xl);
+          }
         }
       }
 
       .ax-card-header {
-        @apply relative;
+        position: relative;
 
         .ax-card-header-actions {
-          @apply absolute top-4 right-4;
+          position: absolute;
+          top: var(--ax-spacing-md);
+          right: var(--ax-spacing-md);
         }
       }
 
       .ax-card-icon {
-        @apply flex items-center justify-center;
-        @apply bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400;
-        @apply rounded-full;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--ax-primary-faint);
+        color: var(--ax-primary-default);
+        border-radius: 50%;
         width: 40px;
         height: 40px;
         font-size: 24px;
@@ -87,13 +100,13 @@ import { MatIconModule } from '@angular/material/icon';
 
       .ax-card-content {
         &:last-child {
-          padding-bottom: 16px;
+          padding-bottom: var(--ax-spacing-md);
         }
       }
 
       .ax-card-actions {
-        @apply border-t border-gray-200 dark:border-gray-700;
-        padding: 8px 16px;
+        border-top: 1px solid var(--ax-border-default);
+        padding: var(--ax-spacing-sm) var(--ax-spacing-md);
       }
     `,
   ],

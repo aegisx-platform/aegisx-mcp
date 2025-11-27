@@ -77,19 +77,28 @@ export interface EmptyStateAction {
       }
 
       .ax-empty-state {
-        @apply bg-white rounded-lg border border-gray-200 p-12 text-center;
+        background-color: var(--ax-background-default);
+        border-radius: var(--ax-radius-lg);
+        border: 1px solid var(--ax-border-default);
+        padding: var(--ax-spacing-3xl);
+        text-align: center;
 
         &.ax-empty-state-compact {
-          @apply p-8;
+          padding: var(--ax-spacing-2xl);
         }
       }
 
       .ax-empty-state-content {
-        @apply max-w-md mx-auto;
+        max-width: 28rem; /* 448px - md */
+        margin-left: auto;
+        margin-right: auto;
       }
 
       .ax-empty-state-icon {
-        @apply text-gray-400 mx-auto;
+        color: var(--ax-text-disabled);
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
 
         &.ax-empty-state-icon-lg {
           font-size: 48px;
@@ -105,27 +114,41 @@ export interface EmptyStateAction {
       }
 
       .ax-empty-state-title {
-        @apply text-lg font-medium text-gray-900 mt-4;
+        font-size: var(--ax-text-lg);
+        font-weight: var(--ax-font-medium);
+        color: var(--ax-text-heading);
+        margin-top: var(--ax-spacing-md);
+        margin-bottom: 0;
       }
 
       .ax-empty-state-message {
-        @apply text-sm text-gray-600 mt-2;
+        font-size: var(--ax-text-sm);
+        color: var(--ax-text-secondary);
+        margin-top: var(--ax-spacing-sm);
+        margin-bottom: 0;
+        line-height: var(--ax-leading-relaxed);
       }
 
       .ax-empty-state-body {
-        @apply mt-3;
+        margin-top: var(--ax-spacing-sm);
       }
 
       .ax-empty-state-actions {
-        @apply flex items-center justify-center gap-2 mt-4;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--ax-spacing-sm);
+        margin-top: var(--ax-spacing-md);
       }
 
       .ax-empty-state-custom-actions {
-        @apply mt-4;
+        margin-top: var(--ax-spacing-md);
       }
 
       .ax-empty-state-action {
-        @apply inline-flex items-center gap-2;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--ax-spacing-sm);
       }
     `,
   ],
