@@ -21,6 +21,12 @@
 /* Import AegisX UI Components */
 @import '../../../libs/aegisx-ui/src/lib/styles/components/kpi-cards';
 
+/* Import ngx-toastr styles */
+@import 'ngx-toastr/toastr';
+
+/* Import AegisX Toast customizations */
+@import '../../../libs/aegisx-ui/src/lib/services/toast/ax-toast.styles';
+
 /* Global Styles */
 html,
 body {

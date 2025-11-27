@@ -8,6 +8,7 @@ import {
 import { provideRouter } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient } from '@angular/common/http';
+import { provideToastr } from 'ngx-toastr';
 import {
   AegisxConfigService,
   AegisxNavigationService,
@@ -42,6 +43,20 @@ export const appConfig: ApplicationConfig = {
     provideRouter(appRoutes),
     provideAnimations(),
     provideHttpClient(),
+
+    // ngx-toastr configuration
+    provideToastr({
+      positionClass: 'toast-top-right',
+      timeOut: 5000,
+      extendedTimeOut: 1000,
+      closeButton: true,
+      progressBar: true,
+      progressAnimation: 'decreasing',
+      preventDuplicates: false,
+      newestOnTop: true,
+      maxOpened: 5,
+      autoDismiss: true,
+    }),
 
     // Initialize icons
     {
