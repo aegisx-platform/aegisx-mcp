@@ -1,0 +1,313 @@
+<div class="docs-page">
+  <!-- Page Header -->
+  <ax-doc-header
+    variant="page"
+    icon="rocket_launch"
+    title="AegisX Design System"
+    description="A comprehensive design system built with Angular Material 3, providing everything you need to build modern, beautiful, and consistent user interfaces."
+    [breadcrumbs]="[
+      { label: 'Getting Started', link: '/docs/getting-started/introduction' },
+      { label: 'Introduction' },
+    ]"
+    [showImport]="false"
+    [showQuickLinks]="false"
+  ></ax-doc-header>
+
+  <!-- Quick Actions -->
+  <div class="docs-actions">
+    <a
+      mat-flat-button
+      color="primary"
+      routerLink="/docs/getting-started/installation"
+    >
+      <mat-icon>download</mat-icon>
+      Get Started
+    </a>
+    <a mat-stroked-button routerLink="/docs/examples/components">
+      <mat-icon>widgets</mat-icon>
+      View Components
+    </a>
+    <a mat-stroked-button routerLink="/docs/foundations/typography">
+      <mat-icon>text_fields</mat-icon>
+      Typography Guide
+    </a>
+  </div>
+
+  <!-- Main Content with Prose Typography -->
+  <article class="ax-prose-docs">
+    <h2>Welcome to AegisX</h2>
+    <p class="lead">
+      AegisX is a modern design system that combines the best of Angular
+      Material 3 with custom components inspired by Tremor. It provides a
+      complete set of design tokens, components, and patterns to help you build
+      enterprise-grade applications quickly and consistently.
+    </p>
+
+    <h2>What is AegisX Design System?</h2>
+    <p>
+      AegisX is not just a component library—it's a comprehensive design system
+      that includes design tokens, typography scales, color palettes, and a
+      complete set of UI components. Every element is carefully crafted to work
+      together seamlessly, ensuring consistency across your entire application.
+    </p>
+
+    <p>
+      Built on top of <strong>Angular Material 3</strong>, AegisX extends the
+      foundation with additional components and patterns commonly needed in
+      enterprise applications. Whether you're building dashboards, data tables,
+      or complex forms, AegisX has you covered.
+    </p>
+
+    <h2>Key Features</h2>
+
+    <h3>Comprehensive Component Library</h3>
+    <p>
+      AegisX includes over 50+ components ranging from basic elements like
+      buttons and inputs to complex components like data tables, date pickers,
+      and charts. All components are built as
+      <strong>standalone Angular components</strong> using the latest Angular
+      features including Signals for reactive state management.
+    </p>
+
+    <h3>Design Token System</h3>
+    <p>
+      A complete design token system built with CSS custom properties provides:
+    </p>
+    <ul>
+      <li>
+        <strong>Color tokens</strong> - Semantic colors with Zinc palette for
+        better readability
+      </li>
+      <li>
+        <strong>Typography tokens</strong> - Two complete typography systems (UI
+        & Prose)
+      </li>
+      <li>
+        <strong>Spacing tokens</strong> - Consistent spacing scale across all
+        components
+      </li>
+      <li>
+        <strong>Shadow tokens</strong> - Elevation system for depth and
+        hierarchy
+      </li>
+      <li>
+        <strong>Radius tokens</strong> - Border radius scale for rounded corners
+      </li>
+    </ul>
+
+    <h3>Two Typography Systems</h3>
+    <p>AegisX provides two specialized typography systems:</p>
+
+    <ol>
+      <li>
+        <strong>AegisX Typography</strong> - Optimized for UI components with
+        16px base size and 1.5 line-height. Perfect for dashboards, forms, and
+        data tables.
+      </li>
+      <li>
+        <strong>Prose Typography</strong> - Optimized for long-form content with
+        15px base size and 1.7 line-height. Ideal for documentation, articles,
+        and help pages.
+      </li>
+    </ol>
+
+    <blockquote>
+      <p>
+        "Good design is invisible. The best typography gets out of the way and
+        lets the content shine." - AegisX Design Principles
+      </p>
+    </blockquote>
+
+    <h3>Accessibility First</h3>
+    <p>
+      Every component in AegisX is built with accessibility in mind, following
+      <strong>WCAG 2.1 AA</strong> guidelines:
+    </p>
+    <ul>
+      <li>Proper ARIA labels and roles</li>
+      <li>Keyboard navigation support</li>
+      <li>High contrast color combinations</li>
+      <li>Screen reader compatibility</li>
+      <li>Focus indicators and states</li>
+    </ul>
+
+    <h3>Built With Modern Technologies</h3>
+    <p>AegisX leverages the latest web technologies:</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Technology</th>
+          <th>Version</th>
+          <th>Purpose</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Angular</strong></td>
+          <td>18+</td>
+          <td>Modern standalone components with Signals</td>
+        </tr>
+        <tr>
+          <td><strong>Material Design 3</strong></td>
+          <td>Latest</td>
+          <td>Base component library and theming</td>
+        </tr>
+        <tr>
+          <td><strong>TypeScript</strong></td>
+          <td>5.4+</td>
+          <td>Type-safe development</td>
+        </tr>
+        <tr>
+          <td><strong>SCSS</strong></td>
+          <td>Latest</td>
+          <td>Powerful styling with design tokens</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <hr />
+
+    <h2>Getting Started</h2>
+    <p>Ready to start building with AegisX? Here's how to get started:</p>
+
+    <h3>1. Installation</h3>
+    <p>
+      First, install the required packages in your Angular project. Visit our
+      <a routerLink="/installation">Installation Guide</a> for detailed
+      step-by-step instructions.
+    </p>
+
+    <pre><code>pnpm add &#64;aegisx/ui &#64;angular/material &#64;angular/cdk</code></pre>
+
+    <h3>2. Configuration</h3>
+    <p>
+      Configure your Angular application to use AegisX theme and design tokens.
+      The setup process takes just a few minutes and includes:
+    </p>
+    <ul>
+      <li>Importing the AegisX theme SCSS files</li>
+      <li>Configuring Material Design theme</li>
+      <li>Setting up design tokens</li>
+      <li>Importing required fonts (Inter, Noto Sans Thai)</li>
+    </ul>
+
+    <h3>3. Start Building</h3>
+    <p>
+      Once configured, you can start using AegisX components in your
+      application. Check out our
+      <a routerLink="/quick-start">Quick Start Guide</a> for examples and best
+      practices.
+    </p>
+
+    <div class="ax-prose-note info">
+      <strong>Tip:</strong> Explore the
+      <a routerLink="/typography">Typography Guide</a> to understand when to use
+      each typography system in your documentation pages.
+    </div>
+
+    <hr />
+
+    <h2>Component Categories</h2>
+    <p>AegisX components are organized into logical categories:</p>
+
+    <h3>Data Display</h3>
+    <p>
+      Components for displaying data including badges, cards, chips, KPI cards,
+      and stat cards. Perfect for dashboards and analytics interfaces.
+    </p>
+
+    <h3>Forms & Input</h3>
+    <p>
+      Complete form controls including text inputs, selects, date pickers,
+      checkboxes, radio buttons, and switches. All components support
+      <code>ReactiveFormsModule</code> and <code>ngModel</code>.
+    </p>
+
+    <h3>Navigation</h3>
+    <p>
+      Navigation components including breadcrumbs, tabs, stepper, and sidebar
+      navigation. Responsive and touch-friendly on all devices.
+    </p>
+
+    <h3>Feedback</h3>
+    <p>
+      User feedback components like alerts, dialogs, snackbars, and loading
+      indicators. Keep users informed about system status and actions.
+    </p>
+
+    <h3>Data Tables</h3>
+    <p>
+      Advanced data table component with sorting, filtering, pagination, and row
+      selection. Optimized for large datasets with virtual scrolling support.
+    </p>
+
+    <hr />
+
+    <h2>Why Choose AegisX?</h2>
+
+    <h3>Enterprise-Ready</h3>
+    <p>
+      Built for enterprise applications with requirements like high performance,
+      scalability, and maintainability. Every component is tested and optimized
+      for production use.
+    </p>
+
+    <h3>Consistent Design Language</h3>
+    <p>
+      A unified design language ensures your application looks and feels
+      cohesive. Design tokens make it easy to customize and maintain brand
+      consistency.
+    </p>
+
+    <h3>Developer Experience</h3>
+    <p>
+      Excellent developer experience with TypeScript types, comprehensive
+      documentation, and code examples. Fast development with ready-to-use
+      components.
+    </p>
+
+    <h3>Active Development</h3>
+    <p>
+      Regular updates with new components, bug fixes, and improvements. Built
+      and maintained by developers for developers.
+    </p>
+
+    <hr />
+
+    <h2>Need Help?</h2>
+    <p>
+      We're here to help you succeed with AegisX. Here are some resources to get
+      you started:
+    </p>
+
+    <ul>
+      <li>
+        <a routerLink="/installation">Installation Guide</a> - Step-by-step
+        setup instructions
+      </li>
+      <li>
+        <a routerLink="/quick-start">Quick Start Guide</a> - Get up and running
+        quickly
+      </li>
+      <li>
+        <a routerLink="/typography">Typography Guide</a> - Learn about our
+        typography systems
+      </li>
+      <li>
+        <a routerLink="/components">Component Library</a> - Browse all available
+        components
+      </li>
+      <li>
+        <a routerLink="/design-tokens">Design Tokens</a> - Customize colors and
+        styles
+      </li>
+    </ul>
+
+    <div class="ax-prose-note success">
+      <strong>Ready to start?</strong> Head over to the
+      <a routerLink="/installation">Installation Guide</a> to begin building
+      with AegisX Design System.
+    </div>
+  </article>
+</div>

@@ -2,15 +2,6 @@ import { Route } from '@angular/router';
 
 export const appRoutes: Route[] = [
   // ============================================
-  // STANDALONE ROUTES (no layout)
-  // ============================================
-  {
-    path: 'login',
-    loadComponent: () =>
-      import('./pages/login/login.component').then((m) => m.LoginComponent),
-  },
-
-  // ============================================
   // ROOT REDIRECT
   // ============================================
   {
@@ -27,23 +18,23 @@ export const appRoutes: Route[] = [
   {
     path: 'docs/getting-started/introduction',
     loadComponent: () =>
-      import('./pages/introduction/introduction.component').then(
-        (m) => m.IntroductionComponent,
-      ),
+      import(
+        './pages/docs/getting-started/introduction/introduction-doc.component'
+      ).then((m) => m.IntroductionDocComponent),
   },
   {
     path: 'docs/getting-started/installation',
     loadComponent: () =>
-      import('./pages/installation/installation.component').then(
-        (m) => m.InstallationComponent,
-      ),
+      import(
+        './pages/docs/getting-started/installation/installation-doc.component'
+      ).then((m) => m.InstallationDocComponent),
   },
   {
     path: 'docs/getting-started/quick-start',
     loadComponent: () =>
-      import('./pages/quick-start/quick-start.component').then(
-        (m) => m.QuickStartComponent,
-      ),
+      import(
+        './pages/docs/getting-started/quick-start/quick-start-doc.component'
+      ).then((m) => m.QuickStartDocComponent),
   },
 
   // --- Foundations ---
@@ -57,9 +48,9 @@ export const appRoutes: Route[] = [
   {
     path: 'docs/foundations/design-tokens',
     loadComponent: () =>
-      import('./pages/design-tokens/design-tokens.component').then(
-        (m) => m.DesignTokensComponent,
-      ),
+      import(
+        './pages/docs/foundations/design-tokens/design-tokens.component'
+      ).then((m) => m.DesignTokensComponent),
   },
   {
     path: 'docs/foundations/colors',
@@ -71,9 +62,9 @@ export const appRoutes: Route[] = [
   {
     path: 'docs/foundations/typography',
     loadComponent: () =>
-      import('./pages/typography-showcase/typography-showcase.component').then(
-        (m) => m.TypographyShowcaseComponent,
-      ),
+      import(
+        './pages/docs/foundations/typography/typography-showcase.component'
+      ).then((m) => m.TypographyShowcaseComponent),
   },
   {
     path: 'docs/foundations/spacing',
@@ -97,111 +88,116 @@ export const appRoutes: Route[] = [
       ),
   },
 
-  // --- Components > Data Display ---
+  // --- Components > AegisX > Data Display ---
   {
-    path: 'docs/components/data-display/overview',
+    path: 'docs/components/aegisx/data-display/overview',
     loadComponent: () =>
       import(
-        './pages/aegisx-ui/data-display-demo/data-display-demo.component'
+        './pages/docs/components/aegisx/data-display/overview/data-display-demo.component'
       ).then((m) => m.DataDisplayDemoComponent),
   },
   {
-    path: 'docs/components/data-display/card',
+    path: 'docs/components/aegisx/data-display/card',
     loadComponent: () =>
       import(
-        './pages/docs/components/data-display/card/card-doc.component'
+        './pages/docs/components/aegisx/data-display/card/card-doc.component'
       ).then((m) => m.CardDocComponent),
   },
   {
-    path: 'docs/components/data-display/kpi-card',
+    path: 'docs/components/aegisx/data-display/kpi-card',
     loadComponent: () =>
       import(
-        './pages/docs/components/data-display/kpi-card/kpi-card-doc.component'
+        './pages/docs/components/aegisx/data-display/kpi-card/kpi-card-doc.component'
       ).then((m) => m.KpiCardDocComponent),
   },
   {
-    path: 'docs/components/data-display/badge',
+    path: 'docs/components/aegisx/data-display/badge',
     loadComponent: () =>
       import(
-        './pages/docs/components/data-display/badge/badge-doc.component'
+        './pages/docs/components/aegisx/data-display/badge/badge-doc.component'
       ).then((m) => m.BadgeDocComponent),
   },
   {
-    path: 'docs/components/data-display/avatar',
+    path: 'docs/components/aegisx/data-display/avatar',
     loadComponent: () =>
       import(
-        './pages/docs/components/data-display/avatar/avatar-doc.component'
+        './pages/docs/components/aegisx/data-display/avatar/avatar-doc.component'
       ).then((m) => m.AvatarDocComponent),
   },
   {
-    path: 'docs/components/data-display/list',
+    path: 'docs/components/aegisx/data-display/list',
     loadComponent: () =>
       import(
-        './pages/docs/components/data-display/list/list-doc.component'
+        './pages/docs/components/aegisx/data-display/list/list-doc.component'
       ).then((m) => m.ListDocComponent),
   },
+
+  // --- Components > AegisX > Charts ---
   {
-    path: 'docs/components/data-display/sparkline',
-    loadComponent: () =>
-      import('./pages/sparkline-demo/sparkline-demo.component').then(
-        (m) => m.SparklineDemoComponent,
-      ),
-  },
-  {
-    path: 'docs/components/data-display/circular-progress',
+    path: 'docs/components/aegisx/charts/sparkline',
     loadComponent: () =>
       import(
-        './pages/circular-progress-demo/circular-progress-demo.component'
+        './pages/docs/components/aegisx/charts/sparkline/sparkline-demo.component'
+      ).then((m) => m.SparklineDemoComponent),
+  },
+  {
+    path: 'docs/components/aegisx/charts/circular-progress',
+    loadComponent: () =>
+      import(
+        './pages/docs/components/aegisx/charts/circular-progress/circular-progress-demo.component'
       ).then((m) => m.CircularProgressDemoComponent),
   },
   {
-    path: 'docs/components/data-display/segmented-progress',
+    path: 'docs/components/aegisx/charts/segmented-progress',
     loadComponent: () =>
       import(
-        './pages/segmented-progress-demo/segmented-progress-demo.component'
+        './pages/docs/components/aegisx/charts/segmented-progress/segmented-progress-demo.component'
       ).then((m) => m.SegmentedProgressDemoComponent),
   },
 
-  // --- Components > Forms ---
+  // --- Components > AegisX > Forms ---
   {
-    path: 'docs/components/forms/date-picker',
+    path: 'docs/components/aegisx/forms/date-picker',
     loadComponent: () =>
       import(
-        './pages/docs/components/forms/date-picker/date-picker-doc.component'
+        './pages/docs/components/aegisx/forms/date-picker/date-picker-doc.component'
       ).then((m) => m.DatePickerDocComponent),
   },
 
-  // --- Components > Feedback ---
+  // --- Components > AegisX > Feedback ---
   {
-    path: 'docs/components/feedback/alert',
-    loadComponent: () =>
-      import('./pages/docs/components/feedback/alert/alert-doc.component').then(
-        (m) => m.AlertDocComponent,
-      ),
-  },
-  {
-    path: 'docs/components/feedback/loading-bar',
+    path: 'docs/components/aegisx/feedback/alert',
     loadComponent: () =>
       import(
-        './pages/docs/components/feedback/loading-bar/loading-bar-doc.component'
+        './pages/docs/components/aegisx/feedback/alert/alert-doc.component'
+      ).then((m) => m.AlertDocComponent),
+  },
+  {
+    path: 'docs/components/aegisx/feedback/loading-bar',
+    loadComponent: () =>
+      import(
+        './pages/docs/components/aegisx/feedback/loading-bar/loading-bar-doc.component'
       ).then((m) => m.LoadingBarDocComponent),
   },
   {
-    path: 'docs/components/feedback/dialogs',
+    path: 'docs/components/aegisx/feedback/dialogs',
     loadComponent: () =>
       import(
-        './pages/docs/components/feedback/dialogs/dialogs-doc.component'
+        './pages/docs/components/aegisx/feedback/dialogs/dialogs-doc.component'
       ).then((m) => m.DialogsDocComponent),
   },
 
-  // --- Components > Navigation ---
+  // --- Components > AegisX > Navigation ---
   {
-    path: 'docs/components/navigation/breadcrumb',
+    path: 'docs/components/aegisx/navigation/breadcrumb',
     loadComponent: () =>
       import(
-        './pages/docs/components/navigation/breadcrumb/breadcrumb-doc.component'
+        './pages/docs/components/aegisx/navigation/breadcrumb/breadcrumb-doc.component'
       ).then((m) => m.BreadcrumbDocComponent),
   },
+
+  // --- Components > Material (placeholder for future) ---
+  // TODO: Add Material component docs
 
   // --- Patterns ---
   {
@@ -219,39 +215,79 @@ export const appRoutes: Route[] = [
       ).then((m) => m.FormLayoutsDocComponent),
   },
 
-  // --- Examples ---
+  // ============================================
+  // PLAYGROUND ROUTES - /playground/*
+  // ============================================
+
+  // --- Page Templates ---
   {
-    path: 'docs/examples/dashboard',
+    path: 'playground/pages/login',
     loadComponent: () =>
-      import('./pages/dashboard/dashboard.component').then(
+      import('./pages/playground/pages/login/login.component').then(
+        (m) => m.LoginComponent,
+      ),
+  },
+  {
+    path: 'playground/pages/dashboard',
+    loadComponent: () =>
+      import('./pages/playground/pages/dashboard/dashboard.component').then(
         (m) => m.DashboardComponent,
       ),
   },
   {
-    path: 'docs/examples/user-management',
+    path: 'playground/pages/user-management',
     loadComponent: () =>
-      import('./pages/user-management/user-management.component').then(
-        (m) => m.UserManagementComponent,
-      ),
+      import(
+        './pages/playground/pages/user-management/user-management.component'
+      ).then((m) => m.UserManagementComponent),
+  },
+
+  // --- Experiments ---
+  {
+    path: 'playground/experiments/components',
+    loadComponent: () =>
+      import(
+        './pages/playground/experiments/components-demo/components-demo.component'
+      ).then((m) => m.ComponentsDemoComponent),
   },
   {
-    path: 'docs/examples/components',
+    path: 'playground/experiments/cards',
     loadComponent: () =>
-      import('./pages/components-demo/components-demo.component').then(
-        (m) => m.ComponentsDemoComponent,
-      ),
+      import(
+        './pages/playground/experiments/card-examples/card-examples.component'
+      ).then((m) => m.CardExamplesComponent),
   },
   {
-    path: 'docs/examples/card-examples',
+    path: 'playground/experiments/prose',
     loadComponent: () =>
-      import('./pages/card-examples/card-examples.component').then(
-        (m) => m.CardExamplesComponent,
+      import(
+        './pages/playground/experiments/prose-demo/prose-demo.component'
+      ).then((m) => m.ProseDemoComponent),
+  },
+  {
+    path: 'playground/experiments/charts',
+    loadComponent: () =>
+      import(
+        './pages/playground/experiments/spark-charts/spark-charts.component'
+      ).then((m) => m.SparkChartsComponent),
+  },
+
+  // ============================================
+  // STANDALONE ROUTES
+  // ============================================
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('./pages/playground/pages/login/login.component').then(
+        (m) => m.LoginComponent,
       ),
   },
 
   // ============================================
   // LEGACY REDIRECTS (old routes → new routes)
   // ============================================
+
+  // Getting Started redirects
   {
     path: 'introduction',
     redirectTo: 'docs/getting-started/introduction',
@@ -267,6 +303,8 @@ export const appRoutes: Route[] = [
     redirectTo: 'docs/getting-started/quick-start',
     pathMatch: 'full',
   },
+
+  // Foundations redirects
   {
     path: 'design-tokens',
     redirectTo: 'docs/foundations/design-tokens',
@@ -277,19 +315,115 @@ export const appRoutes: Route[] = [
     redirectTo: 'docs/foundations/typography',
     pathMatch: 'full',
   },
+
+  // Old component routes → new aegisx routes
+  {
+    path: 'docs/components/data-display/overview',
+    redirectTo: 'docs/components/aegisx/data-display/overview',
+    pathMatch: 'full',
+  },
+  {
+    path: 'docs/components/data-display/card',
+    redirectTo: 'docs/components/aegisx/data-display/card',
+    pathMatch: 'full',
+  },
+  {
+    path: 'docs/components/data-display/badge',
+    redirectTo: 'docs/components/aegisx/data-display/badge',
+    pathMatch: 'full',
+  },
+  {
+    path: 'docs/components/data-display/avatar',
+    redirectTo: 'docs/components/aegisx/data-display/avatar',
+    pathMatch: 'full',
+  },
+  {
+    path: 'docs/components/data-display/list',
+    redirectTo: 'docs/components/aegisx/data-display/list',
+    pathMatch: 'full',
+  },
+  {
+    path: 'docs/components/data-display/kpi-card',
+    redirectTo: 'docs/components/aegisx/data-display/kpi-card',
+    pathMatch: 'full',
+  },
+  {
+    path: 'docs/components/data-display/sparkline',
+    redirectTo: 'docs/components/aegisx/charts/sparkline',
+    pathMatch: 'full',
+  },
+  {
+    path: 'docs/components/data-display/circular-progress',
+    redirectTo: 'docs/components/aegisx/charts/circular-progress',
+    pathMatch: 'full',
+  },
+  {
+    path: 'docs/components/data-display/segmented-progress',
+    redirectTo: 'docs/components/aegisx/charts/segmented-progress',
+    pathMatch: 'full',
+  },
+  {
+    path: 'docs/components/forms/date-picker',
+    redirectTo: 'docs/components/aegisx/forms/date-picker',
+    pathMatch: 'full',
+  },
+  {
+    path: 'docs/components/feedback/alert',
+    redirectTo: 'docs/components/aegisx/feedback/alert',
+    pathMatch: 'full',
+  },
+  {
+    path: 'docs/components/feedback/loading-bar',
+    redirectTo: 'docs/components/aegisx/feedback/loading-bar',
+    pathMatch: 'full',
+  },
+  {
+    path: 'docs/components/feedback/dialogs',
+    redirectTo: 'docs/components/aegisx/feedback/dialogs',
+    pathMatch: 'full',
+  },
+  {
+    path: 'docs/components/navigation/breadcrumb',
+    redirectTo: 'docs/components/aegisx/navigation/breadcrumb',
+    pathMatch: 'full',
+  },
+
+  // Examples redirects → playground
+  {
+    path: 'docs/examples/dashboard',
+    redirectTo: 'playground/pages/dashboard',
+    pathMatch: 'full',
+  },
+  {
+    path: 'docs/examples/user-management',
+    redirectTo: 'playground/pages/user-management',
+    pathMatch: 'full',
+  },
+  {
+    path: 'docs/examples/components',
+    redirectTo: 'playground/experiments/components',
+    pathMatch: 'full',
+  },
+  {
+    path: 'docs/examples/card-examples',
+    redirectTo: 'playground/experiments/cards',
+    pathMatch: 'full',
+  },
+
+  // Other legacy redirects
   {
     path: 'dashboard',
-    redirectTo: 'docs/examples/dashboard',
+    redirectTo: 'playground/pages/dashboard',
     pathMatch: 'full',
   },
   {
     path: 'users',
-    redirectTo: 'docs/examples/user-management',
+    redirectTo: 'playground/pages/user-management',
     pathMatch: 'full',
   },
   {
     path: 'components',
-    redirectTo: 'docs/examples/components',
+    redirectTo: 'playground/experiments/components',
     pathMatch: 'full',
   },
   {
@@ -304,98 +438,92 @@ export const appRoutes: Route[] = [
   },
   {
     path: 'badges',
-    redirectTo: 'docs/components/data-display/badge',
+    redirectTo: 'docs/components/aegisx/data-display/badge',
     pathMatch: 'full',
   },
   {
     path: 'kpi-card-demo',
-    redirectTo: 'docs/components/data-display/kpi-card',
+    redirectTo: 'docs/components/aegisx/data-display/kpi-card',
     pathMatch: 'full',
   },
   {
     path: 'card-examples',
-    redirectTo: 'docs/examples/card-examples',
+    redirectTo: 'playground/experiments/cards',
     pathMatch: 'full',
   },
   {
     path: 'sparkline-demo',
-    redirectTo: 'docs/components/data-display/sparkline',
+    redirectTo: 'docs/components/aegisx/charts/sparkline',
     pathMatch: 'full',
   },
   {
     path: 'circular-progress-demo',
-    redirectTo: 'docs/components/data-display/circular-progress',
+    redirectTo: 'docs/components/aegisx/charts/circular-progress',
     pathMatch: 'full',
   },
   {
     path: 'segmented-progress-demo',
-    redirectTo: 'docs/components/data-display/segmented-progress',
+    redirectTo: 'docs/components/aegisx/charts/segmented-progress',
     pathMatch: 'full',
   },
   {
     path: 'aegisx-ui',
-    redirectTo: 'docs/components/data-display/overview',
+    redirectTo: 'docs/components/aegisx/data-display/overview',
     pathMatch: 'full',
   },
   {
     path: 'aegisx-ui/cards',
-    redirectTo: 'docs/components/data-display/card',
+    redirectTo: 'docs/components/aegisx/data-display/card',
     pathMatch: 'full',
   },
   {
     path: 'aegisx-ui/lists',
-    redirectTo: 'docs/components/data-display/list',
+    redirectTo: 'docs/components/aegisx/data-display/list',
     pathMatch: 'full',
   },
   {
     path: 'aegisx-ui/data-display',
-    redirectTo: 'docs/components/data-display/overview',
+    redirectTo: 'docs/components/aegisx/data-display/overview',
     pathMatch: 'full',
   },
   {
     path: 'aegisx-ui/avatar',
-    redirectTo: 'docs/components/data-display/avatar',
+    redirectTo: 'docs/components/aegisx/data-display/avatar',
     pathMatch: 'full',
   },
   {
     path: 'aegisx-ui/date-picker',
-    redirectTo: 'docs/components/forms/date-picker',
+    redirectTo: 'docs/components/aegisx/forms/date-picker',
     pathMatch: 'full',
   },
   {
     path: 'aegisx-ui/alerts',
-    redirectTo: 'docs/components/feedback/alert',
+    redirectTo: 'docs/components/aegisx/feedback/alert',
     pathMatch: 'full',
   },
   {
     path: 'aegisx-ui/loading-bar',
-    redirectTo: 'docs/components/feedback/loading-bar',
+    redirectTo: 'docs/components/aegisx/feedback/loading-bar',
     pathMatch: 'full',
   },
   {
     path: 'aegisx-ui/breadcrumb',
-    redirectTo: 'docs/components/navigation/breadcrumb',
+    redirectTo: 'docs/components/aegisx/navigation/breadcrumb',
     pathMatch: 'full',
   },
   {
     path: 'aegisx-ui/dialogs',
-    redirectTo: 'docs/components/feedback/dialogs',
+    redirectTo: 'docs/components/aegisx/feedback/dialogs',
     pathMatch: 'full',
   },
-
-  // Deprecated routes (can be removed later)
   {
     path: 'prose-demo',
-    loadComponent: () =>
-      import('./pages/prose-demo/prose-demo.component').then(
-        (m) => m.ProseDemoComponent,
-      ),
+    redirectTo: 'playground/experiments/prose',
+    pathMatch: 'full',
   },
   {
     path: 'spark-charts',
-    loadComponent: () =>
-      import('./pages/spark-charts/spark-charts.component').then(
-        (m) => m.SparkChartsComponent,
-      ),
+    redirectTo: 'playground/experiments/charts',
+    pathMatch: 'full',
   },
 ];

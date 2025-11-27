@@ -1,0 +1,262 @@
+/* ============================================
+   Introduction Page Styles
+   Uses typography from aegisx-ui design system
+   ============================================ */
+
+// Enhanced body text for better readability
+.body-text {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--ax-text-primary);
+}
+
+// Section headers
+.section-header {
+  margin-bottom: 1.5rem;
+
+  h2 {
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+// Quick Actions Card
+.quick-actions-card {
+  background: var(--ax-background-default);
+  border: 1px solid var(--ax-border-default);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem 0;
+
+  .action-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
+
+// Tech Stack Grid
+.tech-stack {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  padding: 0.5rem 0;
+}
+
+.tech-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+
+  mat-icon {
+    font-size: 2rem;
+    width: 2rem;
+    height: 2rem;
+    color: var(--ax-brand-default);
+    flex-shrink: 0;
+  }
+
+  .tech-info {
+    // Typography handled by .h4 and .text-secondary classes
+  }
+}
+
+// Feature Cards Grid
+.quick-ref-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+
+.quick-ref-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 1.5rem;
+  min-height: 200px;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid var(--ax-border-default);
+  border-radius: var(--ax-radius-lg);
+  background: var(--ax-background-default);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  text-decoration: none;
+
+  &:hover {
+    box-shadow:
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border-color: var(--ax-brand-default);
+  }
+
+  .ref-icon {
+    font-size: 2.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    color: var(--ax-brand-default);
+    margin-bottom: 1rem;
+  }
+
+  .card-title {
+    margin: 0 0 0.5rem 0;
+    text-decoration: none !important;
+  }
+
+  .card-description {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin: 0;
+    color: var(--ax-text-secondary);
+  }
+}
+
+// Quick Links Grid
+.quick-links-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 1.5rem;
+}
+
+.quick-link-card {
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid var(--ax-border-default);
+  background: var(--ax-background-default);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  min-height: 240px;
+
+  &:hover {
+    box-shadow:
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border-color: var(--ax-brand-default);
+  }
+
+  mat-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.5rem;
+    height: 100%;
+  }
+
+  .link-icon {
+    font-size: 2.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    color: var(--ax-brand-default);
+    margin-bottom: 1rem;
+    flex-shrink: 0;
+  }
+
+  h3 {
+    flex-shrink: 0;
+  }
+
+  p {
+    flex: 1;
+  }
+
+  .link-action {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin-top: auto;
+    padding-top: 1rem;
+
+    mat-icon {
+      font-size: 1.125rem;
+      width: 1.125rem;
+      height: 1.125rem;
+    }
+  }
+}
+
+// Help Card
+.help-card {
+  background: var(--ax-background-default);
+  border: 1px solid var(--ax-border-default);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.help-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  padding: 1rem 0;
+
+  .help-text {
+    // Typography handled by .h3 and .text-secondary classes
+  }
+
+  .help-actions {
+    display: flex;
+    gap: 1rem;
+    flex-shrink: 0;
+
+    a {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+  }
+}
+
+// Responsive Adjustments
+@media (max-width: 1024px) {
+  .tech-stack {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .quick-ref-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .quick-actions {
+    flex-direction: column;
+
+    .action-button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  .tech-stack {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-ref-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-links-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .help-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+
+    .help-actions {
+      flex-direction: column;
+      width: 100%;
+
+      a {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  }
+}

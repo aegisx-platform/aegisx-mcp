@@ -5,7 +5,7 @@
    ============================================ */
 
 // ============================================
-// Typography Utilities (Semantic Text Colors)
+// Typography Utilities (Use Prose Colors)
 // ============================================
 
 .text-heading {
@@ -26,14 +26,14 @@
 }
 
 .text-disabled {
-  color: var(--ax-text-disabled);
+  color: var(--ax-text-subtle);
 }
 
 .text-inverted {
   color: var(--ax-text-inverted);
 }
 
-// Semantic success/warning/info text
+// Semantic success/warning/info text (keep AegisX tokens for semantic colors)
 .text-success {
   color: var(--ax-success-default);
 }
@@ -56,7 +56,7 @@
 
 // Standard documentation page container
 .docs-page {
-  max-width: 1400px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 1.5rem;
   display: flex;
@@ -229,10 +229,10 @@ code:not(pre code) {
   font-family: 'Fira Code', 'Courier New', Consolas, Monaco, monospace;
   font-size: 0.875em;
   padding: 0.125rem 0.375rem;
-  background-color: var(--ax-background-subtle);
+  background-color: var(--ax-background-muted);
   border: 1px solid var(--ax-border-default);
   border-radius: var(--ax-radius-sm);
-  color: var(--ax-text-primary);
+  color: var(--ax-text-heading);
 }
 
 // ============================================
@@ -242,7 +242,7 @@ code:not(pre code) {
 .example-box {
   padding: 2rem;
   border-radius: var(--ax-radius-lg);
-  background: var(--ax-background-muted);
+  background: var(--ax-background-subtle);
   border: 1px solid var(--ax-border-default);
   min-height: 120px;
   display: flex;
@@ -261,7 +261,7 @@ code:not(pre code) {
   }
 
   &.example-box-dark {
-    background: var(--ax-background-emphasis);
+    background: #1e1e1e;
     border-color: var(--ax-border-emphasis);
   }
 
@@ -314,14 +314,14 @@ code:not(pre code) {
     color: var(--ax-text-heading);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    border-bottom: 2px solid var(--ax-border-default);
+    border-bottom: 2px solid var(--ax-border-emphasis);
   }
 
   td {
     padding: 0.875rem 1rem;
     font-size: 0.9375rem;
     color: var(--ax-text-primary);
-    border-bottom: 1px solid var(--ax-border-muted);
+    border-bottom: 1px solid var(--ax-border-default);
 
     code {
       font-size: 0.8125em;
@@ -333,7 +333,7 @@ code:not(pre code) {
   }
 
   tr:hover {
-    background-color: var(--ax-background-muted);
+    background-color: var(--ax-background-subtle);
   }
 
   // Column width presets
@@ -408,7 +408,7 @@ code:not(pre code) {
     align-items: center;
     font-size: 0.875rem;
     padding: 0.5rem 0;
-    border-bottom: 1px solid var(--ax-border-muted);
+    border-bottom: 1px solid var(--ax-border-default);
 
     &:last-child {
       border-bottom: none;
@@ -468,6 +468,7 @@ code:not(pre code) {
       gap: 0.75rem;
       font-size: 0.9375rem;
       line-height: 1.5;
+      color: var(--ax-text-primary);
 
       mat-icon {
         flex-shrink: 0;
@@ -506,7 +507,7 @@ code:not(pre code) {
 
 .installation-block {
   padding: 1.5rem;
-  background-color: var(--ax-background-muted);
+  background-color: var(--ax-background-subtle);
   border-left: 4px solid var(--ax-brand-default);
   border-radius: var(--ax-radius-md);
 
@@ -543,7 +544,7 @@ code:not(pre code) {
 .quick-ref-card {
   padding: 1.25rem;
   border-radius: var(--ax-radius-lg);
-  background-color: var(--ax-background-muted);
+  background-color: var(--ax-background-subtle);
   border: 1px solid var(--ax-border-default);
   text-align: center;
   transition: all 0.2s;

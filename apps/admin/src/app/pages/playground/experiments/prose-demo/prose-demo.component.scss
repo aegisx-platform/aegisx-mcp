@@ -1,0 +1,66 @@
+/* Prose Demo Page Styles */
+
+.docs-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.docs-header {
+  margin-bottom: 3rem;
+
+  .docs-title {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: var(--ax-text-heading);
+    margin: 0 0 0.5rem 0;
+  }
+
+  .docs-subtitle {
+    font-size: 1.125rem;
+    color: var(--ax-text-secondary);
+    margin: 0;
+    line-height: 1.6;
+  }
+}
+
+.section-header {
+  margin-bottom: 1.5rem;
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--ax-text-heading);
+    margin: 0 0 0.5rem 0;
+  }
+
+  p {
+    font-size: 1rem;
+    color: var(--ax-text-secondary);
+    margin: 0;
+    line-height: 1.6;
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .docs-page {
+    padding: 1rem;
+  }
+
+  .docs-header {
+    margin-bottom: 2rem;
+
+    .docs-title {
+      font-size: 1.875rem;
+    }
+
+    .docs-subtitle {
+      font-size: 1rem;
+    }
+  }
+
+  .section-header h2 {
+    font-size: 1.25rem;
+  }
+}
