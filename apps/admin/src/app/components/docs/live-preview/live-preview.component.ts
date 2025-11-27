@@ -85,7 +85,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     `
       .live-preview {
         border-radius: var(--ax-radius-lg, 0.75rem);
-        overflow: hidden;
+        overflow: visible;
         background-color: var(--ax-background-default);
         margin: var(--ax-spacing-md, 0.75rem) 0;
       }

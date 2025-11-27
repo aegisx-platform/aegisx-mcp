@@ -3,8 +3,37 @@
 <router-outlet></router-outlet>
 }
 
-<!-- Main routes (with layout) -->
-@if (showLayout()) {
+<!-- Documentation routes (docs layout) -->
+@if (showLayout() && isDocsRoute()) {
+<ax-docs-layout
+  [navigation]="docsNavigation"
+  [showToc]="true"
+  [showHeader]="true"
+  [appName]="title"
+  [githubUrl]="'https://github.com/aegisx/aegisx-ui'"
+>
+  <!-- Header Actions (Theme Switcher + Search + GitHub) -->
+  <ng-template #headerActions>
+    <ax-tremor-theme-switcher></ax-tremor-theme-switcher>
+    <button mat-icon-button aria-label="Search">
+      <mat-icon>search</mat-icon>
+    </button>
+    <a
+      mat-icon-button
+      href="https://github.com/aegisx/aegisx-ui"
+      target="_blank"
+      aria-label="GitHub"
+    >
+      <mat-icon>code</mat-icon>
+    </a>
+  </ng-template>
+
+  <router-outlet></router-outlet>
+</ax-docs-layout>
+}
+
+<!-- Other routes (compact layout) -->
+@if (showLayout() && !isDocsRoute()) {
 <ax-compact-layout
   [navigation]="navigation"
   [appName]="appName"

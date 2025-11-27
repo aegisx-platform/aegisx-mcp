@@ -8,6 +8,8 @@ import {
   AxNavigationItem,
   AxLayoutSwitcherComponent,
   LayoutType,
+  AxDocsLayoutComponent,
+  DocsNavItem,
 } from '@aegisx/ui';
 import { TremorThemeSwitcherComponent } from './components/tremor-theme-switcher.component';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -20,6 +22,7 @@ import { filter, map, startWith } from 'rxjs/operators';
     MatButtonModule,
     MatIconModule,
     AxCompactLayoutComponent,
+    AxDocsLayoutComponent,
     TremorThemeSwitcherComponent,
     AxLayoutSwitcherComponent,
   ],
@@ -49,6 +52,12 @@ export class App {
     const url = this.currentUrl();
     // Don't show layout for standalone routes
     return !url.startsWith('/login');
+  });
+
+  // Check if current route is in docs section (for docs layout)
+  protected readonly isDocsRoute = computed(() => {
+    const url = this.currentUrl();
+    return url.startsWith('/docs');
   });
 
   // Navigation items - Storybook-style documentation structure
@@ -400,4 +409,223 @@ export class App {
     // TODO: Implement actual layout switching logic
     // This will be implemented when we create Enterprise and Empty layout components
   }
+
+  // Documentation navigation for Shadcn/ui-style sidebar
+  docsNavigation: DocsNavItem[] = [
+    {
+      id: 'getting-started',
+      title: 'Getting Started',
+      defaultOpen: true,
+      children: [
+        {
+          id: 'introduction',
+          title: 'Introduction',
+          link: '/docs/getting-started/introduction',
+        },
+        {
+          id: 'installation',
+          title: 'Installation',
+          link: '/docs/getting-started/installation',
+        },
+        {
+          id: 'quick-start',
+          title: 'Quick Start',
+          link: '/docs/getting-started/quick-start',
+        },
+      ],
+    },
+    {
+      id: 'foundations',
+      title: 'Foundations',
+      children: [
+        {
+          id: 'foundations-overview',
+          title: 'Overview',
+          link: '/docs/foundations/overview',
+        },
+        {
+          id: 'design-tokens',
+          title: 'Design Tokens',
+          link: '/docs/foundations/design-tokens',
+        },
+        {
+          id: 'colors',
+          title: 'Colors',
+          link: '/docs/foundations/colors',
+        },
+        {
+          id: 'typography',
+          title: 'Typography',
+          link: '/docs/foundations/typography',
+        },
+        {
+          id: 'spacing',
+          title: 'Spacing',
+          link: '/docs/foundations/spacing',
+        },
+        {
+          id: 'shadows',
+          title: 'Shadows',
+          link: '/docs/foundations/shadows',
+        },
+        {
+          id: 'motion',
+          title: 'Motion',
+          link: '/docs/foundations/motion',
+        },
+      ],
+    },
+    {
+      id: 'components',
+      title: 'Components',
+      children: [
+        {
+          id: 'data-display',
+          title: 'Data Display',
+          children: [
+            {
+              id: 'card',
+              title: 'Card',
+              link: '/docs/components/data-display/card',
+            },
+            {
+              id: 'kpi-card',
+              title: 'KPI Card',
+              link: '/docs/components/data-display/kpi-card',
+            },
+            {
+              id: 'badge',
+              title: 'Badge',
+              link: '/docs/components/data-display/badge',
+            },
+            {
+              id: 'avatar',
+              title: 'Avatar',
+              link: '/docs/components/data-display/avatar',
+            },
+            {
+              id: 'list',
+              title: 'List',
+              link: '/docs/components/data-display/list',
+            },
+            {
+              id: 'sparkline',
+              title: 'Sparkline',
+              link: '/docs/components/data-display/sparkline',
+            },
+          ],
+        },
+        {
+          id: 'forms',
+          title: 'Forms',
+          children: [
+            {
+              id: 'date-picker',
+              title: 'Date Picker',
+              link: '/docs/components/aegisx/forms/date-picker',
+            },
+            {
+              id: 'file-upload',
+              title: 'File Upload',
+              link: '/docs/components/aegisx/forms/file-upload',
+            },
+            {
+              id: 'form-sizes',
+              title: 'Form Sizes',
+              link: '/docs/patterns/form-sizes',
+            },
+            {
+              id: 'form-layouts',
+              title: 'Form Layouts',
+              link: '/docs/patterns/form-layouts',
+            },
+          ],
+        },
+        {
+          id: 'feedback',
+          title: 'Feedback',
+          children: [
+            {
+              id: 'alert',
+              title: 'Alert',
+              link: '/docs/components/aegisx/feedback/alert',
+            },
+            {
+              id: 'loading-bar',
+              title: 'Loading Bar',
+              link: '/docs/components/aegisx/feedback/loading-bar',
+            },
+            {
+              id: 'dialogs',
+              title: 'Dialogs',
+              link: '/docs/components/aegisx/feedback/dialogs',
+            },
+            {
+              id: 'toast',
+              title: 'Toast',
+              link: '/docs/components/aegisx/feedback/toast',
+            },
+            {
+              id: 'skeleton',
+              title: 'Skeleton',
+              link: '/docs/components/aegisx/feedback/skeleton',
+            },
+          ],
+        },
+        {
+          id: 'navigation',
+          title: 'Navigation',
+          children: [
+            {
+              id: 'breadcrumb',
+              title: 'Breadcrumb',
+              link: '/docs/components/aegisx/navigation/breadcrumb',
+            },
+            {
+              id: 'stepper',
+              title: 'Stepper',
+              link: '/docs/components/aegisx/navigation/stepper',
+            },
+          ],
+        },
+        {
+          id: 'layout',
+          title: 'Layout',
+          children: [
+            {
+              id: 'drawer',
+              title: 'Drawer / Sheet',
+              link: '/docs/components/aegisx/layout/drawer',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'examples',
+      title: 'Examples',
+      children: [
+        {
+          id: 'dashboard',
+          title: 'Dashboard',
+          link: '/docs/examples/dashboard',
+        },
+        {
+          id: 'user-management',
+          title: 'User Management',
+          link: '/docs/examples/user-management',
+        },
+        {
+          id: 'components-demo',
+          title: 'Material Components',
+          link: '/docs/examples/components',
+        },
+        {
+          id: 'card-examples',
+          title: 'Card Examples',
+          link: '/docs/examples/card-examples',
+        },
+      ],
+    },
+  ];
 }
