@@ -73,6 +73,9 @@ export class TestProductService {
 
   /**
    * Handle HTTP errors and set appropriate error signals
+   * - 400 errors: Don't set error state (validation errors should show toast only)
+   * - 403 errors: Set permission error for access denied
+   * - 5xx errors: Set error state for server errors (show full page error)
    */
   private handleError(error: any, defaultMessage: string): void {
     const status = error?.status || null;
@@ -82,7 +85,18 @@ export class TestProductService {
     if (status === 403) {
       this.permissionErrorSignal.set(true);
       this.errorSignal.set('You do not have permission to perform this action');
+    } else if (
+      status === 400 ||
+      status === 404 ||
+      status === 409 ||
+      status === 422
+    ) {
+      // Client errors (validation, not found, conflict) - don't set error state
+      // These should be handled by the component showing a toast
+      this.permissionErrorSignal.set(false);
+      // Don't set errorSignal - let component handle with toast
     } else {
+      // Server errors (5xx) or unknown errors - show full page error
       this.permissionErrorSignal.set(false);
       this.errorSignal.set(error.message || defaultMessage);
     }
@@ -522,81 +536,6 @@ export class TestProductService {
       throw error;
     } finally {
       this.loadingSignal.set(false);
-    }
-  }
-
-  // ===== ADVANCED OPERATIONS (FULL PACKAGE) =====
-
-  /**
-   * Validate testProducts data before save
-   */
-  async validateTestProduct(
-    data: CreateTestProductRequest,
-  ): Promise<{ valid: boolean; errors?: any[] }> {
-    try {
-      const response = await this.http
-        .post<
-          ApiResponse<{ valid: boolean; errors?: any[] }>
-        >(`${this.baseUrl}/validate`, { data })
-        .toPromise();
-
-      if (response) {
-        return response.data;
-      }
-      return { valid: false, errors: ['Validation failed'] };
-    } catch (error: any) {
-      console.error('Failed to validate testProducts:', error);
-      return { valid: false, errors: [error.message || 'Validation error'] };
-    }
-  }
-
-  /**
-   * Check field uniqueness
-   */
-  async checkUniqueness(
-    field: string,
-    value: string,
-    excludeId?: string,
-  ): Promise<{ unique: boolean }> {
-    try {
-      let params = new HttpParams().set('value', value);
-
-      if (excludeId) {
-        params = params.set('excludeId', excludeId);
-      }
-
-      const response = await this.http
-        .get<
-          ApiResponse<{ unique: boolean }>
-        >(`${this.baseUrl}/check/${field}`, { params })
-        .toPromise();
-
-      if (response) {
-        return response.data;
-      }
-      return { unique: false };
-    } catch (error: any) {
-      console.error('Failed to check uniqueness:', error);
-      return { unique: false };
-    }
-  }
-
-  /**
-   * Get testProducts statistics
-   */
-  async getStats(): Promise<{ total: number } | null> {
-    try {
-      const response = await this.http
-        .get<ApiResponse<{ total: number }>>(`${this.baseUrl}/stats`)
-        .toPromise();
-
-      if (response) {
-        return response.data;
-      }
-      return null;
-    } catch (error: any) {
-      console.error('Failed to get testProducts stats:', error);
-      return null;
     }
   }
 

@@ -1,37 +1,27 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
+import { AxKpiCardComponent } from '@aegisx/ui';
 
 @Component({
   selector: 'app-test-products-list-header',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatButtonModule, MatCardModule],
+  imports: [CommonModule, MatIconModule, MatButtonModule, AxKpiCardComponent],
   template: `
-    <!-- Page Header -->
-    <div class="flex justify-between items-center mb-6">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
-          Test Products
-        </h1>
-        <p class="text-gray-600 dark:text-gray-400 mt-1">
-          Manage your test product collection
+    <!-- Header with Stats Summary -->
+    <div class="flex items-start justify-between mt-4">
+      <div class="flex-1">
+        <div class="flex items-center gap-3">
+          <h1 class="text-2xl font-semibold text-[var(--ax-text-default)]">
+            TestProducts
+          </h1>
+        </div>
+        <p class="text-sm text-[var(--ax-text-secondary)]">
+          Manage your testproduct collection
         </p>
       </div>
-
-      <div class="flex gap-2">
-        <!-- Import Button -->
-        <button
-          mat-stroked-button
-          (click)="importClicked.emit()"
-          [disabled]="loading || hasError"
-        >
-          <mat-icon>upload</mat-icon>
-          <span>Import</span>
-        </button>
-
-        <!-- Add Product Button -->
+      <div class="flex items-center gap-2">
         <button
           mat-flat-button
           color="primary"
@@ -39,7 +29,7 @@ import { MatIconModule } from '@angular/material/icon';
           [disabled]="loading || hasError"
         >
           <mat-icon>add</mat-icon>
-          <span>Add Product</span>
+          Add testproduct
         </button>
       </div>
     </div>
@@ -47,104 +37,70 @@ import { MatIconModule } from '@angular/material/icon';
     <!-- Permission Error -->
     @if (permissionError) {
       <div
-        class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-2 mb-6"
+        class="bg-[var(--ax-error-faint)] border border-[var(--ax-error-border)] rounded-lg p-2 mb-6"
       >
         <div class="flex items-start gap-3">
           <div
-            class="flex items-center justify-center w-18 h-18 bg-red-100 dark:bg-red-900/50 rounded-full flex-shrink-0"
+            class="flex items-center justify-center w-18 h-18 bg-[var(--ax-error-surface)] rounded-full flex-shrink-0"
           >
-            <mat-icon class="text-red-600 dark:text-red-400 !text-4xl !w-7 !h-7"
+            <mat-icon class="text-[var(--ax-error-default)] !text-4xl !w-7 !h-7"
               >lock</mat-icon
             >
           </div>
           <div class="flex-1">
-            <h3 class="text-lg font-medium text-red-900 dark:text-red-300">
+            <h3 class="text-lg font-medium text-[var(--ax-error-emphasis)]">
               Access Denied
             </h3>
-            <p class="text-sm text-red-700 dark:text-red-400">
+            <p class="text-sm text-[var(--ax-error-default)]">
               You don't have permission to access or modify test_products.
             </p>
           </div>
           <button
-            mat-icon-button
-            color="warn"
             (click)="clearPermissionError.emit()"
+            class="text-[var(--ax-error-default)] hover:text-[var(--ax-error-hover)]"
           >
-            <mat-icon>close</mat-icon>
+            <mat-icon class="!text-xl !w-5 !h-5">close</mat-icon>
           </button>
         </div>
       </div>
     }
 
-    <!-- Statistics Cards Grid -->
+    <!-- Stats Cards using AxKpiCardComponent (hide when any error exists) -->
     @if (!hasError) {
       <div
         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-2 mb-4"
       >
-        <!-- Total TestProducts Card -->
-        <mat-card appearance="outlined">
-          <mat-card-content>
-            <p class="text-sm text-gray-600 dark:text-gray-400">
-              Total TestProducts
-            </p>
-            <h3
-              class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mt-2"
-            >
-              {{ stats.total }}
-            </h3>
-            <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">
-              <span>All products</span>
-            </p>
-          </mat-card-content>
-        </mat-card>
+        <ax-kpi-card
+          label="Total TestProducts"
+          [value]="stats.total"
+          variant="simple"
+        ></ax-kpi-card>
 
-        <!-- Available Card -->
-        <mat-card appearance="outlined">
-          <mat-card-content>
-            <p class="text-sm text-gray-600 dark:text-gray-400">Available</p>
-            <h3
-              class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mt-2"
-            >
-              {{ stats.available }}
-            </h3>
-            <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">
-              <span>{{ getPercentage(stats.available) }}% available</span>
-            </p>
-          </mat-card-content>
-        </mat-card>
+        <ax-kpi-card
+          label="Available"
+          [value]="stats.available"
+          variant="badge"
+          [badge]="getPercentage(stats.available) + '%'"
+          badgeType="success"
+        ></ax-kpi-card>
 
-        <!-- Unavailable Card -->
-        <mat-card appearance="outlined">
-          <mat-card-content>
-            <p class="text-sm text-gray-600 dark:text-gray-400">Unavailable</p>
-            <h3
-              class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mt-2"
-            >
-              {{ stats.unavailable }}
-            </h3>
-            <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">
-              <span>{{ getPercentage(stats.unavailable) }}% unavailable</span>
-            </p>
-          </mat-card-content>
-        </mat-card>
+        <ax-kpi-card
+          label="Unavailable"
+          [value]="stats.unavailable"
+          variant="badge"
+          [badge]="getPercentage(stats.unavailable) + '%'"
+          badgeType="error"
+        ></ax-kpi-card>
 
-        <!-- This Week Card -->
-        <mat-card appearance="outlined">
-          <mat-card-content>
-            <p class="text-sm text-gray-600 dark:text-gray-400">This Week</p>
-            <h3
-              class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mt-2"
-            >
-              {{ stats.recentWeek }}
-            </h3>
-            <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">
-              <span>New products</span>
-            </p>
-          </mat-card-content>
-        </mat-card>
+        <ax-kpi-card
+          label="This Week"
+          [value]="stats.recentWeek"
+          variant="simple"
+        ></ax-kpi-card>
       </div>
     }
   `,
+  styles: [],
 })
 export class TestProductsListHeaderComponent {
   @Input({ required: true }) stats!: {
@@ -158,7 +114,6 @@ export class TestProductsListHeaderComponent {
   @Input() hasError = false; // General error state (from service)
 
   @Output() createClicked = new EventEmitter<void>();
-  @Output() importClicked = new EventEmitter<void>();
   @Output() clearPermissionError = new EventEmitter<void>();
 
   getPercentage(count: number): number {

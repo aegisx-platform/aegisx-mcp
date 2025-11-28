@@ -1,24 +1,21 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnDestroy, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, inject, signal, OnDestroy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTableModule } from '@angular/material/table';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-import { AuthService } from '../../../core/auth/services/auth.service';
-import { WebSocketService } from '../../../shared/business/services/websocket.service';
+import { MatChipsModule } from '@angular/material/chips';
+import { FormsModule } from '@angular/forms';
 
 import { TestProductService } from '../services/test-products.service';
 import {
-  ImportJob,
   ImportOptions,
   ValidateImportResponse,
+  ImportJob,
+  ImportRowPreview,
 } from '../types/test-products.types';
 
 type ImportStep = 'upload' | 'review' | 'options' | 'progress' | 'complete';
@@ -40,23 +37,28 @@ type ImportStep = 'upload' | 'review' | 'options' | 'progress' | 'complete';
   template: `
     <div class="tremor-dialog-container">
       <!-- Header -->
-      <h2 mat-dialog-title class="ax-header ax-header-success">
-        <div class="ax-icon-success">
-          <mat-icon>upload_file</mat-icon>
-        </div>
-        <div class="header-text">
-          <div class="ax-title">Bulk Import Test Products</div>
-          <div class="ax-subtitle">{{ getStepTitle() }}</div>
+      <div class="tremor-dialog-header bg-green-50">
+        <div class="flex items-center gap-3">
+          <div class="tremor-icon-wrapper tremor-icon-green">
+            <mat-icon>upload_file</mat-icon>
+          </div>
+          <div>
+            <h2 class="tremor-dialog-title">Bulk Import Test Products</h2>
+            <p class="tremor-dialog-subtitle">
+              {{ getStepTitle() }}
+            </p>
+          </div>
         </div>
         <button
           type="button"
           mat-icon-button
+          class="tremor-close-button"
           [mat-dialog-close]="false"
           [disabled]="currentStep() === 'progress'"
         >
           <mat-icon>close</mat-icon>
         </button>
-      </h2>
+      </div>
 
       <!-- Step Indicator -->
       <div class="step-indicator">
@@ -528,14 +530,56 @@ type ImportStep = 'upload' | 'review' | 'options' | 'progress' | 'complete';
         max-height: 90vh;
       }
 
-      /* Header styles now use shared dialog classes from _dialog-shared.scss */
+      .tremor-dialog-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        padding: 1.5rem;
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      .bg-green-50 {
+        background: linear-gradient(to bottom, #ffffff, #f0fdf4);
+      }
+
+      .tremor-icon-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 3rem;
+        height: 3rem;
+        border-radius: 0.75rem;
+      }
+
+      .tremor-icon-green {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
+      }
+
+      .tremor-dialog-title {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #111827;
+      }
+
+      .tremor-dialog-subtitle {
+        margin: 0.25rem 0 0 0;
+        font-size: 0.875rem;
+        color: #6b7280;
+      }
+
+      .tremor-close-button {
+        color: #6b7280;
+      }
 
       .step-indicator {
         display: flex;
         align-items: center;
         padding: 1.5rem;
-        background: var(--ax-background-subtle);
-        border-bottom: 1px solid var(--ax-border-default);
+        background: #f9fafb;
+        border-bottom: 1px solid #e5e7eb;
       }
 
       .step {
@@ -549,8 +593,8 @@ type ImportStep = 'upload' | 'review' | 'options' | 'progress' | 'complete';
         width: 2rem;
         height: 2rem;
         border-radius: 50%;
-        background: var(--ax-background-muted);
-        color: var(--ax-text-secondary);
+        background: #e5e7eb;
+        color: #6b7280;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -559,35 +603,35 @@ type ImportStep = 'upload' | 'review' | 'options' | 'progress' | 'complete';
       }
 
       .step.active .step-number {
-        background: var(--ax-success);
-        color: var(--ax-white);
+        background: #10b981;
+        color: white;
       }
 
       .step.completed .step-number {
-        background: var(--ax-success);
-        color: var(--ax-white);
+        background: #10b981;
+        color: white;
       }
 
       .step span {
         font-size: 0.75rem;
-        color: var(--ax-text-secondary);
+        color: #6b7280;
         font-weight: 500;
       }
 
       .step.active span {
-        color: var(--ax-success);
+        color: #10b981;
         font-weight: 600;
       }
 
       .step-line {
         flex: 1;
         height: 2px;
-        background: var(--ax-border-default);
+        background: #e5e7eb;
         margin: 0 1rem;
       }
 
       .step-line.completed {
-        background: var(--ax-success);
+        background: #10b981;
       }
 
       .tremor-dialog-content {
@@ -601,24 +645,24 @@ type ImportStep = 'upload' | 'review' | 'options' | 'progress' | 'complete';
       }
 
       .upload-area {
-        border: 2px dashed var(--ax-border-default);
-        border-radius: var(--ax-radius-md);
+        border: 2px dashed #d1d5db;
+        border-radius: 0.5rem;
         padding: 3rem 2rem;
         text-align: center;
         cursor: pointer;
-        transition: all var(--ax-duration-normal) var(--ax-easing-easeInOut);
+        transition: all 0.2s;
       }
 
       .upload-area:hover {
-        border-color: var(--ax-success);
-        background: var(--ax-success-faint);
+        border-color: #10b981;
+        background: #f0fdf4;
       }
 
       .upload-icon {
         font-size: 4rem;
         width: 4rem;
         height: 4rem;
-        color: var(--ax-success);
+        color: #10b981;
         margin-bottom: 1rem;
       }
 
@@ -627,51 +671,51 @@ type ImportStep = 'upload' | 'review' | 'options' | 'progress' | 'complete';
         align-items: center;
         gap: 0.5rem;
         padding: 1rem;
-        background: var(--ax-success-faint);
-        border-radius: var(--ax-radius-md);
+        background: #f0fdf4;
+        border-radius: 0.5rem;
         margin-top: 1rem;
       }
 
       .stat-card {
         padding: 1rem;
-        background: var(--ax-background-default);
-        border-radius: var(--ax-radius-md);
-        border: 1px solid var(--ax-border-default);
+        background: white;
+        border-radius: 0.5rem;
+        border: 1px solid #e5e7eb;
         text-align: center;
       }
 
       .stat-card.stat-success {
-        background: var(--ax-success-faint);
-        border-color: var(--ax-success);
+        background: #f0fdf4;
+        border-color: #10b981;
       }
 
       .stat-card.stat-error {
-        background: var(--ax-error-faint);
-        border-color: var(--ax-error);
+        background: #fef2f2;
+        border-color: #ef4444;
       }
 
       .stat-card.stat-warning {
-        background: var(--ax-warning-faint);
-        border-color: var(--ax-warning);
+        background: #fffbeb;
+        border-color: #f59e0b;
       }
 
       .stat-value {
         font-size: 1.5rem;
         font-weight: 700;
-        color: var(--ax-text-primary);
+        color: #111827;
       }
 
       .stat-label {
         font-size: 0.875rem;
-        color: var(--ax-text-secondary);
+        color: #6b7280;
         margin-top: 0.25rem;
       }
 
       .table-container {
         max-height: 400px;
         overflow-y: auto;
-        border: 1px solid var(--ax-border-default);
-        border-radius: var(--ax-radius-md);
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
       }
 
       .preview-table {
@@ -679,7 +723,7 @@ type ImportStep = 'upload' | 'review' | 'options' | 'progress' | 'complete';
       }
 
       .error-row {
-        background: var(--ax-error-faint) !important;
+        background: #fef2f2 !important;
       }
 
       .error-list,
@@ -696,14 +740,14 @@ type ImportStep = 'upload' | 'review' | 'options' | 'progress' | 'complete';
       }
 
       .error-icon {
-        color: var(--ax-error);
+        color: #ef4444;
         font-size: 1rem;
         width: 1rem;
         height: 1rem;
       }
 
       .warning-icon {
-        color: var(--ax-warning);
+        color: #f59e0b;
         font-size: 1rem;
         width: 1rem;
         height: 1rem;
@@ -711,24 +755,24 @@ type ImportStep = 'upload' | 'review' | 'options' | 'progress' | 'complete';
 
       .action-badge {
         padding: 0.25rem 0.5rem;
-        border-radius: var(--ax-radius-sm);
+        border-radius: 0.25rem;
         font-size: 0.75rem;
         font-weight: 600;
       }
 
       .action-badge.create {
-        background: var(--ax-info-faint);
-        color: var(--ax-info-dark);
+        background: #dbeafe;
+        color: #1e40af;
       }
 
       .action-badge.update {
-        background: var(--ax-warning-faint);
-        color: var(--ax-warning-dark);
+        background: #fef3c7;
+        color: #92400e;
       }
 
       .action-badge.skip {
-        background: var(--ax-background-muted);
-        color: var(--ax-text-secondary);
+        background: #f3f4f6;
+        color: #6b7280;
       }
 
       .options-grid {
@@ -738,14 +782,14 @@ type ImportStep = 'upload' | 'review' | 'options' | 'progress' | 'complete';
 
       .option-item {
         padding: 1rem;
-        background: var(--ax-background-subtle);
-        border-radius: var(--ax-radius-md);
+        background: #f9fafb;
+        border-radius: 0.5rem;
       }
 
       .option-description {
         margin: 0.5rem 0 0 2rem;
         font-size: 0.875rem;
-        color: var(--ax-text-secondary);
+        color: #6b7280;
       }
 
       .progress-container,
@@ -758,7 +802,7 @@ type ImportStep = 'upload' | 'review' | 'options' | 'progress' | 'complete';
         font-size: 4rem;
         width: 4rem;
         height: 4rem;
-        color: var(--ax-success);
+        color: #10b981;
         margin-bottom: 1rem;
       }
 
@@ -783,26 +827,26 @@ type ImportStep = 'upload' | 'review' | 'options' | 'progress' | 'complete';
       }
 
       .complete-icon.success {
-        color: var(--ax-success);
+        color: #10b981;
       }
 
       .complete-icon.warning {
-        color: var(--ax-warning);
+        color: #f59e0b;
       }
 
       .result-summary {
         max-width: 400px;
         margin: 2rem auto;
         padding: 1rem;
-        background: var(--ax-background-subtle);
-        border-radius: var(--ax-radius-md);
+        background: #f9fafb;
+        border-radius: 0.5rem;
       }
 
       .result-row {
         display: flex;
         justify-content: space-between;
         padding: 0.5rem 0;
-        border-bottom: 1px solid var(--ax-border-default);
+        border-bottom: 1px solid #e5e7eb;
       }
 
       .result-row:last-child {
@@ -810,11 +854,11 @@ type ImportStep = 'upload' | 'review' | 'options' | 'progress' | 'complete';
       }
 
       .result-row.success {
-        color: var(--ax-success);
+        color: #10b981;
       }
 
       .result-row.error {
-        color: var(--ax-error);
+        color: #ef4444;
       }
 
       .tremor-dialog-footer {
@@ -822,8 +866,8 @@ type ImportStep = 'upload' | 'review' | 'options' | 'progress' | 'complete';
         justify-content: flex-end;
         gap: 0.5rem;
         padding: 1rem 1.5rem;
-        border-top: 1px solid var(--ax-border-default);
-        background: var(--ax-background-subtle);
+        border-top: 1px solid #e5e7eb;
+        background: #f9fafb;
       }
 
       /* Utility classes */
@@ -879,7 +923,7 @@ type ImportStep = 'upload' | 'review' | 'options' | 'progress' | 'complete';
         font-weight: 600;
       }
       .text-gray-600 {
-        color: var(--ax-text-secondary);
+        color: #6b7280;
       }
     `,
   ],
@@ -888,9 +932,6 @@ export class TestProductImportDialogComponent implements OnDestroy {
   private testProductsService = inject(TestProductService);
   private snackBar = inject(MatSnackBar);
   private dialogRef = inject(MatDialogRef<TestProductImportDialogComponent>);
-  private wsService = inject(WebSocketService);
-  private authService = inject(AuthService);
-  private destroy$ = new Subject<void>();
 
   currentStep = signal<ImportStep>('upload');
   loading = signal<boolean>(false);
@@ -914,6 +955,8 @@ export class TestProductImportDialogComponent implements OnDestroy {
     'slug',
     'errors',
   ];
+
+  private pollingInterval: any;
 
   getStepTitle(): string {
     const titles: Record<ImportStep, string> = {
@@ -1025,7 +1068,7 @@ export class TestProductImportDialogComponent implements OnDestroy {
       if (response?.success && response.data) {
         this.importJob.set(response.data);
         this.currentStep.set('progress');
-        this.setupWebSocketListener(response.data.jobId);
+        this.startPolling(response.data.jobId);
       }
     } catch (error: any) {
       this.snackBar.open(error?.message || 'Failed to start import', 'Close', {
@@ -1036,59 +1079,41 @@ export class TestProductImportDialogComponent implements OnDestroy {
     }
   }
 
-  private setupWebSocketListener(jobId: string): void {
-    // 🔌 Establish WebSocket connection before subscribing
-    const token = this.authService.accessToken();
-    if (!token) {
-      console.error(
-        'No authentication token available for WebSocket connection',
-      );
-      return;
-    }
-    this.wsService.connect(token);
+  private startPolling(jobId: string): void {
+    this.pollingInterval = setInterval(async () => {
+      try {
+        const response = await this.testProductsService.getImportStatus(jobId);
 
-    // 📡 Subscribe to feature events (use camelCase to match backend module name)
-    this.wsService.subscribe({ features: ['testProducts'] });
+        if (response?.success && response.data) {
+          this.importJob.set(response.data);
 
-    this.wsService
-      .subscribeToEvent('testProducts', 'import', 'progress')
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((event: any) => {
-        console.log('📡 Import progress event received:', { jobId, event });
+          if (
+            response.data.status === 'completed' ||
+            response.data.status === 'failed'
+          ) {
+            this.stopPolling();
+            this.currentStep.set('complete');
 
-        // Only process events for this job
-        if (event.jobId !== jobId) return;
-
-        console.log('✅ Updating import progress:', {
-          progress: event.progress,
-          processed: event.processedRecords,
-          total: event.totalRecords,
-        });
-
-        // Update import job with progress data
-        this.importJob.update((current) => ({
-          ...current!,
-          status: event.status,
-          progress: event.progress,
-          processedRecords: event.processedRecords,
-          successCount: event.successCount,
-          failedCount: event.failedCount,
-          error: event.error,
-        }));
-
-        // Handle completion/failure
-        if (event.status === 'completed' || event.status === 'failed') {
-          this.currentStep.set('complete');
-
-          if (event.status === 'completed') {
-            this.snackBar.open('Import completed successfully!', 'Close', {
-              duration: 5000,
-            });
-          } else {
-            this.snackBar.open('Import failed', 'Close', { duration: 5000 });
+            if (response.data.status === 'completed') {
+              this.snackBar.open('Import completed successfully!', 'Close', {
+                duration: 5000,
+              });
+            } else {
+              this.snackBar.open('Import failed', 'Close', { duration: 5000 });
+            }
           }
         }
-      });
+      } catch (error) {
+        console.error('Failed to poll import status:', error);
+      }
+    }, 2000); // Poll every 2 seconds
+  }
+
+  private stopPolling(): void {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+      this.pollingInterval = null;
+    }
   }
 
   goToStep(step: ImportStep): void {
@@ -1116,13 +1141,11 @@ export class TestProductImportDialogComponent implements OnDestroy {
   }
 
   onCancel(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+    this.stopPolling();
     this.dialogRef.close();
   }
 
   ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+    this.stopPolling();
   }
 }

@@ -1,10 +1,3 @@
-import {
-  animate,
-  state,
-  style,
-  transition,
-  trigger,
-} from '@angular/animations';
 import { CommonModule } from '@angular/common';
 import {
   ChangeDetectorRef,
@@ -19,12 +12,18 @@ import {
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { fromEventPattern } from 'rxjs';
+import {
+  trigger,
+  state,
+  style,
+  transition,
+  animate,
+} from '@angular/animations';
 
 // Material imports for table
 import { SelectionModel } from '@angular/cdk/collections';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -40,11 +39,12 @@ import {
 } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatCardModule } from '@angular/material/card';
 
 import {
-  AxDialogService,
   AxEmptyStateComponent,
   AxErrorStateComponent,
+  AxDialogService,
   BreadcrumbComponent,
   BreadcrumbItem,
 } from '@aegisx/ui';
@@ -53,18 +53,16 @@ import {
   ExportService,
   SharedExportComponent,
 } from '../../../shared/components/shared-export/shared-export.component';
-import { TestProductStateManager } from '../services/test-products-state-manager.service';
 import { TestProductService } from '../services/test-products.service';
 import {
-  ListTestProductQuery,
   TestProduct,
+  ListTestProductQuery,
 } from '../types/test-products.types';
 import { TestProductCreateDialogComponent } from './test-products-create.dialog';
 import {
   TestProductEditDialogComponent,
   TestProductEditDialogData,
 } from './test-products-edit.dialog';
-import { TestProductImportDialogComponent } from './test-products-import.dialog';
 import {
   TestProductViewDialogComponent,
   TestProductViewDialogData,
@@ -82,7 +80,6 @@ import { TestProductsListHeaderComponent } from './test-products-list-header.com
     RouterModule,
     FormsModule,
     MatButtonModule,
-    MatCardModule,
     MatIconModule,
     MatProgressSpinnerModule,
     MatTableModule,
@@ -91,6 +88,7 @@ import { TestProductsListHeaderComponent } from './test-products-list-header.com
     MatCheckboxModule,
     MatTooltipModule,
     MatMenuModule,
+    MatCardModule,
     SharedExportComponent,
     BreadcrumbComponent,
     // Child components
@@ -115,7 +113,6 @@ import { TestProductsListHeaderComponent } from './test-products-list-header.com
 })
 export class TestProductsListComponent {
   testProductsService = inject(TestProductService);
-  testProductStateManager = inject(TestProductStateManager);
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
   private axDialog = inject(AxDialogService);
@@ -135,7 +132,6 @@ export class TestProductsListComponent {
   // Mat-Table setup
   displayedColumns: string[] = [
     'select',
-    'expand',
     'code',
     'name',
     'slug',
@@ -348,13 +344,36 @@ export class TestProductsListComponent {
     this.is_featuredInputSignal.set(value);
   }
 
-  // Stats from API (should come from dedicated stats endpoint)
-  stats = computed(() => ({
-    total: this.testProductsService.totalTestProduct(),
-    available: 0,
-    unavailable: 0,
-    recentWeek: 0,
-  }));
+  // Stats computed from data
+  // Note: For accurate stats, consider implementing a dedicated stats endpoint
+  stats = computed(() => {
+    const list = this.testProductsService.testProductsList();
+    const total = this.testProductsService.totalTestProduct();
+
+    // Calculate available/unavailable from first boolean field (typically is_active)
+    // This is a client-side approximation - for accurate counts, use a stats API
+    const available = list.filter(
+      (item: any) => item.is_active === true,
+    ).length;
+    const unavailable = list.filter(
+      (item: any) => item.is_active === false,
+    ).length;
+
+    // Calculate items created this week
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    const recentWeek = list.filter((item: any) => {
+      const createdAt = item.created_at ? new Date(item.created_at) : null;
+      return createdAt && createdAt >= oneWeekAgo;
+    }).length;
+
+    return {
+      total,
+      available,
+      unavailable,
+      recentWeek,
+    };
+  });
 
   // Export configuration
   exportServiceAdapter: ExportService = {
@@ -390,37 +409,6 @@ export class TestProductsListComponent {
 
   // --- Effect: reload test_products on sort/page/search/filter change ---
   constructor() {
-    // Initialize real-time state manager
-    this.testProductStateManager.initialize();
-
-    // 🔧 OPTIONAL: Uncomment for real-time CRUD updates
-    // By default, list uses reload trigger for data accuracy (HIS mode)
-    // Uncomment below to enable real-time updates instead:
-    /*
-    // Real-time CRUD event subscriptions (optional)
-    // Backend always emits these events for audit trail and event-driven architecture
-    // Frontend can optionally subscribe for real-time UI updates
-
-    // Note: Import required dependencies first:
-    // import { WebSocketService } from '../../../core/services/websocket.service';
-    // import { AuthService } from '../../../core/services/auth.service';
-    // import { Subject } from 'rxjs';
-    // import { takeUntil } from 'rxjs/operators';
-
-    // Add these as class properties:
-    // private wsService = inject(WebSocketService);
-    // private authService = inject(AuthService);
-    // private destroy$ = new Subject<void>();
-
-    // Setup WebSocket connection for real-time updates
-    const token = this.authService.accessToken();
-    if (token) {
-      this.wsService.connect(token);
-      this.wsService.subscribe({ features: ['test_products'] });
-      this.setupCrudEventListeners();
-    }
-    */
-
     // Sync export selection state
     effect(() => {
       const ids = new Set(this.selection.selected.map((b) => b.id));
@@ -690,22 +678,6 @@ export class TestProductsListComponent {
     });
   }
 
-  openImportDialog() {
-    const dialogRef = this.dialog.open(TestProductImportDialogComponent, {
-      width: '900px',
-      maxHeight: '90vh',
-    });
-
-    dialogRef.afterClosed().subscribe((result: boolean) => {
-      if (result) {
-        this.snackBar.open('Import completed successfully', 'Close', {
-          duration: 3000,
-        });
-        this.reloadTrigger.update((n) => n + 1);
-      }
-    });
-  }
-
   onViewTestProduct(testProduct: TestProduct) {
     const dialogRef = this.dialog.open(TestProductViewDialogComponent, {
       width: '600px',
@@ -738,12 +710,11 @@ export class TestProductsListComponent {
     this.axDialog.confirmDelete(itemName).subscribe(async (confirmed) => {
       if (confirmed) {
         try {
-          // Use state manager's optimistic delete for real-time UI updates
-          await this.testProductStateManager.optimisticDelete(testProduct.id);
+          await this.testProductsService.deleteTestProduct(testProduct.id);
           this.snackBar.open('TestProduct deleted successfully', 'Close', {
             duration: 3000,
           });
-          // No need to reload - state manager auto-updates dataSource via effect
+          this.reloadTrigger.update((n) => n + 1);
         } catch {
           this.snackBar.open('Failed to delete testproduct', 'Close', {
             duration: 3000,
@@ -852,65 +823,4 @@ export class TestProductsListComponent {
   isRowExpanded(testProduct: TestProduct): boolean {
     return this.expandedTestProduct()?.id === testProduct.id;
   }
-
-  // 🔧 OPTIONAL: Real-time CRUD Event Listeners
-  // This method is commented out by default - uncomment to enable real-time updates
-  // Remember to also uncomment the WebSocket setup in constructor and add required imports
-  /*
-  private setupCrudEventListeners(): void {
-    // 📡 Subscribe to 'created' event
-    // Triggered when a new testProduct is created (by any user)
-    this.wsService
-      .subscribeToEvent('test_products', 'test_products', 'created')
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((event: any) => {
-        console.log('🔥 New testProduct created:', event.data);
-
-        // Option 1: Add to local state and refresh display
-        this.testProductsService.testProductsListSignal.update(
-          list => [event.data, ...list]
-        );
-        this.reloadTrigger.update(n => n + 1); // Refresh display
-
-        // Option 2: Just refresh from server (more reliable)
-        // this.reloadTrigger.update(n => n + 1);
-      });
-
-    // 📡 Subscribe to 'updated' event
-    // Triggered when a testProduct is modified (by any user)
-    this.wsService
-      .subscribeToEvent('test_products', 'test_products', 'updated')
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((event: any) => {
-        console.log('🔄 TestProduct updated:', event.data);
-
-        // Option 1: Update in local state and refresh display
-        this.testProductsService.testProductsListSignal.update(
-          list => list.map(item => item.id === event.data.id ? event.data : item)
-        );
-        this.reloadTrigger.update(n => n + 1); // Refresh display
-
-        // Option 2: Just refresh from server (more reliable)
-        // this.reloadTrigger.update(n => n + 1);
-      });
-
-    // 📡 Subscribe to 'deleted' event
-    // Triggered when a testProduct is removed (by any user)
-    this.wsService
-      .subscribeToEvent('test_products', 'test_products', 'deleted')
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((event: any) => {
-        console.log('🗑️ TestProduct deleted:', event.data);
-
-        // Option 1: Remove from local state and refresh display
-        this.testProductsService.testProductsListSignal.update(
-          list => list.filter(item => item.id !== event.data.id)
-        );
-        this.reloadTrigger.update(n => n + 1); // Refresh display
-
-        // Option 2: Just refresh from server (more reliable)
-        // this.reloadTrigger.update(n => n + 1);
-      });
-  }
-  */
 }

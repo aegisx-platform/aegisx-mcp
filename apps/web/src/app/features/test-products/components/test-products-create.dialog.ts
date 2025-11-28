@@ -1,11 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal, ViewChild } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
-import { TestProductStateManager } from '../services/test-products-state-manager.service';
 import { TestProductService } from '../services/test-products.service';
 import { CreateTestProductRequest } from '../types/test-products.types';
 import {
@@ -24,87 +23,68 @@ import {
     MatIconModule,
   ],
   template: `
+    <!-- Dialog Header -->
     <h2 mat-dialog-title class="ax-header ax-header-info">
       <div class="ax-icon-info">
         <mat-icon>add_circle</mat-icon>
       </div>
       <div class="header-text">
-        <div class="ax-title">ข้อมูลเอกสาร</div>
-        <div class="ax-subtitle">เพิ่ม Test Product ใหม่</div>
+        <div class="ax-title">Create New TestProduct</div>
+        <div class="ax-subtitle">Add a new testproduct to your collection</div>
       </div>
       <button
         type="button"
         mat-icon-button
         [mat-dialog-close]="false"
-        [disabled]="loading()"
+        aria-label="Close dialog"
       >
         <mat-icon>close</mat-icon>
       </button>
     </h2>
 
-    <mat-dialog-content>
-      <app-test-products-form
-        mode="create"
-        [loading]="loading()"
-        (formSubmit)="onFormSubmit($event)"
-        (formCancel)="onCancel()"
-      />
-    </mat-dialog-content>
-
-    <div mat-dialog-actions align="end">
-      <button
-        mat-button
-        type="button"
-        (click)="onCancel()"
-        [disabled]="loading()"
-      >
-        ยกเลิก
-      </button>
-      <button
-        mat-flat-button
-        color="primary"
-        type="button"
-        (click)="onSubmit()"
-        [disabled]="!formComponent?.testProductsForm?.valid || loading()"
-      >
-        บันทึก
-      </button>
-    </div>
+    <!-- Dialog Content - Form component handles mat-dialog-content and mat-dialog-actions -->
+    <app-test-products-form
+      mode="create"
+      [loading]="loading()"
+      (formSubmit)="onFormSubmit($event)"
+      (formCancel)="onCancel()"
+    ></app-test-products-form>
   `,
-  styles: [],
+  styles: [
+    `
+      /* Header text wrapper for flex layout */
+      .header-text {
+        flex: 1;
+        min-width: 0;
+      }
+    `,
+  ],
 })
 export class TestProductCreateDialogComponent {
   private testProductsService = inject(TestProductService);
-  private testProductStateManager = inject(TestProductStateManager);
   private snackBar = inject(MatSnackBar);
   private dialogRef = inject(MatDialogRef<TestProductCreateDialogComponent>);
 
-  @ViewChild(TestProductFormComponent) formComponent?: TestProductFormComponent;
-
   loading = signal<boolean>(false);
 
-  onSubmit() {
-    if (this.formComponent) {
-      this.formComponent.onSubmit();
-    }
-  }
-
   async onFormSubmit(formData: TestProductFormData) {
-    // Call API directly - WebSocket events will handle real-time sync
     this.loading.set(true);
 
     try {
       const createRequest = formData as CreateTestProductRequest;
-
-      // Call API to create
       const result =
         await this.testProductsService.createTestProduct(createRequest);
 
-      // Show success message and close
-      this.snackBar.open('TestProduct created successfully', 'Close', {
-        duration: 3000,
-      });
-      this.dialogRef.close(true); // Close with success flag
+      if (result) {
+        this.snackBar.open('TestProduct created successfully', 'Close', {
+          duration: 3000,
+        });
+        this.dialogRef.close(result);
+      } else {
+        this.snackBar.open('Failed to create testproduct', 'Close', {
+          duration: 5000,
+        });
+      }
     } catch (error: any) {
       const errorMessage = this.testProductsService.permissionError()
         ? 'You do not have permission to create testproduct'

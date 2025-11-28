@@ -19,27 +19,31 @@ export interface TestProductViewDialogData {
   standalone: true,
   imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule],
   template: `
-    <!-- Fixed Header with theme-aware styling -->
+    <!-- Dialog Header -->
     <h2 mat-dialog-title class="ax-header ax-header-neutral">
       <div class="ax-icon-neutral">
         <mat-icon>visibility</mat-icon>
       </div>
       <div class="header-text">
-        <div class="ax-title">Test Product Details</div>
-        <div class="ax-subtitle">View complete product information</div>
+        <div class="ax-title">TestProduct Details</div>
+        <div class="ax-subtitle">View complete information</div>
       </div>
-      <button type="button" mat-icon-button (click)="onClose()">
+      <button
+        type="button"
+        mat-icon-button
+        [mat-dialog-close]="false"
+        aria-label="Close dialog"
+      >
         <mat-icon>close</mat-icon>
       </button>
     </h2>
 
-    <!-- Scrollable Content -->
-    <mat-dialog-content class="ax-dialog-content">
-      <div class="ax-dialog-flex-column ax-dialog-gap-lg">
-        <!-- Basic Information -->
-        <div class="ax-dialog-section">
-          <h3 class="ax-dialog-section-title">Basic Information</h3>
-
+    <!-- Dialog Content -->
+    <mat-dialog-content>
+      <!-- Basic Information -->
+      <div class="ax-dialog-section">
+        <h3 class="ax-dialog-section-title">Basic Information</h3>
+        <div class="ax-dialog-section-content">
           <div class="ax-dialog-field-row">
             <div class="ax-dialog-field-label">Code</div>
             <div class="ax-dialog-field-value">
@@ -151,11 +155,11 @@ export interface TestProductViewDialogData {
             </div>
           </div>
         </div>
-
-        <!-- Record Information -->
-        <div class="ax-dialog-section-metadata">
-          <h3 class="ax-dialog-section-title">Record Information</h3>
-
+      </div>
+      <!-- Record Information -->
+      <div class="ax-dialog-section">
+        <h3 class="ax-dialog-section-title">Record Information</h3>
+        <div class="ax-dialog-section-content ax-dialog-section-metadata">
           <div class="ax-dialog-field-row">
             <div class="ax-dialog-field-label">Id</div>
             <div class="ax-dialog-field-value">
@@ -178,16 +182,49 @@ export interface TestProductViewDialogData {
       </div>
     </mat-dialog-content>
 
-    <!-- Fixed Footer with theme-aware styling -->
+    <!-- Dialog Actions -->
     <mat-dialog-actions align="end">
-      <button mat-button type="button" (click)="onClose()">Close</button>
-      <button mat-flat-button color="primary" type="button" (click)="onEdit()">
+      <button mat-button (click)="onClose()">Close</button>
+      <button mat-flat-button color="primary" (click)="onEdit()">
         <mat-icon>edit</mat-icon>
-        Edit Test Product
+        Edit TestProduct
       </button>
     </mat-dialog-actions>
   `,
-  styles: [],
+  styles: [
+    `
+      /* Header text wrapper for flex layout */
+      .header-text {
+        flex: 1;
+        min-width: 0;
+      }
+
+      /* Badge Styles */
+      .badge-purple {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        background: var(--ax-info-faint, #f3e8ff);
+        color: var(--ax-info-emphasis, #7c3aed);
+        border-radius: var(--ax-radius-sm, 4px);
+        font-size: var(--ax-text-xs, 0.75rem);
+      }
+
+      /* Code Display */
+      code {
+        padding: 2px 6px;
+        background: var(--ax-background-subtle, #f5f5f5);
+        border-radius: var(--ax-radius-sm, 3px);
+        font-size: 0.85rem;
+        font-family: monospace;
+      }
+
+      /* Price Display */
+      .price {
+        font-weight: var(--ax-font-semibold, 600);
+        color: var(--ax-success-emphasis, #059669);
+      }
+    `,
+  ],
 })
 export class TestProductViewDialogComponent {
   private dialogRef = inject(MatDialogRef<TestProductViewDialogComponent>);

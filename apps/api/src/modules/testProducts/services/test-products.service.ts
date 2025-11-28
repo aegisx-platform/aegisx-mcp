@@ -1,7 +1,5 @@
 import { BaseService } from '../../../shared/services/base.service';
 import { TestProductsRepository } from '../repositories/test-products.repository';
-import { EventService } from '../../../shared/websocket/event.service';
-import { CrudEventHelper } from '../../../shared/websocket/crud-event-helper';
 import {
   type TestProducts,
   type CreateTestProducts,
@@ -26,18 +24,8 @@ export class TestProductsService extends BaseService<
   CreateTestProducts,
   UpdateTestProducts
 > {
-  private eventHelper?: CrudEventHelper;
-
-  constructor(
-    private testProductsRepository: TestProductsRepository,
-    private eventService?: EventService,
-  ) {
+  constructor(private testProductsRepository: TestProductsRepository) {
     super(testProductsRepository);
-
-    // Initialize event helper using Fastify pattern
-    if (eventService) {
-      this.eventHelper = eventService.for('testProducts', 'testProducts');
-    }
   }
 
   /**
@@ -53,11 +41,6 @@ export class TestProductsService extends BaseService<
       // Handle query options (includes, etc.)
       if (options.include) {
         // Add relationship loading logic here
-      }
-
-      // Emit read event for monitoring/analytics
-      if (this.eventHelper) {
-        await this.eventHelper.emitCustom('read', testProducts);
       }
     }
 
@@ -78,14 +61,6 @@ export class TestProductsService extends BaseService<
   }> {
     const result = await this.getList(options);
 
-    // Emit bulk read event
-    if (this.eventHelper) {
-      await this.eventHelper.emitCustom('bulk_read', {
-        count: result.data.length,
-        filters: options,
-      });
-    }
-
     return result;
   }
 
@@ -94,11 +69,6 @@ export class TestProductsService extends BaseService<
    */
   async create(data: CreateTestProducts): Promise<TestProducts> {
     const testProducts = await super.create(data);
-
-    // Emit created event for real-time updates
-    if (this.eventHelper) {
-      await this.eventHelper.emitCreated(testProducts);
-    }
 
     return testProducts;
   }
@@ -111,10 +81,6 @@ export class TestProductsService extends BaseService<
     data: UpdateTestProducts,
   ): Promise<TestProducts | null> {
     const testProducts = await super.update(id, data);
-
-    if (testProducts && this.eventHelper) {
-      await this.eventHelper.emitUpdated(testProducts);
-    }
 
     return testProducts;
   }
@@ -135,17 +101,10 @@ export class TestProductsService extends BaseService<
 
       console.log('Found testProducts to delete:', existing.id);
 
-      // Get entity before deletion for event emission
-      const testProducts = await this.getById(id);
-
       // Direct repository call to avoid base service complexity
       const deleted = await this.testProductsRepository.delete(id);
 
       console.log('Delete result:', deleted);
-
-      if (deleted && testProducts && this.eventHelper) {
-        await this.eventHelper.emitDeleted(testProducts.id);
-      }
 
       if (deleted) {
         console.log('TestProducts deleted successfully:', { id });
@@ -269,413 +228,5 @@ export class TestProductsService extends BaseService<
     }
 
     // ===== ERROR HANDLING: FOREIGN KEY REFERENCE VALIDATION =====
-  }
-
-  // ===== ENHANCED CRUD METHODS =====
-
-  /**
-   * Get dropdown options for UI components
-   */
-  async getDropdownOptions(options: any = {}): Promise<{
-    options: Array<{
-      value: string | number;
-      label: string;
-      disabled?: boolean;
-    }>;
-    total: number;
-  }> {
-    const {
-      limit = 100,
-      search,
-      labelField = 'code',
-      valueField = 'id',
-    } = options;
-
-    const result = await this.testProductsRepository.list({
-      limit,
-      search,
-      sort: `${labelField}:asc`,
-    });
-
-    const dropdownOptions = result.data.map((item) => ({
-      value: item[valueField],
-      label: item[labelField] || `${item.id}`,
-      disabled: item.is_active === false,
-    }));
-
-    return {
-      options: dropdownOptions,
-      total: result.pagination.total,
-    };
-  }
-
-  /**
-   * Bulk create multiple testProductss
-   */
-  async bulkCreate(data: { items: CreateTestProducts[] }): Promise<{
-    created: TestProducts[];
-    summary: { successful: number; failed: number; errors: any[] };
-  }> {
-    const results: TestProducts[] = [];
-    const errors: any[] = [];
-
-    // Validate and process all items first
-    const validItems: CreateTestProducts[] = [];
-    for (const item of data.items) {
-      try {
-        await this.validateCreate(item);
-        const processed = await this.beforeCreate(item);
-        validItems.push(processed);
-      } catch (error) {
-        errors.push({
-          item,
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
-    }
-
-    // Bulk create valid items
-    if (validItems.length > 0) {
-      try {
-        // Use individual creates instead of createMany for debugging
-        for (const item of validItems) {
-          const created = await this.testProductsRepository.create(item);
-          results.push(created);
-        }
-
-        // Call afterCreate for each created item
-        for (let i = 0; i < results.length; i++) {
-          try {
-            await this.afterCreate(results[i], validItems[i]);
-            if (this.eventHelper) {
-              await this.eventHelper.emitCreated(results[i]);
-            }
-          } catch (error) {
-            console.warn('Error in afterCreate:', error);
-          }
-        }
-      } catch (error) {
-        errors.push({
-          item: 'bulk_operation',
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
-    }
-
-    return {
-      created: results,
-      summary: {
-        successful: results.length,
-        failed: errors.length,
-        errors,
-      },
-    };
-  }
-
-  /**
-   * Bulk update multiple testProductss
-   */
-  async bulkUpdate(data: {
-    items: Array<{ id: string | number; data: UpdateTestProducts }>;
-  }): Promise<{
-    updated: TestProducts[];
-    summary: { successful: number; failed: number; errors: any[] };
-  }> {
-    const results: TestProducts[] = [];
-    const errors: any[] = [];
-
-    for (const item of data.items) {
-      try {
-        const updated = await this.update(item.id, item.data);
-        if (updated) {
-          results.push(updated);
-        }
-      } catch (error) {
-        errors.push({
-          item,
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
-    }
-
-    return {
-      updated: results,
-      summary: {
-        successful: results.length,
-        failed: errors.length,
-        errors,
-      },
-    };
-  }
-
-  /**
-   * Bulk delete multiple testProductss
-   */
-  async bulkDelete(data: { ids: Array<string | number> }): Promise<{
-    deleted: Array<string | number>;
-    summary: { successful: number; failed: number; errors: any[] };
-  }> {
-    const results: Array<string | number> = [];
-    const errors: any[] = [];
-
-    for (const id of data.ids) {
-      try {
-        const deleted = await this.delete(id);
-        if (deleted) {
-          results.push(id);
-        }
-      } catch (error) {
-        errors.push({
-          id,
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
-    }
-
-    return {
-      deleted: results,
-      summary: {
-        successful: results.length,
-        failed: errors.length,
-        errors,
-      },
-    };
-  }
-
-  /**
-   * Bulk update status for multiple testProductss
-   */
-  async bulkUpdateStatus(data: {
-    ids: Array<string | number>;
-    status: boolean;
-  }): Promise<{
-    updated: TestProducts[];
-    summary: { successful: number; failed: number; errors: any[] };
-  }> {
-    const results: TestProducts[] = [];
-    const errors: any[] = [];
-
-    for (const id of data.ids) {
-      try {
-        const updated = await this.update(id, {
-          is_active: data.status,
-        } as UpdateTestProducts);
-        if (updated) {
-          results.push(updated);
-        }
-      } catch (error) {
-        errors.push({
-          id,
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
-    }
-
-    return {
-      updated: results,
-      summary: {
-        successful: results.length,
-        failed: errors.length,
-        errors,
-      },
-    };
-  }
-
-  /**
-   * Activate testProducts
-   */
-  async activate(
-    id: string | number,
-    options: any = {},
-  ): Promise<TestProducts | null> {
-    return this.update(id, { is_active: true } as UpdateTestProducts);
-  }
-
-  /**
-   * Deactivate testProducts
-   */
-  async deactivate(
-    id: string | number,
-    options: any = {},
-  ): Promise<TestProducts | null> {
-    return this.update(id, { is_active: false } as UpdateTestProducts);
-  }
-
-  /**
-   * Toggle testProducts status
-   */
-  async toggle(
-    id: string | number,
-    options: any = {},
-  ): Promise<TestProducts | null> {
-    const current = await this.getById(id);
-    if (!current) return null;
-
-    const newStatus = !current.is_active;
-    return this.update(id, { is_active: newStatus } as UpdateTestProducts);
-  }
-
-  /**
-   * Get basic statistics (count only)
-   */
-  async getStats(): Promise<{
-    total: number;
-  }> {
-    return this.testProductsRepository.getStats();
-  }
-
-  /**
-   * Get data for export with formatting
-   */
-  async getExportData(
-    queryParams: any = {},
-    fields?: string[],
-  ): Promise<any[]> {
-    // Get specific IDs if provided
-    if (queryParams.ids && queryParams.ids.length > 0) {
-      // Get specific records by IDs
-      const records = await Promise.all(
-        queryParams.ids.map((id: string) => this.getById(id)),
-      );
-
-      // Return raw data - ExportService will handle formatting
-      return records.filter((record) => record !== null);
-    }
-
-    // Separate filters from pagination parameters to avoid SQL errors
-    const { limit, offset, page, ...filters } = queryParams;
-
-    // Build query parameters for data retrieval with proper pagination
-    const query: any = {
-      ...filters, // Only include actual filter parameters
-      limit: limit || 50000, // Max export limit for performance
-      page: 1, // Always start from first page for exports
-    };
-
-    // Get filtered data
-    const result = await this.testProductsRepository.list(query);
-
-    // Return raw data - ExportService will handle formatting
-    return result.data;
-  }
-
-  /**
-   * Format single record for export
-   */
-  private formatExportRecord(record: TestProducts, fields?: string[]): any {
-    const formatted: any = {};
-
-    // Define all exportable fields
-    const exportableFields: { [key: string]: string | ((value: any) => any) } =
-      {
-        id: 'Id',
-        code: 'Code',
-        name: 'Name',
-        slug: 'Slug',
-        description: 'Description',
-        is_active: 'Is active',
-        is_featured: 'Is featured',
-        display_order: 'Display order',
-        item_count: 'Item count',
-        discount_rate: 'Discount rate',
-        metadata: 'Metadata',
-        settings: 'Settings',
-        status: 'Status',
-        created_by: 'Created by',
-        updated_by: 'Updated by',
-        deleted_at: 'Deleted at',
-        created_at: 'Created at',
-        updated_at: 'Updated at',
-      };
-
-    // If specific fields requested, use only those
-    const fieldsToExport =
-      fields && fields.length > 0
-        ? fields.filter((field) => exportableFields.hasOwnProperty(field))
-        : Object.keys(exportableFields);
-
-    // Format each field
-    fieldsToExport.forEach((field) => {
-      const fieldConfig = exportableFields[field];
-      let value = (record as any)[field];
-
-      // Apply field-specific formatting
-      if (typeof fieldConfig === 'function') {
-        value = fieldConfig(value);
-      } else {
-        // Apply default formatting based on field type
-      }
-
-      // Use field label as key for export
-      const exportKey = typeof fieldConfig === 'string' ? fieldConfig : field;
-      formatted[exportKey] = value;
-    });
-
-    return formatted;
-  }
-
-  // ===== FULL PACKAGE METHODS =====
-
-  /**
-   * Validate data before save
-   */
-  async validate(data: { data: CreateTestProducts }): Promise<{
-    valid: boolean;
-    errors: Array<{ field: string; message: string }>;
-  }> {
-    const errors: Array<{ field: string; message: string }> = [];
-
-    try {
-      await this.validateCreate(data.data);
-    } catch (error) {
-      errors.push({
-        field: 'general',
-        message: error instanceof Error ? error.message : String(error),
-      });
-    }
-
-    // Add specific field validations
-
-    return {
-      valid: errors.length === 0,
-      errors,
-    };
-  }
-
-  /**
-   * Check field uniqueness
-   */
-  async checkUniqueness(
-    field: string,
-    options: { value: string; excludeId?: string | number },
-  ): Promise<{
-    unique: boolean;
-    exists?: any;
-  }> {
-    const query: any = { [field]: options.value };
-
-    // Add exclusion for updates
-    if (options.excludeId) {
-      query.excludeId = options.excludeId;
-    }
-
-    // Use field-specific find methods based on unique constraints only
-    let existing: any = null;
-
-    if (field === 'code' && options.value) {
-      existing = await this.testProductsRepository.findByCode(options.value);
-    } else if (field === 'name' && options.value) {
-      existing = await this.testProductsRepository.findByName(options.value);
-    }
-
-    // If updating (excludeId provided), ignore the current record
-    if (existing && options.excludeId && existing.id === options.excludeId) {
-      existing = null;
-    }
-
-    return {
-      unique: !existing,
-      exists: existing || undefined,
-    };
   }
 }

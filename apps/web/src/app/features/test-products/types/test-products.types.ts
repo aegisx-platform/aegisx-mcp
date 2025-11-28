@@ -193,31 +193,6 @@ export interface BulkResponse {
   };
 }
 
-// ===== FULL PACKAGE TYPES =====
-
-export interface ValidationError {
-  field: string;
-  message: string;
-  code: string;
-  value?: any;
-}
-
-export interface ValidationResponse {
-  valid: boolean;
-  errors?: ValidationError[];
-}
-
-export interface UniquenessResponse {
-  unique: boolean;
-  message?: string;
-}
-
-export interface StatsResponse {
-  total: number;
-  // Additional stats can be added based on module needs
-  [key: string]: number;
-}
-
 // ===== IMPORT TYPES =====
 
 export interface ImportOptions {
