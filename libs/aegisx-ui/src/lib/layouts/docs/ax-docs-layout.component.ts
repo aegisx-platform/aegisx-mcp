@@ -13,6 +13,7 @@ import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterModule } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
   AxDocsSidebarComponent,
   DocsNavItem,
@@ -22,6 +23,11 @@ import {
   TocItem,
 } from './components/ax-docs-toc.component';
 import { AxMediaWatcherService } from '../../services/ax-media-watcher.service';
+import { AxLoadingBarComponent } from '../../components/ax-loading-bar.component';
+import {
+  LoadingBarService,
+  LoadingBarState,
+} from '../../components/feedback/loading-bar/loading-bar.service';
 import { Subject, takeUntil } from 'rxjs';
 
 /**
@@ -49,8 +55,17 @@ import { Subject, takeUntil } from 'rxjs';
     RouterModule,
     AxDocsSidebarComponent,
     AxDocsTocComponent,
+    AxLoadingBarComponent,
   ],
   template: `
+    <!-- Loading bar - Connected to LoadingBarService -->
+    <ax-loading-bar
+      [visible]="loadingBarState().visible"
+      [mode]="loadingBarState().mode"
+      [progress]="loadingBarState().progress"
+      [color]="loadingBarState().color"
+    ></ax-loading-bar>
+
     <!-- Header/Toolbar - Fixed at top (Tremor style) -->
     @if (showHeader) {
       <header class="ax-docs-header">
@@ -170,8 +185,8 @@ import { Subject, takeUntil } from 'rxjs';
         left: 0 !important;
         right: 0 !important;
         height: var(--ax-docs-header-height) !important;
-        background-color: #ffffff !important;
-        border-bottom: 1px solid #e5e7eb !important;
+        background-color: var(--ax-background-default, #ffffff) !important;
+        border-bottom: 1px solid var(--ax-border-default, #e5e7eb) !important;
         z-index: 100 !important;
         display: flex !important;
         align-items: center !important;
@@ -200,7 +215,7 @@ import { Subject, takeUntil } from 'rxjs';
       ax-docs-layout .ax-docs-header__logo-text {
         font-size: 1.25rem;
         font-weight: 600;
-        color: #111827;
+        color: var(--ax-text-default, #111827);
         letter-spacing: -0.025em;
       }
 
@@ -212,32 +227,12 @@ import { Subject, takeUntil } from 'rxjs';
 
       ax-docs-layout .ax-docs-header__actions button,
       ax-docs-layout .ax-docs-header__actions a {
-        color: #6b7280;
+        color: var(--ax-text-secondary, #6b7280);
       }
 
       ax-docs-layout .ax-docs-header__actions button:hover,
       ax-docs-layout .ax-docs-header__actions a:hover {
-        color: #111827;
-      }
-
-      /* Dark mode */
-      .dark ax-docs-layout > .ax-docs-header {
-        background-color: #111827 !important;
-        border-bottom-color: #374151 !important;
-      }
-
-      .dark ax-docs-layout .ax-docs-header__logo-text {
-        color: #f9fafb;
-      }
-
-      .dark ax-docs-layout .ax-docs-header__actions button,
-      .dark ax-docs-layout .ax-docs-header__actions a {
-        color: #9ca3af;
-      }
-
-      .dark ax-docs-layout .ax-docs-header__actions button:hover,
-      .dark ax-docs-layout .ax-docs-header__actions a:hover {
-        color: #f9fafb;
+        color: var(--ax-text-default, #111827);
       }
 
       /* Main Layout */
@@ -411,7 +406,21 @@ export class AxDocsLayoutComponent implements OnInit, OnDestroy {
   @ContentChild('sidebarFooter') sidebarFooter?: TemplateRef<unknown>;
 
   private _mediaWatcher = inject(AxMediaWatcherService);
+  private _loadingBarService = inject(LoadingBarService);
   private _destroy$ = new Subject<void>();
+
+  // Expose loading bar state as a signal for reactive template binding
+  protected readonly loadingBarState = toSignal(
+    this._loadingBarService.state$,
+    {
+      initialValue: {
+        visible: false,
+        mode: 'indeterminate' as const,
+        progress: 0,
+        color: 'primary' as const,
+      } satisfies LoadingBarState,
+    },
+  );
 
   sidebarOpen = signal(false);
   isMobile = signal(false);
