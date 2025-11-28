@@ -313,6 +313,54 @@
   }
 }
 
+// Tab nav bar (standalone tabs like in docs)
+.mat-mdc-tab-nav-bar {
+  border-bottom: 1px solid var(--ax-border-default);
+
+  .mat-mdc-tab-link {
+    // Default (inactive) tab label - use secondary text color
+    .mdc-tab__text-label {
+      color: var(--ax-text-secondary) !important;
+    }
+
+    // Active tab label - use primary text color
+    &.mdc-tab--active .mdc-tab__text-label {
+      color: var(--ax-text-default) !important;
+    }
+
+    // Hover state
+    &:hover:not(.mat-mdc-tab-disabled) .mdc-tab__text-label {
+      color: var(--ax-text-default) !important;
+    }
+  }
+
+  // Active indicator (ink bar)
+  .mdc-tab-indicator__content--underline {
+    border-color: var(--ax-brand-default) !important;
+  }
+}
+
+// Also apply to regular tab group
+.mat-mdc-tab-group {
+  .mat-mdc-tab {
+    .mdc-tab__text-label {
+      color: var(--ax-text-secondary) !important;
+    }
+
+    &.mdc-tab--active .mdc-tab__text-label {
+      color: var(--ax-text-default) !important;
+    }
+
+    &:hover:not(.mat-mdc-tab-disabled) .mdc-tab__text-label {
+      color: var(--ax-text-default) !important;
+    }
+  }
+
+  .mdc-tab-indicator__content--underline {
+    border-color: var(--ax-brand-default) !important;
+  }
+}
+
 // ===== Expansion Panels - Tremor Style =====
 .mat-expansion-panel {
   border: 1px solid var(--ax-border-default) !important;

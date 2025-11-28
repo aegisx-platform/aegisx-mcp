@@ -1,6 +1,7 @@
 /* ============================================================
    Verus Theme - Dark Mode
-   Based on NFT Marketplace Design System
+   Modern dark theme inspired by Linear, Vercel, and Stripe
+   Soft, elegant colors with Verus blue brand identity
    ============================================================ */
 
 @import './colors';
@@ -8,93 +9,158 @@
 [data-theme='verus-dark'],
 .theme-verus-dark {
   // ===========================================
-  // PRIMARY / BRAND
+  // PRIMARY / BRAND (Verus Blue - softer for dark)
   // ===========================================
-  --ax-primary: #{$verus-blue};
-  --ax-primary-light: #{$verus-indigo};
-  --ax-primary-dark: #{$verus-dark-blue};
+  --ax-primary: #5ab8f7; // Info light - softer
+  --ax-primary-light: #7dc8f9; // Even lighter
+  --ax-primary-dark: #029cf5; // Original blue
   --ax-primary-contrast: #ffffff;
 
-  --ax-brand-default: #{$verus-blue};
-  --ax-brand-emphasis: #{$verus-indigo};
-  --ax-brand-muted: #{$verus-dark-blue};
-  --ax-brand-faint: rgba(2, 156, 245, 0.1);
+  --ax-brand-default: #5ab8f7;
+  --ax-brand-emphasis: #7dc8f9;
+  --ax-brand-muted: rgba(90, 184, 247, 0.2);
+  --ax-brand-faint: rgba(90, 184, 247, 0.1);
+  --ax-brand-surface: rgba(90, 184, 247, 0.08);
+  --ax-brand-border: rgba(90, 184, 247, 0.3);
 
   // ===========================================
-  // BACKGROUNDS
+  // BACKGROUNDS (VitePress dark style - clean neutral gray)
   // ===========================================
-  --ax-background-default: #{$verus-black};
-  --ax-background-subtle: #1a1d1e;
-  --ax-background-muted: #242729;
-  --ax-background-emphasis: #2d3133;
-  --ax-white: #{$verus-black};
+  --ax-background-default: #1b1b1f; // Main background (VitePress bg)
+  --ax-background-subtle: #202127; // Card/surface background (soft)
+  --ax-background-muted: #2c2c32; // Elevated surfaces
+  --ax-background-emphasis: #3c3c42; // Highlighted areas
+  --ax-background-page: #161618; // Page background (darker)
+  --ax-white: #1b1b1f;
 
   // ===========================================
-  // TEXT
+  // TEXT (High contrast but not harsh)
   // ===========================================
-  --ax-text-default: #f8f9fa;
-  --ax-text-primary: #f8f9fa;
-  --ax-text-secondary: #{$verus-gray-400};
-  --ax-text-subtle: #{$verus-gray-500};
-  --ax-text-disabled: #{$verus-gray-600};
-  --ax-text-inverse: #{$verus-black};
+  --ax-text-default: #e4e4e7; // Primary text - soft white (Zinc 200)
+  --ax-text-primary: #e4e4e7;
+  --ax-text-secondary: #a1a1aa; // Secondary text - muted (Zinc 400)
+  --ax-text-subtle: #71717a; // Tertiary text (Zinc 500)
+  --ax-text-disabled: #52525b; // Disabled text (Zinc 600)
+  --ax-text-heading: #fafafa; // Headings - bright white (Zinc 50)
+  --ax-text-strong: #fafafa; // Strong/bold text
+  --ax-text-body: #d4d4d8; // Body text (Zinc 300)
+  --ax-text-inverse: #09090b;
 
   // ===========================================
-  // BORDERS
+  // BORDERS (Ultra subtle - barely visible like Linear/Vercel)
   // ===========================================
-  --ax-border-default: #2d3133;
-  --ax-border-emphasis: #{$verus-gray-700};
-  --ax-border-subtle: #242729;
-  --ax-border-color: #2d3133;
+  --ax-border-default: rgba(255, 255, 255, 0.08); // Main border - ultra subtle
+  --ax-border-emphasis: rgba(255, 255, 255, 0.12); // Emphasized border
+  --ax-border-subtle: rgba(255, 255, 255, 0.04); // Very subtle border
+  --ax-border-color: rgba(255, 255, 255, 0.08);
 
   // ===========================================
-  // SUCCESS
+  // SUCCESS (Softer green)
   // ===========================================
-  --ax-success-default: #{$verus-success-light};
-  --ax-success-emphasis: #{$verus-success};
-  --ax-success-faint: rgba(13, 172, 111, 0.15);
-  --ax-success-muted: rgba(13, 172, 111, 0.3);
-  --ax-success: #{$verus-success-light};
+  --ax-success-default: #4ade80; // Green 400
+  --ax-success-emphasis: #22c55e; // Green 500
+  --ax-success-faint: rgba(74, 222, 128, 0.1);
+  --ax-success-muted: rgba(74, 222, 128, 0.2);
+  --ax-success-surface: rgba(74, 222, 128, 0.08);
+  --ax-success-border: rgba(74, 222, 128, 0.3);
+  --ax-success: #4ade80;
 
   // ===========================================
-  // ERROR
+  // ERROR (Softer red)
   // ===========================================
-  --ax-error-default: #{$verus-error-light};
-  --ax-error-emphasis: #{$verus-error};
-  --ax-error-faint: rgba(255, 9, 54, 0.15);
-  --ax-error-muted: rgba(255, 9, 54, 0.3);
+  --ax-error-default: #f87171; // Red 400
+  --ax-error-emphasis: #ef4444; // Red 500
+  --ax-error-faint: rgba(248, 113, 113, 0.1);
+  --ax-error-muted: rgba(248, 113, 113, 0.2);
+  --ax-error-surface: rgba(248, 113, 113, 0.08);
+  --ax-error-border: rgba(248, 113, 113, 0.3);
 
   // ===========================================
-  // WARNING
+  // WARNING (Softer amber)
   // ===========================================
-  --ax-warning-default: #{$verus-warning-light};
-  --ax-warning-emphasis: #{$verus-warning};
-  --ax-warning-faint: rgba(255, 182, 71, 0.15);
-  --ax-warning-muted: rgba(255, 182, 71, 0.3);
+  --ax-warning-default: #fbbf24; // Amber 400
+  --ax-warning-emphasis: #f59e0b; // Amber 500
+  --ax-warning-faint: rgba(251, 191, 36, 0.1);
+  --ax-warning-muted: rgba(251, 191, 36, 0.2);
+  --ax-warning-surface: rgba(251, 191, 36, 0.08);
+  --ax-warning-border: rgba(251, 191, 36, 0.3);
 
   // ===========================================
-  // INFO
+  // INFO (Verus Blue - softer)
   // ===========================================
-  --ax-info-default: #{$verus-info-light};
-  --ax-info-emphasis: #{$verus-info};
-  --ax-info-faint: rgba(2, 156, 245, 0.15);
-  --ax-info-muted: rgba(2, 156, 245, 0.3);
+  --ax-info-default: #5ab8f7; // Verus info light
+  --ax-info-emphasis: #029cf5; // Verus blue
+  --ax-info-faint: rgba(90, 184, 247, 0.1);
+  --ax-info-muted: rgba(90, 184, 247, 0.2);
+  --ax-info-surface: rgba(90, 184, 247, 0.08);
+  --ax-info-border: rgba(90, 184, 247, 0.3);
 
   // ===========================================
-  // SHADOWS (subtle in dark mode)
+  // GRAY SCALE (Zinc scale for dark mode)
   // ===========================================
-  --ax-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --ax-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --ax-gray-50: #09090b;
+  --ax-gray-100: #18181b;
+  --ax-gray-200: #27272a;
+  --ax-gray-300: #3f3f46;
+  --ax-gray-400: #52525b;
+  --ax-gray-500: #71717a;
+  --ax-gray-600: #a1a1aa;
+  --ax-gray-700: #d4d4d8;
+  --ax-gray-800: #e4e4e7;
+  --ax-gray-900: #fafafa;
+  --ax-gray-950: #ffffff;
+
+  // ===========================================
+  // SHADOWS (Subtle glow effect for dark mode)
+  // ===========================================
+  --ax-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --ax-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4);
   --ax-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
-  --ax-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.4), 0 4px 6px rgba(0, 0, 0, 0.3);
+  --ax-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3), 0 4px 6px rgba(0, 0, 0, 0.2);
+  --ax-shadow-xl:
+    0 20px 25px rgba(0, 0, 0, 0.25), 0 8px 10px rgba(0, 0, 0, 0.15);
 
   // ===========================================
-  // NAVIGATION (Dark - same as light for Verus)
+  // SPACING (Same as light)
   // ===========================================
-  --ax-nav-bg: #0a0b0c;
-  --ax-nav-text: #{$verus-gray-400};
-  --ax-nav-text-active: #ffffff;
-  --ax-nav-hover: #1a1d1e;
-  --ax-nav-active: #{$verus-dark-blue};
-  --ax-nav-border: #242729;
+  --ax-spacing-xs: 0.25rem; // 4px
+  --ax-spacing-sm: 0.5rem; // 8px
+  --ax-spacing-md: 1rem; // 16px
+  --ax-spacing-lg: 1.5rem; // 24px
+  --ax-spacing-xl: 2rem; // 32px
+  --ax-spacing-2xl: 3rem; // 48px
+
+  // ===========================================
+  // RADIUS (Same as light)
+  // ===========================================
+  --ax-radius-none: 0;
+  --ax-radius-sm: 0.25rem; // 4px
+  --ax-radius-md: 0.5rem; // 8px
+  --ax-radius-lg: 0.75rem; // 12px
+  --ax-radius-xl: 1rem; // 16px
+  --ax-radius-full: 9999px;
+
+  // ===========================================
+  // NAVIGATION (Clean dark sidebar)
+  // ===========================================
+  --ax-nav-bg: #09090b;
+  --ax-nav-text: #a1a1aa;
+  --ax-nav-text-active: #fafafa;
+  --ax-nav-hover: #18181b;
+  --ax-nav-active: rgba(90, 184, 247, 0.15);
+  --ax-nav-border: rgba(255, 255, 255, 0.08);
+
+  // ===========================================
+  // INTERACTIVE STATES
+  // ===========================================
+  --ax-hover-overlay: rgba(255, 255, 255, 0.05);
+  --ax-focus-ring: rgba(90, 184, 247, 0.5);
+  --ax-active-overlay: rgba(255, 255, 255, 0.1);
+
+  // ===========================================
+  // SCROLLBAR (Dark mode)
+  // ===========================================
+  --ax-scrollbar-track: #18181b;
+  --ax-scrollbar-thumb: #3f3f46;
+  --ax-scrollbar-thumb-hover: #52525b;
 }
