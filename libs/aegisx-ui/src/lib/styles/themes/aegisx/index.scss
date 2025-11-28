@@ -1,0 +1,17 @@
+/* ============================================================
+   AegisX Theme - Entry Point
+
+   A clean, professional design system featuring:
+   - Indigo primary colors (#6366f1)
+   - Zinc gray scale for neutrals
+   - Tailwind-inspired semantic colors
+   - Light navigation sidebar
+
+   Usage:
+   - Light mode: Add [data-theme="aegisx"] or .theme-aegisx to html/body
+   - Dark mode: Add [data-theme="aegisx-dark"] or .theme-aegisx-dark
+   ============================================================ */
+
+// Include CSS output from theme files
+@use './light';
+@use './dark';

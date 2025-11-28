@@ -32,19 +32,7 @@
             "output": "themes"
           }
         ],
-        "styles": [
-          "apps/web/src/styles.scss",
-          {
-            "input": "libs/aegisx-ui/src/lib/styles/themes/aegisx-light.scss",
-            "bundleName": "aegisx-light",
-            "inject": false
-          },
-          {
-            "input": "libs/aegisx-ui/src/lib/styles/themes/aegisx-dark.scss",
-            "bundleName": "aegisx-dark",
-            "inject": false
-          }
-        ]
+        "styles": ["apps/web/src/styles.scss"]
       },
       "configurations": {
         "production": {

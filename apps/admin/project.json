@@ -27,19 +27,7 @@
             "output": "themes"
           }
         ],
-        "styles": [
-          "apps/admin/src/styles.scss",
-          {
-            "input": "libs/aegisx-ui/src/lib/styles/themes/aegisx-light.scss",
-            "bundleName": "aegisx-light",
-            "inject": false
-          },
-          {
-            "input": "libs/aegisx-ui/src/lib/styles/themes/aegisx-dark.scss",
-            "bundleName": "aegisx-dark",
-            "inject": false
-          }
-        ]
+        "styles": ["apps/admin/src/styles.scss"]
       },
       "configurations": {
         "production": {
@@ -51,8 +39,8 @@
             },
             {
               "type": "anyComponentStyle",
-              "maximumWarning": "4kb",
-              "maximumError": "10kb"
+              "maximumWarning": "8kb",
+              "maximumError": "15kb"
             }
           ],
           "outputHashing": "all"

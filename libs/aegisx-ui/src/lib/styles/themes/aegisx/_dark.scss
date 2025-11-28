@@ -1,0 +1,125 @@
+/* ============================================================
+   AegisX Theme - Dark Mode
+   Zinc/Indigo color scheme inspired by Tailwind
+   ============================================================ */
+
+@import './colors';
+
+[data-theme='aegisx-dark'],
+.theme-aegisx-dark {
+  // ===========================================
+  // PRIMARY / BRAND (Indigo - brighter for dark)
+  // ===========================================
+  --ax-primary: #{$aegisx-indigo-400};
+  --ax-primary-light: #{$aegisx-indigo-300};
+  --ax-primary-dark: #{$aegisx-indigo-500};
+  --ax-primary-contrast: #ffffff;
+
+  --ax-brand-default: #{$aegisx-indigo-400};
+  --ax-brand-emphasis: #{$aegisx-indigo-300};
+  --ax-brand-muted: #{$aegisx-indigo-800};
+  --ax-brand-faint: #{$aegisx-indigo-900};
+  --ax-brand-surface: rgba(99, 102, 241, 0.1);
+  --ax-brand-border: #{$aegisx-indigo-700};
+
+  // ===========================================
+  // BACKGROUNDS
+  // ===========================================
+  --ax-background-default: #{$aegisx-zinc-900};
+  --ax-background-subtle: #{$aegisx-zinc-800};
+  --ax-background-muted: #{$aegisx-zinc-950};
+  --ax-background-emphasis: #{$aegisx-zinc-300};
+  --ax-white: #{$aegisx-zinc-900};
+
+  // ===========================================
+  // TEXT
+  // ===========================================
+  --ax-text-default: #{$aegisx-zinc-300};
+  --ax-text-primary: #{$aegisx-zinc-300};
+  --ax-text-secondary: #{$aegisx-zinc-400};
+  --ax-text-subtle: #{$aegisx-zinc-500};
+  --ax-text-disabled: #{$aegisx-zinc-600};
+  --ax-text-heading: #{$aegisx-zinc-100};
+  --ax-text-inverse: #{$aegisx-zinc-900};
+
+  // ===========================================
+  // BORDERS
+  // ===========================================
+  --ax-border-default: #{$aegisx-zinc-700};
+  --ax-border-emphasis: #{$aegisx-zinc-600};
+  --ax-border-subtle: #{$aegisx-zinc-800};
+  --ax-border-color: #{$aegisx-zinc-700};
+
+  // ===========================================
+  // SUCCESS
+  // ===========================================
+  --ax-success-default: #{$aegisx-success-400};
+  --ax-success-emphasis: #{$aegisx-success-300};
+  --ax-success-faint: rgba(34, 197, 94, 0.15);
+  --ax-success-muted: rgba(34, 197, 94, 0.3);
+  --ax-success-surface: rgba(34, 197, 94, 0.1);
+  --ax-success-border: #{$aegisx-success-800};
+  --ax-success: #{$aegisx-success-400};
+
+  // ===========================================
+  // ERROR
+  // ===========================================
+  --ax-error-default: #{$aegisx-error-400};
+  --ax-error-emphasis: #{$aegisx-error-300};
+  --ax-error-faint: rgba(239, 68, 68, 0.15);
+  --ax-error-muted: rgba(239, 68, 68, 0.3);
+  --ax-error-surface: rgba(239, 68, 68, 0.1);
+  --ax-error-border: #{$aegisx-error-800};
+
+  // ===========================================
+  // WARNING
+  // ===========================================
+  --ax-warning-default: #{$aegisx-warning-400};
+  --ax-warning-emphasis: #{$aegisx-warning-300};
+  --ax-warning-faint: rgba(245, 158, 11, 0.15);
+  --ax-warning-muted: rgba(245, 158, 11, 0.3);
+  --ax-warning-surface: rgba(245, 158, 11, 0.1);
+  --ax-warning-border: #{$aegisx-warning-800};
+
+  // ===========================================
+  // INFO
+  // ===========================================
+  --ax-info-default: #{$aegisx-info-400};
+  --ax-info-emphasis: #{$aegisx-info-300};
+  --ax-info-faint: rgba(59, 130, 246, 0.15);
+  --ax-info-muted: rgba(59, 130, 246, 0.3);
+  --ax-info-surface: rgba(59, 130, 246, 0.1);
+  --ax-info-border: #{$aegisx-info-800};
+
+  // ===========================================
+  // GRAY SCALE (inverted for dark mode)
+  // ===========================================
+  --ax-gray-50: #{$aegisx-zinc-900};
+  --ax-gray-100: #{$aegisx-zinc-800};
+  --ax-gray-200: #{$aegisx-zinc-700};
+  --ax-gray-300: #{$aegisx-zinc-600};
+  --ax-gray-400: #{$aegisx-zinc-500};
+  --ax-gray-500: #{$aegisx-zinc-400};
+  --ax-gray-600: #{$aegisx-zinc-300};
+  --ax-gray-700: #{$aegisx-zinc-200};
+  --ax-gray-800: #{$aegisx-zinc-100};
+  --ax-gray-900: #{$aegisx-zinc-50};
+
+  // ===========================================
+  // SHADOWS (darker for dark mode)
+  // ===========================================
+  --ax-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --ax-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --ax-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+  --ax-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.4), 0 4px 6px rgba(0, 0, 0, 0.3);
+
+  // ===========================================
+  // NAVIGATION (Dark sidebar)
+  // ===========================================
+  --ax-nav-bg: #{$aegisx-zinc-950};
+  --ax-nav-text: #{$aegisx-zinc-400};
+  --ax-nav-text-active: #ffffff;
+  --ax-nav-hover: #{$aegisx-zinc-800};
+  --ax-nav-active: #{$aegisx-indigo-900};
+  --ax-nav-border: #{$aegisx-zinc-800};
+}

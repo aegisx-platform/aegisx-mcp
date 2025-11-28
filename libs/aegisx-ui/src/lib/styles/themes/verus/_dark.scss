@@ -1,0 +1,100 @@
+/* ============================================================
+   Verus Theme - Dark Mode
+   Based on NFT Marketplace Design System
+   ============================================================ */
+
+@import './colors';
+
+[data-theme='verus-dark'],
+.theme-verus-dark {
+  // ===========================================
+  // PRIMARY / BRAND
+  // ===========================================
+  --ax-primary: #{$verus-blue};
+  --ax-primary-light: #{$verus-indigo};
+  --ax-primary-dark: #{$verus-dark-blue};
+  --ax-primary-contrast: #ffffff;
+
+  --ax-brand-default: #{$verus-blue};
+  --ax-brand-emphasis: #{$verus-indigo};
+  --ax-brand-muted: #{$verus-dark-blue};
+  --ax-brand-faint: rgba(2, 156, 245, 0.1);
+
+  // ===========================================
+  // BACKGROUNDS
+  // ===========================================
+  --ax-background-default: #{$verus-black};
+  --ax-background-subtle: #1a1d1e;
+  --ax-background-muted: #242729;
+  --ax-background-emphasis: #2d3133;
+  --ax-white: #{$verus-black};
+
+  // ===========================================
+  // TEXT
+  // ===========================================
+  --ax-text-default: #f8f9fa;
+  --ax-text-primary: #f8f9fa;
+  --ax-text-secondary: #{$verus-gray-400};
+  --ax-text-subtle: #{$verus-gray-500};
+  --ax-text-disabled: #{$verus-gray-600};
+  --ax-text-inverse: #{$verus-black};
+
+  // ===========================================
+  // BORDERS
+  // ===========================================
+  --ax-border-default: #2d3133;
+  --ax-border-emphasis: #{$verus-gray-700};
+  --ax-border-subtle: #242729;
+  --ax-border-color: #2d3133;
+
+  // ===========================================
+  // SUCCESS
+  // ===========================================
+  --ax-success-default: #{$verus-success-light};
+  --ax-success-emphasis: #{$verus-success};
+  --ax-success-faint: rgba(13, 172, 111, 0.15);
+  --ax-success-muted: rgba(13, 172, 111, 0.3);
+  --ax-success: #{$verus-success-light};
+
+  // ===========================================
+  // ERROR
+  // ===========================================
+  --ax-error-default: #{$verus-error-light};
+  --ax-error-emphasis: #{$verus-error};
+  --ax-error-faint: rgba(255, 9, 54, 0.15);
+  --ax-error-muted: rgba(255, 9, 54, 0.3);
+
+  // ===========================================
+  // WARNING
+  // ===========================================
+  --ax-warning-default: #{$verus-warning-light};
+  --ax-warning-emphasis: #{$verus-warning};
+  --ax-warning-faint: rgba(255, 182, 71, 0.15);
+  --ax-warning-muted: rgba(255, 182, 71, 0.3);
+
+  // ===========================================
+  // INFO
+  // ===========================================
+  --ax-info-default: #{$verus-info-light};
+  --ax-info-emphasis: #{$verus-info};
+  --ax-info-faint: rgba(2, 156, 245, 0.15);
+  --ax-info-muted: rgba(2, 156, 245, 0.3);
+
+  // ===========================================
+  // SHADOWS (subtle in dark mode)
+  // ===========================================
+  --ax-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --ax-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --ax-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+  --ax-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.4), 0 4px 6px rgba(0, 0, 0, 0.3);
+
+  // ===========================================
+  // NAVIGATION (Dark - same as light for Verus)
+  // ===========================================
+  --ax-nav-bg: #0a0b0c;
+  --ax-nav-text: #{$verus-gray-400};
+  --ax-nav-text-active: #ffffff;
+  --ax-nav-hover: #1a1d1e;
+  --ax-nav-active: #{$verus-dark-blue};
+  --ax-nav-border: #242729;
+}

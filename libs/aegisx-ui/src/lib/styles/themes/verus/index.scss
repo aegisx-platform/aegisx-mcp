@@ -1,0 +1,17 @@
+/* ============================================================
+   Verus Theme - Entry Point
+
+   A vibrant NFT Marketplace-inspired design system featuring:
+   - Deep blue primary colors (#102BA9, #029CF5)
+   - Rich semantic colors (green success, red error)
+   - Dark navigation sidebar
+   - Clean, modern aesthetic
+
+   Usage:
+   - Light mode: Add [data-theme="verus"] or .theme-verus to html/body
+   - Dark mode: Add [data-theme="verus-dark"] or .theme-verus-dark
+   ============================================================ */
+
+// Include CSS output from theme files
+@use './light';
+@use './dark';

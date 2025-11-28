@@ -1,0 +1,131 @@
+/* ============================================================
+   AegisX Design System - Color Palette
+   Based on Zinc/Indigo color scheme with Tailwind-inspired colors
+   ============================================================ */
+
+// ===========================================
+// BRAND/PRIMARY COLORS (Indigo)
+// ===========================================
+$aegisx-indigo-50: #eef2ff;
+$aegisx-indigo-100: #e0e7ff;
+$aegisx-indigo-200: #c7d2fe;
+$aegisx-indigo-300: #a5b4fc;
+$aegisx-indigo-400: #818cf8;
+$aegisx-indigo-500: #6366f1; // Main brand color
+$aegisx-indigo-600: #4f46e5;
+$aegisx-indigo-700: #4338ca;
+$aegisx-indigo-800: #3730a3;
+$aegisx-indigo-900: #312e81;
+
+// ===========================================
+// GRAY SCALE (Zinc)
+// ===========================================
+$aegisx-zinc-50: #fafafa;
+$aegisx-zinc-100: #f4f4f5;
+$aegisx-zinc-200: #e4e4e7;
+$aegisx-zinc-300: #d4d4d8;
+$aegisx-zinc-400: #a1a1aa;
+$aegisx-zinc-500: #71717a;
+$aegisx-zinc-600: #52525b;
+$aegisx-zinc-700: #3f3f46;
+$aegisx-zinc-800: #27272a;
+$aegisx-zinc-900: #18181b;
+$aegisx-zinc-950: #09090b;
+
+// ===========================================
+// SUCCESS (Green)
+// ===========================================
+$aegisx-success-50: #f0fdf4;
+$aegisx-success-100: #dcfce7;
+$aegisx-success-200: #bbf7d0;
+$aegisx-success-300: #86efac;
+$aegisx-success-400: #4ade80;
+$aegisx-success-500: #22c55e; // Main
+$aegisx-success-600: #16a34a;
+$aegisx-success-700: #15803d;
+$aegisx-success-800: #166534;
+$aegisx-success-900: #14532d;
+
+// ===========================================
+// ERROR (Red)
+// ===========================================
+$aegisx-error-50: #fef2f2;
+$aegisx-error-100: #fee2e2;
+$aegisx-error-200: #fecaca;
+$aegisx-error-300: #fca5a5;
+$aegisx-error-400: #f87171;
+$aegisx-error-500: #ef4444; // Main
+$aegisx-error-600: #dc2626;
+$aegisx-error-700: #b91c1c;
+$aegisx-error-800: #991b1b;
+$aegisx-error-900: #7f1d1d;
+
+// ===========================================
+// WARNING (Amber)
+// ===========================================
+$aegisx-warning-50: #fffbeb;
+$aegisx-warning-100: #fef3c7;
+$aegisx-warning-200: #fde68a;
+$aegisx-warning-300: #fcd34d;
+$aegisx-warning-400: #fbbf24;
+$aegisx-warning-500: #f59e0b; // Main
+$aegisx-warning-600: #d97706;
+$aegisx-warning-700: #b45309;
+$aegisx-warning-800: #92400e;
+$aegisx-warning-900: #78350f;
+
+// ===========================================
+// INFO (Blue)
+// ===========================================
+$aegisx-info-50: #eff6ff;
+$aegisx-info-100: #dbeafe;
+$aegisx-info-200: #bfdbfe;
+$aegisx-info-300: #93c5fd;
+$aegisx-info-400: #60a5fa;
+$aegisx-info-500: #3b82f6; // Main
+$aegisx-info-600: #2563eb;
+$aegisx-info-700: #1d4ed8;
+$aegisx-info-800: #1e40af;
+$aegisx-info-900: #1e3a8a;
+
+// ===========================================
+// CYAN (For metrics)
+// ===========================================
+$aegisx-cyan-50: #ecfeff;
+$aegisx-cyan-100: #cffafe;
+$aegisx-cyan-200: #a5f3fc;
+$aegisx-cyan-300: #67e8f9;
+$aegisx-cyan-400: #22d3ee;
+$aegisx-cyan-500: #06b6d4; // Main
+$aegisx-cyan-600: #0891b2;
+$aegisx-cyan-700: #0e7490;
+$aegisx-cyan-800: #155e75;
+$aegisx-cyan-900: #164e63;
+
+// ===========================================
+// PURPLE (For accents)
+// ===========================================
+$aegisx-purple-50: #faf5ff;
+$aegisx-purple-100: #f3e8ff;
+$aegisx-purple-200: #e9d5ff;
+$aegisx-purple-300: #d8b4fe;
+$aegisx-purple-400: #c084fc;
+$aegisx-purple-500: #a855f7; // Main
+$aegisx-purple-600: #9333ea;
+$aegisx-purple-700: #7e22ce;
+$aegisx-purple-800: #6b21a8;
+$aegisx-purple-900: #581c87;
+
+// ===========================================
+// PINK (For accents)
+// ===========================================
+$aegisx-pink-50: #fdf2f8;
+$aegisx-pink-100: #fce7f3;
+$aegisx-pink-200: #fbcfe8;
+$aegisx-pink-300: #f9a8d4;
+$aegisx-pink-400: #f472b6;
+$aegisx-pink-500: #ec4899; // Main
+$aegisx-pink-600: #db2777;
+$aegisx-pink-700: #be185d;
+$aegisx-pink-800: #9f1239;
+$aegisx-pink-900: #831843;

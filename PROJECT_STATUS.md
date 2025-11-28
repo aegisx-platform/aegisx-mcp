@@ -1,6 +1,6 @@
 # AegisX Project Status
 
-**Last Updated:** 2025-11-28 (Session 74 - CRUD Generator v2.2.1 UI/UX Improvements)
+**Last Updated:** 2025-11-28 (Session 75 - Theme Switching Fix for Admin & Web Apps)
 **Current Status:** ✅ **PLATFORM COMPLETE** - All core features implemented, tested, and production-ready with complete design system
 **Git Repository:** git@github.com:aegisx-platform/aegisx-starter.git
 **CRUD Generator Version:** v2.2.1 (Ready for npm publish)
@@ -182,7 +182,7 @@ aegisx-starter/
 - ✅ Full type safety & comprehensive documentation
 - ✅ 0 TypeScript errors, all builds passing
 
-**Last Updated:** 2025-11-28 (Session 74)
+**Last Updated:** 2025-11-28 (Session 75)
 
 ---
 
@@ -192,6 +192,58 @@ aegisx-starter/
 >
 > - [Sessions 38-46 (2024 Q4)](./docs/sessions/ARCHIVE_2024_Q4.md)
 > - [Sessions 47-71 (2025 Q1)](./docs/sessions/ARCHIVE_2025_Q1.md)
+
+### Session 75 (2025-11-28) ✅ COMPLETED
+
+**Session Focus:** Theme Switching Fix - AxThemeService for Admin & Web Apps
+
+**Main Achievements:**
+
+- ✅ **Admin App Theme Switching** - Fixed Material CSS variables override to use AegisX tokens
+- ✅ **Web App Theme Switching** - Applied same fix pattern as admin app
+- ✅ **Removed Legacy Style Entries** - Cleaned up `project.json` for both apps
+- ✅ **Added data-theme Attribute** - Both apps now support dynamic theme switching
+
+**Root Cause Identified:**
+
+Material CSS variables (`--mat-app-background-color`, `--mat-app-text-color`) were hardcoded in `:root` and not being overridden when `data-theme` attribute changed.
+
+**Technical Changes:**
+
+| App   | File           | Change                                                                 |
+| ----- | -------------- | ---------------------------------------------------------------------- |
+| Admin | `styles.scss`  | Added `:root, [data-theme]` override for Material variables            |
+| Admin | `project.json` | Removed separate `aegisx-light.scss` and `aegisx-dark.scss` entries    |
+| Admin | `index.html`   | Removed separate CSS link (was already fixed)                          |
+| Web   | `styles.scss`  | Added `all-themes` import + Material variable overrides + `--ax-*` use |
+| Web   | `project.json` | Removed separate style entries                                         |
+| Web   | `index.html`   | Added `data-theme="aegisx" class="theme-aegisx light"` attribute       |
+
+**CSS Fix Applied:**
+
+```scss
+/* Override Material CSS variables to use AegisX tokens */
+:root,
+[data-theme] {
+  --mat-app-background-color: var(--ax-background-default) !important;
+  --mat-app-text-color: var(--ax-text-default) !important;
+}
+
+html,
+body {
+  background-color: var(--ax-background-default) !important;
+  color: var(--ax-text-default) !important;
+}
+```
+
+**Theme Switching Flow:**
+
+1. `AxThemeService.applyDataTheme()` sets `data-theme` attribute on `<html>`
+2. CSS `[data-theme=aegisx-dark]` selector activates dark theme variables
+3. Material variables now reference `--ax-*` tokens which change per theme
+4. Background and text colors update automatically
+
+---
 
 ### Session 74 (2025-11-28) ✅ COMPLETED
 
@@ -420,7 +472,7 @@ pnpm run crud:full -- [name] --force
 | **Frontend Features**           | 12     | ✅ Production Ready |
 | **CRUD Generator Version**      | v2.2.1 | ✅ Ready for npm    |
 | **Documentation Guides**        | 8+     | ✅ Complete         |
-| **Active Development Sessions** | 74     | 📊 Ongoing          |
+| **Active Development Sessions** | 75     | 📊 Ongoing          |
 | **API Endpoints Audited**       | 139+   | ✅ Session 48       |
 
 ### Code Quality
@@ -435,7 +487,7 @@ pnpm run crud:full -- [name] --force
 
 ---
 
-**Last Updated:** 2025-11-28 (Session 74)
+**Last Updated:** 2025-11-28 (Session 75)
 **Status:** ✅ HEALTHY - Production-ready platform with complete design system
 **Next Session:** When user requests new feature or improvement
 
