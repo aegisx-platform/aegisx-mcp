@@ -332,6 +332,13 @@ export class App {
               icon: 'linear_scale',
               link: '/docs/components/aegisx/navigation/stepper',
             },
+            {
+              id: 'launcher',
+              title: 'Launcher',
+              type: 'item',
+              icon: 'apps',
+              link: '/docs/components/aegisx/navigation/launcher',
+            },
           ],
         },
         // Layout
@@ -728,6 +735,11 @@ export class App {
               id: 'stepper',
               title: 'Stepper',
               link: '/docs/components/aegisx/navigation/stepper',
+            },
+            {
+              id: 'launcher',
+              title: 'Launcher',
+              link: '/docs/components/aegisx/navigation/launcher',
             },
           ],
         },

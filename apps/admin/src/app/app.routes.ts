@@ -88,6 +88,15 @@ export const appRoutes: Route[] = [
       ),
   },
 
+  // --- Components > AegisX > Overview ---
+  {
+    path: 'docs/components/aegisx/overview',
+    loadComponent: () =>
+      import(
+        './pages/docs/components/aegisx/overview/components-overview.component'
+      ).then((m) => m.ComponentsOverviewComponent),
+  },
+
   // --- Components > AegisX > Data Display ---
   {
     path: 'docs/components/aegisx/data-display/overview',
@@ -223,6 +232,13 @@ export const appRoutes: Route[] = [
         './pages/docs/components/aegisx/navigation/stepper/stepper-doc.component'
       ).then((m) => m.StepperDocComponent),
   },
+  {
+    path: 'docs/components/aegisx/navigation/launcher',
+    loadComponent: () =>
+      import(
+        './pages/docs/components/aegisx/navigation/launcher/launcher-doc.component'
+      ).then((m) => m.LauncherDocComponent),
+  },
 
   // --- Components > AegisX > Layout ---
   {
@@ -232,9 +248,177 @@ export const appRoutes: Route[] = [
         './pages/docs/components/aegisx/layout/drawer/drawer-doc.component'
       ).then((m) => m.DrawerDocComponent),
   },
+  {
+    path: 'docs/components/aegisx/layout/enterprise',
+    loadComponent: () =>
+      import(
+        './pages/docs/components/aegisx/layout/enterprise/enterprise-layout-doc.component'
+      ).then((m) => m.EnterpriseLayoutDocComponent),
+  },
 
-  // --- Components > Material (placeholder for future) ---
-  // TODO: Add Material component docs
+  // --- Components > Material ---
+  {
+    path: 'docs/material/overview',
+    loadComponent: () =>
+      import('./pages/docs/material/material-overview.component').then(
+        (m) => m.MaterialOverviewComponent,
+      ),
+  },
+  {
+    path: 'docs/material/button',
+    loadComponent: () =>
+      import('./pages/docs/material/button/material-button-doc.component').then(
+        (m) => m.MaterialButtonDocComponent,
+      ),
+  },
+  {
+    path: 'docs/material/card',
+    loadComponent: () =>
+      import('./pages/docs/material/card/material-card-doc.component').then(
+        (m) => m.MaterialCardDocComponent,
+      ),
+  },
+  {
+    path: 'docs/material/table',
+    loadComponent: () =>
+      import('./pages/docs/material/table/material-table-doc.component').then(
+        (m) => m.MaterialTableDocComponent,
+      ),
+  },
+  {
+    path: 'docs/material/form-field',
+    loadComponent: () =>
+      import(
+        './pages/docs/material/form-field/material-form-field-doc.component'
+      ).then((m) => m.MaterialFormFieldDocComponent),
+  },
+  {
+    path: 'docs/material/chips',
+    loadComponent: () =>
+      import('./pages/docs/material/chips/material-chips-doc.component').then(
+        (m) => m.MaterialChipsDocComponent,
+      ),
+  },
+  {
+    path: 'docs/material/dialog',
+    loadComponent: () =>
+      import('./pages/docs/material/dialog/material-dialog-doc.component').then(
+        (m) => m.MaterialDialogDocComponent,
+      ),
+  },
+  {
+    path: 'docs/material/menu',
+    loadComponent: () =>
+      import('./pages/docs/material/menu/material-menu-doc.component').then(
+        (m) => m.MaterialMenuDocComponent,
+      ),
+  },
+  {
+    path: 'docs/material/tabs',
+    loadComponent: () =>
+      import('./pages/docs/material/tabs/material-tabs-doc.component').then(
+        (m) => m.MaterialTabsDocComponent,
+      ),
+  },
+  {
+    path: 'docs/material/fab',
+    loadComponent: () =>
+      import('./pages/docs/material/fab/material-fab-doc.component').then(
+        (m) => m.MaterialFabDocComponent,
+      ),
+  },
+  {
+    path: 'docs/material/select',
+    loadComponent: () =>
+      import('./pages/docs/material/select/material-select-doc.component').then(
+        (m) => m.MaterialSelectDocComponent,
+      ),
+  },
+  {
+    path: 'docs/material/progress',
+    loadComponent: () =>
+      import(
+        './pages/docs/material/progress/material-progress-doc.component'
+      ).then((m) => m.MaterialProgressDocComponent),
+  },
+  {
+    path: 'docs/material/tooltip',
+    loadComponent: () =>
+      import(
+        './pages/docs/material/tooltip/material-tooltip-doc.component'
+      ).then((m) => m.MaterialTooltipDocComponent),
+  },
+  {
+    path: 'docs/material/checkbox',
+    loadComponent: () =>
+      import(
+        './pages/docs/material/checkbox/material-checkbox-doc.component'
+      ).then((m) => m.MaterialCheckboxDocComponent),
+  },
+  {
+    path: 'docs/material/slider',
+    loadComponent: () =>
+      import('./pages/docs/material/slider/material-slider-doc.component').then(
+        (m) => m.MaterialSliderDocComponent,
+      ),
+  },
+  {
+    path: 'docs/material/snackbar',
+    loadComponent: () =>
+      import(
+        './pages/docs/material/snackbar/material-snackbar-doc.component'
+      ).then((m) => m.MaterialSnackbarDocComponent),
+  },
+  {
+    path: 'docs/material/expansion',
+    loadComponent: () =>
+      import(
+        './pages/docs/material/expansion/material-expansion-doc.component'
+      ).then((m) => m.MaterialExpansionDocComponent),
+  },
+  {
+    path: 'docs/material/list',
+    loadComponent: () =>
+      import('./pages/docs/material/list/material-list-doc.component').then(
+        (m) => m.MaterialListDocComponent,
+      ),
+  },
+  {
+    path: 'docs/material/icon',
+    loadComponent: () =>
+      import('./pages/docs/material/icon/material-icon-doc.component').then(
+        (m) => m.MaterialIconDocComponent,
+      ),
+  },
+  {
+    path: 'docs/material/button-toggle',
+    loadComponent: () =>
+      import(
+        './pages/docs/material/button-toggle/material-button-toggle-doc.component'
+      ).then((m) => m.MaterialButtonToggleDocComponent),
+  },
+  {
+    path: 'docs/material/datepicker',
+    loadComponent: () =>
+      import(
+        './pages/docs/material/datepicker/material-datepicker-doc.component'
+      ).then((m) => m.MaterialDatepickerDocComponent),
+  },
+  {
+    path: 'docs/material/progress-bar',
+    loadComponent: () =>
+      import(
+        './pages/docs/material/progress-bar/material-progress-bar-doc.component'
+      ).then((m) => m.MaterialProgressBarDocComponent),
+  },
+  // Placeholder routes for other Material components
+  {
+    path: 'docs/material/:component',
+    loadComponent: () =>
+      import('./pages/docs/material/material-placeholder.component').then(
+        (m) => m.MaterialPlaceholderComponent,
+      ),
+  },
 
   // --- Patterns ---
   {
@@ -317,6 +501,115 @@ export const appRoutes: Route[] = [
     loadComponent: () =>
       import('./pages/playground/pages/login/login.component').then(
         (m) => m.LoginComponent,
+      ),
+  },
+  {
+    path: 'enterprise-demo',
+    loadComponent: () =>
+      import('./pages/enterprise-demo/enterprise-demo.component').then(
+        (m) => m.EnterpriseDemoComponent,
+      ),
+  },
+  {
+    path: 'inventory-demo',
+    loadComponent: () =>
+      import('./pages/inventory-demo/inventory-shell.component').then(
+        (m) => m.InventoryShellComponent,
+      ),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./pages/inventory-demo/pages/dashboard.component').then(
+            (m) => m.DashboardComponent,
+          ),
+      },
+      {
+        path: 'stock',
+        loadComponent: () =>
+          import('./pages/inventory-demo/pages/stock.component').then(
+            (m) => m.StockComponent,
+          ),
+      },
+      {
+        path: 'purchase',
+        loadComponent: () =>
+          import('./pages/inventory-demo/pages/purchase.component').then(
+            (m) => m.PurchaseComponent,
+          ),
+      },
+      {
+        path: 'suppliers',
+        loadComponent: () =>
+          import('./pages/inventory-demo/pages/suppliers.component').then(
+            (m) => m.SuppliersComponent,
+          ),
+      },
+      {
+        path: 'reports',
+        loadComponent: () =>
+          import('./pages/inventory-demo/pages/reports.component').then(
+            (m) => m.ReportsComponent,
+          ),
+      },
+    ],
+  },
+  {
+    path: 'his-demo',
+    loadComponent: () =>
+      import('./pages/his-demo/his-shell.component').then(
+        (m) => m.HisShellComponent,
+      ),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./pages/his-demo/pages/dashboard.component').then(
+            (m) => m.HisDashboardComponent,
+          ),
+      },
+      {
+        path: 'patients',
+        loadComponent: () =>
+          import('./pages/his-demo/pages/patients.component').then(
+            (m) => m.PatientsComponent,
+          ),
+      },
+      {
+        path: 'appointments',
+        loadComponent: () =>
+          import('./pages/his-demo/pages/appointments.component').then(
+            (m) => m.AppointmentsComponent,
+          ),
+      },
+      {
+        path: 'lab-results',
+        loadComponent: () =>
+          import('./pages/his-demo/pages/lab-results.component').then(
+            (m) => m.LabResultsComponent,
+          ),
+      },
+      {
+        path: 'pharmacy',
+        loadComponent: () =>
+          import('./pages/his-demo/pages/pharmacy.component').then(
+            (m) => m.PharmacyComponent,
+          ),
+      },
+      {
+        path: 'reports',
+        loadComponent: () =>
+          import('./pages/his-demo/pages/reports.component').then(
+            (m) => m.HisReportsComponent,
+          ),
+      },
+    ],
+  },
+  {
+    path: 'app-launcher-demo',
+    loadComponent: () =>
+      import('./pages/app-launcher-demo/app-launcher-demo.component').then(
+        (m) => m.AppLauncherDemoComponent,
       ),
   },
 
@@ -505,7 +798,7 @@ export const appRoutes: Route[] = [
   },
   {
     path: 'aegisx-ui',
-    redirectTo: 'docs/components/aegisx/data-display/overview',
+    redirectTo: 'docs/components/aegisx/overview',
     pathMatch: 'full',
   },
   {
@@ -520,7 +813,7 @@ export const appRoutes: Route[] = [
   },
   {
     path: 'aegisx-ui/data-display',
-    redirectTo: 'docs/components/aegisx/data-display/overview',
+    redirectTo: 'docs/components/aegisx/overview',
     pathMatch: 'full',
   },
   {
