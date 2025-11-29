@@ -5,6 +5,9 @@ import {
   EventEmitter,
   ContentChild,
   TemplateRef,
+  computed,
+  signal,
+  HostBinding,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
@@ -17,6 +20,13 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
 import { AxLoadingBarComponent } from '../../components/feedback/loading-bar/loading-bar.component';
 import { AxNavigationItem } from '../../types/ax-navigation.types';
+import {
+  EnterpriseAppThemeInput,
+  EnterpriseAppThemeOverride,
+  EnterpriseAppTheme,
+  resolveEnterpriseTheme,
+  generateThemeCSSVariables,
+} from './enterprise-theme.types';
 
 /**
  * Enterprise Layout Component
@@ -30,20 +40,50 @@ import { AxNavigationItem } from '../../types/ax-navigation.types';
  * - Full-width content area
  * - Customizable header actions
  * - Loading bar integration
+ * - **App-specific theming** with preset themes and custom overrides
  *
- * @example
+ * @example Basic usage
  * ```html
  * <ax-enterprise-layout
  *   [appName]="'My Enterprise App'"
  *   [navigation]="navItems"
- *   [subNavigation]="subNavItems"
  * >
- *   <ng-template #headerActions>
- *     <button mat-icon-button><mat-icon>notifications</mat-icon></button>
- *   </ng-template>
  *   <router-outlet></router-outlet>
  * </ax-enterprise-layout>
  * ```
+ *
+ * @example With preset theme
+ * ```html
+ * <ax-enterprise-layout
+ *   [appName]="'Hospital Information System'"
+ *   [appTheme]="'medical'"
+ *   [navigation]="navItems"
+ * >
+ *   <router-outlet></router-outlet>
+ * </ax-enterprise-layout>
+ * ```
+ *
+ * @example With theme override
+ * ```html
+ * <ax-enterprise-layout
+ *   [appName]="'Custom App'"
+ *   [appTheme]="'finance'"
+ *   [themeOverrides]="{ headerBg: '#1a1a2e', primary: '#16a34a' }"
+ * >
+ *   <router-outlet></router-outlet>
+ * </ax-enterprise-layout>
+ * ```
+ *
+ * Available preset themes:
+ * - `default` - Indigo/Slate (default AegisX)
+ * - `medical` - Cyan/Teal (Healthcare/HIS)
+ * - `finance` - Teal/Amber (Banking/Finance)
+ * - `inventory` - Violet/Orange (Warehouse/Inventory)
+ * - `hr` - Pink/Purple (Human Resources)
+ * - `education` - Blue/Emerald (LMS/Education)
+ * - `retail` - Orange/Lime (POS/Retail)
+ * - `manufacturing` - Slate/Yellow (MES/Manufacturing)
+ * - `logistics` - Emerald/Sky (TMS/Logistics)
  */
 @Component({
   selector: 'ax-enterprise-layout',
@@ -63,7 +103,7 @@ import { AxNavigationItem } from '../../types/ax-navigation.types';
     AxLoadingBarComponent,
   ],
   template: `
-    <div class="ax-enterprise-layout">
+    <div class="ax-enterprise-layout" [class.has-app-theme]="hasAppTheme()">
       <!-- Loading Bar -->
       <ax-loading-bar variant="primary" />
 
@@ -71,6 +111,7 @@ import { AxNavigationItem } from '../../types/ax-navigation.types';
       <header
         class="ax-enterprise-header"
         [class.dark-header]="headerTheme === 'dark'"
+        [class.themed-header]="hasAppTheme()"
       >
         <div class="ax-enterprise-header-primary">
           <div class="ax-enterprise-header-container">
@@ -385,9 +426,17 @@ import { AxNavigationItem } from '../../types/ax-navigation.types';
         .ax-enterprise-header-container > button {
           color: rgba(255, 255, 255, 0.8);
 
+          mat-icon {
+            color: rgba(255, 255, 255, 0.8);
+          }
+
           &:hover {
             color: white;
             background: rgba(255, 255, 255, 0.1);
+
+            mat-icon {
+              color: white;
+            }
           }
         }
 
@@ -405,6 +454,92 @@ import { AxNavigationItem } from '../../types/ax-navigation.types';
 
           .mdc-tab-indicator__content--underline {
             border-color: var(--ax-brand-default) !important;
+          }
+        }
+      }
+
+      /* App-Specific Themed Header (uses CSS variables from theme) */
+      .ax-enterprise-header.themed-header {
+        background: var(--ax-enterprise-header-bg);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+        .ax-enterprise-header-primary {
+          background: transparent;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .ax-enterprise-logo-placeholder {
+          background: var(--ax-enterprise-logo-bg);
+          color: var(--ax-enterprise-logo-color);
+        }
+
+        .ax-enterprise-brand-text {
+          color: var(--ax-enterprise-header-text-hover);
+        }
+
+        .ax-enterprise-nav-link {
+          color: var(--ax-enterprise-header-text);
+
+          &:hover {
+            color: var(--ax-enterprise-header-text-hover);
+            background: rgba(255, 255, 255, 0.1);
+          }
+
+          &.active {
+            color: var(--ax-enterprise-header-text-hover);
+            background: var(--ax-enterprise-header-active-bg);
+          }
+
+          .dropdown-arrow {
+            color: var(--ax-enterprise-header-text);
+          }
+        }
+
+        .ax-enterprise-header-actions button,
+        .ax-enterprise-search button,
+        .ax-enterprise-header-container > button {
+          color: var(--ax-enterprise-header-text);
+
+          mat-icon {
+            color: var(--ax-enterprise-header-text);
+          }
+
+          &:hover {
+            color: var(--ax-enterprise-header-text-hover);
+            background: rgba(255, 255, 255, 0.1);
+
+            mat-icon {
+              color: var(--ax-enterprise-header-text-hover);
+            }
+          }
+        }
+
+        .ax-enterprise-subnav {
+          background: var(--ax-enterprise-subnav-bg);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+          .mat-mdc-tab-link {
+            color: var(--ax-enterprise-header-text) !important;
+
+            &.mdc-tab--active {
+              color: var(--ax-enterprise-header-text-hover) !important;
+            }
+          }
+
+          .mdc-tab-indicator__content--underline {
+            border-color: var(--ax-enterprise-tab-indicator) !important;
+          }
+        }
+
+        .ax-enterprise-badge {
+          &.badge-primary {
+            background: var(--ax-enterprise-badge-primary);
+            color: white;
+          }
+
+          &.badge-accent {
+            background: var(--ax-enterprise-badge-accent);
+            color: white;
           }
         }
       }
@@ -646,6 +781,14 @@ export class EnterpriseLayoutComponent {
   @Input() headerTheme: 'light' | 'dark' = 'light';
   @Input() contentBackground: 'white' | 'gray' = 'white';
 
+  // Theme Configuration
+  @Input() set appTheme(value: EnterpriseAppThemeInput | undefined) {
+    this._appTheme.set(value);
+  }
+  @Input() set themeOverrides(value: EnterpriseAppThemeOverride | undefined) {
+    this._themeOverrides.set(value);
+  }
+
   // Navigation
   @Input() navigation: AxNavigationItem[] = [];
   @Input() subNavigation: AxNavigationItem[] = [];
@@ -661,4 +804,38 @@ export class EnterpriseLayoutComponent {
   @ContentChild('footerContent') footerContent!: TemplateRef<unknown>;
 
   currentYear = new Date().getFullYear();
+
+  // Theme signals
+  private readonly _appTheme = signal<EnterpriseAppThemeInput | undefined>(
+    undefined,
+  );
+  private readonly _themeOverrides = signal<
+    EnterpriseAppThemeOverride | undefined
+  >(undefined);
+
+  // Computed resolved theme
+  protected readonly resolvedTheme = computed<EnterpriseAppTheme>(() => {
+    return resolveEnterpriseTheme(this._appTheme(), this._themeOverrides());
+  });
+
+  // Check if using app theme (dark header is applied automatically)
+  protected readonly hasAppTheme = computed(() => !!this._appTheme());
+
+  // Computed CSS variables string for host binding
+  protected readonly themeStyles = computed(() => {
+    if (!this._appTheme()) {
+      return '';
+    }
+    const theme = this.resolvedTheme();
+    const cssVars = generateThemeCSSVariables(theme);
+    return Object.entries(cssVars)
+      .map(([property, value]) => `${property}: ${value}`)
+      .join('; ');
+  });
+
+  // Apply CSS variables via host binding
+  @HostBinding('style')
+  get hostStyles(): string {
+    return this.themeStyles();
+  }
 }
