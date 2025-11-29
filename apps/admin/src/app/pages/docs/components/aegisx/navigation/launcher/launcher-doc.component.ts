@@ -146,13 +146,28 @@ import { CodeTab } from '../../../../../../types/docs.types';
               <p class="text-on-surface-variant mb-4">
                 10 pastel colors available with full dark mode support:
               </p>
-              <div class="flex flex-wrap gap-2">
+              <div class="flex flex-wrap gap-2 mb-6">
                 @for (color of colors; track color) {
                   <mat-chip-option [selected]="false">{{
                     color
                   }}</mat-chip-option>
                 }
               </div>
+
+              <!-- All Colors Demo -->
+              <mat-card appearance="outlined" class="p-6">
+                <h4 class="text-lg font-medium mb-4">All Color Previews</h4>
+                <div
+                  class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
+                >
+                  @for (app of colorVariantApps; track app.id) {
+                    <ax-launcher-card
+                      [app]="app"
+                      (cardClick)="onAppClick($event)"
+                    />
+                  }
+                </div>
+              </mat-card>
             </section>
 
             <!-- Basic Usage -->
@@ -398,6 +413,11 @@ import { CodeTab } from '../../../../../../types/docs.types';
         align-items: center;
         gap: 0.5rem;
       }
+
+      .grid ax-launcher-card {
+        width: 100%;
+        min-width: 0;
+      }
     `,
   ],
 })
@@ -460,6 +480,101 @@ export class LauncherDocComponent {
     'rose',
     'neutral',
     'white',
+  ];
+
+  // All 10 color variants with sample apps
+  colorVariantApps: LauncherApp[] = [
+    {
+      id: 'pink-app',
+      name: 'Health',
+      description: 'Healthcare system',
+      icon: 'favorite',
+      color: 'pink',
+      status: 'active',
+      enabled: true,
+    },
+    {
+      id: 'peach-app',
+      name: 'Social',
+      description: 'Social network',
+      icon: 'people',
+      color: 'peach',
+      status: 'active',
+      enabled: true,
+    },
+    {
+      id: 'mint-app',
+      name: 'Finance',
+      description: 'Banking app',
+      icon: 'account_balance',
+      color: 'mint',
+      status: 'active',
+      enabled: true,
+    },
+    {
+      id: 'blue-app',
+      name: 'Dashboard',
+      description: 'Main dashboard',
+      icon: 'dashboard',
+      color: 'blue',
+      status: 'active',
+      enabled: true,
+    },
+    {
+      id: 'yellow-app',
+      name: 'Alerts',
+      description: 'Notifications',
+      icon: 'notifications',
+      color: 'yellow',
+      status: 'new',
+      enabled: true,
+      notificationCount: 3,
+    },
+    {
+      id: 'lavender-app',
+      name: 'Settings',
+      description: 'App settings',
+      icon: 'settings',
+      color: 'lavender',
+      status: 'active',
+      enabled: true,
+    },
+    {
+      id: 'cyan-app',
+      name: 'Calendar',
+      description: 'Schedule events',
+      icon: 'calendar_month',
+      color: 'cyan',
+      status: 'active',
+      enabled: true,
+    },
+    {
+      id: 'rose-app',
+      name: 'Reports',
+      description: 'Generate reports',
+      icon: 'assessment',
+      color: 'rose',
+      status: 'beta',
+      enabled: true,
+    },
+    {
+      id: 'neutral-app',
+      name: 'Archive',
+      description: 'Document storage',
+      icon: 'folder',
+      color: 'neutral',
+      status: 'active',
+      enabled: true,
+    },
+    {
+      id: 'white-app',
+      name: 'Notes',
+      description: 'Take notes',
+      icon: 'edit_note',
+      color: 'white',
+      status: 'active',
+      enabled: true,
+    },
   ];
 
   demoApps: LauncherApp[] = [
