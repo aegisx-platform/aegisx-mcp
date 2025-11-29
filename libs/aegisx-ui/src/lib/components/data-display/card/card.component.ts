@@ -30,6 +30,7 @@ export class AxCardComponent {
   @Input() hoverable = false;
   @Input() clickable = false;
   @Input() loading = false;
+  @Input() flat = false;
   @Input() title = '';
   @Input() subtitle = '';
 
@@ -47,6 +48,7 @@ export class AxCardComponent {
     if (this.hoverable) classes.push('ax-card-hoverable');
     if (this.clickable) classes.push('ax-card-clickable');
     if (this.loading) classes.push('ax-card-loading');
+    if (this.flat) classes.push('ax-card-flat');
     return classes.join(' ');
   }
 

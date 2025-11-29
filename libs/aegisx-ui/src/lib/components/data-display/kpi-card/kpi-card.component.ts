@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export type KpiCardVariant =
@@ -66,6 +66,7 @@ export type KpiCardAccentColor =
   imports: [CommonModule],
   templateUrl: './kpi-card.component.html',
   styleUrls: ['./kpi-card.component.scss'],
+  encapsulation: ViewEncapsulation.None,
 })
 export class AxKpiCardComponent {
   /** Card variant */
@@ -113,6 +114,9 @@ export class AxKpiCardComponent {
   /** Clickable cursor */
   @Input() clickable = false;
 
+  /** Flat style (no shadow) */
+  @Input() flat = false;
+
   /** Number of filled bars (for visual-indicator variant, 0-3) */
   @Input() barsFilled = 0;
 
@@ -132,6 +136,7 @@ export class AxKpiCardComponent {
     if (this.compact) classes.push('ax-kpi-card--compact');
     if (this.hoverable) classes.push('ax-kpi-card--hoverable');
     if (this.clickable) classes.push('ax-kpi-card--clickable');
+    if (this.flat) classes.push('ax-kpi-card--flat');
     if (this.accentColor)
       classes.push(`ax-kpi-card--accent-${this.accentColor}`);
     return classes.join(' ');

@@ -4,7 +4,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  background-color: var(--ax-white);
+  background-color: var(--ax-background-default);
   border-radius: var(--ax-radius-lg);
   overflow: hidden;
   transition: all 0.2s ease;
@@ -12,11 +12,13 @@
 
 // Variants
 .ax-card-default {
-  border: 1px solid var(--ax-border-color);
+  border: 1px solid var(--ax-border-emphasis);
+  box-shadow: var(--ax-shadow-sm);
 }
 
 .ax-card-outlined {
-  border: 2px solid var(--ax-border-color);
+  border: 1px solid var(--ax-border-emphasis);
+  box-shadow: var(--ax-shadow-sm);
 }
 
 .ax-card-elevated {
@@ -151,7 +153,7 @@
 
 // Neutral Color
 .ax-card-neutral.ax-card-filled {
-  background-color: var(--ax-gray-500);
+  background-color: var(--ax-text-subtle);
 }
 
 .ax-card-neutral.ax-card-subtle {
@@ -214,7 +216,7 @@
   cursor: pointer;
 
   &:hover {
-    border-color: var(--ax-primary-light);
+    border-color: var(--ax-brand-100);
   }
 
   &:active {
@@ -224,6 +226,10 @@
 
 .ax-card-loading {
   pointer-events: none;
+}
+
+.ax-card-flat {
+  box-shadow: none;
 }
 
 // Focus State
@@ -268,7 +274,7 @@
 .ax-card-neutral:focus-visible {
   box-shadow:
     0 0 0 3px var(--ax-background-muted),
-    0 0 0 5px var(--ax-gray-400);
+    0 0 0 5px var(--ax-border-default);
 }
 
 .ax-card-primary:focus,
@@ -303,7 +309,7 @@
 }
 
 .ax-card-spinner-circle {
-  stroke: var(--ax-primary);
+  stroke: var(--ax-brand-default);
   stroke-dasharray: 50;
   stroke-dashoffset: 0;
   animation: ax-card-dash 1.5s ease-in-out infinite;
