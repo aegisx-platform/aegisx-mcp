@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
@@ -386,14 +386,11 @@ export class AxCalendarEventDialogComponent implements OnInit {
     },
   ];
 
-  constructor(
-    private fb: FormBuilder,
-    private dialogRef: MatDialogRef<
-      AxCalendarEventDialogComponent,
-      AxCalendarEventDialogResult
-    >,
-    @Inject(MAT_DIALOG_DATA) public data: AxCalendarEventDialogData,
-  ) {}
+  private readonly fb = inject(FormBuilder);
+  private readonly dialogRef = inject(
+    MatDialogRef<AxCalendarEventDialogComponent, AxCalendarEventDialogResult>,
+  );
+  public readonly data = inject<AxCalendarEventDialogData>(MAT_DIALOG_DATA);
 
   ngOnInit(): void {
     this.initForm();

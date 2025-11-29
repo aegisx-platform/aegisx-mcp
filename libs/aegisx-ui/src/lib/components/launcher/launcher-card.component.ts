@@ -859,6 +859,8 @@ export class AxLauncherCardComponent {
   size = input<LauncherCardSize>('md');
   /** Custom grid span for precise bento grid control */
   gridSpan = input<LauncherGridSpan | undefined>(undefined);
+  /** Whether to enable grid span classes (only for bento grid layout) */
+  enableGridSpan = input<boolean>(false);
 
   // Outputs
   cardClick = output<LauncherAppClickEvent>();
@@ -876,6 +878,9 @@ export class AxLauncherCardComponent {
 
   /** Grid span classes for CSS grid layout */
   gridSpanClasses = computed(() => {
+    // Only apply grid span when explicitly enabled (for bento grid)
+    if (!this.enableGridSpan()) return '';
+
     // Priority: input gridSpan > app.gridSpan
     const span = this.gridSpan() || this.app().gridSpan;
     if (!span) return '';

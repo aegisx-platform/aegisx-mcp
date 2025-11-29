@@ -327,9 +327,7 @@ export class AxCalendarComponent implements OnInit, OnDestroy {
     this._isBrowser.set(isPlatformBrowser(this.platformId));
   }
 
-  ngOnDestroy(): void {
-    // Cleanup if needed
-  }
+  // ngOnDestroy not needed - no manual subscriptions
 
   // =========================================================================
   // Public API
