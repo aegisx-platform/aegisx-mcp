@@ -28,10 +28,10 @@ export interface ListWidgetConfig {
  * List Widget Data
  */
 export interface ListWidgetData {
-  items: ListItem[];
+  items: WidgetListItem[];
 }
 
-export interface ListItem {
+export interface WidgetListItem {
   /** Unique ID */
   id: string;
 

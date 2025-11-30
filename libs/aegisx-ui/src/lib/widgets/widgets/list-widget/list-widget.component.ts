@@ -7,7 +7,7 @@ import { BaseWidgetComponent } from '../../core/base-widget.component';
 import {
   ListWidgetConfig,
   ListWidgetData,
-  ListItem,
+  WidgetListItem,
   LIST_WIDGET_DEFAULTS,
 } from './list-widget.types';
 
@@ -300,7 +300,7 @@ export class ListWidgetComponent extends BaseWidgetComponent<
   ListWidgetConfig,
   ListWidgetData
 > {
-  itemClick = output<ListItem>();
+  itemClick = output<WidgetListItem>();
 
   mergedConfig = computed(() => ({
     ...LIST_WIDGET_DEFAULTS,
@@ -323,7 +323,7 @@ export class ListWidgetComponent extends BaseWidgetComponent<
     return LIST_WIDGET_DEFAULTS;
   }
 
-  onItemClick(item: ListItem): void {
+  onItemClick(item: WidgetListItem): void {
     if (this.mergedConfig().clickable) {
       this.itemClick.emit(item);
     }
