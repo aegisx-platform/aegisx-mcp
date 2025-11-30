@@ -406,6 +406,13 @@ export class App {
           icon: 'calendar_month',
           link: '/docs/components/aegisx/data-display/calendar',
         },
+        {
+          id: 'integrations-qrcode',
+          title: 'QR Code',
+          type: 'item',
+          icon: 'qr_code',
+          link: '/docs/integrations/qrcode',
+        },
       ],
     },
 
@@ -995,6 +1002,11 @@ export class App {
           id: 'integrations-fullcalendar',
           title: 'FullCalendar',
           link: '/docs/components/aegisx/data-display/calendar',
+        },
+        {
+          id: 'integrations-qrcode',
+          title: 'QR Code',
+          link: '/docs/integrations/qrcode',
         },
       ],
     },

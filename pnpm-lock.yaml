@@ -139,6 +139,12 @@ importers:
       '@types/winston':
         specifier: ^2.4.4
         version: 2.4.4
+      angular-gridster2:
+        specifier: ^20.2.4
+        version: 20.2.4(@angular/common@20.1.8(@angular/core@20.1.8(@angular/compiler@20.1.8)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.1.8(@angular/compiler@20.1.8)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2)
+      angularx-qrcode:
+        specifier: ^20.0.0
+        version: 20.0.0(@angular/core@20.1.8(@angular/compiler@20.1.8)(rxjs@7.8.2)(zone.js@0.15.1))
       bcrypt:
         specifier: ^6.0.0
         version: 6.0.0
@@ -346,7 +352,7 @@ importers:
         version: 1.55.0
       '@scalar/api-reference':
         specifier: ^1.38.1
-        version: 1.38.1(axios@1.11.0)(tailwindcss@3.4.17(ts-node@10.9.1(@swc/core@1.5.29(@swc/helpers@0.5.17))(@types/node@20.19.9)(typescript@5.8.3)))(typescript@5.8.3)
+        version: 1.38.1(axios@1.11.0)(qrcode@1.5.4)(tailwindcss@3.4.17(ts-node@10.9.1(@swc/core@1.5.29(@swc/helpers@0.5.17))(@types/node@20.19.9)(typescript@5.8.3)))(typescript@5.8.3)
       '@schematics/angular':
         specifier: ~20.1.0
         version: 20.1.6(chokidar@4.0.3)
@@ -475,7 +481,7 @@ importers:
         version: 6.1.6(encoding@0.1.13)(typanion@3.14.0)
       vitepress:
         specifier: ^1.6.4
-        version: 1.6.4(@algolia/client-search@5.32.0)(@types/node@20.19.9)(axios@1.11.0)(fuse.js@7.1.0)(less@4.4.1)(postcss@8.5.6)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(sass-embedded@1.92.1)(sass@1.92.1)(search-insights@2.17.3)(terser@5.43.1)(typescript@5.8.3)
+        version: 1.6.4(@algolia/client-search@5.32.0)(@types/node@20.19.9)(axios@1.11.0)(fuse.js@7.1.0)(less@4.4.1)(postcss@8.5.6)(qrcode@1.5.4)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(sass-embedded@1.92.1)(sass@1.92.1)(search-insights@2.17.3)(terser@5.43.1)(typescript@5.8.3)
       vue:
         specifier: ^3.5.22
         version: 3.5.22(typescript@5.8.3)
@@ -9357,6 +9363,24 @@ packages:
       typescript: '*'
       typescript-eslint: ^8.0.0
 
+  angular-gridster2@20.2.4:
+    resolution:
+      {
+        integrity: sha512-UditqVW6AkFK528c08i4hXlGxofX2l5+FKF9BgHtNAiB9w2/5SJx7TMaqsHi10EKU0RW13ugE8MbAlv5bRdvzw==,
+      }
+    peerDependencies:
+      '@angular/common': ^20.0.0
+      '@angular/core': ^20.0.0
+      rxjs: ^7.0.0
+
+  angularx-qrcode@20.0.0:
+    resolution:
+      {
+        integrity: sha512-WZolRZztQsQxOXqodNSDicxPWNO79t/AT4wts+DxwYdtdXb1RELfZjtax9oGMQQ6mEZ6bwk5GqBGEDB3Y+cSqw==,
+      }
+    peerDependencies:
+      '@angular/core': ^20.0.0
+
   ansi-colors@4.1.3:
     resolution:
       {
@@ -10420,6 +10444,12 @@ packages:
     peerDependencies:
       typanion: '*'
 
+  cliui@6.0.0:
+    resolution:
+      {
+        integrity: sha512-t6wbgtoCXvAzst7QgXxJYqPt0usEfbgQdftEPbLL/cvv6HPE5VgvqCuAIDR0NgU52ds6rFwqrgakNLrHEjCbrQ==,
+      }
+
   cliui@7.0.4:
     resolution:
       {
@@ -11386,6 +11416,13 @@ packages:
       supports-color:
         optional: true
 
+  decamelize@1.2.0:
+    resolution:
+      {
+        integrity: sha512-z2S+W9X73hAUUki+N+9Za2lBlun89zigOyGrsax+KUQ6wKW4ZoWpEYBkGhQjwAjjDCkWxhY0VKEhk8wzY7F5cA==,
+      }
+    engines: { node: '>=0.10.0' }
+
   decimal.js@10.6.0:
     resolution:
       {
@@ -11617,6 +11654,12 @@ packages:
         integrity: sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==,
       }
     engines: { node: '>=0.3.1' }
+
+  dijkstrajs@1.0.3:
+    resolution:
+      {
+        integrity: sha512-qiSlmBq9+BCdCA/L46dw8Uy93mloxsPSbwnm5yrKn2vMPiy8KyAskTF6zuV/j5BMsmOGZDPs7KjU+mjb670kfA==,
+      }
 
   dir-glob@3.0.1:
     resolution:
@@ -17591,6 +17634,13 @@ packages:
         integrity: sha512-k+YsbhpA9e+EFfKjTCH3VW6aoKlyNYI6NYdTfDL4CIvFnvsuO84ttonmZE7rc+v23SLTH8XX+5w/Ak9v0xGY4g==,
       }
 
+  pngjs@5.0.0:
+    resolution:
+      {
+        integrity: sha512-40QW5YalBNfQo5yRYmiw7Yz6TKKVr3h6970B2YE+3fQpsWcrbj1PzJgxeJ19DRQjhMbKPIuMY8rFaXc8moolVw==,
+      }
+    engines: { node: '>=10.13.0' }
+
   portfinder@1.0.37:
     resolution:
       {
@@ -18244,6 +18294,14 @@ packages:
         integrity: sha512-oTUZM/NAZS8p7ANR3SHh30kXB+zK2r2BPcEn/awJIbOvq82WoMN4p62AWWp3Hhw50G0xMsw1mhIBLqHw64EcNQ==,
       }
 
+  qrcode@1.5.4:
+    resolution:
+      {
+        integrity: sha512-1ca71Zgiu6ORjHqFBDpnSMTR2ReToX4l1Au1VFLyVeBTFavzQnv5JxMFr3ukHVKpSrSA2MCk0lNJSykjUfz7Zg==,
+      }
+    engines: { node: '>=10.13.0' }
+    hasBin: true
+
   qs@6.13.0:
     resolution:
       {
@@ -18590,6 +18648,12 @@ packages:
         integrity: sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw==,
       }
     engines: { node: '>=0.10.0' }
+
+  require-main-filename@2.0.0:
+    resolution:
+      {
+        integrity: sha512-NKN5kMDylKuldxYLSUfrbo5Tuzh4hd+2E8NPPX02mZtn1VuREQToYe/ZdlJy+J3uCpfaiGF05e7B8W0iXbQHmg==,
+      }
 
   requires-port@1.0.0:
     resolution:
@@ -19188,6 +19252,12 @@ packages:
         integrity: sha512-61g9pCh0Vnh7IutZjtLGGpTA355+OPn2TyDv/6ivP2h/AdAVX9azsoxmg2/M6nZeQZNYBEwIcsne1mJd9oQItQ==,
       }
     engines: { node: '>= 18' }
+
+  set-blocking@2.0.0:
+    resolution:
+      {
+        integrity: sha512-KiKBS8AnWGEyLzofFfmvKwpdPzqiy16LvQfK3yv/fVH7Bj13/wl3JSR1J+rfgRE9q7xUJK4qvgS8raSOeLUehw==,
+      }
 
   set-cookie-parser@2.7.1:
     resolution:
@@ -21338,6 +21408,12 @@ packages:
         integrity: sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==,
       }
 
+  which-module@2.0.1:
+    resolution:
+      {
+        integrity: sha512-iBdZ57RDvnOR9AGBhML2vFZf7h8vmBjhoaZqODJBFWHVtKkDmKuHai3cx5PgVMrX5YDNp27AofYbAwctSS+vhQ==,
+      }
+
   which-typed-array@1.1.19:
     resolution:
       {
@@ -21572,6 +21648,12 @@ packages:
         integrity: sha512-AkTuIuVTET12tpsVIQo+ZU6f/qDmKuRUcjaqR+OIvm+aCBsZ95i7UVY5WJ9TMsSaZ0DA2WxoZ4acu0sPH+OKAw==,
       }
 
+  y18n@4.0.3:
+    resolution:
+      {
+        integrity: sha512-JKhqTOwSrqNA1NY5lSztJ1GrBiUodLMmIZuLiDaMRJ+itFd+ABVE8XBjOvIWL+rSqNDC74LCSFmlb/U4UZ4hJQ==,
+      }
+
   y18n@5.0.8:
     resolution:
       {
@@ -21621,6 +21703,13 @@ packages:
     engines: { node: '>= 14.6' }
     hasBin: true
 
+  yargs-parser@18.1.3:
+    resolution:
+      {
+        integrity: sha512-o50j0JeToy/4K6OZcaQmW6lyXXKhq7csREXcDwk2omFPJEwUNOVtJKvmDr9EI1fAJZUyZcRF7kxGBWmRXudrCQ==,
+      }
+    engines: { node: '>=6' }
+
   yargs-parser@20.2.9:
     resolution:
       {
@@ -21641,6 +21730,13 @@ packages:
         integrity: sha512-rwu/ClNdSMpkSrUb+d6BRsSkLUq1fmfsY6TOpYzTwvwkg1/NRG85KBy3kq++A8LKQwX6lsu+aWad+2khvuXrqw==,
       }
     engines: { node: ^20.19.0 || ^22.12.0 || >=23 }
+
+  yargs@15.4.1:
+    resolution:
+      {
+        integrity: sha512-aePbxDmcYW++PaqBsJ+HYUFwCdv4LVvdnhBy78E57PIor8/OVvhMrADFFEDh8DHDFRv/O9i3lPhsENjO7QX0+A==,
+      }
+    engines: { node: '>=8' }
 
   yargs@16.2.0:
     resolution:
@@ -27523,7 +27619,7 @@ snapshots:
     dependencies:
       zod: 3.24.1
 
-  '@scalar/api-client@2.8.1(axios@1.11.0)(tailwindcss@3.4.17(ts-node@10.9.1(@swc/core@1.5.29(@swc/helpers@0.5.17))(@types/node@20.19.9)(typescript@5.8.3)))(typescript@5.8.3)':
+  '@scalar/api-client@2.8.1(axios@1.11.0)(qrcode@1.5.4)(tailwindcss@3.4.17(ts-node@10.9.1(@swc/core@1.5.29(@swc/helpers@0.5.17))(@types/node@20.19.9)(typescript@5.8.3)))(typescript@5.8.3)':
     dependencies:
       '@headlessui/tailwindcss': 0.2.2(tailwindcss@3.4.17(ts-node@10.9.1(@swc/core@1.5.29(@swc/helpers@0.5.17))(@types/node@20.19.9)(typescript@5.8.3)))
       '@headlessui/vue': 1.7.23(vue@3.5.22(typescript@5.8.3))
@@ -27548,7 +27644,7 @@ snapshots:
       '@scalar/workspace-store': 0.17.1(typescript@5.8.3)
       '@types/har-format': 1.2.16
       '@vueuse/core': 13.9.0(vue@3.5.22(typescript@5.8.3))
-      '@vueuse/integrations': 13.9.0(axios@1.11.0)(focus-trap@7.6.6)(fuse.js@7.1.0)(vue@3.5.22(typescript@5.8.3))
+      '@vueuse/integrations': 13.9.0(axios@1.11.0)(focus-trap@7.6.6)(fuse.js@7.1.0)(qrcode@1.5.4)(vue@3.5.22(typescript@5.8.3))
       focus-trap: 7.6.6
       fuse.js: 7.1.0
       js-base64: 3.7.8
@@ -27579,11 +27675,11 @@ snapshots:
       - typescript
       - universal-cookie
 
-  '@scalar/api-reference@1.38.1(axios@1.11.0)(tailwindcss@3.4.17(ts-node@10.9.1(@swc/core@1.5.29(@swc/helpers@0.5.17))(@types/node@20.19.9)(typescript@5.8.3)))(typescript@5.8.3)':
+  '@scalar/api-reference@1.38.1(axios@1.11.0)(qrcode@1.5.4)(tailwindcss@3.4.17(ts-node@10.9.1(@swc/core@1.5.29(@swc/helpers@0.5.17))(@types/node@20.19.9)(typescript@5.8.3)))(typescript@5.8.3)':
     dependencies:
       '@floating-ui/vue': 1.1.9(vue@3.5.22(typescript@5.8.3))
       '@headlessui/vue': 1.7.23(vue@3.5.22(typescript@5.8.3))
-      '@scalar/api-client': 2.8.1(axios@1.11.0)(tailwindcss@3.4.17(ts-node@10.9.1(@swc/core@1.5.29(@swc/helpers@0.5.17))(@types/node@20.19.9)(typescript@5.8.3)))(typescript@5.8.3)
+      '@scalar/api-client': 2.8.1(axios@1.11.0)(qrcode@1.5.4)(tailwindcss@3.4.17(ts-node@10.9.1(@swc/core@1.5.29(@swc/helpers@0.5.17))(@types/node@20.19.9)(typescript@5.8.3)))(typescript@5.8.3)
       '@scalar/code-highlight': 0.2.0
       '@scalar/components': 0.15.1(typescript@5.8.3)
       '@scalar/helpers': 0.0.12
@@ -29448,7 +29544,7 @@ snapshots:
       '@vueuse/shared': 13.9.0(vue@3.5.22(typescript@5.8.3))
       vue: 3.5.22(typescript@5.8.3)
 
-  '@vueuse/integrations@12.8.2(axios@1.11.0)(focus-trap@7.6.6)(fuse.js@7.1.0)(typescript@5.8.3)':
+  '@vueuse/integrations@12.8.2(axios@1.11.0)(focus-trap@7.6.6)(fuse.js@7.1.0)(qrcode@1.5.4)(typescript@5.8.3)':
     dependencies:
       '@vueuse/core': 12.8.2(typescript@5.8.3)
       '@vueuse/shared': 12.8.2(typescript@5.8.3)
@@ -29457,10 +29553,11 @@ snapshots:
       axios: 1.11.0
       focus-trap: 7.6.6
       fuse.js: 7.1.0
+      qrcode: 1.5.4
     transitivePeerDependencies:
       - typescript
 
-  '@vueuse/integrations@13.9.0(axios@1.11.0)(focus-trap@7.6.6)(fuse.js@7.1.0)(vue@3.5.22(typescript@5.8.3))':
+  '@vueuse/integrations@13.9.0(axios@1.11.0)(focus-trap@7.6.6)(fuse.js@7.1.0)(qrcode@1.5.4)(vue@3.5.22(typescript@5.8.3))':
     dependencies:
       '@vueuse/core': 13.9.0(vue@3.5.22(typescript@5.8.3))
       '@vueuse/shared': 13.9.0(vue@3.5.22(typescript@5.8.3))
@@ -29469,6 +29566,7 @@ snapshots:
       axios: 1.11.0
       focus-trap: 7.6.6
       fuse.js: 7.1.0
+      qrcode: 1.5.4
 
   '@vueuse/metadata@10.11.1': {}
 
@@ -29723,6 +29821,19 @@ snapshots:
     transitivePeerDependencies:
       - chokidar
       - supports-color
+
+  angular-gridster2@20.2.4(@angular/common@20.1.8(@angular/core@20.1.8(@angular/compiler@20.1.8)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.1.8(@angular/compiler@20.1.8)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2):
+    dependencies:
+      '@angular/common': 20.1.8(@angular/core@20.1.8(@angular/compiler@20.1.8)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2)
+      '@angular/core': 20.1.8(@angular/compiler@20.1.8)(rxjs@7.8.2)(zone.js@0.15.1)
+      rxjs: 7.8.2
+      tslib: 2.8.1
+
+  angularx-qrcode@20.0.0(@angular/core@20.1.8(@angular/compiler@20.1.8)(rxjs@7.8.2)(zone.js@0.15.1)):
+    dependencies:
+      '@angular/core': 20.1.8(@angular/compiler@20.1.8)(rxjs@7.8.2)(zone.js@0.15.1)
+      qrcode: 1.5.4
+      tslib: 2.8.1
 
   ansi-colors@4.1.3: {}
 
@@ -30387,6 +30498,12 @@ snapshots:
     dependencies:
       typanion: 3.14.0
 
+  cliui@6.0.0:
+    dependencies:
+      string-width: 4.2.3
+      strip-ansi: 6.0.1
+      wrap-ansi: 6.2.0
+
   cliui@7.0.4:
     dependencies:
       string-width: 4.2.3
@@ -30942,6 +31059,8 @@ snapshots:
     dependencies:
       ms: 2.1.3
 
+  decamelize@1.2.0: {}
+
   decimal.js@10.6.0: {}
 
   decode-named-character-reference@1.2.0:
@@ -31036,6 +31155,8 @@ snapshots:
   didyoumean@1.2.2: {}
 
   diff@4.0.2: {}
+
+  dijkstrajs@1.0.3: {}
 
   dir-glob@3.0.1:
     dependencies:
@@ -35196,6 +35317,8 @@ snapshots:
 
   png-js@1.0.0: {}
 
+  pngjs@5.0.0: {}
+
   portfinder@1.0.37:
     dependencies:
       async: 3.2.6
@@ -35578,6 +35701,12 @@ snapshots:
 
   pure-rand@7.0.1: {}
 
+  qrcode@1.5.4:
+    dependencies:
+      dijkstrajs: 1.0.3
+      pngjs: 5.0.0
+      yargs: 15.4.1
+
   qs@6.13.0:
     dependencies:
       side-channel: 1.1.0
@@ -35840,6 +35969,8 @@ snapshots:
   require-directory@2.1.1: {}
 
   require-from-string@2.0.2: {}
+
+  require-main-filename@2.0.0: {}
 
   requires-port@1.0.0: {}
 
@@ -36284,6 +36415,8 @@ snapshots:
       send: 1.2.0
     transitivePeerDependencies:
       - supports-color
+
+  set-blocking@2.0.0: {}
 
   set-cookie-parser@2.7.1: {}
 
@@ -37599,7 +37732,7 @@ snapshots:
       yaml: 2.8.1
     optional: true
 
-  vitepress@1.6.4(@algolia/client-search@5.32.0)(@types/node@20.19.9)(axios@1.11.0)(fuse.js@7.1.0)(less@4.4.1)(postcss@8.5.6)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(sass-embedded@1.92.1)(sass@1.92.1)(search-insights@2.17.3)(terser@5.43.1)(typescript@5.8.3):
+  vitepress@1.6.4(@algolia/client-search@5.32.0)(@types/node@20.19.9)(axios@1.11.0)(fuse.js@7.1.0)(less@4.4.1)(postcss@8.5.6)(qrcode@1.5.4)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(sass-embedded@1.92.1)(sass@1.92.1)(search-insights@2.17.3)(terser@5.43.1)(typescript@5.8.3):
     dependencies:
       '@docsearch/css': 3.8.2
       '@docsearch/js': 3.8.2(@algolia/client-search@5.32.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(search-insights@2.17.3)
@@ -37612,7 +37745,7 @@ snapshots:
       '@vue/devtools-api': 7.7.7
       '@vue/shared': 3.5.22
       '@vueuse/core': 12.8.2(typescript@5.8.3)
-      '@vueuse/integrations': 12.8.2(axios@1.11.0)(focus-trap@7.6.6)(fuse.js@7.1.0)(typescript@5.8.3)
+      '@vueuse/integrations': 12.8.2(axios@1.11.0)(focus-trap@7.6.6)(fuse.js@7.1.0)(qrcode@1.5.4)(typescript@5.8.3)
       focus-trap: 7.6.6
       mark.js: 8.11.1
       minisearch: 7.2.0
@@ -37886,6 +38019,8 @@ snapshots:
       tr46: 0.0.3
       webidl-conversions: 3.0.1
 
+  which-module@2.0.1: {}
+
   which-typed-array@1.1.19:
     dependencies:
       available-typed-arrays: 1.0.7
@@ -38016,6 +38151,8 @@ snapshots:
     dependencies:
       cuint: 0.2.2
 
+  y18n@4.0.3: {}
+
   y18n@5.0.8: {}
 
   yallist@3.1.1: {}
@@ -38030,11 +38167,30 @@ snapshots:
 
   yaml@2.8.1: {}
 
+  yargs-parser@18.1.3:
+    dependencies:
+      camelcase: 5.3.1
+      decamelize: 1.2.0
+
   yargs-parser@20.2.9: {}
 
   yargs-parser@21.1.1: {}
 
   yargs-parser@22.0.0: {}
+
+  yargs@15.4.1:
+    dependencies:
+      cliui: 6.0.0
+      decamelize: 1.2.0
+      find-up: 4.1.0
+      get-caller-file: 2.0.5
+      require-directory: 2.1.1
+      require-main-filename: 2.0.0
+      set-blocking: 2.0.0
+      string-width: 4.2.3
+      which-module: 2.0.1
+      y18n: 4.0.3
+      yargs-parser: 18.1.3
 
   yargs@16.2.0:
     dependencies:

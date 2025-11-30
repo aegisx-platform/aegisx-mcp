@@ -192,6 +192,69 @@ interface Integration {
             }
           </div>
         </div>
+
+        <!-- Utils Category -->
+        <div class="category">
+          <div class="category-header">
+            <mat-icon>build</mat-icon>
+            <h3>Utilities</h3>
+          </div>
+          <p class="category-desc">
+            Utility components for common tasks like QR codes, file handling,
+            and data visualization
+          </p>
+
+          <div class="integrations-grid">
+            @for (integration of getByCategory('utils'); track integration.id) {
+              <mat-card
+                class="integration-card"
+                [routerLink]="integration.docsUrl"
+              >
+                <mat-card-header>
+                  <div class="card-icon">
+                    <mat-icon>{{ integration.icon }}</mat-icon>
+                  </div>
+                  <mat-card-title>{{ integration.name }}</mat-card-title>
+                  <mat-card-subtitle>
+                    {{ integration.package }}
+                  </mat-card-subtitle>
+                </mat-card-header>
+                <mat-card-content>
+                  <p>{{ integration.description }}</p>
+                  <div class="card-meta">
+                    <mat-chip-set>
+                      <mat-chip [highlighted]="integration.status === 'stable'">
+                        {{ integration.status }}
+                      </mat-chip>
+                      <mat-chip>v{{ integration.version }}</mat-chip>
+                    </mat-chip-set>
+                    @if (integration.wrapper) {
+                      <div class="wrapper-badge">
+                        <mat-icon>widgets</mat-icon>
+                        <span>{{ integration.wrapper }}</span>
+                      </div>
+                    }
+                  </div>
+                </mat-card-content>
+                <mat-card-actions>
+                  <a
+                    mat-button
+                    [href]="integration.npmUrl"
+                    target="_blank"
+                    (click)="$event.stopPropagation()"
+                  >
+                    <mat-icon>open_in_new</mat-icon>
+                    NPM
+                  </a>
+                  <button mat-flat-button color="primary">
+                    <mat-icon>menu_book</mat-icon>
+                    Docs
+                  </button>
+                </mat-card-actions>
+              </mat-card>
+            }
+          </div>
+        </div>
       </section>
 
       <!-- Why Wrappers Section -->
@@ -520,6 +583,19 @@ export class IntegrationsOverviewComponent {
       docsUrl: '/docs/components/aegisx/data-display/calendar',
       npmUrl: 'https://www.npmjs.com/package/@fullcalendar/angular',
       status: 'beta',
+    },
+    {
+      id: 'qrcode',
+      name: 'QR Code',
+      description:
+        'Generate QR codes for URLs, text, vCards, WiFi credentials, and custom data with customizable colors and sizes.',
+      icon: 'qr_code',
+      category: 'utils',
+      package: 'angularx-qrcode',
+      version: '20.0.0',
+      docsUrl: '/docs/integrations/qrcode',
+      npmUrl: 'https://www.npmjs.com/package/angularx-qrcode',
+      status: 'stable',
     },
   ];
 

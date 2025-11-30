@@ -315,6 +315,13 @@ export const appRoutes: Route[] = [
         (m) => m.GridsterDocComponent,
       ),
   },
+  {
+    path: 'docs/integrations/qrcode',
+    loadComponent: () =>
+      import('./pages/docs/integrations/qrcode/qrcode-doc.component').then(
+        (m) => m.QRCodeDocComponent,
+      ),
+  },
 
   // --- Components > Material ---
   {
