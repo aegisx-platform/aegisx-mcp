@@ -610,6 +610,22 @@ export const appRoutes: Route[] = [
             (m) => m.HisReportsComponent,
           ),
       },
+      {
+        path: 'appointment-calendar',
+        loadComponent: () =>
+          import(
+            './pages/his-demo/pages/appointment-calendar/appointment-calendar.component'
+          ).then((m) => m.AppointmentCalendarComponent),
+        data: { title: 'ระบบนัดหมายคนไข้' },
+      },
+      {
+        path: 'followup-demo',
+        loadComponent: () =>
+          import(
+            './pages/his-demo/pages/followup-demo/followup-demo.component'
+          ).then((m) => m.FollowupDemoComponent),
+        data: { title: 'Follow-up Booking Demo' },
+      },
     ],
   },
   {
@@ -619,7 +635,20 @@ export const appRoutes: Route[] = [
         (m) => m.AppLauncherDemoComponent,
       ),
   },
-
+  {
+    path: 'gridster-demo',
+    loadComponent: () =>
+      import('./pages/gridster-demo/gridster-demo.component').then(
+        (m) => m.GridsterDemoComponent,
+      ),
+  },
+  {
+    path: 'gridster-poc',
+    loadComponent: () =>
+      import('./pages/gridster-poc/gridster-poc.component').then(
+        (m) => m.GridsterPocComponent,
+      ),
+  },
   // ============================================
   // LEGACY REDIRECTS (old routes → new routes)
   // ============================================
