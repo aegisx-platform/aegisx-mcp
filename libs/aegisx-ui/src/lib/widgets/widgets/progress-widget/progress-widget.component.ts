@@ -108,12 +108,8 @@ import {
             }
             @case ('gauge') {
               <div class="ax-progress-widget__gauge">
-                <svg
-                  viewBox="0 0 100 55"
-                  class="ax-progress-widget__svg"
-                  preserveAspectRatio="xMidYMax meet"
-                >
-                  <!-- Background arc -->
+                <svg viewBox="0 0 100 54" class="ax-progress-widget__svg">
+                  <!-- Background arc: center (50,50), radius 40 -->
                   <path
                     d="M 10 50 A 40 40 0 0 1 90 50"
                     fill="none"
@@ -272,7 +268,7 @@ import {
         &__gauge {
           position: relative;
           width: 100%;
-          max-width: 200px;
+          max-width: 180px;
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -282,12 +278,13 @@ import {
           transform: none;
           width: 100%;
           height: auto;
-          aspect-ratio: 100 / 55;
         }
 
         &__gauge-value {
-          margin-top: 8px;
+          margin-top: -20px;
           text-align: center;
+          position: relative;
+          z-index: 1;
         }
 
         /* Secondary */
