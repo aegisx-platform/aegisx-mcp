@@ -844,7 +844,7 @@ type ConfigurableWidgetType = 'kpi' | 'progress';
         display: flex;
         justify-content: center;
         align-items: center;
-        min-height: 200px;
+        min-height: 280px;
         padding: 2rem;
         background: var(--ax-background-subtle);
         border-radius: var(--ax-radius-lg);
@@ -857,8 +857,11 @@ type ConfigurableWidgetType = 'kpi' | 'progress';
         }
 
         &--progress {
-          width: 200px;
-          height: 200px;
+          width: 240px;
+          min-height: 220px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
       }
 
