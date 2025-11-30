@@ -378,6 +378,37 @@ export class App {
       ],
     },
 
+    // Integrations Section
+    {
+      id: 'integrations',
+      title: 'Integrations',
+      type: 'collapsible',
+      icon: 'extension',
+      children: [
+        {
+          id: 'integrations-overview',
+          title: 'Overview',
+          type: 'item',
+          icon: 'dashboard',
+          link: '/docs/integrations/overview',
+        },
+        {
+          id: 'integrations-gridster',
+          title: 'Gridster',
+          type: 'item',
+          icon: 'grid_view',
+          link: '/docs/integrations/gridster',
+        },
+        {
+          id: 'integrations-fullcalendar',
+          title: 'FullCalendar',
+          type: 'item',
+          icon: 'calendar_month',
+          link: '/docs/components/aegisx/data-display/calendar',
+        },
+      ],
+    },
+
     // Material Components Section
     {
       id: 'material',
@@ -713,6 +744,16 @@ export class App {
               link: '/docs/components/aegisx/forms/file-upload',
             },
             {
+              id: 'popup-edit',
+              title: 'Popup Edit',
+              link: '/docs/components/aegisx/forms/popup-edit',
+            },
+            {
+              id: 'knob',
+              title: 'Knob',
+              link: '/docs/components/aegisx/forms/knob',
+            },
+            {
               id: 'form-sizes',
               title: 'Form Sizes',
               link: '/docs/patterns/form-sizes',
@@ -753,6 +794,11 @@ export class App {
               title: 'Skeleton',
               link: '/docs/components/aegisx/feedback/skeleton',
             },
+            {
+              id: 'inner-loading',
+              title: 'Inner Loading',
+              link: '/docs/components/aegisx/feedback/inner-loading',
+            },
           ],
         },
         {
@@ -789,6 +835,11 @@ export class App {
               id: 'enterprise-layout',
               title: 'Enterprise Layout',
               link: '/docs/components/aegisx/layout/enterprise',
+            },
+            {
+              id: 'splitter',
+              title: 'Splitter',
+              link: '/docs/components/aegisx/layout/splitter',
             },
           ],
         },
@@ -923,6 +974,27 @@ export class App {
               link: '/docs/material/progress-bar',
             },
           ],
+        },
+      ],
+    },
+    {
+      id: 'integrations',
+      title: 'Integrations',
+      children: [
+        {
+          id: 'integrations-overview',
+          title: 'Overview',
+          link: '/docs/integrations/overview',
+        },
+        {
+          id: 'integrations-gridster',
+          title: 'Gridster',
+          link: '/docs/integrations/gridster',
+        },
+        {
+          id: 'integrations-fullcalendar',
+          title: 'FullCalendar',
+          link: '/docs/components/aegisx/data-display/calendar',
         },
       ],
     },

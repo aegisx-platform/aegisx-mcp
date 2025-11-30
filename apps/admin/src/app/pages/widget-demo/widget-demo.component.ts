@@ -1,11 +1,18 @@
-import { Component } from '@angular/core';
+import { Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSliderModule } from '@angular/material/slider';
+import { MatDividerModule } from '@angular/material/divider';
 import {
   AxEnterpriseLayoutComponent,
   AxNavigationItem,
@@ -15,9 +22,13 @@ import {
   KpiWidgetComponent,
   KpiWidgetConfig,
   KpiWidgetData,
+  KpiFormat,
+  KpiColor,
+  KpiTrend,
   ChartWidgetComponent,
   ChartWidgetConfig,
   ChartWidgetData,
+  ChartType,
   TableWidgetComponent,
   TableWidgetConfig,
   TableWidgetData,
@@ -27,7 +38,11 @@ import {
   ProgressWidgetComponent,
   ProgressWidgetConfig,
   ProgressWidgetData,
+  ProgressType,
+  ProgressColor,
 } from '@aegisx/ui';
+
+type ConfigurableWidgetType = 'kpi' | 'progress';
 
 @Component({
   selector: 'app-widget-demo',
@@ -35,11 +50,18 @@ import {
   imports: [
     CommonModule,
     RouterLink,
+    FormsModule,
     MatTabsModule,
     MatButtonModule,
     MatIconModule,
     MatTooltipModule,
     MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatSlideToggleModule,
+    MatSliderModule,
+    MatDividerModule,
     AxEnterpriseLayoutComponent,
     AxBreadcrumbComponent,
     // Widget components
@@ -184,6 +206,249 @@ import {
                         [initialData]="progress.data"
                       ></ax-progress-widget>
                     }
+                  </div>
+                </div>
+              </div>
+            </mat-tab>
+
+            <!-- Widget Configurator Tab -->
+            <mat-tab>
+              <ng-template mat-tab-label>
+                <mat-icon>tune</mat-icon>
+                <span>Configurator</span>
+              </ng-template>
+              <div class="tab-content">
+                <div class="info-banner">
+                  <mat-icon>edit</mat-icon>
+                  <span>Configure widgets in real-time and see changes instantly</span>
+                </div>
+
+                <div class="configurator-layout">
+                  <!-- Config Panel -->
+                  <div class="config-panel">
+                    <div class="panel-header">
+                      <mat-icon>settings</mat-icon>
+                      <h3>Widget Configuration</h3>
+                    </div>
+
+                    <!-- Widget Type Selector -->
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Widget Type</mat-label>
+                      <mat-select [value]="selectedWidgetType()" (selectionChange)="selectedWidgetType.set($event.value)">
+                        <mat-option value="kpi">KPI Widget</mat-option>
+                        <mat-option value="progress">Progress Widget</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+
+                    <mat-divider></mat-divider>
+
+                    <!-- KPI Config -->
+                    @if (selectedWidgetType() === 'kpi') {
+                      <div class="config-section">
+                        <h4>Display Settings</h4>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                          <mat-label>Title</mat-label>
+                          <input matInput [value]="kpiConfig().title" (input)="updateKpiConfig('title', $any($event.target).value)" />
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                          <mat-label>Subtitle</mat-label>
+                          <input matInput [value]="kpiConfig().subtitle || ''" (input)="updateKpiConfig('subtitle', $any($event.target).value)" />
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                          <mat-label>Icon</mat-label>
+                          <mat-select [value]="kpiConfig().icon" (selectionChange)="updateKpiConfig('icon', $event.value)">
+                            <mat-option value="attach_money">attach_money</mat-option>
+                            <mat-option value="people">people</mat-option>
+                            <mat-option value="shopping_cart">shopping_cart</mat-option>
+                            <mat-option value="trending_up">trending_up</mat-option>
+                            <mat-option value="analytics">analytics</mat-option>
+                            <mat-option value="bar_chart">bar_chart</mat-option>
+                          </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                          <mat-label>Format</mat-label>
+                          <mat-select [value]="kpiConfig().format" (selectionChange)="updateKpiConfig('format', $event.value)">
+                            <mat-option value="number">Number</mat-option>
+                            <mat-option value="currency">Currency</mat-option>
+                            <mat-option value="percent">Percent</mat-option>
+                            <mat-option value="compact">Compact</mat-option>
+                          </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                          <mat-label>Color</mat-label>
+                          <mat-select [value]="kpiConfig().color" (selectionChange)="updateKpiConfig('color', $event.value)">
+                            <mat-option value="default">Default</mat-option>
+                            <mat-option value="primary">Primary</mat-option>
+                            <mat-option value="success">Success</mat-option>
+                            <mat-option value="warning">Warning</mat-option>
+                            <mat-option value="error">Error</mat-option>
+                            <mat-option value="info">Info</mat-option>
+                          </mat-select>
+                        </mat-form-field>
+
+                        <mat-slide-toggle
+                          [checked]="kpiConfig().showTrend"
+                          (change)="updateKpiConfig('showTrend', $event.checked)"
+                        >
+                          Show Trend
+                        </mat-slide-toggle>
+
+                        <mat-slide-toggle
+                          [checked]="kpiConfig().compact"
+                          (change)="updateKpiConfig('compact', $event.checked)"
+                        >
+                          Compact Mode
+                        </mat-slide-toggle>
+                      </div>
+
+                      <mat-divider></mat-divider>
+
+                      <div class="config-section">
+                        <h4>Data Settings</h4>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                          <mat-label>Value</mat-label>
+                          <input matInput type="number" [value]="kpiData().value" (input)="updateKpiData('value', +$any($event.target).value)" />
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                          <mat-label>Change (%)</mat-label>
+                          <input matInput type="number" step="0.1" [value]="kpiData().change" (input)="updateKpiData('change', +$any($event.target).value)" />
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                          <mat-label>Trend</mat-label>
+                          <mat-select [value]="kpiData().trend" (selectionChange)="updateKpiData('trend', $event.value)">
+                            <mat-option value="up">Up</mat-option>
+                            <mat-option value="down">Down</mat-option>
+                            <mat-option value="neutral">Neutral</mat-option>
+                          </mat-select>
+                        </mat-form-field>
+                      </div>
+                    }
+
+                    <!-- Progress Config -->
+                    @if (selectedWidgetType() === 'progress') {
+                      <div class="config-section">
+                        <h4>Display Settings</h4>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                          <mat-label>Title</mat-label>
+                          <input matInput [value]="progressConfig().title" (input)="updateProgressConfig('title', $any($event.target).value)" />
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                          <mat-label>Type</mat-label>
+                          <mat-select [value]="progressConfig().type" (selectionChange)="updateProgressConfig('type', $event.value)">
+                            <mat-option value="circular">Circular</mat-option>
+                            <mat-option value="linear">Linear</mat-option>
+                            <mat-option value="gauge">Gauge</mat-option>
+                          </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                          <mat-label>Color</mat-label>
+                          <mat-select [value]="progressConfig().color" (selectionChange)="updateProgressConfig('color', $event.value)">
+                            <mat-option value="primary">Primary</mat-option>
+                            <mat-option value="success">Success</mat-option>
+                            <mat-option value="warning">Warning</mat-option>
+                            <mat-option value="error">Error</mat-option>
+                            <mat-option value="info">Info</mat-option>
+                          </mat-select>
+                        </mat-form-field>
+
+                        <mat-slide-toggle
+                          [checked]="progressConfig().showPercent"
+                          (change)="updateProgressConfig('showPercent', $event.checked)"
+                        >
+                          Show Percent
+                        </mat-slide-toggle>
+
+                        <mat-slide-toggle
+                          [checked]="progressConfig().showLabel"
+                          (change)="updateProgressConfig('showLabel', $event.checked)"
+                        >
+                          Show Label
+                        </mat-slide-toggle>
+
+                        <mat-slide-toggle
+                          [checked]="progressConfig().autoColor"
+                          (change)="updateProgressConfig('autoColor', $event.checked)"
+                        >
+                          Auto Color (by threshold)
+                        </mat-slide-toggle>
+                      </div>
+
+                      <mat-divider></mat-divider>
+
+                      <div class="config-section">
+                        <h4>Data Settings</h4>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                          <mat-label>Value (0-100)</mat-label>
+                          <input matInput type="number" min="0" max="100" [value]="progressData().value" (input)="updateProgressData('value', +$any($event.target).value)" />
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                          <mat-label>Label</mat-label>
+                          <input matInput [value]="progressData().label || ''" (input)="updateProgressData('label', $any($event.target).value)" />
+                        </mat-form-field>
+
+                        <div class="slider-container">
+                          <label>Value: {{ progressData().value }}%</label>
+                          <mat-slider min="0" max="100" step="1" discrete>
+                            <input matSliderThumb [value]="progressData().value" (valueChange)="updateProgressData('value', $event)" />
+                          </mat-slider>
+                        </div>
+                      </div>
+                    }
+                  </div>
+
+                  <!-- Preview Panel -->
+                  <div class="preview-panel">
+                    <div class="panel-header">
+                      <mat-icon>visibility</mat-icon>
+                      <h3>Live Preview</h3>
+                    </div>
+
+                    <div class="preview-container">
+                      @if (selectedWidgetType() === 'kpi') {
+                        <div class="preview-widget preview-widget--kpi">
+                          <ax-kpi-widget
+                            [instanceId]="'kpi-configurator'"
+                            [config]="kpiConfig()"
+                            [initialData]="kpiData()"
+                          ></ax-kpi-widget>
+                        </div>
+                      }
+
+                      @if (selectedWidgetType() === 'progress') {
+                        <div class="preview-widget preview-widget--progress">
+                          <ax-progress-widget
+                            [instanceId]="'progress-configurator'"
+                            [config]="progressConfig()"
+                            [initialData]="progressData()"
+                          ></ax-progress-widget>
+                        </div>
+                      }
+                    </div>
+
+                    <!-- Code Preview -->
+                    <div class="code-preview">
+                      <div class="code-header">
+                        <mat-icon>code</mat-icon>
+                        <span>Configuration Code</span>
+                        <button mat-icon-button matTooltip="Copy to clipboard" (click)="copyConfig()">
+                          <mat-icon>content_copy</mat-icon>
+                        </button>
+                      </div>
+                      <pre class="code-block">{{ configCode() }}</pre>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -394,7 +659,7 @@ import {
 
       .widget-tabs {
         ::ng-deep .mat-mdc-tab {
-          min-width: 160px;
+          min-width: 140px;
         }
 
         ::ng-deep .mat-mdc-tab-labels {
@@ -500,6 +765,141 @@ import {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 1rem;
+      }
+
+      /* Configurator Layout */
+      .configurator-layout {
+        display: grid;
+        grid-template-columns: 350px 1fr;
+        gap: 1.5rem;
+
+        @media (max-width: 1024px) {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .config-panel,
+      .preview-panel {
+        background: var(--ax-background-default);
+        border: 1px solid var(--ax-border-muted);
+        border-radius: var(--ax-radius-lg);
+        padding: 1.25rem;
+      }
+
+      .panel-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--ax-border-muted);
+
+        mat-icon {
+          color: var(--ax-primary-default);
+        }
+
+        h3 {
+          margin: 0;
+          font-size: 1rem;
+          font-weight: 600;
+          color: var(--ax-text-heading);
+        }
+      }
+
+      .config-section {
+        margin: 1rem 0;
+
+        h4 {
+          margin: 0 0 1rem;
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: var(--ax-text-secondary);
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+      }
+
+      .full-width {
+        width: 100%;
+        margin-bottom: 0.5rem;
+      }
+
+      mat-slide-toggle {
+        display: block;
+        margin: 0.75rem 0;
+      }
+
+      .slider-container {
+        margin: 1rem 0;
+
+        label {
+          display: block;
+          margin-bottom: 0.5rem;
+          font-size: 0.875rem;
+          color: var(--ax-text-secondary);
+        }
+
+        mat-slider {
+          width: 100%;
+        }
+      }
+
+      /* Preview Panel */
+      .preview-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 200px;
+        padding: 2rem;
+        background: var(--ax-background-subtle);
+        border-radius: var(--ax-radius-lg);
+        margin-bottom: 1.5rem;
+      }
+
+      .preview-widget {
+        &--kpi {
+          width: 280px;
+        }
+
+        &--progress {
+          width: 200px;
+          height: 200px;
+        }
+      }
+
+      /* Code Preview */
+      .code-preview {
+        background: var(--ax-background-subtle);
+        border-radius: var(--ax-radius-lg);
+        overflow: hidden;
+      }
+
+      .code-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        background: var(--ax-background-default);
+        border-bottom: 1px solid var(--ax-border-muted);
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--ax-text-secondary);
+
+        span {
+          flex: 1;
+        }
+      }
+
+      .code-block {
+        margin: 0;
+        padding: 1rem;
+        font-size: 0.75rem;
+        font-family: 'Fira Code', 'Monaco', monospace;
+        color: var(--ax-text-default);
+        white-space: pre-wrap;
+        word-break: break-all;
+        max-height: 300px;
+        overflow-y: auto;
       }
 
       /* Placeholder Area */
@@ -644,6 +1044,113 @@ export class WidgetDemoComponent {
       icon: 'settings',
     },
   ];
+
+  // ============================================================================
+  // Configurator State
+  // ============================================================================
+
+  selectedWidgetType = signal<ConfigurableWidgetType>('kpi');
+
+  // KPI Configurator
+  kpiConfig = signal<KpiWidgetConfig>({
+    title: 'Revenue',
+    subtitle: 'This month',
+    icon: 'attach_money',
+    format: 'currency',
+    currency: 'USD',
+    showTrend: true,
+    color: 'primary',
+    compact: false,
+  });
+
+  kpiData = signal<KpiWidgetData>({
+    value: 125840,
+    change: 12.5,
+    trend: 'up',
+    previousLabel: 'vs last month',
+  });
+
+  // Progress Configurator
+  progressConfig = signal<ProgressWidgetConfig>({
+    title: 'Storage Used',
+    type: 'circular',
+    max: 100,
+    showLabel: true,
+    showPercent: true,
+    color: 'primary',
+    autoColor: false,
+    thresholds: { warning: 70, error: 90 },
+  });
+
+  progressData = signal<ProgressWidgetData>({
+    value: 68,
+    label: '68 GB of 100 GB',
+  });
+
+  // Config code output
+  configCode = computed(() => {
+    if (this.selectedWidgetType() === 'kpi') {
+      return `// KPI Widget Configuration
+const config: KpiWidgetConfig = ${JSON.stringify(this.kpiConfig(), null, 2)};
+
+const data: KpiWidgetData = ${JSON.stringify(this.kpiData(), null, 2)};
+
+// Usage in template:
+<ax-kpi-widget
+  [instanceId]="'my-kpi'"
+  [config]="config"
+  [initialData]="data"
+></ax-kpi-widget>`;
+    } else {
+      return `// Progress Widget Configuration
+const config: ProgressWidgetConfig = ${JSON.stringify(this.progressConfig(), null, 2)};
+
+const data: ProgressWidgetData = ${JSON.stringify(this.progressData(), null, 2)};
+
+// Usage in template:
+<ax-progress-widget
+  [instanceId]="'my-progress'"
+  [config]="config"
+  [initialData]="data"
+></ax-progress-widget>`;
+    }
+  });
+
+  updateKpiConfig<K extends keyof KpiWidgetConfig>(
+    key: K,
+    value: KpiWidgetConfig[K],
+  ): void {
+    this.kpiConfig.update((config) => ({ ...config, [key]: value }));
+  }
+
+  updateKpiData<K extends keyof KpiWidgetData>(
+    key: K,
+    value: KpiWidgetData[K],
+  ): void {
+    this.kpiData.update((data) => ({ ...data, [key]: value }));
+  }
+
+  updateProgressConfig<K extends keyof ProgressWidgetConfig>(
+    key: K,
+    value: ProgressWidgetConfig[K],
+  ): void {
+    this.progressConfig.update((config) => ({ ...config, [key]: value }));
+  }
+
+  updateProgressData<K extends keyof ProgressWidgetData>(
+    key: K,
+    value: ProgressWidgetData[K],
+  ): void {
+    this.progressData.update((data) => ({ ...data, [key]: value }));
+  }
+
+  copyConfig(): void {
+    navigator.clipboard.writeText(this.configCode());
+  }
+
+  // ============================================================================
+  // Static Demo Data
+  // ============================================================================
 
   // KPI Widgets
   kpiWidgets: {
