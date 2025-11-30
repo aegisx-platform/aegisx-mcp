@@ -186,6 +186,20 @@ export const appRoutes: Route[] = [
         './pages/docs/components/aegisx/forms/file-upload/file-upload-doc.component'
       ).then((m) => m.FileUploadDocComponent),
   },
+  {
+    path: 'docs/components/aegisx/forms/popup-edit',
+    loadComponent: () =>
+      import(
+        './pages/docs/components/aegisx/forms/popup-edit/popup-edit-doc.component'
+      ).then((m) => m.PopupEditDocComponent),
+  },
+  {
+    path: 'docs/components/aegisx/forms/knob',
+    loadComponent: () =>
+      import(
+        './pages/docs/components/aegisx/forms/knob/knob-doc.component'
+      ).then((m) => m.KnobDocComponent),
+  },
 
   // --- Components > AegisX > Feedback ---
   {
@@ -194,6 +208,13 @@ export const appRoutes: Route[] = [
       import(
         './pages/docs/components/aegisx/feedback/alert/alert-doc.component'
       ).then((m) => m.AlertDocComponent),
+  },
+  {
+    path: 'docs/components/aegisx/feedback/inner-loading',
+    loadComponent: () =>
+      import(
+        './pages/docs/components/aegisx/feedback/inner-loading/inner-loading-doc.component'
+      ).then((m) => m.InnerLoadingDocComponent),
   },
   {
     path: 'docs/components/aegisx/feedback/loading-bar',
@@ -256,6 +277,13 @@ export const appRoutes: Route[] = [
       ).then((m) => m.DrawerDocComponent),
   },
   {
+    path: 'docs/components/aegisx/layout/splitter',
+    loadComponent: () =>
+      import(
+        './pages/docs/components/aegisx/layout/splitter/splitter-doc.component'
+      ).then((m) => m.SplitterDocComponent),
+  },
+  {
     path: 'docs/components/aegisx/layout/enterprise',
     loadComponent: () =>
       import(
@@ -270,6 +298,22 @@ export const appRoutes: Route[] = [
       import(
         './pages/docs/components/aegisx/dashboard/widget-framework/widget-framework-doc.component'
       ).then((m) => m.WidgetFrameworkDocComponent),
+  },
+
+  // --- Integrations ---
+  {
+    path: 'docs/integrations/overview',
+    loadComponent: () =>
+      import(
+        './pages/docs/integrations/overview/integrations-overview.component'
+      ).then((m) => m.IntegrationsOverviewComponent),
+  },
+  {
+    path: 'docs/integrations/gridster',
+    loadComponent: () =>
+      import('./pages/docs/integrations/gridster/gridster-doc.component').then(
+        (m) => m.GridsterDocComponent,
+      ),
   },
 
   // --- Components > Material ---
