@@ -14,7 +14,6 @@ import {
 import {
   DocHeaderComponent,
   CodeTabsComponent,
-  LivePreviewComponent,
   ComponentTokensComponent,
 } from '../../../../components/docs';
 import { ComponentToken, CodeTab } from '../../../../types/docs.types';
@@ -37,7 +36,6 @@ interface DemoItem extends AxGridsterItemBase {
     AxGridsterComponent,
     DocHeaderComponent,
     CodeTabsComponent,
-    LivePreviewComponent,
     ComponentTokensComponent,
   ],
   template: `
@@ -73,11 +71,7 @@ interface DemoItem extends AxGridsterItemBase {
                 </mat-slide-toggle>
               </div>
 
-              <ax-live-preview
-                variant="bordered"
-                direction="column"
-                class="demo-preview"
-              >
+              <div class="demo-preview-container">
                 <ax-gridster
                   [items]="demoItems()"
                   [editMode]="editMode"
@@ -98,7 +92,7 @@ interface DemoItem extends AxGridsterItemBase {
                     </div>
                   </ng-template>
                 </ax-gridster>
-              </ax-live-preview>
+              </div>
 
               <ax-code-tabs [tabs]="basicUsageCode"></ax-code-tabs>
             </section>
@@ -364,8 +358,13 @@ interface DemoItem extends AxGridsterItemBase {
         margin-bottom: 1rem;
       }
 
-      .demo-preview {
-        height: 400px;
+      .demo-preview-container {
+        height: 350px;
+        border: 1px solid var(--ax-border-default);
+        border-radius: var(--ax-radius-lg);
+        overflow: hidden;
+        background: var(--ax-background-subtle);
+        margin-bottom: 1.5rem;
 
         ax-gridster {
           width: 100%;
