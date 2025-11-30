@@ -161,10 +161,10 @@ interface DemoItem extends AxGridsterItemBase {
                   <mat-icon class="arrow">arrow_forward</mat-icon>
                 </a>
                 <a routerLink="/gridster-poc" class="demo-link-card">
-                  <mat-icon>science</mat-icon>
+                  <mat-icon>dashboard_customize</mat-icon>
                   <div class="demo-link-content">
-                    <h4>Gridster POC</h4>
-                    <p>Proof of concept with advanced features</p>
+                    <h4>Dashboard Builder</h4>
+                    <p>Advanced dashboard with app launcher cards</p>
                   </div>
                   <mat-icon class="arrow">arrow_forward</mat-icon>
                 </a>

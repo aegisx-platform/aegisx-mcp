@@ -21,22 +21,21 @@ import {
   AxNavigationItem,
   AxBreadcrumbComponent,
   BreadcrumbItem,
-  AxLauncherCardComponent,
   AxDrawerComponent,
-  LauncherApp,
-  LauncherColor,
 } from '@aegisx/ui';
 
-// สร้าง type ที่รวม LauncherApp กับ GridsterItem properties
-type GridsterLauncherApp = LauncherApp & {
+interface DashboardItem {
+  id: string;
+  label: string;
+  color: string;
   x: number;
   y: number;
   cols: number;
   rows: number;
-};
+}
 
 @Component({
-  selector: 'app-gridster-poc',
+  selector: 'app-gridster-demo',
   standalone: true,
   imports: [
     RouterLink,
@@ -53,12 +52,11 @@ type GridsterLauncherApp = LauncherApp & {
     MatDividerModule,
     AxEnterpriseLayoutComponent,
     AxBreadcrumbComponent,
-    AxLauncherCardComponent,
     AxDrawerComponent,
   ],
   template: `
     <ax-enterprise-layout
-      [appName]="'Dashboard Builder'"
+      [appName]="'Gridster Demo'"
       [navigation]="navigation"
       [showFooter]="true"
       [headerTheme]="'dark'"
@@ -67,6 +65,10 @@ type GridsterLauncherApp = LauncherApp & {
     >
       <!-- Header Actions -->
       <ng-template #headerActions>
+        <button mat-flat-button (click)="addItem()">
+          <mat-icon>add</mat-icon>
+          Add Item
+        </button>
         <button
           mat-flat-button
           [color]="editMode() ? 'accent' : 'primary'"
@@ -85,7 +87,7 @@ type GridsterLauncherApp = LauncherApp & {
       </ng-template>
 
       <!-- Main Content -->
-      <div class="poc-content">
+      <div class="demo-content">
         <!-- Breadcrumb -->
         <ax-breadcrumb
           [items]="breadcrumbItems"
@@ -95,9 +97,9 @@ type GridsterLauncherApp = LauncherApp & {
 
         <!-- Instructions -->
         @if (editMode()) {
-          <div class="poc-instructions">
+          <div class="demo-instructions">
             <mat-icon>info</mat-icon>
-            <span>Edit mode enabled - You can now drag and resize cards!</span>
+            <span>Edit mode enabled - You can now drag and resize items!</span>
           </div>
         }
 
@@ -106,11 +108,15 @@ type GridsterLauncherApp = LauncherApp & {
           <gridster [options]="options">
             @for (item of dashboard; track item.id) {
               <gridster-item [item]="item">
-                <ax-launcher-card
-                  [app]="item"
-                  [isEditMode]="editMode()"
-                  (cardClick)="onCardClick($event)"
-                />
+                <div class="item-content" [style.background]="item.color">
+                  <span class="item-label">{{ item.label }}</span>
+                  <span class="item-size">{{ item.cols }}x{{ item.rows }}</span>
+                  @if (editMode()) {
+                    <button class="remove-btn" (click)="removeItem(item)">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  }
+                </div>
               </gridster-item>
             }
           </gridster>
@@ -120,25 +126,28 @@ type GridsterLauncherApp = LauncherApp & {
         <div class="info-card">
           <mat-icon class="info-icon">info</mat-icon>
           <div class="info-text">
-            <strong>Dashboard Builder Features</strong>
+            <strong>Gridster Demo Features</strong>
             <ul>
               <li>
-                <strong>Edit Mode:</strong> Click the button in header to enable
-                drag & resize
+                <strong>Add Item:</strong> Click "Add Item" button to add new
+                items
               </li>
               <li>
-                <strong>Drag:</strong> When edit mode is ON, drag cards to
+                <strong>Edit Mode:</strong> Toggle edit mode to enable drag &
+                resize
+              </li>
+              <li>
+                <strong>Drag:</strong> When edit mode is ON, drag items to
                 reposition them
               </li>
               <li>
-                <strong>Resize:</strong> Drag the corners/edges of cards to
+                <strong>Resize:</strong> Drag the corners/edges of items to
                 resize them
               </li>
               <li>
-                <strong>Push Items:</strong> Cards will automatically push
-                others out of the way
+                <strong>Remove:</strong> Click X button on items in edit mode to
+                remove them
               </li>
-              <li><strong>Grid:</strong> 12-column responsive grid system</li>
               <li>
                 <strong>Options:</strong> Click settings icon to customize grid
                 options
@@ -150,8 +159,8 @@ type GridsterLauncherApp = LauncherApp & {
 
       <!-- Footer Content -->
       <ng-template #footerContent>
-        <span>Dashboard Builder - AegisX Design System</span>
-        <a mat-button routerLink="/gridster-demo"> Back to Gridster Demo </a>
+        <span>Gridster Demo - AegisX Design System</span>
+        <a mat-button routerLink="/gridster-poc"> View Advanced POC </a>
       </ng-template>
     </ax-enterprise-layout>
 
@@ -332,14 +341,14 @@ type GridsterLauncherApp = LauncherApp & {
       height: 100vh;
     }
 
-    .poc-content {
+    .demo-content {
       display: flex;
       flex-direction: column;
       gap: 1rem;
       height: 100%;
     }
 
-    .poc-instructions {
+    .demo-instructions {
       display: flex;
       align-items: center;
       gap: 12px;
@@ -373,23 +382,61 @@ type GridsterLauncherApp = LauncherApp & {
       bottom: 0;
     }
 
-    /* CRITICAL: Make ax-launcher-card fill the gridster-item completely */
+    /* Gridster item styles */
     ::ng-deep gridster-item {
-      /* Remove white background from gridster-item */
       background: transparent !important;
-      /* Allow shadow to overflow outside the item bounds */
       overflow: visible !important;
+      border-radius: 8px;
+    }
 
-      ax-launcher-card {
-        display: block;
-        height: 100%;
-        width: 100%;
+    .item-content {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      position: relative;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .item-label {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .item-size {
+      font-size: 14px;
+      opacity: 0.8;
+      margin-top: 4px;
+    }
+
+    .remove-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 28px;
+      height: 28px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.3);
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease;
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
       }
 
-      .launcher-card {
-        min-height: unset !important;
-        height: 100% !important;
-        box-sizing: border-box;
+      &:hover {
+        background: rgba(0, 0, 0, 0.5);
       }
     }
 
@@ -481,9 +528,10 @@ type GridsterLauncherApp = LauncherApp & {
     }
   `,
 })
-export class GridsterPocComponent {
+export class GridsterDemoComponent {
   editMode = signal(false);
   optionsDrawerOpen = false;
+  private itemCounter = 10;
 
   // Grid settings state for drawer controls
   gridSettings = {
@@ -504,7 +552,7 @@ export class GridsterPocComponent {
   breadcrumbItems: BreadcrumbItem[] = [
     { label: 'Home', url: '/', icon: 'home' },
     { label: 'Demos', url: '/enterprise-demo' },
-    { label: 'Dashboard Builder' },
+    { label: 'Gridster Demo' },
   ];
 
   navigation: AxNavigationItem[] = [
@@ -534,7 +582,7 @@ export class GridsterPocComponent {
     },
   ];
 
-  // Gridster options - ใช้ object ธรรมดา และต้อง mutate object เดิม
+  // Gridster options
   options: GridsterConfig = {
     draggable: {
       enabled: false,
@@ -552,135 +600,17 @@ export class GridsterPocComponent {
     margin: 16,
   };
 
-  // Dashboard data ใช้ LauncherApp format + GridsterItem properties
-  dashboard: GridsterLauncherApp[] = [
-    {
-      id: 'revenue',
-      name: 'Revenue',
-      description: 'Track revenue metrics',
-      icon: 'attach_money',
-      color: 'pink' as LauncherColor,
-      status: 'active',
-      enabled: true,
-      route: '/revenue',
-      x: 0,
-      y: 0,
-      rows: 2,
-      cols: 3,
-    },
-    {
-      id: 'users',
-      name: 'Users',
-      description: 'User management',
-      icon: 'people',
-      color: 'mint' as LauncherColor,
-      status: 'active',
-      enabled: true,
-      route: '/users',
-      x: 3,
-      y: 0,
-      rows: 2,
-      cols: 3,
-    },
-    {
-      id: 'orders',
-      name: 'Orders',
-      description: 'Order tracking',
-      icon: 'shopping_cart',
-      color: 'peach' as LauncherColor,
-      status: 'active',
-      enabled: true,
-      route: '/orders',
-      x: 6,
-      y: 0,
-      rows: 2,
-      cols: 3,
-    },
-    {
-      id: 'traffic',
-      name: 'Traffic',
-      description: 'Site traffic analytics',
-      icon: 'trending_up',
-      color: 'lavender' as LauncherColor,
-      status: 'active',
-      enabled: true,
-      route: '/traffic',
-      x: 9,
-      y: 0,
-      rows: 2,
-      cols: 3,
-    },
-    {
-      id: 'sales-chart',
-      name: 'Sales Chart',
-      description: 'Visual sales data',
-      icon: 'bar_chart',
-      color: 'blue' as LauncherColor,
-      status: 'active',
-      enabled: true,
-      route: '/sales',
-      x: 0,
-      y: 2,
-      rows: 3,
-      cols: 6,
-    },
-    {
-      id: 'analytics',
-      name: 'User Analytics',
-      description: 'Deep user insights',
-      icon: 'analytics',
-      color: 'cyan' as LauncherColor,
-      status: 'active',
-      enabled: true,
-      route: '/analytics',
-      x: 6,
-      y: 2,
-      rows: 3,
-      cols: 6,
-    },
-    {
-      id: 'notifications',
-      name: 'Notifications',
-      description: 'Alert management',
-      icon: 'notifications',
-      color: 'rose' as LauncherColor,
-      status: 'new',
-      enabled: true,
-      route: '/notifications',
-      notificationCount: 5,
-      x: 0,
-      y: 5,
-      rows: 2,
-      cols: 4,
-    },
-    {
-      id: 'tasks',
-      name: 'Tasks',
-      description: 'Task management',
-      icon: 'task_alt',
-      color: 'yellow' as LauncherColor,
-      status: 'active',
-      enabled: true,
-      route: '/tasks',
-      x: 4,
-      y: 5,
-      rows: 2,
-      cols: 4,
-    },
-    {
-      id: 'calendar',
-      name: 'Calendar',
-      description: 'Schedule & events',
-      icon: 'calendar_today',
-      color: 'neutral' as LauncherColor,
-      status: 'beta',
-      enabled: true,
-      route: '/calendar',
-      x: 8,
-      y: 5,
-      rows: 2,
-      cols: 4,
-    },
+  // Dashboard items
+  dashboard: DashboardItem[] = [
+    { id: 'A', label: 'A', color: '#3b82f6', x: 0, y: 0, cols: 3, rows: 2 },
+    { id: 'B', label: 'B', color: '#eab308', x: 3, y: 0, cols: 3, rows: 2 },
+    { id: 'C', label: 'C', color: '#6b7280', x: 6, y: 0, cols: 3, rows: 2 },
+    { id: 'D', label: 'D', color: '#a855f7', x: 9, y: 0, cols: 3, rows: 2 },
+    { id: 'E', label: 'E', color: '#10b981', x: 0, y: 2, cols: 6, rows: 3 },
+    { id: 'F', label: 'F', color: '#f43f5e', x: 6, y: 2, cols: 6, rows: 3 },
+    { id: 'G', label: 'G', color: '#06b6d4', x: 0, y: 5, cols: 4, rows: 2 },
+    { id: 'H', label: 'H', color: '#f97316', x: 4, y: 5, cols: 4, rows: 2 },
+    { id: 'I', label: 'I', color: '#8b5cf6', x: 8, y: 5, cols: 4, rows: 2 },
   ];
 
   openOptionsDrawer(): void {
@@ -691,15 +621,42 @@ export class GridsterPocComponent {
     const newEditMode = !this.editMode();
     this.editMode.set(newEditMode);
 
-    // IMPORTANT: ต้อง mutate options object เดิม แล้วเรียก api.optionsChanged()
     this.options.draggable!.enabled = newEditMode;
     this.options.resizable!.enabled = newEditMode;
     this.options.displayGrid = newEditMode
       ? 'always'
       : this.gridSettings.displayGrid;
 
-    // เรียก optionsChanged เพื่อ notify gridster
     this.notifyGridster();
+  }
+
+  addItem(): void {
+    const colors = [
+      '#3b82f6',
+      '#eab308',
+      '#10b981',
+      '#f43f5e',
+      '#a855f7',
+      '#06b6d4',
+      '#f97316',
+      '#8b5cf6',
+    ];
+    const label = String.fromCharCode(65 + this.itemCounter);
+    this.itemCounter++;
+
+    this.dashboard.push({
+      id: label,
+      label: label,
+      color: colors[this.dashboard.length % colors.length],
+      x: 0,
+      y: 0,
+      cols: 3,
+      rows: 2,
+    });
+  }
+
+  removeItem(item: DashboardItem): void {
+    this.dashboard = this.dashboard.filter((i) => i.id !== item.id);
   }
 
   onColsChange(value: number): void {
@@ -709,7 +666,6 @@ export class GridsterPocComponent {
   }
 
   applyOptions(): void {
-    // Apply all settings to gridster options
     this.options.gridType = this.gridSettings.gridType;
     this.options.minCols = this.gridSettings.minCols;
     this.options.maxCols = this.gridSettings.maxCols;
@@ -719,21 +675,18 @@ export class GridsterPocComponent {
     this.options.pushItems = this.gridSettings.pushItems;
     this.options.swap = this.gridSettings.swap;
 
-    // Display grid based on edit mode
     if (this.editMode()) {
       this.options.displayGrid = 'always';
     } else {
       this.options.displayGrid = this.gridSettings.displayGrid;
     }
 
-    // Compact type
     if (this.gridSettings.compactType) {
       this.options.compactType = 'compactUp&Left';
     } else {
       this.options.compactType = 'none';
     }
 
-    // Fixed size options
     if (
       this.gridSettings.gridType === 'fixed' ||
       this.gridSettings.gridType === 'verticalFixed' ||
@@ -768,11 +721,6 @@ export class GridsterPocComponent {
     if (this.options.api && this.options.api.optionsChanged) {
       this.options.api.optionsChanged();
     }
-  }
-
-  onCardClick(event: { app: LauncherApp }): void {
-    console.log('Card clicked:', event.app.name);
-    alert(`Clicked: ${event.app.name}`);
   }
 
   onLogout(): void {
