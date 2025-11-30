@@ -597,6 +597,20 @@ export class IntegrationsOverviewComponent {
       npmUrl: 'https://www.npmjs.com/package/angularx-qrcode',
       status: 'stable',
     },
+    {
+      id: 'signature-pad',
+      name: 'Signature Pad',
+      description:
+        'Digital signature capture with drawing and upload support. For HIS consent forms, document approval, contracts.',
+      icon: 'draw',
+      category: 'utils',
+      package: 'signature_pad',
+      version: '5.1.2',
+      wrapper: 'AxSignaturePadComponent',
+      docsUrl: '/docs/integrations/signature-pad',
+      npmUrl: 'https://www.npmjs.com/package/signature_pad',
+      status: 'stable',
+    },
   ];
 
   getByCategory(category: Integration['category']): Integration[] {

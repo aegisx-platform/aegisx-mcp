@@ -147,6 +147,34 @@ export const appRoutes: Route[] = [
         './pages/docs/components/aegisx/data-display/calendar/calendar-doc.component'
       ).then((m) => m.CalendarDocComponent),
   },
+  {
+    path: 'docs/components/aegisx/data-display/field-display',
+    loadComponent: () =>
+      import(
+        './pages/docs/components/aegisx/data-display/field-display/field-display-doc.component'
+      ).then((m) => m.FieldDisplayDocComponent),
+  },
+  {
+    path: 'docs/components/aegisx/data-display/description-list',
+    loadComponent: () =>
+      import(
+        './pages/docs/components/aegisx/data-display/description-list/description-list-doc.component'
+      ).then((m) => m.DescriptionListDocComponent),
+  },
+  {
+    path: 'docs/components/aegisx/data-display/stats-card',
+    loadComponent: () =>
+      import(
+        './pages/docs/components/aegisx/data-display/stats-card/stats-card-doc.component'
+      ).then((m) => m.StatsCardDocComponent),
+  },
+  {
+    path: 'docs/components/aegisx/data-display/timeline',
+    loadComponent: () =>
+      import(
+        './pages/docs/components/aegisx/data-display/timeline/timeline-doc.component'
+      ).then((m) => m.TimelineDocComponent),
+  },
 
   // --- Components > AegisX > Charts ---
   {
@@ -200,6 +228,20 @@ export const appRoutes: Route[] = [
         './pages/docs/components/aegisx/forms/knob/knob-doc.component'
       ).then((m) => m.KnobDocComponent),
   },
+  {
+    path: 'docs/components/aegisx/forms/time-slots',
+    loadComponent: () =>
+      import(
+        './pages/docs/components/aegisx/forms/time-slots/time-slots-doc.component'
+      ).then((m) => m.TimeSlotsDocComponent),
+  },
+  {
+    path: 'docs/components/aegisx/forms/scheduler',
+    loadComponent: () =>
+      import(
+        './pages/docs/components/aegisx/forms/scheduler/scheduler-doc.component'
+      ).then((m) => m.SchedulerDocComponent),
+  },
 
   // --- Components > AegisX > Feedback ---
   {
@@ -244,6 +286,20 @@ export const appRoutes: Route[] = [
         './pages/docs/components/aegisx/feedback/skeleton/skeleton-doc.component'
       ).then((m) => m.SkeletonDocComponent),
   },
+  {
+    path: 'docs/components/aegisx/feedback/empty-state',
+    loadComponent: () =>
+      import(
+        './pages/docs/components/aegisx/feedback/empty-state/empty-state-doc.component'
+      ).then((m) => m.EmptyStateDocComponent),
+  },
+  {
+    path: 'docs/components/aegisx/feedback/error-state',
+    loadComponent: () =>
+      import(
+        './pages/docs/components/aegisx/feedback/error-state/error-state-doc.component'
+      ).then((m) => m.ErrorStateDocComponent),
+  },
 
   // --- Components > AegisX > Navigation ---
   {
@@ -267,6 +323,13 @@ export const appRoutes: Route[] = [
         './pages/docs/components/aegisx/navigation/launcher/launcher-doc.component'
       ).then((m) => m.LauncherDocComponent),
   },
+  {
+    path: 'docs/components/aegisx/navigation/navigation-menu',
+    loadComponent: () =>
+      import(
+        './pages/docs/components/aegisx/navigation/navigation-menu/navigation-menu-doc.component'
+      ).then((m) => m.NavigationMenuDocComponent),
+  },
 
   // --- Components > AegisX > Layout ---
   {
@@ -289,6 +352,36 @@ export const appRoutes: Route[] = [
       import(
         './pages/docs/components/aegisx/layout/enterprise/enterprise-layout-doc.component'
       ).then((m) => m.EnterpriseLayoutDocComponent),
+  },
+  {
+    path: 'docs/components/aegisx/layout/compact',
+    loadComponent: () =>
+      import(
+        './pages/docs/components/aegisx/layout/compact/compact-layout-doc.component'
+      ).then((m) => m.CompactLayoutDocComponent),
+  },
+  {
+    path: 'docs/components/aegisx/layout/empty',
+    loadComponent: () =>
+      import(
+        './pages/docs/components/aegisx/layout/empty/empty-layout-doc.component'
+      ).then((m) => m.EmptyLayoutDocComponent),
+  },
+
+  // --- Components > AegisX > Utilities ---
+  {
+    path: 'docs/components/aegisx/utilities/theme-switcher',
+    loadComponent: () =>
+      import(
+        './pages/docs/components/aegisx/utilities/theme-switcher/theme-switcher-doc.component'
+      ).then((m) => m.ThemeSwitcherDocComponent),
+  },
+  {
+    path: 'docs/components/aegisx/utilities/layout-switcher',
+    loadComponent: () =>
+      import(
+        './pages/docs/components/aegisx/utilities/layout-switcher/layout-switcher-doc.component'
+      ).then((m) => m.LayoutSwitcherDocComponent),
   },
 
   // --- Components > AegisX > Dashboard ---
@@ -321,6 +414,13 @@ export const appRoutes: Route[] = [
       import('./pages/docs/integrations/qrcode/qrcode-doc.component').then(
         (m) => m.QRCodeDocComponent,
       ),
+  },
+  {
+    path: 'docs/integrations/signature-pad',
+    loadComponent: () =>
+      import(
+        './pages/docs/integrations/signature-pad/signature-pad-doc.component'
+      ).then((m) => m.SignaturePadDocComponent),
   },
 
   // --- Components > Material ---

@@ -56,3 +56,6 @@ export * from './calendar';
 
 // Gridster Component (Draggable Grid Layout)
 export * from './gridster';
+
+// Integrations (Third-party library wrappers)
+export * from './integrations';
