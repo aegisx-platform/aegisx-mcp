@@ -263,6 +263,15 @@ export const appRoutes: Route[] = [
       ).then((m) => m.EnterpriseLayoutDocComponent),
   },
 
+  // --- Components > AegisX > Dashboard ---
+  {
+    path: 'docs/components/aegisx/dashboard/widget-framework',
+    loadComponent: () =>
+      import(
+        './pages/docs/components/aegisx/dashboard/widget-framework/widget-framework-doc.component'
+      ).then((m) => m.WidgetFrameworkDocComponent),
+  },
+
   // --- Components > Material ---
   {
     path: 'docs/material/overview',
@@ -891,5 +900,16 @@ export const appRoutes: Route[] = [
     path: 'spark-charts',
     redirectTo: 'playground/experiments/charts',
     pathMatch: 'full',
+  },
+
+  // ============================================
+  // WIDGET FRAMEWORK DEMO
+  // ============================================
+  {
+    path: 'widget-demo',
+    loadComponent: () =>
+      import('./pages/widget-demo/widget-demo.component').then(
+        (m) => m.WidgetDemoComponent,
+      ),
   },
 ];

@@ -56,6 +56,9 @@ export class App {
       !url.startsWith('/inventory-demo') &&
       !url.startsWith('/his-demo') &&
       !url.startsWith('/app-launcher-demo') &&
+      !url.startsWith('/widget-demo') &&
+      !url.startsWith('/gridster-demo') &&
+      !url.startsWith('/gridster-poc') &&
       !url.startsWith('/playground/pages/dashboard')
     );
   });
@@ -532,6 +535,13 @@ export class App {
           link: '/app-launcher-demo',
         },
         {
+          id: 'gridster-demo',
+          title: 'Gridster Demo',
+          type: 'item',
+          icon: 'grid_view',
+          link: '/gridster-demo',
+        },
+        {
           id: 'enterprise-demo',
           title: 'Enterprise Dashboard',
           type: 'item',
@@ -782,6 +792,17 @@ export class App {
             },
           ],
         },
+        {
+          id: 'dashboard',
+          title: 'Dashboard',
+          children: [
+            {
+              id: 'widget-framework',
+              title: 'Widget Framework',
+              link: '/docs/components/aegisx/dashboard/widget-framework',
+            },
+          ],
+        },
       ],
     },
     {
@@ -939,6 +960,11 @@ export class App {
           id: 'app-launcher-demo',
           title: 'App Launcher',
           link: '/app-launcher-demo',
+        },
+        {
+          id: 'gridster-demo',
+          title: 'Gridster Demo',
+          link: '/gridster-demo',
         },
         {
           id: 'enterprise-demo',
