@@ -1,5 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -28,6 +29,7 @@ interface DemoItem extends AxGridsterItemBase {
   standalone: true,
   imports: [
     CommonModule,
+    RouterLink,
     FormsModule,
     MatTabsModule,
     MatIconModule,
@@ -134,6 +136,57 @@ interface DemoItem extends AxGridsterItemBase {
               </p>
 
               <ax-code-tabs [tabs]="templateCode"></ax-code-tabs>
+            </section>
+          </div>
+        </mat-tab>
+
+        <!-- Examples Tab -->
+        <mat-tab label="Examples">
+          <div class="gridster-doc__tab-content">
+            <!-- Live Demo Link -->
+            <section class="gridster-doc__section">
+              <h2>Live Demos</h2>
+              <p>
+                Try out the interactive demos to see Gridster in action with
+                different configurations.
+              </p>
+
+              <div class="demo-links">
+                <a routerLink="/gridster-demo" class="demo-link-card">
+                  <mat-icon>dashboard</mat-icon>
+                  <div class="demo-link-content">
+                    <h4>Gridster Demo</h4>
+                    <p>Dashboard with draggable widgets</p>
+                  </div>
+                  <mat-icon class="arrow">arrow_forward</mat-icon>
+                </a>
+                <a routerLink="/gridster-poc" class="demo-link-card">
+                  <mat-icon>science</mat-icon>
+                  <div class="demo-link-content">
+                    <h4>Gridster POC</h4>
+                    <p>Proof of concept with advanced features</p>
+                  </div>
+                  <mat-icon class="arrow">arrow_forward</mat-icon>
+                </a>
+              </div>
+            </section>
+
+            <section class="gridster-doc__section">
+              <h2>Dashboard Example</h2>
+              <p>Create a responsive dashboard with drag-and-drop widgets.</p>
+              <ax-code-tabs [tabs]="dashboardExampleCode"></ax-code-tabs>
+            </section>
+
+            <section class="gridster-doc__section">
+              <h2>App Launcher Example</h2>
+              <p>Build an iOS-style app launcher with compact grid layout.</p>
+              <ax-code-tabs [tabs]="launcherExampleCode"></ax-code-tabs>
+            </section>
+
+            <section class="gridster-doc__section">
+              <h2>Saving Layout</h2>
+              <p>Persist layout changes to localStorage or API.</p>
+              <ax-code-tabs [tabs]="savingLayoutCode"></ax-code-tabs>
             </section>
           </div>
         </mat-tab>
@@ -276,29 +329,6 @@ interface DemoItem extends AxGridsterItemBase {
             <section class="gridster-doc__section">
               <h2>AxGridsterSettings Interface</h2>
               <ax-code-tabs [tabs]="settingsInterfaceCode"></ax-code-tabs>
-            </section>
-          </div>
-        </mat-tab>
-
-        <!-- Examples Tab -->
-        <mat-tab label="Examples">
-          <div class="gridster-doc__tab-content">
-            <section class="gridster-doc__section">
-              <h2>Dashboard Example</h2>
-              <p>Create a responsive dashboard with drag-and-drop widgets.</p>
-              <ax-code-tabs [tabs]="dashboardExampleCode"></ax-code-tabs>
-            </section>
-
-            <section class="gridster-doc__section">
-              <h2>App Launcher Example</h2>
-              <p>Build an iOS-style app launcher with compact grid layout.</p>
-              <ax-code-tabs [tabs]="launcherExampleCode"></ax-code-tabs>
-            </section>
-
-            <section class="gridster-doc__section">
-              <h2>Saving Layout</h2>
-              <p>Persist layout changes to localStorage or API.</p>
-              <ax-code-tabs [tabs]="savingLayoutCode"></ax-code-tabs>
             </section>
           </div>
         </mat-tab>
@@ -466,6 +496,66 @@ interface DemoItem extends AxGridsterItemBase {
             border-radius: var(--ax-radius-full);
             color: var(--ax-text-muted);
           }
+        }
+      }
+
+      .demo-links {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .demo-link-card {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.25rem;
+        background: var(--ax-background-default);
+        border: 1px solid var(--ax-border-default);
+        border-radius: var(--ax-radius-lg);
+        text-decoration: none;
+        transition: all 0.2s ease;
+
+        &:hover {
+          border-color: var(--ax-primary-default);
+          background: var(--ax-primary-faint);
+          transform: translateX(4px);
+
+          .arrow {
+            opacity: 1;
+            transform: translateX(4px);
+          }
+        }
+
+        > mat-icon:first-child {
+          font-size: 32px;
+          width: 32px;
+          height: 32px;
+          color: var(--ax-primary-default);
+        }
+
+        .demo-link-content {
+          flex: 1;
+
+          h4 {
+            margin: 0 0 0.25rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--ax-text-heading);
+          }
+
+          p {
+            margin: 0;
+            font-size: 0.875rem;
+            color: var(--ax-text-secondary);
+          }
+        }
+
+        .arrow {
+          opacity: 0;
+          transition: all 0.2s ease;
+          color: var(--ax-primary-default);
         }
       }
 
