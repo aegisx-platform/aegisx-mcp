@@ -358,24 +358,30 @@ export class ProgressWidgetComponent extends BaseWidgetComponent<
     const pct = this.percent() / 100;
     if (pct <= 0) return '';
 
-    // Arc goes from left (10, 50) to right (90, 50) following the top half
+    // Background arc: M 10 50 A 40 40 0 0 1 90 50
+    // This draws from (10,50) to (90,50) clockwise through top
     // Center at (50, 50), radius 40
-    const cx = 50,
-      cy = 50,
-      r = 40;
-    const startX = cx - r; // 10
-    const startY = cy; // 50
+    const r = 40;
 
-    // Calculate end point based on percentage (0% = left, 100% = right)
-    // Angle goes from 180° (left) to 0° (right) as percentage increases
-    const angleRad = Math.PI * (1 - pct); // 180° to 0° in radians
-    const endX = cx + r * Math.cos(angleRad);
-    const endY = cy - r * Math.sin(angleRad);
+    // Start point is always left side (10, 50)
+    const startX = 10;
+    const startY = 50;
 
-    // Use large arc flag when angle > 90° (pct > 50%)
+    // End point moves along the arc based on percentage
+    // At 0%: stay at start (10, 50)
+    // At 50%: top center (50, 10)
+    // At 100%: right side (90, 50)
+    // Angle from center: 180° at start, 0° at end
+    const angle = Math.PI * (1 - pct); // radians: π to 0
+    const endX = 50 + r * Math.cos(angle);
+    const endY = 50 - r * Math.sin(angle);
+
+    // Large arc flag: 1 if arc > 180° (pct > 50%)
     const largeArc = pct > 0.5 ? 1 : 0;
+    // Sweep flag: 1 = clockwise (same as background)
+    const sweep = 1;
 
-    return `M ${startX} ${startY} A ${r} ${r} 0 ${largeArc} 1 ${endX.toFixed(2)} ${endY.toFixed(2)}`;
+    return `M ${startX} ${startY} A ${r} ${r} 0 ${largeArc} ${sweep} ${endX.toFixed(1)} ${endY.toFixed(1)}`;
   });
 
   getDefaultConfig(): ProgressWidgetConfig {
