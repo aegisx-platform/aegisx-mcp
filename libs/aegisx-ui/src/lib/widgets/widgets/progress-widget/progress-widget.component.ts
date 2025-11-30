@@ -109,7 +109,7 @@ import {
             @case ('gauge') {
               <div class="ax-progress-widget__gauge">
                 <svg viewBox="0 0 100 54" class="ax-progress-widget__svg">
-                  <!-- Background arc: center (50,50), radius 40 -->
+                  <!-- Background arc -->
                   <path
                     d="M 10 50 A 40 40 0 0 1 90 50"
                     fill="none"
@@ -117,13 +117,16 @@ import {
                     stroke-width="8"
                     stroke-linecap="round"
                   />
-                  <!-- Progress arc -->
+                  <!-- Progress arc: same path, controlled by stroke-dasharray -->
                   <path
-                    [attr.d]="gaugePath()"
+                    d="M 10 50 A 40 40 0 0 1 90 50"
                     fill="none"
                     [attr.stroke]="strokeColor()"
                     stroke-width="8"
                     stroke-linecap="round"
+                    [attr.stroke-dasharray]="gaugeArcLength"
+                    [attr.stroke-dashoffset]="gaugeDashOffset()"
+                    class="ax-progress-widget__gauge-progress"
                   />
                 </svg>
                 <div class="ax-progress-widget__gauge-value">
@@ -287,6 +290,10 @@ import {
           z-index: 1;
         }
 
+        &__gauge-progress {
+          transition: stroke-dashoffset 0.5s ease;
+        }
+
         /* Secondary */
         &__secondary {
           margin-top: 12px;
@@ -354,34 +361,15 @@ export class ProgressWidgetComponent extends BaseWidgetComponent<
     return colorMap[color];
   });
 
-  gaugePath = computed(() => {
+  // Gauge arc length: half circle with radius 40 = π * 40 ≈ 125.66
+  readonly gaugeArcLength = Math.PI * 40;
+
+  // Calculate dash offset for gauge progress
+  gaugeDashOffset = computed(() => {
     const pct = this.percent() / 100;
-    if (pct <= 0) return '';
-
-    // Background arc: M 10 50 A 40 40 0 0 1 90 50
-    // This draws from (10,50) to (90,50) clockwise through top
-    // Center at (50, 50), radius 40
-    const r = 40;
-
-    // Start point is always left side (10, 50)
-    const startX = 10;
-    const startY = 50;
-
-    // End point moves along the arc based on percentage
-    // At 0%: stay at start (10, 50)
-    // At 50%: top center (50, 10)
-    // At 100%: right side (90, 50)
-    // Angle from center: 180° at start, 0° at end
-    const angle = Math.PI * (1 - pct); // radians: π to 0
-    const endX = 50 + r * Math.cos(angle);
-    const endY = 50 - r * Math.sin(angle);
-
-    // Large arc flag: 1 if arc > 180° (pct > 50%)
-    const largeArc = pct > 0.5 ? 1 : 0;
-    // Sweep flag: 1 = clockwise (same as background)
-    const sweep = 1;
-
-    return `M ${startX} ${startY} A ${r} ${r} 0 ${largeArc} ${sweep} ${endX.toFixed(1)} ${endY.toFixed(1)}`;
+    // At 0%: offset = full length (nothing visible)
+    // At 100%: offset = 0 (full arc visible)
+    return this.gaugeArcLength * (1 - pct);
   });
 
   getDefaultConfig(): ProgressWidgetConfig {
