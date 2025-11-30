@@ -13,6 +13,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatDividerModule } from '@angular/material/divider';
+import { CodeBlockComponent } from '../../components/code-block/code-block.component';
 import {
   AxEnterpriseLayoutComponent,
   AxNavigationItem,
@@ -70,6 +71,8 @@ type ConfigurableWidgetType = 'kpi' | 'progress';
     TableWidgetComponent,
     ListWidgetComponent,
     ProgressWidgetComponent,
+    // Code block
+    CodeBlockComponent,
   ],
   template: `
     <ax-enterprise-layout
@@ -224,7 +227,44 @@ type ConfigurableWidgetType = 'kpi' | 'progress';
                 </div>
 
                 <div class="configurator-layout">
-                  <!-- Config Panel -->
+                  <!-- Preview Panel (Left) -->
+                  <div class="preview-panel">
+                    <div class="panel-header">
+                      <mat-icon>visibility</mat-icon>
+                      <h3>Live Preview</h3>
+                    </div>
+
+                    <div class="preview-container">
+                      @if (selectedWidgetType() === 'kpi') {
+                        <div class="preview-widget preview-widget--kpi">
+                          <ax-kpi-widget
+                            [instanceId]="'kpi-configurator'"
+                            [config]="kpiConfig()"
+                            [initialData]="kpiData()"
+                          ></ax-kpi-widget>
+                        </div>
+                      }
+
+                      @if (selectedWidgetType() === 'progress') {
+                        <div class="preview-widget preview-widget--progress">
+                          <ax-progress-widget
+                            [instanceId]="'progress-configurator'"
+                            [config]="progressConfig()"
+                            [initialData]="progressData()"
+                          ></ax-progress-widget>
+                        </div>
+                      }
+                    </div>
+
+                    <!-- Code Preview using CodeBlockComponent -->
+                    <ax-code-block
+                      [code]="configCode()"
+                      language="typescript"
+                      label="Configuration Code"
+                    ></ax-code-block>
+                  </div>
+
+                  <!-- Config Panel (Right) -->
                   <div class="config-panel">
                     <div class="panel-header">
                       <mat-icon>settings</mat-icon>
@@ -407,48 +447,6 @@ type ConfigurableWidgetType = 'kpi' | 'progress';
                         </div>
                       </div>
                     }
-                  </div>
-
-                  <!-- Preview Panel -->
-                  <div class="preview-panel">
-                    <div class="panel-header">
-                      <mat-icon>visibility</mat-icon>
-                      <h3>Live Preview</h3>
-                    </div>
-
-                    <div class="preview-container">
-                      @if (selectedWidgetType() === 'kpi') {
-                        <div class="preview-widget preview-widget--kpi">
-                          <ax-kpi-widget
-                            [instanceId]="'kpi-configurator'"
-                            [config]="kpiConfig()"
-                            [initialData]="kpiData()"
-                          ></ax-kpi-widget>
-                        </div>
-                      }
-
-                      @if (selectedWidgetType() === 'progress') {
-                        <div class="preview-widget preview-widget--progress">
-                          <ax-progress-widget
-                            [instanceId]="'progress-configurator'"
-                            [config]="progressConfig()"
-                            [initialData]="progressData()"
-                          ></ax-progress-widget>
-                        </div>
-                      }
-                    </div>
-
-                    <!-- Code Preview -->
-                    <div class="code-preview">
-                      <div class="code-header">
-                        <mat-icon>code</mat-icon>
-                        <span>Configuration Code</span>
-                        <button mat-icon-button matTooltip="Copy to clipboard" (click)="copyConfig()">
-                          <mat-icon>content_copy</mat-icon>
-                        </button>
-                      </div>
-                      <pre class="code-block">{{ configCode() }}</pre>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -767,10 +765,10 @@ type ConfigurableWidgetType = 'kpi' | 'progress';
         gap: 1rem;
       }
 
-      /* Configurator Layout */
+      /* Configurator Layout - Preview left, Config right */
       .configurator-layout {
         display: grid;
-        grid-template-columns: 350px 1fr;
+        grid-template-columns: 1fr 350px;
         gap: 1.5rem;
 
         @media (max-width: 1024px) {
@@ -865,41 +863,6 @@ type ConfigurableWidgetType = 'kpi' | 'progress';
           width: 200px;
           height: 200px;
         }
-      }
-
-      /* Code Preview */
-      .code-preview {
-        background: var(--ax-background-subtle);
-        border-radius: var(--ax-radius-lg);
-        overflow: hidden;
-      }
-
-      .code-header {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.75rem 1rem;
-        background: var(--ax-background-default);
-        border-bottom: 1px solid var(--ax-border-muted);
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: var(--ax-text-secondary);
-
-        span {
-          flex: 1;
-        }
-      }
-
-      .code-block {
-        margin: 0;
-        padding: 1rem;
-        font-size: 0.75rem;
-        font-family: 'Fira Code', 'Monaco', monospace;
-        color: var(--ax-text-default);
-        white-space: pre-wrap;
-        word-break: break-all;
-        max-height: 300px;
-        overflow-y: auto;
       }
 
       /* Placeholder Area */
@@ -1142,10 +1105,6 @@ const data: ProgressWidgetData = ${JSON.stringify(this.progressData(), null, 2)}
     value: ProgressWidgetData[K],
   ): void {
     this.progressData.update((data) => ({ ...data, [key]: value }));
-  }
-
-  copyConfig(): void {
-    navigator.clipboard.writeText(this.configCode());
   }
 
   // ============================================================================
