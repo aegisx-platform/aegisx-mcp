@@ -610,15 +610,18 @@ export class WidgetShowcaseComponent {
   kpiShowTrend = signal(true);
   kpiCompact = signal(false);
 
-  kpiConfig = computed<KpiWidgetConfig>(() => ({
-    title: this.kpiTitle(),
-    subtitle: this.kpiSubtitle(),
-    icon: this.kpiIcon(),
-    format: this.kpiFormat(),
-    color: this.kpiColor(),
-    showTrend: this.kpiShowTrend(),
-    compact: this.kpiCompact(),
-  }));
+  kpiConfig = computed<KpiWidgetConfig>(() => {
+    const config: KpiWidgetConfig = {
+      title: this.kpiTitle(),
+      subtitle: this.kpiSubtitle(),
+      icon: this.kpiIcon(),
+      format: this.kpiFormat(),
+      color: this.kpiColor(),
+      showTrend: this.kpiShowTrend(),
+      compact: this.kpiCompact(),
+    };
+    return config;
+  });
 
   kpiData = computed<KpiWidgetData>(() => ({
     value: this.kpiValue(),

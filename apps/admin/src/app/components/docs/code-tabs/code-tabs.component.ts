@@ -101,7 +101,7 @@ import 'prismjs/components/prism-json';
               <mat-icon>content_copy</mat-icon>
             </button>
           </div>
-          @for (tab of tabs; track tab.label; let i = $index) {
+          @for (tab of tabs; track getTabTrackId(tab, i); let i = $index) {
             @if (activeTabIndex === i) {
               <pre class="code-tabs__code"><code
                 #codeBlock
@@ -350,8 +350,9 @@ export class CodeTabsComponent implements AfterViewInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['tabs']) {
+      // Reset highlighted status when tabs change
       // Use setTimeout to ensure DOM is updated
-      setTimeout(() => this.highlightAllCode(), 0);
+      setTimeout(() => this.forceHighlightAllCode(), 0);
     }
   }
 
@@ -366,6 +367,20 @@ export class CodeTabsComponent implements AfterViewInit, OnChanges {
       this.codeBlocks.forEach((codeBlock) => {
         const element = codeBlock.nativeElement;
         if (element && !element.classList.contains('prism-highlighted')) {
+          Prism.highlightElement(element);
+          element.classList.add('prism-highlighted');
+        }
+      });
+    }
+  }
+
+  private forceHighlightAllCode(): void {
+    if (this.codeBlocks && this.codeBlocks.length > 0) {
+      this.codeBlocks.forEach((codeBlock) => {
+        const element = codeBlock.nativeElement;
+        if (element) {
+          // Remove prism-highlighted class to force re-highlight
+          element.classList.remove('prism-highlighted');
           Prism.highlightElement(element);
           element.classList.add('prism-highlighted');
         }
@@ -391,5 +406,20 @@ export class CodeTabsComponent implements AfterViewInit, OnChanges {
       json: 'json',
     };
     return languageMap[language] || 'plaintext';
+  }
+
+  getTabTrackId(tab: CodeTab, index: number): string {
+    // Include code hash in track id to force re-render when code changes
+    return `${tab.label}-${index}-${this.hashCode(tab.code)}`;
+  }
+
+  private hashCode(str: string): number {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return hash;
   }
 }
