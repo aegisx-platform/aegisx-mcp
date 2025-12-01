@@ -17,28 +17,30 @@ import { RouterOutlet } from '@angular/router';
   styles: [
     `
       :host {
-        display: flex;
-        flex: 1 1 auto;
+        display: block;
         width: 100%;
-        height: 100%;
+        min-height: 100vh;
       }
 
       .ax-empty-layout {
         display: flex;
-        flex: 1 1 auto;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
         width: 100%;
-        height: 100%;
         min-height: 100vh;
+        padding: var(--ax-spacing-xl) var(--ax-spacing-md);
+        box-sizing: border-box;
         background-color: var(--ax-background-muted);
+        overflow-y: auto;
       }
 
       .ax-empty-layout-content {
         display: flex;
-        flex: 1 1 auto;
+        flex-direction: column;
         align-items: center;
-        justify-content: center;
         width: 100%;
-        height: 100%;
+        max-width: 500px;
       }
     `,
   ],

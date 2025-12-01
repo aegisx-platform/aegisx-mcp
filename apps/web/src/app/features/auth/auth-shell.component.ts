@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet } from '@angular/router';
 import { EmptyLayoutComponent } from '@aegisx/ui';
 
 /**
@@ -8,16 +7,15 @@ import { EmptyLayoutComponent } from '@aegisx/ui';
  *
  * Shell component for authentication routes (login, register, forgot-password, etc.)
  * Uses AxEmptyLayoutComponent for a clean, centered layout.
+ *
+ * Note: EmptyLayoutComponent already includes <router-outlet>,
+ * so we don't need to add it here.
  */
 @Component({
   selector: 'app-auth-shell',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, EmptyLayoutComponent],
-  template: `
-    <ax-empty-layout>
-      <router-outlet></router-outlet>
-    </ax-empty-layout>
-  `,
+  imports: [CommonModule, EmptyLayoutComponent],
+  template: `<ax-empty-layout></ax-empty-layout>`,
   styles: [
     `
       :host {
