@@ -819,149 +819,135 @@ export class WidgetShowcaseComponent {
   }));
 
   // ============================================================
-  // Generated Code
+  // Generated Code - All computed for reactivity
   // ============================================================
-  generatedCodeTabs = computed<CodeTab[]>(() => {
-    switch (this.selectedWidget()) {
-      case 'kpi':
-        return this.generateKpiCode();
-      case 'progress':
-        return this.generateProgressCode();
-      case 'chart':
-        return this.generateChartCode();
-      case 'table':
-        return this.generateTableCode();
-      case 'list':
-        return this.generateListCode();
-      default:
-        return [];
-    }
-  });
-
-  private generateKpiCode(): CodeTab[] {
-    return [
-      {
-        label: 'TypeScript',
-        language: 'typescript' as const,
-        code: `// KPI Widget Configuration
+  kpiCodeTabs = computed<CodeTab[]>(() => [
+    {
+      label: 'TypeScript',
+      language: 'typescript' as const,
+      code: `// KPI Widget Configuration
 import { KpiWidgetConfig, KpiWidgetData } from '@aegisx/ui';
 
 const config: KpiWidgetConfig = ${JSON.stringify(this.kpiConfig(), null, 2)};
 
 const data: KpiWidgetData = ${JSON.stringify(this.kpiData(), null, 2)};`,
-      },
-      {
-        label: 'HTML',
-        language: 'html' as const,
-        code: `<ax-kpi-widget
+    },
+    {
+      label: 'HTML',
+      language: 'html' as const,
+      code: `<ax-kpi-widget
   [instanceId]="'my-kpi'"
   [config]="config"
   [initialData]="data"
 ></ax-kpi-widget>`,
-      },
-    ];
-  }
+    },
+  ]);
 
-  private generateProgressCode(): CodeTab[] {
-    return [
-      {
-        label: 'TypeScript',
-        language: 'typescript' as const,
-        code: `// Progress Widget Configuration
+  progressCodeTabs = computed<CodeTab[]>(() => [
+    {
+      label: 'TypeScript',
+      language: 'typescript' as const,
+      code: `// Progress Widget Configuration
 import { ProgressWidgetConfig, ProgressWidgetData } from '@aegisx/ui';
 
 const config: ProgressWidgetConfig = ${JSON.stringify(this.progressConfig(), null, 2)};
 
 const data: ProgressWidgetData = ${JSON.stringify(this.progressData(), null, 2)};`,
-      },
-      {
-        label: 'HTML',
-        language: 'html' as const,
-        code: `<ax-progress-widget
+    },
+    {
+      label: 'HTML',
+      language: 'html' as const,
+      code: `<ax-progress-widget
   [instanceId]="'my-progress'"
   [config]="config"
   [initialData]="data"
 ></ax-progress-widget>`,
-      },
-    ];
-  }
+    },
+  ]);
 
-  private generateChartCode(): CodeTab[] {
-    const configObj = {
-      title: this.chartTitle(),
-      type: this.chartType(),
-      showLegend: this.chartShowLegend(),
-    };
-    return [
-      {
-        label: 'TypeScript',
-        language: 'typescript' as const,
-        code: `// Chart Widget Configuration
+  chartCodeTabs = computed<CodeTab[]>(() => [
+    {
+      label: 'TypeScript',
+      language: 'typescript' as const,
+      code: `// Chart Widget Configuration
 import { ChartWidgetConfig, ChartWidgetData } from '@aegisx/ui';
 
-const config: ChartWidgetConfig = ${JSON.stringify(configObj, null, 2)};
+const config: ChartWidgetConfig = ${JSON.stringify(this.chartConfig(), null, 2)};
 
 const data: ChartWidgetData = ${JSON.stringify(this.chartData(), null, 2)};`,
-      },
-      {
-        label: 'HTML',
-        language: 'html' as const,
-        code: `<ax-chart-widget
+    },
+    {
+      label: 'HTML',
+      language: 'html' as const,
+      code: `<ax-chart-widget
   [instanceId]="'my-chart'"
   [config]="config"
   [initialData]="data"
 ></ax-chart-widget>`,
-      },
-    ];
-  }
+    },
+  ]);
 
-  private generateTableCode(): CodeTab[] {
-    return [
-      {
-        label: 'TypeScript',
-        language: 'typescript' as const,
-        code: `// Table Widget Configuration
+  tableCodeTabs = computed<CodeTab[]>(() => [
+    {
+      label: 'TypeScript',
+      language: 'typescript' as const,
+      code: `// Table Widget Configuration
 import { TableWidgetConfig, TableWidgetData } from '@aegisx/ui';
 
 const config: TableWidgetConfig = ${JSON.stringify(this.tableConfig(), null, 2)};
 
 const data: TableWidgetData = ${JSON.stringify(this.tableData(), null, 2)};`,
-      },
-      {
-        label: 'HTML',
-        language: 'html' as const,
-        code: `<ax-table-widget
+    },
+    {
+      label: 'HTML',
+      language: 'html' as const,
+      code: `<ax-table-widget
   [instanceId]="'my-table'"
   [config]="config"
   [initialData]="data"
 ></ax-table-widget>`,
-      },
-    ];
-  }
+    },
+  ]);
 
-  private generateListCode(): CodeTab[] {
-    return [
-      {
-        label: 'TypeScript',
-        language: 'typescript' as const,
-        code: `// List Widget Configuration
+  listCodeTabs = computed<CodeTab[]>(() => [
+    {
+      label: 'TypeScript',
+      language: 'typescript' as const,
+      code: `// List Widget Configuration
 import { ListWidgetConfig, ListWidgetData } from '@aegisx/ui';
 
 const config: ListWidgetConfig = ${JSON.stringify(this.listConfig(), null, 2)};
 
 const data: ListWidgetData = ${JSON.stringify(this.listData(), null, 2)};`,
-      },
-      {
-        label: 'HTML',
-        language: 'html' as const,
-        code: `<ax-list-widget
+    },
+    {
+      label: 'HTML',
+      language: 'html' as const,
+      code: `<ax-list-widget
   [instanceId]="'my-list'"
   [config]="config"
   [initialData]="data"
 ></ax-list-widget>`,
-      },
-    ];
-  }
+    },
+  ]);
+
+  // Main computed that switches between widget types
+  generatedCodeTabs = computed<CodeTab[]>(() => {
+    switch (this.selectedWidget()) {
+      case 'kpi':
+        return this.kpiCodeTabs();
+      case 'progress':
+        return this.progressCodeTabs();
+      case 'chart':
+        return this.chartCodeTabs();
+      case 'table':
+        return this.tableCodeTabs();
+      case 'list':
+        return this.listCodeTabs();
+      default:
+        return [];
+    }
+  });
 
   copyCode(): void {
     const tabs = this.generatedCodeTabs();
