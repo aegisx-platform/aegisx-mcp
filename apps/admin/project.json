@@ -25,6 +25,11 @@
             "glob": "**/*.css",
             "input": "node_modules/@angular/material/prebuilt-themes",
             "output": "themes"
+          },
+          {
+            "glob": "**/*",
+            "input": "node_modules/monaco-editor",
+            "output": "assets/monaco-editor"
           }
         ],
         "styles": ["apps/admin/src/styles.scss"]

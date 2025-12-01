@@ -7,7 +7,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
+import {
+  MonacoEditorModule,
+  NGX_MONACO_EDITOR_CONFIG,
+  NgxMonacoEditorConfig,
+} from 'ngx-monaco-editor-v2';
 import {
   DocHeaderComponent,
   CodeTabsComponent,
@@ -15,6 +19,11 @@ import {
   ComponentTokensComponent,
 } from '../../../../components/docs';
 import { CodeTab, ComponentToken } from '../../../../types/docs.types';
+
+const monacoConfig: NgxMonacoEditorConfig = {
+  baseUrl: '/assets/monaco-editor/min/vs',
+  defaultOptions: { scrollBeyondLastLine: false },
+};
 
 @Component({
   selector: 'ax-monaco-editor-doc',
@@ -34,6 +43,7 @@ import { CodeTab, ComponentToken } from '../../../../types/docs.types';
     LivePreviewComponent,
     ComponentTokensComponent,
   ],
+  providers: [{ provide: NGX_MONACO_EDITOR_CONFIG, useValue: monacoConfig }],
   template: `
     <div class="monaco-editor-doc">
       <ax-doc-header
