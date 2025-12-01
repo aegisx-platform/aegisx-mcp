@@ -10,6 +10,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import {
   AxLauncherComponent,
   AxLauncherCardComponent,
+  AxKbdComponent,
   LauncherApp,
   LauncherCategory,
 } from '@aegisx/ui';
@@ -34,6 +35,7 @@ import { CodeTab } from '../../../../../../types/docs.types';
     MatChipsModule,
     AxLauncherComponent,
     AxLauncherCardComponent,
+    AxKbdComponent,
     DocHeaderComponent,
     CodeTabsComponent,
     LivePreviewComponent,
@@ -137,6 +139,42 @@ import { CodeTab } from '../../../../../../types/docs.types';
                   Last clicked:
                   <span class="font-mono">{{ lastClicked() }}</span>
                 </p>
+              </mat-card>
+            </section>
+
+            <!-- Keyboard Shortcuts -->
+            <section class="mb-8">
+              <h3 class="text-xl font-semibold mb-4">Keyboard Shortcuts</h3>
+              <p class="text-on-surface-variant mb-4">
+                The Launcher supports keyboard navigation for power users.
+              </p>
+              <mat-card appearance="outlined" class="p-6">
+                <div class="shortcuts-grid">
+                  <div class="shortcut-item">
+                    <ax-kbd shortcut="Ctrl+K"></ax-kbd>
+                    <span>Open Launcher</span>
+                  </div>
+                  <div class="shortcut-item">
+                    <ax-kbd>Up</ax-kbd>
+                    <span>Previous App</span>
+                  </div>
+                  <div class="shortcut-item">
+                    <ax-kbd>Down</ax-kbd>
+                    <span>Next App</span>
+                  </div>
+                  <div class="shortcut-item">
+                    <ax-kbd>Enter</ax-kbd>
+                    <span>Open App</span>
+                  </div>
+                  <div class="shortcut-item">
+                    <ax-kbd>Esc</ax-kbd>
+                    <span>Close Launcher</span>
+                  </div>
+                  <div class="shortcut-item">
+                    <ax-kbd shortcut="Ctrl+F"></ax-kbd>
+                    <span>Focus Search</span>
+                  </div>
+                </div>
               </mat-card>
             </section>
 
@@ -340,41 +378,95 @@ import { CodeTab } from '../../../../../../types/docs.types';
           <div class="py-6">
             <section class="mb-8">
               <h3 class="text-xl font-semibold mb-4">Keyboard Shortcuts</h3>
+              <p class="text-on-surface-variant mb-4">
+                The Launcher provides comprehensive keyboard navigation for
+                power users and accessibility.
+              </p>
               <mat-card appearance="outlined" class="p-6">
-                <table class="w-full">
-                  <thead>
-                    <tr class="border-b">
-                      <th class="text-left py-2">Shortcut</th>
-                      <th class="text-left py-2">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr class="border-b">
-                      <td class="py-2">
-                        <code class="bg-surface-container px-2 py-1 rounded"
-                          >Cmd/Ctrl + K</code
+                <div class="shortcuts-list">
+                  <div class="shortcut-row">
+                    <ax-kbd shortcut="Ctrl+K"></ax-kbd>
+                    <span>Open / Focus Search</span>
+                  </div>
+                  <div class="shortcut-row">
+                    <ax-kbd>Esc</ax-kbd>
+                    <span>Clear Search / Close</span>
+                  </div>
+                  <div class="shortcut-row">
+                    <ax-kbd>Enter</ax-kbd>
+                    <span>Open Focused App</span>
+                  </div>
+                  <div class="shortcut-row">
+                    <ax-kbd>Up</ax-kbd>
+                    <span>Previous App</span>
+                  </div>
+                  <div class="shortcut-row">
+                    <ax-kbd>Down</ax-kbd>
+                    <span>Next App</span>
+                  </div>
+                  <div class="shortcut-row">
+                    <ax-kbd>Tab</ax-kbd>
+                    <span>Navigate Categories</span>
+                  </div>
+                  <div class="shortcut-row">
+                    <ax-kbd shortcut="Ctrl+F"></ax-kbd>
+                    <span>Toggle Favorites</span>
+                  </div>
+                  <div class="shortcut-row">
+                    <ax-kbd shortcut="Ctrl+Shift+P"></ax-kbd>
+                    <span>Pin/Unpin App</span>
+                  </div>
+                </div>
+              </mat-card>
+            </section>
+
+            <section class="mb-8">
+              <h3 class="text-xl font-semibold mb-4">Platform Awareness</h3>
+              <p class="text-on-surface-variant mb-4">
+                The
+                <code class="bg-surface-container px-2 py-1 rounded"
+                  >ax-kbd</code
+                >
+                component automatically converts modifier keys based on the
+                user's platform.
+              </p>
+              <mat-card appearance="outlined" class="p-6">
+                <div class="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 class="font-semibold mb-3">macOS</h4>
+                    <div class="space-y-2">
+                      <div class="flex items-center gap-3">
+                        <ax-kbd [keys]="['⌘', 'K']"></ax-kbd>
+                        <span class="text-sm text-on-surface-variant"
+                          >Command + K</span
                         >
-                      </td>
-                      <td class="py-2">Focus search input</td>
-                    </tr>
-                    <tr class="border-b">
-                      <td class="py-2">
-                        <code class="bg-surface-container px-2 py-1 rounded"
-                          >Escape</code
+                      </div>
+                      <div class="flex items-center gap-3">
+                        <ax-kbd [keys]="['⌥', '⇧', 'P']"></ax-kbd>
+                        <span class="text-sm text-on-surface-variant"
+                          >Option + Shift + P</span
                         >
-                      </td>
-                      <td class="py-2">Clear search</td>
-                    </tr>
-                    <tr>
-                      <td class="py-2">
-                        <code class="bg-surface-container px-2 py-1 rounded"
-                          >Enter</code
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 class="font-semibold mb-3">Windows / Linux</h4>
+                    <div class="space-y-2">
+                      <div class="flex items-center gap-3">
+                        <ax-kbd [keys]="['Ctrl', 'K']"></ax-kbd>
+                        <span class="text-sm text-on-surface-variant"
+                          >Control + K</span
                         >
-                      </td>
-                      <td class="py-2">Open focused app</td>
-                    </tr>
-                  </tbody>
-                </table>
+                      </div>
+                      <div class="flex items-center gap-3">
+                        <ax-kbd [keys]="['Alt', 'Shift', 'P']"></ax-kbd>
+                        <span class="text-sm text-on-surface-variant"
+                          >Alt + Shift + P</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </mat-card>
             </section>
           </div>
@@ -415,6 +507,53 @@ import { CodeTab } from '../../../../../../types/docs.types';
       .grid ax-launcher-card {
         width: 100%;
         min-width: 0;
+      }
+
+      .shortcuts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+      }
+
+      .shortcut-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        background: var(--ax-surface-container);
+        border-radius: 0.5rem;
+      }
+
+      .shortcut-item span {
+        color: var(--ax-on-surface-variant);
+        font-size: 0.875rem;
+      }
+
+      .shortcuts-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .shortcut-row {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--ax-outline-variant);
+      }
+
+      .shortcut-row:last-child {
+        border-bottom: none;
+      }
+
+      .shortcut-row ax-kbd {
+        min-width: 120px;
+      }
+
+      .shortcut-row span {
+        color: var(--ax-on-surface-variant);
+        font-size: 0.875rem;
       }
     `,
   ],

@@ -19,3 +19,4 @@ export * from './timeline';
 // Display Components (new)
 export * from './field-display';
 export * from './description-list';
+export * from './kbd';
