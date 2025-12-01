@@ -22,6 +22,8 @@ import { Component, Input } from '@angular/core';
         class="live-preview__content"
         [class.live-preview__content--dark]="variant === 'dark'"
         [class.live-preview__content--subtle]="variant === 'subtle'"
+        [class.live-preview__content--white]="variant === 'white'"
+        [class.live-preview__content--contrast]="variant === 'contrast'"
         [class.live-preview__content--center]="align === 'center'"
         [class.live-preview__content--start]="align === 'start'"
         [class.live-preview__content--end]="align === 'end'"
@@ -64,6 +66,14 @@ import { Component, Input } from '@angular/core';
         background-color: var(--ax-background-subtle);
       }
 
+      .live-preview__content--white {
+        background-color: #ffffff;
+      }
+
+      .live-preview__content--contrast {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+
       .live-preview__content--center {
         justify-content: center;
         align-items: center;
@@ -94,7 +104,13 @@ import { Component, Input } from '@angular/core';
   ],
 })
 export class LivePreviewComponent {
-  @Input() variant: 'default' | 'dark' | 'subtle' | 'bordered' = 'bordered';
+  @Input() variant:
+    | 'default'
+    | 'dark'
+    | 'subtle'
+    | 'bordered'
+    | 'white'
+    | 'contrast' = 'bordered';
   @Input() align: 'center' | 'start' | 'end' | 'stretch' = 'center';
   @Input() direction: 'row' | 'column' = 'row';
   @Input() wrap = true;

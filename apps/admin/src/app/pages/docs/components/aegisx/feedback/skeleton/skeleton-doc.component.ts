@@ -63,7 +63,7 @@ import { ComponentToken, CodeTab } from '../../../../../../types/docs.types';
               </p>
 
               <ax-live-preview
-                variant="bordered"
+                variant="white"
                 direction="column"
                 gap="var(--ax-spacing-lg)"
               >
@@ -107,7 +107,7 @@ import { ComponentToken, CodeTab } from '../../../../../../types/docs.types';
               <p>Two animation styles are available: pulse and wave.</p>
 
               <ax-live-preview
-                variant="bordered"
+                variant="white"
                 direction="row"
                 gap="var(--ax-spacing-xl)"
               >
@@ -141,7 +141,7 @@ import { ComponentToken, CodeTab } from '../../../../../../types/docs.types';
                 reduction.
               </p>
 
-              <ax-live-preview variant="bordered">
+              <ax-live-preview variant="white">
                 <ax-skeleton
                   variant="text"
                   [lines]="3"
@@ -162,7 +162,7 @@ import { ComponentToken, CodeTab } from '../../../../../../types/docs.types';
               <p>Pre-configured skeleton for card layouts.</p>
 
               <ax-live-preview
-                variant="bordered"
+                variant="white"
                 direction="row"
                 gap="var(--ax-spacing-lg)"
               >
@@ -188,7 +188,7 @@ import { ComponentToken, CodeTab } from '../../../../../../types/docs.types';
               <p>Pre-configured skeleton for user profiles.</p>
 
               <ax-live-preview
-                variant="bordered"
+                variant="white"
                 direction="row"
                 gap="var(--ax-spacing-xl)"
               >
@@ -207,7 +207,7 @@ import { ComponentToken, CodeTab } from '../../../../../../types/docs.types';
               <h2>Table Skeleton</h2>
               <p>Pre-configured skeleton for table rows.</p>
 
-              <ax-live-preview variant="bordered">
+              <ax-live-preview variant="white">
                 <ax-skeleton-table [rows]="4" [columns]="4"></ax-skeleton-table>
               </ax-live-preview>
 
@@ -218,7 +218,7 @@ import { ComponentToken, CodeTab } from '../../../../../../types/docs.types';
               <h2>List Skeleton</h2>
               <p>Pre-configured skeleton for list items.</p>
 
-              <ax-live-preview variant="bordered">
+              <ax-live-preview variant="white">
                 <div style="width: 320px;">
                   <ax-skeleton-list [items]="3"></ax-skeleton-list>
                 </div>
