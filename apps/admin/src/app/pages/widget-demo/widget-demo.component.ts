@@ -44,7 +44,7 @@ import {
   ProgressColor,
 } from '@aegisx/ui';
 
-type ConfigurableWidgetType = 'kpi' | 'progress';
+type ConfigurableWidgetType = 'kpi' | 'progress' | 'chart' | 'table' | 'list';
 
 @Component({
   selector: 'app-widget-demo',
@@ -236,24 +236,52 @@ type ConfigurableWidgetType = 'kpi' | 'progress';
                     </div>
 
                     <div class="preview-container">
-                      @if (selectedWidgetType() === 'kpi') {
-                        <div class="preview-widget preview-widget--kpi">
-                          <ax-kpi-widget
-                            [instanceId]="'kpi-configurator'"
-                            [config]="kpiConfig()"
-                            [initialData]="kpiData()"
-                          ></ax-kpi-widget>
-                        </div>
-                      }
-
-                      @if (selectedWidgetType() === 'progress') {
-                        <div class="preview-widget preview-widget--progress">
-                          <ax-progress-widget
-                            [instanceId]="'progress-configurator'"
-                            [config]="progressConfig()"
-                            [initialData]="progressData()"
-                          ></ax-progress-widget>
-                        </div>
+                      @switch (selectedWidgetType()) {
+                        @case ('kpi') {
+                          <div class="preview-widget preview-widget--kpi">
+                            <ax-kpi-widget
+                              [instanceId]="'kpi-configurator'"
+                              [config]="kpiConfig()"
+                              [initialData]="kpiData()"
+                            ></ax-kpi-widget>
+                          </div>
+                        }
+                        @case ('progress') {
+                          <div class="preview-widget preview-widget--progress">
+                            <ax-progress-widget
+                              [instanceId]="'progress-configurator'"
+                              [config]="progressConfig()"
+                              [initialData]="progressData()"
+                            ></ax-progress-widget>
+                          </div>
+                        }
+                        @case ('chart') {
+                          <div class="preview-widget preview-widget--chart">
+                            <ax-chart-widget
+                              [instanceId]="'chart-configurator'"
+                              [config]="chartConfigSignal()"
+                              [initialData]="chartDataSignal()"
+                            ></ax-chart-widget>
+                          </div>
+                        }
+                        @case ('table') {
+                          <div class="preview-widget preview-widget--table">
+                            <ax-table-widget
+                              [instanceId]="'table-configurator'"
+                              [config]="tableConfigSignal()"
+                              [initialData]="tableDataSignal()"
+                            ></ax-table-widget>
+                          </div>
+                        }
+                        @case ('list') {
+                          <div class="preview-widget preview-widget--list">
+                            <ax-list-widget
+                              [instanceId]="'list-configurator'"
+                              [config]="listConfigSignal()"
+                              [initialData]="listDataSignal()"
+                            ></ax-list-widget>
+                          </div>
+                        }
                       }
                     </div>
 
@@ -272,8 +300,26 @@ type ConfigurableWidgetType = 'kpi' | 'progress';
                     <mat-form-field appearance="outline" class="full-width">
                       <mat-label>Widget Type</mat-label>
                       <mat-select [value]="selectedWidgetType()" (selectionChange)="selectedWidgetType.set($event.value)">
-                        <mat-option value="kpi">KPI Widget</mat-option>
-                        <mat-option value="progress">Progress Widget</mat-option>
+                        <mat-option value="kpi">
+                          <mat-icon>analytics</mat-icon>
+                          KPI Widget
+                        </mat-option>
+                        <mat-option value="progress">
+                          <mat-icon>donut_large</mat-icon>
+                          Progress Widget
+                        </mat-option>
+                        <mat-option value="chart">
+                          <mat-icon>bar_chart</mat-icon>
+                          Chart Widget
+                        </mat-option>
+                        <mat-option value="table">
+                          <mat-icon>table_chart</mat-icon>
+                          Table Widget
+                        </mat-option>
+                        <mat-option value="list">
+                          <mat-icon>list</mat-icon>
+                          List Widget
+                        </mat-option>
                       </mat-select>
                     </mat-form-field>
 
@@ -442,6 +488,153 @@ type ConfigurableWidgetType = 'kpi' | 'progress';
                             <input matSliderThumb [value]="progressData().value" (valueChange)="updateProgressData('value', $event)" />
                           </mat-slider>
                         </div>
+                      </div>
+                    }
+
+                    <!-- Chart Config -->
+                    @if (selectedWidgetType() === 'chart') {
+                      <div class="config-section">
+                        <h4>Display Settings</h4>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                          <mat-label>Title</mat-label>
+                          <input matInput [value]="chartConfigSignal().title" (input)="updateChartConfig('title', $any($event.target).value)" />
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                          <mat-label>Chart Type</mat-label>
+                          <mat-select [value]="chartConfigSignal().type" (selectionChange)="updateChartConfig('type', $event.value)">
+                            <mat-option value="line">Line</mat-option>
+                            <mat-option value="bar">Bar</mat-option>
+                            <mat-option value="donut">Donut</mat-option>
+                          </mat-select>
+                        </mat-form-field>
+
+                        <mat-slide-toggle
+                          [checked]="chartConfigSignal().showLegend"
+                          (change)="updateChartConfig('showLegend', $event.checked)"
+                        >
+                          Show Legend
+                        </mat-slide-toggle>
+
+                        <mat-slide-toggle
+                          [checked]="chartConfigSignal().showGrid"
+                          (change)="updateChartConfig('showGrid', $event.checked)"
+                        >
+                          Show Grid
+                        </mat-slide-toggle>
+
+                        <mat-slide-toggle
+                          [checked]="chartConfigSignal().smooth"
+                          (change)="updateChartConfig('smooth', $event.checked)"
+                        >
+                          Smooth Line
+                        </mat-slide-toggle>
+                      </div>
+                    }
+
+                    <!-- Table Config -->
+                    @if (selectedWidgetType() === 'table') {
+                      <div class="config-section">
+                        <h4>Display Settings</h4>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                          <mat-label>Title</mat-label>
+                          <input matInput [value]="tableConfigSignal().title" (input)="updateTableConfig('title', $any($event.target).value)" />
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                          <mat-label>Page Size</mat-label>
+                          <mat-select [value]="tableConfigSignal().pageSize" (selectionChange)="updateTableConfig('pageSize', $event.value)">
+                            <mat-option [value]="3">3 rows</mat-option>
+                            <mat-option [value]="5">5 rows</mat-option>
+                            <mat-option [value]="10">10 rows</mat-option>
+                          </mat-select>
+                        </mat-form-field>
+
+                        <mat-slide-toggle
+                          [checked]="tableConfigSignal().showPagination"
+                          (change)="updateTableConfig('showPagination', $event.checked)"
+                        >
+                          Show Pagination
+                        </mat-slide-toggle>
+
+                        <mat-slide-toggle
+                          [checked]="tableConfigSignal().striped"
+                          (change)="updateTableConfig('striped', $event.checked)"
+                        >
+                          Striped Rows
+                        </mat-slide-toggle>
+
+                        <mat-slide-toggle
+                          [checked]="tableConfigSignal().sortable"
+                          (change)="updateTableConfig('sortable', $event.checked)"
+                        >
+                          Sortable
+                        </mat-slide-toggle>
+
+                        <mat-slide-toggle
+                          [checked]="tableConfigSignal().compact"
+                          (change)="updateTableConfig('compact', $event.checked)"
+                        >
+                          Compact Mode
+                        </mat-slide-toggle>
+                      </div>
+                    }
+
+                    <!-- List Config -->
+                    @if (selectedWidgetType() === 'list') {
+                      <div class="config-section">
+                        <h4>Display Settings</h4>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                          <mat-label>Title</mat-label>
+                          <input matInput [value]="listConfigSignal().title" (input)="updateListConfig('title', $any($event.target).value)" />
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                          <mat-label>Max Items</mat-label>
+                          <mat-select [value]="listConfigSignal().maxItems" (selectionChange)="updateListConfig('maxItems', $event.value)">
+                            <mat-option [value]="3">3 items</mat-option>
+                            <mat-option [value]="5">5 items</mat-option>
+                            <mat-option [value]="10">10 items</mat-option>
+                          </mat-select>
+                        </mat-form-field>
+
+                        <mat-slide-toggle
+                          [checked]="listConfigSignal().showIcons"
+                          (change)="updateListConfig('showIcons', $event.checked)"
+                        >
+                          Show Icons
+                        </mat-slide-toggle>
+
+                        <mat-slide-toggle
+                          [checked]="listConfigSignal().showMeta"
+                          (change)="updateListConfig('showMeta', $event.checked)"
+                        >
+                          Show Meta
+                        </mat-slide-toggle>
+
+                        <mat-slide-toggle
+                          [checked]="listConfigSignal().divided"
+                          (change)="updateListConfig('divided', $event.checked)"
+                        >
+                          Show Dividers
+                        </mat-slide-toggle>
+
+                        <mat-slide-toggle
+                          [checked]="listConfigSignal().clickable"
+                          (change)="updateListConfig('clickable', $event.checked)"
+                        >
+                          Clickable
+                        </mat-slide-toggle>
+
+                        <mat-slide-toggle
+                          [checked]="listConfigSignal().compact"
+                          (change)="updateListConfig('compact', $event.checked)"
+                        >
+                          Compact Mode
+                        </mat-slide-toggle>
                       </div>
                     }
                   </div>
@@ -863,6 +1056,22 @@ type ConfigurableWidgetType = 'kpi' | 'progress';
           align-items: center;
           justify-content: center;
         }
+
+        &--chart {
+          width: 100%;
+          max-width: 500px;
+          height: 300px;
+        }
+
+        &--table {
+          width: 100%;
+          max-width: 600px;
+        }
+
+        &--list {
+          width: 100%;
+          max-width: 400px;
+        }
       }
 
       /* Placeholder Area */
@@ -1050,48 +1259,255 @@ export class WidgetDemoComponent {
     label: '68 GB of 100 GB',
   });
 
-  // Config code tabs output
+  // Chart Configurator
+  chartConfigSignal = signal<ChartWidgetConfig>({
+    title: 'Monthly Sales',
+    type: 'line',
+    showLegend: true,
+    showGrid: true,
+    smooth: true,
+  });
+
+  chartDataSignal = signal<ChartWidgetData>({
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    series: [
+      {
+        name: 'Revenue',
+        data: [42000, 38000, 45000, 51000, 48000, 55000],
+        color: '#6366f1',
+      },
+      {
+        name: 'Expenses',
+        data: [28000, 32000, 30000, 35000, 33000, 38000],
+        color: '#f59e0b',
+      },
+    ],
+  });
+
+  // Table Configurator
+  tableConfigSignal = signal<TableWidgetConfig>({
+    title: 'Recent Transactions',
+    columns: [
+      { key: 'id', label: 'ID', width: '80px' },
+      { key: 'customer', label: 'Customer' },
+      { key: 'amount', label: 'Amount', align: 'right' as const },
+      { key: 'status', label: 'Status' },
+      { key: 'date', label: 'Date' },
+    ],
+    pageSize: 5,
+    showPagination: true,
+    striped: true,
+    sortable: true,
+    compact: false,
+  });
+
+  tableDataSignal = signal<TableWidgetData>({
+    items: [
+      {
+        id: 'TXN001',
+        customer: 'John Smith',
+        amount: '$1,250.00',
+        status: 'completed',
+        date: '1/15/2024',
+      },
+      {
+        id: 'TXN002',
+        customer: 'Jane Doe',
+        amount: '$890.50',
+        status: 'pending',
+        date: '1/14/2024',
+      },
+      {
+        id: 'TXN003',
+        customer: 'Bob Wilson',
+        amount: '$2,100.00',
+        status: 'completed',
+        date: '1/14/2024',
+      },
+      {
+        id: 'TXN004',
+        customer: 'Alice Brown',
+        amount: '$450.25',
+        status: 'error',
+        date: '1/13/2024',
+      },
+      {
+        id: 'TXN005',
+        customer: 'Charlie Davis',
+        amount: '$1,780.00',
+        status: 'completed',
+        date: '1/12/2024',
+      },
+    ],
+    total: 5,
+  });
+
+  // List Configurator
+  listConfigSignal = signal<ListWidgetConfig>({
+    title: 'Recent Activities',
+    maxItems: 5,
+    showIcons: true,
+    showMeta: true,
+    clickable: true,
+    divided: true,
+    compact: false,
+  });
+
+  listDataSignal = signal<ListWidgetData>({
+    items: [
+      {
+        id: '1',
+        title: 'New order received',
+        subtitle: 'Order #12345 from John Smith',
+        icon: 'shopping_cart',
+        iconColor: '#6366f1',
+        status: 'active' as const,
+        meta: '2 min ago',
+      },
+      {
+        id: '2',
+        title: 'Payment processed',
+        subtitle: '$1,250.00 via Credit Card',
+        icon: 'payment',
+        iconColor: '#10b981',
+        status: 'completed' as const,
+        meta: '15 min ago',
+      },
+      {
+        id: '3',
+        title: 'User registered',
+        subtitle: 'jane.doe@example.com',
+        icon: 'person_add',
+        iconColor: '#6366f1',
+        status: 'active' as const,
+        meta: '1 hour ago',
+      },
+      {
+        id: '4',
+        title: 'Stock alert',
+        subtitle: 'Product SKU-001 is low',
+        icon: 'warning',
+        iconColor: '#f59e0b',
+        status: 'warning' as const,
+        meta: '2 hours ago',
+      },
+      {
+        id: '5',
+        title: 'Report generated',
+        subtitle: 'Monthly sales report',
+        icon: 'description',
+        iconColor: '#10b981',
+        status: 'completed' as const,
+        meta: '3 hours ago',
+      },
+    ],
+  });
+
+  // Config code tabs output - supports all widget types
   configCodeTabs = computed<CodeTab[]>(() => {
-    if (this.selectedWidgetType() === 'kpi') {
-      return [
-        {
-          label: 'TypeScript',
-          language: 'typescript',
-          code: `// KPI Widget Configuration
+    switch (this.selectedWidgetType()) {
+      case 'kpi':
+        return [
+          {
+            label: 'TypeScript',
+            language: 'typescript',
+            code: `// KPI Widget Configuration
 const config: KpiWidgetConfig = ${JSON.stringify(this.kpiConfig(), null, 2)};
 
 const data: KpiWidgetData = ${JSON.stringify(this.kpiData(), null, 2)};`,
-        },
-        {
-          label: 'HTML',
-          language: 'html',
-          code: `<ax-kpi-widget
+          },
+          {
+            label: 'HTML',
+            language: 'html',
+            code: `<ax-kpi-widget
   [instanceId]="'my-kpi'"
   [config]="config"
   [initialData]="data"
 ></ax-kpi-widget>`,
-        },
-      ];
-    } else {
-      return [
-        {
-          label: 'TypeScript',
-          language: 'typescript',
-          code: `// Progress Widget Configuration
+          },
+        ];
+      case 'progress':
+        return [
+          {
+            label: 'TypeScript',
+            language: 'typescript',
+            code: `// Progress Widget Configuration
 const config: ProgressWidgetConfig = ${JSON.stringify(this.progressConfig(), null, 2)};
 
 const data: ProgressWidgetData = ${JSON.stringify(this.progressData(), null, 2)};`,
-        },
-        {
-          label: 'HTML',
-          language: 'html',
-          code: `<ax-progress-widget
+          },
+          {
+            label: 'HTML',
+            language: 'html',
+            code: `<ax-progress-widget
   [instanceId]="'my-progress'"
   [config]="config"
   [initialData]="data"
 ></ax-progress-widget>`,
-        },
-      ];
+          },
+        ];
+      case 'chart':
+        return [
+          {
+            label: 'TypeScript',
+            language: 'typescript',
+            code: `// Chart Widget Configuration
+const config: ChartWidgetConfig = ${JSON.stringify(this.chartConfigSignal(), null, 2)};
+
+const data: ChartWidgetData = ${JSON.stringify(this.chartDataSignal(), null, 2)};`,
+          },
+          {
+            label: 'HTML',
+            language: 'html',
+            code: `<ax-chart-widget
+  [instanceId]="'my-chart'"
+  [config]="config"
+  [initialData]="data"
+></ax-chart-widget>`,
+          },
+        ];
+      case 'table':
+        return [
+          {
+            label: 'TypeScript',
+            language: 'typescript',
+            code: `// Table Widget Configuration
+const config: TableWidgetConfig = ${JSON.stringify(this.tableConfigSignal(), null, 2)};
+
+const data: TableWidgetData = ${JSON.stringify(this.tableDataSignal(), null, 2)};`,
+          },
+          {
+            label: 'HTML',
+            language: 'html',
+            code: `<ax-table-widget
+  [instanceId]="'my-table'"
+  [config]="config"
+  [initialData]="data"
+></ax-table-widget>`,
+          },
+        ];
+      case 'list':
+        return [
+          {
+            label: 'TypeScript',
+            language: 'typescript',
+            code: `// List Widget Configuration
+const config: ListWidgetConfig = ${JSON.stringify(this.listConfigSignal(), null, 2)};
+
+const data: ListWidgetData = ${JSON.stringify(this.listDataSignal(), null, 2)};`,
+          },
+          {
+            label: 'HTML',
+            language: 'html',
+            code: `<ax-list-widget
+  [instanceId]="'my-list'"
+  [config]="config"
+  [initialData]="data"
+></ax-list-widget>`,
+          },
+        ];
+      default:
+        return [];
     }
   });
 
@@ -1121,6 +1537,27 @@ const data: ProgressWidgetData = ${JSON.stringify(this.progressData(), null, 2)}
     value: ProgressWidgetData[K],
   ): void {
     this.progressData.update((data) => ({ ...data, [key]: value }));
+  }
+
+  updateChartConfig<K extends keyof ChartWidgetConfig>(
+    key: K,
+    value: ChartWidgetConfig[K],
+  ): void {
+    this.chartConfigSignal.update((config) => ({ ...config, [key]: value }));
+  }
+
+  updateTableConfig<K extends keyof TableWidgetConfig>(
+    key: K,
+    value: TableWidgetConfig[K],
+  ): void {
+    this.tableConfigSignal.update((config) => ({ ...config, [key]: value }));
+  }
+
+  updateListConfig<K extends keyof ListWidgetConfig>(
+    key: K,
+    value: ListWidgetConfig[K],
+  ): void {
+    this.listConfigSignal.update((config) => ({ ...config, [key]: value }));
   }
 
   // ============================================================================
