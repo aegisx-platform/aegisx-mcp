@@ -14,7 +14,9 @@ import {
   DocHeaderComponent,
   CodeTabsComponent,
   LivePreviewComponent,
+  ComponentTokensComponent,
 } from '../../../../../../components/docs';
+import { ComponentToken } from '../../../../../../types/docs.types';
 
 @Component({
   selector: 'app-breadcrumb-doc',
@@ -34,6 +36,7 @@ import {
     DocHeaderComponent,
     CodeTabsComponent,
     LivePreviewComponent,
+    ComponentTokensComponent,
   ],
   template: `
     <div class="breadcrumb-doc">
@@ -97,23 +100,66 @@ import {
             <!-- Basic Usage -->
             <section>
               <h3 class="text-xl font-semibold mb-4">Basic Usage</h3>
-              <mat-card appearance="outlined">
-                <div class="p-4 bg-surface-container-lowest">
-                  <pre class="text-sm overflow-x-auto"><code>import {{'{'}} AxBreadcrumbComponent, BreadcrumbItem {{'}'}} from '@aegisx/ui';
+              <ax-code-tabs [tabs]="basicUsageCode" />
+            </section>
 
-// In your component
-breadcrumbs: BreadcrumbItem[] = [
-  {{'{'}} label: 'Home', url: '/', icon: 'home' {{'}'}},
-  {{'{'}} label: 'Products', url: '/products', icon: 'inventory_2' {{'}'}},
-  {{'{'}} label: 'Smartphones' {{'}'}} // Last item has no URL
-];
+            <!-- Interactive Playground -->
+            <section class="mb-8">
+              <h3 class="text-xl font-semibold mb-4">Interactive Playground</h3>
+              <mat-card appearance="outlined" class="p-6">
+                <div class="grid md:grid-cols-3 gap-4 mb-6">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Size</mat-label>
+                    <mat-select [(ngModel)]="playgroundSize">
+                      <mat-option value="sm">Small</mat-option>
+                      <mat-option value="md">Medium</mat-option>
+                      <mat-option value="lg">Large</mat-option>
+                    </mat-select>
+                  </mat-form-field>
 
-// In template
-&lt;ax-breadcrumb
-  [items]="breadcrumbs"
-  separatorIcon="chevron_right"
-  (itemClick)="onBreadcrumbClick($event)"
-/&gt;</code></pre>
+                  <mat-form-field appearance="outline">
+                    <mat-label>Separator Type</mat-label>
+                    <mat-select [(ngModel)]="playgroundSeparatorType">
+                      <mat-option value="text">Text</mat-option>
+                      <mat-option value="icon">Icon</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    @if (playgroundSeparatorType === 'text') {
+                      <mat-label>Text Separator</mat-label>
+                      <mat-select [(ngModel)]="playgroundTextSeparator">
+                        @for (sep of textSeparators; track sep) {
+                          <mat-option [value]="sep">{{ sep }}</mat-option>
+                        }
+                      </mat-select>
+                    } @else {
+                      <mat-label>Icon Separator</mat-label>
+                      <mat-select [(ngModel)]="playgroundIconSeparator">
+                        @for (sep of iconSeparators; track sep) {
+                          <mat-option [value]="sep">{{ sep }}</mat-option>
+                        }
+                      </mat-select>
+                    }
+                  </mat-form-field>
+                </div>
+
+                <div class="p-4 bg-surface-container rounded-lg">
+                  @if (playgroundSeparatorType === 'text') {
+                    <ax-breadcrumb
+                      [items]="iconBreadcrumbs"
+                      [size]="playgroundSize"
+                      [separator]="playgroundTextSeparator"
+                      (itemClick)="onBreadcrumbClick($event)"
+                    />
+                  } @else {
+                    <ax-breadcrumb
+                      [items]="iconBreadcrumbs"
+                      [size]="playgroundSize"
+                      [separatorIcon]="playgroundIconSeparator"
+                      (itemClick)="onBreadcrumbClick($event)"
+                    />
+                  }
                 </div>
               </mat-card>
             </section>
@@ -227,67 +273,6 @@ breadcrumbs: BreadcrumbItem[] = [
                 </mat-card>
               </div>
             </section>
-
-            <!-- Interactive Playground -->
-            <section>
-              <h3 class="text-xl font-semibold mb-4">Interactive Playground</h3>
-              <mat-card appearance="outlined" class="p-6">
-                <div class="grid md:grid-cols-3 gap-4 mb-6">
-                  <mat-form-field appearance="outline">
-                    <mat-label>Size</mat-label>
-                    <mat-select [(ngModel)]="playgroundSize">
-                      <mat-option value="sm">Small</mat-option>
-                      <mat-option value="md">Medium</mat-option>
-                      <mat-option value="lg">Large</mat-option>
-                    </mat-select>
-                  </mat-form-field>
-
-                  <mat-form-field appearance="outline">
-                    <mat-label>Separator Type</mat-label>
-                    <mat-select [(ngModel)]="playgroundSeparatorType">
-                      <mat-option value="text">Text</mat-option>
-                      <mat-option value="icon">Icon</mat-option>
-                    </mat-select>
-                  </mat-form-field>
-
-                  <mat-form-field appearance="outline">
-                    @if (playgroundSeparatorType === 'text') {
-                      <mat-label>Text Separator</mat-label>
-                      <mat-select [(ngModel)]="playgroundTextSeparator">
-                        @for (sep of textSeparators; track sep) {
-                          <mat-option [value]="sep">{{ sep }}</mat-option>
-                        }
-                      </mat-select>
-                    } @else {
-                      <mat-label>Icon Separator</mat-label>
-                      <mat-select [(ngModel)]="playgroundIconSeparator">
-                        @for (sep of iconSeparators; track sep) {
-                          <mat-option [value]="sep">{{ sep }}</mat-option>
-                        }
-                      </mat-select>
-                    }
-                  </mat-form-field>
-                </div>
-
-                <div class="p-4 bg-surface-container rounded-lg">
-                  @if (playgroundSeparatorType === 'text') {
-                    <ax-breadcrumb
-                      [items]="iconBreadcrumbs"
-                      [size]="playgroundSize"
-                      [separator]="playgroundTextSeparator"
-                      (itemClick)="onBreadcrumbClick($event)"
-                    />
-                  } @else {
-                    <ax-breadcrumb
-                      [items]="iconBreadcrumbs"
-                      [size]="playgroundSize"
-                      [separatorIcon]="playgroundIconSeparator"
-                      (itemClick)="onBreadcrumbClick($event)"
-                    />
-                  }
-                </div>
-              </mat-card>
-            </section>
           </div>
         </mat-tab>
 
@@ -399,75 +384,10 @@ breadcrumbs: BreadcrumbItem[] = [
           </div>
         </mat-tab>
 
-        <!-- Tokens Tab -->
-        <mat-tab label="Tokens">
-          <div class="py-6 space-y-8">
-            <!-- CSS Classes -->
-            <section>
-              <h3 class="text-xl font-semibold mb-4">CSS Classes</h3>
-              <mat-card appearance="outlined">
-                <div class="p-4 bg-surface-container-lowest">
-                  <pre class="text-sm overflow-x-auto"><code>/* Base class */
-.ax-breadcrumb
-
-/* Size modifiers */
-.ax-breadcrumb-sm      /* Small text */
-.ax-breadcrumb-md      /* Medium text (default) */
-.ax-breadcrumb-lg      /* Large text */
-
-/* Item states */
-.ax-breadcrumb-item          /* All items */
-.ax-breadcrumb-item--link    /* Clickable items with URL */
-.ax-breadcrumb-item--current /* Last item (current page) */
-
-/* Elements */
-.ax-breadcrumb-separator     /* Separator element */
-.ax-breadcrumb-icon          /* Icon element */</code></pre>
-                </div>
-              </mat-card>
-            </section>
-
-            <!-- Design Tokens -->
-            <section>
-              <h3 class="text-xl font-semibold mb-4">Design Tokens Used</h3>
-              <div class="grid md:grid-cols-2 gap-4">
-                <mat-card appearance="outlined" class="p-4">
-                  <h4 class="font-semibold mb-3">Colors</h4>
-                  <div class="space-y-2 text-sm">
-                    <div class="flex justify-between">
-                      <code>--md-sys-color-on-surface</code>
-                      <span class="text-on-surface-variant">Link text</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <code>--md-sys-color-on-surface-variant</code>
-                      <span class="text-on-surface-variant">Current item, separator</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <code>--md-sys-color-primary</code>
-                      <span class="text-on-surface-variant">Hover state</span>
-                    </div>
-                  </div>
-                </mat-card>
-
-                <mat-card appearance="outlined" class="p-4">
-                  <h4 class="font-semibold mb-3">Typography</h4>
-                  <div class="space-y-2 text-sm">
-                    <div class="flex justify-between">
-                      <code>sm</code>
-                      <span class="text-on-surface-variant">0.875rem (14px)</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <code>md</code>
-                      <span class="text-on-surface-variant">1rem (16px)</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <code>lg</code>
-                      <span class="text-on-surface-variant">1.125rem (18px)</span>
-                    </div>
-                  </div>
-                </mat-card>
-              </div>
-            </section>
+        <!-- Design Tokens Tab -->
+        <mat-tab label="Design Tokens">
+          <div class="py-6">
+            <ax-component-tokens [tokens]="designTokens"></ax-component-tokens>
           </div>
         </mat-tab>
 
@@ -772,6 +692,49 @@ export class BreadcrumbDocComponent {
   ];
 
   // Code Examples
+  basicUsageCode = [
+    {
+      language: 'typescript' as const,
+      label: 'TypeScript',
+      code: `import { Component, signal } from '@angular/core';
+import { AxBreadcrumbComponent, BreadcrumbItem } from '@aegisx/ui';
+
+@Component({
+  selector: 'app-basic-breadcrumb',
+  standalone: true,
+  imports: [AxBreadcrumbComponent],
+  template: \`
+    <ax-breadcrumb
+      [items]="breadcrumbs"
+      separatorIcon="chevron_right"
+      (itemClick)="onBreadcrumbClick($event)"
+    />
+  \`
+})
+export class BasicBreadcrumbComponent {
+  breadcrumbs: BreadcrumbItem[] = [
+    { label: 'Home', url: '/', icon: 'home' },
+    { label: 'Products', url: '/products', icon: 'inventory_2' },
+    { label: 'Smartphones' } // Last item has no URL
+  ];
+
+  onBreadcrumbClick(item: BreadcrumbItem): void {
+    console.log('Clicked:', item.label, item.url);
+    // Navigate or handle click
+  }
+}`,
+    },
+    {
+      language: 'html' as const,
+      label: 'Template',
+      code: `<ax-breadcrumb
+  [items]="breadcrumbs"
+  separatorIcon="chevron_right"
+  (itemClick)="onBreadcrumbClick($event)"
+/>`,
+    },
+  ];
+
   sizeVariantsCode = [
     {
       language: 'typescript' as const,
@@ -910,6 +873,50 @@ export class BreadcrumbSeparatorsComponent {
 
 <!-- Icon separator: navigate_next -->
 <ax-breadcrumb [items]="items" separatorIcon="navigate_next" />`,
+    },
+  ];
+
+  // Design Tokens
+  readonly designTokens: ComponentToken[] = [
+    {
+      category: 'Colors',
+      cssVar: '--ax-text-default',
+      usage: 'Link text color',
+    },
+    {
+      category: 'Colors',
+      cssVar: '--ax-text-muted',
+      usage: 'Current item, separator text',
+    },
+    {
+      category: 'Colors',
+      cssVar: '--ax-brand-default',
+      usage: 'Link hover state',
+    },
+    {
+      category: 'Typography',
+      cssVar: '--ax-font-size-sm',
+      usage: 'Small size (0.875rem)',
+    },
+    {
+      category: 'Typography',
+      cssVar: '--ax-font-size-md',
+      usage: 'Medium size (1rem)',
+    },
+    {
+      category: 'Typography',
+      cssVar: '--ax-font-size-lg',
+      usage: 'Large size (1.125rem)',
+    },
+    {
+      category: 'Spacing',
+      cssVar: '--ax-spacing-xs',
+      usage: 'Gap between items and separators',
+    },
+    {
+      category: 'Spacing',
+      cssVar: '--ax-spacing-sm',
+      usage: 'Icon margin',
     },
   ];
 
