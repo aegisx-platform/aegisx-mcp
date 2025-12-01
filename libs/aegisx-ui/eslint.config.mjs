@@ -10,6 +10,7 @@ export default [
         'error',
         {
           ignoredFiles: ['{projectRoot}/eslint.config.{js,cjs,mjs,ts,cts,mts}'],
+          ignoredDependencies: ['signature_pad'],
         },
       ],
     },
@@ -56,6 +57,13 @@ export default [
       '@typescript-eslint/no-empty-function': ['error', {
         allow: ['constructors']
       }],
+    },
+  },
+  // Services that use factory pattern require constructor parameter injection
+  {
+    files: ['**/ax-calendar.service.ts'],
+    rules: {
+      '@angular-eslint/prefer-inject': 'off',
     },
   },
   {

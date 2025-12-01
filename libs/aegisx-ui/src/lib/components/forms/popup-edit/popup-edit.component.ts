@@ -5,10 +5,6 @@ import {
   EventEmitter,
   ViewChild,
   ElementRef,
-  TemplateRef,
-  ContentChild,
-  AfterViewInit,
-  OnDestroy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -16,11 +12,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import {
-  CdkOverlayOrigin,
-  CdkConnectedOverlay,
-  OverlayModule,
-} from '@angular/cdk/overlay';
+import { OverlayModule } from '@angular/cdk/overlay';
 
 export type PopupEditInputType = 'text' | 'number' | 'textarea';
 
@@ -77,7 +69,10 @@ export type PopupEditInputType = 'text' | 'number' | 'textarea';
       [class.ax-popup-edit--disabled]="disabled"
       cdkOverlayOrigin
       #trigger="cdkOverlayOrigin"
+      tabindex="0"
+      role="button"
       (click)="open()"
+      (keyup.enter)="open()"
     >
       <ng-content></ng-content>
       @if (!disabled) {
@@ -143,7 +138,7 @@ export type PopupEditInputType = 'text' | 'number' | 'textarea';
   `,
   styleUrls: ['./popup-edit.component.scss'],
 })
-export class AxPopupEditComponent implements AfterViewInit, OnDestroy {
+export class AxPopupEditComponent {
   @ViewChild('inputRef') inputRef!: ElementRef<
     HTMLInputElement | HTMLTextAreaElement
   >;
@@ -196,14 +191,6 @@ export class AxPopupEditComponent implements AfterViewInit, OnDestroy {
   isOpen = false;
   editValue: string | number = '';
   private initialValue: string | number = '';
-
-  ngAfterViewInit(): void {
-    // Setup if needed
-  }
-
-  ngOnDestroy(): void {
-    // Cleanup
-  }
 
   open(): void {
     if (this.disabled) return;

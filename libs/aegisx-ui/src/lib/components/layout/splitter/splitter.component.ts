@@ -5,7 +5,6 @@ import {
   EventEmitter,
   ElementRef,
   ViewChild,
-  AfterViewInit,
   OnDestroy,
   HostListener,
 } from '@angular/core';
@@ -86,7 +85,7 @@ export type SplitterUnit = 'percent' | 'pixel';
   `,
   styleUrls: ['./splitter.component.scss'],
 })
-export class AxSplitterComponent implements AfterViewInit, OnDestroy {
+export class AxSplitterComponent implements OnDestroy {
   @ViewChild('container') containerRef!: ElementRef<HTMLElement>;
   @ViewChild('separator') separatorRef!: ElementRef<HTMLElement>;
 
@@ -124,10 +123,6 @@ export class AxSplitterComponent implements AfterViewInit, OnDestroy {
   private startPos = 0;
   private startSize = 0;
   private containerSize = 0;
-
-  ngAfterViewInit(): void {
-    // Initial setup if needed
-  }
 
   ngOnDestroy(): void {
     this.removeListeners();

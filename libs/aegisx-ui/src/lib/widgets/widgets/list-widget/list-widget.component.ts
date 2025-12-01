@@ -53,7 +53,10 @@ import {
             <div
               class="ax-list-widget__item"
               [class.ax-list-widget__item--clickable]="mergedConfig().clickable"
+              [attr.tabindex]="mergedConfig().clickable ? 0 : null"
+              [attr.role]="mergedConfig().clickable ? 'button' : null"
               (click)="onItemClick(item)"
+              (keyup.enter)="onItemClick(item)"
             >
               @if (mergedConfig().showIcons && item.icon) {
                 <div

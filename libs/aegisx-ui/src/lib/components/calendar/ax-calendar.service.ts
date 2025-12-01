@@ -112,8 +112,6 @@ export class AxCalendarService {
    * When used via factory, HttpClient is passed directly.
    */
   constructor(http?: HttpClient) {
-    // Use provided http or fall back to injection
-     
     this.http = http || inject(HttpClient);
   }
 
