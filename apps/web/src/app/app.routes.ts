@@ -8,8 +8,8 @@ import { AuthGuard, GuestGuard } from './core/auth';
  * ┌─────────────────────────────────────────────────────────────────┐
  * │ Route Pattern        │ Layout Type      │ Description           │
  * ├─────────────────────────────────────────────────────────────────┤
- * │ /login, /register    │ No Layout        │ Auth pages (guest)    │
- * │ /portal              │ Standalone       │ App launcher portal   │
+ * │ /login, /register    │ Empty Layout     │ Auth pages (guest)    │
+ * │ /portal              │ Enterprise Shell │ App launcher portal   │
  * │ /inventory/*         │ Enterprise Shell │ Inventory feature app │
  * │ /system/*            │ Enterprise Shell │ System admin app      │
  * │ /4xx, /5xx           │ No Layout        │ Error pages           │
@@ -17,45 +17,52 @@ import { AuthGuard, GuestGuard } from './core/auth';
  */
 export const appRoutes: Route[] = [
   // ============================================
-  // Authentication Routes (No Layout - Guest Only)
+  // Authentication Routes (Empty Layout - Guest Only)
   // ============================================
   {
-    path: 'login',
+    path: '',
     loadComponent: () =>
-      import('./pages/auth/login.page').then((m) => m.LoginPage),
-    canActivate: [GuestGuard],
-  },
-  {
-    path: 'forgot-password',
-    loadComponent: () =>
-      import('./pages/auth/forgot-password.page').then(
-        (m) => m.ForgotPasswordPage,
+      import('./features/auth/auth-shell.component').then(
+        (m) => m.AuthShellComponent,
       ),
     canActivate: [GuestGuard],
-  },
-  {
-    path: 'register',
-    loadComponent: () =>
-      import('./pages/auth/register.page').then((m) => m.RegisterPage),
-    canActivate: [GuestGuard],
-  },
-  {
-    path: 'reset-password',
-    loadComponent: () =>
-      import('./pages/auth/reset-password.page').then(
-        (m) => m.ResetPasswordPage,
-      ),
-    canActivate: [GuestGuard],
-  },
-  {
-    path: 'verify-email',
-    loadComponent: () =>
-      import('./pages/auth/verify-email.page').then((m) => m.VerifyEmailPage),
-    canActivate: [GuestGuard],
+    children: [
+      {
+        path: 'login',
+        loadComponent: () =>
+          import('./pages/auth/login.page').then((m) => m.LoginPage),
+      },
+      {
+        path: 'forgot-password',
+        loadComponent: () =>
+          import('./pages/auth/forgot-password.page').then(
+            (m) => m.ForgotPasswordPage,
+          ),
+      },
+      {
+        path: 'register',
+        loadComponent: () =>
+          import('./pages/auth/register.page').then((m) => m.RegisterPage),
+      },
+      {
+        path: 'reset-password',
+        loadComponent: () =>
+          import('./pages/auth/reset-password.page').then(
+            (m) => m.ResetPasswordPage,
+          ),
+      },
+      {
+        path: 'verify-email',
+        loadComponent: () =>
+          import('./pages/auth/verify-email.page').then(
+            (m) => m.VerifyEmailPage,
+          ),
+      },
+    ],
   },
 
   // ============================================
-  // Portal (Standalone Layout)
+  // Portal (Enterprise Shell - Standalone Page)
   // ============================================
   {
     path: 'portal',
