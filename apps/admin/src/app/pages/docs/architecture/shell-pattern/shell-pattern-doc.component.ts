@@ -1,10 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatDividerModule } from '@angular/material/divider';
 import { RouterLink } from '@angular/router';
 import { DocHeaderComponent } from '../../../../components/docs/doc-header/doc-header.component';
 import { CodeTabsComponent } from '../../../../components/docs/code-tabs/code-tabs.component';
@@ -16,18 +13,15 @@ import { CodeTab } from '../../../../types/docs.types';
   standalone: true,
   imports: [
     CommonModule,
-    MatCardModule,
     MatButtonModule,
     MatIconModule,
-    MatTabsModule,
-    MatDividerModule,
     RouterLink,
     DocHeaderComponent,
     CodeTabsComponent,
     PropsTableComponent,
   ],
   template: `
-    <div class="docs-page">
+    <article class="docs-article">
       <!-- Header -->
       <ax-doc-header
         title="Shell Pattern & Routing"
@@ -36,348 +30,284 @@ import { CodeTab } from '../../../../types/docs.types';
       />
 
       <!-- Overview -->
-      <mat-card class="card-section">
-        <mat-card-header>
-          <mat-card-title>
-            <h2 class="section-title">Overview</h2>
-          </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <p class="text-secondary mb-4">
-            Shell Pattern คือรูปแบบการออกแบบที่ใช้ "Shell Component"
-            เป็นตัวกลางระหว่าง Route และ Layout เพื่อจัดการ layout อย่างมีระบบ
-            ลด code ซ้ำซ้อน และง่ายต่อการ maintain
-          </p>
+      <section class="doc-section">
+        <h2 class="section-title">Overview</h2>
+        <p class="prose">
+          Shell Pattern คือรูปแบบการออกแบบที่ใช้ "Shell Component"
+          เป็นตัวกลางระหว่าง Route และ Layout เพื่อจัดการ layout อย่างมีระบบ ลด
+          code ซ้ำซ้อน และง่ายต่อการ maintain
+        </p>
 
-          <div class="feature-grid">
-            <div class="feature-item">
-              <mat-icon class="feature-icon">layers</mat-icon>
-              <h4>Separation of Concerns</h4>
-              <p>แยก Layout Logic ออกจาก Business Logic</p>
-            </div>
-            <div class="feature-item">
-              <mat-icon class="feature-icon">repeat</mat-icon>
-              <h4>DRY Principle</h4>
-              <p>Layout code อยู่ที่เดียว ไม่ต้องซ้ำทุก page</p>
-            </div>
-            <div class="feature-item">
-              <mat-icon class="feature-icon">extension</mat-icon>
-              <h4>Extensible</h4>
-              <p>เพิ่ม shared elements ได้ง่าย (logo, footer, etc.)</p>
-            </div>
-            <div class="feature-item">
-              <mat-icon class="feature-icon">security</mat-icon>
-              <h4>Route-Level Guards</h4>
-              <p>ใส่ Guards ที่ Shell level ใช้ได้กับทุก children</p>
-            </div>
+        <div class="feature-grid">
+          <div class="feature-item">
+            <mat-icon class="feature-icon">layers</mat-icon>
+            <h4>Separation of Concerns</h4>
+            <p>แยก Layout Logic ออกจาก Business Logic</p>
           </div>
-        </mat-card-content>
-      </mat-card>
+          <div class="feature-item">
+            <mat-icon class="feature-icon">repeat</mat-icon>
+            <h4>DRY Principle</h4>
+            <p>Layout code อยู่ที่เดียว ไม่ต้องซ้ำทุก page</p>
+          </div>
+          <div class="feature-item">
+            <mat-icon class="feature-icon">extension</mat-icon>
+            <h4>Extensible</h4>
+            <p>เพิ่ม shared elements ได้ง่าย (logo, footer, etc.)</p>
+          </div>
+          <div class="feature-item">
+            <mat-icon class="feature-icon">security</mat-icon>
+            <h4>Route-Level Guards</h4>
+            <p>ใส่ Guards ที่ Shell level ใช้ได้กับทุก children</p>
+          </div>
+        </div>
+      </section>
 
       <!-- Architecture Diagram -->
-      <mat-card class="card-section">
-        <mat-card-header>
-          <mat-card-title>
-            <h2 class="section-title">Architecture Diagram</h2>
-          </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="architecture-diagram">
-            <div class="diagram-row">
-              <div class="diagram-box router">
-                <span class="box-label">Angular Router</span>
-                <span class="box-detail">matches /login</span>
-              </div>
-            </div>
-            <div class="diagram-arrow">
-              <mat-icon>arrow_downward</mat-icon>
-            </div>
-            <div class="diagram-row">
-              <div class="diagram-box shell">
-                <span class="box-label">Shell Component</span>
-                <span class="box-detail">AuthShellComponent</span>
-              </div>
-            </div>
-            <div class="diagram-arrow">
-              <mat-icon>arrow_downward</mat-icon>
-            </div>
-            <div class="diagram-row">
-              <div class="diagram-box layout">
-                <span class="box-label">Layout Component</span>
-                <span class="box-detail">EmptyLayoutComponent</span>
-              </div>
-            </div>
-            <div class="diagram-arrow">
-              <mat-icon>arrow_downward</mat-icon>
-            </div>
-            <div class="diagram-row">
-              <div class="diagram-box outlet">
-                <span class="box-label">&lt;router-outlet&gt;</span>
-                <span class="box-detail">renders children</span>
-              </div>
-            </div>
-            <div class="diagram-arrow">
-              <mat-icon>arrow_downward</mat-icon>
-            </div>
-            <div class="diagram-row">
-              <div class="diagram-box page">
-                <span class="box-label">Page Component</span>
-                <span class="box-detail">LoginPage</span>
-              </div>
+      <section class="doc-section">
+        <h2 class="section-title">Architecture Diagram</h2>
+        <div class="architecture-diagram">
+          <div class="diagram-row">
+            <div class="diagram-box router">
+              <span class="box-label">Angular Router</span>
+              <span class="box-detail">matches /login</span>
             </div>
           </div>
-        </mat-card-content>
-      </mat-card>
+          <div class="diagram-arrow">
+            <mat-icon>arrow_downward</mat-icon>
+          </div>
+          <div class="diagram-row">
+            <div class="diagram-box shell">
+              <span class="box-label">Shell Component</span>
+              <span class="box-detail">AuthShellComponent</span>
+            </div>
+          </div>
+          <div class="diagram-arrow">
+            <mat-icon>arrow_downward</mat-icon>
+          </div>
+          <div class="diagram-row">
+            <div class="diagram-box layout">
+              <span class="box-label">Layout Component</span>
+              <span class="box-detail">EmptyLayoutComponent</span>
+            </div>
+          </div>
+          <div class="diagram-arrow">
+            <mat-icon>arrow_downward</mat-icon>
+          </div>
+          <div class="diagram-row">
+            <div class="diagram-box outlet">
+              <span class="box-label">&lt;router-outlet&gt;</span>
+              <span class="box-detail">renders children</span>
+            </div>
+          </div>
+          <div class="diagram-arrow">
+            <mat-icon>arrow_downward</mat-icon>
+          </div>
+          <div class="diagram-row">
+            <div class="diagram-box page">
+              <span class="box-label">Page Component</span>
+              <span class="box-detail">LoginPage</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <!-- Shell vs Page -->
-      <mat-card class="card-section">
-        <mat-card-header>
-          <mat-card-title>
-            <h2 class="section-title">Shell vs Page Component</h2>
-          </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <ax-props-table [properties]="shellVsPageProps" />
-        </mat-card-content>
-      </mat-card>
+      <section class="doc-section">
+        <h2 class="section-title">Shell vs Page Component</h2>
+        <ax-props-table [properties]="shellVsPageProps" />
+      </section>
 
       <!-- Route Patterns -->
-      <mat-card class="card-section">
-        <mat-card-header>
-          <mat-card-title>
-            <h2 class="section-title">Route Configuration Patterns</h2>
-          </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <h3 class="subsection-title">
-            Pattern 1: Shell with Children (Recommended)
-          </h3>
-          <p class="text-secondary mb-4">
-            Shell เป็น parent route พร้อม children routes ที่ render ใน
-            router-outlet
-          </p>
-          <ax-code-tabs [tabs]="shellWithChildrenCode" />
+      <section class="doc-section">
+        <h2 class="section-title">Route Configuration Patterns</h2>
 
-          <h3 class="subsection-title mt-6">Pattern 2: Standalone Page</h3>
-          <p class="text-secondary mb-4">
-            สำหรับ pages ที่จัดการ layout เองภายใน component
-          </p>
-          <ax-code-tabs [tabs]="standalonePageCode" />
+        <h3 class="subsection-title">
+          Pattern 1: Shell with Children (Recommended)
+        </h3>
+        <p class="prose">
+          Shell เป็น parent route พร้อม children routes ที่ render ใน
+          router-outlet
+        </p>
+        <ax-code-tabs [tabs]="shellWithChildrenCode" />
 
-          <h3 class="subsection-title mt-6">
-            Pattern 3: loadChildren for Feature Modules
-          </h3>
-          <p class="text-secondary mb-4">
-            สำหรับ feature modules ที่มีหลาย routes
-          </p>
-          <ax-code-tabs [tabs]="loadChildrenCode" />
-        </mat-card-content>
-      </mat-card>
+        <h3 class="subsection-title">Pattern 2: Standalone Page</h3>
+        <p class="prose">สำหรับ pages ที่จัดการ layout เองภายใน component</p>
+        <ax-code-tabs [tabs]="standalonePageCode" />
+
+        <h3 class="subsection-title">
+          Pattern 3: loadChildren for Feature Modules
+        </h3>
+        <p class="prose">สำหรับ feature modules ที่มีหลาย routes</p>
+        <ax-code-tabs [tabs]="loadChildrenCode" />
+      </section>
 
       <!-- Implementation Guide -->
-      <mat-card class="card-section">
-        <mat-card-header>
-          <mat-card-title>
-            <h2 class="section-title">Implementation Guide</h2>
-          </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <h3 class="subsection-title">Step 1: Create Shell Component</h3>
-          <ax-code-tabs [tabs]="shellComponentCode" />
+      <section class="doc-section">
+        <h2 class="section-title">Implementation Guide</h2>
 
-          <h3 class="subsection-title mt-6">
-            Step 2: Configure Routes with Children
-          </h3>
-          <ax-code-tabs [tabs]="routeConfigCode" />
+        <h3 class="subsection-title">Step 1: Create Shell Component</h3>
+        <ax-code-tabs [tabs]="shellComponentCode" />
 
-          <h3 class="subsection-title mt-6">Step 3: Create Page Components</h3>
-          <ax-code-tabs [tabs]="pageComponentCode" />
-        </mat-card-content>
-      </mat-card>
+        <h3 class="subsection-title">Step 2: Configure Routes with Children</h3>
+        <ax-code-tabs [tabs]="routeConfigCode" />
+
+        <h3 class="subsection-title">Step 3: Create Page Components</h3>
+        <ax-code-tabs [tabs]="pageComponentCode" />
+      </section>
 
       <!-- Anti-Patterns -->
-      <mat-card class="card-section">
-        <mat-card-header>
-          <mat-card-title>
-            <h2 class="section-title">Anti-Patterns</h2>
-          </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <h3 class="subsection-title">1. Shell without Children</h3>
-          <p class="text-secondary mb-4">
-            Shell มี router-outlet แต่ไม่มี children routes = outlet ว่างเปล่า
-          </p>
-          <ax-code-tabs [tabs]="antiPattern1Code" />
+      <section class="doc-section">
+        <h2 class="section-title">Anti-Patterns</h2>
 
-          <h3 class="subsection-title mt-6">2. Layout in Every Page</h3>
-          <p class="text-secondary mb-4">
-            ใส่ Layout component ซ้ำในทุก page = code ซ้ำซ้อน
-          </p>
-          <ax-code-tabs [tabs]="antiPattern2Code" />
+        <h3 class="subsection-title">1. Shell without Children</h3>
+        <p class="prose">
+          Shell มี router-outlet แต่ไม่มี children routes = outlet ว่างเปล่า
+        </p>
+        <ax-code-tabs [tabs]="antiPattern1Code" />
 
-          <h3 class="subsection-title mt-6">3. Double router-outlet</h3>
-          <p class="text-secondary mb-4">
-            ทั้ง Shell และ Layout มี router-outlet = render ซ้ำ/ผิดที่
-          </p>
-          <ax-code-tabs [tabs]="antiPattern3Code" />
-        </mat-card-content>
-      </mat-card>
+        <h3 class="subsection-title">2. Layout in Every Page</h3>
+        <p class="prose">ใส่ Layout component ซ้ำในทุก page = code ซ้ำซ้อน</p>
+        <ax-code-tabs [tabs]="antiPattern2Code" />
+
+        <h3 class="subsection-title">3. Double router-outlet</h3>
+        <p class="prose">
+          ทั้ง Shell และ Layout มี router-outlet = render ซ้ำ/ผิดที่
+        </p>
+        <ax-code-tabs [tabs]="antiPattern3Code" />
+      </section>
 
       <!-- Available Layouts -->
-      <mat-card class="card-section">
-        <mat-card-header>
-          <mat-card-title>
-            <h2 class="section-title">Available Layout Components</h2>
-          </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <ax-props-table [properties]="layoutProps" />
-        </mat-card-content>
-      </mat-card>
+      <section class="doc-section">
+        <h2 class="section-title">Available Layout Components</h2>
+        <ax-props-table [properties]="layoutProps" />
+      </section>
 
       <!-- Best Practices -->
-      <mat-card class="card-section">
-        <mat-card-header>
-          <mat-card-title>
-            <h2 class="section-title">Best Practices</h2>
-          </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="usage-comparison">
-            <div class="usage-column do">
-              <h4><mat-icon>check_circle</mat-icon> Do:</h4>
-              <ul>
-                <li>One Shell per domain (AuthShell, SystemShell)</li>
-                <li>ใส่ Guards ที่ Shell level</li>
-                <li>ใช้ children routes สำหรับ pages</li>
-                <li>Shell component ทำแค่ layout logic</li>
-                <li>ใช้ path: '' สำหรับ default child</li>
-                <li>ตั้งชื่อชัดเจน: XxxShellComponent</li>
-              </ul>
-            </div>
-            <div class="usage-column dont">
-              <h4><mat-icon>cancel</mat-icon> Don't:</h4>
-              <ul>
-                <li>Shell without children routes</li>
-                <li>Double router-outlet</li>
-                <li>Layout ซ้ำในทุก page component</li>
-                <li>Business logic ใน Shell</li>
-                <li>Guards ซ้ำในทุก child route</li>
-                <li>ใช้ Shell component เป็น page</li>
-              </ul>
-            </div>
+      <section class="doc-section">
+        <h2 class="section-title">Best Practices</h2>
+        <div class="usage-comparison">
+          <div class="usage-column do">
+            <h4><mat-icon>check_circle</mat-icon> Do:</h4>
+            <ul>
+              <li>One Shell per domain (AuthShell, SystemShell)</li>
+              <li>ใส่ Guards ที่ Shell level</li>
+              <li>ใช้ children routes สำหรับ pages</li>
+              <li>Shell component ทำแค่ layout logic</li>
+              <li>ใช้ path: '' สำหรับ default child</li>
+              <li>ตั้งชื่อชัดเจน: XxxShellComponent</li>
+            </ul>
           </div>
-        </mat-card-content>
-      </mat-card>
+          <div class="usage-column dont">
+            <h4><mat-icon>cancel</mat-icon> Don't:</h4>
+            <ul>
+              <li>Shell without children routes</li>
+              <li>Double router-outlet</li>
+              <li>Layout ซ้ำในทุก page component</li>
+              <li>Business logic ใน Shell</li>
+              <li>Guards ซ้ำในทุก child route</li>
+              <li>ใช้ Shell component เป็น page</li>
+            </ul>
+          </div>
+        </div>
+      </section>
 
       <!-- Checklist -->
-      <mat-card class="card-section">
-        <mat-card-header>
-          <mat-card-title>
-            <h2 class="section-title">Implementation Checklist</h2>
-          </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="checklist-grid">
-            <div class="checklist-item">
-              <mat-icon class="checklist-icon">check_box</mat-icon>
-              <span>Shell route has <code>loadComponent</code></span>
-            </div>
-            <div class="checklist-item">
-              <mat-icon class="checklist-icon">check_box</mat-icon>
-              <span>Shell route has <code>children</code> array</span>
-            </div>
-            <div class="checklist-item">
-              <mat-icon class="checklist-icon">check_box</mat-icon>
-              <span>Default child has <code>path: ''</code></span>
-            </div>
-            <div class="checklist-item">
-              <mat-icon class="checklist-icon">check_box</mat-icon>
-              <span>Guards at Shell level only</span>
-            </div>
-            <div class="checklist-item">
-              <mat-icon class="checklist-icon">check_box</mat-icon>
-              <span>No duplicate router-outlet</span>
-            </div>
-            <div class="checklist-item">
-              <mat-icon class="checklist-icon">check_box</mat-icon>
-              <span>Layout has router-outlet</span>
-            </div>
+      <section class="doc-section">
+        <h2 class="section-title">Implementation Checklist</h2>
+        <div class="checklist-grid">
+          <div class="checklist-item">
+            <mat-icon class="checklist-icon">check_box</mat-icon>
+            <span>Shell route has <code>loadComponent</code></span>
           </div>
-        </mat-card-content>
-      </mat-card>
+          <div class="checklist-item">
+            <mat-icon class="checklist-icon">check_box</mat-icon>
+            <span>Shell route has <code>children</code> array</span>
+          </div>
+          <div class="checklist-item">
+            <mat-icon class="checklist-icon">check_box</mat-icon>
+            <span>Default child has <code>path: ''</code></span>
+          </div>
+          <div class="checklist-item">
+            <mat-icon class="checklist-icon">check_box</mat-icon>
+            <span>Guards at Shell level only</span>
+          </div>
+          <div class="checklist-item">
+            <mat-icon class="checklist-icon">check_box</mat-icon>
+            <span>No duplicate router-outlet</span>
+          </div>
+          <div class="checklist-item">
+            <mat-icon class="checklist-icon">check_box</mat-icon>
+            <span>Layout has router-outlet</span>
+          </div>
+        </div>
+      </section>
 
       <!-- Related -->
-      <mat-card class="card-section">
-        <mat-card-header>
-          <mat-card-title>
-            <h2 class="section-title">Related Documentation</h2>
-          </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="related-links">
-            <a mat-stroked-button routerLink="/docs/architecture/multi-app">
-              <mat-icon>apps</mat-icon>
-              Multi-App Architecture
-            </a>
-            <a
-              mat-stroked-button
-              routerLink="/docs/components/aegisx/layout/enterprise"
-            >
-              <mat-icon>web</mat-icon>
-              Enterprise Layout
-            </a>
-            <a
-              mat-stroked-button
-              routerLink="/docs/components/aegisx/layout/empty"
-            >
-              <mat-icon>crop_free</mat-icon>
-              Empty Layout
-            </a>
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </div>
+      <section class="doc-section">
+        <h2 class="section-title">Related Documentation</h2>
+        <div class="related-links">
+          <a mat-stroked-button routerLink="/docs/architecture/multi-app">
+            <mat-icon>apps</mat-icon>
+            Multi-App Architecture
+          </a>
+          <a
+            mat-stroked-button
+            routerLink="/docs/components/aegisx/layout/enterprise"
+          >
+            <mat-icon>web</mat-icon>
+            Enterprise Layout
+          </a>
+          <a
+            mat-stroked-button
+            routerLink="/docs/components/aegisx/layout/empty"
+          >
+            <mat-icon>crop_free</mat-icon>
+            Empty Layout
+          </a>
+        </div>
+      </section>
+    </article>
   `,
   styles: [
     `
-      .docs-page {
-        max-width: 1200px;
+      /* Article Layout - Prose Style */
+      .docs-article {
+        max-width: 900px;
         margin: 0 auto;
-        padding: 1.5rem;
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
+        padding: 2rem 1.5rem;
       }
 
-      .card-section {
-        margin-bottom: 1rem;
+      .doc-section {
+        margin-bottom: 3rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--ax-border-default);
+
+        &:last-child {
+          border-bottom: none;
+        }
       }
 
       .section-title {
-        font-size: 1.5rem;
-        font-weight: 600;
+        font-size: 1.75rem;
+        font-weight: 700;
         color: var(--ax-text-heading);
-        margin: 0;
+        margin: 0 0 1rem 0;
+        line-height: 1.3;
       }
 
       .subsection-title {
-        font-size: 1.125rem;
+        font-size: 1.25rem;
         font-weight: 600;
         color: var(--ax-text-heading);
-        margin: 1.5rem 0 0.75rem 0;
+        margin: 2rem 0 0.75rem 0;
+        line-height: 1.4;
       }
 
-      .text-secondary {
+      .prose {
+        font-size: 1rem;
+        line-height: 1.75;
         color: var(--ax-text-secondary);
-      }
-
-      .mb-4 {
-        margin-bottom: 1rem;
-      }
-
-      .mt-6 {
-        margin-top: 1.5rem;
+        margin-bottom: 1.5rem;
       }
 
       /* Feature Grid */
