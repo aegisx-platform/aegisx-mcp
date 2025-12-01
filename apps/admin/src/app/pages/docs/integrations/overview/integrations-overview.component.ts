@@ -15,7 +15,16 @@ interface Integration {
   name: string;
   description: string;
   icon: string;
-  category: 'layout' | 'calendar' | 'charts' | 'data' | 'utils';
+  category:
+    | 'layout'
+    | 'calendar'
+    | 'charts'
+    | 'data'
+    | 'utils'
+    | 'notifications'
+    | 'code'
+    | 'media'
+    | 'editor';
   package: string;
   version: string;
   wrapper?: string;
@@ -141,6 +150,326 @@ interface Integration {
           <div class="integrations-grid">
             @for (
               integration of getByCategory('calendar');
+              track integration.id
+            ) {
+              <mat-card
+                class="integration-card"
+                [routerLink]="integration.docsUrl"
+              >
+                <mat-card-header>
+                  <div class="card-icon">
+                    <mat-icon>{{ integration.icon }}</mat-icon>
+                  </div>
+                  <mat-card-title>{{ integration.name }}</mat-card-title>
+                  <mat-card-subtitle>
+                    {{ integration.package }}
+                  </mat-card-subtitle>
+                </mat-card-header>
+                <mat-card-content>
+                  <p>{{ integration.description }}</p>
+                  <div class="card-meta">
+                    <mat-chip-set>
+                      <mat-chip [highlighted]="integration.status === 'stable'">
+                        {{ integration.status }}
+                      </mat-chip>
+                      <mat-chip>v{{ integration.version }}</mat-chip>
+                    </mat-chip-set>
+                    @if (integration.wrapper) {
+                      <div class="wrapper-badge">
+                        <mat-icon>widgets</mat-icon>
+                        <span>{{ integration.wrapper }}</span>
+                      </div>
+                    }
+                  </div>
+                </mat-card-content>
+                <mat-card-actions>
+                  <a
+                    mat-button
+                    [href]="integration.npmUrl"
+                    target="_blank"
+                    (click)="$event.stopPropagation()"
+                  >
+                    <mat-icon>open_in_new</mat-icon>
+                    NPM
+                  </a>
+                  <button mat-flat-button color="primary">
+                    <mat-icon>menu_book</mat-icon>
+                    Docs
+                  </button>
+                </mat-card-actions>
+              </mat-card>
+            }
+          </div>
+        </div>
+
+        <!-- Notifications Category -->
+        <div class="category">
+          <div class="category-header">
+            <mat-icon>notifications</mat-icon>
+            <h3>Notifications & Feedback</h3>
+          </div>
+          <p class="category-desc">
+            Toast notifications, snackbars, and user feedback components
+          </p>
+
+          <div class="integrations-grid">
+            @for (
+              integration of getByCategory('notifications');
+              track integration.id
+            ) {
+              <mat-card
+                class="integration-card"
+                [routerLink]="integration.docsUrl"
+              >
+                <mat-card-header>
+                  <div class="card-icon">
+                    <mat-icon>{{ integration.icon }}</mat-icon>
+                  </div>
+                  <mat-card-title>{{ integration.name }}</mat-card-title>
+                  <mat-card-subtitle>
+                    {{ integration.package }}
+                  </mat-card-subtitle>
+                </mat-card-header>
+                <mat-card-content>
+                  <p>{{ integration.description }}</p>
+                  <div class="card-meta">
+                    <mat-chip-set>
+                      <mat-chip [highlighted]="integration.status === 'stable'">
+                        {{ integration.status }}
+                      </mat-chip>
+                      <mat-chip>v{{ integration.version }}</mat-chip>
+                    </mat-chip-set>
+                    @if (integration.wrapper) {
+                      <div class="wrapper-badge">
+                        <mat-icon>widgets</mat-icon>
+                        <span>{{ integration.wrapper }}</span>
+                      </div>
+                    }
+                  </div>
+                </mat-card-content>
+                <mat-card-actions>
+                  <a
+                    mat-button
+                    [href]="integration.npmUrl"
+                    target="_blank"
+                    (click)="$event.stopPropagation()"
+                  >
+                    <mat-icon>open_in_new</mat-icon>
+                    NPM
+                  </a>
+                  <button mat-flat-button color="primary">
+                    <mat-icon>menu_book</mat-icon>
+                    Docs
+                  </button>
+                </mat-card-actions>
+              </mat-card>
+            }
+          </div>
+        </div>
+
+        <!-- Code & Syntax Category -->
+        <div class="category">
+          <div class="category-header">
+            <mat-icon>code</mat-icon>
+            <h3>Code & Syntax</h3>
+          </div>
+          <p class="category-desc">
+            Syntax highlighting and code display components
+          </p>
+
+          <div class="integrations-grid">
+            @for (integration of getByCategory('code'); track integration.id) {
+              <mat-card
+                class="integration-card"
+                [routerLink]="integration.docsUrl"
+              >
+                <mat-card-header>
+                  <div class="card-icon">
+                    <mat-icon>{{ integration.icon }}</mat-icon>
+                  </div>
+                  <mat-card-title>{{ integration.name }}</mat-card-title>
+                  <mat-card-subtitle>
+                    {{ integration.package }}
+                  </mat-card-subtitle>
+                </mat-card-header>
+                <mat-card-content>
+                  <p>{{ integration.description }}</p>
+                  <div class="card-meta">
+                    <mat-chip-set>
+                      <mat-chip [highlighted]="integration.status === 'stable'">
+                        {{ integration.status }}
+                      </mat-chip>
+                      <mat-chip>v{{ integration.version }}</mat-chip>
+                    </mat-chip-set>
+                    @if (integration.wrapper) {
+                      <div class="wrapper-badge">
+                        <mat-icon>widgets</mat-icon>
+                        <span>{{ integration.wrapper }}</span>
+                      </div>
+                    }
+                  </div>
+                </mat-card-content>
+                <mat-card-actions>
+                  <a
+                    mat-button
+                    [href]="integration.npmUrl"
+                    target="_blank"
+                    (click)="$event.stopPropagation()"
+                  >
+                    <mat-icon>open_in_new</mat-icon>
+                    NPM
+                  </a>
+                  <button mat-flat-button color="primary">
+                    <mat-icon>menu_book</mat-icon>
+                    Docs
+                  </button>
+                </mat-card-actions>
+              </mat-card>
+            }
+          </div>
+        </div>
+
+        <!-- Charts & Data Category -->
+        <div class="category">
+          <div class="category-header">
+            <mat-icon>bar_chart</mat-icon>
+            <h3>Charts & Data Visualization</h3>
+          </div>
+          <p class="category-desc">
+            Powerful charting libraries for creating interactive data
+            visualizations
+          </p>
+
+          <div class="integrations-grid">
+            @for (
+              integration of getByCategory('charts');
+              track integration.id
+            ) {
+              <mat-card
+                class="integration-card"
+                [routerLink]="integration.docsUrl"
+              >
+                <mat-card-header>
+                  <div class="card-icon">
+                    <mat-icon>{{ integration.icon }}</mat-icon>
+                  </div>
+                  <mat-card-title>{{ integration.name }}</mat-card-title>
+                  <mat-card-subtitle>
+                    {{ integration.package }}
+                  </mat-card-subtitle>
+                </mat-card-header>
+                <mat-card-content>
+                  <p>{{ integration.description }}</p>
+                  <div class="card-meta">
+                    <mat-chip-set>
+                      <mat-chip [highlighted]="integration.status === 'stable'">
+                        {{ integration.status }}
+                      </mat-chip>
+                      <mat-chip>v{{ integration.version }}</mat-chip>
+                    </mat-chip-set>
+                    @if (integration.wrapper) {
+                      <div class="wrapper-badge">
+                        <mat-icon>widgets</mat-icon>
+                        <span>{{ integration.wrapper }}</span>
+                      </div>
+                    }
+                  </div>
+                </mat-card-content>
+                <mat-card-actions>
+                  <a
+                    mat-button
+                    [href]="integration.npmUrl"
+                    target="_blank"
+                    (click)="$event.stopPropagation()"
+                  >
+                    <mat-icon>open_in_new</mat-icon>
+                    NPM
+                  </a>
+                  <button mat-flat-button color="primary">
+                    <mat-icon>menu_book</mat-icon>
+                    Docs
+                  </button>
+                </mat-card-actions>
+              </mat-card>
+            }
+          </div>
+        </div>
+
+        <!-- Media & Files Category -->
+        <div class="category">
+          <div class="category-header">
+            <mat-icon>perm_media</mat-icon>
+            <h3>Media & Documents</h3>
+          </div>
+          <p class="category-desc">
+            Components for handling documents, images, and media files
+          </p>
+
+          <div class="integrations-grid">
+            @for (integration of getByCategory('media'); track integration.id) {
+              <mat-card
+                class="integration-card"
+                [routerLink]="integration.docsUrl"
+              >
+                <mat-card-header>
+                  <div class="card-icon">
+                    <mat-icon>{{ integration.icon }}</mat-icon>
+                  </div>
+                  <mat-card-title>{{ integration.name }}</mat-card-title>
+                  <mat-card-subtitle>
+                    {{ integration.package }}
+                  </mat-card-subtitle>
+                </mat-card-header>
+                <mat-card-content>
+                  <p>{{ integration.description }}</p>
+                  <div class="card-meta">
+                    <mat-chip-set>
+                      <mat-chip [highlighted]="integration.status === 'stable'">
+                        {{ integration.status }}
+                      </mat-chip>
+                      <mat-chip>v{{ integration.version }}</mat-chip>
+                    </mat-chip-set>
+                    @if (integration.wrapper) {
+                      <div class="wrapper-badge">
+                        <mat-icon>widgets</mat-icon>
+                        <span>{{ integration.wrapper }}</span>
+                      </div>
+                    }
+                  </div>
+                </mat-card-content>
+                <mat-card-actions>
+                  <a
+                    mat-button
+                    [href]="integration.npmUrl"
+                    target="_blank"
+                    (click)="$event.stopPropagation()"
+                  >
+                    <mat-icon>open_in_new</mat-icon>
+                    NPM
+                  </a>
+                  <button mat-flat-button color="primary">
+                    <mat-icon>menu_book</mat-icon>
+                    Docs
+                  </button>
+                </mat-card-actions>
+              </mat-card>
+            }
+          </div>
+        </div>
+
+        <!-- Code Editor Category -->
+        <div class="category">
+          <div class="category-header">
+            <mat-icon>edit_note</mat-icon>
+            <h3>Code Editors</h3>
+          </div>
+          <p class="category-desc">
+            Professional code editing with syntax highlighting and IntelliSense
+          </p>
+
+          <div class="integrations-grid">
+            @for (
+              integration of getByCategory('editor');
               track integration.id
             ) {
               <mat-card
@@ -556,6 +885,7 @@ interface Integration {
 })
 export class IntegrationsOverviewComponent {
   integrations: Integration[] = [
+    // Layout & Grid
     {
       id: 'gridster',
       name: 'Gridster',
@@ -570,6 +900,7 @@ export class IntegrationsOverviewComponent {
       npmUrl: 'https://www.npmjs.com/package/angular-gridster2',
       status: 'stable',
     },
+    // Calendar & Scheduling
     {
       id: 'fullcalendar',
       name: 'FullCalendar',
@@ -584,6 +915,50 @@ export class IntegrationsOverviewComponent {
       npmUrl: 'https://www.npmjs.com/package/@fullcalendar/angular',
       status: 'beta',
     },
+    // Notifications & Feedback
+    {
+      id: 'ngx-toastr',
+      name: 'ngx-toastr',
+      description:
+        'Toast notification library with stacking, positioning, progress bar, and customizable animations.',
+      icon: 'layers',
+      category: 'notifications',
+      package: 'ngx-toastr',
+      version: '19.1.0',
+      wrapper: 'AxToastService',
+      docsUrl: '/docs/components/aegisx/feedback/toast',
+      npmUrl: 'https://www.npmjs.com/package/ngx-toastr',
+      status: 'stable',
+    },
+    {
+      id: 'mat-snackbar',
+      name: 'MatSnackBar',
+      description:
+        'Angular Material snackbar for simple notifications with action buttons following Material Design 3.',
+      icon: 'crop_landscape',
+      category: 'notifications',
+      package: '@angular/material',
+      version: '18.x',
+      wrapper: 'AxToastService',
+      docsUrl: '/docs/components/aegisx/feedback/toast',
+      npmUrl: 'https://material.angular.io/components/snack-bar',
+      status: 'stable',
+    },
+    // Code & Syntax
+    {
+      id: 'highlightjs',
+      name: 'Highlight.js',
+      description:
+        'Syntax highlighting for 190+ languages with customizable themes. Used for code preview in documentation.',
+      icon: 'data_object',
+      category: 'code',
+      package: 'highlight.js',
+      version: '11.x',
+      docsUrl: '/docs/patterns/code-preview',
+      npmUrl: 'https://www.npmjs.com/package/highlight.js',
+      status: 'stable',
+    },
+    // Utilities
     {
       id: 'qrcode',
       name: 'QR Code',
@@ -609,6 +984,74 @@ export class IntegrationsOverviewComponent {
       wrapper: 'AxSignaturePadComponent',
       docsUrl: '/docs/integrations/signature-pad',
       npmUrl: 'https://www.npmjs.com/package/signature_pad',
+      status: 'stable',
+    },
+    // Charts & Data Visualization
+    {
+      id: 'ngx-charts',
+      name: 'NGX Charts',
+      description:
+        'Declarative charting framework using D3.js. Line, bar, pie, area, gauge charts with animations.',
+      icon: 'bar_chart',
+      category: 'charts',
+      package: '@swimlane/ngx-charts',
+      version: '23.1.0',
+      docsUrl: '/docs/integrations/ngx-charts',
+      npmUrl: 'https://www.npmjs.com/package/@swimlane/ngx-charts',
+      status: 'stable',
+    },
+    {
+      id: 'chartjs',
+      name: 'Chart.js',
+      description:
+        'Simple yet flexible JavaScript charting. Canvas-based rendering with excellent performance for large datasets.',
+      icon: 'ssid_chart',
+      category: 'charts',
+      package: 'chart.js',
+      version: '4.4.x',
+      docsUrl: '/docs/integrations/chartjs',
+      npmUrl: 'https://www.npmjs.com/package/chart.js',
+      status: 'stable',
+    },
+    // Media & Documents
+    {
+      id: 'pdf-viewer',
+      name: 'PDF Viewer',
+      description:
+        'Powerful PDF viewer based on Mozilla PDF.js. View, search, print, and annotate PDF documents.',
+      icon: 'picture_as_pdf',
+      category: 'media',
+      package: 'ngx-extended-pdf-viewer',
+      version: '21.x',
+      docsUrl: '/docs/integrations/pdf-viewer',
+      npmUrl: 'https://www.npmjs.com/package/ngx-extended-pdf-viewer',
+      status: 'stable',
+    },
+    {
+      id: 'image-cropper',
+      name: 'Image Cropper',
+      description:
+        'Crop, rotate, and resize images before upload. Perfect for avatars, cover images, and product photos.',
+      icon: 'crop',
+      category: 'media',
+      package: 'ngx-image-cropper',
+      version: '8.x',
+      docsUrl: '/docs/integrations/image-cropper',
+      npmUrl: 'https://www.npmjs.com/package/ngx-image-cropper',
+      status: 'stable',
+    },
+    // Code Editors
+    {
+      id: 'monaco-editor',
+      name: 'Monaco Editor',
+      description:
+        "VS Code's powerful code editor. Syntax highlighting, IntelliSense, and diff view for 40+ languages.",
+      icon: 'code',
+      category: 'editor',
+      package: 'ngx-monaco-editor-v2',
+      version: '2.x',
+      docsUrl: '/docs/integrations/monaco-editor',
+      npmUrl: 'https://www.npmjs.com/package/ngx-monaco-editor-v2',
       status: 'stable',
     },
   ];
