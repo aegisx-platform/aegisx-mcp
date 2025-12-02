@@ -1,21 +1,21 @@
-import { Component, computed, inject, signal, OnInit } from '@angular/core';
-import { Router, RouterModule, NavigationEnd } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import {
   AxCompactLayoutComponent,
-  AxNavigationItem,
-  AxLayoutSwitcherComponent,
-  LayoutType,
   AxDocsLayoutComponent,
+  AxLayoutSwitcherComponent,
+  AxNavigationItem,
   AxSplashScreenComponent,
+  LayoutType,
   SplashScreenService,
   SplashScreenStage,
 } from '@aegisx/ui';
-import { TremorThemeSwitcherComponent } from './components/tremor-theme-switcher.component';
+import { CommonModule } from '@angular/common';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { filter, map, startWith } from 'rxjs/operators';
+import { TremorThemeSwitcherComponent } from './components/tremor-theme-switcher.component';
 
 @Component({
   imports: [
@@ -64,7 +64,8 @@ export class App implements OnInit {
       !url.startsWith('/widget-demo') &&
       !url.startsWith('/gridster-demo') &&
       !url.startsWith('/gridster-poc') &&
-      !url.startsWith('/playground/pages/dashboard')
+      !url.startsWith('/playground/pages/dashboard') &&
+      !url.startsWith('/tools')
     );
   });
 
