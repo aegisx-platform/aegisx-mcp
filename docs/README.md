@@ -59,6 +59,23 @@ API specifications and response standards.
 - **[TypeBox Schema Standard](./api/typebox-schema-standard.md)** - Schema validation patterns
 - **[Response Patterns](./api/response-patterns-examples.md)** - Implementation examples
 
+### 🎨 [AegisX UI Library](./ui/)
+
+Enterprise Angular UI library documentation.
+
+- **[Git Workflow](./ui/GIT_WORKFLOW.md)** - Git subtree sync and separate repository
+- **[NPM Publishing](./ui/NPM_PUBLISHING.md)** - Publishing to npm registry
+- **[Theme System Standard](./ui/THEME_SYSTEM_STANDARD.md)** - Theme system documentation
+- **[Token Reference](./ui/TOKEN_REFERENCE.md)** - Design token reference
+
+### 🤖 [CRUD Generator](./crud-generator/)
+
+Automatic CRUD API generation tool.
+
+- **[Quick Reference](./crud-generator/QUICK_REFERENCE.md)** - Command reference and examples
+- **[Git Workflow](./crud-generator/GIT_WORKFLOW.md)** - Version release & NPM publishing
+- **[Command Reference](./crud-generator/COMMAND_REFERENCE.md)** - CLI commands
+
 ### 📚 [References](./references/)
 
 Quick reference guides and standards.

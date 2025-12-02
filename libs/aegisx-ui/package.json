@@ -2,6 +2,16 @@
   "name": "@aegisx/ui",
   "version": "0.1.0",
   "description": "Enterprise Angular UI library with layouts, components, and services built on Angular Material and TailwindCSS",
+  "author": "AegisX Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aegisx-platform/aegisx-ui"
+  },
+  "homepage": "https://github.com/aegisx-platform/aegisx-ui#readme",
+  "bugs": {
+    "url": "https://github.com/aegisx-platform/aegisx-ui/issues"
+  },
   "keywords": [
     "angular",
     "ui",
@@ -9,7 +19,10 @@
     "material",
     "tailwind",
     "enterprise",
-    "aegisx"
+    "aegisx",
+    "angular-material",
+    "tailwindcss",
+    "design-system"
   ],
   "exports": {
     ".": {

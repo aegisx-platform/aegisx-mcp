@@ -28,11 +28,19 @@ import {
 
 // ============ Types ============
 
+/**
+ * M3 Extended Tonal Palette (18 tones like Google Material Theme Builder)
+ * Tones: 100, 99, 98, 95, 90, 80, 70, 60, 50, 40, 35, 30, 25, 20, 15, 10, 5, 0
+ */
 export interface M3TonalPalette {
   0: string;
+  5: string;
   10: string;
+  15: string;
   20: string;
+  25: string;
   30: string;
+  35: string;
   40: string;
   50: string;
   60: string;
@@ -40,11 +48,22 @@ export interface M3TonalPalette {
   80: string;
   90: string;
   95: string;
+  98: string;
   99: string;
   100: string;
 }
 
 export type ToneValue = keyof M3TonalPalette;
+
+/** Standard tones for compact view */
+export const STANDARD_TONES: ToneValue[] = [
+  0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 99, 100,
+];
+
+/** Extended tones for full palette view (Google-style) */
+export const EXTENDED_TONES: ToneValue[] = [
+  100, 99, 98, 95, 90, 80, 70, 60, 50, 40, 35, 30, 25, 20, 15, 10, 5, 0,
+];
 
 export interface M3CorePalettes {
   primary: M3TonalPalette;
@@ -120,15 +139,16 @@ export interface M3ColorSchemeSet {
 
 /**
  * Generate M3 Tonal Palette from a seed color
- * Creates 13 tones from 0 (black) to 100 (white)
+ * Creates 18 tones like Google's Material Theme Builder
+ * Tones: 0, 5, 10, 15, 20, 25, 30, 35, 40, 50, 60, 70, 80, 90, 95, 98, 99, 100
  */
 export function generateTonalPalette(seedHex: string): M3TonalPalette {
   const rgb = hexToColor(seedHex);
   const hsl = rgbToHsl(rgb);
 
-  // M3 tone levels
+  // M3 extended tone levels (Google-style 18 tones)
   const tones: ToneValue[] = [
-    0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 99, 100,
+    0, 5, 10, 15, 20, 25, 30, 35, 40, 50, 60, 70, 80, 90, 95, 98, 99, 100,
   ];
   const palette: Partial<M3TonalPalette> = {};
 

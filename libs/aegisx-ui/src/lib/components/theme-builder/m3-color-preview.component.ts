@@ -20,6 +20,10 @@ import {
   type M3ColorScheme,
   type ToneValue,
 } from './m3-color.util';
+import {
+  AxCodeTabsComponent,
+  type CodeTab,
+} from '../code-tabs/code-tabs.component';
 
 type ViewMode = 'scheme' | 'palettes';
 type SchemeMode = 'light' | 'dark';
@@ -33,6 +37,7 @@ type SchemeMode = 'light' | 'dark';
     MatIconModule,
     MatTooltipModule,
     MatButtonToggleModule,
+    AxCodeTabsComponent,
   ],
   template: `
     <div class="m3-preview">
@@ -68,7 +73,12 @@ type SchemeMode = 'light' | 'dark';
 
       <!-- Scheme View (Key Colors) -->
       @if (viewMode() === 'scheme') {
-        <div class="scheme-view">
+        <div
+          class="scheme-view"
+          [class.light-mode]="schemeMode() === 'light'"
+          [class.dark-mode]="schemeMode() === 'dark'"
+          [style.background]="currentScheme().surface"
+        >
           <!-- Light/Dark Toggle -->
           <div class="mode-toggle">
             <mat-button-toggle-group
@@ -253,7 +263,7 @@ type SchemeMode = 'light' | 'dark';
 
           <!-- Surface Colors Row -->
           <div class="surface-section">
-            <h4>Surface Colors</h4>
+            <h4 [style.color]="currentScheme().onSurface">Surface Colors</h4>
             <div class="surface-row">
               <div
                 class="surface-block"
@@ -466,18 +476,30 @@ type SchemeMode = 'light' | 'dark';
 
       <!-- Export Actions -->
       <div class="export-section">
-        <button mat-stroked-button (click)="copyScheme('css')">
-          <mat-icon>content_copy</mat-icon>
-          Copy CSS Variables
-        </button>
-        <button mat-stroked-button (click)="copyScheme('scss')">
-          <mat-icon>code</mat-icon>
-          Copy SCSS Variables
-        </button>
-        <button mat-flat-button color="primary" (click)="applyToTheme()">
-          <mat-icon>check</mat-icon>
-          Apply to Theme
-        </button>
+        <div class="export-buttons">
+          <button
+            mat-stroked-button
+            (click)="showCodePreview.set(!showCodePreview())"
+          >
+            <mat-icon>{{
+              showCodePreview() ? 'visibility_off' : 'visibility'
+            }}</mat-icon>
+            {{ showCodePreview() ? 'Hide Code' : 'Preview Code' }}
+          </button>
+          <button mat-stroked-button (click)="copyScheme('css')">
+            <mat-icon>content_copy</mat-icon>
+            Copy CSS
+          </button>
+          <button mat-flat-button color="primary" (click)="applyToTheme()">
+            <mat-icon>check</mat-icon>
+            Apply to Theme
+          </button>
+        </div>
+
+        <!-- Code Preview using ax-code-tabs -->
+        @if (showCodePreview()) {
+          <ax-code-tabs [tabs]="codeTabs()"></ax-code-tabs>
+        }
       </div>
     </div>
   `,
@@ -543,6 +565,9 @@ type SchemeMode = 'light' | 'dark';
         display: flex;
         flex-direction: column;
         gap: 1.5rem;
+        padding: 1.5rem;
+        border-radius: var(--ax-radius-xl);
+        transition: background-color 0.3s ease;
       }
 
       .mode-toggle {
@@ -627,7 +652,7 @@ type SchemeMode = 'light' | 'dark';
           margin: 0 0 0.75rem;
           font-size: 0.9375rem;
           font-weight: 600;
-          color: var(--ax-text-heading);
+          transition: color 0.3s ease;
         }
       }
 
@@ -747,10 +772,16 @@ type SchemeMode = 'light' | 'dark';
       /* Export Section */
       .export-section {
         display: flex;
-        justify-content: flex-end;
-        gap: 0.75rem;
+        flex-direction: column;
+        gap: 1rem;
         padding-top: 1rem;
         border-top: 1px solid var(--ax-border-muted);
+      }
+
+      .export-buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
         flex-wrap: wrap;
 
         button {
@@ -820,6 +851,7 @@ export class AxM3ColorPreviewComponent {
   // Internal state
   viewMode = signal<ViewMode>('scheme');
   schemeMode = signal<SchemeMode>('light');
+  showCodePreview = signal<boolean>(false);
 
   // Extended tones for Google-style palette view
   readonly extendedTones: ToneValue[] = EXTENDED_TONES;
@@ -846,6 +878,24 @@ export class AxM3ColorPreviewComponent {
     return this.schemeMode() === 'light' ? schemes.light : schemes.dark;
   });
 
+  // Code tabs for preview (CSS and SCSS)
+  codeTabs = computed<CodeTab[]>(() => {
+    const scheme = this.currentScheme();
+    const mode = this.schemeMode() === 'light' ? 'Light' : 'Dark';
+    return [
+      {
+        label: `CSS (${mode})`,
+        code: this.generateExportContent(scheme, 'css'),
+        language: 'scss', // Use scss for syntax highlighting (css not in CodeLanguage type)
+      },
+      {
+        label: `SCSS (${mode})`,
+        code: this.generateExportContent(scheme, 'scss'),
+        language: 'scss',
+      },
+    ];
+  });
+
   // Get text color for a given background
   getTextColorFor(bgColor: string): string {
     const rgb = this.hexToRgb(bgColor);
@@ -868,26 +918,204 @@ export class AxM3ColorPreviewComponent {
     });
   }
 
-  // Generate export content
+  // Generate export content as AegisX theme variables
   private generateExportContent(
     scheme: M3ColorScheme,
     format: 'css' | 'scss',
   ): string {
-    const prefix = format === 'scss' ? '$m3-' : '--m3-';
     const lines: string[] = [];
+    const mode = this.schemeMode();
+    const indent = format === 'css' ? '  ' : '';
+    const prefix = format === 'scss' ? '$ax-' : '--ax-';
 
-    if (format === 'css') {
-      lines.push(':root {');
+    // Add header comment
+    if (format === 'scss') {
+      lines.push(
+        `// AegisX Theme - ${mode === 'light' ? 'Light' : 'Dark'} Mode`,
+      );
+      lines.push(`// Generated from M3 Color Scheme`);
+      lines.push('');
+    } else {
+      lines.push(
+        `/* AegisX Theme - ${mode === 'light' ? 'Light' : 'Dark'} Mode */`,
+      );
+      lines.push(`/* Generated from M3 Color Scheme */`);
+      lines.push('');
+      lines.push('[data-theme="custom"] {');
     }
 
-    for (const [key, value] of Object.entries(scheme)) {
-      const varName = this.toKebabCase(key);
-      if (format === 'scss') {
-        lines.push(`${prefix}${varName}: ${value};`);
-      } else {
-        lines.push(`  ${prefix}${varName}: ${value};`);
-      }
-    }
+    // PRIMARY / BRAND
+    lines.push(
+      `${indent}${format === 'scss' ? '// ' : '/* '}PRIMARY / BRAND${format === 'scss' ? '' : ' */'}`,
+    );
+    lines.push(`${indent}${prefix}primary: ${scheme.primary};`);
+    lines.push(`${indent}${prefix}primary-light: ${scheme.primaryContainer};`);
+    lines.push(`${indent}${prefix}primary-dark: ${scheme.onPrimaryContainer};`);
+    lines.push(`${indent}${prefix}primary-contrast: ${scheme.onPrimary};`);
+    lines.push('');
+    lines.push(`${indent}${prefix}brand-default: ${scheme.primary};`);
+    lines.push(
+      `${indent}${prefix}brand-emphasis: ${scheme.onPrimaryContainer};`,
+    );
+    lines.push(`${indent}${prefix}brand-muted: ${scheme.primaryContainer};`);
+    lines.push(`${indent}${prefix}brand-faint: ${scheme.primaryContainer};`);
+    lines.push(`${indent}${prefix}brand-surface: ${scheme.primaryContainer};`);
+    lines.push(`${indent}${prefix}brand-border: ${scheme.outline};`);
+    lines.push('');
+
+    // BACKGROUNDS
+    lines.push(
+      `${indent}${format === 'scss' ? '// ' : '/* '}BACKGROUNDS${format === 'scss' ? '' : ' */'}`,
+    );
+    lines.push(`${indent}${prefix}background-default: ${scheme.surface};`);
+    lines.push(
+      `${indent}${prefix}background-subtle: ${scheme.surfaceContainerLow};`,
+    );
+    lines.push(
+      `${indent}${prefix}background-muted: ${scheme.surfaceContainerLowest};`,
+    );
+    lines.push(
+      `${indent}${prefix}background-emphasis: ${scheme.inverseSurface};`,
+    );
+    lines.push(`${indent}${prefix}background-page: ${scheme.surfaceDim};`);
+    lines.push(`${indent}${prefix}white: ${scheme.surface};`);
+    lines.push('');
+
+    // TEXT
+    lines.push(
+      `${indent}${format === 'scss' ? '// ' : '/* '}TEXT${format === 'scss' ? '' : ' */'}`,
+    );
+    lines.push(`${indent}${prefix}text-default: ${scheme.onSurface};`);
+    lines.push(`${indent}${prefix}text-primary: ${scheme.onSurface};`);
+    lines.push(`${indent}${prefix}text-secondary: ${scheme.onSurfaceVariant};`);
+    lines.push(`${indent}${prefix}text-subtle: ${scheme.outline};`);
+    lines.push(`${indent}${prefix}text-disabled: ${scheme.outlineVariant};`);
+    lines.push(`${indent}${prefix}text-heading: ${scheme.onSurface};`);
+    lines.push(`${indent}${prefix}text-strong: ${scheme.onSurface};`);
+    lines.push(`${indent}${prefix}text-inverse: ${scheme.inverseOnSurface};`);
+    lines.push('');
+
+    // BORDERS
+    lines.push(
+      `${indent}${format === 'scss' ? '// ' : '/* '}BORDERS${format === 'scss' ? '' : ' */'}`,
+    );
+    lines.push(`${indent}${prefix}border-default: ${scheme.outline};`);
+    lines.push(`${indent}${prefix}border-emphasis: ${scheme.outline};`);
+    lines.push(`${indent}${prefix}border-subtle: ${scheme.outlineVariant};`);
+    lines.push(`${indent}${prefix}border-color: ${scheme.outline};`);
+    lines.push('');
+
+    // ERROR (from M3 error colors)
+    lines.push(
+      `${indent}${format === 'scss' ? '// ' : '/* '}ERROR${format === 'scss' ? '' : ' */'}`,
+    );
+    lines.push(`${indent}${prefix}error-default: ${scheme.error};`);
+    lines.push(`${indent}${prefix}error-emphasis: ${scheme.onErrorContainer};`);
+    lines.push(`${indent}${prefix}error-faint: ${scheme.errorContainer};`);
+    lines.push(`${indent}${prefix}error-muted: ${scheme.errorContainer};`);
+    lines.push(`${indent}${prefix}error-surface: ${scheme.errorContainer};`);
+    lines.push(`${indent}${prefix}error-border: ${scheme.error};`);
+    lines.push('');
+
+    // SECONDARY (for success-like semantics)
+    lines.push(
+      `${indent}${format === 'scss' ? '// ' : '/* '}SUCCESS (derived from Secondary)${format === 'scss' ? '' : ' */'}`,
+    );
+    lines.push(`${indent}${prefix}success-default: ${scheme.secondary};`);
+    lines.push(
+      `${indent}${prefix}success-emphasis: ${scheme.onSecondaryContainer};`,
+    );
+    lines.push(
+      `${indent}${prefix}success-faint: ${scheme.secondaryContainer};`,
+    );
+    lines.push(
+      `${indent}${prefix}success-muted: ${scheme.secondaryContainer};`,
+    );
+    lines.push(
+      `${indent}${prefix}success-surface: ${scheme.secondaryContainer};`,
+    );
+    lines.push(`${indent}${prefix}success-border: ${scheme.secondary};`);
+    lines.push(`${indent}${prefix}success: ${scheme.secondary};`);
+    lines.push('');
+
+    // TERTIARY (for warning-like semantics)
+    lines.push(
+      `${indent}${format === 'scss' ? '// ' : '/* '}WARNING (derived from Tertiary)${format === 'scss' ? '' : ' */'}`,
+    );
+    lines.push(`${indent}${prefix}warning-default: ${scheme.tertiary};`);
+    lines.push(
+      `${indent}${prefix}warning-emphasis: ${scheme.onTertiaryContainer};`,
+    );
+    lines.push(`${indent}${prefix}warning-faint: ${scheme.tertiaryContainer};`);
+    lines.push(`${indent}${prefix}warning-muted: ${scheme.tertiaryContainer};`);
+    lines.push(
+      `${indent}${prefix}warning-surface: ${scheme.tertiaryContainer};`,
+    );
+    lines.push(`${indent}${prefix}warning-border: ${scheme.tertiary};`);
+    lines.push('');
+
+    // INFO (derived from Primary variant)
+    lines.push(
+      `${indent}${format === 'scss' ? '// ' : '/* '}INFO (derived from Primary)${format === 'scss' ? '' : ' */'}`,
+    );
+    lines.push(`${indent}${prefix}info-default: ${scheme.primary};`);
+    lines.push(
+      `${indent}${prefix}info-emphasis: ${scheme.onPrimaryContainer};`,
+    );
+    lines.push(`${indent}${prefix}info-faint: ${scheme.primaryContainer};`);
+    lines.push(`${indent}${prefix}info-muted: ${scheme.primaryContainer};`);
+    lines.push(`${indent}${prefix}info-surface: ${scheme.primaryContainer};`);
+    lines.push(`${indent}${prefix}info-border: ${scheme.primary};`);
+    lines.push('');
+
+    // SURFACE VARIANTS (M3 specific)
+    lines.push(
+      `${indent}${format === 'scss' ? '// ' : '/* '}SURFACE VARIANTS${format === 'scss' ? '' : ' */'}`,
+    );
+    lines.push(`${indent}${prefix}surface: ${scheme.surface};`);
+    lines.push(`${indent}${prefix}surface-variant: ${scheme.surfaceVariant};`);
+    lines.push(
+      `${indent}${prefix}surface-container: ${scheme.surfaceContainer};`,
+    );
+    lines.push(
+      `${indent}${prefix}surface-container-high: ${scheme.surfaceContainerHigh};`,
+    );
+    lines.push(
+      `${indent}${prefix}surface-container-highest: ${scheme.surfaceContainerHighest};`,
+    );
+    lines.push(`${indent}${prefix}surface-bright: ${scheme.surfaceBright};`);
+    lines.push(`${indent}${prefix}surface-dim: ${scheme.surfaceDim};`);
+    lines.push('');
+
+    // NAVIGATION
+    lines.push(
+      `${indent}${format === 'scss' ? '// ' : '/* '}NAVIGATION${format === 'scss' ? '' : ' */'}`,
+    );
+    lines.push(`${indent}${prefix}nav-bg: ${scheme.surface};`);
+    lines.push(`${indent}${prefix}nav-text: ${scheme.onSurfaceVariant};`);
+    lines.push(`${indent}${prefix}nav-text-active: ${scheme.primary};`);
+    lines.push(`${indent}${prefix}nav-hover: ${scheme.surfaceContainerLow};`);
+    lines.push(`${indent}${prefix}nav-active: ${scheme.primaryContainer};`);
+    lines.push(`${indent}${prefix}nav-border: ${scheme.outlineVariant};`);
+    lines.push('');
+
+    // INVERSE
+    lines.push(
+      `${indent}${format === 'scss' ? '// ' : '/* '}INVERSE${format === 'scss' ? '' : ' */'}`,
+    );
+    lines.push(`${indent}${prefix}inverse-surface: ${scheme.inverseSurface};`);
+    lines.push(
+      `${indent}${prefix}inverse-on-surface: ${scheme.inverseOnSurface};`,
+    );
+    lines.push(`${indent}${prefix}inverse-primary: ${scheme.inversePrimary};`);
+    lines.push('');
+
+    // SHADOWS & EFFECTS
+    lines.push(
+      `${indent}${format === 'scss' ? '// ' : '/* '}SHADOWS${format === 'scss' ? '' : ' */'}`,
+    );
+    lines.push(`${indent}${prefix}shadow: ${scheme.shadow};`);
+    lines.push(`${indent}${prefix}scrim: ${scheme.scrim};`);
 
     if (format === 'css') {
       lines.push('}');
