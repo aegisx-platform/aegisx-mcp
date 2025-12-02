@@ -14,6 +14,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ExtractedPalette, generateColorShades } from './color-extraction.util';
 import { AxColorPaletteEditorComponent } from './color-palette-editor.component';
 import { AxImageColorExtractorComponent } from './image-color-extractor.component';
+import { AxM3ColorPreviewComponent } from './m3-color-preview.component';
 import { AxThemePreviewPanelComponent } from './preview-panel.component';
 import { ThemeBuilderService } from './theme-builder.service';
 import {
@@ -23,6 +24,7 @@ import {
   ThemePreset,
   ThemeSection,
 } from './theme-builder.types';
+import type { M3ColorScheme } from './m3-color.util';
 
 @Component({
   selector: 'ax-theme-builder',
@@ -43,6 +45,7 @@ import {
     AxColorPaletteEditorComponent,
     AxThemePreviewPanelComponent,
     AxImageColorExtractorComponent,
+    AxM3ColorPreviewComponent,
   ],
   template: `
     <div class="theme-builder">
@@ -137,6 +140,14 @@ import {
           </button>
           <button
             class="nav-item"
+            [class.active]="activeSection() === 'm3-colors'"
+            (click)="setActiveSection('m3-colors')"
+          >
+            <mat-icon>auto_awesome</mat-icon>
+            <span>M3 Colors</span>
+          </button>
+          <button
+            class="nav-item"
             [class.active]="activeSection() === 'typography'"
             (click)="setActiveSection('typography')"
           >
@@ -178,6 +189,26 @@ import {
                 (colorsExtracted)="onColorsExtracted($event)"
                 (paletteApplied)="onPaletteApplied($event)"
                 (dominantColorApplied)="onDominantColorApplied($event)"
+              />
+            </div>
+          }
+
+          <!-- M3 Colors Section -->
+          @if (activeSection() === 'm3-colors') {
+            <div class="section-content">
+              <div class="section-header">
+                <h2>Material Design 3 Colors</h2>
+                <p class="section-description">
+                  Generate a complete M3 color scheme from your primary color.
+                  Preview Primary, Secondary, Tertiary palettes and export to
+                  CSS/SCSS.
+                </p>
+              </div>
+
+              <ax-m3-color-preview
+                [seedColor]="themeService.currentTheme().colors.brand[500]"
+                (schemeApplied)="onM3SchemeApplied($event)"
+                (schemeCopied)="onM3SchemeCopied($event)"
               />
             </div>
           }
@@ -1411,6 +1442,47 @@ export class AxThemeBuilderComponent {
     }
 
     this.showNotification('Dominant color applied to Brand palette!');
+  }
+
+  // ========== M3 Color Scheme Methods ==========
+
+  /**
+   * Handle M3 color scheme applied
+   */
+  onM3SchemeApplied(event: {
+    scheme: M3ColorScheme;
+    mode: 'light' | 'dark';
+  }): void {
+    // Apply primary color from M3 scheme to brand palette
+    const scheme = event.scheme;
+
+    // Map M3 primary tones to brand palette
+    // Using the primaryContainer and primary colors
+    this.themeService.updateColor('brand', 50, scheme.primaryContainer);
+    this.themeService.updateColor('brand', 500, scheme.primary);
+    this.themeService.updateColor('brand', 900, scheme.onPrimaryContainer);
+
+    // Update background colors
+    this.themeService.updateBackground('default', scheme.surface);
+    this.themeService.updateBackground('subtle', scheme.surfaceContainerLow);
+    this.themeService.updateBackground('muted', scheme.surfaceContainerLowest);
+
+    // Update text colors
+    this.themeService.updateText('primary', scheme.onSurface);
+    this.themeService.updateText('secondary', scheme.onSurfaceVariant);
+
+    // Update border colors
+    this.themeService.updateBorder('default', scheme.outline);
+    this.themeService.updateBorder('muted', scheme.outlineVariant);
+
+    this.showNotification(`M3 ${event.mode} scheme applied to theme!`);
+  }
+
+  /**
+   * Handle M3 scheme copied to clipboard
+   */
+  onM3SchemeCopied(event: { format: 'css' | 'scss'; content: string }): void {
+    this.showNotification(`M3 scheme copied as ${event.format.toUpperCase()}!`);
   }
 
   // ========== Slider Helper Methods ==========

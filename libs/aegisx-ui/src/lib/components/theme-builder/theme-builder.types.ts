@@ -142,6 +142,7 @@ export interface ThemeBuilderState {
 export type ThemeSection =
   | 'colors'
   | 'image-extractor'
+  | 'm3-colors'
   | 'typography'
   | 'spacing'
   | 'radius'
