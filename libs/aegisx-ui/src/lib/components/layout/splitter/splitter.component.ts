@@ -5,6 +5,7 @@ import {
   EventEmitter,
   ElementRef,
   ViewChild,
+  OnInit,
   OnDestroy,
   HostListener,
 } from '@angular/core';
@@ -12,6 +13,7 @@ import { CommonModule } from '@angular/common';
 
 export type SplitterOrientation = 'horizontal' | 'vertical';
 export type SplitterUnit = 'percent' | 'pixel';
+export type SplitterStateStorage = 'local' | 'session';
 
 /**
  * Splitter Component
@@ -36,6 +38,13 @@ export type SplitterUnit = 'percent' | 'pixel';
  * @example
  * // With min/max constraints
  * <ax-splitter [size]="40" [min]="20" [max]="80">
+ *   <div before>Sidebar</div>
+ *   <div after>Content</div>
+ * </ax-splitter>
+ *
+ * @example
+ * // With state persistence (remembers size across page refreshes)
+ * <ax-splitter stateKey="my-splitter" stateStorage="local">
  *   <div before>Sidebar</div>
  *   <div after>Content</div>
  * </ax-splitter>
@@ -85,7 +94,7 @@ export type SplitterUnit = 'percent' | 'pixel';
   `,
   styleUrls: ['./splitter.component.scss'],
 })
-export class AxSplitterComponent implements OnDestroy {
+export class AxSplitterComponent implements OnInit, OnDestroy {
   @ViewChild('container') containerRef!: ElementRef<HTMLElement>;
   @ViewChild('separator') separatorRef!: ElementRef<HTMLElement>;
 
@@ -110,6 +119,12 @@ export class AxSplitterComponent implements OnDestroy {
   /** Disable resizing */
   @Input() disabled = false;
 
+  /** Key to store splitter state. When provided, enables state persistence. */
+  @Input() stateKey: string | null = null;
+
+  /** Storage type for state persistence: 'local' (localStorage) or 'session' (sessionStorage) */
+  @Input() stateStorage: SplitterStateStorage = 'local';
+
   /** Emit when size changes during drag */
   @Output() sizeChange = new EventEmitter<number>();
 
@@ -123,6 +138,12 @@ export class AxSplitterComponent implements OnDestroy {
   private startPos = 0;
   private startSize = 0;
   private containerSize = 0;
+  private initialSize = 50;
+
+  ngOnInit(): void {
+    this.initialSize = this.size;
+    this.restoreState();
+  }
 
   ngOnDestroy(): void {
     this.removeListeners();
@@ -228,6 +249,7 @@ export class AxSplitterComponent implements OnDestroy {
   private endDrag(): void {
     this.isDragging = false;
     this.dragEnd.emit(this.size);
+    this.saveState();
     this.removeListeners();
   }
 
@@ -258,7 +280,55 @@ export class AxSplitterComponent implements OnDestroy {
   }
 
   /** Reset to initial size */
-  reset(initialSize = 50): void {
-    this.setSize(initialSize);
+  reset(initialSize?: number): void {
+    this.setSize(initialSize ?? this.initialSize);
+  }
+
+  /** Clear saved state and reset to initial size */
+  clearState(): void {
+    if (this.stateKey) {
+      this.getStorage()?.removeItem(this.stateKey);
+    }
+    this.reset();
+  }
+
+  /** Save current size to storage */
+  private saveState(): void {
+    if (!this.stateKey) return;
+
+    try {
+      const storage = this.getStorage();
+      if (storage) {
+        storage.setItem(this.stateKey, JSON.stringify({ size: this.size }));
+      }
+    } catch {
+      // Storage not available or quota exceeded - fail silently
+    }
+  }
+
+  /** Restore size from storage */
+  private restoreState(): void {
+    if (!this.stateKey) return;
+
+    try {
+      const storage = this.getStorage();
+      if (storage) {
+        const saved = storage.getItem(this.stateKey);
+        if (saved) {
+          const state = JSON.parse(saved);
+          if (typeof state.size === 'number') {
+            this.size = Math.max(this.min, Math.min(this.max, state.size));
+          }
+        }
+      }
+    } catch {
+      // Storage not available or invalid data - use default size
+    }
+  }
+
+  /** Get storage based on stateStorage setting */
+  private getStorage(): Storage | null {
+    if (typeof window === 'undefined') return null;
+    return this.stateStorage === 'session' ? sessionStorage : localStorage;
   }
 }

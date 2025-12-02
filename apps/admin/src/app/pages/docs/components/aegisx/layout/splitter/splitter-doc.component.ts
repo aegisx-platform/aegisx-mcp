@@ -352,6 +352,46 @@ import { ComponentToken } from '../../../../../../types/docs.types';
 
               <ax-code-tabs [tabs]="eventsCode"></ax-code-tabs>
             </section>
+
+            <!-- State Persistence -->
+            <section class="splitter-doc__section">
+              <h2>State Persistence</h2>
+              <p>
+                Use <code>stateKey</code> and <code>stateStorage</code> to
+                automatically remember the user's preferred panel size across
+                page refreshes. This creates a user-friendly experience where
+                layout preferences are preserved.
+              </p>
+
+              <ax-live-preview variant="bordered">
+                <div class="splitter-doc__demo-container">
+                  <ax-splitter
+                    stateKey="docs-demo-splitter"
+                    stateStorage="local"
+                    [size]="30"
+                    [min]="20"
+                    [max]="60"
+                  >
+                    <div
+                      before
+                      class="splitter-doc__panel splitter-doc__panel--primary"
+                    >
+                      <h4>Persistent Sidebar</h4>
+                      <p>Resize me and refresh the page!</p>
+                    </div>
+                    <div
+                      after
+                      class="splitter-doc__panel splitter-doc__panel--secondary"
+                    >
+                      <h4>Content Area</h4>
+                      <p>Your size preference is saved</p>
+                    </div>
+                  </ax-splitter>
+                </div>
+              </ax-live-preview>
+
+              <ax-code-tabs [tabs]="statePersistenceCode"></ax-code-tabs>
+            </section>
           </div>
         </mat-tab>
 
@@ -650,6 +690,24 @@ greet('World');</code></pre>
                       <td><code>false</code></td>
                       <td>Disable resizing</td>
                     </tr>
+                    <tr>
+                      <td><code>stateKey</code></td>
+                      <td><code>string | null</code></td>
+                      <td><code>null</code></td>
+                      <td>
+                        Key to store splitter state. When provided, enables
+                        automatic state persistence.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><code>stateStorage</code></td>
+                      <td><code>'local' | 'session'</code></td>
+                      <td><code>'local'</code></td>
+                      <td>
+                        Storage type: localStorage (persists) or sessionStorage
+                        (clears on close)
+                      </td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
@@ -735,7 +793,14 @@ greet('World');</code></pre>
                     <tr>
                       <td><code>reset(initialSize?)</code></td>
                       <td><code>initialSize?: number</code></td>
-                      <td>Reset to initial size (default: 50)</td>
+                      <td>Reset to initial size</td>
+                    </tr>
+                    <tr>
+                      <td><code>clearState()</code></td>
+                      <td>none</td>
+                      <td>
+                        Clear saved state from storage and reset to initial size
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -1723,6 +1788,59 @@ export class MyComponent {
     </div>
   </aside>
 </ax-splitter>`,
+    },
+  ];
+
+  statePersistenceCode = [
+    {
+      label: 'HTML',
+      language: 'html' as const,
+      code: `<!-- Automatic state persistence with localStorage -->
+<ax-splitter
+  stateKey="my-app-sidebar"
+  stateStorage="local"
+  [size]="30"
+  [min]="20"
+  [max]="60"
+>
+  <div before>Sidebar - resize me!</div>
+  <div after>Content</div>
+</ax-splitter>
+
+<!-- Session-only persistence (clears when browser closes) -->
+<ax-splitter stateKey="temp-splitter" stateStorage="session">
+  <div before>Temp Panel</div>
+  <div after>Content</div>
+</ax-splitter>`,
+    },
+    {
+      label: 'TypeScript',
+      language: 'typescript' as const,
+      code: `import { Component, ViewChild } from '@angular/core';
+import { AxSplitterComponent } from '@aegisx/ui';
+
+@Component({
+  template: \`
+    <ax-splitter
+      #splitter
+      stateKey="file-explorer-sidebar"
+      stateStorage="local"
+      [size]="25"
+    >
+      <nav before>File Tree</nav>
+      <main after>Editor</main>
+    </ax-splitter>
+    <button (click)="resetLayout()">Reset Layout</button>
+  \`,
+})
+export class FileExplorerComponent {
+  @ViewChild('splitter') splitter!: AxSplitterComponent;
+
+  resetLayout() {
+    // Clears saved state and resets to initial size
+    this.splitter.clearState();
+  }
+}`,
     },
   ];
 
