@@ -59,3 +59,6 @@ export * from './gridster';
 
 // Integrations (Third-party library wrappers)
 export * from './integrations';
+
+// Theme Builder (Visual Theme Editor)
+export * from './theme-builder';

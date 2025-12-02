@@ -60,6 +60,66 @@ import { ThemeBuilderService } from './theme-builder.service';
 
       <!-- Scrollable Content -->
       <div class="preview-content">
+        <!-- Color Scheme Section (M3-style) -->
+        <section class="preview-section color-scheme">
+          <h4>Color Scheme</h4>
+
+          <!-- Brand/Primary Colors -->
+          <div class="scheme-row">
+            <div class="scheme-card brand-500">
+              <span class="scheme-label">Brand</span>
+              <span class="scheme-text on-brand">On Brand</span>
+            </div>
+            <div class="scheme-card brand-container">
+              <span class="scheme-label">Brand Container</span>
+              <span class="scheme-text on-brand-container">On Container</span>
+            </div>
+          </div>
+
+          <!-- Semantic Colors Grid -->
+          <div class="scheme-grid">
+            <div class="scheme-card success-500">
+              <span class="scheme-mini-label">Success</span>
+            </div>
+            <div class="scheme-card warning-500">
+              <span class="scheme-mini-label">Warning</span>
+            </div>
+            <div class="scheme-card error-500">
+              <span class="scheme-mini-label">Error</span>
+            </div>
+            <div class="scheme-card info-500">
+              <span class="scheme-mini-label">Info</span>
+            </div>
+          </div>
+
+          <!-- Surface Colors -->
+          <div class="scheme-surfaces">
+            <div class="surface-item surface-default">
+              <span class="surface-label">Surface</span>
+              <span class="surface-text">On Surface</span>
+            </div>
+            <div class="surface-item surface-subtle">
+              <span class="surface-label">Subtle</span>
+              <span class="surface-text">On Subtle</span>
+            </div>
+            <div class="surface-item surface-muted">
+              <span class="surface-label">Muted</span>
+              <span class="surface-text">On Muted</span>
+            </div>
+            <div class="surface-item surface-emphasis">
+              <span class="surface-label">Emphasis</span>
+              <span class="surface-text inverse">On Emphasis</span>
+            </div>
+          </div>
+
+          <!-- Border & Outline -->
+          <div class="scheme-borders">
+            <div class="border-item border-default">Default</div>
+            <div class="border-item border-muted">Muted</div>
+            <div class="border-item border-emphasis">Emphasis</div>
+          </div>
+        </section>
+
         <!-- Buttons Section -->
         <section class="preview-section">
           <h4>Buttons</h4>
@@ -428,6 +488,7 @@ import { ThemeBuilderService } from './theme-builder.service';
       .preview-content {
         flex: 1;
         padding: 1rem;
+        padding-bottom: 3rem;
         overflow-y: auto;
         overflow-x: hidden;
       }
@@ -1035,6 +1096,194 @@ import { ThemeBuilderService } from './theme-builder.service';
         }
         &.lg {
           box-shadow: var(--ax-shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
+        }
+      }
+
+      /* =============================================
+         Color Scheme Section (M3-style visualization)
+         ============================================= */
+      .color-scheme {
+        h4 {
+          margin-bottom: 1rem;
+        }
+      }
+
+      /* Brand/Primary Color Row */
+      .scheme-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+      }
+
+      .scheme-card {
+        padding: 1rem;
+        border-radius: var(--ax-radius-lg, 0.5rem);
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        min-height: 80px;
+        transition:
+          transform 0.15s ease,
+          box-shadow 0.15s ease;
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: var(--ax-shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+        }
+
+        /* Brand Colors */
+        &.brand-500 {
+          background: var(--ax-brand-500, #6366f1);
+        }
+        &.brand-container {
+          background: var(--ax-brand-100, #e0e7ff);
+        }
+
+        /* Semantic Colors */
+        &.success-500 {
+          background: var(--ax-success-500, #22c55e);
+        }
+        &.warning-500 {
+          background: var(--ax-warning-500, #f59e0b);
+        }
+        &.error-500 {
+          background: var(--ax-error-500, #ef4444);
+        }
+        &.info-500 {
+          background: var(--ax-info-500, #3b82f6);
+        }
+      }
+
+      .scheme-label {
+        font-size: 0.6875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        opacity: 0.85;
+      }
+
+      .scheme-text {
+        font-size: 0.75rem;
+        font-weight: 500;
+
+        &.on-brand {
+          color: white;
+        }
+        &.on-brand-container {
+          color: var(--ax-brand-700, #4338ca);
+        }
+      }
+
+      .scheme-card.brand-500 .scheme-label {
+        color: rgba(255, 255, 255, 0.9);
+      }
+      .scheme-card.brand-container .scheme-label {
+        color: var(--ax-brand-600, #4f46e5);
+      }
+
+      /* Semantic Colors Grid */
+      .scheme-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+
+        .scheme-card {
+          min-height: 50px;
+          padding: 0.75rem;
+          align-items: center;
+          justify-content: center;
+        }
+      }
+
+      .scheme-mini-label {
+        font-size: 0.625rem;
+        font-weight: 600;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
+
+      /* Surface Colors */
+      .scheme-surfaces {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .surface-item {
+        padding: 0.75rem 0.5rem;
+        border-radius: var(--ax-radius-md, 0.375rem);
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        border: 1px solid
+          var(--preview-border, var(--ax-border-default, #e4e4e7));
+
+        &.surface-default {
+          background: var(--preview-bg, var(--ax-background-default, #ffffff));
+        }
+        &.surface-subtle {
+          background: var(--ax-background-subtle, #f4f4f5);
+        }
+        &.surface-muted {
+          background: var(--ax-background-muted, #e4e4e7);
+        }
+        &.surface-emphasis {
+          background: var(--ax-background-emphasis, #18181b);
+          border-color: var(--ax-background-emphasis, #18181b);
+        }
+      }
+
+      .surface-label {
+        font-size: 0.5625rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: var(--preview-text-secondary, var(--ax-text-secondary, #71717a));
+      }
+
+      .surface-text {
+        font-size: 0.625rem;
+        font-weight: 500;
+        color: var(--preview-text, var(--ax-text-primary, #3f3f46));
+
+        &.inverse {
+          color: white;
+        }
+      }
+
+      .surface-item.surface-emphasis .surface-label {
+        color: rgba(255, 255, 255, 0.7);
+      }
+
+      /* Border Colors */
+      .scheme-borders {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+      }
+
+      .border-item {
+        padding: 0.625rem;
+        border-radius: var(--ax-radius-md, 0.375rem);
+        text-align: center;
+        font-size: 0.625rem;
+        font-weight: 500;
+        color: var(--preview-text-secondary, var(--ax-text-secondary, #71717a));
+        background: var(--preview-bg, var(--ax-background-default, #ffffff));
+
+        &.border-default {
+          border: 2px solid var(--ax-border-default, #e4e4e7);
+        }
+        &.border-muted {
+          border: 2px solid var(--ax-border-muted, #d4d4d8);
+        }
+        &.border-emphasis {
+          border: 2px solid var(--ax-border-emphasis, #71717a);
         }
       }
     `,
