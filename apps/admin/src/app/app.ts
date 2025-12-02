@@ -171,6 +171,13 @@ export class App implements OnInit {
           icon: 'accessibility_new',
           link: '/docs/foundations/accessibility',
         },
+        {
+          id: 'theming',
+          title: 'Theming',
+          type: 'item',
+          icon: 'palette',
+          link: '/docs/foundations/theming',
+        },
       ],
     },
 
@@ -279,6 +286,13 @@ export class App implements OnInit {
               type: 'item',
               icon: 'timeline',
               link: '/docs/components/aegisx/data-display/timeline',
+            },
+            {
+              id: 'divider',
+              title: 'Divider',
+              type: 'item',
+              icon: 'horizontal_rule',
+              link: '/docs/components/aegisx/data-display/divider',
             },
             {
               id: 'sparkline',
@@ -937,6 +951,11 @@ export class App implements OnInit {
           title: 'Accessibility',
           link: '/docs/foundations/accessibility',
         },
+        {
+          id: 'theming',
+          title: 'Theming',
+          link: '/docs/foundations/theming',
+        },
       ],
     },
     {
@@ -1006,6 +1025,11 @@ export class App implements OnInit {
               id: 'timeline',
               title: 'Timeline',
               link: '/docs/components/aegisx/data-display/timeline',
+            },
+            {
+              id: 'divider',
+              title: 'Divider',
+              link: '/docs/components/aegisx/data-display/divider',
             },
             {
               id: 'sparkline',
@@ -1464,6 +1488,17 @@ export class App implements OnInit {
           id: 'his-demo',
           title: 'HIS (Hospital)',
           link: '/his-demo',
+        },
+      ],
+    },
+    {
+      id: 'tools',
+      title: 'Tools',
+      children: [
+        {
+          id: 'theme-builder-tool',
+          title: 'Theme Builder',
+          link: '/tools/theme-builder',
         },
       ],
     },

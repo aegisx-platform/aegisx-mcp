@@ -89,4 +89,15 @@ export const FOUNDATIONS_ROUTES: Route[] = [
       description: 'Accessibility standards and guidelines',
     },
   },
+  {
+    path: 'theming',
+    loadComponent: () =>
+      import('../../pages/docs/foundations/theming/theming.component').then(
+        (m) => m.ThemingComponent,
+      ),
+    data: {
+      title: 'Theming',
+      description: 'Theme configuration and customization guide',
+    },
+  },
 ];
