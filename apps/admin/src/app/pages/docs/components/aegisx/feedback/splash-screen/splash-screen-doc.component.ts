@@ -138,6 +138,54 @@ import { ComponentToken, CodeTab } from '../../../../../../types/docs.types';
             </section>
 
             <section class="splash-screen-doc__section">
+              <h2>Wave Background</h2>
+              <p>
+                ใช้ animated wave background สำหรับ splash screen ที่ดู premium
+                และ calming effect เหมาะสำหรับ enterprise apps, healthcare,
+                finance หรือ apps ที่ต้องการความน่าเชื่อถือ
+              </p>
+
+              <ax-live-preview
+                variant="bordered"
+                direction="row"
+                gap="var(--ax-spacing-md)"
+              >
+                <mat-form-field appearance="outline">
+                  <mat-label>Wave Color Theme</mat-label>
+                  <mat-select [(ngModel)]="selectedWaveColor">
+                    <mat-option value="light"
+                      >Light (Neutral - Default)</mat-option
+                    >
+                    <mat-option value="dark"
+                      >Dark (Neutral - Default)</mat-option
+                    >
+                    <mat-option value="ocean">Ocean (Cyan/Teal)</mat-option>
+                    <mat-option value="sunset"
+                      >Sunset (Amber - Warning)</mat-option
+                    >
+                    <mat-option value="forest"
+                      >Forest (Green - Success)</mat-option
+                    >
+                    <mat-option value="aurora">Aurora (Purple)</mat-option>
+                    <mat-option value="aegisx"
+                      >AegisX (Indigo - Design System)</mat-option
+                    >
+                  </mat-select>
+                </mat-form-field>
+                <button
+                  mat-flat-button
+                  color="primary"
+                  (click)="showWaveDemo()"
+                >
+                  <mat-icon>waves</mat-icon>
+                  Show Wave Demo
+                </button>
+              </ax-live-preview>
+
+              <ax-code-tabs [tabs]="waveBackgroundCode"></ax-code-tabs>
+            </section>
+
+            <section class="splash-screen-doc__section">
               <h2>Error Handling</h2>
               <p>
                 เมื่อเกิด error ระหว่างโหลด จะแสดง error message พร้อมปุ่ม Retry
@@ -260,6 +308,21 @@ import { ComponentToken, CodeTab } from '../../../../../../types/docs.types';
                       <td>boolean</td>
                       <td>true</td>
                       <td>แสดงเปอร์เซ็นต์</td>
+                    </tr>
+                    <tr>
+                      <td><code>bgStyle</code></td>
+                      <td>'orbs' | 'wave' | 'minimal'</td>
+                      <td>'orbs'</td>
+                      <td>Background style variant</td>
+                    </tr>
+                    <tr>
+                      <td><code>waveTheme</code></td>
+                      <td>
+                        'light' | 'dark' | 'ocean' | 'sunset' | 'forest' |
+                        'aurora' | 'aegisx'
+                      </td>
+                      <td>'ocean'</td>
+                      <td>Wave color theme (for wave background)</td>
                     </tr>
                   </tbody>
                 </table>
@@ -435,12 +498,21 @@ export class SplashScreenDocComponent {
   private readonly splashService = inject(SplashScreenService);
 
   selectedAnimation: 'fade' | 'slide' | 'scale' = 'fade';
+  selectedWaveColor:
+    | 'light'
+    | 'dark'
+    | 'ocean'
+    | 'sunset'
+    | 'forest'
+    | 'aurora'
+    | 'aegisx' = 'light';
 
   // Demo methods
   showBasicDemo(): void {
     this.splashService.show({
-      appName: 'AegisX Platform',
-      tagline: 'Enterprise UI Framework',
+      appName: 'AegisX',
+      tagline: 'Building the future, today',
+      backgroundStyle: 'orbs',
       minDisplayTime: 1000,
     });
 
@@ -469,8 +541,10 @@ export class SplashScreenDocComponent {
     ];
 
     this.splashService.show({
-      appName: 'AegisX Platform',
+      appName: 'AegisX',
+      tagline: 'Building the future, today',
       version: '1.0.0',
+      backgroundStyle: 'orbs',
     });
     this.splashService.setStages(stages);
 
@@ -489,9 +563,10 @@ export class SplashScreenDocComponent {
 
   showBrandingDemo(): void {
     this.splashService.show({
-      appName: 'My Enterprise App',
+      appName: 'AegisX',
       tagline: 'Building the future, today',
-      version: '2.5.0',
+      version: '1.0.0',
+      backgroundStyle: 'orbs',
       background: 'linear-gradient(135deg, #1a237e 0%, #0d47a1 100%)',
       animationStyle: this.selectedAnimation,
       minDisplayTime: 500,
@@ -500,6 +575,51 @@ export class SplashScreenDocComponent {
     setTimeout(() => {
       this.splashService.hide();
     }, 3000);
+  }
+
+  showWaveDemo(): void {
+    this.splashService.show({
+      appName: 'AegisX',
+      tagline: 'Building the future, today',
+      version: '1.0.0',
+      backgroundStyle: 'wave',
+      waveColor: this.selectedWaveColor,
+      minDisplayTime: 500,
+    });
+
+    // Simulate loading with stages
+    const stages: SplashScreenStage[] = [
+      {
+        id: 'init',
+        label: 'Initializing',
+        icon: 'hourglass_empty',
+        status: 'pending',
+      },
+      {
+        id: 'connect',
+        label: 'Connecting',
+        icon: 'wifi',
+        status: 'pending',
+      },
+      {
+        id: 'ready',
+        label: 'Ready',
+        icon: 'check_circle',
+        status: 'pending',
+      },
+    ];
+
+    this.splashService.setStages(stages);
+
+    this.splashService
+      .runStages([
+        { id: 'init', handler: () => this.delay(1200) },
+        { id: 'connect', handler: () => this.delay(1200) },
+        { id: 'ready', handler: () => this.delay(1000) },
+      ])
+      .then(() => {
+        this.splashService.hide();
+      });
   }
 
   showErrorDemo(): void {
@@ -519,7 +639,7 @@ export class SplashScreenDocComponent {
       },
     ];
 
-    this.splashService.show({ appName: 'AegisX Platform' });
+    this.splashService.show({ appName: 'AegisX', backgroundStyle: 'orbs' });
     this.splashService.setStages(stages);
 
     // Simulate error on auth stage
@@ -566,8 +686,8 @@ export class AppComponent {
   ngOnInit() {
     // แสดง splash screen
     this.splashService.show({
-      appName: 'My App',
-      tagline: 'Welcome to the future',
+      appName: 'AegisX',
+      tagline: 'Building the future, today',
     });
 
     // ซ่อนหลังโหลดเสร็จ
@@ -592,7 +712,7 @@ const stages: SplashScreenStage[] = [
 ];
 
 // แสดง splash พร้อม stages
-this.splashService.show({ appName: 'My App' });
+this.splashService.show({ appName: 'AegisX' });
 this.splashService.setStages(stages);
 
 // รัน stages อัตโนมัติ
@@ -615,10 +735,10 @@ if (success) {
       language: 'typescript',
       code: `this.splashService.show({
   // Branding
-  appName: 'My Enterprise App',
+  appName: 'AegisX',
   logo: '/assets/logo.svg',
   tagline: 'Building the future, today',
-  version: '2.5.0',
+  version: '1.0.0',
 
   // Styling
   background: 'linear-gradient(135deg, #1a237e 0%, #0d47a1 100%)',
@@ -629,6 +749,75 @@ if (success) {
   showStageDetails: true,
   showTips: false,
 });`,
+    },
+  ];
+
+  readonly waveBackgroundCode: CodeTab[] = [
+    {
+      label: 'TypeScript',
+      language: 'typescript',
+      code: `// ใช้ Wave Background แทน Orbs
+this.splashService.show({
+  appName: 'AegisX',
+  tagline: 'Building the future, today',
+  version: '1.0.0',
+
+  // Wave Background Options
+  backgroundStyle: 'wave',  // 'orbs' | 'wave' | 'minimal'
+  waveColor: 'ocean',       // 'ocean' | 'sunset' | 'forest' | 'aurora'
+
+  minDisplayTime: 500,
+});
+
+// เลือก color theme ตามแบรนด์
+// ocean  - ฟ้าทะเล สำหรับ corporate, finance
+// sunset - พระอาทิตย์ตก สำหรับ creative, entertainment
+// forest - ป่าเขียว สำหรับ healthcare, eco-friendly
+// aurora - แสงเหนือ สำหรับ tech, futuristic`,
+    },
+    {
+      label: 'HTML (Standalone)',
+      language: 'html',
+      code: `<!-- ใช้งานแบบ standalone ด้วย inputs -->
+<ax-splash-screen
+  [visible]="isLoading"
+  [appName]="'AegisX'"
+  [bgStyle]="'wave'"
+  [waveTheme]="'sunset'"
+/>`,
+    },
+    {
+      label: 'Wave Themes',
+      language: 'typescript',
+      code: `// Available Wave Color Themes (AegisX Design System):
+
+// ☀️ Light - Neutral Zinc (Default for Light Mode)
+// Colors: Zinc-50 (#fafafa) + Zinc-200 (#e4e4e7) + Zinc-500/#52525b (wave)
+// Best for: Universal default, works with any theme in light mode
+
+// 🌙 Dark - Neutral Zinc (Default for Dark Mode)
+// Colors: Zinc-800 (#27272a) + Zinc-900 (#18181b) + Zinc-600/#18181b (wave)
+// Best for: Universal default, works with any theme in dark mode
+
+// 🌊 Ocean - Cyan/Teal (Calming)
+// Colors: #fffef2 (sky) + #b7e8eb (gradient) + #57BBC1/#015871 (wave)
+// Best for: Healthcare, Wellness, Calm apps
+
+// 🌅 Sunset - Warning/Amber (Creative)
+// Colors: Warning-50 (#fffbeb) + Warning-200 (#fde68a) + Warning-700 (#b45309)
+// Best for: Creative, Entertainment, Food
+
+// 🌲 Forest - Success/Green (Natural)
+// Colors: Success-50 (#f0fdf4) + Success-200 (#bbf7d0) + Success-700 (#15803d)
+// Best for: Eco-friendly, Wellness, Nature
+
+// 🌌 Aurora - Purple (Tech/Innovation)
+// Colors: Purple-50 (#faf5ff) + Purple-200 (#e9d5ff) + Purple-700 (#7e22ce)
+// Best for: Tech, Gaming, Innovation
+
+// 🔷 AegisX - Indigo (Design System)
+// Colors: Indigo-50 (#eef2ff) + Indigo-200 (#c7d2fe) + Indigo-700 (#4338ca)
+// Best for: Enterprise, Finance, Corporate (matches AegisX Design System)`,
     },
   ];
 
@@ -675,7 +864,8 @@ function initializeApp(splashService: SplashScreenService) {
   return async () => {
     // แสดง splash screen
     splashService.show({
-      appName: 'My Enterprise App',
+      appName: 'AegisX',
+      tagline: 'Building the future, today',
       logo: '/assets/logo.svg',
       version: '1.0.0',
     });
@@ -730,7 +920,7 @@ export const appConfig: ApplicationConfig = {
 <ax-splash-screen
   [visible]="isLoading"
   [logo]="'/assets/logo.svg'"
-  [appName]="'My App'"
+  [appName]="'AegisX'"
   [version]="'1.0.0'"
   [stages]="loadingStages"
   [message]="currentMessage"
@@ -827,6 +1017,12 @@ export const appConfig: ApplicationConfig = {
 
   /** Animation style */
   animationStyle?: 'fade' | 'slide' | 'scale';
+
+  /** Background style variant */
+  backgroundStyle?: 'orbs' | 'wave' | 'minimal';
+
+  /** Wave color theme (for wave background) */
+  waveColor?: 'light' | 'dark' | 'ocean' | 'sunset' | 'forest' | 'aurora' | 'aegisx';
 }`,
     },
   ];

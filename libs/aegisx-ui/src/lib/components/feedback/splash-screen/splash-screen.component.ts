@@ -10,8 +10,27 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
 import { SplashScreenService } from './splash-screen.service';
 import { SplashScreenStage } from './splash-screen.types';
+
+type WaveColorTheme =
+  | 'light'
+  | 'dark'
+  | 'ocean'
+  | 'sunset'
+  | 'forest'
+  | 'aurora'
+  | 'aegisx';
+type BackgroundStyle = 'orbs' | 'wave' | 'minimal';
+
+interface WaveColorPalette {
+  light: string;
+  dark: string;
+  skyTop: string;
+  skyBottom: string;
+  textColor?: string;
+}
 
 /**
  * AegisX Splash Screen Component
@@ -54,15 +73,43 @@ import { SplashScreenStage } from './splash-screen.types';
         [class.ax-splash-screen--scale]="animationStyle() === 'scale'"
         [class.ax-splash-screen--error]="hasError()"
       >
-        <!-- Animated Background (theme-aware, no inline style override) -->
-        <div class="ax-splash-screen__bg">
-          <div class="gradient-orb orb-1"></div>
-          <div class="gradient-orb orb-2"></div>
-          <div class="gradient-orb orb-3"></div>
-          <div class="grid-pattern"></div>
-        </div>
+        <!-- Background based on style -->
+        @if (bgStyle() === 'wave') {
+          <!-- Wave Background -->
+          <div
+            class="ax-splash-screen__bg ax-splash-screen__bg--wave"
+            [attr.data-wave-theme]="waveTheme()"
+            [style]="waveBackgroundStyle()"
+          >
+            <div class="wave-container">
+              <div
+                class="wave wave-1"
+                [style.background]="waveBackground1()"
+              ></div>
+              <div
+                class="wave wave-2"
+                [style.background]="waveBackground2()"
+              ></div>
+              <div
+                class="wave wave-3"
+                [style.background]="waveBackground3()"
+              ></div>
+            </div>
+          </div>
+        } @else if (bgStyle() === 'minimal') {
+          <!-- Minimal Background -->
+          <div class="ax-splash-screen__bg ax-splash-screen__bg--minimal"></div>
+        } @else {
+          <!-- Orbs Background (default) -->
+          <div class="ax-splash-screen__bg">
+            <div class="gradient-orb orb-1"></div>
+            <div class="gradient-orb orb-2"></div>
+            <div class="gradient-orb orb-3"></div>
+            <div class="grid-pattern"></div>
+          </div>
+        }
 
-        <div class="ax-splash-screen__content">
+        <div class="ax-splash-screen__content" [ngStyle]="waveContentStyles()">
           <!-- Logo -->
           @if (displayLogo()) {
             <div class="ax-splash-screen__logo">
@@ -197,10 +244,10 @@ import { SplashScreenStage } from './splash-screen.types';
         --splash-logo-shadow: rgba(99, 102, 241, 0.4);
       }
 
-      /* Light theme - detect via .light class or data-theme without -dark */
+      /* Light theme - detect via explicit light indicators only */
       :host-context(.light),
-      :host-context([data-theme='aegisx']),
-      :host-context([data-theme='verus']) {
+      :host-context([data-ax-mode='light']),
+      :host-context([data-theme$='-light']) {
         --splash-bg: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
         --splash-bg-error: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
         --splash-text: #1e293b;
@@ -228,6 +275,7 @@ import { SplashScreenStage } from './splash-screen.types';
         display: flex;
         align-items: center;
         justify-content: center;
+        overflow: hidden;
         animation: fadeIn 0.3s ease-out;
 
         &--fade {
@@ -319,7 +367,7 @@ import { SplashScreenStage } from './splash-screen.types';
 
       .ax-splash-screen__content {
         position: relative;
-        z-index: 1;
+        z-index: 10;
         text-align: center;
         color: var(--splash-text);
         max-width: 400px;
@@ -617,11 +665,147 @@ import { SplashScreenStage } from './splash-screen.types';
           height: 150px;
         }
       }
+
+      /* Wave Background Styles */
+      .ax-splash-screen__bg--wave {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        z-index: 0;
+      }
+
+      .wave-container {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 200px;
+        overflow: hidden;
+      }
+
+      .wave {
+        position: absolute;
+        left: 0;
+        width: 6400px;
+        height: 198px;
+        animation: waveScroll 7s linear infinite;
+        background-size: 1600px 198px;
+        background-repeat: repeat-x;
+      }
+
+      .wave-1 {
+        top: 0;
+        opacity: 1;
+      }
+
+      .wave-2 {
+        top: 20px;
+        opacity: 0.8;
+        animation:
+          waveScroll 7s linear -0.125s infinite,
+          waveSwell 7s ease -1.25s infinite;
+      }
+
+      .wave-3 {
+        top: 40px;
+        opacity: 0.5;
+        animation:
+          waveScroll 9s linear -0.5s infinite,
+          waveSwell 9s ease -2s infinite;
+      }
+
+      @keyframes waveScroll {
+        0% {
+          translate: 0 0;
+        }
+        100% {
+          translate: -1600px 0;
+        }
+      }
+
+      @keyframes waveSwell {
+        0%,
+        100% {
+          transform: translateY(-25px);
+        }
+        50% {
+          transform: translateY(5px);
+        }
+      }
+
+      /* Minimal Background */
+      .ax-splash-screen__bg--minimal {
+        background: var(--splash-bg);
+      }
+
+      /* Wave theme text colors override */
+      .ax-splash-screen__bg--wave ~ .ax-splash-screen__content {
+        --splash-text: #1e293b;
+        --splash-text-muted: rgba(30, 41, 59, 0.7);
+        --splash-text-subtle: rgba(30, 41, 59, 0.5);
+      }
+
+      /* Dark wave theme - white text */
+      .ax-splash-screen__bg--wave[data-wave-theme='dark']
+        ~ .ax-splash-screen__content {
+        --splash-text: #ffffff;
+        --splash-text-muted: rgba(255, 255, 255, 0.8);
+        --splash-text-subtle: rgba(255, 255, 255, 0.6);
+      }
     `,
   ],
 })
 export class AxSplashScreenComponent {
   private splashService = inject(SplashScreenService);
+  private sanitizer = inject(DomSanitizer);
+
+  // Wave color palettes
+  private readonly waveColorPalettes: Record<WaveColorTheme, WaveColorPalette> =
+    {
+      light: {
+        light: '#e2e8f0',
+        dark: '#cbd5e1',
+        skyTop: '#ffffff',
+        skyBottom: '#f8fafc',
+      },
+      dark: {
+        light: '#52525b',
+        dark: '#27272a',
+        skyTop: '#18181b',
+        skyBottom: '#27272a',
+        textColor: '#ffffff',
+      },
+      ocean: {
+        light: '#22d3ee',
+        dark: '#0891b2',
+        skyTop: '#ecfeff',
+        skyBottom: '#cffafe',
+      },
+      sunset: {
+        light: '#fb923c',
+        dark: '#ea580c',
+        skyTop: '#fff7ed',
+        skyBottom: '#ffedd5',
+      },
+      forest: {
+        light: '#4ade80',
+        dark: '#16a34a',
+        skyTop: '#f0fdf4',
+        skyBottom: '#dcfce7',
+      },
+      aurora: {
+        light: '#a78bfa',
+        dark: '#7c3aed',
+        skyTop: '#faf5ff',
+        skyBottom: '#f3e8ff',
+      },
+      aegisx: {
+        light: '#818cf8',
+        dark: '#4f46e5',
+        skyTop: '#eef2ff',
+        skyBottom: '#e0e7ff',
+      },
+    };
 
   // Standalone inputs (override service)
   readonly visible = input<boolean | undefined>(undefined);
@@ -636,8 +820,32 @@ export class AxSplashScreenComponent {
   readonly error = input<string | undefined>(undefined);
   readonly showPercentage = input(true);
 
+  // Background style inputs (override service config)
+  readonly bgStyleInput = input<BackgroundStyle | undefined>(undefined, {
+    alias: 'bgStyle',
+  });
+  readonly waveThemeInput = input<WaveColorTheme | undefined>(undefined, {
+    alias: 'waveTheme',
+  });
+
   // Retry callback
   onRetry?: () => void;
+
+  // Computed bgStyle - merge input with service config
+  protected bgStyle = computed(() => {
+    return (
+      this.bgStyleInput() ||
+      this.splashService.config().backgroundStyle ||
+      'orbs'
+    );
+  });
+
+  // Computed waveTheme - merge input with service config
+  protected waveTheme = computed(() => {
+    return (
+      this.waveThemeInput() || this.splashService.config().waveColor || 'ocean'
+    );
+  });
 
   // Computed values (merge input with service)
   protected isVisible = computed(() => {
@@ -708,4 +916,69 @@ export class AxSplashScreenComponent {
   protected animationStyle = computed(() => {
     return this.splashService.config().animationStyle || 'fade';
   });
+
+  // Wave computed signals
+  private currentPalette = computed(() => {
+    return this.waveColorPalettes[this.waveTheme()];
+  });
+
+  protected waveBackgroundStyle = computed((): SafeStyle => {
+    const palette = this.currentPalette();
+    const style = `background: linear-gradient(180deg, ${palette.skyTop} 0%, ${palette.skyBottom} 100%)`;
+    return this.sanitizer.bypassSecurityTrustStyle(style);
+  });
+
+  // Wave backgrounds with repeat-x for seamless animation
+  protected waveBackground1 = computed(() => {
+    const palette = this.currentPalette();
+    const svg = this.generateWaveSvg(palette.light, palette.dark, 1);
+    return `url("${svg}") repeat-x`;
+  });
+
+  protected waveBackground2 = computed(() => {
+    const palette = this.currentPalette();
+    const svg = this.generateWaveSvg(palette.dark, palette.light, 0.8);
+    return `url("${svg}") repeat-x`;
+  });
+
+  protected waveBackground3 = computed(() => {
+    const palette = this.currentPalette();
+    const svg = this.generateWaveSvg(palette.light, palette.dark, 0.6);
+    return `url("${svg}") repeat-x`;
+  });
+
+  protected waveContentStyles = computed(() => {
+    if (this.bgStyle() !== 'wave') {
+      return {};
+    }
+    const palette = this.currentPalette();
+    if (palette.textColor) {
+      return {
+        '--splash-text': palette.textColor,
+        '--splash-text-muted': `${palette.textColor}cc`,
+        '--splash-text-subtle': `${palette.textColor}99`,
+      };
+    }
+    return {};
+  });
+
+  // Generate wave SVG with gradient fill - 1600px wide for seamless repeat
+  private generateWaveSvg(
+    colorLight: string,
+    colorDark: string,
+    opacity: number,
+  ): string {
+    const gradientId = `waveGrad${Math.random().toString(36).substr(2, 9)}`;
+    // Original wave shape with fill - the v77H0 creates the solid area below the wave curve
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="198" viewBox="0 0 1600 198">
+      <defs>
+        <linearGradient id="${gradientId}" x1="50%" x2="50%" y1="-10.959%" y2="100%">
+          <stop stop-color="${colorLight}" stop-opacity="${opacity * 0.25}" offset="0%"/>
+          <stop stop-color="${colorDark}" stop-opacity="${opacity}" offset="100%"/>
+        </linearGradient>
+      </defs>
+      <path fill="url(#${gradientId})" d="M.005 121C311 121 409.898-.25 811 0c400 0 500 121 789 121v77H0s.005-48 .005-77z" transform="matrix(-1 0 0 1 1600 0)"/>
+    </svg>`;
+    return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+  }
 }

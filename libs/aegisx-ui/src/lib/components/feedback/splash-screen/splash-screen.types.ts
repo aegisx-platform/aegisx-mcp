@@ -33,6 +33,17 @@ export interface SplashScreenConfig {
   showStageDetails?: boolean;
   /** Animation style */
   animationStyle?: 'fade' | 'slide' | 'scale';
+  /** Background style variant */
+  backgroundStyle?: 'orbs' | 'wave' | 'minimal';
+  /** Wave color theme (for wave background) */
+  waveColor?:
+    | 'light'
+    | 'dark'
+    | 'ocean'
+    | 'sunset'
+    | 'forest'
+    | 'aurora'
+    | 'aegisx';
 }
 
 export interface SplashScreenState {
