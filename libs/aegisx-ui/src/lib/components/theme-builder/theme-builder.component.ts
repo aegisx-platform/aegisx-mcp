@@ -1422,9 +1422,17 @@ export class AxThemeBuilderComponent {
       this.themeService.updateColor(target, shadeValues[i], palette[i]);
     }
 
-    this.showNotification(
-      `Color palette applied to ${target.charAt(0).toUpperCase() + target.slice(1)}!`,
-    );
+    // If brand palette is updated, auto-switch to M3 Colors to show generated scheme
+    if (target === 'brand') {
+      this.activeSection.set('m3-colors');
+      this.showNotification(
+        'Brand palette applied! M3 color scheme auto-generated. Click "Apply to Theme" to use it.',
+      );
+    } else {
+      this.showNotification(
+        `Color palette applied to ${target.charAt(0).toUpperCase() + target.slice(1)}!`,
+      );
+    }
   }
 
   /**
@@ -1441,7 +1449,12 @@ export class AxThemeBuilderComponent {
       this.themeService.updateColor('brand', shadeValues[i], shades[i]);
     }
 
-    this.showNotification('Dominant color applied to Brand palette!');
+    // Auto-switch to M3 Colors tab to show generated M3 scheme
+    this.activeSection.set('m3-colors');
+
+    this.showNotification(
+      'Brand color applied! M3 color scheme auto-generated. Click "Apply to Theme" to use it.',
+    );
   }
 
   // ========== M3 Color Scheme Methods ==========

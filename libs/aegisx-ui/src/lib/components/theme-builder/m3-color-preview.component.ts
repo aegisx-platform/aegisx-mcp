@@ -1,32 +1,27 @@
 /**
  * M3 Color Scheme Preview Component
  *
- * Displays Material Design 3 color scheme preview generated from primary color.
- * Shows Primary, Secondary, Tertiary palettes and complete light/dark schemes.
+ * Google Material Theme Builder-style UI for M3 color scheme preview.
+ * Shows Primary, Secondary, Tertiary palettes with large color blocks
+ * and full-width tonal palette strips.
  */
 import { Component, computed, input, signal, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 import {
   generateM3CorePalettes,
   generateM3ColorScheme,
-  generateTonalPalette,
-  formatM3ColorName,
-  getM3ColorRoleCategories,
-  getContrastRatio,
+  EXTENDED_TONES,
   type M3CorePalettes,
   type M3ColorScheme,
-  type M3ColorSchemeSet,
-  type M3TonalPalette,
   type ToneValue,
 } from './m3-color.util';
 
-type ViewMode = 'scheme' | 'palettes' | 'tones';
+type ViewMode = 'scheme' | 'palettes';
 type SchemeMode = 'light' | 'dark';
 
 @Component({
@@ -36,53 +31,46 @@ type SchemeMode = 'light' | 'dark';
     CommonModule,
     MatButtonModule,
     MatIconModule,
-    MatTabsModule,
     MatTooltipModule,
     MatButtonToggleModule,
   ],
   template: `
     <div class="m3-preview">
-      <!-- Header with View Toggle -->
-      <div class="m3-preview-header">
-        <div class="header-info">
-          <h3>M3 Color Scheme</h3>
-          <p class="subtitle">
-            Generated from seed color
+      <!-- Header -->
+      <div class="m3-header">
+        <div class="header-left">
+          <h3>Material Design 3 Colors</h3>
+          <div class="seed-info">
+            <span class="label">Source color:</span>
             <span
               class="seed-badge"
               [style.background]="seedColor()"
-              [style.color]="getSeedTextColor()"
+              [style.color]="getTextColorFor(seedColor())"
             >
               {{ seedColor() }}
             </span>
-          </p>
+          </div>
         </div>
 
-        <mat-button-toggle-group
-          [value]="viewMode()"
-          (change)="viewMode.set($event.value)"
-          class="view-toggle"
-        >
-          <mat-button-toggle value="scheme">
-            <mat-icon>color_lens</mat-icon>
-            Scheme
-          </mat-button-toggle>
-          <mat-button-toggle value="palettes">
-            <mat-icon>palette</mat-icon>
-            Palettes
-          </mat-button-toggle>
-          <mat-button-toggle value="tones">
-            <mat-icon>gradient</mat-icon>
-            Tones
-          </mat-button-toggle>
-        </mat-button-toggle-group>
+        <div class="header-controls">
+          <mat-button-toggle-group
+            [value]="viewMode()"
+            (change)="viewMode.set($event.value)"
+            class="view-toggle"
+          >
+            <mat-button-toggle value="scheme">Key Colors</mat-button-toggle>
+            <mat-button-toggle value="palettes"
+              >Tonal Palettes</mat-button-toggle
+            >
+          </mat-button-toggle-group>
+        </div>
       </div>
 
-      <!-- Scheme View -->
+      <!-- Scheme View (Key Colors) -->
       @if (viewMode() === 'scheme') {
         <div class="scheme-view">
           <!-- Light/Dark Toggle -->
-          <div class="scheme-toggle">
+          <div class="mode-toggle">
             <mat-button-toggle-group
               [value]="schemeMode()"
               (change)="schemeMode.set($event.value)"
@@ -98,58 +86,372 @@ type SchemeMode = 'light' | 'dark';
             </mat-button-toggle-group>
           </div>
 
-          <!-- Color Scheme Grid -->
-          <div class="scheme-grid">
-            @for (category of colorCategories; track category.category) {
-              <div class="scheme-category">
-                <h4>{{ category.category }}</h4>
-                <div class="color-roles">
-                  @for (role of category.roles; track role) {
-                    <div
-                      class="color-role"
-                      [style.background]="getSchemeColor(role)"
-                      [matTooltip]="getColorTooltip(role)"
-                    >
-                      <span
-                        class="role-name"
-                        [style.color]="getTextColorFor(getSchemeColor(role))"
-                      >
-                        {{ formatRoleName(role) }}
-                      </span>
-                      <span
-                        class="role-value"
-                        [style.color]="getTextColorFor(getSchemeColor(role))"
-                      >
-                        {{ getSchemeColor(role) }}
-                      </span>
-                    </div>
-                  }
+          <!-- 4-Column Color Grid (Google-style color pairs) -->
+          <div class="color-grid-4col">
+            <!-- Primary Column -->
+            <div class="color-column">
+              <!-- Primary + On Primary pair -->
+              <div class="color-pair">
+                <div
+                  class="color-block main"
+                  [style.background]="currentScheme().primary"
+                >
+                  <span [style.color]="currentScheme().onPrimary">Primary</span>
+                </div>
+                <div
+                  class="color-block on"
+                  [style.background]="currentScheme().onPrimary"
+                >
+                  <span [style.color]="currentScheme().primary"
+                    >On Primary</span
+                  >
                 </div>
               </div>
-            }
+              <!-- Primary Container + On Primary Container pair -->
+              <div class="color-pair">
+                <div
+                  class="color-block container"
+                  [style.background]="currentScheme().primaryContainer"
+                >
+                  <span [style.color]="currentScheme().onPrimaryContainer"
+                    >Primary Container</span
+                  >
+                </div>
+                <div
+                  class="color-block on-container"
+                  [style.background]="currentScheme().onPrimaryContainer"
+                >
+                  <span [style.color]="currentScheme().primaryContainer"
+                    >On Primary Container</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- Secondary Column -->
+            <div class="color-column">
+              <!-- Secondary + On Secondary pair -->
+              <div class="color-pair">
+                <div
+                  class="color-block main"
+                  [style.background]="currentScheme().secondary"
+                >
+                  <span [style.color]="currentScheme().onSecondary"
+                    >Secondary</span
+                  >
+                </div>
+                <div
+                  class="color-block on"
+                  [style.background]="currentScheme().onSecondary"
+                >
+                  <span [style.color]="currentScheme().secondary"
+                    >On Secondary</span
+                  >
+                </div>
+              </div>
+              <!-- Secondary Container + On Secondary Container pair -->
+              <div class="color-pair">
+                <div
+                  class="color-block container"
+                  [style.background]="currentScheme().secondaryContainer"
+                >
+                  <span [style.color]="currentScheme().onSecondaryContainer"
+                    >Secondary Container</span
+                  >
+                </div>
+                <div
+                  class="color-block on-container"
+                  [style.background]="currentScheme().onSecondaryContainer"
+                >
+                  <span [style.color]="currentScheme().secondaryContainer"
+                    >On Secondary Container</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- Tertiary Column -->
+            <div class="color-column">
+              <!-- Tertiary + On Tertiary pair -->
+              <div class="color-pair">
+                <div
+                  class="color-block main"
+                  [style.background]="currentScheme().tertiary"
+                >
+                  <span [style.color]="currentScheme().onTertiary"
+                    >Tertiary</span
+                  >
+                </div>
+                <div
+                  class="color-block on"
+                  [style.background]="currentScheme().onTertiary"
+                >
+                  <span [style.color]="currentScheme().tertiary"
+                    >On Tertiary</span
+                  >
+                </div>
+              </div>
+              <!-- Tertiary Container + On Tertiary Container pair -->
+              <div class="color-pair">
+                <div
+                  class="color-block container"
+                  [style.background]="currentScheme().tertiaryContainer"
+                >
+                  <span [style.color]="currentScheme().onTertiaryContainer"
+                    >Tertiary Container</span
+                  >
+                </div>
+                <div
+                  class="color-block on-container"
+                  [style.background]="currentScheme().onTertiaryContainer"
+                >
+                  <span [style.color]="currentScheme().tertiaryContainer"
+                    >On Tertiary Container</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- Error Column -->
+            <div class="color-column">
+              <!-- Error + On Error pair -->
+              <div class="color-pair">
+                <div
+                  class="color-block main"
+                  [style.background]="currentScheme().error"
+                >
+                  <span [style.color]="currentScheme().onError">Error</span>
+                </div>
+                <div
+                  class="color-block on"
+                  [style.background]="currentScheme().onError"
+                >
+                  <span [style.color]="currentScheme().error">On Error</span>
+                </div>
+              </div>
+              <!-- Error Container + On Error Container pair -->
+              <div class="color-pair">
+                <div
+                  class="color-block container"
+                  [style.background]="currentScheme().errorContainer"
+                >
+                  <span [style.color]="currentScheme().onErrorContainer"
+                    >Error Container</span
+                  >
+                </div>
+                <div
+                  class="color-block on-container"
+                  [style.background]="currentScheme().onErrorContainer"
+                >
+                  <span [style.color]="currentScheme().errorContainer"
+                    >On Error Container</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Surface Colors Row -->
+          <div class="surface-section">
+            <h4>Surface Colors</h4>
+            <div class="surface-row">
+              <div
+                class="surface-block"
+                [style.background]="currentScheme().surfaceDim"
+                [matTooltip]="'Surface Dim: ' + currentScheme().surfaceDim"
+              >
+                <span
+                  [style.color]="getTextColorFor(currentScheme().surfaceDim)"
+                >
+                  Dim
+                </span>
+              </div>
+              <div
+                class="surface-block"
+                [style.background]="currentScheme().surface"
+                [matTooltip]="'Surface: ' + currentScheme().surface"
+              >
+                <span [style.color]="getTextColorFor(currentScheme().surface)">
+                  Surface
+                </span>
+              </div>
+              <div
+                class="surface-block"
+                [style.background]="currentScheme().surfaceBright"
+                [matTooltip]="
+                  'Surface Bright: ' + currentScheme().surfaceBright
+                "
+              >
+                <span
+                  [style.color]="getTextColorFor(currentScheme().surfaceBright)"
+                >
+                  Bright
+                </span>
+              </div>
+            </div>
+
+            <div class="surface-row">
+              <div
+                class="surface-block"
+                [style.background]="currentScheme().surfaceContainerLowest"
+                [matTooltip]="
+                  'Container Lowest: ' + currentScheme().surfaceContainerLowest
+                "
+              >
+                <span
+                  [style.color]="
+                    getTextColorFor(currentScheme().surfaceContainerLowest)
+                  "
+                >
+                  Lowest
+                </span>
+              </div>
+              <div
+                class="surface-block"
+                [style.background]="currentScheme().surfaceContainerLow"
+                [matTooltip]="
+                  'Container Low: ' + currentScheme().surfaceContainerLow
+                "
+              >
+                <span
+                  [style.color]="
+                    getTextColorFor(currentScheme().surfaceContainerLow)
+                  "
+                >
+                  Low
+                </span>
+              </div>
+              <div
+                class="surface-block"
+                [style.background]="currentScheme().surfaceContainer"
+                [matTooltip]="'Container: ' + currentScheme().surfaceContainer"
+              >
+                <span
+                  [style.color]="
+                    getTextColorFor(currentScheme().surfaceContainer)
+                  "
+                >
+                  Container
+                </span>
+              </div>
+              <div
+                class="surface-block"
+                [style.background]="currentScheme().surfaceContainerHigh"
+                [matTooltip]="
+                  'Container High: ' + currentScheme().surfaceContainerHigh
+                "
+              >
+                <span
+                  [style.color]="
+                    getTextColorFor(currentScheme().surfaceContainerHigh)
+                  "
+                >
+                  High
+                </span>
+              </div>
+              <div
+                class="surface-block"
+                [style.background]="currentScheme().surfaceContainerHighest"
+                [matTooltip]="
+                  'Container Highest: ' +
+                  currentScheme().surfaceContainerHighest
+                "
+              >
+                <span
+                  [style.color]="
+                    getTextColorFor(currentScheme().surfaceContainerHighest)
+                  "
+                >
+                  Highest
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Outline & Inverse -->
+          <div class="other-colors">
+            <div class="color-row">
+              <div
+                class="small-block"
+                [style.background]="currentScheme().outline"
+                [matTooltip]="'Outline: ' + currentScheme().outline"
+              >
+                <span [style.color]="getTextColorFor(currentScheme().outline)">
+                  Outline
+                </span>
+              </div>
+              <div
+                class="small-block"
+                [style.background]="currentScheme().outlineVariant"
+                [matTooltip]="
+                  'Outline Variant: ' + currentScheme().outlineVariant
+                "
+              >
+                <span
+                  [style.color]="
+                    getTextColorFor(currentScheme().outlineVariant)
+                  "
+                >
+                  Outline Variant
+                </span>
+              </div>
+              <div
+                class="small-block"
+                [style.background]="currentScheme().inverseSurface"
+                [matTooltip]="
+                  'Inverse Surface: ' + currentScheme().inverseSurface
+                "
+              >
+                <span
+                  [style.color]="
+                    getTextColorFor(currentScheme().inverseSurface)
+                  "
+                >
+                  Inverse Surface
+                </span>
+              </div>
+              <div
+                class="small-block"
+                [style.background]="currentScheme().inversePrimary"
+                [matTooltip]="
+                  'Inverse Primary: ' + currentScheme().inversePrimary
+                "
+              >
+                <span
+                  [style.color]="
+                    getTextColorFor(currentScheme().inversePrimary)
+                  "
+                >
+                  Inverse Primary
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       }
 
-      <!-- Palettes View -->
+      <!-- Tonal Palettes View -->
       @if (viewMode() === 'palettes') {
         <div class="palettes-view">
-          @for (paletteName of paletteNames; track paletteName) {
-            <div class="palette-section">
-              <h4>{{ formatPaletteName(paletteName) }}</h4>
+          @for (palette of paletteEntries; track palette.name) {
+            <div class="palette-row">
+              <div class="palette-label">{{ palette.label }}</div>
               <div class="tonal-strip">
-                @for (tone of toneValues; track tone) {
+                @for (tone of extendedTones; track tone) {
                   <div
                     class="tone-cell"
-                    [style.background]="getPaletteColor(paletteName, tone)"
+                    [style.background]="getPaletteColor(palette.name, tone)"
                     [matTooltip]="
-                      'Tone ' + tone + ': ' + getPaletteColor(paletteName, tone)
+                      'Tone ' +
+                      tone +
+                      ': ' +
+                      getPaletteColor(palette.name, tone)
                     "
                   >
                     <span
-                      class="tone-label"
+                      class="tone-number"
                       [style.color]="
-                        getTextColorFor(getPaletteColor(paletteName, tone))
+                        getTextColorFor(getPaletteColor(palette.name, tone))
                       "
                     >
                       {{ tone }}
@@ -162,58 +464,15 @@ type SchemeMode = 'light' | 'dark';
         </div>
       }
 
-      <!-- Tones View (Single Palette Detail) -->
-      @if (viewMode() === 'tones') {
-        <div class="tones-view">
-          <div class="tones-header">
-            <label>Select Palette:</label>
-            <select
-              [value]="selectedPalette()"
-              (change)="onPaletteSelect($event)"
-              class="palette-select"
-            >
-              @for (name of paletteNames; track name) {
-                <option [value]="name">{{ formatPaletteName(name) }}</option>
-              }
-            </select>
-          </div>
-
-          <div class="tones-grid">
-            @for (tone of toneValues; track tone) {
-              <div class="tone-card">
-                <div
-                  class="tone-preview"
-                  [style.background]="getSelectedPaletteColor(tone)"
-                >
-                  <span
-                    [style.color]="
-                      getTextColorFor(getSelectedPaletteColor(tone))
-                    "
-                  >
-                    Aa
-                  </span>
-                </div>
-                <div class="tone-info">
-                  <span class="tone-number">{{ tone }}</span>
-                  <span class="tone-hex">{{
-                    getSelectedPaletteColor(tone)
-                  }}</span>
-                </div>
-              </div>
-            }
-          </div>
-        </div>
-      }
-
-      <!-- Export Section -->
+      <!-- Export Actions -->
       <div class="export-section">
         <button mat-stroked-button (click)="copyScheme('css')">
           <mat-icon>content_copy</mat-icon>
-          Copy CSS
+          Copy CSS Variables
         </button>
         <button mat-stroked-button (click)="copyScheme('scss')">
           <mat-icon>code</mat-icon>
-          Copy SCSS
+          Copy SCSS Variables
         </button>
         <button mat-flat-button color="primary" (click)="applyToTheme()">
           <mat-icon>check</mat-icon>
@@ -230,7 +489,8 @@ type SchemeMode = 'light' | 'dark';
         gap: 1.5rem;
       }
 
-      .m3-preview-header {
+      /* Header */
+      .m3-header {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
@@ -238,27 +498,29 @@ type SchemeMode = 'light' | 'dark';
         gap: 1rem;
       }
 
-      .header-info {
+      .header-left {
         h3 {
-          margin: 0 0 0.25rem;
+          margin: 0 0 0.5rem;
           font-size: 1.25rem;
           font-weight: 600;
           color: var(--ax-text-heading);
         }
+      }
 
-        .subtitle {
-          margin: 0;
+      .seed-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        .label {
           font-size: 0.875rem;
           color: var(--ax-text-secondary);
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
         }
       }
 
       .seed-badge {
-        padding: 0.125rem 0.5rem;
-        border-radius: var(--ax-radius-sm);
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--ax-radius-md);
         font-family: monospace;
         font-size: 0.75rem;
         font-weight: 600;
@@ -267,21 +529,11 @@ type SchemeMode = 'light' | 'dark';
       .view-toggle {
         ::ng-deep {
           .mat-button-toggle-button {
-            height: 36px;
+            height: 40px;
           }
-
           .mat-button-toggle-label-content {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-            padding: 0 0.75rem;
-            font-size: 0.75rem;
-          }
-
-          mat-icon {
-            font-size: 18px;
-            width: 18px;
-            height: 18px;
+            padding: 0 1rem;
+            font-size: 0.875rem;
           }
         }
       }
@@ -290,84 +542,177 @@ type SchemeMode = 'light' | 'dark';
       .scheme-view {
         display: flex;
         flex-direction: column;
-        gap: 1rem;
+        gap: 1.5rem;
       }
 
-      .scheme-toggle {
+      .mode-toggle {
         display: flex;
         justify-content: center;
+
+        ::ng-deep {
+          .mat-button-toggle-label-content {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0 1rem;
+          }
+          mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+          }
+        }
       }
 
-      .scheme-grid {
+      /* 4-Column Color Grid (Google-style paired colors) */
+      .color-grid-4col {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 1rem;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.75rem;
       }
 
-      .scheme-category {
-        background: var(--ax-background-default);
-        border: 1px solid var(--ax-border-muted);
-        border-radius: var(--ax-radius-md);
-        padding: 1rem;
+      .color-column {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
 
+      /* Color pair container - groups main + on colors together */
+      .color-pair {
+        border-radius: var(--ax-radius-lg);
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      }
+
+      .color-block {
+        padding: 1rem 0.875rem;
+        display: flex;
+        align-items: flex-start;
+        cursor: pointer;
+        transition: filter 0.15s ease;
+
+        &:hover {
+          filter: brightness(1.05);
+        }
+
+        span {
+          font-size: 0.8125rem;
+          font-weight: 500;
+        }
+
+        /* Main color block - larger */
+        &.main {
+          min-height: 72px;
+        }
+
+        /* On color block - smaller, attached to main */
+        &.on {
+          min-height: 40px;
+        }
+
+        /* Container block - larger */
+        &.container {
+          min-height: 72px;
+        }
+
+        /* On container block - smaller */
+        &.on-container {
+          min-height: 40px;
+        }
+      }
+
+      /* Surface Colors */
+      .surface-section {
         h4 {
           margin: 0 0 0.75rem;
-          font-size: 0.875rem;
+          font-size: 0.9375rem;
           font-weight: 600;
           color: var(--ax-text-heading);
         }
       }
 
-      .color-roles {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
+      .surface-row {
+        display: flex;
         gap: 0.5rem;
+        margin-bottom: 0.5rem;
       }
 
-      .color-role {
-        padding: 0.75rem 0.5rem;
-        border-radius: var(--ax-radius-sm);
+      .surface-block {
+        flex: 1;
+        padding: 1rem 0.75rem;
+        border-radius: var(--ax-radius-md);
         display: flex;
-        flex-direction: column;
-        gap: 0.125rem;
+        align-items: center;
+        justify-content: center;
         cursor: pointer;
         transition: transform 0.15s ease;
 
         &:hover {
           transform: scale(1.02);
         }
-      }
 
-      .role-name {
-        font-size: 0.625rem;
-        font-weight: 500;
-        text-transform: capitalize;
-        opacity: 0.9;
-      }
-
-      .role-value {
-        font-family: monospace;
-        font-size: 0.625rem;
-        opacity: 0.75;
-      }
-
-      /* Palettes View */
-      .palettes-view {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-      }
-
-      .palette-section {
-        h4 {
-          margin: 0 0 0.5rem;
-          font-size: 0.875rem;
-          font-weight: 600;
-          color: var(--ax-text-heading);
+        span {
+          font-size: 0.75rem;
+          font-weight: 500;
         }
       }
 
+      /* Other Colors (Outline, Inverse) */
+      .other-colors {
+        padding-top: 0.5rem;
+      }
+
+      .color-row {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .small-block {
+        flex: 1;
+        padding: 0.875rem 0.5rem;
+        border-radius: var(--ax-radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: transform 0.15s ease;
+
+        &:hover {
+          transform: scale(1.02);
+        }
+
+        span {
+          font-size: 0.6875rem;
+          font-weight: 500;
+          text-align: center;
+        }
+      }
+
+      /* Tonal Palettes View (Google-style full-width strips) */
+      .palettes-view {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .palette-row {
+        display: flex;
+        align-items: stretch;
+        gap: 0.75rem;
+      }
+
+      .palette-label {
+        width: 100px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: var(--ax-text-secondary);
+      }
+
       .tonal-strip {
+        flex: 1;
         display: flex;
         border-radius: var(--ax-radius-md);
         overflow: hidden;
@@ -375,101 +720,28 @@ type SchemeMode = 'light' | 'dark';
 
       .tone-cell {
         flex: 1;
+        min-width: 0;
         aspect-ratio: 1;
-        min-width: 40px;
+        min-height: 48px;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
         transition: transform 0.15s ease;
+        position: relative;
 
         &:hover {
-          transform: scale(1.1);
+          transform: scale(1.15);
           z-index: 1;
+          border-radius: var(--ax-radius-sm);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
-      }
-
-      .tone-label {
-        font-size: 0.625rem;
-        font-weight: 600;
-      }
-
-      /* Tones View */
-      .tones-view {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-      }
-
-      .tones-header {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-
-        label {
-          font-size: 0.875rem;
-          font-weight: 500;
-          color: var(--ax-text-secondary);
-        }
-      }
-
-      .palette-select {
-        padding: 0.5rem 1rem;
-        border: 1px solid var(--ax-border-default);
-        border-radius: var(--ax-radius-md);
-        background: var(--ax-background-default);
-        font-size: 0.875rem;
-        color: var(--ax-text-primary);
-        cursor: pointer;
-
-        &:focus {
-          outline: none;
-          border-color: var(--ax-brand-500);
-        }
-      }
-
-      .tones-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-        gap: 0.75rem;
-      }
-
-      .tone-card {
-        display: flex;
-        flex-direction: column;
-        border-radius: var(--ax-radius-md);
-        overflow: hidden;
-        border: 1px solid var(--ax-border-muted);
-      }
-
-      .tone-preview {
-        aspect-ratio: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        font-weight: 600;
-      }
-
-      .tone-info {
-        padding: 0.5rem;
-        background: var(--ax-background-default);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.125rem;
       }
 
       .tone-number {
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: var(--ax-text-heading);
-      }
-
-      .tone-hex {
-        font-family: monospace;
         font-size: 0.625rem;
-        color: var(--ax-text-secondary);
+        font-weight: 600;
+        opacity: 0.9;
       }
 
       /* Export Section */
@@ -484,18 +756,33 @@ type SchemeMode = 'light' | 'dark';
         button {
           display: flex;
           align-items: center;
-          gap: 0.25rem;
+          gap: 0.375rem;
         }
       }
 
       /* Responsive */
+      @media (max-width: 1024px) {
+        .color-grid-4col {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
       @media (max-width: 768px) {
-        .m3-preview-header {
+        .m3-header {
           flex-direction: column;
         }
 
-        .color-roles {
+        .color-grid-4col {
           grid-template-columns: 1fr;
+        }
+
+        .palette-row {
+          flex-direction: column;
+          gap: 0.25rem;
+        }
+
+        .palette-label {
+          width: auto;
         }
 
         .tonal-strip {
@@ -503,7 +790,18 @@ type SchemeMode = 'light' | 'dark';
         }
 
         .tone-cell {
-          min-width: 30px;
+          min-width: calc(100% / 9);
+          aspect-ratio: 1;
+        }
+
+        .surface-row,
+        .color-row {
+          flex-wrap: wrap;
+        }
+
+        .surface-block,
+        .small-block {
+          min-width: calc(50% - 0.25rem);
         }
       }
     `,
@@ -522,25 +820,19 @@ export class AxM3ColorPreviewComponent {
   // Internal state
   viewMode = signal<ViewMode>('scheme');
   schemeMode = signal<SchemeMode>('light');
-  selectedPalette = signal<keyof M3CorePalettes>('primary');
 
-  // Tone values for iteration
-  readonly toneValues: ToneValue[] = [
-    0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 99, 100,
+  // Extended tones for Google-style palette view
+  readonly extendedTones: ToneValue[] = EXTENDED_TONES;
+
+  // Palette entries for iteration
+  readonly paletteEntries: { name: keyof M3CorePalettes; label: string }[] = [
+    { name: 'primary', label: 'Primary' },
+    { name: 'secondary', label: 'Secondary' },
+    { name: 'tertiary', label: 'Tertiary' },
+    { name: 'neutral', label: 'Neutral' },
+    { name: 'neutralVariant', label: 'Neutral Variant' },
+    { name: 'error', label: 'Error' },
   ];
-
-  // Palette names
-  readonly paletteNames: (keyof M3CorePalettes)[] = [
-    'primary',
-    'secondary',
-    'tertiary',
-    'neutral',
-    'neutralVariant',
-    'error',
-  ];
-
-  // Color categories for scheme view
-  readonly colorCategories = getM3ColorRoleCategories();
 
   // Computed palettes
   corePalettes = computed(() => generateM3CorePalettes(this.seedColor()));
@@ -554,18 +846,6 @@ export class AxM3ColorPreviewComponent {
     return this.schemeMode() === 'light' ? schemes.light : schemes.dark;
   });
 
-  // Get seed text color for badge
-  getSeedTextColor(): string {
-    const rgb = this.hexToRgb(this.seedColor());
-    const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255;
-    return luminance > 0.5 ? '#000000' : '#FFFFFF';
-  }
-
-  // Get color from current scheme
-  getSchemeColor(role: keyof M3ColorScheme): string {
-    return this.currentScheme()[role];
-  }
-
   // Get text color for a given background
   getTextColorFor(bgColor: string): string {
     const rgb = this.hexToRgb(bgColor);
@@ -573,71 +853,9 @@ export class AxM3ColorPreviewComponent {
     return luminance > 0.5 ? '#000000' : '#FFFFFF';
   }
 
-  // Get color tooltip
-  getColorTooltip(role: keyof M3ColorScheme): string {
-    const color = this.getSchemeColor(role);
-    const bgRole = this.getBackgroundRoleFor(role);
-    if (bgRole) {
-      const bgColor = this.getSchemeColor(bgRole);
-      const contrast = getContrastRatio(color, bgColor).toFixed(2);
-      return `${color} | Contrast: ${contrast}:1`;
-    }
-    return color;
-  }
-
-  // Get background role for "on" colors
-  private getBackgroundRoleFor(
-    role: keyof M3ColorScheme,
-  ): keyof M3ColorScheme | null {
-    const mappings: Partial<Record<keyof M3ColorScheme, keyof M3ColorScheme>> =
-      {
-        onPrimary: 'primary',
-        onPrimaryContainer: 'primaryContainer',
-        onSecondary: 'secondary',
-        onSecondaryContainer: 'secondaryContainer',
-        onTertiary: 'tertiary',
-        onTertiaryContainer: 'tertiaryContainer',
-        onError: 'error',
-        onErrorContainer: 'errorContainer',
-        onSurface: 'surface',
-        onSurfaceVariant: 'surfaceVariant',
-        onBackground: 'background',
-      };
-    return mappings[role] || null;
-  }
-
-  // Format role name for display
-  formatRoleName(role: string): string {
-    return formatM3ColorName(role);
-  }
-
-  // Format palette name
-  formatPaletteName(name: string): string {
-    const names: Record<string, string> = {
-      primary: 'Primary',
-      secondary: 'Secondary',
-      tertiary: 'Tertiary',
-      neutral: 'Neutral',
-      neutralVariant: 'Neutral Variant',
-      error: 'Error',
-    };
-    return names[name] || name;
-  }
-
-  // Get palette color
+  // Get palette color by name and tone
   getPaletteColor(paletteName: keyof M3CorePalettes, tone: ToneValue): string {
     return this.corePalettes()[paletteName][tone];
-  }
-
-  // Get selected palette color
-  getSelectedPaletteColor(tone: ToneValue): string {
-    return this.corePalettes()[this.selectedPalette()][tone];
-  }
-
-  // Handle palette selection
-  onPaletteSelect(event: Event): void {
-    const select = event.target as HTMLSelectElement;
-    this.selectedPalette.set(select.value as keyof M3CorePalettes);
   }
 
   // Copy scheme to clipboard
