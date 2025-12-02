@@ -1150,6 +1150,108 @@ export class ThemeBuilderService {
   }
 
   /**
+   * Import theme from JSON string
+   */
+  importFromJSON(jsonString: string): {
+    success: boolean;
+    error?: string;
+    theme?: ThemeBuilderConfig;
+  } {
+    try {
+      const parsed = JSON.parse(jsonString);
+
+      // Validate basic structure
+      if (!parsed || typeof parsed !== 'object') {
+        return { success: false, error: 'Invalid JSON structure' };
+      }
+
+      // Check for required fields
+      const requiredFields = ['colors', 'background', 'text', 'border'];
+      for (const field of requiredFields) {
+        if (!parsed[field]) {
+          return { success: false, error: `Missing required field: ${field}` };
+        }
+      }
+
+      // Merge with default theme to fill in missing values
+      const mergedTheme: ThemeBuilderConfig = {
+        ...structuredClone(DEFAULT_LIGHT_THEME),
+        ...parsed,
+        colors: {
+          ...structuredClone(DEFAULT_LIGHT_THEME.colors),
+          ...parsed.colors,
+        },
+        background: {
+          ...structuredClone(DEFAULT_LIGHT_THEME.background),
+          ...parsed.background,
+        },
+        text: {
+          ...structuredClone(DEFAULT_LIGHT_THEME.text),
+          ...parsed.text,
+        },
+        border: {
+          ...structuredClone(DEFAULT_LIGHT_THEME.border),
+          ...parsed.border,
+        },
+        typography: {
+          ...structuredClone(DEFAULT_LIGHT_THEME.typography),
+          ...parsed.typography,
+        },
+        spacing: {
+          ...structuredClone(DEFAULT_LIGHT_THEME.spacing),
+          ...parsed.spacing,
+        },
+        radius: {
+          ...structuredClone(DEFAULT_LIGHT_THEME.radius),
+          ...parsed.radius,
+        },
+        shadows: {
+          ...structuredClone(DEFAULT_LIGHT_THEME.shadows),
+          ...parsed.shadows,
+        },
+      };
+
+      this._currentTheme.set(mergedTheme);
+      this._hasChanges.set(true);
+
+      return { success: true, theme: mergedTheme };
+    } catch (e) {
+      return {
+        success: false,
+        error: e instanceof Error ? e.message : 'Failed to parse JSON',
+      };
+    }
+  }
+
+  /**
+   * Import theme from file (used with file input)
+   */
+  importFromFile(file: File): Promise<{
+    success: boolean;
+    error?: string;
+    theme?: ThemeBuilderConfig;
+  }> {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        const content = e.target?.result as string;
+        if (!content) {
+          resolve({ success: false, error: 'Failed to read file' });
+          return;
+        }
+        resolve(this.importFromJSON(content));
+      };
+
+      reader.onerror = () => {
+        resolve({ success: false, error: 'Failed to read file' });
+      };
+
+      reader.readAsText(file);
+    });
+  }
+
+  /**
    * Apply theme to document (live preview)
    */
   applyToDocument(): void {

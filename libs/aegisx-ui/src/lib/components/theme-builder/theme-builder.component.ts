@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  signal,
+  ViewChild,
+  ElementRef,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -82,6 +89,19 @@ import type { M3ColorScheme } from './m3-color.util';
               }
             </mat-select>
           </mat-form-field>
+
+          <!-- Import Button -->
+          <button mat-stroked-button (click)="triggerImport()">
+            <mat-icon>upload</mat-icon>
+            Import
+          </button>
+          <input
+            #fileInput
+            type="file"
+            accept=".json"
+            style="display: none"
+            (change)="onFileSelected($event)"
+          />
 
           <!-- Export Menu -->
           <button mat-stroked-button [matMenuTriggerFor]="exportMenu">
@@ -1899,6 +1919,9 @@ export class AxThemeBuilderComponent {
   readonly themeService = inject(ThemeBuilderService);
   private snackBar = inject(MatSnackBar);
 
+  // File input reference for Import functionality
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+
   // Section navigation
   readonly activeSection = signal<ThemeSection>('colors');
 
@@ -2538,5 +2561,47 @@ export class AxThemeBuilderComponent {
   deleteSavedTheme(themeId: string): void {
     this.themeService.deleteSavedTheme(themeId);
     this.showNotification('Theme deleted');
+  }
+
+  // ========== Import Theme Methods ==========
+
+  /**
+   * Trigger file input click for importing theme from JSON
+   */
+  triggerImport(): void {
+    this.fileInput.nativeElement.click();
+  }
+
+  /**
+   * Handle file selection for theme import
+   */
+  async onFileSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    // Validate file type
+    if (!file.name.endsWith('.json')) {
+      this.showNotification('Please select a JSON file');
+      input.value = '';
+      return;
+    }
+
+    // Import the theme
+    const result = await this.themeService.importFromFile(file);
+
+    if (result.success) {
+      this.showNotification(
+        `Theme "${result.theme?.name || 'Imported'}" loaded successfully!`,
+      );
+    } else {
+      this.showNotification(`Import failed: ${result.error}`);
+    }
+
+    // Reset file input for future imports
+    input.value = '';
   }
 }

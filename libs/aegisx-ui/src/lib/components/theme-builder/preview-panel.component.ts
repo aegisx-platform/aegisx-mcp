@@ -1,4 +1,11 @@
-import { Component, Input, inject } from '@angular/core';
+import {
+  Component,
+  Input,
+  inject,
+  computed,
+  effect,
+  ElementRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -1291,8 +1298,64 @@ import { ThemeBuilderService } from './theme-builder.service';
 })
 export class AxThemePreviewPanelComponent {
   private themeService = inject(ThemeBuilderService);
+  private elementRef = inject(ElementRef);
 
   @Input() previewMode: 'light' | 'dark' = 'light';
+
+  // Computed CSS style that updates in real-time with theme changes
+  readonly themeStyles = computed(() => {
+    const theme = this.themeService.currentTheme();
+    const styles: Record<string, string> = {};
+
+    // Apply colors
+    Object.entries(theme.colors).forEach(([colorName, palette]) => {
+      Object.entries(palette).forEach(([shade, value]) => {
+        styles[`--ax-${colorName}-${shade}`] = value;
+      });
+    });
+
+    // Apply background
+    Object.entries(theme.background).forEach(([key, value]) => {
+      styles[`--ax-background-${key}`] = value;
+    });
+
+    // Apply text
+    Object.entries(theme.text).forEach(([key, value]) => {
+      styles[`--ax-text-${key}`] = value;
+    });
+
+    // Apply border
+    Object.entries(theme.border).forEach(([key, value]) => {
+      styles[`--ax-border-${key}`] = value;
+    });
+
+    // Apply radius
+    Object.entries(theme.radius).forEach(([key, value]) => {
+      styles[`--ax-radius-${key}`] = value;
+    });
+
+    // Apply shadows
+    Object.entries(theme.shadows).forEach(([key, value]) => {
+      styles[`--ax-shadow-${key}`] = value;
+    });
+
+    return styles;
+  });
+
+  constructor() {
+    // Effect to apply CSS variables to the preview panel container
+    effect(() => {
+      const styles = this.themeStyles();
+      const element = this.elementRef.nativeElement as HTMLElement;
+      const container = element.querySelector('.preview-panel') as HTMLElement;
+
+      if (container) {
+        Object.entries(styles).forEach(([prop, value]) => {
+          container.style.setProperty(prop, value);
+        });
+      }
+    });
+  }
 
   toggleMode(): void {
     this.themeService.togglePreviewMode();
