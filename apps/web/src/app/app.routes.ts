@@ -17,10 +17,20 @@ import { AuthGuard, GuestGuard } from './core/auth';
  */
 export const appRoutes: Route[] = [
   // ============================================
-  // Authentication Routes (Empty Layout - Guest Only)
+  // Default Redirect (must be first with pathMatch: 'full')
   // ============================================
   {
     path: '',
+    redirectTo: 'portal',
+    pathMatch: 'full',
+  },
+
+  // ============================================
+  // Authentication Routes (Empty Layout - Guest Only)
+  // Each route uses AuthShell as parent with actual page as child
+  // ============================================
+  {
+    path: 'login',
     loadComponent: () =>
       import('./features/auth/auth-shell.component').then(
         (m) => m.AuthShellComponent,
@@ -28,31 +38,71 @@ export const appRoutes: Route[] = [
     canActivate: [GuestGuard],
     children: [
       {
-        path: 'login',
+        path: '',
         loadComponent: () =>
           import('./pages/auth/login.page').then((m) => m.LoginPage),
       },
+    ],
+  },
+  {
+    path: 'register',
+    loadComponent: () =>
+      import('./features/auth/auth-shell.component').then(
+        (m) => m.AuthShellComponent,
+      ),
+    canActivate: [GuestGuard],
+    children: [
       {
-        path: 'forgot-password',
+        path: '',
+        loadComponent: () =>
+          import('./pages/auth/register.page').then((m) => m.RegisterPage),
+      },
+    ],
+  },
+  {
+    path: 'forgot-password',
+    loadComponent: () =>
+      import('./features/auth/auth-shell.component').then(
+        (m) => m.AuthShellComponent,
+      ),
+    canActivate: [GuestGuard],
+    children: [
+      {
+        path: '',
         loadComponent: () =>
           import('./pages/auth/forgot-password.page').then(
             (m) => m.ForgotPasswordPage,
           ),
       },
+    ],
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () =>
+      import('./features/auth/auth-shell.component').then(
+        (m) => m.AuthShellComponent,
+      ),
+    canActivate: [GuestGuard],
+    children: [
       {
-        path: 'register',
-        loadComponent: () =>
-          import('./pages/auth/register.page').then((m) => m.RegisterPage),
-      },
-      {
-        path: 'reset-password',
+        path: '',
         loadComponent: () =>
           import('./pages/auth/reset-password.page').then(
             (m) => m.ResetPasswordPage,
           ),
       },
+    ],
+  },
+  {
+    path: 'verify-email',
+    loadComponent: () =>
+      import('./features/auth/auth-shell.component').then(
+        (m) => m.AuthShellComponent,
+      ),
+    canActivate: [GuestGuard],
+    children: [
       {
-        path: 'verify-email',
+        path: '',
         loadComponent: () =>
           import('./pages/auth/verify-email.page').then(
             (m) => m.VerifyEmailPage,
@@ -105,15 +155,6 @@ export const appRoutes: Route[] = [
       description: 'Warehouse and Inventory Management System',
       requiredPermissions: ['inventory.read', 'admin.*'],
     },
-  },
-
-  // ============================================
-  // Default Redirects
-  // ============================================
-  {
-    path: '',
-    redirectTo: 'portal',
-    pathMatch: 'full',
   },
 
   // ============================================
