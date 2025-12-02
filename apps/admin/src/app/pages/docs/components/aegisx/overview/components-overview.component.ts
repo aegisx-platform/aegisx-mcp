@@ -129,6 +129,40 @@ import { MatIconModule } from '@angular/material/icon';
         </div>
       </section>
 
+      <!-- Integrations Teaser Section -->
+      <section class="integrations-teaser">
+        <div class="teaser-content">
+          <div class="teaser-text">
+            <mat-icon class="teaser-icon">extension</mat-icon>
+            <div>
+              <h2>Powered by Industry-Leading Libraries</h2>
+              <p>
+                AegisX UI integrates with ngx-toastr, FullCalendar,
+                Highlight.js, and more. All with custom wrappers that follow our
+                design system.
+              </p>
+            </div>
+          </div>
+          <a
+            mat-flat-button
+            color="primary"
+            routerLink="/docs/integrations/overview"
+            class="teaser-btn"
+          >
+            <mat-icon>arrow_forward</mat-icon>
+            View All Integrations
+          </a>
+        </div>
+        <div class="teaser-badges">
+          @for (lib of externalLibraries; track lib.name) {
+            <div class="teaser-badge" [style.--badge-color]="lib.color">
+              <mat-icon>{{ lib.icon }}</mat-icon>
+              <span>{{ lib.name }}</span>
+            </div>
+          }
+        </div>
+      </section>
+
       <!-- Code Example Section -->
       <section class="code-example">
         <div class="section-header">
@@ -856,6 +890,93 @@ import { MatIconModule } from '@angular/material/icon';
         align-items: center;
         gap: 0.5rem;
       }
+
+      /* Integrations Teaser Section */
+      .integrations-teaser {
+        margin: 3rem 2rem;
+        padding: 2rem;
+        background: linear-gradient(
+          135deg,
+          var(--ax-brand-faint),
+          var(--ax-background-subtle)
+        );
+        border: 1px solid var(--ax-border-default);
+        border-radius: 20px;
+        max-width: 1200px;
+        margin-inline: auto;
+      }
+
+      .teaser-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 2rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+      }
+
+      .teaser-text {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        flex: 1;
+        min-width: 280px;
+      }
+
+      .teaser-icon {
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+        color: var(--ax-brand-default);
+        flex-shrink: 0;
+      }
+
+      .teaser-text h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--ax-text-heading);
+        margin: 0 0 0.5rem;
+      }
+
+      .teaser-text p {
+        font-size: 0.9375rem;
+        color: var(--ax-text-secondary);
+        margin: 0;
+        line-height: 1.5;
+      }
+
+      .teaser-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-shrink: 0;
+      }
+
+      .teaser-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+      }
+
+      .teaser-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: var(--ax-background-default);
+        border: 1px solid var(--ax-border-default);
+        border-radius: 100px;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: var(--ax-text-default);
+
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+          color: var(--badge-color, var(--ax-brand-default));
+        }
+      }
     `,
   ],
 })
@@ -953,6 +1074,15 @@ export class ComponentsOverviewComponent {
       count: '1 component',
       components: ['Drawer / Sheet'],
     },
+  ];
+
+  externalLibraries = [
+    { name: 'ngx-toastr', icon: 'layers', color: '#f97316' },
+    { name: 'Angular Material', icon: 'widgets', color: '#6366f1' },
+    { name: 'FullCalendar', icon: 'calendar_month', color: '#3b82f6' },
+    { name: 'Highlight.js', icon: 'code', color: '#10b981' },
+    { name: 'Gridster', icon: 'grid_view', color: '#8b5cf6' },
+    { name: 'Signature Pad', icon: 'draw', color: '#ec4899' },
   ];
 
   features = [
