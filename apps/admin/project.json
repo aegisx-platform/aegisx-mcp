@@ -50,6 +50,22 @@
           ],
           "outputHashing": "all"
         },
+        "gh-pages": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "2mb",
+              "maximumError": "2.5mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "12kb",
+              "maximumError": "20kb"
+            }
+          ],
+          "outputHashing": "all",
+          "baseHref": "/aegisx-ui/"
+        },
         "development": {
           "buildOptimizer": false,
           "optimization": false,
