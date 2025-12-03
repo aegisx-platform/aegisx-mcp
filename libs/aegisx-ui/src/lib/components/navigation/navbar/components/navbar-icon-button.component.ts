@@ -60,11 +60,12 @@ export type IconButtonSize = 'sm' | 'md' | 'lg';
   styles: [
     `
       .ax-navbar-icon-button {
-        color: var(--ax-text-secondary);
+        color: var(--ax-navbar-text-color, var(--ax-text-secondary));
         transition: color var(--ax-duration-fast, 150ms);
 
         &:hover:not(:disabled) {
-          color: var(--ax-text-primary);
+          color: var(--ax-navbar-text-color, var(--ax-text-primary));
+          opacity: 0.8;
         }
 
         &--sm {

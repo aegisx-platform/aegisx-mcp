@@ -178,13 +178,13 @@ export interface NavbarUserMenuItem {
       .ax-navbar-user__name {
         font-size: var(--ax-text-sm, 0.875rem);
         font-weight: 500;
-        color: var(--ax-text-primary);
+        color: var(--ax-navbar-text-color, var(--ax-text-primary));
         line-height: 1.2;
       }
 
       .ax-navbar-user__role {
         font-size: var(--ax-text-xs, 0.75rem);
-        color: var(--ax-text-secondary);
+        color: var(--ax-navbar-text-muted, var(--ax-text-secondary));
         line-height: 1.2;
       }
 
@@ -192,7 +192,7 @@ export interface NavbarUserMenuItem {
         font-size: 18px;
         width: 18px;
         height: 18px;
-        color: var(--ax-text-secondary);
+        color: var(--ax-navbar-text-muted, var(--ax-text-secondary));
         transition: transform var(--ax-duration-fast, 150ms);
       }
 

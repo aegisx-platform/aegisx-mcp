@@ -535,7 +535,7 @@ export class NavbarDemoComponent {
     { value: 'royal', label: 'Royal (Creative)', hex: '#7c3aed' },
     { value: 'royal-dark', label: 'Royal Dark', hex: '#5b21b6' },
     { value: 'forest', label: 'Forest (Growth)', hex: '#15803d' },
-    { value: 'amber', label: 'Amber (Energy)', hex: '#b45309' },
+    { value: 'amber', label: 'Amber (Energy)', hex: '#92400e' },
   ];
 
   alignments: { value: NavbarNavAlign; label: string; icon: string }[] = [

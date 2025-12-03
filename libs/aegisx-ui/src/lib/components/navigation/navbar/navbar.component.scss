@@ -377,6 +377,7 @@
 }
 
 // Amber - Energy, attention, warmth (Orange tones)
+// Using darker amber for better contrast with white text
 .ax-navbar--color-amber {
-  @include navbar-solid-color(#b45309); // Amber 700 - Warm attention
+  @include navbar-solid-color(#92400e); // Amber 800 - Better contrast
 }
