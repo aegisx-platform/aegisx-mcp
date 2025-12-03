@@ -954,21 +954,21 @@ $aegisx-dark-brand-inverted: #1a237e; // Indigo 900 (dark)
 
     /* RGB Color Variants (for opacity/rgba usage) */
     --ax-success-rgb:
-      #{color.red($aegisx-light-success-default)},
-      #{color.green($aegisx-light-success-default)},
-      #{color.blue($aegisx-light-success-default)};
+      #{color.channel($aegisx-light-success-default, 'red', $space: rgb)},
+      #{color.channel($aegisx-light-success-default, 'green', $space: rgb)},
+      #{color.channel($aegisx-light-success-default, 'blue', $space: rgb)};
     --ax-error-rgb:
-      #{color.red($aegisx-light-error-default)},
-      #{color.green($aegisx-light-error-default)},
-      #{color.blue($aegisx-light-error-default)};
+      #{color.channel($aegisx-light-error-default, 'red', $space: rgb)},
+      #{color.channel($aegisx-light-error-default, 'green', $space: rgb)},
+      #{color.channel($aegisx-light-error-default, 'blue', $space: rgb)};
     --ax-warning-rgb:
-      #{color.red($aegisx-light-warning-default)},
-      #{color.green($aegisx-light-warning-default)},
-      #{color.blue($aegisx-light-warning-default)};
+      #{color.channel($aegisx-light-warning-default, 'red', $space: rgb)},
+      #{color.channel($aegisx-light-warning-default, 'green', $space: rgb)},
+      #{color.channel($aegisx-light-warning-default, 'blue', $space: rgb)};
     --ax-info-rgb:
-      #{color.red($aegisx-light-info-default)},
-      #{color.green($aegisx-light-info-default)},
-      #{color.blue($aegisx-light-info-default)};
+      #{color.channel($aegisx-light-info-default, 'red', $space: rgb)},
+      #{color.channel($aegisx-light-info-default, 'green', $space: rgb)},
+      #{color.channel($aegisx-light-info-default, 'blue', $space: rgb)};
 
     /* White Color */
     --ax-white: #ffffff;
@@ -1354,21 +1354,21 @@ $aegisx-dark-brand-inverted: #1a237e; // Indigo 900 (dark)
 
     /* RGB Color Variants (for opacity/rgba usage) */
     --ax-success-rgb:
-      #{color.red($aegisx-dark-success-default)},
-      #{color.green($aegisx-dark-success-default)},
-      #{color.blue($aegisx-dark-success-default)};
+      #{color.channel($aegisx-dark-success-default, 'red', $space: rgb)},
+      #{color.channel($aegisx-dark-success-default, 'green', $space: rgb)},
+      #{color.channel($aegisx-dark-success-default, 'blue', $space: rgb)};
     --ax-error-rgb:
-      #{color.red($aegisx-dark-error-default)},
-      #{color.green($aegisx-dark-error-default)},
-      #{color.blue($aegisx-dark-error-default)};
+      #{color.channel($aegisx-dark-error-default, 'red', $space: rgb)},
+      #{color.channel($aegisx-dark-error-default, 'green', $space: rgb)},
+      #{color.channel($aegisx-dark-error-default, 'blue', $space: rgb)};
     --ax-warning-rgb:
-      #{color.red($aegisx-dark-warning-default)},
-      #{color.green($aegisx-dark-warning-default)},
-      #{color.blue($aegisx-dark-warning-default)};
+      #{color.channel($aegisx-dark-warning-default, 'red', $space: rgb)},
+      #{color.channel($aegisx-dark-warning-default, 'green', $space: rgb)},
+      #{color.channel($aegisx-dark-warning-default, 'blue', $space: rgb)};
     --ax-info-rgb:
-      #{color.red($aegisx-dark-info-default)},
-      #{color.green($aegisx-dark-info-default)},
-      #{color.blue($aegisx-dark-info-default)};
+      #{color.channel($aegisx-dark-info-default, 'red', $space: rgb)},
+      #{color.channel($aegisx-dark-info-default, 'green', $space: rgb)},
+      #{color.channel($aegisx-dark-info-default, 'blue', $space: rgb)};
 
     /* White Color */
     --ax-white: #ffffff;
