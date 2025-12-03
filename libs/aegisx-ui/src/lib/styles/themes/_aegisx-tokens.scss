@@ -31,6 +31,7 @@
    ============================================================ */
 
 @use 'sass:map';
+@use 'sass:color';
 
 /* ============================================================
    LIGHT THEME TOKEN VALUES
@@ -906,8 +907,14 @@ $aegisx-dark-brand-inverted: #1a237e; // Indigo 900 (dark)
     --ax-primary-subtle: var(--ax-brand-subtle);
     --ax-primary-emphasis: var(--ax-brand-emphasis);
     --ax-primary-inverted: var(--ax-brand-inverted);
-    --ax-primary-dark: #{darken($aegisx-light-brand-default, 10%)};
-    --ax-primary-light: #{lighten($aegisx-light-brand-default, 20%)};
+    --ax-primary-dark: #{color.adjust(
+        $aegisx-light-brand-default,
+        $lightness: -10%
+      )};
+    --ax-primary-light: #{color.adjust(
+        $aegisx-light-brand-default,
+        $lightness: 20%
+      )};
 
     /* Semantic Color Shorthands */
     --ax-success: var(--ax-success-default);
@@ -916,30 +923,52 @@ $aegisx-dark-brand-inverted: #1a237e; // Indigo 900 (dark)
     --ax-info: var(--ax-info-default);
 
     /* Color Dark/Light Variants */
-    --ax-success-dark: #{darken($aegisx-light-success-default, 10%)};
-    --ax-success-light: #{lighten($aegisx-light-success-default, 20%)};
-    --ax-error-dark: #{darken($aegisx-light-error-default, 10%)};
-    --ax-error-light: #{lighten($aegisx-light-error-default, 20%)};
-    --ax-warning-dark: #{darken($aegisx-light-warning-default, 10%)};
-    --ax-warning-light: #{lighten($aegisx-light-warning-default, 20%)};
-    --ax-info-dark: #{darken($aegisx-light-info-default, 10%)};
+    --ax-success-dark: #{color.adjust(
+        $aegisx-light-success-default,
+        $lightness: -10%
+      )};
+    --ax-success-light: #{color.adjust(
+        $aegisx-light-success-default,
+        $lightness: 20%
+      )};
+    --ax-error-dark: #{color.adjust(
+        $aegisx-light-error-default,
+        $lightness: -10%
+      )};
+    --ax-error-light: #{color.adjust(
+        $aegisx-light-error-default,
+        $lightness: 20%
+      )};
+    --ax-warning-dark: #{color.adjust(
+        $aegisx-light-warning-default,
+        $lightness: -10%
+      )};
+    --ax-warning-light: #{color.adjust(
+        $aegisx-light-warning-default,
+        $lightness: 20%
+      )};
+    --ax-info-dark: #{color.adjust(
+        $aegisx-light-info-default,
+        $lightness: -10%
+      )};
 
     /* RGB Color Variants (for opacity/rgba usage) */
     --ax-success-rgb:
-      #{red($aegisx-light-success-default)},
-      #{green($aegisx-light-success-default)},
-      #{blue($aegisx-light-success-default)};
+      #{color.red($aegisx-light-success-default)},
+      #{color.green($aegisx-light-success-default)},
+      #{color.blue($aegisx-light-success-default)};
     --ax-error-rgb:
-      #{red($aegisx-light-error-default)},
-      #{green($aegisx-light-error-default)},
-      #{blue($aegisx-light-error-default)};
+      #{color.red($aegisx-light-error-default)},
+      #{color.green($aegisx-light-error-default)},
+      #{color.blue($aegisx-light-error-default)};
     --ax-warning-rgb:
-      #{red($aegisx-light-warning-default)},
-      #{green($aegisx-light-warning-default)},
-      #{blue($aegisx-light-warning-default)};
+      #{color.red($aegisx-light-warning-default)},
+      #{color.green($aegisx-light-warning-default)},
+      #{color.blue($aegisx-light-warning-default)};
     --ax-info-rgb:
-      #{red($aegisx-light-info-default)}, #{green($aegisx-light-info-default)},
-      #{blue($aegisx-light-info-default)};
+      #{color.red($aegisx-light-info-default)},
+      #{color.green($aegisx-light-info-default)},
+      #{color.blue($aegisx-light-info-default)};
 
     /* White Color */
     --ax-white: #ffffff;
@@ -1281,8 +1310,14 @@ $aegisx-dark-brand-inverted: #1a237e; // Indigo 900 (dark)
     --ax-primary-subtle: var(--ax-brand-subtle);
     --ax-primary-emphasis: var(--ax-brand-emphasis);
     --ax-primary-inverted: var(--ax-brand-inverted);
-    --ax-primary-dark: #{darken($aegisx-dark-brand-default, 10%)};
-    --ax-primary-light: #{lighten($aegisx-dark-brand-default, 20%)};
+    --ax-primary-dark: #{color.adjust(
+        $aegisx-dark-brand-default,
+        $lightness: -10%
+      )};
+    --ax-primary-light: #{color.adjust(
+        $aegisx-dark-brand-default,
+        $lightness: 20%
+      )};
 
     /* Semantic Color Shorthands */
     --ax-success: var(--ax-success-default);
@@ -1291,29 +1326,49 @@ $aegisx-dark-brand-inverted: #1a237e; // Indigo 900 (dark)
     --ax-info: var(--ax-info-default);
 
     /* Color Dark/Light Variants */
-    --ax-success-dark: #{darken($aegisx-dark-success-default, 10%)};
-    --ax-success-light: #{lighten($aegisx-dark-success-default, 20%)};
-    --ax-error-dark: #{darken($aegisx-dark-error-default, 10%)};
-    --ax-error-light: #{lighten($aegisx-dark-error-default, 20%)};
-    --ax-warning-dark: #{darken($aegisx-dark-warning-default, 10%)};
-    --ax-warning-light: #{lighten($aegisx-dark-warning-default, 20%)};
-    --ax-info-dark: #{darken($aegisx-dark-info-default, 10%)};
+    --ax-success-dark: #{color.adjust(
+        $aegisx-dark-success-default,
+        $lightness: -10%
+      )};
+    --ax-success-light: #{color.adjust(
+        $aegisx-dark-success-default,
+        $lightness: 20%
+      )};
+    --ax-error-dark: #{color.adjust(
+        $aegisx-dark-error-default,
+        $lightness: -10%
+      )};
+    --ax-error-light: #{color.adjust(
+        $aegisx-dark-error-default,
+        $lightness: 20%
+      )};
+    --ax-warning-dark: #{color.adjust(
+        $aegisx-dark-warning-default,
+        $lightness: -10%
+      )};
+    --ax-warning-light: #{color.adjust(
+        $aegisx-dark-warning-default,
+        $lightness: 20%
+      )};
+    --ax-info-dark: #{color.adjust($aegisx-dark-info-default, $lightness: -10%)};
 
     /* RGB Color Variants (for opacity/rgba usage) */
     --ax-success-rgb:
-      #{red($aegisx-dark-success-default)},
-      #{green($aegisx-dark-success-default)},
-      #{blue($aegisx-dark-success-default)};
+      #{color.red($aegisx-dark-success-default)},
+      #{color.green($aegisx-dark-success-default)},
+      #{color.blue($aegisx-dark-success-default)};
     --ax-error-rgb:
-      #{red($aegisx-dark-error-default)}, #{green($aegisx-dark-error-default)},
-      #{blue($aegisx-dark-error-default)};
+      #{color.red($aegisx-dark-error-default)},
+      #{color.green($aegisx-dark-error-default)},
+      #{color.blue($aegisx-dark-error-default)};
     --ax-warning-rgb:
-      #{red($aegisx-dark-warning-default)},
-      #{green($aegisx-dark-warning-default)},
-      #{blue($aegisx-dark-warning-default)};
+      #{color.red($aegisx-dark-warning-default)},
+      #{color.green($aegisx-dark-warning-default)},
+      #{color.blue($aegisx-dark-warning-default)};
     --ax-info-rgb:
-      #{red($aegisx-dark-info-default)}, #{green($aegisx-dark-info-default)},
-      #{blue($aegisx-dark-info-default)};
+      #{color.red($aegisx-dark-info-default)},
+      #{color.green($aegisx-dark-info-default)},
+      #{color.blue($aegisx-dark-info-default)};
 
     /* White Color */
     --ax-white: #ffffff;
