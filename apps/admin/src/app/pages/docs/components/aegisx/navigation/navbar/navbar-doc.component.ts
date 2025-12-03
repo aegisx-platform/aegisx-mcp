@@ -407,6 +407,123 @@ import { CodeTab, ComponentToken } from '../../../../../../types/docs.types';
               <ax-code-tabs [tabs]="navItemIconTabs"></ax-code-tabs>
             </section>
 
+            <!-- Navigation Alignment -->
+            <section>
+              <h3 class="text-xl font-semibold mb-4">Navigation Alignment</h3>
+              <p class="text-on-surface-variant mb-4">
+                Use
+                <code class="bg-surface-container px-2 py-1 rounded"
+                  >navAlign</code
+                >
+                to control how navigation items are positioned within the center
+                zone.
+              </p>
+
+              <!-- navAlign: start -->
+              <div class="mb-6">
+                <h4 class="font-medium mb-3 text-on-surface-variant">
+                  navAlign="start"
+                </h4>
+                <ax-live-preview title="Navigation Aligned to Start">
+                  <ax-navbar variant="bordered" navAlign="start">
+                    <ng-container axNavbarStart>
+                      <ax-navbar-brand
+                        name="AegisX"
+                        icon="widgets"
+                      ></ax-navbar-brand>
+                    </ng-container>
+                    <ng-container axNavbarCenter>
+                      <ax-navbar-nav>
+                        <ax-nav-item
+                          label="Home"
+                          [isActive]="true"
+                        ></ax-nav-item>
+                        <ax-nav-item label="Products"></ax-nav-item>
+                        <ax-nav-item label="About"></ax-nav-item>
+                      </ax-navbar-nav>
+                    </ng-container>
+                    <ng-container axNavbarEnd>
+                      <ax-navbar-actions>
+                        <ax-navbar-icon-button
+                          icon="search"
+                        ></ax-navbar-icon-button>
+                      </ax-navbar-actions>
+                    </ng-container>
+                  </ax-navbar>
+                </ax-live-preview>
+              </div>
+
+              <!-- navAlign: center (default) -->
+              <div class="mb-6">
+                <h4 class="font-medium mb-3 text-on-surface-variant">
+                  navAlign="center" (default)
+                </h4>
+                <ax-live-preview title="Navigation Centered">
+                  <ax-navbar variant="bordered" navAlign="center">
+                    <ng-container axNavbarStart>
+                      <ax-navbar-brand
+                        name="AegisX"
+                        icon="widgets"
+                      ></ax-navbar-brand>
+                    </ng-container>
+                    <ng-container axNavbarCenter>
+                      <ax-navbar-nav>
+                        <ax-nav-item
+                          label="Home"
+                          [isActive]="true"
+                        ></ax-nav-item>
+                        <ax-nav-item label="Products"></ax-nav-item>
+                        <ax-nav-item label="About"></ax-nav-item>
+                      </ax-navbar-nav>
+                    </ng-container>
+                    <ng-container axNavbarEnd>
+                      <ax-navbar-actions>
+                        <ax-navbar-icon-button
+                          icon="search"
+                        ></ax-navbar-icon-button>
+                      </ax-navbar-actions>
+                    </ng-container>
+                  </ax-navbar>
+                </ax-live-preview>
+              </div>
+
+              <!-- navAlign: end -->
+              <div class="mb-6">
+                <h4 class="font-medium mb-3 text-on-surface-variant">
+                  navAlign="end"
+                </h4>
+                <ax-live-preview title="Navigation Aligned to End">
+                  <ax-navbar variant="bordered" navAlign="end">
+                    <ng-container axNavbarStart>
+                      <ax-navbar-brand
+                        name="AegisX"
+                        icon="widgets"
+                      ></ax-navbar-brand>
+                    </ng-container>
+                    <ng-container axNavbarCenter>
+                      <ax-navbar-nav>
+                        <ax-nav-item
+                          label="Home"
+                          [isActive]="true"
+                        ></ax-nav-item>
+                        <ax-nav-item label="Products"></ax-nav-item>
+                        <ax-nav-item label="About"></ax-nav-item>
+                      </ax-navbar-nav>
+                    </ng-container>
+                    <ng-container axNavbarEnd>
+                      <ax-navbar-actions>
+                        <ax-navbar-icon-button
+                          icon="search"
+                        ></ax-navbar-icon-button>
+                      </ax-navbar-actions>
+                    </ng-container>
+                  </ax-navbar>
+                </ax-live-preview>
+              </div>
+
+              <ax-code-tabs [tabs]="navAlignTabs"></ax-code-tabs>
+            </section>
+
             <!-- Default Variant -->
             <section>
               <h3 class="text-xl font-semibold mb-4">Default Variant</h3>
@@ -1634,6 +1751,31 @@ export class AppComponent {
   name="Home"
   routerLink="/"
 ></ax-navbar-brand>`,
+    },
+  ];
+
+  navAlignTabs: CodeTab[] = [
+    {
+      label: 'HTML',
+      language: 'html',
+      code: `<!-- Align navigation to start (left) -->
+<ax-navbar navAlign="start">
+  <ng-container axNavbarStart>
+    <ax-navbar-brand name="Brand"></ax-navbar-brand>
+  </ng-container>
+  <ng-container axNavbarCenter>
+    <ax-navbar-nav>
+      <ax-nav-item label="Home"></ax-nav-item>
+      <ax-nav-item label="Products"></ax-nav-item>
+    </ax-navbar-nav>
+  </ng-container>
+</ax-navbar>
+
+<!-- Align navigation to center (default) -->
+<ax-navbar navAlign="center">...</ax-navbar>
+
+<!-- Align navigation to end (right) -->
+<ax-navbar navAlign="end">...</ax-navbar>`,
     },
   ];
 
