@@ -10,7 +10,6 @@
       [permissionError]="testProductsService.permissionError()"
       [hasError]="!!testProductsService.error()"
       (createClicked)="openCreateDialog()"
-      (importClicked)="openImportDialog()"
       (clearPermissionError)="testProductsService.clearPermissionError()"
     ></app-test-products-list-header>
 
@@ -40,16 +39,6 @@
         (dateFilterChange)="onDateFilterChange($event)"
       >
         <!-- Export Button Slot -->
-        <app-export
-          export
-          [exportService]="exportServiceAdapter"
-          [currentFilters]="getExportFilters()"
-          [selectedItems]="selectedItems()"
-          [availableFields]="availableExportFields"
-          [moduleName]="'test_products'"
-          (exportStarted)="onExportStarted($event)"
-          (exportCompleted)="onExportCompleted($event)"
-        ></app-export>
 
         <!-- Filter Chips Slot -->
         <div filter-chips>
