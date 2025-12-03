@@ -1,4 +1,4 @@
-name: 🚀 Simple Release (3 Apps)
+name: 🚀 Simple Release (4 Apps)
 
 on:
   push:
@@ -64,7 +64,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [api, web, admin]
+        app: [api, web, admin, landing]
     permissions:
       packages: write
       contents: read
@@ -116,6 +116,7 @@ jobs:
           if [ "${{ matrix.app }}" = "api" ]; then
             docker run --rm ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-${{ matrix.app }}:latest node --version
           else
+            # web, admin, landing all use nginx
             docker run --rm ghcr.io/${{ steps.repo.outputs.REPO_NAME }}-${{ matrix.app }}:latest nginx -t
           fi
 
@@ -133,7 +134,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [api, web, admin]
+        app: [api, web, admin, landing]
     permissions:
       contents: read
       packages: write
@@ -192,7 +193,7 @@ jobs:
       - name: Deployment summary
         run: |
           echo "🚀 All production images built successfully!"
-          echo "✅ API, Web, Admin containers are ready for deployment"
+          echo "✅ API, Web, Admin, Landing containers are ready for deployment"
           echo "📋 Next steps: Deploy to production environment"
 
   staging_ready:
@@ -203,5 +204,5 @@ jobs:
       - name: Staging summary
         run: |
           echo "🧪 All staging images built successfully!"
-          echo "✅ API, Web, Admin staging containers are ready"
+          echo "✅ API, Web, Admin, Landing staging containers are ready"
           echo "📋 Next steps: Deploy to staging environment"
