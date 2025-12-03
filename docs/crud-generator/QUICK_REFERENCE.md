@@ -81,6 +81,7 @@ Use direct CLI for advanced features or multiple flags:
 | -------------- | --------------------- | ----------- | ----------------------------- |
 | `-t, --target` | `backend`, `frontend` | `backend`   | What to generate              |
 | `-a, --app`    | `api`, `web`, `admin` | `api`/`web` | Target app (backend/frontend) |
+| `-s, --shell`  | `system`, `inventory` | (none)      | Target shell for routes       |
 | `-o, --output` | `<dir>`               | Auto        | Custom output                 |
 
 **Important**:
@@ -105,6 +106,50 @@ Output directories by app:
 
 - `--app web` → `apps/web/src/app/features/`
 - `--app admin` → `apps/admin/src/app/features/`
+
+### Shell-Based Route Registration (NEW)
+
+Register routes directly into shell routes files instead of `app.routes.ts`:
+
+```bash
+# Register in SystemShell routes
+./bin/cli.js generate products --target frontend --shell system --force
+
+# Register in InventoryShell routes
+./bin/cli.js generate products --target frontend --shell inventory --force
+```
+
+**How it works**:
+
+- Routes are registered as **children** of the shell component
+- Shell routes file: `apps/{app}/src/app/features/{shell}/{shell}.routes.ts`
+- Falls back to `app.routes.ts` if shell routes file not found
+- Automatically detects duplicate routes to prevent double registration
+
+**Example Result** (in `system.routes.ts`):
+
+```typescript
+export const SYSTEM_ROUTES: Routes = [
+  {
+    path: '',
+    component: SystemShellComponent,
+    children: [
+      // ... existing routes ...
+
+      // Products (Generated CRUD)
+      {
+        path: 'products',
+        loadChildren: () => import('../products/products.routes').then((m) => m.productsRoutes),
+        data: {
+          title: 'Products',
+          description: 'Products Management System',
+          requiredPermissions: ['products.read', 'admin.*'],
+        },
+      },
+    ],
+  },
+];
+```
 
 ### Feature Package
 
@@ -412,6 +457,6 @@ config show                  # Show current config
 
 ---
 
-**Generator Version**: 2.2.2
+**Generator Version**: 2.2.3
 **Last Updated**: December 3, 2025
 **Status**: ✅ Production Ready

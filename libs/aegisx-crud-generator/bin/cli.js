@@ -139,6 +139,14 @@ program
         process.exit(1);
       }
 
+      // Auto-detect app based on target if not explicitly set
+      // For frontend target, default to 'web' app
+      // For backend target, default to 'api' app
+      if (options.target === 'frontend' && options.app === 'api') {
+        // User didn't explicitly set app, use web for frontend
+        options.app = 'web';
+      }
+
       // Determine output directory based on app and target
       let outputDir = options.output;
       if (!outputDir) {

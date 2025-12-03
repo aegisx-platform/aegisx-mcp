@@ -1,5 +1,70 @@
 # CRUD Generator Changelog
 
+## [2.2.3] - 2025-12-03
+
+### Added
+
+#### Shell-Based Route Registration (`--shell`)
+
+**New CLI flag** to register frontend routes directly into shell routes files instead of `app.routes.ts`.
+
+**Problem Solved**: Previously, CRUD-generated frontend routes were always registered at the root level in `app.routes.ts`. This didn't integrate well with shell-based architectures where routes should be registered as children of shell components (e.g., SystemShell, InventoryShell).
+
+**Usage**:
+
+```bash
+# Register in SystemShell routes
+./bin/cli.js generate products --target frontend --shell system --force
+
+# Register in InventoryShell routes
+./bin/cli.js generate products --target frontend --shell inventory --force
+```
+
+**How it works**:
+
+- Routes are registered as **children** of the shell component
+- Shell routes file: `apps/{app}/src/app/features/{shell}/{shell}.routes.ts`
+- Falls back to `app.routes.ts` if shell routes file not found
+- Automatically detects duplicate routes to prevent double registration
+
+**Example Result** (in `system.routes.ts`):
+
+```typescript
+export const SYSTEM_ROUTES: Routes = [
+  {
+    path: '',
+    component: SystemShellComponent,
+    children: [
+      // ... existing routes ...
+
+      // Products (Generated CRUD)
+      {
+        path: 'products',
+        loadChildren: () => import('../products/products.routes').then((m) => m.productsRoutes),
+        data: {
+          title: 'Products',
+          description: 'Products Management System',
+          requiredPermissions: ['products.read', 'admin.*'],
+        },
+      },
+    ],
+  },
+];
+```
+
+**Files Modified**:
+
+- `bin/cli.js` - Added `--shell` option and auto-detection for frontend target
+- `lib/generators/frontend-generator.js` - Added `autoRegisterShellRoute()` function
+
+### Fixed
+
+#### Auto-Detection of App Target for Frontend Generation
+
+When `--target frontend` is specified without `--app`, the generator now automatically defaults to `--app web` instead of `--app api`. This prevents frontend files from being incorrectly generated to the API app folder.
+
+---
+
 ## [2.2.2] - 2025-12-03
 
 ### Added
