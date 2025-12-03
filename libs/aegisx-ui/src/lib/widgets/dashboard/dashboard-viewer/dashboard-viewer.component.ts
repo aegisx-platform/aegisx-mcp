@@ -84,52 +84,54 @@ import { WidgetHostComponent } from '../widget-host/widget-host.component';
       .ax-dashboard-viewer {
         width: 100%;
         min-height: 200px;
+      }
 
-        &__loading,
-        &__error,
-        &__empty {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 16px;
-          padding: 48px;
-          color: var(--ax-text-muted);
+      .ax-dashboard-viewer__loading,
+      .ax-dashboard-viewer__error,
+      .ax-dashboard-viewer__empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        padding: 48px;
+        color: var(--ax-text-muted);
+      }
 
-          mat-icon {
-            font-size: 48px;
-            width: 48px;
-            height: 48px;
-          }
-        }
+      .ax-dashboard-viewer__loading mat-icon,
+      .ax-dashboard-viewer__error mat-icon,
+      .ax-dashboard-viewer__empty mat-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+      }
 
-        &__error {
-          color: var(--ax-error-default);
-        }
+      .ax-dashboard-viewer__error {
+        color: var(--ax-error-default);
+      }
 
-        &__retry {
-          padding: 8px 16px;
-          border: 1px solid var(--ax-border-default);
-          border-radius: var(--ax-radius-md);
-          background: var(--ax-background-default);
-          color: var(--ax-text-default);
-          cursor: pointer;
+      .ax-dashboard-viewer__retry {
+        padding: 8px 16px;
+        border: 1px solid var(--ax-border-default);
+        border-radius: var(--ax-radius-md);
+        background: var(--ax-background-default);
+        color: var(--ax-text-default);
+        cursor: pointer;
+      }
 
-          &:hover {
-            background: var(--ax-background-subtle);
-          }
-        }
+      .ax-dashboard-viewer__retry:hover {
+        background: var(--ax-background-subtle);
+      }
 
-        &__grid {
-          display: grid;
-          grid-template-columns: repeat(var(--columns, 4), 1fr);
-          grid-auto-rows: var(--row-height, 160px);
-          gap: var(--gap, 16px);
-        }
+      .ax-dashboard-viewer__grid {
+        display: grid;
+        grid-template-columns: repeat(var(--columns, 4), 1fr);
+        grid-auto-rows: var(--row-height, 160px);
+        gap: var(--gap, 16px);
+      }
 
-        &__cell {
-          min-height: 0;
-        }
+      .ax-dashboard-viewer__cell {
+        min-height: 0;
       }
 
       /* Responsive */

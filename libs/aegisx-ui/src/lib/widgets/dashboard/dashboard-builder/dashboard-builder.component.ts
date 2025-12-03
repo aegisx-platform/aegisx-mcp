@@ -150,115 +150,111 @@ interface GridsterWidgetItem extends GridsterItem {
         flex-direction: column;
         height: 100%;
         background: var(--ax-background-subtle);
+      }
 
-        &__toolbar {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 12px 16px;
-          background: var(--ax-background-default);
-          border-bottom: 1px solid var(--ax-border-default);
-        }
+      .ax-dashboard-builder__toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        background: var(--ax-background-default);
+        border-bottom: 1px solid var(--ax-border-default);
+      }
 
-        &__toolbar-left,
-        &__toolbar-right {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
+      .ax-dashboard-builder__toolbar-left,
+      .ax-dashboard-builder__toolbar-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
 
-        &__name-input {
-          font-size: 16px;
-          font-weight: 500;
-          border: none;
-          background: transparent;
-          color: var(--ax-text-heading);
-          padding: 8px;
-          border-radius: var(--ax-radius-sm);
+      .ax-dashboard-builder__name-input {
+        font-size: 16px;
+        font-weight: 500;
+        border: none;
+        background: transparent;
+        color: var(--ax-text-heading);
+        padding: 8px;
+        border-radius: var(--ax-radius-sm);
+      }
 
-          &:hover,
-          &:focus {
-            background: var(--ax-background-subtle);
-            outline: none;
-          }
-        }
+      .ax-dashboard-builder__name-input:hover,
+      .ax-dashboard-builder__name-input:focus {
+        background: var(--ax-background-subtle);
+        outline: none;
+      }
 
-        &__add-btn {
-          mat-icon {
-            margin-right: 4px;
-          }
-        }
+      .ax-dashboard-builder__add-btn mat-icon {
+        margin-right: 4px;
+      }
 
-        &__widget-menu {
-          max-height: 400px;
-        }
+      .ax-dashboard-builder__widget-menu {
+        max-height: 400px;
+      }
 
-        &__category {
-          padding: 8px 0;
+      .ax-dashboard-builder__category {
+        padding: 8px 0;
+      }
 
-          &:not(:last-child) {
-            border-bottom: 1px solid var(--ax-border-faint);
-          }
-        }
+      .ax-dashboard-builder__category:not(:last-child) {
+        border-bottom: 1px solid var(--ax-border-faint);
+      }
 
-        &__category-name {
-          display: block;
-          padding: 4px 16px;
-          font-size: 11px;
-          font-weight: 600;
-          text-transform: uppercase;
-          color: var(--ax-text-muted);
-        }
+      .ax-dashboard-builder__category-name {
+        display: block;
+        padding: 4px 16px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: var(--ax-text-muted);
+      }
 
-        &__loading {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          flex: 1;
-          gap: 16px;
-          color: var(--ax-text-muted);
-        }
+      .ax-dashboard-builder__loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        gap: 16px;
+        color: var(--ax-text-muted);
+      }
 
-        &__canvas {
-          flex: 1;
-          overflow: auto;
-          padding: 16px;
-        }
+      .ax-dashboard-builder__canvas {
+        flex: 1;
+        overflow: auto;
+        padding: 16px;
+      }
 
-        &__empty {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 16px;
-          color: var(--ax-text-muted);
-          pointer-events: none;
+      .ax-dashboard-builder__empty {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        color: var(--ax-text-muted);
+        pointer-events: none;
+      }
 
-          mat-icon {
-            font-size: 64px;
-            width: 64px;
-            height: 64px;
-            opacity: 0.5;
-          }
-        }
+      .ax-dashboard-builder__empty mat-icon {
+        font-size: 64px;
+        width: 64px;
+        height: 64px;
+        opacity: 0.5;
+      }
 
-        gridster {
-          background: transparent;
-        }
+      .ax-dashboard-builder gridster {
+        background: transparent;
+      }
 
-        ::ng-deep {
-          gridster-item {
-            background: transparent;
-          }
+      ::ng-deep gridster-item {
+        background: transparent;
+      }
 
-          .gridster-item-resizable-handler {
-            display: block;
-          }
-        }
+      ::ng-deep .gridster-item-resizable-handler {
+        display: block;
       }
     `,
   ],

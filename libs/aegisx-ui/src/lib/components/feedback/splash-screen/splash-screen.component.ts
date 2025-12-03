@@ -277,30 +277,30 @@ interface WaveColorPalette {
         justify-content: center;
         overflow: hidden;
         animation: fadeIn 0.3s ease-out;
+      }
 
-        &--fade {
-          animation: fadeIn 0.3s ease-out;
-        }
+      .ax-splash-screen--fade {
+        animation: fadeIn 0.3s ease-out;
+      }
 
-        &--slide {
-          animation: slideIn 0.4s ease-out;
-        }
+      .ax-splash-screen--slide {
+        animation: slideIn 0.4s ease-out;
+      }
 
-        &--scale {
-          animation: scaleIn 0.3s ease-out;
-        }
+      .ax-splash-screen--scale {
+        animation: scaleIn 0.3s ease-out;
+      }
 
-        &--error {
-          .ax-splash-screen__bg {
-            background: var(--splash-bg-error);
-          }
-          .orb-1 {
-            background: linear-gradient(135deg, #f5576c, #f093fb);
-          }
-          .orb-2 {
-            background: linear-gradient(135deg, #ef4444, #f87171);
-          }
-        }
+      .ax-splash-screen--error .ax-splash-screen__bg {
+        background: var(--splash-bg-error);
+      }
+
+      .ax-splash-screen--error .orb-1 {
+        background: linear-gradient(135deg, #f5576c, #f093fb);
+      }
+
+      .ax-splash-screen--error .orb-2 {
+        background: linear-gradient(135deg, #ef4444, #f87171);
       }
 
       /* Animated Background */
@@ -515,28 +515,28 @@ interface WaveColorPalette {
         gap: 0.75rem;
         padding: 0.5rem 0;
         transition: all 0.2s ease;
+      }
 
-        &--pending {
-          opacity: 0.4;
-        }
+      .ax-splash-screen__stage--pending {
+        opacity: 0.4;
+      }
 
-        &--loading {
-          opacity: 1;
-        }
+      .ax-splash-screen__stage--loading {
+        opacity: 1;
+      }
 
-        &--completed {
-          opacity: 0.6;
+      .ax-splash-screen__stage--completed {
+        opacity: 0.6;
+      }
 
-          .ax-splash-screen__stage-icon mat-icon {
-            color: var(--splash-success);
-          }
-        }
+      .ax-splash-screen__stage--completed
+        .ax-splash-screen__stage-icon
+        mat-icon {
+        color: var(--splash-success);
+      }
 
-        &--error {
-          .ax-splash-screen__stage-icon mat-icon {
-            color: var(--splash-error);
-          }
-        }
+      .ax-splash-screen__stage--error .ax-splash-screen__stage-icon mat-icon {
+        color: var(--splash-error);
       }
 
       .ax-splash-screen__stage-icon {
@@ -574,16 +574,16 @@ interface WaveColorPalette {
           font-size: 0.875rem;
           color: var(--splash-text-muted);
         }
+      }
 
-        button {
-          color: var(--splash-text);
-          border-color: var(--splash-text-subtle);
+      .ax-splash-screen__error button {
+        color: var(--splash-text);
+        border-color: var(--splash-text-subtle);
+      }
 
-          &:hover {
-            background: var(--splash-progress-bg);
-            border-color: var(--splash-text-muted);
-          }
-        }
+      .ax-splash-screen__error button:hover {
+        background: var(--splash-progress-bg);
+        border-color: var(--splash-text-muted);
       }
 
       .ax-splash-screen__version {

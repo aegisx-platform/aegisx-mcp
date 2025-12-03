@@ -101,116 +101,116 @@ import {
         background: var(--ax-background-default);
         border-radius: var(--ax-radius-lg);
         border: 1px solid var(--ax-border-default);
+      }
 
-        &--compact {
-          padding: 12px;
-          gap: 4px;
-        }
+      .ax-kpi-widget--compact {
+        padding: 12px;
+        gap: 4px;
+      }
 
-        &__loading,
-        &__error {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          height: 100%;
-          gap: 8px;
-        }
+      .ax-kpi-widget__loading,
+      .ax-kpi-widget__error {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        gap: 8px;
+      }
 
-        &__error {
-          color: var(--ax-error-default);
-          font-size: 14px;
-        }
+      .ax-kpi-widget__error {
+        color: var(--ax-error-default);
+        font-size: 14px;
+      }
 
-        &__header {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
+      .ax-kpi-widget__header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
 
-        &__icon {
-          color: var(--ax-text-secondary);
-          font-size: 20px;
-          width: 20px;
-          height: 20px;
-        }
+      .ax-kpi-widget__icon {
+        color: var(--ax-text-secondary);
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
 
-        &__titles {
-          display: flex;
-          flex-direction: column;
-        }
+      .ax-kpi-widget__titles {
+        display: flex;
+        flex-direction: column;
+      }
 
-        &__title {
-          font-size: 14px;
-          font-weight: 500;
-          color: var(--ax-text-secondary);
-        }
+      .ax-kpi-widget__title {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--ax-text-secondary);
+      }
 
-        &__subtitle {
-          font-size: 12px;
-          color: var(--ax-text-muted);
-        }
+      .ax-kpi-widget__subtitle {
+        font-size: 12px;
+        color: var(--ax-text-muted);
+      }
 
-        &__value {
-          font-size: 28px;
-          font-weight: 600;
-          color: var(--ax-text-heading);
-          line-height: 1.2;
-        }
+      .ax-kpi-widget__value {
+        font-size: 28px;
+        font-weight: 600;
+        color: var(--ax-text-heading);
+        line-height: 1.2;
+      }
 
-        &--compact &__value {
-          font-size: 24px;
-        }
+      .ax-kpi-widget--compact .ax-kpi-widget__value {
+        font-size: 24px;
+      }
 
-        &__trend {
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          font-size: 13px;
+      .ax-kpi-widget__trend {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 13px;
+      }
 
-          &[data-trend='up'] {
-            color: var(--ax-success-default);
-          }
+      .ax-kpi-widget__trend[data-trend='up'] {
+        color: var(--ax-success-default);
+      }
 
-          &[data-trend='down'] {
-            color: var(--ax-error-default);
-          }
+      .ax-kpi-widget__trend[data-trend='down'] {
+        color: var(--ax-error-default);
+      }
 
-          &[data-trend='neutral'] {
-            color: var(--ax-text-muted);
-          }
-        }
+      .ax-kpi-widget__trend[data-trend='neutral'] {
+        color: var(--ax-text-muted);
+      }
 
-        &__trend-icon {
-          font-size: 18px;
-          width: 18px;
-          height: 18px;
-        }
+      .ax-kpi-widget__trend-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
 
-        &__trend-label {
-          color: var(--ax-text-muted);
-          margin-left: 4px;
-        }
+      .ax-kpi-widget__trend-label {
+        color: var(--ax-text-muted);
+        margin-left: 4px;
+      }
 
-        /* Color variants */
-        &[data-color='primary'] {
-          border-left: 3px solid var(--ax-primary-default);
-        }
+      /* Color variants */
+      .ax-kpi-widget[data-color='primary'] {
+        border-left: 3px solid var(--ax-primary-default);
+      }
 
-        &[data-color='success'] {
-          border-left: 3px solid var(--ax-success-default);
-        }
+      .ax-kpi-widget[data-color='success'] {
+        border-left: 3px solid var(--ax-success-default);
+      }
 
-        &[data-color='warning'] {
-          border-left: 3px solid var(--ax-warning-default);
-        }
+      .ax-kpi-widget[data-color='warning'] {
+        border-left: 3px solid var(--ax-warning-default);
+      }
 
-        &[data-color='error'] {
-          border-left: 3px solid var(--ax-error-default);
-        }
+      .ax-kpi-widget[data-color='error'] {
+        border-left: 3px solid var(--ax-error-default);
+      }
 
-        &[data-color='info'] {
-          border-left: 3px solid var(--ax-info-default);
-        }
+      .ax-kpi-widget[data-color='info'] {
+        border-left: 3px solid var(--ax-info-default);
       }
     `,
   ],

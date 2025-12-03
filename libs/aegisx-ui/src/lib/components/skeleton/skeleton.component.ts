@@ -122,22 +122,20 @@ export type SkeletonAnimation = 'pulse' | 'wave' | 'none';
       }
 
       // Wave animation
-      .ax-skeleton-wave {
-        &::after {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: linear-gradient(
-            90deg,
-            transparent,
-            rgba(255, 255, 255, 0.5),
-            transparent
-          );
-          animation: ax-skeleton-wave 1.5s infinite;
-        }
+      .ax-skeleton-wave::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.5),
+          transparent
+        );
+        animation: ax-skeleton-wave 1.5s infinite;
       }
 
       @keyframes ax-skeleton-wave {

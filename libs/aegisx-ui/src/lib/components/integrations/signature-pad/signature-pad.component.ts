@@ -295,28 +295,28 @@ export interface SignatureData {
         align-items: center;
         justify-content: center;
         background: #fafafa;
+      }
 
-        &:hover:not(.disabled) {
-          border-color: var(--mat-sys-primary);
-          background: var(--mat-sys-primary-container);
-        }
+      .signature-upload:hover:not(.disabled) {
+        border-color: var(--mat-sys-primary);
+        background: var(--mat-sys-primary-container);
+      }
 
-        &.drag-over {
-          border-color: var(--mat-sys-primary);
-          background: var(--mat-sys-primary-container);
-          border-style: solid;
-        }
+      .signature-upload.drag-over {
+        border-color: var(--mat-sys-primary);
+        background: var(--mat-sys-primary-container);
+        border-style: solid;
+      }
 
-        &.disabled {
-          cursor: not-allowed;
-          opacity: 0.6;
-        }
+      .signature-upload.disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
 
-        &.has-image {
-          border-style: solid;
-          border-color: var(--mat-sys-outline-variant);
-          background: white;
-        }
+      .signature-upload.has-image {
+        border-style: solid;
+        border-color: var(--mat-sys-outline-variant);
+        background: white;
       }
 
       .upload-placeholder {

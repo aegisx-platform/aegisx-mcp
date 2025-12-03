@@ -167,150 +167,150 @@ import {
         background: var(--ax-background-default);
         border-radius: var(--ax-radius-lg);
         border: 1px solid var(--ax-border-default);
+      }
 
-        &__header {
-          margin-bottom: 12px;
-        }
+      .ax-progress-widget__header {
+        margin-bottom: 12px;
+      }
 
-        &__title {
-          font-size: 14px;
-          font-weight: 500;
-          color: var(--ax-text-secondary);
-        }
+      .ax-progress-widget__title {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--ax-text-secondary);
+      }
 
-        &__loading,
-        &__error {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex: 1;
-          gap: 8px;
-        }
+      .ax-progress-widget__loading,
+      .ax-progress-widget__error {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        gap: 8px;
+      }
 
-        &__error {
-          color: var(--ax-error-default);
-          font-size: 14px;
-        }
+      .ax-progress-widget__error {
+        color: var(--ax-error-default);
+        font-size: 14px;
+      }
 
-        &__content {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-        }
+      .ax-progress-widget__content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
 
-        /* Circular */
-        &__circular {
-          position: relative;
-          width: 120px;
-          height: 120px;
-        }
+      /* Circular */
+      .ax-progress-widget__circular {
+        position: relative;
+        width: 120px;
+        height: 120px;
+      }
 
-        &__svg {
-          width: 100%;
-          height: 100%;
-          transform: rotate(-90deg);
-        }
+      .ax-progress-widget__svg {
+        width: 100%;
+        height: 100%;
+        transform: rotate(-90deg);
+      }
 
-        &__progress-ring {
-          transition: stroke-dashoffset 0.5s ease;
-        }
+      .ax-progress-widget__progress-ring {
+        transition: stroke-dashoffset 0.5s ease;
+      }
 
-        &__center {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          text-align: center;
-        }
+      .ax-progress-widget__center {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+      }
 
-        &__percent {
-          font-size: 24px;
-          font-weight: 600;
-          color: var(--ax-text-heading);
-          display: block;
-        }
+      .ax-progress-widget__percent {
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--ax-text-heading);
+        display: block;
+      }
 
-        &__label {
-          font-size: 12px;
-          color: var(--ax-text-muted);
-        }
+      .ax-progress-widget__label {
+        font-size: 12px;
+        color: var(--ax-text-muted);
+      }
 
-        /* Linear */
-        &__linear {
-          width: 100%;
-        }
+      /* Linear */
+      .ax-progress-widget__linear {
+        width: 100%;
+      }
 
-        &__bar-container {
-          height: 8px;
-          background: var(--ax-border-default);
-          border-radius: 4px;
-          overflow: hidden;
-        }
+      .ax-progress-widget__bar-container {
+        height: 8px;
+        background: var(--ax-border-default);
+        border-radius: 4px;
+        overflow: hidden;
+      }
 
-        &__bar {
-          height: 100%;
-          border-radius: 4px;
-          transition: width 0.5s ease;
-        }
+      .ax-progress-widget__bar {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.5s ease;
+      }
 
-        &__info {
-          display: flex;
-          justify-content: space-between;
-          margin-top: 8px;
-        }
+      .ax-progress-widget__info {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 8px;
+      }
 
-        &__value {
-          font-size: 14px;
-          font-weight: 500;
-          color: var(--ax-text-heading);
-        }
+      .ax-progress-widget__value {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--ax-text-heading);
+      }
 
-        /* Gauge */
-        &__gauge {
-          position: relative;
-          width: 100%;
-          max-width: 180px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-        }
+      /* Gauge */
+      .ax-progress-widget__gauge {
+        position: relative;
+        width: 100%;
+        max-width: 180px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
 
-        &__gauge &__svg {
-          transform: none;
-          width: 100%;
-          height: auto;
-        }
+      .ax-progress-widget__gauge .ax-progress-widget__svg {
+        transform: none;
+        width: 100%;
+        height: auto;
+      }
 
-        &__gauge-value {
-          margin-top: -20px;
-          text-align: center;
-          position: relative;
-          z-index: 1;
-        }
+      .ax-progress-widget__gauge-value {
+        margin-top: -20px;
+        text-align: center;
+        position: relative;
+        z-index: 1;
+      }
 
-        &__gauge-progress {
-          transition: stroke-dashoffset 0.5s ease;
-        }
+      .ax-progress-widget__gauge-progress {
+        transition: stroke-dashoffset 0.5s ease;
+      }
 
-        /* Secondary */
-        &__secondary {
-          margin-top: 12px;
-          text-align: center;
-        }
+      /* Secondary */
+      .ax-progress-widget__secondary {
+        margin-top: 12px;
+        text-align: center;
+      }
 
-        &__secondary-value {
-          font-size: 18px;
-          font-weight: 500;
-          color: var(--ax-text-heading);
-        }
+      .ax-progress-widget__secondary-value {
+        font-size: 18px;
+        font-weight: 500;
+        color: var(--ax-text-heading);
+      }
 
-        &__secondary-label {
-          font-size: 12px;
-          color: var(--ax-text-muted);
-          margin-left: 4px;
-        }
+      .ax-progress-widget__secondary-label {
+        font-size: 12px;
+        color: var(--ax-text-muted);
+        margin-left: 4px;
       }
     `,
   ],

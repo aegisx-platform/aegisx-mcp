@@ -541,17 +541,17 @@ const DEFAULT_CONFIG: LauncherConfig = {
       cursor: pointer;
       border-radius: var(--ax-radius-md, 8px);
       transition: background-color 0.2s ease;
+    }
 
-      &:hover {
-        background: var(--ax-background-subtle, #f3f4f6);
-      }
+    .ax-launcher__notification-summary:hover {
+      background: var(--ax-background-subtle, #f3f4f6);
+    }
 
-      mat-icon {
-        font-size: 24px;
-        width: 24px;
-        height: 24px;
-        color: var(--ax-text-secondary, #6b7280);
-      }
+    .ax-launcher__notification-summary mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+      color: var(--ax-text-secondary, #6b7280);
     }
 
     /* Search Hint */
@@ -743,15 +743,15 @@ const DEFAULT_CONFIG: LauncherConfig = {
     /* Edit Layout Button */
     .ax-launcher__edit-btn {
       transition: all 0.2s ease;
+    }
 
-      &--active {
-        background: var(--ax-brand-default, #6366f1);
-        color: white;
+    .ax-launcher__edit-btn--active {
+      background: var(--ax-brand-default, #6366f1);
+      color: white;
+    }
 
-        &:hover {
-          background: var(--ax-brand-hover, #4f46e5);
-        }
-      }
+    .ax-launcher__edit-btn--active:hover {
+      background: var(--ax-brand-hover, #4f46e5);
     }
 
     /* Gridster Container */
@@ -836,16 +836,16 @@ const DEFAULT_CONFIG: LauncherConfig = {
         .gridster-item {
           cursor: grab;
           box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+        }
 
-          &:hover {
-            box-shadow: 0 0 0 2px var(--ax-brand-default, #6366f1);
-          }
+        .gridster-item:hover {
+          box-shadow: 0 0 0 2px var(--ax-brand-default, #6366f1);
+        }
 
-          &.gridster-item-moving {
-            cursor: grabbing;
-            z-index: 1000;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-          }
+        .gridster-item.gridster-item-moving {
+          cursor: grabbing;
+          z-index: 1000;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
         }
       }
     }
@@ -894,13 +894,12 @@ const DEFAULT_CONFIG: LauncherConfig = {
         border-color: #4b5563;
       }
 
-      .ax-launcher__notification-summary {
-        &:hover {
-          background: #374151;
-        }
-        mat-icon {
-          color: #9ca3af;
-        }
+      .ax-launcher__notification-summary:hover {
+        background: #374151;
+      }
+
+      .ax-launcher__notification-summary mat-icon {
+        color: #9ca3af;
       }
 
       .tab-count {
@@ -915,22 +914,22 @@ const DEFAULT_CONFIG: LauncherConfig = {
 
       .ax-launcher__section-header {
         border-bottom-color: #374151;
+      }
 
-        h3 {
-          color: #f9fafb;
-        }
+      .ax-launcher__section-header h3 {
+        color: #f9fafb;
+      }
 
-        .section-hint {
-          color: #6b7280;
-        }
+      .ax-launcher__section-header .section-hint {
+        color: #6b7280;
+      }
 
-        .section-icon {
-          color: #9ca3af;
+      .ax-launcher__section-header .section-icon {
+        color: #9ca3af;
+      }
 
-          &.section-icon--pinned {
-            color: #fbbf24;
-          }
-        }
+      .ax-launcher__section-header .section-icon.section-icon--pinned {
+        color: #fbbf24;
       }
 
       .ax-launcher__group-header {

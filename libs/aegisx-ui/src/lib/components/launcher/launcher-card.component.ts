@@ -169,29 +169,31 @@ import {
       cursor: pointer;
       transition: all 0.2s ease;
       overflow: hidden;
+    }
 
-      &:hover:not(.launcher-card--disabled):not(
-          .launcher-card--maintenance
-        ):not(.launcher-card--coming-soon) {
-        transform: translateY(-4px);
-        box-shadow: var(--ax-shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
-      }
+    .launcher-card:hover:not(.launcher-card--disabled):not(
+        .launcher-card--maintenance
+      ):not(.launcher-card--coming-soon) {
+      transform: translateY(-4px);
+      box-shadow: var(--ax-shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
+    }
 
-      &:focus-visible {
-        outline: 2px solid var(--ax-brand-default, #6366f1);
-        outline-offset: 2px;
-      }
+    .launcher-card:focus-visible {
+      outline: 2px solid var(--ax-brand-default, #6366f1);
+      outline-offset: 2px;
+    }
 
-      &--disabled,
-      &--maintenance,
-      &--coming-soon {
-        cursor: not-allowed;
-        opacity: 0.7;
+    .launcher-card--disabled,
+    .launcher-card--maintenance,
+    .launcher-card--coming-soon {
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
 
-        &:hover {
-          transform: none;
-        }
-      }
+    .launcher-card--disabled:hover,
+    .launcher-card--maintenance:hover,
+    .launcher-card--coming-soon:hover {
+      transform: none;
     }
 
     /* Pastel Color Variants with balanced border (25% opacity) */
@@ -543,10 +545,10 @@ import {
       gap: 0.25rem;
       opacity: 0;
       transition: opacity 0.15s ease;
+    }
 
-      &--visible {
-        opacity: 1;
-      }
+    .launcher-card__quick-actions--visible {
+      opacity: 1;
     }
 
     .launcher-card:hover .launcher-card__quick-actions {
@@ -559,26 +561,26 @@ import {
       height: 28px;
       opacity: 0.6;
       transition: all 0.15s ease;
+    }
 
-      mat-icon {
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
-      }
+    .launcher-card__action-btn mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
 
-      &:hover {
-        opacity: 1;
-        background: rgba(0, 0, 0, 0.05);
-      }
+    .launcher-card__action-btn:hover {
+      opacity: 1;
+      background: rgba(0, 0, 0, 0.05);
+    }
 
-      &--active {
-        opacity: 1;
-        color: var(--ax-brand-default, #6366f1);
+    .launcher-card__action-btn--active {
+      opacity: 1;
+      color: var(--ax-brand-default, #6366f1);
+    }
 
-        mat-icon {
-          color: inherit;
-        }
-      }
+    .launcher-card__action-btn--active mat-icon {
+      color: inherit;
     }
 
     /* Pinned Indicator */
@@ -606,10 +608,10 @@ import {
     /* Menu Button */
     .launcher-card__menu-btn {
       opacity: 0.6;
+    }
 
-      &:hover {
-        opacity: 1;
-      }
+    .launcher-card__menu-btn:hover {
+      opacity: 1;
     }
 
     /* Content */
@@ -818,11 +820,11 @@ import {
     /* Edit Mode */
     .launcher-card--edit-mode {
       cursor: move;
+    }
 
-      &:hover {
-        transform: none;
-        box-shadow: 0 0 0 2px var(--ax-brand-default, #6366f1);
-      }
+    .launcher-card--edit-mode:hover {
+      transform: none;
+      box-shadow: 0 0 0 2px var(--ax-brand-default, #6366f1);
     }
   `,
 })

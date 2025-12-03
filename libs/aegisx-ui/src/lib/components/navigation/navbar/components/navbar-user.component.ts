@@ -134,10 +134,10 @@ export interface NavbarUserMenuItem {
         border-radius: var(--ax-radius-full, 9999px);
         cursor: pointer;
         transition: background-color var(--ax-duration-fast, 150ms);
+      }
 
-        &:hover {
-          background-color: var(--ax-background-subtle);
-        }
+      .ax-navbar-user__trigger:hover {
+        background-color: var(--ax-background-subtle);
       }
 
       .ax-navbar-user__avatar {

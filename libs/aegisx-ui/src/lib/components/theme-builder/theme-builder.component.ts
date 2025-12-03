@@ -1133,21 +1133,21 @@ import type { M3ColorScheme } from './m3-color.util';
         font-size: 0.875rem;
         color: var(--ax-text-secondary, #71717a);
         transition: all 0.15s ease;
+      }
 
-        &:hover {
-          background: var(--ax-background-default, #ffffff);
-          color: var(--ax-text-primary, #3f3f46);
-        }
+      .nav-item:hover {
+        background: var(--ax-background-default, #ffffff);
+        color: var(--ax-text-primary, #3f3f46);
+      }
 
-        &.active {
-          background: var(--ax-brand-50, #eef2ff);
-          color: var(--ax-brand-600, #4f46e5);
-          font-weight: 500;
+      .nav-item.active {
+        background: var(--ax-brand-50, #eef2ff);
+        color: var(--ax-brand-600, #4f46e5);
+        font-weight: 500;
+      }
 
-          mat-icon {
-            color: var(--ax-brand-500, #6366f1);
-          }
-        }
+      .nav-item.active mat-icon {
+        color: var(--ax-brand-500, #6366f1);
       }
 
       .nav-divider {
@@ -1239,14 +1239,15 @@ import type { M3ColorScheme } from './m3-color.util';
           border: none;
           cursor: pointer;
           border-radius: var(--ax-radius-sm, 0.25rem);
+        }
 
-          &::-webkit-color-swatch-wrapper {
-            padding: 0;
-          }
-          &::-webkit-color-swatch {
-            border: none;
-            border-radius: var(--ax-radius-sm, 0.25rem);
-          }
+        input[type='color']::-webkit-color-swatch-wrapper {
+          padding: 0;
+        }
+
+        input[type='color']::-webkit-color-swatch {
+          border: none;
+          border-radius: var(--ax-radius-sm, 0.25rem);
         }
 
         input[type='text'] {
@@ -1839,11 +1840,11 @@ import type { M3ColorScheme } from './m3-color.util';
         transition:
           border-color 0.15s ease,
           box-shadow 0.15s ease;
+      }
 
-        &:hover {
-          border-color: var(--ax-border-default, #e4e4e7);
-          box-shadow: var(--ax-shadow-sm, 0 1px 2px 0 rgb(0 0 0 / 0.05));
-        }
+      .theme-card:hover {
+        border-color: var(--ax-border-default, #e4e4e7);
+        box-shadow: var(--ax-shadow-sm, 0 1px 2px 0 rgb(0 0 0 / 0.05));
       }
 
       .theme-preview-colors {

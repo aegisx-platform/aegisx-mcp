@@ -242,10 +242,10 @@ export class AxSkeletonAvatarComponent {
         gap: 1rem;
         padding: 0.875rem 1rem;
         border-bottom: 1px solid var(--ax-border-muted, #f4f4f5);
+      }
 
-        &:last-child {
-          border-bottom: none;
-        }
+      .ax-skeleton-table-row:last-child {
+        border-bottom: none;
       }
     `,
   ],
@@ -339,10 +339,10 @@ export class AxSkeletonTableComponent {
         justify-content: space-between;
         padding: 0.75rem 0;
         border-bottom: 1px solid var(--ax-border-muted, #f4f4f5);
+      }
 
-        &:last-child {
-          border-bottom: none;
-        }
+      .ax-skeleton-list-item:last-child {
+        border-bottom: none;
       }
 
       .ax-skeleton-list-text {

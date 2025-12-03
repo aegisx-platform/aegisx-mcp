@@ -96,10 +96,10 @@ import { expandCollapse } from '../../animations';
           color var(--ax-transition-fast);
         color: var(--ax-text-primary);
         text-decoration: none;
+      }
 
-        &:hover {
-          background-color: var(--ax-background-hover);
-        }
+      .ax-nav-item:hover {
+        background-color: var(--ax-background-hover);
       }
 
       .ax-nav-item.active {

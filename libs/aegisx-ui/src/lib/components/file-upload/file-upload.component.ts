@@ -184,22 +184,22 @@ export interface FileItem {
         cursor: pointer;
         transition: all 200ms ease;
         background: var(--ax-background-default, #ffffff);
+      }
 
-        &:hover:not(.ax-file-upload-disabled) {
-          border-color: var(--ax-brand-default, #3b82f6);
-          background: var(--ax-brand-faint, #eff6ff);
-        }
+      .ax-file-upload:hover:not(.ax-file-upload-disabled) {
+        border-color: var(--ax-brand-default, #3b82f6);
+        background: var(--ax-brand-faint, #eff6ff);
+      }
 
-        &.ax-file-upload-drag-over {
-          border-color: var(--ax-brand-default, #3b82f6);
-          background: var(--ax-brand-faint, #eff6ff);
-          border-style: solid;
-        }
+      .ax-file-upload.ax-file-upload-drag-over {
+        border-color: var(--ax-brand-default, #3b82f6);
+        background: var(--ax-brand-faint, #eff6ff);
+        border-style: solid;
+      }
 
-        &.ax-file-upload-disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
+      .ax-file-upload.ax-file-upload-disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
       }
 
       .ax-file-upload-input {
@@ -265,11 +265,11 @@ export interface FileItem {
         background: var(--ax-background-subtle, #f4f4f5);
         border-radius: var(--ax-radius-md, 0.5rem);
         border: 1px solid var(--ax-border-muted, #f4f4f5);
+      }
 
-        &.ax-file-upload-item-error {
-          background: var(--ax-error-faint, #fef2f2);
-          border-color: var(--ax-error-muted, #fecaca);
-        }
+      .ax-file-upload-item.ax-file-upload-item-error {
+        background: var(--ax-error-faint, #fef2f2);
+        border-color: var(--ax-error-muted, #fecaca);
       }
 
       .ax-file-upload-preview {
@@ -328,13 +328,12 @@ export interface FileItem {
         flex-shrink: 0;
       }
 
-      .ax-file-upload-status {
-        &.success {
-          color: var(--ax-success-default, #22c55e);
-        }
-        &.error {
-          color: var(--ax-error-default, #ef4444);
-        }
+      .ax-file-upload-status.success {
+        color: var(--ax-success-default, #22c55e);
+      }
+
+      .ax-file-upload-status.error {
+        color: var(--ax-error-default, #ef4444);
       }
 
       .ax-file-upload-remove {
@@ -343,25 +342,28 @@ export interface FileItem {
       }
 
       // Dark mode
-      :host-context(.dark),
-      :host-context([data-theme='dark']) {
-        .ax-file-upload {
-          background: var(--ax-background-default);
-          border-color: var(--ax-border-default);
+      :host-context(.dark) .ax-file-upload,
+      :host-context([data-theme='dark']) .ax-file-upload {
+        background: var(--ax-background-default);
+        border-color: var(--ax-border-default);
+      }
 
-          &:hover:not(.ax-file-upload-disabled) {
-            background: rgba(59, 130, 246, 0.1);
-          }
+      :host-context(.dark) .ax-file-upload:hover:not(.ax-file-upload-disabled),
+      :host-context([data-theme='dark'])
+        .ax-file-upload:hover:not(.ax-file-upload-disabled) {
+        background: rgba(59, 130, 246, 0.1);
+      }
 
-          &.ax-file-upload-drag-over {
-            background: rgba(59, 130, 246, 0.1);
-          }
-        }
+      :host-context(.dark) .ax-file-upload.ax-file-upload-drag-over,
+      :host-context([data-theme='dark'])
+        .ax-file-upload.ax-file-upload-drag-over {
+        background: rgba(59, 130, 246, 0.1);
+      }
 
-        .ax-file-upload-item {
-          background: var(--ax-background-subtle);
-          border-color: var(--ax-border-default);
-        }
+      :host-context(.dark) .ax-file-upload-item,
+      :host-context([data-theme='dark']) .ax-file-upload-item {
+        background: var(--ax-background-subtle);
+        border-color: var(--ax-border-default);
       }
     `,
   ],

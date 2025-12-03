@@ -104,10 +104,8 @@ import { AxThemeService } from '../../services/theme/ax-theme.service';
         display: block;
       }
 
-      .theme-switcher-button {
-        &:hover {
-          background-color: rgba(0, 0, 0, 0.04);
-        }
+      .theme-switcher-button:hover {
+        background-color: rgba(0, 0, 0, 0.04);
       }
 
       .theme-switcher-menu {
@@ -143,19 +141,19 @@ import { AxThemeService } from '../../services/theme/ax-theme.service';
       .theme-option {
         height: auto !important;
         padding: 12px 16px !important;
+      }
 
-        &.theme-active {
-          background-color: var(--ax-brand-faint) !important;
+      .theme-option.theme-active {
+        background-color: var(--ax-brand-faint) !important;
+      }
 
-          .theme-name {
-            font-weight: 500;
-            color: var(--ax-brand-emphasis) !important;
-          }
-        }
+      .theme-option.theme-active .theme-name {
+        font-weight: 500;
+        color: var(--ax-brand-emphasis) !important;
+      }
 
-        &:hover {
-          background-color: var(--ax-background-muted) !important;
-        }
+      .theme-option:hover {
+        background-color: var(--ax-background-muted) !important;
       }
 
       .theme-option-content {
@@ -189,19 +187,19 @@ import { AxThemeService } from '../../services/theme/ax-theme.service';
       .appearance-option {
         height: auto !important;
         padding: 12px 16px !important;
+      }
 
-        &:hover {
-          background-color: var(--ax-background-muted) !important;
-        }
+      .appearance-option:hover {
+        background-color: var(--ax-background-muted) !important;
+      }
 
-        mat-icon {
-          margin-right: 12px;
-          color: var(--ax-text-body);
-        }
+      .appearance-option mat-icon {
+        margin-right: 12px;
+        color: var(--ax-text-body);
+      }
 
-        span {
-          color: var(--ax-text-body);
-        }
+      .appearance-option span {
+        color: var(--ax-text-body);
       }
     `,
   ],

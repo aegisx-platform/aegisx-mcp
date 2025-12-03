@@ -195,113 +195,113 @@ import {
         background: var(--ax-background-default);
         border-radius: var(--ax-radius-lg);
         border: 1px solid var(--ax-border-default);
+      }
 
-        &__header {
-          margin-bottom: 12px;
-        }
+      .ax-chart-widget__header {
+        margin-bottom: 12px;
+      }
 
-        &__title {
-          font-size: 14px;
-          font-weight: 500;
-          color: var(--ax-text-secondary);
-        }
+      .ax-chart-widget__title {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--ax-text-secondary);
+      }
 
-        &__loading,
-        &__error {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex: 1;
-          gap: 8px;
-        }
+      .ax-chart-widget__loading,
+      .ax-chart-widget__error {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        gap: 8px;
+      }
 
-        &__error {
-          color: var(--ax-error-default);
-          font-size: 14px;
-        }
+      .ax-chart-widget__error {
+        color: var(--ax-error-default);
+        font-size: 14px;
+      }
 
-        &__chart {
-          flex: 1;
-          min-height: 0;
-        }
+      .ax-chart-widget__chart {
+        flex: 1;
+        min-height: 0;
+      }
 
-        &__svg {
-          width: 100%;
-          height: 100%;
+      .ax-chart-widget__svg {
+        width: 100%;
+        height: 100%;
+      }
 
-          &--donut {
-            max-height: 200px;
-          }
-        }
+      .ax-chart-widget__svg--donut {
+        max-height: 200px;
+      }
 
-        &__grid line {
-          stroke: var(--ax-border-default);
-          stroke-dasharray: 2 2;
-        }
+      .ax-chart-widget__grid line {
+        stroke: var(--ax-border-default);
+        stroke-dasharray: 2 2;
+      }
 
-        &__line {
-          fill: none;
-          stroke-width: 2;
-          stroke-linecap: round;
-          stroke-linejoin: round;
-        }
+      .ax-chart-widget__line {
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
 
-        &__bar {
-          transition: opacity 0.2s;
+      .ax-chart-widget__bar {
+        transition: opacity 0.2s;
+      }
 
-          &:hover {
-            opacity: 0.8;
-          }
-        }
+      .ax-chart-widget__bar:hover {
+        opacity: 0.8;
+      }
 
-        &__donut-segment {
-          transition: opacity 0.2s;
+      .ax-chart-widget__donut-segment {
+        transition: opacity 0.2s;
+      }
 
-          &:hover {
-            opacity: 0.8;
-          }
-        }
+      .ax-chart-widget__donut-segment:hover {
+        opacity: 0.8;
+      }
 
-        &__donut-total {
-          font-size: 24px;
-          font-weight: 600;
-          fill: var(--ax-text-heading);
-        }
+      .ax-chart-widget__donut-total {
+        font-size: 24px;
+        font-weight: 600;
+        fill: var(--ax-text-heading);
+      }
 
-        &__labels text {
-          font-size: 10px;
-          fill: var(--ax-text-muted);
-        }
+      .ax-chart-widget__labels text {
+        font-size: 10px;
+        fill: var(--ax-text-muted);
+      }
 
-        &__legend {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 12px;
-          margin-top: 12px;
-          justify-content: center;
+      .ax-chart-widget__legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 12px;
+        justify-content: center;
+      }
 
-          &[data-position='left'],
-          &[data-position='right'] {
-            flex-direction: column;
-          }
-        }
+      .ax-chart-widget__legend[data-position='left'],
+      .ax-chart-widget__legend[data-position='right'] {
+        flex-direction: column;
+      }
 
-        &__legend-item {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-        }
+      .ax-chart-widget__legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
 
-        &__legend-color {
-          width: 12px;
-          height: 12px;
-          border-radius: 2px;
-        }
+      .ax-chart-widget__legend-color {
+        width: 12px;
+        height: 12px;
+        border-radius: 2px;
+      }
 
-        &__legend-label {
-          font-size: 12px;
-          color: var(--ax-text-secondary);
-        }
+      .ax-chart-widget__legend-label {
+        font-size: 12px;
+        color: var(--ax-text-secondary);
       }
     `,
   ],

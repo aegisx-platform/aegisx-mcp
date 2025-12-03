@@ -9,3 +9,6 @@ export * from './breadcrumb';
 
 // Navbar
 export * from './navbar';
+
+// Command Palette
+export * from './command-palette';

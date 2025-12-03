@@ -62,33 +62,33 @@ export type IconButtonSize = 'sm' | 'md' | 'lg';
       .ax-navbar-icon-button {
         color: var(--ax-navbar-text-color, var(--ax-text-secondary));
         transition: color var(--ax-duration-fast, 150ms);
+      }
 
-        &:hover:not(:disabled) {
-          color: var(--ax-navbar-text-color, var(--ax-text-primary));
-          opacity: 0.8;
-        }
+      .ax-navbar-icon-button:hover:not(:disabled) {
+        color: var(--ax-navbar-text-color, var(--ax-text-primary));
+        opacity: 0.8;
+      }
 
-        &--sm {
-          width: 32px;
-          height: 32px;
+      .ax-navbar-icon-button--sm {
+        width: 32px;
+        height: 32px;
+      }
 
-          .mat-icon {
-            font-size: 18px;
-            width: 18px;
-            height: 18px;
-          }
-        }
+      .ax-navbar-icon-button--sm .mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
 
-        &--lg {
-          width: 48px;
-          height: 48px;
+      .ax-navbar-icon-button--lg {
+        width: 48px;
+        height: 48px;
+      }
 
-          .mat-icon {
-            font-size: 28px;
-            width: 28px;
-            height: 28px;
-          }
-        }
+      .ax-navbar-icon-button--lg .mat-icon {
+        font-size: 28px;
+        width: 28px;
+        height: 28px;
       }
 
       ::ng-deep .mat-badge-content {

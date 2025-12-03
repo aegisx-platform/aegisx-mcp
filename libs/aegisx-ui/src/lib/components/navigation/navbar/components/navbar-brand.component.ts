@@ -96,14 +96,14 @@ import { MatIconModule } from '@angular/material/icon';
         font-weight: 600;
         font-size: var(--ax-text-lg, 1.125rem);
         transition: opacity var(--ax-duration-fast, 150ms);
+      }
 
-        &--clickable {
-          cursor: pointer;
+      .ax-navbar-brand--clickable {
+        cursor: pointer;
+      }
 
-          &:hover {
-            opacity: 0.8;
-          }
-        }
+      .ax-navbar-brand--clickable:hover {
+        opacity: 0.8;
       }
 
       .ax-navbar-brand__logo {
@@ -127,8 +127,10 @@ import { MatIconModule } from '@angular/material/icon';
       .ax-navbar-brand__name {
         color: var(--ax-navbar-text-color, var(--ax-text-heading));
         white-space: nowrap;
+      }
 
-        @media (max-width: 640px) {
+      @media (max-width: 640px) {
+        .ax-navbar-brand__name {
           display: none;
         }
       }

@@ -96,87 +96,87 @@ import { BaseWidgetComponent } from '../../core/base-widget.component';
         height: 100%;
         border-radius: var(--ax-radius-lg);
         overflow: hidden;
+      }
 
-        &--editing {
-          border: 2px dashed var(--ax-border-default);
+      .ax-widget-host--editing {
+        border: 2px dashed var(--ax-border-default);
+      }
 
-          &:hover {
-            border-color: var(--ax-primary-default);
-          }
-        }
+      .ax-widget-host--editing:hover {
+        border-color: var(--ax-primary-default);
+      }
 
-        &--error {
-          border: 2px dashed var(--ax-error-default);
-        }
+      .ax-widget-host--error {
+        border: 2px dashed var(--ax-error-default);
+      }
 
-        &__header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 4px 8px;
-          background: var(--ax-background-subtle);
-          border-bottom: 1px solid var(--ax-border-faint);
-        }
+      .ax-widget-host__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 4px 8px;
+        background: var(--ax-background-subtle);
+        border-bottom: 1px solid var(--ax-border-faint);
+      }
 
-        &__name {
-          font-size: 12px;
-          font-weight: 500;
-          color: var(--ax-text-secondary);
-        }
+      .ax-widget-host__name {
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--ax-text-secondary);
+      }
 
-        &__menu-btn {
-          width: 24px;
-          height: 24px;
-          line-height: 24px;
+      .ax-widget-host__menu-btn {
+        width: 24px;
+        height: 24px;
+        line-height: 24px;
+      }
 
-          mat-icon {
-            font-size: 18px;
-            width: 18px;
-            height: 18px;
-          }
-        }
+      .ax-widget-host__menu-btn mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
 
-        &__remove {
-          color: var(--ax-error-default);
-        }
+      .ax-widget-host__remove {
+        color: var(--ax-error-default);
+      }
 
-        &__content {
-          height: 100%;
-        }
+      .ax-widget-host__content {
+        height: 100%;
+      }
 
-        &--editing &__content {
-          height: calc(100% - 40px);
-        }
+      .ax-widget-host--editing .ax-widget-host__content {
+        height: calc(100% - 40px);
+      }
 
-        &__error-state {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          height: 100%;
-          gap: 8px;
-          color: var(--ax-error-default);
-          font-size: 13px;
+      .ax-widget-host__error-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        gap: 8px;
+        color: var(--ax-error-default);
+        font-size: 13px;
+      }
 
-          mat-icon {
-            font-size: 32px;
-            width: 32px;
-            height: 32px;
-          }
-        }
+      .ax-widget-host__error-state mat-icon {
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+      }
 
-        &__resize-handle {
-          position: absolute;
-          bottom: 4px;
-          right: 4px;
-          color: var(--ax-text-muted);
-          cursor: se-resize;
+      .ax-widget-host__resize-handle {
+        position: absolute;
+        bottom: 4px;
+        right: 4px;
+        color: var(--ax-text-muted);
+        cursor: se-resize;
+      }
 
-          mat-icon {
-            font-size: 16px;
-            transform: rotate(-45deg);
-          }
-        }
+      .ax-widget-host__resize-handle mat-icon {
+        font-size: 16px;
+        transform: rotate(-45deg);
       }
     `,
   ],

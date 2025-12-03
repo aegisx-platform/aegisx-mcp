@@ -48,32 +48,32 @@ import { MatIconModule } from '@angular/material/icon';
 
       .ax-card {
         transition: box-shadow var(--ax-transition-base);
+      }
 
-        &:not(.ax-card-flat) {
-          box-shadow: var(--ax-shadow-sm);
+      .ax-card:not(.ax-card-flat) {
+        box-shadow: var(--ax-shadow-sm);
+      }
 
-          &:hover {
-            box-shadow: var(--ax-shadow-md);
-          }
-        }
+      .ax-card:not(.ax-card-flat):hover {
+        box-shadow: var(--ax-shadow-md);
+      }
 
-        &.ax-card-flat {
-          box-shadow: none !important;
-          border: 1px solid var(--ax-border-default);
-        }
+      .ax-card.ax-card-flat {
+        box-shadow: none !important;
+        border: 1px solid var(--ax-border-default);
+      }
 
-        &.ax-card-outlined {
-          box-shadow: none !important;
-          border: 2px solid var(--ax-border-default);
-        }
+      .ax-card.ax-card-outlined {
+        box-shadow: none !important;
+        border: 2px solid var(--ax-border-default);
+      }
 
-        &.ax-card-elevated {
-          box-shadow: var(--ax-shadow-lg);
+      .ax-card.ax-card-elevated {
+        box-shadow: var(--ax-shadow-lg);
+      }
 
-          &:hover {
-            box-shadow: var(--ax-shadow-xl);
-          }
-        }
+      .ax-card.ax-card-elevated:hover {
+        box-shadow: var(--ax-shadow-xl);
       }
 
       .ax-card-header {
@@ -98,10 +98,8 @@ import { MatIconModule } from '@angular/material/icon';
         font-size: 24px;
       }
 
-      .ax-card-content {
-        &:last-child {
-          padding-bottom: var(--ax-spacing-md);
-        }
+      .ax-card-content:last-child {
+        padding-bottom: var(--ax-spacing-md);
       }
 
       .ax-card-actions {

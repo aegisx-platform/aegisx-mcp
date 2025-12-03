@@ -159,29 +159,29 @@ export interface NavbarMenuItem {
         cursor: pointer;
         transition: all var(--ax-duration-fast, 150ms);
         white-space: nowrap;
+      }
 
-        &:hover:not(.ax-nav-item__link--disabled) {
-          background-color: var(
-            --ax-navbar-hover-bg,
-            var(--ax-background-subtle)
-          );
-          color: var(--ax-navbar-text-color, var(--ax-text-primary));
-        }
+      .ax-nav-item__link:hover:not(.ax-nav-item__link--disabled) {
+        background-color: var(
+          --ax-navbar-hover-bg,
+          var(--ax-background-subtle)
+        );
+        color: var(--ax-navbar-text-color, var(--ax-text-primary));
+      }
 
-        &--active {
-          background-color: var(--ax-navbar-active-bg, var(--ax-primary-faint));
-          color: var(--ax-navbar-active-color, var(--ax-primary));
-        }
+      .ax-nav-item__link--active {
+        background-color: var(--ax-navbar-active-bg, var(--ax-primary-faint));
+        color: var(--ax-navbar-active-color, var(--ax-primary));
+      }
 
-        &--disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-          pointer-events: none;
-        }
+      .ax-nav-item__link--disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        pointer-events: none;
+      }
 
-        &--menu {
-          font-family: inherit;
-        }
+      .ax-nav-item__link--menu {
+        font-family: inherit;
       }
 
       .ax-nav-item__icon {
@@ -202,10 +202,8 @@ export interface NavbarMenuItem {
         transition: transform var(--ax-duration-fast, 150ms);
       }
 
-      .ax-nav-item__link--menu[aria-expanded='true'] {
-        .ax-nav-item__chevron {
-          transform: rotate(180deg);
-        }
+      .ax-nav-item__link--menu[aria-expanded='true'] .ax-nav-item__chevron {
+        transform: rotate(180deg);
       }
 
       .ax-nav-item__badge {
@@ -215,17 +213,15 @@ export interface NavbarMenuItem {
         color: var(--ax-primary);
       }
 
-      // Vertical mode (mobile)
-      :host-context(.ax-navbar-nav--vertical) {
-        .ax-nav-item {
-          width: 100%;
-        }
+      /* Vertical mode (mobile) */
+      :host-context(.ax-navbar-nav--vertical) .ax-nav-item {
+        width: 100%;
+      }
 
-        .ax-nav-item__link {
-          width: 100%;
-          justify-content: flex-start;
-          padding: var(--ax-spacing-md, 0.75rem);
-        }
+      :host-context(.ax-navbar-nav--vertical) .ax-nav-item__link {
+        width: 100%;
+        justify-content: flex-start;
+        padding: var(--ax-spacing-md, 0.75rem);
       }
     `,
   ],

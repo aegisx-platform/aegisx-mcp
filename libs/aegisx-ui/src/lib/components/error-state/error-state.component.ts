@@ -190,10 +190,10 @@ export interface ErrorStateAction {
         color: var(--ax-text-subtle);
         cursor: pointer;
         transition: color var(--ax-transition-fast);
+      }
 
-        &:hover {
-          color: var(--ax-text-primary);
-        }
+      .ax-error-state-details-toggle:hover {
+        color: var(--ax-text-primary);
       }
 
       .ax-error-state-details-content {
