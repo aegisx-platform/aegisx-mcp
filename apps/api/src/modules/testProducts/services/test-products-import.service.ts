@@ -92,7 +92,8 @@ export class TestProductsImportService extends BaseImportService<TestProducts> {
         type: 'string',
         maxLength: 255,
         description: 'Slug value (max 255 characters)',
-        defaultExample: 'Sample value',
+
+        transformer: TestProductsImportService.generateSlug,
       },
       {
         name: 'description',
@@ -264,6 +265,30 @@ export class TestProductsImportService extends BaseImportService<TestProducts> {
   }
 
   /**
+   * Transform slug field values
+   */
+  private static generateSlug(value: any, _row: any): string {
+    // If slug is provided, use it
+    if (value && typeof value === 'string' && value.trim()) {
+      return value
+        .trim()
+        .toLowerCase()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/[\s_-]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+    }
+    // Auto-generate from name field in the row
+    const name = _row?.name || _row?.title || '';
+    if (!name) return '';
+    return name
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
+  /**
    * Transform is_active field values
    */
   private static transformIsActive(value: any, _row: any): boolean {
@@ -326,30 +351,13 @@ export class TestProductsImportService extends BaseImportService<TestProducts> {
   }
 
   /**
-   * Generate slug from name
-   * Converts "Example Name" to "example-name"
-   */
-  private static generateSlug(name: string): string {
-    if (!name) return '';
-    return name
-      .toLowerCase()
-      .trim()
-      .replace(/[^\w\s-]/g, '') // Remove special characters
-      .replace(/[\s_-]+/g, '-') // Replace spaces and underscores with hyphens
-      .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
-  }
-
-  /**
    * Transform row data to TestProducts entity format
    */
   private static transformRow(row: any): Partial<TestProducts> {
-    // Auto-generate slug from name if not provided
-    const slug = row.slug || TestProductsImportService.generateSlug(row.name);
-
     return {
       code: row.code,
       name: row.name,
-      slug: slug,
+      slug: TestProductsImportService.generateSlug(row.slug, row),
       description: row.description,
       is_active: TestProductsImportService.transformIsActive(
         row.is_active,

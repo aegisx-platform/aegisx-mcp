@@ -10,7 +10,7 @@ import {
  *
  * Integration tests for test_products domain functionality.
  *
- * Generated on: 2025-11-27T16:15:26.882Z
+ * Generated on: 2025-12-03T06:47:29.899Z
  */
 
 describe('TestProducts Domain', () => {
@@ -204,6 +204,18 @@ describe('TestProducts Domain', () => {
         });
 
         expect(response.statusCode).toBe(404);
+      });
+    });
+
+    describe('WebSocket Events', () => {
+      it('should handle WebSocket connections', async () => {
+        // TODO: Add WebSocket testing logic
+        // This requires setting up WebSocket test client
+      });
+
+      it('should emit events on CRUD operations', async () => {
+        // TODO: Add event emission testing
+        // This requires event listener setup
       });
     });
   });

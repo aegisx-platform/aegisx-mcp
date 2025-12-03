@@ -1,5 +1,7 @@
 import { BaseService } from '../../../shared/services/base.service';
 import { TestProductsRepository } from '../repositories/test-products.repository';
+import { EventService } from '../../../shared/websocket/event.service';
+import { CrudEventHelper } from '../../../shared/websocket/crud-event-helper';
 import {
   type TestProducts,
   type CreateTestProducts,
@@ -24,8 +26,18 @@ export class TestProductsService extends BaseService<
   CreateTestProducts,
   UpdateTestProducts
 > {
-  constructor(private testProductsRepository: TestProductsRepository) {
+  private eventHelper?: CrudEventHelper;
+
+  constructor(
+    private testProductsRepository: TestProductsRepository,
+    private eventService?: EventService,
+  ) {
     super(testProductsRepository);
+
+    // Initialize event helper using Fastify pattern
+    if (eventService) {
+      this.eventHelper = eventService.for('testProducts', 'testProducts');
+    }
   }
 
   /**
@@ -41,6 +53,11 @@ export class TestProductsService extends BaseService<
       // Handle query options (includes, etc.)
       if (options.include) {
         // Add relationship loading logic here
+      }
+
+      // Emit read event for monitoring/analytics
+      if (this.eventHelper) {
+        await this.eventHelper.emitCustom('read', testProducts);
       }
     }
 
@@ -61,6 +78,14 @@ export class TestProductsService extends BaseService<
   }> {
     const result = await this.getList(options);
 
+    // Emit bulk read event
+    if (this.eventHelper) {
+      await this.eventHelper.emitCustom('bulk_read', {
+        count: result.data.length,
+        filters: options,
+      });
+    }
+
     return result;
   }
 
@@ -69,6 +94,11 @@ export class TestProductsService extends BaseService<
    */
   async create(data: CreateTestProducts): Promise<TestProducts> {
     const testProducts = await super.create(data);
+
+    // Emit created event for real-time updates
+    if (this.eventHelper) {
+      await this.eventHelper.emitCreated(testProducts);
+    }
 
     return testProducts;
   }
@@ -81,6 +111,10 @@ export class TestProductsService extends BaseService<
     data: UpdateTestProducts,
   ): Promise<TestProducts | null> {
     const testProducts = await super.update(id, data);
+
+    if (testProducts && this.eventHelper) {
+      await this.eventHelper.emitUpdated(testProducts);
+    }
 
     return testProducts;
   }
@@ -101,10 +135,17 @@ export class TestProductsService extends BaseService<
 
       console.log('Found testProducts to delete:', existing.id);
 
+      // Get entity before deletion for event emission
+      const testProducts = await this.getById(id);
+
       // Direct repository call to avoid base service complexity
       const deleted = await this.testProductsRepository.delete(id);
 
       console.log('Delete result:', deleted);
+
+      if (deleted && testProducts && this.eventHelper) {
+        await this.eventHelper.emitDeleted(testProducts.id);
+      }
 
       if (deleted) {
         console.log('TestProducts deleted successfully:', { id });

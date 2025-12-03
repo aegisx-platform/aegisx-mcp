@@ -4,6 +4,8 @@ import { TestProductsController } from './controllers/test-products.controller';
 import { TestProductsService } from './services/test-products.service';
 import { TestProductsRepository } from './repositories/test-products.repository';
 import { testProductsRoutes } from './routes/index';
+import { testProductsImportRoutes } from './routes/test-products-import.routes';
+import { TestProductsImportService } from './services/test-products-import.service';
 
 // Note: FastifyInstance eventService type is declared in websocket.plugin.ts
 
@@ -34,15 +36,34 @@ export default fp(
     const testProductsRepository = new TestProductsRepository(
       (fastify as any).knex,
     );
-    const testProductsService = new TestProductsService(testProductsRepository);
+    const testProductsService = new TestProductsService(
+      testProductsRepository,
+      (fastify as any).eventService,
+    );
+    const testProductsImportService = new TestProductsImportService(
+      (fastify as any).knex,
+      testProductsRepository,
+      (fastify as any).eventService, // Pass eventService for import progress events
+    );
 
     // Controller instantiation with proper dependencies
     const testProductsController = new TestProductsController(
       testProductsService,
+      testProductsImportService,
+      (fastify as any).eventService,
     );
 
     // Optional: Decorate Fastify instance with service for cross-plugin access
     // fastify.decorate('testProductsService', testProductsService);
+
+    // ⚠️ IMPORTANT: Register import routes FIRST (before main routes)
+    // Import routes have static paths like /export, /import/template
+    // They must be registered before dynamic routes like /:id
+    // Otherwise /:id will match everything including /export
+    await fastify.register(testProductsImportRoutes, {
+      controller: testProductsController,
+      prefix: options.prefix || '/test-products',
+    });
 
     // Register main CRUD routes (includes dynamic /:id route)
     await fastify.register(testProductsRoutes, {
@@ -54,10 +75,16 @@ export default fp(
     fastify.addHook('onReady', async () => {
       fastify.log.info(`TestProducts domain module registered successfully`);
     });
+
+    // Cleanup event listeners on close
+    fastify.addHook('onClose', async () => {
+      fastify.log.info(`Cleaning up TestProducts domain module resources`);
+      // Add any cleanup logic here
+    });
   },
   {
     name: 'testProducts-domain-plugin',
-    dependencies: ['knex-plugin'],
+    dependencies: ['knex-plugin', 'websocket-plugin'],
   },
 );
 
@@ -76,7 +103,24 @@ export type {
   TestProductsIdParam,
   GetTestProductsQuery,
   ListTestProductsQuery,
+  TestProductsCreatedEvent,
+  TestProductsUpdatedEvent,
+  TestProductsDeletedEvent,
 } from './schemas/test-products.schemas';
+
+// Event type definitions for external consumers
+import { TestProducts } from './schemas/test-products.schemas';
+
+export interface TestProductsEventHandlers {
+  onCreated?: (data: TestProducts) => void | Promise<void>;
+  onUpdated?: (data: TestProducts) => void | Promise<void>;
+  onDeleted?: (data: { id: number | string }) => void | Promise<void>;
+}
+
+export interface TestProductsWebSocketSubscription {
+  subscribe(handlers: TestProductsEventHandlers): void;
+  unsubscribe(): void;
+}
 
 // Module name constant
 export const MODULE_NAME = 'testProducts' as const;

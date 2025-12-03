@@ -192,6 +192,19 @@ export const appRoutes: Route[] = [
   // Catch-all (404)
   // ============================================
   {
+    path: 'test-products',
+    loadChildren: () =>
+      import('./features/test-products/test-products.routes').then(
+        (m) => m.testProductsRoutes,
+      ),
+    canActivate: [AuthGuard],
+    data: {
+      title: 'Test Products',
+      description: 'Test Products Management System',
+      requiredPermissions: ['test-products.read', 'admin.*'],
+    },
+  },
+  {
     path: '**',
     redirectTo: '404',
   },

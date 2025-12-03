@@ -9,6 +9,10 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTableModule } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
 import { FormsModule } from '@angular/forms';
+import { takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { WebSocketService } from '../../../shared/business/services/websocket.service';
+import { AuthService } from '../../../core/auth/services/auth.service';
 
 import { TestProductService } from '../services/test-products.service';
 import {
@@ -932,6 +936,9 @@ export class TestProductImportDialogComponent implements OnDestroy {
   private testProductsService = inject(TestProductService);
   private snackBar = inject(MatSnackBar);
   private dialogRef = inject(MatDialogRef<TestProductImportDialogComponent>);
+  private wsService = inject(WebSocketService);
+  private authService = inject(AuthService);
+  private destroy$ = new Subject<void>();
 
   currentStep = signal<ImportStep>('upload');
   loading = signal<boolean>(false);
@@ -955,8 +962,6 @@ export class TestProductImportDialogComponent implements OnDestroy {
     'slug',
     'errors',
   ];
-
-  private pollingInterval: any;
 
   getStepTitle(): string {
     const titles: Record<ImportStep, string> = {
@@ -1068,7 +1073,7 @@ export class TestProductImportDialogComponent implements OnDestroy {
       if (response?.success && response.data) {
         this.importJob.set(response.data);
         this.currentStep.set('progress');
-        this.startPolling(response.data.jobId);
+        this.setupWebSocketListener(response.data.jobId);
       }
     } catch (error: any) {
       this.snackBar.open(error?.message || 'Failed to start import', 'Close', {
@@ -1079,41 +1084,59 @@ export class TestProductImportDialogComponent implements OnDestroy {
     }
   }
 
-  private startPolling(jobId: string): void {
-    this.pollingInterval = setInterval(async () => {
-      try {
-        const response = await this.testProductsService.getImportStatus(jobId);
+  private setupWebSocketListener(jobId: string): void {
+    // 🔌 Establish WebSocket connection before subscribing
+    const token = this.authService.accessToken();
+    if (!token) {
+      console.error(
+        'No authentication token available for WebSocket connection',
+      );
+      return;
+    }
+    this.wsService.connect(token);
 
-        if (response?.success && response.data) {
-          this.importJob.set(response.data);
+    // 📡 Subscribe to feature events (use camelCase to match backend module name)
+    this.wsService.subscribe({ features: ['testProducts'] });
 
-          if (
-            response.data.status === 'completed' ||
-            response.data.status === 'failed'
-          ) {
-            this.stopPolling();
-            this.currentStep.set('complete');
+    this.wsService
+      .subscribeToEvent('testProducts', 'import', 'progress')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((event: any) => {
+        console.log('📡 Import progress event received:', { jobId, event });
 
-            if (response.data.status === 'completed') {
-              this.snackBar.open('Import completed successfully!', 'Close', {
-                duration: 5000,
-              });
-            } else {
-              this.snackBar.open('Import failed', 'Close', { duration: 5000 });
-            }
+        // Only process events for this job
+        if (event.jobId !== jobId) return;
+
+        console.log('✅ Updating import progress:', {
+          progress: event.progress,
+          processed: event.processedRecords,
+          total: event.totalRecords,
+        });
+
+        // Update import job with progress data
+        this.importJob.update((current) => ({
+          ...current!,
+          status: event.status,
+          progress: event.progress,
+          processedRecords: event.processedRecords,
+          successCount: event.successCount,
+          failedCount: event.failedCount,
+          error: event.error,
+        }));
+
+        // Handle completion/failure
+        if (event.status === 'completed' || event.status === 'failed') {
+          this.currentStep.set('complete');
+
+          if (event.status === 'completed') {
+            this.snackBar.open('Import completed successfully!', 'Close', {
+              duration: 5000,
+            });
+          } else {
+            this.snackBar.open('Import failed', 'Close', { duration: 5000 });
           }
         }
-      } catch (error) {
-        console.error('Failed to poll import status:', error);
-      }
-    }, 2000); // Poll every 2 seconds
-  }
-
-  private stopPolling(): void {
-    if (this.pollingInterval) {
-      clearInterval(this.pollingInterval);
-      this.pollingInterval = null;
-    }
+      });
   }
 
   goToStep(step: ImportStep): void {
@@ -1141,11 +1164,13 @@ export class TestProductImportDialogComponent implements OnDestroy {
   }
 
   onCancel(): void {
-    this.stopPolling();
+    this.destroy$.next();
+    this.destroy$.complete();
     this.dialogRef.close();
   }
 
   ngOnDestroy(): void {
-    this.stopPolling();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

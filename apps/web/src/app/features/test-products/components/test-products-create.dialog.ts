@@ -7,6 +7,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { TestProductService } from '../services/test-products.service';
 import { CreateTestProductRequest } from '../types/test-products.types';
+import { TestProductStateManager } from '../services/test-products-state-manager.service';
 import {
   TestProductFormComponent,
   TestProductFormData,
@@ -62,29 +63,28 @@ import {
 })
 export class TestProductCreateDialogComponent {
   private testProductsService = inject(TestProductService);
+  private testProductStateManager = inject(TestProductStateManager);
   private snackBar = inject(MatSnackBar);
   private dialogRef = inject(MatDialogRef<TestProductCreateDialogComponent>);
 
   loading = signal<boolean>(false);
 
   async onFormSubmit(formData: TestProductFormData) {
+    // Call API directly - WebSocket events will handle real-time sync
     this.loading.set(true);
 
     try {
       const createRequest = formData as CreateTestProductRequest;
+
+      // Call API to create
       const result =
         await this.testProductsService.createTestProduct(createRequest);
 
-      if (result) {
-        this.snackBar.open('TestProduct created successfully', 'Close', {
-          duration: 3000,
-        });
-        this.dialogRef.close(result);
-      } else {
-        this.snackBar.open('Failed to create testproduct', 'Close', {
-          duration: 5000,
-        });
-      }
+      // Show success message and close
+      this.snackBar.open('TestProduct created successfully', 'Close', {
+        duration: 3000,
+      });
+      this.dialogRef.close(true); // Close with success flag
     } catch (error: any) {
       const errorMessage = this.testProductsService.permissionError()
         ? 'You do not have permission to create testproduct'

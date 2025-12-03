@@ -14,6 +14,7 @@ import {
   TestProduct,
   UpdateTestProductRequest,
 } from '../types/test-products.types';
+import { TestProductStateManager } from '../services/test-products-state-manager.service';
 import {
   TestProductFormComponent,
   TestProductFormData,
@@ -74,6 +75,7 @@ export interface TestProductEditDialogData {
 })
 export class TestProductEditDialogComponent implements OnInit {
   private testProductsService = inject(TestProductService);
+  private testProductStateManager = inject(TestProductStateManager);
   private snackBar = inject(MatSnackBar);
   private dialogRef = inject(MatDialogRef<TestProductEditDialogComponent>);
   public data = inject<TestProductEditDialogData>(MAT_DIALOG_DATA);
@@ -85,25 +87,23 @@ export class TestProductEditDialogComponent implements OnInit {
   }
 
   async onFormSubmit(formData: TestProductFormData) {
+    // Call API directly - WebSocket events will handle real-time sync
     this.loading.set(true);
 
     try {
       const updateRequest = formData as UpdateTestProductRequest;
+
+      // Call API to update
       const result = await this.testProductsService.updateTestProduct(
         this.data.testProducts.id,
         updateRequest,
       );
 
-      if (result) {
-        this.snackBar.open('TestProduct updated successfully', 'Close', {
-          duration: 3000,
-        });
-        this.dialogRef.close(result);
-      } else {
-        this.snackBar.open('Failed to update testproduct', 'Close', {
-          duration: 5000,
-        });
-      }
+      // Show success message and close
+      this.snackBar.open('TestProduct updated successfully', 'Close', {
+        duration: 3000,
+      });
+      this.dialogRef.close(true); // Close with success flag
     } catch (error: any) {
       const errorMessage = this.testProductsService.permissionError()
         ? 'You do not have permission to update testproduct'

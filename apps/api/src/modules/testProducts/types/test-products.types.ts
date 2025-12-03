@@ -6,6 +6,9 @@ import {
   type TestProductsIdParam,
   type GetTestProductsQuery,
   type ListTestProductsQuery,
+  type TestProductsCreatedEvent,
+  type TestProductsUpdatedEvent,
+  type TestProductsDeletedEvent,
 } from '../schemas/test-products.schemas';
 
 export {
@@ -15,6 +18,9 @@ export {
   type TestProductsIdParam,
   type GetTestProductsQuery,
   type ListTestProductsQuery,
+  type TestProductsCreatedEvent,
+  type TestProductsUpdatedEvent,
+  type TestProductsDeletedEvent,
 };
 
 // Additional type definitions
@@ -35,6 +41,18 @@ export interface TestProductsRepository {
     data: UpdateTestProducts,
   ): Promise<TestProducts | null>;
   delete(id: number | string): Promise<boolean>;
+}
+
+// Real-time event type definitions
+export interface TestProductsEventHandlers {
+  onCreated?: (data: TestProducts) => void | Promise<void>;
+  onUpdated?: (data: TestProducts) => void | Promise<void>;
+  onDeleted?: (data: { id: number | string }) => void | Promise<void>;
+}
+
+export interface TestProductsWebSocketSubscription {
+  subscribe(handlers: TestProductsEventHandlers): void;
+  unsubscribe(): void;
 }
 
 // Database entity type (matches database table structure exactly)
