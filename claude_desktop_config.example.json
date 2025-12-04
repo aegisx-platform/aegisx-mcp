@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "aegisx": {
+      "command": "node",
+      "args": ["/path/to/libs/aegisx-mcp/dist/index.js"]
+    }
+  }
+}
