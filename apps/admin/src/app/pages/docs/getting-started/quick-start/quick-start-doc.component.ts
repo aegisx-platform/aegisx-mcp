@@ -4,9 +4,11 @@ import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
-import { CodeBlockComponent } from '../../../../components/code-block/code-block.component';
-import { ExampleBoxComponent } from '../../../../components/example-box/example-box.component';
-import { DocHeaderComponent } from '../../../../components/docs';
+import {
+  DocHeaderComponent,
+  CodeTabsComponent,
+} from '../../../../components/docs';
+import { CodeTab } from '../../../../types/docs.types';
 
 /**
  * Quick Start Page - Step-by-step guide to building first page
@@ -21,9 +23,8 @@ import { DocHeaderComponent } from '../../../../components/docs';
     MatButtonModule,
     MatIconModule,
     MatCardModule,
-    CodeBlockComponent,
-    ExampleBoxComponent,
     DocHeaderComponent,
+    CodeTabsComponent,
   ],
   templateUrl: './quick-start-doc.component.html',
   styleUrl: './quick-start-doc.component.scss',
@@ -237,6 +238,43 @@ export class UserFormComponent {
       description: 'Create a user profile form',
       icon: 'article',
       code: this.formPage,
+    },
+  ];
+
+  // Code tabs for standardized preview
+  simpleDashboardCode: CodeTab[] = [
+    {
+      label: 'dashboard.component.ts',
+      language: 'typescript',
+      code: this.simpleComponent,
+    },
+  ];
+
+  kpiDashboardCode: CodeTab[] = [
+    {
+      label: 'kpi-dashboard.component.ts',
+      language: 'typescript',
+      code: this.kpiDashboard,
+    },
+  ];
+
+  formPageCode: CodeTab[] = [
+    {
+      label: 'user-form.component.ts',
+      language: 'typescript',
+      code: this.formPage,
+    },
+  ];
+
+  responsiveGridCode: CodeTab[] = [
+    {
+      label: 'SCSS',
+      language: 'scss',
+      code: `.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}`,
     },
   ];
 }

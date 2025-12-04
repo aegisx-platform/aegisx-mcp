@@ -44,39 +44,11 @@
       Create a new component file (<code>dashboard.component.ts</code>) and add
       the following code:
     </p>
+  </article>
 
-    <pre><code>import {{ '{' }} Component {{ '}' }} from '&#64;angular/core';
-import {{ '{' }} MatCardModule {{ '}' }} from '&#64;angular/material/card';
-import {{ '{' }} MatButtonModule {{ '}' }} from '&#64;angular/material/button';
+  <ax-code-tabs [tabs]="simpleDashboardCode"></ax-code-tabs>
 
-&#64;Component({{ '{' }}
-  selector: 'app-dashboard',
-  imports: [MatCardModule, MatButtonModule],
-  template: `
-    &lt;div class="page-container"&gt;
-      &lt;h1&gt;Dashboard&lt;/h1&gt;
-
-      &lt;mat-card&gt;
-        &lt;mat-card-content&gt;
-          &lt;h2&gt;Welcome to AegisX&lt;/h2&gt;
-          &lt;p&gt;Get started building your application.&lt;/p&gt;
-          &lt;button mat-raised-button color="primary"&gt;
-            Get Started
-          &lt;/button&gt;
-        &lt;/mat-card-content&gt;
-      &lt;/mat-card&gt;
-    &lt;/div&gt;
-  `,
-  styles: `
-    .page-container {{ '{' }}
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2rem;
-    {{ '}' }}
-  `,
-{{ '}' }})
-export class DashboardComponent {{ '{' }}{{ '}' }}</code></pre>
-
+  <article class="ax-prose-docs">
     <p><strong>Key Points:</strong></p>
     <ul>
       <li>
@@ -107,79 +79,11 @@ export class DashboardComponent {{ '{' }}{{ '}' }}</code></pre>
     </p>
 
     <h3>Example 2: KPI Dashboard</h3>
+  </article>
 
-    <pre><code>import {{ '{' }} Component {{ '}' }} from '&#64;angular/core';
-import {{ '{' }} MatCardModule {{ '}' }} from '&#64;angular/material/card';
-import {{ '{' }} MatIconModule {{ '}' }} from '&#64;angular/material/icon';
+  <ax-code-tabs [tabs]="kpiDashboardCode"></ax-code-tabs>
 
-&#64;Component({{ '{' }}
-  selector: 'app-kpi-dashboard',
-  imports: [MatCardModule, MatIconModule],
-  template: `
-    &lt;div class="dashboard-grid"&gt;
-      &lt;mat-card class="kpi-card"&gt;
-        &lt;mat-card-content&gt;
-          &lt;div class="kpi-header"&gt;
-            &lt;span class="kpi-label"&gt;Total Revenue&lt;/span&gt;
-            &lt;mat-icon&gt;trending_up&lt;/mat-icon&gt;
-          &lt;/div&gt;
-          &lt;div class="kpi-value"&gt;$45,231&lt;/div&gt;
-          &lt;div class="kpi-change positive"&gt;+20.1% from last month&lt;/div&gt;
-        &lt;/mat-card-content&gt;
-      &lt;/mat-card&gt;
-
-      &lt;mat-card class="kpi-card"&gt;
-        &lt;mat-card-content&gt;
-          &lt;div class="kpi-header"&gt;
-            &lt;span class="kpi-label"&gt;Active Users&lt;/span&gt;
-            &lt;mat-icon&gt;people&lt;/mat-icon&gt;
-          &lt;/div&gt;
-          &lt;div class="kpi-value"&gt;2,350&lt;/div&gt;
-          &lt;div class="kpi-change positive"&gt;+15.3% from last month&lt;/div&gt;
-        &lt;/mat-card-content&gt;
-      &lt;/mat-card&gt;
-    &lt;/div&gt;
-  `,
-  styles: `
-    .dashboard-grid {{ '{' }}
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.5rem;
-      padding: 2rem;
-    {{ '}' }}
-
-    .kpi-header {{ '{' }}
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-    {{ '}' }}
-
-    .kpi-label {{ '{' }}
-      font-size: 0.875rem;
-      color: var(--ax-text-secondary);
-      text-transform: uppercase;
-      font-weight: 600;
-    {{ '}' }}
-
-    .kpi-value {{ '{' }}
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--ax-text-heading);
-      margin-bottom: 0.5rem;
-    {{ '}' }}
-
-    .kpi-change {{ '{' }}
-      font-size: 0.875rem;
-
-      &.positive {{ '{' }}
-        color: var(--ax-success-default);
-      {{ '}' }}
-    {{ '}' }}
-  `,
-{{ '}' }})
-export class KpiDashboardComponent {{ '{' }}{{ '}' }}</code></pre>
-
+  <article class="ax-prose-docs">
     <p><strong>Design Token Usage:</strong></p>
     <ul>
       <li>
@@ -209,89 +113,11 @@ export class KpiDashboardComponent {{ '{' }}{{ '}' }}</code></pre>
     </p>
 
     <h3>Example 3: User Profile Form</h3>
+  </article>
 
-    <pre><code>import {{ '{' }} Component {{ '}' }} from '&#64;angular/core';
-import {{ '{' }} FormBuilder, ReactiveFormsModule, Validators {{ '}' }} from '&#64;angular/forms';
-import {{ '{' }} MatFormFieldModule {{ '}' }} from '&#64;angular/material/form-field';
-import {{ '{' }} MatInputModule {{ '}' }} from '&#64;angular/material/input';
-import {{ '{' }} MatButtonModule {{ '}' }} from '&#64;angular/material/button';
-import {{ '{' }} MatCardModule {{ '}' }} from '&#64;angular/material/card';
+  <ax-code-tabs [tabs]="formPageCode"></ax-code-tabs>
 
-&#64;Component({{ '{' }}
-  selector: 'app-user-form',
-  imports: [
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatCardModule,
-  ],
-  template: `
-    &lt;div class="form-container"&gt;
-      &lt;mat-card&gt;
-        &lt;mat-card-header&gt;
-          &lt;h2&gt;User Profile&lt;/h2&gt;
-        &lt;/mat-card-header&gt;
-
-        &lt;mat-card-content&gt;
-          &lt;form [formGroup]="userForm" (ngSubmit)="onSubmit()"&gt;
-            &lt;mat-form-field appearance="outline"&gt;
-              &lt;mat-label&gt;Full Name&lt;/mat-label&gt;
-              &lt;input matInput formControlName="name" /&gt;
-            &lt;/mat-form-field&gt;
-
-            &lt;mat-form-field appearance="outline"&gt;
-              &lt;mat-label&gt;Email&lt;/mat-label&gt;
-              &lt;input matInput type="email" formControlName="email" /&gt;
-            &lt;/mat-form-field&gt;
-
-            &lt;div class="form-actions"&gt;
-              &lt;button mat-button type="button"&gt;Cancel&lt;/button&gt;
-              &lt;button mat-raised-button color="primary" type="submit"&gt;
-                Save
-              &lt;/button&gt;
-            &lt;/div&gt;
-          &lt;/form&gt;
-        &lt;/mat-card-content&gt;
-      &lt;/mat-card&gt;
-    &lt;/div&gt;
-  `,
-  styles: `
-    .form-container {{ '{' }}
-      max-width: 600px;
-      margin: 2rem auto;
-      padding: 1rem;
-    {{ '}' }}
-
-    form {{ '{' }}
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    {{ '}' }}
-
-    .form-actions {{ '{' }}
-      display: flex;
-      gap: 1rem;
-      justify-content: flex-end;
-      margin-top: 1rem;
-    {{ '}' }}
-  `,
-{{ '}' }})
-export class UserFormComponent {{ '{' }}
-  userForm = this.fb.group({{ '{' }}
-    name: ['', Validators.required],
-    email: ['', [Validators.required, Validators.email]],
-  {{ '}' }});
-
-  constructor(private fb: FormBuilder) {{ '{' }}{{ '}' }}
-
-  onSubmit() {{ '{' }}
-    if (this.userForm.valid) {{ '{' }}
-      console.log(this.userForm.value);
-    {{ '}' }}
-  {{ '}' }}
-{{ '}' }}</code></pre>
-
+  <article class="ax-prose-docs">
     <p><strong>Form Best Practices:</strong></p>
     <ul>
       <li>
@@ -413,13 +239,11 @@ export class UserFormComponent {{ '{' }}
       Use CSS Grid with <code>auto-fit</code> or <code>auto-fill</code> for
       responsive layouts that adapt to screen size automatically:
     </p>
+  </article>
 
-    <pre><code>.dashboard-grid {{ '{' }}
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-{{ '}' }}</code></pre>
+  <ax-code-tabs [tabs]="responsiveGridCode"></ax-code-tabs>
 
+  <article class="ax-prose-docs">
     <p>This pattern works for:</p>
     <ul>
       <li>KPI card grids</li>
@@ -436,7 +260,7 @@ export class UserFormComponent {{ '{' }}
       performant applications with AegisX Design System.
     </p>
 
-    <h3>✅ Do's</h3>
+    <h3>Do's</h3>
     <ul>
       <li>
         <strong>Use design tokens</strong> - Always use
@@ -460,7 +284,7 @@ export class UserFormComponent {{ '{' }}
       </li>
     </ul>
 
-    <h3>❌ Don'ts</h3>
+    <h3>Don'ts</h3>
     <ul>
       <li>
         <strong>Don't hardcode colors</strong> - Use design tokens for theming
