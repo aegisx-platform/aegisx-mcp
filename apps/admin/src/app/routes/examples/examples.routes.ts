@@ -15,6 +15,11 @@ import { Route } from '@angular/router';
  * /examples/account/settings  - Account settings page
  * /examples/dashboard/analytics  - Analytics dashboard
  * /examples/dashboard/ecommerce  - E-commerce dashboard
+ * /examples/auth/login           - Login page
+ * /examples/auth/register        - Registration page
+ * /examples/auth/forgot-password - Forgot password page
+ * /examples/auth/reset-password  - Reset password page
+ * /examples/auth/confirm-email   - Email confirmation page
  */
 export const EXAMPLES_ROUTES: Route[] = [
   // Redirect /examples to error pages overview
@@ -151,6 +156,78 @@ export const EXAMPLES_ROUTES: Route[] = [
           layout: 'empty',
           title: 'E-commerce Dashboard',
           description: 'E-commerce dashboard example',
+        },
+      },
+    ],
+  },
+
+  // Auth Pages
+  {
+    path: 'auth',
+    children: [
+      {
+        path: '',
+        redirectTo: 'login',
+        pathMatch: 'full',
+      },
+      {
+        path: 'login',
+        loadComponent: () =>
+          import('../../pages/examples/auth/login.component').then(
+            (m) => m.LoginComponent,
+          ),
+        data: {
+          layout: 'empty',
+          title: 'Login',
+          description: 'Login page example',
+        },
+      },
+      {
+        path: 'register',
+        loadComponent: () =>
+          import('../../pages/examples/auth/register.component').then(
+            (m) => m.RegisterComponent,
+          ),
+        data: {
+          layout: 'empty',
+          title: 'Register',
+          description: 'Registration page example',
+        },
+      },
+      {
+        path: 'forgot-password',
+        loadComponent: () =>
+          import('../../pages/examples/auth/forgot-password.component').then(
+            (m) => m.ForgotPasswordComponent,
+          ),
+        data: {
+          layout: 'empty',
+          title: 'Forgot Password',
+          description: 'Forgot password page example',
+        },
+      },
+      {
+        path: 'reset-password',
+        loadComponent: () =>
+          import('../../pages/examples/auth/reset-password.component').then(
+            (m) => m.ResetPasswordComponent,
+          ),
+        data: {
+          layout: 'empty',
+          title: 'Reset Password',
+          description: 'Reset password page example',
+        },
+      },
+      {
+        path: 'confirm-email',
+        loadComponent: () =>
+          import('../../pages/examples/auth/confirm-email.component').then(
+            (m) => m.ConfirmEmailComponent,
+          ),
+        data: {
+          layout: 'empty',
+          title: 'Confirm Email',
+          description: 'Email confirmation page example',
         },
       },
     ],

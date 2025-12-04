@@ -32,6 +32,7 @@ export const STANDALONE_ROUTES = [
   '/examples/error',
   '/examples/account',
   '/examples/dashboard',
+  '/examples/auth',
 ] as const;
 
 /**

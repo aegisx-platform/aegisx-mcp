@@ -1025,6 +1025,44 @@ const PAGE_EXAMPLES_DASHBOARD_ITEMS: AxNavigationItem[] = [
   },
 ];
 
+const PAGE_EXAMPLES_AUTH_ITEMS: AxNavigationItem[] = [
+  {
+    id: 'login',
+    title: 'Login',
+    type: 'item',
+    icon: 'login',
+    link: '/examples/auth/login',
+  },
+  {
+    id: 'register',
+    title: 'Register',
+    type: 'item',
+    icon: 'person_add',
+    link: '/examples/auth/register',
+  },
+  {
+    id: 'forgot-password',
+    title: 'Forgot Password',
+    type: 'item',
+    icon: 'lock_reset',
+    link: '/examples/auth/forgot-password',
+  },
+  {
+    id: 'reset-password',
+    title: 'Reset Password',
+    type: 'item',
+    icon: 'lock',
+    link: '/examples/auth/reset-password',
+  },
+  {
+    id: 'confirm-email',
+    title: 'Confirm Email',
+    type: 'item',
+    icon: 'mark_email_read',
+    link: '/examples/auth/confirm-email',
+  },
+];
+
 // ============================================================
 // COMPACT NAVIGATION (with icons, for AxCompactLayoutComponent)
 // ============================================================
@@ -1183,6 +1221,13 @@ export const COMPACT_NAVIGATION: AxNavigationItem[] = [
         type: 'collapsible',
         icon: 'dashboard',
         children: PAGE_EXAMPLES_DASHBOARD_ITEMS,
+      },
+      {
+        id: 'auth-pages',
+        title: 'Authentication',
+        type: 'collapsible',
+        icon: 'lock',
+        children: PAGE_EXAMPLES_AUTH_ITEMS,
       },
     ],
   },
@@ -1428,6 +1473,15 @@ export const DOCS_NAVIGATION: AxNavigationItem[] = [
         id: 'dashboard-pages',
         title: 'Dashboard',
         children: PAGE_EXAMPLES_DASHBOARD_ITEMS.map((item) => ({
+          id: item.id,
+          title: item.title,
+          link: item.link,
+        })),
+      },
+      {
+        id: 'auth-pages',
+        title: 'Authentication',
+        children: PAGE_EXAMPLES_AUTH_ITEMS.map((item) => ({
           id: item.id,
           title: item.title,
           link: item.link,
