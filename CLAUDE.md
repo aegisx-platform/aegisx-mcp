@@ -352,6 +352,90 @@ pnpm run build
 git commit -m "refactor(styles): migrate CSS variables to --ax- prefix"
 ```
 
+### 🚨 CRITICAL: Git Subtree for Shared Libraries
+
+**This project uses Git Subtree to manage shared libraries that are published to separate repositories and npm.**
+
+**Libraries using Git Subtree:**
+
+| Library        | Monorepo Path                | Separate Repo                                                                       | NPM Package              |
+| -------------- | ---------------------------- | ----------------------------------------------------------------------------------- | ------------------------ |
+| CRUD Generator | `libs/aegisx-crud-generator` | [aegisx-platform/crud-generator](https://github.com/aegisx-platform/crud-generator) | `@aegisx/crud-generator` |
+| UI Components  | `libs/aegisx-ui`             | [aegisx-platform/aegisx-ui](https://github.com/aegisx-platform/aegisx-ui)           | `@aegisx/ui`             |
+| MCP Server     | `libs/aegisx-mcp`            | [aegisx-platform/aegisx-mcp](https://github.com/aegisx-platform/aegisx-mcp)         | `@aegisx/mcp`            |
+
+**How Git Subtree Works:**
+
+```
+┌─────────────────────────────────────┐
+│     Monorepo (aegisx-starter)       │
+│  ┌─────────────────────────────┐    │
+│  │  libs/aegisx-crud-generator │◄───┼──► GitHub: aegisx-platform/crud-generator
+│  └─────────────────────────────┘    │         ↓ npm: @aegisx/crud-generator
+│  ┌─────────────────────────────┐    │
+│  │  libs/aegisx-ui             │◄───┼──► GitHub: aegisx-platform/aegisx-ui
+│  └─────────────────────────────┘    │         ↓ npm: @aegisx/ui
+│  ┌─────────────────────────────┐    │
+│  │  libs/aegisx-mcp            │◄───┼──► GitHub: aegisx-platform/aegisx-mcp
+│  └─────────────────────────────┘    │         ↓ npm: @aegisx/mcp
+└─────────────────────────────────────┘
+```
+
+**MANDATORY Rules:**
+
+1. **NEVER create `.git` folder inside libs** - Libraries are part of monorepo
+2. **Use `sync-to-repo.sh`** to push changes to separate repository
+3. **Commit to monorepo first** - Then sync to separate repo
+4. **Don't modify files directly in separate repo** - Always work in monorepo
+
+**Workflow for Making Changes:**
+
+```bash
+# 1. Make changes in monorepo
+cd libs/aegisx-mcp
+# ... edit files ...
+
+# 2. Commit to monorepo
+cd /path/to/aegisx-starter
+git add libs/aegisx-mcp/
+git commit -m "feat(aegisx-mcp): add new feature"
+
+# 3. Sync to separate repository
+cd libs/aegisx-mcp
+./sync-to-repo.sh
+
+# 4. Publish to npm (from separate repo or after sync)
+npm publish
+```
+
+**Adding a New Subtree Library:**
+
+```bash
+# Add existing repo as subtree
+git subtree add --prefix=libs/NEW_LIB https://github.com/aegisx-platform/NEW_LIB.git main --squash
+
+# Create sync script
+cat > libs/NEW_LIB/sync-to-repo.sh << 'EOF'
+#!/bin/bash
+BRANCH=${1:-main}
+REMOTE_REPO="git@github.com:aegisx-platform/NEW_LIB.git"
+cd "$(git rev-parse --show-toplevel)"
+git subtree push --prefix=libs/NEW_LIB "$REMOTE_REPO" "$BRANCH"
+EOF
+chmod +x libs/NEW_LIB/sync-to-repo.sh
+```
+
+**Common Mistakes to AVOID:**
+
+- ❌ Running `git init` inside libs folder
+- ❌ Editing files directly in separate GitHub repo
+- ❌ Forgetting to sync after changes
+- ❌ Using `git submodule` instead of `git subtree`
+- ✅ Always work in monorepo, then sync
+- ✅ Use `sync-to-repo.sh` for pushing to separate repo
+
+**📚 For complete guide, see [docs/infrastructure/git-subtree-guide.md](./docs/infrastructure/git-subtree-guide.md)**
+
 ### 🚨 CRITICAL: Semantic Release Protection Policy
 
 **FORBIDDEN PATTERNS IN COMMIT MESSAGES - WILL TRIGGER v2.x.x RELEASES:**
