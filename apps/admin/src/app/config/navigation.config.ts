@@ -957,6 +957,41 @@ const TOOLS_ITEMS: AxNavigationItem[] = [
 ];
 
 // ============================================================
+// PAGE EXAMPLES SECTION (Copy-paste friendly templates)
+// ============================================================
+
+const PAGE_EXAMPLES_ERROR_ITEMS: AxNavigationItem[] = [
+  {
+    id: 'error-404',
+    title: '404 Not Found',
+    type: 'item',
+    icon: 'search_off',
+    link: '/examples/error/404',
+  },
+  {
+    id: 'error-500',
+    title: '500 Server Error',
+    type: 'item',
+    icon: 'report_problem',
+    link: '/examples/error/500',
+  },
+  {
+    id: 'error-403',
+    title: '403 Forbidden',
+    type: 'item',
+    icon: 'lock',
+    link: '/examples/error/403',
+  },
+  {
+    id: 'maintenance',
+    title: 'Maintenance',
+    type: 'item',
+    icon: 'build',
+    link: '/examples/error/maintenance',
+  },
+];
+
+// ============================================================
 // COMPACT NAVIGATION (with icons, for AxCompactLayoutComponent)
 // ============================================================
 
@@ -1086,6 +1121,22 @@ export const COMPACT_NAVIGATION: AxNavigationItem[] = [
     type: 'collapsible',
     icon: 'play_circle',
     children: DEMO_APPS_ITEMS,
+  },
+  {
+    id: 'page-examples',
+    title: 'Page Examples',
+    type: 'collapsible',
+    icon: 'web_stories',
+    badge: { content: 'New', type: 'info' },
+    children: [
+      {
+        id: 'error-pages',
+        title: 'Error Pages',
+        type: 'collapsible',
+        icon: 'error_outline',
+        children: PAGE_EXAMPLES_ERROR_ITEMS,
+      },
+    ],
   },
 ];
 
@@ -1301,5 +1352,21 @@ export const DOCS_NAVIGATION: AxNavigationItem[] = [
       link: item.link,
       badge: item.badge,
     })),
+  },
+  {
+    id: 'page-examples',
+    title: 'Page Examples',
+    badge: { content: 'New', type: 'info' },
+    children: [
+      {
+        id: 'error-pages',
+        title: 'Error Pages',
+        children: PAGE_EXAMPLES_ERROR_ITEMS.map((item) => ({
+          id: item.id,
+          title: item.title,
+          link: item.link,
+        })),
+      },
+    ],
   },
 ];

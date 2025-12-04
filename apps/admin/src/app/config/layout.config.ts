@@ -29,6 +29,7 @@ export const STANDALONE_ROUTES = [
   '/gridster-poc',
   '/playground/pages/dashboard',
   '/tools',
+  '/examples/error',
 ] as const;
 
 /**

@@ -10,6 +10,7 @@ import {
   ARCHITECTURE_ROUTES,
   PATTERNS_ROUTES,
 } from './routes/docs/patterns-architecture.routes';
+import { EXAMPLES_ROUTES } from './routes/examples/examples.routes';
 import { PLAYGROUND_ROUTES } from './routes/playground/playground.routes';
 import { LEGACY_REDIRECTS } from './routes/redirects/legacy-redirects.routes';
 import { STANDALONE_ROUTES } from './routes/standalone/standalone.routes';
@@ -124,6 +125,19 @@ export const appRoutes: Route[] = [
     data: {
       title: 'Tools',
       description: 'Administrative tools and utilities',
+    },
+  },
+
+  // ============================================
+  // EXAMPLES ROUTES - /examples/*
+  // Copy-paste friendly page examples
+  // ============================================
+  {
+    path: 'examples',
+    children: EXAMPLES_ROUTES,
+    data: {
+      title: 'Page Examples',
+      description: 'Copy-paste friendly page examples',
     },
   },
 
