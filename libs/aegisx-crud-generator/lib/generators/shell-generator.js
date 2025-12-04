@@ -68,12 +68,15 @@ function toTitleCase(str) {
 // HANDLEBARS HELPERS
 // ============================================================================
 
-// Register helpers
-Handlebars.registerHelper('pascalCase', toPascalCase);
-Handlebars.registerHelper('camelCase', toCamelCase);
-Handlebars.registerHelper('kebabCase', toKebabCase);
-Handlebars.registerHelper('screamingSnakeCase', toScreamingSnakeCase);
-Handlebars.registerHelper('titleCase', toTitleCase);
+// Register helpers with underscore prefix to avoid conflicts with context variables
+// IMPORTANT: frontend-generator.js uses kebabCase, camelCase, pascalCase as context variables
+// Registering them as helpers causes Handlebars to call the helper instead of reading the variable
+// Using _kebabCase, _camelCase, etc. to avoid this conflict
+Handlebars.registerHelper('_pascalCase', toPascalCase);
+Handlebars.registerHelper('_camelCase', toCamelCase);
+Handlebars.registerHelper('_kebabCase', toKebabCase);
+Handlebars.registerHelper('_screamingSnakeCase', toScreamingSnakeCase);
+Handlebars.registerHelper('_titleCase', toTitleCase);
 
 Handlebars.registerHelper('eq', function (a, b) {
   return a === b;
@@ -109,14 +112,14 @@ import {
 {{/if}}
   EnterprisePresetTheme,
 } from '@aegisx/ui';
-import { {{screamingSnakeCase shellName}}_APP_CONFIG } from './{{kebabCase shellName}}.config';
+import { {{_screamingSnakeCase shellName}}_APP_CONFIG } from './{{_kebabCase shellName}}.config';
 {{#if withAuth}}
 import { AuthService } from '../../core/auth';
 {{/if}}
 import { MultiAppService, HeaderAction } from '../../shared/multi-app';
 
 /**
- * {{titleCase shellName}} Shell Component
+ * {{_titleCase shellName}} Shell Component
  *
  * Main shell component for the {{displayName}} app.
  * Uses AxEnterpriseLayoutComponent with navigation managed by MultiAppService.
@@ -128,10 +131,10 @@ import { MultiAppService, HeaderAction } from '../../shared/multi-app';
  * - App-specific header actions
  *
  * Routes:
- * - /{{kebabCase shellName}}          → Dashboard
+ * - /{{_kebabCase shellName}}          → Dashboard
  */
 @Component({
-  selector: 'app-{{kebabCase shellName}}-shell',
+  selector: 'app-{{_kebabCase shellName}}-shell',
   standalone: true,
   imports: [
     CommonModule,
@@ -211,7 +214,7 @@ import { MultiAppService, HeaderAction } from '../../shared/multi-app';
     \`,
   ],
 })
-export class {{pascalCase shellName}}ShellComponent implements OnInit, OnDestroy {
+export class {{_pascalCase shellName}}ShellComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
 {{#if withAuth}}
   private readonly authService = inject(AuthService);
@@ -219,7 +222,7 @@ export class {{pascalCase shellName}}ShellComponent implements OnInit, OnDestroy
   private readonly multiAppService = inject(MultiAppService);
 
   // App configuration
-  readonly config = {{screamingSnakeCase shellName}}_APP_CONFIG;
+  readonly config = {{_screamingSnakeCase shellName}}_APP_CONFIG;
   readonly appName = this.config.name;
   readonly appTheme = this.config.theme as EnterprisePresetTheme;
 
@@ -298,7 +301,7 @@ export class {{pascalCase shellName}}ShellComponent implements OnInit, OnDestroy
    * Settings action
    */
   onSettings(): void {
-    this.router.navigate(['/{{kebabCase shellName}}/settings']);
+    this.router.navigate(['/{{_kebabCase shellName}}/settings']);
   }
 
   /**
@@ -330,17 +333,17 @@ const ENTERPRISE_SHELL_CONFIG_TEMPLATE = `import { AxNavigationItem } from '@aeg
 import { AppConfig } from '../../shared/multi-app';
 
 /**
- * {{titleCase shellName}} Navigation Configuration
+ * {{_titleCase shellName}} Navigation Configuration
  *
  * Navigation items for the {{displayName}} app.
  */
-const {{camelCase shellName}}Navigation: AxNavigationItem[] = [
+const {{_camelCase shellName}}Navigation: AxNavigationItem[] = [
   // Dashboard
   {
     id: 'dashboard',
     title: 'Dashboard',
     icon: 'dashboard',
-    link: '/{{kebabCase shellName}}',
+    link: '/{{_kebabCase shellName}}',
   },
 
 {{#if withSettings}}
@@ -349,23 +352,23 @@ const {{camelCase shellName}}Navigation: AxNavigationItem[] = [
     id: 'settings',
     title: 'Settings',
     icon: 'settings',
-    link: '/{{kebabCase shellName}}/settings',
+    link: '/{{_kebabCase shellName}}/settings',
   },
 {{/if}}
 ];
 
 /**
- * {{titleCase shellName}} App Configuration
+ * {{_titleCase shellName}} App Configuration
  *
  * Configuration following AppConfig interface for MultiAppService integration.
  */
-export const {{screamingSnakeCase shellName}}_APP_CONFIG: AppConfig = {
-  id: '{{kebabCase shellName}}',
+export const {{_screamingSnakeCase shellName}}_APP_CONFIG: AppConfig = {
+  id: '{{_kebabCase shellName}}',
   name: '{{displayName}}',
   description: '{{description}}',
   theme: '{{theme}}',
-  baseRoute: '/{{kebabCase shellName}}',
-  defaultRoute: '/{{kebabCase shellName}}',
+  baseRoute: '/{{_kebabCase shellName}}',
+  defaultRoute: '/{{_kebabCase shellName}}',
   showFooter: true,
   footerContent: 'AegisX Platform',
 
@@ -393,8 +396,8 @@ export const {{screamingSnakeCase shellName}}_APP_CONFIG: AppConfig = {
       id: 'main',
       name: 'Main',
       icon: 'home',
-      route: '/{{kebabCase shellName}}',
-      navigation: {{camelCase shellName}}Navigation,
+      route: '/{{_kebabCase shellName}}',
+      navigation: {{_camelCase shellName}}Navigation,
       isDefault: true,
       description: 'Main dashboard',
     },
@@ -407,8 +410,8 @@ export const {{screamingSnakeCase shellName}}_APP_CONFIG: AppConfig = {
       id: 'main',
       name: '{{displayName}}',
       icon: '{{icon}}',
-      route: '/{{kebabCase shellName}}',
-      navigation: {{camelCase shellName}}Navigation,
+      route: '/{{_kebabCase shellName}}',
+      navigation: {{_camelCase shellName}}Navigation,
       isDefault: true,
       description: '{{description}}',
       roles: ['admin'],
@@ -418,10 +421,10 @@ export const {{screamingSnakeCase shellName}}_APP_CONFIG: AppConfig = {
 };
 
 /**
- * @deprecated Use {{screamingSnakeCase shellName}}_APP_CONFIG instead
+ * @deprecated Use {{_screamingSnakeCase shellName}}_APP_CONFIG instead
  * Kept for backward compatibility
  */
-export const {{screamingSnakeCase shellName}}_NAVIGATION = {{camelCase shellName}}Navigation;
+export const {{_screamingSnakeCase shellName}}_NAVIGATION = {{_camelCase shellName}}Navigation;
 `;
 
 /**
@@ -433,16 +436,16 @@ import { AuthGuard } from '../../core/auth';
 {{/if}}
 
 /**
- * {{titleCase shellName}} Routes
+ * {{_titleCase shellName}} Routes
  *
- * All routes under /{{kebabCase shellName}} use the {{pascalCase shellName}}ShellComponent as shell
+ * All routes under /{{_kebabCase shellName}} use the {{_pascalCase shellName}}ShellComponent as shell
  * with AxEnterpriseLayoutComponent for navigation.
  */
-export const {{screamingSnakeCase shellName}}_ROUTES: Route[] = [
+export const {{_screamingSnakeCase shellName}}_ROUTES: Route[] = [
   {
     path: '',
     loadComponent: () =>
-      import('./{{kebabCase shellName}}-shell.component').then((m) => m.{{pascalCase shellName}}ShellComponent),
+      import('./{{_kebabCase shellName}}-shell.component').then((m) => m.{{_pascalCase shellName}}ShellComponent),
 {{#if withAuth}}
     canActivate: [AuthGuard],
 {{/if}}
@@ -478,10 +481,10 @@ export const {{screamingSnakeCase shellName}}_ROUTES: Route[] = [
 /**
  * Shell Index Template
  */
-const SHELL_INDEX_TEMPLATE = `// {{titleCase shellName}} Shell Module
-export * from './{{kebabCase shellName}}-shell.component';
-export * from './{{kebabCase shellName}}.config';
-export * from './{{kebabCase shellName}}.routes';
+const SHELL_INDEX_TEMPLATE = `// {{_titleCase shellName}} Shell Module
+export * from './{{_kebabCase shellName}}-shell.component';
+export * from './{{_kebabCase shellName}}.config';
+export * from './{{_kebabCase shellName}}.routes';
 `;
 
 /**
@@ -494,10 +497,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 
 /**
- * {{titleCase shellName}} Dashboard Page
+ * {{_titleCase shellName}} Dashboard Page
  */
 @Component({
-  selector: 'app-{{kebabCase shellName}}-dashboard',
+  selector: 'app-{{_kebabCase shellName}}-dashboard',
   standalone: true,
   imports: [
     CommonModule,
@@ -587,10 +590,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 /**
- * {{titleCase shellName}} Settings Page
+ * {{_titleCase shellName}} Settings Page
  */
 @Component({
-  selector: 'app-{{kebabCase shellName}}-settings',
+  selector: 'app-{{_kebabCase shellName}}-settings',
   standalone: true,
   imports: [
     CommonModule,
@@ -670,13 +673,13 @@ import { RouterOutlet } from '@angular/router';
 import { AxEmptyLayoutComponent } from '@aegisx/ui';
 
 /**
- * {{titleCase shellName}} Shell Component
+ * {{_titleCase shellName}} Shell Component
  *
  * Simple shell using AxEmptyLayoutComponent.
  * Suitable for auth pages, landing pages, or minimal layouts.
  */
 @Component({
-  selector: 'app-{{kebabCase shellName}}-shell',
+  selector: 'app-{{_kebabCase shellName}}-shell',
   standalone: true,
   imports: [
     CommonModule,
@@ -697,7 +700,7 @@ import { AxEmptyLayoutComponent } from '@aegisx/ui';
     \`,
   ],
 })
-export class {{pascalCase shellName}}ShellComponent {}
+export class {{_pascalCase shellName}}ShellComponent {}
 `;
 
 /**
@@ -706,15 +709,15 @@ export class {{pascalCase shellName}}ShellComponent {}
 const SIMPLE_SHELL_ROUTES_TEMPLATE = `import { Route } from '@angular/router';
 
 /**
- * {{titleCase shellName}} Routes
+ * {{_titleCase shellName}} Routes
  *
  * Routes using simple shell layout.
  */
-export const {{screamingSnakeCase shellName}}_ROUTES: Route[] = [
+export const {{_screamingSnakeCase shellName}}_ROUTES: Route[] = [
   {
     path: '',
     loadComponent: () =>
-      import('./{{kebabCase shellName}}-shell.component').then((m) => m.{{pascalCase shellName}}ShellComponent),
+      import('./{{_kebabCase shellName}}-shell.component').then((m) => m.{{_pascalCase shellName}}ShellComponent),
     children: [
       {
         path: '',
@@ -737,10 +740,10 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 
 /**
- * {{titleCase shellName}} Main Page
+ * {{_titleCase shellName}} Main Page
  */
 @Component({
-  selector: 'app-{{kebabCase shellName}}-main',
+  selector: 'app-{{_kebabCase shellName}}-main',
   standalone: true,
   imports: [
     CommonModule,
