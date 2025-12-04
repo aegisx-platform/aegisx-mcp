@@ -1,8 +1,0 @@
-@if (loading$ | async) {
-  <div [class]="barClasses" [ngStyle]="barStyles">
-    <div
-      class="ax-loading-bar-progress"
-      [ngStyle]="getProgressStyles((progress$ | async) || 0)"
-    ></div>
-  </div>
-}

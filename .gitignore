@@ -1,122 +1,26 @@
-# See https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
+# Dependencies
+node_modules/
 
-# compiled output
-dist
-tmp
-temp
-out-tsc
+# Build output
+dist/
 
-# dependencies
-node_modules
-.pnpm-store
-.pnpm-debug.log*
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
 
-# IDEs and editors
-/.idea
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
-
-# IDE - VSCode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-
-# misc
-/.sass-cache
-/connect.lock
-/coverage
-/libpeerconnection.log
-npm-debug.log
-yarn-error.log
-testem.log
-/typings
-
-# Test files and temporary files (exclude important .ts route files)
-test-*.html
-test-*.json
-test-*.txt
-test-*.sh
-test-*.md
-test-*.log
-*-test.*
-*.test.*
-# Keep important test route files in API modules
-!apps/api/src/**/test-*.ts
-!apps/api/src/**/test-*.js
-test-file-uploads/
-test-results/
-playwright-report/
-
-# Log files
-*.log
-api-server.log
-server.log
-web.log
-
-# System Files
+# OS
 .DS_Store
 Thumbs.db
 
-.nx/cache
-.nx/workspace-data
-.cursor/rules/nx-rules.mdc
-.github/instructions/nx.instructions.md
-
-.angular
-
-.env
-.env.local
-
-# Multi-instance development files
-docker-compose.override.yml
-docker-compose.instance.yml
-
-# Playwright MCP generated files
-.playwright-mcp/
-
 # Logs
 *.log
-api.log
-web.log
-e2e.log
-api-debug.log
-debug.log
+npm-debug.log*
 
-# Upload directories
-uploads/
-!/uploads/.gitkeep
+# Test
+coverage/
 
-# Test results and artifacts
-test-results/
-playwright-report/
-junit-results.xml
-test-results.json
-*.json.test
-bulk_test.json
-login_data.json
-
-# Temporary and build directories
-tmp/
-dist/
-.angular/
-node_modules/
-
-# E2E test artifacts
-apps/e2e/test-results/
-apps/e2e/playwright-report/
-apps/e2e/screenshots/
-apps/*/api.log
-
-# Docker and dev files
-docker-compose.override.yml
-docker-compose.instance.yml
-
-# Test and development files
-responsive-test.html
-test-websocket.html
+# Environment
+.env
+.env.local
