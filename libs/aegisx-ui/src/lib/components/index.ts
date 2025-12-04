@@ -65,3 +65,6 @@ export * from './theme-builder';
 
 // Code Tabs (Syntax Highlighting with Prism.js)
 export * from './code-tabs/code-tabs.component';
+
+// Auth Components (Login, Register, Forgot Password, etc.)
+export * from './auth';

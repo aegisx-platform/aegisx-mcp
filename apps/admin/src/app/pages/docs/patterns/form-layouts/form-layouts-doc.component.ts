@@ -14,6 +14,8 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSliderModule } from '@angular/material/slider';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import {
@@ -43,6 +45,8 @@ import {
     MatChipsModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    MatSlideToggleModule,
+    MatSliderModule,
     DocHeaderComponent,
     CodeTabsComponent,
     LivePreviewComponent,
@@ -492,6 +496,295 @@ import {
                 </mat-card>
               </ax-live-preview>
               <ax-code-tabs [tabs]="inlineFiltersCode" />
+            </section>
+
+            <!-- Comprehensive Input Test -->
+            <section>
+              <h3 class="text-xl font-semibold mb-4">
+                7. Comprehensive Input Test (Dark Mode)
+              </h3>
+              <p class="text-on-surface-variant mb-4">
+                ทดสอบ Input ทุกประเภทเพื่อตรวจสอบ visibility ใน dark mode - ทั้ง
+                border, placeholder, label และ states ต่างๆ
+              </p>
+              <ax-live-preview
+                title="All Input Types - Dark Mode Visibility Test"
+              >
+                <mat-card appearance="outlined">
+                  <mat-card-header>
+                    <mat-card-title>Input Visibility Test</mat-card-title>
+                    <mat-card-subtitle>
+                      ตรวจสอบว่า border, placeholder, label อ่านได้ชัดเจนหรือไม่
+                    </mat-card-subtitle>
+                  </mat-card-header>
+                  <mat-card-content class="form-compact">
+                    <div class="space-y-6 pt-4">
+                      <!-- Section 1: Text Inputs -->
+                      <div>
+                        <h4 class="font-semibold mb-3 text-primary">
+                          1. Text Inputs
+                        </h4>
+                        <div class="grid md:grid-cols-2 gap-4">
+                          <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Text Input</mat-label>
+                            <input matInput placeholder="Enter text here..." />
+                            <mat-hint>Helper text for guidance</mat-hint>
+                          </mat-form-field>
+
+                          <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Email Input</mat-label>
+                            <mat-icon matPrefix>email</mat-icon>
+                            <input
+                              matInput
+                              type="email"
+                              placeholder="your@email.com"
+                            />
+                          </mat-form-field>
+
+                          <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Password Input</mat-label>
+                            <mat-icon matPrefix>lock</mat-icon>
+                            <input
+                              matInput
+                              type="password"
+                              placeholder="Enter password..."
+                            />
+                            <mat-icon matSuffix>visibility_off</mat-icon>
+                          </mat-form-field>
+
+                          <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Number Input</mat-label>
+                            <mat-icon matPrefix>tag</mat-icon>
+                            <input
+                              matInput
+                              type="number"
+                              placeholder="Enter number..."
+                            />
+                          </mat-form-field>
+                        </div>
+                      </div>
+
+                      <mat-divider></mat-divider>
+
+                      <!-- Section 2: Textarea -->
+                      <div>
+                        <h4 class="font-semibold mb-3 text-primary">
+                          2. Textarea
+                        </h4>
+                        <mat-form-field appearance="outline" class="w-full">
+                          <mat-label>Message</mat-label>
+                          <textarea
+                            matInput
+                            rows="3"
+                            placeholder="Enter your message here..."
+                          ></textarea>
+                          <mat-hint align="end">0/500 characters</mat-hint>
+                        </mat-form-field>
+                      </div>
+
+                      <mat-divider></mat-divider>
+
+                      <!-- Section 3: Select & Datepicker -->
+                      <div>
+                        <h4 class="font-semibold mb-3 text-primary">
+                          3. Select & Date Picker
+                        </h4>
+                        <div class="grid md:grid-cols-2 gap-4">
+                          <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Select Option</mat-label>
+                            <mat-select placeholder="Choose an option...">
+                              <mat-option value="option1">Option 1</mat-option>
+                              <mat-option value="option2">Option 2</mat-option>
+                              <mat-option value="option3">Option 3</mat-option>
+                            </mat-select>
+                          </mat-form-field>
+
+                          <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Date Picker</mat-label>
+                            <input
+                              matInput
+                              [matDatepicker]="testPicker"
+                              placeholder="Select date..."
+                            />
+                            <mat-datepicker-toggle
+                              matSuffix
+                              [for]="testPicker"
+                            ></mat-datepicker-toggle>
+                            <mat-datepicker #testPicker></mat-datepicker>
+                          </mat-form-field>
+                        </div>
+                      </div>
+
+                      <mat-divider></mat-divider>
+
+                      <!-- Section 4: Disabled States -->
+                      <div>
+                        <h4 class="font-semibold mb-3 text-primary">
+                          4. Disabled States
+                        </h4>
+                        <div class="grid md:grid-cols-2 gap-4">
+                          <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Disabled Input</mat-label>
+                            <input matInput disabled value="This is disabled" />
+                          </mat-form-field>
+
+                          <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Disabled Select</mat-label>
+                            <mat-select disabled placeholder="Disabled...">
+                              <mat-option value="1">Option 1</mat-option>
+                            </mat-select>
+                          </mat-form-field>
+                        </div>
+                      </div>
+
+                      <mat-divider></mat-divider>
+
+                      <!-- Section 5: Error States -->
+                      <div>
+                        <h4 class="font-semibold mb-3 text-primary">
+                          5. Error States
+                        </h4>
+                        <div class="grid md:grid-cols-2 gap-4">
+                          <mat-form-field
+                            appearance="outline"
+                            class="w-full error-demo"
+                          >
+                            <mat-label>Required Field</mat-label>
+                            <input matInput required />
+                            <mat-error>This field is required</mat-error>
+                          </mat-form-field>
+
+                          <mat-form-field
+                            appearance="outline"
+                            class="w-full error-demo"
+                          >
+                            <mat-label>Invalid Email</mat-label>
+                            <input
+                              matInput
+                              type="email"
+                              value="invalid-email"
+                            />
+                            <mat-error>Please enter a valid email</mat-error>
+                          </mat-form-field>
+                        </div>
+                      </div>
+
+                      <mat-divider></mat-divider>
+
+                      <!-- Section 6: Checkboxes & Radio -->
+                      <div>
+                        <h4 class="font-semibold mb-3 text-primary">
+                          6. Checkboxes & Radio Buttons
+                        </h4>
+                        <div class="grid md:grid-cols-2 gap-4">
+                          <div class="space-y-2">
+                            <p class="text-sm text-on-surface-variant mb-2">
+                              Checkboxes:
+                            </p>
+                            <mat-checkbox>Unchecked checkbox</mat-checkbox>
+                            <mat-checkbox checked
+                              >Checked checkbox</mat-checkbox
+                            >
+                            <mat-checkbox disabled
+                              >Disabled checkbox</mat-checkbox
+                            >
+                            <mat-checkbox disabled checked
+                              >Disabled checked</mat-checkbox
+                            >
+                          </div>
+
+                          <div class="space-y-2">
+                            <p class="text-sm text-on-surface-variant mb-2">
+                              Radio Buttons:
+                            </p>
+                            <mat-radio-group class="flex flex-col gap-2">
+                              <mat-radio-button value="1"
+                                >Radio option 1</mat-radio-button
+                              >
+                              <mat-radio-button value="2" checked
+                                >Radio option 2</mat-radio-button
+                              >
+                              <mat-radio-button value="3" disabled
+                                >Disabled option</mat-radio-button
+                              >
+                            </mat-radio-group>
+                          </div>
+                        </div>
+                      </div>
+
+                      <mat-divider></mat-divider>
+
+                      <!-- Section 7: Toggle & Slider -->
+                      <div>
+                        <h4 class="font-semibold mb-3 text-primary">
+                          7. Slide Toggle & Slider
+                        </h4>
+                        <div class="grid md:grid-cols-2 gap-4">
+                          <div class="space-y-3">
+                            <p class="text-sm text-on-surface-variant mb-2">
+                              Slide Toggles:
+                            </p>
+                            <mat-slide-toggle>Toggle off</mat-slide-toggle>
+                            <mat-slide-toggle checked
+                              >Toggle on</mat-slide-toggle
+                            >
+                            <mat-slide-toggle disabled
+                              >Disabled toggle</mat-slide-toggle
+                            >
+                          </div>
+
+                          <div class="space-y-3">
+                            <p class="text-sm text-on-surface-variant mb-2">
+                              Slider:
+                            </p>
+                            <mat-slider
+                              min="0"
+                              max="100"
+                              step="1"
+                              class="w-full"
+                            >
+                              <input matSliderThumb value="50" />
+                            </mat-slider>
+                            <mat-slider
+                              min="0"
+                              max="100"
+                              step="1"
+                              disabled
+                              class="w-full"
+                            >
+                              <input matSliderThumb value="30" />
+                            </mat-slider>
+                          </div>
+                        </div>
+                      </div>
+
+                      <mat-divider></mat-divider>
+
+                      <!-- Section 8: Chips -->
+                      <div>
+                        <h4 class="font-semibold mb-3 text-primary">
+                          8. Chips
+                        </h4>
+                        <mat-chip-set>
+                          <mat-chip>Default chip</mat-chip>
+                          <mat-chip highlighted>Highlighted chip</mat-chip>
+                          <mat-chip disabled>Disabled chip</mat-chip>
+                          <mat-chip>
+                            With icon
+                            <mat-icon matChipRemove>cancel</mat-icon>
+                          </mat-chip>
+                        </mat-chip-set>
+                      </div>
+                    </div>
+                  </mat-card-content>
+                  <mat-card-actions align="end">
+                    <button mat-stroked-button>Reset All</button>
+                    <button mat-flat-button color="primary">
+                      Submit Test Form
+                    </button>
+                  </mat-card-actions>
+                </mat-card>
+              </ax-live-preview>
             </section>
           </div>
         </mat-tab>
