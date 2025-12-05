@@ -87,6 +87,60 @@ export const packages: PackageInfo[] = [
 
 export const commands: CommandInfo[] = [
   {
+    name: 'domain:init',
+    description:
+      'Initialize a new domain with PostgreSQL schema and folder structure',
+    usage: 'pnpm run domain:init -- <domain_name> [options]',
+    options: [
+      {
+        name: 'force',
+        alias: 'f',
+        type: 'boolean',
+        default: false,
+        description: 'Reinitialize even if domain already exists',
+      },
+      {
+        name: 'dry-run',
+        alias: 'd',
+        type: 'boolean',
+        default: false,
+        description: 'Preview files without creating',
+      },
+    ],
+    examples: [
+      '# Initialize inventory domain',
+      'pnpm run domain:init -- inventory',
+      '',
+      '# Initialize with dry run preview',
+      './bin/cli.js domain:init inventory --dry-run',
+      '',
+      '# Force reinitialize existing domain',
+      './bin/cli.js domain:init inventory --force',
+    ],
+    notes: [
+      'Creates PostgreSQL schema, knexfile, migrations folder, seeds folder',
+      'Run migration after init: npx knex migrate:latest --knexfile knexfile-{domain}.ts',
+      'Domain names are converted: hr_management → hr-management (kebab), hr_management (snake)',
+    ],
+  },
+  {
+    name: 'domain:list',
+    description: 'List all initialized domains in the project',
+    usage: 'pnpm run domain:list',
+    options: [],
+    examples: [
+      '# List all domains',
+      'pnpm run domain:list',
+      '',
+      '# Or using direct CLI',
+      './bin/cli.js domain:list',
+    ],
+    notes: [
+      'Shows domains with their schema names and status',
+      'Checks for knexfile and modules folder existence',
+    ],
+  },
+  {
     name: 'generate',
     description: 'Generate CRUD module from database table',
     usage: 'pnpm run crud -- <table_name> [options]',
@@ -159,6 +213,19 @@ export const commands: CommandInfo[] = [
         default: false,
         description: 'Include audit fields in forms (created_at, updated_at)',
       },
+      {
+        name: 'domain',
+        type: 'string',
+        description:
+          'Domain path for module organization (e.g., inventory/master-data)',
+      },
+      {
+        name: 'schema',
+        alias: 's',
+        type: 'string',
+        default: 'public',
+        description: 'PostgreSQL schema to read table from',
+      },
     ],
     examples: [
       '# Basic backend generation',
@@ -173,6 +240,12 @@ export const commands: CommandInfo[] = [
       '# Full package (all features)',
       'pnpm run crud:full -- orders --force',
       '',
+      '# Generate for specific domain (e.g., inventory)',
+      'pnpm run crud -- drugs --domain inventory/master-data --schema inventory --force',
+      '',
+      '# Generate for HR domain',
+      'pnpm run crud -- employees --domain hr --schema hr --force',
+      '',
       '# Frontend generation (must generate backend first)',
       './bin/cli.js generate products --target frontend --force',
       '',
@@ -186,6 +259,8 @@ export const commands: CommandInfo[] = [
       'Always use -- separator before table name when using pnpm scripts',
       'Generate backend first, then frontend',
       'Use snake_case for table names (auto-converted to kebab-case)',
+      'For domain generation, initialize domain first: pnpm run domain:init -- <domain>',
+      'Domain auto-detect: prompts to initialize if domain not found',
     ],
   },
   {
@@ -356,9 +431,22 @@ export const troubleshooting: TroubleshootingItem[] = [
     example: '❌ pnpm run crud products\n✅ pnpm run crud -- products --force',
   },
   {
-    problem: 'Table not found',
+    problem: 'Domain not initialized',
     solution:
-      'Run migrations first and check table exists: pnpm run crud:list',
+      'Initialize domain first with domain:init command, then generate CRUD',
+    example:
+      'pnpm run domain:init -- inventory\nnpx knex migrate:latest --knexfile knexfile-inventory.ts\npnpm run crud -- drugs --domain inventory --schema inventory --force',
+  },
+  {
+    problem: 'Table not found in schema',
+    solution:
+      'Ensure table exists in the specified PostgreSQL schema. Use --schema flag to specify non-public schemas',
+    example:
+      'pnpm run crud -- drugs --schema inventory --force\n# Or check tables: psql -c "SELECT table_name FROM information_schema.tables WHERE table_schema = \'inventory\'"',
+  },
+  {
+    problem: 'Table not found',
+    solution: 'Run migrations first and check table exists: pnpm run crud:list',
     example: 'pnpm run db:migrate && pnpm run crud:list',
   },
   {
@@ -433,6 +521,8 @@ export function buildCommand(
     withEvents?: boolean;
     force?: boolean;
     dryRun?: boolean;
+    domain?: string;
+    schema?: string;
   },
 ): string {
   const parts: string[] = [];
@@ -443,7 +533,10 @@ export function buildCommand(
     parts.push('--target frontend');
   } else {
     // Backend - use pnpm scripts
-    if (options.package === 'full' || (options.withImport && options.withEvents)) {
+    if (
+      options.package === 'full' ||
+      (options.withImport && options.withEvents)
+    ) {
       parts.push('pnpm run crud:full --');
     } else if (options.package === 'enterprise' || options.withImport) {
       parts.push('pnpm run crud:import --');
@@ -453,6 +546,15 @@ export function buildCommand(
       parts.push('pnpm run crud --');
     }
     parts.push(tableName);
+  }
+
+  // Domain options (for both backend and frontend)
+  if (options.domain) {
+    parts.push(`--domain ${options.domain}`);
+  }
+
+  if (options.schema && options.schema !== 'public') {
+    parts.push(`--schema ${options.schema}`);
   }
 
   if (options.withImport && options.target === 'frontend') {

@@ -20,7 +20,8 @@ export const crudTools: ToolDefinition[] = [
       properties: {
         tableName: {
           type: 'string',
-          description: 'Database table name in snake_case (e.g., "products", "user_profiles")',
+          description:
+            'Database table name in snake_case (e.g., "products", "user_profiles")',
         },
         target: {
           type: 'string',
@@ -30,7 +31,8 @@ export const crudTools: ToolDefinition[] = [
         package: {
           type: 'string',
           enum: ['standard', 'enterprise', 'full'],
-          description: 'Feature package: standard (basic CRUD), enterprise (+ import), full (+ events)',
+          description:
+            'Feature package: standard (basic CRUD), enterprise (+ import), full (+ events)',
         },
         withImport: {
           type: 'boolean',
@@ -47,6 +49,16 @@ export const crudTools: ToolDefinition[] = [
         dryRun: {
           type: 'boolean',
           description: 'Preview files without creating them',
+        },
+        domain: {
+          type: 'string',
+          description:
+            'Domain path for module organization (e.g., "inventory", "hr", "inventory/master-data")',
+        },
+        schema: {
+          type: 'string',
+          description:
+            'PostgreSQL schema to read table from (default: "public")',
         },
       },
       required: ['tableName'],
@@ -69,8 +81,7 @@ export const crudTools: ToolDefinition[] = [
   },
   {
     name: 'aegisx_crud_files',
-    description:
-      'Show what files will be generated for a CRUD module.',
+    description: 'Show what files will be generated for a CRUD module.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -88,8 +99,7 @@ export const crudTools: ToolDefinition[] = [
   },
   {
     name: 'aegisx_crud_troubleshoot',
-    description:
-      'Get troubleshooting help for common CRUD generator issues.',
+    description: 'Get troubleshooting help for common CRUD generator issues.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -119,6 +129,15 @@ export const crudTools: ToolDefinition[] = [
           type: 'boolean',
           description: 'Include real-time events',
         },
+        domain: {
+          type: 'string',
+          description:
+            'Domain path for module organization (e.g., "inventory", "hr")',
+        },
+        schema: {
+          type: 'string',
+          description: 'PostgreSQL schema to read table from',
+        },
       },
       required: ['tableName'],
     },
@@ -135,7 +154,9 @@ interface PackageInfo {
 
 function formatPackage(pkg: PackageInfo): string {
   const lines: string[] = [];
-  lines.push(`## ${pkg.name.charAt(0).toUpperCase() + pkg.name.slice(1)} Package`);
+  lines.push(
+    `## ${pkg.name.charAt(0).toUpperCase() + pkg.name.slice(1)} Package`,
+  );
   lines.push(pkg.description);
   lines.push('');
   lines.push('**Features:**');
@@ -162,6 +183,8 @@ export function handleCrudTool(
   switch (name) {
     case 'aegisx_crud_build_command': {
       const tableName = args.tableName as string;
+      const domain = args.domain as string | undefined;
+      const schema = args.schema as string | undefined;
       const command = buildCommand(tableName, {
         target: args.target as 'backend' | 'frontend',
         package: args.package as 'standard' | 'enterprise' | 'full',
@@ -169,6 +192,8 @@ export function handleCrudTool(
         withEvents: args.withEvents as boolean,
         force: args.force as boolean,
         dryRun: args.dryRun as boolean,
+        domain,
+        schema,
       });
 
       const lines: string[] = [];
@@ -179,17 +204,35 @@ export function handleCrudTool(
       lines.push('```');
       lines.push('');
 
+      // Add domain initialization note
+      if (domain) {
+        const domainRoot = domain.split('/')[0];
+        lines.push(`> **Note:** Initialize domain first if not already done:`);
+        lines.push('> ```bash');
+        lines.push(`> pnpm run domain:init -- ${domainRoot}`);
+        lines.push(
+          `> npx knex migrate:latest --knexfile knexfile-${domainRoot}.ts`,
+        );
+        lines.push('> ```');
+        lines.push('');
+      }
+
       // Add helpful notes based on options
       if (args.target === 'frontend') {
         lines.push('> **Note:** Generate backend first before frontend.');
         lines.push('> ```bash');
-        lines.push(`> pnpm run crud -- ${tableName} --force`);
+        const backendCmd = domain
+          ? `> pnpm run crud -- ${tableName} --domain ${domain}${schema ? ` --schema ${schema}` : ''} --force`
+          : `> pnpm run crud -- ${tableName} --force`;
+        lines.push(backendCmd);
         lines.push('> ```');
       }
 
       if (args.dryRun) {
         lines.push('');
-        lines.push('> This is a dry run. Remove `--dry-run` to actually generate files.');
+        lines.push(
+          '> This is a dry run. Remove `--dry-run` to actually generate files.',
+        );
       }
 
       return {
@@ -224,7 +267,9 @@ export function handleCrudTool(
       lines.push('| Package | Description | Key Feature |');
       lines.push('|---------|-------------|-------------|');
       for (const pkg of packages) {
-        lines.push(`| **${pkg.name}** | ${pkg.description} | ${pkg.features[pkg.features.length - 1] || ''} |`);
+        lines.push(
+          `| **${pkg.name}** | ${pkg.description} | ${pkg.features[pkg.features.length - 1] || ''} |`,
+        );
       }
       lines.push('');
       for (const pkg of packages) {
@@ -331,11 +376,20 @@ export function handleCrudTool(
       const tableName = args.tableName as string;
       const withImport = args.withImport as boolean;
       const withEvents = args.withEvents as boolean;
+      const domain = args.domain as string | undefined;
+      const schema = args.schema as string | undefined;
 
       const kebabName = tableName.replace(/_/g, '-');
+      const domainRoot = domain ? domain.split('/')[0] : null;
+      const kebabDomain = domainRoot ? domainRoot.replace(/_/g, '-') : null;
 
       const lines: string[] = [];
       lines.push(`# Complete CRUD Workflow for \`${tableName}\``);
+      if (domain) {
+        lines.push(
+          `**Domain:** ${domain} | **Schema:** ${schema || domainRoot}`,
+        );
+      }
       lines.push('');
       lines.push('## Prerequisites');
       lines.push('');
@@ -344,10 +398,33 @@ export function handleCrudTool(
       lines.push('docker ps | grep postgres');
       lines.push('```');
       lines.push('');
-      lines.push('2. Check table exists:');
-      lines.push('```bash');
-      lines.push('pnpm run crud:list');
-      lines.push('```');
+
+      // Add domain initialization step if domain is specified
+      if (domain && domainRoot) {
+        lines.push('2. Initialize domain (if not already done):');
+        lines.push('```bash');
+        lines.push(`pnpm run domain:init -- ${domainRoot}`);
+        lines.push('```');
+        lines.push('');
+        lines.push('3. Run domain migrations:');
+        lines.push('```bash');
+        lines.push(
+          `npx knex migrate:latest --knexfile knexfile-${kebabDomain}.ts`,
+        );
+        lines.push('```');
+        lines.push('');
+        lines.push('4. Check table exists in schema:');
+        lines.push('```bash');
+        lines.push(
+          `psql -c "SELECT table_name FROM information_schema.tables WHERE table_schema = '${schema || domainRoot}'"`,
+        );
+        lines.push('```');
+      } else {
+        lines.push('2. Check table exists:');
+        lines.push('```bash');
+        lines.push('pnpm run crud:list');
+        lines.push('```');
+      }
       lines.push('');
       lines.push('## Step 1: Generate Backend');
       lines.push('');
@@ -361,16 +438,30 @@ export function handleCrudTool(
       } else if (withEvents) {
         backendCmd = 'pnpm run crud:events';
       }
-      lines.push(`${backendCmd} -- ${tableName} --force`);
+      let backendFullCmd = `${backendCmd} -- ${tableName}`;
+      if (domain) {
+        backendFullCmd += ` --domain ${domain}`;
+      }
+      if (schema) {
+        backendFullCmd += ` --schema ${schema}`;
+      }
+      backendFullCmd += ' --force';
+      lines.push(backendFullCmd);
       lines.push('```');
       lines.push('');
+
+      // Module path depends on domain
+      const modulePath = domain
+        ? `apps/api/src/modules/${kebabDomain}/${domain.includes('/') ? domain.split('/').slice(1).join('/') + '/' : ''}${kebabName}`
+        : `apps/api/src/modules/${kebabName}`;
+
       lines.push('Generated files:');
-      lines.push(`- \`apps/api/src/modules/${kebabName}/${kebabName}.routes.ts\``);
-      lines.push(`- \`apps/api/src/modules/${kebabName}/${kebabName}.controller.ts\``);
-      lines.push(`- \`apps/api/src/modules/${kebabName}/${kebabName}.service.ts\``);
-      lines.push(`- \`apps/api/src/modules/${kebabName}/${kebabName}.repository.ts\``);
-      lines.push(`- \`apps/api/src/modules/${kebabName}/${kebabName}.schemas.ts\``);
-      lines.push(`- \`apps/api/src/modules/${kebabName}/${kebabName}.types.ts\``);
+      lines.push(`- \`${modulePath}/${kebabName}.routes.ts\``);
+      lines.push(`- \`${modulePath}/${kebabName}.controller.ts\``);
+      lines.push(`- \`${modulePath}/${kebabName}.service.ts\``);
+      lines.push(`- \`${modulePath}/${kebabName}.repository.ts\``);
+      lines.push(`- \`${modulePath}/${kebabName}.schemas.ts\``);
+      lines.push(`- \`${modulePath}/${kebabName}.types.ts\``);
       lines.push('');
 
       lines.push('## Step 2: Verify Backend');
@@ -383,7 +474,10 @@ export function handleCrudTool(
       lines.push('pnpm run dev:api');
       lines.push('');
       lines.push('# Test endpoint (in another terminal)');
-      lines.push(`curl http://localhost:3333/api/${kebabName}`);
+      const apiPath = domain
+        ? `/api/${kebabDomain}/${domain.includes('/') ? domain.split('/').slice(1).join('/') + '/' : ''}${kebabName}`
+        : `/api/${kebabName}`;
+      lines.push(`curl http://localhost:3333${apiPath}`);
       lines.push('```');
       lines.push('');
 
@@ -391,6 +485,9 @@ export function handleCrudTool(
       lines.push('');
       lines.push('```bash');
       let frontendCmd = `./bin/cli.js generate ${tableName} --target frontend`;
+      if (domain) {
+        frontendCmd += ` --domain ${domain}`;
+      }
       if (withImport) {
         frontendCmd += ' --with-import';
       }
@@ -401,8 +498,11 @@ export function handleCrudTool(
       lines.push(frontendCmd);
       lines.push('```');
       lines.push('');
+      const frontendPath = domain
+        ? `apps/admin/src/app/features/${kebabDomain}/${domain.includes('/') ? domain.split('/').slice(1).join('/') + '/' : ''}${kebabName}`
+        : `apps/admin/src/app/features/${kebabName}`;
       lines.push('Generated files:');
-      lines.push(`- \`apps/admin/src/app/features/${kebabName}/\``);
+      lines.push(`- \`${frontendPath}/\``);
       lines.push(`  - \`${kebabName}.component.ts\``);
       lines.push(`  - \`${kebabName}.service.ts\``);
       lines.push(`  - \`${kebabName}.types.ts\``);
@@ -412,15 +512,20 @@ export function handleCrudTool(
 
       lines.push('## Step 4: Add Navigation');
       lines.push('');
+      const navLink = domain
+        ? `/${kebabDomain}/${domain.includes('/') ? domain.split('/').slice(1).join('/') + '/' : ''}${kebabName}`
+        : `/${kebabName}`;
       lines.push('Add to your navigation config:');
       lines.push('```typescript');
       lines.push('// apps/admin/src/app/config/navigation.config.ts');
       lines.push(`{`);
       lines.push(`  id: '${kebabName}',`);
-      lines.push(`  title: '${tableName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}',`);
+      lines.push(
+        `  title: '${tableName.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}',`,
+      );
       lines.push(`  type: 'basic',`);
       lines.push(`  icon: 'heroicons_outline:folder',`);
-      lines.push(`  link: '/${kebabName}',`);
+      lines.push(`  link: '${navLink}',`);
       lines.push(`}`);
       lines.push('```');
       lines.push('');
