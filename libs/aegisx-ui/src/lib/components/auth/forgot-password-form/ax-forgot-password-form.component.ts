@@ -18,7 +18,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { AxLoadingButtonComponent } from '../../loading-button/ax-loading-button.component';
 
 export interface ForgotPasswordFormData {
   email: string;
@@ -59,7 +59,7 @@ export interface ForgotPasswordFormConfig {
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    AxLoadingButtonComponent,
   ],
   template: `
     <mat-card appearance="outlined" class="forgot-password-card">
@@ -103,21 +103,17 @@ export interface ForgotPasswordFormConfig {
             </mat-form-field>
 
             <!-- Submit Button -->
-            <button
-              mat-raised-button
-              color="primary"
+            <ax-loading-button
               type="submit"
-              class="submit-button full-width"
-              [disabled]="loading"
+              [loading]="loading"
+              loadingText="Sending..."
+              icon="send"
+              iconPosition="end"
+              [fullWidth]="true"
+              (buttonClick)="onSubmit()"
             >
-              @if (loading) {
-                <mat-spinner diameter="20" class="button-spinner"></mat-spinner>
-                <span>Sending...</span>
-              } @else {
-                <span>{{ config.submitButtonText }}</span>
-                <mat-icon>send</mat-icon>
-              }
-            </button>
+              {{ config.submitButtonText }}
+            </ax-loading-button>
           </form>
         </mat-card-content>
       } @else {
@@ -139,20 +135,16 @@ export interface ForgotPasswordFormConfig {
             Didn't receive the email? Check your spam folder or try again.
           </p>
 
-          <button
-            mat-stroked-button
-            type="button"
-            class="resend-button full-width"
-            (click)="onResendClick()"
-            [disabled]="loading"
+          <ax-loading-button
+            [loading]="loading"
+            loadingText="Resending..."
+            icon="refresh"
+            iconPosition="start"
+            [fullWidth]="true"
+            (buttonClick)="onResendClick()"
           >
-            @if (loading) {
-              <mat-spinner diameter="20" class="button-spinner"></mat-spinner>
-            } @else {
-              <mat-icon>refresh</mat-icon>
-            }
-            <span>Resend Email</span>
-          </button>
+            Resend Email
+          </ax-loading-button>
         </mat-card-content>
       }
 
@@ -193,10 +185,15 @@ export interface ForgotPasswordFormConfig {
       .card-header {
         padding: 2rem 2rem 0 !important;
         margin-bottom: 0 !important;
+        border-bottom: none !important;
         display: flex;
         flex-direction: column;
         align-items: center;
         text-align: center;
+      }
+
+      ::ng-deep .mat-mdc-card-header {
+        border-bottom: none !important;
       }
 
       .header-icon {
@@ -277,15 +274,20 @@ export interface ForgotPasswordFormConfig {
         height: 48px !important;
         font-size: 1rem !important;
         font-weight: 500 !important;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
+
+        .mdc-button__label {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+        }
 
         mat-icon {
           font-size: 20px;
           width: 20px;
           height: 20px;
+          line-height: 1;
+          vertical-align: middle;
         }
       }
 
@@ -306,7 +308,6 @@ export interface ForgotPasswordFormConfig {
 
       .card-footer {
         padding: 1.5rem 2rem !important;
-        border-top: 1px solid var(--ax-border-default);
         display: flex;
         justify-content: center;
       }

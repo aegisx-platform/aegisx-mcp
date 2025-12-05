@@ -20,7 +20,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { AxLoadingButtonComponent } from '../../loading-button/ax-loading-button.component';
 
 export interface ResetPasswordFormData {
   password: string;
@@ -63,7 +63,7 @@ export interface ResetPasswordFormConfig {
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    AxLoadingButtonComponent,
   ],
   template: `
     <mat-card appearance="outlined" class="reset-password-card">
@@ -157,21 +157,17 @@ export interface ResetPasswordFormConfig {
             </mat-form-field>
 
             <!-- Submit Button -->
-            <button
-              mat-raised-button
-              color="primary"
+            <ax-loading-button
               type="submit"
-              class="submit-button full-width"
-              [disabled]="loading"
+              [loading]="loading"
+              loadingText="Resetting..."
+              icon="check"
+              iconPosition="end"
+              [fullWidth]="true"
+              (buttonClick)="onSubmit()"
             >
-              @if (loading) {
-                <mat-spinner diameter="20" class="button-spinner"></mat-spinner>
-                <span>Resetting...</span>
-              } @else {
-                <span>{{ config.submitButtonText }}</span>
-                <mat-icon>check</mat-icon>
-              }
-            </button>
+              {{ config.submitButtonText }}
+            </ax-loading-button>
           </form>
         </mat-card-content>
       } @else {
@@ -189,16 +185,15 @@ export interface ResetPasswordFormConfig {
         </mat-card-header>
 
         <mat-card-content class="card-content">
-          <button
-            mat-raised-button
-            color="primary"
-            type="button"
-            class="submit-button full-width"
-            (click)="onBackToLoginClick()"
+          <ax-loading-button
+            [loading]="false"
+            icon="login"
+            iconPosition="end"
+            [fullWidth]="true"
+            (buttonClick)="onBackToLoginClick()"
           >
-            <span>{{ config.successButtonText }}</span>
-            <mat-icon>login</mat-icon>
-          </button>
+            {{ config.successButtonText }}
+          </ax-loading-button>
         </mat-card-content>
       }
 
@@ -241,10 +236,15 @@ export interface ResetPasswordFormConfig {
       .card-header {
         padding: 2rem 2rem 0 !important;
         margin-bottom: 0 !important;
+        border-bottom: none !important;
         display: flex;
         flex-direction: column;
         align-items: center;
         text-align: center;
+      }
+
+      ::ng-deep .mat-mdc-card-header {
+        border-bottom: none !important;
       }
 
       .header-icon {
@@ -325,29 +325,25 @@ export interface ResetPasswordFormConfig {
         font-size: 1rem !important;
         font-weight: 500 !important;
         margin-top: 0.5rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
+
+        .mdc-button__label {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+        }
 
         mat-icon {
           font-size: 20px;
           width: 20px;
           height: 20px;
-        }
-      }
-
-      .button-spinner {
-        margin-right: 0.5rem;
-
-        ::ng-deep circle {
-          stroke: currentColor !important;
+          line-height: 1;
+          vertical-align: middle;
         }
       }
 
       .card-footer {
         padding: 1.5rem 2rem !important;
-        border-top: 1px solid var(--ax-border-default);
         display: flex;
         justify-content: center;
       }

@@ -4,6 +4,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { AxLoadingButtonComponent } from '../../loading-button/ax-loading-button.component';
 
 export type ConfirmEmailStatus =
   | 'pending'
@@ -56,6 +57,7 @@ export interface ConfirmEmailConfig {
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    AxLoadingButtonComponent,
   ],
   template: `
     <mat-card appearance="outlined" class="confirm-email-card">
@@ -99,20 +101,16 @@ export interface ConfirmEmailConfig {
               }
             </div>
 
-            <button
-              mat-stroked-button
-              type="button"
-              class="action-button full-width"
-              (click)="onResendClick()"
-              [disabled]="resendLoading"
+            <ax-loading-button
+              [loading]="resendLoading"
+              loadingText="Sending..."
+              icon="refresh"
+              iconPosition="start"
+              [fullWidth]="true"
+              (buttonClick)="onResendClick()"
             >
-              @if (resendLoading) {
-                <mat-spinner diameter="20" class="button-spinner"></mat-spinner>
-              } @else {
-                <mat-icon>refresh</mat-icon>
-              }
-              <span>{{ config.resendButtonText }}</span>
-            </button>
+              {{ config.resendButtonText }}
+            </ax-loading-button>
           }
 
           @case ('verifying') {
@@ -120,47 +118,40 @@ export interface ConfirmEmailConfig {
           }
 
           @case ('success') {
-            <button
-              mat-raised-button
-              color="primary"
-              type="button"
-              class="action-button full-width"
-              (click)="onContinueClick()"
+            <ax-loading-button
+              [loading]="false"
+              icon="arrow_forward"
+              iconPosition="end"
+              [fullWidth]="true"
+              (buttonClick)="onContinueClick()"
             >
-              <span>{{ config.continueButtonText }}</span>
-              <mat-icon>arrow_forward</mat-icon>
-            </button>
+              {{ config.continueButtonText }}
+            </ax-loading-button>
           }
 
           @case ('error') {
-            <button
-              mat-raised-button
-              color="primary"
-              type="button"
-              class="action-button full-width"
-              (click)="onTryAgainClick()"
+            <ax-loading-button
+              [loading]="false"
+              icon="refresh"
+              iconPosition="start"
+              [fullWidth]="true"
+              (buttonClick)="onTryAgainClick()"
             >
-              <mat-icon>refresh</mat-icon>
-              <span>{{ config.tryAgainButtonText }}</span>
-            </button>
+              {{ config.tryAgainButtonText }}
+            </ax-loading-button>
           }
 
           @case ('expired') {
-            <button
-              mat-raised-button
-              color="primary"
-              type="button"
-              class="action-button full-width"
-              (click)="onResendClick()"
-              [disabled]="resendLoading"
+            <ax-loading-button
+              [loading]="resendLoading"
+              loadingText="Sending..."
+              icon="send"
+              iconPosition="start"
+              [fullWidth]="true"
+              (buttonClick)="onResendClick()"
             >
-              @if (resendLoading) {
-                <mat-spinner diameter="20" class="button-spinner"></mat-spinner>
-              } @else {
-                <mat-icon>send</mat-icon>
-              }
-              <span>{{ config.resendButtonText }}</span>
-            </button>
+              {{ config.resendButtonText }}
+            </ax-loading-button>
           }
         }
       </mat-card-content>
@@ -203,10 +194,15 @@ export interface ConfirmEmailConfig {
       .card-header {
         padding: 2rem 2rem 0 !important;
         margin-bottom: 0 !important;
+        border-bottom: none !important;
         display: flex;
         flex-direction: column;
         align-items: center;
         text-align: center;
+      }
+
+      ::ng-deep .mat-mdc-card-header {
+        border-bottom: none !important;
       }
 
       .header-icon {
@@ -329,29 +325,25 @@ export interface ConfirmEmailConfig {
         height: 48px !important;
         font-size: 1rem !important;
         font-weight: 500 !important;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
+
+        .mdc-button__label {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+        }
 
         mat-icon {
           font-size: 20px;
           width: 20px;
           height: 20px;
-        }
-      }
-
-      .button-spinner {
-        margin-right: 0.5rem;
-
-        ::ng-deep circle {
-          stroke: currentColor !important;
+          line-height: 1;
+          vertical-align: middle;
         }
       }
 
       .card-footer {
         padding: 1.5rem 2rem !important;
-        border-top: 1px solid var(--ax-border-default);
         display: flex;
         justify-content: center;
       }

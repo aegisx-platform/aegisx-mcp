@@ -19,8 +19,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
+import { AxLoadingButtonComponent } from '../../loading-button/ax-loading-button.component';
 
 export interface LoginFormData {
   email: string;
@@ -71,8 +71,8 @@ export interface LoginFormConfig {
     MatButtonModule,
     MatIconModule,
     MatCheckboxModule,
-    MatProgressSpinnerModule,
     MatDividerModule,
+    AxLoadingButtonComponent,
   ],
   template: `
     <mat-card appearance="outlined" class="login-card">
@@ -170,21 +170,17 @@ export interface LoginFormConfig {
           }
 
           <!-- Login Button -->
-          <button
-            mat-raised-button
-            color="primary"
+          <ax-loading-button
             type="submit"
-            class="login-button full-width"
-            [disabled]="loading"
+            [loading]="loading"
+            loadingText="Signing in..."
+            icon="arrow_forward"
+            iconPosition="end"
+            [fullWidth]="true"
+            (buttonClick)="onSubmit()"
           >
-            @if (loading) {
-              <mat-spinner diameter="20" class="button-spinner"></mat-spinner>
-              <span>Signing in...</span>
-            } @else {
-              <span>{{ config.submitButtonText }}</span>
-              <mat-icon>arrow_forward</mat-icon>
-            }
-          </button>
+            {{ config.submitButtonText }}
+          </ax-loading-button>
         </form>
 
         <!-- Social Login -->
@@ -258,10 +254,15 @@ export interface LoginFormConfig {
       .login-header {
         padding: 2rem 2rem 0 !important;
         margin-bottom: 0 !important;
+        border-bottom: none !important;
 
         @media (max-width: 960px) {
           padding: 1.5rem 1.5rem 0 !important;
         }
+      }
+
+      ::ng-deep .mat-mdc-card-header {
+        border-bottom: none !important;
       }
 
       .login-title {
@@ -337,15 +338,20 @@ export interface LoginFormConfig {
         font-size: 1rem !important;
         font-weight: 500 !important;
         margin-top: 0.5rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
+
+        .mdc-button__label {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+        }
 
         mat-icon {
           font-size: 20px;
           width: 20px;
           height: 20px;
+          line-height: 1;
+          vertical-align: middle;
         }
       }
 
@@ -407,7 +413,6 @@ export interface LoginFormConfig {
 
       .login-footer {
         padding: 1.5rem 2rem !important;
-        border-top: 1px solid var(--ax-border-default);
         text-align: center;
 
         p {
