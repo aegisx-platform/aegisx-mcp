@@ -1,8 +1,5 @@
 import { Type, Static } from '@sinclair/typebox';
 import {
-  UuidParamSchema,
-  PaginationQuerySchema,
-  ApiErrorResponseSchema,
   ApiSuccessResponseSchema,
   PaginatedResponseSchema,
   PartialPaginatedResponseSchema,

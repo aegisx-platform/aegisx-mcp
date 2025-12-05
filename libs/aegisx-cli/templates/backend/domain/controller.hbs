@@ -10,8 +10,8 @@ import {
   List{{ModuleName}}QuerySchema
 } from './{{toKebabCase currentRoute.camelName}}.schemas';
 {{#if (or (eq package 'enterprise') (eq package 'full'))}}
-import { ExportQuerySchema } from '../../../schemas/export.schemas';
-import { ExportService, ExportField } from '../../../services/export.service';
+import { ExportQuerySchema } from '{{schemasPath}}/export.schemas';
+import { ExportService, ExportField } from '{{servicesPath}}/export.service';
 {{/if}}
 {{#if withImport}}
 import { {{ModuleName}}ImportService } from './{{toKebabCase currentRoute.camelName}}-import.service';
@@ -25,14 +25,11 @@ import {
 {{#if (or (eq package 'enterprise') (eq package 'full'))}}
 import {
   DropdownQuerySchema,
-  BulkCreateSchema,
-  BulkUpdateSchema,
   BulkDeleteSchema,{{#if hasStatusField}}
   BulkStatusSchema,
   StatusToggleSchema,{{/if}}{{#if (eq package 'full')}}
-  ValidationRequestSchema,
-  UniquenessCheckSchema{{/if}}
-} from '../../../schemas/base.schemas';
+  UniquenessCheckSchema,{{/if}}
+} from '{{schemasPath}}/base.schemas';
 {{/if}}
 {{#if withEvents}}
 import { EventService } from '{{sharedPath}}/websocket/event.service';

@@ -644,8 +644,8 @@ export class {{ModuleName}}Service extends BaseService<{{ModuleName}}, Create{{M
     };
 
     // If specific fields requested, use only those
-    const fieldsToExport = fields && fields.length > 0 
-      ? fields.filter(field => exportableFields.hasOwnProperty(field))
+    const fieldsToExport = fields && fields.length > 0
+      ? fields.filter(field => Object.hasOwn(exportableFields, field))
       : Object.keys(exportableFields);
 
     // Format each field

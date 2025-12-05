@@ -1,20 +1,8 @@
 import { Type, Static } from '@sinclair/typebox';
-import { 
-  UuidParamSchema, 
-  PaginationQuerySchema, 
-  ApiErrorResponseSchema,
+import {
   ApiSuccessResponseSchema,
   PaginatedResponseSchema,
-  PartialPaginatedResponseSchema{{#if (or (eq package 'enterprise') (eq package 'full'))}},
-  DropdownOptionSchema,
-  BulkCreateSchema,
-  BulkUpdateSchema,
-  BulkDeleteSchema,
-  BulkStatusSchema,
-  StatusToggleSchema,
-  StatisticsSchema{{/if}}{{#if (eq package 'full')}},
-  ValidationRequestSchema,
-  UniquenessCheckSchema{{/if}} 
+  PartialPaginatedResponseSchema,
 } from '{{schemasPath}}/base.schemas';
 
 // Base {{ModuleName}} Schema
