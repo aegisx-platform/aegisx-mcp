@@ -1,0 +1,41 @@
+import fp from 'fastify-plugin';
+import type { FastifyInstance, FastifyPluginOptions } from 'fastify';
+
+{{#each modules}}
+import {{camelName}}Plugin from './{{path}}';
+{{/each}}
+
+/**
+ * {{domainName}} Domain Plugin
+ *
+ * Aggregates all modules within the {{domainName}} domain.
+ * Route prefix: /{{routePrefix}}
+ */
+export default fp(
+  async function {{domainCamelName}}DomainPlugin(
+    fastify: FastifyInstance,
+    options: FastifyPluginOptions
+  ) {
+    const prefix = options.prefix || '/{{routePrefix}}';
+
+    // Register all domain modules
+{{#each modules}}
+    await fastify.register({{camelName}}Plugin, {
+      ...options,
+      prefix: `${prefix}/{{kebabName}}`
+    });
+{{/each}}
+
+    fastify.addHook('onReady', async () => {
+      fastify.log.info(`{{domainName}} domain loaded with {{moduleCount}} modules at ${prefix}`);
+    });
+  },
+  {
+    name: '{{domainCamelName}}-domain-plugin',
+    dependencies: ['knex-plugin']
+  }
+);
+
+// Note: Individual module exports are accessed through their respective index.ts files
+// Example: import { DrugsService } from './drugs';
+//          import { DrugGenericsService } from './drugGenerics';

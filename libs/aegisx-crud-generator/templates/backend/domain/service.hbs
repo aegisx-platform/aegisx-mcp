@@ -1,8 +1,8 @@
-import { BaseService } from '../../../shared/services/base.service';
+import { BaseService } from '{{sharedPath}}/services/base.service';
 import { {{ModuleName}}Repository } from '../repositories/{{toKebabCase currentRoute.camelName}}.repository';
 {{#if withEvents}}
-import { EventService } from '../../../shared/websocket/event.service';
-import { CrudEventHelper } from '../../../shared/websocket/crud-event-helper';
+import { EventService } from '{{sharedPath}}/websocket/event.service';
+import { CrudEventHelper } from '{{sharedPath}}/websocket/crud-event-helper';
 {{/if}}
 import {
   type {{ModuleName}},

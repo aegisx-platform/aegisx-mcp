@@ -15,7 +15,7 @@ import {
   StatisticsSchema{{/if}}{{#if (eq package 'full')}},
   ValidationRequestSchema,
   UniquenessCheckSchema{{/if}} 
-} from '../../../schemas/base.schemas';
+} from '{{schemasPath}}/base.schemas';
 
 // Base {{ModuleName}} Schema
 export const {{ModuleName}}Schema = Type.Object({

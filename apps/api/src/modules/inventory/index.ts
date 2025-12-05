@@ -1,54 +1,29 @@
 import fp from 'fastify-plugin';
-import { FastifyInstance, FastifyPluginOptions } from 'fastify';
-import { InventoryController } from './controllers/inventory.controller';
-import { InventoryService } from './services/inventory.service';
-import { InventoryRepository } from './repositories/inventory.repository';
-import { inventoryRoutes } from './routes/index';
+import type { FastifyInstance, FastifyPluginOptions } from 'fastify';
 
-// Note: FastifyInstance eventService type is declared in websocket.plugin.ts
+import masterDataPlugin from './master-data';
 
 /**
  * Inventory Domain Plugin
  *
- * Following Fastify best practices:
- * - Service instantiation with proper dependency injection
- * - Encapsulation through plugin scoping
- * - Lifecycle management with hooks
- * - Schema registration through Fastify's schema registry
+ * Aggregates all modules within the Inventory domain.
+ * Route prefix: /inventory
  */
 export default fp(
   async function inventoryDomainPlugin(
     fastify: FastifyInstance,
     options: FastifyPluginOptions,
   ) {
-    // Register schemas using Fastify's built-in schema registry
-    if (fastify.hasDecorator('schemaRegistry')) {
-      (fastify as any).schemaRegistry.registerModuleSchemas(
-        'inventory',
-        {}, // schemas will be imported automatically
-      );
-    }
+    const prefix = options.prefix || '/inventory';
 
-    // Service instantiation following Fastify DI pattern
-    // Dependencies are accessed from Fastify instance decorators
-    const inventoryRepository = new InventoryRepository((fastify as any).knex);
-    const inventoryService = new InventoryService(inventoryRepository);
-
-    // Controller instantiation with proper dependencies
-    const inventoryController = new InventoryController(inventoryService);
-
-    // Optional: Decorate Fastify instance with service for cross-plugin access
-    // fastify.decorate('inventoryService', inventoryService);
-
-    // Register main CRUD routes (includes dynamic /:id route)
-    await fastify.register(inventoryRoutes, {
-      controller: inventoryController,
-      prefix: options.prefix || '/inventory',
+    // Register all domain modules
+    await fastify.register(masterDataPlugin, {
+      ...options,
+      prefix: `${prefix}/master-data`,
     });
 
-    // Lifecycle hooks for monitoring
     fastify.addHook('onReady', async () => {
-      fastify.log.info(`Inventory domain module registered successfully`);
+      fastify.log.info(`Inventory domain loaded with 1 modules at ${prefix}`);
     });
   },
   {
@@ -57,22 +32,6 @@ export default fp(
   },
 );
 
-// Re-exports for external consumers
-export * from './schemas/inventory.schemas';
-export * from './types/inventory.types';
-export { InventoryRepository } from './repositories/inventory.repository';
-export { InventoryService } from './services/inventory.service';
-export { InventoryController } from './controllers/inventory.controller';
-
-// Re-export commonly used types for external use
-export type {
-  Inventory,
-  CreateInventory,
-  UpdateInventory,
-  InventoryIdParam,
-  GetInventoryQuery,
-  ListInventoryQuery,
-} from './schemas/inventory.schemas';
-
-// Module name constant
-export const MODULE_NAME = 'inventory' as const;
+// Note: Individual module exports are accessed through their respective index.ts files
+// Example: import { DrugsService } from './drugs';
+//          import { DrugGenericsService } from './drugGenerics';

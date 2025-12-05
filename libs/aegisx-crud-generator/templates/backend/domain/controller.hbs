@@ -35,7 +35,7 @@ import {
 } from '../../../schemas/base.schemas';
 {{/if}}
 {{#if withEvents}}
-import { EventService } from '../../../shared/websocket/event.service';
+import { EventService } from '{{sharedPath}}/websocket/event.service';
 {{/if}}
 
 /**

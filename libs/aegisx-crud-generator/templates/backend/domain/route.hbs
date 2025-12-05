@@ -27,11 +27,11 @@ import {
   UniquenessQuerySchema,
   UniquenessResponseSchema,{{/if}}
   StatisticsResponseSchema
-} from '../../../schemas/base.schemas';
-import { ExportQuerySchema } from '../../../schemas/export.schemas';
+} from '{{schemasPath}}/base.schemas';
+import { ExportQuerySchema } from '{{schemasPath}}/export.schemas';
 {{/if}}
-import { ApiErrorResponseSchema as ErrorResponseSchema } from '../../../schemas/base.schemas';
-import { SchemaRefs } from '../../../schemas/registry';
+import { ApiErrorResponseSchema as ErrorResponseSchema } from '{{schemasPath}}/base.schemas';
+import { SchemaRefs } from '{{schemasPath}}/registry';
 
 export interface {{ModuleName}}RoutesOptions extends FastifyPluginOptions {
   controller: {{ModuleName}}Controller;

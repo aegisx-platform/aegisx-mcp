@@ -583,25 +583,27 @@ async function ensureDirectoryExists(dirPath) {
 
 /**
  * Convert string to camelCase
+ * Handles both snake_case and kebab-case
  */
 function toCamelCase(str) {
   if (typeof str !== 'string') {
     return String(str || '');
   }
   return str
-    .replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
+    .replace(/[-_]([a-z])/g, (_, letter) => letter.toUpperCase())
     .replace(/^[A-Z]/, (letter) => letter.toLowerCase());
 }
 
 /**
  * Convert string to PascalCase
+ * Handles both snake_case and kebab-case
  */
 function toPascalCase(str) {
   if (typeof str !== 'string') {
     return String(str || '');
   }
   return str
-    .replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
+    .replace(/[-_]([a-z])/g, (_, letter) => letter.toUpperCase())
     .replace(/^[a-z]/, (letter) => letter.toUpperCase());
 }
 
@@ -1463,6 +1465,24 @@ async function generateDomainModule(domainName, options = {}) {
     fullRoutePath: domain
       ? `/${domain}/${toKebabCase(domainName)}`
       : `/${toKebabCase(domainName)}`,
+    // Calculate relative path to shared folder based on domain depth
+    // modules/inventory/master-data/drugs/services -> needs ../../../../../shared
+    // Path: services -> drugs -> master-data -> inventory -> modules -> src
+    // domain depth (inventory/master-data) = 2, plus module folder + sub-folder + modules = 5 levels up
+    sharedPath: domain
+      ? '../'.repeat(domain.split('/').length + 3) + 'shared'
+      : '../../../../shared',
+    // Calculate relative path to schemas folder (at same level as modules, not in shared)
+    // modules/inventory/master-data/drugs/schemas -> needs ../../../../../schemas
+    // domain depth (inventory/master-data) = 2, plus module folder + schemas subfolder = 5 levels up
+    schemasPath: domain
+      ? '../'.repeat(domain.split('/').length + 3) + 'schemas'
+      : '../../../../schemas',
+    // Calculate relative path to modules root (for routes to reach schemas/)
+    // modules/inventory/master-data/drugs/routes -> needs ../../../../../
+    modulesRootPath: domain
+      ? '../'.repeat(domain.split('/').length + 3)
+      : '../../../../',
   };
 
   console.log(`📦 Domain Package context: ${context.package}`);
@@ -1710,6 +1730,7 @@ async function generateDomainModule(domainName, options = {}) {
         useMigration: !directDb,
         directDb,
         multipleRoles,
+        domain, // Pass domain for permission naming (e.g., 'inventory/master-data')
         // Don't pass outputDir - let role-generator detect correct path automatically
       };
 
@@ -1717,6 +1738,11 @@ async function generateDomainModule(domainName, options = {}) {
         context.moduleName,
         roleOptions,
       );
+
+      // Show domain-based permission format if domain is specified
+      const permissionFormat = domain
+        ? `${domain.split('/')[0]}:${context.moduleName}:action`
+        : `${context.moduleName}.action`;
 
       if (!dryRun) {
         if (directDb) {
@@ -1728,6 +1754,9 @@ async function generateDomainModule(domainName, options = {}) {
           console.log(
             `📝 Migration will create ${rolesData.permissions.length} permissions and ${rolesData.roles.length} roles`,
           );
+          if (domain) {
+            console.log(`📝 Permission format: ${permissionFormat}`);
+          }
         }
       } else {
         if (directDb) {
@@ -1745,6 +1774,9 @@ async function generateDomainModule(domainName, options = {}) {
           console.log(
             `📝 Migration would create ${rolesData.permissions.length} permissions and ${rolesData.roles.length} roles`,
           );
+          if (domain) {
+            console.log(`📝 Permission format: ${permissionFormat}`);
+          }
         }
       }
     } catch (error) {
@@ -1758,6 +1790,20 @@ async function generateDomainModule(domainName, options = {}) {
     }
   } else {
     console.log(`⏭️  Skipping role generation (--no-roles specified)`);
+  }
+
+  // Generate domain index files if using domain structure
+  if (domain && !dryRun) {
+    try {
+      console.log(`📂 Generating domain index files for: ${domain}`);
+      await generateDomainIndex(domain, domainName, outputDir);
+    } catch (error) {
+      console.error(
+        `⚠️  Warning: Failed to generate domain index files:`,
+        error.message,
+      );
+      warnings.push(`Failed to generate domain index files: ${error.message}`);
+    }
   }
 
   return {
@@ -1915,10 +1961,109 @@ async function autoRegisterBackendPlugin(
       return false;
     }
 
+    let content = await fs.readFile(pluginLoaderPath, 'utf8');
+
+    // When using domain structure, register only the domain root plugin
+    // e.g., for 'inventory/master-data/drugs', register 'inventory' domain plugin
+    // The domain index.ts will handle loading sub-domains and modules
+    if (domain) {
+      const domainParts = domain.split('/');
+      const domainRoot = domainParts[0]; // e.g., 'inventory'
+      const domainRootCamel = toCamelCase(domainRoot);
+      const domainRootKebab = toKebabCase(domainRoot);
+
+      // Check if domain root is already registered
+      if (content.includes(`${domainRootCamel}DomainPlugin`)) {
+        console.log(
+          `✅ Domain '${domainRoot}' already registered in plugin.loader.ts`,
+        );
+        console.log(
+          `   (Module '${moduleName}' will be loaded via domain index.ts)`,
+        );
+        return true;
+      }
+
+      // Find last import in business features section
+      const businessFeatureImportMarker = '// Business feature modules';
+      const markerIndex = content.indexOf(businessFeatureImportMarker);
+
+      if (markerIndex === -1) {
+        console.error(
+          '❌ Cannot find business feature modules section in plugin.loader.ts',
+        );
+        console.log(
+          `💡 Please register manually: import ${domainRootCamel}DomainPlugin from '../modules/${domainRootKebab}'`,
+        );
+        return false;
+      }
+
+      // Import path for domain root
+      const importPath = `../modules/${domainRootKebab}`;
+
+      // Add domain import after last business feature import
+      const importStatement = `import ${domainRootCamel}DomainPlugin from '${importPath}';\n`;
+      let insertPos = content.indexOf('\n', markerIndex);
+      while (
+        insertPos > 0 &&
+        content[insertPos + 1] === 'i' &&
+        content.substring(insertPos + 1, insertPos + 7) === 'import'
+      ) {
+        insertPos = content.indexOf('\n', insertPos + 1);
+      }
+      insertPos += 1;
+
+      content =
+        content.slice(0, insertPos) +
+        importStatement +
+        content.slice(insertPos);
+
+      // Add to createFeaturePluginGroup
+      const featureGroupMarker = "name: 'business-features',";
+      const featureGroupIndex = content.indexOf(featureGroupMarker);
+      if (featureGroupIndex === -1) {
+        console.error(
+          '❌ Cannot find business-features group in plugin.loader.ts',
+        );
+        return false;
+      }
+
+      // Find the plugins array
+      const pluginsArrayStart = content.indexOf(
+        'plugins: [',
+        featureGroupIndex,
+      );
+      const insertPosition = content.indexOf('[', pluginsArrayStart) + 1;
+
+      // Add domain plugin entry with comment
+      const pluginEntry = `\n      // ${domainRoot.charAt(0).toUpperCase() + domainRoot.slice(1)} Domain - aggregates all ${domainRoot} modules\n      {\n        name: '${domainRootCamel}-domain',\n        plugin: ${domainRootCamel}DomainPlugin,\n        required: true,\n      },`;
+
+      content =
+        content.slice(0, insertPosition) +
+        pluginEntry +
+        content.slice(insertPosition);
+
+      // Write back
+      await fs.writeFile(pluginLoaderPath, content);
+
+      console.log(
+        `✅ Auto-registered ${domainRoot} domain plugin in plugin.loader.ts:`,
+      );
+      console.log(
+        `   - Import: import ${domainRootCamel}DomainPlugin from '${importPath}'`,
+      );
+      console.log(
+        `   - Plugin: { name: '${domainRootCamel}-domain', plugin: ${domainRootCamel}DomainPlugin }`,
+      );
+      console.log(
+        `   - Module '${moduleName}' will be loaded via domain index.ts`,
+      );
+
+      return true;
+    }
+
+    // For non-domain modules, use the old registration logic
     const kebabName = toKebabCase(moduleName);
     const camelName = toCamelCase(moduleName);
-
-    let content = await fs.readFile(pluginLoaderPath, 'utf8');
 
     // Check if already registered
     if (content.includes(`${camelName}Plugin`)) {
@@ -1935,22 +2080,17 @@ async function autoRegisterBackendPlugin(
         '❌ Cannot find business feature modules section in plugin.loader.ts',
       );
       console.log(
-        "💡 Please register manually: import {camelName}Plugin from '../modules/{kebabName}'",
+        `💡 Please register manually: import ${camelName}Plugin from '../modules/${kebabName}'`,
       );
       return false;
     }
 
-    // Build import path based on domain
-    // If domain is 'inventory/master-data', import path is '../modules/inventory/master-data/{moduleName}'
-    const importPath = domain
-      ? `../modules/${domain}/${camelName}`
-      : `../modules/${camelName}`;
+    // Import path for flat module
+    const importPath = `../modules/${camelName}`;
 
     // Add import after last business feature import
     const importStatement = `import ${camelName}Plugin from '${importPath}';\n`;
-    // Find the next line after the marker
     let insertPos = content.indexOf('\n', markerIndex);
-    // Skip to the line after all existing imports in this section
     while (
       insertPos > 0 &&
       content[insertPos + 1] === 'i' &&
@@ -2002,6 +2142,94 @@ async function autoRegisterBackendPlugin(
   }
 }
 
+/**
+ * Generate or update domain index file
+ * Creates/updates index.ts for each level of the domain path
+ *
+ * @param {string} domainPath - Domain path (e.g., 'inventory/master-data')
+ * @param {string} moduleName - Module name being added
+ * @param {string} outputDir - Base modules directory
+ */
+async function generateDomainIndex(domainPath, moduleName, outputDir) {
+  if (!domainPath) return;
+
+  const domainParts = domainPath.split('/');
+  const camelModuleName = toCamelCase(moduleName);
+  const kebabModuleName = toKebabCase(moduleName);
+
+  // Generate index for each level of the domain path
+  for (let i = 0; i < domainParts.length; i++) {
+    const currentPath = domainParts.slice(0, i + 1).join('/');
+    const indexPath = path.join(outputDir, currentPath, 'index.ts');
+    const domainName = domainParts[i];
+    const domainCamelName = toCamelCase(domainName);
+
+    // Check if index already exists
+    let existingContent = '';
+    const modules = [];
+
+    try {
+      existingContent = await fs.readFile(indexPath, 'utf8');
+      // Parse existing modules from imports
+      const importRegex = /import\s+(\w+)Plugin\s+from\s+['"](\.\/[^'"]+)['"]/g;
+      let match;
+      while ((match = importRegex.exec(existingContent)) !== null) {
+        modules.push({
+          camelName: match[1],
+          path: match[2].replace('./', ''),
+          kebabName: toKebabCase(match[1]),
+        });
+      }
+    } catch {
+      // File doesn't exist, start fresh
+    }
+
+    // Determine what to add based on level
+    if (i === domainParts.length - 1) {
+      // Leaf level - add the actual module
+      const modulePath = camelModuleName;
+      if (!modules.some((m) => m.camelName === camelModuleName)) {
+        modules.push({
+          camelName: camelModuleName,
+          path: modulePath,
+          kebabName: kebabModuleName,
+        });
+      }
+    } else {
+      // Intermediate level - add sub-domain
+      const subDomain = domainParts[i + 1];
+      const subDomainCamel = toCamelCase(subDomain);
+      const subDomainKebab = toKebabCase(subDomain);
+      if (!modules.some((m) => m.camelName === subDomainCamel)) {
+        modules.push({
+          camelName: subDomainCamel,
+          path: subDomainKebab,
+          kebabName: subDomainKebab,
+        });
+      }
+    }
+
+    // Generate the domain index content
+    const routePrefix = currentPath.replace(/\//g, '/');
+    const context = {
+      domainName: domainName.charAt(0).toUpperCase() + domainName.slice(1),
+      domainCamelName,
+      routePrefix,
+      modules,
+      moduleCount: modules.length,
+    };
+
+    const content = await renderTemplate('domain-index.hbs', {
+      ...context,
+      templateVersion: 'domain',
+    });
+
+    await ensureDirectoryExists(path.dirname(indexPath));
+    await fs.writeFile(indexPath, content, 'utf8');
+    console.log(`📦 Updated domain index: ${indexPath}`);
+  }
+}
+
 module.exports = {
   generateCrudModule,
   generateDomainModule,
@@ -2012,4 +2240,5 @@ module.exports = {
   toPascalCase,
   toKebabCase,
   autoRegisterBackendPlugin,
+  generateDomainIndex,
 };
