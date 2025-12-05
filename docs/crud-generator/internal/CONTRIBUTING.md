@@ -6,7 +6,7 @@ Thank you for your interest in contributing to the AegisX CRUD Generator!
 
 This repository is **auto-synced** from the main AegisX monorepo at:
 
-- **Source**: `aegisx-platform/aegisx-starter` → `libs/aegisx-crud-generator`
+- **Source**: `aegisx-platform/aegisx-starter` → `libs/aegisx-cli`
 - **Published**: `aegisx-platform/crud-generator`
 
 ## 🔄 Development Workflow
@@ -21,7 +21,7 @@ git clone git@github.com:aegisx-platform/aegisx-starter.git
 cd aegisx-starter
 
 # Navigate to package
-cd libs/aegisx-crud-generator
+cd libs/aegisx-cli
 
 # Make changes and test
 pnpm install
@@ -63,7 +63,7 @@ node bin/cli.js generate users --dry-run
 ## 📦 Publishing (Maintainers Only)
 
 ```bash
-# In monorepo: libs/aegisx-crud-generator
+# In monorepo: libs/aegisx-cli
 npm version patch  # or minor/major
 npm publish --access public
 

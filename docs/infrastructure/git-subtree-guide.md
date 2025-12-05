@@ -6,11 +6,11 @@
 
 ## Libraries ที่ใช้ Git Subtree
 
-| Library        | Monorepo Path                 | Standalone Repo                  | NPM Package              |
-| -------------- | ----------------------------- | -------------------------------- | ------------------------ |
-| CRUD Generator | `libs/aegisx-crud-generator/` | `aegisx-platform/crud-generator` | `@aegisx/crud-generator` |
-| UI Components  | `libs/aegisx-ui/`             | `aegisx-platform/aegisx-ui`      | `@aegisx/ui`             |
-| MCP Server     | `libs/aegisx-mcp/`            | `aegisx-platform/aegisx-mcp`     | `@aegisx/mcp`            |
+| Library        | Monorepo Path      | Standalone Repo                  | NPM Package              |
+| -------------- | ------------------ | -------------------------------- | ------------------------ |
+| CRUD Generator | `libs/aegisx-cli/` | `aegisx-platform/crud-generator` | `@aegisx/crud-generator` |
+| UI Components  | `libs/aegisx-ui/`  | `aegisx-platform/aegisx-ui`      | `@aegisx/ui`             |
+| MCP Server     | `libs/aegisx-mcp/` | `aegisx-platform/aegisx-mcp`     | `@aegisx/mcp`            |
 
 ## Git Subtree คืออะไร?
 
@@ -21,7 +21,7 @@ Git Subtree เป็นวิธีการ embed repository หนึ่ง�
 │                    aegisx-starter (Monorepo)                 │
 │                                                              │
 │  ┌─────────────────────────────────────────────────────┐    │
-│  │  libs/aegisx-crud-generator/  ←──────────────────────────────► crud-generator repo
+│  │  libs/aegisx-cli/  ←──────────────────────────────► crud-generator repo
 │  │  libs/aegisx-ui/              ←──────────────────────────────► aegisx-ui repo
 │  │  libs/aegisx-mcp/             ←──────────────────────────────► aegisx-mcp repo
 │  └─────────────────────────────────────────────────────┘    │
@@ -155,11 +155,11 @@ git branch -D aegisx-new-lib-split
 
 แต่ละ library มี script สำหรับ sync:
 
-| Library        | Sync Command                                 |
-| -------------- | -------------------------------------------- |
-| CRUD Generator | `libs/aegisx-crud-generator/sync-to-repo.sh` |
-| UI Components  | `libs/aegisx-ui/sync-to-repo.sh`             |
-| MCP Server     | `libs/aegisx-mcp/sync-to-repo.sh`            |
+| Library        | Sync Command                      |
+| -------------- | --------------------------------- |
+| CRUD Generator | `libs/aegisx-cli/sync-to-repo.sh` |
+| UI Components  | `libs/aegisx-ui/sync-to-repo.sh`  |
+| MCP Server     | `libs/aegisx-mcp/sync-to-repo.sh` |
 
 ## การดึง Changes จาก Standalone Repo กลับ Monorepo
 
@@ -264,4 +264,4 @@ rm -rf /tmp/aegisx-mcp
 
 - [Git Flow & Release Guide](./GIT-FLOW-RELEASE-GUIDE.md)
 - [Automated Versioning Guide](./AUTOMATED-VERSIONING-GUIDE.md)
-- [CRUD Generator Git Workflow](../../libs/aegisx-crud-generator/docs/GIT_WORKFLOW.md)
+- [CRUD Generator Git Workflow](../../libs/aegisx-cli/docs/GIT_WORKFLOW.md)

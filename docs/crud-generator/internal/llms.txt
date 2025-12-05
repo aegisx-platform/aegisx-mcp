@@ -381,7 +381,7 @@ DB_NAME=aegisx
 ## File Structure
 
 ```
-libs/aegisx-crud-generator/
+libs/aegisx-cli/
 ├── bin/
 │   └── cli.js               # CLI entry point
 ├── lib/

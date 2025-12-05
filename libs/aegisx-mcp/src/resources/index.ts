@@ -45,9 +45,9 @@ export function registerResources(): Resource[] {
 /**
  * Handle resource read requests
  */
-export function handleResourceRead(
-  uri: string,
-): { contents: Array<{ uri: string; mimeType: string; text: string }> } {
+export function handleResourceRead(uri: string): {
+  contents: Array<{ uri: string; mimeType: string; text: string }>;
+} {
   const content = getResourceContent(uri);
 
   return {
@@ -655,7 +655,7 @@ aegisx-starter/
 │   │   │   └── theme/          # Theme styles
 │   │   └── package.json
 │   │
-│   ├── aegisx-crud-generator/  # CRUD generator CLI
+│   ├── aegisx-cli/  # CRUD generator CLI
 │   │   ├── bin/                # CLI entry
 │   │   ├── src/
 │   │   │   ├── commands/       # CLI commands

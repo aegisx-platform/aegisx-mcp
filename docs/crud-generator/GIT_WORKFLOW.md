@@ -1,10 +1,10 @@
 # CRUD Generator Git Workflow
 
-> **⚠️ CRITICAL: libs/aegisx-crud-generator/ is synced to a separate repository**
+> **⚠️ CRITICAL: libs/aegisx-cli/ is synced to a separate repository**
 
 ## Overview
 
-The CRUD Generator library (`libs/aegisx-crud-generator/`) is maintained in the main monorepo but published as a standalone NPM package from a separate repository using git subtree.
+The CRUD Generator library (`libs/aegisx-cli/`) is maintained in the main monorepo but published as a standalone NPM package from a separate repository using git subtree.
 
 **Repositories:**
 
@@ -13,21 +13,21 @@ The CRUD Generator library (`libs/aegisx-crud-generator/`) is maintained in the 
 
 ## Mandatory Steps After Making Changes
 
-**Every time you modify files in `libs/aegisx-crud-generator/`:**
+**Every time you modify files in `libs/aegisx-cli/`:**
 
 ```bash
 # 1. Commit changes in main monorepo
-git add libs/aegisx-crud-generator/
+git add libs/aegisx-cli/
 git commit -m "docs(crud-generator): update documentation"
 
 # 2. ⚠️ CRITICAL: Sync to separate crud-generator repository
-./libs/aegisx-crud-generator/sync-to-repo.sh develop
+./libs/aegisx-cli/sync-to-repo.sh develop
 
 # 3. Push main monorepo
 git push origin develop
 
 # 4. (Optional) Publish to NPM if package.json version changed
-cd libs/aegisx-crud-generator
+cd libs/aegisx-cli
 npm publish
 ```
 
@@ -37,17 +37,17 @@ npm publish
 
 ```bash
 # Using helper script (recommended)
-./libs/aegisx-crud-generator/sync-to-repo.sh develop
+./libs/aegisx-cli/sync-to-repo.sh develop
 
 # Manual sync (if script unavailable)
-git subtree push --prefix=libs/aegisx-crud-generator \
+git subtree push --prefix=libs/aegisx-cli \
   git@github.com:aegisx-platform/crud-generator.git develop
 ```
 
 ### Pull Updates from Separate Repository (Rare)
 
 ```bash
-git subtree pull --prefix=libs/aegisx-crud-generator \
+git subtree pull --prefix=libs/aegisx-cli \
   git@github.com:aegisx-platform/crud-generator.git develop --squash
 ```
 
@@ -71,7 +71,7 @@ git subtree pull --prefix=libs/aegisx-crud-generator \
 
 ```bash
 # Step 1: Version Bump & Commit (in main repo)
-cd libs/aegisx-crud-generator
+cd libs/aegisx-cli
 # Edit package.json: "version": "2.1.0"
 git add .
 git commit -m "chore(crud-generator): bump version to 2.1.0"
@@ -79,14 +79,14 @@ git push origin develop
 
 # Step 2: Sync to Separate Repository
 cd /path/to/main/repo
-./libs/aegisx-crud-generator/sync-to-repo.sh develop
+./libs/aegisx-cli/sync-to-repo.sh develop
 
 # Step 3: Create Tag in CRUD Generator Repo (NOT main repo!)
 git push git@github.com:aegisx-platform/crud-generator.git \
   <commit-hash>:refs/tags/v2.1.0
 
 # Step 4: Publish to NPM (user provides OTP)
-cd libs/aegisx-crud-generator
+cd libs/aegisx-cli
 ./publish.sh <OTP-CODE>
 ```
 
@@ -110,7 +110,7 @@ cd libs/aegisx-crud-generator
 
 ```
 Main Monorepo (aegisx-starter)
-└── libs/aegisx-crud-generator/
+└── libs/aegisx-cli/
     │
     ├─ git subtree push ──→ Separate Repo (crud-generator)
     │                       └── NPM Package Source
@@ -159,7 +159,7 @@ Claude: ✅ Create tag in crud-generator repo (NOT main repo)
 
 ## Why This Matters
 
-- `libs/aegisx-crud-generator/` is published as standalone NPM package
+- `libs/aegisx-cli/` is published as standalone NPM package
 - Separate repository: https://github.com/aegisx-platform/crud-generator
 - Main monorepo is source of truth, must sync to separate repo
 - NPM package is built from separate repository
@@ -174,7 +174,7 @@ Claude: ✅ Create tag in crud-generator repo (NOT main repo)
 **Solution**: You forgot to run the sync step!
 
 ```bash
-./libs/aegisx-crud-generator/sync-to-repo.sh develop
+./libs/aegisx-cli/sync-to-repo.sh develop
 ```
 
 ### Cannot Create Tag

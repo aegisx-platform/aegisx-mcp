@@ -6,7 +6,7 @@ This package lives in a **monorepo** but is **published as a standalone package*
 
 ```
 🏢 Monorepo (aegisx-starter)
-└── libs/aegisx-crud-generator/     ← 🎯 Work here (Source of Truth)
+└── libs/aegisx-cli/     ← 🎯 Work here (Source of Truth)
 
 📦 Standalone Repo (crud-generator)  ← 🔄 Auto-synced mirror for distribution
 ```
@@ -16,7 +16,7 @@ This package lives in a **monorepo** but is **published as a standalone package*
 ### 1️⃣ Development (in Monorepo)
 
 ```bash
-cd libs/aegisx-crud-generator
+cd libs/aegisx-cli
 
 # Make your changes
 vim lib/some-file.js
@@ -46,7 +46,7 @@ git push origin develop
 ./sync-to-repo.sh main
 ```
 
-**⚠️ IMPORTANT:** After **EVERY** commit that modifies `libs/aegisx-crud-generator/`, you MUST run `./sync-to-repo.sh main`
+**⚠️ IMPORTANT:** After **EVERY** commit that modifies `libs/aegisx-cli/`, you MUST run `./sync-to-repo.sh main`
 
 ### 4️⃣ Publish to npm (for releases only)
 

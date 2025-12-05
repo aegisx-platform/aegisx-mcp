@@ -45,7 +45,7 @@ pnpm run crud-gen products --entity Product --package enterprise
 pnpm run crud-gen products --entity Product --package full
 
 # Legacy command (still works)
-node libs/aegisx-crud-generator/bin/cli.js generate authors --package full --no-roles --force
+node libs/aegisx-cli/bin/cli.js generate authors --package full --no-roles --force
 ```
 
 ## 📚 Documentation
@@ -340,7 +340,7 @@ The generator detects validations based on field names:
 
 ```bash
 # Authors table with email validation and FK checking
-node libs/aegisx-crud-generator/bin/cli.js generate authors --package full --no-roles --force
+node libs/aegisx-cli/bin/cli.js generate authors --package full --no-roles --force
 
 # Expected output:
 ✅ Detected unique constraints:
@@ -523,7 +523,7 @@ describe('Authors Validation', () => {
 
 ## 📚 Related Documentation
 
-- [CRUD Generator Source](../../libs/aegisx-crud-generator/) - Generator implementation
+- [CRUD Generator Source](../../libs/aegisx-cli/) - Generator implementation
 - [API Documentation](../api/) - Complete API reference
 - [Database Migrations](../database/) - Migration patterns
 

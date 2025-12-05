@@ -172,7 +172,7 @@ Direct CLI commands for advanced usage:
 
 ```bash
 ./bin/cli.js generate [TABLE_NAME] [OPTIONS]
-./libs/aegisx-crud-generator/bin/cli.js generate [TABLE_NAME] [OPTIONS]
+./libs/aegisx-cli/bin/cli.js generate [TABLE_NAME] [OPTIONS]
 ```
 
 **Aliases**: `g`

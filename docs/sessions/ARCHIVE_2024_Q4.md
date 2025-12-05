@@ -213,7 +213,7 @@ Created 4 comprehensive documents (4,300+ lines total):
    - Cleaned up project structure for npm package
 
 2. **✅ Version Bump to 2.1.0**
-   - Updated `libs/aegisx-crud-generator/package.json`
+   - Updated `libs/aegisx-cli/package.json`
    - Changed version: `2.0.1` → `2.1.0` (minor version)
    - Reason: HIS Mode is new feature with backward compatibility
 
@@ -267,7 +267,7 @@ Created 4 comprehensive documents (4,300+ lines total):
 
 ```
 Main Monorepo (aegisx-starter)
-└── libs/aegisx-crud-generator/
+└── libs/aegisx-cli/
     │
     ├─ git subtree push ──→ Separate Repo (crud-generator)
     │                       └── NPM Package Source

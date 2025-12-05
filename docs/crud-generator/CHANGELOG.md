@@ -557,7 +557,7 @@ See git history for details on legacy implementations.
 1. **Install latest version**:
 
    ```bash
-   cd libs/aegisx-crud-generator
+   cd libs/aegisx-cli
    pnpm install
    ```
 

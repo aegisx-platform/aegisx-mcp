@@ -5,7 +5,7 @@
 ## Generator Location
 
 ```
-libs/aegisx-crud-generator/
+libs/aegisx-cli/
 ├── bin/cli.js                    # CLI entry point
 ├── src/
 │   ├── index.ts                  # Main generator logic

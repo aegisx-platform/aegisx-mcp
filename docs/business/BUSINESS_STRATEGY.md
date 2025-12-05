@@ -168,7 +168,7 @@ AEGISX-ENT-C9Z1M4P6-3E
 ### Validation Flow
 
 ```typescript
-// libs/aegisx-crud-generator/src/license/validator.ts
+// libs/aegisx-cli/src/license/validator.ts
 export async function validateLicense(key: string): Promise<LicenseInfo> {
   // 1. Parse key format
   const [prefix, tier, serial, checksum] = key.split('-');

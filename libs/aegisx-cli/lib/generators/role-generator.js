@@ -4,6 +4,34 @@ const path = require('path');
 const Handlebars = require('handlebars');
 
 /**
+ * Generate permission name based on domain and module
+ * Format: domain:module:action (e.g., inventory:drugs:create)
+ * Or without domain: module:action (e.g., drugs:create)
+ */
+function generatePermissionName(moduleName, action, domain = null) {
+  if (domain) {
+    // Extract domain root (first part of domain path)
+    const domainRoot = domain.split('/')[0];
+    return `${domainRoot}:${moduleName}:${action}`;
+  }
+  // Legacy format for backward compatibility
+  return `${moduleName}.${action}`;
+}
+
+/**
+ * Generate resource name based on domain and module
+ * Format: domain:module (e.g., inventory:drugs)
+ * Or just module for backward compatibility
+ */
+function generateResourceName(moduleName, domain = null) {
+  if (domain) {
+    const domainRoot = domain.split('/')[0];
+    return `${domainRoot}:${moduleName}`;
+  }
+  return moduleName;
+}
+
+/**
  * Generate migration file for roles and permissions
  */
 async function generateMigrationFile(moduleName, options = {}) {
@@ -19,7 +47,11 @@ async function generateMigrationFile(moduleName, options = {}) {
     multipleRoles = false,
     outputDir = path.resolve(cwd, defaultPath),
     force = false,
+    domain = null, // Domain path for permission naming
   } = options;
+
+  // Generate resource name based on domain
+  const resourceName = generateResourceName(moduleName, domain);
 
   // ✅ Check for existing migrations with same pattern
   let shouldSkip = false;
@@ -41,33 +73,33 @@ async function generateMigrationFile(moduleName, options = {}) {
       // Generate new content to compare
       const permissions = [
         {
-          name: `${moduleName}.create`,
+          name: generatePermissionName(moduleName, 'create', domain),
           description: `Create ${moduleName}`,
-          resource: moduleName,
+          resource: resourceName,
           action: 'create',
         },
         {
-          name: `${moduleName}.read`,
+          name: generatePermissionName(moduleName, 'read', domain),
           description: `Read ${moduleName}`,
-          resource: moduleName,
+          resource: resourceName,
           action: 'read',
         },
         {
-          name: `${moduleName}.update`,
+          name: generatePermissionName(moduleName, 'update', domain),
           description: `Update ${moduleName}`,
-          resource: moduleName,
+          resource: resourceName,
           action: 'update',
         },
         {
-          name: `${moduleName}.delete`,
+          name: generatePermissionName(moduleName, 'delete', domain),
           description: `Delete ${moduleName}`,
-          resource: moduleName,
+          resource: resourceName,
           action: 'delete',
         },
         {
-          name: `${moduleName}.export`,
+          name: generatePermissionName(moduleName, 'export', domain),
           description: `Export ${moduleName}`,
-          resource: moduleName,
+          resource: resourceName,
           action: 'export',
         },
       ];
@@ -83,16 +115,19 @@ async function generateMigrationFile(moduleName, options = {}) {
               name: `${moduleName}_editor`,
               description: `Create, read, update, and export ${moduleName}`,
               permissions: [
-                `${moduleName}.create`,
-                `${moduleName}.read`,
-                `${moduleName}.update`,
-                `${moduleName}.export`,
+                generatePermissionName(moduleName, 'create', domain),
+                generatePermissionName(moduleName, 'read', domain),
+                generatePermissionName(moduleName, 'update', domain),
+                generatePermissionName(moduleName, 'export', domain),
               ],
             },
             {
               name: `${moduleName}_viewer`,
               description: `Read-only and export access to ${moduleName}`,
-              permissions: [`${moduleName}.read`, `${moduleName}.export`],
+              permissions: [
+                generatePermissionName(moduleName, 'read', domain),
+                generatePermissionName(moduleName, 'export', domain),
+              ],
             },
           ]
         : [
@@ -106,7 +141,10 @@ async function generateMigrationFile(moduleName, options = {}) {
       // Template expects an array of objects with UPPER_ROLE_NAME and permissions array
       const rolePermissions = roles.map((role) => {
         const actions = role.permissions.map((permName) => {
-          const parts = permName.split('.');
+          // Handle both formats: domain:module:action and module.action
+          const parts = permName.includes(':')
+            ? permName.split(':')
+            : permName.split('.');
           return parts[parts.length - 1];
         });
 
@@ -129,7 +167,9 @@ async function generateMigrationFile(moduleName, options = {}) {
         permissions,
         roles,
         rolePermissions,
-        permissionGroup: moduleName,
+        permissionGroup: resourceName, // Use resource name for permission group
+        domain: domain || null,
+        resourceName,
         timestamp: new Date().toISOString(),
       };
 
@@ -198,36 +238,36 @@ async function generateMigrationFile(moduleName, options = {}) {
     return;
   }
 
-  // Generate data structure same as before
+  // Generate data structure using new permission naming
   const permissions = [
     {
-      name: `${moduleName}.create`,
+      name: generatePermissionName(moduleName, 'create', domain),
       description: `Create ${moduleName}`,
-      resource: moduleName,
+      resource: resourceName,
       action: 'create',
     },
     {
-      name: `${moduleName}.read`,
+      name: generatePermissionName(moduleName, 'read', domain),
       description: `Read ${moduleName}`,
-      resource: moduleName,
+      resource: resourceName,
       action: 'read',
     },
     {
-      name: `${moduleName}.update`,
+      name: generatePermissionName(moduleName, 'update', domain),
       description: `Update ${moduleName}`,
-      resource: moduleName,
+      resource: resourceName,
       action: 'update',
     },
     {
-      name: `${moduleName}.delete`,
+      name: generatePermissionName(moduleName, 'delete', domain),
       description: `Delete ${moduleName}`,
-      resource: moduleName,
+      resource: resourceName,
       action: 'delete',
     },
     {
-      name: `${moduleName}.export`,
+      name: generatePermissionName(moduleName, 'export', domain),
       description: `Export ${moduleName}`,
-      resource: moduleName,
+      resource: resourceName,
       action: 'export',
     },
   ];
@@ -244,16 +284,19 @@ async function generateMigrationFile(moduleName, options = {}) {
           name: `${moduleName}_editor`,
           description: `Create, read, update, and export ${moduleName}`,
           permissions: [
-            `${moduleName}.create`,
-            `${moduleName}.read`,
-            `${moduleName}.update`,
-            `${moduleName}.export`,
+            generatePermissionName(moduleName, 'create', domain),
+            generatePermissionName(moduleName, 'read', domain),
+            generatePermissionName(moduleName, 'update', domain),
+            generatePermissionName(moduleName, 'export', domain),
           ],
         },
         {
           name: `${moduleName}_viewer`,
           description: `Read-only and export access to ${moduleName}`,
-          permissions: [`${moduleName}.read`, `${moduleName}.export`],
+          permissions: [
+            generatePermissionName(moduleName, 'read', domain),
+            generatePermissionName(moduleName, 'export', domain),
+          ],
         },
       ]
     : [
@@ -267,10 +310,13 @@ async function generateMigrationFile(moduleName, options = {}) {
   // Prepare role permissions data for template
   // Template expects an array of objects with UPPER_ROLE_NAME and permissions array
   const rolePermissions = roles.map((role) => {
-    // Extract actions from permission names (e.g., 'authors.create' -> 'create')
+    // Extract actions from permission names
+    // Handle both formats: domain:module:action and module.action
     const actions = role.permissions.map((permName) => {
-      const parts = permName.split('.');
-      return parts[parts.length - 1]; // Get last part after dot
+      const parts = permName.includes(':')
+        ? permName.split(':')
+        : permName.split('.');
+      return parts[parts.length - 1]; // Get last part (action)
     });
 
     // Convert role name to UPPER_SNAKE_CASE for SYSTEM_ROLE_IDS lookup
@@ -291,7 +337,9 @@ async function generateMigrationFile(moduleName, options = {}) {
     permissions,
     roles,
     rolePermissions,
-    permissionGroup: moduleName,
+    permissionGroup: resourceName, // Use resource name for permission group
+    domain: domain || null,
+    resourceName,
     timestamp: new Date().toISOString(),
   };
 
@@ -360,6 +408,7 @@ async function generateRolesAndPermissions(moduleName, options = {}) {
     directDb = false,
     multipleRoles = false,
     outputDir,
+    domain = null, // Domain path for permission naming (e.g., 'inventory/master-data')
   } = options;
 
   // Default to migration file generation
@@ -368,6 +417,7 @@ async function generateRolesAndPermissions(moduleName, options = {}) {
       dryRun,
       multipleRoles,
       outputDir,
+      domain, // Pass domain for permission naming
     });
   }
 

@@ -60,7 +60,7 @@ aegisx-starter/
 │   ├── admin/            # Angular admin panel
 │   └── e2e/              # E2E tests with Playwright
 ├── libs/
-│   ├── aegisx-crud-generator/  # CRUD generator (published as @aegisx/crud-generator)
+│   ├── aegisx-cli/  # CRUD generator (published as @aegisx/crud-generator)
 │   ├── aegisx-ui/              # UI component library (published as @aegisx/ui)
 │   ├── aegisx-mcp/             # MCP server (published as @aegisx/mcp)
 │   └── shared/           # Shared utilities and types
@@ -625,10 +625,10 @@ body {
 
 **Files Modified:**
 
-- `libs/aegisx-crud-generator/lib/generators/frontend-generator.js` - AUDIT_FIELDS constant, input type mapping
-- `libs/aegisx-crud-generator/bin/cli.js` - Added `--include-audit-fields` option
-- `libs/aegisx-crud-generator/templates/frontend/v2/list-component.html-v2.hbs` - mat-card + white background
-- `libs/aegisx-crud-generator/templates/frontend/v2/list-component-v2.hbs` - MatCardModule import
+- `libs/aegisx-cli/lib/generators/frontend-generator.js` - AUDIT_FIELDS constant, input type mapping
+- `libs/aegisx-cli/bin/cli.js` - Added `--include-audit-fields` option
+- `libs/aegisx-cli/templates/frontend/v2/list-component.html-v2.hbs` - mat-card + white background
+- `libs/aegisx-cli/templates/frontend/v2/list-component-v2.hbs` - MatCardModule import
 - Documentation: CHANGELOG.md, COMMAND_REFERENCE.md, QUICK_REFERENCE.md, README.md, CLAUDE.md
 
 **Commits:**

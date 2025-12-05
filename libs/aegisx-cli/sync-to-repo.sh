@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Sync libs/aegisx-crud-generator to separate repository
+# Sync libs/aegisx-cli to separate repository
 # Usage: ./sync-to-repo.sh [branch]
 
 BRANCH=${1:-main}
-REMOTE_REPO="git@github.com:aegisx-platform/cli.git"
+REMOTE_REPO="git@github.com:aegisx-platform/aegisx-cli.git"
 
 echo "🔄 Syncing @aegisx/cli to separate repository..."
 echo "📦 Branch: $BRANCH"
@@ -16,12 +16,12 @@ cd "$(git rev-parse --show-toplevel)"
 
 # Push subtree to separate repository
 echo "🚀 Pushing subtree..."
-git subtree push --prefix=libs/aegisx-crud-generator "$REMOTE_REPO" "$BRANCH"
+git subtree push --prefix=libs/aegisx-cli "$REMOTE_REPO" "$BRANCH"
 
 if [ $? -eq 0 ]; then
   echo ""
   echo "✅ Successfully synced to $REMOTE_REPO"
-  echo "🔗 View at: https://github.com/aegisx-platform/cli"
+  echo "🔗 View at: https://github.com/aegisx-platform/aegisx-cli"
 else
   echo ""
   echo "❌ Failed to sync"

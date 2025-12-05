@@ -52,7 +52,7 @@ Use direct CLI for advanced features or multiple flags:
 ./bin/cli.js generate TABLE_NAME [OPTIONS]
 
 # Or full path
-./libs/aegisx-crud-generator/bin/cli.js generate TABLE_NAME [OPTIONS]
+./libs/aegisx-cli/bin/cli.js generate TABLE_NAME [OPTIONS]
 ```
 
 ### Examples

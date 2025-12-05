@@ -420,7 +420,7 @@ async validateCreate(data: CreateAuthors): Promise<void> {
 
 3. **Regenerate with force flag:**
    ```bash
-   node libs/aegisx-crud-generator/bin/cli.js generate authors --force
+   node libs/aegisx-cli/bin/cli.js generate authors --force
    ```
 
 ---

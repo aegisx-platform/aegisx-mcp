@@ -114,7 +114,7 @@ Generator needs to create:
 
 ### File to Create
 
-**Path**: `libs/aegisx-crud-generator/templates/frontend/v2/state-manager.hbs`
+**Path**: `libs/aegisx-cli/templates/frontend/v2/state-manager.hbs`
 
 ### Complete Template Code
 
@@ -289,7 +289,7 @@ export class {{PascalCase}}StateManager extends BaseRealtimeStateManager<{{Pasca
 
 ### Generator Logic Changes
 
-**File**: `libs/aegisx-crud-generator/lib/generators/frontend-generator.js`
+**File**: `libs/aegisx-cli/lib/generators/frontend-generator.js`
 
 Add method:
 
@@ -466,7 +466,7 @@ export class BudgetStateManager extends BaseRealtimeStateManager<BudgetStateItem
 
 ### File to Modify
 
-**Path**: `libs/aegisx-crud-generator/templates/frontend/v2/list-component-v2.hbs`
+**Path**: `libs/aegisx-cli/templates/frontend/v2/list-component-v2.hbs`
 
 ### Code Blocks to Add
 
@@ -611,7 +611,7 @@ export class BudgetsListComponent {
 
 ### File to Modify
 
-**Path**: `libs/aegisx-crud-generator/templates/frontend/v2/import-dialog.hbs`
+**Path**: `libs/aegisx-cli/templates/frontend/v2/import-dialog.hbs`
 
 ### Replace Polling Logic with WebSocket
 
@@ -789,7 +789,7 @@ export class BudgetsImportDialogComponent {
 
 ### File to Modify
 
-**Path**: `libs/aegisx-crud-generator/templates/backend/domain/test.hbs`
+**Path**: `libs/aegisx-cli/templates/backend/domain/test.hbs`
 
 ### Complete Test Suite for Events
 

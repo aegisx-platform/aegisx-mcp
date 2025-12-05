@@ -44,7 +44,7 @@ aegisx-starter/
 │   ├── admin/        # Angular admin panel
 │   └── e2e/          # Playwright E2E tests
 ├── libs/
-│   ├── aegisx-crud-generator/  # CRUD generator (@aegisx/crud-generator)
+│   ├── aegisx-cli/  # CRUD generator (@aegisx/crud-generator)
 │   ├── aegisx-ui/    # Shared UI components
 │   └── shared/       # Shared utilities
 ├── docs/             # Comprehensive documentation
@@ -148,7 +148,7 @@ The CRUD Generator creates complete full-stack CRUD operations in seconds.
 
 ```bash
 # Publish to npm (for global use)
-cd libs/aegisx-crud-generator
+cd libs/aegisx-cli
 npm publish
 
 # Or use locally

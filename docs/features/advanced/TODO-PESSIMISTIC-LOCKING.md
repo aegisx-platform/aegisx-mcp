@@ -357,10 +357,10 @@ COMMIT;
 
 ### Templates to Modify
 
-- `libs/aegisx-crud-generator/templates/backend/domain/controller.hbs`
-- `libs/aegisx-crud-generator/templates/backend/domain/index.hbs`
-- `libs/aegisx-crud-generator/templates/frontend/v2/edit-dialog-v2.hbs`
-- `libs/aegisx-crud-generator/templates/frontend/v2/list-component-v2.hbs`
+- `libs/aegisx-cli/templates/backend/domain/controller.hbs`
+- `libs/aegisx-cli/templates/backend/domain/index.hbs`
+- `libs/aegisx-cli/templates/frontend/v2/edit-dialog-v2.hbs`
+- `libs/aegisx-cli/templates/frontend/v2/list-component-v2.hbs`
 
 ## 💡 Alternative: Hybrid Approach
 

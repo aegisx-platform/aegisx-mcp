@@ -358,11 +358,11 @@ git commit -m "refactor(styles): migrate CSS variables to --ax- prefix"
 
 **Libraries using Git Subtree:**
 
-| Library        | Monorepo Path                | Separate Repo                                                                       | NPM Package              |
-| -------------- | ---------------------------- | ----------------------------------------------------------------------------------- | ------------------------ |
-| CRUD Generator | `libs/aegisx-crud-generator` | [aegisx-platform/crud-generator](https://github.com/aegisx-platform/crud-generator) | `@aegisx/crud-generator` |
-| UI Components  | `libs/aegisx-ui`             | [aegisx-platform/aegisx-ui](https://github.com/aegisx-platform/aegisx-ui)           | `@aegisx/ui`             |
-| MCP Server     | `libs/aegisx-mcp`            | [aegisx-platform/aegisx-mcp](https://github.com/aegisx-platform/aegisx-mcp)         | `@aegisx/mcp`            |
+| Library        | Monorepo Path     | Separate Repo                                                                       | NPM Package              |
+| -------------- | ----------------- | ----------------------------------------------------------------------------------- | ------------------------ |
+| CRUD Generator | `libs/aegisx-cli` | [aegisx-platform/crud-generator](https://github.com/aegisx-platform/crud-generator) | `@aegisx/crud-generator` |
+| UI Components  | `libs/aegisx-ui`  | [aegisx-platform/aegisx-ui](https://github.com/aegisx-platform/aegisx-ui)           | `@aegisx/ui`             |
+| MCP Server     | `libs/aegisx-mcp` | [aegisx-platform/aegisx-mcp](https://github.com/aegisx-platform/aegisx-mcp)         | `@aegisx/mcp`            |
 
 **How Git Subtree Works:**
 
@@ -370,7 +370,7 @@ git commit -m "refactor(styles): migrate CSS variables to --ax- prefix"
 ┌─────────────────────────────────────┐
 │     Monorepo (aegisx-starter)       │
 │  ┌─────────────────────────────┐    │
-│  │  libs/aegisx-crud-generator │◄───┼──► GitHub: aegisx-platform/crud-generator
+│  │  libs/aegisx-cli │◄───┼──► GitHub: aegisx-platform/crud-generator
 │  └─────────────────────────────┘    │         ↓ npm: @aegisx/crud-generator
 │  ┌─────────────────────────────┐    │
 │  │  libs/aegisx-ui             │◄───┼──► GitHub: aegisx-platform/aegisx-ui
