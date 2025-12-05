@@ -12,6 +12,9 @@ import {
   ComponentInfo,
 } from '../data/components.js';
 
+// Re-export for use in index.ts
+export { componentCategories };
+
 export const componentTools: ToolDefinition[] = [
   {
     name: 'aegisx_components_list',
@@ -149,7 +152,9 @@ export function handleComponentTool(
       lines.push('');
 
       for (const [cat, comps] of grouped) {
-        lines.push(`## ${cat.charAt(0).toUpperCase() + cat.slice(1).replace('-', ' ')}`);
+        lines.push(
+          `## ${cat.charAt(0).toUpperCase() + cat.slice(1).replace('-', ' ')}`,
+        );
         for (const comp of comps) {
           lines.push(formatComponentBrief(comp));
         }
