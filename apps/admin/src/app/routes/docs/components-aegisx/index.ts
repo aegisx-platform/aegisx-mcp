@@ -3,6 +3,10 @@
  *
  * Split into category files for better maintainability.
  * Each file contains routes for a specific category of components.
+ *
+ * IMPORTANT: Dynamic imports MUST use static string paths.
+ * Template literals with variables (e.g., `${BASE_PATH}/...`) do NOT work
+ * because Webpack/Angular cannot analyze them at build time.
  */
 
 import { Route } from '@angular/router';
@@ -14,17 +18,15 @@ import { LAYOUT_ROUTES } from './layout.routes';
 import { UTILITIES_ROUTES, DASHBOARD_ROUTES } from './utilities.routes';
 import { AUTH_ROUTES } from './auth.routes';
 
-const BASE_PATH = '../../../pages/docs/components/aegisx';
-
 /**
  * Overview route for components section
  */
 const OVERVIEW_ROUTE: Route = {
   path: 'overview',
   loadComponent: () =>
-    import(`${BASE_PATH}/overview/components-overview.component`).then(
-      (m) => m.ComponentsOverviewComponent,
-    ),
+    import(
+      '../../../pages/docs/components/aegisx/overview/components-overview.component'
+    ).then((m) => m.ComponentsOverviewComponent),
   data: {
     title: 'Components Overview',
     description: 'AegisX components library overview',

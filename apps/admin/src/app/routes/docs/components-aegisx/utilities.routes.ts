@@ -1,13 +1,18 @@
-import { Route } from '@angular/router';
+/**
+ * Utilities and Dashboard Routes
+ *
+ * IMPORTANT: Dynamic imports MUST use static string paths.
+ * Template literals with variables do NOT work with Webpack/Angular.
+ */
 
-const BASE_PATH = '../../../pages/docs/components/aegisx';
+import { Route } from '@angular/router';
 
 export const UTILITIES_ROUTES: Route[] = [
   {
     path: 'utilities/theme-switcher',
     loadComponent: () =>
       import(
-        `${BASE_PATH}/utilities/theme-switcher/theme-switcher-doc.component`
+        '../../../pages/docs/components/aegisx/utilities/theme-switcher/theme-switcher-doc.component'
       ).then((m) => m.ThemeSwitcherDocComponent),
     data: {
       title: 'Theme Switcher',
@@ -18,7 +23,7 @@ export const UTILITIES_ROUTES: Route[] = [
     path: 'utilities/layout-switcher',
     loadComponent: () =>
       import(
-        `${BASE_PATH}/utilities/layout-switcher/layout-switcher-doc.component`
+        '../../../pages/docs/components/aegisx/utilities/layout-switcher/layout-switcher-doc.component'
       ).then((m) => m.LayoutSwitcherDocComponent),
     data: {
       title: 'Layout Switcher',
@@ -29,7 +34,7 @@ export const UTILITIES_ROUTES: Route[] = [
     path: 'utilities/theme-builder',
     loadComponent: () =>
       import(
-        `${BASE_PATH}/utilities/theme-builder/theme-builder-doc.component`
+        '../../../pages/docs/components/aegisx/utilities/theme-builder/theme-builder-doc.component'
       ).then((m) => m.ThemeBuilderDocComponent),
     data: {
       title: 'Theme Builder Doc',
@@ -43,7 +48,7 @@ export const DASHBOARD_ROUTES: Route[] = [
     path: 'dashboard/widget-framework',
     loadComponent: () =>
       import(
-        `${BASE_PATH}/dashboard/widget-framework/widget-framework-doc.component`
+        '../../../pages/docs/components/aegisx/dashboard/widget-framework/widget-framework-doc.component'
       ).then((m) => m.WidgetFrameworkDocComponent),
     data: {
       title: 'Widget Framework',

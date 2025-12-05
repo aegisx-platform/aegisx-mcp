@@ -1,13 +1,18 @@
-import { Route } from '@angular/router';
+/**
+ * Navigation Routes
+ *
+ * IMPORTANT: Dynamic imports MUST use static string paths.
+ * Template literals with variables do NOT work with Webpack/Angular.
+ */
 
-const BASE_PATH = '../../../pages/docs/components/aegisx';
+import { Route } from '@angular/router';
 
 export const NAVIGATION_ROUTES: Route[] = [
   {
     path: 'navigation/breadcrumb',
     loadComponent: () =>
       import(
-        `${BASE_PATH}/navigation/breadcrumb/breadcrumb-doc.component`
+        '../../../pages/docs/components/aegisx/navigation/breadcrumb/breadcrumb-doc.component'
       ).then((m) => m.BreadcrumbDocComponent),
     data: {
       title: 'Breadcrumb',
@@ -17,9 +22,9 @@ export const NAVIGATION_ROUTES: Route[] = [
   {
     path: 'navigation/stepper',
     loadComponent: () =>
-      import(`${BASE_PATH}/navigation/stepper/stepper-doc.component`).then(
-        (m) => m.StepperDocComponent,
-      ),
+      import(
+        '../../../pages/docs/components/aegisx/navigation/stepper/stepper-doc.component'
+      ).then((m) => m.StepperDocComponent),
     data: {
       title: 'Stepper',
       description: 'Stepper component',
@@ -28,9 +33,9 @@ export const NAVIGATION_ROUTES: Route[] = [
   {
     path: 'navigation/launcher',
     loadComponent: () =>
-      import(`${BASE_PATH}/navigation/launcher/launcher-doc.component`).then(
-        (m) => m.LauncherDocComponent,
-      ),
+      import(
+        '../../../pages/docs/components/aegisx/navigation/launcher/launcher-doc.component'
+      ).then((m) => m.LauncherDocComponent),
     data: {
       title: 'Launcher',
       description: 'App launcher component',
@@ -40,7 +45,7 @@ export const NAVIGATION_ROUTES: Route[] = [
     path: 'navigation/navigation-menu',
     loadComponent: () =>
       import(
-        `${BASE_PATH}/navigation/navigation-menu/navigation-menu-doc.component`
+        '../../../pages/docs/components/aegisx/navigation/navigation-menu/navigation-menu-doc.component'
       ).then((m) => m.NavigationMenuDocComponent),
     data: {
       title: 'Navigation Menu',
@@ -50,9 +55,9 @@ export const NAVIGATION_ROUTES: Route[] = [
   {
     path: 'navigation/navbar',
     loadComponent: () =>
-      import(`${BASE_PATH}/navigation/navbar/navbar-doc.component`).then(
-        (m) => m.NavbarDocComponent,
-      ),
+      import(
+        '../../../pages/docs/components/aegisx/navigation/navbar/navbar-doc.component'
+      ).then((m) => m.NavbarDocComponent),
     data: {
       title: 'Navbar',
       description: 'Enterprise navigation bar component',
@@ -62,7 +67,7 @@ export const NAVIGATION_ROUTES: Route[] = [
     path: 'navigation/command-palette',
     loadComponent: () =>
       import(
-        `${BASE_PATH}/navigation/command-palette/command-palette-doc.component`
+        '../../../pages/docs/components/aegisx/navigation/command-palette/command-palette-doc.component'
       ).then((m) => m.CommandPaletteDocComponent),
     data: {
       title: 'Command Palette',
