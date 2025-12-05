@@ -368,8 +368,6 @@ async function generateCrudModule(tableName, options = {}) {
             // New file
           }
 
-          console.log(`📝 Writing file: ${outputPath}`);
-          console.log(`📄 Content length: ${content.length} chars`);
           await fs.writeFile(outputPath, content, 'utf8');
           console.log(`${status} ${outputPath}`);
         }
@@ -480,6 +478,9 @@ async function renderTemplate(templateName, context) {
     try {
       // Determine template version from context or default to 'standard'
       const templateVersion = context.templateVersion || 'standard';
+      console.log(
+        `🎨 TemplateManager rendering: template=${templateName}, version=${templateVersion}, hasBusinessRules=${context.hasBusinessRules}`,
+      );
 
       // For domain templates, pass templateName without prefix
       // TemplateManager will resolve the full path based on templateVersion
@@ -497,17 +498,22 @@ async function renderTemplate(templateName, context) {
 
   // Legacy path-based rendering (backward compatibility)
   // For backward compat, if templateName has path separators, use as-is
-  // Otherwise, prepend 'backend/standard/' for default location
+  // Otherwise, use templateVersion from context to determine template folder
+  const templateVersion = context.templateVersion || 'standard';
+  console.log(
+    `📁 Legacy rendering: template=${templateName}, version=${templateVersion}`,
+  );
   let fullTemplatePath;
   if (templateName.includes('/')) {
     fullTemplatePath = path.join(__dirname, '../../templates', templateName);
   } else {
     fullTemplatePath = path.join(
       __dirname,
-      '../../templates/backend/standard',
+      `../../templates/backend/${templateVersion}`,
       templateName,
     );
   }
+  console.log(`📁 Full template path: ${fullTemplatePath}`);
 
   const templateContent = await fs.readFile(fullTemplatePath, 'utf8');
   const template = Handlebars.compile(templateContent);
@@ -919,15 +925,27 @@ Handlebars.registerHelper('eq', function (arg1, arg2, options) {
       : '';
 });
 
-Handlebars.registerHelper('or', function (arg1, arg2, options) {
-  if (!options || typeof options.fn !== 'function') {
-    return arg1 || arg2;
+Handlebars.registerHelper('or', function (...args) {
+  // Remove the options hash (last argument) if present
+  const options = args[args.length - 1];
+  const hasOptionsHash =
+    options && typeof options === 'object' && options.hash !== undefined;
+  const values = hasOptionsHash ? args.slice(0, -1) : args;
+
+  // Check if any value is truthy
+  const result = values.some((v) => Boolean(v));
+
+  // If used as block helper
+  if (hasOptionsHash && typeof options.fn === 'function') {
+    return result
+      ? options.fn(this)
+      : options.inverse
+        ? options.inverse(this)
+        : '';
   }
-  return arg1 || arg2
-    ? options.fn(this)
-    : options.inverse
-      ? options.inverse(this)
-      : '';
+
+  // If used as subexpression
+  return result;
 });
 
 Handlebars.registerHelper('unless', function (conditional, options) {

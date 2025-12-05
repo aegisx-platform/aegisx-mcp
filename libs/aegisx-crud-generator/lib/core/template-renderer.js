@@ -9,6 +9,76 @@ const fs = require('fs').promises;
 const path = require('path');
 const Handlebars = require('handlebars');
 
+// Register all required Handlebars helpers
+// These must match the helpers in backend-generator.js
+
+function toCamelCase(str) {
+  if (!str) return '';
+  return str
+    .replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
+    .replace(/^([A-Z])/, (_, letter) => letter.toLowerCase());
+}
+
+function toKebabCase(str) {
+  if (!str) return '';
+  return str
+    .replace(/([a-z])([A-Z])/g, '$1-$2')
+    .replace(/_/g, '-')
+    .toLowerCase();
+}
+
+function toPascalCase(str) {
+  if (!str) return '';
+  return str
+    .replace(/(^|_)([a-z])/g, (_, __, letter) => letter.toUpperCase())
+    .replace(/_/g, '');
+}
+
+// Register or helper that supports multiple arguments
+Handlebars.registerHelper('or', function (...args) {
+  const options = args[args.length - 1];
+  const hasOptionsHash =
+    options && typeof options === 'object' && options.hash !== undefined;
+  const values = hasOptionsHash ? args.slice(0, -1) : args;
+  const result = values.some((v) => Boolean(v));
+  if (hasOptionsHash && typeof options.fn === 'function') {
+    return result
+      ? options.fn(this)
+      : options.inverse
+        ? options.inverse(this)
+        : '';
+  }
+  return result;
+});
+
+Handlebars.registerHelper('toKebabCase', function (str) {
+  return toKebabCase(str);
+});
+
+Handlebars.registerHelper('toCamelCase', function (str) {
+  return toCamelCase(str);
+});
+
+Handlebars.registerHelper('toPascalCase', function (str) {
+  return toPascalCase(str);
+});
+
+Handlebars.registerHelper('uppercase', function (str) {
+  if (!str || typeof str !== 'string') return '';
+  return str.toUpperCase();
+});
+
+Handlebars.registerHelper('eq', function (a, b, options) {
+  if (!options || typeof options.fn !== 'function') {
+    return a === b;
+  }
+  return a === b
+    ? options.fn(this)
+    : options.inverse
+      ? options.inverse(this)
+      : '';
+});
+
 class TemplateRenderer {
   constructor(templateManager) {
     this.templateManager = templateManager;
@@ -31,7 +101,9 @@ class TemplateRenderer {
     const templateContent = await fs.readFile(templatePath, 'utf8');
     const compiled = Handlebars.compile(templateContent);
 
-    return compiled(context);
+    const result = compiled(context);
+
+    return result;
   }
 
   /**

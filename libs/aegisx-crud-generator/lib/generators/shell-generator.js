@@ -82,8 +82,25 @@ Handlebars.registerHelper('eq', function (a, b) {
   return a === b;
 });
 
-Handlebars.registerHelper('or', function (a, b) {
-  return a || b;
+Handlebars.registerHelper('or', function (...args) {
+  // Support multiple arguments for or helper
+  const options = args[args.length - 1];
+  const hasOptionsHash =
+    options && typeof options === 'object' && options.hash !== undefined;
+  const values = hasOptionsHash ? args.slice(0, -1) : args;
+  const result = values.some((v) => Boolean(v));
+
+  // If used as block helper
+  if (hasOptionsHash && typeof options.fn === 'function') {
+    return result
+      ? options.fn(this)
+      : options.inverse
+        ? options.inverse(this)
+        : '';
+  }
+
+  // If used as subexpression
+  return result;
 });
 
 Handlebars.registerHelper('json', function (context) {
