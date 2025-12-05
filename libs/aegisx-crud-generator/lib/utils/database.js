@@ -2,19 +2,30 @@ const { knex } = require('../config/knex-connection');
 
 /**
  * Get database schema for a specific table
+ * @param {string} tableName - Name of the table
+ * @param {string} schemaName - PostgreSQL schema name (default: 'public')
  */
-async function getDatabaseSchema(tableName) {
+async function getDatabaseSchema(tableName, schemaName = 'public') {
   try {
-    // Check if table exists
-    const tableExists = await knex.schema.hasTable(tableName);
-    if (!tableExists) {
+    // Check if table exists in the specified schema
+    const tableCheck = await knex.raw(
+      `
+      SELECT EXISTS (
+        SELECT 1 FROM information_schema.tables
+        WHERE table_schema = ? AND table_name = ?
+      ) as table_exists
+    `,
+      [schemaName, tableName],
+    );
+
+    if (!tableCheck.rows[0].table_exists) {
       return null;
     }
 
     // Get column information
     const columns = await knex.raw(
       `
-      SELECT 
+      SELECT
         column_name,
         data_type,
         is_nullable,
@@ -23,11 +34,11 @@ async function getDatabaseSchema(tableName) {
         numeric_precision,
         numeric_scale,
         udt_name
-      FROM information_schema.columns 
-      WHERE table_name = ? 
+      FROM information_schema.columns
+      WHERE table_schema = ? AND table_name = ?
       ORDER BY ordinal_position
     `,
-      [tableName],
+      [schemaName, tableName],
     );
 
     // Get primary key information
@@ -37,62 +48,69 @@ async function getDatabaseSchema(tableName) {
       FROM information_schema.key_column_usage kcu
       JOIN information_schema.table_constraints tc
         ON kcu.constraint_name = tc.constraint_name
-      WHERE tc.table_name = ? 
+        AND kcu.table_schema = tc.table_schema
+      WHERE tc.table_schema = ? AND tc.table_name = ?
         AND tc.constraint_type = 'PRIMARY KEY'
     `,
-      [tableName],
+      [schemaName, tableName],
     );
 
     // Get foreign key information
     const foreignKeys = await knex.raw(
       `
-      SELECT 
+      SELECT
         kcu.column_name,
+        ccu.table_schema AS foreign_table_schema,
         ccu.table_name AS foreign_table_name,
         ccu.column_name AS foreign_column_name,
         tc.constraint_name
       FROM information_schema.key_column_usage kcu
       JOIN information_schema.constraint_column_usage ccu
         ON kcu.constraint_name = ccu.constraint_name
+        AND kcu.table_schema = ccu.table_schema
       JOIN information_schema.table_constraints tc
         ON kcu.constraint_name = tc.constraint_name
-      WHERE kcu.table_name = ? 
+        AND kcu.table_schema = tc.table_schema
+      WHERE kcu.table_schema = ? AND kcu.table_name = ?
         AND tc.constraint_type = 'FOREIGN KEY'
     `,
-      [tableName],
+      [schemaName, tableName],
     );
 
-    // Get enum types and values
+    // Get enum types and values (including schema-qualified enums)
     const enumInfo = await knex.raw(
       `
-      SELECT 
+      SELECT
         c.column_name,
+        n.nspname as enum_schema,
         t.typname as enum_name,
         array_agg(e.enumlabel ORDER BY e.enumsortorder) as enum_values
       FROM information_schema.columns c
       JOIN pg_type t ON c.udt_name = t.typname
+      JOIN pg_namespace n ON t.typnamespace = n.oid
       JOIN pg_enum e ON t.oid = e.enumtypid
-      WHERE c.table_name = ?
+      WHERE c.table_schema = ? AND c.table_name = ?
         AND t.typtype = 'e'
-      GROUP BY c.column_name, t.typname
+      GROUP BY c.column_name, n.nspname, t.typname
     `,
-      [tableName],
+      [schemaName, tableName],
     );
 
     // Get check constraints that might define enum-like values
     const checkConstraints = await knex.raw(
       `
-      SELECT 
+      SELECT
         kcu.column_name,
         cc.check_clause
       FROM information_schema.check_constraints cc
       JOIN information_schema.constraint_column_usage kcu
         ON cc.constraint_name = kcu.constraint_name
-      WHERE kcu.table_name = ?
-        AND (cc.check_clause LIKE '%IN (%' 
+        AND cc.constraint_schema = kcu.constraint_schema
+      WHERE kcu.table_schema = ? AND kcu.table_name = ?
+        AND (cc.check_clause LIKE '%IN (%'
              OR cc.check_clause LIKE '%ANY%ARRAY%')
     `,
-      [tableName],
+      [schemaName, tableName],
     );
 
     // Process columns with enhanced metadata
@@ -177,10 +195,12 @@ async function getDatabaseSchema(tableName) {
 
     return {
       tableName,
+      schemaName,
       columns: processedColumns,
       primaryKey: primaryKeys.rows.map((pk) => pk.column_name),
       foreignKeys: foreignKeys.rows.map((fk) => ({
         column: fk.column_name,
+        referencedSchema: fk.foreign_table_schema,
         referencedTable: fk.foreign_table_name,
         referencedColumn: fk.foreign_column_name,
       })),
@@ -195,18 +215,23 @@ async function getDatabaseSchema(tableName) {
 
 /**
  * List all tables in the database
+ * @param {string} schemaName - PostgreSQL schema name (default: 'public')
  */
-async function listTables() {
+async function listTables(schemaName = 'public') {
   try {
-    const result = await knex.raw(`
-      SELECT 
+    const result = await knex.raw(
+      `
+      SELECT
         table_name,
-        (SELECT COUNT(*) FROM information_schema.columns WHERE table_name = t.table_name) as column_count
+        (SELECT COUNT(*) FROM information_schema.columns c
+         WHERE c.table_name = t.table_name AND c.table_schema = t.table_schema) as column_count
       FROM information_schema.tables t
-      WHERE table_schema = 'public'
+      WHERE table_schema = ?
         AND table_type = 'BASE TABLE'
       ORDER BY table_name
-    `);
+    `,
+      [schemaName],
+    );
 
     return result.rows.map((row) => ({
       name: row.table_name,
@@ -637,11 +662,13 @@ function getDropdownEndpoint(foreignKeyInfo) {
 
 /**
  * Check if a table has a dropdown endpoint available
+ * @param {string} tableName - Name of the table
+ * @param {string} schemaName - PostgreSQL schema name (default: 'public')
  */
-async function hasDropdownEndpoint(tableName) {
+async function hasDropdownEndpoint(tableName, schemaName = 'public') {
   try {
     // Check if the referenced table exists and has basic structure for dropdown
-    const schema = await getDatabaseSchema(tableName);
+    const schema = await getDatabaseSchema(tableName, schemaName);
     if (!schema) return false;
 
     // Look for common display fields (name, title, etc.)
@@ -793,26 +820,34 @@ function mapPostgresToTypeBox(dataType, udtName, isNullable) {
 
 /**
  * Get enhanced schema with smart field detection and FK analysis
+ * @param {string} tableName - Name of the table
+ * @param {string} schemaName - PostgreSQL schema name (default: 'public')
  */
-async function getEnhancedSchema(tableName) {
+async function getEnhancedSchema(tableName, schemaName = 'public') {
   try {
-    console.log(`🔍 Analyzing table: ${tableName}`);
+    console.log(`🔍 Analyzing table: ${tableName} (schema: ${schemaName})`);
 
     // Get basic schema
-    const schema = await getDatabaseSchema(tableName);
+    const schema = await getDatabaseSchema(tableName, schemaName);
     if (!schema) {
-      throw new Error(`Table ${tableName} not found`);
+      throw new Error(`Table ${tableName} not found in schema ${schemaName}`);
     }
 
     // ===== DETECT ERROR HANDLING CONSTRAINTS =====
     console.log(`🔍 Detecting error handling constraints...`);
 
     // Detect unique constraints (for duplicate detection)
-    const uniqueConstraints = await detectUniqueConstraints(tableName);
+    const uniqueConstraints = await detectUniqueConstraints(
+      tableName,
+      schemaName,
+    );
     schema.uniqueConstraints = uniqueConstraints;
 
     // Detect foreign key references (for delete validation)
-    const foreignKeyReferences = await detectForeignKeyReferences(tableName);
+    const foreignKeyReferences = await detectForeignKeyReferences(
+      tableName,
+      schemaName,
+    );
     schema.foreignKeyReferences = foreignKeyReferences;
 
     // Detect business rules (for validation)
@@ -840,14 +875,23 @@ async function getEnhancedSchema(tableName) {
       schema.columns.map(async (column) => {
         if (column.isForeignKey && column.foreignKeyInfo) {
           const { referencedTable } = column.foreignKeyInfo;
+          // Use the referenced schema from FK info, or fall back to current schema
+          const refSchemaName =
+            column.foreignKeyInfo.referencedSchema || schemaName;
 
           try {
             // Get referenced table schema for dropdown analysis
-            const referencedSchema = await getDatabaseSchema(referencedTable);
-            const hasDropdown = await hasDropdownEndpoint(referencedTable);
+            const referencedTableSchema = await getDatabaseSchema(
+              referencedTable,
+              refSchemaName,
+            );
+            const hasDropdown = await hasDropdownEndpoint(
+              referencedTable,
+              refSchemaName,
+            );
             const displayFields = getDropdownDisplayFields(
               referencedTable,
-              referencedSchema,
+              referencedTableSchema,
             );
 
             return {
@@ -856,7 +900,7 @@ async function getEnhancedSchema(tableName) {
                 endpoint: getDropdownEndpoint(column.foreignKeyInfo),
                 hasEndpoint: hasDropdown,
                 displayFields: displayFields,
-                referencedSchema: referencedSchema,
+                referencedSchema: referencedTableSchema,
               },
             };
           } catch (error) {
@@ -1094,9 +1138,10 @@ function createConstraintMetadata(constraintValues, enumData, column) {
  * Returns both single-field and composite unique constraints
  *
  * @param {string} tableName - Name of the table to analyze
+ * @param {string} schemaName - PostgreSQL schema name (default: 'public')
  * @returns {Promise<Object>} Object with singleField and composite arrays
  */
-async function detectUniqueConstraints(tableName) {
+async function detectUniqueConstraints(tableName, schemaName = 'public') {
   try {
     // Query to get all UNIQUE constraints (including indexes)
     const uniqueConstraints = await knex.raw(
@@ -1109,7 +1154,7 @@ async function detectUniqueConstraints(tableName) {
       JOIN information_schema.key_column_usage kcu
         ON tc.constraint_name = kcu.constraint_name
         AND tc.table_schema = kcu.table_schema
-      WHERE tc.table_name = ?
+      WHERE tc.table_schema = ? AND tc.table_name = ?
         AND tc.constraint_type = 'UNIQUE'
       GROUP BY tc.constraint_name
 
@@ -1123,18 +1168,19 @@ async function detectUniqueConstraints(tableName) {
         SELECT
           indexname,
           tablename,
+          schemaname,
           string_to_array(indkey::text, ' ')::int[] as indkey_array
         FROM pg_indexes
         JOIN pg_index ON pg_indexes.indexname = pg_index.indexrelid::regclass::text
-        WHERE tablename = ?
+        WHERE schemaname = ? AND tablename = ?
           AND indisunique = true
           AND indisprimary = false
       ) ix
-      JOIN pg_attribute a ON a.attrelid = (SELECT oid FROM pg_class WHERE relname = ix.tablename)
+      JOIN pg_attribute a ON a.attrelid = (SELECT oid FROM pg_class c JOIN pg_namespace n ON c.relnamespace = n.oid WHERE n.nspname = ix.schemaname AND c.relname = ix.tablename)
         AND a.attnum = ANY(ix.indkey_array)
       GROUP BY ix.indexname, ix.indkey_array
     `,
-      [tableName, tableName],
+      [schemaName, tableName, schemaName, tableName],
     );
 
     const singleField = [];
@@ -1193,13 +1239,15 @@ async function detectUniqueConstraints(tableName) {
  * Used for delete validation - prevent deletion if records exist
  *
  * @param {string} tableName - Name of the table to analyze
+ * @param {string} schemaName - PostgreSQL schema name (default: 'public')
  * @returns {Promise<Array>} Array of objects describing foreign key references
  */
-async function detectForeignKeyReferences(tableName) {
+async function detectForeignKeyReferences(tableName, schemaName = 'public') {
   try {
     const references = await knex.raw(
       `
       SELECT
+        tc.table_schema as referencing_schema,
         tc.table_name as referencing_table,
         kcu.column_name as referencing_column,
         rc.delete_rule as on_delete_rule
@@ -1214,13 +1262,14 @@ async function detectForeignKeyReferences(tableName) {
         ON tc.constraint_name = rc.constraint_name
         AND tc.table_schema = rc.constraint_schema
       WHERE tc.constraint_type = 'FOREIGN KEY'
-        AND ccu.table_name = ?
+        AND ccu.table_schema = ? AND ccu.table_name = ?
       ORDER BY tc.table_name, kcu.column_name
     `,
-      [tableName],
+      [schemaName, tableName],
     );
 
     const fkReferences = references.rows.map((ref) => ({
+      schema: ref.referencing_schema,
       table: ref.referencing_table,
       field: ref.referencing_column,
       cascade: ref.on_delete_rule === 'CASCADE',

@@ -77,15 +77,16 @@ async function generateCrudModule(tableName, options = {}) {
     force = false,
     outputDir = path.resolve(process.cwd(), 'apps/api/src/modules'),
     configFile = null,
+    schema: dbSchema = 'public',
   } = options;
 
   // Initialize template system
   await initializeTemplateSystem();
 
-  console.log(`🔍 Analyzing table: ${tableName}`);
+  console.log(`🔍 Analyzing table: ${tableName} (schema: ${dbSchema})`);
 
   // Get enhanced database schema for the table (includes constraint detection)
-  const schema = await getEnhancedSchema(tableName);
+  const schema = await getEnhancedSchema(tableName, dbSchema);
 
   if (!schema) {
     throw new Error(`Table '${tableName}' not found in database`);
@@ -120,6 +121,7 @@ async function generateCrudModule(tableName, options = {}) {
 
   const context = {
     tableName,
+    dbSchema, // PostgreSQL schema name (e.g., 'public', 'inventory')
     moduleName: toCamelCase(tableName),
     ModuleName: toPascalCase(tableName),
     moduleNameKebab: toKebabCase(tableName),
@@ -1317,15 +1319,16 @@ async function generateDomainModule(domainName, options = {}) {
     noRoles = false,
     migrationOnly = false,
     multipleRoles = false,
+    schema: dbSchema = 'public',
   } = options;
 
   // Initialize template system
   await initializeTemplateSystem();
 
-  console.log(`🔍 Analyzing table: ${domainName}`);
+  console.log(`🔍 Analyzing table: ${domainName} (schema: ${dbSchema})`);
 
   // Get enhanced database schema for the table (includes constraint detection)
-  const schema = await getEnhancedSchema(domainName);
+  const schema = await getEnhancedSchema(domainName, dbSchema);
 
   if (!schema) {
     throw new Error(`Table '${domainName}' not found in database`);
@@ -1360,6 +1363,7 @@ async function generateDomainModule(domainName, options = {}) {
   // Generate context for templates (same as flat generator + domain routes)
   const context = {
     tableName: domainName,
+    dbSchema, // PostgreSQL schema name (e.g., 'public', 'inventory')
     domainName,
     moduleName: toCamelCase(domainName),
     ModuleName: toPascalCase(domainName),

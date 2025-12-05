@@ -113,8 +113,13 @@ program
     false,
   )
   .option(
-    '-s, --shell <shell>',
+    '--shell <shell>',
     'Target shell for route registration (e.g., system, inventory). If specified, routes will be registered in the shell routes file instead of app.routes.ts',
+  )
+  .option(
+    '-s, --schema <schema>',
+    'PostgreSQL schema to read table from (default: public)',
+    'public',
   )
   .action(async (tableName, options) => {
     try {
@@ -208,6 +213,7 @@ program
       const structureType = useFlat ? 'flat' : 'domain';
 
       console.log(`🚀 Generating CRUD module for table: ${tableName}`);
+      console.log(`🗄️  Database schema: ${options.schema}`);
       console.log(`📱 Target app: ${options.app}`);
       console.log(`🎯 Target type: ${options.target}`);
       console.log(`🏗️  Structure: ${structureType}`);
@@ -306,6 +312,7 @@ program
               multipleRoles: options.multipleRoles,
               package: options.package,
               smartStats: options.smartStats,
+              schema: options.schema,
             })
           : await generateDomainModule(tableName, {
               withEvents: options.withEvents,
@@ -322,6 +329,7 @@ program
               package: options.package,
               smartStats: options.smartStats,
               withImport: options.withImport,
+              schema: options.schema,
             });
       }
 
@@ -707,15 +715,33 @@ program
   .command('list-tables')
   .alias('ls')
   .description('List available database tables')
-  .action(async () => {
+  .option(
+    '-s, --schema <schema>',
+    'PostgreSQL schema to list tables from (default: public)',
+    'public',
+  )
+  .action(async (options) => {
     try {
       const { listTables } = require('../lib/utils/database');
-      const tables = await listTables();
+      const tables = await listTables(options.schema);
 
-      console.log('📊 Available database tables:');
-      tables.forEach((table) => {
-        console.log(`  • ${table.name} (${table.columns} columns)`);
-      });
+      console.log(
+        chalk.bold.cyan(
+          `\n📊 Available database tables in schema "${options.schema}":\n`,
+        ),
+      );
+      if (tables.length === 0) {
+        console.log(
+          chalk.yellow(`  No tables found in schema "${options.schema}"`),
+        );
+        console.log(chalk.gray('  Try: aegisx ls --schema public'));
+        console.log(chalk.gray('       aegisx ls --schema inventory\n'));
+      } else {
+        tables.forEach((table) => {
+          console.log(`  • ${table.name} (${table.columns} columns)`);
+        });
+        console.log(chalk.gray(`\n  Total: ${tables.length} tables\n`));
+      }
     } catch (error) {
       console.error('❌ Error listing tables:', error.message);
       // Cleanup database connection
