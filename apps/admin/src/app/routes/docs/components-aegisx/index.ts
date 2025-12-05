@@ -12,6 +12,7 @@ import { FEEDBACK_ROUTES } from './feedback.routes';
 import { NAVIGATION_ROUTES } from './navigation.routes';
 import { LAYOUT_ROUTES } from './layout.routes';
 import { UTILITIES_ROUTES, DASHBOARD_ROUTES } from './utilities.routes';
+import { AUTH_ROUTES } from './auth.routes';
 
 const BASE_PATH = '../../pages/docs/components/aegisx';
 
@@ -43,6 +44,7 @@ export const COMPONENTS_AEGISX_ROUTES: Route[] = [
   ...LAYOUT_ROUTES,
   ...UTILITIES_ROUTES,
   ...DASHBOARD_ROUTES,
+  ...AUTH_ROUTES,
 ];
 
 // Re-export individual route arrays for granular imports
@@ -55,4 +57,5 @@ export {
   LAYOUT_ROUTES,
   UTILITIES_ROUTES,
   DASHBOARD_ROUTES,
+  AUTH_ROUTES,
 };

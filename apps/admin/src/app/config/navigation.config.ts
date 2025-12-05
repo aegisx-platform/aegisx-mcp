@@ -489,6 +489,20 @@ const DASHBOARD_ITEMS: AxNavigationItem[] = [
 ];
 
 // ============================================================
+// COMPONENTS - AUTH
+// ============================================================
+
+const AUTH_ITEMS: AxNavigationItem[] = [
+  {
+    id: 'auth-overview',
+    title: 'Authentication',
+    type: 'item',
+    icon: 'lock',
+    link: '/docs/components/aegisx/auth',
+  },
+];
+
+// ============================================================
 // INTEGRATIONS SECTION
 // ============================================================
 
@@ -1137,6 +1151,13 @@ export const COMPACT_NAVIGATION: AxNavigationItem[] = [
         icon: 'build',
         children: UTILITIES_ITEMS,
       },
+      {
+        id: 'auth',
+        title: 'Authentication',
+        type: 'collapsible',
+        icon: 'lock',
+        children: AUTH_ITEMS,
+      },
     ],
   },
   {
@@ -1337,6 +1358,15 @@ export const DOCS_NAVIGATION: AxNavigationItem[] = [
         id: 'dashboard',
         title: 'Dashboard',
         children: DASHBOARD_ITEMS.map((item) => ({
+          id: item.id,
+          title: item.title,
+          link: item.link,
+        })),
+      },
+      {
+        id: 'auth',
+        title: 'Authentication',
+        children: AUTH_ITEMS.map((item) => ({
           id: item.id,
           title: item.title,
           link: item.link,

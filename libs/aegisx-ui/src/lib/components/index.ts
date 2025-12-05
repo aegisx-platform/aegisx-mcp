@@ -68,3 +68,6 @@ export * from './code-tabs/code-tabs.component';
 
 // Auth Components (Login, Register, Forgot Password, etc.)
 export * from './auth';
+
+// Loading Button Component (Material 3 with shimmer effect)
+export * from './loading-button';

@@ -33,6 +33,7 @@ export const STANDALONE_ROUTES = [
   '/examples/account',
   '/examples/dashboard',
   '/examples/auth',
+  '/docs/components/aegisx/auth/examples',
 ] as const;
 
 /**
