@@ -46,6 +46,12 @@ aegisx deactivate
 # Basic CRUD module
 aegisx generate <table_name>
 
+# With domain organization (NEW!)
+aegisx generate <table_name> --domain inventory/master-data
+
+# From specific PostgreSQL schema
+aegisx generate <table_name> --schema inventory
+
 # With WebSocket events
 aegisx generate <table_name> --with-events
 
@@ -60,6 +66,30 @@ aegisx generate <table_name> --dry-run
 
 # Force overwrite existing files
 aegisx generate <table_name> --force
+```
+
+### Domain-Based Generation (NEW!)
+
+```bash
+# Generate module in domain structure
+aegisx generate drugs --domain inventory/master-data --force
+
+# Result:
+# modules/
+# └── inventory/
+#     ├── index.ts                 # Domain aggregator
+#     └── master-data/
+#         ├── index.ts             # Subdomain aggregator
+#         └── drugs/               # CRUD module
+#             ├── controllers/
+#             ├── repositories/
+#             ├── routes/
+#             ├── schemas/
+#             ├── services/
+#             ├── types/
+#             └── index.ts
+
+# API Route: /api/inventory/master-data/drugs
 ```
 
 ### Frontend Generation
@@ -86,16 +116,50 @@ aegisx generate <table_name> --target frontend --app admin
 | Option                   | Default    | Description                                 |
 | ------------------------ | ---------- | ------------------------------------------- |
 | `-t, --target`           | `backend`  | Generation target (`backend` or `frontend`) |
+| `--domain <path>`        | -          | Domain path (e.g., `inventory/master-data`) |
+| `-s, --schema <schema>`  | `public`   | PostgreSQL schema to read table from        |
 | `-f, --force`            | `false`    | Overwrite existing files                    |
 | `-d, --dry-run`          | `false`    | Preview files without creating              |
 | `-e, --with-events`      | `false`    | Include WebSocket events                    |
 | `--with-import`          | `false`    | Include bulk import (Excel/CSV)             |
 | `-a, --app`              | `api`      | Target app: `api`, `web`, `admin`           |
-| `-s, --shell`            | -          | Target shell for route registration         |
+| `--shell`                | -          | Target shell for route registration         |
 | `--package`              | `standard` | Package: `standard`, `enterprise`, `full`   |
-| `--flat`                 | `false`    | Use flat structure (not domain)             |
 | `--no-register`          | `false`    | Skip auto-registration                      |
 | `--include-audit-fields` | `false`    | Include audit fields in forms               |
+| `--direct-db`            | `false`    | Write roles directly to database (dev only) |
+| `--migration-only`       | `false`    | Generate migration file only                |
+| `--multiple-roles`       | `false`    | Generate admin, editor, viewer roles        |
+| `--smart-stats`          | `false`    | Enable smart statistics detection           |
+| `--no-format`            | `false`    | Skip auto-formatting generated files        |
+
+---
+
+## Domain Commands
+
+### Generate Domain Module
+
+```bash
+# Generate domain with specific routes
+aegisx domain <domain_name> --routes core,profiles,preferences
+
+# Example: User domain
+aegisx domain users --routes core,profiles,preferences --force
+
+# With events
+aegisx domain notifications --routes alerts,inbox --with-events --force
+```
+
+### Domain Options
+
+| Option              | Default   | Description                          |
+| ------------------- | --------- | ------------------------------------ |
+| `-r, --routes`      | -         | Comma-separated list of routes       |
+| `-e, --with-events` | `false`   | Include real-time events integration |
+| `-t, --target`      | `backend` | Generation target                    |
+| `-a, --app`         | `api`     | Target app                           |
+| `-f, --force`       | `false`   | Force overwrite                      |
+| `-d, --dry-run`     | `false`   | Preview without creating             |
 
 ---
 
@@ -128,6 +192,7 @@ aegisx shell <shell_name> --app admin
 | `-a, --app`             | `web`        | Target app: `web`, `admin`                        |
 | `-n, --name`            | -            | Display name for the shell                        |
 | `--theme`               | `default`    | Theme preset: `default`, `indigo`, `teal`, `rose` |
+| `--order`               | `0`          | App order in launcher                             |
 | `--with-dashboard`      | `true`       | Include dashboard page                            |
 | `--with-settings`       | `false`      | Include settings page                             |
 | `--with-auth`           | `true`       | Include AuthGuard                                 |
@@ -154,9 +219,12 @@ aegisx shell-types
 ## Database Commands
 
 ```bash
-# List available tables
+# List available tables (public schema)
 aegisx list-tables
 aegisx ls
+
+# List tables from specific schema
+aegisx list-tables --schema inventory
 
 # Validate generated module
 aegisx validate <module_name>
@@ -243,7 +311,29 @@ aegisx generate products --force
 aegisx generate products --target frontend --force
 ```
 
-### 2. Module with Import Feature
+### 2. Domain-Based Module (Recommended)
+
+```bash
+# Generate backend with domain organization
+aegisx generate drugs --domain inventory/master-data --force
+
+# Generate multiple modules in same domain
+aegisx generate generics --domain inventory/master-data --force
+aegisx generate suppliers --domain inventory/master-data --force
+
+# Result structure:
+# modules/inventory/master-data/
+# ├── drugs/
+# ├── generics/
+# └── suppliers/
+
+# API Routes:
+# /api/inventory/master-data/drugs
+# /api/inventory/master-data/generics
+# /api/inventory/master-data/suppliers
+```
+
+### 3. Module with Import Feature
 
 ```bash
 # Backend with import service
@@ -253,7 +343,7 @@ aegisx generate budgets --with-import --force
 aegisx generate budgets --target frontend --with-import --force
 ```
 
-### 3. Real-Time Module
+### 4. Real-Time Module
 
 ```bash
 # Backend with WebSocket events
@@ -263,7 +353,7 @@ aegisx generate notifications --with-events --force
 aegisx generate notifications --target frontend --with-events --force
 ```
 
-### 4. New App Shell + Module
+### 5. New App Shell + Module
 
 ```bash
 # Create shell
@@ -272,6 +362,44 @@ aegisx shell inventory --type enterprise --force
 # Generate module into shell
 aegisx generate products --target frontend --shell inventory --force
 ```
+
+### 6. Multi-Schema Support
+
+```bash
+# Read from inventory schema, output to modules
+aegisx generate drug_lots --schema inventory --force
+
+# Combine with domain
+aegisx generate drug_lots --schema inventory --domain inventory/transactions --force
+```
+
+---
+
+## pnpm Scripts (Monorepo)
+
+For monorepo projects, use pnpm scripts:
+
+```bash
+# Basic generation
+pnpm run crud -- <table_name> --force
+
+# With import
+pnpm run crud:import -- <table_name> --force
+
+# With events
+pnpm run crud:events -- <table_name> --force
+
+# Full package
+pnpm run crud:full -- <table_name> --force
+
+# List tables
+pnpm run crud:list
+
+# Validate module
+pnpm run crud:validate -- <module_name>
+```
+
+**Important:** Always use `--` separator before table name with pnpm!
 
 ---
 
@@ -284,7 +412,9 @@ aegisx --help
 # Command-specific help
 aegisx generate --help
 aegisx shell --help
+aegisx domain --help
 aegisx templates --help
+aegisx config --help
 ```
 
 ---
