@@ -1,14 +1,14 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { Static } from '@sinclair/typebox';
-import { DrugsService } from '../services/drugs.service';
-import { CreateDrugs, UpdateDrugs } from '../types/drugs.types';
+import { DrugsService } from './drugs.service';
+import { CreateDrugs, UpdateDrugs } from './drugs.types';
 import {
   CreateDrugsSchema,
   UpdateDrugsSchema,
   DrugsIdParamSchema,
   GetDrugsQuerySchema,
   ListDrugsQuerySchema,
-} from '../schemas/drugs.schemas';
+} from './drugs.schemas';
 
 /**
  * Drugs Controller

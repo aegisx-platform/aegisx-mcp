@@ -2,7 +2,7 @@ import {
   BaseRepository,
   BaseListQuery,
   PaginatedListResult,
-} from '../../../../../shared/repositories/base.repository';
+} from '../../../../shared/repositories/base.repository';
 import type { Knex } from 'knex';
 import {
   type CreateDrugs,
@@ -11,7 +11,7 @@ import {
   type GetDrugsQuery,
   type ListDrugsQuery,
   type DrugsEntity,
-} from '../types/drugs.types';
+} from './drugs.types';
 
 export interface DrugsListQuery extends BaseListQuery {
   // Smart field-based filters for Drugs

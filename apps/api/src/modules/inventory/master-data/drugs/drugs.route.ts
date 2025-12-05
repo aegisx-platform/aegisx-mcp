@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { Type } from '@sinclair/typebox';
-import { DrugsController } from '../controllers/drugs.controller';
+import { DrugsController } from './drugs.controller';
 import {
   CreateDrugsSchema,
   UpdateDrugsSchema,
@@ -10,9 +10,9 @@ import {
   DrugsResponseSchema,
   DrugsListResponseSchema,
   FlexibleDrugsListResponseSchema,
-} from '../schemas/drugs.schemas';
-import { ApiErrorResponseSchema as ErrorResponseSchema } from '../../../../../schemas/base.schemas';
-import { SchemaRefs } from '../../../../../schemas/registry';
+} from './drugs.schemas';
+import { ApiErrorResponseSchema as ErrorResponseSchema } from '../../../../schemas/base.schemas';
+import { SchemaRefs } from '../../../../schemas/registry';
 
 export interface DrugsRoutesOptions extends FastifyPluginOptions {
   controller: DrugsController;

@@ -1,5 +1,5 @@
-import { BaseService } from '../../../../../shared/services/base.service';
-import { DrugsRepository } from '../repositories/drugs.repository';
+import { BaseService } from '../../../../shared/services/base.service';
+import { DrugsRepository } from './drugs.repository';
 import {
   type Drugs,
   type CreateDrugs,
@@ -8,7 +8,7 @@ import {
   type ListDrugsQuery,
   DrugsErrorCode,
   DrugsErrorMessages,
-} from '../types/drugs.types';
+} from './drugs.types';
 
 /**
  * Drugs Service

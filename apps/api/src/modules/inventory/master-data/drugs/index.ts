@@ -1,9 +1,9 @@
 import fp from 'fastify-plugin';
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
-import { DrugsController } from './controllers/drugs.controller';
-import { DrugsService } from './services/drugs.service';
-import { DrugsRepository } from './repositories/drugs.repository';
-import { drugsRoutes } from './routes/index';
+import { DrugsController } from './drugs.controller';
+import { DrugsService } from './drugs.service';
+import { DrugsRepository } from './drugs.repository';
+import { drugsRoutes } from './drugs.route';
 
 // Note: FastifyInstance eventService type is declared in websocket.plugin.ts
 
@@ -58,11 +58,11 @@ export default fp(
 );
 
 // Re-exports for external consumers
-export * from './schemas/drugs.schemas';
-export * from './types/drugs.types';
-export { DrugsRepository } from './repositories/drugs.repository';
-export { DrugsService } from './services/drugs.service';
-export { DrugsController } from './controllers/drugs.controller';
+export * from './drugs.schemas';
+export * from './drugs.types';
+export { DrugsRepository } from './drugs.repository';
+export { DrugsService } from './drugs.service';
+export { DrugsController } from './drugs.controller';
 
 // Re-export commonly used types for external use
 export type {
@@ -72,7 +72,7 @@ export type {
   DrugsIdParam,
   GetDrugsQuery,
   ListDrugsQuery,
-} from './schemas/drugs.schemas';
+} from './drugs.schemas';
 
 // Module name constant
 export const MODULE_NAME = 'drugs' as const;

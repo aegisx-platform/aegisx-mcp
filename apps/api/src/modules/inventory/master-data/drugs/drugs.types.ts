@@ -6,7 +6,7 @@ import {
   type DrugsIdParam,
   type GetDrugsQuery,
   type ListDrugsQuery,
-} from '../schemas/drugs.schemas';
+} from './drugs.schemas';
 
 export {
   type Drugs,

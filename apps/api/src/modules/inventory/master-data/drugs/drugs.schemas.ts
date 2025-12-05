@@ -6,7 +6,7 @@ import {
   ApiSuccessResponseSchema,
   PaginatedResponseSchema,
   PartialPaginatedResponseSchema,
-} from '../../../../../schemas/base.schemas';
+} from '../../../../schemas/base.schemas';
 
 // Base Drugs Schema
 export const DrugsSchema = Type.Object({
