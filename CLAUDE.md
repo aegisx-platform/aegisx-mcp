@@ -1,1152 +1,163 @@
 # Enterprise Monorepo Application
 
-> **📚 Complete documentation has been split into organized files in the `docs/` directory for better readability.**
+> **Complete documentation in `docs/` directory. Detailed rules in [docs/development/claude-detailed-rules.md](./docs/development/claude-detailed-rules.md)**
 
-## 🚨 Important Development Guidelines
+## Critical Development Rules
 
-### 🚨 CRITICAL: Universal Work Rules (MANDATORY FOR ALL TASKS - NO EXCEPTIONS)
+### 1. Universal Work Rules (MANDATORY)
 
-**These rules apply to EVERY task, EVERY change, EVERY operation. No exceptions, no shortcuts, no assumptions.**
+- **Read docs FIRST** - Check `docs/` before any task
+- **Search ENTIRE codebase** - `grep -r` across all directories, not partial
+- **Test BEFORE changes** - `pnpm run build` must pass before and after
+- **Follow existing patterns** - No new patterns without approval
+- **Verify completeness** - 100% or nothing, no partial work
+- **When unsure: STOP and ASK** - Never proceed with uncertainty
 
-#### 1. Read Documentation FIRST (MANDATORY)
+### 2. Multi-Instance Port Configuration
 
-**BEFORE doing ANYTHING:**
-
-```bash
-# 1. Check if documentation exists for this task
-ls docs/
-grep -r "keyword" docs/
-
-# 2. Read ALL relevant documentation
-cat docs/path/to/relevant-doc.md
-
-# 3. Read project instructions
-cat CLAUDE.md | grep -A 20 "keyword"
-
-# 4. Only THEN start working
-```
-
-**NEVER:**
-
-- ❌ Start coding without reading docs
-- ❌ Assume you know the pattern
-- ❌ Skip reading existing code
-- ❌ Make changes based on assumptions
-
-#### 2. Thoroughness is MANDATORY (NO PARTIAL WORK)
-
-**When searching/modifying:**
+**Ports are AUTO-ASSIGNED based on folder name. NEVER hardcode ports.**
 
 ```bash
-# ❌ WRONG - Partial search
-grep "keyword" apps/admin/src/
-
-# ✅ CORRECT - Complete search across entire codebase
-grep -r "keyword" . --exclude-dir={node_modules,.git,dist}
-
-# ❌ WRONG - Only searching specific file types
-find . -name "*.ts" -exec grep "keyword" {} \;
-
-# ✅ CORRECT - Search ALL files including .md, .json, .html, .scss, etc.
-grep -r "keyword" . --exclude-dir={node_modules,.git,dist}
-```
-
-**Rules:**
-
-- ✅ **ALWAYS search entire codebase** - Use `grep -r` across all directories
-- ✅ **Check ALL file types** - .ts, .html, .scss, .json, .md, config files, EVERYTHING
-- ✅ **Verify completeness** - Count occurrences before and after changes
-- ✅ **List all affected files** - Show user complete list for verification
-- ❌ **NEVER do partial work** - Either complete 100% or don't start
-
-**Example - Complete search workflow:**
-
-```bash
-# 1. Find ALL occurrences
-grep -r "--aegisx-" . --exclude-dir={node_modules,.git,dist} | wc -l
-# Output: 855 occurrences
-
-# 2. List all affected files
-grep -rl "--aegisx-" . --exclude-dir={node_modules,.git,dist}
-# Lists every single file
-
-# 3. Fix ALL files
-# ... fix each file ...
-
-# 4. Verify ZERO occurrences remain
-grep -r "--aegisx-" . --exclude-dir={node_modules,.git,dist}
-# Output: (empty) = Success
-```
-
-#### 3. Test BEFORE Any Action (MANDATORY)
-
-**BEFORE making changes:**
-
-```bash
-# 1. Test current state
-pnpm run build  # Must pass
-pnpm run test   # Must pass (if applicable)
-
-# 2. Make changes
-
-# 3. Test again
-pnpm run build  # Must still pass
-pnpm run test   # Must still pass
-
-# 4. Only if tests pass, proceed
-```
-
-**NEVER:**
-
-- ❌ Skip testing
-- ❌ Commit without testing
-- ❌ Assume it works
-- ❌ Trust pre-commit hooks alone (they don't check TypeScript compilation)
-
-#### 4. Follow Existing Patterns (NO ASSUMPTIONS)
-
-**BEFORE writing code:**
-
-```bash
-# 1. Find similar existing code
-grep -r "similar-pattern" apps/
-
-# 2. Read and understand existing implementation
-cat apps/path/to/existing-file.ts
-
-# 3. Copy the exact pattern
-# Don't invent new patterns, follow existing ones
-
-# 4. Verify your code matches the pattern
-diff your-code.ts existing-code.ts
-```
-
-**NEVER:**
-
-- ❌ Invent new patterns without approval
-- ❌ Deviate from existing structure
-- ❌ Assume a better way exists
-- ❌ Create inconsistency
-
-#### 5. Verify and Double-Check (MANDATORY)
-
-**After ANY change:**
-
-```bash
-# 1. List what you changed
-git status
-git diff
-
-# 2. Verify each file manually
-cat path/to/changed-file.ts
-
-# 3. Check for side effects
-grep -r "affected-code" .
-
-# 4. Test everything
-pnpm run build
-pnpm run test
-
-# 5. Review one more time
-git diff --cached
-```
-
-#### 6. No Shortcuts, No Assumptions (ENTERPRISE LEVEL)
-
-**This is an enterprise-level project. Act accordingly:**
-
-- ✅ **Be thorough** - Check everything twice
-- ✅ **Be careful** - One mistake wastes hours
-- ✅ **Be detailed** - Document every step
-- ✅ **Be consistent** - Follow all existing patterns
-- ✅ **Be professional** - No hacks, no quick fixes
-- ❌ **No shortcuts** - Do it right the first time
-- ❌ **No assumptions** - Verify everything
-- ❌ **No guessing** - Read the code, read the docs
-- ❌ **No partial work** - Complete 100% or nothing
-
-#### 7. When in Doubt (ALWAYS)
-
-**If you're not 100% sure:**
-
-1. **STOP immediately**
-2. **Read the documentation again**
-3. **Check existing code for similar patterns**
-4. **Ask the user for clarification**
-5. **NEVER proceed with uncertainty**
-
----
-
-### 🚨 CRITICAL: Multi-Instance Port Configuration
-
-**This project uses AUTOMATIC port assignment based on folder name.**
-
-**Setup Process (User runs this BEFORE starting development):**
-
-```bash
-pnpm run setup
-# This runs: setup-env.sh → generates .env.local with unique ports
-#            docker:up → starts containers
-#            db:migrate → runs migrations
-#            db:seed → seeds database
-```
-
-**How Ports Are Assigned (from setup-env.sh):**
-
-- Folder `aegisx-starter` → Default ports (API: 3333, PostgreSQL: 5432)
-- Folder `aegisx-starter-1` → Hash("1") = 49 → API: 3383, PostgreSQL: 5482
-- Folder `aegisx-starter-xyz` → Hash("xyz") → Unique ports calculated
-- **Each folder gets DIFFERENT ports automatically**
-
-**NEVER modify these generated files:**
-
-- `.env.local` - Auto-generated by setup-env.sh
-- `docker-compose.instance.yml` - Auto-generated by setup-env.sh
-- `proxy.conf.js` - Reads from .env.local automatically
-
-**How to Find Current Ports:**
-
-```bash
-# ALWAYS do this FIRST before any port-related operation
+# Check current ports FIRST
 cat .env.local | grep PORT
+
+# Use pnpm commands (they read .env.local)
+pnpm run dev:api
 ```
 
-**MANDATORY Rules:**
+**NEVER modify**: `.env.local`, `docker-compose.instance.yml`, `proxy.conf.js`
 
-1. **User runs `pnpm run setup` FIRST** - Generates .env.local with correct ports
-2. **ALWAYS read `.env.local`** before any operation - Don't assume ANY port
-3. **Use `pnpm run dev:api`** - Reads from .env.local automatically via load-env.sh
-4. **NEVER hardcode ports** - setup-env.sh calculates them from folder name
-5. **If port conflict**: User must stop conflicting service, DON'T change .env.local
+See [docs/infrastructure/multi-instance-setup.md](./docs/infrastructure/multi-instance-setup.md)
 
-**Common Mistakes to AVOID:**
+### 3. Git Rules (MANDATORY)
 
-- ❌ Assuming API is on 3333 (depends on folder name hash)
-- ❌ Running `nx serve api --port 3333` (bypasses .env.local)
-- ❌ Modifying .env.local manually (breaks multi-instance setup)
-- ✅ User runs `pnpm run setup` first
-- ✅ Use `pnpm run dev:api` (respects .env.local)
-- ✅ Check ports: `cat .env.local | grep PORT`
+**Commit message rules:**
 
-**Why This Matters:**
+- NO `Generated with Claude Code` or `Co-Authored-By: Claude`
+- NO `BREAKING CHANGE:` - triggers v2.x.x release (FORBIDDEN)
+- Use: `IMPORTANT:`, `MAJOR UPDATE:`, `MIGRATION:` instead
 
-- User runs multiple repos: aegisx-starter, aegisx-starter-1, aegisx-starter-feature-x
-- setup-env.sh assigns unique ports based on folder name hash
-- Wrong port = data goes to wrong database = DATA CORRUPTION
-- Modifying .env.local breaks the automatic port assignment system
+**Git workflow:**
 
-**📚 For complete multi-instance setup guide, see [docs/infrastructure/multi-instance-setup.md](./docs/infrastructure/multi-instance-setup.md)**
+- NEVER use `git add -A` or `git add .`
+- ALWAYS add specific files only
+- ALWAYS run `pnpm run build` before commit
+- Pre-commit hooks don't check TypeScript - build does
 
-### 🚨 CRITICAL: Standard Development Policy
+**Git Subtree** - Shared libs sync to separate repos:
 
-**NEVER make changes without explicit user approval**
+- `libs/aegisx-cli` → GitHub: aegisx-platform/crud-generator
+- `libs/aegisx-ui` → GitHub: aegisx-platform/aegisx-ui
+- `libs/aegisx-mcp` → GitHub: aegisx-platform/aegisx-mcp
+- Commit to monorepo first, then use `sync-to-repo.sh`
 
-- **DO NOT add/modify standards without asking first**
-- **DO NOT extend checklists or create new verification steps**
-- **DO NOT write code or configs based on assumptions**
-- **ALWAYS ask user before adding new requirements**
+See [docs/infrastructure/git-subtree-guide.md](./docs/infrastructure/git-subtree-guide.md)
 
-**When encountering gaps in standards:**
+### 4. Standard Development Policy
 
-1. **STOP development**
-2. **Ask user:** "Found [issue]. Should we create standard for this?"
-3. **Wait for explicit approval and direction**
-4. **Create standard only as instructed by user**
+- **NEVER add/modify standards without user approval**
+- **NEVER extend checklists or create new verification steps**
+- **ALWAYS ask before adding new requirements**
 
-**Examples of what requires user approval:**
+### 5. File Management
 
-- Adding new checklist items
-- Creating new verification scripts
-- Extending existing standards
-- Adding new phase/step requirements
-- Modifying workflow processes
+- **NEVER delete files without permission**
+- **Keep root directory clean** - only essential files
+- **Move docs to `docs/`** - features/, architecture/, development/, infrastructure/
 
-### Git Commit Rules
+### 6. Type Safety (MANDATORY)
 
-**DO NOT include the following in git commits**:
+- **ALL routes MUST use TypeBox schemas** - no exceptions
+- **NEVER use `any` or type assertions** - use proper schemas
+- **UUID fields MUST be validated** - BaseRepository handles this automatically
 
-- `🤖 Generated with Claude Code`
-- `Co-Authored-By: Claude <noreply@anthropic.com>`
+Flow: Schema → Type Export → Route → Controller → Type-safe access
 
-Keep commit messages clean and professional.
+### 7. Fastify preValidation Hook (CRITICAL)
 
-### 🚨 CRITICAL: Git Commit Workflow (MANDATORY - NO EXCEPTIONS)
-
-**These rules are MANDATORY and MUST be followed for EVERY commit. Violation of these rules is unacceptable.**
-
-#### Before ANY Git Operation:
-
-1. **ALWAYS run `git status` first** - Know what files exist
-2. **NEVER use `git add -A` or `git add .`** - FORBIDDEN in enterprise projects
-3. **ONLY add specific files** - Use explicit paths only
-
-#### Mandatory Pre-Commit Steps:
-
-```bash
-# Step 1: Check what will be committed
-git status
-git diff
-
-# Step 2: Add ONLY specific files related to current task
-git add apps/admin/src/path/to/file.ts
-git add libs/aegisx-ui/src/path/to/file.scss
-# NEVER: git add -A
-# NEVER: git add .
-
-# Step 3: Verify what's staged
-git diff --cached
-
-# Step 4: TEST BUILD (MANDATORY - NO EXCEPTIONS)
-pnpm run build
-
-# Step 5: Only if build succeeds, commit
-git commit -m "type(scope): description"
-```
-
-#### Forbidden Actions:
-
-- ❌ **NEVER use `git add -A`**
-- ❌ **NEVER use `git add .`**
-- ❌ **NEVER commit without testing build**
-- ❌ **NEVER commit unfinished/broken code**
-- ❌ **NEVER assume pre-commit hook is sufficient** - It only checks lint, not TypeScript compilation
-
-#### Build Test Requirements:
-
-**MANDATORY: Must run and pass before ANY commit:**
-
-```bash
-pnpm run build
-```
-
-**If build fails:**
-
-- ❌ DO NOT commit
-- ✅ Fix errors first
-- ✅ Test build again
-- ✅ Only commit when build succeeds
-
-#### Example Correct Workflow:
-
-```bash
-# 1. Check status
-git status
-
-# 2. See you modified 3 files for CSS variable migration
-# modified: apps/admin/src/app/app.scss
-# modified: libs/aegisx-ui/src/lib/theme/light.scss
-# modified: docs/README.md
-
-# 3. Add ONLY these 3 files
-git add apps/admin/src/app/app.scss
-git add libs/aegisx-ui/src/lib/theme/light.scss
-git add docs/README.md
-
-# 4. Verify staged changes
-git diff --cached
-
-# 5. Test build
-pnpm run build
-
-# 6. If build passes, commit
-git commit -m "refactor(styles): migrate CSS variables to --ax- prefix"
-```
-
-### 🚨 CRITICAL: Git Subtree for Shared Libraries
-
-**This project uses Git Subtree to manage shared libraries that are published to separate repositories and npm.**
-
-**Libraries using Git Subtree:**
-
-| Library        | Monorepo Path     | Separate Repo                                                                       | NPM Package              |
-| -------------- | ----------------- | ----------------------------------------------------------------------------------- | ------------------------ |
-| CRUD Generator | `libs/aegisx-cli` | [aegisx-platform/crud-generator](https://github.com/aegisx-platform/crud-generator) | `@aegisx/crud-generator` |
-| UI Components  | `libs/aegisx-ui`  | [aegisx-platform/aegisx-ui](https://github.com/aegisx-platform/aegisx-ui)           | `@aegisx/ui`             |
-| MCP Server     | `libs/aegisx-mcp` | [aegisx-platform/aegisx-mcp](https://github.com/aegisx-platform/aegisx-mcp)         | `@aegisx/mcp`            |
-
-**How Git Subtree Works:**
-
-```
-┌─────────────────────────────────────┐
-│     Monorepo (aegisx-starter)       │
-│  ┌─────────────────────────────┐    │
-│  │  libs/aegisx-cli │◄───┼──► GitHub: aegisx-platform/crud-generator
-│  └─────────────────────────────┘    │         ↓ npm: @aegisx/crud-generator
-│  ┌─────────────────────────────┐    │
-│  │  libs/aegisx-ui             │◄───┼──► GitHub: aegisx-platform/aegisx-ui
-│  └─────────────────────────────┘    │         ↓ npm: @aegisx/ui
-│  ┌─────────────────────────────┐    │
-│  │  libs/aegisx-mcp            │◄───┼──► GitHub: aegisx-platform/aegisx-mcp
-│  └─────────────────────────────┘    │         ↓ npm: @aegisx/mcp
-└─────────────────────────────────────┘
-```
-
-**MANDATORY Rules:**
-
-1. **NEVER create `.git` folder inside libs** - Libraries are part of monorepo
-2. **Use `sync-to-repo.sh`** to push changes to separate repository
-3. **Commit to monorepo first** - Then sync to separate repo
-4. **Don't modify files directly in separate repo** - Always work in monorepo
-
-**Workflow for Making Changes:**
-
-```bash
-# 1. Make changes in monorepo
-cd libs/aegisx-mcp
-# ... edit files ...
-
-# 2. Commit to monorepo
-cd /path/to/aegisx-starter
-git add libs/aegisx-mcp/
-git commit -m "feat(aegisx-mcp): add new feature"
-
-# 3. Sync to separate repository
-cd libs/aegisx-mcp
-./sync-to-repo.sh
-
-# 4. Publish to npm (from separate repo or after sync)
-npm publish
-```
-
-**Adding a New Subtree Library:**
-
-```bash
-# Add existing repo as subtree
-git subtree add --prefix=libs/NEW_LIB https://github.com/aegisx-platform/NEW_LIB.git main --squash
-
-# Create sync script
-cat > libs/NEW_LIB/sync-to-repo.sh << 'EOF'
-#!/bin/bash
-BRANCH=${1:-main}
-REMOTE_REPO="git@github.com:aegisx-platform/NEW_LIB.git"
-cd "$(git rev-parse --show-toplevel)"
-git subtree push --prefix=libs/NEW_LIB "$REMOTE_REPO" "$BRANCH"
-EOF
-chmod +x libs/NEW_LIB/sync-to-repo.sh
-```
-
-**Common Mistakes to AVOID:**
-
-- ❌ Running `git init` inside libs folder
-- ❌ Editing files directly in separate GitHub repo
-- ❌ Forgetting to sync after changes
-- ❌ Using `git submodule` instead of `git subtree`
-- ✅ Always work in monorepo, then sync
-- ✅ Use `sync-to-repo.sh` for pushing to separate repo
-
-**📚 For complete guide, see [docs/infrastructure/git-subtree-guide.md](./docs/infrastructure/git-subtree-guide.md)**
-
-### 🚨 CRITICAL: Semantic Release Protection Policy
-
-**FORBIDDEN PATTERNS IN COMMIT MESSAGES - WILL TRIGGER v2.x.x RELEASES:**
-
-- **NEVER use "BREAKING CHANGE:" in commit messages**
-- **NEVER use "BREAKING CHANGES:" in commit messages**
-- **NEVER use "BREAKING:" in commit messages**
-- **NEVER copy commit messages from other repositories without reviewing**
-
-**SAFE ALTERNATIVES to use instead:**
-
-- `IMPORTANT:` - For significant changes that need attention
-- `MAJOR UPDATE:` - For substantial feature changes
-- `SIGNIFICANT:` - For notable modifications
-- `API CHANGE:` - For API modifications that maintain compatibility
-- `MIGRATION:` - For database or configuration changes
-- `DEPRECATED:` - For marking features as deprecated
-
-**VERSION STRATEGY:**
-
-- Project maintains **v1.x.x versioning only**
-- Major version (v2.x.x) releases are **FORBIDDEN**
-- All changes must be backward compatible
-- Use minor/patch releases for all updates
-
-**COMMIT MESSAGE REVIEW CHECKLIST:**
-
-1. ✅ No "BREAKING CHANGE" text anywhere in commit
-2. ✅ No "BREAKING CHANGES" text anywhere in commit
-3. ✅ No "BREAKING:" text anywhere in commit
-4. ✅ Use safe alternatives for significant changes
-5. ✅ Conventional commit format: `type(scope): description`
-
-**IF ACCIDENTAL BREAKING CHANGE COMMIT:**
-
-1. **STOP immediately** - Do not push
-2. Use `git commit --amend` to fix message
-3. If already pushed, contact project owner immediately
-4. Follow emergency recovery procedures in `/docs/troubleshooting/semantic-release-recovery.md`
-
-### File Management Rules
-
-**CRITICAL: File Deletion Policy**
-
-- **NEVER delete any files without explicit permission**
-- **ALWAYS ask for approval before removing any file**
-- **This includes temporary files, old code, or seemingly unused files**
-- When refactoring or cleaning up, list files to be deleted and wait for confirmation
-
-**CRITICAL: Documentation Organization Policy**
-
-- **KEEP root directory clean** - Only essential files should remain in root
-- **Essential root files only:**
-  - `README.md` - Project introduction and quick start
-  - `CHANGELOG.md` - Release notes and version history
-  - `CLAUDE.md` - Instructions for AI development assistant
-  - `PROJECT_STATUS.md` - Current development status
-  - `package.json`, `tsconfig.json` - Core configuration files
-- **Move documentation to organized structure:**
-  - Feature docs → `docs/features/[feature-name]/`
-  - Architecture docs → `docs/architecture/`
-  - Development guides → `docs/development/`
-  - Infrastructure guides → `docs/infrastructure/`
-- **NEVER create standalone .md files in root** without specific justification
-
-### PROJECT_STATUS.md Update Policy (MANDATORY)
-
-**🚨 CRITICAL: Keep file clean and maintainable with session archiving**
-
-**Why This Matters:**
-
-- `PROJECT_STATUS.md` is the session recovery document
-- File becomes too large if all sessions are kept (2,800+ lines before archiving)
-- **Only keep 2-3 most recent sessions** for quick recovery
-- Old sessions archived to `docs/sessions/ARCHIVE_YYYY_QX.md`
-
-**File Structure:**
-
-```
-PROJECT_STATUS.md              # Main status file (~500 lines)
-├─ Summary & Recommendations   # Always at the top
-├─ Recent Sessions (2-3)       # Latest sessions for quick recovery
-└─ Reference to archives       # Link to docs/sessions/
-
-docs/sessions/
-├─ ARCHIVE_2024_Q4.md         # Sessions 38-46
-├─ ARCHIVE_2024_Q3.md         # Older sessions
-└─ SESSION_TEMPLATE.md        # Template for new sessions
-```
-
-**MANDATORY Rules:**
-
-1. **Location**: Summary & Recommendations section is located **immediately after "Implemented Features"** section
-2. **Update Frequency**: Update this section **every time you complete a major task or session**
-3. **What to Update**:
-   - ✅ "What's Working Well" - Add new completed features
-   - 🎯 "Recommended Next Steps" - Update priorities based on current status
-   - 📊 "Project Health Status" - Update metrics if changed
-   - 🎉 "Current Project Status" - Update feature counts and capabilities
-
-4. **Session Management**:
-   - **Keep only 2-3 most recent sessions** in PROJECT_STATUS.md
-   - **Archive old sessions** when file exceeds ~800 lines
-   - **Use SESSION_TEMPLATE.md** for documenting new sessions
-   - **Reference archives** at bottom of PROJECT_STATUS.md
-
-**When to Update:**
-
-- ✅ After completing a feature
-- ✅ After significant architectural changes
-- ✅ After publishing new versions (CRUD Generator, etc.)
-- ✅ When starting a new major feature
-- ✅ At the end of each session if significant progress made
-
-**When to Archive:**
-
-- 📦 When PROJECT_STATUS.md exceeds ~800 lines
-- 📦 When you have more than 3 completed sessions
-- 📦 At end of each quarter (Q1, Q2, Q3, Q4)
-
-**How to Update:**
-
-```bash
-# 1. Open PROJECT_STATUS.md
-# 2. Scroll to "Summary & Recommendations" section (near top)
-# 3. Update relevant subsections
-# 4. Update "Last Updated" date at bottom of section
-# 5. Add new session using SESSION_TEMPLATE.md as reference
-# 6. Archive old sessions if needed
-# 7. Commit changes with descriptive message
-```
-
-**How to Archive Sessions:**
-
-```bash
-# 1. Identify sessions to archive (keep only 2-3 latest)
-# 2. Create/update docs/sessions/ARCHIVE_YYYY_QX.md
-# 3. Move old session content to archive file
-# 4. Update PROJECT_STATUS.md to reference archive
-# 5. Commit with message: "docs: archive sessions X-Y to ARCHIVE_YYYY_QX.md"
-```
-
-**Important Notes:**
-
-- ❌ **DO NOT** duplicate Summary & Recommendations at the bottom
-- ✅ **KEEP IT** at the top after "Implemented Features" section
-- ✅ **ADD NOTE** at bottom: "_📌 Note: For archived sessions, see [docs/sessions/](./docs/sessions/)_"
-- ✅ **USE TEMPLATE**: Copy from `docs/sessions/SESSION_TEMPLATE.md` for new sessions
-
-**Example Commit Messages:**
-
-- `docs(status): update project health status after CRUD generator v2.1.0 release`
-- `docs(status): add new completed features to recommendations`
-- `docs(status): update next steps priorities`
-- `docs(status): archive sessions 38-46 to ARCHIVE_2024_Q4.md`
-
-### Feature Documentation Policy (MANDATORY)
-
-**🚨 ALL new features MUST have comprehensive documentation - NO EXCEPTIONS**
-
-**For EVERY new feature, create a complete documentation package in `/docs/features/[feature-name]/`:**
-
-1. **README.md** - Feature overview and quick start guide
-2. **USER_GUIDE.md** - End-user guide for using the feature
-3. **DEVELOPER_GUIDE.md** - Technical guide for developers
-4. **API_REFERENCE.md** - Complete API documentation (if applicable)
-5. **ARCHITECTURE.md** - System architecture and design decisions
-6. **DEPLOYMENT_GUIDE.md** - Production deployment instructions
-7. **TROUBLESHOOTING.md** - Common issues and solutions
-8. **DOCUMENTATION_INDEX.md** - Navigation & learning guide
-
-**Documentation Standards:**
-
-- **Professional grade** - Suitable for enterprise environments
-- **Multiple audiences** - End users, developers, administrators, architects
-- **Practical examples** - Working code examples and step-by-step guides
-- **Complete coverage** - All aspects of the feature documented
-- **Cross-referenced** - Easy navigation between related documents
-- **Maintainable** - Well-organized for future updates
-
-**Example Reference:** See `/docs/features/activity-tracking/` for the complete documentation standard that should be followed for all new features.
-
-### Schema Standards (MANDATORY)
-
-**🚨 ALL API routes MUST use TypeBox schemas - NO EXCEPTIONS**
-
-- **See [TypeBox Schema Standard](./docs/05c-typebox-schema-standard.md) for implementation**
-- **TypeBox provides both runtime validation and TypeScript types**
-- **Use base schemas from `/src/schemas/base.schemas.ts`**
-- **Register schemas via schema registry**
-
-### Type Safety Policy (MANDATORY)
-
-**🚨 NEVER use `any` or type assertions without proper schemas - NO EXCEPTIONS**
-
-**Full Type Flow Required:**
-
-1. **Schema Definition**: Create TypeBox schema in `*.schemas.ts`
-2. **Type Export**: Export `Static<typeof Schema>` type
-3. **Route Registration**: Use schema in routes with proper imports
-4. **Controller Typing**: Use exported types in FastifyRequest generics
-5. **OpenAPI Documentation**: Schemas automatically generate OpenAPI spec
-
-**Example Flow:**
+**NEVER throw errors in preValidation hooks - causes timeouts!**
 
 ```typescript
-// 1. Schema definition
-export const DeleteQuerySchema = Type.Object({
-  force: Type.Optional(Type.Boolean())
-});
-
-// 2. Type export
-export type DeleteQuery = Static<typeof DeleteQuerySchema>;
-
-// 3. Route registration
-querystring: DeleteQuerySchema,
-
-// 4. Controller typing
-request: FastifyRequest<{
-  Params: FileIdParam;
-  Querystring: DeleteQuery;
-}>
-
-// 5. Type-safe access
-const force = request.query.force || false;
+// ❌ WRONG: throw new Error('...') - request hangs
+// ✅ CORRECT: return reply.unauthorized() or return reply.forbidden()
 ```
 
-**Forbidden Patterns:**
+See `apps/api/src/core/auth/strategies/auth.strategies.ts` for reference.
 
-- `request.query as any`
-- `request.query as { field?: string }`
-- Modifying TypeScript types without updating schemas
-- Type assertions without schema validation
+### 8. API-First Development
 
-### UUID Validation Policy (MANDATORY)
+Before implementing frontend:
 
-**🚨 UUID fields MUST be validated to prevent PostgreSQL casting errors - NO EXCEPTIONS**
+1. Check API spec in `docs/features/[feature]/API_CONTRACTS.md`
+2. Verify backend routes exist
+3. Test API endpoints
+4. Then implement frontend
 
-**Built-in UUID Protection:**
-
-- **Automatic Validation**: All repositories inherit UUID validation from BaseRepository
-- **Smart Detection**: Auto-detects UUID fields based on patterns (`*_id`, `id`, `*uuid*`)
-- **PostgreSQL Error Prevention**: Invalid UUIDs filtered out before database queries
-- **Multiple Strategies**: STRICT (400 errors), GRACEFUL (filter invalid), WARN (log + continue)
-
-**CRUD Generator Integration:**
-
-```typescript
-// Generated repositories automatically include UUID validation
-export class ArticlesRepository extends BaseRepository<Articles, CreateArticles, UpdateArticles> {
-  constructor(knex: Knex) {
-    super(
-      knex,
-      'articles',
-      [...searchFields],
-      ['id', 'author_id'], // 🛡️ Explicit UUID fields for validation
-    );
-  }
-}
-```
-
-**Manual Configuration:**
-
-```typescript
-// For custom repositories, declare UUID fields explicitly
-repository.setUUIDFields(['user_id', 'category_id']);
-
-// Configure validation strategy
-repository.setUUIDValidationConfig({
-  strategy: UUIDValidationStrategy.STRICT, // Throw 400 errors
-  allowAnyVersion: true,
-  logInvalidAttempts: true,
-});
-```
-
-**Benefits:**
-
-- **No PostgreSQL Errors**: Prevents `invalid input syntax for type uuid` errors
-- **Better UX**: Invalid UUIDs handled gracefully instead of 500 errors
-- **Automatic Protection**: All new CRUD modules get UUID validation by default
-- **Zero Configuration**: Works automatically with naming conventions
-
-### Universal Development Standard (MANDATORY)
-
-**🚨 MUST follow Universal Full-Stack Standard for ALL feature development - NO EXCEPTIONS**
-
-See **[Universal Full-Stack Standard](./docs/development/universal-fullstack-standard.md)** for complete database-first development workflow that must be followed for every feature to prevent integration bugs.
-
-### Feature Development Standard (MANDATORY)
-
-**🚨 MUST follow Feature Development Standard for EVERY feature - NO EXCEPTIONS**
-
-- **See [Feature Development Standard](./docs/development/feature-development-standard.md)** for complete feature lifecycle from planning to completion
-- **ALWAYS create feature documentation before coding** using templates from `docs/features/templates/`
-- **Reserve resources** in [Resource Registry](./docs/features/RESOURCE_REGISTRY.md) before starting development
-- **Follow [Multi-Feature Workflow](./docs/development/multi-feature-workflow.md)** when multiple features are being developed simultaneously
-- **Update progress daily** in feature PROGRESS.md files
-- **Check [Feature Status Dashboard](./docs/features/README.md)** for coordination with other developers
-
-### API-First Development Policy (MANDATORY)
-
-**🚨 MUST follow API-First workflow for ALL feature development - NO EXCEPTIONS**
-
-**Before implementing ANY frontend component or making API calls:**
-
-1. **📋 CHECK API SPEC** - Review `docs/features/[feature]/API_CONTRACTS.md` thoroughly
-2. **🔍 VERIFY ENDPOINTS** - Confirm backend routes match the documented API spec exactly
-3. **🧪 TEST API ENDPOINTS** - Test actual API calls before implementing frontend logic
-4. **📝 VALIDATE SCHEMAS** - Ensure request/response schemas match TypeBox definitions
-5. **🔄 UPDATE DOCUMENTATION** - Update API docs if any changes are needed
-6. **🎯 FOLLOW API CALLING STANDARD** - See [API Calling Standard](./docs/development/API_CALLING_STANDARD.md) for correct URL patterns
-
-**API Spec Verification Rules:**
-
-- **NEVER assume endpoint URLs** - Always check the documented API contracts first
-- **NEVER implement frontend without backend API** - API must exist and work before frontend
-- **NEVER guess schema formats** - Use exact TypeBox schemas from documentation
-- **ALWAYS test with real data** - Use actual API responses, not mock data
-
-**If API spec missing or incorrect:**
-
-1. **STOP development immediately**
-2. **Ask user:** "API spec for [feature] is missing/incorrect. Should I update the spec or fix the implementation?"
-3. **Wait for explicit direction**
-4. **Update either spec or implementation as instructed**
-
-**Example API-First Workflow:**
-
-```bash
-# 1. Check feature API contracts
-cat docs/features/user-profile/API_CONTRACTS.md
-
-# 2. Verify backend routes exist
-grep -r "GET /api/profile/preferences" apps/api/src/
-
-# 3. Test API endpoint
-curl -X GET http://localhost:3333/api/profile/preferences
-
-# 4. Only then implement frontend service
-```
-
-### Quality Assurance Workflow (MANDATORY)
-
-**🚨 MUST run QA Checklist after every code change - NO EXCEPTIONS**
-
-See **[QA Checklist](./docs/development/qa-checklist.md)** for complete quality assurance steps that must be performed before every commit.
-
-### Testing Workflow (MANDATORY)
-
-**🚨 ALWAYS follow this workflow when writing tests - NO EXCEPTIONS**
-
-**Before writing ANY test:**
-
-1. **📋 Check existing schemas** - Review `*.schemas.ts` files for the module you're testing
-2. **🔍 Verify request/response formats** - Ensure test data matches schema exactly
-3. **🏗️ Check test app helper** - Ensure all required plugins are registered in test environment
-4. **📊 Compare with main app** - Verify test setup mirrors production plugin registration order
-
-**Test Data Rules:**
-
-- **NEVER guess request formats** - Always use schema definitions
-- **Match schemas exactly** - Include only fields defined in request schemas
-- **Use schema-based factories** - Create separate functions for API-valid test data
-- **Check plugin registration** - Ensure test app includes ALL plugins the route needs
-
-**Example Test Workflow:**
-
-```typescript
-// 1. Check schema first
-import { RegisterRequestSchema } from '../auth.schemas';
-
-// 2. Create API-compatible test data
-function createRegisterRequestData() {
-  return {
-    email: 'test@example.com',
-    username: 'testuser',
-    password: 'testpass123',
-    firstName: 'Test',
-    lastName: 'User',
-    // ❌ Don't include: role, status, emailVerified (not in schema)
-  };
-}
-
-// 3. Verify test app helper includes ALL required plugins
-```
-
-**ผิดแล้วต้องแก้ทันที - ห้ามเดา!**
-
-### 🚨 CRITICAL: Fastify preValidation Hook Error Handling (MANDATORY)
-
-**🚨 NEVER throw errors in Fastify preValidation hooks - ALWAYS return responses directly**
-
-**Critical Issue Discovered (Session 47):**
-
-Fastify `preValidation` hooks don't automatically convert thrown errors to HTTP responses. Throwing errors in preValidation hooks causes requests to hang indefinitely without sending responses to clients, leading to timeouts instead of proper error responses.
-
-**MANDATORY Pattern for All Auth Middleware:**
-
-```typescript
-// ❌ WRONG: Throwing errors causes timeouts
-fastify.decorate('verifyRole', function (allowedRoles: string[]) {
-  return async function (request: FastifyRequest, _reply: FastifyReply) {
-    if (!user || !user.role || !allowedRoles.includes(user.role)) {
-      throw new Error('INSUFFICIENT_PERMISSIONS'); // ❌ Request hangs, no response sent!
-    }
-  };
-});
-
-// ✅ CORRECT: Return response directly
-fastify.decorate('verifyRole', function (allowedRoles: string[]) {
-  return async function (request: FastifyRequest, reply: FastifyReply) {
-    if (!user || !user.role || !allowedRoles.includes(user.role)) {
-      return reply.forbidden('Insufficient permissions'); // ✅ Immediate 403 response!
-    }
-  };
-});
-```
-
-**MANDATORY Rules:**
-
-1. **ALWAYS use `return reply.unauthorized()` for authentication failures** (401)
-2. **ALWAYS use `return reply.forbidden()` for authorization failures** (403)
-3. **NEVER throw `Error()` in preValidation hooks** - causes timeouts
-4. **Include `reply: FastifyReply` parameter** - not `_reply` (underscore means unused)
-5. **Error handlers may NOT catch preValidation hook errors** - must return responses directly
-
-**Impact of Wrong Pattern:**
-
-- ❌ Requests timeout after 60+ seconds without any response
-- ❌ Server logs "Request error" but never sends HTTP response to client
-- ❌ Hanging connections and resource leaks
-- ❌ Poor user experience and production instability
-- ❌ Affects ALL protected routes using these middleware
-
-**Correct Implementation (Reference):**
-
-See `apps/api/src/core/auth/strategies/auth.strategies.ts` for standardized implementations:
-
-- `verifyJWT` (lines 8-40) - Returns `reply.unauthorized()` ✅
-- `verifyRole` (lines 44-51) - Returns `reply.forbidden()` ✅
-- `verifyOwnership` (lines 54-66) - Returns `reply.forbidden()` ✅
-- `verifyPermission` (lines 69-132) - Returns `reply.forbidden()` ✅
-
-**Why This Matters:**
-
-This was a **production-critical bug** discovered when User Role Assignment page hung indefinitely instead of returning 403 errors. All auth middleware were standardized to prevent this issue across the entire codebase.
-
-## 🔴 IMPORTANT: This project uses PNPM, not NPM or Yarn
-
-**Always use `pnpm` commands, never use `npm` or `yarn` commands for dependencies**
-
-## 🤖 Custom Commands
-
-These are shortcut commands that can be used to trigger common workflows. When you see these commands, perform the actions listed below.
-
-### doc-sync
-
-**Purpose**: Update project documentation and sync with remote repository after completing a session or major work.
-
-**Actions to Perform**:
-
-1. **Update `PROJECT_STATUS.md`**:
-   - Change "Last Updated" to current session number
-   - Add new session entry to "Recent Development Sessions"
-   - Update "What's Working Well" section if new features were added
-   - Update "Last Updated" in summary section
-
-2. **Update `CLAUDE.md`**:
-   - Update "Current Status" section if major changes
-   - No need to duplicate session history (kept in PROJECT_STATUS.md)
-
-3. **Git operations**:
-   - `git add PROJECT_STATUS.md CLAUDE.md`
-   - `git commit -m "docs: update documentation for Session X"`
-   - `git pull origin develop`
-   - `git push origin develop`
-
-**Usage Examples**:
-
-- "doc-sync"
-- "please doc-sync"
-- "ช่วย doc-sync ให้หน่อย"
-- "doc-sync for this session"
-
-**When to Use**: After completing significant work or at the end of a development session.
+See [docs/development/API_CALLING_STANDARD.md](./docs/development/API_CALLING_STANDARD.md)
 
 ---
 
-## 🤖 CRUD Generator Quick Commands
+## Quick Reference
 
-### Package Scripts (Recommended)
+### Package Manager
 
-```bash
-# Basic CRUD (standard package)
-pnpm run crud -- products --force
+**Use PNPM only** - never npm or yarn for dependencies
 
-# With import functionality (Excel/CSV)
-pnpm run crud:import -- budgets --force
-
-# With WebSocket events (real-time updates)
-pnpm run crud:events -- notifications --force
-
-# Full package (all features)
-pnpm run crud:full -- products --force
-
-# List available tables
-pnpm run crud:list
-
-# Validate generated module
-pnpm run crud:validate -- products
-```
-
-**IMPORTANT**: Always use `--` separator before table name when using pnpm scripts!
-
-### Direct CLI (for advanced usage)
-
-Use direct CLI when you need multiple flags or frontend generation:
+### Common Commands
 
 ```bash
-# Backend with import + events
-./bin/cli.js generate products --with-import --with-events --force
+# Development
+pnpm run dev:api          # Start API server
+pnpm run dev:admin        # Start Admin frontend
+pnpm run build            # Build all
 
-# Frontend (must generate backend first)
-./bin/cli.js generate products --target frontend --force
+# Database
+pnpm run db:migrate       # Run migrations
+pnpm run db:seed          # Seed database
 
-# Frontend with import dialog
-./bin/cli.js generate budgets --target frontend --with-import --force
-
-# Dry run to preview files
-./bin/cli.js generate articles --dry-run
-
-# Custom output directory
-./bin/cli.js generate products --output ./custom/path --force
+# CRUD Generator
+pnpm run crud -- TABLE --force              # Basic CRUD
+pnpm run crud:import -- TABLE --force       # With Excel/CSV import
+pnpm run crud:events -- TABLE --force       # With WebSocket events
+pnpm run crud:full -- TABLE --force         # All features
+pnpm run crud:list                          # List tables
 ```
 
-### Complete Workflows
+See [docs/crud-generator/QUICK_REFERENCE.md](./docs/crud-generator/QUICK_REFERENCE.md)
 
-**1. Basic Feature (Backend + Frontend):**
+### Custom Commands
 
-```bash
-# Step 1: Generate backend
-pnpm run crud -- products --force
-
-# Step 2: Generate frontend
-./bin/cli.js generate products --target frontend --force
-```
-
-**2. Feature with Import:**
-
-```bash
-# Step 1: Backend with import service
-pnpm run crud:import -- budgets --force
-
-# Step 2: Frontend with import dialog
-./bin/cli.js generate budgets --target frontend --with-import --force
-```
-
-**3. Real-Time Feature:**
-
-```bash
-# Step 1: Backend with event emission
-pnpm run crud:events -- notifications --force
-
-# Step 2: Frontend with event handling
-./bin/cli.js generate notifications --target frontend --with-events --force
-```
-
-### Available Flags
-
-| Flag                     | Default    | Description                                                  |
-| ------------------------ | ---------- | ------------------------------------------------------------ |
-| `-t, --target`           | `backend`  | Generation target (`backend` or `frontend`)                  |
-| `-f, --force`            | `false`    | Overwrite existing files without prompt                      |
-| `-d, --dry-run`          | `false`    | Preview files without creating                               |
-| `--package`              | `standard` | Package: `standard`, `enterprise`, `full`                    |
-| `-e, --with-events`      | `false`    | Include WebSocket events                                     |
-| `--with-import`          | `false`    | Include bulk import (Excel/CSV)                              |
-| `-a, --app`              | `api`      | Target app: `api`, `web`, `admin`                            |
-| `--flat`                 | `false`    | Use flat structure (not domain)                              |
-| `--no-register`          | `false`    | Skip auto-registration                                       |
-| `--include-audit-fields` | `false`    | Include audit fields in forms (created_at, updated_at, etc.) |
-
-### Table Name Conventions
-
-Use database table names in `snake_case`. They're automatically converted:
-
-| Database Table  | Module Folder    | TypeScript Types |
-| --------------- | ---------------- | ---------------- |
-| `test_products` | `test-products/` | `TestProducts`   |
-| `user_profiles` | `user-profiles/` | `UserProfiles`   |
-| `blog_posts`    | `blog-posts/`    | `BlogPosts`      |
-
-```bash
-# Input: database table name (snake_case)
-pnpm run crud -- test_products --force
-
-# Generates:
-# - Folder: apps/api/src/modules/test-products/
-# - Types: TestProducts, CreateTestProducts, UpdateTestProducts
-# - Routes: /api/test-products
-```
-
-### Common Mistakes
-
-```bash
-# ❌ WRONG - Missing double dash
-pnpm run crud products --force
-
-# ✅ CORRECT - With double dash
-pnpm run crud -- products --force
-
-# ❌ WRONG - Non-existent command
-pnpm aegisx-crud products
-
-# ✅ CORRECT - Use pnpm run crud
-pnpm run crud -- products --force
-
-# ❌ WRONG - Both targets at once
-./bin/cli.js generate products --target backend --target frontend
-
-# ✅ CORRECT - Generate separately
-pnpm run crud -- products --force
-./bin/cli.js generate products --target frontend --force
-```
-
-### Before Generating
-
-```bash
-# 1. Check available tables
-pnpm run crud:list
-
-# 2. Run migrations if needed
-pnpm run db:migrate
-
-# 3. Preview with dry run
-pnpm run crud -- TABLE_NAME --dry-run
-
-# 4. Generate with force
-pnpm run crud -- TABLE_NAME --force
-```
-
-**Complete Documentation:** See [docs/crud-generator/](./docs/crud-generator/) for detailed guides and troubleshooting
+**doc-sync** - Update PROJECT_STATUS.md and sync with remote after session
 
 ---
 
-## 📚 Quick Navigation
+## Documentation Links
 
-### 🚀 Start Here
+### Start Here
 
-- **[📖 Getting Started](./docs/getting-started/getting-started.md)** - **อ่านก่อนเริ่มงาน! Git workflow & rules**
-- **[🚨 Current Project Status](./PROJECT_STATUS.md)** - **Session recovery & current progress**
-- **[📖 README](./README.md)** - **Project introduction, tech stack, quick start**
+- [Getting Started](./docs/getting-started/getting-started.md) - Git workflow & rules
+- [PROJECT_STATUS.md](./PROJECT_STATUS.md) - Session recovery & current progress
+- [README.md](./README.md) - Tech stack, quick start
 
-### Development Resources
+### Development
 
-- **[📊 Feature Status Dashboard](./docs/features/README.md)** - Central feature development tracking
-- **[📋 Feature Development Standard](./docs/development/feature-development-standard.md)** - **MANDATORY** feature lifecycle
-- **[🤝 Multi-Feature Workflow](./docs/development/multi-feature-workflow.md)** - Parallel development coordination
-- **[📝 Resource Registry](./docs/features/RESOURCE_REGISTRY.md)** - Reserve resources to prevent conflicts
-- **[📊 Feature Tracking System](./docs/development/feature-tracking.md)** - Track development progress
-- **[🚀 Quick Commands](./docs/development/quick-commands.md)** - Claude command reference (/feature, /status, etc.)
-- **[🏗️ Project Setup](./docs/getting-started/project-setup.md)** - Bootstrap guide
-- **[🔄 Development Workflow](./docs/development/development-workflow.md)** - Step-by-step workflows
-- **[🎯 API-First Workflow](./docs/development/api-first-workflow.md)** - Recommended development approach
-- **[📡 API Calling Standard](./docs/development/API_CALLING_STANDARD.md)** - **MANDATORY** How to call APIs correctly
-- **[🏛️ Architecture](./docs/architecture/architecture-overview.md)** - Frontend/Backend patterns
-- **[🧪 Testing Strategy](./docs/testing/testing-strategy.md)** - E2E with Playwright MCP
-- **[🤖 MCP Integration](./docs/development/mcp-integration.md)** - Nx MCP & Playwright MCP usage
-- **[📋 All Commands Reference](./docs/references/claude-commands.md)** - Complete shell command list
+- [Feature Development Standard](./docs/development/feature-development-standard.md) - Feature lifecycle
+- [API Calling Standard](./docs/development/API_CALLING_STANDARD.md) - Correct URL patterns
+- [QA Checklist](./docs/development/qa-checklist.md) - Quality assurance steps
+- [Universal Full-Stack Standard](./docs/development/universal-fullstack-standard.md) - Database-first workflow
+- [Claude Detailed Rules](./docs/development/claude-detailed-rules.md) - Verbose examples
+
+### Infrastructure
+
+- [Multi-Instance Setup](./docs/infrastructure/multi-instance-setup.md) - Parallel development
+- [Git Subtree Guide](./docs/infrastructure/git-subtree-guide.md) - Shared library management
+- [Git Flow & Release](./docs/infrastructure/git-flow-release-guide.md) - Branch strategy
 
 ### CRUD Generator
 
-- **[🤖 CRUD Generator Overview](./docs/crud-generator/)** - Automatic CRUD API generation
-- **[📋 Quick Reference](./docs/crud-generator/QUICK_REFERENCE.md)** - Command reference and examples
-- **[🔄 Git Workflow](./docs/crud-generator/GIT_WORKFLOW.md)** - Version release & NPM publishing
-
-### Infrastructure & DevOps
-
-- **[🏗️ Multi-Instance Setup](./docs/infrastructure/multi-instance-setup.md)** - Parallel development with isolated environments
-- **[🔄 Git Flow & Release](./docs/infrastructure/git-flow-release-guide.md)** - Branch strategy & release process
-- **[📦 Automated Versioning](./docs/infrastructure/automated-versioning-guide.md)** - Conventional commits & changelog
-- **[🐳 Monorepo Docker Guide](./docs/infrastructure/monorepo-docker-guide.md)** - Docker management for monorepo
-- **[🚀 CI/CD Quick Start](./docs/infrastructure/quick-start-cicd.md)** - GitHub Actions setup & usage
-- **[📚 CI/CD Complete Setup](./docs/infrastructure/ci-cd-setup.md)** - Detailed CI/CD documentation
-- **[🚀 Deployment](./docs/infrastructure/deployment.md)** - Docker + CI/CD
+- [CRUD Generator Overview](./docs/crud-generator/) - Automatic API generation
+- [Quick Reference](./docs/crud-generator/QUICK_REFERENCE.md) - Commands & examples
 
 ---
 
-## 📖 For Detailed Information See
-
-### Recent Development Sessions
-
-- **[PROJECT_STATUS.md](./PROJECT_STATUS.md)** - Complete session history and recent updates
-
-### Technology Stack & Quick Start
-
-- **[README.md](./README.md)** - Tech stack, quick start commands, project structure
-
-### CRUD Generator Detailed Guides
-
-- **[CRUD Generator Git Workflow](./docs/crud-generator/GIT_WORKFLOW.md)** - Version release & npm publishing
-- **[CRUD Generator Quick Reference](./docs/crud-generator/QUICK_REFERENCE.md)** - All commands and workflows
-
-### Multi-Instance Development
-
-- **[Multi-Instance Setup](./docs/infrastructure/multi-instance-setup.md)** - Complete guide for parallel development
-
-### Complete Documentation
-
-- **[docs/](./docs/)** - Organized documentation hub with all guides and references
-
----
-
-_For complete documentation, see individual files in the `docs/` directory._
+_For complete documentation, see `docs/` directory._
