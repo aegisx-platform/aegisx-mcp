@@ -4,9 +4,9 @@
 # Usage: ./sync-to-repo.sh [branch]
 
 BRANCH=${1:-main}
-REMOTE_REPO="git@github.com:aegisx-platform/crud-generator.git"
+REMOTE_REPO="git@github.com:aegisx-platform/cli.git"
 
-echo "🔄 Syncing @aegisx/crud-generator to separate repository..."
+echo "🔄 Syncing @aegisx/cli to separate repository..."
 echo "📦 Branch: $BRANCH"
 echo "🌐 Remote: $REMOTE_REPO"
 echo ""
@@ -21,7 +21,7 @@ git subtree push --prefix=libs/aegisx-crud-generator "$REMOTE_REPO" "$BRANCH"
 if [ $? -eq 0 ]; then
   echo ""
   echo "✅ Successfully synced to $REMOTE_REPO"
-  echo "🔗 View at: https://github.com/aegisx-platform/crud-generator"
+  echo "🔗 View at: https://github.com/aegisx-platform/cli"
 else
   echo ""
   echo "❌ Failed to sync"
