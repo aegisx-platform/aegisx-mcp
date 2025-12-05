@@ -7,6 +7,7 @@ import { GETTING_STARTED_ROUTES } from './routes/docs/getting-started.routes';
 import { INTEGRATIONS_ROUTES } from './routes/docs/integrations.routes';
 import { MATERIAL_ROUTES } from './routes/docs/material.routes';
 import { MCP_ROUTES } from './routes/docs/mcp.routes';
+import { CLI_ROUTES } from './routes/docs/cli.routes';
 import {
   ARCHITECTURE_ROUTES,
   PATTERNS_ROUTES,
@@ -110,6 +111,14 @@ export const appRoutes: Route[] = [
     data: {
       title: 'MCP Server',
       description: 'AegisX Model Context Protocol server',
+    },
+  },
+  {
+    path: 'docs/cli',
+    children: CLI_ROUTES,
+    data: {
+      title: 'CLI Reference',
+      description: 'AegisX CRUD Generator CLI documentation',
     },
   },
 

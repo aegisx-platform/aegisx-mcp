@@ -527,6 +527,257 @@ interface CrudPackage {
         </ax-live-preview>
       </section>
 
+      <!-- CLI Reference -->
+      <section class="section">
+        <h2>CLI Command Reference</h2>
+        <p>Complete reference for all AegisX CLI commands</p>
+
+        <mat-tab-group animationDuration="200ms" class="cli-tabs">
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <mat-icon>terminal</mat-icon>
+              <span>generate</span>
+            </ng-template>
+            <div class="tab-content">
+              <div class="command-section">
+                <h4>aegisx generate [table-name] [options]</h4>
+                <p>Generate CRUD modules for backend or frontend</p>
+
+                <div class="options-table">
+                  <div class="option-row header">
+                    <div class="col-option">Option</div>
+                    <div class="col-alias">Alias</div>
+                    <div class="col-default">Default</div>
+                    <div class="col-desc">Description</div>
+                  </div>
+                  @for (opt of generateOptions; track opt.name) {
+                    <div class="option-row">
+                      <div class="col-option">
+                        <code>{{ opt.name }}</code>
+                      </div>
+                      <div class="col-alias">
+                        <code>{{ opt.alias || '-' }}</code>
+                      </div>
+                      <div class="col-default">
+                        <code>{{ opt.default }}</code>
+                      </div>
+                      <div class="col-desc">{{ opt.description }}</div>
+                    </div>
+                  }
+                </div>
+
+                <h5>Examples</h5>
+                <div class="code-block">
+                  <pre><code>{{ generateExamples }}</code></pre>
+                </div>
+              </div>
+            </div>
+          </mat-tab>
+
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <mat-icon>folder_special</mat-icon>
+              <span>domain</span>
+            </ng-template>
+            <div class="tab-content">
+              <div class="command-section">
+                <h4>aegisx generate --domain [path]</h4>
+                <p>Generate modules with domain-based organization</p>
+
+                <div class="domain-structure">
+                  <h5>Before: Flat Structure</h5>
+                  <div class="code-block">
+                    <pre><code>{{ domainBefore }}</code></pre>
+                  </div>
+
+                  <h5>After: Domain Structure</h5>
+                  <div class="code-block">
+                    <pre><code>{{ domainAfter }}</code></pre>
+                  </div>
+                </div>
+
+                <h5>Domain Examples</h5>
+                <div class="code-block">
+                  <pre><code>{{ domainExamples }}</code></pre>
+                </div>
+
+                <h5>API Routes</h5>
+                <div class="options-table">
+                  <div class="option-row header">
+                    <div class="col-domain">Domain Path</div>
+                    <div class="col-route">API Route</div>
+                  </div>
+                  @for (route of domainRoutes; track route.domain) {
+                    <div class="option-row">
+                      <div class="col-domain">
+                        <code>{{ route.domain }}</code>
+                      </div>
+                      <div class="col-route">
+                        <code>{{ route.api }}</code>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+          </mat-tab>
+
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <mat-icon>web</mat-icon>
+              <span>shell</span>
+            </ng-template>
+            <div class="tab-content">
+              <div class="command-section">
+                <h4>aegisx shell [name] [options]</h4>
+                <p>Generate Angular app shell (layout with navigation)</p>
+
+                <div class="options-table">
+                  <div class="option-row header">
+                    <div class="col-option">Option</div>
+                    <div class="col-alias">Alias</div>
+                    <div class="col-default">Default</div>
+                    <div class="col-desc">Description</div>
+                  </div>
+                  @for (opt of shellOptions; track opt.name) {
+                    <div class="option-row">
+                      <div class="col-option">
+                        <code>{{ opt.name }}</code>
+                      </div>
+                      <div class="col-alias">
+                        <code>{{ opt.alias || '-' }}</code>
+                      </div>
+                      <div class="col-default">
+                        <code>{{ opt.default }}</code>
+                      </div>
+                      <div class="col-desc">{{ opt.description }}</div>
+                    </div>
+                  }
+                </div>
+
+                <h5>Shell Types</h5>
+                <div class="shell-types">
+                  @for (shell of shellTypes; track shell.type) {
+                    <mat-card appearance="outlined" class="shell-card">
+                      <div class="shell-header">
+                        <mat-icon>{{ shell.icon }}</mat-icon>
+                        <span>{{ shell.type }}</span>
+                      </div>
+                      <p>{{ shell.description }}</p>
+                      <code>{{ shell.component }}</code>
+                    </mat-card>
+                  }
+                </div>
+
+                <h5>Examples</h5>
+                <div class="code-block">
+                  <pre><code>{{ shellExamples }}</code></pre>
+                </div>
+              </div>
+            </div>
+          </mat-tab>
+
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <mat-icon>list</mat-icon>
+              <span>database</span>
+            </ng-template>
+            <div class="tab-content">
+              <div class="command-section">
+                <h4>Database Commands</h4>
+
+                <div class="command-group">
+                  <h5>aegisx list-tables [options]</h5>
+                  <p>List available database tables</p>
+                  <div class="code-block">
+                    <pre><code>{{ listTablesExamples }}</code></pre>
+                  </div>
+                </div>
+
+                <div class="command-group">
+                  <h5>aegisx validate [module-name]</h5>
+                  <p>Validate generated module structure</p>
+                  <div class="code-block">
+                    <pre><code>{{ validateExamples }}</code></pre>
+                  </div>
+                </div>
+
+                <div class="command-group">
+                  <h5>Schema Options</h5>
+                  <p>Read from specific PostgreSQL schema</p>
+                  <div class="code-block">
+                    <pre><code>{{ schemaExamples }}</code></pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </mat-tab>
+
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <mat-icon>key</mat-icon>
+              <span>license</span>
+            </ng-template>
+            <div class="tab-content">
+              <div class="command-section">
+                <h4>License Commands</h4>
+
+                <div class="license-commands">
+                  <div class="code-block">
+                    <pre><code>{{ licenseCommands }}</code></pre>
+                  </div>
+                </div>
+
+                <h5>License Key Format</h5>
+                <div class="code-block">
+                  <pre><code>AEGISX-[TIER]-[SERIAL]-[CHECKSUM]</code></pre>
+                </div>
+
+                <div class="options-table">
+                  <div class="option-row header">
+                    <div class="col-tier">Tier</div>
+                    <div class="col-example">Example</div>
+                  </div>
+                  @for (tier of licenseTiers; track tier.name) {
+                    <div class="option-row">
+                      <div class="col-tier">{{ tier.name }}</div>
+                      <div class="col-example">
+                        <code>{{ tier.example }}</code>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+          </mat-tab>
+
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <mat-icon>content_copy</mat-icon>
+              <span>pnpm scripts</span>
+            </ng-template>
+            <div class="tab-content">
+              <div class="command-section">
+                <h4>pnpm Scripts (Monorepo)</h4>
+                <p>Shortcut scripts for common operations</p>
+
+                <div class="code-block">
+                  <pre><code>{{ pnpmScripts }}</code></pre>
+                </div>
+
+                <div class="warning-box">
+                  <mat-icon>warning</mat-icon>
+                  <span
+                    ><strong>Important:</strong> Always use
+                    <code>--</code> separator before table name!</span
+                  >
+                </div>
+              </div>
+            </div>
+          </mat-tab>
+        </mat-tab-group>
+      </section>
+
       <!-- Quick Links -->
       <section class="section">
         <h2>Quick Links</h2>
@@ -544,6 +795,11 @@ interface CrudPackage {
           <a routerLink="/docs/mcp/patterns" class="quick-link">
             <mat-icon>pattern</mat-icon>
             <span>MCP Patterns</span>
+            <mat-icon class="arrow">arrow_forward</mat-icon>
+          </a>
+          <a routerLink="/tools/crud-generator" class="quick-link">
+            <mat-icon>terminal</mat-icon>
+            <span>CRUD Generator Tool</span>
             <mat-icon class="arrow">arrow_forward</mat-icon>
           </a>
         </div>
@@ -1042,6 +1298,237 @@ interface CrudPackage {
           color: var(--ax-primary-default);
         }
       }
+
+      /* CLI Reference Styles */
+      .cli-tabs {
+        background: var(--ax-background-default);
+        border: 1px solid var(--ax-border-muted);
+        border-radius: var(--ax-radius-lg);
+        overflow: hidden;
+      }
+
+      .options-table {
+        background: var(--ax-background-default);
+        border: 1px solid var(--ax-border-muted);
+        border-radius: var(--ax-radius-lg);
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+
+        .option-row {
+          display: grid;
+          grid-template-columns: 140px 80px 100px 1fr;
+          gap: 1rem;
+          padding: 0.75rem 1rem;
+          border-bottom: 1px solid var(--ax-border-muted);
+          align-items: center;
+
+          &:last-child {
+            border-bottom: none;
+          }
+
+          &.header {
+            background: var(--ax-background-subtle);
+            font-size: var(--ax-text-xs);
+            font-weight: var(--ax-font-weight-semibold);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--ax-text-muted);
+          }
+
+          &:not(.header):hover {
+            background: var(--ax-background-subtle);
+          }
+
+          .col-option code,
+          .col-alias code,
+          .col-default code {
+            font-family: var(--ax-font-mono);
+            font-size: var(--ax-text-xs);
+            color: var(--ax-text-heading);
+          }
+
+          .col-desc {
+            font-size: var(--ax-text-sm);
+            color: var(--ax-text-secondary);
+          }
+
+          .col-domain,
+          .col-route,
+          .col-tier,
+          .col-example {
+            code {
+              font-family: var(--ax-font-mono);
+              font-size: var(--ax-text-xs);
+              color: var(--ax-text-heading);
+            }
+          }
+        }
+      }
+
+      .command-section {
+        h4 {
+          font-size: var(--ax-text-lg);
+          font-weight: var(--ax-font-weight-semibold);
+          color: var(--ax-text-heading);
+          margin-bottom: 0.5rem;
+        }
+
+        > p {
+          color: var(--ax-text-secondary);
+          margin-bottom: 1.5rem;
+        }
+
+        h5 {
+          font-size: var(--ax-text-sm);
+          font-weight: var(--ax-font-weight-semibold);
+          color: var(--ax-text-heading);
+          margin: 1.5rem 0 0.75rem;
+        }
+      }
+
+      .domain-structure {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+
+        h5 {
+          font-size: var(--ax-text-sm);
+          font-weight: var(--ax-font-weight-semibold);
+          color: var(--ax-text-heading);
+          margin-bottom: 0.75rem;
+        }
+
+        .code-block {
+          margin-bottom: 0;
+        }
+      }
+
+      .shell-types {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .shell-card {
+        padding: 1rem;
+        background: var(--ax-background-default);
+
+        .shell-header {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin-bottom: 0.5rem;
+
+          mat-icon {
+            color: var(--ax-primary-default);
+          }
+
+          span {
+            font-weight: var(--ax-font-weight-semibold);
+            color: var(--ax-text-heading);
+          }
+        }
+
+        p {
+          font-size: var(--ax-text-sm);
+          color: var(--ax-text-secondary);
+          margin-bottom: 0.5rem;
+        }
+
+        code {
+          font-family: var(--ax-font-mono);
+          font-size: var(--ax-text-xs);
+          color: var(--ax-primary-default);
+        }
+      }
+
+      .command-group {
+        margin-bottom: 2rem;
+
+        h5 {
+          font-size: var(--ax-text-base);
+          font-weight: var(--ax-font-weight-semibold);
+          color: var(--ax-text-heading);
+          margin-bottom: 0.5rem;
+        }
+
+        > p {
+          color: var(--ax-text-secondary);
+          font-size: var(--ax-text-sm);
+          margin-bottom: 1rem;
+        }
+      }
+
+      .license-commands {
+        margin-bottom: 1.5rem;
+      }
+
+      .warning-box {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: var(--ax-warning-faint);
+        border: 1px solid var(--ax-warning-muted);
+        border-radius: var(--ax-radius-md);
+        margin-top: 1.5rem;
+
+        mat-icon {
+          color: var(--ax-warning-default);
+          flex-shrink: 0;
+        }
+
+        span {
+          font-size: var(--ax-text-sm);
+          color: var(--ax-text-heading);
+
+          code {
+            font-family: var(--ax-font-mono);
+            font-size: var(--ax-text-xs);
+            color: var(--ax-warning-default);
+            background: var(--ax-warning-faint);
+            padding: 0.125rem 0.375rem;
+            border-radius: 4px;
+          }
+        }
+      }
+
+      @media (max-width: 768px) {
+        .options-table .option-row {
+          grid-template-columns: 1fr;
+          gap: 0.5rem;
+
+          &.header {
+            display: none;
+          }
+
+          .col-option::before {
+            content: 'Option: ';
+            color: var(--ax-text-muted);
+          }
+
+          .col-alias::before {
+            content: 'Alias: ';
+            color: var(--ax-text-muted);
+          }
+
+          .col-default::before {
+            content: 'Default: ';
+            color: var(--ax-text-muted);
+          }
+
+          .col-desc::before {
+            content: 'Description: ';
+            color: var(--ax-text-muted);
+          }
+        }
+
+        .domain-structure {
+          grid-template-columns: 1fr;
+        }
+      }
     `,
   ],
 })
@@ -1184,10 +1671,10 @@ pnpm run crud:import -- products --force
 pnpm run crud:full -- products --force`;
 
   frontendCode = `# Generate frontend components
-npx @aegisx/crud-generator generate products --target frontend --force
+npx @aegisx/cli generate products --target frontend --force
 
 # With import dialog
-npx @aegisx/crud-generator generate products --target frontend --with-import --force`;
+npx @aegisx/cli generate products --target frontend --with-import --force`;
 
   testCode = `# Build project
 pnpm run build
@@ -1221,7 +1708,7 @@ pnpm run crud:import -- products --force
 
 ## After generating, remember to:
 1. Test the API endpoints
-2. Generate frontend: \`npx @aegisx/crud-generator generate products --target frontend --force\``;
+2. Generate frontend: \`npx @aegisx/cli generate products --target frontend --force\``;
 
   workflowExample = `aegisx_crud_workflow tableName="products" withImport=true`;
 
@@ -1244,7 +1731,7 @@ pnpm run crud:import -- products --force
 
 ## Step 4: Generate Frontend
 \`\`\`bash
-npx @aegisx/crud-generator generate products --target frontend --with-import --force
+npx @aegisx/cli generate products --target frontend --with-import --force
 \`\`\`
 
 ## Step 5: Verify
@@ -1307,4 +1794,269 @@ cat .env.local | grep DATABASE
 
 ## Prevention:
 Always run \`pnpm run crud:list\` to see available tables before generating.`;
+
+  // CLI Reference Data
+  generateOptions = [
+    {
+      name: '--target',
+      alias: '-t',
+      default: 'backend',
+      description: 'Generation target (backend or frontend)',
+    },
+    {
+      name: '--force',
+      alias: '-f',
+      default: 'false',
+      description: 'Overwrite existing files without prompt',
+    },
+    {
+      name: '--dry-run',
+      alias: '-d',
+      default: 'false',
+      description: 'Preview files without creating',
+    },
+    {
+      name: '--package',
+      alias: '',
+      default: 'standard',
+      description: 'Package: standard, enterprise, full',
+    },
+    {
+      name: '--with-events',
+      alias: '-e',
+      default: 'false',
+      description: 'Include WebSocket events',
+    },
+    {
+      name: '--with-import',
+      alias: '',
+      default: 'false',
+      description: 'Include bulk import (Excel/CSV)',
+    },
+    {
+      name: '--domain',
+      alias: '',
+      default: '',
+      description: 'Domain path for organization',
+    },
+    {
+      name: '--schema',
+      alias: '',
+      default: 'public',
+      description: 'PostgreSQL schema to read from',
+    },
+    {
+      name: '--app',
+      alias: '-a',
+      default: 'api',
+      description: 'Target app: api, web, admin',
+    },
+    {
+      name: '--flat',
+      alias: '',
+      default: 'false',
+      description: 'Use flat structure (no domain)',
+    },
+    {
+      name: '--no-register',
+      alias: '',
+      default: 'false',
+      description: 'Skip auto-registration',
+    },
+    {
+      name: '--include-audit-fields',
+      alias: '',
+      default: 'false',
+      description: 'Include audit fields in forms',
+    },
+  ];
+
+  generateExamples = `# Basic CRUD generation
+aegisx generate products --force
+
+# Frontend generation
+aegisx generate products --target frontend --force
+
+# With import functionality
+aegisx generate products --with-import --force
+
+# With WebSocket events
+aegisx generate products --with-events --force
+
+# Full package (all features)
+aegisx generate products --with-import --with-events --force
+
+# Domain-based organization
+aegisx generate drugs --domain inventory/master-data --force
+
+# Read from specific PostgreSQL schema
+aegisx generate products --schema inventory --force
+
+# Dry run (preview only)
+aegisx generate products --dry-run`;
+
+  domainBefore = `modules/
+├── products/
+├── categories/
+├── brands/
+├── suppliers/
+└── warehouses/`;
+
+  domainAfter = `modules/
+└── inventory/
+    └── master-data/
+        ├── products/
+        ├── categories/
+        ├── brands/
+        ├── suppliers/
+        └── warehouses/`;
+
+  domainExamples = `# Single domain level
+aegisx generate users --domain admin --force
+# Result: modules/admin/users/
+# Route: /api/admin/users
+
+# Two level domain
+aegisx generate drugs --domain inventory/master-data --force
+# Result: modules/inventory/master-data/drugs/
+# Route: /api/inventory/master-data/drugs
+
+# Three level domain
+aegisx generate audit-logs --domain system/security/logs --force
+# Result: modules/system/security/logs/audit-logs/
+# Route: /api/system/security/logs/audit-logs`;
+
+  domainRoutes = [
+    { domain: 'admin', api: '/api/admin/{table}' },
+    {
+      domain: 'inventory/master-data',
+      api: '/api/inventory/master-data/{table}',
+    },
+    { domain: 'system/security', api: '/api/system/security/{table}' },
+    { domain: 'hr/employees', api: '/api/hr/employees/{table}' },
+  ];
+
+  shellOptions = [
+    {
+      name: '--type',
+      alias: '-t',
+      default: 'enterprise',
+      description: 'Shell type: enterprise, simple, multi-app',
+    },
+    {
+      name: '--app',
+      alias: '-a',
+      default: 'admin',
+      description: 'Target Angular app',
+    },
+    {
+      name: '--force',
+      alias: '-f',
+      default: 'false',
+      description: 'Overwrite existing files',
+    },
+    {
+      name: '--dry-run',
+      alias: '-d',
+      default: 'false',
+      description: 'Preview files without creating',
+    },
+  ];
+
+  shellTypes = [
+    {
+      type: 'enterprise',
+      icon: 'business',
+      description: 'Full-featured shell with sidebar, header, breadcrumbs',
+      component: 'EnterpriseShellComponent',
+    },
+    {
+      type: 'simple',
+      icon: 'web',
+      description: 'Minimal shell with header only',
+      component: 'SimpleShellComponent',
+    },
+    {
+      type: 'multi-app',
+      icon: 'apps',
+      description: 'App switcher for multiple applications',
+      component: 'MultiAppShellComponent',
+    },
+  ];
+
+  shellExamples = `# Enterprise shell (default)
+aegisx shell my-app --force
+
+# Simple shell
+aegisx shell my-app --type simple --force
+
+# Multi-app shell
+aegisx shell my-app --type multi-app --force
+
+# Specify target app
+aegisx shell my-app --app web --force`;
+
+  listTablesExamples = `# List all tables in public schema
+aegisx list-tables
+
+# List tables in specific schema
+aegisx list-tables --schema inventory
+
+# Using pnpm script
+pnpm run crud:list`;
+
+  validateExamples = `# Validate generated module
+aegisx validate products
+
+# Validate with verbose output
+aegisx validate products --verbose
+
+# Using pnpm script
+pnpm run crud:validate -- products`;
+
+  schemaExamples = `# Generate from inventory schema
+aegisx generate drugs --schema inventory --force
+
+# List tables in inventory schema
+aegisx list-tables --schema inventory
+
+# Combined with domain
+aegisx generate drugs --schema inventory --domain master-data --force`;
+
+  licenseCommands = `# Start 14-day trial
+aegisx trial
+
+# Activate with license key
+aegisx activate AEGISX-PRO-XXXXXXXX-XX
+
+# Check license status
+aegisx license
+
+# Deactivate current license
+aegisx deactivate`;
+
+  licenseTiers = [
+    { name: 'Trial', example: 'AEGISX-TRIAL-XXXXXXXX-XX' },
+    { name: 'Professional', example: 'AEGISX-PRO-XXXXXXXX-XX' },
+    { name: 'Team', example: 'AEGISX-TEAM-XXXXXXXX-XX' },
+    { name: 'Enterprise', example: 'AEGISX-ENT-XXXXXXXX-XX' },
+  ];
+
+  pnpmScripts = `# Basic CRUD (standard package)
+pnpm run crud -- TABLE_NAME --force
+
+# With import functionality (Excel/CSV)
+pnpm run crud:import -- TABLE_NAME --force
+
+# With WebSocket events (real-time updates)
+pnpm run crud:events -- TABLE_NAME --force
+
+# Full package (all features)
+pnpm run crud:full -- TABLE_NAME --force
+
+# List available tables
+pnpm run crud:list
+
+# Validate generated module
+pnpm run crud:validate -- MODULE_NAME`;
 }

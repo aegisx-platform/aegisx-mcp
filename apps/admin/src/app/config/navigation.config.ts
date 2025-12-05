@@ -107,6 +107,13 @@ const FOUNDATIONS_ITEMS: AxNavigationItem[] = [
     icon: 'palette',
     link: '/docs/foundations/theming',
   },
+  {
+    id: 'docs-system-guide',
+    title: 'Docs System Guide',
+    type: 'item',
+    icon: 'menu_book',
+    link: '/docs/foundations/docs-system-guide',
+  },
 ];
 
 // ============================================================
@@ -998,6 +1005,20 @@ const MCP_ITEMS: AxNavigationItem[] = [
 ];
 
 // ============================================================
+// CLI REFERENCE SECTION
+// ============================================================
+
+const CLI_ITEMS: AxNavigationItem[] = [
+  {
+    id: 'cli-reference',
+    title: 'CLI Reference',
+    type: 'item',
+    icon: 'terminal',
+    link: '/docs/cli/reference',
+  },
+];
+
+// ============================================================
 // TOOLS SECTION
 // ============================================================
 
@@ -1009,6 +1030,14 @@ const TOOLS_ITEMS: AxNavigationItem[] = [
     icon: 'brush',
     link: '/tools/theme-builder',
     badge: { content: 'New', type: 'info' },
+  },
+  {
+    id: 'crud-generator-tool',
+    title: 'CRUD Generator',
+    type: 'item',
+    icon: 'terminal',
+    link: '/tools/crud-generator',
+    badge: { content: 'PRO', type: 'warning' },
   },
 ];
 
@@ -1252,6 +1281,14 @@ export const COMPACT_NAVIGATION: AxNavigationItem[] = [
     children: MCP_ITEMS,
   },
   {
+    id: 'cli',
+    title: 'CLI Reference',
+    type: 'collapsible',
+    icon: 'terminal',
+    badge: { content: 'PRO', type: 'warning' },
+    children: CLI_ITEMS,
+  },
+  {
     id: 'examples',
     title: 'Examples',
     type: 'collapsible',
@@ -1301,6 +1338,13 @@ export const COMPACT_NAVIGATION: AxNavigationItem[] = [
         children: PAGE_EXAMPLES_AUTH_ITEMS,
       },
     ],
+  },
+  {
+    id: 'tools',
+    title: 'Tools',
+    type: 'collapsible',
+    icon: 'build',
+    children: TOOLS_ITEMS,
   },
 ];
 
@@ -1503,6 +1547,16 @@ export const DOCS_NAVIGATION: AxNavigationItem[] = [
     title: 'MCP Server',
     badge: { content: 'New', type: 'info' },
     children: MCP_ITEMS.map((item) => ({
+      id: item.id,
+      title: item.title,
+      link: item.link,
+    })),
+  },
+  {
+    id: 'cli',
+    title: 'CLI Reference',
+    badge: { content: 'PRO', type: 'warning' },
+    children: CLI_ITEMS.map((item) => ({
       id: item.id,
       title: item.title,
       link: item.link,
