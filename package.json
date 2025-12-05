@@ -91,6 +91,10 @@
     "crud:import": "./bin/cli.js generate --with-import",
     "crud:list": "./bin/cli.js list-tables",
     "crud:validate": "./bin/cli.js validate",
+    "db:migrate:inventory": "node --loader ts-node/esm ./node_modules/knex/bin/cli.js migrate:latest --knexfile knexfile-inventory.ts",
+    "db:migrate:inventory:rollback": "node --loader ts-node/esm ./node_modules/knex/bin/cli.js migrate:rollback --knexfile knexfile-inventory.ts",
+    "db:migrate:inventory:status": "node --loader ts-node/esm ./node_modules/knex/bin/cli.js migrate:status --knexfile knexfile-inventory.ts",
+    "db:seed:inventory": "node --loader ts-node/esm ./node_modules/knex/bin/cli.js seed:run --knexfile knexfile-inventory.ts",
     "docs:dev": "vitepress dev docs-site",
     "docs:build": "vitepress build docs-site",
     "docs:preview": "vitepress preview docs-site"
