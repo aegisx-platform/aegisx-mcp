@@ -41,6 +41,61 @@ Available scripts in `package.json`:
 | `pnpm run crud:full -- TABLE`      | + `--package full`      | Full feature package         |
 | `pnpm run crud:list`               | `list-tables`           | List database tables         |
 | `pnpm run crud:validate -- MODULE` | `validate`              | Validate module              |
+| `pnpm run domain:init -- DOMAIN`   | `domain:init`           | Initialize new domain        |
+| `pnpm run domain:list`             | `domain:list`           | List initialized domains     |
+
+---
+
+## 🏢 Domain Management (Enterprise Scale)
+
+For large-scale systems with multiple business domains (inventory, HR, finance, etc.), use domain isolation with PostgreSQL schemas.
+
+### Initialize a Domain
+
+```bash
+# Initialize new domain (creates schema, knexfile, migrations folder)
+pnpm run domain:init -- inventory
+./bin/cli.js domain:init inventory --dry-run  # Preview
+
+# After init, run the domain migration
+npx knex migrate:latest --knexfile knexfile-inventory.ts
+```
+
+### List Domains
+
+```bash
+pnpm run domain:list
+```
+
+### Generate CRUD for a Domain
+
+```bash
+# Generate backend with domain
+pnpm run crud -- drugs --domain inventory/master-data --schema inventory --force
+
+# Generate frontend with domain
+./bin/cli.js generate drugs --target frontend --domain inventory/master-data --force
+```
+
+### Domain Structure
+
+When using domains, files are organized:
+
+```
+apps/api/src/
+├─ modules/
+│  └─ inventory/           # Domain folder
+│     ├─ index.ts          # Domain plugin registration
+│     ├─ master-data/      # Subdomain
+│     │  └─ drugs/         # CRUD module
+│     │     ├─ drugs.routes.ts
+│     │     ├─ drugs.controller.ts
+│     │     └─ ...
+│     └─ transactions/
+│        └─ drug-returns/
+└─ database/
+   └─ migrations-inventory/ # Domain-specific migrations
+```
 
 ---
 
@@ -80,12 +135,14 @@ Use direct CLI for advanced features or multiple flags:
 
 ### Target Selection
 
-| Flag           | Options               | Default     | Description                   |
-| -------------- | --------------------- | ----------- | ----------------------------- |
-| `-t, --target` | `backend`, `frontend` | `backend`   | What to generate              |
-| `-a, --app`    | `api`, `web`, `admin` | `api`/`web` | Target app (backend/frontend) |
-| `-s, --shell`  | `system`, `inventory` | (none)      | Target shell for routes       |
-| `-o, --output` | `<dir>`               | Auto        | Custom output                 |
+| Flag           | Options               | Default     | Description                                 |
+| -------------- | --------------------- | ----------- | ------------------------------------------- |
+| `-t, --target` | `backend`, `frontend` | `backend`   | What to generate                            |
+| `-a, --app`    | `api`, `web`, `admin` | `api`/`web` | Target app (backend/frontend)               |
+| `-s, --shell`  | `system`, `inventory` | (none)      | Target shell for routes                     |
+| `-o, --output` | `<dir>`               | Auto        | Custom output                               |
+| `--domain`     | `<path>`              | (none)      | Domain path (e.g., `inventory/master-data`) |
+| `--schema`     | `<name>`              | `public`    | PostgreSQL schema for table                 |
 
 **Important**:
 

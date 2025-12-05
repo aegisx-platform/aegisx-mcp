@@ -121,6 +121,13 @@ pnpm run crud:import -- TABLE --force       # With Excel/CSV import
 pnpm run crud:events -- TABLE --force       # With WebSocket events
 pnpm run crud:full -- TABLE --force         # All features
 pnpm run crud:list                          # List tables
+
+# Domain Management (for enterprise-scale multi-domain systems)
+pnpm run domain:init -- DOMAIN              # Initialize domain (inventory, hr, etc.)
+pnpm run domain:list                        # List initialized domains
+
+# Generate CRUD for specific domain/schema
+pnpm run crud -- TABLE --domain inventory/master-data --schema inventory --force
 ```
 
 See [docs/crud-generator/QUICK_REFERENCE.md](./docs/crud-generator/QUICK_REFERENCE.md)
