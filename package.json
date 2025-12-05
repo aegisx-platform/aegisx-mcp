@@ -95,6 +95,8 @@
     "db:migrate:inventory:rollback": "node --loader ts-node/esm ./node_modules/knex/bin/cli.js migrate:rollback --knexfile knexfile-inventory.ts",
     "db:migrate:inventory:status": "node --loader ts-node/esm ./node_modules/knex/bin/cli.js migrate:status --knexfile knexfile-inventory.ts",
     "db:seed:inventory": "node --loader ts-node/esm ./node_modules/knex/bin/cli.js seed:run --knexfile knexfile-inventory.ts",
+    "inventory:setup": "pnpm run db:migrate:inventory && pnpm run db:seed:inventory",
+    "inventory:import-tmt": "node --loader ts-node/esm apps/api/src/database/scripts/inventory-import-tmt.ts",
     "docs:dev": "vitepress dev docs-site",
     "docs:build": "vitepress build docs-site",
     "docs:preview": "vitepress preview docs-site"
@@ -152,6 +154,7 @@
     "chalk": "^4.1.2",
     "chart.js": "^4.5.1",
     "commander": "^12.1.0",
+    "csv-parse": "^6.1.0",
     "csv-parser": "^3.2.0",
     "dotenv-expand": "^12.0.3",
     "eventemitter2": "6.4.9",
