@@ -26,6 +26,9 @@ cat > "$CONFIG_FILE" << EOF
 }
 EOF
 
+# Set permissions so nginx can read it
+chmod 644 "$CONFIG_FILE"
+
 echo "Runtime config generated:"
 cat "$CONFIG_FILE"
 echo ""
