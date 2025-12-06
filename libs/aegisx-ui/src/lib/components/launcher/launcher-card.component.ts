@@ -56,15 +56,17 @@ import {
           "
         >
           <!-- Pin Button -->
-          <button
-            mat-icon-button
-            class="launcher-card__action-btn"
-            [class.launcher-card__action-btn--active]="isPinned()"
-            (click)="onPinClick($event)"
-            [matTooltip]="isPinned() ? 'Unpin' : 'Pin to top'"
-          >
-            <mat-icon>{{ isPinned() ? 'push_pin' : 'push_pin' }}</mat-icon>
-          </button>
+          @if (showPinButton()) {
+            <button
+              mat-icon-button
+              class="launcher-card__action-btn"
+              [class.launcher-card__action-btn--active]="isPinned()"
+              (click)="onPinClick($event)"
+              [matTooltip]="isPinned() ? 'Unpin' : 'Pin to top'"
+            >
+              <mat-icon>{{ isPinned() ? 'push_pin' : 'push_pin' }}</mat-icon>
+            </button>
+          }
 
           <!-- Favorite Button -->
           <button
@@ -845,6 +847,8 @@ export class AxLauncherCardComponent {
   isFavorite = input<boolean>(false);
   /** Whether app is pinned */
   isPinned = input<boolean>(false);
+  /** Whether to show pin button */
+  showPinButton = input<boolean>(true);
   /** Whether edit mode is active (for draggable grid) */
   isEditMode = input<boolean>(false);
 

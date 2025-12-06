@@ -246,6 +246,9 @@ export interface LauncherConfig {
   /** Enable favorites (stored in localStorage) */
   enableFavorites?: boolean;
 
+  /** Enable pinned apps */
+  enablePinned?: boolean;
+
   /** Enable recent apps tracking */
   enableRecent?: boolean;
 

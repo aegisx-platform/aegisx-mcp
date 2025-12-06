@@ -58,6 +58,7 @@ const DEFAULT_CONFIG: LauncherConfig = {
   emptyMessage: 'No applications available',
   noResultsMessage: 'No applications found',
   enableFavorites: true,
+  enablePinned: true,
   enableRecent: true,
   maxRecentApps: 5,
   storageKeyPrefix: 'ax-launcher',
@@ -181,7 +182,7 @@ const DEFAULT_CONFIG: LauncherConfig = {
           animationDuration="200ms"
         >
           <!-- Pinned Tab -->
-          @if (pinnedApps().length > 0) {
+          @if (mergedConfig().enablePinned && pinnedApps().length > 0) {
             <mat-tab>
               <ng-template mat-tab-label>
                 <mat-icon class="tab-icon tab-icon--pinned">push_pin</mat-icon>
@@ -272,6 +273,7 @@ const DEFAULT_CONFIG: LauncherConfig = {
                       [isAdmin]="userContext().isAdmin || false"
                       [isFavorite]="isFavorite(app.id)"
                       [isPinned]="true"
+                      [showPinButton]="mergedConfig().enablePinned ?? true"
                       [isEditMode]="isEditMode()"
                       (cardClick)="onAppClick($event)"
                       (menuAction)="onMenuAction($event)"
@@ -293,6 +295,7 @@ const DEFAULT_CONFIG: LauncherConfig = {
                     [isAdmin]="userContext().isAdmin || false"
                     [isFavorite]="isFavorite(app.id)"
                     [isPinned]="true"
+                    [showPinButton]="mergedConfig().enablePinned ?? true"
                     (cardClick)="onAppClick($event)"
                     (menuAction)="onMenuAction($event)"
                     (favoriteToggle)="toggleFavorite($event)"
@@ -325,6 +328,7 @@ const DEFAULT_CONFIG: LauncherConfig = {
                       [isAdmin]="userContext().isAdmin || false"
                       [isFavorite]="isFavorite(app.id)"
                       [isPinned]="isPinned(app.id)"
+                      [showPinButton]="mergedConfig().enablePinned ?? true"
                       [isEditMode]="isEditMode()"
                       (cardClick)="onAppClick($event)"
                       (menuAction)="onMenuAction($event)"
@@ -346,6 +350,7 @@ const DEFAULT_CONFIG: LauncherConfig = {
                     [isAdmin]="userContext().isAdmin || false"
                     [isFavorite]="isFavorite(app.id)"
                     [isPinned]="isPinned(app.id)"
+                    [showPinButton]="mergedConfig().enablePinned ?? true"
                     (cardClick)="onAppClick($event)"
                     (menuAction)="onMenuAction($event)"
                     (favoriteToggle)="toggleFavorite($event)"
@@ -382,6 +387,7 @@ const DEFAULT_CONFIG: LauncherConfig = {
                       [isAdmin]="userContext().isAdmin || false"
                       [isFavorite]="isFavorite(app.id)"
                       [isPinned]="isPinned(app.id)"
+                      [showPinButton]="mergedConfig().enablePinned ?? true"
                       [isEditMode]="isEditMode()"
                       (cardClick)="onAppClick($event)"
                       (menuAction)="onMenuAction($event)"
@@ -400,6 +406,7 @@ const DEFAULT_CONFIG: LauncherConfig = {
                     [isAdmin]="userContext().isAdmin || false"
                     [isFavorite]="isFavorite(app.id)"
                     [isPinned]="isPinned(app.id)"
+                    [showPinButton]="mergedConfig().enablePinned ?? true"
                     (cardClick)="onAppClick($event)"
                     (menuAction)="onMenuAction($event)"
                     (favoriteToggle)="toggleFavorite($event)"
@@ -459,6 +466,7 @@ const DEFAULT_CONFIG: LauncherConfig = {
                   [isAdmin]="userContext().isAdmin || false"
                   [isFavorite]="isFavorite(app.id)"
                   [isPinned]="isPinned(app.id)"
+                  [showPinButton]="mergedConfig().enablePinned ?? true"
                   (cardClick)="onAppClick($event)"
                   (menuAction)="onMenuAction($event)"
                   (favoriteToggle)="toggleFavorite($event)"
