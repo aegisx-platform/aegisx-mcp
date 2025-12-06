@@ -1,0 +1,199 @@
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+
+/**
+ * Dashboard Component
+ *
+ * Default landing page for the {{Title}} app.
+ * Displays overview and key metrics.
+ */
+@Component({
+  selector: 'app-dashboard',
+  standalone: true,
+  imports: [CommonModule, MatCardModule, MatIconModule],
+  template: `
+    <div class="dashboard-container">
+      <div class="dashboard-header">
+        <h1>{{Title}} Dashboard</h1>
+        <p class="subtitle">Welcome to the {{title}} management system</p>
+      </div>
+
+      <div class="dashboard-grid">
+        <mat-card class="stat-card">
+          <mat-card-content>
+            <div class="stat-icon">
+              <mat-icon>inventory_2</mat-icon>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value">0</span>
+              <span class="stat-label">Total Records</span>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stat-card">
+          <mat-card-content>
+            <div class="stat-icon success">
+              <mat-icon>check_circle</mat-icon>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value">0</span>
+              <span class="stat-label">Active</span>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stat-card">
+          <mat-card-content>
+            <div class="stat-icon warning">
+              <mat-icon>pending</mat-icon>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value">0</span>
+              <span class="stat-label">Pending</span>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stat-card">
+          <mat-card-content>
+            <div class="stat-icon info">
+              <mat-icon>trending_up</mat-icon>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value">0%</span>
+              <span class="stat-label">Growth</span>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <mat-card class="welcome-card">
+        <mat-card-content>
+          <h2>Getting Started</h2>
+          <p>
+            Use the <strong>Master Data</strong> section to manage your data modules.
+            CRUD modules can be generated using the CLI:
+          </p>
+          <code>./bin/cli.js generate TABLE_NAME --target frontend --shell {{kebabCase}}</code>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  `,
+  styles: [
+    `
+      .dashboard-container {
+        padding: var(--ax-spacing-lg, 24px);
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .dashboard-header {
+        margin-bottom: var(--ax-spacing-xl, 32px);
+      }
+
+      .dashboard-header h1 {
+        font-size: var(--ax-text-2xl, 1.5rem);
+        font-weight: var(--ax-font-semibold, 600);
+        color: var(--ax-text-default);
+        margin: 0 0 var(--ax-spacing-xs, 4px) 0;
+      }
+
+      .dashboard-header .subtitle {
+        font-size: var(--ax-text-sm, 0.875rem);
+        color: var(--ax-text-subtle);
+        margin: 0;
+      }
+
+      .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--ax-spacing-md, 16px);
+        margin-bottom: var(--ax-spacing-xl, 32px);
+      }
+
+      .stat-card mat-card-content {
+        display: flex;
+        align-items: center;
+        gap: var(--ax-spacing-md, 16px);
+        padding: var(--ax-spacing-md, 16px);
+      }
+
+      .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: var(--ax-primary-50);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .stat-icon mat-icon {
+        color: var(--ax-primary-600);
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+      }
+
+      .stat-icon.success {
+        background: var(--ax-success-50, #ecfdf5);
+      }
+      .stat-icon.success mat-icon {
+        color: var(--ax-success-600, #059669);
+      }
+
+      .stat-icon.warning {
+        background: var(--ax-warning-50, #fffbeb);
+      }
+      .stat-icon.warning mat-icon {
+        color: var(--ax-warning-600, #d97706);
+      }
+
+      .stat-icon.info {
+        background: var(--ax-info-50, #eff6ff);
+      }
+      .stat-icon.info mat-icon {
+        color: var(--ax-info-600, #2563eb);
+      }
+
+      .stat-info {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .stat-value {
+        font-size: var(--ax-text-xl, 1.25rem);
+        font-weight: var(--ax-font-bold, 700);
+        color: var(--ax-text-default);
+      }
+
+      .stat-label {
+        font-size: var(--ax-text-sm, 0.875rem);
+        color: var(--ax-text-subtle);
+      }
+
+      .welcome-card {
+        margin-top: var(--ax-spacing-lg, 24px);
+      }
+
+      .welcome-card h2 {
+        margin: 0 0 var(--ax-spacing-sm, 8px) 0;
+        font-size: var(--ax-text-lg, 1.125rem);
+      }
+
+      .welcome-card code {
+        display: block;
+        margin-top: var(--ax-spacing-sm, 8px);
+        padding: var(--ax-spacing-sm, 8px);
+        background: var(--ax-gray-100);
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: var(--ax-text-sm, 0.875rem);
+      }
+    `,
+  ],
+})
+export class DashboardComponent {}

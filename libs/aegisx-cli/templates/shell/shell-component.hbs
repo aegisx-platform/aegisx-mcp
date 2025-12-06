@@ -1,0 +1,173 @@
+import { Component, OnInit, OnDestroy, inject, computed } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterOutlet, Router } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatBadgeModule } from '@angular/material/badge';
+import { AxEnterpriseLayoutComponent, AxNavigationItem } from '@aegisx/ui';
+import { EnterprisePresetTheme } from '@aegisx/ui';
+import { {{PascalCase}}_APP_CONFIG } from './{{kebabCase}}.config';
+import { MultiAppService, HeaderAction } from '../../shared/multi-app';
+
+/**
+ * {{Title}} Shell Component
+ *
+ * Main shell component for the {{Title}} app.
+ * Uses AxEnterpriseLayoutComponent with dynamic navigation
+ * based on the current sub-app tracked by MultiAppService.
+ *
+ * Features:
+ * - Registers app with MultiAppService on init
+ * - Uses centralized context from MultiAppService
+ * - Dynamic navigation based on active sub-app
+ * - App-specific header actions
+ *
+ * Sub-apps:
+ * - Dashboard: /{{kebabCase}}/dashboard
+ * - Master Data: /{{kebabCase}}/master-data
+ */
+@Component({
+  selector: 'app-{{kebabCase}}-shell',
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterOutlet,
+    MatIconModule,
+    MatButtonModule,
+    MatTooltipModule,
+    MatBadgeModule,
+    AxEnterpriseLayoutComponent,
+  ],
+  template: `
+    <ax-enterprise-layout
+      [appName]="appName"
+      [appTheme]="appTheme"
+      [navigation]="currentNavigation()"
+      [subNavigation]="subAppNavigation()"
+      [showFooter]="config.showFooter ?? true"
+      [contentBackground]="'gray'"
+      (logoutClicked)="onLogout()"
+    >
+      <!-- Header Actions -->
+      <ng-template #headerActions>
+        @for (action of appHeaderActions(); track action.id) {
+          <button
+            mat-icon-button
+            [matTooltip]="action.tooltip"
+            (click)="handleAction(action)"
+          >
+            @if (action.badge) {
+              <mat-icon [matBadge]="action.badge" matBadgeColor="warn">
+                \{{ action.icon }}
+              </mat-icon>
+            } @else {
+              <mat-icon>\{{ action.icon }}</mat-icon>
+            }
+          </button>
+        }
+      </ng-template>
+
+      <!-- Router Outlet for Sub-App Pages -->
+      <router-outlet></router-outlet>
+
+      <!-- Footer Content -->
+      <ng-template #footerContent>
+        <span>\{{ config.footerContent }}</span>
+        <span class="footer-version">v1.0.0</span>
+      </ng-template>
+    </ax-enterprise-layout>
+  `,
+  styles: [
+    `
+      :host {
+        display: block;
+        height: 100vh;
+      }
+
+      .footer-version {
+        font-size: 0.75rem;
+        color: var(--ax-text-subtle);
+      }
+    `,
+  ],
+})
+export class {{PascalCase}}ShellComponent implements OnInit, OnDestroy {
+  private readonly router = inject(Router);
+  private readonly multiAppService = inject(MultiAppService);
+
+  // App configuration
+  readonly config = {{PascalCase}}_APP_CONFIG;
+  readonly appName = this.config.name;
+  readonly appTheme = this.config.theme as EnterprisePresetTheme;
+
+  // Get navigation from MultiAppService (centralized)
+  readonly currentNavigation = computed<AxNavigationItem[]>(() => {
+    return this.multiAppService.currentNavigation();
+  });
+
+  // Sub-app tabs navigation
+  readonly subAppNavigation = computed<AxNavigationItem[]>(() => {
+    const app = this.multiAppService.activeApp();
+    if (!app) return [];
+    return app.subApps.map((subApp) => ({
+      id: subApp.id,
+      title: subApp.name,
+      icon: subApp.icon,
+      link: subApp.route,
+    }));
+  });
+
+  // Header actions from MultiAppService
+  readonly appHeaderActions = computed<HeaderAction[]>(() => {
+    return this.multiAppService.currentHeaderActions();
+  });
+
+  ngOnInit(): void {
+    // Register this app with MultiAppService
+    this.multiAppService.registerApp(this.config, 1, true);
+  }
+
+  ngOnDestroy(): void {
+    // Optionally unregister when shell is destroyed
+    // this.multiAppService.unregisterApp(this.config.id);
+  }
+
+  /**
+   * Handle header action click
+   */
+  handleAction(action: HeaderAction): void {
+    switch (action.action) {
+      case 'onNotifications':
+        this.onNotifications();
+        break;
+      case 'onSettings':
+        this.onSettings();
+        break;
+    }
+  }
+
+  /**
+   * Notifications action
+   */
+  onNotifications(): void {
+    console.log('Notifications clicked');
+    // TODO: Open notifications panel
+  }
+
+  /**
+   * Settings action
+   */
+  onSettings(): void {
+    console.log('Settings clicked');
+    this.router.navigate(['/{{kebabCase}}/settings']);
+  }
+
+  /**
+   * Logout action
+   */
+  onLogout(): void {
+    console.log('Logout clicked');
+    this.router.navigate(['/login']);
+  }
+}

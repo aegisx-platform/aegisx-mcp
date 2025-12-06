@@ -1,0 +1,91 @@
+import { AxNavigationItem } from '@aegisx/ui';
+import { AppConfig } from '../../shared/multi-app';
+
+/**
+ * {{Title}} App Configuration
+ *
+ * Defines the {{title}} management app structure with sub-apps:
+ * - Dashboard: Overview and KPIs
+ * - Master Data: Master data modules (ax-launcher)
+ */
+
+// Dashboard Sub-App Navigation
+const dashboardNavigation: AxNavigationItem[] = [
+  {
+    id: 'overview',
+    title: 'Overview',
+    icon: 'dashboard',
+    link: '/{{kebabCase}}/dashboard',
+    exactMatch: true,
+  },
+  {
+    id: 'analytics',
+    title: 'Analytics',
+    icon: 'analytics',
+    link: '/{{kebabCase}}/dashboard/analytics',
+  },
+];
+
+// Master Data Sub-App Navigation (uses ax-launcher, no sidebar needed)
+const masterDataNavigation: AxNavigationItem[] = [
+  {
+    id: 'all-modules',
+    title: 'All Modules',
+    icon: 'apps',
+    link: '/{{kebabCase}}/master-data',
+    exactMatch: true,
+  },
+];
+
+/**
+ * {{Title}} App Configuration
+ */
+export const {{PascalCase}}_APP_CONFIG: AppConfig = {
+  id: '{{kebabCase}}',
+  name: '{{Title}}',
+  description: '{{description}}',
+  theme: '{{theme}}',
+  baseRoute: '/{{kebabCase}}',
+  defaultRoute: '/{{kebabCase}}/dashboard',
+  showFooter: true,
+  footerContent: '{{Title}} - AegisX Platform',
+
+  // Global header actions for all sub-apps
+  headerActions: [
+    {
+      id: 'notifications',
+      icon: 'notifications',
+      tooltip: 'Notifications',
+      badge: 0,
+      action: 'onNotifications',
+    },
+    {
+      id: 'settings',
+      icon: 'settings',
+      tooltip: 'Settings',
+      action: 'onSettings',
+    },
+  ],
+
+  // Sub-apps configuration
+  subApps: [
+    {
+      id: 'dashboard',
+      name: 'Dashboard',
+      icon: 'dashboard',
+      route: '/{{kebabCase}}/dashboard',
+      navigation: dashboardNavigation,
+      isDefault: true,
+      description: 'Overview and Analytics',
+    },
+    {
+      id: 'master-data',
+      name: 'Master Data',
+      icon: 'database',
+      route: '/{{kebabCase}}/master-data',
+      navigation: masterDataNavigation,
+      description: 'Master data modules',
+      permissions: ['{{kebabCase}}.master-data.read'],
+    },
+  ],
+};

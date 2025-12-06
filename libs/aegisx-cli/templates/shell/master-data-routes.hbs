@@ -1,0 +1,19 @@
+import { Routes } from '@angular/router';
+import { MasterDataComponent } from './master-data.component';
+
+/**
+ * Master Data Routes
+ *
+ * Main route for the master data launcher.
+ * Individual CRUD modules are loaded at the shell level, not here.
+ */
+export const MASTER_DATA_ROUTES: Routes = [
+  {
+    path: '',
+    component: MasterDataComponent,
+    data: {
+      title: 'Master Data',
+      description: 'Master data management modules',
+    },
+  },
+];
