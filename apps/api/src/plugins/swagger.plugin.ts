@@ -1,8 +1,7 @@
-import fp from 'fastify-plugin';
-import { FastifyInstance } from 'fastify';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
-import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
+import { FastifyInstance } from 'fastify';
+import fp from 'fastify-plugin';
 
 export default fp(
   async function swaggerPlugin(fastify: FastifyInstance) {
@@ -18,7 +17,7 @@ Complete API specification for the AegisX Platform including all UI library endp
 
 This API provides comprehensive functionality for:
 - Authentication and session management
-- User profile and preferences management  
+- User profile and preferences management
 - Navigation structure and menu management
 - Application settings and themes
 - System monitoring and health checks
@@ -114,47 +113,8 @@ API requests are rate limited to prevent abuse. Rate limit headers are included 
     await fastify.register(fastifySwaggerUi, {
       routePrefix: '/documentation',
       uiConfig: {
-        docExpansion: 'list',
-        deepLinking: false,
-        displayOperationId: true,
-        defaultModelsExpandDepth: 2,
-        defaultModelExpandDepth: 2,
-        displayRequestDuration: true,
-        filter: true,
-        showExtensions: true,
-        showCommonExtensions: true,
-        tryItOutEnabled: true,
-        persistAuthorization: true,
-        defaultModelRendering: 'model',
-        syntaxHighlight: {
-          activate: true,
-          theme: 'monokai',
-        },
+        docExpansion: 'none',
       },
-      uiHooks: {
-        onRequest: function (request, reply, next) {
-          next();
-        },
-        preHandler: function (request, reply, next) {
-          next();
-        },
-      },
-      staticCSP: true,
-      transformStaticCSP: (header) => header,
-      transformSpecification: (swaggerObject, request, reply) => {
-        // Fix server URL for Try It Out functionality
-        const modifiedSpec = { ...swaggerObject };
-        if (request.headers.host) {
-          modifiedSpec.servers = [
-            {
-              url: `http://${request.headers.host}`,
-              description: 'Current server',
-            },
-          ];
-        }
-        return modifiedSpec;
-      },
-      transformSpecificationClone: true,
     });
 
     // Add JSON endpoint for programmatic access
