@@ -165,10 +165,12 @@ import {
       flex-direction: column;
       padding: 1.25rem;
       border-radius: var(--ax-radius-xl, 16px);
-      min-height: 160px;
+      min-height: var(--launcher-card-min-height, 160px);
+      height: var(--launcher-card-height, auto);
       cursor: pointer;
       transition: all 0.2s ease;
       overflow: hidden;
+      box-sizing: border-box;
     }
 
     .launcher-card:hover:not(.launcher-card--disabled):not(
@@ -815,6 +817,14 @@ import {
     :host {
       display: block;
       height: 100%;
+    }
+
+    /* When inside gridster, fill the container */
+    :host-context(.gridster-item) {
+      .launcher-card {
+        height: 100%;
+        min-height: 100%;
+      }
     }
 
     /* Edit Mode */

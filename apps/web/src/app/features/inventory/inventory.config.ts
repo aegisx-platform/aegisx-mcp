@@ -5,22 +5,32 @@ import { AppConfig } from '../../shared/multi-app';
  * Inventory Navigation Configuration
  *
  * Navigation items for the Inventory app.
+ * Note: Main page (/) is ax-launcher, Dashboard is for analytics/KPIs.
  */
 const inventoryNavigation: AxNavigationItem[] = [
-  // Dashboard
+  // Portal (back to main portal)
+  {
+    id: 'portal',
+    title: 'Portal',
+    icon: 'home',
+    link: '/',
+    exactMatch: true,
+  },
+  // Inventory Home (main page with ax-launcher)
+  {
+    id: 'inventory',
+    title: 'Inventory',
+    icon: 'inventory_2',
+    link: '/inventory',
+    exactMatch: true,
+  },
+  // Dashboard (analytics, KPIs)
   {
     id: 'dashboard',
     title: 'Dashboard',
     icon: 'dashboard',
-    link: '/inventory',
-  },
-
-  // Master Data (ax-launcher for CRUD modules)
-  {
-    id: 'master-data',
-    title: 'Master Data',
-    icon: 'storage',
-    link: '/inventory/master-data',
+    link: '/inventory/dashboard',
+    exactMatch: true,
   },
 ];
 

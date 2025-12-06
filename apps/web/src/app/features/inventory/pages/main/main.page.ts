@@ -6,33 +6,27 @@ import {
   LauncherApp,
   LauncherAppClickEvent,
 } from '@aegisx/ui';
-import { MASTER_DATA_ITEMS } from './master-data.config';
+import { MODULE_ITEMS } from './main.config';
 
 /**
- * Master Data Component
+ * Inventory Main Page
  *
- * Displays a launcher grid for all master data CRUD modules.
+ * Main landing page displaying all available modules.
  * Uses ax-launcher component for card-based navigation.
  *
- * Modules are configured in master-data.config.ts and can be
+ * Modules are configured in main.config.ts and can be
  * auto-registered by CRUD generator when using --shell option.
  */
 @Component({
-  selector: 'app-master-data',
+  selector: 'app-inventory-main',
   standalone: true,
   imports: [CommonModule, AxLauncherComponent],
   template: `
-    <div class="master-data-container">
-      <!-- Header -->
-      <div class="master-data-header">
-        <h1>Master Data</h1>
-        <p class="subtitle">Manage your Inventory master data modules</p>
-      </div>
-
+    <div class="main-container">
       <!-- Launcher Grid -->
       <ax-launcher
-        [apps]="masterDataItems"
-        title="Master Data Modules"
+        [apps]="moduleItems"
+        title="Inventory"
         subtitle="Select a module to manage"
         (appClick)="onModuleSelect($event)"
       />
@@ -40,35 +34,18 @@ import { MASTER_DATA_ITEMS } from './master-data.config';
   `,
   styles: [
     `
-      .master-data-container {
+      .main-container {
         padding: var(--ax-spacing-lg, 24px);
         max-width: 1400px;
         margin: 0 auto;
       }
-
-      .master-data-header {
-        margin-bottom: var(--ax-spacing-xl, 32px);
-      }
-
-      .master-data-header h1 {
-        font-size: var(--ax-text-2xl, 1.5rem);
-        font-weight: var(--ax-font-semibold, 600);
-        color: var(--ax-text-default);
-        margin: 0 0 var(--ax-spacing-xs, 4px) 0;
-      }
-
-      .master-data-header .subtitle {
-        font-size: var(--ax-text-sm, 0.875rem);
-        color: var(--ax-text-subtle);
-        margin: 0;
-      }
     `,
   ],
 })
-export class MasterDataPage {
+export class MainPage {
   private readonly router = inject(Router);
 
-  readonly masterDataItems: LauncherApp[] = MASTER_DATA_ITEMS;
+  readonly moduleItems: LauncherApp[] = MODULE_ITEMS;
 
   /**
    * Handle module selection from launcher

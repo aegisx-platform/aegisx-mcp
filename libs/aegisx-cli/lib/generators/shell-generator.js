@@ -345,6 +345,7 @@ export class {{_pascalCase shellName}}ShellComponent implements OnInit, OnDestro
 
 /**
  * Enterprise Shell Config Template
+ * Navigation: Dashboard link only (main page is ax-launcher landing)
  */
 const ENTERPRISE_SHELL_CONFIG_TEMPLATE = `import { AxNavigationItem } from '@aegisx/ui';
 import { AppConfig } from '../../shared/multi-app';
@@ -353,25 +354,34 @@ import { AppConfig } from '../../shared/multi-app';
  * {{_titleCase shellName}} Navigation Configuration
  *
  * Navigation items for the {{displayName}} app.
+ * Note: Main page (/) is ax-launcher, Dashboard is for analytics/KPIs.
  */
 const {{_camelCase shellName}}Navigation: AxNavigationItem[] = [
-  // Dashboard
+  // Portal (back to main portal)
+  {
+    id: 'portal',
+    title: 'Portal',
+    icon: 'home',
+    link: '/',
+    exactMatch: true,
+  },
+  // App Home (main page with ax-launcher)
+  {
+    id: '{{_kebabCase shellName}}',
+    title: '{{displayName}}',
+    icon: '{{icon}}',
+    link: '/{{_kebabCase shellName}}',
+    exactMatch: true,
+  },
+{{#if withDashboard}}
+  // Dashboard (analytics, KPIs)
   {
     id: 'dashboard',
     title: 'Dashboard',
     icon: 'dashboard',
-    link: '/{{_kebabCase shellName}}',
+    link: '/{{_kebabCase shellName}}/dashboard',
+    exactMatch: true,
   },
-
-{{#if withMasterData}}
-  // Master Data (ax-launcher for CRUD modules)
-  {
-    id: 'master-data',
-    title: 'Master Data',
-    icon: 'storage',
-    link: '/{{_kebabCase shellName}}/master-data',
-  },
-
 {{/if}}
 {{#if withSettings}}
   // Settings
@@ -456,6 +466,7 @@ export const {{_screamingSnakeCase shellName}}_NAVIGATION = {{_camelCase shellNa
 
 /**
  * Enterprise Shell Routes Template
+ * Main page = ax-launcher, Dashboard = child route
  */
 const ENTERPRISE_SHELL_ROUTES_TEMPLATE = `import { Route } from '@angular/router';
 {{#if withAuth}}
@@ -465,8 +476,9 @@ import { AuthGuard } from '../../core/auth';
 /**
  * {{_titleCase shellName}} Routes
  *
- * All routes under /{{_kebabCase shellName}} use the {{_pascalCase shellName}}ShellComponent as shell
- * with AxEnterpriseLayoutComponent for navigation.
+ * Route structure:
+ * /{{_kebabCase shellName}}           -> Main page (ax-launcher with all modules)
+ * /{{_kebabCase shellName}}/dashboard -> Dashboard (analytics, KPIs)
  *
  * CRUD modules are auto-registered at the marked section below.
  */
@@ -479,26 +491,26 @@ export const {{_screamingSnakeCase shellName}}_ROUTES: Route[] = [
     canActivate: [AuthGuard],
 {{/if}}
     children: [
-      // Dashboard (default route)
+      // Main page - ax-launcher with all modules
       {
         path: '',
+        loadComponent: () =>
+          import('./pages/main/main.page').then((m) => m.MainPage),
+        data: {
+          title: '{{displayName}}',
+          description: '{{displayName}} modules',
+        },
+      },
+
+{{#if withDashboard}}
+      // Dashboard page
+      {
+        path: 'dashboard',
         loadComponent: () =>
           import('./pages/dashboard/dashboard.page').then((m) => m.DashboardPage),
         data: {
           title: 'Dashboard',
           description: '{{displayName}} Dashboard',
-        },
-      },
-
-{{#if withMasterData}}
-      // Master Data (launcher for CRUD modules)
-      {
-        path: 'master-data',
-        loadComponent: () =>
-          import('./pages/master-data/master-data.page').then((m) => m.MasterDataPage),
-        data: {
-          title: 'Master Data',
-          description: '{{displayName}} Master Data',
         },
       },
 
@@ -534,63 +546,44 @@ export * from './{{_kebabCase shellName}}.routes';
 `;
 
 /**
- * Dashboard Page Template
+ * Dashboard Page Template (simple mat-card outlined placeholder)
  */
 const DASHBOARD_PAGE_TEMPLATE = `import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
 
 /**
  * {{_titleCase shellName}} Dashboard Page
+ *
+ * Simple placeholder dashboard with mat-card outlined.
+ * Add your analytics, charts, and KPIs here.
  */
 @Component({
   selector: 'app-{{_kebabCase shellName}}-dashboard',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatCardModule,
-    MatIconModule,
-    MatButtonModule,
-  ],
+  imports: [CommonModule, MatCardModule, MatIconModule],
   template: \`
     <div class="dashboard-container">
       <header class="dashboard-header">
-        <h1>{{displayName}} Dashboard</h1>
-        <p class="subtitle">Welcome to the {{displayName}} management system</p>
+        <h1>Dashboard</h1>
+        <p class="subtitle">{{displayName}} analytics and overview</p>
       </header>
 
-      <div class="dashboard-grid">
-        <!-- Quick Stats -->
-        <mat-card class="stat-card">
-          <mat-card-header>
-            <mat-icon mat-card-avatar>analytics</mat-icon>
-            <mat-card-title>Statistics</mat-card-title>
-            <mat-card-subtitle>Overview</mat-card-subtitle>
-          </mat-card-header>
-          <mat-card-content>
-            <p>Dashboard content goes here...</p>
-          </mat-card-content>
-        </mat-card>
-
-        <!-- Recent Activity -->
-        <mat-card class="activity-card">
-          <mat-card-header>
-            <mat-icon mat-card-avatar>history</mat-icon>
-            <mat-card-title>Recent Activity</mat-card-title>
-            <mat-card-subtitle>Latest updates</mat-card-subtitle>
-          </mat-card-header>
-          <mat-card-content>
-            <p>Activity content goes here...</p>
-          </mat-card-content>
-        </mat-card>
-      </div>
+      <mat-card appearance="outlined" class="placeholder-card">
+        <mat-card-content>
+          <mat-icon class="placeholder-icon">analytics</mat-icon>
+          <h2>Dashboard Coming Soon</h2>
+          <p>Add your analytics, charts, and KPIs here.</p>
+        </mat-card-content>
+      </mat-card>
     </div>
   \`,
   styles: [\`
     .dashboard-container {
       padding: 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
     .dashboard-header {
@@ -599,24 +592,40 @@ import { MatButtonModule } from '@angular/material/button';
 
     .dashboard-header h1 {
       margin: 0;
-      font-size: 1.75rem;
-      font-weight: 500;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--ax-text-default);
     }
 
     .dashboard-header .subtitle {
-      margin: 0.5rem 0 0;
+      margin: 0.25rem 0 0;
+      font-size: 0.875rem;
       color: var(--ax-text-subtle);
     }
 
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
+    .placeholder-card {
+      text-align: center;
+      padding: 3rem 2rem;
     }
 
-    .stat-card,
-    .activity-card {
-      height: 200px;
+    .placeholder-icon {
+      font-size: 3rem;
+      width: 3rem;
+      height: 3rem;
+      color: var(--ax-text-subtle);
+      margin-bottom: 1rem;
+    }
+
+    .placeholder-card h2 {
+      margin: 0 0 0.5rem;
+      font-size: 1.25rem;
+      font-weight: 500;
+      color: var(--ax-text-default);
+    }
+
+    .placeholder-card p {
+      margin: 0;
+      color: var(--ax-text-subtle);
     }
   \`],
 })
@@ -707,13 +716,14 @@ export class SettingsPage {}
 `;
 
 // ============================================================================
-// MASTER DATA TEMPLATES (with ax-launcher)
+// MAIN PAGE TEMPLATES (ax-launcher as main landing page)
 // ============================================================================
 
 /**
- * Master Data Component Template (uses ax-launcher)
+ * Main Page Component Template (uses ax-launcher)
+ * This is the main landing page showing all CRUD modules
  */
-const MASTER_DATA_COMPONENT_TEMPLATE = `import { Component, inject } from '@angular/core';
+const MAIN_PAGE_COMPONENT_TEMPLATE = `import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import {
@@ -721,33 +731,27 @@ import {
   LauncherApp,
   LauncherAppClickEvent,
 } from '@aegisx/ui';
-import { MASTER_DATA_ITEMS } from './master-data.config';
+import { MODULE_ITEMS } from './main.config';
 
 /**
- * Master Data Component
+ * {{_titleCase shellName}} Main Page
  *
- * Displays a launcher grid for all master data CRUD modules.
+ * Main landing page displaying all available modules.
  * Uses ax-launcher component for card-based navigation.
  *
- * Modules are configured in master-data.config.ts and can be
+ * Modules are configured in main.config.ts and can be
  * auto-registered by CRUD generator when using --shell option.
  */
 @Component({
-  selector: 'app-master-data',
+  selector: 'app-{{_kebabCase shellName}}-main',
   standalone: true,
   imports: [CommonModule, AxLauncherComponent],
   template: \`
-    <div class="master-data-container">
-      <!-- Header -->
-      <div class="master-data-header">
-        <h1>Master Data</h1>
-        <p class="subtitle">Manage your {{displayName}} master data modules</p>
-      </div>
-
+    <div class="main-container">
       <!-- Launcher Grid -->
       <ax-launcher
-        [apps]="masterDataItems"
-        title="Master Data Modules"
+        [apps]="moduleItems"
+        title="{{displayName}}"
         subtitle="Select a module to manage"
         (appClick)="onModuleSelect($event)"
       />
@@ -755,35 +759,18 @@ import { MASTER_DATA_ITEMS } from './master-data.config';
   \`,
   styles: [
     \`
-      .master-data-container {
+      .main-container {
         padding: var(--ax-spacing-lg, 24px);
         max-width: 1400px;
         margin: 0 auto;
       }
-
-      .master-data-header {
-        margin-bottom: var(--ax-spacing-xl, 32px);
-      }
-
-      .master-data-header h1 {
-        font-size: var(--ax-text-2xl, 1.5rem);
-        font-weight: var(--ax-font-semibold, 600);
-        color: var(--ax-text-default);
-        margin: 0 0 var(--ax-spacing-xs, 4px) 0;
-      }
-
-      .master-data-header .subtitle {
-        font-size: var(--ax-text-sm, 0.875rem);
-        color: var(--ax-text-subtle);
-        margin: 0;
-      }
     \`,
   ],
 })
-export class MasterDataPage {
+export class MainPage {
   private readonly router = inject(Router);
 
-  readonly masterDataItems: LauncherApp[] = MASTER_DATA_ITEMS;
+  readonly moduleItems: LauncherApp[] = MODULE_ITEMS;
 
   /**
    * Handle module selection from launcher
@@ -804,56 +791,133 @@ export class MasterDataPage {
 `;
 
 /**
- * Master Data Config Template (with auto-registration markers)
+ * Main Page Config Template (with auto-registration markers)
  */
-const MASTER_DATA_CONFIG_TEMPLATE = `import { LauncherApp } from '@aegisx/ui';
+const MAIN_PAGE_CONFIG_TEMPLATE = `import { LauncherApp } from '@aegisx/ui';
 
 /**
- * Master Data Configuration
+ * {{_titleCase shellName}} Module Configuration
  *
- * This file contains the configuration for master data modules
- * displayed in the ax-launcher component.
+ * This file contains the configuration for modules
+ * displayed in the ax-launcher component on the main page.
  *
  * NOTE: CRUD generator will auto-register new modules here when using --shell option.
- * Generator looks for the MASTER_DATA_ITEMS array and appends new entries.
+ * Generator looks for the MODULE_ITEMS array and appends new entries.
  */
 
 /**
- * Master Data Items
+ * Module Items
  *
  * Each item represents a CRUD module accessible from the launcher.
  * Generator will auto-add entries when using: --shell {{_kebabCase shellName}}
  *
  * Available colors: 'pink', 'peach', 'mint', 'blue', 'yellow', 'purple', 'teal', 'red', 'indigo', 'gray'
  */
-export const MASTER_DATA_ITEMS: LauncherApp[] = [
+export const MODULE_ITEMS: LauncherApp[] = [
   // === AUTO-GENERATED ENTRIES START ===
   // CRUD modules will be auto-registered here by the generator
   // === AUTO-GENERATED ENTRIES END ===
 ];
 `;
 
-/**
- * Master Data Routes Template
- */
-const MASTER_DATA_ROUTES_TEMPLATE = `import { Routes } from '@angular/router';
+// ============================================================================
+// SECTION PAGE TEMPLATES (optional sub-sections with ax-launcher)
+// ============================================================================
 
 /**
- * Master Data Routes
- *
- * Main route for the master data launcher.
- * Individual CRUD modules are loaded at the shell level, not here.
+ * Section Page Component Template (uses ax-launcher)
+ * Used for optional sub-sections like master-data, budget-planning, etc.
  */
-export const MASTER_DATA_ROUTES: Routes = [
-  {
-    path: '',
-    loadComponent: () =>
-      import('./master-data.page').then((m) => m.MasterDataPage),
-    data: {
-      title: 'Master Data',
-      description: 'Master data management modules',
-    },
-  },
+const SECTION_PAGE_COMPONENT_TEMPLATE = `import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import {
+  AxLauncherComponent,
+  LauncherApp,
+  LauncherAppClickEvent,
+} from '@aegisx/ui';
+import { SECTION_ITEMS } from './{{sectionKebab}}.config';
+
+/**
+ * {{sectionTitle}} Section Page
+ *
+ * Displays modules for the {{sectionTitle}} section.
+ * Uses ax-launcher component for card-based navigation.
+ */
+@Component({
+  selector: 'app-{{sectionKebab}}',
+  standalone: true,
+  imports: [CommonModule, AxLauncherComponent],
+  template: \`
+    <div class="section-container">
+      <!-- Launcher Grid -->
+      <ax-launcher
+        [apps]="sectionItems"
+        title="{{sectionTitle}}"
+        subtitle="Select a module to manage"
+        (appClick)="onModuleSelect($event)"
+      />
+    </div>
+  \`,
+  styles: [
+    \`
+      .section-container {
+        padding: var(--ax-spacing-lg, 24px);
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+    \`,
+  ],
+})
+export class {{sectionPascal}}Page {
+  private readonly router = inject(Router);
+
+  readonly sectionItems: LauncherApp[] = SECTION_ITEMS;
+
+  /**
+   * Handle module selection from launcher
+   */
+  onModuleSelect(event: LauncherAppClickEvent): void {
+    const app = event.app;
+    if (app.route) {
+      if (event.newTab) {
+        window.open(app.route, '_blank');
+      } else {
+        this.router.navigate([app.route]);
+      }
+    } else if (app.externalUrl) {
+      window.open(app.externalUrl, '_blank');
+    }
+  }
+}
+`;
+
+/**
+ * Section Config Template (with auto-registration markers)
+ */
+const SECTION_CONFIG_TEMPLATE = `import { LauncherApp } from '@aegisx/ui';
+
+/**
+ * {{sectionTitle}} Section Configuration
+ *
+ * This file contains the configuration for {{sectionTitle}} modules
+ * displayed in the ax-launcher component.
+ *
+ * NOTE: CRUD generator will auto-register new modules here when using --section {{sectionKebab}}
+ */
+
+/**
+ * Section Items
+ *
+ * Each item represents a CRUD module accessible from the launcher.
+ * Generator will auto-add entries when using: --shell {{_kebabCase shellName}} --section {{sectionKebab}}
+ *
+ * Available colors: 'pink', 'peach', 'mint', 'blue', 'yellow', 'purple', 'teal', 'red', 'indigo', 'gray'
+ */
+export const SECTION_ITEMS: LauncherApp[] = [
+  // === AUTO-GENERATED ENTRIES START ===
+  // CRUD modules will be auto-registered here by the generator
+  // === AUTO-GENERATED ENTRIES END ===
 ];
 `;
 
@@ -995,7 +1059,6 @@ class ShellGenerator {
       theme: 'default',
       order: 0,
       withDashboard: true,
-      withMasterData: true, // Master Data with ax-launcher for CRUD modules
       withSettings: false,
       withAuth: true,
       withThemeSwitcher: false,
@@ -1015,7 +1078,6 @@ class ShellGenerator {
       theme,
       order,
       withDashboard,
-      withMasterData,
       withSettings,
       withAuth,
       withThemeSwitcher,
@@ -1030,7 +1092,6 @@ class ShellGenerator {
       theme,
       order,
       withDashboard,
-      withMasterData,
       withSettings,
       withAuth,
       withThemeSwitcher,
@@ -1120,29 +1181,28 @@ class ShellGenerator {
         { path: 'index.ts', template: SHELL_INDEX_TEMPLATE },
       );
 
+      // Main page with ax-launcher (always generated for enterprise shell)
+      files.push(
+        {
+          path: 'pages/main/main.page.ts',
+          template: MAIN_PAGE_COMPONENT_TEMPLATE,
+        },
+        {
+          path: 'pages/main/main.config.ts',
+          template: MAIN_PAGE_CONFIG_TEMPLATE,
+        },
+      );
+
+      // Create modules folder for CRUD modules
+      files.push({
+        path: 'modules/.gitkeep',
+        template: '# CRUD modules will be generated here\n',
+      });
+
       if (withDashboard) {
         files.push({
           path: 'pages/dashboard/dashboard.page.ts',
           template: DASHBOARD_PAGE_TEMPLATE,
-        });
-      }
-
-      if (withMasterData) {
-        // Master Data with ax-launcher (for CRUD module navigation)
-        files.push(
-          {
-            path: 'pages/master-data/master-data.page.ts',
-            template: MASTER_DATA_COMPONENT_TEMPLATE,
-          },
-          {
-            path: 'pages/master-data/master-data.config.ts',
-            template: MASTER_DATA_CONFIG_TEMPLATE,
-          },
-        );
-        // Also create modules folder for CRUD modules
-        files.push({
-          path: 'modules/.gitkeep',
-          template: '# CRUD modules will be generated here\n',
         });
       }
 

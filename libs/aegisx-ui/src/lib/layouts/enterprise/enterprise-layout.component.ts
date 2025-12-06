@@ -414,6 +414,19 @@ import {
           &.active {
             color: white;
             background: rgba(255, 255, 255, 0.15);
+            font-weight: 600;
+            position: relative;
+
+            &::after {
+              content: '';
+              position: absolute;
+              bottom: -2px;
+              left: 0.5rem;
+              right: 0.5rem;
+              height: 2px;
+              background: var(--ax-brand-default, #6366f1);
+              border-radius: 1px;
+            }
           }
 
           .dropdown-arrow {
@@ -488,6 +501,19 @@ import {
           &.active {
             color: var(--ax-enterprise-header-text-hover);
             background: var(--ax-enterprise-header-active-bg);
+            font-weight: 600;
+            position: relative;
+
+            &::after {
+              content: '';
+              position: absolute;
+              bottom: -2px;
+              left: 0.5rem;
+              right: 0.5rem;
+              height: 2px;
+              background: var(--ax-enterprise-primary, currentColor);
+              border-radius: 1px;
+            }
           }
 
           .dropdown-arrow {
@@ -630,6 +656,19 @@ import {
         &.active {
           color: var(--ax-brand-default);
           background: var(--ax-brand-faint);
+          font-weight: 600;
+          position: relative;
+
+          &::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0.5rem;
+            right: 0.5rem;
+            height: 2px;
+            background: var(--ax-brand-default);
+            border-radius: 1px;
+          }
         }
 
         &.disabled {

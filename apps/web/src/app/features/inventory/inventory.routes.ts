@@ -4,8 +4,9 @@ import { AuthGuard } from '../../core/auth';
 /**
  * Inventory Routes
  *
- * All routes under /inventory use the InventoryShellComponent as shell
- * with AxEnterpriseLayoutComponent for navigation.
+ * Route structure:
+ * /inventory           -> Main page (ax-launcher with all modules)
+ * /inventory/dashboard -> Dashboard (analytics, KPIs)
  *
  * CRUD modules are auto-registered at the marked section below.
  */
@@ -18,9 +19,20 @@ export const INVENTORY_ROUTES: Route[] = [
       ),
     canActivate: [AuthGuard],
     children: [
-      // Dashboard (default route)
+      // Main page - ax-launcher with all modules
       {
         path: '',
+        loadComponent: () =>
+          import('./pages/main/main.page').then((m) => m.MainPage),
+        data: {
+          title: 'Inventory',
+          description: 'Inventory modules',
+        },
+      },
+
+      // Dashboard page
+      {
+        path: 'dashboard',
         loadComponent: () =>
           import('./pages/dashboard/dashboard.page').then(
             (m) => m.DashboardPage,
@@ -28,19 +40,6 @@ export const INVENTORY_ROUTES: Route[] = [
         data: {
           title: 'Dashboard',
           description: 'Inventory Dashboard',
-        },
-      },
-
-      // Master Data (launcher for CRUD modules)
-      {
-        path: 'master-data',
-        loadComponent: () =>
-          import('./pages/master-data/master-data.page').then(
-            (m) => m.MasterDataPage,
-          ),
-        data: {
-          title: 'Master Data',
-          description: 'Inventory Master Data',
         },
       },
 

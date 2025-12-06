@@ -756,8 +756,8 @@ const DEFAULT_CONFIG: LauncherConfig = {
 
     /* Gridster Container */
     .ax-launcher__gridster {
-      min-height: 600px;
-      background: var(--ax-background-subtle, #f9fafb);
+      height: 400px;
+      background: transparent;
       border-radius: var(--ax-radius-lg, 12px);
 
       ::ng-deep {
@@ -768,25 +768,19 @@ const DEFAULT_CONFIG: LauncherConfig = {
         .gridster-item {
           border-radius: var(--ax-radius-lg, 12px);
           overflow: hidden;
-          background: transparent;
+          background: transparent !important;
         }
 
         .gridster-item-content {
           height: 100% !important;
           width: 100% !important;
-          display: flex;
+          display: block;
+          background: transparent !important;
 
-          /* Make launcher-card fill the gridster item */
           ax-launcher-card {
             width: 100%;
             height: 100%;
             display: block;
-
-            .launcher-card {
-              width: 100%;
-              height: 100%;
-              min-height: unset;
-            }
           }
         }
 
@@ -810,14 +804,9 @@ const DEFAULT_CONFIG: LauncherConfig = {
     }
 
     .ax-launcher__gridster--editing {
-      background: repeating-linear-gradient(
-        45deg,
-        var(--ax-background-subtle, #f9fafb),
-        var(--ax-background-subtle, #f9fafb) 10px,
-        rgba(99, 102, 241, 0.03) 10px,
-        rgba(99, 102, 241, 0.03) 20px
-      );
+      background: var(--ax-background-subtle, #f9fafb);
       border: 2px dashed var(--ax-brand-default, #6366f1);
+      padding: 0.5rem;
 
       ::ng-deep {
         .gridster-item-resizable-handler {
@@ -960,17 +949,11 @@ const DEFAULT_CONFIG: LauncherConfig = {
       }
 
       .ax-launcher__gridster {
-        background: #1f2937;
+        background: transparent;
       }
 
       .ax-launcher__gridster--editing {
-        background: repeating-linear-gradient(
-          45deg,
-          #1f2937,
-          #1f2937 10px,
-          rgba(99, 102, 241, 0.1) 10px,
-          rgba(99, 102, 241, 0.1) 20px
-        );
+        background: #1f2937;
       }
 
       .ax-launcher__edit-btn--active {
@@ -1196,20 +1179,20 @@ export class AxLauncherComponent {
     const isEditing = this.isEditMode();
 
     return {
-      gridType: GridType.ScrollVertical,
-      compactType: CompactType.CompactUp,
+      gridType: GridType.Fit,
+      compactType: CompactType.None,
       displayGrid: isEditing ? DisplayGrid.Always : DisplayGrid.None,
       pushItems: true,
-      swap: true,
-      margin: gridConfig.margin ?? 12,
+      swap: false,
+      margin: gridConfig.margin ?? 16,
       outerMargin: true,
-      outerMarginTop: 12,
-      outerMarginRight: 12,
-      outerMarginBottom: 12,
-      outerMarginLeft: 12,
+      outerMarginTop: 0,
+      outerMarginRight: 0,
+      outerMarginBottom: 0,
+      outerMarginLeft: 0,
       minCols: gridConfig.columns ?? 4,
       maxCols: gridConfig.columns ?? 4,
-      minRows: 4,
+      minRows: 2,
       maxRows: 100,
       defaultItemCols: 1,
       defaultItemRows: 1,
@@ -1217,8 +1200,7 @@ export class AxLauncherComponent {
       maxItemCols: 2,
       minItemRows: 1,
       maxItemRows: 2,
-      fixedColWidth: 280,
-      fixedRowHeight: gridConfig.rowHeight ?? 160,
+      fixedRowHeight: gridConfig.rowHeight ?? 180,
       draggable: {
         enabled: isEditing,
       },

@@ -14,6 +14,20 @@ export const PORTAL_CATEGORIES: LauncherCategory[] = [
     order: 1,
   },
   {
+    id: 'erp',
+    name: 'ERP',
+    icon: 'business',
+    description: 'Enterprise Resource Planning modules',
+    order: 2,
+  },
+  {
+    id: 'operations',
+    name: 'Operations',
+    icon: 'precision_manufacturing',
+    description: 'Operational and logistics management',
+    order: 3,
+  },
+  {
     id: 'admin',
     name: 'Administration',
     icon: 'admin_panel_settings',
@@ -459,7 +473,7 @@ export const PORTAL_CONFIG: LauncherConfig = {
   cardMinWidth: 280,
   cardMaxWidth: 320,
   cardGap: 20,
-  enableDraggable: true,
+  enableDraggable: false,
   gridsterConfig: {
     columns: 4,
     rowHeight: 180,
