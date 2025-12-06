@@ -117,7 +117,7 @@ program
   )
   .option(
     '--shell <shell>',
-    'Target shell for route registration (e.g., system, inventory). If specified, routes will be registered in the shell routes file instead of app.routes.ts',
+    'Target shell for frontend generation (e.g., inventory, system). Output goes to features/{shell}/modules/ and routes are registered in shell routes file',
   )
   .option(
     '-s, --schema <schema>',
@@ -192,7 +192,7 @@ program
         options.app = 'web';
       }
 
-      // Determine output directory based on app and target
+      // Determine output directory based on app, target, and shell
       let outputDir = options.output;
       if (!outputDir) {
         const appPaths = {
@@ -214,6 +214,61 @@ program
         outputDir =
           appPaths[options.app]?.[options.target] ||
           path.resolve(PROJECT_ROOT, 'apps/api/src/modules');
+
+        // Handle --shell option for frontend target
+        // When shell is specified, output to the shell's modules folder
+        // Track whether module is inside shell's modules/ folder for import path calculation
+        let isInsideShellModules = false;
+        if (options.shell && options.target === 'frontend') {
+          const fs = require('fs');
+          const shellPath = path.resolve(
+            PROJECT_ROOT,
+            `apps/${options.app}/src/app/features/${options.shell}`,
+          );
+          const shellModulesPath = path.join(shellPath, 'modules');
+
+          if (fs.existsSync(shellPath)) {
+            // Check if shell has modules/ subfolder
+            if (fs.existsSync(shellModulesPath)) {
+              outputDir = shellModulesPath;
+              isInsideShellModules = true;
+              console.log(
+                chalk.green(
+                  `🐚 Shell '${options.shell}' detected with modules/ folder`,
+                ),
+              );
+            } else {
+              outputDir = shellPath;
+              console.log(
+                chalk.yellow(
+                  `🐚 Shell '${options.shell}' exists but no modules/ folder found`,
+                ),
+              );
+              console.log(
+                chalk.gray(`   Output will go directly to: ${shellPath}`),
+              );
+            }
+          } else {
+            console.log(
+              chalk.red(
+                `\n❌ Shell '${options.shell}' not found at: ${shellPath}`,
+              ),
+            );
+            console.log(
+              chalk.gray(
+                `   Make sure the shell exists in apps/${options.app}/src/app/features/${options.shell}/`,
+              ),
+            );
+            console.log(
+              chalk.cyan(
+                `   You can create a shell first with: aegisx shell:init ${options.shell} --app ${options.app}`,
+              ),
+            );
+            process.exit(1);
+          }
+        }
+        // Store isInsideShellModules in options for later use
+        options.isInsideShellModules = isInsideShellModules;
       }
 
       console.log(`🚀 Generating CRUD module for table: ${tableName}`);
@@ -338,6 +393,7 @@ program
             app: options.app || 'web',
             schema: options.schema || 'public',
             domain: options.domain,
+            outputDir: outputDir,
           },
         );
 
@@ -468,6 +524,7 @@ program
               await frontendGenerator.autoRegisterShellRoute(
                 tableName,
                 options.shell,
+                { isInsideShellModules: options.isInsideShellModules },
               );
             } else {
               await frontendGenerator.autoRegisterRoute(tableName);

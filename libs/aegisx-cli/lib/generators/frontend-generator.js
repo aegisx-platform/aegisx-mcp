@@ -197,21 +197,26 @@ class FrontendGenerator {
     );
     this.templateVersion = templateVersion;
 
-    // Dynamic output directory based on target app
-    this.outputDir = path.resolve(
-      this.projectRoot,
-      'apps',
-      targetApp,
-      'src',
-      'app',
-      'features',
-    );
+    // Dynamic output directory based on target app or custom outputDir
+    // If outputDir is provided in options, use it directly
+    if (options.outputDir) {
+      this.outputDir = path.resolve(options.outputDir);
+    } else {
+      this.outputDir = path.resolve(
+        this.projectRoot,
+        'apps',
+        targetApp,
+        'src',
+        'app',
+        'features',
+      );
+    }
 
     console.log(
       `📋 Using ${templateVersion.toUpperCase()} templates from: templates/frontend/${templateVersion}`,
     );
     console.log(
-      `🎯 Target app: ${targetApp} → apps/${targetApp}/src/app/features/`,
+      `🎯 Target app: ${targetApp} → ${options.outputDir ? this.outputDir : `apps/${targetApp}/src/app/features/`}`,
     );
   }
 
@@ -3028,8 +3033,11 @@ class FrontendGenerator {
    *
    * @param {string} moduleName - The module name to register
    * @param {string} shellName - The shell name (e.g., 'system', 'inventory')
+   * @param {Object} options - Additional options
+   * @param {boolean} options.isInsideShellModules - If true, module is in shell's modules/ subfolder
    */
-  async autoRegisterShellRoute(moduleName, shellName) {
+  async autoRegisterShellRoute(moduleName, shellName, options = {}) {
+    const { isInsideShellModules = false } = options;
     const targetApp = this.targetApp || 'web';
     const shellKebab = this.toKebabCase(shellName);
 
@@ -3106,13 +3114,19 @@ class FrontendGenerator {
         return this.autoRegisterRoute(moduleName);
       }
 
-      // Calculate relative import path from shell routes file to features
-      // From: apps/web/src/app/features/system/system.routes.ts
-      // To:   apps/web/src/app/features/test-products/test-products.routes
-      // Relative: ../../features/test-products/test-products.routes  -> actually: ../${kebabName}/${kebabName}.routes
-      // Since we're in features/{shell}/ and target is features/{module}/
-      // The relative path is: ../${kebabName}/${kebabName}.routes
-      const relativePath = `../${kebabName}/${kebabName}.routes`;
+      // Calculate relative import path from shell routes file to module
+      // Two cases:
+      // 1. Module inside shell's modules/ folder (--shell option used):
+      //    From: apps/web/src/app/features/inventory/inventory.routes.ts
+      //    To:   apps/web/src/app/features/inventory/modules/drugs/drugs.routes
+      //    Relative: ./modules/${kebabName}/${kebabName}.routes
+      // 2. Module as sibling feature folder (default):
+      //    From: apps/web/src/app/features/system/system.routes.ts
+      //    To:   apps/web/src/app/features/test-products/test-products.routes
+      //    Relative: ../${kebabName}/${kebabName}.routes
+      const relativePath = isInsideShellModules
+        ? `./modules/${kebabName}/${kebabName}.routes`
+        : `../${kebabName}/${kebabName}.routes`;
 
       // Create route entry for shell (child route format)
       const routeEntry = `
