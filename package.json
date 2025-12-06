@@ -137,6 +137,7 @@
     "@fullcalendar/interaction": "^6.1.19",
     "@fullcalendar/list": "^6.1.19",
     "@fullcalendar/timegrid": "^6.1.19",
+    "@scalar/fastify-api-reference": "^1.40.1",
     "@sinclair/typebox": "^0.34.41",
     "@socket.io/redis-adapter": "8.2.1",
     "@swimlane/ngx-charts": "^23.1.0",
