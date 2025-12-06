@@ -526,6 +526,11 @@ program
                 options.shell,
                 { isInsideShellModules: options.isInsideShellModules },
               );
+              // Also register in master-data.config.ts for ax-launcher display
+              await frontendGenerator.registerMasterDataConfig(
+                tableName,
+                options.shell,
+              );
             } else {
               await frontendGenerator.autoRegisterRoute(tableName);
             }

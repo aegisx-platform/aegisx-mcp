@@ -49,15 +49,8 @@ import {
   BreadcrumbComponent,
   BreadcrumbItem,
 } from '@aegisx/ui';
-{{#if includeEnhanced}}
-import {
-  ExportOptions,
-  ExportService,
-  SharedExportComponent,
-} from '../../../shared/components/shared-export/shared-export.component';
-{{else}}
-import { SharedExportComponent } from '../../../shared/components/shared-export/shared-export.component';
-{{/if}}
+// Export functionality is available through AxTableComponent or custom implementation
+// TODO: Add export button with custom export service if needed
 import { {{pascalCaseHelper singularName}}Service } from '../services/{{kebabCase}}.service';
 import { {{pascalCaseHelper singularName}}, List{{pascalCaseHelper singularName}}Query } from '../types/{{kebabCase}}.types';
 {{#if withEvents}}
@@ -97,7 +90,6 @@ import { {{pascalCaseHelper moduleName}}ListHeaderComponent } from './{{kebabCas
     MatTooltipModule,
     MatMenuModule,
     MatCardModule,
-    SharedExportComponent,
     BreadcrumbComponent,
     // Child components
     {{pascalCaseHelper moduleName}}ListHeaderComponent,

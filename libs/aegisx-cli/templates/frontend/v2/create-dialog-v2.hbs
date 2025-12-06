@@ -71,7 +71,8 @@ export class {{pascalCaseHelper singularName}}CreateDialogComponent {
     this.loading.set(true);
 
     try {
-      const createRequest = formData as Create{{pascalCaseHelper singularName}}Request;
+      // Cast through unknown to handle form data type conversion (form values may be strings)
+      const createRequest = formData as unknown as Create{{pascalCaseHelper singularName}}Request;
 
       // Call API to create
       const result = await this.{{camelCaseHelper moduleName}}Service.create{{pascalCaseHelper singularName}}(createRequest);
@@ -96,7 +97,8 @@ export class {{pascalCaseHelper singularName}}CreateDialogComponent {
     this.loading.set(true);
 
     try {
-      const createRequest = formData as Create{{pascalCaseHelper singularName}}Request;
+      // Cast through unknown to handle form data type conversion (form values may be strings)
+      const createRequest = formData as unknown as Create{{pascalCaseHelper singularName}}Request;
       const result = await this.{{camelCaseHelper moduleName}}Service.create{{pascalCaseHelper singularName}}(createRequest);
 
       if (result) {

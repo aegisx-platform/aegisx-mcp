@@ -85,7 +85,8 @@ export class {{pascalCaseHelper singularName}}EditDialogComponent implements OnI
     this.loading.set(true);
 
     try {
-      const updateRequest = formData as Update{{pascalCaseHelper singularName}}Request;
+      // Cast through unknown to handle form data type conversion (form values may be strings)
+      const updateRequest = formData as unknown as Update{{pascalCaseHelper singularName}}Request;
 
       // Call API to update
       const result = await this.{{camelCaseHelper moduleName}}Service.update{{pascalCaseHelper singularName}}(
@@ -113,7 +114,8 @@ export class {{pascalCaseHelper singularName}}EditDialogComponent implements OnI
     this.loading.set(true);
 
     try {
-      const updateRequest = formData as Update{{pascalCaseHelper singularName}}Request;
+      // Cast through unknown to handle form data type conversion (form values may be strings)
+      const updateRequest = formData as unknown as Update{{pascalCaseHelper singularName}}Request;
       const result = await this.{{camelCaseHelper moduleName}}Service.update{{pascalCaseHelper singularName}}(
         this.data.{{camelCaseHelper moduleName}}.id,
         updateRequest,

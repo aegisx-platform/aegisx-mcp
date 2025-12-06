@@ -235,8 +235,8 @@ class FrontendGenerator {
     let typesPath;
 
     if (this.backendDomain) {
-      // Domain-based structure: apps/api/src/modules/domain/path/module-name/
-      // Files are flat: module-name.schemas.ts (not schemas/module-name.schemas.ts)
+      // Domain-based structure: apps/api/src/modules/domain/path/moduleName/
+      // Backend uses camelCase folder names, but kebab-case file names
       backendModulePath = path.resolve(
         this.toolsDir,
         '..',
@@ -246,9 +246,9 @@ class FrontendGenerator {
         'src',
         'modules',
         this.backendDomain,
-        kebabCaseModuleName,
+        camelCaseModuleName,
       );
-      // Domain modules use flat structure
+      // Domain modules use flat structure with kebab-case file names
       schemasPath = path.join(
         backendModulePath,
         `${kebabCaseModuleName}.schemas.ts`,
@@ -3175,6 +3175,179 @@ class FrontendGenerator {
       );
       return false;
     }
+  }
+
+  /**
+   * Register module in master-data.config.ts for ax-launcher display
+   * This adds an entry to the MASTER_DATA_ITEMS array
+   *
+   * @param {string} moduleName - The module name to register
+   * @param {string} shellName - The shell name (e.g., 'inventory')
+   */
+  async registerMasterDataConfig(moduleName, shellName) {
+    const targetApp = this.targetApp || 'web';
+    const shellKebab = this.toKebabCase(shellName);
+    const kebabName = this.toKebabCase(moduleName);
+    const title = this.fieldNameToLabel(moduleName);
+
+    // Master data config path
+    const masterDataConfigPath = path.join(
+      this.projectRoot,
+      `apps/${targetApp}/src/app/features/${shellKebab}/modules/master-data/master-data.config.ts`,
+    );
+
+    try {
+      // Check if master-data.config.ts exists
+      if (!fs.existsSync(masterDataConfigPath)) {
+        console.log(
+          `ℹ️ No master-data.config.ts found in ${shellName} shell - skipping launcher registration`,
+        );
+        return false;
+      }
+
+      let content = fs.readFileSync(masterDataConfigPath, 'utf8');
+
+      // Check if already registered
+      if (content.includes(`id: '${kebabName}'`)) {
+        console.log(
+          `⚠️ ${moduleName} already registered in master-data.config.ts`,
+        );
+        return false;
+      }
+
+      // Find the marker for auto-generated entries
+      const markerStart = '// === AUTO-GENERATED ENTRIES START ===';
+      const markerEnd = '// === AUTO-GENERATED ENTRIES END ===';
+
+      const startIndex = content.indexOf(markerStart);
+      const endIndex = content.indexOf(markerEnd);
+
+      if (startIndex === -1 || endIndex === -1) {
+        console.warn(
+          `⚠️ Cannot find auto-generated markers in master-data.config.ts`,
+        );
+        console.log(
+          `💡 Please add manually: { id: '${kebabName}', name: '${title}', ... }`,
+        );
+        return false;
+      }
+
+      // Determine icon based on module name (simple heuristic)
+      const icon = this.getIconForModule(moduleName);
+
+      // Available colors for variety
+      const colors = [
+        'blue',
+        'mint',
+        'peach',
+        'pink',
+        'yellow',
+        'purple',
+        'teal',
+        'indigo',
+      ];
+      // Simple hash to pick a color based on module name
+      const colorIndex =
+        moduleName
+          .split('')
+          .reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
+      const color = colors[colorIndex];
+
+      // Create the new entry
+      const newEntry = `  {
+    id: '${kebabName}',
+    name: '${title}',
+    description: 'Manage ${title.toLowerCase()} data',
+    icon: '${icon}',
+    route: '/${shellKebab}/${kebabName}',
+    color: '${color}',
+    status: 'active',
+    enabled: true,
+  },
+  `;
+
+      // Insert after the start marker
+      const insertPosition = startIndex + markerStart.length;
+      content =
+        content.slice(0, insertPosition) +
+        '\n' +
+        newEntry +
+        content.slice(insertPosition);
+
+      // Write back
+      fs.writeFileSync(masterDataConfigPath, content);
+
+      console.log(`✅ Registered ${moduleName} in master-data.config.ts:`);
+      console.log(`   - ID: ${kebabName}`);
+      console.log(`   - Name: ${title}`);
+      console.log(`   - Icon: ${icon}`);
+      console.log(`   - Route: /${shellKebab}/${kebabName}`);
+      console.log(`   - Color: ${color}`);
+
+      return true;
+    } catch (error) {
+      console.error(
+        `❌ Failed to register in master-data.config.ts:`,
+        error.message,
+      );
+      return false;
+    }
+  }
+
+  /**
+   * Get Material icon name based on module name
+   * Uses simple heuristics based on common naming patterns
+   */
+  getIconForModule(moduleName) {
+    const name = moduleName.toLowerCase();
+
+    // Common patterns
+    const iconMap = {
+      drug: 'medication',
+      medicine: 'medication',
+      product: 'inventory_2',
+      item: 'category',
+      supplier: 'business',
+      vendor: 'store',
+      customer: 'person',
+      user: 'person',
+      order: 'shopping_cart',
+      invoice: 'receipt',
+      payment: 'payment',
+      category: 'folder',
+      department: 'corporate_fare',
+      employee: 'badge',
+      staff: 'groups',
+      location: 'location_on',
+      warehouse: 'warehouse',
+      stock: 'inventory',
+      inventory: 'inventory_2',
+      report: 'analytics',
+      setting: 'settings',
+      config: 'tune',
+      manufacturer: 'factory',
+      brand: 'branding_watermark',
+      unit: 'straighten',
+      price: 'attach_money',
+      discount: 'percent',
+      promotion: 'campaign',
+      notification: 'notifications',
+      message: 'message',
+      log: 'history',
+      audit: 'fact_check',
+      permission: 'admin_panel_settings',
+      role: 'manage_accounts',
+    };
+
+    // Check for matching patterns
+    for (const [pattern, icon] of Object.entries(iconMap)) {
+      if (name.includes(pattern)) {
+        return icon;
+      }
+    }
+
+    // Default icon
+    return 'description';
   }
 }
 
