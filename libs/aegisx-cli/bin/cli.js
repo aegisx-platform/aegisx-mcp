@@ -971,6 +971,11 @@ program
   )
   .option('--order <number>', 'App order in launcher', '0')
   .option('--with-dashboard', 'Include dashboard page', true)
+  .option(
+    '--with-master-data',
+    'Include Master Data page with ax-launcher for CRUD modules',
+    true,
+  )
   .option('--with-settings', 'Include settings page')
   .option('--with-auth', 'Include AuthGuard and AuthService', true)
   .option('--with-theme-switcher', 'Include theme switcher component')
@@ -1005,6 +1010,7 @@ program
         theme: options.theme || 'default',
         order: parseInt(options.order, 10) || 0,
         withDashboard: options.withDashboard !== false,
+        withMasterData: options.withMasterData !== false,
         withSettings: options.withSettings || false,
         withAuth: options.withAuth !== false,
         withThemeSwitcher: options.withThemeSwitcher || false,
@@ -1049,8 +1055,17 @@ program
 
         console.log(chalk.green('\n✅ Shell generated successfully!\n'));
         console.log(chalk.bold.yellow('📋 Next Steps:\n'));
-        console.log('1. Add to app.routes.ts:');
-        console.log(chalk.gray(result.routeSnippet));
+
+        // Check if route was auto-registered
+        if (result.routeRegistered) {
+          console.log(
+            chalk.green('✓ Route already registered in app.routes.ts'),
+          );
+        } else {
+          console.log('1. Add to app.routes.ts:');
+          console.log(chalk.gray(result.routeSnippet));
+        }
+
         console.log('\n2. Customize navigation in:');
         console.log(
           chalk.gray(`   ${result.outputDir}/${shellName}.config.ts\n`),

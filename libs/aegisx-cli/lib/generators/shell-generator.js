@@ -363,6 +363,16 @@ const {{_camelCase shellName}}Navigation: AxNavigationItem[] = [
     link: '/{{_kebabCase shellName}}',
   },
 
+{{#if withMasterData}}
+  // Master Data (ax-launcher for CRUD modules)
+  {
+    id: 'master-data',
+    title: 'Master Data',
+    icon: 'storage',
+    link: '/{{_kebabCase shellName}}/master-data',
+  },
+
+{{/if}}
 {{#if withSettings}}
   // Settings
   {
@@ -457,6 +467,8 @@ import { AuthGuard } from '../../core/auth';
  *
  * All routes under /{{_kebabCase shellName}} use the {{_pascalCase shellName}}ShellComponent as shell
  * with AxEnterpriseLayoutComponent for navigation.
+ *
+ * CRUD modules are auto-registered at the marked section below.
  */
 export const {{_screamingSnakeCase shellName}}_ROUTES: Route[] = [
   {
@@ -478,6 +490,19 @@ export const {{_screamingSnakeCase shellName}}_ROUTES: Route[] = [
         },
       },
 
+{{#if withMasterData}}
+      // Master Data (launcher for CRUD modules)
+      {
+        path: 'master-data',
+        loadComponent: () =>
+          import('./pages/master-data/master-data.page').then((m) => m.MasterDataPage),
+        data: {
+          title: 'Master Data',
+          description: '{{displayName}} Master Data',
+        },
+      },
+
+{{/if}}
 {{#if withSettings}}
       // Settings
       {
@@ -489,7 +514,11 @@ export const {{_screamingSnakeCase shellName}}_ROUTES: Route[] = [
           description: '{{displayName}} Settings',
         },
       },
+
 {{/if}}
+      // === AUTO-GENERATED ROUTES START ===
+      // CRUD modules will be auto-registered here by the generator
+      // === AUTO-GENERATED ROUTES END ===
     ],
   },
 ];
@@ -678,6 +707,157 @@ export class SettingsPage {}
 `;
 
 // ============================================================================
+// MASTER DATA TEMPLATES (with ax-launcher)
+// ============================================================================
+
+/**
+ * Master Data Component Template (uses ax-launcher)
+ */
+const MASTER_DATA_COMPONENT_TEMPLATE = `import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import {
+  AxLauncherComponent,
+  LauncherApp,
+  LauncherAppClickEvent,
+} from '@aegisx/ui';
+import { MASTER_DATA_ITEMS } from './master-data.config';
+
+/**
+ * Master Data Component
+ *
+ * Displays a launcher grid for all master data CRUD modules.
+ * Uses ax-launcher component for card-based navigation.
+ *
+ * Modules are configured in master-data.config.ts and can be
+ * auto-registered by CRUD generator when using --shell option.
+ */
+@Component({
+  selector: 'app-master-data',
+  standalone: true,
+  imports: [CommonModule, AxLauncherComponent],
+  template: \`
+    <div class="master-data-container">
+      <!-- Header -->
+      <div class="master-data-header">
+        <h1>Master Data</h1>
+        <p class="subtitle">Manage your {{displayName}} master data modules</p>
+      </div>
+
+      <!-- Launcher Grid -->
+      <ax-launcher
+        [apps]="masterDataItems"
+        title="Master Data Modules"
+        subtitle="Select a module to manage"
+        (appClick)="onModuleSelect($event)"
+      />
+    </div>
+  \`,
+  styles: [
+    \`
+      .master-data-container {
+        padding: var(--ax-spacing-lg, 24px);
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .master-data-header {
+        margin-bottom: var(--ax-spacing-xl, 32px);
+      }
+
+      .master-data-header h1 {
+        font-size: var(--ax-text-2xl, 1.5rem);
+        font-weight: var(--ax-font-semibold, 600);
+        color: var(--ax-text-default);
+        margin: 0 0 var(--ax-spacing-xs, 4px) 0;
+      }
+
+      .master-data-header .subtitle {
+        font-size: var(--ax-text-sm, 0.875rem);
+        color: var(--ax-text-subtle);
+        margin: 0;
+      }
+    \`,
+  ],
+})
+export class MasterDataPage {
+  private readonly router = inject(Router);
+
+  readonly masterDataItems: LauncherApp[] = MASTER_DATA_ITEMS;
+
+  /**
+   * Handle module selection from launcher
+   */
+  onModuleSelect(event: LauncherAppClickEvent): void {
+    const app = event.app;
+    if (app.route) {
+      if (event.newTab) {
+        window.open(app.route, '_blank');
+      } else {
+        this.router.navigate([app.route]);
+      }
+    } else if (app.externalUrl) {
+      window.open(app.externalUrl, '_blank');
+    }
+  }
+}
+`;
+
+/**
+ * Master Data Config Template (with auto-registration markers)
+ */
+const MASTER_DATA_CONFIG_TEMPLATE = `import { LauncherApp } from '@aegisx/ui';
+
+/**
+ * Master Data Configuration
+ *
+ * This file contains the configuration for master data modules
+ * displayed in the ax-launcher component.
+ *
+ * NOTE: CRUD generator will auto-register new modules here when using --shell option.
+ * Generator looks for the MASTER_DATA_ITEMS array and appends new entries.
+ */
+
+/**
+ * Master Data Items
+ *
+ * Each item represents a CRUD module accessible from the launcher.
+ * Generator will auto-add entries when using: --shell {{_kebabCase shellName}}
+ *
+ * Available colors: 'pink', 'peach', 'mint', 'blue', 'yellow', 'purple', 'teal', 'red', 'indigo', 'gray'
+ */
+export const MASTER_DATA_ITEMS: LauncherApp[] = [
+  // === AUTO-GENERATED ENTRIES START ===
+  // CRUD modules will be auto-registered here by the generator
+  // === AUTO-GENERATED ENTRIES END ===
+];
+`;
+
+/**
+ * Master Data Routes Template
+ */
+const MASTER_DATA_ROUTES_TEMPLATE = `import { Routes } from '@angular/router';
+
+/**
+ * Master Data Routes
+ *
+ * Main route for the master data launcher.
+ * Individual CRUD modules are loaded at the shell level, not here.
+ */
+export const MASTER_DATA_ROUTES: Routes = [
+  {
+    path: '',
+    loadComponent: () =>
+      import('./master-data.page').then((m) => m.MasterDataPage),
+    data: {
+      title: 'Master Data',
+      description: 'Master data management modules',
+    },
+  },
+];
+`;
+
+// ============================================================================
 // SIMPLE SHELL TEMPLATES
 // ============================================================================
 
@@ -815,6 +995,7 @@ class ShellGenerator {
       theme: 'default',
       order: 0,
       withDashboard: true,
+      withMasterData: true, // Master Data with ax-launcher for CRUD modules
       withSettings: false,
       withAuth: true,
       withThemeSwitcher: false,
@@ -834,6 +1015,7 @@ class ShellGenerator {
       theme,
       order,
       withDashboard,
+      withMasterData,
       withSettings,
       withAuth,
       withThemeSwitcher,
@@ -848,6 +1030,7 @@ class ShellGenerator {
       theme,
       order,
       withDashboard,
+      withMasterData,
       withSettings,
       withAuth,
       withThemeSwitcher,
@@ -944,6 +1127,25 @@ class ShellGenerator {
         });
       }
 
+      if (withMasterData) {
+        // Master Data with ax-launcher (for CRUD module navigation)
+        files.push(
+          {
+            path: 'pages/master-data/master-data.page.ts',
+            template: MASTER_DATA_COMPONENT_TEMPLATE,
+          },
+          {
+            path: 'pages/master-data/master-data.config.ts',
+            template: MASTER_DATA_CONFIG_TEMPLATE,
+          },
+        );
+        // Also create modules folder for CRUD modules
+        files.push({
+          path: 'modules/.gitkeep',
+          template: '# CRUD modules will be generated here\n',
+        });
+      }
+
       if (withSettings) {
         files.push({
           path: 'pages/settings/settings.page.ts',
@@ -978,10 +1180,20 @@ class ShellGenerator {
     // Generate route registration snippet
     const routeSnippet = this.generateRouteSnippet(context);
 
+    // Auto-register route in app.routes.ts
+    const routeResult = await this.registerShellRoute(
+      context,
+      projectRoot,
+      app,
+    );
+
     if (!dryRun) {
       console.log(`\n✅ Shell generated successfully!`);
-      console.log(`\n📋 Add to app.routes.ts:\n`);
-      console.log(routeSnippet);
+
+      if (!routeResult.success) {
+        console.log(`\n📋 Add to app.routes.ts manually:\n`);
+        console.log(routeSnippet);
+      }
     }
 
     return {
@@ -989,6 +1201,7 @@ class ShellGenerator {
       outputDir,
       files: generatedFiles,
       routeSnippet,
+      routeRegistered: routeResult.success,
       context,
     };
   }
@@ -1006,6 +1219,108 @@ class ShellGenerator {
   loadChildren: () =>
     import('./features/${shellKebab}/${shellKebab}.routes').then((m) => m.${routesName}),
 },`;
+  }
+
+  /**
+   * Auto-register shell route in app.routes.ts
+   */
+  async registerShellRoute(context, projectRoot, targetApp) {
+    const shellKebab = toKebabCase(context.shellName);
+    const routesName = `${toScreamingSnakeCase(context.shellName)}_ROUTES`;
+    const appRoutesPath = path.join(
+      projectRoot,
+      `apps/${targetApp}/src/app/app.routes.ts`,
+    );
+
+    try {
+      const content = await fs.readFile(appRoutesPath, 'utf8');
+
+      // Check if route already exists
+      if (content.includes(`path: '${shellKebab}'`)) {
+        console.log(
+          `   ℹ️  Route '${shellKebab}' already registered in app.routes.ts`,
+        );
+        return { success: true, alreadyExists: true };
+      }
+
+      // Find the Error Pages section marker to insert before it
+      const errorPagesMarker =
+        '// ============================================\n  // Error Pages';
+      const featureAppsMarker = '// Feature Apps (Enterprise Shell)';
+
+      let newContent;
+
+      if (content.includes(errorPagesMarker)) {
+        // Insert before Error Pages section
+        const routeEntry = `
+  // ${context.displayName}
+  {
+    path: '${shellKebab}',
+    loadChildren: () =>
+      import('./features/${shellKebab}/${shellKebab}.routes').then(
+        (m) => m.${routesName},
+      ),
+  },
+
+  `;
+        newContent = content.replace(
+          errorPagesMarker,
+          routeEntry + errorPagesMarker,
+        );
+      } else if (content.includes(featureAppsMarker)) {
+        // Find end of Feature Apps section and insert there
+        const featureAppsIndex = content.indexOf(featureAppsMarker);
+        const afterMarker = content.substring(featureAppsIndex);
+
+        // Find the next section marker after Feature Apps
+        const nextSectionMatch = afterMarker.match(
+          /\n {2}\/\/ =+\n {2}\/\/ (?!Feature Apps)/,
+        );
+
+        if (nextSectionMatch) {
+          const insertPosition = featureAppsIndex + nextSectionMatch.index;
+          const routeEntry = `
+  // ${context.displayName}
+  {
+    path: '${shellKebab}',
+    loadChildren: () =>
+      import('./features/${shellKebab}/${shellKebab}.routes').then(
+        (m) => m.${routesName},
+      ),
+  },
+`;
+          newContent =
+            content.substring(0, insertPosition) +
+            routeEntry +
+            content.substring(insertPosition);
+        } else {
+          console.log(`   ⚠️  Could not find insertion point in app.routes.ts`);
+          return { success: false, reason: 'no-marker' };
+        }
+      } else {
+        console.log(
+          `   ⚠️  Could not find Feature Apps or Error Pages section in app.routes.ts`,
+        );
+        return { success: false, reason: 'no-marker' };
+      }
+
+      // Write updated content
+      if (this.options.dryRun) {
+        console.log(
+          `   📋 Would register route '${shellKebab}' in app.routes.ts`,
+        );
+      } else {
+        await fs.writeFile(appRoutesPath, newContent, 'utf8');
+        console.log(
+          `   ✅ Auto-registered route '${shellKebab}' in app.routes.ts`,
+        );
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.log(`   ⚠️  Could not auto-register route: ${error.message}`);
+      return { success: false, reason: error.message };
+    }
   }
 }
 

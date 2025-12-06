@@ -142,19 +142,16 @@ export const appRoutes: Route[] = [
   // ============================================
   // Feature Apps (Enterprise Shell)
   // Each feature app has its own shell component
+  // Use CLI: ./bin/cli.js shell <name> --force
   // ============================================
+
+  // Inventory
   {
     path: 'inventory',
     loadChildren: () =>
       import('./features/inventory/inventory.routes').then(
         (m) => m.INVENTORY_ROUTES,
       ),
-    canActivate: [AuthGuard],
-    data: {
-      title: 'Inventory Management',
-      description: 'Warehouse and Inventory Management System',
-      requiredPermissions: ['inventory.read', 'admin.*'],
-    },
   },
 
   // ============================================

@@ -1,0 +1,25 @@
+import { LauncherApp } from '@aegisx/ui';
+
+/**
+ * Master Data Configuration
+ *
+ * This file contains the configuration for master data modules
+ * displayed in the ax-launcher component.
+ *
+ * NOTE: CRUD generator will auto-register new modules here when using --shell option.
+ * Generator looks for the MASTER_DATA_ITEMS array and appends new entries.
+ */
+
+/**
+ * Master Data Items
+ *
+ * Each item represents a CRUD module accessible from the launcher.
+ * Generator will auto-add entries when using: --shell inventory
+ *
+ * Available colors: 'pink', 'peach', 'mint', 'blue', 'yellow', 'purple', 'teal', 'red', 'indigo', 'gray'
+ */
+export const MASTER_DATA_ITEMS: LauncherApp[] = [
+  // === AUTO-GENERATED ENTRIES START ===
+  // CRUD modules will be auto-registered here by the generator
+  // === AUTO-GENERATED ENTRIES END ===
+];

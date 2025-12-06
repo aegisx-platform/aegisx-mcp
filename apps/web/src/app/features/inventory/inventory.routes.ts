@@ -1,102 +1,52 @@
-import { Routes } from '@angular/router';
-import { InventoryShellComponent } from './inventory-shell.component';
+import { Route } from '@angular/router';
+import { AuthGuard } from '../../core/auth';
 
 /**
- * Inventory Feature Routes
+ * Inventory Routes
  *
- * Main route structure:
- * /inventory                    -> Dashboard (default)
- * /inventory/dashboard          -> Dashboard module
- * /inventory/warehouse          -> Warehouse module
- * /inventory/receiving          -> Receiving module
- * /inventory/shipping           -> Shipping module
+ * All routes under /inventory use the InventoryShellComponent as shell
+ * with AxEnterpriseLayoutComponent for navigation.
+ *
+ * CRUD modules are auto-registered at the marked section below.
  */
-export const INVENTORY_ROUTES: Routes = [
+export const INVENTORY_ROUTES: Route[] = [
   {
     path: '',
-    component: InventoryShellComponent,
+    loadComponent: () =>
+      import('./inventory-shell.component').then(
+        (m) => m.InventoryShellComponent,
+      ),
+    canActivate: [AuthGuard],
     children: [
-      // Default redirect to dashboard
+      // Dashboard (default route)
       {
         path: '',
-        redirectTo: 'dashboard',
-        pathMatch: 'full',
-      },
-
-      // Dashboard module
-      {
-        path: 'dashboard',
-        loadChildren: () =>
-          import('./modules/dashboard/dashboard.routes').then(
-            (m) => m.DASHBOARD_ROUTES,
+        loadComponent: () =>
+          import('./pages/dashboard/dashboard.page').then(
+            (m) => m.DashboardPage,
           ),
+        data: {
+          title: 'Dashboard',
+          description: 'Inventory Dashboard',
+        },
       },
 
-      // Warehouse module
-      {
-        path: 'warehouse',
-        loadChildren: () =>
-          import('./modules/warehouse/warehouse.routes').then(
-            (m) => m.WAREHOUSE_ROUTES,
-          ),
-      },
-
-      // Receiving module
-      {
-        path: 'receiving',
-        loadChildren: () =>
-          import('./modules/receiving/receiving.routes').then(
-            (m) => m.RECEIVING_ROUTES,
-          ),
-      },
-
-      // Shipping module
-      {
-        path: 'shipping',
-        loadChildren: () =>
-          import('./modules/shipping/shipping.routes').then(
-            (m) => m.SHIPPING_ROUTES,
-          ),
-      },
-
-      // Master Data module (ax-launcher for CRUD modules)
+      // Master Data (launcher for CRUD modules)
       {
         path: 'master-data',
-        loadChildren: () =>
-          import('./modules/master-data/master-data.routes').then(
-            (m) => m.MASTER_DATA_ROUTES,
+        loadComponent: () =>
+          import('./pages/master-data/master-data.page').then(
+            (m) => m.MasterDataPage,
           ),
         data: {
           title: 'Master Data',
-          description: 'Master data management modules',
+          description: 'Inventory Master Data',
         },
       },
 
-      // Drugs (Generated CRUD)
-      {
-        path: 'drugs',
-        loadChildren: () =>
-          import('./modules/drugs/drugs.routes').then((m) => m.drugsRoutes),
-        data: {
-          title: 'Drugs',
-          description: 'Drugs Management System',
-          requiredPermissions: ['drugs.read', 'admin.*'],
-        },
-      },
-
-      // Dosage Forms (Generated CRUD)
-      {
-        path: 'dosage-forms',
-        loadChildren: () =>
-          import('./modules/dosage-forms/dosage-forms.routes').then(
-            (m) => m.dosageFormsRoutes,
-          ),
-        data: {
-          title: 'Dosage Forms',
-          description: 'Dosage Forms Management System',
-          requiredPermissions: ['dosage-forms.read', 'admin.*'],
-        },
-      },
+      // === AUTO-GENERATED ROUTES START ===
+      // CRUD modules will be auto-registered here by the generator
+      // === AUTO-GENERATED ROUTES END ===
     ],
   },
 ];

@@ -2,156 +2,50 @@ import { AxNavigationItem } from '@aegisx/ui';
 import { AppConfig } from '../../shared/multi-app';
 
 /**
- * Inventory App Configuration
+ * Inventory Navigation Configuration
  *
- * Defines the inventory management app structure with sub-apps:
- * - Dashboard: Overview and KPIs
- * - Warehouse: Stock management
- * - Receiving: Goods receipt
- * - Shipping: Outbound logistics
+ * Navigation items for the Inventory app.
  */
-
-// Dashboard Sub-App Navigation
-const dashboardNavigation: AxNavigationItem[] = [
+const inventoryNavigation: AxNavigationItem[] = [
+  // Dashboard
   {
-    id: 'overview',
-    title: 'Overview',
+    id: 'dashboard',
+    title: 'Dashboard',
     icon: 'dashboard',
-    link: '/inventory/dashboard',
-    exactMatch: true,
+    link: '/inventory',
   },
-  {
-    id: 'kpis',
-    title: 'KPI Metrics',
-    icon: 'analytics',
-    link: '/inventory/dashboard/kpis',
-  },
-  {
-    id: 'alerts',
-    title: 'Stock Alerts',
-    icon: 'notifications_active',
-    link: '/inventory/dashboard/alerts',
-  },
-];
 
-// Warehouse Sub-App Navigation
-const warehouseNavigation: AxNavigationItem[] = [
+  // Master Data (ax-launcher for CRUD modules)
   {
-    id: 'stock-overview',
-    title: 'Stock Overview',
-    icon: 'inventory_2',
-    link: '/inventory/warehouse',
-    exactMatch: true,
-  },
-  {
-    id: 'locations',
-    title: 'Locations',
-    icon: 'location_on',
-    link: '/inventory/warehouse/locations',
-  },
-  {
-    id: 'stock-counts',
-    title: 'Stock Counts',
-    icon: 'calculate',
-    link: '/inventory/warehouse/counts',
-  },
-  {
-    id: 'transfers',
-    title: 'Transfers',
-    icon: 'swap_horiz',
-    link: '/inventory/warehouse/transfers',
-  },
-];
-
-// Receiving Sub-App Navigation
-const receivingNavigation: AxNavigationItem[] = [
-  {
-    id: 'pending',
-    title: 'Pending Receipts',
-    icon: 'pending_actions',
-    link: '/inventory/receiving',
-    exactMatch: true,
-  },
-  {
-    id: 'received',
-    title: 'Received',
-    icon: 'check_circle',
-    link: '/inventory/receiving/received',
-  },
-  {
-    id: 'inspection',
-    title: 'Quality Check',
-    icon: 'fact_check',
-    link: '/inventory/receiving/inspection',
-  },
-];
-
-// Master Data Sub-App Navigation (uses ax-launcher, no sidebar needed)
-const masterDataNavigation: AxNavigationItem[] = [
-  {
-    id: 'all-modules',
-    title: 'All Modules',
-    icon: 'apps',
+    id: 'master-data',
+    title: 'Master Data',
+    icon: 'storage',
     link: '/inventory/master-data',
-    exactMatch: true,
-  },
-];
-
-// Shipping Sub-App Navigation
-const shippingNavigation: AxNavigationItem[] = [
-  {
-    id: 'orders',
-    title: 'Orders',
-    icon: 'shopping_cart',
-    link: '/inventory/shipping',
-    exactMatch: true,
-  },
-  {
-    id: 'picking',
-    title: 'Picking',
-    icon: 'checklist',
-    link: '/inventory/shipping/picking',
-  },
-  {
-    id: 'packing',
-    title: 'Packing',
-    icon: 'package_2',
-    link: '/inventory/shipping/packing',
-  },
-  {
-    id: 'dispatch',
-    title: 'Dispatch',
-    icon: 'local_shipping',
-    link: '/inventory/shipping/dispatch',
   },
 ];
 
 /**
  * Inventory App Configuration
+ *
+ * Configuration following AppConfig interface for MultiAppService integration.
  */
 export const INVENTORY_APP_CONFIG: AppConfig = {
   id: 'inventory',
-  name: 'Inventory Management',
-  description: 'Warehouse and inventory management system',
-  theme: 'inventory',
+  name: 'Inventory',
+  description: 'Inventory management system',
+  theme: 'default',
   baseRoute: '/inventory',
-  defaultRoute: '/inventory/dashboard',
+  defaultRoute: '/inventory',
   showFooter: true,
-  footerContent: 'Inventory Management System - AegisX Platform',
+  footerContent: 'AegisX Platform',
 
-  // Global header actions for all sub-apps
+  // Header actions
   headerActions: [
-    {
-      id: 'scan',
-      icon: 'qr_code_scanner',
-      tooltip: 'Scan Barcode',
-      action: 'onScanBarcode',
-    },
     {
       id: 'notifications',
       icon: 'notifications',
       tooltip: 'Notifications',
-      badge: 5,
+      badge: 0,
       action: 'onNotifications',
     },
     {
@@ -162,52 +56,23 @@ export const INVENTORY_APP_CONFIG: AppConfig = {
     },
   ],
 
-  // Sub-apps configuration
+  // Single sub-app containing all navigation
   subApps: [
     {
-      id: 'dashboard',
-      name: 'Dashboard',
-      icon: 'dashboard',
-      route: '/inventory/dashboard',
-      navigation: dashboardNavigation,
+      id: 'main',
+      name: 'Inventory',
+      icon: 'apps',
+      route: '/inventory',
+      navigation: inventoryNavigation,
       isDefault: true,
-      description: 'Overview and KPIs',
-    },
-    {
-      id: 'warehouse',
-      name: 'Warehouse',
-      icon: 'warehouse',
-      route: '/inventory/warehouse',
-      navigation: warehouseNavigation,
-      description: 'Stock management and locations',
-      permissions: ['inventory.warehouse.read'],
-    },
-    {
-      id: 'receiving',
-      name: 'Receiving',
-      icon: 'move_to_inbox',
-      route: '/inventory/receiving',
-      navigation: receivingNavigation,
-      description: 'Goods receipt and quality check',
-      permissions: ['inventory.receiving.read'],
-    },
-    {
-      id: 'shipping',
-      name: 'Shipping',
-      icon: 'local_shipping',
-      route: '/inventory/shipping',
-      navigation: shippingNavigation,
-      description: 'Outbound logistics',
-      permissions: ['inventory.shipping.read'],
-    },
-    {
-      id: 'master-data',
-      name: 'Master Data',
-      icon: 'database',
-      route: '/inventory/master-data',
-      navigation: masterDataNavigation,
-      description: 'Master data modules (Drugs, Products, etc.)',
-      permissions: ['inventory.master-data.read'],
+      description: 'Inventory management system',
+      roles: ['admin'],
     },
   ],
 };
+
+/**
+ * @deprecated Use INVENTORY_APP_CONFIG instead
+ * Kept for backward compatibility
+ */
+export const INVENTORY_NAVIGATION = inventoryNavigation;

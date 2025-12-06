@@ -3190,10 +3190,10 @@ class FrontendGenerator {
     const kebabName = this.toKebabCase(moduleName);
     const title = this.fieldNameToLabel(moduleName);
 
-    // Master data config path
+    // Master data config path (shell generator creates it at pages/master-data/)
     const masterDataConfigPath = path.join(
       this.projectRoot,
-      `apps/${targetApp}/src/app/features/${shellKebab}/modules/master-data/master-data.config.ts`,
+      `apps/${targetApp}/src/app/features/${shellKebab}/pages/master-data/master-data.config.ts`,
     );
 
     try {
