@@ -86,6 +86,17 @@ const receivingNavigation: AxNavigationItem[] = [
   },
 ];
 
+// Master Data Sub-App Navigation (uses ax-launcher, no sidebar needed)
+const masterDataNavigation: AxNavigationItem[] = [
+  {
+    id: 'all-modules',
+    title: 'All Modules',
+    icon: 'apps',
+    link: '/inventory/master-data',
+    exactMatch: true,
+  },
+];
+
 // Shipping Sub-App Navigation
 const shippingNavigation: AxNavigationItem[] = [
   {
@@ -188,6 +199,15 @@ export const INVENTORY_APP_CONFIG: AppConfig = {
       navigation: shippingNavigation,
       description: 'Outbound logistics',
       permissions: ['inventory.shipping.read'],
+    },
+    {
+      id: 'master-data',
+      name: 'Master Data',
+      icon: 'database',
+      route: '/inventory/master-data',
+      navigation: masterDataNavigation,
+      description: 'Master data modules (Drugs, Products, etc.)',
+      permissions: ['inventory.master-data.read'],
     },
   ],
 };

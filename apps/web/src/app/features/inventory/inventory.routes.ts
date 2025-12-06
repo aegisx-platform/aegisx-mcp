@@ -58,6 +58,45 @@ export const INVENTORY_ROUTES: Routes = [
             (m) => m.SHIPPING_ROUTES,
           ),
       },
+
+      // Master Data module (ax-launcher for CRUD modules)
+      {
+        path: 'master-data',
+        loadChildren: () =>
+          import('./modules/master-data/master-data.routes').then(
+            (m) => m.MASTER_DATA_ROUTES,
+          ),
+        data: {
+          title: 'Master Data',
+          description: 'Master data management modules',
+        },
+      },
+
+      // Drugs (Generated CRUD)
+      {
+        path: 'drugs',
+        loadChildren: () =>
+          import('./modules/drugs/drugs.routes').then((m) => m.drugsRoutes),
+        data: {
+          title: 'Drugs',
+          description: 'Drugs Management System',
+          requiredPermissions: ['drugs.read', 'admin.*'],
+        },
+      },
+
+      // Dosage Forms (Generated CRUD)
+      {
+        path: 'dosage-forms',
+        loadChildren: () =>
+          import('./modules/dosage-forms/dosage-forms.routes').then(
+            (m) => m.dosageFormsRoutes,
+          ),
+        data: {
+          title: 'Dosage Forms',
+          description: 'Dosage Forms Management System',
+          requiredPermissions: ['dosage-forms.read', 'admin.*'],
+        },
+      },
     ],
   },
 ];

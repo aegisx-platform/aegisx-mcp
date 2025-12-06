@@ -14,20 +14,6 @@ export const PORTAL_CATEGORIES: LauncherCategory[] = [
     order: 1,
   },
   {
-    id: 'erp',
-    name: 'ERP',
-    icon: 'business',
-    description: 'Enterprise Resource Planning modules',
-    order: 2,
-  },
-  {
-    id: 'operations',
-    name: 'Operations',
-    icon: 'settings_applications',
-    description: 'Business operations and logistics',
-    order: 3,
-  },
-  {
     id: 'admin',
     name: 'Administration',
     icon: 'admin_panel_settings',

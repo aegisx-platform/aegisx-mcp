@@ -1,0 +1,97 @@
+/* Tremor-style Material Table */
+::ng-deep .tremor-table {
+  .mat-mdc-table {
+    background: var(--ax-background-default, white);
+  }
+
+  /* Sticky Header */
+  .mat-mdc-header-row {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: var(--ax-background-subtle, #f3f4f6);
+    border-bottom: 2px solid var(--ax-border-default, #d1d5db);
+  }
+
+  .mat-mdc-header-cell {
+    color: var(--ax-text-default, #1f2937);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.75rem 1.25rem;
+    border-bottom: none;
+    background-color: var(--ax-background-subtle, #f3f4f6);
+  }
+
+  .mat-mdc-cell {
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--ax-border-subtle, #e5e7eb);
+    color: var(--ax-text-default, #111827);
+  }
+
+  .mat-mdc-row {
+    transition: background-color 0.2s ease;
+  }
+
+  .mat-mdc-row:nth-child(odd) {
+    background-color: var(--ax-background-default, #ffffff);
+  }
+
+  .mat-mdc-row:nth-child(even) {
+    background-color: var(--ax-background-subtle, #f9fafb);
+  }
+
+  .mat-mdc-row:hover {
+    background-color: var(--ax-background-subtle, #f3f4f6) !important;
+  }
+
+  .mat-sort-header-arrow {
+    color: var(--ax-text-secondary, #6b7280);
+  }
+
+  .mat-mdc-checkbox .mdc-checkbox__background {
+    border-color: var(--ax-border-default, #d1d5db);
+  }
+
+  .mat-mdc-checkbox.mat-mdc-checkbox-checked .mdc-checkbox__background {
+    background-color: var(--ax-info-default, #2563eb);
+    border-color: var(--ax-info-default, #2563eb);
+  }
+}
+
+/* Paginator Tremor Style */
+::ng-deep .mat-mdc-paginator {
+  background: var(--ax-background-default, white);
+  color: var(--ax-text-secondary, #374151);
+  font-size: 0.875rem;
+}
+
+::ng-deep .mat-mdc-paginator-page-size-label,
+::ng-deep .mat-mdc-paginator-range-label {
+  color: var(--ax-text-secondary, #6b7280);
+  font-size: 0.875rem;
+}
+
+::ng-deep .mat-mdc-icon-button {
+  color: var(--ax-text-secondary, #6b7280);
+}
+
+::ng-deep .mat-mdc-icon-button:hover:not([disabled]) {
+  color: var(--ax-text-default, #111827);
+  background-color: var(--ax-background-subtle, #f3f4f6);
+}
+
+::ng-deep .mat-mdc-icon-button[disabled] {
+  color: var(--ax-text-disabled, #d1d5db);
+}
+
+/* Expandable Detail Row */
+::ng-deep .tremor-table .detail-row {
+  height: 0;
+  overflow: hidden;
+}
+
+::ng-deep .tremor-table .detail-row:hover {
+  background-color: transparent !important;
+}
