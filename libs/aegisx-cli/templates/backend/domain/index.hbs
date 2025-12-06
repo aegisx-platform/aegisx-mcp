@@ -9,7 +9,7 @@ import { {{currentRoute.camelName}}ImportRoutes } from './{{toKebabCase currentR
 import { {{ModuleName}}ImportService } from './{{toKebabCase currentRoute.camelName}}-import.service';
 {{/if}}
 {{#if (or (eq package 'enterprise') (eq package 'full'))}}
-import { ExportService } from '../../services/export.service';
+import { ExportService } from '{{servicesPath}}/export.service';
 {{/if}}
 
 // Note: FastifyInstance eventService type is declared in websocket.plugin.ts
