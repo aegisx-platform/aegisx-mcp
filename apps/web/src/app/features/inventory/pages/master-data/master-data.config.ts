@@ -20,6 +20,28 @@ import { LauncherApp } from '@aegisx/ui';
 export const SECTION_ITEMS: LauncherApp[] = [
   // === AUTO-GENERATED ENTRIES START ===
   {
+    id: 'budgets',
+    name: 'Budgets',
+    description: 'Manage budgets data',
+    icon: 'description',
+    route: '/inventory/master-data/budgets',
+    color: 'cyan',
+    status: 'active',
+    enabled: true,
+  },
+
+  {
+    id: 'bank',
+    name: 'Bank',
+    description: 'Manage bank data',
+    icon: 'description',
+    route: '/inventory/master-data/bank',
+    color: 'yellow',
+    status: 'active',
+    enabled: true,
+  },
+
+  {
     id: 'hospitals',
     name: 'Hospitals',
     description: 'Manage hospitals data',

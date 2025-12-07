@@ -60,6 +60,30 @@ export const INVENTORY_ROUTES: Route[] = [
             },
           },
           // === MASTER-DATA ROUTES START ===
+          // Budgets (Generated CRUD)
+          {
+            path: 'budgets',
+            loadChildren: () =>
+              import('./modules/budgets/budgets.routes').then(
+                (m) => m.budgetsRoutes,
+              ),
+            data: {
+              title: 'Budgets',
+              description: 'Budgets Management System',
+              requiredPermissions: ['budgets.read', 'admin.*'],
+            },
+          },
+          // Bank (Generated CRUD)
+          {
+            path: 'bank',
+            loadChildren: () =>
+              import('./modules/bank/bank.routes').then((m) => m.bankRoutes),
+            data: {
+              title: 'Bank',
+              description: 'Bank Management System',
+              requiredPermissions: ['bank.read', 'admin.*'],
+            },
+          },
           // Hospitals (Generated CRUD)
           {
             path: 'hospitals',
