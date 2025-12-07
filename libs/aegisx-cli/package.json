@@ -1,6 +1,6 @@
 {
   "name": "@aegisx/cli",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "description": "AegisX CLI - Professional CRUD Generator for Angular + Fastify. Generate full-stack modules with a single command.",
   "main": "lib/index.js",
   "bin": {
