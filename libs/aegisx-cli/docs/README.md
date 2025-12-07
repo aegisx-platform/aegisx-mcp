@@ -4,7 +4,27 @@
 
 ---
 
-## Documentation Index
+## Documentation Strategy
+
+This package has **two documentation locations**:
+
+| Location                       | Purpose                          | Audience            |
+| ------------------------------ | -------------------------------- | ------------------- |
+| `libs/aegisx-cli/docs/` (here) | Condensed guides for npm package | External npm users  |
+| `docs/crud-generator/`         | **Complete documentation**       | Monorepo developers |
+
+**For comprehensive guides, see: `docs/crud-generator/`**
+
+Key complete guides in monorepo:
+
+- **[Workflow Overview](../../../docs/crud-generator/WORKFLOW_OVERVIEW.md)** - Full CLI architecture & workflows
+- **[Command Reference](../../../docs/crud-generator/COMMAND_REFERENCE.md)** - All commands with examples
+- **[Events Guide](../../../docs/crud-generator/EVENTS_GUIDE.md)** - Complete WebSocket integration
+- **[Import Guide](../../../docs/crud-generator/IMPORT_GUIDE.md)** - Full Excel/CSV import workflow
+
+---
+
+## Documentation Index (Quick Reference)
 
 ### Getting Started
 

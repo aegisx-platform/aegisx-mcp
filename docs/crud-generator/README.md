@@ -2,6 +2,21 @@
 
 > **Automatic CRUD API generation with built-in error handling and validation**
 
+---
+
+## Documentation Location
+
+**This is the CANONICAL documentation source for CRUD Generator.**
+
+| Location                          | Purpose                | Audience            |
+| --------------------------------- | ---------------------- | ------------------- |
+| **`docs/crud-generator/`** (here) | Complete documentation | Monorepo developers |
+| `libs/aegisx-cli/docs/`           | Condensed guides       | NPM package users   |
+
+**Always write new documentation here.** The lib folder contains abbreviated versions for npm distribution.
+
+---
+
 ## 🎉 What's New in v2.1.0
 
 **HIS Mode (Hospital Information System Mode)** - New default behavior that prioritizes data accuracy over real-time speed for critical systems:
