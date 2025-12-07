@@ -434,12 +434,17 @@ async function generateCrudModule(tableName, options = {}) {
         `🔐 Generating roles and permissions for module: ${context.moduleName}`,
       );
 
+      // Auto-detect domain from dbSchema for correct migrations folder
+      // If dbSchema is not 'public', use it as the domain root
+      const autoDetectedDomain = dbSchema !== 'public' ? dbSchema : null;
+
       const roleOptions = {
         dryRun,
         force,
         useMigration: !directDb,
         directDb,
         multipleRoles,
+        domain: autoDetectedDomain, // Pass domain for permission naming and migrations folder
         // Don't pass outputDir - let role-generator detect correct path automatically
       };
 
