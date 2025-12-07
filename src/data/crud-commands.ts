@@ -226,6 +226,47 @@ export const commands: CommandInfo[] = [
         default: 'public',
         description: 'PostgreSQL schema to read table from',
       },
+      {
+        name: 'shell',
+        type: 'string',
+        description:
+          'Target shell for frontend generation (requires --target frontend)',
+      },
+      {
+        name: 'section',
+        type: 'string',
+        description: 'Target section within shell (requires --shell)',
+      },
+      {
+        name: 'smart-stats',
+        type: 'boolean',
+        default: false,
+        description: 'Enable smart statistics detection for dashboard cards',
+      },
+      {
+        name: 'direct-db',
+        type: 'boolean',
+        default: false,
+        description: 'Write roles directly to database instead of migration',
+      },
+      {
+        name: 'no-roles',
+        type: 'boolean',
+        default: false,
+        description: 'Skip role/permission generation',
+      },
+      {
+        name: 'migration-only',
+        type: 'boolean',
+        default: false,
+        description: 'Generate only the migration file (for role permissions)',
+      },
+      {
+        name: 'multiple-roles',
+        type: 'boolean',
+        default: false,
+        description: 'Generate multiple role levels (admin, manager, viewer)',
+      },
     ],
     examples: [
       '# Basic backend generation',
@@ -254,6 +295,18 @@ export const commands: CommandInfo[] = [
       '',
       '# Dry run to preview',
       'pnpm run crud -- articles --dry-run',
+      '',
+      '# Frontend generation for specific shell and section',
+      './bin/cli.js generate drugs --target frontend --shell inventory --section master-data --force',
+      '',
+      '# Generate with smart statistics for dashboard',
+      './bin/cli.js generate orders --target frontend --shell sales --smart-stats --force',
+      '',
+      '# Generate backend with multiple roles',
+      'pnpm run crud -- invoices --multiple-roles --force',
+      '',
+      '# Skip role generation',
+      'pnpm run crud -- temp_data --no-roles --force',
     ],
     notes: [
       'Always use -- separator before table name when using pnpm scripts',
@@ -261,6 +314,8 @@ export const commands: CommandInfo[] = [
       'Use snake_case for table names (auto-converted to kebab-case)',
       'For domain generation, initialize domain first: pnpm run domain:init -- <domain>',
       'Domain auto-detect: prompts to initialize if domain not found',
+      'Use --shell and --section for App Shell integration',
+      'Use --smart-stats to auto-detect statistics fields for dashboard cards',
     ],
   },
   {
@@ -317,6 +372,167 @@ export const commands: CommandInfo[] = [
       '',
       '# Show specific template',
       './bin/cli.js templates --show controller',
+    ],
+  },
+  {
+    name: 'shell',
+    description: 'Generate App Shell for organizing frontend features',
+    usage: './bin/cli.js shell <shell-name> [options]',
+    options: [
+      {
+        name: 'type',
+        alias: 't',
+        type: 'string',
+        default: 'simple',
+        description: 'Shell type',
+        choices: ['simple', 'enterprise', 'multi-app'],
+      },
+      {
+        name: 'app',
+        alias: 'a',
+        type: 'string',
+        default: 'web',
+        description: 'Target app',
+        choices: ['web', 'admin'],
+      },
+      {
+        name: 'name',
+        alias: 'n',
+        type: 'string',
+        description: 'Display name for the shell',
+      },
+      {
+        name: 'theme',
+        type: 'string',
+        default: 'default',
+        description: 'Theme preset',
+        choices: ['default', 'indigo', 'teal', 'rose'],
+      },
+      {
+        name: 'with-dashboard',
+        type: 'boolean',
+        default: false,
+        description: 'Include dashboard page',
+      },
+      {
+        name: 'with-master-data',
+        type: 'boolean',
+        default: false,
+        description: 'Include Master Data page with ax-launcher',
+      },
+      {
+        name: 'with-settings',
+        type: 'boolean',
+        default: false,
+        description: 'Include settings page',
+      },
+      {
+        name: 'with-auth',
+        type: 'boolean',
+        default: false,
+        description: 'Include AuthGuard and AuthService',
+      },
+      {
+        name: 'with-theme-switcher',
+        type: 'boolean',
+        default: false,
+        description: 'Include theme switcher component',
+      },
+      {
+        name: 'force',
+        alias: 'f',
+        type: 'boolean',
+        default: false,
+        description: 'Force overwrite existing files',
+      },
+      {
+        name: 'dry-run',
+        alias: 'd',
+        type: 'boolean',
+        default: false,
+        description: 'Preview files without creating',
+      },
+    ],
+    examples: [
+      '# Generate simple shell',
+      './bin/cli.js shell inventory --app web --force',
+      '',
+      '# Generate enterprise shell with all features',
+      './bin/cli.js shell hr --type enterprise --with-dashboard --with-master-data --force',
+      '',
+      '# Generate shell with theme',
+      './bin/cli.js shell finance --theme indigo --with-settings --force',
+      '',
+      '# Preview shell generation',
+      './bin/cli.js shell crm --dry-run',
+    ],
+    notes: [
+      'Shell types: simple (basic layout), enterprise (with sidebar), multi-app (tenant-aware)',
+      'Use --with-master-data for ax-launcher integration',
+      'Shells organize features into logical groupings',
+      'After creating shell, use section command to add sections',
+    ],
+  },
+  {
+    name: 'section',
+    description: 'Generate section within an App Shell',
+    usage: './bin/cli.js section <shell-name> <section-name> [options]',
+    options: [
+      {
+        name: 'app',
+        alias: 'a',
+        type: 'string',
+        default: 'web',
+        description: 'Target app',
+        choices: ['web', 'admin'],
+      },
+      {
+        name: 'name',
+        alias: 'n',
+        type: 'string',
+        description: 'Display name for the section',
+      },
+      {
+        name: 'force',
+        alias: 'f',
+        type: 'boolean',
+        default: false,
+        description: 'Force overwrite existing files',
+      },
+      {
+        name: 'dry-run',
+        alias: 'd',
+        type: 'boolean',
+        default: false,
+        description: 'Preview files without creating',
+      },
+    ],
+    examples: [
+      '# Add master-data section to inventory shell',
+      './bin/cli.js section inventory master-data --force',
+      '',
+      '# Add reports section with custom name',
+      './bin/cli.js section hr reports --name "HR Reports" --force',
+      '',
+      '# Preview section generation',
+      './bin/cli.js section finance transactions --dry-run',
+    ],
+    notes: [
+      'Sections organize features within a shell',
+      'Common sections: master-data, transactions, reports, settings',
+      'Section creates routes and navigation entries',
+      'Use generate command with --shell and --section to add CRUD features',
+    ],
+  },
+  {
+    name: 'shell-types',
+    description: 'Show available shell types and their features',
+    usage: './bin/cli.js shell-types',
+    options: [],
+    examples: ['# Show all shell types', './bin/cli.js shell-types'],
+    notes: [
+      'Lists: simple, enterprise, multi-app shell types',
+      'Shows features included in each type',
     ],
   },
 ];
@@ -523,6 +739,13 @@ export function buildCommand(
     dryRun?: boolean;
     domain?: string;
     schema?: string;
+    shell?: string;
+    section?: string;
+    smartStats?: boolean;
+    directDb?: boolean;
+    noRoles?: boolean;
+    migrationOnly?: boolean;
+    multipleRoles?: boolean;
   },
 ): string {
   const parts: string[] = [];
@@ -563,6 +786,36 @@ export function buildCommand(
 
   if (options.withEvents && options.target === 'frontend') {
     parts.push('--with-events');
+  }
+
+  // Shell integration options (for frontend)
+  if (options.shell && options.target === 'frontend') {
+    parts.push(`--shell ${options.shell}`);
+  }
+
+  if (options.section && options.target === 'frontend') {
+    parts.push(`--section ${options.section}`);
+  }
+
+  if (options.smartStats && options.target === 'frontend') {
+    parts.push('--smart-stats');
+  }
+
+  // Role/permission options (for backend)
+  if (options.directDb && options.target !== 'frontend') {
+    parts.push('--direct-db');
+  }
+
+  if (options.noRoles && options.target !== 'frontend') {
+    parts.push('--no-roles');
+  }
+
+  if (options.migrationOnly && options.target !== 'frontend') {
+    parts.push('--migration-only');
+  }
+
+  if (options.multipleRoles && options.target !== 'frontend') {
+    parts.push('--multiple-roles');
   }
 
   if (options.force) {
