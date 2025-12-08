@@ -1994,6 +1994,12 @@ class FrontendGenerator {
         hasIsAvailableField: fieldNames.includes('is_available'),
         hasEnabledField: fieldNames.includes('enabled'),
         hasIsEnabledField: fieldNames.includes('is_enabled'),
+        // Breadcrumb items for navigation
+        breadcrumbItems: this.generateBreadcrumbItems({
+          shell: options.shell || this.options.shell,
+          section: options.section || this.options.section,
+          moduleName: kebabName,
+        }),
       };
 
       // Prepare output directory
@@ -2803,6 +2809,93 @@ class FrontendGenerator {
   formatLabel(value) {
     // Convert 'draft' -> 'Draft', 'published' -> 'Published'
     return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+  }
+
+  /**
+   * Format module name from kebab-case to Title Case
+   * Example: 'budget-reservations' -> 'Budget Reservations'
+   */
+  formatModuleName(kebabCase) {
+    if (!kebabCase || typeof kebabCase !== 'string') return '';
+    return kebabCase
+      .split('-')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
+  /**
+   * Get display label for shell
+   * Example: 'inventory' -> 'Inventory'
+   */
+  getShellLabel(shell) {
+    if (!shell) return '';
+    const labels = {
+      inventory: 'Inventory',
+      hr: 'Human Resources',
+      finance: 'Finance',
+    };
+    return labels[shell] || this.formatModuleName(shell);
+  }
+
+  /**
+   * Get display label for section
+   * Example: 'master-data' -> 'Master Data', 'budget' -> 'Budget'
+   */
+  getSectionLabel(section) {
+    if (!section) return '';
+    const labels = {
+      'master-data': 'Master Data',
+      budget: 'Budget',
+      operations: 'Operations',
+      procurement: 'Procurement',
+      distribution: 'Distribution',
+    };
+    return labels[section] || this.formatModuleName(section);
+  }
+
+  /**
+   * Generate breadcrumb items array for a module
+   * Follows pattern: Home → Shell → Section → Module
+   *
+   * @param {Object} options - Options object
+   * @param {string} options.shell - Shell name (e.g., 'inventory')
+   * @param {string} options.section - Section name (e.g., 'budget', 'master-data')
+   * @param {string} options.moduleName - Module name in kebab-case (e.g., 'budget-reservations')
+   * @returns {Array} Breadcrumb items array
+   */
+  generateBreadcrumbItems({ shell, section, moduleName }) {
+    const breadcrumbs = [
+      {
+        label: 'Home',
+        url: '/',
+      },
+    ];
+
+    // Add shell level (if exists)
+    if (shell) {
+      const shellLabel = this.getShellLabel(shell);
+      breadcrumbs.push({
+        label: shellLabel,
+        url: `/${shell}`,
+      });
+    }
+
+    // Add section level (if exists)
+    if (section && shell) {
+      const sectionLabel = this.getSectionLabel(section);
+      breadcrumbs.push({
+        label: sectionLabel,
+        url: `/${shell}/${section}`,
+      });
+    }
+
+    // Add module level (current page - no URL)
+    const moduleLabel = this.formatModuleName(moduleName);
+    breadcrumbs.push({
+      label: moduleLabel,
+    });
+
+    return breadcrumbs;
   }
 
   ensureDirectoryExists(dirPath) {

@@ -23,7 +23,7 @@ import {
 })
 export class BudgetService {
   private http = inject(HttpClient);
-  private baseUrl = '/inventory/operations/budgets';
+  private baseUrl = '/inventory/master-data/budgets';
 
   // ===== SIGNALS FOR STATE MANAGEMENT =====
 

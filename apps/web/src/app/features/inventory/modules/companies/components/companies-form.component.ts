@@ -35,6 +35,7 @@ import {
   CreateCompanieRequest,
   UpdateCompanieRequest,
 } from '../types/companies.types';
+// CRUD-GENERATOR-TAG: Foreign Key Service Import
 
 export type CompanieFormMode = 'create' | 'edit';
 
@@ -135,7 +136,7 @@ export interface CompanieFormData {
                 <mat-label>Bank Id</mat-label>
                 <input
                   matInput
-                  type="text"
+                  type="dropdown"
                   formControlName="bank_id"
                   placeholder="Enter bank id"
                 />
@@ -306,6 +307,7 @@ export interface CompanieFormData {
 })
 export class CompanieFormComponent implements OnInit, OnChanges {
   private fb = inject(FormBuilder);
+  // CRUD-GENERATOR-TAG: Foreign Key Service Injection
 
   @Input() mode: CompanieFormMode = 'create';
   @Input() initialData?: Companie;
@@ -315,6 +317,7 @@ export class CompanieFormComponent implements OnInit, OnChanges {
   @Output() formCancel = new EventEmitter<void>();
 
   private originalFormValue: any;
+  // CRUD-GENERATOR-TAG: Foreign Key Options State
 
   companiesForm: FormGroup = this.fb.group({
     company_code: ['', [Validators.required]],
@@ -333,6 +336,7 @@ export class CompanieFormComponent implements OnInit, OnChanges {
   });
 
   ngOnInit() {
+    // CRUD-GENERATOR-TAG: Load Foreign Key Options
     if (this.mode === 'edit' && this.initialData) {
       this.populateForm(this.initialData);
     }

@@ -130,7 +130,15 @@ export class DrugPackRatiosListComponent {
       url: '/',
     },
     {
-      label: 'DrugPackRatios',
+      label: 'Inventory',
+      url: '/inventory',
+    },
+    {
+      label: 'Master Data',
+      url: '/inventory/master-data',
+    },
+    {
+      label: 'Drug Pack Ratios',
     },
   ];
 

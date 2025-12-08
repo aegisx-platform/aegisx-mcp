@@ -65,6 +65,7 @@ import {
   BudgetPlanItemViewDialogComponent,
   BudgetPlanItemViewDialogData,
 } from './budget-plan-items-view.dialog';
+import { BudgetPlanItemImportDialogComponent } from './budget-plan-items-import.dialog';
 import {
   SharedExportComponent,
   ExportOptions,
@@ -129,7 +130,15 @@ export class BudgetPlanItemsListComponent {
       url: '/',
     },
     {
-      label: 'BudgetPlanItems',
+      label: 'Inventory',
+      url: '/inventory',
+    },
+    {
+      label: 'Budget',
+      url: '/inventory/budget',
+    },
+    {
+      label: 'Budget Plan Items',
     },
   ];
 
@@ -786,6 +795,22 @@ export class BudgetPlanItemsListComponent {
 
     dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
+        this.reloadTrigger.update((n) => n + 1);
+      }
+    });
+  }
+
+  openImportDialog() {
+    const dialogRef = this.dialog.open(BudgetPlanItemImportDialogComponent, {
+      width: '900px',
+      maxHeight: '90vh',
+    });
+
+    dialogRef.afterClosed().subscribe((result: boolean) => {
+      if (result) {
+        this.snackBar.open('Import completed successfully', 'Close', {
+          duration: 3000,
+        });
         this.reloadTrigger.update((n) => n + 1);
       }
     });

@@ -130,7 +130,15 @@ export class BudgetAllocationsListComponent {
       url: '/',
     },
     {
-      label: 'BudgetAllocations',
+      label: 'Inventory',
+      url: '/inventory',
+    },
+    {
+      label: 'Budget',
+      url: '/inventory/budget',
+    },
+    {
+      label: 'Budget Allocations',
     },
   ];
 

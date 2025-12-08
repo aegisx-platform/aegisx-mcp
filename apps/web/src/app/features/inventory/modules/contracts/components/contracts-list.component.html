@@ -1,0 +1,454 @@
+<div class="min-h-screen bg-[var(--ax-background-subtle)] p-6">
+  <div class="max-w-7xl mx-auto space-y-4">
+    <!-- Breadcrumb -->
+    <ax-breadcrumb [items]="breadcrumbItems"></ax-breadcrumb>
+
+    <!-- Header with Stats -->
+    <app-contracts-list-header
+      [stats]="stats()"
+      [loading]="contractsService.loading()"
+      [hasError]="!!contractsService.error()"
+      (createClicked)="openCreateDialog()"
+      (importClicked)="openImportDialog()"
+    ></app-contracts-list-header>
+
+    <!-- Filters Panel (hide when any error exists) -->
+    @if (!contractsService.error()) {
+      <ax-card variant="outlined" size="md" [flat]="true">
+        <app-contracts-list-filters
+          [activeFilterCount]="getActiveFilterCount()"
+          [loading]="contractsService.loading()"
+          [(searchTerm)]="searchTerm"
+          [(quickFilter)]="quickFilter"
+          [(contract_numberFilter)]="contract_numberFilter"
+          [(fiscal_yearFilter)]="fiscal_yearFilter"
+          [(egp_numberFilter)]="egp_numberFilter"
+          [(project_numberFilter)]="project_numberFilter"
+          [(is_activeFilter)]="is_activeFilter"
+          (searchClicked)="search()"
+          (refreshClicked)="refresh()"
+          (clearSearchClicked)="clearSearch()"
+          (applyFiltersClicked)="applyFilterImmediate()"
+          (clearAllClicked)="clearAllFilters()"
+          (quickFilterChange)="setQuickFilter($event)"
+          (dateFilterChange)="onDateFilterChange($event)"
+        >
+          <!-- Export Button Slot -->
+          <app-export
+            export
+            [exportService]="exportServiceAdapter"
+            [currentFilters]="getExportFilters()"
+            [selectedItems]="selectedItems()"
+            [availableFields]="availableExportFields"
+            [moduleName]="'contracts'"
+            (exportStarted)="onExportStarted($event)"
+            (exportCompleted)="onExportCompleted($event)"
+          ></app-export>
+
+          <!-- Filter Chips Slot -->
+          <div filter-chips>
+            @if (searchTermSignal()) {
+              <span
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[var(--ax-info-faint)] text-[var(--ax-info-default)] rounded-md text-xs font-medium"
+              >
+                <mat-icon class="!text-sm !w-4 !h-4">search</mat-icon>
+                Search: {{ searchTermSignal() }}
+                <button
+                  (click)="searchTermSignal.set('')"
+                  class="hover:text-[var(--ax-info-hover)]"
+                >
+                  <mat-icon class="!text-sm !w-3 !h-3">close</mat-icon>
+                </button>
+              </span>
+            }
+            @if (is_activeFilterSignal() === true) {
+              <span
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[var(--ax-success-faint)] text-[var(--ax-success-default)] rounded-md text-xs font-medium"
+              >
+                <mat-icon class="!text-sm !w-4 !h-4">check_circle</mat-icon>
+                Is Active: Yes
+                <button
+                  (click)="
+                    is_activeInputSignal.set(undefined);
+                    is_activeFilterSignal.set(undefined);
+                    quickFilter = 'all'
+                  "
+                  class="hover:text-[var(--ax-success-hover)]"
+                >
+                  <mat-icon class="!text-sm !w-3 !h-3">close</mat-icon>
+                </button>
+              </span>
+            }
+            @if (is_activeFilterSignal() === false) {
+              <span
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[var(--ax-error-faint)] text-[var(--ax-error-default)] rounded-md text-xs font-medium"
+              >
+                <mat-icon class="!text-sm !w-4 !h-4">block</mat-icon>
+                Is Active: No
+                <button
+                  (click)="
+                    is_activeInputSignal.set(undefined);
+                    is_activeFilterSignal.set(undefined);
+                    quickFilter = 'all'
+                  "
+                  class="hover:text-[var(--ax-error-hover)]"
+                >
+                  <mat-icon class="!text-sm !w-3 !h-3">close</mat-icon>
+                </button>
+              </span>
+            }
+          </div>
+        </app-contracts-list-filters>
+      </ax-card>
+    }
+
+    <!-- Content Area: Show based on state priority -->
+    <!-- Priority 1: Error (403 or other errors) -->
+    @if (contractsService.error() && !contractsService.loading()) {
+      <ax-error-state
+        [statusCode]="contractsService.lastErrorStatus()"
+        [message]="contractsService.error() || ''"
+        [actions]="[
+          {
+            label: 'Try Again',
+            icon: 'refresh',
+            primary: true,
+            callback: refresh.bind(this),
+          },
+        ]"
+      >
+      </ax-error-state>
+    }
+
+    <!-- Priority 2: Loading (initial load) - with delay to prevent flicker -->
+    @else if (showLoadingIndicator() && dataSource.data.length === 0) {
+      <div
+        class="bg-[var(--ax-background-default)] rounded-lg border border-[var(--ax-border-default)] p-12 text-center"
+      >
+        <mat-spinner class="!mx-auto" [diameter]="40"></mat-spinner>
+        <p class="text-sm text-[var(--ax-text-secondary)] mt-4">
+          Loading contracts...
+        </p>
+      </div>
+    }
+
+    <!-- Priority 3: Empty State (no data, no error, not loading) -->
+    @else if (!contractsService.loading() && dataSource.data.length === 0) {
+      <ax-empty-state
+        icon="menu_book"
+        title="No contracts found"
+        [message]="
+          hasActiveFilters()
+            ? 'Try adjusting your search or filters'
+            : 'Get started by adding your first contract'
+        "
+        [actions]="
+          hasActiveFilters()
+            ? [
+                {
+                  label: 'Clear filters',
+                  primary: true,
+                  callback: clearAllFilters.bind(this),
+                },
+              ]
+            : [
+                {
+                  label: 'Add your first contract',
+                  icon: 'add',
+                  primary: true,
+                  callback: openCreateDialog.bind(this),
+                },
+              ]
+        "
+      >
+      </ax-empty-state>
+    }
+
+    <!-- Priority 4: Table with Data -->
+    @else {
+      <mat-card
+        appearance="outlined"
+        class="overflow-hidden tremor-table relative shadow-sm !border-[var(--ax-border-emphasis)]"
+      >
+        <!-- Loading Overlay (for refresh while data exists) - with delay -->
+        @if (showLoadingIndicator() && dataSource.data.length > 0) {
+          <div
+            class="absolute inset-0 bg-[var(--ax-background-default)]/75 backdrop-blur-sm flex items-center justify-center z-10"
+          >
+            <div class="text-center">
+              <mat-spinner class="!mx-auto" [diameter]="40"></mat-spinner>
+              <p class="text-sm text-[var(--ax-text-secondary)] mt-4">
+                Refreshing...
+              </p>
+            </div>
+          </div>
+        }
+
+        <!-- Bulk Actions -->
+        @if (selection.selected.length > 0) {
+          <div
+            class="bg-[var(--ax-info-surface)] border-b border-[var(--ax-info-border)] px-4 py-2 flex items-center justify-between"
+          >
+            <span class="text-sm font-medium text-[var(--ax-info-default)]"
+              >{{ selection.selected.length }} selected</span
+            >
+            <button mat-flat-button color="warn" (click)="bulkDelete()">
+              <mat-icon>delete</mat-icon>
+              Delete selected
+            </button>
+          </div>
+        }
+
+        <!-- Table Container -->
+        <div class="overflow-x-auto">
+          <table
+            mat-table
+            [dataSource]="dataSource"
+            matSort
+            multiTemplateDataRows
+            class="w-full"
+          >
+            <!-- Checkbox Column -->
+            <ng-container matColumnDef="select">
+              <th mat-header-cell *matHeaderCellDef class="w-12">
+                <mat-checkbox
+                  (change)="$event ? toggleAllRows() : null"
+                  [checked]="selection.hasValue() && isAllSelected()"
+                  [indeterminate]="selection.hasValue() && !isAllSelected()"
+                  aria-label="Select all contracts"
+                ></mat-checkbox>
+              </th>
+              <td
+                mat-cell
+                *matCellDef="let row"
+                (click)="$event.stopPropagation()"
+              >
+                <mat-checkbox
+                  (change)="$event ? selection.toggle(row) : null"
+                  [checked]="selection.isSelected(row)"
+                ></mat-checkbox>
+              </td>
+            </ng-container>
+
+            <!-- Contract Number Column -->
+            <ng-container matColumnDef="contract_number">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                Contract Number
+              </th>
+              <td mat-cell *matCellDef="let contract" class="!py-3">
+                <div class="flex items-center gap-2">
+                  @if (contract.description) {
+                    <button
+                      type="button"
+                      mat-icon-button
+                      (click)="
+                        toggleExpandRow(contract); $event.stopPropagation()
+                      "
+                      class="!w-7 !h-7 !min-w-0 flex-shrink-0"
+                      [attr.aria-label]="
+                        isRowExpanded(contract)
+                          ? 'Collapse description'
+                          : 'Expand description'
+                      "
+                    >
+                      <mat-icon class="!text-xl">{{
+                        isRowExpanded(contract) ? 'expand_less' : 'expand_more'
+                      }}</mat-icon>
+                    </button>
+                  } @else {
+                    <div class="w-7 flex-shrink-0"></div>
+                  }
+                  <div class="flex-1 min-w-0">
+                    <div
+                      class="text-sm font-semibold text-[var(--ax-text-default)]"
+                    >
+                      {{ contract.contract_number }}
+                    </div>
+                    @if (contract.description && !isRowExpanded(contract)) {
+                      <div
+                        class="text-xs text-[var(--ax-text-secondary)] mt-0.5 truncate"
+                      >
+                        {{ contract.description | slice: 0 : 80 }}...
+                      </div>
+                    }
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Contract Type Column -->
+            <ng-container matColumnDef="contract_type">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                Contract Type
+              </th>
+              <td mat-cell *matCellDef="let contract">
+                <span class="text-md text-[var(--ax-text-secondary)]">
+                  {{ contract.contract_type }}
+                </span>
+              </td>
+            </ng-container>
+
+            <!-- Vendor Id Column -->
+            <ng-container matColumnDef="vendor_id">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                Vendor Id
+              </th>
+              <td mat-cell *matCellDef="let contract">
+                <span class="text-md text-[var(--ax-text-secondary)]">
+                  {{ contract.vendor_id }}
+                </span>
+              </td>
+            </ng-container>
+
+            <!-- Start Date Column -->
+            <ng-container matColumnDef="start_date">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                Start Date
+              </th>
+              <td mat-cell *matCellDef="let contract">
+                <span class="text-md text-[var(--ax-text-secondary)]">
+                  {{ contract.start_date | date: 'short' }}
+                </span>
+              </td>
+            </ng-container>
+
+            <!-- End Date Column -->
+            <ng-container matColumnDef="end_date">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                End Date
+              </th>
+              <td mat-cell *matCellDef="let contract">
+                <span class="text-md text-[var(--ax-text-secondary)]">
+                  {{ contract.end_date | date: 'short' }}
+                </span>
+              </td>
+            </ng-container>
+
+            <!-- Total Value Column -->
+            <ng-container matColumnDef="total_value">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                Total Value
+              </th>
+              <td mat-cell *matCellDef="let contract">
+                <span class="text-md text-[var(--ax-text-secondary)]">
+                  {{ contract.total_value }}
+                </span>
+              </td>
+            </ng-container>
+
+            <!-- Expanded Detail Column -->
+            <ng-container matColumnDef="expandedDetail">
+              <td
+                mat-cell
+                *matCellDef="let contract"
+                [attr.colspan]="displayedColumns.length"
+                class="!p-0 !border-b-0"
+              >
+                @if (isRowExpanded(contract)) {
+                  <div
+                    class="pl-16 pr-5 py-3 bg-[var(--ax-background-subtle)]/50"
+                    [@detailExpand]
+                  >
+                    <div class="max-w-4xl">
+                      <div class="flex items-start gap-2">
+                        <mat-icon
+                          class="text-[var(--ax-text-disabled)] !text-base mt-0.5"
+                          >description</mat-icon
+                        >
+                        <div class="flex-1">
+                          <h4
+                            class="text-xs font-semibold text-[var(--ax-text-secondary)] mb-1.5"
+                          >
+                            Description
+                          </h4>
+                          <p
+                            class="text-sm text-[var(--ax-text-secondary)] leading-relaxed"
+                          >
+                            {{ contract.description }}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </td>
+            </ng-container>
+
+            <!-- Actions Column -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef class="text-right w-20">
+                Actions
+              </th>
+              <td
+                mat-cell
+                *matCellDef="let contract"
+                class="text-right"
+                (click)="$event.stopPropagation()"
+              >
+                <button
+                  type="button"
+                  mat-icon-button
+                  [matMenuTriggerFor]="actionMenu"
+                  matTooltip="Actions"
+                  matTooltipPosition="above"
+                  aria-label="More actions"
+                >
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #actionMenu="matMenu" [hasBackdrop]="false">
+                  <button
+                    type="button"
+                    mat-menu-item
+                    (click)="onViewContract(contract)"
+                  >
+                    <mat-icon>visibility</mat-icon><span>View</span>
+                  </button>
+                  <button
+                    type="button"
+                    mat-menu-item
+                    (click)="onEditContract(contract)"
+                  >
+                    <mat-icon>edit</mat-icon><span>Edit</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    mat-menu-item
+                    (click)="onDeleteContract(contract)"
+                  >
+                    <mat-icon class="text-[var(--ax-error-default)]"
+                      >delete</mat-icon
+                    ><span>Delete</span>
+                  </button>
+                </mat-menu>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr
+              mat-row
+              *matRowDef="let row; columns: displayedColumns"
+              class="hover:bg-[var(--ax-background-subtle)]"
+              [attr.data-contract-id]="row.id"
+            ></tr>
+            <tr
+              mat-row
+              *matRowDef="let row; columns: ['expandedDetail']"
+              class="detail-row"
+            ></tr>
+          </table>
+        </div>
+
+        <!-- Paginator -->
+        <mat-paginator
+          [length]="contractsService.totalContract()"
+          [pageSize]="25"
+          [pageSizeOptions]="[10, 25, 50, 100]"
+          [pageIndex]="0"
+          showFirstLastButtons
+          class="border-t border-[var(--ax-border-default)]"
+        ></mat-paginator>
+      </mat-card>
+    }
+  </div>
+</div>

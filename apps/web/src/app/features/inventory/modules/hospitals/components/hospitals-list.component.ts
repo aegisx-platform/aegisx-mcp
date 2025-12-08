@@ -127,6 +127,14 @@ export class HospitalsListComponent {
       url: '/',
     },
     {
+      label: 'Inventory',
+      url: '/inventory',
+    },
+    {
+      label: 'Master Data',
+      url: '/inventory/master-data',
+    },
+    {
       label: 'Hospitals',
     },
   ];

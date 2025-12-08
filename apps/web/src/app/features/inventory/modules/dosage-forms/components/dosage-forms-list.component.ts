@@ -127,7 +127,15 @@ export class DosageFormsListComponent {
       url: '/',
     },
     {
-      label: 'DosageForms',
+      label: 'Inventory',
+      url: '/inventory',
+    },
+    {
+      label: 'Master Data',
+      url: '/inventory/master-data',
+    },
+    {
+      label: 'Dosage Forms',
     },
   ];
 

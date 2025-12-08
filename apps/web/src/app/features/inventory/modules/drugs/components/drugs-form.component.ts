@@ -121,7 +121,7 @@ export interface DrugFormData {
                 <mat-label>Generic Id</mat-label>
                 <input
                   matInput
-                  type="text"
+                  type="dropdown"
                   formControlName="generic_id"
                   placeholder="Enter generic id"
                 />

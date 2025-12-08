@@ -130,7 +130,15 @@ export class DrugComponentsListComponent {
       url: '/',
     },
     {
-      label: 'DrugComponents',
+      label: 'Inventory',
+      url: '/inventory',
+    },
+    {
+      label: 'Master Data',
+      url: '/inventory/master-data',
+    },
+    {
+      label: 'Drug Components',
     },
   ];
 

@@ -3,7 +3,6 @@ import type { FastifyInstance, FastifyPluginOptions } from 'fastify';
 
 import inventoryPlugin from './inventory';
 import inventoryTransactionsPlugin from './inventoryTransactions';
-import budgetsPlugin from './budgets';
 import drugDistributionsPlugin from './drugDistributions';
 import drugDistributionItemsPlugin from './drugDistributionItems';
 import drugReturnsPlugin from './drugReturns';
@@ -34,10 +33,6 @@ export default fp(
     await fastify.register(inventoryTransactionsPlugin, {
       ...options,
       prefix: `${prefix}/inventory-transactions`,
-    });
-    await fastify.register(budgetsPlugin, {
-      ...options,
-      prefix: `${prefix}/budgets`,
     });
     await fastify.register(drugDistributionsPlugin, {
       ...options,
@@ -73,7 +68,7 @@ export default fp(
     });
 
     fastify.addHook('onReady', async () => {
-      fastify.log.info(`Operations domain loaded with 11 modules at ${prefix}`);
+      fastify.log.info(`Operations domain loaded with 10 modules at ${prefix}`);
     });
   },
   {

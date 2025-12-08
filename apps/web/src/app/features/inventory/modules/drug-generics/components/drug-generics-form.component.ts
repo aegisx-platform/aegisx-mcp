@@ -35,6 +35,7 @@ import {
   CreateDrugGenericRequest,
   UpdateDrugGenericRequest,
 } from '../types/drug-generics.types';
+// CRUD-GENERATOR-TAG: Foreign Key Service Import
 
 export type DrugGenericFormMode = 'create' | 'edit';
 
@@ -141,7 +142,7 @@ export interface DrugGenericFormData {
                 <mat-label>Dosage Form Id</mat-label>
                 <input
                   matInput
-                  type="text"
+                  type="dropdown"
                   formControlName="dosage_form_id"
                   placeholder="Enter dosage form id"
                 />
@@ -152,7 +153,7 @@ export interface DrugGenericFormData {
                 <mat-label>Strength Unit Id</mat-label>
                 <input
                   matInput
-                  type="text"
+                  type="dropdown"
                   formControlName="strength_unit_id"
                   placeholder="Enter strength unit id"
                 />
@@ -251,6 +252,7 @@ export interface DrugGenericFormData {
 })
 export class DrugGenericFormComponent implements OnInit, OnChanges {
   private fb = inject(FormBuilder);
+  // CRUD-GENERATOR-TAG: Foreign Key Service Injection
 
   @Input() mode: DrugGenericFormMode = 'create';
   @Input() initialData?: DrugGeneric;
@@ -260,6 +262,7 @@ export class DrugGenericFormComponent implements OnInit, OnChanges {
   @Output() formCancel = new EventEmitter<void>();
 
   private originalFormValue: any;
+  // CRUD-GENERATOR-TAG: Foreign Key Options State
 
   drugGenericsForm: FormGroup = this.fb.group({
     working_code: ['', [Validators.required]],
@@ -273,6 +276,7 @@ export class DrugGenericFormComponent implements OnInit, OnChanges {
   });
 
   ngOnInit() {
+    // CRUD-GENERATOR-TAG: Load Foreign Key Options
     if (this.mode === 'edit' && this.initialData) {
       this.populateForm(this.initialData);
     }

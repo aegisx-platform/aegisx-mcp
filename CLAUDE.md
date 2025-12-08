@@ -95,6 +95,32 @@ Before implementing frontend:
 
 See [docs/development/API_CALLING_STANDARD.md](./docs/development/API_CALLING_STANDARD.md)
 
+### 9. Domain Architecture (CRITICAL)
+
+**ก่อนสร้าง CRUD module ใหม่ MUST อ่านคู่มือ domain architecture!**
+
+```bash
+# ใช้ Domain Checker ก่อน generate ทุกครั้ง
+bash /tmp/check_domain.sh TABLE_NAME
+```
+
+**กฎทองคำ:**
+
+- **Master-Data** = Lookup/Reference data (budget_types, drugs, locations)
+- **Operations** = Transactional data (budget_allocations, inventory_transactions)
+- **Section** (frontend) ≠ **Domain** (backend) - ต่างกันได้!
+
+**Documentation:**
+
+- [Domain Architecture Guide](./docs/architecture/DOMAIN_ARCHITECTURE_GUIDE.md) - คู่มือฉบับเต็ม
+- [Quick Domain Reference](./docs/architecture/QUICK_DOMAIN_REFERENCE.md) - อ้างอิงด่วน
+- [Architecture README](./docs/architecture/README.md) - ภาพรวม + เครื่องมือ
+
+**Common Mistake:**
+
+- ❌ ใส่ `budgets` ใน operations (ผิด!)
+- ✅ ใส่ `budgets` ใน master-data (ถูก - เป็น configuration)
+
 ---
 
 ## Quick Reference

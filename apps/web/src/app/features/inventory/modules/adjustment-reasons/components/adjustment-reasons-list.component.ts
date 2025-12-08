@@ -130,7 +130,15 @@ export class AdjustmentReasonsListComponent {
       url: '/',
     },
     {
-      label: 'AdjustmentReasons',
+      label: 'Inventory',
+      url: '/inventory',
+    },
+    {
+      label: 'Master Data',
+      url: '/inventory/master-data',
+    },
+    {
+      label: 'Adjustment Reasons',
     },
   ];
 

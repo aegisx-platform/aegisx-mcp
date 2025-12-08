@@ -65,6 +65,7 @@ import {
   BudgetReservationViewDialogComponent,
   BudgetReservationViewDialogData,
 } from './budget-reservations-view.dialog';
+import { BudgetReservationImportDialogComponent } from './budget-reservations-import.dialog';
 import {
   SharedExportComponent,
   ExportOptions,
@@ -129,7 +130,15 @@ export class BudgetReservationsListComponent {
       url: '/',
     },
     {
-      label: 'BudgetReservations',
+      label: 'Inventory',
+      url: '/inventory',
+    },
+    {
+      label: 'Budget',
+      url: '/inventory/budget',
+    },
+    {
+      label: 'Budget Reservations',
     },
   ];
 
@@ -518,6 +527,22 @@ export class BudgetReservationsListComponent {
 
     dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
+        this.reloadTrigger.update((n) => n + 1);
+      }
+    });
+  }
+
+  openImportDialog() {
+    const dialogRef = this.dialog.open(BudgetReservationImportDialogComponent, {
+      width: '900px',
+      maxHeight: '90vh',
+    });
+
+    dialogRef.afterClosed().subscribe((result: boolean) => {
+      if (result) {
+        this.snackBar.open('Import completed successfully', 'Close', {
+          duration: 3000,
+        });
         this.reloadTrigger.update((n) => n + 1);
       }
     });

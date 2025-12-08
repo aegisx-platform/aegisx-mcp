@@ -9,6 +9,7 @@
       [loading]="budgetPlanItemsService.loading()"
       [hasError]="!!budgetPlanItemsService.error()"
       (createClicked)="openCreateDialog()"
+      (importClicked)="openImportDialog()"
     ></app-budget-plan-items-list-header>
 
     <!-- Filters Panel (hide when any error exists) -->

@@ -130,7 +130,15 @@ export class DrugFocusListsListComponent {
       url: '/',
     },
     {
-      label: 'DrugFocusLists',
+      label: 'Inventory',
+      url: '/inventory',
+    },
+    {
+      label: 'Master Data',
+      url: '/inventory/master-data',
+    },
+    {
+      label: 'Drug Focus Lists',
     },
   ];
 

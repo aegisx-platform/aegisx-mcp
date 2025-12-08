@@ -436,6 +436,8 @@ Feature Matrix:
             schema: options.schema || 'public',
             domain: options.domain,
             outputDir: outputDir,
+            shell: options.shell,
+            section: options.section,
           },
         );
 
@@ -451,6 +453,8 @@ Feature Matrix:
             withExport: options.withExport,
             withEvents: options.withEvents,
             includeAuditFields: options.includeAuditFields,
+            shell: options.shell,
+            section: options.section,
           },
         );
 
@@ -560,6 +564,8 @@ Feature Matrix:
                 app: options.app || 'web',
                 schema: options.schema || 'public',
                 domain: options.domain,
+                shell: options.shell,
+                section: options.section,
               },
             );
             // Use shell-based registration if --shell is specified

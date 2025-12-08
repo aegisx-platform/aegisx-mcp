@@ -23,6 +23,15 @@ import { AxKpiCardComponent } from '@aegisx/ui';
       </div>
       <div class="flex items-center gap-2">
         <button
+          mat-stroked-button
+          color="primary"
+          (click)="importClicked.emit()"
+          [disabled]="loading || hasError"
+        >
+          <mat-icon>upload_file</mat-icon>
+          Import
+        </button>
+        <button
           mat-flat-button
           color="primary"
           (click)="createClicked.emit()"
@@ -86,6 +95,7 @@ export class BudgetPlanItemsListHeaderComponent {
   @Input() hasError = false; // General error state (from service)
 
   @Output() createClicked = new EventEmitter<void>();
+  @Output() importClicked = new EventEmitter<void>();
 
   getPercentage(count: number): number {
     return this.stats.total > 0

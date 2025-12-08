@@ -1,5 +1,6 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 
 export interface BreadcrumbItem {
@@ -18,11 +19,13 @@ export type BreadcrumbSize = 'sm' | 'md' | 'lg';
   styleUrls: ['./breadcrumb.component.scss'],
 })
 export class AxBreadcrumbComponent {
+  private router = inject(Router);
+
   @Input() items: BreadcrumbItem[] = [];
   @Input() separator = '/';
   @Input() separatorIcon?: string; // Material icon name for separator (e.g., 'chevron_right')
   @Input() size: BreadcrumbSize = 'md'; // Breadcrumb size (font size)
-  @Output() itemClick = new EventEmitter<BreadcrumbItem>();
+  @Output() itemClick = new EventEmitter<BreadcrumbItem>(); // Optional event for custom handling
 
   get breadcrumbClasses(): string {
     return `ax-breadcrumb ax-breadcrumb-${this.size}`;
@@ -31,6 +34,9 @@ export class AxBreadcrumbComponent {
   onItemClick(item: BreadcrumbItem, event: MouseEvent): void {
     if (item.url) {
       event.preventDefault();
+      // Auto-navigate using Angular Router
+      this.router.navigate([item.url]);
+      // Still emit event for backward compatibility or custom handling
       this.itemClick.emit(item);
     }
   }

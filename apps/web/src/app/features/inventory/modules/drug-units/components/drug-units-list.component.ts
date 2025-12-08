@@ -127,7 +127,15 @@ export class DrugUnitsListComponent {
       url: '/',
     },
     {
-      label: 'DrugUnits',
+      label: 'Inventory',
+      url: '/inventory',
+    },
+    {
+      label: 'Master Data',
+      url: '/inventory/master-data',
+    },
+    {
+      label: 'Drug Units',
     },
   ];
 

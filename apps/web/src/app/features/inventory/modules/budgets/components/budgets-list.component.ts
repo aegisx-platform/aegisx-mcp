@@ -127,6 +127,14 @@ export class BudgetsListComponent {
       url: '/',
     },
     {
+      label: 'Inventory',
+      url: '/inventory',
+    },
+    {
+      label: 'Budget',
+      url: '/inventory/budget',
+    },
+    {
       label: 'Budgets',
     },
   ];

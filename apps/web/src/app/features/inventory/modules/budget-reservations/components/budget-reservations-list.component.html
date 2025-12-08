@@ -9,6 +9,7 @@
       [loading]="budgetReservationsService.loading()"
       [hasError]="!!budgetReservationsService.error()"
       (createClicked)="openCreateDialog()"
+      (importClicked)="openImportDialog()"
     ></app-budget-reservations-list-header>
 
     <!-- Filters Panel (hide when any error exists) -->

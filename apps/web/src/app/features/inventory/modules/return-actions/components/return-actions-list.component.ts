@@ -130,7 +130,15 @@ export class ReturnActionsListComponent {
       url: '/',
     },
     {
-      label: 'ReturnActions',
+      label: 'Inventory',
+      url: '/inventory',
+    },
+    {
+      label: 'Master Data',
+      url: '/inventory/master-data',
+    },
+    {
+      label: 'Return Actions',
     },
   ];
 

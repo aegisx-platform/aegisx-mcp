@@ -130,13 +130,14 @@ export class {{pascalCaseHelper moduleName}}ListComponent {
 
   // Breadcrumb configuration
   breadcrumbItems: BreadcrumbItem[] = [
+{{#each breadcrumbItems}}
     {
-      label: 'Home',
-      url: '/',
+      label: '{{this.label}}',
+{{#if this.url}}
+      url: '{{this.url}}',
+{{/if}}
     },
-    {
-      label: '{{pascalCaseHelper moduleName}}',
-    },
+{{/each}}
   ];
 
   // Mat-Table setup
