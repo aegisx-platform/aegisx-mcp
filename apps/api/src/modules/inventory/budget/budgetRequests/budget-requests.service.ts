@@ -799,6 +799,257 @@ export class BudgetRequestsService extends BaseService<
     }
   }
 
+  /**
+   * Export budget request items to SSCJ Excel format
+   * @param id Budget request ID
+   * @returns Excel buffer
+   */
+  async exportSSCJ(id: string | number): Promise<Buffer> {
+    const request = await this.budgetRequestsRepository.findById(id);
+
+    if (!request) {
+      throw new Error('Budget request not found');
+    }
+
+    const knex = (this.budgetRequestsRepository as any).knex;
+
+    // Fetch all items for this budget request
+    const items = await knex('inventory.budget_request_items')
+      .where({ budget_request_id: id })
+      .orderBy('line_number', 'asc');
+
+    // Calculate total amount
+    const totalAmount = items.reduce((sum: number, item: any) => {
+      const amount = (item.requested_qty || 0) * (item.unit_price || 0);
+      return sum + amount;
+    }, 0);
+
+    // Import ExcelJS
+    const ExcelJS = await import('exceljs');
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('แผนงบประมาณยา');
+
+    // Set column widths
+    worksheet.columns = [
+      { width: 6 }, // A: ลำดับ
+      { width: 10 }, // B: รหัส
+      { width: 30 }, // C: รายการ
+      { width: 10 }, // D: ขนาดบรรจุ
+      { width: 8 }, // E: หน่วย
+      { width: 8 }, // F: ปี2566
+      { width: 8 }, // G: ปี2567
+      { width: 8 }, // H: ปี2568
+      { width: 10 }, // I: ประมาณการ2569
+      { width: 10 }, // J: คงคลัง
+      { width: 10 }, // K: ประมาณการจัดซื้อ
+      { width: 12 }, // L: ราคา/หน่วย
+      { width: 10 }, // M: งบประมาณ จำนวน
+      { width: 15 }, // N: งบประมาณ มูลค่า
+      { width: 10 }, // O: เงินบำรุง จำนวน
+      { width: 15 }, // P: เงินบำรุง มูลค่า
+      { width: 10 }, // Q: Q1 จำนวน
+      { width: 15 }, // R: Q1 มูลค่า
+      { width: 10 }, // S: (spacing)
+      { width: 10 }, // T: (spacing)
+      { width: 10 }, // U: Q2 จำนวน
+      { width: 15 }, // V: Q2 มูลค่า
+      { width: 10 }, // W: (spacing)
+      { width: 10 }, // X: (spacing)
+      { width: 10 }, // Y: Q3 จำนวน
+      { width: 15 }, // Z: Q3 มูลค่า
+      { width: 10 }, // AA: (spacing)
+      { width: 10 }, // AB: (spacing)
+      { width: 10 }, // AC: Q4 จำนวน
+      { width: 15 }, // AD: Q4 มูลค่า
+      { width: 10 }, // AE: (spacing)
+      { width: 10 }, // AF: (spacing)
+      { width: 10 }, // AG: Total จำนวน
+      { width: 15 }, // AH: Total มูลค่า
+    ];
+
+    // Row 1: Title (merged A1:AH1)
+    worksheet.mergeCells('A1:AH1');
+    const titleCell = worksheet.getCell('A1');
+    titleCell.value = 'แผนงบประมาณจัดซื้อยา ปีงบประมาณ 2569';
+    titleCell.font = { bold: true, size: 16 };
+    titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    worksheet.getRow(1).height = 25;
+
+    // Row 2: Summary
+    const row2 = worksheet.getRow(2);
+    row2.getCell(12).value = 'รวมมูลค่าจัดซื้อ';
+    row2.getCell(12).font = { bold: true };
+    row2.getCell(16).value = totalAmount;
+    row2.getCell(16).numFmt = '#,##0.00';
+    row2.getCell(16).font = { bold: true };
+    row2.height = 20;
+
+    // Row 3: Main headers
+    const row3 = worksheet.getRow(3);
+    const headers3 = [
+      { col: 1, value: 'ลำดับ', merge: null },
+      { col: 2, value: 'รหัส', merge: null },
+      { col: 3, value: 'รายการ', merge: null },
+      { col: 4, value: 'ขนาดบรรจุ', merge: null },
+      { col: 5, value: 'หน่วยนับ', merge: null },
+      { col: 6, value: 'ข้อมูลอัตราการใช้ย้อนหลัง 3ปี', merge: 'F3:H3' },
+      { col: 9, value: 'ประมาณการใช้ปีงบฯ 2569', merge: null },
+      { col: 10, value: 'ยอดยาคงคลัง', merge: null },
+      { col: 11, value: 'ประมาณการจัดซื้อฯ', merge: null },
+      { col: 12, value: 'ราคา/หน่วยขนาดบรรจุ', merge: null },
+      { col: 13, value: 'จัดซื้อด้วยเงินงบประมาณ', merge: 'M3:N3' },
+      { col: 15, value: 'จัดซื้อด้วยเงินบำรุง', merge: 'O3:P3' },
+      { col: 17, value: 'งวดที่ 1 ต.ค.2568', merge: 'Q3:T3' },
+      { col: 21, value: 'งวดที่ 2 ม.ค.2569', merge: 'U3:X3' },
+      { col: 25, value: 'งวดที่ 3 เม.ย 2569', merge: 'Y3:AB3' },
+      { col: 29, value: 'งวดที่ 4 ก.ค 2569', merge: 'AC3:AF3' },
+      { col: 33, value: 'ยอดรวม', merge: 'AG3:AH3' },
+    ];
+
+    headers3.forEach((h) => {
+      const cell = row3.getCell(h.col);
+      cell.value = h.value;
+      cell.font = { bold: true };
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      cell.border = {
+        top: { style: 'thin' },
+        left: { style: 'thin' },
+        bottom: { style: 'thin' },
+        right: { style: 'thin' },
+      };
+      if (h.merge) {
+        worksheet.mergeCells(h.merge);
+      }
+    });
+    row3.height = 20;
+
+    // Row 4: Sub-headers
+    const row4 = worksheet.getRow(4);
+    const headers4 = [
+      { col: 1, value: '', border: true }, // ลำดับ
+      { col: 2, value: '', border: true }, // รหัส
+      { col: 3, value: '', border: true }, // รายการ
+      { col: 4, value: '', border: true }, // ขนาดบรรจุ
+      { col: 5, value: '', border: true }, // หน่วยนับ
+      { col: 6, value: 'ปีงบฯ2566', border: true },
+      { col: 7, value: 'ปีงบฯ2567', border: true },
+      { col: 8, value: 'ปีงบฯ2568', border: true },
+      { col: 9, value: '', border: true }, // ประมาณการ
+      { col: 10, value: '', border: true }, // คงคลัง
+      { col: 11, value: '', border: true }, // ประมาณการจัดซื้อ
+      { col: 12, value: '', border: true }, // ราคา
+      { col: 13, value: 'จำนวน', border: true },
+      { col: 14, value: 'มูลค่า', border: true },
+      { col: 15, value: 'จำนวน', border: true },
+      { col: 16, value: 'มูลค่า', border: true },
+      { col: 17, value: 'แผนจัดซื้อ', border: true },
+      { col: 18, value: 'มูลค่า', border: true },
+      { col: 19, value: '', border: true },
+      { col: 20, value: '', border: true },
+      { col: 21, value: 'แผนจัดซื้อ', border: true },
+      { col: 22, value: 'มูลค่า', border: true },
+      { col: 23, value: '', border: true },
+      { col: 24, value: '', border: true },
+      { col: 25, value: 'แผนจัดซื้อ', border: true },
+      { col: 26, value: 'มูลค่า', border: true },
+      { col: 27, value: '', border: true },
+      { col: 28, value: '', border: true },
+      { col: 29, value: 'แผนจัดซื้อ', border: true },
+      { col: 30, value: 'มูลค่า', border: true },
+      { col: 31, value: '', border: true },
+      { col: 32, value: '', border: true },
+      { col: 33, value: 'แผนจัดซื้อ', border: true },
+      { col: 34, value: 'มูลค่า', border: true },
+    ];
+
+    headers4.forEach((h) => {
+      const cell = row4.getCell(h.col);
+      cell.value = h.value;
+      cell.font = { bold: true };
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      if (h.border) {
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' },
+        };
+      }
+    });
+    row4.height = 20;
+
+    // Data rows (starting from row 5)
+    let rowIndex = 5;
+    items.forEach((item: any) => {
+      const row = worksheet.getRow(rowIndex);
+
+      // Calculate amounts
+      const unitPrice = item.unit_price || 0;
+      const budgetQty = 0; // Not specified in database
+      const budgetAmount = budgetQty * unitPrice;
+      const fundQty = 0; // Not specified in database
+      const fundAmount = fundQty * unitPrice;
+      const q1Amount = (item.q1_qty || 0) * unitPrice;
+      const q2Amount = (item.q2_qty || 0) * unitPrice;
+      const q3Amount = (item.q3_qty || 0) * unitPrice;
+      const q4Amount = (item.q4_qty || 0) * unitPrice;
+      const totalQty = item.requested_qty || 0;
+      const totalAmount = totalQty * unitPrice;
+
+      // Set values
+      row.getCell(1).value = item.line_number || rowIndex - 4; // A: ลำดับ
+      row.getCell(2).value = item.generic_code || ''; // B: รหัส
+      row.getCell(3).value = item.generic_name || ''; // C: รายการ
+      row.getCell(4).value = item.package_size || ''; // D: ขนาดบรรจุ
+      row.getCell(5).value = item.unit || ''; // E: หน่วย
+      row.getCell(6).value = item.usage_year_2566 || 0; // F: ปี2566
+      row.getCell(7).value = item.usage_year_2567 || 0; // G: ปี2567
+      row.getCell(8).value = item.usage_year_2568 || 0; // H: ปี2568
+      row.getCell(9).value = item.estimated_usage_2569 || 0; // I: ประมาณการ2569
+      row.getCell(10).value = item.current_stock || 0; // J: คงคลัง
+      row.getCell(11).value = item.estimated_purchase || 0; // K: ประมาณการจัดซื้อ
+      row.getCell(12).value = unitPrice; // L: ราคา
+      row.getCell(13).value = budgetQty; // M: งบประมาณ จำนวน
+      row.getCell(14).value = budgetAmount; // N: งบประมาณ มูลค่า
+      row.getCell(15).value = fundQty; // O: เงินบำรุง จำนวน
+      row.getCell(16).value = fundAmount; // P: เงินบำรุง มูลค่า
+      row.getCell(17).value = item.q1_qty || 0; // Q: Q1 จำนวน
+      row.getCell(18).value = q1Amount; // R: Q1 มูลค่า
+      row.getCell(21).value = item.q2_qty || 0; // U: Q2 จำนวน
+      row.getCell(22).value = q2Amount; // V: Q2 มูลค่า
+      row.getCell(25).value = item.q3_qty || 0; // Y: Q3 จำนวน
+      row.getCell(26).value = q3Amount; // Z: Q3 มูลค่า
+      row.getCell(29).value = item.q4_qty || 0; // AC: Q4 จำนวน
+      row.getCell(30).value = q4Amount; // AD: Q4 มูลค่า
+      row.getCell(33).value = totalQty; // AG: Total จำนวน
+      row.getCell(34).value = totalAmount; // AH: Total มูลค่า
+
+      // Apply number formatting
+      [6, 7, 8, 9, 10, 11, 13, 15, 17, 21, 25, 29, 33].forEach((col) => {
+        row.getCell(col).numFmt = '#,##0';
+      });
+      [12, 14, 16, 18, 22, 26, 30, 34].forEach((col) => {
+        row.getCell(col).numFmt = '#,##0.00';
+      });
+
+      // Apply borders
+      for (let col = 1; col <= 34; col++) {
+        row.getCell(col).border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' },
+        };
+      }
+
+      rowIndex++;
+    });
+
+    // Generate buffer
+    const buffer = await workbook.xlsx.writeBuffer();
+    return Buffer.from(buffer);
+  }
+
   // ===== BUSINESS LOGIC HOOKS =====
   // Override these methods in child classes for custom validation/processing
 

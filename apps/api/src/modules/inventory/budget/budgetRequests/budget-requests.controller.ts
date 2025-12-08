@@ -571,6 +571,70 @@ export class BudgetRequestsController {
     }
   }
 
+  /**
+   * Export budget request items to SSCJ Excel format
+   * GET /budgetRequests/:id/export-sscj
+   */
+  async exportSSCJ(
+    request: FastifyRequest<{
+      Params: Static<typeof BudgetRequestsIdParamSchema>;
+      Querystring: { format?: 'xlsx' | 'csv' };
+    }>,
+    reply: FastifyReply,
+  ) {
+    const { id } = request.params;
+    const format = request.query.format || 'xlsx';
+
+    request.log.info(
+      { budgetRequestId: id, format },
+      'Exporting budget request to SSCJ format',
+    );
+
+    try {
+      // Get budget request to generate filename
+      const budgetRequest = await this.budgetRequestsService.findById(
+        id,
+        {} as any,
+      );
+
+      if (!budgetRequest) {
+        return reply.code(404).error('NOT_FOUND', 'Budget request not found');
+      }
+
+      // Generate Excel buffer
+      const buffer = await this.budgetRequestsService.exportSSCJ(id);
+
+      // Generate filename
+      const requestNumber = budgetRequest.request_number || id;
+      const fiscalYear = budgetRequest.fiscal_year || '2569';
+      const filename = `แผนงบประมาณยา_ปี${fiscalYear}_${requestNumber}.xlsx`;
+
+      request.log.info(
+        { budgetRequestId: id, filename, size: buffer.length },
+        'SSCJ export successful',
+      );
+
+      // Set response headers for file download
+      reply.header(
+        'Content-Type',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      );
+      reply.header(
+        'Content-Disposition',
+        `attachment; filename="${encodeURIComponent(filename)}"`,
+      );
+      reply.header('Content-Length', buffer.length);
+
+      return reply.send(buffer);
+    } catch (error: any) {
+      request.log.error(
+        { budgetRequestId: id, error: error.message },
+        'Failed to export SSCJ',
+      );
+      return reply.code(500).error('EXPORT_FAILED', error.message);
+    }
+  }
+
   // ===== PRIVATE TRANSFORMATION METHODS =====
 
   /**

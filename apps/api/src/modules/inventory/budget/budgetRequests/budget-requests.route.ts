@@ -337,4 +337,40 @@ export async function budgetRequestsRoutes(
     ],
     handler: controller.importExcel.bind(controller),
   });
+
+  // Export SSCJ Excel format
+  fastify.get('/:id/export-sscj', {
+    schema: {
+      tags: ['Inventory: Budget Requests'],
+      summary: 'Export budget request to SSCJ Excel format',
+      description:
+        'Export budget request items to SSCJ (Provincial Public Health Office) Excel format for submission. ' +
+        'Generates a formatted Excel file with 34 columns including line items, historical usage, quarterly distribution, and calculated amounts.',
+      params: BudgetRequestsIdParamSchema,
+      querystring: Type.Object({
+        format: Type.Optional(
+          Type.Union([Type.Literal('xlsx'), Type.Literal('csv')], {
+            default: 'xlsx',
+            description: 'Export format (default: xlsx)',
+          }),
+        ),
+      }),
+      response: {
+        200: {
+          type: 'string',
+          format: 'binary',
+          description: 'Excel file download',
+        },
+        404: SchemaRefs.NotFound,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [
+      fastify.authenticate,
+      fastify.verifyPermission('budgetRequests', 'read'), // Using read permission for export
+    ],
+    handler: controller.exportSSCJ.bind(controller),
+  });
 }
