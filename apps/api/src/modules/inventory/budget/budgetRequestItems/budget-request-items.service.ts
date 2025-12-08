@@ -82,6 +82,70 @@ export class BudgetRequestItemsService extends BaseService<
     id: string | number,
     data: UpdateBudgetRequestItems,
   ): Promise<BudgetRequestItems | null> {
+    // Get existing item to check budget_request_id
+    const existing = await this.budgetRequestItemsRepository.findById(id);
+    if (!existing) {
+      return null;
+    }
+
+    // Hook 1: Validate DRAFT status
+    const budgetRequestId =
+      data.budget_request_id || existing.budget_request_id;
+    const budgetRequest = await (this.budgetRequestItemsRepository as any)
+      .db('budget_requests')
+      .where('id', budgetRequestId)
+      .first();
+
+    if (!budgetRequest) {
+      const error = new Error('Budget request not found') as any;
+      error.statusCode = 404;
+      error.code = 'BUDGET_REQUEST_NOT_FOUND';
+      throw error;
+    }
+
+    if (budgetRequest.status !== 'DRAFT') {
+      const error = new Error(
+        'Cannot update items when budget request status is not DRAFT',
+      ) as any;
+      error.statusCode = 422;
+      error.code = 'BUDGET_REQUEST_NOT_DRAFT';
+      throw error;
+    }
+
+    // Hook 2: Validate quarterly split
+    const q1_qty = data.q1_qty !== undefined ? data.q1_qty : existing.q1_qty;
+    const q2_qty = data.q2_qty !== undefined ? data.q2_qty : existing.q2_qty;
+    const q3_qty = data.q3_qty !== undefined ? data.q3_qty : existing.q3_qty;
+    const q4_qty = data.q4_qty !== undefined ? data.q4_qty : existing.q4_qty;
+    const requested_qty =
+      data.requested_qty !== undefined
+        ? data.requested_qty
+        : existing.requested_qty;
+
+    if (requested_qty !== null && requested_qty !== undefined) {
+      const quarterlyTotal = q1_qty + q2_qty + q3_qty + q4_qty;
+      if (quarterlyTotal !== requested_qty) {
+        const error = new Error(
+          `Quarterly total (${quarterlyTotal}) must equal requested_qty (${requested_qty})`,
+        ) as any;
+        error.statusCode = 422;
+        error.code = 'INVALID_QUARTERLY_SPLIT';
+        throw error;
+      }
+    }
+
+    // Hook 3: Auto-calculate requested_amount
+    const unit_price =
+      data.unit_price !== undefined ? data.unit_price : existing.unit_price;
+    if (
+      requested_qty !== undefined &&
+      requested_qty !== null &&
+      unit_price !== undefined &&
+      unit_price !== null
+    ) {
+      data.requested_amount = requested_qty * unit_price;
+    }
+
     const budgetRequestItems = await super.update(id, data);
 
     return budgetRequestItems;
@@ -134,6 +198,46 @@ export class BudgetRequestItemsService extends BaseService<
 
     // ===== ERROR HANDLING: BUSINESS RULES VALIDATION =====
 
+    // Hook 1: Validate DRAFT status - can only add items when budget request is in DRAFT status
+    const budgetRequest = await (this.budgetRequestItemsRepository as any)
+      .db('budget_requests')
+      .where('id', data.budget_request_id)
+      .first();
+
+    if (!budgetRequest) {
+      const error = new Error('Budget request not found') as any;
+      error.statusCode = 404;
+      error.code = 'BUDGET_REQUEST_NOT_FOUND';
+      throw error;
+    }
+
+    if (budgetRequest.status !== 'DRAFT') {
+      const error = new Error(
+        'Cannot add items when budget request status is not DRAFT',
+      ) as any;
+      error.statusCode = 422;
+      error.code = 'BUDGET_REQUEST_NOT_DRAFT';
+      throw error;
+    }
+
+    // Hook 2: Validate quarterly split - Q1 + Q2 + Q3 + Q4 must equal requested_qty
+    if (data.requested_qty !== undefined && data.requested_qty !== null) {
+      const q1 = data.q1_qty || 0;
+      const q2 = data.q2_qty || 0;
+      const q3 = data.q3_qty || 0;
+      const q4 = data.q4_qty || 0;
+      const quarterlyTotal = q1 + q2 + q3 + q4;
+
+      if (quarterlyTotal !== data.requested_qty) {
+        const error = new Error(
+          `Quarterly total (${quarterlyTotal}) must equal requested_qty (${data.requested_qty})`,
+        ) as any;
+        error.statusCode = 422;
+        error.code = 'INVALID_QUARTERLY_SPLIT';
+        throw error;
+      }
+    }
+
     // Business rule: requested_amount must be positive
     if (data.requested_amount !== undefined && data.requested_amount !== null) {
       if (Number(data.requested_amount) < 0) {
@@ -169,10 +273,35 @@ export class BudgetRequestItemsService extends BaseService<
   protected async beforeCreate(
     data: CreateBudgetRequestItems,
   ): Promise<CreateBudgetRequestItems> {
-    // Add custom business logic here
+    // Hook 3: Auto-calculate requested_amount = requested_qty × unit_price
+    let requested_amount = data.requested_amount;
+    if (
+      data.requested_qty !== undefined &&
+      data.requested_qty !== null &&
+      data.unit_price !== undefined &&
+      data.unit_price !== null
+    ) {
+      requested_amount = data.requested_qty * data.unit_price;
+    }
+
+    // Hook 4: Auto-assign line_number for Excel export ordering
+    let line_number = data.line_number;
+    if (line_number === undefined || line_number === null) {
+      // Get the max line_number for this budget_request_id
+      const maxLineResult = await (this.budgetRequestItemsRepository as any)
+        .db('budget_request_items')
+        .where('budget_request_id', data.budget_request_id)
+        .max('line_number as max_line')
+        .first();
+
+      const maxLine = maxLineResult?.max_line || 0;
+      line_number = maxLine + 1;
+    }
+
     return {
       ...data,
-      // Add default values or processing
+      requested_amount,
+      line_number,
     };
   }
 
@@ -198,8 +327,28 @@ export class BudgetRequestItemsService extends BaseService<
     id: string | number,
     existing: BudgetRequestItems,
   ): Promise<void> {
-    // Add deletion validation logic here
-    // Example: Prevent deletion if entity has dependent records
+    // Hook 1: Validate DRAFT status - can only delete items when budget request is in DRAFT status
+    const budgetRequest = await (this.budgetRequestItemsRepository as any)
+      .db('budget_requests')
+      .where('id', existing.budget_request_id)
+      .first();
+
+    if (!budgetRequest) {
+      const error = new Error('Budget request not found') as any;
+      error.statusCode = 404;
+      error.code = 'BUDGET_REQUEST_NOT_FOUND';
+      throw error;
+    }
+
+    if (budgetRequest.status !== 'DRAFT') {
+      const error = new Error(
+        'Cannot delete items when budget request status is not DRAFT',
+      ) as any;
+      error.statusCode = 422;
+      error.code = 'BUDGET_REQUEST_NOT_DRAFT';
+      throw error;
+    }
+
     // ===== ERROR HANDLING: FOREIGN KEY REFERENCE VALIDATION =====
   }
 }
