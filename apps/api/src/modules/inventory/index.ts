@@ -2,6 +2,8 @@ import fp from 'fastify-plugin';
 import type { FastifyInstance, FastifyPluginOptions } from 'fastify';
 
 import masterDataPlugin from './master-data';
+import procurementPlugin from './procurement';
+import operationsPlugin from './operations';
 
 /**
  * Inventory Domain Plugin
@@ -21,9 +23,17 @@ export default fp(
       ...options,
       prefix: `${prefix}/master-data`,
     });
+    await fastify.register(procurementPlugin, {
+      ...options,
+      prefix: `${prefix}/procurement`,
+    });
+    await fastify.register(operationsPlugin, {
+      ...options,
+      prefix: `${prefix}/operations`,
+    });
 
     fastify.addHook('onReady', async () => {
-      fastify.log.info(`Inventory domain loaded with 1 modules at ${prefix}`);
+      fastify.log.info(`Inventory domain loaded with 3 modules at ${prefix}`);
     });
   },
   {

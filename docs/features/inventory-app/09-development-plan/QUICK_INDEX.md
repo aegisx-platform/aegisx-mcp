@@ -1,8 +1,8 @@
 # INVS Development - Quick Index
 
-**Last Updated**: 2024-12-05
-**Current Phase**: Phase 1 - Database Migrations
-**Overall Progress**: 5%
+**Last Updated**: 2024-12-08
+**Current Phase**: Phase 3 - Backend APIs
+**Overall Progress**: ~40%
 
 ---
 
@@ -11,9 +11,9 @@
 | Phase                   | Status      | Progress |
 | ----------------------- | ----------- | -------- |
 | Phase 0: Setup          | DONE        | 100%     |
-| Phase 1: Database       | IN_PROGRESS | 0%       |
+| Phase 1: Database       | DONE        | 100%     |
 | Phase 2: Data Migration | NOT_STARTED | 0%       |
-| Phase 3: Backend APIs   | NOT_STARTED | 0%       |
+| Phase 3: Backend APIs   | IN_PROGRESS | 68%      |
 | Phase 4: Frontend       | NOT_STARTED | 0%       |
 
 ---
@@ -25,6 +25,14 @@
 - **[PROJECT_PROGRESS.md](./PROJECT_PROGRESS.md)** - Current progress & blockers
 - **[FEATURE_STATUS.md](./FEATURE_STATUS.md)** - Feature completion status
 
+### Implementation Specs
+
+- **[BACKEND_REMAINING_SPEC.md](./BACKEND_REMAINING_SPEC.md)** - Spec for remaining backend modules (for Haiku)
+
+### Planning Documents
+
+- **[DOCS_REFACTOR_PLAN.md](./DOCS_REFACTOR_PLAN.md)** - Future documentation restructure plan
+
 ### Phase Details
 
 - **[Phase 0: Setup](./phases/PHASE_0_SETUP.md)** - Schema & environment setup
@@ -35,8 +43,8 @@
 
 ### Checklists (Quick Reference)
 
-- **[Database Checklist](./checklists/DATABASE_CHECKLIST.md)** - 33 migrations
-- **[API Checklist](./checklists/API_CHECKLIST.md)** - 8 systems
+- **[Database Checklist](./checklists/DATABASE_CHECKLIST.md)** - 63 migrations
+- **[API Checklist](./checklists/API_CHECKLIST.md)** - 32 modules
 - **[Frontend Checklist](./checklists/FRONTEND_CHECKLIST.md)** - UI pages
 
 ---
