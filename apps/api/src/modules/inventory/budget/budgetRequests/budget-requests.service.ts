@@ -205,19 +205,115 @@ export class BudgetRequestsService extends BaseService<
       );
     }
 
-    const updated = await this.budgetRequestsRepository.update(id, {
-      status: 'FINANCE_APPROVED',
-      finance_reviewed_by: userId,
-      finance_reviewed_at: new Date(),
-      finance_comments: comments,
-    });
+    // Get knex instance from repository
+    const knex = (this.budgetRequestsRepository as any).knex;
 
-    console.log('Budget request approved by finance:', { id, userId });
+    // Use transaction to ensure atomicity
+    const trx = await knex.transaction();
 
-    // TODO: Auto-create budget_allocations (Phase 0.8)
-    // This will be implemented in the next phase
+    try {
+      // Step 1: Update budget request status
+      const updated = await trx('inventory.budget_requests')
+        .where({ id })
+        .update({
+          status: 'FINANCE_APPROVED',
+          finance_reviewed_by: userId,
+          finance_reviewed_at: new Date(),
+          finance_comments: comments,
+          updated_at: new Date(),
+        })
+        .returning('*')
+        .then((rows: any[]) => rows[0]);
 
-    return updated;
+      // Step 2: Fetch all budget_request_items for this request
+      const requestItems = await trx('inventory.budget_request_items')
+        .where({ budget_request_id: id })
+        .select('*');
+
+      console.log(
+        `Found ${requestItems.length} budget request items to process`,
+      );
+
+      // Step 3: Create or update budget_allocations for each item
+      for (const item of requestItems) {
+        const allocationData = {
+          fiscal_year: request.fiscal_year,
+          budget_id: item.budget_id,
+          department_id: request.department_id,
+          total_budget: item.requested_amount,
+          q1_budget: item.q1_amount,
+          q2_budget: item.q2_amount,
+          q3_budget: item.q3_amount,
+          q4_budget: item.q4_amount,
+          remaining_budget: item.requested_amount, // Initially, no spending
+          total_spent: 0,
+          q1_spent: 0,
+          q2_spent: 0,
+          q3_spent: 0,
+          q4_spent: 0,
+          is_active: true,
+          updated_at: new Date(),
+        };
+
+        // UPSERT: Insert or update if already exists
+        // PostgreSQL's ON CONFLICT syntax
+        await trx.raw(
+          `
+          INSERT INTO inventory.budget_allocations (
+            fiscal_year, budget_id, department_id, total_budget,
+            q1_budget, q2_budget, q3_budget, q4_budget,
+            q1_spent, q2_spent, q3_spent, q4_spent,
+            total_spent, remaining_budget, is_active, created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+          ON CONFLICT (fiscal_year, budget_id, department_id)
+          DO UPDATE SET
+            total_budget = budget_allocations.total_budget + EXCLUDED.total_budget,
+            q1_budget = budget_allocations.q1_budget + EXCLUDED.q1_budget,
+            q2_budget = budget_allocations.q2_budget + EXCLUDED.q2_budget,
+            q3_budget = budget_allocations.q3_budget + EXCLUDED.q3_budget,
+            q4_budget = budget_allocations.q4_budget + EXCLUDED.q4_budget,
+            remaining_budget = budget_allocations.remaining_budget + EXCLUDED.total_budget,
+            updated_at = NOW()
+        `,
+          [
+            allocationData.fiscal_year,
+            allocationData.budget_id,
+            allocationData.department_id,
+            allocationData.total_budget,
+            allocationData.q1_budget,
+            allocationData.q2_budget,
+            allocationData.q3_budget,
+            allocationData.q4_budget,
+            allocationData.q1_spent,
+            allocationData.q2_spent,
+            allocationData.q3_spent,
+            allocationData.q4_spent,
+            allocationData.total_spent,
+            allocationData.remaining_budget,
+            allocationData.is_active,
+          ],
+        );
+
+        console.log(
+          `Created/updated budget allocation for budget_id: ${item.budget_id}`,
+        );
+      }
+
+      // Commit transaction
+      await trx.commit();
+
+      console.log('Budget request approved by finance:', { id, userId });
+      console.log(
+        `Auto-created/updated ${requestItems.length} budget allocations`,
+      );
+
+      return updated;
+    } catch (error) {
+      // Rollback on error
+      await trx.rollback();
+      console.error('Error approving finance and creating allocations:', error);
+      throw error;
+    }
   }
 
   /**
