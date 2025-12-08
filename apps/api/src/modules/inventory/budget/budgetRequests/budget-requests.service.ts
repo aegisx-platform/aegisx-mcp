@@ -117,6 +117,153 @@ export class BudgetRequestsService extends BaseService<
     }
   }
 
+  // ===== WORKFLOW METHODS =====
+
+  /**
+   * Submit budget request for approval
+   * Status: DRAFT → SUBMITTED
+   */
+  async submit(
+    id: string | number,
+    userId: string,
+  ): Promise<BudgetRequests | null> {
+    const request = await this.budgetRequestsRepository.findById(id);
+
+    if (!request) {
+      throw new Error('Budget request not found');
+    }
+
+    if (request.status !== 'DRAFT') {
+      throw new Error(
+        `Cannot submit budget request with status: ${request.status}`,
+      );
+    }
+
+    const updated = await this.budgetRequestsRepository.update(id, {
+      status: 'SUBMITTED',
+      submitted_by: userId,
+      submitted_at: new Date(),
+    });
+
+    console.log('Budget request submitted:', { id, userId });
+
+    return updated;
+  }
+
+  /**
+   * Approve budget request by department head
+   * Status: SUBMITTED → DEPT_APPROVED
+   */
+  async approveDept(
+    id: string | number,
+    userId: string,
+    comments?: string,
+  ): Promise<BudgetRequests | null> {
+    const request = await this.budgetRequestsRepository.findById(id);
+
+    if (!request) {
+      throw new Error('Budget request not found');
+    }
+
+    if (request.status !== 'SUBMITTED') {
+      throw new Error(
+        `Cannot approve budget request with status: ${request.status}. Must be SUBMITTED.`,
+      );
+    }
+
+    const updated = await this.budgetRequestsRepository.update(id, {
+      status: 'DEPT_APPROVED',
+      dept_reviewed_by: userId,
+      dept_reviewed_at: new Date(),
+      dept_comments: comments,
+    });
+
+    console.log('Budget request approved by department:', { id, userId });
+
+    return updated;
+  }
+
+  /**
+   * Approve budget request by finance manager
+   * Status: DEPT_APPROVED → FINANCE_APPROVED
+   * This will also create budget_allocations from approved items
+   */
+  async approveFinance(
+    id: string | number,
+    userId: string,
+    comments?: string,
+  ): Promise<BudgetRequests | null> {
+    const request = await this.budgetRequestsRepository.findById(id);
+
+    if (!request) {
+      throw new Error('Budget request not found');
+    }
+
+    if (request.status !== 'DEPT_APPROVED') {
+      throw new Error(
+        `Cannot approve budget request with status: ${request.status}. Must be DEPT_APPROVED.`,
+      );
+    }
+
+    const updated = await this.budgetRequestsRepository.update(id, {
+      status: 'FINANCE_APPROVED',
+      finance_reviewed_by: userId,
+      finance_reviewed_at: new Date(),
+      finance_comments: comments,
+    });
+
+    console.log('Budget request approved by finance:', { id, userId });
+
+    // TODO: Auto-create budget_allocations (Phase 0.8)
+    // This will be implemented in the next phase
+
+    return updated;
+  }
+
+  /**
+   * Reject budget request
+   * Can reject at any stage after SUBMITTED
+   */
+  async reject(
+    id: string | number,
+    userId: string,
+    reason: string,
+  ): Promise<BudgetRequests | null> {
+    const request = await this.budgetRequestsRepository.findById(id);
+
+    if (!request) {
+      throw new Error('Budget request not found');
+    }
+
+    if (request.status === 'DRAFT' || request.status === 'REJECTED') {
+      throw new Error(
+        `Cannot reject budget request with status: ${request.status}`,
+      );
+    }
+
+    if (!reason || reason.trim().length === 0) {
+      throw new Error('Rejection reason is required');
+    }
+
+    const updated = await this.budgetRequestsRepository.update(id, {
+      status: 'REJECTED',
+      rejection_reason: reason,
+      // Store who rejected it based on current status
+      ...(request.status === 'SUBMITTED' && {
+        dept_reviewed_by: userId,
+        dept_reviewed_at: new Date(),
+      }),
+      ...(request.status === 'DEPT_APPROVED' && {
+        finance_reviewed_by: userId,
+        finance_reviewed_at: new Date(),
+      }),
+    });
+
+    console.log('Budget request rejected:', { id, userId, reason });
+
+    return updated;
+  }
+
   // ===== BUSINESS LOGIC HOOKS =====
   // Override these methods in child classes for custom validation/processing
 

@@ -264,6 +264,172 @@ export class BudgetRequestsController {
     );
   }
 
+  // ===== WORKFLOW ENDPOINTS =====
+
+  /**
+   * Submit budget request for approval
+   * POST /budgetRequests/:id/submit
+   */
+  async submit(
+    request: FastifyRequest<{
+      Params: Static<typeof BudgetRequestsIdParamSchema>;
+    }>,
+    reply: FastifyReply,
+  ) {
+    const { id } = request.params;
+    const userId = request.user?.id;
+
+    if (!userId) {
+      return reply.code(401).error('UNAUTHORIZED', 'User not authenticated');
+    }
+
+    request.log.info(
+      { budgetRequestsId: id, userId },
+      'Submitting budget request',
+    );
+
+    try {
+      const updated = await this.budgetRequestsService.submit(id, userId);
+
+      return reply.success(updated, 'Budget request submitted successfully');
+    } catch (error: any) {
+      request.log.error(
+        { error: error.message, budgetRequestsId: id },
+        'Failed to submit budget request',
+      );
+      return reply.code(400).error('SUBMISSION_FAILED', error.message);
+    }
+  }
+
+  /**
+   * Approve budget request by department head
+   * POST /budgetRequests/:id/approve-dept
+   */
+  async approveDept(
+    request: FastifyRequest<{
+      Params: Static<typeof BudgetRequestsIdParamSchema>;
+      Body: { comments?: string };
+    }>,
+    reply: FastifyReply,
+  ) {
+    const { id } = request.params;
+    const { comments } = request.body || {};
+    const userId = request.user?.id;
+
+    if (!userId) {
+      return reply.code(401).error('UNAUTHORIZED', 'User not authenticated');
+    }
+
+    request.log.info(
+      { budgetRequestsId: id, userId },
+      'Approving budget request (dept)',
+    );
+
+    try {
+      const updated = await this.budgetRequestsService.approveDept(
+        id,
+        userId,
+        comments,
+      );
+
+      return reply.success(updated, 'Budget request approved by department');
+    } catch (error: any) {
+      request.log.error(
+        { error: error.message, budgetRequestsId: id },
+        'Failed to approve budget request (dept)',
+      );
+      return reply.code(400).error('APPROVAL_FAILED', error.message);
+    }
+  }
+
+  /**
+   * Approve budget request by finance manager
+   * POST /budgetRequests/:id/approve-finance
+   */
+  async approveFinance(
+    request: FastifyRequest<{
+      Params: Static<typeof BudgetRequestsIdParamSchema>;
+      Body: { comments?: string };
+    }>,
+    reply: FastifyReply,
+  ) {
+    const { id } = request.params;
+    const { comments } = request.body || {};
+    const userId = request.user?.id;
+
+    if (!userId) {
+      return reply.code(401).error('UNAUTHORIZED', 'User not authenticated');
+    }
+
+    request.log.info(
+      { budgetRequestsId: id, userId },
+      'Approving budget request (finance)',
+    );
+
+    try {
+      const updated = await this.budgetRequestsService.approveFinance(
+        id,
+        userId,
+        comments,
+      );
+
+      return reply.success(updated, 'Budget request approved by finance');
+    } catch (error: any) {
+      request.log.error(
+        { error: error.message, budgetRequestsId: id },
+        'Failed to approve budget request (finance)',
+      );
+      return reply.code(400).error('APPROVAL_FAILED', error.message);
+    }
+  }
+
+  /**
+   * Reject budget request
+   * POST /budgetRequests/:id/reject
+   */
+  async reject(
+    request: FastifyRequest<{
+      Params: Static<typeof BudgetRequestsIdParamSchema>;
+      Body: { reason: string };
+    }>,
+    reply: FastifyReply,
+  ) {
+    const { id } = request.params;
+    const { reason } = request.body || {};
+    const userId = request.user?.id;
+
+    if (!userId) {
+      return reply.code(401).error('UNAUTHORIZED', 'User not authenticated');
+    }
+
+    if (!reason || reason.trim().length === 0) {
+      return reply
+        .code(400)
+        .error('VALIDATION_ERROR', 'Rejection reason is required');
+    }
+
+    request.log.info(
+      { budgetRequestsId: id, userId },
+      'Rejecting budget request',
+    );
+
+    try {
+      const updated = await this.budgetRequestsService.reject(
+        id,
+        userId,
+        reason,
+      );
+
+      return reply.success(updated, 'Budget request rejected');
+    } catch (error: any) {
+      request.log.error(
+        { error: error.message, budgetRequestsId: id },
+        'Failed to reject budget request',
+      );
+      return reply.code(400).error('REJECTION_FAILED', error.message);
+    }
+  }
+
   // ===== PRIVATE TRANSFORMATION METHODS =====
 
   /**
