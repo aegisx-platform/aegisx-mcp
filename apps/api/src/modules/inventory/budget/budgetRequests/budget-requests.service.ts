@@ -10,6 +10,7 @@ import {
   BudgetRequestsErrorMessages,
 } from './budget-requests.types';
 import { BudgetRequestsAuditService } from './budget-requests-audit.service';
+import { BudgetRequestItemsRepository } from '../budgetRequestItems/budget-request-items.repository';
 import type { Knex } from 'knex';
 
 /**
@@ -27,6 +28,7 @@ export class BudgetRequestsService extends BaseService<
   UpdateBudgetRequests
 > {
   private auditService: BudgetRequestsAuditService;
+  private budgetRequestItemsRepository: BudgetRequestItemsRepository;
 
   constructor(
     private budgetRequestsRepository: BudgetRequestsRepository,
@@ -35,6 +37,7 @@ export class BudgetRequestsService extends BaseService<
   ) {
     super(budgetRequestsRepository);
     this.auditService = new BudgetRequestsAuditService(db, logger);
+    this.budgetRequestItemsRepository = new BudgetRequestItemsRepository(db);
   }
 
   /**
@@ -1276,5 +1279,309 @@ export class BudgetRequestsService extends BaseService<
         throw error;
       }
     }
+  }
+
+  // ===== ITEM MANAGEMENT METHODS =====
+
+  /**
+   * Add drug item to budget request
+   * Only allowed when status = DRAFT
+   */
+  async addItem(
+    budgetRequestId: string | number,
+    data: {
+      generic_id: number;
+      estimated_usage_2569?: number;
+      requested_qty: number;
+      unit_price?: number;
+      budget_qty?: number;
+      fund_qty?: number;
+      q1_qty?: number;
+      q2_qty?: number;
+      q3_qty?: number;
+      q4_qty?: number;
+      notes?: string;
+    },
+    userId: string,
+  ): Promise<any> {
+    // Validate budget request exists and status is DRAFT
+    const request =
+      await this.budgetRequestsRepository.findById(budgetRequestId);
+
+    if (!request) {
+      throw new Error('Budget request not found');
+    }
+
+    if (request.status !== 'DRAFT') {
+      throw new Error(
+        `Cannot add items to budget request with status: ${request.status}. Only DRAFT requests can be modified.`,
+      );
+    }
+
+    // Get drug generic information
+    const generic = await this.db('inventory.drug_generics')
+      .where({ id: data.generic_id })
+      .first();
+
+    if (!generic) {
+      throw new Error(`Drug generic with ID ${data.generic_id} not found`);
+    }
+
+    // Get next line number
+    const lastItem = await this.db('inventory.budget_request_items')
+      .where({ budget_request_id: budgetRequestId })
+      .orderBy('line_number', 'desc')
+      .first();
+
+    const lineNumber = (lastItem?.line_number || 0) + 1;
+
+    // Calculate quarterly amounts if not provided
+    const requestedQty = data.requested_qty;
+    const q1Qty = data.q1_qty ?? Math.round(requestedQty * 0.25);
+    const q2Qty = data.q2_qty ?? Math.round(requestedQty * 0.25);
+    const q3Qty = data.q3_qty ?? Math.round(requestedQty * 0.25);
+    const q4Qty = data.q4_qty ?? requestedQty - (q1Qty + q2Qty + q3Qty);
+
+    // Calculate amounts
+    const unitPrice = data.unit_price || 0;
+    const requestedAmount = requestedQty * unitPrice;
+    const budgetQty = data.budget_qty || 0;
+    const fundQty = data.fund_qty || requestedQty;
+
+    // Create item
+    const itemData: any = {
+      budget_request_id: budgetRequestId,
+      budget_id: 1, // Default budget
+      generic_id: data.generic_id,
+      generic_code: generic.generic_code,
+      generic_name: generic.generic_name,
+      package_size: generic.package_size || '',
+      unit: generic.unit || '',
+      line_number: lineNumber,
+      estimated_usage_2569: data.estimated_usage_2569 || 0,
+      requested_qty: requestedQty,
+      unit_price: unitPrice,
+      requested_amount: requestedAmount,
+      budget_qty: budgetQty,
+      fund_qty: fundQty,
+      q1_qty: q1Qty,
+      q2_qty: q2Qty,
+      q3_qty: q3Qty,
+      q4_qty: q4Qty,
+      item_justification: data.notes || '',
+      created_at: new Date(),
+      updated_at: new Date(),
+    };
+
+    const [item] = await this.db('inventory.budget_request_items')
+      .insert(itemData)
+      .returning('*');
+
+    return item;
+  }
+
+  /**
+   * Update budget request item
+   * Only allowed when status = DRAFT
+   */
+  async updateItem(
+    budgetRequestId: string | number,
+    itemId: string | number,
+    data: {
+      estimated_usage_2569?: number;
+      requested_qty?: number;
+      unit_price?: number;
+      budget_qty?: number;
+      fund_qty?: number;
+      q1_qty?: number;
+      q2_qty?: number;
+      q3_qty?: number;
+      q4_qty?: number;
+      notes?: string;
+    },
+    userId: string,
+  ): Promise<any> {
+    // Validate budget request exists and status is DRAFT
+    const request =
+      await this.budgetRequestsRepository.findById(budgetRequestId);
+
+    if (!request) {
+      throw new Error('Budget request not found');
+    }
+
+    if (request.status !== 'DRAFT') {
+      throw new Error(
+        `Cannot update items in budget request with status: ${request.status}. Only DRAFT requests can be modified.`,
+      );
+    }
+
+    // Verify item belongs to this budget request
+    const existingItem = await this.db('inventory.budget_request_items')
+      .where({ id: itemId, budget_request_id: budgetRequestId })
+      .first();
+
+    if (!existingItem) {
+      throw new Error(
+        'Item not found or does not belong to this budget request',
+      );
+    }
+
+    // Build update data
+    const updateData: any = {
+      updated_at: new Date(),
+    };
+
+    if (data.estimated_usage_2569 !== undefined) {
+      updateData.estimated_usage_2569 = data.estimated_usage_2569;
+    }
+
+    if (data.requested_qty !== undefined) {
+      updateData.requested_qty = data.requested_qty;
+    }
+
+    if (data.unit_price !== undefined) {
+      updateData.unit_price = data.unit_price;
+    }
+
+    // Recalculate requested_amount if qty or price changed
+    if (data.requested_qty !== undefined || data.unit_price !== undefined) {
+      const qty =
+        data.requested_qty !== undefined
+          ? data.requested_qty
+          : existingItem.requested_qty;
+      const price =
+        data.unit_price !== undefined
+          ? data.unit_price
+          : existingItem.unit_price;
+      updateData.requested_amount = qty * price;
+    }
+
+    if (data.budget_qty !== undefined) {
+      updateData.budget_qty = data.budget_qty;
+    }
+
+    if (data.fund_qty !== undefined) {
+      updateData.fund_qty = data.fund_qty;
+    }
+
+    if (data.q1_qty !== undefined) {
+      updateData.q1_qty = data.q1_qty;
+    }
+
+    if (data.q2_qty !== undefined) {
+      updateData.q2_qty = data.q2_qty;
+    }
+
+    if (data.q3_qty !== undefined) {
+      updateData.q3_qty = data.q3_qty;
+    }
+
+    if (data.q4_qty !== undefined) {
+      updateData.q4_qty = data.q4_qty;
+    }
+
+    if (data.notes !== undefined) {
+      updateData.item_justification = data.notes;
+    }
+
+    // Update item
+    const [updated] = await this.db('inventory.budget_request_items')
+      .where({ id: itemId })
+      .update(updateData)
+      .returning('*');
+
+    return updated;
+  }
+
+  /**
+   * Batch update multiple budget request items
+   * Only allowed when status = DRAFT
+   */
+  async batchUpdateItems(
+    budgetRequestId: string | number,
+    items: Array<{
+      id: number;
+      estimated_usage_2569?: number;
+      requested_qty?: number;
+      unit_price?: number;
+      budget_qty?: number;
+      fund_qty?: number;
+      q1_qty?: number;
+      q2_qty?: number;
+      q3_qty?: number;
+      q4_qty?: number;
+      notes?: string;
+    }>,
+    userId: string,
+  ): Promise<{ updated: number; failed: number }> {
+    // Validate budget request exists and status is DRAFT
+    const request =
+      await this.budgetRequestsRepository.findById(budgetRequestId);
+
+    if (!request) {
+      throw new Error('Budget request not found');
+    }
+
+    if (request.status !== 'DRAFT') {
+      throw new Error(
+        `Cannot update items in budget request with status: ${request.status}. Only DRAFT requests can be modified.`,
+      );
+    }
+
+    let updated = 0;
+    let failed = 0;
+
+    // Update each item
+    for (const item of items) {
+      try {
+        await this.updateItem(budgetRequestId, item.id, item, userId);
+        updated++;
+      } catch (error) {
+        console.error(`Failed to update item ${item.id}:`, error);
+        failed++;
+      }
+    }
+
+    return { updated, failed };
+  }
+
+  /**
+   * Delete budget request item
+   * Only allowed when status = DRAFT
+   */
+  async deleteItem(
+    budgetRequestId: string | number,
+    itemId: string | number,
+    userId: string,
+  ): Promise<boolean> {
+    // Validate budget request exists and status is DRAFT
+    const request =
+      await this.budgetRequestsRepository.findById(budgetRequestId);
+
+    if (!request) {
+      throw new Error('Budget request not found');
+    }
+
+    if (request.status !== 'DRAFT') {
+      throw new Error(
+        `Cannot delete items from budget request with status: ${request.status}. Only DRAFT requests can be modified.`,
+      );
+    }
+
+    // Verify item belongs to this budget request
+    const existingItem = await this.db('inventory.budget_request_items')
+      .where({ id: itemId, budget_request_id: budgetRequestId })
+      .first();
+
+    if (!existingItem) {
+      return false;
+    }
+
+    // Delete item
+    const deleted = await this.db('inventory.budget_request_items')
+      .where({ id: itemId })
+      .delete();
+
+    return deleted > 0;
   }
 }
