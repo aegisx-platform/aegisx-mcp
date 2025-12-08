@@ -11,7 +11,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatListModule } from '@angular/material/list';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { AegisxCardComponent } from '@aegisx/ui';
+import { AxCardComponent } from '@aegisx/ui';
 import { ActivitySession } from '../../user-profile/components/activity-log/sessions.types';
 import { SessionsService } from '../../user-profile/components/activity-log/sessions.service';
 import { ActivityLogService } from '../../user-profile/components/activity-log/activity-log.service';
@@ -29,7 +29,7 @@ import { ActivityLog } from '../../user-profile/components/activity-log/activity
     MatListModule,
     MatChipsModule,
     MatProgressSpinnerModule,
-    AegisxCardComponent,
+    AxCardComponent,
   ],
   template: `
     <h2 mat-dialog-title class="text-2xl font-bold">Session Details</h2>

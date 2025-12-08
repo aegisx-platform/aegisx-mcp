@@ -17,7 +17,7 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatCardModule } from '@angular/material/card';
-import { AegisxCardComponent } from '@aegisx/ui';
+import { AxCardComponent } from '@aegisx/ui';
 import { ActivityLogService } from '../../user-profile/components/activity-log/activity-log.service';
 import {
   ActivityLog,
@@ -40,7 +40,7 @@ import { ActivityLogFilterComponent } from '../../user-profile/components/activi
     MatTooltipModule,
     MatChipsModule,
     MatCardModule,
-    AegisxCardComponent,
+    AxCardComponent,
     ActivityLogFilterComponent,
   ],
   template: `

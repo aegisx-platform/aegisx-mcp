@@ -11,7 +11,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormsModule } from '@angular/forms';
-import { AegisxCardComponent } from '@aegisx/ui';
+import { AxCardComponent } from '@aegisx/ui';
 import { ConfirmDialogComponent } from '../../../shared/ui/components/confirm-dialog.component';
 import { UserService } from '../services/user.service';
 
@@ -43,7 +43,7 @@ export interface AvailableRole {
     MatCheckboxModule,
     MatTooltipModule,
     FormsModule,
-    AegisxCardComponent,
+    AxCardComponent,
   ],
   template: `
     <ax-card [appearance]="'elevated'" class="mt-6">

@@ -8,7 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatInputModule } from '@angular/material/input';
-import { AegisxCardComponent } from '@aegisx/ui';
+import { AxCardComponent } from '@aegisx/ui';
 import { SessionFilters } from '../../user-profile/components/activity-log/sessions.types';
 
 @Component({
@@ -24,7 +24,7 @@ import { SessionFilters } from '../../user-profile/components/activity-log/sessi
     MatDatepickerModule,
     MatNativeDateModule,
     MatInputModule,
-    AegisxCardComponent,
+    AxCardComponent,
   ],
   template: `
     <ax-card [appearance]="'elevated'" class="mb-6">

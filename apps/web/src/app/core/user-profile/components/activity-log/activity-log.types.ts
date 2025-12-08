@@ -51,6 +51,7 @@ export interface ActivityLogFilters {
   dateTo?: string;
   page?: number;
   limit?: number;
+  sessionId?: string;
 }
 
 export interface ApiResponse<T> {

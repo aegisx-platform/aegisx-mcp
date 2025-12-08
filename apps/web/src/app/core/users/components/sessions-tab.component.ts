@@ -14,7 +14,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
-import { AegisxCardComponent } from '@aegisx/ui';
+import { AxCardComponent } from '@aegisx/ui';
 import { SessionsService } from '../../user-profile/components/activity-log/sessions.service';
 import {
   ActivitySession,
@@ -34,7 +34,7 @@ import { SessionFilterComponent } from './session-filter.component';
     MatButtonModule,
     MatTooltipModule,
     MatChipsModule,
-    AegisxCardComponent,
+    AxCardComponent,
     SessionFilterComponent,
   ],
   template: `
