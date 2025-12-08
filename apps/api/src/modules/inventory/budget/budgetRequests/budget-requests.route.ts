@@ -251,4 +251,42 @@ export async function budgetRequestsRoutes(
     ],
     handler: controller.reject.bind(controller),
   });
+
+  // Initialize budget request with drug generics
+  fastify.post('/:id/initialize', {
+    schema: {
+      tags: ['Inventory: Budget Requests'],
+      summary: 'Initialize budget request with drug generics',
+      description:
+        'Pull all active drug generics and calculate historical usage data (3 years) to create budget request items. Status must be DRAFT.',
+      params: BudgetRequestsIdParamSchema,
+      response: {
+        200: Type.Object({
+          success: Type.Boolean(),
+          data: Type.Object({
+            success: Type.Boolean(),
+            itemsCreated: Type.Number(),
+            message: Type.String(),
+          }),
+          message: Type.String(),
+          meta: Type.Object({
+            timestamp: Type.String(),
+            version: Type.String(),
+            requestId: Type.String(),
+            environment: Type.String(),
+          }),
+        }),
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        404: SchemaRefs.NotFound,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [
+      fastify.authenticate,
+      fastify.verifyPermission('budgetRequests', 'create'), // Using create permission for initialization
+    ],
+    handler: controller.initialize.bind(controller),
+  });
 }

@@ -430,6 +430,49 @@ export class BudgetRequestsController {
     }
   }
 
+  /**
+   * Initialize budget request with drug generics
+   * POST /budgetRequests/:id/initialize
+   */
+  async initialize(
+    request: FastifyRequest<{
+      Params: Static<typeof BudgetRequestsIdParamSchema>;
+    }>,
+    reply: FastifyReply,
+  ) {
+    const { id } = request.params;
+    const userId = request.user?.id;
+
+    if (!userId) {
+      return reply.code(401).error('UNAUTHORIZED', 'User not authenticated');
+    }
+
+    request.log.info(
+      { budgetRequestsId: id, userId },
+      'Initializing budget request with drug generics',
+    );
+
+    try {
+      const result = await this.budgetRequestsService.initialize(id, userId);
+
+      request.log.info(
+        {
+          budgetRequestsId: id,
+          itemsCreated: result.itemsCreated,
+        },
+        'Budget request initialized successfully',
+      );
+
+      return reply.success(result, result.message);
+    } catch (error: any) {
+      request.log.error(
+        { error: error.message, budgetRequestsId: id },
+        'Failed to initialize budget request',
+      );
+      return reply.code(400).error('INITIALIZATION_FAILED', error.message);
+    }
+  }
+
   // ===== PRIVATE TRANSFORMATION METHODS =====
 
   /**

@@ -360,6 +360,195 @@ export class BudgetRequestsService extends BaseService<
     return updated;
   }
 
+  /**
+   * Initialize budget request with drug generics
+   * Pulls all active drugs and calculates historical usage
+   * Status: Must be DRAFT
+   */
+  async initialize(
+    id: string | number,
+    userId: string,
+  ): Promise<{
+    success: boolean;
+    itemsCreated: number;
+    message: string;
+  }> {
+    const request = await this.budgetRequestsRepository.findById(id);
+
+    if (!request) {
+      throw new Error('Budget request not found');
+    }
+
+    if (request.status !== 'DRAFT') {
+      throw new Error(
+        `Cannot initialize budget request with status: ${request.status}. Must be DRAFT.`,
+      );
+    }
+
+    // Get knex instance from repository
+    const knex = (this.budgetRequestsRepository as any).knex;
+
+    try {
+      console.log(`Starting initialization for budget request ${id}...`);
+
+      // Step 1: Get all active drug generics
+      const drugGenerics = await knex('inventory.drug_generics')
+        .where({ is_active: true })
+        .select('*')
+        .orderBy('generic_code');
+
+      console.log(`Found ${drugGenerics.length} active drug generics`);
+
+      if (drugGenerics.length === 0) {
+        return {
+          success: false,
+          itemsCreated: 0,
+          message: 'No active drug generics found',
+        };
+      }
+
+      let itemsCreated = 0;
+
+      // Step 2: For each drug generic, calculate historical usage and create item
+      for (const generic of drugGenerics) {
+        // Calculate historical usage from drug_distributions
+        // Query drug_distribution_items joined with drug_distributions
+        // Filter by fiscal year and sum quantity_dispensed
+
+        const usage2566 = await this.calculateYearlyUsage(
+          knex,
+          generic.id,
+          2566,
+        );
+        const usage2567 = await this.calculateYearlyUsage(
+          knex,
+          generic.id,
+          2567,
+        );
+        const usage2568 = await this.calculateYearlyUsage(
+          knex,
+          generic.id,
+          2568,
+        );
+
+        // Calculate average usage
+        const avgUsage = (usage2566 + usage2567 + usage2568) / 3;
+
+        // Estimate usage for 2569 (using average)
+        const estimatedUsage2569 = Math.round(avgUsage);
+
+        // Get current stock (placeholder - would come from inventory table)
+        const currentStock = 0;
+
+        // Calculate estimated purchase
+        const estimatedPurchase = Math.max(
+          0,
+          estimatedUsage2569 - currentStock,
+        );
+
+        // Get latest unit price (placeholder - would come from drugs table)
+        const unitPrice = 0;
+
+        // Calculate requested amount
+        const requestedAmount = estimatedPurchase * unitPrice;
+
+        // Distribute quarterly (25% each quarter for now)
+        const q1Qty = Math.round(estimatedPurchase * 0.25);
+        const q2Qty = Math.round(estimatedPurchase * 0.25);
+        const q3Qty = Math.round(estimatedPurchase * 0.25);
+        const q4Qty = estimatedPurchase - (q1Qty + q2Qty + q3Qty); // Remainder
+
+        // Create budget_request_item
+        await knex('inventory.budget_request_items').insert({
+          budget_request_id: id,
+          budget_id: 1, // Default budget (would be determined by business logic)
+
+          // Drug information
+          generic_id: generic.id,
+          generic_code: generic.generic_code,
+          generic_name: generic.generic_name,
+          package_size: generic.package_size || '',
+          unit: generic.unit || '',
+          line_number: itemsCreated + 1,
+
+          // Historical usage
+          usage_year_2566: usage2566,
+          usage_year_2567: usage2567,
+          usage_year_2568: usage2568,
+          avg_usage: avgUsage,
+
+          // Planning data
+          estimated_usage_2569: estimatedUsage2569,
+          current_stock: currentStock,
+          estimated_purchase: estimatedPurchase,
+
+          // Pricing and quantities
+          unit_price: unitPrice,
+          requested_qty: estimatedPurchase,
+          requested_amount: requestedAmount,
+
+          // Quarterly distribution
+          q1_qty: q1Qty,
+          q2_qty: q2Qty,
+          q3_qty: q3Qty,
+          q4_qty: q4Qty,
+
+          // Audit
+          created_at: new Date(),
+          updated_at: new Date(),
+        });
+
+        itemsCreated++;
+      }
+
+      console.log(
+        `Successfully initialized ${itemsCreated} budget request items`,
+      );
+
+      return {
+        success: true,
+        itemsCreated,
+        message: `Successfully initialized ${itemsCreated} drug items with historical usage data`,
+      };
+    } catch (error) {
+      console.error('Error initializing budget request:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Calculate yearly usage for a drug generic from drug_distributions
+   * @param knex Knex instance
+   * @param genericId Generic drug ID
+   * @param fiscalYear Fiscal year (e.g., 2566)
+   * @returns Total quantity dispensed in that year
+   */
+  private async calculateYearlyUsage(
+    knex: any,
+    genericId: number,
+    fiscalYear: number,
+  ): Promise<number> {
+    // Convert Buddhist year to AD year for date comparison
+    const startYear = fiscalYear - 543; // e.g., 2566 -> 2023
+    const startDate = `${startYear}-10-01`; // Fiscal year starts Oct 1
+    const endDate = `${startYear + 1}-09-30`; // Fiscal year ends Sep 30
+
+    const result = await knex('inventory.drug_distribution_items as ddi')
+      .join(
+        'inventory.drug_distributions as dd',
+        'ddi.distribution_id',
+        '=',
+        'dd.id',
+      )
+      .join('inventory.drugs as d', 'ddi.drug_id', '=', 'd.id')
+      .where('d.generic_id', genericId)
+      .whereBetween('dd.distribution_date', [startDate, endDate])
+      .sum('ddi.quantity_dispensed as total')
+      .first();
+
+    return parseFloat(result?.total || 0);
+  }
+
   // ===== BUSINESS LOGIC HOOKS =====
   // Override these methods in child classes for custom validation/processing
 
