@@ -9,10 +9,10 @@
  * - Atomic: All operations in transaction
  * - Hierarchical: Supports role inheritance via parent_id
  * - Module role: Creates locations role and links all permissions to it
- * - Admin inheritance: Admin role inherits permissions automatically
+ * - Admin access: Admin role has wildcard permission (*:*) for automatic full access
  *
  * Architecture:
- * - Level 1: admin (parent_id: NULL)
+ * - Level 1: admin (parent_id: NULL) → Has *:* wildcard permission
  * - Level 2: locations (parent_id: admin.id) ← Creates this
  * - Level 3: Custom roles can be created under locations later
  *
@@ -75,16 +75,12 @@ export async function up(knex: Knex): Promise<void> {
     'admin',
   );
 
-  // Step 2: Create permissions and assign to locations role AND admin role
-  // Admin role must have explicit permission assignments (not inherited via parent_id)
+  // Step 2: Create permissions and assign to module role
+  // Admin role has wildcard permission (*:*) and doesn't need explicit assignment
   await createPermissions(knex, LOCATIONS_PERMISSIONS, {
     roleAssignments: [
       {
         roleId: 'locations',
-        permissions: LOCATIONS_PERMISSIONS,
-      },
-      {
-        roleId: 'admin',
         permissions: LOCATIONS_PERMISSIONS,
       },
     ],

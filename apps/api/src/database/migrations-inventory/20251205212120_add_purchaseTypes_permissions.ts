@@ -9,10 +9,10 @@
  * - Atomic: All operations in transaction
  * - Hierarchical: Supports role inheritance via parent_id
  * - Module role: Creates purchaseTypes role and links all permissions to it
- * - Admin inheritance: Admin role inherits permissions automatically
+ * - Admin access: Admin role has wildcard permission (*:*) for automatic full access
  *
  * Architecture:
- * - Level 1: admin (parent_id: NULL)
+ * - Level 1: admin (parent_id: NULL) → Has *:* wildcard permission
  * - Level 2: purchaseTypes (parent_id: admin.id) ← Creates this
  * - Level 3: Custom roles can be created under purchaseTypes later
  *

@@ -9,10 +9,10 @@
  * - Atomic: All operations in transaction
  * - Hierarchical: Supports role inheritance via parent_id
  * - Module role: Creates budgets role and links all permissions to it
- * - Admin inheritance: Admin role inherits permissions automatically
+ * - Admin access: Admin role has wildcard permission (*:*) for automatic full access
  *
  * Architecture:
- * - Level 1: admin (parent_id: NULL)
+ * - Level 1: admin (parent_id: NULL) → Has *:* wildcard permission
  * - Level 2: budgets (parent_id: admin.id) ← Creates this
  * - Level 3: Custom roles can be created under budgets later
  *
@@ -71,15 +71,11 @@ export async function up(knex: Knex): Promise<void> {
   await createRoleIfNotExists(knex, 'budgets', 'Budgets module role', 'admin');
 
   // Step 2: Create permissions and assign to budgets role
-  // Admin role must have explicit permission assignments (not inherited via parent_id)
+  // Admin role has wildcard permission (*:*) and doesn't need explicit assignment
   await createPermissions(knex, BUDGETS_PERMISSIONS, {
     roleAssignments: [
       {
         roleId: 'budgets',
-        permissions: BUDGETS_PERMISSIONS,
-      },
-      {
-        roleId: 'admin',
         permissions: BUDGETS_PERMISSIONS,
       },
     ],

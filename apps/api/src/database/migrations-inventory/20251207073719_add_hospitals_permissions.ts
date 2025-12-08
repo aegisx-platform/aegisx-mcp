@@ -9,10 +9,10 @@
  * - Atomic: All operations in transaction
  * - Hierarchical: Supports role inheritance via parent_id
  * - Module role: Creates hospitals role and links all permissions to it
- * - Admin inheritance: Admin role inherits permissions automatically
+ * - Admin access: Admin role has wildcard permission (*:*) for automatic full access
  *
  * Architecture:
- * - Level 1: admin (parent_id: NULL)
+ * - Level 1: admin (parent_id: NULL) → Has *:* wildcard permission
  * - Level 2: hospitals (parent_id: admin.id) ← Creates this
  * - Level 3: Custom roles can be created under hospitals later
  *
@@ -75,16 +75,12 @@ export async function up(knex: Knex): Promise<void> {
     'admin',
   );
 
-  // Step 2: Create permissions and assign to hospitals role AND admin role
-  // Admin role must have explicit permission assignments (not inherited via parent_id)
+  // Step 2: Create permissions and assign to module role
+  // Admin role has wildcard permission (*:*) and doesn't need explicit assignment
   await createPermissions(knex, HOSPITALS_PERMISSIONS, {
     roleAssignments: [
       {
         roleId: 'hospitals',
-        permissions: HOSPITALS_PERMISSIONS,
-      },
-      {
-        roleId: 'admin',
         permissions: HOSPITALS_PERMISSIONS,
       },
     ],
