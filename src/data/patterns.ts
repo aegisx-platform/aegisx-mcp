@@ -790,9 +790,7 @@ export function getPatternsByCategory(category: string): CodePattern[] {
  * Get pattern by name
  */
 export function getPatternByName(name: string): CodePattern | undefined {
-  return patterns.find(
-    (p) => p.name.toLowerCase() === name.toLowerCase(),
-  );
+  return patterns.find((p) => p.name.toLowerCase() === name.toLowerCase());
 }
 
 /**

@@ -36,7 +36,8 @@ export const patternTools: ToolDefinition[] = [
       properties: {
         name: {
           type: 'string',
-          description: 'Pattern name (e.g., "TypeBox Schema Definition", "Angular Signal-based Component")',
+          description:
+            'Pattern name (e.g., "TypeBox Schema Definition", "Angular Signal-based Component")',
         },
       },
       required: ['name'],
@@ -59,14 +60,14 @@ export const patternTools: ToolDefinition[] = [
   },
   {
     name: 'aegisx_patterns_suggest',
-    description:
-      'Get pattern suggestions for a specific use case or task.',
+    description: 'Get pattern suggestions for a specific use case or task.',
     inputSchema: {
       type: 'object',
       properties: {
         task: {
           type: 'string',
-          description: 'Describe what you want to do (e.g., "create API endpoint", "build form component")',
+          description:
+            'Describe what you want to do (e.g., "create API endpoint", "build form component")',
         },
       },
       required: ['task'],
@@ -116,16 +117,60 @@ function suggestPatterns(task: string): CodePattern[] {
 
   // Keyword matching
   const keywords: Record<string, string[]> = {
-    'TypeBox Schema Definition': ['schema', 'validation', 'typebox', 'request', 'response', 'api'],
+    'TypeBox Schema Definition': [
+      'schema',
+      'validation',
+      'typebox',
+      'request',
+      'response',
+      'api',
+    ],
     'Fastify Route Definition': ['route', 'endpoint', 'api', 'fastify', 'http'],
-    'Auth Middleware Pattern': ['auth', 'authentication', 'authorization', 'jwt', 'middleware', 'role'],
-    'Repository with UUID Validation': ['repository', 'database', 'uuid', 'query', 'crud'],
+    'Auth Middleware Pattern': [
+      'auth',
+      'authentication',
+      'authorization',
+      'jwt',
+      'middleware',
+      'role',
+    ],
+    'Repository with UUID Validation': [
+      'repository',
+      'database',
+      'uuid',
+      'query',
+      'crud',
+    ],
     'Service Layer Pattern': ['service', 'business logic', 'layer'],
-    'Angular Signal-based Component': ['component', 'angular', 'signal', 'frontend', 'ui'],
+    'Angular Signal-based Component': [
+      'component',
+      'angular',
+      'signal',
+      'frontend',
+      'ui',
+    ],
     'Angular HTTP Service': ['http', 'api call', 'service', 'fetch', 'request'],
-    'AegisX UI Integration': ['ui', 'component', 'aegisx', 'material', 'design'],
-    'Knex Migration': ['migration', 'database', 'table', 'schema', 'create table'],
-    'Knex Query Optimization': ['query', 'performance', 'pagination', 'filter', 'search'],
+    'AegisX UI Integration': [
+      'ui',
+      'component',
+      'aegisx',
+      'material',
+      'design',
+    ],
+    'Knex Migration': [
+      'migration',
+      'database',
+      'table',
+      'schema',
+      'create table',
+    ],
+    'Knex Query Optimization': [
+      'query',
+      'performance',
+      'pagination',
+      'filter',
+      'search',
+    ],
     'API Integration Test': ['test', 'integration', 'api', 'vitest'],
   };
 
@@ -179,7 +224,9 @@ export function handlePatternTool(
         lines.push('');
       }
 
-      lines.push('Use `aegisx_patterns_get` with pattern name to see full code example.');
+      lines.push(
+        'Use `aegisx_patterns_get` with pattern name to see full code example.',
+      );
 
       return {
         content: [{ type: 'text', text: lines.join('\n') }],
@@ -194,7 +241,10 @@ export function handlePatternTool(
         // Try fuzzy search
         const results = searchPatterns(patternName);
         if (results.length > 0) {
-          const suggestions = results.slice(0, 3).map((p) => `- ${p.name}`).join('\n');
+          const suggestions = results
+            .slice(0, 3)
+            .map((p) => `- ${p.name}`)
+            .join('\n');
           return {
             content: [
               {
@@ -286,7 +336,9 @@ export function handlePatternTool(
       }
 
       lines.push('---');
-      lines.push('Use `aegisx_patterns_get` with the pattern name to see the complete code example.');
+      lines.push(
+        'Use `aegisx_patterns_get` with the pattern name to see the complete code example.',
+      );
 
       return {
         content: [{ type: 'text', text: lines.join('\n') }],

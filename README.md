@@ -49,55 +49,58 @@ Or if installed globally:
 
 ### UI Components
 
-| Tool | Description |
-|------|-------------|
-| `aegisx_components_list` | List all UI components, optionally filtered by category |
-| `aegisx_components_get` | Get detailed info about a specific component |
-| `aegisx_components_search` | Search components by name or description |
+| Tool                       | Description                                             |
+| -------------------------- | ------------------------------------------------------- |
+| `aegisx_components_list`   | List all UI components, optionally filtered by category |
+| `aegisx_components_get`    | Get detailed info about a specific component            |
+| `aegisx_components_search` | Search components by name or description                |
 
 **Example:**
+
 ```
 Use aegisx_components_get with name="Card" to see the Card component API.
 ```
 
 ### CRUD Generator
 
-| Tool | Description |
-|------|-------------|
-| `aegisx_crud_build_command` | Build a CRUD generation command with options |
-| `aegisx_crud_packages` | View available packages (standard, enterprise, full) |
-| `aegisx_crud_files` | See what files will be generated |
-| `aegisx_crud_troubleshoot` | Get help with common issues |
-| `aegisx_crud_workflow` | Get complete workflow for a feature |
+| Tool                        | Description                                          |
+| --------------------------- | ---------------------------------------------------- |
+| `aegisx_crud_build_command` | Build a CRUD generation command with options         |
+| `aegisx_crud_packages`      | View available packages (standard, enterprise, full) |
+| `aegisx_crud_files`         | See what files will be generated                     |
+| `aegisx_crud_troubleshoot`  | Get help with common issues                          |
+| `aegisx_crud_workflow`      | Get complete workflow for a feature                  |
 
 **Example:**
+
 ```
 Use aegisx_crud_build_command with tableName="products" and withImport=true to get the command.
 ```
 
 ### Development Patterns
 
-| Tool | Description |
-|------|-------------|
-| `aegisx_patterns_list` | List all patterns by category |
-| `aegisx_patterns_get` | Get a specific pattern with code |
-| `aegisx_patterns_search` | Search patterns |
+| Tool                      | Description                        |
+| ------------------------- | ---------------------------------- |
+| `aegisx_patterns_list`    | List all patterns by category      |
+| `aegisx_patterns_get`     | Get a specific pattern with code   |
+| `aegisx_patterns_search`  | Search patterns                    |
 | `aegisx_patterns_suggest` | Get pattern suggestions for a task |
 
 **Example:**
+
 ```
 Use aegisx_patterns_suggest with task="create API endpoint" to get relevant patterns.
 ```
 
 ## Available Resources
 
-| Resource | Description |
-|----------|-------------|
-| `aegisx://design-tokens` | Design tokens (colors, spacing, typography) |
-| `aegisx://development-standards` | Coding standards and guidelines |
-| `aegisx://api-reference` | Backend API conventions |
-| `aegisx://project-structure` | Monorepo structure guide |
-| `aegisx://quick-start` | Getting started guide |
+| Resource                         | Description                                 |
+| -------------------------------- | ------------------------------------------- |
+| `aegisx://design-tokens`         | Design tokens (colors, spacing, typography) |
+| `aegisx://development-standards` | Coding standards and guidelines             |
+| `aegisx://api-reference`         | Backend API conventions                     |
+| `aegisx://project-structure`     | Monorepo structure guide                    |
+| `aegisx://quick-start`           | Getting started guide                       |
 
 ## Component Categories
 
@@ -112,11 +115,11 @@ Use aegisx_patterns_suggest with task="create API endpoint" to get relevant patt
 
 ## CRUD Packages
 
-| Package | Features |
-|---------|----------|
-| **standard** | Basic CRUD, pagination, search, soft delete |
-| **enterprise** | Standard + Excel/CSV import |
-| **full** | Enterprise + WebSocket events |
+| Package        | Features                                    |
+| -------------- | ------------------------------------------- |
+| **standard**   | Basic CRUD, pagination, search, soft delete |
+| **enterprise** | Standard + Excel/CSV import                 |
+| **full**       | Enterprise + WebSocket events               |
 
 ## Development
 

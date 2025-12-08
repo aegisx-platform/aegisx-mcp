@@ -1123,8 +1123,7 @@ export const components: ComponentInfo[] = [
     name: 'Enterprise Layout',
     selector: 'ax-enterprise-layout',
     category: 'layout',
-    description:
-      'Full-featured enterprise layout with multi-level navigation.',
+    description: 'Full-featured enterprise layout with multi-level navigation.',
     inputs: [
       {
         name: 'config',
