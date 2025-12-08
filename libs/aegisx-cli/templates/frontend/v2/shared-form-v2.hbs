@@ -44,10 +44,7 @@ import { {{pascalCaseHelper this.referencedModule}}Service } from '../../{{kebab
 {{/each}}
 {{/if}}
 {{#if hasDateFields}}
-import {
-  formatDateForInput,
-  formatDateForSubmission,
-} from '../../../shared/utils/datetime.utils';
+import { formatDateForInput, formatDateForSubmission } from '@aegisx/ui';
 {{/if}}
 
 export type {{pascalCaseHelper singularName}}FormMode = 'create' | 'edit';

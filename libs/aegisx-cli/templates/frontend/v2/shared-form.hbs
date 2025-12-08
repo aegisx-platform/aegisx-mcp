@@ -26,13 +26,13 @@ import { {{serviceClass}} } from '{{{import}}}';
 import { 
   formatDateTimeForInput, 
   formatDateTimeForSubmission 
-} from '../../../shared/utils/datetime.utils';
+} from '@aegisx/ui';
 {{/if}}
 {{#if hasDateFields}}
 import { 
   formatDateForInput, 
   formatDateForSubmission 
-} from '../../../shared/utils/datetime.utils';
+} from '@aegisx/ui';
 {{/if}}
 
 export type {{PascalCase}}FormMode = 'create' | 'edit';

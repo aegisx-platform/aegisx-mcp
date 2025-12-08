@@ -60,6 +60,32 @@ export const INVENTORY_ROUTES: Route[] = [
             },
           },
           // === MASTER-DATA ROUTES START ===
+          // Contract Items (Generated CRUD)
+          {
+            path: 'contract-items',
+            loadChildren: () =>
+              import('./modules/contract-items/contract-items.routes').then(
+                (m) => m.contractItemsRoutes,
+              ),
+            data: {
+              title: 'Contract Items',
+              description: 'Contract Items Management System',
+              requiredPermissions: ['contract-items.read', 'admin.*'],
+            },
+          },
+          // Contracts (Generated CRUD)
+          {
+            path: 'contracts',
+            loadChildren: () =>
+              import('./modules/contracts/contracts.routes').then(
+                (m) => m.contractsRoutes,
+              ),
+            data: {
+              title: 'Contracts',
+              description: 'Contracts Management System',
+              requiredPermissions: ['contracts.read', 'admin.*'],
+            },
+          },
           // Return Actions (Generated CRUD)
           {
             path: 'return-actions',

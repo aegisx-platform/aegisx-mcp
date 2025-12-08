@@ -36,10 +36,7 @@ import {
   UpdateContractRequest,
 } from '../types/contracts.types';
 // CRUD-GENERATOR-TAG: Foreign Key Service Import
-import {
-  formatDateForInput,
-  formatDateForSubmission,
-} from '../../../shared/utils/datetime.utils';
+import { formatDateForInput, formatDateForSubmission } from '@aegisx/ui';
 
 export type ContractFormMode = 'create' | 'edit';
 
