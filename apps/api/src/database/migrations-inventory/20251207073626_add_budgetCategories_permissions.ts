@@ -76,11 +76,15 @@ export async function up(knex: Knex): Promise<void> {
   );
 
   // Step 2: Create permissions and assign to budgetCategories role
-  // Admin will inherit these permissions automatically via parent_id hierarchy
+  // Admin role must have explicit permission assignments (not inherited via parent_id)
   await createPermissions(knex, BUDGETCATEGORIES_PERMISSIONS, {
     roleAssignments: [
       {
         roleId: 'budgetCategories',
+        permissions: BUDGETCATEGORIES_PERMISSIONS,
+      },
+      {
+        roleId: 'admin',
         permissions: BUDGETCATEGORIES_PERMISSIONS,
       },
     ],

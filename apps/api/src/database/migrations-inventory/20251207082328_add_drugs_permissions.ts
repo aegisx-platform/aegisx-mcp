@@ -71,11 +71,15 @@ export async function up(knex: Knex): Promise<void> {
   await createRoleIfNotExists(knex, 'drugs', 'Drugs module role', 'admin');
 
   // Step 2: Create permissions and assign to drugs role
-  // Admin will inherit these permissions automatically via parent_id hierarchy
+  // Admin role must have explicit permission assignments (not inherited via parent_id)
   await createPermissions(knex, DRUGS_PERMISSIONS, {
     roleAssignments: [
       {
         roleId: 'drugs',
+        permissions: DRUGS_PERMISSIONS,
+      },
+      {
+        roleId: 'admin',
         permissions: DRUGS_PERMISSIONS,
       },
     ],

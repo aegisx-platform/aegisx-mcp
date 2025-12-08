@@ -75,12 +75,16 @@ export async function up(knex: Knex): Promise<void> {
     'admin',
   );
 
-  // Step 2: Create permissions and assign to locations role
-  // Admin will inherit these permissions automatically via parent_id hierarchy
+  // Step 2: Create permissions and assign to locations role AND admin role
+  // Admin role must have explicit permission assignments (not inherited via parent_id)
   await createPermissions(knex, LOCATIONS_PERMISSIONS, {
     roleAssignments: [
       {
         roleId: 'locations',
+        permissions: LOCATIONS_PERMISSIONS,
+      },
+      {
+        roleId: 'admin',
         permissions: LOCATIONS_PERMISSIONS,
       },
     ],
