@@ -35,10 +35,10 @@ export class DrugComponentsRepository extends BaseRepository<
   constructor(knex: Knex) {
     super(
       knex,
-      'drug_components',
+      'inventory.drug_components',
       [
         // Define searchable fields based on intelligent detection
-        'drug_components.component_name',
+        'inventory.drug_components.component_name',
       ],
       [], // explicitUUIDFields
       {
@@ -99,9 +99,11 @@ export class DrugComponentsRepository extends BaseRepository<
 
   // Custom query with joins if needed
   getJoinQuery() {
-    return this.knex('drug_components').select('drug_components.*');
+    return this.knex('inventory.drug_components').select(
+      'inventory.drug_components.*',
+    );
     // Add joins here if needed
-    // .leftJoin('other_table', 'drug_components.foreign_key', 'other_table.id')
+    // .leftJoin('other_table', 'inventory.drug_components.foreign_key', 'other_table.id')
   }
 
   // Apply custom filters
@@ -114,42 +116,59 @@ export class DrugComponentsRepository extends BaseRepository<
 
     // Apply specific DrugComponents filters based on intelligent field categorization
     if (filters.generic_id !== undefined) {
-      query.where('drug_components.generic_id', filters.generic_id);
+      query.where('inventory.drug_components.generic_id', filters.generic_id);
     }
     if (filters.generic_id_min !== undefined) {
-      query.where('drug_components.generic_id', '>=', filters.generic_id_min);
+      query.where(
+        'inventory.drug_components.generic_id',
+        '>=',
+        filters.generic_id_min,
+      );
     }
     if (filters.generic_id_max !== undefined) {
-      query.where('drug_components.generic_id', '<=', filters.generic_id_max);
+      query.where(
+        'inventory.drug_components.generic_id',
+        '<=',
+        filters.generic_id_max,
+      );
     }
     if (filters.component_name !== undefined) {
-      query.where('drug_components.component_name', filters.component_name);
+      query.where(
+        'inventory.drug_components.component_name',
+        filters.component_name,
+      );
     }
     if (filters.strength !== undefined) {
-      query.where('drug_components.strength', filters.strength);
+      query.where('inventory.drug_components.strength', filters.strength);
     }
     if (filters.strength_value !== undefined) {
-      query.where('drug_components.strength_value', filters.strength_value);
+      query.where(
+        'inventory.drug_components.strength_value',
+        filters.strength_value,
+      );
     }
     if (filters.strength_value_min !== undefined) {
       query.where(
-        'drug_components.strength_value',
+        'inventory.drug_components.strength_value',
         '>=',
         filters.strength_value_min,
       );
     }
     if (filters.strength_value_max !== undefined) {
       query.where(
-        'drug_components.strength_value',
+        'inventory.drug_components.strength_value',
         '<=',
         filters.strength_value_max,
       );
     }
     if (filters.strength_unit !== undefined) {
-      query.where('drug_components.strength_unit', filters.strength_unit);
+      query.where(
+        'inventory.drug_components.strength_unit',
+        filters.strength_unit,
+      );
     }
     if (filters.is_active !== undefined) {
-      query.where('drug_components.is_active', filters.is_active);
+      query.where('inventory.drug_components.is_active', filters.is_active);
     }
   }
 
@@ -183,18 +202,18 @@ export class DrugComponentsRepository extends BaseRepository<
   // Custom sort fields mapping
   protected getSortField(sortBy: string): string {
     const sortFields: Record<string, string> = {
-      id: 'drug_components.id',
-      genericId: 'drug_components.generic_id',
-      componentName: 'drug_components.component_name',
-      strength: 'drug_components.strength',
-      strengthValue: 'drug_components.strength_value',
-      strengthUnit: 'drug_components.strength_unit',
-      isActive: 'drug_components.is_active',
-      createdAt: 'drug_components.created_at',
-      updatedAt: 'drug_components.updated_at',
+      id: 'inventory.drug_components.id',
+      genericId: 'inventory.drug_components.generic_id',
+      componentName: 'inventory.drug_components.component_name',
+      strength: 'inventory.drug_components.strength',
+      strengthValue: 'inventory.drug_components.strength_value',
+      strengthUnit: 'inventory.drug_components.strength_unit',
+      isActive: 'inventory.drug_components.is_active',
+      createdAt: 'inventory.drug_components.created_at',
+      updatedAt: 'inventory.drug_components.updated_at',
     };
 
-    return sortFields[sortBy] || 'drug_components.id';
+    return sortFields[sortBy] || 'inventory.drug_components.id';
   }
 
   // Extended find method with options
@@ -237,7 +256,7 @@ export class DrugComponentsRepository extends BaseRepository<
   async getStats(): Promise<{
     total: number;
   }> {
-    const stats: any = await this.knex('drug_components')
+    const stats: any = await this.knex('inventory.drug_components')
       .select([this.knex.raw('COUNT(*) as total')])
       .first();
 
@@ -249,7 +268,7 @@ export class DrugComponentsRepository extends BaseRepository<
   // Bulk operations with better type safety
   async createMany(data: CreateDrugComponents[]): Promise<DrugComponents[]> {
     const transformedData = data.map((item) => this.transformToDb(item));
-    const rows = await this.knex('drug_components')
+    const rows = await this.knex('inventory.drug_components')
       .insert(transformedData)
       .returning('*');
     return rows.map((row) => this.transformToEntity(row));
@@ -261,7 +280,7 @@ export class DrugComponentsRepository extends BaseRepository<
   ): Promise<DrugComponents> {
     return this.withTransaction(async (trx) => {
       const transformedData = this.transformToDb(data);
-      const [row] = await trx('drug_components')
+      const [row] = await trx('inventory.drug_components')
         .insert(transformedData)
         .returning('*');
       return this.transformToEntity(row);

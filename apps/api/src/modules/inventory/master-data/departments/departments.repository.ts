@@ -32,10 +32,10 @@ export class DepartmentsRepository extends BaseRepository<
   constructor(knex: Knex) {
     super(
       knex,
-      'departments',
+      'inventory.departments',
       [
         // Define searchable fields based on intelligent detection
-        'departments.dept_name',
+        'inventory.departments.dept_name',
       ],
       [], // explicitUUIDFields
       {
@@ -96,9 +96,9 @@ export class DepartmentsRepository extends BaseRepository<
 
   // Custom query with joins if needed
   getJoinQuery() {
-    return this.knex('departments').select('departments.*');
+    return this.knex('inventory.departments').select('inventory.departments.*');
     // Add joins here if needed
-    // .leftJoin('other_table', 'departments.foreign_key', 'other_table.id')
+    // .leftJoin('other_table', 'inventory.departments.foreign_key', 'other_table.id')
   }
 
   // Apply custom filters
@@ -111,25 +111,33 @@ export class DepartmentsRepository extends BaseRepository<
 
     // Apply specific Departments filters based on intelligent field categorization
     if (filters.dept_code !== undefined) {
-      query.where('departments.dept_code', filters.dept_code);
+      query.where('inventory.departments.dept_code', filters.dept_code);
     }
     if (filters.dept_name !== undefined) {
-      query.where('departments.dept_name', filters.dept_name);
+      query.where('inventory.departments.dept_name', filters.dept_name);
     }
     if (filters.his_code !== undefined) {
-      query.where('departments.his_code', filters.his_code);
+      query.where('inventory.departments.his_code', filters.his_code);
     }
     if (filters.parent_id !== undefined) {
-      query.where('departments.parent_id', filters.parent_id);
+      query.where('inventory.departments.parent_id', filters.parent_id);
     }
     if (filters.parent_id_min !== undefined) {
-      query.where('departments.parent_id', '>=', filters.parent_id_min);
+      query.where(
+        'inventory.departments.parent_id',
+        '>=',
+        filters.parent_id_min,
+      );
     }
     if (filters.parent_id_max !== undefined) {
-      query.where('departments.parent_id', '<=', filters.parent_id_max);
+      query.where(
+        'inventory.departments.parent_id',
+        '<=',
+        filters.parent_id_max,
+      );
     }
     if (filters.is_active !== undefined) {
-      query.where('departments.is_active', filters.is_active);
+      query.where('inventory.departments.is_active', filters.is_active);
     }
   }
 
@@ -163,18 +171,18 @@ export class DepartmentsRepository extends BaseRepository<
   // Custom sort fields mapping
   protected getSortField(sortBy: string): string {
     const sortFields: Record<string, string> = {
-      id: 'departments.id',
-      deptCode: 'departments.dept_code',
-      deptName: 'departments.dept_name',
-      hisCode: 'departments.his_code',
-      parentId: 'departments.parent_id',
-      consumptionGroup: 'departments.consumption_group',
-      isActive: 'departments.is_active',
-      createdAt: 'departments.created_at',
-      updatedAt: 'departments.updated_at',
+      id: 'inventory.departments.id',
+      deptCode: 'inventory.departments.dept_code',
+      deptName: 'inventory.departments.dept_name',
+      hisCode: 'inventory.departments.his_code',
+      parentId: 'inventory.departments.parent_id',
+      consumptionGroup: 'inventory.departments.consumption_group',
+      isActive: 'inventory.departments.is_active',
+      createdAt: 'inventory.departments.created_at',
+      updatedAt: 'inventory.departments.updated_at',
     };
 
-    return sortFields[sortBy] || 'departments.id';
+    return sortFields[sortBy] || 'inventory.departments.id';
   }
 
   // Extended find method with options
@@ -334,7 +342,7 @@ export class DepartmentsRepository extends BaseRepository<
   async getStats(): Promise<{
     total: number;
   }> {
-    const stats: any = await this.knex('departments')
+    const stats: any = await this.knex('inventory.departments')
       .select([this.knex.raw('COUNT(*) as total')])
       .first();
 
@@ -346,7 +354,7 @@ export class DepartmentsRepository extends BaseRepository<
   // Bulk operations with better type safety
   async createMany(data: CreateDepartments[]): Promise<Departments[]> {
     const transformedData = data.map((item) => this.transformToDb(item));
-    const rows = await this.knex('departments')
+    const rows = await this.knex('inventory.departments')
       .insert(transformedData)
       .returning('*');
     return rows.map((row) => this.transformToEntity(row));
@@ -356,7 +364,7 @@ export class DepartmentsRepository extends BaseRepository<
   async createWithTransaction(data: CreateDepartments): Promise<Departments> {
     return this.withTransaction(async (trx) => {
       const transformedData = this.transformToDb(data);
-      const [row] = await trx('departments')
+      const [row] = await trx('inventory.departments')
         .insert(transformedData)
         .returning('*');
       return this.transformToEntity(row);

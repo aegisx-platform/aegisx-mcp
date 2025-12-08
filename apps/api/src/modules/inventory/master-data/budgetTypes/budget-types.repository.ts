@@ -29,11 +29,11 @@ export class BudgetTypesRepository extends BaseRepository<
   constructor(knex: Knex) {
     super(
       knex,
-      'budget_types',
+      'inventory.budget_types',
       [
         // Define searchable fields based on intelligent detection
-        'budget_types.type_name',
-        'budget_types.description',
+        'inventory.budget_types.type_name',
+        'inventory.budget_types.description',
       ],
       [], // explicitUUIDFields
       {
@@ -90,9 +90,11 @@ export class BudgetTypesRepository extends BaseRepository<
 
   // Custom query with joins if needed
   getJoinQuery() {
-    return this.knex('budget_types').select('budget_types.*');
+    return this.knex('inventory.budget_types').select(
+      'inventory.budget_types.*',
+    );
     // Add joins here if needed
-    // .leftJoin('other_table', 'budget_types.foreign_key', 'other_table.id')
+    // .leftJoin('other_table', 'inventory.budget_types.foreign_key', 'other_table.id')
   }
 
   // Apply custom filters
@@ -105,16 +107,16 @@ export class BudgetTypesRepository extends BaseRepository<
 
     // Apply specific BudgetTypes filters based on intelligent field categorization
     if (filters.type_code !== undefined) {
-      query.where('budget_types.type_code', filters.type_code);
+      query.where('inventory.budget_types.type_code', filters.type_code);
     }
     if (filters.type_name !== undefined) {
-      query.where('budget_types.type_name', filters.type_name);
+      query.where('inventory.budget_types.type_name', filters.type_name);
     }
     if (filters.description !== undefined) {
-      query.where('budget_types.description', filters.description);
+      query.where('inventory.budget_types.description', filters.description);
     }
     if (filters.is_active !== undefined) {
-      query.where('budget_types.is_active', filters.is_active);
+      query.where('inventory.budget_types.is_active', filters.is_active);
     }
   }
 
@@ -148,17 +150,17 @@ export class BudgetTypesRepository extends BaseRepository<
   // Custom sort fields mapping
   protected getSortField(sortBy: string): string {
     const sortFields: Record<string, string> = {
-      id: 'budget_types.id',
-      typeCode: 'budget_types.type_code',
-      typeName: 'budget_types.type_name',
-      budgetClass: 'budget_types.budget_class',
-      description: 'budget_types.description',
-      isActive: 'budget_types.is_active',
-      createdAt: 'budget_types.created_at',
-      updatedAt: 'budget_types.updated_at',
+      id: 'inventory.budget_types.id',
+      typeCode: 'inventory.budget_types.type_code',
+      typeName: 'inventory.budget_types.type_name',
+      budgetClass: 'inventory.budget_types.budget_class',
+      description: 'inventory.budget_types.description',
+      isActive: 'inventory.budget_types.is_active',
+      createdAt: 'inventory.budget_types.created_at',
+      updatedAt: 'inventory.budget_types.updated_at',
     };
 
-    return sortFields[sortBy] || 'budget_types.id';
+    return sortFields[sortBy] || 'inventory.budget_types.id';
   }
 
   // Extended find method with options
@@ -243,7 +245,7 @@ export class BudgetTypesRepository extends BaseRepository<
   async getStats(): Promise<{
     total: number;
   }> {
-    const stats: any = await this.knex('budget_types')
+    const stats: any = await this.knex('inventory.budget_types')
       .select([this.knex.raw('COUNT(*) as total')])
       .first();
 
@@ -255,7 +257,7 @@ export class BudgetTypesRepository extends BaseRepository<
   // Bulk operations with better type safety
   async createMany(data: CreateBudgetTypes[]): Promise<BudgetTypes[]> {
     const transformedData = data.map((item) => this.transformToDb(item));
-    const rows = await this.knex('budget_types')
+    const rows = await this.knex('inventory.budget_types')
       .insert(transformedData)
       .returning('*');
     return rows.map((row) => this.transformToEntity(row));
@@ -265,7 +267,7 @@ export class BudgetTypesRepository extends BaseRepository<
   async createWithTransaction(data: CreateBudgetTypes): Promise<BudgetTypes> {
     return this.withTransaction(async (trx) => {
       const transformedData = this.transformToDb(data);
-      const [row] = await trx('budget_types')
+      const [row] = await trx('inventory.budget_types')
         .insert(transformedData)
         .returning('*');
       return this.transformToEntity(row);

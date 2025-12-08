@@ -31,10 +31,10 @@ export class HospitalsRepository extends BaseRepository<
   constructor(knex: Knex) {
     super(
       knex,
-      'hospitals',
+      'inventory.hospitals',
       [
         // Define searchable fields based on intelligent detection
-        'hospitals.hospital_name',
+        'inventory.hospitals.hospital_name',
       ],
       [], // explicitUUIDFields
       {
@@ -95,9 +95,9 @@ export class HospitalsRepository extends BaseRepository<
 
   // Custom query with joins if needed
   getJoinQuery() {
-    return this.knex('hospitals').select('hospitals.*');
+    return this.knex('inventory.hospitals').select('inventory.hospitals.*');
     // Add joins here if needed
-    // .leftJoin('other_table', 'hospitals.foreign_key', 'other_table.id')
+    // .leftJoin('other_table', 'inventory.hospitals.foreign_key', 'other_table.id')
   }
 
   // Apply custom filters
@@ -107,22 +107,22 @@ export class HospitalsRepository extends BaseRepository<
 
     // Apply specific Hospitals filters based on intelligent field categorization
     if (filters.hospital_code !== undefined) {
-      query.where('hospitals.hospital_code', filters.hospital_code);
+      query.where('inventory.hospitals.hospital_code', filters.hospital_code);
     }
     if (filters.hospital_name !== undefined) {
-      query.where('hospitals.hospital_name', filters.hospital_name);
+      query.where('inventory.hospitals.hospital_name', filters.hospital_name);
     }
     if (filters.hospital_type !== undefined) {
-      query.where('hospitals.hospital_type', filters.hospital_type);
+      query.where('inventory.hospitals.hospital_type', filters.hospital_type);
     }
     if (filters.province !== undefined) {
-      query.where('hospitals.province', filters.province);
+      query.where('inventory.hospitals.province', filters.province);
     }
     if (filters.region !== undefined) {
-      query.where('hospitals.region', filters.region);
+      query.where('inventory.hospitals.region', filters.region);
     }
     if (filters.is_active !== undefined) {
-      query.where('hospitals.is_active', filters.is_active);
+      query.where('inventory.hospitals.is_active', filters.is_active);
     }
   }
 
@@ -156,18 +156,18 @@ export class HospitalsRepository extends BaseRepository<
   // Custom sort fields mapping
   protected getSortField(sortBy: string): string {
     const sortFields: Record<string, string> = {
-      id: 'hospitals.id',
-      hospitalCode: 'hospitals.hospital_code',
-      hospitalName: 'hospitals.hospital_name',
-      hospitalType: 'hospitals.hospital_type',
-      province: 'hospitals.province',
-      region: 'hospitals.region',
-      isActive: 'hospitals.is_active',
-      createdAt: 'hospitals.created_at',
-      updatedAt: 'hospitals.updated_at',
+      id: 'inventory.hospitals.id',
+      hospitalCode: 'inventory.hospitals.hospital_code',
+      hospitalName: 'inventory.hospitals.hospital_name',
+      hospitalType: 'inventory.hospitals.hospital_type',
+      province: 'inventory.hospitals.province',
+      region: 'inventory.hospitals.region',
+      isActive: 'inventory.hospitals.is_active',
+      createdAt: 'inventory.hospitals.created_at',
+      updatedAt: 'inventory.hospitals.updated_at',
     };
 
-    return sortFields[sortBy] || 'hospitals.id';
+    return sortFields[sortBy] || 'inventory.hospitals.id';
   }
 
   // Extended find method with options
@@ -210,7 +210,7 @@ export class HospitalsRepository extends BaseRepository<
   async getStats(): Promise<{
     total: number;
   }> {
-    const stats: any = await this.knex('hospitals')
+    const stats: any = await this.knex('inventory.hospitals')
       .select([this.knex.raw('COUNT(*) as total')])
       .first();
 
@@ -222,7 +222,7 @@ export class HospitalsRepository extends BaseRepository<
   // Bulk operations with better type safety
   async createMany(data: CreateHospitals[]): Promise<Hospitals[]> {
     const transformedData = data.map((item) => this.transformToDb(item));
-    const rows = await this.knex('hospitals')
+    const rows = await this.knex('inventory.hospitals')
       .insert(transformedData)
       .returning('*');
     return rows.map((row) => this.transformToEntity(row));
@@ -232,7 +232,7 @@ export class HospitalsRepository extends BaseRepository<
   async createWithTransaction(data: CreateHospitals): Promise<Hospitals> {
     return this.withTransaction(async (trx) => {
       const transformedData = this.transformToDb(data);
-      const [row] = await trx('hospitals')
+      const [row] = await trx('inventory.hospitals')
         .insert(transformedData)
         .returning('*');
       return this.transformToEntity(row);

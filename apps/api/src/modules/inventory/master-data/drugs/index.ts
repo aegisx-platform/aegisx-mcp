@@ -4,7 +4,6 @@ import { DrugsController } from './drugs.controller';
 import { DrugsService } from './drugs.service';
 import { DrugsRepository } from './drugs.repository';
 import { drugsRoutes } from './drugs.route';
-import { ExportService } from '../../../../services/export.service';
 
 // Note: FastifyInstance eventService type is declared in websocket.plugin.ts
 
@@ -34,10 +33,9 @@ export default fp(
     // Dependencies are accessed from Fastify instance decorators
     const drugsRepository = new DrugsRepository((fastify as any).knex);
     const drugsService = new DrugsService(drugsRepository);
-    const exportService = new ExportService();
 
     // Controller instantiation with proper dependencies
-    const drugsController = new DrugsController(drugsService, exportService);
+    const drugsController = new DrugsController(drugsService);
 
     // Optional: Decorate Fastify instance with service for cross-plugin access
     // fastify.decorate('drugsService', drugsService);

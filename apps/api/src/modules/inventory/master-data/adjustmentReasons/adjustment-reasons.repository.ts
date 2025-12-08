@@ -30,11 +30,11 @@ export class AdjustmentReasonsRepository extends BaseRepository<
   constructor(knex: Knex) {
     super(
       knex,
-      'adjustment_reasons',
+      'inventory.adjustment_reasons',
       [
         // Define searchable fields based on intelligent detection
-        'adjustment_reasons.reason_name',
-        'adjustment_reasons.description',
+        'inventory.adjustment_reasons.reason_name',
+        'inventory.adjustment_reasons.description',
       ],
       [], // explicitUUIDFields
       {
@@ -95,9 +95,11 @@ export class AdjustmentReasonsRepository extends BaseRepository<
 
   // Custom query with joins if needed
   getJoinQuery() {
-    return this.knex('adjustment_reasons').select('adjustment_reasons.*');
+    return this.knex('inventory.adjustment_reasons').select(
+      'inventory.adjustment_reasons.*',
+    );
     // Add joins here if needed
-    // .leftJoin('other_table', 'adjustment_reasons.foreign_key', 'other_table.id')
+    // .leftJoin('other_table', 'inventory.adjustment_reasons.foreign_key', 'other_table.id')
   }
 
   // Apply custom filters
@@ -110,22 +112,31 @@ export class AdjustmentReasonsRepository extends BaseRepository<
 
     // Apply specific AdjustmentReasons filters based on intelligent field categorization
     if (filters.reason_code !== undefined) {
-      query.where('adjustment_reasons.reason_code', filters.reason_code);
+      query.where(
+        'inventory.adjustment_reasons.reason_code',
+        filters.reason_code,
+      );
     }
     if (filters.reason_name !== undefined) {
-      query.where('adjustment_reasons.reason_name', filters.reason_name);
+      query.where(
+        'inventory.adjustment_reasons.reason_name',
+        filters.reason_name,
+      );
     }
     if (filters.requires_approval !== undefined) {
       query.where(
-        'adjustment_reasons.requires_approval',
+        'inventory.adjustment_reasons.requires_approval',
         filters.requires_approval,
       );
     }
     if (filters.description !== undefined) {
-      query.where('adjustment_reasons.description', filters.description);
+      query.where(
+        'inventory.adjustment_reasons.description',
+        filters.description,
+      );
     }
     if (filters.is_active !== undefined) {
-      query.where('adjustment_reasons.is_active', filters.is_active);
+      query.where('inventory.adjustment_reasons.is_active', filters.is_active);
     }
   }
 
@@ -159,18 +170,18 @@ export class AdjustmentReasonsRepository extends BaseRepository<
   // Custom sort fields mapping
   protected getSortField(sortBy: string): string {
     const sortFields: Record<string, string> = {
-      id: 'adjustment_reasons.id',
-      reasonCode: 'adjustment_reasons.reason_code',
-      reasonName: 'adjustment_reasons.reason_name',
-      adjustmentType: 'adjustment_reasons.adjustment_type',
-      requiresApproval: 'adjustment_reasons.requires_approval',
-      description: 'adjustment_reasons.description',
-      isActive: 'adjustment_reasons.is_active',
-      createdAt: 'adjustment_reasons.created_at',
-      updatedAt: 'adjustment_reasons.updated_at',
+      id: 'inventory.adjustment_reasons.id',
+      reasonCode: 'inventory.adjustment_reasons.reason_code',
+      reasonName: 'inventory.adjustment_reasons.reason_name',
+      adjustmentType: 'inventory.adjustment_reasons.adjustment_type',
+      requiresApproval: 'inventory.adjustment_reasons.requires_approval',
+      description: 'inventory.adjustment_reasons.description',
+      isActive: 'inventory.adjustment_reasons.is_active',
+      createdAt: 'inventory.adjustment_reasons.created_at',
+      updatedAt: 'inventory.adjustment_reasons.updated_at',
     };
 
-    return sortFields[sortBy] || 'adjustment_reasons.id';
+    return sortFields[sortBy] || 'inventory.adjustment_reasons.id';
   }
 
   // Extended find method with options
@@ -213,7 +224,7 @@ export class AdjustmentReasonsRepository extends BaseRepository<
   async getStats(): Promise<{
     total: number;
   }> {
-    const stats: any = await this.knex('adjustment_reasons')
+    const stats: any = await this.knex('inventory.adjustment_reasons')
       .select([this.knex.raw('COUNT(*) as total')])
       .first();
 
@@ -227,7 +238,7 @@ export class AdjustmentReasonsRepository extends BaseRepository<
     data: CreateAdjustmentReasons[],
   ): Promise<AdjustmentReasons[]> {
     const transformedData = data.map((item) => this.transformToDb(item));
-    const rows = await this.knex('adjustment_reasons')
+    const rows = await this.knex('inventory.adjustment_reasons')
       .insert(transformedData)
       .returning('*');
     return rows.map((row) => this.transformToEntity(row));
@@ -239,7 +250,7 @@ export class AdjustmentReasonsRepository extends BaseRepository<
   ): Promise<AdjustmentReasons> {
     return this.withTransaction(async (trx) => {
       const transformedData = this.transformToDb(data);
-      const [row] = await trx('adjustment_reasons')
+      const [row] = await trx('inventory.adjustment_reasons')
         .insert(transformedData)
         .returning('*');
       return this.transformToEntity(row);

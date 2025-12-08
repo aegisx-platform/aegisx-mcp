@@ -30,11 +30,11 @@ export class BudgetCategoriesRepository extends BaseRepository<
   constructor(knex: Knex) {
     super(
       knex,
-      'budget_categories',
+      'inventory.budget_categories',
       [
         // Define searchable fields based on intelligent detection
-        'budget_categories.category_name',
-        'budget_categories.description',
+        'inventory.budget_categories.category_name',
+        'inventory.budget_categories.description',
       ],
       [], // explicitUUIDFields
       {
@@ -91,9 +91,11 @@ export class BudgetCategoriesRepository extends BaseRepository<
 
   // Custom query with joins if needed
   getJoinQuery() {
-    return this.knex('budget_categories').select('budget_categories.*');
+    return this.knex('inventory.budget_categories').select(
+      'inventory.budget_categories.*',
+    );
     // Add joins here if needed
-    // .leftJoin('other_table', 'budget_categories.foreign_key', 'other_table.id')
+    // .leftJoin('other_table', 'inventory.budget_categories.foreign_key', 'other_table.id')
   }
 
   // Apply custom filters
@@ -106,19 +108,31 @@ export class BudgetCategoriesRepository extends BaseRepository<
 
     // Apply specific BudgetCategories filters based on intelligent field categorization
     if (filters.category_code !== undefined) {
-      query.where('budget_categories.category_code', filters.category_code);
+      query.where(
+        'inventory.budget_categories.category_code',
+        filters.category_code,
+      );
     }
     if (filters.category_name !== undefined) {
-      query.where('budget_categories.category_name', filters.category_name);
+      query.where(
+        'inventory.budget_categories.category_name',
+        filters.category_name,
+      );
     }
     if (filters.accounting_code !== undefined) {
-      query.where('budget_categories.accounting_code', filters.accounting_code);
+      query.where(
+        'inventory.budget_categories.accounting_code',
+        filters.accounting_code,
+      );
     }
     if (filters.description !== undefined) {
-      query.where('budget_categories.description', filters.description);
+      query.where(
+        'inventory.budget_categories.description',
+        filters.description,
+      );
     }
     if (filters.is_active !== undefined) {
-      query.where('budget_categories.is_active', filters.is_active);
+      query.where('inventory.budget_categories.is_active', filters.is_active);
     }
   }
 
@@ -152,17 +166,17 @@ export class BudgetCategoriesRepository extends BaseRepository<
   // Custom sort fields mapping
   protected getSortField(sortBy: string): string {
     const sortFields: Record<string, string> = {
-      id: 'budget_categories.id',
-      categoryCode: 'budget_categories.category_code',
-      categoryName: 'budget_categories.category_name',
-      accountingCode: 'budget_categories.accounting_code',
-      description: 'budget_categories.description',
-      isActive: 'budget_categories.is_active',
-      createdAt: 'budget_categories.created_at',
-      updatedAt: 'budget_categories.updated_at',
+      id: 'inventory.budget_categories.id',
+      categoryCode: 'inventory.budget_categories.category_code',
+      categoryName: 'inventory.budget_categories.category_name',
+      accountingCode: 'inventory.budget_categories.accounting_code',
+      description: 'inventory.budget_categories.description',
+      isActive: 'inventory.budget_categories.is_active',
+      createdAt: 'inventory.budget_categories.created_at',
+      updatedAt: 'inventory.budget_categories.updated_at',
     };
 
-    return sortFields[sortBy] || 'budget_categories.id';
+    return sortFields[sortBy] || 'inventory.budget_categories.id';
   }
 
   // Extended find method with options
@@ -247,7 +261,7 @@ export class BudgetCategoriesRepository extends BaseRepository<
   async getStats(): Promise<{
     total: number;
   }> {
-    const stats: any = await this.knex('budget_categories')
+    const stats: any = await this.knex('inventory.budget_categories')
       .select([this.knex.raw('COUNT(*) as total')])
       .first();
 
@@ -261,7 +275,7 @@ export class BudgetCategoriesRepository extends BaseRepository<
     data: CreateBudgetCategories[],
   ): Promise<BudgetCategories[]> {
     const transformedData = data.map((item) => this.transformToDb(item));
-    const rows = await this.knex('budget_categories')
+    const rows = await this.knex('inventory.budget_categories')
       .insert(transformedData)
       .returning('*');
     return rows.map((row) => this.transformToEntity(row));
@@ -273,7 +287,7 @@ export class BudgetCategoriesRepository extends BaseRepository<
   ): Promise<BudgetCategories> {
     return this.withTransaction(async (trx) => {
       const transformedData = this.transformToDb(data);
-      const [row] = await trx('budget_categories')
+      const [row] = await trx('inventory.budget_categories')
         .insert(transformedData)
         .returning('*');
       return this.transformToEntity(row);

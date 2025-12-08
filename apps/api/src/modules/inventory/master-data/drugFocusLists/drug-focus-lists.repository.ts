@@ -35,11 +35,11 @@ export class DrugFocusListsRepository extends BaseRepository<
   constructor(knex: Knex) {
     super(
       knex,
-      'drug_focus_lists',
+      'inventory.drug_focus_lists',
       [
         // Define searchable fields based on intelligent detection
-        'drug_focus_lists.list_name',
-        'drug_focus_lists.description',
+        'inventory.drug_focus_lists.list_name',
+        'inventory.drug_focus_lists.description',
       ],
       [], // explicitUUIDFields
       {
@@ -100,9 +100,11 @@ export class DrugFocusListsRepository extends BaseRepository<
 
   // Custom query with joins if needed
   getJoinQuery() {
-    return this.knex('drug_focus_lists').select('drug_focus_lists.*');
+    return this.knex('inventory.drug_focus_lists').select(
+      'inventory.drug_focus_lists.*',
+    );
     // Add joins here if needed
-    // .leftJoin('other_table', 'drug_focus_lists.foreign_key', 'other_table.id')
+    // .leftJoin('other_table', 'inventory.drug_focus_lists.foreign_key', 'other_table.id')
   }
 
   // Apply custom filters
@@ -115,34 +117,53 @@ export class DrugFocusListsRepository extends BaseRepository<
 
     // Apply specific DrugFocusLists filters based on intelligent field categorization
     if (filters.list_code !== undefined) {
-      query.where('drug_focus_lists.list_code', filters.list_code);
+      query.where('inventory.drug_focus_lists.list_code', filters.list_code);
     }
     if (filters.list_name !== undefined) {
-      query.where('drug_focus_lists.list_name', filters.list_name);
+      query.where('inventory.drug_focus_lists.list_name', filters.list_name);
     }
     if (filters.description !== undefined) {
-      query.where('drug_focus_lists.description', filters.description);
+      query.where(
+        'inventory.drug_focus_lists.description',
+        filters.description,
+      );
     }
     if (filters.generic_id !== undefined) {
-      query.where('drug_focus_lists.generic_id', filters.generic_id);
+      query.where('inventory.drug_focus_lists.generic_id', filters.generic_id);
     }
     if (filters.generic_id_min !== undefined) {
-      query.where('drug_focus_lists.generic_id', '>=', filters.generic_id_min);
+      query.where(
+        'inventory.drug_focus_lists.generic_id',
+        '>=',
+        filters.generic_id_min,
+      );
     }
     if (filters.generic_id_max !== undefined) {
-      query.where('drug_focus_lists.generic_id', '<=', filters.generic_id_max);
+      query.where(
+        'inventory.drug_focus_lists.generic_id',
+        '<=',
+        filters.generic_id_max,
+      );
     }
     if (filters.drug_id !== undefined) {
-      query.where('drug_focus_lists.drug_id', filters.drug_id);
+      query.where('inventory.drug_focus_lists.drug_id', filters.drug_id);
     }
     if (filters.drug_id_min !== undefined) {
-      query.where('drug_focus_lists.drug_id', '>=', filters.drug_id_min);
+      query.where(
+        'inventory.drug_focus_lists.drug_id',
+        '>=',
+        filters.drug_id_min,
+      );
     }
     if (filters.drug_id_max !== undefined) {
-      query.where('drug_focus_lists.drug_id', '<=', filters.drug_id_max);
+      query.where(
+        'inventory.drug_focus_lists.drug_id',
+        '<=',
+        filters.drug_id_max,
+      );
     }
     if (filters.is_active !== undefined) {
-      query.where('drug_focus_lists.is_active', filters.is_active);
+      query.where('inventory.drug_focus_lists.is_active', filters.is_active);
     }
   }
 
@@ -176,18 +197,18 @@ export class DrugFocusListsRepository extends BaseRepository<
   // Custom sort fields mapping
   protected getSortField(sortBy: string): string {
     const sortFields: Record<string, string> = {
-      id: 'drug_focus_lists.id',
-      listCode: 'drug_focus_lists.list_code',
-      listName: 'drug_focus_lists.list_name',
-      description: 'drug_focus_lists.description',
-      genericId: 'drug_focus_lists.generic_id',
-      drugId: 'drug_focus_lists.drug_id',
-      isActive: 'drug_focus_lists.is_active',
-      createdAt: 'drug_focus_lists.created_at',
-      updatedAt: 'drug_focus_lists.updated_at',
+      id: 'inventory.drug_focus_lists.id',
+      listCode: 'inventory.drug_focus_lists.list_code',
+      listName: 'inventory.drug_focus_lists.list_name',
+      description: 'inventory.drug_focus_lists.description',
+      genericId: 'inventory.drug_focus_lists.generic_id',
+      drugId: 'inventory.drug_focus_lists.drug_id',
+      isActive: 'inventory.drug_focus_lists.is_active',
+      createdAt: 'inventory.drug_focus_lists.created_at',
+      updatedAt: 'inventory.drug_focus_lists.updated_at',
     };
 
-    return sortFields[sortBy] || 'drug_focus_lists.id';
+    return sortFields[sortBy] || 'inventory.drug_focus_lists.id';
   }
 
   // Extended find method with options
@@ -230,7 +251,7 @@ export class DrugFocusListsRepository extends BaseRepository<
   async getStats(): Promise<{
     total: number;
   }> {
-    const stats: any = await this.knex('drug_focus_lists')
+    const stats: any = await this.knex('inventory.drug_focus_lists')
       .select([this.knex.raw('COUNT(*) as total')])
       .first();
 
@@ -242,7 +263,7 @@ export class DrugFocusListsRepository extends BaseRepository<
   // Bulk operations with better type safety
   async createMany(data: CreateDrugFocusLists[]): Promise<DrugFocusLists[]> {
     const transformedData = data.map((item) => this.transformToDb(item));
-    const rows = await this.knex('drug_focus_lists')
+    const rows = await this.knex('inventory.drug_focus_lists')
       .insert(transformedData)
       .returning('*');
     return rows.map((row) => this.transformToEntity(row));
@@ -254,7 +275,7 @@ export class DrugFocusListsRepository extends BaseRepository<
   ): Promise<DrugFocusLists> {
     return this.withTransaction(async (trx) => {
       const transformedData = this.transformToDb(data);
-      const [row] = await trx('drug_focus_lists')
+      const [row] = await trx('inventory.drug_focus_lists')
         .insert(transformedData)
         .returning('*');
       return this.transformToEntity(row);

@@ -30,12 +30,12 @@ export class DrugUnitsRepository extends BaseRepository<
   constructor(knex: Knex) {
     super(
       knex,
-      'drug_units',
+      'inventory.drug_units',
       [
         // Define searchable fields based on intelligent detection
-        'drug_units.unit_name',
-        'drug_units.unit_name_en',
-        'drug_units.description',
+        'inventory.drug_units.unit_name',
+        'inventory.drug_units.unit_name_en',
+        'inventory.drug_units.description',
       ],
       [], // explicitUUIDFields
       {
@@ -96,9 +96,9 @@ export class DrugUnitsRepository extends BaseRepository<
 
   // Custom query with joins if needed
   getJoinQuery() {
-    return this.knex('drug_units').select('drug_units.*');
+    return this.knex('inventory.drug_units').select('inventory.drug_units.*');
     // Add joins here if needed
-    // .leftJoin('other_table', 'drug_units.foreign_key', 'other_table.id')
+    // .leftJoin('other_table', 'inventory.drug_units.foreign_key', 'other_table.id')
   }
 
   // Apply custom filters
@@ -108,19 +108,19 @@ export class DrugUnitsRepository extends BaseRepository<
 
     // Apply specific DrugUnits filters based on intelligent field categorization
     if (filters.unit_code !== undefined) {
-      query.where('drug_units.unit_code', filters.unit_code);
+      query.where('inventory.drug_units.unit_code', filters.unit_code);
     }
     if (filters.unit_name !== undefined) {
-      query.where('drug_units.unit_name', filters.unit_name);
+      query.where('inventory.drug_units.unit_name', filters.unit_name);
     }
     if (filters.unit_name_en !== undefined) {
-      query.where('drug_units.unit_name_en', filters.unit_name_en);
+      query.where('inventory.drug_units.unit_name_en', filters.unit_name_en);
     }
     if (filters.description !== undefined) {
-      query.where('drug_units.description', filters.description);
+      query.where('inventory.drug_units.description', filters.description);
     }
     if (filters.is_active !== undefined) {
-      query.where('drug_units.is_active', filters.is_active);
+      query.where('inventory.drug_units.is_active', filters.is_active);
     }
   }
 
@@ -154,18 +154,18 @@ export class DrugUnitsRepository extends BaseRepository<
   // Custom sort fields mapping
   protected getSortField(sortBy: string): string {
     const sortFields: Record<string, string> = {
-      id: 'drug_units.id',
-      unitCode: 'drug_units.unit_code',
-      unitName: 'drug_units.unit_name',
-      unitNameEn: 'drug_units.unit_name_en',
-      unitType: 'drug_units.unit_type',
-      description: 'drug_units.description',
-      isActive: 'drug_units.is_active',
-      createdAt: 'drug_units.created_at',
-      updatedAt: 'drug_units.updated_at',
+      id: 'inventory.drug_units.id',
+      unitCode: 'inventory.drug_units.unit_code',
+      unitName: 'inventory.drug_units.unit_name',
+      unitNameEn: 'inventory.drug_units.unit_name_en',
+      unitType: 'inventory.drug_units.unit_type',
+      description: 'inventory.drug_units.description',
+      isActive: 'inventory.drug_units.is_active',
+      createdAt: 'inventory.drug_units.created_at',
+      updatedAt: 'inventory.drug_units.updated_at',
     };
 
-    return sortFields[sortBy] || 'drug_units.id';
+    return sortFields[sortBy] || 'inventory.drug_units.id';
   }
 
   // Extended find method with options
@@ -250,7 +250,7 @@ export class DrugUnitsRepository extends BaseRepository<
   async getStats(): Promise<{
     total: number;
   }> {
-    const stats: any = await this.knex('drug_units')
+    const stats: any = await this.knex('inventory.drug_units')
       .select([this.knex.raw('COUNT(*) as total')])
       .first();
 
@@ -262,7 +262,7 @@ export class DrugUnitsRepository extends BaseRepository<
   // Bulk operations with better type safety
   async createMany(data: CreateDrugUnits[]): Promise<DrugUnits[]> {
     const transformedData = data.map((item) => this.transformToDb(item));
-    const rows = await this.knex('drug_units')
+    const rows = await this.knex('inventory.drug_units')
       .insert(transformedData)
       .returning('*');
     return rows.map((row) => this.transformToEntity(row));
@@ -272,7 +272,7 @@ export class DrugUnitsRepository extends BaseRepository<
   async createWithTransaction(data: CreateDrugUnits): Promise<DrugUnits> {
     return this.withTransaction(async (trx) => {
       const transformedData = this.transformToDb(data);
-      const [row] = await trx('drug_units')
+      const [row] = await trx('inventory.drug_units')
         .insert(transformedData)
         .returning('*');
       return this.transformToEntity(row);

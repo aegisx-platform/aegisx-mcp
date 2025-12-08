@@ -27,7 +27,7 @@ export async function contractItemsRoutes(
   // Create contractItems
   fastify.post('/', {
     schema: {
-      tags: ['ContractItems'],
+      tags: ['Inventory: Contract Items'],
       summary: 'Create a new contractItems',
       description: 'Create a new contractItems with the provided data',
       body: CreateContractItemsSchema,
@@ -51,7 +51,7 @@ export async function contractItemsRoutes(
   // Get contractItems by ID
   fastify.get('/:id', {
     schema: {
-      tags: ['ContractItems'],
+      tags: ['Inventory: Contract Items'],
       summary: 'Get contractItems by ID',
       description: 'Retrieve a contractItems by its unique identifier',
       params: ContractItemsIdParamSchema,
@@ -75,7 +75,7 @@ export async function contractItemsRoutes(
   // Get all contractItemss
   fastify.get('/', {
     schema: {
-      tags: ['ContractItems'],
+      tags: ['Inventory: Contract Items'],
       summary: 'Get all contractItemss with pagination and formats',
       description:
         'Retrieve contractItemss with flexible formatting: ?format=dropdown for UI components, ?format=minimal for lightweight data, ?fields=id,name for custom field selection',
@@ -98,7 +98,7 @@ export async function contractItemsRoutes(
   // Update contractItems
   fastify.put('/:id', {
     schema: {
-      tags: ['ContractItems'],
+      tags: ['Inventory: Contract Items'],
       summary: 'Update contractItems by ID',
       description: 'Update an existing contractItems with new data',
       params: ContractItemsIdParamSchema,
@@ -124,7 +124,7 @@ export async function contractItemsRoutes(
   // Delete contractItems
   fastify.delete('/:id', {
     schema: {
-      tags: ['ContractItems'],
+      tags: ['Inventory: Contract Items'],
       summary: 'Delete contractItems by ID',
       description: 'Delete a contractItems by its unique identifier',
       params: ContractItemsIdParamSchema,

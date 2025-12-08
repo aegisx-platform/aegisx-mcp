@@ -41,10 +41,10 @@ export class ContractItemsRepository extends BaseRepository<
   constructor(knex: Knex) {
     super(
       knex,
-      'contract_items',
+      'inventory.contract_items',
       [
         // Define searchable fields based on intelligent detection
-        'contract_items.notes',
+        'inventory.contract_items.notes',
       ],
       [], // explicitUUIDFields
       {
@@ -105,9 +105,11 @@ export class ContractItemsRepository extends BaseRepository<
 
   // Custom query with joins if needed
   getJoinQuery() {
-    return this.knex('contract_items').select('contract_items.*');
+    return this.knex('inventory.contract_items').select(
+      'inventory.contract_items.*',
+    );
     // Add joins here if needed
-    // .leftJoin('other_table', 'contract_items.foreign_key', 'other_table.id')
+    // .leftJoin('other_table', 'inventory.contract_items.foreign_key', 'other_table.id')
   }
 
   // Apply custom filters
@@ -120,79 +122,101 @@ export class ContractItemsRepository extends BaseRepository<
 
     // Apply specific ContractItems filters based on intelligent field categorization
     if (filters.contract_id !== undefined) {
-      query.where('contract_items.contract_id', filters.contract_id);
+      query.where('inventory.contract_items.contract_id', filters.contract_id);
     }
     if (filters.contract_id_min !== undefined) {
-      query.where('contract_items.contract_id', '>=', filters.contract_id_min);
+      query.where(
+        'inventory.contract_items.contract_id',
+        '>=',
+        filters.contract_id_min,
+      );
     }
     if (filters.contract_id_max !== undefined) {
-      query.where('contract_items.contract_id', '<=', filters.contract_id_max);
+      query.where(
+        'inventory.contract_items.contract_id',
+        '<=',
+        filters.contract_id_max,
+      );
     }
     if (filters.generic_id !== undefined) {
-      query.where('contract_items.generic_id', filters.generic_id);
+      query.where('inventory.contract_items.generic_id', filters.generic_id);
     }
     if (filters.generic_id_min !== undefined) {
-      query.where('contract_items.generic_id', '>=', filters.generic_id_min);
+      query.where(
+        'inventory.contract_items.generic_id',
+        '>=',
+        filters.generic_id_min,
+      );
     }
     if (filters.generic_id_max !== undefined) {
-      query.where('contract_items.generic_id', '<=', filters.generic_id_max);
+      query.where(
+        'inventory.contract_items.generic_id',
+        '<=',
+        filters.generic_id_max,
+      );
     }
     if (filters.agreed_unit_price !== undefined) {
       query.where(
-        'contract_items.agreed_unit_price',
+        'inventory.contract_items.agreed_unit_price',
         filters.agreed_unit_price,
       );
     }
     if (filters.agreed_unit_price_min !== undefined) {
       query.where(
-        'contract_items.agreed_unit_price',
+        'inventory.contract_items.agreed_unit_price',
         '>=',
         filters.agreed_unit_price_min,
       );
     }
     if (filters.agreed_unit_price_max !== undefined) {
       query.where(
-        'contract_items.agreed_unit_price',
+        'inventory.contract_items.agreed_unit_price',
         '<=',
         filters.agreed_unit_price_max,
       );
     }
     if (filters.quantity_limit !== undefined) {
-      query.where('contract_items.quantity_limit', filters.quantity_limit);
+      query.where(
+        'inventory.contract_items.quantity_limit',
+        filters.quantity_limit,
+      );
     }
     if (filters.quantity_limit_min !== undefined) {
       query.where(
-        'contract_items.quantity_limit',
+        'inventory.contract_items.quantity_limit',
         '>=',
         filters.quantity_limit_min,
       );
     }
     if (filters.quantity_limit_max !== undefined) {
       query.where(
-        'contract_items.quantity_limit',
+        'inventory.contract_items.quantity_limit',
         '<=',
         filters.quantity_limit_max,
       );
     }
     if (filters.quantity_used !== undefined) {
-      query.where('contract_items.quantity_used', filters.quantity_used);
+      query.where(
+        'inventory.contract_items.quantity_used',
+        filters.quantity_used,
+      );
     }
     if (filters.quantity_used_min !== undefined) {
       query.where(
-        'contract_items.quantity_used',
+        'inventory.contract_items.quantity_used',
         '>=',
         filters.quantity_used_min,
       );
     }
     if (filters.quantity_used_max !== undefined) {
       query.where(
-        'contract_items.quantity_used',
+        'inventory.contract_items.quantity_used',
         '<=',
         filters.quantity_used_max,
       );
     }
     if (filters.notes !== undefined) {
-      query.where('contract_items.notes', filters.notes);
+      query.where('inventory.contract_items.notes', filters.notes);
     }
   }
 
@@ -226,18 +250,18 @@ export class ContractItemsRepository extends BaseRepository<
   // Custom sort fields mapping
   protected getSortField(sortBy: string): string {
     const sortFields: Record<string, string> = {
-      id: 'contract_items.id',
-      contractId: 'contract_items.contract_id',
-      genericId: 'contract_items.generic_id',
-      agreedUnitPrice: 'contract_items.agreed_unit_price',
-      quantityLimit: 'contract_items.quantity_limit',
-      quantityUsed: 'contract_items.quantity_used',
-      notes: 'contract_items.notes',
-      createdAt: 'contract_items.created_at',
-      updatedAt: 'contract_items.updated_at',
+      id: 'inventory.contract_items.id',
+      contractId: 'inventory.contract_items.contract_id',
+      genericId: 'inventory.contract_items.generic_id',
+      agreedUnitPrice: 'inventory.contract_items.agreed_unit_price',
+      quantityLimit: 'inventory.contract_items.quantity_limit',
+      quantityUsed: 'inventory.contract_items.quantity_used',
+      notes: 'inventory.contract_items.notes',
+      createdAt: 'inventory.contract_items.created_at',
+      updatedAt: 'inventory.contract_items.updated_at',
     };
 
-    return sortFields[sortBy] || 'contract_items.id';
+    return sortFields[sortBy] || 'inventory.contract_items.id';
   }
 
   // Extended find method with options
@@ -280,7 +304,7 @@ export class ContractItemsRepository extends BaseRepository<
   async getStats(): Promise<{
     total: number;
   }> {
-    const stats: any = await this.knex('contract_items')
+    const stats: any = await this.knex('inventory.contract_items')
       .select([this.knex.raw('COUNT(*) as total')])
       .first();
 
@@ -292,7 +316,7 @@ export class ContractItemsRepository extends BaseRepository<
   // Bulk operations with better type safety
   async createMany(data: CreateContractItems[]): Promise<ContractItems[]> {
     const transformedData = data.map((item) => this.transformToDb(item));
-    const rows = await this.knex('contract_items')
+    const rows = await this.knex('inventory.contract_items')
       .insert(transformedData)
       .returning('*');
     return rows.map((row) => this.transformToEntity(row));
@@ -304,7 +328,7 @@ export class ContractItemsRepository extends BaseRepository<
   ): Promise<ContractItems> {
     return this.withTransaction(async (trx) => {
       const transformedData = this.transformToDb(data);
-      const [row] = await trx('contract_items')
+      const [row] = await trx('inventory.contract_items')
         .insert(transformedData)
         .returning('*');
       return this.transformToEntity(row);

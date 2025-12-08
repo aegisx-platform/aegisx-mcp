@@ -29,10 +29,10 @@ export class BankRepository extends BaseRepository<
   constructor(knex: Knex) {
     super(
       knex,
-      'bank',
+      'inventory.bank',
       [
         // Define searchable fields based on intelligent detection
-        'bank.bank_name',
+        'inventory.bank.bank_name',
       ],
       [], // explicitUUIDFields
       {
@@ -83,9 +83,9 @@ export class BankRepository extends BaseRepository<
 
   // Custom query with joins if needed
   getJoinQuery() {
-    return this.knex('bank').select('bank.*');
+    return this.knex('inventory.bank').select('inventory.bank.*');
     // Add joins here if needed
-    // .leftJoin('other_table', 'bank.foreign_key', 'other_table.id')
+    // .leftJoin('other_table', 'inventory.bank.foreign_key', 'other_table.id')
   }
 
   // Apply custom filters
@@ -95,16 +95,16 @@ export class BankRepository extends BaseRepository<
 
     // Apply specific Bank filters based on intelligent field categorization
     if (filters.bank_code !== undefined) {
-      query.where('bank.bank_code', filters.bank_code);
+      query.where('inventory.bank.bank_code', filters.bank_code);
     }
     if (filters.bank_name !== undefined) {
-      query.where('bank.bank_name', filters.bank_name);
+      query.where('inventory.bank.bank_name', filters.bank_name);
     }
     if (filters.swift_code !== undefined) {
-      query.where('bank.swift_code', filters.swift_code);
+      query.where('inventory.bank.swift_code', filters.swift_code);
     }
     if (filters.is_active !== undefined) {
-      query.where('bank.is_active', filters.is_active);
+      query.where('inventory.bank.is_active', filters.is_active);
     }
   }
 
@@ -138,16 +138,16 @@ export class BankRepository extends BaseRepository<
   // Custom sort fields mapping
   protected getSortField(sortBy: string): string {
     const sortFields: Record<string, string> = {
-      id: 'bank.id',
-      bankCode: 'bank.bank_code',
-      bankName: 'bank.bank_name',
-      swiftCode: 'bank.swift_code',
-      isActive: 'bank.is_active',
-      createdAt: 'bank.created_at',
-      updatedAt: 'bank.updated_at',
+      id: 'inventory.bank.id',
+      bankCode: 'inventory.bank.bank_code',
+      bankName: 'inventory.bank.bank_name',
+      swiftCode: 'inventory.bank.swift_code',
+      isActive: 'inventory.bank.is_active',
+      createdAt: 'inventory.bank.created_at',
+      updatedAt: 'inventory.bank.updated_at',
     };
 
-    return sortFields[sortBy] || 'bank.id';
+    return sortFields[sortBy] || 'inventory.bank.id';
   }
 
   // Extended find method with options
@@ -230,7 +230,7 @@ export class BankRepository extends BaseRepository<
   async getStats(): Promise<{
     total: number;
   }> {
-    const stats: any = await this.knex('bank')
+    const stats: any = await this.knex('inventory.bank')
       .select([this.knex.raw('COUNT(*) as total')])
       .first();
 
@@ -242,7 +242,9 @@ export class BankRepository extends BaseRepository<
   // Bulk operations with better type safety
   async createMany(data: CreateBank[]): Promise<Bank[]> {
     const transformedData = data.map((item) => this.transformToDb(item));
-    const rows = await this.knex('bank').insert(transformedData).returning('*');
+    const rows = await this.knex('inventory.bank')
+      .insert(transformedData)
+      .returning('*');
     return rows.map((row) => this.transformToEntity(row));
   }
 
@@ -250,7 +252,9 @@ export class BankRepository extends BaseRepository<
   async createWithTransaction(data: CreateBank): Promise<Bank> {
     return this.withTransaction(async (trx) => {
       const transformedData = this.transformToDb(data);
-      const [row] = await trx('bank').insert(transformedData).returning('*');
+      const [row] = await trx('inventory.bank')
+        .insert(transformedData)
+        .returning('*');
       return this.transformToEntity(row);
     });
   }

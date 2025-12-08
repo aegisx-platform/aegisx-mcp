@@ -27,7 +27,7 @@ export async function hospitalsRoutes(
   // Create hospitals
   fastify.post('/', {
     schema: {
-      tags: ['Hospitals'],
+      tags: ['Inventory: Hospitals'],
       summary: 'Create a new hospitals',
       description: 'Create a new hospitals with the provided data',
       body: CreateHospitalsSchema,
@@ -51,7 +51,7 @@ export async function hospitalsRoutes(
   // Get hospitals by ID
   fastify.get('/:id', {
     schema: {
-      tags: ['Hospitals'],
+      tags: ['Inventory: Hospitals'],
       summary: 'Get hospitals by ID',
       description: 'Retrieve a hospitals by its unique identifier',
       params: HospitalsIdParamSchema,
@@ -75,7 +75,7 @@ export async function hospitalsRoutes(
   // Get all hospitalss
   fastify.get('/', {
     schema: {
-      tags: ['Hospitals'],
+      tags: ['Inventory: Hospitals'],
       summary: 'Get all hospitalss with pagination and formats',
       description:
         'Retrieve hospitalss with flexible formatting: ?format=dropdown for UI components, ?format=minimal for lightweight data, ?fields=id,name for custom field selection',
@@ -98,7 +98,7 @@ export async function hospitalsRoutes(
   // Update hospitals
   fastify.put('/:id', {
     schema: {
-      tags: ['Hospitals'],
+      tags: ['Inventory: Hospitals'],
       summary: 'Update hospitals by ID',
       description: 'Update an existing hospitals with new data',
       params: HospitalsIdParamSchema,
@@ -124,7 +124,7 @@ export async function hospitalsRoutes(
   // Delete hospitals
   fastify.delete('/:id', {
     schema: {
-      tags: ['Hospitals'],
+      tags: ['Inventory: Hospitals'],
       summary: 'Delete hospitals by ID',
       description: 'Delete a hospitals by its unique identifier',
       params: HospitalsIdParamSchema,

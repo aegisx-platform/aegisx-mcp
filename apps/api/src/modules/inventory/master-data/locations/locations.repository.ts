@@ -33,10 +33,10 @@ export class LocationsRepository extends BaseRepository<
   constructor(knex: Knex) {
     super(
       knex,
-      'locations',
+      'inventory.locations',
       [
         // Define searchable fields based on intelligent detection
-        'locations.location_name',
+        'inventory.locations.location_name',
       ],
       [], // explicitUUIDFields
       {
@@ -101,9 +101,9 @@ export class LocationsRepository extends BaseRepository<
 
   // Custom query with joins if needed
   getJoinQuery() {
-    return this.knex('locations').select('locations.*');
+    return this.knex('inventory.locations').select('inventory.locations.*');
     // Add joins here if needed
-    // .leftJoin('other_table', 'locations.foreign_key', 'other_table.id')
+    // .leftJoin('other_table', 'inventory.locations.foreign_key', 'other_table.id')
   }
 
   // Apply custom filters
@@ -113,28 +113,31 @@ export class LocationsRepository extends BaseRepository<
 
     // Apply specific Locations filters based on intelligent field categorization
     if (filters.location_code !== undefined) {
-      query.where('locations.location_code', filters.location_code);
+      query.where('inventory.locations.location_code', filters.location_code);
     }
     if (filters.location_name !== undefined) {
-      query.where('locations.location_name', filters.location_name);
+      query.where('inventory.locations.location_name', filters.location_name);
     }
     if (filters.parent_id !== undefined) {
-      query.where('locations.parent_id', filters.parent_id);
+      query.where('inventory.locations.parent_id', filters.parent_id);
     }
     if (filters.parent_id_min !== undefined) {
-      query.where('locations.parent_id', '>=', filters.parent_id_min);
+      query.where('inventory.locations.parent_id', '>=', filters.parent_id_min);
     }
     if (filters.parent_id_max !== undefined) {
-      query.where('locations.parent_id', '<=', filters.parent_id_max);
+      query.where('inventory.locations.parent_id', '<=', filters.parent_id_max);
     }
     if (filters.address !== undefined) {
-      query.where('locations.address', filters.address);
+      query.where('inventory.locations.address', filters.address);
     }
     if (filters.responsible_person !== undefined) {
-      query.where('locations.responsible_person', filters.responsible_person);
+      query.where(
+        'inventory.locations.responsible_person',
+        filters.responsible_person,
+      );
     }
     if (filters.is_active !== undefined) {
-      query.where('locations.is_active', filters.is_active);
+      query.where('inventory.locations.is_active', filters.is_active);
     }
   }
 
@@ -168,19 +171,19 @@ export class LocationsRepository extends BaseRepository<
   // Custom sort fields mapping
   protected getSortField(sortBy: string): string {
     const sortFields: Record<string, string> = {
-      id: 'locations.id',
-      locationCode: 'locations.location_code',
-      locationName: 'locations.location_name',
-      locationType: 'locations.location_type',
-      parentId: 'locations.parent_id',
-      address: 'locations.address',
-      responsiblePerson: 'locations.responsible_person',
-      isActive: 'locations.is_active',
-      createdAt: 'locations.created_at',
-      updatedAt: 'locations.updated_at',
+      id: 'inventory.locations.id',
+      locationCode: 'inventory.locations.location_code',
+      locationName: 'inventory.locations.location_name',
+      locationType: 'inventory.locations.location_type',
+      parentId: 'inventory.locations.parent_id',
+      address: 'inventory.locations.address',
+      responsiblePerson: 'inventory.locations.responsible_person',
+      isActive: 'inventory.locations.is_active',
+      createdAt: 'inventory.locations.created_at',
+      updatedAt: 'inventory.locations.updated_at',
     };
 
-    return sortFields[sortBy] || 'locations.id';
+    return sortFields[sortBy] || 'inventory.locations.id';
   }
 
   // Extended find method with options
@@ -340,7 +343,7 @@ export class LocationsRepository extends BaseRepository<
   async getStats(): Promise<{
     total: number;
   }> {
-    const stats: any = await this.knex('locations')
+    const stats: any = await this.knex('inventory.locations')
       .select([this.knex.raw('COUNT(*) as total')])
       .first();
 
@@ -352,7 +355,7 @@ export class LocationsRepository extends BaseRepository<
   // Bulk operations with better type safety
   async createMany(data: CreateLocations[]): Promise<Locations[]> {
     const transformedData = data.map((item) => this.transformToDb(item));
-    const rows = await this.knex('locations')
+    const rows = await this.knex('inventory.locations')
       .insert(transformedData)
       .returning('*');
     return rows.map((row) => this.transformToEntity(row));
@@ -362,7 +365,7 @@ export class LocationsRepository extends BaseRepository<
   async createWithTransaction(data: CreateLocations): Promise<Locations> {
     return this.withTransaction(async (trx) => {
       const transformedData = this.transformToDb(data);
-      const [row] = await trx('locations')
+      const [row] = await trx('inventory.locations')
         .insert(transformedData)
         .returning('*');
       return this.transformToEntity(row);

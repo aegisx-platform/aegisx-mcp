@@ -39,7 +39,7 @@ export class ContractsRepository extends BaseRepository<
   constructor(knex: Knex) {
     super(
       knex,
-      'contracts',
+      'inventory.contracts',
       [
         // Define searchable fields based on intelligent detection
       ],
@@ -132,9 +132,9 @@ export class ContractsRepository extends BaseRepository<
 
   // Custom query with joins if needed
   getJoinQuery() {
-    return this.knex('contracts').select('contracts.*');
+    return this.knex('inventory.contracts').select('inventory.contracts.*');
     // Add joins here if needed
-    // .leftJoin('other_table', 'contracts.foreign_key', 'other_table.id')
+    // .leftJoin('other_table', 'inventory.contracts.foreign_key', 'other_table.id')
   }
 
   // Apply custom filters
@@ -144,54 +144,68 @@ export class ContractsRepository extends BaseRepository<
 
     // Apply specific Contracts filters based on intelligent field categorization
     if (filters.contract_number !== undefined) {
-      query.where('contracts.contract_number', filters.contract_number);
+      query.where(
+        'inventory.contracts.contract_number',
+        filters.contract_number,
+      );
     }
     if (filters.vendor_id !== undefined) {
-      query.where('contracts.vendor_id', filters.vendor_id);
+      query.where('inventory.contracts.vendor_id', filters.vendor_id);
     }
     if (filters.vendor_id_min !== undefined) {
-      query.where('contracts.vendor_id', '>=', filters.vendor_id_min);
+      query.where('inventory.contracts.vendor_id', '>=', filters.vendor_id_min);
     }
     if (filters.vendor_id_max !== undefined) {
-      query.where('contracts.vendor_id', '<=', filters.vendor_id_max);
+      query.where('inventory.contracts.vendor_id', '<=', filters.vendor_id_max);
     }
     if (filters.total_value !== undefined) {
-      query.where('contracts.total_value', filters.total_value);
+      query.where('inventory.contracts.total_value', filters.total_value);
     }
     if (filters.total_value_min !== undefined) {
-      query.where('contracts.total_value', '>=', filters.total_value_min);
+      query.where(
+        'inventory.contracts.total_value',
+        '>=',
+        filters.total_value_min,
+      );
     }
     if (filters.total_value_max !== undefined) {
-      query.where('contracts.total_value', '<=', filters.total_value_max);
+      query.where(
+        'inventory.contracts.total_value',
+        '<=',
+        filters.total_value_max,
+      );
     }
     if (filters.remaining_value !== undefined) {
-      query.where('contracts.remaining_value', filters.remaining_value);
+      query.where(
+        'inventory.contracts.remaining_value',
+        filters.remaining_value,
+      );
     }
     if (filters.remaining_value_min !== undefined) {
       query.where(
-        'contracts.remaining_value',
+        'inventory.contracts.remaining_value',
         '>=',
         filters.remaining_value_min,
       );
     }
     if (filters.remaining_value_max !== undefined) {
       query.where(
-        'contracts.remaining_value',
+        'inventory.contracts.remaining_value',
         '<=',
         filters.remaining_value_max,
       );
     }
     if (filters.fiscal_year !== undefined) {
-      query.where('contracts.fiscal_year', filters.fiscal_year);
+      query.where('inventory.contracts.fiscal_year', filters.fiscal_year);
     }
     if (filters.egp_number !== undefined) {
-      query.where('contracts.egp_number', filters.egp_number);
+      query.where('inventory.contracts.egp_number', filters.egp_number);
     }
     if (filters.project_number !== undefined) {
-      query.where('contracts.project_number', filters.project_number);
+      query.where('inventory.contracts.project_number', filters.project_number);
     }
     if (filters.is_active !== undefined) {
-      query.where('contracts.is_active', filters.is_active);
+      query.where('inventory.contracts.is_active', filters.is_active);
     }
   }
 
@@ -225,24 +239,24 @@ export class ContractsRepository extends BaseRepository<
   // Custom sort fields mapping
   protected getSortField(sortBy: string): string {
     const sortFields: Record<string, string> = {
-      id: 'contracts.id',
-      contractNumber: 'contracts.contract_number',
-      contractType: 'contracts.contract_type',
-      vendorId: 'contracts.vendor_id',
-      startDate: 'contracts.start_date',
-      endDate: 'contracts.end_date',
-      totalValue: 'contracts.total_value',
-      remainingValue: 'contracts.remaining_value',
-      fiscalYear: 'contracts.fiscal_year',
-      status: 'contracts.status',
-      egpNumber: 'contracts.egp_number',
-      projectNumber: 'contracts.project_number',
-      isActive: 'contracts.is_active',
-      createdAt: 'contracts.created_at',
-      updatedAt: 'contracts.updated_at',
+      id: 'inventory.contracts.id',
+      contractNumber: 'inventory.contracts.contract_number',
+      contractType: 'inventory.contracts.contract_type',
+      vendorId: 'inventory.contracts.vendor_id',
+      startDate: 'inventory.contracts.start_date',
+      endDate: 'inventory.contracts.end_date',
+      totalValue: 'inventory.contracts.total_value',
+      remainingValue: 'inventory.contracts.remaining_value',
+      fiscalYear: 'inventory.contracts.fiscal_year',
+      status: 'inventory.contracts.status',
+      egpNumber: 'inventory.contracts.egp_number',
+      projectNumber: 'inventory.contracts.project_number',
+      isActive: 'inventory.contracts.is_active',
+      createdAt: 'inventory.contracts.created_at',
+      updatedAt: 'inventory.contracts.updated_at',
     };
 
-    return sortFields[sortBy] || 'contracts.id';
+    return sortFields[sortBy] || 'inventory.contracts.id';
   }
 
   // Extended find method with options
@@ -342,7 +356,7 @@ export class ContractsRepository extends BaseRepository<
   async getStats(): Promise<{
     total: number;
   }> {
-    const stats: any = await this.knex('contracts')
+    const stats: any = await this.knex('inventory.contracts')
       .select([this.knex.raw('COUNT(*) as total')])
       .first();
 
@@ -354,7 +368,7 @@ export class ContractsRepository extends BaseRepository<
   // Bulk operations with better type safety
   async createMany(data: CreateContracts[]): Promise<Contracts[]> {
     const transformedData = data.map((item) => this.transformToDb(item));
-    const rows = await this.knex('contracts')
+    const rows = await this.knex('inventory.contracts')
       .insert(transformedData)
       .returning('*');
     return rows.map((row) => this.transformToEntity(row));
@@ -364,7 +378,7 @@ export class ContractsRepository extends BaseRepository<
   async createWithTransaction(data: CreateContracts): Promise<Contracts> {
     return this.withTransaction(async (trx) => {
       const transformedData = this.transformToDb(data);
-      const [row] = await trx('contracts')
+      const [row] = await trx('inventory.contracts')
         .insert(transformedData)
         .returning('*');
       return this.transformToEntity(row);

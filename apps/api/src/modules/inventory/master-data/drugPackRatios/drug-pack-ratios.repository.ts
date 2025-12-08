@@ -43,7 +43,7 @@ export class DrugPackRatiosRepository extends BaseRepository<
   constructor(knex: Knex) {
     super(
       knex,
-      'drug_pack_ratios',
+      'inventory.drug_pack_ratios',
       [
         // Define searchable fields based on intelligent detection
       ],
@@ -114,9 +114,11 @@ export class DrugPackRatiosRepository extends BaseRepository<
 
   // Custom query with joins if needed
   getJoinQuery() {
-    return this.knex('drug_pack_ratios').select('drug_pack_ratios.*');
+    return this.knex('inventory.drug_pack_ratios').select(
+      'inventory.drug_pack_ratios.*',
+    );
     // Add joins here if needed
-    // .leftJoin('other_table', 'drug_pack_ratios.foreign_key', 'other_table.id')
+    // .leftJoin('other_table', 'inventory.drug_pack_ratios.foreign_key', 'other_table.id')
   }
 
   // Apply custom filters
@@ -129,66 +131,101 @@ export class DrugPackRatiosRepository extends BaseRepository<
 
     // Apply specific DrugPackRatios filters based on intelligent field categorization
     if (filters.drug_id !== undefined) {
-      query.where('drug_pack_ratios.drug_id', filters.drug_id);
+      query.where('inventory.drug_pack_ratios.drug_id', filters.drug_id);
     }
     if (filters.drug_id_min !== undefined) {
-      query.where('drug_pack_ratios.drug_id', '>=', filters.drug_id_min);
+      query.where(
+        'inventory.drug_pack_ratios.drug_id',
+        '>=',
+        filters.drug_id_min,
+      );
     }
     if (filters.drug_id_max !== undefined) {
-      query.where('drug_pack_ratios.drug_id', '<=', filters.drug_id_max);
+      query.where(
+        'inventory.drug_pack_ratios.drug_id',
+        '<=',
+        filters.drug_id_max,
+      );
     }
     if (filters.company_id !== undefined) {
-      query.where('drug_pack_ratios.company_id', filters.company_id);
+      query.where('inventory.drug_pack_ratios.company_id', filters.company_id);
     }
     if (filters.company_id_min !== undefined) {
-      query.where('drug_pack_ratios.company_id', '>=', filters.company_id_min);
+      query.where(
+        'inventory.drug_pack_ratios.company_id',
+        '>=',
+        filters.company_id_min,
+      );
     }
     if (filters.company_id_max !== undefined) {
-      query.where('drug_pack_ratios.company_id', '<=', filters.company_id_max);
+      query.where(
+        'inventory.drug_pack_ratios.company_id',
+        '<=',
+        filters.company_id_max,
+      );
     }
     if (filters.pack_size !== undefined) {
-      query.where('drug_pack_ratios.pack_size', filters.pack_size);
+      query.where('inventory.drug_pack_ratios.pack_size', filters.pack_size);
     }
     if (filters.pack_size_min !== undefined) {
-      query.where('drug_pack_ratios.pack_size', '>=', filters.pack_size_min);
+      query.where(
+        'inventory.drug_pack_ratios.pack_size',
+        '>=',
+        filters.pack_size_min,
+      );
     }
     if (filters.pack_size_max !== undefined) {
-      query.where('drug_pack_ratios.pack_size', '<=', filters.pack_size_max);
+      query.where(
+        'inventory.drug_pack_ratios.pack_size',
+        '<=',
+        filters.pack_size_max,
+      );
     }
     if (filters.pack_unit !== undefined) {
-      query.where('drug_pack_ratios.pack_unit', filters.pack_unit);
+      query.where('inventory.drug_pack_ratios.pack_unit', filters.pack_unit);
     }
     if (filters.unit_per_pack !== undefined) {
-      query.where('drug_pack_ratios.unit_per_pack', filters.unit_per_pack);
+      query.where(
+        'inventory.drug_pack_ratios.unit_per_pack',
+        filters.unit_per_pack,
+      );
     }
     if (filters.unit_per_pack_min !== undefined) {
       query.where(
-        'drug_pack_ratios.unit_per_pack',
+        'inventory.drug_pack_ratios.unit_per_pack',
         '>=',
         filters.unit_per_pack_min,
       );
     }
     if (filters.unit_per_pack_max !== undefined) {
       query.where(
-        'drug_pack_ratios.unit_per_pack',
+        'inventory.drug_pack_ratios.unit_per_pack',
         '<=',
         filters.unit_per_pack_max,
       );
     }
     if (filters.pack_price !== undefined) {
-      query.where('drug_pack_ratios.pack_price', filters.pack_price);
+      query.where('inventory.drug_pack_ratios.pack_price', filters.pack_price);
     }
     if (filters.pack_price_min !== undefined) {
-      query.where('drug_pack_ratios.pack_price', '>=', filters.pack_price_min);
+      query.where(
+        'inventory.drug_pack_ratios.pack_price',
+        '>=',
+        filters.pack_price_min,
+      );
     }
     if (filters.pack_price_max !== undefined) {
-      query.where('drug_pack_ratios.pack_price', '<=', filters.pack_price_max);
+      query.where(
+        'inventory.drug_pack_ratios.pack_price',
+        '<=',
+        filters.pack_price_max,
+      );
     }
     if (filters.is_default !== undefined) {
-      query.where('drug_pack_ratios.is_default', filters.is_default);
+      query.where('inventory.drug_pack_ratios.is_default', filters.is_default);
     }
     if (filters.is_active !== undefined) {
-      query.where('drug_pack_ratios.is_active', filters.is_active);
+      query.where('inventory.drug_pack_ratios.is_active', filters.is_active);
     }
   }
 
@@ -222,20 +259,20 @@ export class DrugPackRatiosRepository extends BaseRepository<
   // Custom sort fields mapping
   protected getSortField(sortBy: string): string {
     const sortFields: Record<string, string> = {
-      id: 'drug_pack_ratios.id',
-      drugId: 'drug_pack_ratios.drug_id',
-      companyId: 'drug_pack_ratios.company_id',
-      packSize: 'drug_pack_ratios.pack_size',
-      packUnit: 'drug_pack_ratios.pack_unit',
-      unitPerPack: 'drug_pack_ratios.unit_per_pack',
-      packPrice: 'drug_pack_ratios.pack_price',
-      isDefault: 'drug_pack_ratios.is_default',
-      isActive: 'drug_pack_ratios.is_active',
-      createdAt: 'drug_pack_ratios.created_at',
-      updatedAt: 'drug_pack_ratios.updated_at',
+      id: 'inventory.drug_pack_ratios.id',
+      drugId: 'inventory.drug_pack_ratios.drug_id',
+      companyId: 'inventory.drug_pack_ratios.company_id',
+      packSize: 'inventory.drug_pack_ratios.pack_size',
+      packUnit: 'inventory.drug_pack_ratios.pack_unit',
+      unitPerPack: 'inventory.drug_pack_ratios.unit_per_pack',
+      packPrice: 'inventory.drug_pack_ratios.pack_price',
+      isDefault: 'inventory.drug_pack_ratios.is_default',
+      isActive: 'inventory.drug_pack_ratios.is_active',
+      createdAt: 'inventory.drug_pack_ratios.created_at',
+      updatedAt: 'inventory.drug_pack_ratios.updated_at',
     };
 
-    return sortFields[sortBy] || 'drug_pack_ratios.id';
+    return sortFields[sortBy] || 'inventory.drug_pack_ratios.id';
   }
 
   // Extended find method with options
@@ -278,7 +315,7 @@ export class DrugPackRatiosRepository extends BaseRepository<
   async getStats(): Promise<{
     total: number;
   }> {
-    const stats: any = await this.knex('drug_pack_ratios')
+    const stats: any = await this.knex('inventory.drug_pack_ratios')
       .select([this.knex.raw('COUNT(*) as total')])
       .first();
 
@@ -290,7 +327,7 @@ export class DrugPackRatiosRepository extends BaseRepository<
   // Bulk operations with better type safety
   async createMany(data: CreateDrugPackRatios[]): Promise<DrugPackRatios[]> {
     const transformedData = data.map((item) => this.transformToDb(item));
-    const rows = await this.knex('drug_pack_ratios')
+    const rows = await this.knex('inventory.drug_pack_ratios')
       .insert(transformedData)
       .returning('*');
     return rows.map((row) => this.transformToEntity(row));
@@ -302,7 +339,7 @@ export class DrugPackRatiosRepository extends BaseRepository<
   ): Promise<DrugPackRatios> {
     return this.withTransaction(async (trx) => {
       const transformedData = this.transformToDb(data);
-      const [row] = await trx('drug_pack_ratios')
+      const [row] = await trx('inventory.drug_pack_ratios')
         .insert(transformedData)
         .returning('*');
       return this.transformToEntity(row);

@@ -153,6 +153,10 @@ async function generateCrudModule(tableName, options = {}) {
   const context = {
     tableName,
     dbSchema, // PostgreSQL schema name (e.g., 'public', 'inventory')
+    fullTableName:
+      dbSchema && dbSchema !== 'public'
+        ? `${dbSchema}.${tableName}`
+        : tableName, // Full table name with schema prefix for non-public schemas
     moduleName: toCamelCase(tableName),
     ModuleName: toPascalCase(tableName),
     moduleNameKebab: toKebabCase(tableName),
@@ -1430,6 +1434,10 @@ async function generateDomainModule(domainName, options = {}) {
   const context = {
     tableName: domainName,
     dbSchema, // PostgreSQL schema name (e.g., 'public', 'inventory')
+    fullTableName:
+      dbSchema && dbSchema !== 'public'
+        ? `${dbSchema}.${domainName}`
+        : domainName, // Full table name with schema prefix for non-public schemas
     domainName,
     moduleName: toCamelCase(domainName),
     ModuleName: toPascalCase(domainName),

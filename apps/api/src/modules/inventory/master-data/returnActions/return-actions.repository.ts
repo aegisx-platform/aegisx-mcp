@@ -30,11 +30,11 @@ export class ReturnActionsRepository extends BaseRepository<
   constructor(knex: Knex) {
     super(
       knex,
-      'return_actions',
+      'inventory.return_actions',
       [
         // Define searchable fields based on intelligent detection
-        'return_actions.action_name',
-        'return_actions.description',
+        'inventory.return_actions.action_name',
+        'inventory.return_actions.description',
       ],
       [], // explicitUUIDFields
       {
@@ -98,9 +98,11 @@ export class ReturnActionsRepository extends BaseRepository<
 
   // Custom query with joins if needed
   getJoinQuery() {
-    return this.knex('return_actions').select('return_actions.*');
+    return this.knex('inventory.return_actions').select(
+      'inventory.return_actions.*',
+    );
     // Add joins here if needed
-    // .leftJoin('other_table', 'return_actions.foreign_key', 'other_table.id')
+    // .leftJoin('other_table', 'inventory.return_actions.foreign_key', 'other_table.id')
   }
 
   // Apply custom filters
@@ -113,22 +115,22 @@ export class ReturnActionsRepository extends BaseRepository<
 
     // Apply specific ReturnActions filters based on intelligent field categorization
     if (filters.action_code !== undefined) {
-      query.where('return_actions.action_code', filters.action_code);
+      query.where('inventory.return_actions.action_code', filters.action_code);
     }
     if (filters.action_name !== undefined) {
-      query.where('return_actions.action_name', filters.action_name);
+      query.where('inventory.return_actions.action_name', filters.action_name);
     }
     if (filters.requires_vendor_approval !== undefined) {
       query.where(
-        'return_actions.requires_vendor_approval',
+        'inventory.return_actions.requires_vendor_approval',
         filters.requires_vendor_approval,
       );
     }
     if (filters.description !== undefined) {
-      query.where('return_actions.description', filters.description);
+      query.where('inventory.return_actions.description', filters.description);
     }
     if (filters.is_active !== undefined) {
-      query.where('return_actions.is_active', filters.is_active);
+      query.where('inventory.return_actions.is_active', filters.is_active);
     }
   }
 
@@ -162,18 +164,19 @@ export class ReturnActionsRepository extends BaseRepository<
   // Custom sort fields mapping
   protected getSortField(sortBy: string): string {
     const sortFields: Record<string, string> = {
-      id: 'return_actions.id',
-      actionCode: 'return_actions.action_code',
-      actionName: 'return_actions.action_name',
-      actionType: 'return_actions.action_type',
-      requiresVendorApproval: 'return_actions.requires_vendor_approval',
-      description: 'return_actions.description',
-      isActive: 'return_actions.is_active',
-      createdAt: 'return_actions.created_at',
-      updatedAt: 'return_actions.updated_at',
+      id: 'inventory.return_actions.id',
+      actionCode: 'inventory.return_actions.action_code',
+      actionName: 'inventory.return_actions.action_name',
+      actionType: 'inventory.return_actions.action_type',
+      requiresVendorApproval:
+        'inventory.return_actions.requires_vendor_approval',
+      description: 'inventory.return_actions.description',
+      isActive: 'inventory.return_actions.is_active',
+      createdAt: 'inventory.return_actions.created_at',
+      updatedAt: 'inventory.return_actions.updated_at',
     };
 
-    return sortFields[sortBy] || 'return_actions.id';
+    return sortFields[sortBy] || 'inventory.return_actions.id';
   }
 
   // Extended find method with options
@@ -258,7 +261,7 @@ export class ReturnActionsRepository extends BaseRepository<
   async getStats(): Promise<{
     total: number;
   }> {
-    const stats: any = await this.knex('return_actions')
+    const stats: any = await this.knex('inventory.return_actions')
       .select([this.knex.raw('COUNT(*) as total')])
       .first();
 
@@ -270,7 +273,7 @@ export class ReturnActionsRepository extends BaseRepository<
   // Bulk operations with better type safety
   async createMany(data: CreateReturnActions[]): Promise<ReturnActions[]> {
     const transformedData = data.map((item) => this.transformToDb(item));
-    const rows = await this.knex('return_actions')
+    const rows = await this.knex('inventory.return_actions')
       .insert(transformedData)
       .returning('*');
     return rows.map((row) => this.transformToEntity(row));
@@ -282,7 +285,7 @@ export class ReturnActionsRepository extends BaseRepository<
   ): Promise<ReturnActions> {
     return this.withTransaction(async (trx) => {
       const transformedData = this.transformToDb(data);
-      const [row] = await trx('return_actions')
+      const [row] = await trx('inventory.return_actions')
         .insert(transformedData)
         .returning('*');
       return this.transformToEntity(row);

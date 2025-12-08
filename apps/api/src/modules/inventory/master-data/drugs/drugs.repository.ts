@@ -44,10 +44,10 @@ export class DrugsRepository extends BaseRepository<
   constructor(knex: Knex) {
     super(
       knex,
-      'drugs',
+      'inventory.drugs',
       [
         // Define searchable fields based on intelligent detection
-        'drugs.trade_name',
+        'inventory.drugs.trade_name',
       ],
       [], // explicitUUIDFields
       {
@@ -137,9 +137,9 @@ export class DrugsRepository extends BaseRepository<
 
   // Custom query with joins if needed
   getJoinQuery() {
-    return this.knex('drugs').select('drugs.*');
+    return this.knex('inventory.drugs').select('inventory.drugs.*');
     // Add joins here if needed
-    // .leftJoin('other_table', 'drugs.foreign_key', 'other_table.id')
+    // .leftJoin('other_table', 'inventory.drugs.foreign_key', 'other_table.id')
   }
 
   // Apply custom filters
@@ -149,61 +149,77 @@ export class DrugsRepository extends BaseRepository<
 
     // Apply specific Drugs filters based on intelligent field categorization
     if (filters.drug_code !== undefined) {
-      query.where('drugs.drug_code', filters.drug_code);
+      query.where('inventory.drugs.drug_code', filters.drug_code);
     }
     if (filters.trade_name !== undefined) {
-      query.where('drugs.trade_name', filters.trade_name);
+      query.where('inventory.drugs.trade_name', filters.trade_name);
     }
     if (filters.generic_id !== undefined) {
-      query.where('drugs.generic_id', filters.generic_id);
+      query.where('inventory.drugs.generic_id', filters.generic_id);
     }
     if (filters.generic_id_min !== undefined) {
-      query.where('drugs.generic_id', '>=', filters.generic_id_min);
+      query.where('inventory.drugs.generic_id', '>=', filters.generic_id_min);
     }
     if (filters.generic_id_max !== undefined) {
-      query.where('drugs.generic_id', '<=', filters.generic_id_max);
+      query.where('inventory.drugs.generic_id', '<=', filters.generic_id_max);
     }
     if (filters.manufacturer_id !== undefined) {
-      query.where('drugs.manufacturer_id', filters.manufacturer_id);
+      query.where('inventory.drugs.manufacturer_id', filters.manufacturer_id);
     }
     if (filters.manufacturer_id_min !== undefined) {
-      query.where('drugs.manufacturer_id', '>=', filters.manufacturer_id_min);
+      query.where(
+        'inventory.drugs.manufacturer_id',
+        '>=',
+        filters.manufacturer_id_min,
+      );
     }
     if (filters.manufacturer_id_max !== undefined) {
-      query.where('drugs.manufacturer_id', '<=', filters.manufacturer_id_max);
+      query.where(
+        'inventory.drugs.manufacturer_id',
+        '<=',
+        filters.manufacturer_id_max,
+      );
     }
     if (filters.tmt_tpu_id !== undefined) {
-      query.where('drugs.tmt_tpu_id', filters.tmt_tpu_id);
+      query.where('inventory.drugs.tmt_tpu_id', filters.tmt_tpu_id);
     }
     if (filters.tmt_tpu_id_min !== undefined) {
-      query.where('drugs.tmt_tpu_id', '>=', filters.tmt_tpu_id_min);
+      query.where('inventory.drugs.tmt_tpu_id', '>=', filters.tmt_tpu_id_min);
     }
     if (filters.tmt_tpu_id_max !== undefined) {
-      query.where('drugs.tmt_tpu_id', '<=', filters.tmt_tpu_id_max);
+      query.where('inventory.drugs.tmt_tpu_id', '<=', filters.tmt_tpu_id_max);
     }
     if (filters.unit_price !== undefined) {
-      query.where('drugs.unit_price', filters.unit_price);
+      query.where('inventory.drugs.unit_price', filters.unit_price);
     }
     if (filters.unit_price_min !== undefined) {
-      query.where('drugs.unit_price', '>=', filters.unit_price_min);
+      query.where('inventory.drugs.unit_price', '>=', filters.unit_price_min);
     }
     if (filters.unit_price_max !== undefined) {
-      query.where('drugs.unit_price', '<=', filters.unit_price_max);
+      query.where('inventory.drugs.unit_price', '<=', filters.unit_price_max);
     }
     if (filters.package_size !== undefined) {
-      query.where('drugs.package_size', filters.package_size);
+      query.where('inventory.drugs.package_size', filters.package_size);
     }
     if (filters.package_size_min !== undefined) {
-      query.where('drugs.package_size', '>=', filters.package_size_min);
+      query.where(
+        'inventory.drugs.package_size',
+        '>=',
+        filters.package_size_min,
+      );
     }
     if (filters.package_size_max !== undefined) {
-      query.where('drugs.package_size', '<=', filters.package_size_max);
+      query.where(
+        'inventory.drugs.package_size',
+        '<=',
+        filters.package_size_max,
+      );
     }
     if (filters.package_unit !== undefined) {
-      query.where('drugs.package_unit', filters.package_unit);
+      query.where('inventory.drugs.package_unit', filters.package_unit);
     }
     if (filters.is_active !== undefined) {
-      query.where('drugs.is_active', filters.is_active);
+      query.where('inventory.drugs.is_active', filters.is_active);
     }
   }
 
@@ -237,25 +253,25 @@ export class DrugsRepository extends BaseRepository<
   // Custom sort fields mapping
   protected getSortField(sortBy: string): string {
     const sortFields: Record<string, string> = {
-      id: 'drugs.id',
-      drugCode: 'drugs.drug_code',
-      tradeName: 'drugs.trade_name',
-      genericId: 'drugs.generic_id',
-      manufacturerId: 'drugs.manufacturer_id',
-      tmtTpuId: 'drugs.tmt_tpu_id',
-      nlemStatus: 'drugs.nlem_status',
-      drugStatus: 'drugs.drug_status',
-      productCategory: 'drugs.product_category',
-      statusChangedDate: 'drugs.status_changed_date',
-      unitPrice: 'drugs.unit_price',
-      packageSize: 'drugs.package_size',
-      packageUnit: 'drugs.package_unit',
-      isActive: 'drugs.is_active',
-      createdAt: 'drugs.created_at',
-      updatedAt: 'drugs.updated_at',
+      id: 'inventory.drugs.id',
+      drugCode: 'inventory.drugs.drug_code',
+      tradeName: 'inventory.drugs.trade_name',
+      genericId: 'inventory.drugs.generic_id',
+      manufacturerId: 'inventory.drugs.manufacturer_id',
+      tmtTpuId: 'inventory.drugs.tmt_tpu_id',
+      nlemStatus: 'inventory.drugs.nlem_status',
+      drugStatus: 'inventory.drugs.drug_status',
+      productCategory: 'inventory.drugs.product_category',
+      statusChangedDate: 'inventory.drugs.status_changed_date',
+      unitPrice: 'inventory.drugs.unit_price',
+      packageSize: 'inventory.drugs.package_size',
+      packageUnit: 'inventory.drugs.package_unit',
+      isActive: 'inventory.drugs.is_active',
+      createdAt: 'inventory.drugs.created_at',
+      updatedAt: 'inventory.drugs.updated_at',
     };
 
-    return sortFields[sortBy] || 'drugs.id';
+    return sortFields[sortBy] || 'inventory.drugs.id';
   }
 
   // Extended find method with options
@@ -452,7 +468,7 @@ export class DrugsRepository extends BaseRepository<
   async getStats(): Promise<{
     total: number;
   }> {
-    const stats: any = await this.knex('drugs')
+    const stats: any = await this.knex('inventory.drugs')
       .select([this.knex.raw('COUNT(*) as total')])
       .first();
 
@@ -464,7 +480,7 @@ export class DrugsRepository extends BaseRepository<
   // Bulk operations with better type safety
   async createMany(data: CreateDrugs[]): Promise<Drugs[]> {
     const transformedData = data.map((item) => this.transformToDb(item));
-    const rows = await this.knex('drugs')
+    const rows = await this.knex('inventory.drugs')
       .insert(transformedData)
       .returning('*');
     return rows.map((row) => this.transformToEntity(row));
@@ -474,7 +490,9 @@ export class DrugsRepository extends BaseRepository<
   async createWithTransaction(data: CreateDrugs): Promise<Drugs> {
     return this.withTransaction(async (trx) => {
       const transformedData = this.transformToDb(data);
-      const [row] = await trx('drugs').insert(transformedData).returning('*');
+      const [row] = await trx('inventory.drugs')
+        .insert(transformedData)
+        .returning('*');
       return this.transformToEntity(row);
     });
   }

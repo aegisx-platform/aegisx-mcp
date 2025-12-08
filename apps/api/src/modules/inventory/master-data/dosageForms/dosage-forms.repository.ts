@@ -30,12 +30,12 @@ export class DosageFormsRepository extends BaseRepository<
   constructor(knex: Knex) {
     super(
       knex,
-      'dosage_forms',
+      'inventory.dosage_forms',
       [
         // Define searchable fields based on intelligent detection
-        'dosage_forms.form_name',
-        'dosage_forms.form_name_en',
-        'dosage_forms.description',
+        'inventory.dosage_forms.form_name',
+        'inventory.dosage_forms.form_name_en',
+        'inventory.dosage_forms.description',
       ],
       [], // explicitUUIDFields
       {
@@ -92,9 +92,11 @@ export class DosageFormsRepository extends BaseRepository<
 
   // Custom query with joins if needed
   getJoinQuery() {
-    return this.knex('dosage_forms').select('dosage_forms.*');
+    return this.knex('inventory.dosage_forms').select(
+      'inventory.dosage_forms.*',
+    );
     // Add joins here if needed
-    // .leftJoin('other_table', 'dosage_forms.foreign_key', 'other_table.id')
+    // .leftJoin('other_table', 'inventory.dosage_forms.foreign_key', 'other_table.id')
   }
 
   // Apply custom filters
@@ -107,19 +109,19 @@ export class DosageFormsRepository extends BaseRepository<
 
     // Apply specific DosageForms filters based on intelligent field categorization
     if (filters.form_code !== undefined) {
-      query.where('dosage_forms.form_code', filters.form_code);
+      query.where('inventory.dosage_forms.form_code', filters.form_code);
     }
     if (filters.form_name !== undefined) {
-      query.where('dosage_forms.form_name', filters.form_name);
+      query.where('inventory.dosage_forms.form_name', filters.form_name);
     }
     if (filters.form_name_en !== undefined) {
-      query.where('dosage_forms.form_name_en', filters.form_name_en);
+      query.where('inventory.dosage_forms.form_name_en', filters.form_name_en);
     }
     if (filters.description !== undefined) {
-      query.where('dosage_forms.description', filters.description);
+      query.where('inventory.dosage_forms.description', filters.description);
     }
     if (filters.is_active !== undefined) {
-      query.where('dosage_forms.is_active', filters.is_active);
+      query.where('inventory.dosage_forms.is_active', filters.is_active);
     }
   }
 
@@ -153,17 +155,17 @@ export class DosageFormsRepository extends BaseRepository<
   // Custom sort fields mapping
   protected getSortField(sortBy: string): string {
     const sortFields: Record<string, string> = {
-      id: 'dosage_forms.id',
-      formCode: 'dosage_forms.form_code',
-      formName: 'dosage_forms.form_name',
-      formNameEn: 'dosage_forms.form_name_en',
-      description: 'dosage_forms.description',
-      isActive: 'dosage_forms.is_active',
-      createdAt: 'dosage_forms.created_at',
-      updatedAt: 'dosage_forms.updated_at',
+      id: 'inventory.dosage_forms.id',
+      formCode: 'inventory.dosage_forms.form_code',
+      formName: 'inventory.dosage_forms.form_name',
+      formNameEn: 'inventory.dosage_forms.form_name_en',
+      description: 'inventory.dosage_forms.description',
+      isActive: 'inventory.dosage_forms.is_active',
+      createdAt: 'inventory.dosage_forms.created_at',
+      updatedAt: 'inventory.dosage_forms.updated_at',
     };
 
-    return sortFields[sortBy] || 'dosage_forms.id';
+    return sortFields[sortBy] || 'inventory.dosage_forms.id';
   }
 
   // Extended find method with options
@@ -248,7 +250,7 @@ export class DosageFormsRepository extends BaseRepository<
   async getStats(): Promise<{
     total: number;
   }> {
-    const stats: any = await this.knex('dosage_forms')
+    const stats: any = await this.knex('inventory.dosage_forms')
       .select([this.knex.raw('COUNT(*) as total')])
       .first();
 
@@ -260,7 +262,7 @@ export class DosageFormsRepository extends BaseRepository<
   // Bulk operations with better type safety
   async createMany(data: CreateDosageForms[]): Promise<DosageForms[]> {
     const transformedData = data.map((item) => this.transformToDb(item));
-    const rows = await this.knex('dosage_forms')
+    const rows = await this.knex('inventory.dosage_forms')
       .insert(transformedData)
       .returning('*');
     return rows.map((row) => this.transformToEntity(row));
@@ -270,7 +272,7 @@ export class DosageFormsRepository extends BaseRepository<
   async createWithTransaction(data: CreateDosageForms): Promise<DosageForms> {
     return this.withTransaction(async (trx) => {
       const transformedData = this.transformToDb(data);
-      const [row] = await trx('dosage_forms')
+      const [row] = await trx('inventory.dosage_forms')
         .insert(transformedData)
         .returning('*');
       return this.transformToEntity(row);

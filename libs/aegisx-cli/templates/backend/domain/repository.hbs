@@ -29,12 +29,12 @@ export class {{ModuleName}}Repository extends BaseRepository<{{ModuleName}}, Cre
   constructor(knex: Knex) {
     super(
       knex,
-      '{{tableName}}',
+      '{{fullTableName}}',
       [
         // Define searchable fields based on intelligent detection
         {{#each columns}}
         {{#if (isSearchableField this)}}
-        '{{@root.tableName}}.{{name}}'{{#unless @last}},{{/unless}}
+        '{{@root.fullTableName}}.{{name}}'{{#unless @last}},{{/unless}}
         {{/if}}
         {{/each}}
       ],
@@ -86,10 +86,10 @@ export class {{ModuleName}}Repository extends BaseRepository<{{ModuleName}}, Cre
 
   // Custom query with joins if needed
   getJoinQuery() {
-    return this.knex('{{tableName}}')
-      .select('{{tableName}}.*');
+    return this.knex('{{fullTableName}}')
+      .select('{{fullTableName}}.*');
       // Add joins here if needed
-      // .leftJoin('other_table', '{{tableName}}.foreign_key', 'other_table.id')
+      // .leftJoin('other_table', '{{fullTableName}}.foreign_key', 'other_table.id')
   }
 
   // Apply custom filters
@@ -102,15 +102,15 @@ export class {{ModuleName}}Repository extends BaseRepository<{{ModuleName}}, Cre
     {{#unless (or isPrimaryKey (eq name 'created_at') (eq name 'updated_at'))}}
     {{#if (isExactMatchField this)}}
     if (filters.{{name}} !== undefined) {
-      query.where('{{@root.tableName}}.{{name}}', filters.{{name}});
+      query.where('{{@root.fullTableName}}.{{name}}', filters.{{name}});
     }
     {{/if}}
     {{#if (isRangeField this)}}
     if (filters.{{name}}_min !== undefined) {
-      query.where('{{@root.tableName}}.{{name}}', '>=', filters.{{name}}_min);
+      query.where('{{@root.fullTableName}}.{{name}}', '>=', filters.{{name}}_min);
     }
     if (filters.{{name}}_max !== undefined) {
-      query.where('{{@root.tableName}}.{{name}}', '<=', filters.{{name}}_max);
+      query.where('{{@root.fullTableName}}.{{name}}', '<=', filters.{{name}}_max);
     }
     {{/if}}
     {{/unless}}
@@ -146,11 +146,11 @@ export class {{ModuleName}}Repository extends BaseRepository<{{ModuleName}}, Cre
   protected getSortField(sortBy: string): string {
     const sortFields: Record<string, string> = {
       {{#each columns}}
-      {{toCamelCase name}}: '{{@root.tableName}}.{{name}}'{{#unless @last}},{{/unless}}
+      {{toCamelCase name}}: '{{@root.fullTableName}}.{{name}}'{{#unless @last}},{{/unless}}
       {{/each}}
     };
 
-    return sortFields[sortBy] || '{{@root.tableName}}.id';
+    return sortFields[sortBy] || '{{@root.fullTableName}}.id';
   }
 
   // Extended find method with options
@@ -192,7 +192,7 @@ export class {{ModuleName}}Repository extends BaseRepository<{{ModuleName}}, Cre
    */
   async findBy{{toPascalCase this}}({{toCamelCase this}}: string | number): Promise<{{@root.ModuleName}} | null> {
     const query = this.getJoinQuery();
-    const row = await query.where('{{@root.tableName}}.{{this}}', {{toCamelCase this}}).first();
+    const row = await query.where('{{@root.fullTableName}}.{{this}}', {{toCamelCase this}}).first();
     return row ? this.transformToEntity(row) : null;
   }
 
@@ -205,7 +205,7 @@ export class {{ModuleName}}Repository extends BaseRepository<{{ModuleName}}, Cre
   async findBy{{#each this}}{{toPascalCase this}}{{#unless @last}}And{{/unless}}{{/each}}(params: { {{#each this}}{{toCamelCase this}}: string | number{{#unless @last}}, {{/unless}}{{/each}} }): Promise<{{@root.ModuleName}} | null> {
     const query = this.getJoinQuery();
     {{#each this}}
-    query.where('{{@root.tableName}}.{{this}}', params.{{toCamelCase this}});
+    query.where('{{@root.fullTableName}}.{{this}}', params.{{toCamelCase this}});
     {{/each}}
     const row = await query.first();
     return row ? this.transformToEntity(row) : null;
@@ -280,7 +280,7 @@ export class {{ModuleName}}Repository extends BaseRepository<{{ModuleName}}, Cre
     recentlyUpdated?: number;
     {{/if}}
   }> {
-    const baseQuery = this.knex('{{tableName}}');
+    const baseQuery = this.knex('{{fullTableName}}');
     
     // Build select fields based on detected patterns
     const selectFields = [
@@ -345,7 +345,7 @@ export class {{ModuleName}}Repository extends BaseRepository<{{ModuleName}}, Cre
   async getStats(): Promise<{
     total: number;
   }> {
-    const stats: any = await this.knex('{{tableName}}')
+    const stats: any = await this.knex('{{fullTableName}}')
       .select([
         this.knex.raw('COUNT(*) as total')
       ])
@@ -360,7 +360,7 @@ export class {{ModuleName}}Repository extends BaseRepository<{{ModuleName}}, Cre
   // Bulk operations with better type safety
   async createMany(data: Create{{ModuleName}}[]): Promise<{{ModuleName}}[]> {
     const transformedData = data.map(item => this.transformToDb(item));
-    const rows = await this.knex('{{tableName}}').insert(transformedData).returning('*');
+    const rows = await this.knex('{{fullTableName}}').insert(transformedData).returning('*');
     return rows.map(row => this.transformToEntity(row));
   }
 
@@ -368,7 +368,7 @@ export class {{ModuleName}}Repository extends BaseRepository<{{ModuleName}}, Cre
   async createWithTransaction(data: Create{{ModuleName}}): Promise<{{ModuleName}}> {
     return this.withTransaction(async (trx) => {
       const transformedData = this.transformToDb(data);
-      const [row] = await trx('{{tableName}}').insert(transformedData).returning('*');
+      const [row] = await trx('{{fullTableName}}').insert(transformedData).returning('*');
       return this.transformToEntity(row);
     });
   }

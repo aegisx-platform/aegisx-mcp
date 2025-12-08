@@ -33,10 +33,10 @@ export class BudgetsRepository extends BaseRepository<
   constructor(knex: Knex) {
     super(
       knex,
-      'budgets',
+      'inventory.budgets',
       [
         // Define searchable fields based on intelligent detection
-        'budgets.description',
+        'inventory.budgets.description',
       ],
       [], // explicitUUIDFields
       {
@@ -87,9 +87,9 @@ export class BudgetsRepository extends BaseRepository<
 
   // Custom query with joins if needed
   getJoinQuery() {
-    return this.knex('budgets').select('budgets.*');
+    return this.knex('inventory.budgets').select('inventory.budgets.*');
     // Add joins here if needed
-    // .leftJoin('other_table', 'budgets.foreign_key', 'other_table.id')
+    // .leftJoin('other_table', 'inventory.budgets.foreign_key', 'other_table.id')
   }
 
   // Apply custom filters
@@ -99,36 +99,47 @@ export class BudgetsRepository extends BaseRepository<
 
     // Apply specific Budgets filters based on intelligent field categorization
     if (filters.budget_type_id !== undefined) {
-      query.where('budgets.budget_type_id', filters.budget_type_id);
+      query.where('inventory.budgets.budget_type_id', filters.budget_type_id);
     }
     if (filters.budget_type_id_min !== undefined) {
-      query.where('budgets.budget_type_id', '>=', filters.budget_type_id_min);
+      query.where(
+        'inventory.budgets.budget_type_id',
+        '>=',
+        filters.budget_type_id_min,
+      );
     }
     if (filters.budget_type_id_max !== undefined) {
-      query.where('budgets.budget_type_id', '<=', filters.budget_type_id_max);
+      query.where(
+        'inventory.budgets.budget_type_id',
+        '<=',
+        filters.budget_type_id_max,
+      );
     }
     if (filters.budget_category_id !== undefined) {
-      query.where('budgets.budget_category_id', filters.budget_category_id);
+      query.where(
+        'inventory.budgets.budget_category_id',
+        filters.budget_category_id,
+      );
     }
     if (filters.budget_category_id_min !== undefined) {
       query.where(
-        'budgets.budget_category_id',
+        'inventory.budgets.budget_category_id',
         '>=',
         filters.budget_category_id_min,
       );
     }
     if (filters.budget_category_id_max !== undefined) {
       query.where(
-        'budgets.budget_category_id',
+        'inventory.budgets.budget_category_id',
         '<=',
         filters.budget_category_id_max,
       );
     }
     if (filters.description !== undefined) {
-      query.where('budgets.description', filters.description);
+      query.where('inventory.budgets.description', filters.description);
     }
     if (filters.is_active !== undefined) {
-      query.where('budgets.is_active', filters.is_active);
+      query.where('inventory.budgets.is_active', filters.is_active);
     }
   }
 
@@ -162,16 +173,16 @@ export class BudgetsRepository extends BaseRepository<
   // Custom sort fields mapping
   protected getSortField(sortBy: string): string {
     const sortFields: Record<string, string> = {
-      id: 'budgets.id',
-      budgetTypeId: 'budgets.budget_type_id',
-      budgetCategoryId: 'budgets.budget_category_id',
-      description: 'budgets.description',
-      isActive: 'budgets.is_active',
-      createdAt: 'budgets.created_at',
-      updatedAt: 'budgets.updated_at',
+      id: 'inventory.budgets.id',
+      budgetTypeId: 'inventory.budgets.budget_type_id',
+      budgetCategoryId: 'inventory.budgets.budget_category_id',
+      description: 'inventory.budgets.description',
+      isActive: 'inventory.budgets.is_active',
+      createdAt: 'inventory.budgets.created_at',
+      updatedAt: 'inventory.budgets.updated_at',
     };
 
-    return sortFields[sortBy] || 'budgets.id';
+    return sortFields[sortBy] || 'inventory.budgets.id';
   }
 
   // Extended find method with options
@@ -271,7 +282,7 @@ export class BudgetsRepository extends BaseRepository<
   async getStats(): Promise<{
     total: number;
   }> {
-    const stats: any = await this.knex('budgets')
+    const stats: any = await this.knex('inventory.budgets')
       .select([this.knex.raw('COUNT(*) as total')])
       .first();
 
@@ -283,7 +294,7 @@ export class BudgetsRepository extends BaseRepository<
   // Bulk operations with better type safety
   async createMany(data: CreateBudgets[]): Promise<Budgets[]> {
     const transformedData = data.map((item) => this.transformToDb(item));
-    const rows = await this.knex('budgets')
+    const rows = await this.knex('inventory.budgets')
       .insert(transformedData)
       .returning('*');
     return rows.map((row) => this.transformToEntity(row));
@@ -293,7 +304,9 @@ export class BudgetsRepository extends BaseRepository<
   async createWithTransaction(data: CreateBudgets): Promise<Budgets> {
     return this.withTransaction(async (trx) => {
       const transformedData = this.transformToDb(data);
-      const [row] = await trx('budgets').insert(transformedData).returning('*');
+      const [row] = await trx('inventory.budgets')
+        .insert(transformedData)
+        .returning('*');
       return this.transformToEntity(row);
     });
   }

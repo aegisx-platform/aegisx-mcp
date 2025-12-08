@@ -40,11 +40,11 @@ export class CompaniesRepository extends BaseRepository<
   constructor(knex: Knex) {
     super(
       knex,
-      'companies',
+      'inventory.companies',
       [
         // Define searchable fields based on intelligent detection
-        'companies.company_name',
-        'companies.bank_account_name',
+        'inventory.companies.company_name',
+        'inventory.companies.bank_account_name',
       ],
       [], // explicitUUIDFields
       {
@@ -133,9 +133,9 @@ export class CompaniesRepository extends BaseRepository<
 
   // Custom query with joins if needed
   getJoinQuery() {
-    return this.knex('companies').select('companies.*');
+    return this.knex('inventory.companies').select('inventory.companies.*');
     // Add joins here if needed
-    // .leftJoin('other_table', 'companies.foreign_key', 'other_table.id')
+    // .leftJoin('other_table', 'inventory.companies.foreign_key', 'other_table.id')
   }
 
   // Apply custom filters
@@ -145,49 +145,58 @@ export class CompaniesRepository extends BaseRepository<
 
     // Apply specific Companies filters based on intelligent field categorization
     if (filters.company_code !== undefined) {
-      query.where('companies.company_code', filters.company_code);
+      query.where('inventory.companies.company_code', filters.company_code);
     }
     if (filters.company_name !== undefined) {
-      query.where('companies.company_name', filters.company_name);
+      query.where('inventory.companies.company_name', filters.company_name);
     }
     if (filters.tax_id !== undefined) {
-      query.where('companies.tax_id', filters.tax_id);
+      query.where('inventory.companies.tax_id', filters.tax_id);
     }
     if (filters.bank_id !== undefined) {
-      query.where('companies.bank_id', filters.bank_id);
+      query.where('inventory.companies.bank_id', filters.bank_id);
     }
     if (filters.bank_id_min !== undefined) {
-      query.where('companies.bank_id', '>=', filters.bank_id_min);
+      query.where('inventory.companies.bank_id', '>=', filters.bank_id_min);
     }
     if (filters.bank_id_max !== undefined) {
-      query.where('companies.bank_id', '<=', filters.bank_id_max);
+      query.where('inventory.companies.bank_id', '<=', filters.bank_id_max);
     }
     if (filters.bank_account_number !== undefined) {
-      query.where('companies.bank_account_number', filters.bank_account_number);
+      query.where(
+        'inventory.companies.bank_account_number',
+        filters.bank_account_number,
+      );
     }
     if (filters.bank_account_name !== undefined) {
-      query.where('companies.bank_account_name', filters.bank_account_name);
+      query.where(
+        'inventory.companies.bank_account_name',
+        filters.bank_account_name,
+      );
     }
     if (filters.is_vendor !== undefined) {
-      query.where('companies.is_vendor', filters.is_vendor);
+      query.where('inventory.companies.is_vendor', filters.is_vendor);
     }
     if (filters.is_manufacturer !== undefined) {
-      query.where('companies.is_manufacturer', filters.is_manufacturer);
+      query.where(
+        'inventory.companies.is_manufacturer',
+        filters.is_manufacturer,
+      );
     }
     if (filters.contact_person !== undefined) {
-      query.where('companies.contact_person', filters.contact_person);
+      query.where('inventory.companies.contact_person', filters.contact_person);
     }
     if (filters.phone !== undefined) {
-      query.where('companies.phone', filters.phone);
+      query.where('inventory.companies.phone', filters.phone);
     }
     if (filters.email !== undefined) {
-      query.where('companies.email', filters.email);
+      query.where('inventory.companies.email', filters.email);
     }
     if (filters.address !== undefined) {
-      query.where('companies.address', filters.address);
+      query.where('inventory.companies.address', filters.address);
     }
     if (filters.is_active !== undefined) {
-      query.where('companies.is_active', filters.is_active);
+      query.where('inventory.companies.is_active', filters.is_active);
     }
   }
 
@@ -221,25 +230,25 @@ export class CompaniesRepository extends BaseRepository<
   // Custom sort fields mapping
   protected getSortField(sortBy: string): string {
     const sortFields: Record<string, string> = {
-      id: 'companies.id',
-      companyCode: 'companies.company_code',
-      companyName: 'companies.company_name',
-      taxId: 'companies.tax_id',
-      bankId: 'companies.bank_id',
-      bankAccountNumber: 'companies.bank_account_number',
-      bankAccountName: 'companies.bank_account_name',
-      isVendor: 'companies.is_vendor',
-      isManufacturer: 'companies.is_manufacturer',
-      contactPerson: 'companies.contact_person',
-      phone: 'companies.phone',
-      email: 'companies.email',
-      address: 'companies.address',
-      isActive: 'companies.is_active',
-      createdAt: 'companies.created_at',
-      updatedAt: 'companies.updated_at',
+      id: 'inventory.companies.id',
+      companyCode: 'inventory.companies.company_code',
+      companyName: 'inventory.companies.company_name',
+      taxId: 'inventory.companies.tax_id',
+      bankId: 'inventory.companies.bank_id',
+      bankAccountNumber: 'inventory.companies.bank_account_number',
+      bankAccountName: 'inventory.companies.bank_account_name',
+      isVendor: 'inventory.companies.is_vendor',
+      isManufacturer: 'inventory.companies.is_manufacturer',
+      contactPerson: 'inventory.companies.contact_person',
+      phone: 'inventory.companies.phone',
+      email: 'inventory.companies.email',
+      address: 'inventory.companies.address',
+      isActive: 'inventory.companies.is_active',
+      createdAt: 'inventory.companies.created_at',
+      updatedAt: 'inventory.companies.updated_at',
     };
 
-    return sortFields[sortBy] || 'companies.id';
+    return sortFields[sortBy] || 'inventory.companies.id';
   }
 
   // Extended find method with options
@@ -369,7 +378,7 @@ export class CompaniesRepository extends BaseRepository<
   async getStats(): Promise<{
     total: number;
   }> {
-    const stats: any = await this.knex('companies')
+    const stats: any = await this.knex('inventory.companies')
       .select([this.knex.raw('COUNT(*) as total')])
       .first();
 
@@ -381,7 +390,7 @@ export class CompaniesRepository extends BaseRepository<
   // Bulk operations with better type safety
   async createMany(data: CreateCompanies[]): Promise<Companies[]> {
     const transformedData = data.map((item) => this.transformToDb(item));
-    const rows = await this.knex('companies')
+    const rows = await this.knex('inventory.companies')
       .insert(transformedData)
       .returning('*');
     return rows.map((row) => this.transformToEntity(row));
@@ -391,7 +400,7 @@ export class CompaniesRepository extends BaseRepository<
   async createWithTransaction(data: CreateCompanies): Promise<Companies> {
     return this.withTransaction(async (trx) => {
       const transformedData = this.transformToDb(data);
-      const [row] = await trx('companies')
+      const [row] = await trx('inventory.companies')
         .insert(transformedData)
         .returning('*');
       return this.transformToEntity(row);
