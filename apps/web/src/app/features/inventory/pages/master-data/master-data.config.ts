@@ -58,7 +58,7 @@ export const SECTION_ITEMS: LauncherApp[] = [
   {
     id: 'return-actions',
     name: 'Return Actions',
-    description: 'Manage return actions data',
+    description: 'จัดการข้อมูลการคืนสินค้า',
     icon: 'description',
     route: '/inventory/master-data/return-actions',
     color: 'blue',
@@ -70,7 +70,7 @@ export const SECTION_ITEMS: LauncherApp[] = [
   {
     id: 'adjustment-reasons',
     name: 'Adjustment Reasons',
-    description: 'Manage adjustment reasons data',
+    description: 'จัดการข้อมูลเหตุผลการปรับปรุง',
     icon: 'description',
     route: '/inventory/master-data/adjustment-reasons',
     color: 'mint',
@@ -82,7 +82,7 @@ export const SECTION_ITEMS: LauncherApp[] = [
   {
     id: 'drug-units',
     name: 'Drug Units',
-    description: 'Manage drug units data',
+    description: 'จัดการข้อมูลหน่วยยา',
     icon: 'medication',
     route: '/inventory/master-data/drug-units',
     color: 'yellow',
@@ -94,7 +94,7 @@ export const SECTION_ITEMS: LauncherApp[] = [
   {
     id: 'dosage-forms',
     name: 'Dosage Forms',
-    description: 'Manage dosage forms data',
+    description: 'จัดการข้อมูลรูปแบบปริมาณยา',
     icon: 'description',
     route: '/inventory/master-data/dosage-forms',
     color: 'mint',
@@ -106,7 +106,7 @@ export const SECTION_ITEMS: LauncherApp[] = [
   {
     id: 'drug-pack-ratios',
     name: 'Drug Pack Ratios',
-    description: 'Manage drug pack ratios data',
+    description: 'จัดการข้อมูลอัตราส่วนแพ็คยา',
     icon: 'medication',
     route: '/inventory/master-data/drug-pack-ratios',
     color: 'mint',
@@ -118,7 +118,7 @@ export const SECTION_ITEMS: LauncherApp[] = [
   {
     id: 'drug-focus-lists',
     name: 'Drug Focus Lists',
-    description: 'Manage drug focus lists data',
+    description: 'จัดการข้อมูลรายการยาเด่น',
     icon: 'medication',
     route: '/inventory/master-data/drug-focus-lists',
     color: 'rose',
@@ -130,7 +130,7 @@ export const SECTION_ITEMS: LauncherApp[] = [
   {
     id: 'drug-components',
     name: 'Drug Components',
-    description: 'Manage drug components data',
+    description: 'จัดการข้อมูลส่วนประกอบของยา',
     icon: 'medication',
     route: '/inventory/master-data/drug-components',
     color: 'rose',
@@ -142,7 +142,7 @@ export const SECTION_ITEMS: LauncherApp[] = [
   {
     id: 'budget-categories',
     name: 'Budget Categories',
-    description: 'Manage budget categories data',
+    description: 'จัดการข้อมูลประเภทงบประมาณ',
     icon: 'description',
     route: '/inventory/master-data/budget-categories',
     color: 'blue',
@@ -154,7 +154,7 @@ export const SECTION_ITEMS: LauncherApp[] = [
   {
     id: 'budget-types',
     name: 'Budget Types',
-    description: 'Manage budget types data',
+    description: 'จัดการข้อมูลประเภทงบประมาณ',
     icon: 'description',
     route: '/inventory/master-data/budget-types',
     color: 'rose',
@@ -166,7 +166,7 @@ export const SECTION_ITEMS: LauncherApp[] = [
   {
     id: 'drug-generics',
     name: 'Drug Generics',
-    description: 'Manage drug generics data',
+    description: 'จัดการข้อมูลยาสามัญชาติ',
     icon: 'medication',
     route: '/inventory/master-data/drug-generics',
     color: 'mint',
@@ -178,7 +178,7 @@ export const SECTION_ITEMS: LauncherApp[] = [
   {
     id: 'budgets',
     name: 'Budgets',
-    description: 'Manage budgets data',
+    description: 'จัดการข้อมูลงบประมาณ',
     icon: 'description',
     route: '/inventory/master-data/budgets',
     color: 'cyan',
@@ -190,7 +190,7 @@ export const SECTION_ITEMS: LauncherApp[] = [
   {
     id: 'bank',
     name: 'Bank',
-    description: 'Manage bank data',
+    description: 'จัดการข้อมูลธนาคาร',
     icon: 'description',
     route: '/inventory/master-data/bank',
     color: 'yellow',
@@ -202,7 +202,7 @@ export const SECTION_ITEMS: LauncherApp[] = [
   {
     id: 'hospitals',
     name: 'Hospitals',
-    description: 'Manage hospitals data',
+    description: 'จัดการข้อมูลโรงพยาบาล',
     icon: 'description',
     route: '/inventory/master-data/hospitals',
     color: 'peach',
@@ -214,7 +214,7 @@ export const SECTION_ITEMS: LauncherApp[] = [
   {
     id: 'departments',
     name: 'Departments',
-    description: 'Manage departments data',
+    description: 'จัดการข้อมูลแผนก',
     icon: 'corporate_fare',
     route: '/inventory/master-data/departments',
     color: 'blue',
@@ -226,7 +226,7 @@ export const SECTION_ITEMS: LauncherApp[] = [
   {
     id: 'companies',
     name: 'Companies',
-    description: 'Manage companies data',
+    description: 'จัดการข้อมูลบริษัท',
     icon: 'description',
     route: '/inventory/master-data/companies',
     color: 'cyan',
@@ -238,7 +238,7 @@ export const SECTION_ITEMS: LauncherApp[] = [
   {
     id: 'locations',
     name: 'Locations',
-    description: 'Manage locations data',
+    description: 'จัดการข้อมูลสถานที่',
     icon: 'location_on',
     route: '/inventory/master-data/locations',
     color: 'rose',
@@ -250,7 +250,7 @@ export const SECTION_ITEMS: LauncherApp[] = [
   {
     id: 'drugs',
     name: 'Drugs',
-    description: 'Manage drugs data',
+    description: 'จัดการข้อมูลยา',
     icon: 'medication',
     route: '/inventory/master-data/drugs',
     color: 'yellow',
