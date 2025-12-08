@@ -9,6 +9,8 @@ import {
   BudgetRequestsErrorCode,
   BudgetRequestsErrorMessages,
 } from './budget-requests.types';
+import { BudgetRequestsAuditService } from './budget-requests-audit.service';
+import type { Knex } from 'knex';
 
 /**
  * BudgetRequests Service
@@ -24,8 +26,15 @@ export class BudgetRequestsService extends BaseService<
   CreateBudgetRequests,
   UpdateBudgetRequests
 > {
-  constructor(private budgetRequestsRepository: BudgetRequestsRepository) {
+  private auditService: BudgetRequestsAuditService;
+
+  constructor(
+    private budgetRequestsRepository: BudgetRequestsRepository,
+    private db: Knex,
+    private logger: any,
+  ) {
     super(budgetRequestsRepository);
+    this.auditService = new BudgetRequestsAuditService(db, logger);
   }
 
   /**
@@ -145,6 +154,17 @@ export class BudgetRequestsService extends BaseService<
       submitted_at: new Date().toISOString(),
     });
 
+    // Log audit trail
+    if (updated) {
+      await this.auditService.logWorkflowChange(
+        Number(updated.id),
+        'SUBMIT',
+        'DRAFT',
+        'SUBMITTED',
+        userId,
+      );
+    }
+
     console.log('Budget request submitted:', { id, userId });
 
     return updated;
@@ -177,6 +197,17 @@ export class BudgetRequestsService extends BaseService<
       dept_reviewed_at: new Date().toISOString(),
       dept_comments: comments,
     });
+
+    // Log audit trail
+    if (updated) {
+      await this.auditService.logWorkflowChange(
+        Number(updated.id),
+        'APPROVE_DEPT',
+        'SUBMITTED',
+        'DEPT_APPROVED',
+        userId,
+      );
+    }
 
     console.log('Budget request approved by department:', { id, userId });
 
@@ -299,6 +330,17 @@ export class BudgetRequestsService extends BaseService<
         );
       }
 
+      // Log audit trail before committing
+      if (updated) {
+        await this.auditService.logWorkflowChange(
+          Number(updated.id),
+          'APPROVE_FINANCE',
+          'DEPT_APPROVED',
+          'FINANCE_APPROVED',
+          userId,
+        );
+      }
+
       // Commit transaction
       await trx.commit();
 
@@ -354,6 +396,17 @@ export class BudgetRequestsService extends BaseService<
         finance_reviewed_at: new Date().toISOString(),
       }),
     });
+
+    // Log audit trail
+    if (updated) {
+      await this.auditService.logWorkflowChange(
+        Number(updated.id),
+        'REJECT',
+        String(request.status),
+        'REJECTED',
+        userId,
+      );
+    }
 
     console.log('Budget request rejected:', { id, userId, reason });
 
@@ -1107,6 +1160,15 @@ export class BudgetRequestsService extends BaseService<
       error.code = 'BUDGET_REQUEST_REOPEN_FAILED';
       throw error;
     }
+
+    // Log audit trail
+    await this.auditService.logWorkflowChange(
+      Number(updated.id),
+      'REOPEN',
+      String(budgetRequest.status),
+      'DRAFT',
+      userId,
+    );
 
     return updated;
   }

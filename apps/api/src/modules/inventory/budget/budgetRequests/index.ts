@@ -36,6 +36,8 @@ export default fp(
     );
     const budgetRequestsService = new BudgetRequestsService(
       budgetRequestsRepository,
+      (fastify as any).knex,
+      fastify.log,
     );
 
     // Controller instantiation with proper dependencies

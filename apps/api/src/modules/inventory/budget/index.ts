@@ -3,6 +3,7 @@ import type { FastifyInstance, FastifyPluginOptions } from 'fastify';
 
 import budgetRequestsPlugin from './budgetRequests';
 import budgetRequestItemsPlugin from './budgetRequestItems';
+import budgetRequestCommentsPlugin from './budgetRequestComments';
 
 /**
  * Budget Domain Plugin
@@ -26,9 +27,13 @@ export default fp(
       ...options,
       prefix: `${prefix}/budget-request-items`,
     });
+    await fastify.register(budgetRequestCommentsPlugin, {
+      ...options,
+      prefix: `${prefix}/budget-request-comments`,
+    });
 
     fastify.addHook('onReady', async () => {
-      fastify.log.info(`Budget domain loaded with 2 modules at ${prefix}`);
+      fastify.log.info(`Budget domain loaded with 3 modules at ${prefix}`);
     });
   },
   {

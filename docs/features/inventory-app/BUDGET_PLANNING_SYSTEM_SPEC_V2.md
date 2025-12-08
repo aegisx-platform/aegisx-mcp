@@ -292,11 +292,9 @@ ADD COLUMN package_size VARCHAR(100),       -- ขนาดบรรจุ
 ADD COLUMN unit VARCHAR(50),                -- หน่วยนับ
 ADD COLUMN line_number INTEGER,             -- ลำดับ
 
--- Historical Usage (3 years back)
-ADD COLUMN usage_year_2566 DECIMAL(10,2) DEFAULT 0,  -- ยอดใช้ปี 2566
-ADD COLUMN usage_year_2567 DECIMAL(10,2) DEFAULT 0,  -- ยอดใช้ปี 2567
-ADD COLUMN usage_year_2568 DECIMAL(10,2) DEFAULT 0,  -- ยอดใช้ปี 2568
-ADD COLUMN avg_usage DECIMAL(10,2) DEFAULT 0,        -- เฉลี่ย 3 ปี
+-- Historical Usage (3 years back) - FLEXIBLE DESIGN
+ADD COLUMN historical_usage JSONB DEFAULT '{}',       -- ยอดใช้ย้อนหลัง 3 ปี (Format: {"2566": 4200, "2567": 4400, "2568": 4527})
+ADD COLUMN avg_usage DECIMAL(10,2) DEFAULT 0,         -- เฉลี่ย 3 ปี (คำนวณจาก historical_usage)
 
 -- Planning
 ADD COLUMN estimated_usage_2569 DECIMAL(10,2) DEFAULT 0,  -- ประมาณการใช้ปี 2569
@@ -344,29 +342,27 @@ CREATE INDEX idx_budget_request_items_line
 
 ### 4.2 Sample Data
 
-| Field                 | Value                 | Note                    |
-| --------------------- | --------------------- | ----------------------- |
-| line_number           | 1                     | ลำดับ                   |
-| generic_code          | 100103660             | รหัสยา TMT              |
-| generic_name          | 0.1% Triamcinolone... | ชื่อยา                  |
-| package_size          | 1                     | ขนาดบรรจุ               |
-| unit                  | หลอด                  | หน่วยนับ                |
-| usage_year_2566       | 4200                  | ยอดใช้ปี 66             |
-| usage_year_2567       | 4400                  | ยอดใช้ปี 67             |
-| usage_year_2568       | 4527                  | ยอดใช้ปี 68             |
-| avg_usage             | 4376                  | เฉลี่ย                  |
-| estimated_usage_2569  | 4662                  | ประมาณการ (4376 × 1.05) |
-| current_stock         | 851                   | คงคลัง                  |
-| estimated_purchase    | 3811                  | ประมาณซื้อ (4662 - 851) |
-| unit_price            | 15.00                 | ราคา/หน่วย              |
-| requested_qty         | 5400                  | จำนวนที่ขอ              |
-| requested_amount_calc | 81000                 | มูลค่า (5400 × 15)      |
-| budget_qty            | 0                     | เงินงบประมาณ            |
-| fund_qty              | 5400                  | เงินบำรุง               |
-| q1_qty                | 1350                  | Q1                      |
-| q2_qty                | 1350                  | Q2                      |
-| q3_qty                | 1350                  | Q3                      |
-| q4_qty                | 1350                  | Q4                      |
+| Field                 | Value                                 | Note                    |
+| --------------------- | ------------------------------------- | ----------------------- |
+| line_number           | 1                                     | ลำดับ                   |
+| generic_code          | 100103660                             | รหัสยา TMT              |
+| generic_name          | 0.1% Triamcinolone...                 | ชื่อยา                  |
+| package_size          | 1                                     | ขนาดบรรจุ               |
+| unit                  | หลอด                                  | หน่วยนับ                |
+| historical_usage      | {"2566":4200,"2567":4400,"2568":4527} | ยอดใช้ย้อนหลัง 3 ปี     |
+| avg_usage             | 4376                                  | เฉลี่ย                  |
+| estimated_usage_2569  | 4662                                  | ประมาณการ (4376 × 1.05) |
+| current_stock         | 851                                   | คงคลัง                  |
+| estimated_purchase    | 3811                                  | ประมาณซื้อ (4662 - 851) |
+| unit_price            | 15.00                                 | ราคา/หน่วย              |
+| requested_qty         | 5400                                  | จำนวนที่ขอ              |
+| requested_amount_calc | 81000                                 | มูลค่า (5400 × 15)      |
+| budget_qty            | 0                                     | เงินงบประมาณ            |
+| fund_qty              | 5400                                  | เงินบำรุง               |
+| q1_qty                | 1350                                  | Q1                      |
+| q2_qty                | 1350                                  | Q2                      |
+| q3_qty                | 1350                                  | Q3                      |
+| q4_qty                | 1350                                  | Q4                      |
 
 ---
 
@@ -1030,10 +1026,38 @@ Response:
 - [ ] API: PUT /budget-requests/:id/items/:itemId
 - [ ] API: PUT /budget-requests/:id/items/batch
 - [ ] API: DELETE /budget-requests/:id/items/:itemId
-- [ ] API: GET /budget-requests/:id/export-sscj
+- [x] API: GET /budget-requests/:id/export-sscj ✅ (Phase 1.5 Completed)
 - [ ] Unit tests
 
-### Phase 2: Frontend (Week 3-4)
+**Phase 1.5: Export SSCJ API** ✅ **COMPLETED**
+
+- [x] Implemented GET /budget-requests/:id/export-sscj
+- [x] ExcelJS integration
+- [x] SSCJ format with merged cells
+- [x] Tested and deployed
+
+**Phase 2: Enhanced Features** ✅ **COMPLETED**
+
+**Phase 2.1: Reopen Feature** ✅
+
+- [x] API: POST /budget-requests/:id/reopen
+- [x] Status validation (REJECTED → DRAFT allowed)
+- [x] Audit trail integration
+
+**Phase 2.2: Audit Log** ✅
+
+- [x] Migration: Create budget_request_audit table
+- [x] Audit service implementation
+- [x] Integration with all workflow methods
+- [x] Track CREATE, UPDATE, DELETE, SUBMIT, APPROVE, REJECT, REOPEN
+
+**Phase 2.3: Comments Feature** 🔄 **IN PROGRESS**
+
+- [ ] Migration: Create budget_request_comments table
+- [ ] Generate CRUD endpoints
+- [ ] Frontend integration
+
+### Phase 3: Frontend (Week 3-4)
 
 **Week 3:**
 
@@ -1051,7 +1075,7 @@ Response:
 - [ ] Export button
 - [ ] E2E tests
 
-### Phase 3: Excel Export (Week 5)
+### Phase 4: Excel Export (Week 5)
 
 - [ ] ExcelJS implementation
 - [ ] Multi-level headers
@@ -1060,7 +1084,7 @@ Response:
 - [ ] Borders
 - [ ] Test with real data
 
-### Phase 4: Testing & Deployment (Week 6)
+### Phase 5: Testing & Deployment (Week 6)
 
 - [ ] Integration testing
 - [ ] Performance testing (2,000+ items)
@@ -1107,7 +1131,7 @@ Response:
 
 ## 10. Future Enhancements (Optional)
 
-### 10.1 Reopen Feature
+### 10.1 Reopen Feature ✅ **COMPLETED** (Phase 2.1)
 
 **Purpose:** ส่งกลับแผนมาแก้ไขใหม่
 
@@ -1140,7 +1164,7 @@ Response 200:
 - DEPT_APPROVED → DRAFT (ต้องได้รับอนุมัติจาก Finance Manager)
 - FINANCE_APPROVED → ห้าม Reopen (งบล็อคแล้ว ต้องสร้างใหม่)
 
-### 10.2 Audit Log
+### 10.2 Audit Log ✅ **COMPLETED** (Phase 2.2)
 
 **Purpose:** บันทึกประวัติการแก้ไข
 
@@ -1191,7 +1215,7 @@ CREATE TABLE inventory.budget_request_versions (
 - Compare versions (diff view)
 - Restore from previous version
 
-### 10.4 Comments & Discussion
+### 10.4 Comments & Discussion 🔄 **IN PROGRESS** (Phase 2.3)
 
 **Purpose:** สนทนาและแลกเปลี่ยนความคิดเห็นในแผน
 
