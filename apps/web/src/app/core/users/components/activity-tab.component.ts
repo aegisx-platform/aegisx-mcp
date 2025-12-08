@@ -48,7 +48,6 @@ import { ActivityLogFilterComponent } from '../../user-profile/components/activi
       <!-- Statistics Panel -->
       @if (activityLogService.stats() && !statsLoading()) {
         <ax-card
-          [appearance]="'elevated'"
           class="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900 dark:to-cyan-900"
         >
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -111,7 +110,7 @@ import { ActivityLogFilterComponent } from '../../user-profile/components/activi
       ></ax-activity-log-filter>
 
       <!-- Activity Table -->
-      <ax-card [appearance]="'elevated'">
+      <ax-card>
         <h3 class="text-lg font-semibold mb-4">Activity Log</h3>
 
         @if (activityLogService.loading()) {

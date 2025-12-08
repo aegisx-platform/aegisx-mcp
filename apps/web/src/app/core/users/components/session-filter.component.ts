@@ -27,7 +27,7 @@ import { SessionFilters } from '../../user-profile/components/activity-log/sessi
     AxCardComponent,
   ],
   template: `
-    <ax-card [appearance]="'elevated'" class="mb-6">
+    <ax-card class="mb-6">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-lg font-semibold">Filter Sessions</h3>
         <button mat-icon-button (click)="toggleExpanded()">

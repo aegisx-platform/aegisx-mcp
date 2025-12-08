@@ -46,7 +46,7 @@ export interface AvailableRole {
     AxCardComponent,
   ],
   template: `
-    <ax-card [appearance]="'elevated'" class="mt-6">
+    <ax-card class="mt-6">
       <div class="flex justify-between items-center mb-4">
         <h3 class="text-lg font-semibold">Assigned Roles</h3>
         <button
