@@ -569,19 +569,76 @@ export class BudgetRequestEditComponent implements OnInit {
     }
   }
 
-  submitRequest() {
-    console.log('Submit request');
-    // TODO: Implement submit
+  /**
+   * Submit request for approval (DRAFT → SUBMITTED)
+   */
+  async submitRequest() {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id) return;
+
+    try {
+      this.loading.set(true);
+
+      const updated = await this.budgetRequestService.submitBudgetRequest(+id);
+
+      if (updated) {
+        console.log('Budget request submitted successfully');
+        // Reload to reflect new status
+        await this.loadBudgetRequest(+id);
+      }
+    } catch (error) {
+      console.error('Error submitting budget request:', error);
+    } finally {
+      this.loading.set(false);
+    }
   }
 
-  approveDepartment() {
-    console.log('Department approve');
-    // TODO: Implement department approval
+  /**
+   * Department approval (SUBMITTED → DEPT_APPROVED)
+   */
+  async approveDepartment() {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id) return;
+
+    try {
+      this.loading.set(true);
+
+      const updated = await this.budgetRequestService.approveDepartment(+id);
+
+      if (updated) {
+        console.log('Budget request approved by department');
+        // Reload to reflect new status
+        await this.loadBudgetRequest(+id);
+      }
+    } catch (error) {
+      console.error('Error approving budget request (department):', error);
+    } finally {
+      this.loading.set(false);
+    }
   }
 
-  approveFinance() {
-    console.log('Finance approve');
-    // TODO: Implement finance approval
+  /**
+   * Finance approval (DEPT_APPROVED → FINANCE_APPROVED)
+   */
+  async approveFinance() {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id) return;
+
+    try {
+      this.loading.set(true);
+
+      const updated = await this.budgetRequestService.approveFinance(+id);
+
+      if (updated) {
+        console.log('Budget request approved by finance');
+        // Reload to reflect new status
+        await this.loadBudgetRequest(+id);
+      }
+    } catch (error) {
+      console.error('Error approving budget request (finance):', error);
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   goBack() {

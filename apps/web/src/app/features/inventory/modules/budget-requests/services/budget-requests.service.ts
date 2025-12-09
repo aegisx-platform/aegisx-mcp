@@ -687,6 +687,97 @@ export class BudgetRequestService {
   }
 
   /**
+   * Submit budget request for approval
+   * POST /:id/submit
+   * DRAFT → SUBMITTED
+   */
+  async submitBudgetRequest(id: number): Promise<BudgetRequest | null> {
+    this.loadingSignal.set(true);
+    this.errorSignal.set(null);
+
+    try {
+      const response = await this.http
+        .post<ApiResponse<BudgetRequest>>(`${this.baseUrl}/${id}/submit`, {})
+        .toPromise();
+
+      if (response) {
+        this.selectedBudgetRequestSignal.set(response.data);
+        return response.data;
+      }
+      return null;
+    } catch (error: any) {
+      this.handleError(error, 'Failed to submit budget request');
+      throw error;
+    } finally {
+      this.loadingSignal.set(false);
+    }
+  }
+
+  /**
+   * Approve budget request by department head
+   * POST /:id/approve-dept
+   * SUBMITTED → DEPT_APPROVED
+   */
+  async approveDepartment(
+    id: number,
+    comments?: string,
+  ): Promise<BudgetRequest | null> {
+    this.loadingSignal.set(true);
+    this.errorSignal.set(null);
+
+    try {
+      const response = await this.http
+        .post<
+          ApiResponse<BudgetRequest>
+        >(`${this.baseUrl}/${id}/approve-dept`, { comments })
+        .toPromise();
+
+      if (response) {
+        this.selectedBudgetRequestSignal.set(response.data);
+        return response.data;
+      }
+      return null;
+    } catch (error: any) {
+      this.handleError(error, 'Failed to approve budget request (department)');
+      throw error;
+    } finally {
+      this.loadingSignal.set(false);
+    }
+  }
+
+  /**
+   * Approve budget request by finance manager
+   * POST /:id/approve-finance
+   * DEPT_APPROVED → FINANCE_APPROVED
+   */
+  async approveFinance(
+    id: number,
+    comments?: string,
+  ): Promise<BudgetRequest | null> {
+    this.loadingSignal.set(true);
+    this.errorSignal.set(null);
+
+    try {
+      const response = await this.http
+        .post<
+          ApiResponse<BudgetRequest>
+        >(`${this.baseUrl}/${id}/approve-finance`, { comments })
+        .toPromise();
+
+      if (response) {
+        this.selectedBudgetRequestSignal.set(response.data);
+        return response.data;
+      }
+      return null;
+    } catch (error: any) {
+      this.handleError(error, 'Failed to approve budget request (finance)');
+      throw error;
+    } finally {
+      this.loadingSignal.set(false);
+    }
+  }
+
+  /**
    * Clear error state
    */
   clearError(): void {
