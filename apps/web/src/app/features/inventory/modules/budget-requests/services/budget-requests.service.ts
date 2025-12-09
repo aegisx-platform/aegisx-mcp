@@ -705,4 +705,40 @@ export class BudgetRequestService {
     this.clearPermissionError();
     this.totalBudgetRequestSignal.set(0);
   }
+
+  /**
+   * Initialize budget request with drug generics
+   * Pull all active drug generics and calculate historical usage data
+   */
+  async initializeBudgetRequest(id: number): Promise<{
+    success: boolean;
+    itemsCreated: number;
+    message: string;
+  }> {
+    this.loadingSignal.set(true);
+    this.errorSignal.set(null);
+
+    try {
+      const response = await this.http
+        .post<
+          ApiResponse<{
+            success: boolean;
+            itemsCreated: number;
+            message: string;
+          }>
+        >(`${this.baseUrl}/${id}/initialize`, {})
+        .toPromise();
+
+      if (response?.data) {
+        return response.data;
+      }
+
+      throw new Error('Invalid response from server');
+    } catch (error: any) {
+      this.handleError(error, 'Failed to initialize budget request');
+      throw error;
+    } finally {
+      this.loadingSignal.set(false);
+    }
+  }
 }

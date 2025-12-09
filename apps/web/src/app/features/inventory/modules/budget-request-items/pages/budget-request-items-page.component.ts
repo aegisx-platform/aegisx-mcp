@@ -15,8 +15,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { BudgetRequestItem } from '../types/budget-request-items.types';
 import { BudgetRequestItemService } from '../services/budget-request-items.service';
+import { BudgetRequestService } from '../../budget-requests/services/budget-requests.service';
 
 @Component({
   selector: 'app-budget-request-items-page',
@@ -29,6 +31,7 @@ import { BudgetRequestItemService } from '../services/budget-request-items.servi
     MatCardModule,
     MatChipsModule,
     MatTooltipModule,
+    MatSnackBarModule,
   ],
   templateUrl: './budget-request-items-page.component.html',
   styleUrls: ['./budget-request-items-page.component.scss'],
@@ -37,6 +40,8 @@ export class BudgetRequestItemsPageComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private budgetRequestItemService = inject(BudgetRequestItemService);
+  private budgetRequestService = inject(BudgetRequestService);
+  private snackBar = inject(MatSnackBar);
 
   budgetRequestId = signal<number | null>(null);
   loading = signal(false);
@@ -345,9 +350,52 @@ export class BudgetRequestItemsPageComponent implements OnInit {
   }
 
   // Action handlers
-  onInitialize() {
-    console.log('Initialize budget request items');
-    // TODO: Implement initialize functionality
+  async onInitialize() {
+    const id = this.budgetRequestId();
+    if (!id) {
+      this.snackBar.open('Invalid budget request ID', 'Close', {
+        duration: 3000,
+        panelClass: ['error-snackbar'],
+      });
+      return;
+    }
+
+    this.loading.set(true);
+    try {
+      const result =
+        await this.budgetRequestService.initializeBudgetRequest(id);
+
+      if (result.success) {
+        this.snackBar.open(
+          `Successfully initialized ${result.itemsCreated} budget request items`,
+          'Close',
+          {
+            duration: 5000,
+            panelClass: ['success-snackbar'],
+          },
+        );
+
+        // Reload the budget request items to show the initialized data
+        await this.loadBudgetRequestItems();
+      } else {
+        this.snackBar.open(result.message || 'Failed to initialize', 'Close', {
+          duration: 3000,
+          panelClass: ['error-snackbar'],
+        });
+      }
+    } catch (error: any) {
+      console.error('Failed to initialize budget request items:', error);
+      this.snackBar.open(
+        error?.error?.message || 'Failed to initialize budget request items',
+        'Close',
+        {
+          duration: 3000,
+          panelClass: ['error-snackbar'],
+        },
+      );
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   onAddDrug() {
