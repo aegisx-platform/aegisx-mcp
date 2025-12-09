@@ -571,12 +571,12 @@ export async function loadAllPlugins(
     ],
   };
 
-  await loadPluginGroup(
-    fastify,
-    allApiPlugins,
-    { prefix: appConfig.api.prefix },
-    quiet,
-  );
+  // Only add prefix if it's not empty string
+  const pluginOptions = appConfig.api.prefix
+    ? { prefix: appConfig.api.prefix }
+    : {};
+
+  await loadPluginGroup(fastify, allApiPlugins, pluginOptions, quiet);
 
   const totalDuration = Date.now() - startTime;
   const totalPlugins =
