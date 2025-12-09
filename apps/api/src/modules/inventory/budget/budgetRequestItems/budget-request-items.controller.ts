@@ -11,6 +11,7 @@ import {
   BudgetRequestItemsIdParamSchema,
   GetBudgetRequestItemsQuerySchema,
   ListBudgetRequestItemsQuerySchema,
+  BatchUpdateBudgetRequestItemsSchema,
 } from './budget-request-items.schemas';
 
 /**
@@ -123,9 +124,6 @@ export class BudgetRequestItemsController {
         'package_size',
         'unit',
         'line_number',
-        'usage_year_2566',
-        'usage_year_2567',
-        'usage_year_2568',
         'avg_usage',
         'estimated_usage_2569',
         'current_stock',
@@ -134,6 +132,7 @@ export class BudgetRequestItemsController {
         'requested_qty',
         'budget_type_id',
         'budget_category_id',
+        'historical_usage',
         'created_at',
       ],
       admin: [
@@ -155,9 +154,6 @@ export class BudgetRequestItemsController {
         'package_size',
         'unit',
         'line_number',
-        'usage_year_2566',
-        'usage_year_2567',
-        'usage_year_2568',
         'avg_usage',
         'estimated_usage_2569',
         'current_stock',
@@ -166,6 +162,7 @@ export class BudgetRequestItemsController {
         'requested_qty',
         'budget_type_id',
         'budget_category_id',
+        'historical_usage',
       ],
     };
 
@@ -294,6 +291,33 @@ export class BudgetRequestItemsController {
     );
   }
 
+  /**
+   * Batch update multiple budget request items
+   * POST /budgetRequestItems/batch-update
+   */
+  async batchUpdate(
+    request: FastifyRequest<{
+      Body: Static<typeof BatchUpdateBudgetRequestItemsSchema>;
+    }>,
+    reply: FastifyReply,
+  ) {
+    request.log.info(
+      { itemCount: request.body.items.length },
+      'Batch updating budget request items',
+    );
+
+    const result = await this.budgetRequestItemsService.batchUpdate(
+      request.body.items,
+    );
+
+    request.log.info(
+      { updated: result.updated, failed: result.failed },
+      'Batch update complete',
+    );
+
+    return reply.success(result, 'Batch update completed');
+  }
+
   // ===== PRIVATE TRANSFORMATION METHODS =====
 
   /**
@@ -320,9 +344,6 @@ export class BudgetRequestItemsController {
       package_size: schema.package_size,
       unit: schema.unit,
       line_number: schema.line_number,
-      usage_year_2566: schema.usage_year_2566,
-      usage_year_2567: schema.usage_year_2567,
-      usage_year_2568: schema.usage_year_2568,
       avg_usage: schema.avg_usage,
       estimated_usage_2569: schema.estimated_usage_2569,
       current_stock: schema.current_stock,
@@ -331,6 +352,7 @@ export class BudgetRequestItemsController {
       requested_qty: schema.requested_qty,
       budget_type_id: schema.budget_type_id,
       budget_category_id: schema.budget_category_id,
+      historical_usage: schema.historical_usage,
     };
 
     // Auto-fill created_by from JWT if table has this field
@@ -392,15 +414,6 @@ export class BudgetRequestItemsController {
     if (schema.line_number !== undefined) {
       updateData.line_number = schema.line_number;
     }
-    if (schema.usage_year_2566 !== undefined) {
-      updateData.usage_year_2566 = schema.usage_year_2566;
-    }
-    if (schema.usage_year_2567 !== undefined) {
-      updateData.usage_year_2567 = schema.usage_year_2567;
-    }
-    if (schema.usage_year_2568 !== undefined) {
-      updateData.usage_year_2568 = schema.usage_year_2568;
-    }
     if (schema.avg_usage !== undefined) {
       updateData.avg_usage = schema.avg_usage;
     }
@@ -424,6 +437,9 @@ export class BudgetRequestItemsController {
     }
     if (schema.budget_category_id !== undefined) {
       updateData.budget_category_id = schema.budget_category_id;
+    }
+    if (schema.historical_usage !== undefined) {
+      updateData.historical_usage = schema.historical_usage;
     }
 
     // Auto-fill updated_by from JWT if table has this field

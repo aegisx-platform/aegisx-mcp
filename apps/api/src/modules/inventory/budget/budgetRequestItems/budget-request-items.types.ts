@@ -6,6 +6,9 @@ import {
   type BudgetRequestItemsIdParam,
   type GetBudgetRequestItemsQuery,
   type ListBudgetRequestItemsQuery,
+  type BatchUpdateItem,
+  type BatchUpdateBudgetRequestItems,
+  type BatchUpdateResponse,
 } from './budget-request-items.schemas';
 
 export {
@@ -15,6 +18,9 @@ export {
   type BudgetRequestItemsIdParam,
   type GetBudgetRequestItemsQuery,
   type ListBudgetRequestItemsQuery,
+  type BatchUpdateItem,
+  type BatchUpdateBudgetRequestItems,
+  type BatchUpdateResponse,
 };
 
 // Additional type definitions
@@ -57,9 +63,6 @@ export interface BudgetRequestItemsEntity {
   package_size: string | null;
   unit: string | null;
   line_number: number | null;
-  usage_year_2566: number | null;
-  usage_year_2567: number | null;
-  usage_year_2568: number | null;
   avg_usage: number | null;
   estimated_usage_2569: number | null;
   current_stock: number | null;
@@ -68,6 +71,7 @@ export interface BudgetRequestItemsEntity {
   requested_qty: number | null;
   budget_type_id: number | null;
   budget_category_id: number | null;
+  historical_usage: Record<string, any> | null;
 }
 
 // ===== ERROR HANDLING: ERROR CODES =====

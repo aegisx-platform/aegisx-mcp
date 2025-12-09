@@ -6,6 +6,8 @@ import {
   type UpdateBudgetRequestItems,
   type GetBudgetRequestItemsQuery,
   type ListBudgetRequestItemsQuery,
+  type BatchUpdateItem,
+  type BatchUpdateResponse,
   BudgetRequestItemsErrorCode,
   BudgetRequestItemsErrorMessages,
 } from './budget-request-items.types';
@@ -82,70 +84,6 @@ export class BudgetRequestItemsService extends BaseService<
     id: string | number,
     data: UpdateBudgetRequestItems,
   ): Promise<BudgetRequestItems | null> {
-    // Get existing item to check budget_request_id
-    const existing = await this.budgetRequestItemsRepository.findById(id);
-    if (!existing) {
-      return null;
-    }
-
-    // Hook 1: Validate DRAFT status
-    const budgetRequestId =
-      data.budget_request_id || existing.budget_request_id;
-    const budgetRequest = await (this.budgetRequestItemsRepository as any)
-      .db('budget_requests')
-      .where('id', budgetRequestId)
-      .first();
-
-    if (!budgetRequest) {
-      const error = new Error('Budget request not found') as any;
-      error.statusCode = 404;
-      error.code = 'BUDGET_REQUEST_NOT_FOUND';
-      throw error;
-    }
-
-    if (budgetRequest.status !== 'DRAFT') {
-      const error = new Error(
-        'Cannot update items when budget request status is not DRAFT',
-      ) as any;
-      error.statusCode = 422;
-      error.code = 'BUDGET_REQUEST_NOT_DRAFT';
-      throw error;
-    }
-
-    // Hook 2: Validate quarterly split
-    const q1_qty = data.q1_qty !== undefined ? data.q1_qty : existing.q1_qty;
-    const q2_qty = data.q2_qty !== undefined ? data.q2_qty : existing.q2_qty;
-    const q3_qty = data.q3_qty !== undefined ? data.q3_qty : existing.q3_qty;
-    const q4_qty = data.q4_qty !== undefined ? data.q4_qty : existing.q4_qty;
-    const requested_qty =
-      data.requested_qty !== undefined
-        ? data.requested_qty
-        : existing.requested_qty;
-
-    if (requested_qty !== null && requested_qty !== undefined) {
-      const quarterlyTotal = q1_qty + q2_qty + q3_qty + q4_qty;
-      if (quarterlyTotal !== requested_qty) {
-        const error = new Error(
-          `Quarterly total (${quarterlyTotal}) must equal requested_qty (${requested_qty})`,
-        ) as any;
-        error.statusCode = 422;
-        error.code = 'INVALID_QUARTERLY_SPLIT';
-        throw error;
-      }
-    }
-
-    // Hook 3: Auto-calculate requested_amount
-    const unit_price =
-      data.unit_price !== undefined ? data.unit_price : existing.unit_price;
-    if (
-      requested_qty !== undefined &&
-      requested_qty !== null &&
-      unit_price !== undefined &&
-      unit_price !== null
-    ) {
-      data.requested_amount = requested_qty * unit_price;
-    }
-
     const budgetRequestItems = await super.update(id, data);
 
     return budgetRequestItems;
@@ -183,6 +121,124 @@ export class BudgetRequestItemsService extends BaseService<
     }
   }
 
+  /**
+   * Batch update multiple budget request items
+   * Used for editing large datasets (2000-3000 rows) efficiently
+   *
+   * @param items Array of items to update (max 100 per request)
+   * @returns Success/failure counts with error details
+   */
+  async batchUpdate(items: BatchUpdateItem[]): Promise<BatchUpdateResponse> {
+    const knex = (this.budgetRequestItemsRepository as any).knex;
+    let updated = 0;
+    let failed = 0;
+    const errors: Array<{ id: number; error: string }> = [];
+
+    // Validate max 100 items
+    if (items.length > 100) {
+      throw new Error('Maximum 100 items allowed per batch update');
+    }
+
+    try {
+      // Use transaction for atomicity
+      await knex.transaction(async (trx: any) => {
+        for (const item of items) {
+          try {
+            // Verify item exists
+            const existing = await trx('inventory.budget_request_items')
+              .where({ id: item.id })
+              .first();
+
+            if (!existing) {
+              errors.push({
+                id: item.id,
+                error: `Item ${item.id} not found`,
+              });
+              failed++;
+              continue;
+            }
+
+            // Verify budget request is in DRAFT status
+            const budgetRequest = await trx('inventory.budget_requests')
+              .where({ id: existing.budget_request_id })
+              .first();
+
+            if (!budgetRequest) {
+              errors.push({
+                id: item.id,
+                error: 'Budget request not found',
+              });
+              failed++;
+              continue;
+            }
+
+            if (budgetRequest.status !== 'DRAFT') {
+              errors.push({
+                id: item.id,
+                error: `Cannot edit items in ${budgetRequest.status} status`,
+              });
+              failed++;
+              continue;
+            }
+
+            // Build update object (only include fields that were provided)
+            const updateData: any = {
+              updated_at: new Date(),
+            };
+
+            if (item.estimated_usage_2569 !== undefined) {
+              updateData.estimated_usage_2569 = item.estimated_usage_2569;
+            }
+            if (item.unit_price !== undefined) {
+              updateData.unit_price = item.unit_price;
+            }
+            if (item.requested_qty !== undefined) {
+              updateData.requested_qty = item.requested_qty;
+            }
+            if (item.q1_qty !== undefined) {
+              updateData.q1_qty = item.q1_qty;
+            }
+            if (item.q2_qty !== undefined) {
+              updateData.q2_qty = item.q2_qty;
+            }
+            if (item.q3_qty !== undefined) {
+              updateData.q3_qty = item.q3_qty;
+            }
+            if (item.q4_qty !== undefined) {
+              updateData.q4_qty = item.q4_qty;
+            }
+
+            // Update the item
+            await trx('inventory.budget_request_items')
+              .where({ id: item.id })
+              .update(updateData);
+
+            updated++;
+          } catch (itemError: any) {
+            errors.push({
+              id: item.id,
+              error: itemError.message || 'Unknown error',
+            });
+            failed++;
+          }
+        }
+      });
+
+      console.log(
+        `Batch update complete: ${updated} updated, ${failed} failed`,
+      );
+
+      return {
+        updated,
+        failed,
+        errors: errors.length > 0 ? errors : undefined,
+      };
+    } catch (error: any) {
+      console.error('Batch update transaction failed:', error);
+      throw new Error(`Batch update failed: ${error.message}`);
+    }
+  }
+
   // ===== BUSINESS LOGIC HOOKS =====
   // Override these methods in child classes for custom validation/processing
 
@@ -197,46 +253,6 @@ export class BudgetRequestItemsService extends BaseService<
     // ===== ERROR HANDLING: DUPLICATE VALIDATION =====
 
     // ===== ERROR HANDLING: BUSINESS RULES VALIDATION =====
-
-    // Hook 1: Validate DRAFT status - can only add items when budget request is in DRAFT status
-    const budgetRequest = await (this.budgetRequestItemsRepository as any)
-      .db('budget_requests')
-      .where('id', data.budget_request_id)
-      .first();
-
-    if (!budgetRequest) {
-      const error = new Error('Budget request not found') as any;
-      error.statusCode = 404;
-      error.code = 'BUDGET_REQUEST_NOT_FOUND';
-      throw error;
-    }
-
-    if (budgetRequest.status !== 'DRAFT') {
-      const error = new Error(
-        'Cannot add items when budget request status is not DRAFT',
-      ) as any;
-      error.statusCode = 422;
-      error.code = 'BUDGET_REQUEST_NOT_DRAFT';
-      throw error;
-    }
-
-    // Hook 2: Validate quarterly split - Q1 + Q2 + Q3 + Q4 must equal requested_qty
-    if (data.requested_qty !== undefined && data.requested_qty !== null) {
-      const q1 = data.q1_qty || 0;
-      const q2 = data.q2_qty || 0;
-      const q3 = data.q3_qty || 0;
-      const q4 = data.q4_qty || 0;
-      const quarterlyTotal = q1 + q2 + q3 + q4;
-
-      if (quarterlyTotal !== data.requested_qty) {
-        const error = new Error(
-          `Quarterly total (${quarterlyTotal}) must equal requested_qty (${data.requested_qty})`,
-        ) as any;
-        error.statusCode = 422;
-        error.code = 'INVALID_QUARTERLY_SPLIT';
-        throw error;
-      }
-    }
 
     // Business rule: requested_amount must be positive
     if (data.requested_amount !== undefined && data.requested_amount !== null) {
@@ -273,35 +289,10 @@ export class BudgetRequestItemsService extends BaseService<
   protected async beforeCreate(
     data: CreateBudgetRequestItems,
   ): Promise<CreateBudgetRequestItems> {
-    // Hook 3: Auto-calculate requested_amount = requested_qty × unit_price
-    let requested_amount = data.requested_amount;
-    if (
-      data.requested_qty !== undefined &&
-      data.requested_qty !== null &&
-      data.unit_price !== undefined &&
-      data.unit_price !== null
-    ) {
-      requested_amount = data.requested_qty * data.unit_price;
-    }
-
-    // Hook 4: Auto-assign line_number for Excel export ordering
-    let line_number = data.line_number;
-    if (line_number === undefined || line_number === null) {
-      // Get the max line_number for this budget_request_id
-      const maxLineResult = await (this.budgetRequestItemsRepository as any)
-        .db('budget_request_items')
-        .where('budget_request_id', data.budget_request_id)
-        .max('line_number as max_line')
-        .first();
-
-      const maxLine = maxLineResult?.max_line || 0;
-      line_number = maxLine + 1;
-    }
-
+    // Add custom business logic here
     return {
       ...data,
-      requested_amount,
-      line_number,
+      // Add default values or processing
     };
   }
 
@@ -327,28 +318,8 @@ export class BudgetRequestItemsService extends BaseService<
     id: string | number,
     existing: BudgetRequestItems,
   ): Promise<void> {
-    // Hook 1: Validate DRAFT status - can only delete items when budget request is in DRAFT status
-    const budgetRequest = await (this.budgetRequestItemsRepository as any)
-      .db('budget_requests')
-      .where('id', existing.budget_request_id)
-      .first();
-
-    if (!budgetRequest) {
-      const error = new Error('Budget request not found') as any;
-      error.statusCode = 404;
-      error.code = 'BUDGET_REQUEST_NOT_FOUND';
-      throw error;
-    }
-
-    if (budgetRequest.status !== 'DRAFT') {
-      const error = new Error(
-        'Cannot delete items when budget request status is not DRAFT',
-      ) as any;
-      error.statusCode = 422;
-      error.code = 'BUDGET_REQUEST_NOT_DRAFT';
-      throw error;
-    }
-
+    // Add deletion validation logic here
+    // Example: Prevent deletion if entity has dependent records
     // ===== ERROR HANDLING: FOREIGN KEY REFERENCE VALIDATION =====
   }
 }

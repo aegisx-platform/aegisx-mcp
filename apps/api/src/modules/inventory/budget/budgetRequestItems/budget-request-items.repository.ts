@@ -50,15 +50,6 @@ export interface BudgetRequestItemsListQuery extends BaseListQuery {
   line_number?: number;
   line_number_min?: number;
   line_number_max?: number;
-  usage_year_2566?: number;
-  usage_year_2566_min?: number;
-  usage_year_2566_max?: number;
-  usage_year_2567?: number;
-  usage_year_2567_min?: number;
-  usage_year_2567_max?: number;
-  usage_year_2568?: number;
-  usage_year_2568_min?: number;
-  usage_year_2568_max?: number;
   avg_usage?: number;
   avg_usage_min?: number;
   avg_usage_max?: number;
@@ -132,9 +123,6 @@ export class BudgetRequestItemsRepository extends BaseRepository<
       package_size: dbRow.package_size,
       unit: dbRow.unit,
       line_number: dbRow.line_number,
-      usage_year_2566: dbRow.usage_year_2566,
-      usage_year_2567: dbRow.usage_year_2567,
-      usage_year_2568: dbRow.usage_year_2568,
       avg_usage: dbRow.avg_usage,
       estimated_usage_2569: dbRow.estimated_usage_2569,
       current_stock: dbRow.current_stock,
@@ -143,6 +131,7 @@ export class BudgetRequestItemsRepository extends BaseRepository<
       requested_qty: dbRow.requested_qty,
       budget_type_id: dbRow.budget_type_id,
       budget_category_id: dbRow.budget_category_id,
+      historical_usage: dbRow.historical_usage,
     };
   }
 
@@ -197,15 +186,6 @@ export class BudgetRequestItemsRepository extends BaseRepository<
     if ('line_number' in dto && dto.line_number !== undefined) {
       transformed.line_number = dto.line_number;
     }
-    if ('usage_year_2566' in dto && dto.usage_year_2566 !== undefined) {
-      transformed.usage_year_2566 = dto.usage_year_2566;
-    }
-    if ('usage_year_2567' in dto && dto.usage_year_2567 !== undefined) {
-      transformed.usage_year_2567 = dto.usage_year_2567;
-    }
-    if ('usage_year_2568' in dto && dto.usage_year_2568 !== undefined) {
-      transformed.usage_year_2568 = dto.usage_year_2568;
-    }
     if ('avg_usage' in dto && dto.avg_usage !== undefined) {
       transformed.avg_usage = dto.avg_usage;
     }
@@ -232,6 +212,9 @@ export class BudgetRequestItemsRepository extends BaseRepository<
     }
     if ('budget_category_id' in dto && dto.budget_category_id !== undefined) {
       transformed.budget_category_id = dto.budget_category_id;
+    }
+    if ('historical_usage' in dto && dto.historical_usage !== undefined) {
+      transformed.historical_usage = dto.historical_usage;
     }
     // updated_at is handled automatically by database
 
@@ -468,66 +451,6 @@ export class BudgetRequestItemsRepository extends BaseRepository<
         filters.line_number_max,
       );
     }
-    if (filters.usage_year_2566 !== undefined) {
-      query.where(
-        'inventory.budget_request_items.usage_year_2566',
-        filters.usage_year_2566,
-      );
-    }
-    if (filters.usage_year_2566_min !== undefined) {
-      query.where(
-        'inventory.budget_request_items.usage_year_2566',
-        '>=',
-        filters.usage_year_2566_min,
-      );
-    }
-    if (filters.usage_year_2566_max !== undefined) {
-      query.where(
-        'inventory.budget_request_items.usage_year_2566',
-        '<=',
-        filters.usage_year_2566_max,
-      );
-    }
-    if (filters.usage_year_2567 !== undefined) {
-      query.where(
-        'inventory.budget_request_items.usage_year_2567',
-        filters.usage_year_2567,
-      );
-    }
-    if (filters.usage_year_2567_min !== undefined) {
-      query.where(
-        'inventory.budget_request_items.usage_year_2567',
-        '>=',
-        filters.usage_year_2567_min,
-      );
-    }
-    if (filters.usage_year_2567_max !== undefined) {
-      query.where(
-        'inventory.budget_request_items.usage_year_2567',
-        '<=',
-        filters.usage_year_2567_max,
-      );
-    }
-    if (filters.usage_year_2568 !== undefined) {
-      query.where(
-        'inventory.budget_request_items.usage_year_2568',
-        filters.usage_year_2568,
-      );
-    }
-    if (filters.usage_year_2568_min !== undefined) {
-      query.where(
-        'inventory.budget_request_items.usage_year_2568',
-        '>=',
-        filters.usage_year_2568_min,
-      );
-    }
-    if (filters.usage_year_2568_max !== undefined) {
-      query.where(
-        'inventory.budget_request_items.usage_year_2568',
-        '<=',
-        filters.usage_year_2568_max,
-      );
-    }
     if (filters.avg_usage !== undefined) {
       query.where(
         'inventory.budget_request_items.avg_usage',
@@ -738,9 +661,6 @@ export class BudgetRequestItemsRepository extends BaseRepository<
       packageSize: 'inventory.budget_request_items.package_size',
       unit: 'inventory.budget_request_items.unit',
       lineNumber: 'inventory.budget_request_items.line_number',
-      usageYear_2566: 'inventory.budget_request_items.usage_year_2566',
-      usageYear_2567: 'inventory.budget_request_items.usage_year_2567',
-      usageYear_2568: 'inventory.budget_request_items.usage_year_2568',
       avgUsage: 'inventory.budget_request_items.avg_usage',
       estimatedUsage_2569:
         'inventory.budget_request_items.estimated_usage_2569',
@@ -750,6 +670,7 @@ export class BudgetRequestItemsRepository extends BaseRepository<
       requestedQty: 'inventory.budget_request_items.requested_qty',
       budgetTypeId: 'inventory.budget_request_items.budget_type_id',
       budgetCategoryId: 'inventory.budget_request_items.budget_category_id',
+      historicalUsage: 'inventory.budget_request_items.historical_usage',
     };
 
     return sortFields[sortBy] || 'inventory.budget_request_items.id';

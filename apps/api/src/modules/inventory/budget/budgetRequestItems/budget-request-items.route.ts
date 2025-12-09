@@ -10,6 +10,8 @@ import {
   BudgetRequestItemsResponseSchema,
   BudgetRequestItemsListResponseSchema,
   FlexibleBudgetRequestItemsListResponseSchema,
+  BatchUpdateBudgetRequestItemsSchema,
+  BatchUpdateResponseSchema,
 } from './budget-request-items.schemas';
 import { ApiErrorResponseSchema as ErrorResponseSchema } from '../../../../schemas/base.schemas';
 import { SchemaRefs } from '../../../../schemas/registry';
@@ -143,5 +145,34 @@ export async function budgetRequestItemsRoutes(
       fastify.verifyPermission('budgetRequestItems', 'delete'),
     ], // Authentication & authorization required
     handler: controller.delete.bind(controller),
+  });
+
+  // Batch update budget request items
+  fastify.post('/batch-update', {
+    schema: {
+      tags: ['Inventory: Budget Request Items'],
+      summary: 'Batch update multiple budget request items',
+      description:
+        'Update multiple budget items at once (max 100 per request). Only works on items in DRAFT status.',
+      body: BatchUpdateBudgetRequestItemsSchema,
+      response: {
+        200: Type.Object({
+          success: Type.Boolean(),
+          data: BatchUpdateResponseSchema,
+          message: Type.String(),
+          meta: Type.Any(),
+        }),
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        422: SchemaRefs.UnprocessableEntity,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [
+      fastify.authenticate,
+      fastify.verifyPermission('budgetRequestItems', 'update'),
+    ], // Authentication & authorization required
+    handler: controller.batchUpdate.bind(controller),
   });
 }
