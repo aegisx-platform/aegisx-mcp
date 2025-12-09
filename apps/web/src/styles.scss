@@ -42,3 +42,9 @@ body {
   min-width: 280px;
   /* Individual dialog widths are controlled by dialog config and .ax-dialog-container-* classes */
 }
+
+/* ============================================
+   AG Grid Material Theme
+   ============================================ */
+@import 'ag-grid-community/styles/ag-grid.css';
+@import 'ag-grid-community/styles/ag-theme-material.css';

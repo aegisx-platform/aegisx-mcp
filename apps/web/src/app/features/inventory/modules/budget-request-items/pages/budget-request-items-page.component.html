@@ -1,0 +1,94 @@
+<div class="budget-request-items-page">
+  <!-- Header Card -->
+  <mat-card class="header-card">
+    <mat-card-content>
+      <div class="header-content">
+        <button mat-icon-button (click)="goBack()" class="back-button">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div class="header-info">
+          <h1>แผนงบประมาณจัดซื้อยา ปี 2569</h1>
+          <div class="meta-info">
+            <mat-chip class="request-number">
+              Request Number: BR-2569-{{ budgetRequestId() | number: '4.0-0' }}
+            </mat-chip>
+            <mat-chip class="status">Status: DRAFT</mat-chip>
+            <mat-chip class="total-amount">
+              Total Amount: {{ totalAmount() | number: '1.2-2' }} บาท
+            </mat-chip>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Action Bar -->
+  <div class="action-bar">
+    <div class="action-buttons-left">
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="onInitialize()"
+        [disabled]="loading()"
+      >
+        <mat-icon>autorenew</mat-icon>
+        Initialize
+      </button>
+      <button
+        mat-raised-button
+        color="accent"
+        (click)="onAddDrug()"
+        [disabled]="loading()"
+      >
+        <mat-icon>add</mat-icon>
+        Add Drug
+      </button>
+    </div>
+    <div class="action-buttons-right">
+      <button mat-raised-button (click)="onSave()" [disabled]="loading()">
+        <mat-icon>save</mat-icon>
+        Save
+      </button>
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="onSubmit()"
+        [disabled]="loading()"
+      >
+        <mat-icon>send</mat-icon>
+        Submit
+      </button>
+      <button mat-raised-button (click)="onExport()" [disabled]="loading()">
+        <mat-icon>file_download</mat-icon>
+        Export SSCJ
+      </button>
+    </div>
+  </div>
+
+  <!-- AG Grid -->
+  <div class="grid-container">
+    @if (loading()) {
+      <div class="loading-overlay">
+        <mat-icon class="spinner">refresh</mat-icon>
+        <p>Loading...</p>
+      </div>
+    }
+
+    <ag-grid-angular
+      class="ag-theme-material"
+      [rowData]="rowData()"
+      [columnDefs]="columnDefs"
+      [gridOptions]="gridOptions"
+      [domLayout]="'autoHeight'"
+      (gridReady)="onGridReady($event)"
+    ></ag-grid-angular>
+  </div>
+
+  <!-- Summary Footer -->
+  <div class="summary-footer">
+    <div class="summary-info">
+      <span>Total Items: {{ rowData().length }}</span>
+      <span>Total Amount: {{ totalAmount() | number: '1.2-2' }} บาท</span>
+    </div>
+  </div>
+</div>
