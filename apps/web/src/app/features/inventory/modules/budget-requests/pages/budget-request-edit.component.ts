@@ -5,6 +5,14 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { AgGridAngular } from 'ag-grid-angular';
+import {
+  ColDef,
+  GridOptions,
+  CellValueChangedEvent,
+  GridReadyEvent,
+  GridApi,
+} from 'ag-grid-community';
 
 import { BudgetRequestService } from '../services/budget-requests.service';
 import { BudgetRequestItemService } from '../../budget-request-items/services/budget-request-items.service';
@@ -29,6 +37,7 @@ import { BudgetRequestItem } from '../../budget-request-items/types/budget-reque
     MatIconModule,
     MatCardModule,
     MatProgressSpinnerModule,
+    AgGridAngular,
   ],
   template: `
     <div class="budget-request-edit-page">
@@ -103,11 +112,16 @@ import { BudgetRequestItem } from '../../budget-request-items/types/budget-reque
             </div>
           </mat-card-header>
           <mat-card-content>
-            <!-- AG Grid will be added here in next step -->
-            <div class="grid-placeholder">
-              <p>AG Grid will be implemented here</p>
-              <p>Items loaded: {{ itemsCount() }}</p>
-            </div>
+            <!-- AG Grid for editing budget items -->
+            <ag-grid-angular
+              class="ag-theme-material"
+              [rowData]="budgetItems()"
+              [columnDefs]="columnDefs"
+              [gridOptions]="gridOptions"
+              [defaultColDef]="defaultColDef"
+              (gridReady)="onGridReady($event)"
+              (cellValueChanged)="onCellValueChanged($event)"
+            ></ag-grid-angular>
           </mat-card-content>
         </mat-card>
 
@@ -250,12 +264,9 @@ import { BudgetRequestItem } from '../../budget-request-items/types/budget-reque
         }
       }
 
-      .grid-placeholder {
-        padding: 48px;
-        text-align: center;
-        background: #f5f5f5;
-        border-radius: 4px;
-        border: 2px dashed #ddd;
+      ag-grid-angular {
+        width: 100%;
+        height: 600px;
       }
 
       .action-buttons {
@@ -277,6 +288,153 @@ export class BudgetRequestEditComponent implements OnInit {
   budgetItems = signal<BudgetRequestItem[]>([]);
   loading = signal(true);
   itemsCount = signal(0);
+
+  // AG Grid
+  private gridApi?: GridApi;
+  modifiedRows = signal<Map<number, Partial<BudgetRequestItem>>>(new Map());
+
+  // Column definitions for AG Grid
+  columnDefs: ColDef[] = [
+    {
+      headerName: 'Line',
+      field: 'line_number',
+      width: 80,
+      pinned: 'left',
+      editable: false,
+    },
+    {
+      headerName: 'Generic Code',
+      field: 'generic_code',
+      width: 120,
+      pinned: 'left',
+      editable: false,
+    },
+    {
+      headerName: 'Generic Name',
+      field: 'generic_name',
+      width: 250,
+      pinned: 'left',
+      editable: false,
+    },
+    {
+      headerName: 'Package Size',
+      field: 'package_size',
+      width: 120,
+      editable: false,
+    },
+    {
+      headerName: 'Unit',
+      field: 'unit',
+      width: 80,
+      editable: false,
+    },
+    {
+      headerName: 'Avg Usage',
+      field: 'avg_usage',
+      width: 120,
+      editable: false,
+      valueFormatter: (params) =>
+        params.value != null ? params.value.toLocaleString() : '',
+    },
+    {
+      headerName: 'Est. Usage 2569',
+      field: 'estimated_usage_2569',
+      width: 150,
+      editable: true,
+      cellStyle: { backgroundColor: '#fff3cd' },
+      valueFormatter: (params) =>
+        params.value != null ? params.value.toLocaleString() : '',
+    },
+    {
+      headerName: 'Current Stock',
+      field: 'current_stock',
+      width: 130,
+      editable: false,
+      valueFormatter: (params) =>
+        params.value != null ? params.value.toLocaleString() : '',
+    },
+    {
+      headerName: 'Est. Purchase',
+      field: 'estimated_purchase',
+      width: 150,
+      editable: false,
+      valueFormatter: (params) =>
+        params.value != null ? params.value.toLocaleString() : '',
+    },
+    {
+      headerName: 'Unit Price',
+      field: 'unit_price',
+      width: 120,
+      editable: true,
+      cellStyle: { backgroundColor: '#fff3cd' },
+      valueFormatter: (params) =>
+        params.value != null ? params.value.toFixed(2) : '',
+    },
+    {
+      headerName: 'Requested Qty',
+      field: 'requested_qty',
+      width: 150,
+      editable: true,
+      cellStyle: { backgroundColor: '#fff3cd' },
+      valueFormatter: (params) =>
+        params.value != null ? params.value.toLocaleString() : '',
+    },
+    {
+      headerName: 'Q1 Qty',
+      field: 'q1_qty',
+      width: 120,
+      editable: true,
+      cellStyle: { backgroundColor: '#fff3cd' },
+      valueFormatter: (params) =>
+        params.value != null ? params.value.toLocaleString() : '',
+    },
+    {
+      headerName: 'Q2 Qty',
+      field: 'q2_qty',
+      width: 120,
+      editable: true,
+      cellStyle: { backgroundColor: '#fff3cd' },
+      valueFormatter: (params) =>
+        params.value != null ? params.value.toLocaleString() : '',
+    },
+    {
+      headerName: 'Q3 Qty',
+      field: 'q3_qty',
+      width: 120,
+      editable: true,
+      cellStyle: { backgroundColor: '#fff3cd' },
+      valueFormatter: (params) =>
+        params.value != null ? params.value.toLocaleString() : '',
+    },
+    {
+      headerName: 'Q4 Qty',
+      field: 'q4_qty',
+      width: 120,
+      editable: true,
+      cellStyle: { backgroundColor: '#fff3cd' },
+      valueFormatter: (params) =>
+        params.value != null ? params.value.toLocaleString() : '',
+    },
+  ];
+
+  // Default column definition
+  defaultColDef: ColDef = {
+    sortable: true,
+    filter: true,
+    resizable: true,
+  };
+
+  // Grid options
+  gridOptions: GridOptions = {
+    suppressMovableColumns: true,
+    enableCellTextSelection: true,
+    ensureDomOrder: true,
+    rowHeight: 40,
+    headerHeight: 48,
+    pagination: false, // Handle 2000-3000 rows without pagination
+    suppressRowClickSelection: true,
+    singleClickEdit: true,
+  };
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -317,9 +475,98 @@ export class BudgetRequestEditComponent implements OnInit {
     }
   }
 
-  saveBatchChanges() {
-    console.log('Save batch changes - will implement in next step');
-    // TODO: Implement batch save
+  /**
+   * Grid ready event handler
+   */
+  onGridReady(event: GridReadyEvent) {
+    this.gridApi = event.api;
+    this.gridApi.sizeColumnsToFit();
+  }
+
+  /**
+   * Track cell value changes for batch update
+   */
+  onCellValueChanged(event: CellValueChangedEvent) {
+    const rowId = event.data.id;
+    const field = event.colDef.field;
+    const newValue = event.newValue;
+
+    // Get current modified rows map
+    const modified = new Map(this.modifiedRows());
+
+    // Get or create the changes for this row
+    const rowChanges: any = modified.get(rowId) || {};
+
+    // Update the field value
+    if (field) {
+      rowChanges[field] = newValue;
+    }
+
+    // Add ID to row changes
+    rowChanges.id = rowId;
+
+    // Update the map
+    modified.set(rowId, rowChanges);
+
+    // Update signal
+    this.modifiedRows.set(modified);
+
+    console.log(
+      `Modified ${this.modifiedRows().size} rows`,
+      Array.from(this.modifiedRows().entries()),
+    );
+  }
+
+  /**
+   * Save batch changes to backend
+   */
+  async saveBatchChanges() {
+    const changes = Array.from(this.modifiedRows().values());
+
+    if (changes.length === 0) {
+      console.log('No changes to save');
+      return;
+    }
+
+    try {
+      this.loading.set(true);
+
+      // Backend accepts max 100 items per batch
+      const batchSize = 100;
+      let totalUpdated = 0;
+      let totalFailed = 0;
+
+      for (let i = 0; i < changes.length; i += batchSize) {
+        const batch = changes.slice(i, i + batchSize);
+
+        const result =
+          await this.budgetRequestItemService.batchUpdateBudgetRequestItems(
+            batch as any,
+          );
+
+        if (result) {
+          totalUpdated += result.updated;
+          totalFailed += result.failed;
+        }
+      }
+
+      console.log(
+        `Batch save complete: ${totalUpdated} updated, ${totalFailed} failed`,
+      );
+
+      // Clear modified rows
+      this.modifiedRows.set(new Map());
+
+      // Reload data to reflect changes
+      const id = this.route.snapshot.paramMap.get('id');
+      if (id) {
+        await this.loadBudgetRequest(+id);
+      }
+    } catch (error) {
+      console.error('Error saving batch changes:', error);
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   submitRequest() {
