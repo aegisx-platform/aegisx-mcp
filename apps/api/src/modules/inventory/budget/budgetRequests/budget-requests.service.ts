@@ -270,16 +270,30 @@ export class BudgetRequestsService extends BaseService<
 
       // Step 3: Create or update budget_allocations for each item
       for (const item of requestItems) {
+        // Calculate amounts from quantities and unit price
+        const unitPrice = Number(item.unit_price) || 0;
+        const requestedQty = Number(item.requested_qty) || 0;
+        const q1Qty = Number(item.q1_qty) || 0;
+        const q2Qty = Number(item.q2_qty) || 0;
+        const q3Qty = Number(item.q3_qty) || 0;
+        const q4Qty = Number(item.q4_qty) || 0;
+
+        const totalAmount = requestedQty * unitPrice;
+        const q1Amount = q1Qty * unitPrice;
+        const q2Amount = q2Qty * unitPrice;
+        const q3Amount = q3Qty * unitPrice;
+        const q4Amount = q4Qty * unitPrice;
+
         const allocationData = {
           fiscal_year: request.fiscal_year,
-          budget_id: item.budget_id,
+          budget_id: item.budget_type_id || 1, // Use budget_type_id (defaults to 1 = main budget)
           department_id: request.department_id,
-          total_budget: item.requested_amount,
-          q1_budget: item.q1_amount,
-          q2_budget: item.q2_amount,
-          q3_budget: item.q3_amount,
-          q4_budget: item.q4_amount,
-          remaining_budget: item.requested_amount, // Initially, no spending
+          total_budget: totalAmount,
+          q1_budget: q1Amount,
+          q2_budget: q2Amount,
+          q3_budget: q3Amount,
+          q4_budget: q4Amount,
+          remaining_budget: totalAmount, // Initially, no spending
           total_spent: 0,
           q1_spent: 0,
           q2_spent: 0,
@@ -605,6 +619,45 @@ export class BudgetRequestsService extends BaseService<
       .first();
 
     return parseFloat(result?.total || 0);
+  }
+
+  /**
+   * Recalculate total_requested_amount for a budget request
+   * Sums up all (requested_qty * unit_price) from budget_request_items
+   * @param id Budget request ID
+   * @returns Updated budget request
+   */
+  async recalculateTotalAmount(
+    id: string | number,
+  ): Promise<BudgetRequests | null> {
+    const request = await this.budgetRequestsRepository.findById(id);
+
+    if (!request) {
+      throw new Error('Budget request not found');
+    }
+
+    const knex = (this.budgetRequestsRepository as any).knex;
+
+    // Calculate total from all items
+    const result = await knex('inventory.budget_request_items')
+      .where({ budget_request_id: id })
+      .select(
+        knex.raw(
+          'COALESCE(SUM((requested_qty * unit_price)::numeric), 0) as total',
+        ),
+      )
+      .first();
+
+    const totalAmount = parseFloat(result?.total || 0);
+
+    // Update budget_requests table
+    const updated = await this.budgetRequestsRepository.update(id, {
+      total_requested_amount: totalAmount,
+    } as Partial<BudgetRequests>);
+
+    console.log(`Recalculated total amount for request ${id}: ${totalAmount}`);
+
+    return updated;
   }
 
   /**

@@ -29,62 +29,83 @@ export async function up(knex: Knex): Promise<void> {
   `);
 
   // ==============================================
-  // Step 2: Rename quarterly columns from _amount to _qty
+  // Step 2: Rename quarterly columns from _amount to _qty (if they exist)
   // ==============================================
-  await knex.raw(`
-    ALTER TABLE inventory.budget_request_items
-    RENAME COLUMN q1_amount TO q1_qty
+  // Check if q1_amount exists before renaming
+  const hasQ1Amount = await knex.raw(`
+    SELECT column_name
+    FROM information_schema.columns
+    WHERE table_schema = 'inventory'
+    AND table_name = 'budget_request_items'
+    AND column_name = 'q1_amount'
   `);
 
-  await knex.raw(`
-    ALTER TABLE inventory.budget_request_items
-    RENAME COLUMN q2_amount TO q2_qty
-  `);
+  if (hasQ1Amount.rows.length > 0) {
+    await knex.raw(`
+      ALTER TABLE inventory.budget_request_items
+      RENAME COLUMN q1_amount TO q1_qty
+    `);
 
-  await knex.raw(`
-    ALTER TABLE inventory.budget_request_items
-    RENAME COLUMN q3_amount TO q3_qty
-  `);
+    await knex.raw(`
+      ALTER TABLE inventory.budget_request_items
+      RENAME COLUMN q2_amount TO q2_qty
+    `);
 
-  await knex.raw(`
-    ALTER TABLE inventory.budget_request_items
-    RENAME COLUMN q4_amount TO q4_qty
-  `);
+    await knex.raw(`
+      ALTER TABLE inventory.budget_request_items
+      RENAME COLUMN q3_amount TO q3_qty
+    `);
+
+    await knex.raw(`
+      ALTER TABLE inventory.budget_request_items
+      RENAME COLUMN q4_amount TO q4_qty
+    `);
+  }
 
   // ==============================================
-  // Step 3: Add new columns for drug-level planning
+  // Step 3: Add new columns for drug-level planning (if they don't exist)
   // ==============================================
-  await knex.raw(`
-    ALTER TABLE inventory.budget_request_items
-
-    -- Drug Information
-    ADD COLUMN drug_id INTEGER REFERENCES inventory.drugs(id),
-    ADD COLUMN generic_id INTEGER REFERENCES inventory.drug_generics(id),
-    ADD COLUMN generic_code VARCHAR(50),
-    ADD COLUMN generic_name VARCHAR(500),
-    ADD COLUMN package_size VARCHAR(100),
-    ADD COLUMN unit VARCHAR(50),
-    ADD COLUMN line_number INTEGER,
-
-    -- Historical Usage Data (3 years)
-    ADD COLUMN usage_year_2566 DECIMAL(10,2) DEFAULT 0,
-    ADD COLUMN usage_year_2567 DECIMAL(10,2) DEFAULT 0,
-    ADD COLUMN usage_year_2568 DECIMAL(10,2) DEFAULT 0,
-    ADD COLUMN avg_usage DECIMAL(10,2) DEFAULT 0,
-
-    -- Planning Data
-    ADD COLUMN estimated_usage_2569 DECIMAL(10,2) DEFAULT 0,
-    ADD COLUMN current_stock DECIMAL(10,2) DEFAULT 0,
-    ADD COLUMN estimated_purchase DECIMAL(10,2) DEFAULT 0,
-
-    -- Pricing and Quantities
-    ADD COLUMN unit_price DECIMAL(10,2) DEFAULT 0,
-    ADD COLUMN requested_qty DECIMAL(10,2) DEFAULT 0,
-
-    -- Budget Classification
-    ADD COLUMN budget_type_id INTEGER REFERENCES inventory.budget_types(id),
-    ADD COLUMN budget_category_id INTEGER REFERENCES inventory.budget_categories(id)
+  const hasDrugId = await knex.raw(`
+    SELECT column_name
+    FROM information_schema.columns
+    WHERE table_schema = 'inventory'
+    AND table_name = 'budget_request_items'
+    AND column_name = 'drug_id'
   `);
+
+  if (hasDrugId.rows.length === 0) {
+    await knex.raw(`
+      ALTER TABLE inventory.budget_request_items
+
+      -- Drug Information
+      ADD COLUMN drug_id INTEGER REFERENCES inventory.drugs(id),
+      ADD COLUMN generic_id INTEGER REFERENCES inventory.drug_generics(id),
+      ADD COLUMN generic_code VARCHAR(50),
+      ADD COLUMN generic_name VARCHAR(500),
+      ADD COLUMN package_size VARCHAR(100),
+      ADD COLUMN unit VARCHAR(50),
+      ADD COLUMN line_number INTEGER,
+
+      -- Historical Usage Data (3 years)
+      ADD COLUMN usage_year_2566 DECIMAL(10,2) DEFAULT 0,
+      ADD COLUMN usage_year_2567 DECIMAL(10,2) DEFAULT 0,
+      ADD COLUMN usage_year_2568 DECIMAL(10,2) DEFAULT 0,
+      ADD COLUMN avg_usage DECIMAL(10,2) DEFAULT 0,
+
+      -- Planning Data
+      ADD COLUMN estimated_usage_2569 DECIMAL(10,2) DEFAULT 0,
+      ADD COLUMN current_stock DECIMAL(10,2) DEFAULT 0,
+      ADD COLUMN estimated_purchase DECIMAL(10,2) DEFAULT 0,
+
+      -- Pricing and Quantities
+      ADD COLUMN unit_price DECIMAL(10,2) DEFAULT 0,
+      ADD COLUMN requested_qty DECIMAL(10,2) DEFAULT 0,
+
+      -- Budget Classification
+      ADD COLUMN budget_type_id INTEGER REFERENCES inventory.budget_types(id),
+      ADD COLUMN budget_category_id INTEGER REFERENCES inventory.budget_categories(id)
+    `);
+  }
 
   // ==============================================
   // Step 4: Make requested_amount nullable (calculated field)
@@ -95,46 +116,54 @@ export async function up(knex: Knex): Promise<void> {
   `);
 
   // ==============================================
-  // Step 5: Create indexes for performance
+  // Step 5: Create indexes for performance (if they don't exist)
   // ==============================================
   await knex.raw(`
-    CREATE INDEX idx_budget_request_items_drug
+    CREATE INDEX IF NOT EXISTS idx_budget_request_items_drug
     ON inventory.budget_request_items(drug_id)
   `);
 
   await knex.raw(`
-    CREATE INDEX idx_budget_request_items_generic
+    CREATE INDEX IF NOT EXISTS idx_budget_request_items_generic
     ON inventory.budget_request_items(generic_id)
   `);
 
   await knex.raw(`
-    CREATE INDEX idx_budget_request_items_generic_code
+    CREATE INDEX IF NOT EXISTS idx_budget_request_items_generic_code
     ON inventory.budget_request_items(generic_code)
   `);
 
   await knex.raw(`
-    CREATE INDEX idx_budget_request_items_line_number
+    CREATE INDEX IF NOT EXISTS idx_budget_request_items_line_number
     ON inventory.budget_request_items(budget_request_id, line_number)
   `);
 
   // ==============================================
-  // Step 6: Add comments for documentation
+  // Step 6: Add comments for documentation (only for new columns)
   // ==============================================
+  if (hasDrugId.rows.length === 0) {
+    await knex.raw(`
+      COMMENT ON COLUMN inventory.budget_request_items.drug_id IS 'Reference to specific drug (optional - may only have generic)';
+      COMMENT ON COLUMN inventory.budget_request_items.generic_id IS 'Reference to drug generic (primary identifier)';
+      COMMENT ON COLUMN inventory.budget_request_items.generic_code IS 'Generic code for quick lookup and Excel import';
+      COMMENT ON COLUMN inventory.budget_request_items.generic_name IS 'Generic name (denormalized for Excel export)';
+      COMMENT ON COLUMN inventory.budget_request_items.line_number IS 'Line number for Excel export ordering';
+      COMMENT ON COLUMN inventory.budget_request_items.usage_year_2566 IS 'Historical usage in fiscal year 2566 (calculated from drug_distributions)';
+      COMMENT ON COLUMN inventory.budget_request_items.usage_year_2567 IS 'Historical usage in fiscal year 2567 (calculated from drug_distributions)';
+      COMMENT ON COLUMN inventory.budget_request_items.usage_year_2568 IS 'Historical usage in fiscal year 2568 (calculated from drug_distributions)';
+      COMMENT ON COLUMN inventory.budget_request_items.avg_usage IS 'Average usage across 3 years (calculated)';
+      COMMENT ON COLUMN inventory.budget_request_items.estimated_usage_2569 IS 'Estimated usage for planning year 2569';
+      COMMENT ON COLUMN inventory.budget_request_items.current_stock IS 'Current stock level at planning time';
+      COMMENT ON COLUMN inventory.budget_request_items.estimated_purchase IS 'Estimated purchase quantity (calculated: estimated_usage - current_stock)';
+      COMMENT ON COLUMN inventory.budget_request_items.unit_price IS 'Unit price for budget calculation';
+      COMMENT ON COLUMN inventory.budget_request_items.requested_qty IS 'Total requested quantity';
+      COMMENT ON COLUMN inventory.budget_request_items.budget_type_id IS 'Budget type for this line item';
+      COMMENT ON COLUMN inventory.budget_request_items.budget_category_id IS 'Budget category for this line item';
+    `);
+  }
+
+  // Always add comments for quarterly columns (they were renamed)
   await knex.raw(`
-    COMMENT ON COLUMN inventory.budget_request_items.drug_id IS 'Reference to specific drug (optional - may only have generic)';
-    COMMENT ON COLUMN inventory.budget_request_items.generic_id IS 'Reference to drug generic (primary identifier)';
-    COMMENT ON COLUMN inventory.budget_request_items.generic_code IS 'Generic code for quick lookup and Excel import';
-    COMMENT ON COLUMN inventory.budget_request_items.generic_name IS 'Generic name (denormalized for Excel export)';
-    COMMENT ON COLUMN inventory.budget_request_items.line_number IS 'Line number for Excel export ordering';
-    COMMENT ON COLUMN inventory.budget_request_items.usage_year_2566 IS 'Historical usage in fiscal year 2566 (calculated from drug_distributions)';
-    COMMENT ON COLUMN inventory.budget_request_items.usage_year_2567 IS 'Historical usage in fiscal year 2567 (calculated from drug_distributions)';
-    COMMENT ON COLUMN inventory.budget_request_items.usage_year_2568 IS 'Historical usage in fiscal year 2568 (calculated from drug_distributions)';
-    COMMENT ON COLUMN inventory.budget_request_items.avg_usage IS 'Average usage across 3 years (calculated)';
-    COMMENT ON COLUMN inventory.budget_request_items.estimated_usage_2569 IS 'Estimated usage for planning year 2569';
-    COMMENT ON COLUMN inventory.budget_request_items.current_stock IS 'Current stock level at planning time';
-    COMMENT ON COLUMN inventory.budget_request_items.estimated_purchase IS 'Estimated purchase quantity (calculated: estimated_usage - current_stock)';
-    COMMENT ON COLUMN inventory.budget_request_items.unit_price IS 'Unit price for budget calculation';
-    COMMENT ON COLUMN inventory.budget_request_items.requested_qty IS 'Total requested quantity';
     COMMENT ON COLUMN inventory.budget_request_items.requested_amount IS 'Total requested amount (calculated: requested_qty * unit_price)';
     COMMENT ON COLUMN inventory.budget_request_items.q1_qty IS 'Q1 quantity (must sum to requested_qty)';
     COMMENT ON COLUMN inventory.budget_request_items.q2_qty IS 'Q2 quantity (must sum to requested_qty)';
