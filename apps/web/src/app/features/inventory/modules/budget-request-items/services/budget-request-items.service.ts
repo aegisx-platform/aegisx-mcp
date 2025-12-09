@@ -998,6 +998,57 @@ export class BudgetRequestItemService {
   }
 
   /**
+   * Batch update budget request items (Mode 1 - for editing 2000-3000 items)
+   * POST /budget-request-items/batch-update
+   * Max 100 items per request, only works on DRAFT status items
+   */
+  async batchUpdateBudgetRequestItems(
+    items: Array<{
+      id: number;
+      estimated_usage_2569?: number;
+      unit_price?: number;
+      requested_qty?: number;
+      q1_qty?: number;
+      q2_qty?: number;
+      q3_qty?: number;
+      q4_qty?: number;
+    }>,
+  ): Promise<{
+    success: boolean;
+    updated: number;
+    failed: number;
+    errors?: Array<{ id: number; error: string }>;
+  } | null> {
+    this.loadingSignal.set(true);
+    this.errorSignal.set(null);
+
+    try {
+      const response = await this.http
+        .post<
+          ApiResponse<{
+            updated: number;
+            failed: number;
+            errors?: Array<{ id: number; error: string }>;
+          }>
+        >(`${this.baseUrl}/batch-update`, { items })
+        .toPromise();
+
+      if (response) {
+        return {
+          success: response.success,
+          ...response.data,
+        };
+      }
+      return null;
+    } catch (error: any) {
+      this.handleError(error, 'Failed to batch update budget request items');
+      throw error;
+    } finally {
+      this.loadingSignal.set(false);
+    }
+  }
+
+  /**
    * Reset service state
    */
   reset(): void {
