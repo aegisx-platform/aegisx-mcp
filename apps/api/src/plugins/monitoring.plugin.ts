@@ -249,11 +249,8 @@ async function monitoringPlugin(
     updateRedisMetrics();
   }
 
-  // Metrics endpoint
-  fastify.get('/metrics', async (request, reply) => {
-    reply.type('text/plain');
-    return register.metrics();
-  });
+  // Metrics endpoint is now handled by core/monitoring/plugins/metrics.plugin.ts
+  // to avoid duplicate route registration
 
   // Monitoring plugin initialized (silent)
 }

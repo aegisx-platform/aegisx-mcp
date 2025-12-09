@@ -535,6 +535,9 @@ export async function loadPluginGroup(
 
 /**
  * Load all plugin groups
+ *
+ * Note: API prefix ("/api") should be applied at bootstrap level,
+ * not here in plugin loader. Each plugin defines its own sub-route prefix.
  */
 export async function loadAllPlugins(
   fastify: FastifyInstance,
@@ -545,7 +548,7 @@ export async function loadAllPlugins(
 ): Promise<void> {
   const startTime = Date.now();
 
-  // Load core plugin groups
+  // Load core plugin groups (infrastructure, database, auth, middleware)
   const pluginGroups = createPluginGroups(
     appConfig,
     securityConfig,
@@ -556,27 +559,23 @@ export async function loadAllPlugins(
     await loadPluginGroup(fastify, group, undefined, quiet);
   }
 
-  // Load core infrastructure and business features together
-  // in single context to resolve dependencies
+  // Load core infrastructure and business features
   const coreGroup = createCorePluginGroup(appConfig.api.prefix);
   const featureGroup = createFeaturePluginGroup(appConfig.api.prefix);
 
   // Combine plugins in proper dependency order
   const allApiPlugins: PluginGroup = {
     name: 'api-modules',
-    description: 'All API modules (core + features) with API prefix',
+    description: 'All API modules (core + features)',
     plugins: [
-      ...coreGroup.plugins, // Core first (users, auth, etc.)
-      ...featureGroup.plugins, // Features second (user-profile, etc.)
+      ...coreGroup.plugins, // Core first (users, auth, rbac, etc.)
+      ...featureGroup.plugins, // Features second (settings, attachments, etc.)
     ],
   };
 
-  // Only add prefix if it's not empty string
-  const pluginOptions = appConfig.api.prefix
-    ? { prefix: appConfig.api.prefix }
-    : {};
-
-  await loadPluginGroup(fastify, allApiPlugins, pluginOptions, quiet);
+  // Load all API plugins without prefix wrapper
+  // Each plugin has its own route prefix (/auth, /users, /settings, etc.)
+  await loadPluginGroup(fastify, allApiPlugins, undefined, quiet);
 
   const totalDuration = Date.now() - startTime;
   const totalPlugins =

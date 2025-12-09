@@ -8,7 +8,7 @@ async function staticFilesPlugin(
   _options: FastifyPluginOptions,
 ) {
   // Get API prefix from serverInfo to avoid duplication
-  const apiPrefix = (fastify as any).serverInfo?.apiPrefix || '/api';
+  const apiPrefix = (fastify as any).serverInfo?.apiPrefix ?? '/api';
 
   // Serve avatar files
   fastify.route({
@@ -110,33 +110,36 @@ async function staticFilesPlugin(
           type: {
             type: 'string',
             enum: ['logos', 'images', 'icons'],
-            description: 'Asset type directory'
+            description: 'Asset type directory',
           },
           filename: {
             type: 'string',
             pattern: '^[a-zA-Z0-9._-]+\\.(jpg|jpeg|png|svg|webp)$',
-            description: 'Asset filename'
-          }
-        }
+            description: 'Asset filename',
+          },
+        },
       },
       response: {
         200: {
           type: 'string',
           format: 'binary',
-          description: 'Asset file'
+          description: 'Asset file',
         },
         404: {
           type: 'object',
           properties: {
             success: { type: 'boolean', const: false },
             error: { type: 'string' },
-            message: { type: 'string' }
-          }
-        }
-      }
+            message: { type: 'string' },
+          },
+        },
+      },
     },
     handler: async (request, reply) => {
-      const { type, filename } = request.params as { type: string; filename: string };
+      const { type, filename } = request.params as {
+        type: string;
+        filename: string;
+      };
 
       // Security checks
       const allowedExtensions = ['.jpg', '.jpeg', '.png', '.svg', '.webp'];
@@ -158,7 +161,14 @@ async function staticFilesPlugin(
         return reply.notFound();
       }
 
-      const assetsDir = path.join(process.cwd(), 'apps', 'api', 'src', 'assets', type);
+      const assetsDir = path.join(
+        process.cwd(),
+        'apps',
+        'api',
+        'src',
+        'assets',
+        type,
+      );
       const filePath = path.join(assetsDir, filename);
 
       try {
@@ -170,7 +180,7 @@ async function staticFilesPlugin(
           '.jpeg': 'image/jpeg',
           '.png': 'image/png',
           '.svg': 'image/svg+xml',
-          '.webp': 'image/webp'
+          '.webp': 'image/webp',
         };
 
         reply.type(contentTypes[ext] || 'application/octet-stream');
@@ -182,7 +192,7 @@ async function staticFilesPlugin(
       } catch (_error) {
         return reply.notFound();
       }
-    }
+    },
   });
 
   fastify.log.info('Static files plugin registered successfully');

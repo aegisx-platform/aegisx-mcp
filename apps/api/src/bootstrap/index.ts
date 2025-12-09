@@ -92,9 +92,11 @@ export async function bootstrap(): Promise<BootstrapResult> {
     console.log('================================================');
     console.log('');
 
-    // 1. Load environment variables
+    // 1. Load environment variables (.env.local overrides .env)
     logStep('🔧', 'Loading environment configuration');
-    const env = dotenv.config();
+    dotenv.config(); // Load .env first (defaults)
+    dotenv.config({ path: '.env.local', override: true }); // Load .env.local (overrides)
+    const env = { parsed: process.env };
     dotenvExpand.expand(env);
 
     // 2. Validate environment
@@ -157,13 +159,30 @@ export async function bootstrap(): Promise<BootstrapResult> {
     logStep('🔌', 'Loading application plugins');
     const pluginLoadStartTime = Date.now();
 
-    await loadAllPlugins(
-      serverInfo.instance,
-      appConfig,
-      securityConfig,
-      databaseConfig,
-      !appConfig.server.isDevelopment, // quiet mode for non-dev
-    );
+    // Wrap all plugins with API prefix if configured
+    if (appConfig.api.prefix) {
+      await serverInfo.instance.register(
+        async (app) => {
+          await loadAllPlugins(
+            app,
+            appConfig,
+            securityConfig,
+            databaseConfig,
+            !appConfig.server.isDevelopment,
+          );
+        },
+        { prefix: appConfig.api.prefix },
+      );
+    } else {
+      // No prefix - load plugins directly
+      await loadAllPlugins(
+        serverInfo.instance,
+        appConfig,
+        securityConfig,
+        databaseConfig,
+        !appConfig.server.isDevelopment,
+      );
+    }
 
     const pluginLoadTime = Date.now() - pluginLoadStartTime;
     logStepComplete('All plugins loaded successfully', pluginLoadTime);

@@ -56,6 +56,7 @@ export class DefaultController {
   }
 
   async getWelcome(request: FastifyRequest, reply: FastifyReply) {
+    const apiPrefix = (request.server as any).serverInfo?.apiPrefix ?? '/api';
     const welcomeMessage = {
       message: 'Welcome to AegisX Platform API',
       description: 'Enterprise-Ready Full Stack Application',
@@ -63,10 +64,10 @@ export class DefaultController {
       environment: process.env.NODE_ENV || 'development',
       timestamp: new Date().toISOString(),
       endpoints: {
-        api: '/api',
-        health: '/api/health',
-        info: '/api/info',
-        status: '/api/status',
+        api: apiPrefix || '/',
+        health: apiPrefix ? `${apiPrefix}/health` : '/health',
+        info: apiPrefix ? `${apiPrefix}/info` : '/info',
+        status: apiPrefix ? `${apiPrefix}/status` : '/status',
         documentation: '/documentation',
       },
       logo: [

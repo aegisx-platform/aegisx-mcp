@@ -92,16 +92,16 @@ export function validateEnvironment(): EnvironmentValidation {
   for (const envVar of REQUIRED_ENV_VARS) {
     const value = process.env[envVar.key];
 
-    // Check if required variable exists
-    if (envVar.required && !value) {
+    // Check if required variable exists (undefined or null, but empty string is valid)
+    if (envVar.required && value == null) {
       errors.push(
         `Missing required environment variable: ${envVar.key} - ${envVar.description}`,
       );
       continue;
     }
 
-    // Use default value if not set
-    if (!value && envVar.defaultValue) {
+    // Use default value if not set (only for undefined/null, not empty string)
+    if (value == null && envVar.defaultValue) {
       process.env[envVar.key] = envVar.defaultValue;
       warnings.push(
         `Using default value for ${envVar.key}: ${envVar.defaultValue}`,
@@ -116,8 +116,8 @@ export function validateEnvironment(): EnvironmentValidation {
       );
     }
 
-    // Warning for optional but recommended variables
-    if (!envVar.required && !value) {
+    // Warning for optional but recommended variables (only if undefined/null)
+    if (!envVar.required && value == null) {
       warnings.push(
         `Optional environment variable not set: ${envVar.key} - ${envVar.description}`,
       );
@@ -189,7 +189,7 @@ export function getEnvironmentInfo() {
     nodeEnv: process.env.NODE_ENV || 'development',
     nodeVersion: process.version,
     port: process.env.PORT || '3333',
-    apiPrefix: process.env.API_PREFIX || '/api',
+    apiPrefix: process.env.API_PREFIX ?? '/api',
     hasRedis: !!process.env.REDIS_URL,
     hasCustomJwtSecret: process.env.JWT_SECRET !== 'supersecret',
     timestamp: new Date().toISOString(),
