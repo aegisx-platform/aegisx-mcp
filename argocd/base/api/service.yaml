@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: aegisx-api
+  labels:
+    app: aegisx-api
+    app.kubernetes.io/name: aegisx-api
+    app.kubernetes.io/part-of: aegisx-platform
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: aegisx-api
+    app.kubernetes.io/name: aegisx-api
+    app.kubernetes.io/part-of: aegisx-platform

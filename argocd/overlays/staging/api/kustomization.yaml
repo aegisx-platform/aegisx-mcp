@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: staging
+
+namePrefix: staging-
+
+bases:
+  - ../../../base/api
+
+images:
+  - name: ghcr.io/aegisx-platform/aegisx-starter-api
+    newTag: staging
+
+commonLabels:
+  environment: staging
+
+configMapGenerator:
+  - name: aegisx-api-config
+    behavior: merge
+    literals:
+      - NODE_ENV=staging
+      - API_PREFIX= # Empty string - no prefix
+      - CORS_ORIGINS=https://staging.aegisx.example.com,https://staging-admin.aegisx.example.com

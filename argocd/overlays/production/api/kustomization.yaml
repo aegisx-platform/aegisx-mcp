@@ -1,0 +1,29 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: production
+
+namePrefix: production-
+
+bases:
+  - ../../../base/api
+
+images:
+  - name: ghcr.io/aegisx-platform/aegisx-starter-api
+    newTag: production
+
+replicas:
+  - name: aegisx-api
+    count: 3
+
+commonLabels:
+  environment: production
+
+configMapGenerator:
+  - name: aegisx-api-config
+    behavior: merge
+    literals:
+      - NODE_ENV=production
+      - API_PREFIX= # Empty string - no prefix
+      - CORS_ORIGINS=https://aegisx.example.com,https://admin.aegisx.example.com
+      - LOG_LEVEL=warn
