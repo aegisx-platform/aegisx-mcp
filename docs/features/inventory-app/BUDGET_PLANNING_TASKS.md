@@ -96,7 +96,7 @@ if (drugRecord?.id) {
 
 ### Task 1.3: Add Historical Data Columns to Detail Page
 
-**Status:** 🔴 TODO
+**Status:** ✅ DONE (2025-12-10)
 **Effort:** 3 hours
 **File:** `apps/web/src/app/features/inventory/modules/budget-requests/pages/budget-request-detail.component.ts`
 
@@ -164,9 +164,9 @@ getHistoricalUsage(item: BudgetRequestItem, year: string): number {
 
 **Acceptance Criteria:**
 
-- [ ] Table แสดงคอลัมน์ ปี66, ปี67, ปี68, เฉลี่ย
-- [ ] Parse JSONB historical_usage ถูกต้อง
-- [ ] Format ตัวเลขด้วย number pipe
+- [x] Table แสดงคอลัมน์ ปี66, ปี67, ปี68, เฉลี่ย
+- [x] Parse JSONB historical_usage ถูกต้อง
+- [x] Format ตัวเลขด้วย number pipe
 
 ---
 
