@@ -656,10 +656,16 @@ interface ImportResult {
         gap: 12px;
       }
 
-      .drop-zone:hover,
+      .drop-zone:hover {
+        border-color: #64b5f6;
+        background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+      }
+
       .drop-zone.dragover {
-        border-color: var(--ax-primary-default);
-        background: var(--ax-primary-light, #e3f2fd);
+        border-color: #1976d2;
+        background: linear-gradient(135deg, #bbdefb 0%, #e1bee7 100%);
+        border-width: 3px;
+        transform: scale(1.01);
       }
 
       .drop-zone.has-file {
@@ -674,7 +680,13 @@ interface ImportResult {
         font-size: 48px;
         width: 48px;
         height: 48px;
-        color: #9e9e9e;
+        color: #90a4ae;
+        transition: color 0.2s ease;
+      }
+
+      .drop-zone:hover .upload-icon,
+      .drop-zone.dragover .upload-icon {
+        color: #1976d2;
       }
 
       .file-icon {
