@@ -117,36 +117,40 @@ export interface AdjustPriceResult {
           </mat-select>
         </mat-form-field>
 
-        <!-- Percentage Input with +/- Buttons -->
-        <div class="space-y-3">
-          <label class="text-sm font-medium text-gray-700"
+        <!-- Percentage Input Section -->
+        <div class="percentage-section">
+          <label class="text-sm font-medium text-gray-700 block mb-3"
             >เปอร์เซ็นต์ที่ต้องการปรับ</label
           >
 
-          <!-- Main Input Row -->
-          <div class="percentage-input-row">
+          <!-- Input with buttons - simple row layout -->
+          <div class="percentage-controls">
             <button
               type="button"
-              mat-mini-fab
+              mat-fab
               color="warn"
+              class="ctrl-btn"
               matTooltip="ลด 5%"
               (click)="adjustPercentage(-5)"
             >
               <mat-icon>remove</mat-icon>
             </button>
-            <div class="percentage-input-box">
+
+            <div class="value-display">
               <input
                 type="number"
                 formControlName="percentage"
-                class="percentage-input"
+                class="value-input"
                 placeholder="0"
               />
-              <span class="percentage-suffix">%</span>
+              <span class="value-suffix">%</span>
             </div>
+
             <button
               type="button"
-              mat-mini-fab
+              mat-fab
               color="primary"
+              class="ctrl-btn"
               matTooltip="เพิ่ม 5%"
               (click)="adjustPercentage(5)"
             >
@@ -154,50 +158,43 @@ export interface AdjustPriceResult {
             </button>
           </div>
 
-          <!-- Quick Select Row -->
-          <div class="quick-select-row">
-            <span class="text-xs text-gray-500">เลือกด่วน:</span>
-            <div class="quick-buttons">
-              <button
-                type="button"
-                mat-stroked-button
-                class="quick-btn"
-                (click)="setPercentage(-10)"
-              >
-                -10%
-              </button>
-              <button
-                type="button"
-                mat-stroked-button
-                class="quick-btn"
-                (click)="setPercentage(-5)"
-              >
-                -5%
-              </button>
-              <button
-                type="button"
-                mat-stroked-button
-                class="quick-btn"
-                (click)="setPercentage(5)"
-              >
-                +5%
-              </button>
-              <button
-                type="button"
-                mat-stroked-button
-                class="quick-btn"
-                (click)="setPercentage(10)"
-              >
-                +10%
-              </button>
-            </div>
+          <!-- Quick buttons -->
+          <div class="quick-btns">
+            <button
+              type="button"
+              mat-stroked-button
+              (click)="setPercentage(-10)"
+            >
+              -10%
+            </button>
+            <button
+              type="button"
+              mat-stroked-button
+              (click)="setPercentage(-5)"
+            >
+              -5%
+            </button>
+            <button type="button" mat-stroked-button (click)="setPercentage(5)">
+              +5%
+            </button>
+            <button
+              type="button"
+              mat-stroked-button
+              (click)="setPercentage(10)"
+            >
+              +10%
+            </button>
           </div>
 
           @if (form.get('percentage')?.hasError('required')) {
-            <mat-error class="text-xs">กรุณากรอกเปอร์เซ็นต์</mat-error>
+            <mat-error class="text-xs text-center"
+              >กรุณากรอกเปอร์เซ็นต์</mat-error
+            >
           }
           @if (form.get('percentage')?.hasError('min')) {
-            <mat-error class="text-xs">ไม่สามารถลดเกิน 100%</mat-error>
+            <mat-error class="text-xs text-center"
+              >ไม่สามารถลดเกิน 100%</mat-error
+            >
           }
         </div>
 
@@ -297,75 +294,82 @@ export interface AdjustPriceResult {
         min-width: 0;
       }
 
-      /* Main input row - centered with fixed widths */
-      .percentage-input-row {
+      /* Section container */
+      .percentage-section {
+        text-align: center;
+      }
+
+      /* Main controls row: [btn] [value] [btn] */
+      .percentage-controls {
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 12px;
+        gap: 16px;
+        margin-bottom: 16px;
       }
 
-      /* Input box container - no overlap */
-      .percentage-input-box {
+      /* Control buttons */
+      .ctrl-btn {
+        flex-shrink: 0;
+        width: 48px !important;
+        height: 48px !important;
+      }
+
+      /* Value display box */
+      .value-display {
         display: flex;
         align-items: center;
+        justify-content: center;
         gap: 4px;
-        padding: 8px 16px;
-        border: 2px solid #e5e7eb;
-        border-radius: 10px;
+        padding: 12px 20px;
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        min-width: 120px;
+      }
+
+      .value-display:focus-within {
+        border-color: #6366f1;
         background: white;
       }
 
-      .percentage-input-box:focus-within {
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-      }
-
-      .percentage-input {
-        width: 80px;
-        height: 36px;
-        padding: 0;
-        font-size: 28px;
-        font-weight: 600;
-        text-align: center;
+      /* Number input */
+      .value-input {
+        width: 60px;
         border: none;
-        outline: none;
         background: transparent;
+        font-size: 32px;
+        font-weight: 700;
+        text-align: center;
+        color: #1e293b;
+        outline: none;
         -moz-appearance: textfield;
       }
 
-      .percentage-input::-webkit-outer-spin-button,
-      .percentage-input::-webkit-inner-spin-button {
+      .value-input::-webkit-outer-spin-button,
+      .value-input::-webkit-inner-spin-button {
         -webkit-appearance: none;
         margin: 0;
       }
 
-      .percentage-suffix {
-        font-size: 20px;
-        font-weight: 500;
-        color: #6b7280;
+      .value-suffix {
+        font-size: 24px;
+        font-weight: 600;
+        color: #64748b;
       }
 
-      /* Quick select row */
-      .quick-select-row {
+      /* Quick select buttons */
+      .quick-btns {
         display: flex;
-        align-items: center;
         justify-content: center;
-        gap: 12px;
-        padding-top: 4px;
+        gap: 8px;
+        margin-bottom: 8px;
       }
 
-      .quick-buttons {
-        display: flex;
-        gap: 6px;
-      }
-
-      .quick-btn {
-        height: 28px !important;
-        min-width: 50px !important;
-        padding: 0 10px !important;
-        font-size: 12px !important;
-        line-height: 28px !important;
+      .quick-btns button {
+        min-width: 60px !important;
+        height: 32px !important;
+        font-size: 13px !important;
       }
     `,
   ],
