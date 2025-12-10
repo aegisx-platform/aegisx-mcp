@@ -989,6 +989,13 @@ export class BudgetRequestsService extends BaseService<
       return sum + amount;
     }, 0);
 
+    // Calculate dynamic years based on fiscal_year from budget request
+    const fiscalYear = request.fiscal_year || 2569; // Default to 2569 if not set
+    const histYear1 = fiscalYear - 3; // e.g., 2566
+    const histYear2 = fiscalYear - 2; // e.g., 2567
+    const histYear3 = fiscalYear - 1; // e.g., 2568
+    const q1StartYear = fiscalYear - 1; // Q1 starts in October of previous year
+
     // Import ExcelJS
     const ExcelJS = await import('exceljs');
     const { Workbook } = ExcelJS.default || ExcelJS;
@@ -1036,7 +1043,7 @@ export class BudgetRequestsService extends BaseService<
     // Row 1: Title (merged A1:AH1)
     worksheet.mergeCells('A1:AH1');
     const titleCell = worksheet.getCell('A1');
-    titleCell.value = 'แผนงบประมาณจัดซื้อยา ปีงบประมาณ 2569';
+    titleCell.value = `แผนงบประมาณจัดซื้อยา ปีงบประมาณ ${fiscalYear}`;
     titleCell.font = { bold: true, size: 16 };
     titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
     worksheet.getRow(1).height = 25;
@@ -1059,16 +1066,16 @@ export class BudgetRequestsService extends BaseService<
       { col: 4, value: 'ขนาดบรรจุ', merge: null },
       { col: 5, value: 'หน่วยนับ', merge: null },
       { col: 6, value: 'ข้อมูลอัตราการใช้ย้อนหลัง 3ปี', merge: 'F3:H3' },
-      { col: 9, value: 'ประมาณการใช้ปีงบฯ 2569', merge: null },
+      { col: 9, value: `ประมาณการใช้ปีงบฯ ${fiscalYear}`, merge: null },
       { col: 10, value: 'ยอดยาคงคลัง', merge: null },
       { col: 11, value: 'ประมาณการจัดซื้อฯ', merge: null },
       { col: 12, value: 'ราคา/หน่วยขนาดบรรจุ', merge: null },
       { col: 13, value: 'จัดซื้อด้วยเงินงบประมาณ', merge: 'M3:N3' },
       { col: 15, value: 'จัดซื้อด้วยเงินบำรุง', merge: 'O3:P3' },
-      { col: 17, value: 'งวดที่ 1 ต.ค.2568', merge: 'Q3:T3' },
-      { col: 21, value: 'งวดที่ 2 ม.ค.2569', merge: 'U3:X3' },
-      { col: 25, value: 'งวดที่ 3 เม.ย 2569', merge: 'Y3:AB3' },
-      { col: 29, value: 'งวดที่ 4 ก.ค 2569', merge: 'AC3:AF3' },
+      { col: 17, value: `งวดที่ 1 ต.ค.${q1StartYear}`, merge: 'Q3:T3' },
+      { col: 21, value: `งวดที่ 2 ม.ค.${fiscalYear}`, merge: 'U3:X3' },
+      { col: 25, value: `งวดที่ 3 เม.ย ${fiscalYear}`, merge: 'Y3:AB3' },
+      { col: 29, value: `งวดที่ 4 ก.ค ${fiscalYear}`, merge: 'AC3:AF3' },
       { col: 33, value: 'ยอดรวม', merge: 'AG3:AH3' },
     ];
 
@@ -1097,9 +1104,9 @@ export class BudgetRequestsService extends BaseService<
       { col: 3, value: '', border: true }, // รายการ
       { col: 4, value: '', border: true }, // ขนาดบรรจุ
       { col: 5, value: '', border: true }, // หน่วยนับ
-      { col: 6, value: 'ปีงบฯ2566', border: true },
-      { col: 7, value: 'ปีงบฯ2567', border: true },
-      { col: 8, value: 'ปีงบฯ2568', border: true },
+      { col: 6, value: `ปีงบฯ${histYear1}`, border: true },
+      { col: 7, value: `ปีงบฯ${histYear2}`, border: true },
+      { col: 8, value: `ปีงบฯ${histYear3}`, border: true },
       { col: 9, value: '', border: true }, // ประมาณการ
       { col: 10, value: '', border: true }, // คงคลัง
       { col: 11, value: '', border: true }, // ประมาณการจัดซื้อ
@@ -1162,15 +1169,21 @@ export class BudgetRequestsService extends BaseService<
       const totalQty = item.requested_qty || 0;
       const totalAmount = totalQty * unitPrice;
 
+      // Parse JSONB historical_usage field
+      const historicalUsage =
+        typeof item.historical_usage === 'string'
+          ? JSON.parse(item.historical_usage)
+          : item.historical_usage || {};
+
       // Set values
       row.getCell(1).value = item.line_number || rowIndex - 4; // A: ลำดับ
-      row.getCell(2).value = item.working_code || ''; // B: รหัส
+      row.getCell(2).value = item.generic_code || ''; // B: รหัส
       row.getCell(3).value = item.generic_name || ''; // C: รายการ
       row.getCell(4).value = item.package_size || ''; // D: ขนาดบรรจุ
       row.getCell(5).value = item.unit || ''; // E: หน่วย
-      row.getCell(6).value = item.usage_year_2566 || 0; // F: ปี2566
-      row.getCell(7).value = item.usage_year_2567 || 0; // G: ปี2567
-      row.getCell(8).value = item.usage_year_2568 || 0; // H: ปี2568
+      row.getCell(6).value = historicalUsage[String(histYear1)] || 0; // F: historical year 1
+      row.getCell(7).value = historicalUsage[String(histYear2)] || 0; // G: historical year 2
+      row.getCell(8).value = historicalUsage[String(histYear3)] || 0; // H: historical year 3
       row.getCell(9).value = item.estimated_usage_2569 || 0; // I: ประมาณการ2569
       row.getCell(10).value = item.current_stock || 0; // J: คงคลัง
       row.getCell(11).value = item.estimated_purchase || 0; // K: ประมาณการจัดซื้อ

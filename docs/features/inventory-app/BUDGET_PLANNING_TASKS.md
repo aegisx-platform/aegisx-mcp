@@ -172,7 +172,7 @@ getHistoricalUsage(item: BudgetRequestItem, year: string): number {
 
 ### Task 1.4: Fix Export SSCJ - Parse JSONB Historical Usage
 
-**Status:** 🔴 TODO
+**Status:** ✅ DONE (2025-12-10)
 **Effort:** 2 hours
 **File:** `apps/api/src/modules/inventory/budget/budgetRequests/budget-requests.service.ts`
 
@@ -185,32 +185,37 @@ row.getCell(7).value = item.usage_year_2567 || 0; // Field doesn't exist!
 row.getCell(8).value = item.usage_year_2568 || 0; // Field doesn't exist!
 ```
 
-**Solution:**
+**Solution Implemented (Dynamic Years based on fiscal_year):**
 
 ```typescript
+// Calculate dynamic years based on fiscal_year from budget request
+const fiscalYear = request.fiscal_year || 2569;
+const histYear1 = fiscalYear - 3; // e.g., 2566
+const histYear2 = fiscalYear - 2; // e.g., 2567
+const histYear3 = fiscalYear - 1; // e.g., 2568
+const q1StartYear = fiscalYear - 1; // Q1 starts in October of previous year
+
 // Parse JSONB historical_usage
 const historicalUsage = typeof item.historical_usage === 'string' ? JSON.parse(item.historical_usage) : item.historical_usage || {};
 
-row.getCell(6).value = historicalUsage['2566'] || 0; // F: ปี2566
-row.getCell(7).value = historicalUsage['2567'] || 0; // G: ปี2567
-row.getCell(8).value = historicalUsage['2568'] || 0; // H: ปี2568
+row.getCell(6).value = historicalUsage[String(histYear1)] || 0;
+row.getCell(7).value = historicalUsage[String(histYear2)] || 0;
+row.getCell(8).value = historicalUsage[String(histYear3)] || 0;
 ```
 
-**Also fix Line 1152:**
+**Additional fixes:**
 
-```typescript
-// CURRENT (WRONG)
-row.getCell(2).value = item.working_code || ''; // Field is generic_code!
-
-// CORRECT
-row.getCell(2).value = item.generic_code || '';
-```
+- Title: `แผนงบประมาณจัดซื้อยา ปีงบประมาณ ${fiscalYear}` (dynamic)
+- Headers: `ปีงบฯ${histYear1}`, `ปีงบฯ${histYear2}`, `ปีงบฯ${histYear3}` (dynamic)
+- Quarter labels: `งวดที่ 1 ต.ค.${q1StartYear}`, `งวดที่ 2 ม.ค.${fiscalYear}`, etc.
+- Fixed `working_code` → `generic_code`
 
 **Acceptance Criteria:**
 
-- [ ] Export แสดง historical usage ถูกต้อง
-- [ ] ไม่มี cell ว่างในคอลัมน์ ปี66-68
-- [ ] รหัสยาแสดงถูกต้อง
+- [x] Export แสดง historical usage ถูกต้อง
+- [x] ไม่มี cell ว่างในคอลัมน์ ปี66-68
+- [x] รหัสยาแสดงถูกต้อง
+- [x] ปีต่างๆ คำนวณอัตโนมัติจาก fiscal_year
 
 ---
 
