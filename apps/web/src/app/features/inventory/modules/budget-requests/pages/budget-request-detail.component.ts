@@ -95,7 +95,7 @@ interface BudgetRequestItem {
                   แผนงบประมาณจัดซื้อยา ปี
                   {{ budgetRequest()?.fiscal_year || '...' }}
                 </h1>
-                <div class="flex items-center gap-4 mt-2 flex-wrap">
+                <div class="flex items-center gap-2 mt-2">
                   <span
                     class="inline-flex items-center gap-1.5 px-3 py-1 bg-[var(--ax-info-faint)] text-[var(--ax-info-default)] rounded-md text-sm font-medium"
                   >
@@ -105,22 +105,27 @@ interface BudgetRequestItem {
                   <span [class]="getStatusClass(budgetRequest()?.status)">
                     {{ getStatusText(budgetRequest()?.status) }}
                   </span>
-                  <span
-                    class="inline-flex items-center gap-1.5 px-3 py-1 bg-[var(--ax-success-faint)] text-[var(--ax-success-default)] rounded-md text-sm font-medium"
+                </div>
+              </div>
+              <!-- Right side: Item count and Total Amount (large) -->
+              <div class="flex items-center gap-4">
+                <div class="text-right">
+                  <span class="text-sm text-[var(--ax-text-secondary)] block"
+                    >จำนวนรายการ</span
                   >
-                    <mat-icon class="!text-base !w-4 !h-4">payments</mat-icon>
-                    {{
-                      budgetRequest()?.total_requested_amount | number: '1.2-2'
-                    }}
-                    บาท
+                  <span class="text-lg font-bold text-[var(--ax-text-default)]">
+                    {{ items().length | number }}
                   </span>
-                  <span
-                    class="inline-flex items-center gap-1.5 px-3 py-1 bg-[var(--ax-background-muted)] text-[var(--ax-text-secondary)] rounded-md text-sm font-medium"
+                </div>
+                <div class="w-px h-10 bg-[var(--ax-border-default)]"></div>
+                <div class="text-right">
+                  <span class="text-sm text-[var(--ax-text-secondary)] block"
+                    >มูลค่ารวม</span
                   >
-                    <mat-icon class="!text-base !w-4 !h-4"
-                      >inventory_2</mat-icon
-                    >
-                    {{ items().length | number }} รายการ
+                  <span
+                    class="text-2xl font-bold text-[var(--ax-success-default)]"
+                  >
+                    ฿{{ totalAmount() | number: '1.2-2' }}
                   </span>
                 </div>
               </div>
@@ -178,6 +183,16 @@ interface BudgetRequestItem {
                   >
                     <mat-icon>add</mat-icon>
                     <span class="ml-1">Add Drug</span>
+                  </button>
+                  <button
+                    mat-stroked-button
+                    color="warn"
+                    (click)="resetAll()"
+                    [disabled]="actionLoading() || items().length === 0"
+                    matTooltip="ลบรายการยาทั้งหมด"
+                  >
+                    <mat-icon>delete_sweep</mat-icon>
+                    <span class="ml-1">Reset</span>
                   </button>
                   <div class="flex-1"></div>
                   <button
@@ -1019,6 +1034,48 @@ export class BudgetRequestDetailComponent implements OnInit {
         } catch (error: any) {
           this.snackBar.open(
             error?.error?.message || 'ดึงรายการยาไม่สำเร็จ',
+            'ปิด',
+            { duration: 3000 },
+          );
+        } finally {
+          this.actionLoading.set(false);
+        }
+      });
+  }
+
+  resetAll() {
+    const count = this.items().length;
+    this.axDialog
+      .confirm({
+        title: 'ลบรายการทั้งหมด',
+        message: `คุณต้องการลบรายการยาทั้งหมด ${count} รายการ หรือไม่?\n\nการกระทำนี้ไม่สามารถย้อนกลับได้`,
+        confirmText: 'ลบทั้งหมด',
+        cancelText: 'ยกเลิก',
+        isDangerous: true,
+      })
+      .subscribe(async (confirmed) => {
+        if (!confirmed) return;
+
+        this.actionLoading.set(true);
+        try {
+          // Delete all items for this budget request
+          const itemIds = this.items().map((item) => item.id);
+
+          // Use batch delete if available, otherwise delete one by one
+          for (const id of itemIds) {
+            await firstValueFrom(
+              this.http.delete(`/inventory/budget/budget-request-items/${id}`),
+            );
+          }
+
+          this.snackBar.open(`ลบรายการสำเร็จ ${count} รายการ`, 'ปิด', {
+            duration: 3000,
+          });
+          await this.loadItems();
+          await this.loadData();
+        } catch (error: any) {
+          this.snackBar.open(
+            error?.error?.message || 'ลบรายการไม่สำเร็จ',
             'ปิด',
             { duration: 3000 },
           );
