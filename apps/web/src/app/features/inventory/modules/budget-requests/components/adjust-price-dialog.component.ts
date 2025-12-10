@@ -117,24 +117,88 @@ export interface AdjustPriceResult {
           </mat-select>
         </mat-form-field>
 
-        <!-- Percentage Input -->
-        <mat-form-field appearance="outline" class="w-full">
-          <mat-label>เปอร์เซ็นต์ที่ต้องการปรับ</mat-label>
-          <input
-            matInput
-            type="number"
-            formControlName="percentage"
-            placeholder="เช่น 10 หรือ -5"
-          />
-          <span matTextSuffix>%</span>
-          <mat-hint>ค่าบวก = เพิ่ม, ค่าลบ = ลด (เช่น +10% หรือ -5%)</mat-hint>
+        <!-- Percentage Input with +/- Buttons -->
+        <div class="space-y-2">
+          <label class="text-sm font-medium text-gray-700"
+            >เปอร์เซ็นต์ที่ต้องการปรับ</label
+          >
+          <div class="percentage-input-group">
+            <button
+              type="button"
+              mat-mini-fab
+              color="warn"
+              class="decrement-btn"
+              matTooltip="ลด 5%"
+              (click)="adjustPercentage(-5)"
+            >
+              <mat-icon>remove</mat-icon>
+            </button>
+            <div class="input-wrapper">
+              <input
+                type="number"
+                formControlName="percentage"
+                class="percentage-input"
+                placeholder="0"
+              />
+              <span class="percentage-suffix">%</span>
+            </div>
+            <button
+              type="button"
+              mat-mini-fab
+              color="primary"
+              class="increment-btn"
+              matTooltip="เพิ่ม 5%"
+              (click)="adjustPercentage(5)"
+            >
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+          <div class="flex justify-between items-center mt-2">
+            <span class="text-xs text-gray-500"
+              >ค่าบวก = เพิ่ม, ค่าลบ = ลด</span
+            >
+            <div class="flex gap-1">
+              <button
+                type="button"
+                mat-stroked-button
+                class="!h-7 !min-w-0 !px-2 !text-xs"
+                (click)="setPercentage(-10)"
+              >
+                -10%
+              </button>
+              <button
+                type="button"
+                mat-stroked-button
+                class="!h-7 !min-w-0 !px-2 !text-xs"
+                (click)="setPercentage(-5)"
+              >
+                -5%
+              </button>
+              <button
+                type="button"
+                mat-stroked-button
+                class="!h-7 !min-w-0 !px-2 !text-xs"
+                (click)="setPercentage(5)"
+              >
+                +5%
+              </button>
+              <button
+                type="button"
+                mat-stroked-button
+                class="!h-7 !min-w-0 !px-2 !text-xs"
+                (click)="setPercentage(10)"
+              >
+                +10%
+              </button>
+            </div>
+          </div>
           @if (form.get('percentage')?.hasError('required')) {
-            <mat-error>กรุณากรอกเปอร์เซ็นต์</mat-error>
+            <mat-error class="text-xs">กรุณากรอกเปอร์เซ็นต์</mat-error>
           }
           @if (form.get('percentage')?.hasError('min')) {
-            <mat-error>ไม่สามารถลดเกิน 100%</mat-error>
+            <mat-error class="text-xs">ไม่สามารถลดเกิน 100%</mat-error>
           }
-        </mat-form-field>
+        </div>
 
         <mat-divider></mat-divider>
 
@@ -230,6 +294,61 @@ export interface AdjustPriceResult {
       .header-text {
         flex: 1;
         min-width: 0;
+      }
+
+      .percentage-input-group {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        justify-content: center;
+      }
+
+      .percentage-input-group .decrement-btn,
+      .percentage-input-group .increment-btn {
+        flex-shrink: 0;
+      }
+
+      .input-wrapper {
+        position: relative;
+        flex: 1;
+        max-width: 200px;
+      }
+
+      .percentage-input {
+        width: 100%;
+        height: 56px;
+        padding: 0 40px 0 16px;
+        font-size: 24px;
+        font-weight: 600;
+        text-align: center;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        outline: none;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+        -moz-appearance: textfield;
+      }
+
+      .percentage-input::-webkit-outer-spin-button,
+      .percentage-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+
+      .percentage-input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+
+      .percentage-suffix {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 20px;
+        font-weight: 500;
+        color: #6b7280;
       }
     `,
   ],
@@ -331,6 +450,18 @@ export class AdjustPriceDialogComponent {
   calculateNewValue(originalValue: number): number {
     const percentage = this.form?.get('percentage')?.value || 0;
     return originalValue * (1 + percentage / 100);
+  }
+
+  /** เพิ่ม/ลด percentage ตาม delta (เช่น +5 หรือ -5) */
+  adjustPercentage(delta: number): void {
+    const current = this.form.get('percentage')?.value || 0;
+    const newValue = Math.max(-99.99, current + delta);
+    this.form.patchValue({ percentage: newValue });
+  }
+
+  /** ตั้งค่า percentage โดยตรง */
+  setPercentage(value: number): void {
+    this.form.patchValue({ percentage: value });
   }
 
   // Styling computed values
