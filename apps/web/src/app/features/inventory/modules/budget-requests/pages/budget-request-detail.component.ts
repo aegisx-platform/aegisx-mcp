@@ -1,4 +1,11 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  inject,
+  signal,
+  computed,
+  HostListener,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -22,6 +29,10 @@ import { firstValueFrom } from 'rxjs';
 import { AxDialogService, AxErrorStateComponent } from '@aegisx/ui';
 import { AddDrugDialogComponent } from '../components/add-drug-dialog.component';
 import { BudgetRequestImportDialogComponent } from '../components/budget-request-import-dialog.component';
+import {
+  AdjustPriceDialogComponent,
+  AdjustPriceResult,
+} from '../components/adjust-price-dialog.component';
 
 interface BudgetRequest {
   id: number;
@@ -228,6 +239,15 @@ interface BudgetRequestItem {
                   </button>
                   <button
                     mat-stroked-button
+                    (click)="showAdjustPriceDialog()"
+                    [disabled]="actionLoading() || items().length === 0"
+                    matTooltip="ปรับราคา/จำนวนเป็น % (ทุกรายการ หรือเฉพาะที่เลือก)"
+                  >
+                    <mat-icon>percent</mat-icon>
+                    <span class="ml-1">ปรับ %</span>
+                  </button>
+                  <button
+                    mat-stroked-button
                     color="warn"
                     (click)="resetAll()"
                     [disabled]="actionLoading() || items().length === 0"
@@ -237,25 +257,65 @@ interface BudgetRequestItem {
                     <span class="ml-1">Reset</span>
                   </button>
                   <div class="flex-1"></div>
-                  <button
-                    mat-stroked-button
-                    (click)="saveAll()"
-                    [disabled]="actionLoading() || !hasChanges()"
-                    matTooltip="บันทึกการแก้ไขทั้งหมด"
-                  >
-                    <mat-icon>save</mat-icon>
-                    <span class="ml-1">Save All</span>
-                  </button>
-                  <button
-                    mat-raised-button
-                    color="accent"
-                    (click)="submit()"
-                    [disabled]="actionLoading() || items().length === 0"
-                    matTooltip="ส่งคำขอเพื่อรออนุมัติ"
-                  >
-                    <mat-icon>send</mat-icon>
-                    <span class="ml-1">Submit</span>
-                  </button>
+
+                  <!-- Unsaved changes warning (visible in button bar) -->
+                  @if (hasChanges()) {
+                    <div
+                      class="flex items-center gap-2 px-3 py-1.5 bg-[var(--ax-warning-faint)] text-[var(--ax-warning-default)] rounded-md animate-pulse"
+                    >
+                      <mat-icon class="!text-base !w-4 !h-4">warning</mat-icon>
+                      <span class="text-sm font-medium"
+                        >ยังไม่ได้บันทึก:
+                        {{ modifiedItems().length }} รายการ</span
+                      >
+                    </div>
+                  }
+
+                  <!-- Save All: เด่นเมื่อมีการแก้ไข -->
+                  @if (hasChanges()) {
+                    <button
+                      mat-flat-button
+                      color="accent"
+                      (click)="saveAll()"
+                      [disabled]="actionLoading()"
+                      matTooltip="บันทึกการแก้ไขทั้งหมด"
+                    >
+                      <mat-icon>save</mat-icon>
+                      <span class="ml-1">Save All</span>
+                    </button>
+                  } @else {
+                    <button
+                      mat-stroked-button
+                      [disabled]="true"
+                      matTooltip="ไม่มีการแก้ไข"
+                    >
+                      <mat-icon>save</mat-icon>
+                      <span class="ml-1">Save All</span>
+                    </button>
+                  }
+
+                  <!-- Submit: เด่นเมื่อไม่มีการแก้ไข -->
+                  @if (hasChanges()) {
+                    <button
+                      mat-stroked-button
+                      [disabled]="true"
+                      matTooltip="กรุณาบันทึกก่อน Submit"
+                    >
+                      <mat-icon>send</mat-icon>
+                      <span class="ml-1">Submit</span>
+                    </button>
+                  } @else {
+                    <button
+                      mat-flat-button
+                      color="primary"
+                      (click)="submit()"
+                      [disabled]="actionLoading() || items().length === 0"
+                      matTooltip="ส่งคำขอเพื่อรออนุมัติ"
+                    >
+                      <mat-icon>send</mat-icon>
+                      <span class="ml-1">Submit</span>
+                    </button>
+                  }
                 }
 
                 <!-- SUBMITTED mode buttons -->
@@ -466,26 +526,40 @@ interface BudgetRequestItem {
                     </td>
                   </ng-container>
 
-                  <!-- Generic Code Column -->
-                  <ng-container matColumnDef="generic_code">
-                    <th mat-header-cell *matHeaderCellDef>รหัสยา</th>
-                    <td mat-cell *matCellDef="let item">
+                  <!-- Generic Code Column (Sticky) -->
+                  <ng-container matColumnDef="generic_code" sticky>
+                    <th
+                      mat-header-cell
+                      *matHeaderCellDef
+                      class="sticky-column sticky-code !min-w-[80px]"
+                    >
+                      รหัสยา
+                    </th>
+                    <td
+                      mat-cell
+                      *matCellDef="let item"
+                      class="sticky-column sticky-code"
+                    >
                       <span class="font-mono text-sm">{{
                         item.generic_code
                       }}</span>
                     </td>
                   </ng-container>
 
-                  <!-- Generic Name Column -->
-                  <ng-container matColumnDef="generic_name">
+                  <!-- Generic Name Column (Sticky) -->
+                  <ng-container matColumnDef="generic_name" sticky>
                     <th
                       mat-header-cell
                       *matHeaderCellDef
-                      class="!min-w-[200px]"
+                      class="sticky-column sticky-name !min-w-[280px]"
                     >
                       ชื่อยา
                     </th>
-                    <td mat-cell *matCellDef="let item">
+                    <td
+                      mat-cell
+                      *matCellDef="let item"
+                      class="sticky-column sticky-name"
+                    >
                       {{ item.generic_name }}
                     </td>
                   </ng-container>
@@ -569,8 +643,10 @@ interface BudgetRequestItem {
                       @if (budgetRequest()?.status === 'DRAFT') {
                         <input
                           type="number"
+                          min="0"
                           [value]="item.unit_price"
                           (change)="updateItemField(item, 'unit_price', $event)"
+                          (click)="$event.stopPropagation()"
                           class="w-24 text-right px-2 py-1 border rounded bg-yellow-50 border-yellow-300 focus:outline-none focus:ring-2 focus:ring-yellow-400"
                         />
                       } @else {
@@ -588,10 +664,12 @@ interface BudgetRequestItem {
                       @if (budgetRequest()?.status === 'DRAFT') {
                         <input
                           type="number"
+                          min="0"
                           [value]="item.requested_qty"
                           (change)="
                             updateItemField(item, 'requested_qty', $event)
                           "
+                          (click)="$event.stopPropagation()"
                           class="w-20 text-right px-2 py-1 border rounded bg-yellow-50 border-yellow-300 focus:outline-none focus:ring-2 focus:ring-yellow-400"
                         />
                       } @else {
@@ -609,8 +687,10 @@ interface BudgetRequestItem {
                       @if (budgetRequest()?.status === 'DRAFT') {
                         <input
                           type="number"
+                          min="0"
                           [value]="item.q1_qty"
                           (change)="updateItemField(item, 'q1_qty', $event)"
+                          (click)="$event.stopPropagation()"
                           class="w-16 text-right px-2 py-1 border rounded bg-yellow-50 border-yellow-300 focus:outline-none focus:ring-2 focus:ring-yellow-400"
                         />
                       } @else {
@@ -628,8 +708,10 @@ interface BudgetRequestItem {
                       @if (budgetRequest()?.status === 'DRAFT') {
                         <input
                           type="number"
+                          min="0"
                           [value]="item.q2_qty"
                           (change)="updateItemField(item, 'q2_qty', $event)"
+                          (click)="$event.stopPropagation()"
                           class="w-16 text-right px-2 py-1 border rounded bg-yellow-50 border-yellow-300 focus:outline-none focus:ring-2 focus:ring-yellow-400"
                         />
                       } @else {
@@ -647,8 +729,10 @@ interface BudgetRequestItem {
                       @if (budgetRequest()?.status === 'DRAFT') {
                         <input
                           type="number"
+                          min="0"
                           [value]="item.q3_qty"
                           (change)="updateItemField(item, 'q3_qty', $event)"
+                          (click)="$event.stopPropagation()"
                           class="w-16 text-right px-2 py-1 border rounded bg-yellow-50 border-yellow-300 focus:outline-none focus:ring-2 focus:ring-yellow-400"
                         />
                       } @else {
@@ -666,8 +750,10 @@ interface BudgetRequestItem {
                       @if (budgetRequest()?.status === 'DRAFT') {
                         <input
                           type="number"
+                          min="0"
                           [value]="item.q4_qty"
                           (change)="updateItemField(item, 'q4_qty', $event)"
+                          (click)="$event.stopPropagation()"
                           class="w-16 text-right px-2 py-1 border rounded bg-yellow-50 border-yellow-300 focus:outline-none focus:ring-2 focus:ring-yellow-400"
                         />
                       } @else {
@@ -704,7 +790,7 @@ interface BudgetRequestItem {
                         <button
                           mat-icon-button
                           color="warn"
-                          (click)="deleteItem(item)"
+                          (click)="deleteItem(item); $event.stopPropagation()"
                           matTooltip="ลบรายการ"
                         >
                           <mat-icon>delete</mat-icon>
@@ -802,17 +888,6 @@ interface BudgetRequestItem {
                       >
                     </div>
                   </div>
-                  @if (modifiedItems().length > 0) {
-                    <div
-                      class="flex items-center gap-2 px-3 py-1.5 bg-[var(--ax-warning-faint)] text-[var(--ax-warning-default)] rounded-md"
-                    >
-                      <mat-icon class="!text-base !w-4 !h-4">warning</mat-icon>
-                      <span class="text-sm font-medium"
-                        >Unsaved changes: {{ modifiedItems().length }} items
-                        modified</span
-                      >
-                    </div>
-                  }
                 </div>
               </mat-card-content>
             </mat-card>
@@ -844,6 +919,11 @@ interface BudgetRequestItem {
           line-height: 20px !important;
         }
       }
+      .btn-with-icon {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+      }
       .items-table {
         th.mat-mdc-header-cell {
           background: var(--ax-background-subtle);
@@ -856,10 +936,46 @@ interface BudgetRequestItem {
           font-size: 13px;
         }
       }
-      ::ng-deep .items-table tr.mat-mdc-row.selected-row {
+      /* Sticky columns - use :host ::ng-deep for Angular encapsulation */
+      :host ::ng-deep .items-table .mat-mdc-cell.sticky-column,
+      :host ::ng-deep .items-table .mat-mdc-header-cell.sticky-column {
+        position: sticky !important;
+        z-index: 100 !important;
+      }
+      :host ::ng-deep .items-table .mat-mdc-header-cell.sticky-column {
+        background-color: #ffffff !important;
+        z-index: 101 !important;
+      }
+      :host ::ng-deep .items-table .mat-mdc-cell.sticky-column {
+        background-color: #ffffff !important;
+      }
+      :host ::ng-deep .items-table .sticky-code {
+        left: 0 !important;
+        min-width: 100px !important;
+        max-width: 100px !important;
+      }
+      :host ::ng-deep .items-table .sticky-name {
+        left: 100px !important;
+        min-width: 280px !important;
+        box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.15) !important;
+      }
+      :host ::ng-deep .items-table tr.selected-row .mat-mdc-cell.sticky-column {
         background-color: #dbeafe !important;
       }
-      ::ng-deep .items-table tr.mat-mdc-row.selected-row:hover {
+      :host ::ng-deep .items-table tr:hover .mat-mdc-cell.sticky-column {
+        background-color: #f1f5f9 !important;
+      }
+      :host ::ng-deep .items-table tr.mat-mdc-row.selected-row {
+        background-color: #dbeafe !important;
+      }
+      :host ::ng-deep .items-table tr.mat-mdc-row.selected-row:hover {
+        background-color: #bfdbfe !important;
+      }
+      :host
+        ::ng-deep
+        .items-table
+        tr.mat-mdc-row.selected-row:hover
+        .mat-mdc-cell.sticky-column {
         background-color: #bfdbfe !important;
       }
     `,
@@ -891,8 +1007,8 @@ export class BudgetRequestDetailComponent implements OnInit {
   pageSize = 50;
   pageIndex = 0;
 
-  // Track modified items
-  private modifiedItemIds = new Set<number>();
+  // Track modified items (use signal for reactivity)
+  modifiedItemIds = signal<Set<number>>(new Set());
 
   displayedColumns = [
     'select',
@@ -949,11 +1065,11 @@ export class BudgetRequestDetailComponent implements OnInit {
   });
 
   modifiedItems = computed(() => {
-    return Array.from(this.modifiedItemIds);
+    return Array.from(this.modifiedItemIds());
   });
 
   hasChanges = computed(() => {
-    return this.modifiedItemIds.size > 0;
+    return this.modifiedItemIds().size > 0;
   });
 
   // Selection computed signals
@@ -977,6 +1093,19 @@ export class BudgetRequestDetailComponent implements OnInit {
 
   ngOnInit() {
     this.loadData();
+  }
+
+  // Warn user when leaving page with unsaved changes
+  @HostListener('window:beforeunload', ['$event'])
+  canDeactivate(event: BeforeUnloadEvent): boolean {
+    if (this.modifiedItemIds().size > 0) {
+      event.preventDefault();
+      // Chrome requires returnValue to be set
+      event.returnValue =
+        'มีข้อมูลที่ยังไม่ได้บันทึก ต้องการออกจากหน้านี้หรือไม่?';
+      return false;
+    }
+    return true;
   }
 
   async loadData() {
@@ -1009,7 +1138,7 @@ export class BudgetRequestDetailComponent implements OnInit {
         ),
       );
       this.items.set(response.data || []);
-      this.modifiedItemIds.clear();
+      this.modifiedItemIds.set(new Set());
       // Clear selection when items are reloaded
       this.selectedItemIds.set(new Set());
     } catch (error) {
@@ -1182,7 +1311,10 @@ export class BudgetRequestDetailComponent implements OnInit {
 
       items[index] = updatedItem;
       this.items.set([...items]);
-      this.modifiedItemIds.add(item.id);
+      // Update signal with new Set containing the item id
+      const currentModified = new Set(this.modifiedItemIds());
+      currentModified.add(item.id);
+      this.modifiedItemIds.set(currentModified);
     }
   }
 
@@ -1388,40 +1520,154 @@ export class BudgetRequestDetailComponent implements OnInit {
     });
   }
 
+  showAdjustPriceDialog() {
+    const dialogRef = this.dialog.open(AdjustPriceDialogComponent, {
+      width: '600px',
+      maxHeight: '90vh',
+      data: {
+        items: this.items().map((item) => ({
+          id: item.id,
+          generic_name: item.generic_name,
+          unit_price: item.unit_price,
+          requested_qty: item.requested_qty,
+          requested_amount: item.requested_amount,
+        })),
+        selectedItemIds: Array.from(this.selectedItemIds()),
+        hasSelection: this.hasSelection(),
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result: AdjustPriceResult | null) => {
+      if (result) {
+        this.applyPriceAdjustment(result);
+      }
+    });
+  }
+
+  private applyPriceAdjustment(result: AdjustPriceResult) {
+    const { field, percentage, itemIds } = result;
+    const multiplier = 1 + percentage / 100;
+
+    const items = this.items();
+    const modifiedIds = new Set(this.modifiedItemIds());
+    let adjustedCount = 0;
+
+    for (const item of items) {
+      if (itemIds.includes(item.id)) {
+        if (field === 'unit_price') {
+          item.unit_price =
+            Math.round(item.unit_price * multiplier * 100) / 100;
+        } else {
+          item.requested_qty = Math.round(item.requested_qty * multiplier);
+          // Auto-distribute quarters
+          const quarterQty = Math.floor(item.requested_qty / 4);
+          const remainder = item.requested_qty % 4;
+          item.q1_qty = quarterQty + (remainder > 0 ? 1 : 0);
+          item.q2_qty = quarterQty + (remainder > 1 ? 1 : 0);
+          item.q3_qty = quarterQty + (remainder > 2 ? 1 : 0);
+          item.q4_qty = quarterQty;
+        }
+        // Recalculate total
+        item.requested_amount = item.unit_price * item.requested_qty;
+        modifiedIds.add(item.id);
+        adjustedCount++;
+      }
+    }
+
+    this.items.set([...items]);
+    this.modifiedItemIds.set(modifiedIds);
+
+    const fieldLabel = field === 'unit_price' ? 'ราคา/หน่วย' : 'จำนวนที่ขอ';
+    const changeLabel = percentage >= 0 ? `+${percentage}%` : `${percentage}%`;
+    this.snackBar.open(
+      `ปรับ ${fieldLabel} ${changeLabel} สำเร็จ ${adjustedCount} รายการ`,
+      'ปิด',
+      { duration: 3000 },
+    );
+  }
+
   async saveAll() {
-    if (this.modifiedItemIds.size === 0) return;
+    if (this.modifiedItemIds().size === 0) return;
 
     this.actionLoading.set(true);
+
     try {
       const modifiedItems = this.items().filter((item) =>
-        this.modifiedItemIds.has(item.id),
+        this.modifiedItemIds().has(item.id),
       );
 
-      // Update each modified item
-      for (const item of modifiedItems) {
-        await firstValueFrom(
-          this.http.patch(`/inventory/budget/budget-request-items/${item.id}`, {
-            unit_price: item.unit_price,
-            requested_qty: item.requested_qty,
-            q1_qty: item.q1_qty,
-            q2_qty: item.q2_qty,
-            q3_qty: item.q3_qty,
-            q4_qty: item.q4_qty,
-          }),
+      const totalItems = modifiedItems.length;
+
+      // Prepare items for batch update
+      const itemsToUpdate = modifiedItems.map((item) => ({
+        id: item.id,
+        unit_price: item.unit_price,
+        requested_qty: item.requested_qty,
+        q1_qty: item.q1_qty,
+        q2_qty: item.q2_qty,
+        q3_qty: item.q3_qty,
+        q4_qty: item.q4_qty,
+      }));
+
+      // Batch API limit is 100 items per request - chunk if needed
+      const BATCH_SIZE = 100;
+      const chunks: (typeof itemsToUpdate)[] = [];
+      for (let i = 0; i < itemsToUpdate.length; i += BATCH_SIZE) {
+        chunks.push(itemsToUpdate.slice(i, i + BATCH_SIZE));
+      }
+
+      let totalUpdated = 0;
+      let totalFailed = 0;
+      let processedItems = 0;
+
+      // Show initial progress under loading spinner
+      this.actionMessage.set(`กำลังบันทึก 0/${totalItems} รายการ...`);
+
+      // Process each chunk sequentially
+      for (let i = 0; i < chunks.length; i++) {
+        const chunk = chunks[i];
+
+        // Update progress before processing
+        this.actionMessage.set(
+          `กำลังบันทึก ${processedItems}/${totalItems} รายการ... (${Math.round((processedItems / totalItems) * 100)}%)`,
+        );
+
+        const response = await firstValueFrom(
+          this.http.put<any>(
+            `/inventory/budget/budget-requests/${this.requestId}/items/batch`,
+            { items: chunk },
+          ),
+        );
+
+        if (response.success) {
+          totalUpdated += response.data.updated || 0;
+          totalFailed += response.data.failed || 0;
+        }
+
+        processedItems += chunk.length;
+
+        // Update progress after processing
+        this.actionMessage.set(
+          `กำลังบันทึก ${processedItems}/${totalItems} รายการ... (${Math.round((processedItems / totalItems) * 100)}%)`,
         );
       }
 
-      this.snackBar.open(`บันทึกสำเร็จ ${modifiedItems.length} รายการ`, 'ปิด', {
-        duration: 3000,
-      });
-      this.modifiedItemIds.clear();
+      this.actionMessage.set('');
+      this.snackBar.open(
+        `บันทึกสำเร็จ ${totalUpdated} รายการ${totalFailed > 0 ? ` (ล้มเหลว ${totalFailed})` : ''}`,
+        'ปิด',
+        { duration: 3000 },
+      );
+      this.modifiedItemIds.set(new Set());
       await this.loadData();
     } catch (error: any) {
+      this.actionMessage.set('');
       this.snackBar.open(error?.error?.message || 'บันทึกไม่สำเร็จ', 'ปิด', {
         duration: 3000,
       });
     } finally {
       this.actionLoading.set(false);
+      this.actionMessage.set('');
     }
   }
 
