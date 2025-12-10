@@ -26,10 +26,10 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
 interface DrugGeneric {
   id: number;
-  generic_code: string;
+  working_code: string;
   generic_name: string;
-  unit: string;
-  unit_price?: number;
+  strength_unit: string | null;
+  dosage_form: string | null;
 }
 
 interface AddDrugDialogData {
@@ -109,11 +109,13 @@ interface AddDrugDialogData {
                 <div class="flex items-center justify-between gap-2">
                   <div>
                     <span class="font-mono text-sm text-gray-500">{{
-                      drug.generic_code
+                      drug.working_code
                     }}</span>
                     <span class="ml-2">{{ drug.generic_name }}</span>
                   </div>
-                  <span class="text-sm text-gray-400">{{ drug.unit }}</span>
+                  <span class="text-sm text-gray-400">{{
+                    drug.strength_unit || drug.dosage_form || '-'
+                  }}</span>
                 </div>
                 @if (isDrugAlreadyAdded(drug.id)) {
                   <span class="text-xs text-orange-500 ml-2"
@@ -148,8 +150,12 @@ interface AddDrugDialogData {
                   {{ selectedDrug()?.generic_name }}
                 </div>
                 <div class="text-sm text-blue-600">
-                  รหัส: {{ selectedDrug()?.generic_code }} | หน่วย:
-                  {{ selectedDrug()?.unit }}
+                  รหัส: {{ selectedDrug()?.working_code }} | หน่วย:
+                  {{
+                    selectedDrug()?.strength_unit ||
+                      selectedDrug()?.dosage_form ||
+                      '-'
+                  }}
                 </div>
               </div>
               <button
@@ -312,7 +318,7 @@ export class AddDrugDialogComponent implements OnInit {
   }
 
   displayDrug(drug: DrugGeneric): string {
-    return drug ? `${drug.generic_code} - ${drug.generic_name}` : '';
+    return drug ? `${drug.working_code} - ${drug.generic_name}` : '';
   }
 
   onSearchInput(event: Event) {
@@ -355,9 +361,6 @@ export class AddDrugDialogComponent implements OnInit {
       return;
     }
     this.selectedDrug.set(drug);
-    if (drug.unit_price) {
-      this.form.get('unit_price')?.setValue(drug.unit_price);
-    }
     this.autoDistributeQuarters();
   }
 
