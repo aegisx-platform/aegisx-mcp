@@ -1817,6 +1817,51 @@ export class BudgetRequestsService extends BaseService<
   }
 
   /**
+   * Bulk delete selected items for a budget request
+   * Only allowed when status = DRAFT
+   */
+  async bulkDeleteItems(
+    budgetRequestId: string | number,
+    itemIds: number[],
+    userId: string,
+  ): Promise<{ deletedCount: number }> {
+    // Validate budget request exists and status is DRAFT
+    const request =
+      await this.budgetRequestsRepository.findById(budgetRequestId);
+
+    if (!request) {
+      throw new Error('Budget request not found');
+    }
+
+    if (request.status !== 'DRAFT') {
+      throw new Error(
+        `Cannot delete items from budget request with status: ${request.status}. Only DRAFT requests can be modified.`,
+      );
+    }
+
+    // Delete selected items
+    const deletedCount = await this.db('inventory.budget_request_items')
+      .where({ budget_request_id: budgetRequestId })
+      .whereIn('id', itemIds)
+      .delete();
+
+    // Recalculate total from remaining items
+    const remaining = await this.db('inventory.budget_request_items')
+      .where({ budget_request_id: budgetRequestId })
+      .select(this.db.raw('COALESCE(SUM(requested_amount), 0) as total'))
+      .first<{ total: string }>();
+
+    const newTotal = Number(remaining?.total || 0);
+
+    // Update the budget request total
+    await this.budgetRequestsRepository.update(budgetRequestId, {
+      total_requested_amount: newTotal,
+    });
+
+    return { deletedCount };
+  }
+
+  /**
    * Delete all items for a budget request
    * Only allowed when status = DRAFT
    * Uses single SQL query for efficiency

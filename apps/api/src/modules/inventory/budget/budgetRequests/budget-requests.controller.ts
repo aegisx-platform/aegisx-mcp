@@ -1082,6 +1082,56 @@ export class BudgetRequestsController {
   }
 
   /**
+   * Bulk delete selected budget request items
+   * POST /budget-requests/:id/items/bulk-delete
+   */
+  async bulkDeleteItems(
+    request: FastifyRequest<{
+      Params: Static<typeof BudgetRequestsIdParamSchema>;
+      Body: { itemIds: number[] };
+    }>,
+    reply: FastifyReply,
+  ) {
+    const { id } = request.params;
+    const { itemIds } = request.body;
+    const userId = request.user?.id;
+
+    if (!userId) {
+      return reply.code(401).error('UNAUTHORIZED', 'User not authenticated');
+    }
+
+    if (!itemIds || itemIds.length === 0) {
+      return reply.code(400).error('INVALID_REQUEST', 'No item IDs provided');
+    }
+
+    request.log.info(
+      { budgetRequestId: id, itemIds, userId },
+      'Bulk deleting budget request items',
+    );
+
+    try {
+      const result = await this.budgetRequestsService.bulkDeleteItems(
+        id,
+        itemIds,
+        userId,
+      );
+
+      request.log.info(
+        { budgetRequestId: id, deletedCount: result.deletedCount },
+        'Items deleted successfully',
+      );
+
+      return reply.success(result, `Deleted ${result.deletedCount} items`);
+    } catch (error: any) {
+      request.log.error(
+        { error: error.message, budgetRequestId: id },
+        'Failed to bulk delete items',
+      );
+      return reply.code(400).error('BULK_DELETE_FAILED', error.message);
+    }
+  }
+
+  /**
    * Delete ALL budget request items (bulk delete)
    * DELETE /budget-requests/:id/items
    */

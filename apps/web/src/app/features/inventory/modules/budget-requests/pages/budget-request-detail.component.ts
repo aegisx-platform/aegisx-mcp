@@ -709,19 +709,17 @@ interface BudgetRequestItem {
             <!-- Selection Floating Bar -->
             @if (hasSelection() && budgetRequest()?.status === 'DRAFT') {
               <div
-                class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50
-                       bg-[var(--ax-surface-default)] shadow-lg rounded-lg border border-[var(--ax-border-default)]
-                       px-4 py-3 flex items-center gap-4"
+                class="fixed bottom-4 left-6 z-50
+                       bg-[var(--ax-primary-default)] text-white shadow-2xl rounded-lg
+                       px-5 py-3 flex items-center gap-4"
               >
                 <div class="flex items-center gap-2">
-                  <mat-icon class="text-[var(--ax-primary-default)]"
-                    >check_circle</mat-icon
-                  >
-                  <span class="font-medium text-[var(--ax-text-default)]">
+                  <mat-icon class="text-white">check_circle</mat-icon>
+                  <span class="font-bold text-white text-base">
                     {{ selectedCount() | number }} รายการถูกเลือก
                   </span>
                 </div>
-                <div class="w-px h-6 bg-[var(--ax-border-default)]"></div>
+                <div class="w-px h-6 bg-white/30"></div>
                 <button
                   mat-raised-button
                   color="warn"
@@ -733,6 +731,7 @@ interface BudgetRequestItem {
                 </button>
                 <button
                   mat-icon-button
+                  class="!text-white hover:!bg-white/20"
                   (click)="clearSelection()"
                   matTooltip="ยกเลิกการเลือก"
                 >
@@ -962,6 +961,8 @@ export class BudgetRequestDetailComponent implements OnInit {
       );
       this.items.set(response.data || []);
       this.modifiedItemIds.clear();
+      // Clear selection when items are reloaded
+      this.selectedItemIds.set(new Set());
     } catch (error) {
       console.error('Failed to load items:', error);
     }
