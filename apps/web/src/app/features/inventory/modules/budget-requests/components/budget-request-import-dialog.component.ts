@@ -432,19 +432,43 @@ interface ImportResult {
               </div>
             } @else if (importResult()) {
               <div class="import-result text-center py-8">
-                @if (importResult()?.success) {
+                @if ((importResult()?.imported || 0) > 0) {
+                  <!-- Success: imported some items -->
                   <mat-icon class="text-green-600 !text-6xl !w-16 !h-16">
                     check_circle
                   </mat-icon>
                   <div class="mt-4 text-xl font-medium text-green-800">
                     Import สำเร็จ!
                   </div>
-                } @else {
+                } @else if (
+                  (importResult()?.skipped || 0) > 0 &&
+                  !importResult()?.errors?.length
+                ) {
+                  <!-- All skipped (duplicates) - not an error -->
+                  <mat-icon class="text-blue-600 !text-6xl !w-16 !h-16">
+                    info
+                  </mat-icon>
+                  <div class="mt-4 text-xl font-medium text-blue-800">
+                    ข้ามรายการซ้ำทั้งหมด
+                  </div>
+                  <div class="text-sm text-blue-600 mt-2">
+                    รายการทั้งหมดมีอยู่แล้วในระบบ
+                  </div>
+                } @else if (importResult()?.errors?.length) {
+                  <!-- Has errors -->
                   <mat-icon class="text-orange-600 !text-6xl !w-16 !h-16">
                     warning
                   </mat-icon>
                   <div class="mt-4 text-xl font-medium text-orange-800">
-                    Import เสร็จสิ้น (มีข้อผิดพลาดบางส่วน)
+                    Import เสร็จสิ้น (มีข้อผิดพลาด)
+                  </div>
+                } @else {
+                  <!-- Nothing imported, nothing skipped, no errors (empty file?) -->
+                  <mat-icon class="text-gray-600 !text-6xl !w-16 !h-16">
+                    help_outline
+                  </mat-icon>
+                  <div class="mt-4 text-xl font-medium text-gray-800">
+                    ไม่มีรายการที่จะ Import
                   </div>
                 }
 
