@@ -553,8 +553,16 @@ export class BudgetRequestsService extends BaseService<
         // Get unit_price from drugs table (0 if not found)
         const unitPrice = parseFloat(drugRecord?.unit_price || 0);
 
-        // Get current stock (placeholder - would come from inventory table in Task 1.2)
-        const currentStock = 0;
+        // Get current stock from drug_lots table (linked via drugRecord.id)
+        // drug_lots.drug_id → drugs.id → drugs.generic_id = generic.id
+        let currentStock = 0;
+        if (drugRecord?.id) {
+          const stockResult = await knex('inventory.drug_lots')
+            .where({ drug_id: drugRecord.id, is_active: true })
+            .sum('quantity_available as total')
+            .first();
+          currentStock = Math.max(0, parseFloat(stockResult?.total || 0));
+        }
 
         // Calculate estimated purchase
         const estimatedPurchase = Math.max(

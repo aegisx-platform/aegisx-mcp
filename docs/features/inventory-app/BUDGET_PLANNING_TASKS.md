@@ -61,7 +61,7 @@ const unitPrice = parseFloat(drugRecord?.unit_price || 0);
 
 ### Task 1.2: Fix Initialize - Get Real currentStock
 
-**Status:** 🔴 TODO
+**Status:** ✅ DONE (2025-12-10)
 **Effort:** 2 hours
 **File:** `apps/api/src/modules/inventory/budget/budgetRequests/budget-requests.service.ts`
 
@@ -72,20 +72,25 @@ const unitPrice = parseFloat(drugRecord?.unit_price || 0);
 const currentStock = 0; // Placeholder - always 0!
 ```
 
-**Solution:**
+**Solution Implemented:**
 
 ```typescript
-// Get current stock from inventory or drug_lots
-const stockResult = await knex('inventory.drug_lots').where({ drug_id: drug?.id }).sum('quantity_remaining as total').first();
-
-const currentStock = parseFloat(stockResult?.total || 0);
+// Get current stock from drug_lots table (linked via drugRecord.id)
+// drug_lots.drug_id → drugs.id → drugs.generic_id = generic.id
+let currentStock = 0;
+if (drugRecord?.id) {
+  const stockResult = await knex('inventory.drug_lots').where({ drug_id: drugRecord.id, is_active: true }).sum('quantity_available as total').first();
+  currentStock = Math.max(0, parseFloat(stockResult?.total || 0));
+}
 ```
+
+**Note:** Column name is `quantity_available` (not `quantity_remaining` as originally documented)
 
 **Acceptance Criteria:**
 
-- [ ] Initialize ดึง stock จาก drug_lots หรือ inventory
-- [ ] estimated_purchase = estimated_usage - currentStock
-- [ ] ถ้า stock เป็นลบให้แสดง 0
+- [x] Initialize ดึง stock จาก drug_lots หรือ inventory
+- [x] estimated_purchase = estimated_usage - currentStock
+- [x] ถ้า stock เป็นลบให้แสดง 0
 
 ---
 
