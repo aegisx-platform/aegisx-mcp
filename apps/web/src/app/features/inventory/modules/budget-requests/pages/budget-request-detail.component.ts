@@ -432,6 +432,64 @@ interface BudgetRequestItem {
                   </button>
                 }
               </div>
+
+              <!-- Data Filter Chips -->
+              @if (items().length > 0) {
+                <div
+                  class="flex items-center gap-2 mt-3 pt-3 border-t border-gray-200"
+                >
+                  <span class="text-sm text-gray-500 mr-2">กรอง:</span>
+                  <mat-chip-listbox
+                    [(ngModel)]="dataFilter"
+                    class="!gap-2"
+                    aria-label="เลือก filter"
+                  >
+                    <mat-chip-option
+                      value="all"
+                      [selected]="dataFilter === 'all'"
+                    >
+                      ทั้งหมด ({{ items().length }})
+                    </mat-chip-option>
+                    <mat-chip-option
+                      value="zero_price"
+                      [selected]="dataFilter === 'zero_price'"
+                      [disabled]="zeroPriceCount() === 0"
+                      class="!text-orange-700 !bg-orange-50"
+                    >
+                      <mat-icon class="!text-base !mr-1">attach_money</mat-icon>
+                      ราคา = 0 ({{ zeroPriceCount() }})
+                    </mat-chip-option>
+                    <mat-chip-option
+                      value="zero_qty"
+                      [selected]="dataFilter === 'zero_qty'"
+                      [disabled]="zeroQtyCount() === 0"
+                      class="!text-red-700 !bg-red-50"
+                    >
+                      <mat-icon class="!text-base !mr-1">inventory</mat-icon>
+                      จำนวน = 0 ({{ zeroQtyCount() }})
+                    </mat-chip-option>
+                    <mat-chip-option
+                      value="zero_any"
+                      [selected]="dataFilter === 'zero_any'"
+                      [disabled]="zeroAnyCount() === 0"
+                      class="!text-purple-700 !bg-purple-50"
+                    >
+                      <mat-icon class="!text-base !mr-1">warning</mat-icon>
+                      มีค่า 0 ({{ zeroAnyCount() }})
+                    </mat-chip-option>
+                  </mat-chip-listbox>
+                  @if (dataFilter !== 'all') {
+                    <button
+                      mat-icon-button
+                      (click)="dataFilter = 'all'"
+                      matTooltip="ล้าง filter"
+                      class="!ml-2"
+                    >
+                      <mat-icon class="!text-base">clear</mat-icon>
+                    </button>
+                  }
+                </div>
+              }
             </mat-card-content>
           </mat-card>
 
@@ -1002,6 +1060,7 @@ export class BudgetRequestDetailComponent implements OnInit {
   // Search
   searchTerm = '';
   searchField = 'all';
+  dataFilter: 'all' | 'zero_price' | 'zero_qty' | 'zero_any' = 'all';
 
   // Pagination
   pageSize = 50;
@@ -1036,6 +1095,26 @@ export class BudgetRequestDetailComponent implements OnInit {
   filteredItems = computed(() => {
     let result = this.items();
 
+    // Apply data filter (zero price/qty)
+    if (this.dataFilter === 'zero_price') {
+      result = result.filter(
+        (item) => !item.unit_price || item.unit_price === 0,
+      );
+    } else if (this.dataFilter === 'zero_qty') {
+      result = result.filter(
+        (item) => !item.requested_qty || item.requested_qty === 0,
+      );
+    } else if (this.dataFilter === 'zero_any') {
+      result = result.filter(
+        (item) =>
+          !item.unit_price ||
+          item.unit_price === 0 ||
+          !item.requested_qty ||
+          item.requested_qty === 0,
+      );
+    }
+
+    // Apply search filter
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
       result = result.filter((item) => {
@@ -1075,6 +1154,27 @@ export class BudgetRequestDetailComponent implements OnInit {
   // Selection computed signals
   selectedCount = computed(() => this.selectedItemIds().size);
   hasSelection = computed(() => this.selectedItemIds().size > 0);
+
+  // Data filter counts
+  zeroPriceCount = computed(
+    () =>
+      this.items().filter((i) => !i.unit_price || i.unit_price === 0).length,
+  );
+  zeroQtyCount = computed(
+    () =>
+      this.items().filter((i) => !i.requested_qty || i.requested_qty === 0)
+        .length,
+  );
+  zeroAnyCount = computed(
+    () =>
+      this.items().filter(
+        (i) =>
+          !i.unit_price ||
+          i.unit_price === 0 ||
+          !i.requested_qty ||
+          i.requested_qty === 0,
+      ).length,
+  );
   isAllSelected = computed(() => {
     const items = this.items();
     const selected = this.selectedItemIds();
@@ -1274,6 +1374,7 @@ export class BudgetRequestDetailComponent implements OnInit {
 
   clearSearch() {
     this.searchTerm = '';
+    this.dataFilter = 'all';
     this.pageIndex = 0;
     this.items.set([...this.items()]);
   }
