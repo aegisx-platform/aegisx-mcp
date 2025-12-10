@@ -26,7 +26,12 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { firstValueFrom } from 'rxjs';
-import { AxDialogService, AxErrorStateComponent } from '@aegisx/ui';
+import {
+  AxDialogService,
+  AxErrorStateComponent,
+  AxStatsCardComponent,
+  AxAlertComponent,
+} from '@aegisx/ui';
 import { AddDrugDialogComponent } from '../components/add-drug-dialog.component';
 import { BudgetRequestImportDialogComponent } from '../components/budget-request-import-dialog.component';
 import {
@@ -46,6 +51,8 @@ interface BudgetRequest {
   updated_at: string;
 }
 
+type EdCategory = 'ED' | 'NED' | 'CM' | 'NDMS' | null;
+
 interface BudgetRequestItem {
   id: number;
   line_number: number;
@@ -60,6 +67,11 @@ interface BudgetRequestItem {
   q2_qty: number;
   q3_qty: number;
   q4_qty: number;
+  // Drug category fields from API
+  budget_type_id?: number | null;
+  budget_category_id?: number | null;
+  // ED Classification from drug_generics
+  ed_category?: EdCategory;
   // Historical data (JSONB from backend)
   historical_usage?: Record<string, number>;
   avg_usage?: number;
@@ -90,6 +102,8 @@ interface BudgetRequestItem {
     MatDialogModule,
     MatCheckboxModule,
     AxErrorStateComponent,
+    AxStatsCardComponent,
+    AxAlertComponent,
   ],
   template: `
     <div class="min-h-screen bg-[var(--ax-background-subtle)] p-6">
@@ -148,6 +162,36 @@ interface BudgetRequestItem {
             </div>
           </mat-card-content>
         </mat-card>
+
+        <!-- Budget Category Stats Cards -->
+        @if (items().length > 0) {
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <ax-stats-card
+              title="ในบัญชี (ED)"
+              [value]="'฿' + (inListAmount() | number: '1.2-2')"
+              [change]="inListCount() + ' รายการ'"
+              icon="medication"
+            ></ax-stats-card>
+            <ax-stats-card
+              title="นอกบัญชี (Non-ED)"
+              [value]="'฿' + (outListAmount() | number: '1.2-2')"
+              [change]="outListCount() + ' รายการ'"
+              icon="medical_services"
+            ></ax-stats-card>
+            <ax-stats-card
+              title="ยาสารเคมี"
+              [value]="'฿' + (chemicalAmount() | number: '1.2-2')"
+              [change]="chemicalCount() + ' รายการ'"
+              icon="science"
+            ></ax-stats-card>
+            <ax-stats-card
+              title="ยอดรวมทั้งหมด"
+              [value]="'฿' + (totalAmount() | number: '1.2-2')"
+              [change]="items().length + ' รายการ'"
+              icon="account_balance_wallet"
+            ></ax-stats-card>
+          </div>
+        }
 
         <!-- Action Loading Overlay -->
         @if (actionLoading()) {
@@ -672,6 +716,55 @@ interface BudgetRequestItem {
                     </td>
                   </ng-container>
 
+                  <!-- Trend Sparkline Column -->
+                  <ng-container matColumnDef="trend">
+                    <th
+                      mat-header-cell
+                      *matHeaderCellDef
+                      class="!text-center !w-20"
+                    >
+                      แนวโน้ม
+                    </th>
+                    <td
+                      mat-cell
+                      *matCellDef="let item"
+                      class="!text-center !px-1"
+                    >
+                      <div
+                        class="sparkline-container"
+                        [matTooltip]="getSparklineTooltip(item)"
+                      >
+                        <svg
+                          width="60"
+                          height="24"
+                          viewBox="0 0 60 24"
+                          class="sparkline"
+                        >
+                          <polyline
+                            [attr.points]="getSparklinePoints(item)"
+                            fill="none"
+                            [attr.stroke]="getSparklineColor(item)"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          />
+                          <!-- Data points -->
+                          @for (
+                            point of getSparklineDataPoints(item);
+                            track $index
+                          ) {
+                            <circle
+                              [attr.cx]="point.x"
+                              [attr.cy]="point.y"
+                              r="3"
+                              [attr.fill]="getSparklineColor(item)"
+                            />
+                          }
+                        </svg>
+                      </div>
+                    </td>
+                  </ng-container>
+
                   <!-- Estimated Usage 2569 Column -->
                   <ng-container matColumnDef="estimated_usage_2569">
                     <th mat-header-cell *matHeaderCellDef class="!text-right">
@@ -917,38 +1010,66 @@ interface BudgetRequestItem {
             }
           }
 
-          <!-- Summary Footer -->
-          @if (items().length > 0) {
-            <mat-card class="!shadow-sm">
+          <!-- Validation Warnings Section -->
+          @if (
+            items().length > 0 && (zeroPriceCount() > 0 || zeroQtyCount() > 0)
+          ) {
+            <mat-card
+              class="!shadow-sm !border-l-4 !border-l-orange-500 !bg-orange-50"
+            >
               <mat-card-content class="!p-4">
-                <div class="flex items-center justify-between flex-wrap gap-4">
-                  <div class="flex items-center gap-6">
-                    <div class="flex items-center gap-2">
-                      <mat-icon class="text-[var(--ax-text-secondary)]"
-                        >inventory_2</mat-icon
-                      >
-                      <span class="text-sm text-[var(--ax-text-secondary)]"
-                        >รายการทั้งหมด:</span
-                      >
-                      <span class="font-bold text-[var(--ax-text-default)]">{{
-                        items().length | number
-                      }}</span>
+                <div class="flex items-start gap-3">
+                  <mat-icon class="text-orange-500 !text-2xl">warning</mat-icon>
+                  <div class="flex-1">
+                    <div class="font-semibold text-orange-800 mb-2">
+                      ตรวจสอบข้อมูลก่อนบันทึก
                     </div>
-                    <div class="flex items-center gap-2">
-                      <mat-icon class="text-[var(--ax-text-secondary)]"
-                        >payments</mat-icon
-                      >
-                      <span class="text-sm text-[var(--ax-text-secondary)]"
-                        >รวมมูลค่า:</span
-                      >
-                      <span class="font-bold text-[var(--ax-success-default)]"
-                        >{{ totalAmount() | number: '1.2-2' }} บาท</span
-                      >
+                    <div class="flex flex-wrap gap-4 text-sm">
+                      @if (zeroPriceCount() > 0) {
+                        <div
+                          class="flex items-center gap-2 px-3 py-1.5 bg-orange-100 rounded-lg cursor-pointer hover:bg-orange-200 transition-colors"
+                          (click)="dataFilter = 'zero_price'; applySearch()"
+                        >
+                          <mat-icon class="!text-lg text-orange-600"
+                            >attach_money</mat-icon
+                          >
+                          <span class="text-orange-800">
+                            <span class="font-bold">{{
+                              zeroPriceCount()
+                            }}</span>
+                            รายการ ราคา = 0
+                          </span>
+                        </div>
+                      }
+                      @if (zeroQtyCount() > 0) {
+                        <div
+                          class="flex items-center gap-2 px-3 py-1.5 bg-orange-100 rounded-lg cursor-pointer hover:bg-orange-200 transition-colors"
+                          (click)="dataFilter = 'zero_qty'; applySearch()"
+                        >
+                          <mat-icon class="!text-lg text-orange-600"
+                            >inventory</mat-icon
+                          >
+                          <span class="text-orange-800">
+                            <span class="font-bold">{{ zeroQtyCount() }}</span>
+                            รายการ จำนวน = 0
+                          </span>
+                        </div>
+                      }
                     </div>
                   </div>
                 </div>
               </mat-card-content>
             </mat-card>
+          }
+
+          <!-- Uncategorized items note -->
+          @if (items().length > 0 && uncategorizedCount() > 0) {
+            <div class="text-xs text-gray-500 flex items-center gap-1">
+              <mat-icon class="!text-sm">info</mat-icon>
+              มี {{ uncategorizedCount() }} รายการ (฿{{
+                uncategorizedAmount() | number: '1.2-2'
+              }}) ที่ยังไม่ได้จัดหมวดหมู่
+            </div>
           }
         }
       </div>
@@ -1036,6 +1157,22 @@ interface BudgetRequestItem {
         .mat-mdc-cell.sticky-column {
         background-color: #bfdbfe !important;
       }
+      /* Sparkline mini chart */
+      .sparkline-container {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2px 4px;
+        background: #f8fafc;
+        border-radius: 4px;
+        cursor: help;
+      }
+      .sparkline-container:hover {
+        background: #f1f5f9;
+      }
+      .sparkline {
+        display: block;
+      }
     `,
   ],
 })
@@ -1079,6 +1216,7 @@ export class BudgetRequestDetailComponent implements OnInit {
     'usage_2567',
     'usage_2568',
     'avg_usage',
+    'trend',
     'estimated_usage_2569',
     'current_stock',
     'unit_price',
@@ -1175,6 +1313,55 @@ export class BudgetRequestDetailComponent implements OnInit {
           i.requested_qty === 0,
       ).length,
   );
+
+  // Category stats computed signals (ed_category from drug_generics)
+  // ED = ยาในบัญชียาหลัก, NED = ยานอกบัญชี, CM = ยาเคมี/สัญญา, NDMS = ยา NDMS
+  inListAmount = computed(() => {
+    return this.items()
+      .filter((i) => i.ed_category === 'ED')
+      .reduce((sum, item) => sum + (item.requested_amount || 0), 0);
+  });
+  outListAmount = computed(() => {
+    return this.items()
+      .filter((i) => i.ed_category === 'NED')
+      .reduce((sum, item) => sum + (item.requested_amount || 0), 0);
+  });
+  chemicalAmount = computed(() => {
+    return this.items()
+      .filter((i) => i.ed_category === 'CM' || i.ed_category === 'NDMS')
+      .reduce((sum, item) => sum + (item.requested_amount || 0), 0);
+  });
+  uncategorizedAmount = computed(() => {
+    return this.items()
+      .filter(
+        (i) =>
+          !i.ed_category ||
+          !['ED', 'NED', 'CM', 'NDMS'].includes(i.ed_category),
+      )
+      .reduce((sum, item) => sum + (item.requested_amount || 0), 0);
+  });
+  // Count by category
+  inListCount = computed(
+    () => this.items().filter((i) => i.ed_category === 'ED').length,
+  );
+  outListCount = computed(
+    () => this.items().filter((i) => i.ed_category === 'NED').length,
+  );
+  chemicalCount = computed(
+    () =>
+      this.items().filter(
+        (i) => i.ed_category === 'CM' || i.ed_category === 'NDMS',
+      ).length,
+  );
+  uncategorizedCount = computed(
+    () =>
+      this.items().filter(
+        (i) =>
+          !i.ed_category ||
+          !['ED', 'NED', 'CM', 'NDMS'].includes(i.ed_category),
+      ).length,
+  );
+
   isAllSelected = computed(() => {
     const items = this.items();
     const selected = this.selectedItemIds();
@@ -1364,6 +1551,99 @@ export class BudgetRequestDetailComponent implements OnInit {
       return item.historical_usage[year] || 0;
     }
     return 0;
+  }
+
+  /**
+   * Get SVG polyline points for sparkline chart
+   * Returns string format: "x1,y1 x2,y2 x3,y3"
+   */
+  getSparklinePoints(item: BudgetRequestItem): string {
+    const values = [
+      this.getHistoricalUsage(item, '2566'),
+      this.getHistoricalUsage(item, '2567'),
+      this.getHistoricalUsage(item, '2568'),
+    ];
+
+    const max = Math.max(...values, 1); // Avoid division by zero
+    const min = Math.min(...values);
+    const range = max - min || 1;
+
+    // SVG viewBox is 60x24, leave padding
+    const width = 60;
+    const height = 24;
+    const padding = 4;
+    const chartHeight = height - padding * 2;
+
+    const points = values.map((val, i) => {
+      const x = padding + (i * (width - padding * 2)) / 2;
+      // Invert Y because SVG 0,0 is top-left
+      const y = padding + chartHeight - ((val - min) / range) * chartHeight;
+      return `${x},${y}`;
+    });
+
+    return points.join(' ');
+  }
+
+  /**
+   * Get data points for sparkline circles
+   */
+  getSparklineDataPoints(item: BudgetRequestItem): { x: number; y: number }[] {
+    const values = [
+      this.getHistoricalUsage(item, '2566'),
+      this.getHistoricalUsage(item, '2567'),
+      this.getHistoricalUsage(item, '2568'),
+    ];
+
+    const max = Math.max(...values, 1);
+    const min = Math.min(...values);
+    const range = max - min || 1;
+
+    const width = 60;
+    const height = 24;
+    const padding = 4;
+    const chartHeight = height - padding * 2;
+
+    return values.map((val, i) => ({
+      x: padding + (i * (width - padding * 2)) / 2,
+      y: padding + chartHeight - ((val - min) / range) * chartHeight,
+    }));
+  }
+
+  /**
+   * Get sparkline color based on trend direction
+   */
+  getSparklineColor(item: BudgetRequestItem): string {
+    const usage2566 = this.getHistoricalUsage(item, '2566');
+    const usage2567 = this.getHistoricalUsage(item, '2567');
+    const usage2568 = this.getHistoricalUsage(item, '2568');
+
+    // No data - gray
+    if (usage2566 === 0 && usage2567 === 0 && usage2568 === 0) {
+      return '#9ca3af'; // gray-400
+    }
+
+    // Calculate overall trend (first to last)
+    const firstNonZero = usage2566 || usage2567 || 1;
+    const lastValue = usage2568 || usage2567 || usage2566;
+    const overallChange = (lastValue - firstNonZero) / firstNonZero;
+
+    if (overallChange > 0.05) {
+      return '#16a34a'; // green-600 (increasing)
+    } else if (overallChange < -0.05) {
+      return '#dc2626'; // red-600 (decreasing)
+    }
+    return '#6b7280'; // gray-500 (flat)
+  }
+
+  /**
+   * Get tooltip text for sparkline
+   */
+  getSparklineTooltip(item: BudgetRequestItem): string {
+    const usage2566 = this.getHistoricalUsage(item, '2566');
+    const usage2567 = this.getHistoricalUsage(item, '2567');
+    const usage2568 = this.getHistoricalUsage(item, '2568');
+
+    return `ปี66: ${usage2566.toLocaleString()} | ปี67: ${usage2567.toLocaleString()} | ปี68: ${usage2568.toLocaleString()}`;
   }
 
   applySearch() {
