@@ -900,7 +900,7 @@ export class BudgetRequestsController {
         { error: error.message, budgetRequestId: id },
         'Failed to add item',
       );
-      return reply.code(422).error('ADD_ITEM_FAILED', error.message);
+      return reply.error('ADD_ITEM_FAILED', error.message, 422);
     }
   }
 
