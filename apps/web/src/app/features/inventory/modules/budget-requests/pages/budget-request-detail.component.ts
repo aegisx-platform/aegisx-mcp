@@ -148,9 +148,19 @@ interface BudgetRequestItem {
                     color="primary"
                     (click)="initialize()"
                     [disabled]="actionLoading()"
+                    matTooltip="ดึงรายการยาพร้อมคำนวณยอดใช้ย้อนหลัง ราคา และสต็อก"
                   >
                     <mat-icon>auto_fix_high</mat-icon>
                     <span class="ml-1">Initialize</span>
+                  </button>
+                  <button
+                    mat-stroked-button
+                    (click)="initializeFromMaster()"
+                    [disabled]="actionLoading()"
+                    matTooltip="ดึงรายการยาจาก Drug Master (ไม่คำนวณยอดใช้)"
+                  >
+                    <mat-icon>playlist_add</mat-icon>
+                    <span class="ml-1">From Master</span>
                   </button>
                   <button
                     mat-stroked-button
@@ -299,18 +309,29 @@ interface BudgetRequestItem {
                   ยังไม่มีรายการยา
                 </h3>
                 <p class="text-sm text-[var(--ax-text-secondary)] mb-4">
-                  คลิก "Initialize" เพื่อดึงรายการยาจาก Drug Master
+                  คลิก "Initialize" เพื่อดึงรายการยาพร้อมคำนวณยอดใช้<br />
+                  หรือ "From Master" เพื่อดึงรายการยาเปล่าๆ
                 </p>
                 @if (budgetRequest()?.status === 'DRAFT') {
-                  <button
-                    mat-raised-button
-                    color="primary"
-                    (click)="initialize()"
-                    [disabled]="actionLoading()"
-                  >
-                    <mat-icon>auto_fix_high</mat-icon>
-                    Initialize from Drug Master
-                  </button>
+                  <div class="flex gap-3 justify-center">
+                    <button
+                      mat-raised-button
+                      color="primary"
+                      (click)="initialize()"
+                      [disabled]="actionLoading()"
+                    >
+                      <mat-icon>auto_fix_high</mat-icon>
+                      Initialize
+                    </button>
+                    <button
+                      mat-stroked-button
+                      (click)="initializeFromMaster()"
+                      [disabled]="actionLoading()"
+                    >
+                      <mat-icon>playlist_add</mat-icon>
+                      From Master
+                    </button>
+                  </div>
                 }
               </mat-card-content>
             </mat-card>
@@ -922,7 +943,7 @@ export class BudgetRequestDetailComponent implements OnInit {
   async initialize() {
     if (
       !confirm(
-        'ต้องการ Initialize รายการยาจาก Drug Master หรือไม่?\n\nหากมีข้อมูลอยู่แล้ว จะถูกเขียนทับ',
+        'ต้องการ Initialize รายการยาจาก Drug Master หรือไม่?\n\n• จะดึงรายการยาทั้งหมด\n• คำนวณยอดใช้ย้อนหลัง 3 ปี\n• ดึงราคาและสต็อกปัจจุบัน\n\nหากมีข้อมูลอยู่แล้ว จะถูกเขียนทับ',
       )
     )
       return;
@@ -945,6 +966,40 @@ export class BudgetRequestDetailComponent implements OnInit {
     } catch (error: any) {
       this.snackBar.open(
         error?.error?.message || 'Initialize ไม่สำเร็จ',
+        'ปิด',
+        { duration: 3000 },
+      );
+    } finally {
+      this.actionLoading.set(false);
+    }
+  }
+
+  async initializeFromMaster() {
+    if (
+      !confirm(
+        'ต้องการดึงรายการยาจาก Drug Master หรือไม่?\n\n• จะดึงรายการยาทั้งหมด\n• ไม่คำนวณยอดใช้ย้อนหลัง\n• ค่าทุกอย่างจะเป็น 0\n\nหากมีข้อมูลอยู่แล้ว จะถูกเขียนทับ',
+      )
+    )
+      return;
+
+    this.actionLoading.set(true);
+    try {
+      const response = await firstValueFrom(
+        this.http.post<any>(
+          `/inventory/budget/budget-requests/${this.requestId}/initialize-from-master`,
+          {},
+        ),
+      );
+      this.snackBar.open(
+        `ดึงรายการยาสำเร็จ ${response.data?.itemsCreated || 0} รายการ`,
+        'ปิด',
+        { duration: 3000 },
+      );
+      await this.loadItems();
+      await this.loadData();
+    } catch (error: any) {
+      this.snackBar.open(
+        error?.error?.message || 'ดึงรายการยาไม่สำเร็จ',
         'ปิด',
         { duration: 3000 },
       );

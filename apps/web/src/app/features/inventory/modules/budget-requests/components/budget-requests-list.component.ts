@@ -10,7 +10,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { fromEventPattern } from 'rxjs';
 import {
   trigger,
@@ -115,6 +115,7 @@ export class BudgetRequestsListComponent {
   private dialog = inject(MatDialog);
   private axDialog = inject(AxDialogService);
   private cdr = inject(ChangeDetectorRef);
+  private router = inject(Router);
 
   // Breadcrumb configuration
   breadcrumbItems: BreadcrumbItem[] = [
@@ -802,5 +803,14 @@ export class BudgetRequestsListComponent {
 
   isRowExpanded(budgetRequest: BudgetRequest): boolean {
     return this.expandedBudgetRequest()?.id === budgetRequest.id;
+  }
+
+  // Navigate to Budget Request Items page
+  onRowClick(budgetRequest: BudgetRequest): void {
+    this.router.navigate([
+      '/inventory/budget/budget-requests',
+      budgetRequest.id,
+      'items',
+    ]);
   }
 }

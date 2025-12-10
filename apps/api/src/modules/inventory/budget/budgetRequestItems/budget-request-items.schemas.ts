@@ -109,7 +109,7 @@ export const GetBudgetRequestItemsQuerySchema = Type.Object({
 export const ListBudgetRequestItemsQuerySchema = Type.Object({
   // Pagination parameters
   page: Type.Optional(Type.Number({ minimum: 1, default: 1 })),
-  limit: Type.Optional(Type.Number({ minimum: 1, maximum: 1000, default: 20 })),
+  limit: Type.Optional(Type.Number({ minimum: 1, maximum: 5000, default: 20 })),
   // Modern multiple sort support
   sort: Type.Optional(
     Type.String({

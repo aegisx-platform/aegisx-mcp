@@ -640,6 +640,116 @@ export class BudgetRequestsService extends BaseService<
   }
 
   /**
+   * Initialize budget request from Drug Master (no calculation)
+   * Pulls all active drug generics WITHOUT historical calculation.
+   * Creates items with default values (qty=0, price=0).
+   * Status: Must be DRAFT
+   */
+  async initializeFromMaster(
+    id: string | number,
+    userId: string,
+  ): Promise<{
+    success: boolean;
+    itemsCreated: number;
+    message: string;
+  }> {
+    const request = await this.budgetRequestsRepository.findById(id);
+
+    if (!request) {
+      throw new Error('Budget request not found');
+    }
+
+    if (request.status !== 'DRAFT') {
+      throw new Error(
+        `Cannot initialize budget request with status: ${request.status}. Must be DRAFT.`,
+      );
+    }
+
+    // Get knex instance from repository
+    const knex = (this.budgetRequestsRepository as any).knex;
+
+    try {
+      console.log(
+        `Starting initialization from Drug Master for budget request ${id}...`,
+      );
+
+      // Step 1: Get all active drug generics
+      const drugGenerics = await knex('inventory.drug_generics')
+        .where({ is_active: true })
+        .select('*')
+        .orderBy('working_code');
+
+      console.log(`Found ${drugGenerics.length} active drug generics`);
+
+      if (drugGenerics.length === 0) {
+        return {
+          success: false,
+          itemsCreated: 0,
+          message: 'No active drug generics found',
+        };
+      }
+
+      let itemsCreated = 0;
+
+      // Step 2: For each drug generic, create item with default values (no calculation)
+      for (const generic of drugGenerics) {
+        // Create budget_request_item with default values
+        await knex('inventory.budget_request_items').insert({
+          budget_request_id: id,
+          budget_id: 1, // Default budget
+
+          // Drug information
+          generic_id: generic.id,
+          generic_code: generic.working_code,
+          generic_name: generic.generic_name,
+          package_size: generic.package_size || '',
+          unit: generic.unit || '',
+          line_number: itemsCreated + 1,
+
+          // Historical usage - empty (no calculation)
+          historical_usage: JSON.stringify({}),
+          avg_usage: 0,
+
+          // Planning data - all zeros
+          estimated_usage_2569: 0,
+          current_stock: 0,
+          estimated_purchase: 0,
+
+          // Pricing and quantities - all zeros
+          unit_price: 0,
+          requested_qty: 0,
+          requested_amount: 0,
+
+          // Quarterly distribution - all zeros
+          q1_qty: 0,
+          q2_qty: 0,
+          q3_qty: 0,
+          q4_qty: 0,
+
+          // Audit
+          created_at: new Date(),
+          updated_at: new Date(),
+        });
+
+        itemsCreated++;
+      }
+
+      console.log(
+        `Successfully initialized ${itemsCreated} items from Drug Master (no calculation)`,
+      );
+
+      return {
+        success: true,
+        itemsCreated,
+        message: `Successfully initialized ${itemsCreated} drug items from Drug Master (no historical calculation)`,
+      };
+    } catch (error) {
+      console.error('Error initializing from Drug Master:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Calculate yearly usage for a drug generic from drug_distributions
    * @param knex Knex instance
    * @param genericId Generic drug ID

@@ -426,8 +426,9 @@
             <tr
               mat-row
               *matRowDef="let row; columns: displayedColumns"
-              class="hover:bg-[var(--ax-background-subtle)]"
+              class="hover:bg-[var(--ax-background-subtle)] cursor-pointer"
               [attr.data-budgetrequest-id]="row.id"
+              (click)="onRowClick(row)"
             ></tr>
             <tr
               mat-row

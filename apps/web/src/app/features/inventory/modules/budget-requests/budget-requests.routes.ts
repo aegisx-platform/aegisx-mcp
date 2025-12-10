@@ -10,6 +10,14 @@ export const budgetRequestsRoutes: Routes = [
     title: 'Budget Requests',
   },
   {
+    path: ':id/items',
+    loadComponent: () =>
+      import('./pages/budget-request-detail.component').then(
+        (m) => m.BudgetRequestDetailComponent,
+      ),
+    title: 'Budget Request Items',
+  },
+  {
     path: ':id/edit',
     loadComponent: () =>
       import('./pages/budget-request-edit.component').then(

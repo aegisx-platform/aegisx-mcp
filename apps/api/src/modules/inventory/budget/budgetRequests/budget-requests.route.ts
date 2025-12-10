@@ -11,7 +11,10 @@ import {
   BudgetRequestsListResponseSchema,
   FlexibleBudgetRequestsListResponseSchema,
 } from './budget-requests.schemas';
-import { ApiErrorResponseSchema as ErrorResponseSchema } from '../../../../schemas/base.schemas';
+import {
+  ApiErrorResponseSchema,
+  ApiMetaSchema,
+} from '../../../../schemas/base.schemas';
 import { SchemaRefs } from '../../../../schemas/registry';
 
 export interface BudgetRequestsRoutesOptions extends FastifyPluginOptions {
@@ -304,7 +307,7 @@ export async function budgetRequestsRoutes(
             environment: Type.String(),
           }),
         }),
-        400: SchemaRefs.ValidationError,
+        400: ApiErrorResponseSchema, // Use flexible error schema (details is optional)
         401: SchemaRefs.Unauthorized,
         403: SchemaRefs.Forbidden,
         404: SchemaRefs.NotFound,
@@ -316,6 +319,44 @@ export async function budgetRequestsRoutes(
       fastify.verifyPermission('budgetRequests', 'create'), // Using create permission for initialization
     ],
     handler: controller.initialize.bind(controller),
+  });
+
+  // Initialize from Drug Master (no calculation)
+  fastify.post('/:id/initialize-from-master', {
+    schema: {
+      tags: ['Inventory: Budget Requests'],
+      summary: 'Initialize from Drug Master (no calculation)',
+      description:
+        'Pull all active drug generics WITHOUT historical calculation. Creates items with default values (qty=0, price=0). Status must be DRAFT.',
+      params: BudgetRequestsIdParamSchema,
+      response: {
+        200: Type.Object({
+          success: Type.Boolean(),
+          data: Type.Object({
+            success: Type.Boolean(),
+            itemsCreated: Type.Number(),
+            message: Type.String(),
+          }),
+          message: Type.String(),
+          meta: Type.Object({
+            timestamp: Type.String(),
+            version: Type.String(),
+            requestId: Type.String(),
+            environment: Type.String(),
+          }),
+        }),
+        400: ApiErrorResponseSchema,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        404: SchemaRefs.NotFound,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [
+      fastify.authenticate,
+      fastify.verifyPermission('budgetRequests', 'create'),
+    ],
+    handler: controller.initializeFromMaster.bind(controller),
   });
 
   // Import Excel/CSV file
@@ -351,7 +392,7 @@ export async function budgetRequestsRoutes(
             environment: Type.String(),
           }),
         }),
-        400: SchemaRefs.ValidationError,
+        400: ApiErrorResponseSchema, // Use flexible error schema (details is optional)
         401: SchemaRefs.Unauthorized,
         403: SchemaRefs.Forbidden,
         404: SchemaRefs.NotFound,

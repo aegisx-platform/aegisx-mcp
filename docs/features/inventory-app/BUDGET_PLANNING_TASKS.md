@@ -20,8 +20,8 @@
 
 | Category    | Done | Partial | Todo | Total |
 | ----------- | :--: | :-----: | :--: | :---: |
-| Backend API |  12  |    2    |  3   |  17   |
-| Frontend UI |  8   |    3    |  4   |  15   |
+| Backend API |  13  |    2    |  2   |  17   |
+| Frontend UI |  9   |    3    |  3   |  15   |
 | Database    |  3   |    0    |  2   |   5   |
 
 ---
@@ -221,7 +221,7 @@ row.getCell(8).value = historicalUsage[String(histYear3)] || 0;
 
 ### Task 1.5: Separate "Initialize from Drug Master" API
 
-**Status:** 🔴 TODO
+**Status:** ✅ DONE (2025-12-10)
 **Effort:** 4 hours
 **Files:**
 
@@ -229,85 +229,37 @@ row.getCell(8).value = historicalUsage[String(histYear3)] || 0;
 - `apps/api/src/modules/inventory/budget/budgetRequests/budget-requests.route.ts`
 - `apps/web/src/app/features/inventory/modules/budget-requests/pages/budget-request-detail.component.ts`
 
-**Background:**
-User มี 2 ปุ่มใน UI:
+**Solution Implemented:**
 
-1. **Initialize** - คำนวณ historical usage + สร้าง items
-2. **Initialize from Drug Master** - ดึงรายการยามาเฉยๆ ไม่คำนวณ
+**Backend:**
 
-ปัจจุบันทั้งสองปุ่มเรียก API เดียวกัน!
+- Added new route `POST /:id/initialize-from-master`
+- Added controller method `initializeFromMaster`
+- Added service method `initializeFromMaster` that:
+  - Pulls all active drug generics from `inventory.drug_generics`
+  - Creates budget_request_items with default values (all zeros)
+  - Does NOT calculate historical usage, stock, or prices
 
-**Solution - Add new endpoint:**
+**Frontend:**
 
-```typescript
-// Route (budget-requests.route.ts)
-fastify.post('/:id/initialize-from-master', {
-  schema: {
-    tags: ['Inventory: Budget Requests'],
-    summary: 'Initialize from Drug Master (no calculation)',
-    description: 'Pull all active drug generics without historical calculation',
-    params: BudgetRequestsIdParamSchema,
-    response: { ... }
-  },
-  preValidation: [...],
-  handler: controller.initializeFromMaster.bind(controller),
-});
-```
+- Added "From Master" button next to "Initialize" button
+- Button has tooltip explaining the difference
+- Calls new API endpoint `/initialize-from-master`
+- Shows confirmation dialog with bullet points explaining the behavior
 
-```typescript
-// Service (budget-requests.service.ts)
-async initializeFromMaster(
-  id: string | number,
-  userId: string,
-): Promise<{ success: boolean; itemsCreated: number; message: string }> {
-  // Similar to initialize() but:
-  // - Skip historical usage calculation
-  // - Skip current stock lookup
-  // - Just create items with drug info + default values
-
-  const drugGenerics = await knex('inventory.drug_generics')
-    .where({ is_active: true })
-    .select('*');
-
-  for (const generic of drugGenerics) {
-    await knex('inventory.budget_request_items').insert({
-      budget_request_id: id,
-      generic_id: generic.id,
-      generic_code: generic.working_code,
-      generic_name: generic.generic_name,
-      unit: generic.unit || '',
-      historical_usage: JSON.stringify({}),  // Empty
-      avg_usage: 0,
-      estimated_usage_2569: 0,
-      current_stock: 0,
-      unit_price: 0,
-      requested_qty: 0,
-      q1_qty: 0, q2_qty: 0, q3_qty: 0, q4_qty: 0,
-      // ... other fields
-    });
-  }
-}
-```
-
-**Frontend - Update button:**
-
-```typescript
-// budget-request-detail.component.ts
-async initializeFromMaster() {
-  if (!confirm('ต้องการดึงรายการยาจาก Drug Master หรือไม่?\n(ไม่คำนวณยอดใช้ย้อนหลัง)')) return;
-
-  await firstValueFrom(
-    this.http.post<any>(`/inventory/budget/budget-requests/${this.requestId}/initialize-from-master`, {})
-  );
-  // ...
-}
-```
+**Difference between the two buttons:**
+| Feature | Initialize | From Master |
+|---------|------------|-------------|
+| Historical Usage | Calculated from drug_distributions | Empty ({}) |
+| Unit Price | From drugs table | 0 |
+| Current Stock | From drug_lots | 0 |
+| Quarterly Distribution | 25% each | 0 |
 
 **Acceptance Criteria:**
 
-- [ ] มี 2 ปุ่มแยกกัน: "Initialize" และ "Initialize from Drug Master"
-- [ ] Initialize = คำนวณ historical + stock + price
-- [ ] Initialize from Drug Master = ดึงยามาเฉยๆ values = 0
+- [x] มี 2 ปุ่มแยกกัน: "Initialize" และ "From Master"
+- [x] Initialize = คำนวณ historical + stock + price
+- [x] Initialize from Drug Master = ดึงยามาเฉยๆ values = 0
 
 ---
 

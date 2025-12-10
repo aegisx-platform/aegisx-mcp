@@ -474,6 +474,52 @@ export class BudgetRequestsController {
   }
 
   /**
+   * Initialize from Drug Master (no calculation)
+   * POST /budgetRequests/:id/initialize-from-master
+   */
+  async initializeFromMaster(
+    request: FastifyRequest<{
+      Params: Static<typeof BudgetRequestsIdParamSchema>;
+    }>,
+    reply: FastifyReply,
+  ) {
+    const { id } = request.params;
+    const userId = request.user?.id;
+
+    if (!userId) {
+      return reply.code(401).error('UNAUTHORIZED', 'User not authenticated');
+    }
+
+    request.log.info(
+      { budgetRequestsId: id, userId },
+      'Initializing budget request from drug master (no calculation)',
+    );
+
+    try {
+      const result = await this.budgetRequestsService.initializeFromMaster(
+        id,
+        userId,
+      );
+
+      request.log.info(
+        {
+          budgetRequestsId: id,
+          itemsCreated: result.itemsCreated,
+        },
+        'Budget request initialized from drug master successfully',
+      );
+
+      return reply.success(result, result.message);
+    } catch (error: any) {
+      request.log.error(
+        { error: error.message, budgetRequestsId: id },
+        'Failed to initialize budget request from drug master',
+      );
+      return reply.code(400).error('INITIALIZATION_FAILED', error.message);
+    }
+  }
+
+  /**
    * Import Excel/CSV file for budget request items
    * POST /budgetRequests/:id/import-excel
    */
@@ -491,12 +537,14 @@ export class BudgetRequestsController {
     }
 
     try {
-      // Get the uploaded file
-      const data = await request.file();
+      // Use @aegisx/fastify-multipart clean API
+      const { files, fields } = await request.parseMultipart();
 
-      if (!data) {
+      if (!files || files.length === 0) {
         return reply.code(400).error('FILE_REQUIRED', 'File is required');
       }
+
+      const file = files[0];
 
       // Validate file type
       const allowedMimeTypes = [
@@ -505,7 +553,7 @@ export class BudgetRequestsController {
         'text/csv', // .csv
       ];
 
-      if (!allowedMimeTypes.includes(data.mimetype)) {
+      if (!allowedMimeTypes.includes(file.mimetype)) {
         return reply
           .code(422)
           .error(
@@ -516,7 +564,7 @@ export class BudgetRequestsController {
 
       // Validate file size (5 MB limit)
       const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
-      const buffer = await data.toBuffer();
+      const buffer = await file.toBuffer();
 
       if (buffer.length > MAX_FILE_SIZE) {
         return reply
@@ -525,17 +573,14 @@ export class BudgetRequestsController {
       }
 
       // Get replace_all field from multipart data
-      const fields = data.fields as any;
-      const replaceAll =
-        fields?.replace_all?.value === 'true' ||
-        fields?.replace_all?.value === true;
+      const replaceAll = fields?.replace_all === 'true';
 
       request.log.info(
         {
           budgetRequestsId: id,
           userId,
-          filename: data.filename,
-          mimetype: data.mimetype,
+          filename: file.filename,
+          mimetype: file.mimetype,
           size: buffer.length,
           replaceAll,
         },
@@ -850,7 +895,7 @@ export class BudgetRequestsController {
         { error: error.message, budgetRequestId: id },
         'Failed to add item',
       );
-      return reply.code(400).error('ADD_ITEM_FAILED', error.message);
+      return reply.code(422).error('ADD_ITEM_FAILED', error.message);
     }
   }
 
