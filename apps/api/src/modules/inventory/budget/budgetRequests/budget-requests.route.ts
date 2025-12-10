@@ -599,6 +599,43 @@ export async function budgetRequestsRoutes(
     handler: controller.batchUpdateItems.bind(controller),
   });
 
+  // Delete ALL budget request items (bulk delete)
+  fastify.delete('/:id/items', {
+    schema: {
+      tags: ['Inventory: Budget Requests'],
+      summary: 'Delete ALL budget request items',
+      description:
+        'Delete ALL items in a budget request (reset). Only allowed when status = DRAFT. Uses efficient single SQL query.',
+      params: BudgetRequestsIdParamSchema,
+      response: {
+        200: Type.Object({
+          success: Type.Boolean(),
+          data: Type.Object({
+            deletedCount: Type.Number(),
+          }),
+          message: Type.String(),
+          meta: Type.Object({
+            timestamp: Type.String(),
+            version: Type.String(),
+            requestId: Type.String(),
+            environment: Type.String(),
+          }),
+        }),
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        404: SchemaRefs.NotFound,
+        422: SchemaRefs.UnprocessableEntity,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [
+      fastify.authenticate,
+      fastify.verifyPermission('budgetRequests', 'delete'),
+    ],
+    handler: controller.deleteAllItems.bind(controller),
+  });
+
   // Delete budget request item
   fastify.delete('/:id/items/:itemId', {
     schema: {

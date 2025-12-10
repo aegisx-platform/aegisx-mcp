@@ -17,8 +17,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { firstValueFrom } from 'rxjs';
-import { AxDialogService } from '@aegisx/ui';
+import { AxDialogService, AxErrorStateComponent } from '@aegisx/ui';
 import { AddDrugDialogComponent } from '../components/add-drug-dialog.component';
 
 interface BudgetRequest {
@@ -75,6 +76,8 @@ interface BudgetRequestItem {
     MatSelectModule,
     MatPaginatorModule,
     MatDialogModule,
+    MatCheckboxModule,
+    AxErrorStateComponent,
   ],
   template: `
     <div class="min-h-screen bg-[var(--ax-background-subtle)] p-6">
@@ -133,6 +136,23 @@ interface BudgetRequestItem {
           </mat-card-content>
         </mat-card>
 
+        <!-- Action Loading Overlay -->
+        @if (actionLoading()) {
+          <mat-card class="!shadow-sm">
+            <mat-card-content class="!p-8 text-center">
+              <mat-spinner class="!mx-auto" [diameter]="48"></mat-spinner>
+              <p
+                class="text-base font-medium text-[var(--ax-text-default)] mt-4"
+              >
+                {{ actionMessage() || 'กำลังดำเนินการ...' }}
+              </p>
+              <p class="text-sm text-[var(--ax-text-secondary)] mt-1">
+                กรุณารอสักครู่
+              </p>
+            </mat-card-content>
+          </mat-card>
+        }
+
         @if (loading()) {
           <mat-card class="!shadow-sm">
             <mat-card-content class="!p-12 text-center">
@@ -142,6 +162,24 @@ interface BudgetRequestItem {
               </p>
             </mat-card-content>
           </mat-card>
+        } @else if (error()) {
+          <ax-error-state
+            [statusCode]="error()!.status"
+            [message]="error()!.message"
+            [actions]="[
+              {
+                label: 'ลองใหม่',
+                icon: 'refresh',
+                primary: true,
+                callback: retryLoad.bind(this),
+              },
+              {
+                label: 'กลับหน้ารายการ',
+                icon: 'arrow_back',
+                callback: goBack.bind(this),
+              },
+            ]"
+          ></ax-error-state>
         } @else if (budgetRequest()) {
           <!-- Action Bar -->
           <mat-card class="!shadow-sm">
@@ -360,6 +398,31 @@ interface BudgetRequestItem {
                   [dataSource]="filteredItems()"
                   class="w-full items-table"
                 >
+                  <!-- Select Checkbox Column -->
+                  <ng-container matColumnDef="select">
+                    <th
+                      mat-header-cell
+                      *matHeaderCellDef
+                      class="!text-center !w-12"
+                    >
+                      @if (budgetRequest()?.status === 'DRAFT') {
+                        <mat-checkbox
+                          [checked]="isAllSelected()"
+                          [indeterminate]="isIndeterminate()"
+                          (change)="toggleSelectAll()"
+                        ></mat-checkbox>
+                      }
+                    </th>
+                    <td mat-cell *matCellDef="let item" class="!text-center">
+                      @if (budgetRequest()?.status === 'DRAFT') {
+                        <mat-checkbox
+                          [checked]="isSelected(item.id)"
+                          (change)="toggleSelectItem(item.id)"
+                        ></mat-checkbox>
+                      }
+                    </td>
+                  </ng-container>
+
                   <!-- Line Number Column -->
                   <ng-container matColumnDef="line_number">
                     <th
@@ -642,6 +705,41 @@ interface BudgetRequestItem {
               >
               </mat-paginator>
             </mat-card>
+
+            <!-- Selection Floating Bar -->
+            @if (hasSelection() && budgetRequest()?.status === 'DRAFT') {
+              <div
+                class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50
+                       bg-[var(--ax-surface-default)] shadow-lg rounded-lg border border-[var(--ax-border-default)]
+                       px-4 py-3 flex items-center gap-4"
+              >
+                <div class="flex items-center gap-2">
+                  <mat-icon class="text-[var(--ax-primary-default)]"
+                    >check_circle</mat-icon
+                  >
+                  <span class="font-medium text-[var(--ax-text-default)]">
+                    {{ selectedCount() | number }} รายการถูกเลือก
+                  </span>
+                </div>
+                <div class="w-px h-6 bg-[var(--ax-border-default)]"></div>
+                <button
+                  mat-raised-button
+                  color="warn"
+                  (click)="bulkDeleteSelected()"
+                  [disabled]="actionLoading()"
+                >
+                  <mat-icon>delete</mat-icon>
+                  <span class="ml-1">ลบที่เลือก</span>
+                </button>
+                <button
+                  mat-icon-button
+                  (click)="clearSelection()"
+                  matTooltip="ยกเลิกการเลือก"
+                >
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            }
           }
 
           <!-- Summary Footer -->
@@ -731,6 +829,11 @@ export class BudgetRequestDetailComponent implements OnInit {
   items = signal<BudgetRequestItem[]>([]);
   loading = signal(true);
   actionLoading = signal(false);
+  actionMessage = signal<string>(''); // Message to show during action loading
+  error = signal<{ status: number; message: string } | null>(null);
+
+  // Selection for bulk operations
+  selectedItemIds = signal<Set<number>>(new Set());
 
   // Search
   searchTerm = '';
@@ -744,6 +847,7 @@ export class BudgetRequestDetailComponent implements OnInit {
   private modifiedItemIds = new Set<number>();
 
   displayedColumns = [
+    'select',
     'line_number',
     'generic_code',
     'generic_name',
@@ -804,6 +908,21 @@ export class BudgetRequestDetailComponent implements OnInit {
     return this.modifiedItemIds.size > 0;
   });
 
+  // Selection computed signals
+  selectedCount = computed(() => this.selectedItemIds().size);
+  hasSelection = computed(() => this.selectedItemIds().size > 0);
+  isAllSelected = computed(() => {
+    const items = this.items();
+    const selected = this.selectedItemIds();
+    return items.length > 0 && items.every((item) => selected.has(item.id));
+  });
+  isIndeterminate = computed(() => {
+    const items = this.items();
+    const selected = this.selectedItemIds();
+    const selectedCount = items.filter((item) => selected.has(item.id)).length;
+    return selectedCount > 0 && selectedCount < items.length;
+  });
+
   private get requestId(): string {
     return this.route.snapshot.params['id'];
   }
@@ -814,6 +933,7 @@ export class BudgetRequestDetailComponent implements OnInit {
 
   async loadData() {
     this.loading.set(true);
+    this.error.set(null);
     try {
       const response = await firstValueFrom(
         this.http.get<any>(
@@ -822,9 +942,12 @@ export class BudgetRequestDetailComponent implements OnInit {
       );
       this.budgetRequest.set(response.data);
       await this.loadItems();
-    } catch (error) {
-      console.error('Failed to load budget request:', error);
-      this.snackBar.open('ไม่สามารถโหลดข้อมูลได้', 'ปิด', { duration: 3000 });
+    } catch (err: any) {
+      console.error('Failed to load budget request:', err);
+      const status = err?.status || 500;
+      const message =
+        err?.error?.message || err?.message || 'ไม่สามารถโหลดข้อมูลได้';
+      this.error.set({ status, message });
     } finally {
       this.loading.set(false);
     }
@@ -846,6 +969,79 @@ export class BudgetRequestDetailComponent implements OnInit {
 
   goBack() {
     this.router.navigate(['/inventory/budget/budget-requests']);
+  }
+
+  retryLoad() {
+    this.loadData();
+  }
+
+  // Selection methods
+  isSelected(id: number): boolean {
+    return this.selectedItemIds().has(id);
+  }
+
+  toggleSelectItem(id: number) {
+    const current = new Set(this.selectedItemIds());
+    if (current.has(id)) {
+      current.delete(id);
+    } else {
+      current.add(id);
+    }
+    this.selectedItemIds.set(current);
+  }
+
+  toggleSelectAll() {
+    const items = this.items();
+    if (this.isAllSelected()) {
+      // Deselect all
+      this.selectedItemIds.set(new Set());
+    } else {
+      // Select all
+      const allIds = new Set(items.map((item) => item.id));
+      this.selectedItemIds.set(allIds);
+    }
+  }
+
+  clearSelection() {
+    this.selectedItemIds.set(new Set());
+  }
+
+  async bulkDeleteSelected() {
+    const count = this.selectedCount();
+    if (count === 0) return;
+
+    this.axDialog
+      .confirmDelete(`${count} รายการที่เลือก`)
+      .subscribe(async (confirmed) => {
+        if (!confirmed) return;
+
+        this.actionLoading.set(true);
+        this.actionMessage.set(`กำลังลบ ${count} รายการที่เลือก...`);
+        try {
+          const itemIds = Array.from(this.selectedItemIds());
+          await firstValueFrom(
+            this.http.post(
+              `/inventory/budget/budget-requests/${this.requestId}/items/bulk-delete`,
+              { itemIds },
+            ),
+          );
+          this.snackBar.open(`ลบ ${count} รายการสำเร็จ`, 'ปิด', {
+            duration: 3000,
+          });
+          this.clearSelection();
+          await this.loadItems();
+          await this.loadData();
+        } catch (error: any) {
+          this.snackBar.open(
+            error?.error?.message || 'ไม่สามารถลบรายการที่เลือกได้',
+            'ปิด',
+            { duration: 3000 },
+          );
+        } finally {
+          this.actionLoading.set(false);
+          this.actionMessage.set('');
+        }
+      });
   }
 
   getStatusClass(status: string | undefined): string {
@@ -946,6 +1142,8 @@ export class BudgetRequestDetailComponent implements OnInit {
       .subscribe(async (confirmed) => {
         if (!confirmed) return;
 
+        this.actionLoading.set(true);
+        this.actionMessage.set(`กำลังลบ ${item.generic_name}...`);
         try {
           await firstValueFrom(
             this.http.delete(
@@ -959,6 +1157,9 @@ export class BudgetRequestDetailComponent implements OnInit {
           this.snackBar.open(error?.error?.message || 'ไม่สามารถลบได้', 'ปิด', {
             duration: 3000,
           });
+        } finally {
+          this.actionLoading.set(false);
+          this.actionMessage.set('');
         }
       });
   }
@@ -977,6 +1178,9 @@ export class BudgetRequestDetailComponent implements OnInit {
         if (!confirmed) return;
 
         this.actionLoading.set(true);
+        this.actionMessage.set(
+          'กำลัง Initialize รายการยา...\n(ดึงข้อมูลยอดใช้ย้อนหลัง 3 ปี, ราคา, สต็อก)',
+        );
         try {
           const response = await firstValueFrom(
             this.http.post<any>(
@@ -999,6 +1203,7 @@ export class BudgetRequestDetailComponent implements OnInit {
           );
         } finally {
           this.actionLoading.set(false);
+          this.actionMessage.set('');
         }
       });
   }
@@ -1017,6 +1222,7 @@ export class BudgetRequestDetailComponent implements OnInit {
         if (!confirmed) return;
 
         this.actionLoading.set(true);
+        this.actionMessage.set('กำลังดึงรายการยาจาก Drug Master...');
         try {
           const response = await firstValueFrom(
             this.http.post<any>(
@@ -1039,6 +1245,7 @@ export class BudgetRequestDetailComponent implements OnInit {
           );
         } finally {
           this.actionLoading.set(false);
+          this.actionMessage.set('');
         }
       });
   }
@@ -1057,18 +1264,17 @@ export class BudgetRequestDetailComponent implements OnInit {
         if (!confirmed) return;
 
         this.actionLoading.set(true);
+        this.actionMessage.set(`กำลังลบรายการทั้งหมด ${count} รายการ...`);
         try {
-          // Delete all items for this budget request
-          const itemIds = this.items().map((item) => item.id);
+          // Use bulk delete API - single request to delete all items
+          const response = await firstValueFrom(
+            this.http.delete<any>(
+              `/inventory/budget/budget-requests/${this.requestId}/items`,
+            ),
+          );
 
-          // Use batch delete if available, otherwise delete one by one
-          for (const id of itemIds) {
-            await firstValueFrom(
-              this.http.delete(`/inventory/budget/budget-request-items/${id}`),
-            );
-          }
-
-          this.snackBar.open(`ลบรายการสำเร็จ ${count} รายการ`, 'ปิด', {
+          const deletedCount = response.data?.deletedCount || count;
+          this.snackBar.open(`ลบรายการสำเร็จ ${deletedCount} รายการ`, 'ปิด', {
             duration: 3000,
           });
           await this.loadItems();
@@ -1081,6 +1287,7 @@ export class BudgetRequestDetailComponent implements OnInit {
           );
         } finally {
           this.actionLoading.set(false);
+          this.actionMessage.set('');
         }
       });
   }

@@ -1080,4 +1080,47 @@ export class BudgetRequestsController {
       return reply.code(400).error('DELETE_ITEM_FAILED', error.message);
     }
   }
+
+  /**
+   * Delete ALL budget request items (bulk delete)
+   * DELETE /budget-requests/:id/items
+   */
+  async deleteAllItems(
+    request: FastifyRequest<{
+      Params: Static<typeof BudgetRequestsIdParamSchema>;
+    }>,
+    reply: FastifyReply,
+  ) {
+    const { id } = request.params;
+    const userId = request.user?.id;
+
+    if (!userId) {
+      return reply.code(401).error('UNAUTHORIZED', 'User not authenticated');
+    }
+
+    request.log.info(
+      { budgetRequestId: id, userId },
+      'Deleting all budget request items',
+    );
+
+    try {
+      const result = await this.budgetRequestsService.deleteAllItems(
+        id,
+        userId,
+      );
+
+      request.log.info(
+        { budgetRequestId: id, deletedCount: result.deletedCount },
+        'All items deleted successfully',
+      );
+
+      return reply.success(result, `Deleted ${result.deletedCount} items`);
+    } catch (error: any) {
+      request.log.error(
+        { error: error.message, budgetRequestId: id },
+        'Failed to delete all items',
+      );
+      return reply.code(400).error('DELETE_ALL_ITEMS_FAILED', error.message);
+    }
+  }
 }

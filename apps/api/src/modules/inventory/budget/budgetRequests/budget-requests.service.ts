@@ -1815,4 +1815,40 @@ export class BudgetRequestsService extends BaseService<
 
     return deleted > 0;
   }
+
+  /**
+   * Delete all items for a budget request
+   * Only allowed when status = DRAFT
+   * Uses single SQL query for efficiency
+   */
+  async deleteAllItems(
+    budgetRequestId: string | number,
+    userId: string,
+  ): Promise<{ deletedCount: number }> {
+    // Validate budget request exists and status is DRAFT
+    const request =
+      await this.budgetRequestsRepository.findById(budgetRequestId);
+
+    if (!request) {
+      throw new Error('Budget request not found');
+    }
+
+    if (request.status !== 'DRAFT') {
+      throw new Error(
+        `Cannot delete items from budget request with status: ${request.status}. Only DRAFT requests can be modified.`,
+      );
+    }
+
+    // Delete all items with single SQL query (efficient for large datasets)
+    const deletedCount = await this.db('inventory.budget_request_items')
+      .where({ budget_request_id: budgetRequestId })
+      .delete();
+
+    // Update the budget request total (updated_at is auto-updated by the repository)
+    await this.budgetRequestsRepository.update(budgetRequestId, {
+      total_requested_amount: 0,
+    });
+
+    return { deletedCount };
+  }
 }
