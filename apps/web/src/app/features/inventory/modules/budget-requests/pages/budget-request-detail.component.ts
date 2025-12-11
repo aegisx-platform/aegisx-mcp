@@ -487,56 +487,57 @@ interface BudgetRequestItem {
                 >
                   <span class="text-sm text-gray-400 mr-1">กรอง:</span>
                   <mat-chip-listbox
-                    [(ngModel)]="dataFilter"
+                    [value]="dataFilter()"
+                    (change)="dataFilter.set($event.value); pageIndex = 0"
                     class="filter-chips"
                     aria-label="เลือก filter"
                   >
                     <mat-chip-option
                       value="all"
-                      [selected]="dataFilter === 'all'"
+                      [selected]="dataFilter() === 'all'"
                     >
                       ทั้งหมด ({{ items().length }})
                     </mat-chip-option>
                     <mat-chip-option
                       value="zero_price"
-                      [selected]="dataFilter === 'zero_price'"
+                      [selected]="dataFilter() === 'zero_price'"
                       [disabled]="zeroPriceCount() === 0"
                     >
                       ราคา = 0 ({{ zeroPriceCount() }})
                     </mat-chip-option>
                     <mat-chip-option
                       value="zero_qty"
-                      [selected]="dataFilter === 'zero_qty'"
+                      [selected]="dataFilter() === 'zero_qty'"
                       [disabled]="zeroQtyCount() === 0"
                     >
                       จำนวน = 0 ({{ zeroQtyCount() }})
                     </mat-chip-option>
                     <mat-chip-option
                       value="zero_any"
-                      [selected]="dataFilter === 'zero_any'"
+                      [selected]="dataFilter() === 'zero_any'"
                       [disabled]="zeroAnyCount() === 0"
                     >
                       มีค่า 0 ({{ zeroAnyCount() }})
                     </mat-chip-option>
                     <mat-chip-option
                       value="has_gpu"
-                      [selected]="dataFilter === 'has_gpu'"
+                      [selected]="dataFilter() === 'has_gpu'"
                       [disabled]="hasGpuCount() === 0"
                     >
                       มี GPU ({{ hasGpuCount() }})
                     </mat-chip-option>
                     <mat-chip-option
                       value="no_gpu"
-                      [selected]="dataFilter === 'no_gpu'"
+                      [selected]="dataFilter() === 'no_gpu'"
                       [disabled]="noGpuCount() === 0"
                     >
                       ไม่มี GPU ({{ noGpuCount() }})
                     </mat-chip-option>
                   </mat-chip-listbox>
-                  @if (dataFilter !== 'all') {
+                  @if (dataFilter() !== 'all') {
                     <button
                       mat-icon-button
-                      (click)="dataFilter = 'all'"
+                      (click)="dataFilter.set('all')"
                       matTooltip="ล้าง filter"
                       class="!w-6 !h-6 !leading-6"
                     >
@@ -1125,7 +1126,7 @@ interface BudgetRequestItem {
                       @if (zeroPriceCount() > 0) {
                         <div
                           class="flex items-center gap-2 px-3 py-1.5 bg-orange-100 rounded-lg cursor-pointer hover:bg-orange-200 transition-colors"
-                          (click)="dataFilter = 'zero_price'; applySearch()"
+                          (click)="dataFilter.set('zero_price'); pageIndex = 0"
                         >
                           <mat-icon class="!text-lg text-orange-600"
                             >attach_money</mat-icon
@@ -1141,7 +1142,7 @@ interface BudgetRequestItem {
                       @if (zeroQtyCount() > 0) {
                         <div
                           class="flex items-center gap-2 px-3 py-1.5 bg-orange-100 rounded-lg cursor-pointer hover:bg-orange-200 transition-colors"
-                          (click)="dataFilter = 'zero_qty'; applySearch()"
+                          (click)="dataFilter.set('zero_qty'); pageIndex = 0"
                         >
                           <mat-icon class="!text-lg text-orange-600"
                             >inventory</mat-icon
@@ -1329,13 +1330,9 @@ export class BudgetRequestDetailComponent implements OnInit {
   // Search
   searchTerm = '';
   searchField = 'all';
-  dataFilter:
-    | 'all'
-    | 'zero_price'
-    | 'zero_qty'
-    | 'zero_any'
-    | 'has_gpu'
-    | 'no_gpu' = 'all';
+  dataFilter = signal<
+    'all' | 'zero_price' | 'zero_qty' | 'zero_any' | 'has_gpu' | 'no_gpu'
+  >('all');
 
   // Pagination
   pageSize = 50;
@@ -1370,17 +1367,18 @@ export class BudgetRequestDetailComponent implements OnInit {
   // Computed signals
   filteredItems = computed(() => {
     let result = this.items();
+    const filter = this.dataFilter();
 
-    // Apply data filter (zero price/qty)
-    if (this.dataFilter === 'zero_price') {
+    // Apply data filter (zero price/qty/gpu)
+    if (filter === 'zero_price') {
       result = result.filter(
         (item) => !item.unit_price || item.unit_price === 0,
       );
-    } else if (this.dataFilter === 'zero_qty') {
+    } else if (filter === 'zero_qty') {
       result = result.filter(
         (item) => !item.requested_qty || item.requested_qty === 0,
       );
-    } else if (this.dataFilter === 'zero_any') {
+    } else if (filter === 'zero_any') {
       result = result.filter(
         (item) =>
           !item.unit_price ||
@@ -1388,9 +1386,9 @@ export class BudgetRequestDetailComponent implements OnInit {
           !item.requested_qty ||
           item.requested_qty === 0,
       );
-    } else if (this.dataFilter === 'has_gpu') {
+    } else if (filter === 'has_gpu') {
       result = result.filter((item) => !!item.tmt_gpu_code);
-    } else if (this.dataFilter === 'no_gpu') {
+    } else if (filter === 'no_gpu') {
       result = result.filter((item) => !item.tmt_gpu_code);
     }
 
@@ -1887,7 +1885,7 @@ export class BudgetRequestDetailComponent implements OnInit {
 
   clearSearch() {
     this.searchTerm = '';
-    this.dataFilter = 'all';
+    this.dataFilter.set('all');
     this.pageIndex = 0;
     this.items.set([...this.items()]);
   }
