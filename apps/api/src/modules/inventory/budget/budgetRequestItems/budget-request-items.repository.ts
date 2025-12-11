@@ -132,6 +132,10 @@ export class BudgetRequestItemsRepository extends BaseRepository<
       budget_type_id: dbRow.budget_type_id,
       budget_category_id: dbRow.budget_category_id,
       historical_usage: dbRow.historical_usage,
+      // From JOIN with drug_generics
+      ed_category: dbRow.ed_category,
+      tmt_gpu_code: dbRow.tmt_gpu_code,
+      working_code: dbRow.working_code,
     };
   }
 
@@ -223,11 +227,18 @@ export class BudgetRequestItemsRepository extends BaseRepository<
 
   // Custom query with joins if needed
   getJoinQuery() {
-    return this.knex('inventory.budget_request_items').select(
-      'inventory.budget_request_items.*',
-    );
-    // Add joins here if needed
-    // .leftJoin('other_table', 'inventory.budget_request_items.foreign_key', 'other_table.id')
+    return this.knex('inventory.budget_request_items')
+      .select(
+        'inventory.budget_request_items.*',
+        'inventory.drug_generics.ed_category as ed_category',
+        'inventory.drug_generics.tmt_gpu_code as tmt_gpu_code',
+        'inventory.drug_generics.working_code as working_code',
+      )
+      .leftJoin(
+        'inventory.drug_generics',
+        'inventory.budget_request_items.generic_id',
+        'inventory.drug_generics.id',
+      );
   }
 
   // Apply custom filters

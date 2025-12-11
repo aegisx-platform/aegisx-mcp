@@ -5,6 +5,15 @@ import {
   PartialPaginatedResponseSchema,
 } from '../../../../schemas/base.schemas';
 
+// ED Category Enum for classification
+const EdCategoryEnum = Type.Union([
+  Type.Literal('ED'), // Essential Drug - ยาในบัญชียาหลัก
+  Type.Literal('NED'), // Non-Essential Drug - ยานอกบัญชียาหลัก
+  Type.Literal('CM'), // Contract Managed - ยาเคมี/สัญญา
+  Type.Literal('NDMS'), // NDMS Managed - ยา NDMS
+  Type.Null(),
+]);
+
 // Base BudgetRequestItems Schema
 export const BudgetRequestItemsSchema = Type.Object({
   id: Type.Number(),
@@ -34,6 +43,11 @@ export const BudgetRequestItemsSchema = Type.Object({
   budget_type_id: Type.Optional(Type.Integer()),
   budget_category_id: Type.Optional(Type.Integer()),
   historical_usage: Type.Optional(Type.Record(Type.String(), Type.Any())),
+  // From JOIN with drug_generics - ED Classification
+  ed_category: Type.Optional(EdCategoryEnum),
+  // From JOIN with drug_generics - TMT GPU code
+  tmt_gpu_code: Type.Optional(Type.String()),
+  working_code: Type.Optional(Type.String()),
 });
 
 // Create Schema (without auto-generated fields)
@@ -239,6 +253,11 @@ export const BatchUpdateItemSchema = Type.Object({
   q2_qty: Type.Optional(Type.Number()),
   q3_qty: Type.Optional(Type.Number()),
   q4_qty: Type.Optional(Type.Number()),
+  // Historical usage data (ปี66, 67, 68) - supports manual editing
+  historical_usage: Type.Optional(Type.Record(Type.String(), Type.Number())),
+  avg_usage: Type.Optional(Type.Number()),
+  // Current stock - คงเหลือปัจจุบัน (importable and editable)
+  current_stock: Type.Optional(Type.Number()),
 });
 
 export const BatchUpdateBudgetRequestItemsSchema = Type.Object({

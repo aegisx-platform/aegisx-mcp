@@ -77,6 +77,9 @@ interface BudgetRequestItem {
   avg_usage?: number;
   estimated_usage_2569?: number;
   current_stock?: number;
+  // TMT GPU code from drug_generics JOIN
+  tmt_gpu_code?: string;
+  working_code?: string;
 }
 
 @Component({
@@ -451,7 +454,7 @@ interface BudgetRequestItem {
                 >
                   <mat-label>ค้นหาตาม</mat-label>
                   <mat-select [(ngModel)]="searchField">
-                    <mat-option value="generic_code">รหัสยา</mat-option>
+                    <mat-option value="generic_code">รหัส GPU</mat-option>
                     <mat-option value="generic_name">ชื่อยา</mat-option>
                     <mat-option value="all">ทั้งหมด</mat-option>
                   </mat-select>
@@ -477,15 +480,15 @@ interface BudgetRequestItem {
                 }
               </div>
 
-              <!-- Data Filter Chips -->
+              <!-- Data Filter Chips - Minimal Style -->
               @if (items().length > 0) {
                 <div
-                  class="flex items-center gap-2 mt-3 pt-3 border-t border-gray-200"
+                  class="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100"
                 >
-                  <span class="text-sm text-gray-500 mr-2">กรอง:</span>
+                  <span class="text-sm text-gray-400 mr-1">กรอง:</span>
                   <mat-chip-listbox
                     [(ngModel)]="dataFilter"
-                    class="!gap-2"
+                    class="filter-chips"
                     aria-label="เลือก filter"
                   >
                     <mat-chip-option
@@ -498,27 +501,21 @@ interface BudgetRequestItem {
                       value="zero_price"
                       [selected]="dataFilter === 'zero_price'"
                       [disabled]="zeroPriceCount() === 0"
-                      class="!text-orange-700 !bg-orange-50"
                     >
-                      <mat-icon class="!text-base !mr-1">attach_money</mat-icon>
                       ราคา = 0 ({{ zeroPriceCount() }})
                     </mat-chip-option>
                     <mat-chip-option
                       value="zero_qty"
                       [selected]="dataFilter === 'zero_qty'"
                       [disabled]="zeroQtyCount() === 0"
-                      class="!text-red-700 !bg-red-50"
                     >
-                      <mat-icon class="!text-base !mr-1">inventory</mat-icon>
                       จำนวน = 0 ({{ zeroQtyCount() }})
                     </mat-chip-option>
                     <mat-chip-option
                       value="zero_any"
                       [selected]="dataFilter === 'zero_any'"
                       [disabled]="zeroAnyCount() === 0"
-                      class="!text-purple-700 !bg-purple-50"
                     >
-                      <mat-icon class="!text-base !mr-1">warning</mat-icon>
                       มีค่า 0 ({{ zeroAnyCount() }})
                     </mat-chip-option>
                   </mat-chip-listbox>
@@ -527,9 +524,9 @@ interface BudgetRequestItem {
                       mat-icon-button
                       (click)="dataFilter = 'all'"
                       matTooltip="ล้าง filter"
-                      class="!ml-2"
+                      class="!w-6 !h-6 !leading-6"
                     >
-                      <mat-icon class="!text-base">clear</mat-icon>
+                      <mat-icon class="!text-sm">close</mat-icon>
                     </button>
                   }
                 </div>
@@ -600,6 +597,7 @@ interface BudgetRequestItem {
                           [checked]="isAllSelected()"
                           [indeterminate]="isIndeterminate()"
                           (change)="toggleSelectAll()"
+                          tabindex="-1"
                         ></mat-checkbox>
                       }
                     </th>
@@ -609,6 +607,7 @@ interface BudgetRequestItem {
                           [checked]="isSelected(item.id)"
                           (change)="toggleSelectItem(item.id)"
                           (click)="$event.stopPropagation()"
+                          tabindex="-1"
                         ></mat-checkbox>
                       }
                     </td>
@@ -628,22 +627,27 @@ interface BudgetRequestItem {
                     </td>
                   </ng-container>
 
-                  <!-- Generic Code Column (Sticky) -->
+                  <!-- GPU Code Column (Sticky) - TMT GPU code for budget planning -->
                   <ng-container matColumnDef="generic_code" sticky>
                     <th
                       mat-header-cell
                       *matHeaderCellDef
                       class="sticky-column sticky-code !min-w-[80px]"
                     >
-                      รหัสยา
+                      รหัส GPU
                     </th>
                     <td
                       mat-cell
                       *matCellDef="let item"
                       class="sticky-column sticky-code"
+                      [matTooltip]="
+                        item.working_code
+                          ? 'รหัส รพ.: ' + item.working_code
+                          : ''
+                      "
                     >
                       <span class="font-mono text-sm">{{
-                        item.generic_code
+                        item.tmt_gpu_code || ''
                       }}</span>
                     </td>
                   </ng-container>
@@ -672,33 +676,99 @@ interface BudgetRequestItem {
                     <td mat-cell *matCellDef="let item">{{ item.unit }}</td>
                   </ng-container>
 
-                  <!-- Historical Usage 2566 Column -->
-                  <ng-container matColumnDef="usage_2566">
+                  <!-- Historical Usage Year 1 Column (Editable) - Dynamic based on fiscal_year -->
+                  <ng-container matColumnDef="usage_year1">
                     <th mat-header-cell *matHeaderCellDef class="!text-right">
-                      ปี66
+                      ปี{{ historicalYears().label1 }}
                     </th>
                     <td mat-cell *matCellDef="let item" class="!text-right">
-                      {{ getHistoricalUsage(item, '2566') | number: '1.0-0' }}
+                      @if (budgetRequest()?.status === 'DRAFT') {
+                        <input
+                          type="number"
+                          min="0"
+                          [value]="
+                            getHistoricalUsage(item, historicalYears().year1)
+                          "
+                          (change)="
+                            updateHistoricalUsage(
+                              item,
+                              historicalYears().year1,
+                              $event
+                            )
+                          "
+                          (click)="$event.stopPropagation()"
+                          class="w-16 text-right px-2 py-1 border rounded bg-blue-50 border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        />
+                      } @else {
+                        {{
+                          getHistoricalUsage(item, historicalYears().year1)
+                            | number: '1.0-0'
+                        }}
+                      }
                     </td>
                   </ng-container>
 
-                  <!-- Historical Usage 2567 Column -->
-                  <ng-container matColumnDef="usage_2567">
+                  <!-- Historical Usage Year 2 Column (Editable) - Dynamic based on fiscal_year -->
+                  <ng-container matColumnDef="usage_year2">
                     <th mat-header-cell *matHeaderCellDef class="!text-right">
-                      ปี67
+                      ปี{{ historicalYears().label2 }}
                     </th>
                     <td mat-cell *matCellDef="let item" class="!text-right">
-                      {{ getHistoricalUsage(item, '2567') | number: '1.0-0' }}
+                      @if (budgetRequest()?.status === 'DRAFT') {
+                        <input
+                          type="number"
+                          min="0"
+                          [value]="
+                            getHistoricalUsage(item, historicalYears().year2)
+                          "
+                          (change)="
+                            updateHistoricalUsage(
+                              item,
+                              historicalYears().year2,
+                              $event
+                            )
+                          "
+                          (click)="$event.stopPropagation()"
+                          class="w-16 text-right px-2 py-1 border rounded bg-blue-50 border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        />
+                      } @else {
+                        {{
+                          getHistoricalUsage(item, historicalYears().year2)
+                            | number: '1.0-0'
+                        }}
+                      }
                     </td>
                   </ng-container>
 
-                  <!-- Historical Usage 2568 Column -->
-                  <ng-container matColumnDef="usage_2568">
+                  <!-- Historical Usage Year 3 Column (Editable) - Dynamic based on fiscal_year -->
+                  <ng-container matColumnDef="usage_year3">
                     <th mat-header-cell *matHeaderCellDef class="!text-right">
-                      ปี68
+                      ปี{{ historicalYears().label3 }}
                     </th>
                     <td mat-cell *matCellDef="let item" class="!text-right">
-                      {{ getHistoricalUsage(item, '2568') | number: '1.0-0' }}
+                      @if (budgetRequest()?.status === 'DRAFT') {
+                        <input
+                          type="number"
+                          min="0"
+                          [value]="
+                            getHistoricalUsage(item, historicalYears().year3)
+                          "
+                          (change)="
+                            updateHistoricalUsage(
+                              item,
+                              historicalYears().year3,
+                              $event
+                            )
+                          "
+                          (click)="$event.stopPropagation()"
+                          class="w-16 text-right px-2 py-1 border rounded bg-blue-50 border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        />
+                      } @else {
+                        {{
+                          getHistoricalUsage(item, historicalYears().year3)
+                            | number: '1.0-0'
+                        }}
+                      }
                     </td>
                   </ng-container>
 
@@ -765,23 +835,36 @@ interface BudgetRequestItem {
                     </td>
                   </ng-container>
 
-                  <!-- Estimated Usage 2569 Column -->
-                  <ng-container matColumnDef="estimated_usage_2569">
+                  <!-- Estimated Usage Column - Dynamic based on fiscal_year -->
+                  <ng-container matColumnDef="estimated_usage">
                     <th mat-header-cell *matHeaderCellDef class="!text-right">
-                      ประมาณ69
+                      ประมาณ{{ historicalYears().fiscalYearLabel }}
                     </th>
                     <td mat-cell *matCellDef="let item" class="!text-right">
                       {{ item.estimated_usage_2569 | number: '1.0-0' }}
                     </td>
                   </ng-container>
 
-                  <!-- Current Stock Column -->
+                  <!-- Current Stock Column (Editable) -->
                   <ng-container matColumnDef="current_stock">
                     <th mat-header-cell *matHeaderCellDef class="!text-right">
                       คงเหลือ
                     </th>
                     <td mat-cell *matCellDef="let item" class="!text-right">
-                      {{ item.current_stock | number: '1.0-0' }}
+                      @if (budgetRequest()?.status === 'DRAFT') {
+                        <input
+                          type="number"
+                          min="0"
+                          [value]="item.current_stock"
+                          (change)="
+                            updateItemField(item, 'current_stock', $event)
+                          "
+                          (click)="$event.stopPropagation()"
+                          class="w-20 text-right px-2 py-1 border rounded bg-green-50 border-green-300 focus:outline-none focus:ring-2 focus:ring-green-400"
+                        />
+                      } @else {
+                        {{ item.current_stock | number: '1.0-0' }}
+                      }
                     </td>
                   </ng-container>
 
@@ -1103,6 +1186,41 @@ interface BudgetRequestItem {
         align-items: center !important;
         gap: 6px !important;
       }
+      /* Minimal filter chips style */
+      .filter-chips {
+        display: flex;
+        gap: 8px;
+
+        ::ng-deep .mat-mdc-chip-option {
+          height: 28px !important;
+          font-size: 13px !important;
+          background: transparent !important;
+          border: 1px solid #e5e7eb !important;
+          color: #6b7280 !important;
+
+          &.mat-mdc-chip-selected {
+            background: #f3f4f6 !important;
+            border-color: #9ca3af !important;
+            color: #374151 !important;
+          }
+
+          &:not(.mat-mdc-chip-disabled):hover {
+            background: #f9fafb !important;
+          }
+
+          &.mat-mdc-chip-disabled {
+            opacity: 0.4 !important;
+          }
+        }
+
+        ::ng-deep .mdc-evolution-chip__cell--primary {
+          padding: 0 12px !important;
+        }
+
+        ::ng-deep .mat-mdc-chip-action-label {
+          font-weight: 400 !important;
+        }
+      }
       .items-table {
         th.mat-mdc-header-cell {
           background: var(--ax-background-subtle);
@@ -1212,12 +1330,12 @@ export class BudgetRequestDetailComponent implements OnInit {
     'generic_code',
     'generic_name',
     'unit',
-    'usage_2566',
-    'usage_2567',
-    'usage_2568',
+    'usage_year1',
+    'usage_year2',
+    'usage_year3',
     'avg_usage',
     'trend',
-    'estimated_usage_2569',
+    'estimated_usage',
     'current_stock',
     'unit_price',
     'requested_qty',
@@ -1257,12 +1375,19 @@ export class BudgetRequestDetailComponent implements OnInit {
       const term = this.searchTerm.toLowerCase();
       result = result.filter((item) => {
         if (this.searchField === 'generic_code') {
-          return item.generic_code?.toLowerCase().includes(term);
+          // Search by GPU code (tmt_gpu_code) or fall back to generic_code
+          return (
+            item.tmt_gpu_code?.toLowerCase().includes(term) ||
+            item.generic_code?.toLowerCase().includes(term) ||
+            item.working_code?.toLowerCase().includes(term)
+          );
         } else if (this.searchField === 'generic_name') {
           return item.generic_name?.toLowerCase().includes(term);
         } else {
           return (
+            item.tmt_gpu_code?.toLowerCase().includes(term) ||
             item.generic_code?.toLowerCase().includes(term) ||
+            item.working_code?.toLowerCase().includes(term) ||
             item.generic_name?.toLowerCase().includes(term)
           );
         }
@@ -1313,6 +1438,24 @@ export class BudgetRequestDetailComponent implements OnInit {
           i.requested_qty === 0,
       ).length,
   );
+
+  // Dynamic historical usage years based on fiscal_year
+  // fiscal_year - 3, fiscal_year - 2, fiscal_year - 1
+  historicalYears = computed(() => {
+    const fiscalYear =
+      this.budgetRequest()?.fiscal_year || new Date().getFullYear() + 543;
+    return {
+      year1: String(fiscalYear - 3), // e.g., 2566 if fiscal_year = 2569
+      year2: String(fiscalYear - 2), // e.g., 2567
+      year3: String(fiscalYear - 1), // e.g., 2568
+      fiscalYear: String(fiscalYear), // e.g., 2569
+      // Short labels for display (last 2 digits)
+      label1: String(fiscalYear - 3).slice(-2), // e.g., "66"
+      label2: String(fiscalYear - 2).slice(-2), // e.g., "67"
+      label3: String(fiscalYear - 1).slice(-2), // e.g., "68"
+      fiscalYearLabel: String(fiscalYear).slice(-2), // e.g., "69"
+    };
+  });
 
   // Category stats computed signals (ed_category from drug_generics)
   // ED = ยาในบัญชียาหลัก, NED = ยานอกบัญชี, CM = ยาเคมี/สัญญา, NDMS = ยา NDMS
@@ -1554,14 +1697,66 @@ export class BudgetRequestDetailComponent implements OnInit {
   }
 
   /**
+   * Update historical usage for a specific year and recalculate avg_usage
+   * Years are dynamic based on fiscal_year of budget request
+   */
+  updateHistoricalUsage(item: BudgetRequestItem, year: string, event: Event) {
+    const input = event.target as HTMLInputElement;
+    const value = parseFloat(input.value) || 0;
+
+    // Update the item
+    const items = this.items();
+    const index = items.findIndex((i) => i.id === item.id);
+    if (index !== -1) {
+      // Ensure historical_usage object exists
+      const historicalUsage = { ...(items[index].historical_usage || {}) };
+      historicalUsage[year] = value;
+
+      // Calculate new average from all 3 years (dynamic based on fiscal_year)
+      const years = this.historicalYears();
+      const usageYear1 = historicalUsage[years.year1] || 0;
+      const usageYear2 = historicalUsage[years.year2] || 0;
+      const usageYear3 = historicalUsage[years.year3] || 0;
+      const newAvgUsage = Math.round(
+        (usageYear1 + usageYear2 + usageYear3) / 3,
+      );
+
+      // Auto-fill requested_qty from avg_usage if not set or zero
+      const currentRequestedQty = items[index].requested_qty || 0;
+      const newRequestedQty =
+        currentRequestedQty === 0 && newAvgUsage > 0
+          ? newAvgUsage
+          : currentRequestedQty;
+
+      const updatedItem = {
+        ...items[index],
+        historical_usage: historicalUsage,
+        avg_usage: newAvgUsage,
+        estimated_usage_2569: newAvgUsage, // Auto-calculate estimated usage (same as avg)
+        requested_qty: newRequestedQty,
+      };
+
+      items[index] = updatedItem;
+      this.items.set([...items]);
+
+      // Mark as modified
+      const currentModified = new Set(this.modifiedItemIds());
+      currentModified.add(updatedItem.id);
+      this.modifiedItemIds.set(currentModified);
+    }
+  }
+
+  /**
    * Get SVG polyline points for sparkline chart
    * Returns string format: "x1,y1 x2,y2 x3,y3"
+   * Uses dynamic years based on fiscal_year
    */
   getSparklinePoints(item: BudgetRequestItem): string {
+    const years = this.historicalYears();
     const values = [
-      this.getHistoricalUsage(item, '2566'),
-      this.getHistoricalUsage(item, '2567'),
-      this.getHistoricalUsage(item, '2568'),
+      this.getHistoricalUsage(item, years.year1),
+      this.getHistoricalUsage(item, years.year2),
+      this.getHistoricalUsage(item, years.year3),
     ];
 
     const max = Math.max(...values, 1); // Avoid division by zero
@@ -1586,12 +1781,14 @@ export class BudgetRequestDetailComponent implements OnInit {
 
   /**
    * Get data points for sparkline circles
+   * Uses dynamic years based on fiscal_year
    */
   getSparklineDataPoints(item: BudgetRequestItem): { x: number; y: number }[] {
+    const years = this.historicalYears();
     const values = [
-      this.getHistoricalUsage(item, '2566'),
-      this.getHistoricalUsage(item, '2567'),
-      this.getHistoricalUsage(item, '2568'),
+      this.getHistoricalUsage(item, years.year1),
+      this.getHistoricalUsage(item, years.year2),
+      this.getHistoricalUsage(item, years.year3),
     ];
 
     const max = Math.max(...values, 1);
@@ -1611,20 +1808,22 @@ export class BudgetRequestDetailComponent implements OnInit {
 
   /**
    * Get sparkline color based on trend direction
+   * Uses dynamic years based on fiscal_year
    */
   getSparklineColor(item: BudgetRequestItem): string {
-    const usage2566 = this.getHistoricalUsage(item, '2566');
-    const usage2567 = this.getHistoricalUsage(item, '2567');
-    const usage2568 = this.getHistoricalUsage(item, '2568');
+    const years = this.historicalYears();
+    const usageYear1 = this.getHistoricalUsage(item, years.year1);
+    const usageYear2 = this.getHistoricalUsage(item, years.year2);
+    const usageYear3 = this.getHistoricalUsage(item, years.year3);
 
     // No data - gray
-    if (usage2566 === 0 && usage2567 === 0 && usage2568 === 0) {
+    if (usageYear1 === 0 && usageYear2 === 0 && usageYear3 === 0) {
       return '#9ca3af'; // gray-400
     }
 
     // Calculate overall trend (first to last)
-    const firstNonZero = usage2566 || usage2567 || 1;
-    const lastValue = usage2568 || usage2567 || usage2566;
+    const firstNonZero = usageYear1 || usageYear2 || 1;
+    const lastValue = usageYear3 || usageYear2 || usageYear1;
     const overallChange = (lastValue - firstNonZero) / firstNonZero;
 
     if (overallChange > 0.05) {
@@ -1637,13 +1836,15 @@ export class BudgetRequestDetailComponent implements OnInit {
 
   /**
    * Get tooltip text for sparkline
+   * Uses dynamic years based on fiscal_year
    */
   getSparklineTooltip(item: BudgetRequestItem): string {
-    const usage2566 = this.getHistoricalUsage(item, '2566');
-    const usage2567 = this.getHistoricalUsage(item, '2567');
-    const usage2568 = this.getHistoricalUsage(item, '2568');
+    const years = this.historicalYears();
+    const usageYear1 = this.getHistoricalUsage(item, years.year1);
+    const usageYear2 = this.getHistoricalUsage(item, years.year2);
+    const usageYear3 = this.getHistoricalUsage(item, years.year3);
 
-    return `ปี66: ${usage2566.toLocaleString()} | ปี67: ${usage2567.toLocaleString()} | ปี68: ${usage2568.toLocaleString()}`;
+    return `ปี${years.label1}: ${usageYear1.toLocaleString()} | ปี${years.label2}: ${usageYear2.toLocaleString()} | ปี${years.label3}: ${usageYear3.toLocaleString()}`;
   }
 
   applySearch() {
@@ -1988,6 +2189,11 @@ export class BudgetRequestDetailComponent implements OnInit {
         q2_qty: item.q2_qty,
         q3_qty: item.q3_qty,
         q4_qty: item.q4_qty,
+        // Include historical usage, avg_usage, estimated_usage_2569, and current_stock
+        historical_usage: item.historical_usage,
+        avg_usage: item.avg_usage,
+        estimated_usage_2569: item.estimated_usage_2569,
+        current_stock: item.current_stock,
       }));
 
       // Batch API limit is 100 items per request - chunk if needed
