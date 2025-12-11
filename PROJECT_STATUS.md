@@ -1,6 +1,6 @@
 # AegisX Project Status
 
-**Last Updated:** 2025-12-05 (Session 83 - Domain-Based CRUD Module Fix)
+**Last Updated:** 2025-12-11 (Session 84 - Budget Request Batch Update Fix)
 **Current Status:** ✅ **PLATFORM COMPLETE** - All core features implemented, tested, and production-ready with complete design system
 **Git Repository:** git@github.com:aegisx-platform/aegisx-starter.git
 **CRUD Generator Version:** v2.2.2 (Domain path fix)
@@ -189,7 +189,7 @@ aegisx-starter/
 - ✅ Full type safety & comprehensive documentation
 - ✅ 0 TypeScript errors, all builds passing
 
-**Last Updated:** 2025-12-05 (Session 81)
+**Last Updated:** 2025-12-11 (Session 84)
 
 ---
 
@@ -199,6 +199,63 @@ aegisx-starter/
 >
 > - [Sessions 38-46 (2024 Q4)](./docs/sessions/ARCHIVE_2024_Q4.md)
 > - [Sessions 47-71 (2025 Q1)](./docs/sessions/ARCHIVE_2025_Q1.md)
+
+### Session 84 (2025-12-11) ✅ COMPLETED
+
+**Session Focus:** Budget Request Batch Update Fix - Historical Usage Fields Not Saving
+
+**Main Achievements:**
+
+- ✅ **Fixed Batch Update API** - `historical_usage`, `avg_usage`, `current_stock` fields now save correctly
+- ✅ **Root Cause Identified** - Fastify schema validation was stripping unknown fields
+- ✅ **Traced Correct Endpoint** - `PUT /budget-requests/:id/items/batch` in `budget-requests.route.ts`
+- ✅ **Verified Fix** - Database values confirmed changed from 0 to expected values
+
+**Problem Identified:**
+
+API returned `{"success":true,"data":{"updated":1,"failed":0}}` but database values for `historical_usage`, `avg_usage`, `current_stock` remained unchanged at 0.
+
+**Root Cause:**
+
+The route schema at `PUT /budget-requests/:id/items/batch` did NOT include `historical_usage`, `avg_usage`, or `current_stock` fields. Fastify's TypeBox schema validation stripped these fields before they reached the service layer.
+
+**Technical Changes:**
+
+| File                            | Change                                                      |
+| ------------------------------- | ----------------------------------------------------------- |
+| `budget-requests.route.ts`      | Added 3 fields to batch update item schema                  |
+| `budget-requests.controller.ts` | Added fields to `batchUpdateItems` type definition          |
+| `budget-requests.service.ts`    | Added field handling in `updateItem` and `batchUpdateItems` |
+
+**Schema Fix Applied:**
+
+```typescript
+// budget-requests.route.ts - Added to batch update item schema
+body: Type.Object({
+  items: Type.Array(Type.Object({
+    id: Type.Number(),
+    // ... existing fields ...
+    // NEW: Historical usage fields (editable)
+    historical_usage: Type.Optional(Type.Record(Type.String(), Type.Number())),
+    avg_usage: Type.Optional(Type.Number()),
+    current_stock: Type.Optional(Type.Number()),
+  })),
+}),
+```
+
+**Test Results:**
+
+```
+BEFORE: {"2566": 0, "2567": 0, "2568": 0} | current_stock: 0.00 | avg_usage: 0.00
+AFTER:  {"2565": 111, "2566": 222, "2567": 333} | current_stock: 444.00 | avg_usage: 55.55
+✅ TEST PASSED: Database values changed correctly!
+```
+
+**Commits:**
+
+- `8793e40e` - fix(budget-requests): batch update now saves historical_usage, avg_usage, current_stock fields
+
+---
 
 ### Session 83 (2025-12-05) ✅ COMPLETED
 
@@ -844,8 +901,8 @@ pnpm run crud:full -- [name] --force
 
 ---
 
-**Last Updated:** 2025-12-05 (Session 80)
-**Status:** ✅ HEALTHY - Production-ready platform with MCP AI integration & Git Subtree management
+**Last Updated:** 2025-12-11 (Session 84)
+**Status:** ✅ HEALTHY - Production-ready platform with Budget Request batch update fix
 **Next Session:** When user requests new feature or improvement
 
 ---
