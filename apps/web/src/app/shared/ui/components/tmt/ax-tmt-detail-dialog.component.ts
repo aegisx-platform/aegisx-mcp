@@ -261,6 +261,59 @@ export interface TmtDetailDialogData {
                 </div>
               </div>
             }
+
+            <!-- TMT Levels Reference -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h3 class="text-sm font-semibold text-blue-700 uppercase mb-3">
+                <mat-icon class="!text-base align-text-bottom mr-1"
+                  >info</mat-icon
+                >
+                TMT Levels Reference
+              </h3>
+              <div class="grid grid-cols-1 gap-2 text-xs">
+                <div class="flex items-center gap-2">
+                  <span
+                    class="inline-flex items-center justify-center w-12 px-2 py-0.5 rounded font-medium bg-purple-100 text-purple-700"
+                    >VTM</span
+                  >
+                  <span class="text-gray-600"
+                    >สารออกฤทธิ์ (Virtual Therapeutic Moiety)</span
+                  >
+                </div>
+                <div class="flex items-center gap-2">
+                  <span
+                    class="inline-flex items-center justify-center w-12 px-2 py-0.5 rounded font-medium bg-blue-100 text-blue-700"
+                    >GP</span
+                  >
+                  <span class="text-gray-600">ยาสามัญ (Generic Product)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span
+                    class="inline-flex items-center justify-center w-12 px-2 py-0.5 rounded font-medium bg-green-100 text-green-700"
+                    >GPU</span
+                  >
+                  <span class="text-gray-600"
+                    >ยาสามัญ+หน่วย (Generic Product Unit)</span
+                  >
+                </div>
+                <div class="flex items-center gap-2">
+                  <span
+                    class="inline-flex items-center justify-center w-12 px-2 py-0.5 rounded font-medium bg-amber-100 text-amber-700"
+                    >TP</span
+                  >
+                  <span class="text-gray-600">ยาการค้า (Trade Product)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span
+                    class="inline-flex items-center justify-center w-12 px-2 py-0.5 rounded font-medium bg-red-100 text-red-700"
+                    >TPU</span
+                  >
+                  <span class="text-gray-600"
+                    >ยาการค้า+หน่วย (Trade Product Unit)</span
+                  >
+                </div>
+              </div>
+            </div>
           </div>
         }
       </div>

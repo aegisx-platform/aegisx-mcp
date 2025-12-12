@@ -193,7 +193,6 @@ export class TmtRepository {
     maxDepth: number,
     includeInactive: boolean,
   ): Promise<TmtConceptWithChildrenType[]> {
-    // Get immediate children first
     const query = `
       WITH RECURSIVE descendants AS (
         -- Base case: get immediate children
@@ -201,7 +200,7 @@ export class TmtRepository {
           c.id, c.tmt_id, c.concept_code, c.level, c.fsn,
           c.preferred_term, c.strength, c.dosage_form, c.is_active,
           1 as depth,
-          ? as parent_id
+          ?::bigint as parent_id
         FROM inventory.tmt_concepts c
         JOIN inventory.tmt_relationships r ON r.child_id = c.id
         WHERE r.parent_id = ?
@@ -247,10 +246,12 @@ export class TmtRepository {
     const roots: TmtConceptWithChildrenType[] = [];
 
     // First pass: create all nodes
+    // Note: PostgreSQL bigint columns are returned as strings
     for (const row of rows) {
-      map.set(row.id, {
-        id: row.id,
-        tmt_id: row.tmt_id,
+      const nodeId = Number(row.id);
+      map.set(nodeId, {
+        id: nodeId,
+        tmt_id: Number(row.tmt_id),
         concept_code: row.concept_code,
         level: row.level,
         fsn: row.fsn,
@@ -264,11 +265,14 @@ export class TmtRepository {
 
     // Second pass: build tree
     for (const row of rows) {
-      const node = map.get(row.id)!;
-      if (row.parent_id === rootParentId) {
+      const nodeId = Number(row.id);
+      const parentId = Number(row.parent_id);
+      const node = map.get(nodeId)!;
+
+      if (parentId === rootParentId) {
         roots.push(node);
       } else {
-        const parent = map.get(row.parent_id);
+        const parent = map.get(parentId);
         if (parent) {
           parent.children = parent.children || [];
           parent.children.push(node);
