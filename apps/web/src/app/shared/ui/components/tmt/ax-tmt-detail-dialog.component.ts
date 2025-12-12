@@ -19,6 +19,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDividerModule } from '@angular/material/divider';
+import { firstValueFrom } from 'rxjs';
 import { TmtService } from './tmt.service';
 import { AxTmtHierarchyComponent } from './ax-tmt-hierarchy.component';
 import {
@@ -413,12 +414,13 @@ export class AxTmtDetailDialogComponent implements OnInit {
       let result: TmtConcept | null = null;
 
       if (this.data.tmtId) {
-        result =
-          (await this.tmtService.getById(this.data.tmtId).toPromise()) || null;
+        result = await firstValueFrom(
+          this.tmtService.getByTmtId(this.data.tmtId),
+        );
       } else if (this.data.tmtCode) {
-        result =
-          (await this.tmtService.getByCode(this.data.tmtCode).toPromise()) ||
-          null;
+        result = await firstValueFrom(
+          this.tmtService.getByCode(this.data.tmtCode),
+        );
       }
 
       if (result) {

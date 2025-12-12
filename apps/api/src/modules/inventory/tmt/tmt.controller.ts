@@ -5,6 +5,7 @@ import {
   TmtSearchQuery,
   TmtIdParamSchema,
   TmtCodeParamSchema,
+  TmtTmtIdParamSchema,
   TmtHierarchyQuerySchema,
   TmtHierarchyQuery,
   TmtConceptResponseSchema,
@@ -98,6 +99,36 @@ export async function tmtController(fastify: FastifyInstance) {
     async (request, reply) => {
       const { code } = request.params;
       const concept = await service.getByCode(code);
+
+      if (!concept) {
+        return reply.notFound('TMT concept not found');
+      }
+
+      return {
+        success: true,
+        data: concept,
+      };
+    },
+  );
+
+  // Get concept by TMT ID
+  fastify.get<{
+    Params: { tmtId: number };
+  }>(
+    '/concepts/tmt-id/:tmtId',
+    {
+      schema: {
+        tags: ['TMT'],
+        summary: 'Get TMT concept by TMT ID',
+        params: TmtTmtIdParamSchema,
+        response: {
+          200: TmtConceptResponseSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const { tmtId } = request.params;
+      const concept = await service.getByTmtId(tmtId);
 
       if (!concept) {
         return reply.notFound('TMT concept not found');

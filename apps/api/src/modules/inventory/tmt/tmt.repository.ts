@@ -127,6 +127,36 @@ export class TmtRepository {
   }
 
   /**
+   * Get TMT concept by TMT ID
+   */
+  async getByTmtId(tmtId: number): Promise<TmtConcept | null> {
+    const result = await this.knex('inventory.tmt_concepts')
+      .select(
+        'id',
+        'tmt_id',
+        'concept_code',
+        'level',
+        'fsn',
+        'preferred_term',
+        'strength',
+        'dosage_form',
+        'manufacturer',
+        'pack_size',
+        'unit_of_use',
+        'route_of_administration',
+        'effective_date',
+        'release_date',
+        'is_active',
+        'created_at',
+        'updated_at',
+      )
+      .where('tmt_id', tmtId)
+      .first();
+
+    return result || null;
+  }
+
+  /**
    * Get hierarchy for a TMT concept (ancestors + descendants)
    */
   async getHierarchy(

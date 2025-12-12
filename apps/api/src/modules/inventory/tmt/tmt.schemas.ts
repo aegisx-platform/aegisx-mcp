@@ -136,6 +136,10 @@ export const TmtCodeParamSchema = Type.Object({
   code: Type.String({ minLength: 1, maxLength: 20 }),
 });
 
+export const TmtTmtIdParamSchema = Type.Object({
+  tmtId: Type.Number({ minimum: 1 }),
+});
+
 // === Response Schemas ===
 
 export const TmtConceptResponseSchema =

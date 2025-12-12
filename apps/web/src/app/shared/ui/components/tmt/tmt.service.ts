@@ -105,6 +105,18 @@ export class TmtService {
   }
 
   /**
+   * Get concept by TMT ID
+   */
+  getByTmtId(tmtId: number): Observable<TmtConcept | null> {
+    return this.http
+      .get<ApiResponse<TmtConcept>>(`${this.baseUrl}/concepts/tmt-id/${tmtId}`)
+      .pipe(
+        map((res) => res.data),
+        catchError(() => of(null)),
+      );
+  }
+
+  /**
    * Get hierarchy for concept (with caching)
    */
   getHierarchy(

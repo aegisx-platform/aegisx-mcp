@@ -64,6 +64,13 @@ export class TmtService {
   }
 
   /**
+   * Get concept by TMT ID
+   */
+  async getByTmtId(tmtId: number): Promise<TmtConcept | null> {
+    return this.repository.getByTmtId(tmtId);
+  }
+
+  /**
    * Get hierarchy for concept
    */
   async getHierarchy(
