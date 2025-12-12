@@ -186,6 +186,14 @@ export function detectUUIDFields(filters: Record<string, any>): string[] {
       continue;
     }
 
+    const stringValue = String(value);
+
+    // Skip numeric values - these are definitely NOT UUIDs
+    // This handles integer IDs like budget_request_id, budget_id, drug_id, etc.
+    if (/^\d+$/.test(stringValue)) {
+      continue;
+    }
+
     // Check field name patterns that typically contain UUIDs
     const isLikelyUUIDField =
       fieldName.endsWith('_id') ||
@@ -194,7 +202,6 @@ export function detectUUIDFields(filters: Record<string, any>): string[] {
       fieldName.endsWith('_uuid');
 
     // Check if value looks like a UUID (basic check)
-    const stringValue = String(value);
     const looksLikeUUID =
       stringValue.length >= 32 && // Minimum length for UUID without dashes
       stringValue.includes('-') && // Contains dashes

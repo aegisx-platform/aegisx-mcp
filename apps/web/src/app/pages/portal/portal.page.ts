@@ -175,9 +175,10 @@ export class PortalPage implements OnInit {
   readonly userContext = computed<LauncherUserContext>(() => {
     const user = this.authService.currentUser();
     return {
-      roles: user?.role ? [user.role] : [],
-      permissions: [], // Add actual permissions when available
-      isAdmin: user?.role === 'admin',
+      roles: user?.roles || (user?.role ? [user.role] : []),
+      permissions: user?.permissions || [],
+      isAdmin:
+        user?.role === 'admin' || user?.roles?.includes('admin') || false,
     };
   });
 

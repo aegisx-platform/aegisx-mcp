@@ -47,6 +47,19 @@ export async function seed(knex: Knex): Promise<void> {
   // Clear only user-related data (idempotent seed design)
   // ❌ Do NOT delete permissions or role_permissions
   // Permissions are managed by migrations, not seeds
+
+  // First, clear inventory tables that reference users (if they exist)
+  // This handles FK constraints from inventory schema
+  try {
+    // Clear budget_request related tables first (child tables)
+    await knex.raw('DELETE FROM inventory.budget_request_items WHERE true');
+    await knex.raw('DELETE FROM inventory.budget_request_comments WHERE true');
+    await knex.raw('DELETE FROM inventory.budget_request_audit WHERE true');
+    await knex.raw('DELETE FROM inventory.budget_requests WHERE true');
+  } catch {
+    // Tables might not exist yet, ignore
+  }
+
   await knex('user_sessions').del();
   await knex('user_roles').del();
   await knex('users').del();

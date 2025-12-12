@@ -140,20 +140,20 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  webServer: [
-    {
-      command: 'nx serve api',
-      url: 'http://localhost:3383/api/health',
-      reuseExistingServer: !process.env.CI,
-      timeout: 120 * 1000,
-    },
-    {
-      command: 'nx serve web',
-      url: 'http://localhost:4249',
-      reuseExistingServer: !process.env.CI,
-      timeout: 120 * 1000,
-    },
-  ],
+  // webServer: [
+  //   {
+  //     command: 'nx serve api',
+  //     url: 'http://localhost:3383/api/health',
+  //     reuseExistingServer: !process.env.CI,
+  //     timeout: 120 * 1000,
+  //   },
+  //   {
+  //     command: 'nx serve web',
+  //     url: 'http://localhost:4249',
+  //     reuseExistingServer: !process.env.CI,
+  //     timeout: 120 * 1000,
+  //   },
+  // ],
 
   /* Global test timeout */
   timeout: 30 * 1000,
