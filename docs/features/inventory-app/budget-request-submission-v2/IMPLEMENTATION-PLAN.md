@@ -12,18 +12,524 @@
 
 เพิ่มฟีเจอร์ให้กับ Budget Request Submission ที่**มีอยู่แล้ว** ด้วย:
 
-- ✅ Permission-based access control (เพิ่ม 13 permissions)
-- ✅ Pre-submission validation checklist
-- ✅ Dashboard สำหรับติดตามงบประมาณ
-- ✅ Integration กับ Budget Plans และ Allocations
-- ✅ UI/UX improvements (Progress stepper, dialogs, widgets)
+- ✅ **Department-based Collaboration** - เภสัชกรหลายคนแก้ไข 1 request ได้
+- ✅ **Permission-based Access Control** - แบ่งสิทธิ์ตามแผนก + role
+- ✅ **Pre-submission Validation Checklist** - เช็คความครบถ้วนก่อน submit
+- ✅ **Real-time Budget Dashboard** - ติดตามงบประมาณแบบ live
+- ✅ **Budget Integration** - เช็คยาในแผน + เช็คงบคงเหลือ
+- ✅ **UI/UX Improvements** - Progress stepper, dialogs, widgets
 
 **Business Value:**
 
-- ป้องกันการ submit งบที่ไม่ครบถ้วน
-- ติดตามงบประมาณแบบ real-time
-- Workflow ชัดเจนกว่าเดิม
-- User experience ดีขึ้น
+- ✅ **ลดข้อผิดพลาด** - Validation ป้องกัน submit ข้อมูลผิด
+- ✅ **เพิ่มความโปร่งใส** - Dashboard แสดงงบ real-time
+- ✅ **ประหยัดเวลา** - Collaborative editing, auto-check
+- ✅ **ควบคุมงบดีขึ้น** - รู้ทันทีว่างบเหลือเท่าไหร่
+- ✅ **UX ดีขึ้น** - User รู้ว่าต้องทำอะไรต่อ
+
+---
+
+## 🎁 FEATURES ที่จะได้
+
+### 1. Department-based Collaborative Editing
+
+**ปัจจุบัน:**
+
+- ใครสร้างคำขอก็ต้องแก้เอง
+
+**หลัง Implement:**
+
+```
+แผนกเภสัชกรรม (Pharmacy Department):
+├─ เภสัชกร A สร้างคำขอ BR-2568-001
+├─ เภสัชกร B แก้ต่อ BR-2568-001  ✅ แก้ได้!
+├─ เภสัชกร C เพิ่มยา BR-2568-001  ✅ แก้ได้!
+└─ เภสัชกร D submit BR-2568-001   ✅ Submit ได้!
+
+= ทำงานร่วมกัน 1 request หลายคน
+```
+
+**Permission:**
+
+- ✅ View: เห็นคำขอทุกตัวในแผนก (ไม่ว่าใครสร้าง)
+- ✅ Edit: แก้คำขอทุกตัวในแผนก (status = DRAFT เท่านั้น)
+- ✅ Submit: Submit ส่งการเงินได้ (ไม่สนใจว่าใครสร้าง)
+
+---
+
+### 2. Pre-submission Validation Checklist
+
+**ปัจจุบัน:**
+
+- Submit ได้ทันที ไม่มีการเช็คความครบถ้วน
+
+**หลัง Implement:**
+
+```
+┌─────────────────────────────────────────┐
+│  📋 Ready to Submit?            [X]     │
+├─────────────────────────────────────────┤
+│  Please review before submitting:       │
+│                                          │
+│  ✅ Required Information                │
+│     ✓ Fiscal Year: 2568                │
+│     ✓ Department: Pharmacy              │
+│     ✓ Justification: 150 chars ✓       │
+│                                          │
+│  ✅ Budget Request Items                │
+│     ✓ Total Items: 45 drugs             │
+│     ✓ Total Amount: 2,500,000 บาท       │
+│     ✓ All items have valid prices       │
+│     ✓ Quarterly distribution valid      │
+│                                          │
+│  ⚠️ Warnings                            │
+│     ⚠️ 3 drugs not in budget plan:      │
+│        - Paracetamol 500mg TAB          │
+│        - Ibuprofen 400mg TAB            │
+│        - Amoxicillin 500mg CAP          │
+│     ⚠️ Total exceeds 80% of budget      │
+│        (2,500,000 / 3,000,000 = 83%)    │
+│                                          │
+│  💰 Budget Impact                       │
+│     Budget Type: OP001 - ยาและเวชภัณฑ์ │
+│     Allocated:   3,000,000 บาท          │
+│     Used:        0 บาท                  │
+│     Reserved:    500,000 บาท            │
+│     Available:   2,500,000 บาท          │
+│     This Request: 2,500,000 บาท         │
+│     After Submit: 0 บาท (100%) ⚠️       │
+│                                          │
+│  ℹ️ Next Steps After Submit             │
+│     1. Department Head notified         │
+│     2. Cannot edit after submission     │
+│     3. Approval takes 2-3 days          │
+│                                          │
+│  ☑️ I have reviewed all info above      │
+│                                          │
+│  [Cancel]  [Submit for Approval]        │
+└─────────────────────────────────────────┘
+```
+
+**Validation Rules:**
+
+- ✅ Fiscal year valid (2560+)
+- ✅ Justification min 20 characters
+- ✅ At least 1 item required
+- ✅ Quarterly sum = total quantity
+- ✅ Budget availability check
+- ⚠️ Drugs not in plan (warning only)
+- ⚠️ High budget utilization (>80%)
+
+---
+
+### 3. Real-time Budget Dashboard
+
+#### 3.1 Overview Dashboard
+
+```
+┌─────────────────────────────────────────────────┐
+│  📊 Budget Request Overview - FY 2568           │
+├─────────────────────────────────────────────────┤
+│  ┌───────────┐ ┌───────────┐ ┌───────────┐    │
+│  │ Total     │ │ Pending   │ │ Approved  │    │
+│  │ 45        │ │ 12        │ │ 28        │    │
+│  │ +5 this   │ │ +3 today  │ │ +2 today  │    │
+│  └───────────┘ └───────────┘ └───────────┘    │
+│                                                  │
+│  💰 Budget Usage: 65% (6.5M / 10M)              │
+│  [████████████░░░░░░] ← Progress bar            │
+│                                                  │
+│  ⏳ Pending Your Action (3)                     │
+│  ┌─────────────────────────────────────────┐   │
+│  │ • BR-2568-001 - Submitted 3 days ago    │   │
+│  │ • BR-2568-005 - Submitted 5 days ago ⚠️ │   │
+│  │ • BR-2568-007 - Submitted 1 day ago     │   │
+│  └─────────────────────────────────────────┘   │
+│                                                  │
+│  📝 Recent Requests                             │
+│  ┌─────────────────────────────────────────┐   │
+│  │ • BR-2568-010 - DRAFT (Today)           │   │
+│  │ • BR-2568-009 - APPROVED (Yesterday)    │   │
+│  │ • BR-2568-008 - SUBMITTED (2 days ago)  │   │
+│  └─────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────┘
+```
+
+#### 3.2 Budget Tracking Dashboard
+
+```
+┌─────────────────────────────────────────────────┐
+│  💰 Budget Allocation & Tracking - FY 2568      │
+├─────────────────────────────────────────────────┤
+│  Budget Type          Allocated    Used   Left  │
+│  OP001 - ยาและเวช    10,000,000   6.5M   3.5M  │
+│  [████████████░░░░░░] 65%                       │
+│                                                  │
+│  OP002 - เวชภัณฑ์     5,000,000   3.2M   1.8M  │
+│  [████████████░░░░░░] 64%                       │
+│                                                  │
+│  📊 Quarterly Breakdown - OP001                 │
+│  ┌──────────────────────────────────────┐       │
+│  │ Q1: 2.5M allocated / 2.5M used (100%) │       │
+│  │ Q2: 2.0M allocated / 1.6M used (80%)  │ ← Now │
+│  │ Q3: 1.5M allocated / 0M used (0%)     │       │
+│  │ Q4: 0.5M allocated / 0M used (0%)     │       │
+│  └──────────────────────────────────────┘       │
+│                                                  │
+│  📈 Spending Trend (Last 12 Months)             │
+│  ┌──────────────────────────────────────┐       │
+│  │    3M ┤     ╭─╮                       │       │
+│  │    2M ┤   ╭─╯ ╰─╮   ╭─╮               │       │
+│  │    1M ┤ ╭─╯     ╰─╮╭╯ ╰─╮             │       │
+│  │    0  ┴─┴────────┴─┴────┴────         │       │
+│  │       J F M A M J J A S O N D          │       │
+│  └──────────────────────────────────────┘       │
+└─────────────────────────────────────────────────┘
+```
+
+**Dashboard APIs:**
+
+- `GET /budget-requests/stats/total` - Total counts
+- `GET /budget-requests/my-pending-actions` - Pending approvals
+- `GET /budget-requests/recent` - Recent requests
+- `GET /allocations/summary` - Budget summary
+- `GET /allocations/quarterly-breakdown` - Quarterly data
+- `GET /allocations/spending-trend` - Trend chart data
+
+---
+
+### 4. Workflow Progress Stepper
+
+**ปัจจุบัน:**
+
+- ไม่รู้ว่าอยู่ขั้นตอนไหน ต้องดู status text
+
+**หลัง Implement:**
+
+```
+Budget Request Progress
+┌─────────────────────────────────────────────────┐
+│  ● ────────── ● ────────── ○ ────────── ○      │
+│  DRAFT      SUBMITTED  DEPT_APPROVED  APPROVED  │
+│  ✓ Done     ✓ Done        Current     Pending  │
+│                                                  │
+│  Created by: นายสมชาย ใจดี                     │
+│  Created at: 2025-12-10 09:00                   │
+│                                                  │
+│  Submitted by: นางสาววรรณา ผู้ช่วย             │
+│  Submitted at: 2025-12-10 14:00                 │
+│                                                  │
+│  Dept Approved by: นายประสิทธิ์ หัวหน้า        │
+│  Approved at: 2025-12-11 10:00                  │
+│  Comments: "อนุมัติตามที่เสนอ"                 │
+│                                                  │
+│  ⏳ Waiting: Finance Manager approval           │
+└─────────────────────────────────────────────────┘
+```
+
+**ถ้า REJECTED:**
+
+```
+┌─────────────────────────────────────────────────┐
+│  ● ────────── ● ────────── ✗                   │
+│  DRAFT      SUBMITTED    REJECTED               │
+│  ✓ Done     ✓ Done        ✗                    │
+│                                                  │
+│  ❌ Request Rejected                            │
+│  Rejected by: นายการเงิน ผู้จัดการ              │
+│  Rejected at: 2025-12-11 15:00                  │
+│  Reason: "งบประมาณไม่เพียงพอ กรุณาปรับลดจำนวน" │
+│                                                  │
+│  [Reopen and Edit]                              │
+└─────────────────────────────────────────────────┘
+```
+
+---
+
+### 5. Smart Action Buttons (Permission-based)
+
+**Staff (Pharmacist) - status = DRAFT:**
+
+```
+[Submit for Approval] [Save Changes] [Initialize] [Import Excel] [Delete]
+```
+
+**Staff (Pharmacist) - status = SUBMITTED:**
+
+```
+[View Only - Cannot Edit]  ← Read-only
+```
+
+**Department Head - status = SUBMITTED (แผนกอื่น):**
+
+```
+[Approve (Department)] [Reject] [Export PDF]
+```
+
+**Department Head - status = SUBMITTED (แผนกตัวเอง):**
+
+```
+[View Only]  ← ไม่สามารถอนุมัติคำขอแผนกตัวเอง
+```
+
+**Finance Manager - status = DEPT_APPROVED:**
+
+```
+[Final Approve (Finance)] [Reject] [Export PDF]
+```
+
+**Status = FINANCE_APPROVED (ทุกคน):**
+
+```
+[Export PDF] [Print]  ← Read-only
+```
+
+**Status = REJECTED (ผู้สร้าง):**
+
+```
+[Reopen and Edit] [View Rejection Reason]
+```
+
+---
+
+### 6. Budget Integration - Auto-check
+
+#### 6.1 Check Drugs in Budget Plan
+
+**API:** `POST /budget-plans/check-drugs`
+
+```typescript
+Request:
+{
+  "fiscal_year": 2568,
+  "department_id": 2,
+  "drug_ids": [101, 102, 103, ...]
+}
+
+Response:
+{
+  "plan_exists": true,
+  "plan_id": 5,
+  "plan_name": "แผนจัดซื้อยาประจำปี 2568",
+  "results": [
+    {
+      "generic_id": 101,
+      "generic_name": "Paracetamol 500mg TAB",
+      "in_plan": true,
+      "planned_qty": 50000,
+      "requested_qty": 5000
+    },
+    {
+      "generic_id": 102,
+      "generic_name": "Ibuprofen 400mg TAB",
+      "in_plan": false,
+      "warning": "Drug not in budget plan"
+    }
+  ],
+  "summary": {
+    "total_drugs": 45,
+    "in_plan": 42,
+    "not_in_plan": 3
+  }
+}
+```
+
+**UI Display:**
+
+```
+⚠️ Warning: 3 drugs not in budget plan
+
+• Paracetamol 500mg TAB - Not planned
+• Ibuprofen 400mg TAB - Not planned
+• Amoxicillin 500mg CAP - Not planned
+
+💡 Recommendation: Add to next year's budget plan
+```
+
+#### 6.2 Budget Availability Check
+
+**API:** `POST /allocations/check-availability`
+
+```typescript
+Request:
+{
+  "fiscal_year": 2568,
+  "department_id": 2,
+  "budget_type_id": 1,
+  "amount": 2500000
+}
+
+Response:
+{
+  "available": true,
+  "allocation": {
+    "total_budget": 10000000,
+    "total_used": 6500000,
+    "remaining_budget": 3500000
+  },
+  "impact": {
+    "before": {
+      "available": 3500000,
+      "utilization_percent": 65
+    },
+    "after": {
+      "available": 1000000,
+      "utilization_percent": 90
+    }
+  },
+  "warnings": [
+    "Budget utilization will reach 90% after this approval",
+    "Only 1M will remain for future requests"
+  ]
+}
+```
+
+**UI Display:**
+
+```
+Budget Check Result:
+✅ Available: 3,500,000 บาท
+   This Request: 2,500,000 บาท
+   Remaining: 1,000,000 บาท (10%)
+
+⚠️ Warning: Only 10% budget will remain after approval
+⚠️ High utilization alert (90% of total budget)
+```
+
+---
+
+### 7. Toast Notifications & Confirmations
+
+#### Success Notifications
+
+```
+✅ Budget request submitted successfully!
+   Your request BR-2568-012 is now pending
+   department head approval.
+   [View Request]
+```
+
+#### Warning Notifications
+
+```
+⚠️ You have 5 unsaved changes
+   Changes will be lost if you navigate away.
+   [Save Now] [Dismiss]
+```
+
+#### Error Notifications
+
+```
+❌ Cannot submit: Please fix 3 validation errors
+   - Justification too short (need 15 more characters)
+   - Item #5 has invalid quarterly distribution
+   - Budget allocation not found
+   [Show Details]
+```
+
+#### Confirmation Dialogs
+
+**Reject Dialog:**
+
+```
+┌──────────────────────────────────────┐
+│  Reject Budget Request?              │
+├──────────────────────────────────────┤
+│  Request: BR-2568-001                │
+│  Amount: 2,500,000 บาท               │
+│  Created by: นายสมชาย ใจดี           │
+│                                       │
+│  Rejection Reason (required):        │
+│  ┌──────────────────────────────┐   │
+│  │ [Reason text area...]        │   │
+│  └──────────────────────────────┘   │
+│                                       │
+│  [Cancel]  [Reject]                  │
+└──────────────────────────────────────┘
+```
+
+**Delete Confirmation:**
+
+```
+┌──────────────────────────────────────┐
+│  Delete Budget Request?              │
+├──────────────────────────────────────┤
+│  ⚠️ This action cannot be undone     │
+│                                       │
+│  You are about to delete:            │
+│  • BR-2568-001                       │
+│  • 45 items                          │
+│  • Total: 2,500,000 บาท              │
+│                                       │
+│  [Cancel]  [Delete]                  │
+└──────────────────────────────────────┘
+```
+
+**Approve with Budget Warning:**
+
+```
+┌──────────────────────────────────────┐
+│  Approve Budget Request              │
+├──────────────────────────────────────┤
+│  ⚠️ High Budget Utilization Warning  │
+│                                       │
+│  This approval will use 83% of       │
+│  available budget                    │
+│                                       │
+│  Available:    3,000,000 บาท         │
+│  This Request: 2,500,000 บาท         │
+│  Remaining:      500,000 บาท (17%)   │
+│                                       │
+│  ⚠️ Only 500K will remain for future │
+│     requests this quarter            │
+│                                       │
+│  ☑️ I have reviewed the budget       │
+│     impact and approve this request  │
+│                                       │
+│  [Cancel]  [Approve]                 │
+└──────────────────────────────────────┘
+```
+
+---
+
+### 8. Status Badge Component
+
+**Color-coded status indicators:**
+
+```
+[● DRAFT]              ← Gray
+[● SUBMITTED]          ← Blue
+[● DEPT_APPROVED]      ← Orange
+[● FINANCE_APPROVED]   ← Green
+[✗ REJECTED]           ← Red
+```
+
+**With icons:**
+
+```
+📝 DRAFT              - Editing in progress
+📤 SUBMITTED          - Awaiting approval
+✓ DEPT_APPROVED       - Department approved
+✓✓ FINANCE_APPROVED   - Fully approved
+✗ REJECTED            - Rejected
+```
+
+---
+
+## 📊 SUMMARY: Before vs After
+
+| Feature            | Before          | After                               |
+| ------------------ | --------------- | ----------------------------------- |
+| **Permission**     | ดูได้ทุกคำขอ    | แบ่งตามแผนก + role ชัดเจน           |
+| **Collaboration**  | ผู้สร้างแก้เอง  | หลายคนแก้ได้ (แผนกเดียวกัน)         |
+| **Validation**     | Submit ได้ทันที | Checklist + budget check            |
+| **Dashboard**      | ไม่มี           | 3 dashboards + 7 widgets            |
+| **Workflow View**  | ดู status text  | Progress stepper visual             |
+| **Action Buttons** | เยอะ สับสน      | แสดงแค่ที่ใช้ได้ (permission-based) |
+| **Budget Check**   | ไม่มี           | Auto-check + warnings               |
+| **Drug in Plan**   | ไม่มี           | เตือนถ้ายาไม่อยู่ในแผน              |
+| **Notifications**  | ไม่มี           | Toast + Email + In-app              |
+| **Self-approval**  | ไม่มีป้องกัน    | ป้องกันอนุมัติแผนกตัวเอง            |
 
 ---
 
@@ -114,7 +620,7 @@
 
 ### Backend
 
-1. **Additional Permissions** - ขาด view_own, view_dept, edit_own
+1. **Additional Permissions** - ขาด view_dept, view_all, edit_dept, validate
 2. **Validation Endpoint** - `POST /:id/validate` สำหรับ pre-submit check
 3. **Dashboard Stats Endpoints** - สถิติ, pending actions, budget tracking
 4. **Budget Integration Endpoints** - Check drugs in plan, budget availability
@@ -174,8 +680,8 @@
 
 1. **Permission Granularity**
    - ใช้ `budgetRequests:read` อันเดียวพอหรือไม่?
-   - หรือต้องแยกเป็น `view_own`, `view_dept`, `view_all`?
-   - **Recommendation:** แยกเพื่อ fine-grained control
+   - หรือต้องแยกเป็น `view_dept`, `view_all` (department-based collaborative model)?
+   - **Decision:** แยกเพื่อ fine-grained control + support collaborative editing
 
 2. **Notification Channels**
    - Email only หรือต้องมี in-app notifications ด้วย?
@@ -238,10 +744,10 @@ interface BudgetRequest {
 ```typescript
 // เพิ่ม permissions ใหม่ 4 ตัว (รวมกับเดิม = 13 permissions)
 const NEW_PERMISSIONS = {
-  'budgetRequests:view_own': 'View own budget requests only',
   'budgetRequests:view_dept': 'View department budget requests',
   'budgetRequests:view_all': 'View all budget requests (all departments)',
-  'budgetRequests:edit_own': 'Edit own budget requests (DRAFT only)',
+  'budgetRequests:edit_dept': 'Edit department budget requests (DRAFT only)',
+  'budgetRequests:validate': 'Validate budget requests before submit',
 };
 
 // Permissions ที่มีอยู่แล้ว (ไม่ต้องสร้างใหม่)
@@ -457,10 +963,10 @@ BudgetRequestModule (Already Exists)
 1. Create migration: `pnpm run db:migrate:make add_additional_budget_request_permissions`
 2. Use permission helper: `const { createPermissionsForResource, linkPermissionsToRole } = require('../helpers/permission-helper')`
 3. Add 4 new permissions:
-   - `budgetRequests:view_own` - View own requests only
-   - `budgetRequests:view_dept` - View department requests
-   - `budgetRequests:view_all` - View all requests
-   - `budgetRequests:edit_own` - Edit own requests (DRAFT only)
+   - `budgetRequests:view_dept` - View department requests (collaborative)
+   - `budgetRequests:view_all` - View all requests (finance/admin)
+   - `budgetRequests:edit_dept` - Edit department requests (DRAFT only, collaborative)
+   - `budgetRequests:validate` - Validate requests before submit
 4. Assign to roles (check actual role names in database first!)
 5. Run migration: `pnpm run db:migrate`
 
@@ -483,29 +989,43 @@ BudgetRequestModule (Already Exists)
 const { createPermissionsForResource, linkPermissionsToRole } = require('../helpers/permission-helper');
 
 exports.up = async function (knex) {
-  // Add 4 new granular permissions
+  // Add 4 new granular permissions for department-based collaborative editing
   await createPermissionsForResource(knex, {
     resource: 'budgetRequests',
     category: 'inventory',
     actions: [
-      { action: 'view_own', description: 'View own budget requests only' },
-      { action: 'view_dept', description: 'View department budget requests' },
-      { action: 'view_all', description: 'View all budget requests' },
-      { action: 'edit_own', description: 'Edit own budget requests (DRAFT)' },
+      { action: 'view_dept', description: 'View department budget requests (collaborative)' },
+      { action: 'view_all', description: 'View all budget requests (finance/admin)' },
+      { action: 'edit_dept', description: 'Edit department budget requests (DRAFT only, collaborative)' },
+      { action: 'validate', description: 'Validate budget requests before submit' },
     ],
   });
 
   // Example role assignments (adjust based on actual role names!)
-  await linkPermissionsToRole(knex, 'inventory.staff', ['budgetRequests:create', 'budgetRequests:view_own', 'budgetRequests:edit_own', 'budgetRequests:submit']);
+  // Pharmacists - collaborative editing within department
+  await linkPermissionsToRole(knex, 'inventory.pharmacist', [
+    'budgetRequests:create',
+    'budgetRequests:view_dept', // เห็นทุกคำขอในแผนก
+    'budgetRequests:edit_dept', // แก้ได้ทุกคำขอในแผนก (DRAFT)
+    'budgetRequests:submit',
+    'budgetRequests:delete',
+    'budgetRequests:validate',
+  ]);
 
+  // Department heads - approve own department (with self-approval prevention)
   await linkPermissionsToRole(knex, 'inventory.department_head', ['budgetRequests:view_dept', 'budgetRequests:approve_dept', 'budgetRequests:reject']);
 
-  await linkPermissionsToRole(knex, 'inventory.finance_manager', ['budgetRequests:view_all', 'budgetRequests:approve_finance', 'budgetRequests:reject']);
+  // Finance managers - view all departments, approve finance level
+  await linkPermissionsToRole(knex, 'inventory.finance_manager', [
+    'budgetRequests:view_all', // เห็นทุกแผนก
+    'budgetRequests:approve_finance',
+    'budgetRequests:reject',
+  ]);
 };
 
 exports.down = async function (knex) {
   // Remove only the 4 new permissions
-  await knex('permissions').where('resource', 'budgetRequests').whereIn('action', ['view_own', 'view_dept', 'view_all', 'edit_own']).del();
+  await knex('permissions').where('resource', 'budgetRequests').whereIn('action', ['view_dept', 'view_all', 'edit_dept', 'validate']).del();
 };
 ```
 
@@ -643,7 +1163,7 @@ async validateForSubmit(id: number) {
 **Acceptance Criteria:**
 
 - ✅ All stats endpoints return correct data
-- ✅ Data filtered by user permission (view_own/view_dept/view_all)
+- ✅ Data filtered by user permission (view_dept/view_all)
 - ✅ Response times <500ms
 - ✅ Proper error handling
 
