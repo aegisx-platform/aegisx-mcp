@@ -1,0 +1,231 @@
+<div class="dashboard-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <h1 class="page-title">Budget Requests Dashboard</h1>
+      <p class="page-subtitle">
+        Monitor and manage budget requests across your organization
+      </p>
+    </div>
+    <button
+      mat-raised-button
+      color="primary"
+      class="create-btn"
+      (click)="createNewRequest()"
+    >
+      <mat-icon>add</mat-icon>
+      <span>New Request</span>
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <mat-progress-bar
+    *ngIf="loading()"
+    mode="indeterminate"
+    class="progress-bar"
+  ></mat-progress-bar>
+
+  <!-- Error State -->
+  <div *ngIf="error() && !loading()" class="error-container">
+    <mat-icon class="error-icon">error_outline</mat-icon>
+    <div class="error-content">
+      <h3>Unable to Load Dashboard</h3>
+      <p>{{ error() }}</p>
+      <button mat-stroked-button color="primary" (click)="retry()">
+        <mat-icon>refresh</mat-icon>
+        Try Again
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="dashboard-grid" *ngIf="hasData()">
+    <!-- Stats Cards Row -->
+    <div class="stats-row">
+      <app-stats-card
+        class="stat-card"
+        color="info"
+        icon="description"
+        [value]="stats()?.total || 0"
+        title="Total Requests"
+        changeLabel="in FY2568"
+      ></app-stats-card>
+
+      <app-stats-card
+        class="stat-card"
+        color="accent"
+        icon="pending_actions"
+        [value]="stats()?.by_status?.SUBMITTED || 0"
+        title="Pending Approval"
+      ></app-stats-card>
+
+      <app-stats-card
+        class="stat-card"
+        color="success"
+        icon="check_circle"
+        [value]="stats()?.by_status?.FINANCE_APPROVED || 0"
+        title="Approved"
+      ></app-stats-card>
+
+      <app-stats-card
+        class="stat-card"
+        color="warn"
+        icon="cancel"
+        [value]="stats()?.by_status?.REJECTED || 0"
+        title="Rejected"
+      ></app-stats-card>
+    </div>
+
+    <!-- Budget Allocation Widget -->
+    <div class="card card-full budget-card">
+      <div class="card-header">
+        <h2 class="card-title">
+          <mat-icon class="title-icon">pie_chart</mat-icon>
+          Budget Utilization
+        </h2>
+        <span class="utilization-badge"
+          >{{ budgetUtilization() | number: '1.0-0' }}%</span
+        >
+      </div>
+      <div class="card-body">
+        <mat-progress-bar
+          mode="determinate"
+          [value]="budgetUtilization()"
+          class="budget-progress"
+          [ngClass]="
+            budgetUtilization() > 80
+              ? 'warn'
+              : budgetUtilization() > 60
+                ? 'accent'
+                : 'primary'
+          "
+        ></mat-progress-bar>
+        <div class="budget-summary">
+          <div class="summary-item">
+            <span class="label">Total Budget</span>
+            <span class="value">{{
+              budgetSummary()?.total_budget
+                | currency: 'THB' : 'symbol' : '1.0-0'
+            }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Used</span>
+            <span class="value highlight">{{
+              budgetSummary()?.total_used | currency: 'THB' : 'symbol' : '1.0-0'
+            }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Remaining</span>
+            <span class="value">{{
+              budgetSummary()?.total_budget - budgetSummary()?.total_used
+                | currency: 'THB' : 'symbol' : '1.0-0'
+            }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Widgets Row -->
+    <div class="widgets-row">
+      <!-- Pending Actions Widget -->
+      <div class="card card-half">
+        <div class="card-header">
+          <h3 class="card-title">
+            <mat-icon class="title-icon">assignment</mat-icon>
+            Pending Your Action
+          </h3>
+        </div>
+        <div class="card-body">
+          <div *ngIf="pendingActions().length === 0" class="empty-state">
+            <mat-icon>check_circle</mat-icon>
+            <p>No pending actions</p>
+          </div>
+          <ul *ngIf="pendingActions().length > 0" class="item-list">
+            <li
+              *ngFor="let item of pendingActions()"
+              class="list-item"
+              (click)="navigateToPendingAction(item)"
+            >
+              <div class="item-main">
+                <span class="item-number">{{ item.request_number }}</span>
+                <span class="item-meta">{{
+                  item.updated_at | date: 'short'
+                }}</span>
+              </div>
+              <app-budget-request-status-badge
+                [status]="item.status"
+              ></app-budget-request-status-badge>
+            </li>
+          </ul>
+        </div>
+        <div class="card-footer" *ngIf="pendingActions().length > 0">
+          <button
+            mat-stroked-button
+            color="primary"
+            (click)="navigateToAllRequests()"
+          >
+            View All
+            <mat-icon>arrow_forward</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Recent Requests Widget -->
+      <div class="card card-half">
+        <div class="card-header">
+          <h3 class="card-title">
+            <mat-icon class="title-icon">history</mat-icon>
+            Recent Requests
+          </h3>
+        </div>
+        <div class="card-body">
+          <div *ngIf="recentRequests().length === 0" class="empty-state">
+            <mat-icon>inbox</mat-icon>
+            <p>No recent requests</p>
+          </div>
+          <ul *ngIf="recentRequests().length > 0" class="item-list">
+            <li
+              *ngFor="let item of recentRequests()"
+              class="list-item"
+              (click)="navigateToRecentRequest(item)"
+            >
+              <div class="item-main">
+                <span class="item-number">{{ item.request_number }}</span>
+                <span class="item-meta">{{
+                  item.updated_at | date: 'short'
+                }}</span>
+              </div>
+              <app-budget-request-status-badge
+                [status]="item.status"
+              ></app-budget-request-status-badge>
+            </li>
+          </ul>
+        </div>
+        <div class="card-footer" *ngIf="recentRequests().length > 0">
+          <button
+            mat-stroked-button
+            color="primary"
+            (click)="navigateToAllRequests()"
+          >
+            View All
+            <mat-icon>arrow_forward</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading() && !hasData() && !error()" class="empty-dashboard">
+    <mat-icon>inbox</mat-icon>
+    <h3>No Data Available</h3>
+    <p>
+      Dashboard data is currently unavailable. Please refresh or try again
+      later.
+    </p>
+    <button mat-raised-button color="primary" (click)="retry()">
+      <mat-icon>refresh</mat-icon>
+      Refresh Dashboard
+    </button>
+  </div>
+</div>

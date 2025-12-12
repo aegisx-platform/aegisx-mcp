@@ -1484,8 +1484,9 @@ export class BudgetRequestDetailComponent implements OnInit {
   );
   zeroQtyCount = computed(
     () =>
-      this.items().filter((i) => !i.requested_qty || i.requested_qty === 0)
-        .length,
+      this.items().filter(
+        (item) => !item.requested_qty || item.requested_qty === 0,
+      ).length,
   );
   zeroAnyCount = computed(
     () =>

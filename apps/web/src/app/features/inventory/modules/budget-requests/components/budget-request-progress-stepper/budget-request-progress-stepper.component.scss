@@ -1,0 +1,82 @@
+:host {
+  display: block;
+  position: relative;
+}
+
+.stepper-container {
+  position: relative;
+}
+
+.budget-stepper {
+  background-color: transparent;
+
+  // Customizing the stepper header
+  ::ng-deep .mat-horizontal-stepper-header {
+    pointer-events: none; // Make headers non-interactive
+    padding: 12px 0;
+  }
+
+  // Customizing the step labels
+  ::ng-deep .mat-step-label {
+    font-weight: 500;
+    .step-subtitle {
+      font-size: 0.75rem;
+      color: var(--mat-stepper-header-label-color, rgba(0, 0, 0, 0.54));
+      margin-top: 2px;
+    }
+  }
+
+  // Customize the line connecting the steps
+  ::ng-deep .mat-stepper-horizontal-line {
+    border-top-width: 2px;
+  }
+}
+
+// Styling for the 'rejected' overlay
+.rejected-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+  z-index: 10;
+}
+
+.rejected-content {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  background-color: var(--mat-red-50, #fde8e8);
+  border-radius: 8px;
+  border: 1px solid var(--mat-red-200, #f9bdbb);
+  color: var(--mat-red-800, #c53929);
+}
+
+.rejected-icon {
+  font-size: 36px;
+  width: 36px;
+  height: 36px;
+  margin-right: 12px;
+}
+
+.rejected-text {
+  .rejected-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+  }
+  .rejected-details {
+    font-style: italic;
+    margin-top: 4px;
+
+    .rejection-meta {
+      font-style: normal;
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+  }
+}

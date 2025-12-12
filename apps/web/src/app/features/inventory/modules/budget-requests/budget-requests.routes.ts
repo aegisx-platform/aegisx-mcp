@@ -3,6 +3,19 @@ import { Routes } from '@angular/router';
 export const budgetRequestsRoutes: Routes = [
   {
     path: '',
+    redirectTo: 'list',
+    pathMatch: 'full',
+  },
+  {
+    path: 'dashboard',
+    loadComponent: () =>
+      import('./pages/overview-dashboard/overview-dashboard.component').then(
+        (m) => m.OverviewDashboardComponent,
+      ),
+    title: 'Budget Requests Dashboard',
+  },
+  {
+    path: 'list',
     loadComponent: () =>
       import('./components/budget-requests-list.component').then(
         (m) => m.BudgetRequestsListComponent,

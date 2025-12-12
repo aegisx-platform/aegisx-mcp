@@ -1,0 +1,23 @@
+<mat-card class="stats-card" [ngClass]="'stats-card-' + color">
+  <div class="stats-card-header">
+    <div class="icon-container">
+      <mat-icon>{{ icon }}</mat-icon>
+    </div>
+  </div>
+  <mat-card-content>
+    <div class="value">{{ value }}</div>
+    <div class="title">{{ title }}</div>
+  </mat-card-content>
+  <mat-card-footer *ngIf="change !== undefined">
+    <div
+      class="change-indicator"
+      [class.positive]="change >= 0"
+      [class.negative]="change < 0"
+    >
+      <mat-icon *ngIf="change >= 0">arrow_upward</mat-icon>
+      <mat-icon *ngIf="change < 0">arrow_downward</mat-icon>
+      <span>{{ change | number: '1.1-1' }}%</span>
+    </div>
+    <div class="change-label" *ngIf="changeLabel">{{ changeLabel }}</div>
+  </mat-card-footer>
+</mat-card>

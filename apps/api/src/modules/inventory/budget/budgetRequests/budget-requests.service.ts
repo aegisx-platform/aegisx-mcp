@@ -166,7 +166,269 @@ export class BudgetRequestsService extends BaseService<
     }
   }
 
+  /**
+   * Get aggregated stats for budget requests based on user permissions
+   * @param user The authenticated user object, including permissions and department
+   * @param filters Query filters like fiscal_year and department_id
+   * @returns Aggregated statistics of budget requests
+   */
+  async getStats(
+    user: { id: string; permissions?: string[] }, // Updated user type
+    filters: { fiscal_year?: number; department_id?: number },
+  ): Promise<{
+    total: number;
+    by_status: {
+      DRAFT: number;
+      SUBMITTED: number;
+      DEPT_APPROVED: number;
+      FINANCE_APPROVED: number;
+      REJECTED: number;
+    };
+  }> {
+    const knex = (this.repository as any).knex;
+    let query = knex('inventory.budget_requests');
+
+    // Apply permission-based filtering
+    const userPermissions = user.permissions || []; // Handle optional permissions
+    const canViewAll =
+      userPermissions.includes('budgetRequests:view_all') ||
+      userPermissions.includes('*:*');
+
+    if (!canViewAll) {
+      // If "view_all" is not granted, fall back to filtering by created_by.
+      // Department-based filtering (view_dept) is not possible without department_id on the user object.
+      // This part will need re-evaluation once department system is integrated.
+      this.logger.info(
+        { userId: user.id },
+        'Applying "own" records filter for stats as department_id is not available or "view_all" not granted.',
+      );
+      query = query.where('created_by', user.id);
+    } else {
+      this.logger.info(
+        { userId: user.id },
+        'Applying "view_all" permission for stats, no user-based filters.',
+      );
+    }
+
+    // Apply query filters from the request
+    if (filters.fiscal_year) {
+      query = query.where('fiscal_year', filters.fiscal_year);
+    }
+    // Allow admin/finance to override department filter if view_all is present
+    // department_id filter from query will still work even without user's department_id
+    if (filters.department_id && canViewAll) {
+      query = query.where('department_id', filters.department_id);
+    }
+
+    const results = await query
+      .select('status')
+      .count('* as count')
+      .groupBy('status');
+
+    const byStatus = {
+      DRAFT: 0,
+      SUBMITTED: 0,
+      DEPT_APPROVED: 0,
+      FINANCE_APPROVED: 0,
+      REJECTED: 0,
+    };
+
+    let total = 0;
+    for (const row of results) {
+      if (Object.prototype.hasOwnProperty.call(byStatus, row.status)) {
+        const count = parseInt(row.count, 10);
+        byStatus[row.status as keyof typeof byStatus] = count;
+        total += count;
+      }
+    }
+
+    return {
+      total,
+      by_status: byStatus,
+    };
+  }
+
+  /**
+   * Get budget requests pending the current user's action based on their permissions.
+   * @param user The authenticated user object
+   * @returns A list of pending budget requests and the count
+   */
+  async getMyPendingActions(user: {
+    id: string;
+    permissions?: string[]; // Updated type
+  }): Promise<{ pending: BudgetRequests[]; count: number }> {
+    const knex = (this.repository as any).knex;
+    const query = knex('inventory.budget_requests');
+
+    const userPermissions = user.permissions || [];
+    const canApproveDept = userPermissions.includes(
+      'budgetRequests:approve_dept',
+    );
+    const canApproveFinance = userPermissions.includes(
+      'budgetRequests:approve_finance',
+    );
+
+    if (!canApproveDept && !canApproveFinance) {
+      return { pending: [], count: 0 };
+    }
+
+    query.where((builder: any) => {
+      if (canApproveDept) {
+        // IMPORTANT: Without user.department_id, we cannot enforce "only own department"
+        // and "prevent self-approval" for department heads as per spec.
+        // This logic is simplified to just filter by status 'SUBMITTED' until department system is fully integrated.
+        builder.orWhere('status', 'SUBMITTED');
+        this.logger.warn(
+          { userId: user.id },
+          'getMyPendingActions: Approving department requests without department_id filter or self-approval prevention due to missing user.department_id.',
+        );
+      }
+      if (canApproveFinance) {
+        builder.orWhere('status', 'DEPT_APPROVED');
+      }
+    });
+
+    const pendingRequests = await query.orderBy('updated_at', 'asc');
+
+    return {
+      pending: pendingRequests,
+      count: pendingRequests.length,
+    };
+  }
+
+  /**
+   * Get the most recent budget requests based on user permissions.
+   * @param user The authenticated user object
+   * @param query Query parameters, including limit
+   * @returns A list of recent budget requests and the count
+   */
+  async getRecent(
+    user: { id: string; permissions?: string[] }, // Updated user type
+    query: { limit?: number },
+  ): Promise<{ requests: BudgetRequests[]; count: number }> {
+    const knex = (this.repository as any).knex;
+    let queryBuilder = knex('inventory.budget_requests');
+
+    // Apply permission-based filtering (same as getStats)
+    const userPermissions = user.permissions || [];
+    const canViewAll =
+      userPermissions.includes('budgetRequests:view_all') ||
+      userPermissions.includes('*:*');
+
+    if (!canViewAll) {
+      // If "view_all" is not granted, fall back to filtering by created_by.
+      // Department-based filtering (view_dept) is not possible without department_id on the user object.
+      // This part will need re-evaluation once department system is integrated.
+      this.logger.info(
+        { userId: user.id },
+        'Applying "own" records filter for recent requests as department_id is not available or "view_all" not granted.',
+      );
+      queryBuilder = queryBuilder.where('created_by', user.id);
+    } else {
+      this.logger.info(
+        { userId: user.id },
+        'Applying "view_all" permission for recent requests, no user-based filters.',
+      );
+    }
+
+    const limit = query.limit || 10;
+    const recentRequests = await queryBuilder
+      .orderBy('updated_at', 'desc')
+      .limit(limit);
+
+    return {
+      requests: recentRequests,
+      count: recentRequests.length,
+    };
+  }
+
   // ===== WORKFLOW METHODS =====
+
+  /**
+   * Validate budget request before submission
+   * @param id Budget request ID
+   * @returns Validation result
+   */
+  async validateForSubmit(id: string | number): Promise<{
+    valid: boolean;
+    errors: { field?: string; message: string; code?: string }[];
+    warnings: { field?: string; message: string; code?: string }[];
+    info: string[];
+  }> {
+    const request = await this.budgetRequestsRepository.findById(id);
+
+    if (!request) {
+      // This should ideally not be hit if called from a valid context,
+      // but as a service method, it should be robust.
+      return {
+        valid: false,
+        errors: [{ message: 'Budget request not found' }],
+        warnings: [],
+        info: [],
+      };
+    }
+
+    const { data: items } = await this.budgetRequestItemsRepository.list({
+      budget_request_id: Number(id),
+      limit: 5000, // Set a high limit to fetch all items for validation
+    });
+
+    const errors: { field?: string; message: string; code?: string }[] = [];
+    const warnings: { field?: string; message: string; code?: string }[] = [];
+    const info: string[] = [];
+
+    // Validate fiscal year
+    if (!request.fiscal_year || request.fiscal_year < 2560) {
+      errors.push({
+        field: 'fiscal_year',
+        message: 'Invalid or missing fiscal year. Must be 2560 or greater.',
+        code: 'INVALID_FISCAL_YEAR',
+      });
+    }
+
+    // Validate justification
+    if (!request.justification || request.justification.length < 20) {
+      errors.push({
+        field: 'justification',
+        message: 'Justification must be at least 20 characters.',
+        code: 'JUSTIFICATION_TOO_SHORT',
+      });
+    }
+
+    // Validate items existence
+    if (!items || items.length === 0) {
+      errors.push({
+        field: 'items',
+        message: 'At least one budget request item is required.',
+        code: 'NO_ITEMS',
+      });
+    }
+
+    // Validate quarterly distribution for each item
+    for (const item of items) {
+      const sum =
+        (item.q1_qty || 0) +
+        (item.q2_qty || 0) +
+        (item.q3_qty || 0) +
+        (item.q4_qty || 0);
+
+      // Use a small tolerance for floating point comparisons
+      if (Math.abs(sum - (item.requested_qty || 0)) > 0.001) {
+        errors.push({
+          field: `items[${item.line_number}].quarterly`,
+          message: `For item '${item.generic_name}', the sum of quarterly quantities (${sum}) does not match the total requested quantity (${item.requested_qty}).`,
+          code: 'QUARTERLY_SUM_MISMATCH',
+        });
+      }
+    }
+
+    return {
+      valid: errors.length === 0,
+      errors,
+      warnings,
+      info,
+    };
+  }
 
   /**
    * Submit budget request for approval
@@ -819,6 +1081,221 @@ export class BudgetRequestsService extends BaseService<
     console.log(`Recalculated total amount for request ${id}: ${totalAmount}`);
 
     return updated;
+  }
+
+  /**
+   * Check if drugs in the request are included in budget plan
+   * @param requestId Budget request ID
+   * @param drugIds Array of drug IDs to check
+   * @returns Summary of drugs in and not in plan
+   */
+  async checkDrugsInPlan(
+    requestId: string | number,
+    drugIds: string[],
+  ): Promise<{
+    total_drugs: number;
+    in_plan: number;
+    not_in_plan: number;
+    drugs_not_in_plan: Array<{
+      drug_id: string;
+      drug_name: string;
+      generic_name: string;
+    }>;
+  }> {
+    const request = await this.budgetRequestsRepository.findById(requestId);
+
+    if (!request) {
+      const error = new Error('Budget request not found') as any;
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const knex = (this.budgetRequestsRepository as any).knex;
+
+    // Get the budget plan for this fiscal year and department
+    const budgetPlan = await knex('inventory.budget_plans')
+      .where({
+        fiscal_year: request.fiscal_year,
+        department_id: request.department_id,
+      })
+      .first();
+
+    if (!budgetPlan) {
+      // No plan exists, all drugs are "not in plan"
+      return {
+        total_drugs: drugIds.length,
+        in_plan: 0,
+        not_in_plan: drugIds.length,
+        drugs_not_in_plan: drugIds.map((id) => ({
+          drug_id: id,
+          drug_name: '',
+          generic_name: '',
+        })),
+      };
+    }
+
+    // Get all drug generics for the provided IDs
+    const drugs = await knex('inventory.drug_generics')
+      .whereIn('working_code', drugIds)
+      .select('id', 'working_code', 'generic_name');
+
+    const drugMap = new Map<string, { id: number; generic_name: string }>();
+    drugs.forEach((drug: any) => {
+      drugMap.set(drug.working_code, {
+        id: drug.id,
+        generic_name: drug.generic_name,
+      });
+    });
+
+    // Get drugs that are in the budget plan
+    const planItems = await knex('inventory.budget_plan_items')
+      .where({ budget_plan_id: budgetPlan.id })
+      .whereIn(
+        'generic_id',
+        Array.from(drugMap.values()).map((d) => d.id),
+      )
+      .select('generic_id');
+
+    const planItemGenericIds = new Set(
+      planItems.map((item: any) => item.generic_id),
+    );
+
+    // Identify drugs not in plan
+    const drugsNotInPlan: Array<{
+      drug_id: string;
+      drug_name: string;
+      generic_name: string;
+    }> = [];
+
+    drugIds.forEach((drugId) => {
+      const drug = drugMap.get(drugId);
+      if (!drug || !planItemGenericIds.has(drug.id)) {
+        drugsNotInPlan.push({
+          drug_id: drugId,
+          drug_name: drug?.generic_name || '',
+          generic_name: drug?.generic_name || '',
+        });
+      }
+    });
+
+    const inPlanCount = drugIds.length - drugsNotInPlan.length;
+
+    return {
+      total_drugs: drugIds.length,
+      in_plan: inPlanCount,
+      not_in_plan: drugsNotInPlan.length,
+      drugs_not_in_plan: drugsNotInPlan,
+    };
+  }
+
+  /**
+   * Check budget availability for the request
+   * Calculates allocated, used, reserved, and available budget
+   * @param requestId Budget request ID
+   * @returns Budget availability analysis
+   */
+  async checkBudgetAvailability(requestId: string | number): Promise<{
+    budget_type_id: string;
+    budget_type_name: string;
+    allocated: number;
+    used: number;
+    reserved: number;
+    available: number;
+    request_amount: number;
+    remaining_after: number;
+    percentage_used: number;
+    is_available: boolean;
+    warnings: string[];
+  }> {
+    const request = await this.budgetRequestsRepository.findById(requestId);
+
+    if (!request) {
+      const error = new Error('Budget request not found') as any;
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const knex = (this.budgetRequestsRepository as any).knex;
+
+    // Get total requested amount for this request
+    const requestAmount = Number(request.total_requested_amount) || 0;
+
+    // Get budget allocation for this request's fiscal year, budget type (1=main), and department
+    const allocation = await knex('inventory.budget_allocations')
+      .where({
+        fiscal_year: request.fiscal_year,
+        budget_id: 1, // Default to main budget (budget_id=1)
+        department_id: request.department_id,
+      })
+      .first();
+
+    // Get budget type information (from budgets table)
+    const budgetType = await knex('inventory.budgets').where({ id: 1 }).first();
+
+    const warnings: string[] = [];
+
+    if (!allocation) {
+      // No allocation exists - full budget is available (theoretical)
+      return {
+        budget_type_id: String(budgetType?.id || 1),
+        budget_type_name: budgetType?.budget_type_name || 'Main Budget',
+        allocated: 0,
+        used: 0,
+        reserved: 0,
+        available: 999999999, // Unlimited if no allocation
+        request_amount: requestAmount,
+        remaining_after: 999999999 - requestAmount,
+        percentage_used: 0,
+        is_available: true,
+        warnings: [
+          'No budget allocation exists for this period - treating as unlimited',
+        ],
+      };
+    }
+
+    // Calculate budget metrics
+    const allocated = Number(allocation.total_budget) || 0;
+    const used = Number(allocation.total_spent) || 0;
+    const available = Number(allocation.remaining_budget) || 0;
+    const reserved = 0; // Would be calculated from budget_reservations table if needed
+
+    // Calculate percentage used
+    const percentageUsed = allocated > 0 ? (used / allocated) * 100 : 0;
+
+    // Check if request can be accommodated
+    const remainingAfter = available - requestAmount;
+    const isAvailable = remainingAfter >= 0;
+
+    // Generate warnings
+    if (percentageUsed > 80) {
+      warnings.push(
+        `Budget utilization is high (${percentageUsed.toFixed(1)}%) - consider budget increase`,
+      );
+    }
+
+    if (!isAvailable) {
+      warnings.push(
+        `Insufficient budget available. Request amount (${requestAmount.toFixed(2)}) exceeds available budget (${available.toFixed(2)})`,
+      );
+    }
+
+    if (percentageUsed > 100) {
+      warnings.push('Budget has been overutilized - immediate review required');
+    }
+
+    return {
+      budget_type_id: String(budgetType?.id || 1),
+      budget_type_name: budgetType?.budget_type_name || 'Main Budget',
+      allocated,
+      used,
+      reserved,
+      available,
+      request_amount: requestAmount,
+      remaining_after: remainingAfter,
+      percentage_used: parseFloat(percentageUsed.toFixed(2)),
+      is_available: isAvailable,
+      warnings,
+    };
   }
 
   /**

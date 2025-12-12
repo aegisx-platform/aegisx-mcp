@@ -181,6 +181,90 @@ export const PartialBudgetRequestsSchema = Type.Partial(BudgetRequestsSchema);
 export const FlexibleBudgetRequestsListResponseSchema =
   PartialPaginatedResponseSchema(BudgetRequestsSchema);
 
+// Response Schemas for Validation Endpoint
+export const ValidationMessageSchema = Type.Object({
+  field: Type.Optional(Type.String()),
+  message: Type.String(),
+  code: Type.Optional(Type.String()),
+});
+
+export const BudgetRequestValidationResultSchema = Type.Object({
+  valid: Type.Boolean(),
+  errors: Type.Array(ValidationMessageSchema),
+  warnings: Type.Array(ValidationMessageSchema),
+  info: Type.Array(Type.String()),
+});
+
+// Schemas for Dashboard Endpoints
+export const GetBudgetRequestsStatsQuerySchema = Type.Object({
+  fiscal_year: Type.Optional(Type.Number()),
+  department_id: Type.Optional(Type.Number()),
+});
+
+export const BudgetRequestsStatsSchema = Type.Object({
+  total: Type.Number(),
+  by_status: Type.Object({
+    DRAFT: Type.Number(),
+    SUBMITTED: Type.Number(),
+    DEPT_APPROVED: Type.Number(),
+    FINANCE_APPROVED: Type.Number(),
+    REJECTED: Type.Number(),
+  }),
+});
+
+export const MyPendingActionsResponseSchema = Type.Object({
+  pending: Type.Array(BudgetRequestsSchema),
+  count: Type.Number(),
+});
+
+export const RecentBudgetRequestsQuerySchema = Type.Object({
+  limit: Type.Optional(Type.Number({ minimum: 1, maximum: 50, default: 10 })),
+});
+
+export const RecentBudgetRequestsResponseSchema = Type.Object({
+  requests: Type.Array(BudgetRequestsSchema),
+  count: Type.Number(),
+});
+
+// ===== BUDGET INTEGRATION ENDPOINTS SCHEMAS =====
+
+// Endpoint 1: Check Drugs in Plan
+export const CheckDrugsInPlanBodySchema = Type.Object({
+  drug_ids: Type.Array(Type.String(), {
+    minItems: 1,
+    maxItems: 500,
+    description: 'Array of drug IDs to check',
+  }),
+});
+
+export const DrugsNotInPlanItemSchema = Type.Object({
+  drug_id: Type.String(),
+  drug_name: Type.String(),
+  generic_name: Type.String(),
+});
+
+export const CheckDrugsInPlanResponseSchema = Type.Object({
+  total_drugs: Type.Number(),
+  in_plan: Type.Number(),
+  not_in_plan: Type.Number(),
+  drugs_not_in_plan: Type.Array(DrugsNotInPlanItemSchema),
+});
+
+// Endpoint 2: Check Budget Availability
+export const CheckBudgetAvailabilityResponseSchema = Type.Object({
+  budget_type_id: Type.String(),
+  budget_type_name: Type.String(),
+  allocated: Type.Number(),
+  used: Type.Number(),
+  reserved: Type.Number(),
+  available: Type.Number(),
+  request_amount: Type.Number(),
+  remaining_after: Type.Number(),
+  percentage_used: Type.Number(),
+  is_available: Type.Boolean(),
+  warnings: Type.Array(Type.String()),
+});
+
 // Export types
 export type BudgetRequests = Static<typeof BudgetRequestsSchema>;
 export type CreateBudgetRequests = Static<typeof CreateBudgetRequestsSchema>;

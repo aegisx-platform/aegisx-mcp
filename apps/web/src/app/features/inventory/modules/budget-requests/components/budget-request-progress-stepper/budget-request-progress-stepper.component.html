@@ -1,0 +1,70 @@
+<div class="stepper-container">
+  <!-- Main Stepper for Workflow -->
+  <mat-stepper
+    [linear]="false"
+    [selectedIndex]="selectedIndex()"
+    class="budget-stepper"
+  >
+    <!-- Step 1: Draft -->
+    <mat-step label="Draft" [completed]="selectedIndex() > 0">
+      <ng-template matStepLabel>
+        <div>DRAFT</div>
+        <div class="step-subtitle" *ngIf="requestSignal() as req">
+          Created: {{ req.created_at | date: 'short' }}
+        </div>
+      </ng-template>
+    </mat-step>
+
+    <!-- Step 2: Submitted -->
+    <mat-step label="Submitted" [completed]="selectedIndex() > 1">
+      <ng-template matStepLabel>
+        <div>SUBMITTED</div>
+        <div class="step-subtitle" *ngIf="requestSignal()?.submitted_at as at">
+          {{ at | date: 'short' }}
+        </div>
+      </ng-template>
+    </mat-step>
+
+    <!-- Step 3: Department Approved -->
+    <mat-step label="Dept. Approved" [completed]="selectedIndex() > 2">
+      <ng-template matStepLabel>
+        <div>DEPT. APPROVED</div>
+        <div
+          class="step-subtitle"
+          *ngIf="requestSignal()?.dept_reviewed_at as at"
+        >
+          {{ at | date: 'short' }}
+        </div>
+      </ng-template>
+    </mat-step>
+
+    <!-- Step 4: Finance Approved -->
+    <mat-step label="Finance Approved">
+      <ng-template matStepLabel>
+        <div>FINANCE APPROVED</div>
+        <div
+          class="step-subtitle"
+          *ngIf="requestSignal()?.finance_reviewed_at as at"
+        >
+          {{ at | date: 'short' }}
+        </div>
+      </ng-template>
+    </mat-step>
+  </mat-stepper>
+
+  <!-- Rejected State Indicator -->
+  <div *ngIf="isRejected()" class="rejected-overlay">
+    <div class="rejected-content">
+      <mat-icon class="rejected-icon">cancel</mat-icon>
+      <div class="rejected-text">
+        <div class="rejected-title">Request Rejected</div>
+        <div class="rejected-details" *ngIf="rejectionDetails() as details">
+          "{{ details.reason }}"
+          <span class="rejection-meta">
+            - Rejected on {{ details.at | date: 'short' }}</span
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -11,6 +11,8 @@ import {
   BudgetRequestsIdParamSchema,
   GetBudgetRequestsQuerySchema,
   ListBudgetRequestsQuerySchema,
+  GetBudgetRequestsStatsQuerySchema,
+  RecentBudgetRequestsQuerySchema,
 } from './budget-requests.schemas';
 
 /**
@@ -198,6 +200,80 @@ export class BudgetRequestsController {
   }
 
   /**
+   * Get aggregated budget request stats for dashboard
+   * GET /budgetRequests/stats/total
+   */
+  async getStats(
+    request: FastifyRequest<{
+      Querystring: Static<typeof GetBudgetRequestsStatsQuerySchema>;
+    }>,
+    reply: FastifyReply,
+  ) {
+    const user = request.user as {
+      id: string;
+      permissions?: string[];
+    };
+
+    if (!user || !user.id) {
+      return reply.code(401).error('UNAUTHORIZED', 'User not authenticated');
+    }
+
+    const stats = await this.budgetRequestsService.getStats(
+      user,
+      request.query,
+    );
+
+    return reply.success(stats);
+  }
+
+  /**
+   * Get budget requests pending the current user's action
+   * GET /budgetRequests/my-pending-actions
+   */
+  async getMyPendingActions(request: FastifyRequest, reply: FastifyReply) {
+    const user = request.user as {
+      id: string;
+      permissions?: string[];
+    };
+
+    if (!user || !user.id) {
+      return reply.code(401).error('UNAUTHORIZED', 'User not authenticated');
+    }
+
+    const result = await this.budgetRequestsService.getMyPendingActions(user);
+
+    return reply.success(result);
+  }
+
+  /**
+   * Get most recent budget requests
+   * GET /budgetRequests/recent
+   */
+  async getRecent(
+    request: FastifyRequest<{
+      Querystring: Static<typeof RecentBudgetRequestsQuerySchema>;
+    }>,
+    reply: FastifyReply,
+  ) {
+    request.log.info({ query: request.query }, 'Fetching recent requests');
+    const user = request.user as {
+      id: string;
+      permissions?: string[];
+    };
+
+    if (!user || !user.id) {
+      return reply.code(401).error('UNAUTHORIZED', 'User not authenticated');
+    }
+
+    const result = await this.budgetRequestsService.getRecent(
+      user,
+      request.query,
+    );
+
+    return reply.success(result);
+  }
+
+  /**
    * Update budgetRequests
    * PUT /budgetRequests/:id
    */
@@ -265,6 +341,92 @@ export class BudgetRequestsController {
   }
 
   // ===== WORKFLOW ENDPOINTS =====
+
+  /**
+   * Validate budget request before submission
+   * POST /budgetRequests/:id/validate
+   */
+  async validate(
+    request: FastifyRequest<{
+      Params: Static<typeof BudgetRequestsIdParamSchema>;
+    }>,
+    reply: FastifyReply,
+  ) {
+    const { id } = request.params;
+    request.log.info({ budgetRequestsId: id }, 'Validating budget request');
+
+    const validationResult =
+      await this.budgetRequestsService.validateForSubmit(id);
+
+    return reply.send(validationResult);
+  }
+
+  /**
+   * Check if drugs in request are in budget plan
+   * POST /budgetRequests/:id/check-drugs-in-plan
+   */
+  async checkDrugsInPlan(
+    request: FastifyRequest<{
+      Params: Static<typeof BudgetRequestsIdParamSchema>;
+      Body: { drug_ids: string[] };
+    }>,
+    reply: FastifyReply,
+  ) {
+    const { id } = request.params;
+    const { drug_ids } = request.body;
+
+    request.log.info(
+      { budgetRequestId: id, drugCount: drug_ids.length },
+      'Checking drugs in plan',
+    );
+
+    try {
+      const result = await this.budgetRequestsService.checkDrugsInPlan(
+        id,
+        drug_ids,
+      );
+      return reply.success(result);
+    } catch (error: any) {
+      request.log.error(
+        { error: error.message, budgetRequestId: id },
+        'Failed to check drugs in plan',
+      );
+      if (error.statusCode === 404) {
+        return reply.code(404).error('NOT_FOUND', error.message);
+      }
+      return reply.code(500).error('CHECK_FAILED', error.message);
+    }
+  }
+
+  /**
+   * Check budget availability for request
+   * POST /budgetRequests/:id/check-budget-availability
+   */
+  async checkBudgetAvailability(
+    request: FastifyRequest<{
+      Params: Static<typeof BudgetRequestsIdParamSchema>;
+    }>,
+    reply: FastifyReply,
+  ) {
+    const { id } = request.params;
+
+    request.log.info({ budgetRequestId: id }, 'Checking budget availability');
+
+    try {
+      const result =
+        await this.budgetRequestsService.checkBudgetAvailability(id);
+      return reply.success(result);
+    } catch (error: any) {
+      request.log.error(
+        { error: error.message, budgetRequestId: id },
+        'Failed to check budget availability',
+      );
+      if (error.statusCode === 404) {
+        return reply.code(404).error('NOT_FOUND', error.message);
+      }
+      return reply.code(500).error('CHECK_FAILED', error.message);
+    }
+  }
 
   /**
    * Submit budget request for approval

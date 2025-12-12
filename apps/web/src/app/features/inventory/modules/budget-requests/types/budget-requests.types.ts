@@ -1,11 +1,18 @@
 // ===== CORE ENTITY TYPES =====
 
+export type BudgetRequestStatus =
+  | 'DRAFT'
+  | 'SUBMITTED'
+  | 'DEPT_APPROVED'
+  | 'FINANCE_APPROVED'
+  | 'REJECTED';
+
 export interface BudgetRequest {
   id: number;
   request_number: string;
   fiscal_year: number;
   department_id: number;
-  status: string;
+  status: BudgetRequestStatus;
   total_requested_amount: number;
   justification?: string | null;
   submitted_by?: string | null;
@@ -22,6 +29,7 @@ export interface BudgetRequest {
   updated_at: string;
   deleted_at?: string | null;
   is_active?: boolean | null;
+  items?: any[]; // Added to fix validation service error
 }
 
 export interface CreateBudgetRequestRequest {
@@ -197,7 +205,7 @@ export interface ImportError {
 
 export interface ImportRowPreview extends Partial<BudgetRequest> {
   rowNumber: number;
-  status: 'valid' | 'warning' | 'error' | 'duplicate';
+  importStatus: 'valid' | 'warning' | 'error' | 'duplicate';
   action: 'create' | 'update' | 'skip';
   errors: ImportError[];
   warnings: ImportError[];

@@ -10,6 +10,15 @@ import {
   BudgetRequestsResponseSchema,
   BudgetRequestsListResponseSchema,
   FlexibleBudgetRequestsListResponseSchema,
+  BudgetRequestValidationResultSchema,
+  GetBudgetRequestsStatsQuerySchema,
+  BudgetRequestsStatsSchema,
+  MyPendingActionsResponseSchema,
+  RecentBudgetRequestsQuerySchema,
+  RecentBudgetRequestsResponseSchema,
+  CheckDrugsInPlanBodySchema,
+  CheckDrugsInPlanResponseSchema,
+  CheckBudgetAvailabilityResponseSchema,
 } from './budget-requests.schemas';
 import {
   ApiErrorResponseSchema,
@@ -149,6 +158,79 @@ export async function budgetRequestsRoutes(
   });
 
   // ===== WORKFLOW ENDPOINTS =====
+
+  // Validate budget request before submitting
+  fastify.post('/:id/validate', {
+    schema: {
+      tags: ['Inventory: Budget Requests'],
+      summary: 'Validate budget request before submit',
+      description:
+        'Runs a pre-submission check to validate required fields, item integrity, and budget impact.',
+      params: BudgetRequestsIdParamSchema,
+      response: {
+        200: BudgetRequestValidationResultSchema,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        404: SchemaRefs.NotFound,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [
+      fastify.authenticate,
+      fastify.verifyPermission('budgetRequests', 'validate'),
+    ],
+    handler: controller.validate.bind(controller),
+  });
+
+  // ===== BUDGET INTEGRATION ENDPOINTS =====
+
+  // Check if drugs in this request are included in the budget plan
+  fastify.post('/:id/check-drugs-in-plan', {
+    schema: {
+      tags: ['Inventory: Budget Requests'],
+      summary: 'Check drugs in budget plan',
+      description:
+        'Check if requested drugs are included in the budget plan. Returns list of drugs not in plan.',
+      params: BudgetRequestsIdParamSchema,
+      body: CheckDrugsInPlanBodySchema,
+      response: {
+        200: CheckDrugsInPlanResponseSchema,
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        404: SchemaRefs.NotFound,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [
+      fastify.authenticate,
+      fastify.verifyPermission('budgetRequests', 'read'),
+    ],
+    handler: controller.checkDrugsInPlan.bind(controller),
+  });
+
+  // Check budget availability for the request
+  fastify.post('/:id/check-budget-availability', {
+    schema: {
+      tags: ['Inventory: Budget Requests'],
+      summary: 'Check budget availability',
+      description:
+        'Check if sufficient budget is available for this request. Calculates allocated, used, reserved, and available amounts.',
+      params: BudgetRequestsIdParamSchema,
+      response: {
+        200: CheckBudgetAvailabilityResponseSchema,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        404: SchemaRefs.NotFound,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [
+      fastify.authenticate,
+      fastify.verifyPermission('budgetRequests', 'read'),
+    ],
+    handler: controller.checkBudgetAvailability.bind(controller),
+  });
 
   // Submit budget request for approval
   fastify.post('/:id/submit', {
@@ -454,9 +536,65 @@ export async function budgetRequestsRoutes(
     handler: controller.exportSSCJ.bind(controller),
   });
 
-  // ===== ITEM MANAGEMENT ENDPOINTS =====
+  // ===== ITEM MANAGEMENT METHODS =====
 
-  // Add drug item to budget request
+  // ===== DASHBOARD ENDPOINTS =====
+
+  // Get total request counts by status
+  fastify.get('/stats/total', {
+    schema: {
+      tags: ['Inventory: Budget Requests Dashboard'],
+      summary: 'Get total request counts by status',
+      description:
+        'Retrieves aggregated counts of budget requests, categorized by their status, for dashboard widgets. Query parameters can filter by fiscal year or department.',
+      querystring: GetBudgetRequestsStatsQuerySchema,
+      response: {
+        200: BudgetRequestsStatsSchema,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [fastify.authenticate], // Permission is handled in the service
+    handler: controller.getStats.bind(controller),
+  });
+
+  // Get requests pending the current user's action
+  fastify.get('/my-pending-actions', {
+    schema: {
+      tags: ['Inventory: Budget Requests Dashboard'],
+      summary: "Get requests pending the current user's action",
+      description:
+        'Retrieves a list of budget requests that are awaiting approval or action from the currently authenticated user, based on their role and permissions.',
+      response: {
+        200: MyPendingActionsResponseSchema,
+        401: SchemaRefs.Unauthorized,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [fastify.authenticate],
+    handler: controller.getMyPendingActions.bind(controller),
+  });
+
+  // Get most recent requests
+  fastify.get('/recent', {
+    schema: {
+      tags: ['Inventory: Budget Requests Dashboard'],
+      summary: 'Get most recent budget requests',
+      description:
+        'Retrieves a list of the most recently created or updated budget requests, based on user permissions.',
+      querystring: RecentBudgetRequestsQuerySchema,
+      response: {
+        200: RecentBudgetRequestsResponseSchema,
+        401: SchemaRefs.Unauthorized,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [fastify.authenticate],
+    handler: controller.getRecent.bind(controller),
+  });
+
+  // ===== ITEM MANAGEMENT ENDPOINTS =====
   fastify.post('/:id/items', {
     schema: {
       tags: ['Inventory: Budget Requests'],

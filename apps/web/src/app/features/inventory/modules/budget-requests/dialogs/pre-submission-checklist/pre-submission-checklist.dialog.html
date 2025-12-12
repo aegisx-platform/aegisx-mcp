@@ -1,0 +1,317 @@
+<div class="dialog-container">
+  <h1 mat-dialog-title>
+    <mat-icon>checklist</mat-icon>
+    Ready to Submit?
+  </h1>
+
+  <mat-dialog-content class="mat-typography">
+    <!-- Loading State -->
+    <ng-container *ngIf="isLoading()">
+      <div class="loading-container">
+        <mat-icon class="spinner">hourglass_empty</mat-icon>
+        <p>Validating budget request...</p>
+      </div>
+    </ng-container>
+
+    <!-- Error State -->
+    <ng-container *ngIf="!isLoading() && loadingError()">
+      <ax-alert status="danger" title="Loading Error">
+        <p>{{ loadingError() }}</p>
+      </ax-alert>
+    </ng-container>
+
+    <!-- Main Content -->
+    <ng-container *ngIf="!isLoading() && !loadingError()">
+      <p class="intro-text">Please review all sections before submitting:</p>
+
+      <!-- REQUIRED INFORMATION SECTION -->
+      <div class="validation-section">
+        <div class="section-header" [class.success]="!hasErrors">
+          <mat-icon> {{ !hasErrors ? 'check_circle' : 'cancel' }} </mat-icon>
+          <h3>Required Information</h3>
+        </div>
+
+        <mat-list dense class="section-content">
+          <mat-list-item class="check-item">
+            <mat-icon matListItemIcon class="success-icon">
+              check_circle
+            </mat-icon>
+            <div matListItemTitle>Fiscal Year</div>
+            <div matListItemMeta>{{ data.request.fiscal_year }}</div>
+          </mat-list-item>
+
+          <mat-list-item class="check-item">
+            <mat-icon matListItemIcon class="success-icon">
+              check_circle
+            </mat-icon>
+            <div matListItemTitle>Department ID</div>
+            <div matListItemMeta>{{ data.request.department_id }}</div>
+          </mat-list-item>
+
+          <mat-list-item class="check-item">
+            <mat-icon matListItemIcon class="success-icon">
+              check_circle
+            </mat-icon>
+            <div matListItemTitle>Justification</div>
+            <div matListItemMeta class="justification-meta">
+              {{ (data.request.justification?.length || 0) > 0 ?
+              data.request.justification?.substring(0, 50) + '...' : 'N/A' }}
+              <span class="char-count">
+                ({{ data.request.justification?.length || 0 }} characters)
+              </span>
+            </div>
+          </mat-list-item>
+        </mat-list>
+      </div>
+
+      <!-- BUDGET REQUEST ITEMS SECTION -->
+      <div class="validation-section">
+        <div class="section-header" [class.success]="!hasErrors">
+          <mat-icon> {{ !hasErrors ? 'check_circle' : 'warning' }} </mat-icon>
+          <h3>Budget Request Items</h3>
+        </div>
+
+        <mat-list dense class="section-content">
+          <mat-list-item class="check-item">
+            <mat-icon matListItemIcon class="success-icon">
+              check_circle
+            </mat-icon>
+            <div matListItemTitle>Total Items</div>
+            <div matListItemMeta>
+              {{ data.request.items?.length ?? 0 }} drugs
+            </div>
+          </mat-list-item>
+
+          <mat-list-item class="check-item">
+            <mat-icon matListItemIcon class="success-icon">
+              check_circle
+            </mat-icon>
+            <div matListItemTitle>Total Amount</div>
+            <div matListItemMeta>
+              {{ formatCurrency(data.request.total_requested_amount) }}
+            </div>
+          </mat-list-item>
+
+          <mat-list-item class="check-item">
+            <mat-icon matListItemIcon [class.success-icon]="quarterlyValid">
+              {{ quarterlyValid ? 'check_circle' : 'warning' }}
+            </mat-icon>
+            <div matListItemTitle>Quarterly Distribution</div>
+            <div matListItemMeta [class.warning-text]="!quarterlyValid">
+              Q1: {{ quarterlyDistribution()?.q1 ?? 0 }} | Q2: {{
+              quarterlyDistribution()?.q2 ?? 0 }} | Q3: {{
+              quarterlyDistribution()?.q3 ?? 0 }} | Q4: {{
+              quarterlyDistribution()?.q4 ?? 0 }}
+              <span *ngIf="!quarterlyValid" class="error-hint">
+                (Sum mismatch!)
+              </span>
+            </div>
+          </mat-list-item>
+        </mat-list>
+      </div>
+
+      <!-- WARNINGS SECTION -->
+      <ng-container
+        *ngIf="validationResult()?.warnings && validationResult()!.warnings.length > 0"
+      >
+        <div class="validation-section warning-section">
+          <div class="section-header warning-header">
+            <mat-icon>warning</mat-icon>
+            <h3>Warnings</h3>
+          </div>
+
+          <ax-alert status="warning" title="Please review these warnings">
+            <mat-list dense class="section-content">
+              <mat-list-item
+                *ngFor="let warning of validationResult()!.warnings"
+                class="warning-item"
+              >
+                <mat-icon matListItemIcon class="warning-icon">
+                  warning
+                </mat-icon>
+                <div matListItemTitle>{{ warning.message }}</div>
+              </mat-list-item>
+            </mat-list>
+          </ax-alert>
+        </div>
+
+        <!-- Drugs Not in Plan Sub-section -->
+        <ng-container
+          *ngIf="drugsInPlan()?.drugsNotInPlan && drugsInPlan()!.drugsNotInPlan.length > 0"
+        >
+          <div class="subsection">
+            <h4>Drugs Not in Budget Plan</h4>
+            <mat-list dense>
+              <mat-list-item
+                *ngFor="let drug of drugsInPlan()!.drugsNotInPlan"
+                class="drug-item"
+              >
+                <mat-icon matListItemIcon class="warning-icon">
+                  local_pharmacy
+                </mat-icon>
+                <div matListItemTitle>{{ getDrugName(drug) }}</div>
+                <div matListItemMeta>{{ formatDrugQuantity(drug) }}</div>
+              </mat-list-item>
+            </mat-list>
+          </div>
+        </ng-container>
+      </ng-container>
+
+      <!-- ERRORS SECTION -->
+      <ng-container
+        *ngIf="validationResult()?.errors && validationResult()!.errors.length > 0"
+      >
+        <div class="validation-section error-section">
+          <div class="section-header error-header">
+            <mat-icon>cancel</mat-icon>
+            <h3>Submission Blocked</h3>
+          </div>
+
+          <ax-alert status="danger" title="Fix these errors before submitting">
+            <mat-list dense class="section-content">
+              <mat-list-item
+                *ngFor="let error of validationResult()!.errors"
+                class="error-item"
+              >
+                <mat-icon matListItemIcon class="error-icon"> cancel </mat-icon>
+                <div matListItemTitle>{{ error.message }}</div>
+                <div matListItemLine *ngIf="error.field" class="error-field">
+                  {{ error.field }}
+                </div>
+              </mat-list-item>
+            </mat-list>
+          </ax-alert>
+        </div>
+      </ng-container>
+
+      <!-- BUDGET IMPACT SECTION -->
+      <div class="validation-section budget-section">
+        <div class="section-header">
+          <mat-icon>account_balance</mat-icon>
+          <h3>Budget Impact</h3>
+        </div>
+
+        <ng-container *ngIf="budgetImpact() as impact">
+          <mat-list dense class="section-content">
+            <mat-list-item class="budget-item">
+              <div matListItemTitle>Budget Type</div>
+              <div matListItemMeta>{{ impact.budgetTypeName }}</div>
+            </mat-list-item>
+
+            <mat-list-item class="budget-item">
+              <div matListItemTitle>Allocated</div>
+              <div matListItemMeta>{{ formatCurrency(impact.allocated) }}</div>
+            </mat-list-item>
+
+            <mat-list-item class="budget-item">
+              <div matListItemTitle>Already Used</div>
+              <div matListItemMeta>{{ formatCurrency(impact.used) }}</div>
+            </mat-list-item>
+
+            <mat-list-item class="budget-item">
+              <div matListItemTitle>Reserved</div>
+              <div matListItemMeta>{{ formatCurrency(impact.reserved) }}</div>
+            </mat-list-item>
+
+            <mat-list-item class="budget-item">
+              <div matListItemTitle>Available</div>
+              <div matListItemMeta class="available-amount">
+                {{ formatCurrency(impact.available) }}
+              </div>
+            </mat-list-item>
+
+            <mat-list-item class="budget-item">
+              <div matListItemTitle>This Request</div>
+              <div matListItemMeta>
+                {{ formatCurrency(data.request.total_requested_amount) }}
+              </div>
+            </mat-list-item>
+          </mat-list>
+
+          <!-- Budget Utilization Progress Bar -->
+          <div class="budget-progress-section">
+            <div class="progress-label">
+              <span>Budget Utilization (After Submit)</span>
+              <span class="percent-badge" [class]="budgetUtilizationColor">
+                {{ budgetUtilizationPercent | number: '1.0-0' }}%
+              </span>
+            </div>
+            <mat-progress-bar
+              mode="determinate"
+              [value]="budgetUtilizationPercent"
+              [color]="budgetUtilizationColor"
+            ></mat-progress-bar>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="!budgetImpact()">
+          <p class="no-data-text">Budget impact data unavailable</p>
+        </ng-container>
+      </div>
+
+      <!-- NEXT STEPS SECTION -->
+      <div class="validation-section info-section">
+        <div class="section-header">
+          <mat-icon>info</mat-icon>
+          <h3>Next Steps After Submit</h3>
+        </div>
+
+        <div class="next-steps-list">
+          <div class="next-step">
+            <span class="step-number">1</span>
+            <span class="step-text">Department Head will be notified</span>
+          </div>
+          <div class="next-step">
+            <span class="step-number">2</span>
+            <span class="step-text">You cannot edit after submission</span>
+          </div>
+          <div class="next-step">
+            <span class="step-number">3</span>
+            <span class="step-text">Approval process takes 2-3 days</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONFIRMATION CHECKBOX -->
+      <div class="confirmation-section">
+        <mat-checkbox
+          [(ngModel)]="isConfirmed"
+          [disabled]="hasErrors || isLoading()"
+          color="primary"
+        >
+          I have reviewed all information above and confirm it is correct
+        </mat-checkbox>
+      </div>
+    </ng-container>
+  </mat-dialog-content>
+
+  <!-- Dialog Actions -->
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()" [disabled]="isLoading()">
+      Cancel
+    </button>
+
+    <!-- Submit Anyway Button (only show if there are warnings but no errors) -->
+    <button
+      mat-stroked-button
+      color="accent"
+      (click)="onSubmitAnyway()"
+      [disabled]="submitAnyWayButtonDisabled || isLoading()"
+      *ngIf="hasWarnings && !hasErrors"
+    >
+      <mat-icon>warning</mat-icon>
+      Submit Anyway
+    </button>
+
+    <!-- Primary Submit Button -->
+    <button
+      mat-flat-button
+      color="primary"
+      (click)="onSubmit()"
+      [disabled]="submitButtonDisabled"
+    >
+      <mat-icon>send</mat-icon>
+      Submit for Approval
+    </button>
+  </mat-dialog-actions>
+</div>
