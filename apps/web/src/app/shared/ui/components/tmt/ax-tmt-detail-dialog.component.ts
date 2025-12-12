@@ -187,7 +187,14 @@ export interface TmtDetailDialogData {
             </div>
 
             <!-- Properties -->
-            @if (concept()!.strength || concept()!.dosage_form) {
+            @if (
+              concept()!.strength ||
+              concept()!.dosage_form ||
+              concept()!.manufacturer ||
+              concept()!.pack_size ||
+              concept()!.unit_of_use ||
+              concept()!.route_of_administration
+            ) {
               <div class="bg-white border rounded-lg p-4">
                 <h3 class="text-sm font-semibold text-gray-500 uppercase mb-3">
                   <mat-icon class="!text-base align-text-bottom mr-1"
@@ -207,6 +214,36 @@ export interface TmtDetailDialogData {
                       <span class="text-gray-500">Dosage Form</span>
                       <div class="font-medium">
                         {{ concept()!.dosage_form }}
+                      </div>
+                    </div>
+                  }
+                  @if (concept()!.manufacturer) {
+                    <div class="col-span-2">
+                      <span class="text-gray-500">Manufacturer</span>
+                      <div class="font-medium">
+                        {{ concept()!.manufacturer }}
+                      </div>
+                    </div>
+                  }
+                  @if (concept()!.pack_size) {
+                    <div>
+                      <span class="text-gray-500">Pack Size</span>
+                      <div class="font-medium">{{ concept()!.pack_size }}</div>
+                    </div>
+                  }
+                  @if (concept()!.unit_of_use) {
+                    <div>
+                      <span class="text-gray-500">Unit of Use</span>
+                      <div class="font-medium">
+                        {{ concept()!.unit_of_use }}
+                      </div>
+                    </div>
+                  }
+                  @if (concept()!.route_of_administration) {
+                    <div class="col-span-2">
+                      <span class="text-gray-500">Route of Administration</span>
+                      <div class="font-medium">
+                        {{ concept()!.route_of_administration }}
                       </div>
                     </div>
                   }

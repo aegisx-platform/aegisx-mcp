@@ -35,6 +35,12 @@ export class TmtRepository {
         'preferred_term',
         'strength',
         'dosage_form',
+        'manufacturer',
+        'pack_size',
+        'unit_of_use',
+        'route_of_administration',
+        'effective_date',
+        'release_date',
         'is_active',
       )
       .where(function () {
@@ -74,6 +80,12 @@ export class TmtRepository {
         'preferred_term',
         'strength',
         'dosage_form',
+        'manufacturer',
+        'pack_size',
+        'unit_of_use',
+        'route_of_administration',
+        'effective_date',
+        'release_date',
         'is_active',
         'created_at',
         'updated_at',
@@ -98,6 +110,12 @@ export class TmtRepository {
         'preferred_term',
         'strength',
         'dosage_form',
+        'manufacturer',
+        'pack_size',
+        'unit_of_use',
+        'route_of_administration',
+        'effective_date',
+        'release_date',
         'is_active',
         'created_at',
         'updated_at',
@@ -153,7 +171,8 @@ export class TmtRepository {
         -- Base case: get immediate parent
         SELECT
           c.id, c.tmt_id, c.concept_code, c.level, c.fsn,
-          c.preferred_term, c.strength, c.dosage_form, c.is_active,
+          c.preferred_term, c.strength, c.dosage_form, c.manufacturer,
+          c.pack_size, c.unit_of_use, c.route_of_administration, c.is_active,
           1 as depth
         FROM inventory.tmt_concepts c
         JOIN inventory.tmt_relationships r ON r.parent_id = c.id
@@ -166,7 +185,8 @@ export class TmtRepository {
         -- Recursive: get parent of parent
         SELECT
           c.id, c.tmt_id, c.concept_code, c.level, c.fsn,
-          c.preferred_term, c.strength, c.dosage_form, c.is_active,
+          c.preferred_term, c.strength, c.dosage_form, c.manufacturer,
+          c.pack_size, c.unit_of_use, c.route_of_administration, c.is_active,
           a.depth + 1
         FROM inventory.tmt_concepts c
         JOIN inventory.tmt_relationships r ON r.parent_id = c.id
@@ -176,7 +196,8 @@ export class TmtRepository {
           ${!includeInactive ? 'AND c.is_active = true' : ''}
       )
       SELECT id, tmt_id, concept_code, level, fsn, preferred_term,
-             strength, dosage_form, is_active
+             strength, dosage_form, manufacturer, pack_size, unit_of_use,
+             route_of_administration, is_active
       FROM ancestors
       ORDER BY depth DESC
     `;
@@ -198,7 +219,8 @@ export class TmtRepository {
         -- Base case: get immediate children
         SELECT
           c.id, c.tmt_id, c.concept_code, c.level, c.fsn,
-          c.preferred_term, c.strength, c.dosage_form, c.is_active,
+          c.preferred_term, c.strength, c.dosage_form, c.manufacturer,
+          c.pack_size, c.unit_of_use, c.route_of_administration, c.is_active,
           1 as depth,
           ?::bigint as parent_id
         FROM inventory.tmt_concepts c
@@ -212,7 +234,8 @@ export class TmtRepository {
         -- Recursive: get children of children
         SELECT
           c.id, c.tmt_id, c.concept_code, c.level, c.fsn,
-          c.preferred_term, c.strength, c.dosage_form, c.is_active,
+          c.preferred_term, c.strength, c.dosage_form, c.manufacturer,
+          c.pack_size, c.unit_of_use, c.route_of_administration, c.is_active,
           d.depth + 1,
           d.id as parent_id
         FROM inventory.tmt_concepts c
@@ -223,7 +246,8 @@ export class TmtRepository {
           ${!includeInactive ? 'AND c.is_active = true' : ''}
       )
       SELECT id, tmt_id, concept_code, level, fsn, preferred_term,
-             strength, dosage_form, is_active, depth, parent_id
+             strength, dosage_form, manufacturer, pack_size, unit_of_use,
+             route_of_administration, is_active, depth, parent_id
       FROM descendants
       ORDER BY depth, concept_code
     `;
@@ -258,6 +282,10 @@ export class TmtRepository {
         preferred_term: row.preferred_term,
         strength: row.strength,
         dosage_form: row.dosage_form,
+        manufacturer: row.manufacturer,
+        pack_size: row.pack_size,
+        unit_of_use: row.unit_of_use,
+        route_of_administration: row.route_of_administration,
         is_active: row.is_active,
         children: [],
       });

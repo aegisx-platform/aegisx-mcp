@@ -25,6 +25,14 @@ export const TmtConceptSchema = Type.Object({
   preferred_term: Type.Union([Type.String(), Type.Null()]),
   strength: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   dosage_form: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  manufacturer: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  pack_size: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  unit_of_use: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  route_of_administration: Type.Optional(
+    Type.Union([Type.String(), Type.Null()]),
+  ),
+  effective_date: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  release_date: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   is_active: Type.Boolean(),
   created_at: Type.Optional(Type.String({ format: 'date-time' })),
   updated_at: Type.Optional(Type.String({ format: 'date-time' })),
@@ -40,6 +48,12 @@ export const TmtConceptWithChildrenSchema = Type.Object({
   preferred_term: Type.Union([Type.String(), Type.Null()]),
   strength: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   dosage_form: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  manufacturer: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  pack_size: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  unit_of_use: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  route_of_administration: Type.Optional(
+    Type.Union([Type.String(), Type.Null()]),
+  ),
   is_active: Type.Boolean(),
   children: Type.Optional(Type.Array(Type.Any())), // Recursive reference
 });
@@ -54,6 +68,10 @@ export interface TmtConceptWithChildrenType {
   preferred_term: string | null;
   strength?: string | null;
   dosage_form?: string | null;
+  manufacturer?: string | null;
+  pack_size?: string | null;
+  unit_of_use?: string | null;
+  route_of_administration?: string | null;
   is_active: boolean;
   children?: TmtConceptWithChildrenType[];
 }

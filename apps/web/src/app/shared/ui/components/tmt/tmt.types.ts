@@ -25,6 +25,12 @@ export interface TmtConcept {
   preferred_term: string | null;
   strength?: string | null;
   dosage_form?: string | null;
+  manufacturer?: string | null;
+  pack_size?: string | null;
+  unit_of_use?: string | null;
+  route_of_administration?: string | null;
+  effective_date?: string | null;
+  release_date?: string | null;
   is_active: boolean;
   created_at?: string;
   updated_at?: string;
