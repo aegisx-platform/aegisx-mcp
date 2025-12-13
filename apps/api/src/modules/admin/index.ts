@@ -26,6 +26,6 @@ export default fp(
   },
   {
     name: 'admin-plugin',
-    dependencies: ['knex-plugin', 'import-discovery-plugin'],
+    dependencies: ['knex-plugin'],
   },
 );

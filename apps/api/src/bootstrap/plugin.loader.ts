@@ -354,7 +354,7 @@ export function createCorePluginGroup(apiPrefix: string): PluginGroup {
         required: true,
       },
       {
-        name: 'import-discovery',
+        name: 'import-discovery-plugin',
         plugin: importDiscoveryPlugin,
         required: false, // Optional - system can run without import discovery
       },
