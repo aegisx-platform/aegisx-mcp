@@ -65,6 +65,7 @@ export * from './departments.types';
 export { DepartmentsRepository } from './departments.repository';
 export { DepartmentsService } from './departments.service';
 export { DepartmentsController } from './departments.controller';
+export { DepartmentsImportService } from './departments-import.service';
 
 // Re-export commonly used types for external use
 export type {

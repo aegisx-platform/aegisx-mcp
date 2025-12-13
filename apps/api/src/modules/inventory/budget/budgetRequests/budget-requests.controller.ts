@@ -44,7 +44,13 @@ export class BudgetRequestsController {
     // Transform API schema to domain model
     const createData = this.transformCreateSchema(request.body, request);
 
-    const budgetRequests = await this.budgetRequestsService.create(createData);
+    // Get userId from authenticated user for department auto-population
+    const userId = request.user?.id;
+
+    const budgetRequests = await this.budgetRequestsService.create(
+      createData,
+      userId,
+    );
 
     request.log.info(
       { budgetRequestsId: budgetRequests.id },

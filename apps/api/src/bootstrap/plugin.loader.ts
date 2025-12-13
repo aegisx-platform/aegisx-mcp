@@ -57,6 +57,9 @@ import websocketPlugin from '../shared/websocket/websocket.plugin';
 import testProductsPlugin from '../modules/testProducts';
 import inventoryDomainPlugin from '../modules/inventory';
 
+// User-related modules
+import userDepartmentsPlugin from '../modules/users/user-departments/user-departments.plugin';
+
 /**
  * Plugin registration group interface
  */
@@ -322,6 +325,11 @@ export function createCorePluginGroup(apiPrefix: string): PluginGroup {
       {
         name: 'users',
         plugin: usersPlugin,
+        required: true,
+      },
+      {
+        name: 'user-departments',
+        plugin: userDepartmentsPlugin,
         required: true,
       },
       {

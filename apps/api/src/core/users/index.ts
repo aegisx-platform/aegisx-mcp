@@ -17,3 +17,11 @@ export type {
   DeleteUserResponse,
   ChangeUserPasswordRequest,
 } from './users.schemas';
+
+// Department assignment types and services
+export { UserDepartmentsService } from './user-departments.service';
+export { UserDepartmentsRepository } from './user-departments.repository';
+export type {
+  UserDepartment,
+  AssignUserToDepartmentData,
+} from './user-departments.repository';
