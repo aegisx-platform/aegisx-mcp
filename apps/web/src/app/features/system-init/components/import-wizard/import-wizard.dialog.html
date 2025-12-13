@@ -1,0 +1,537 @@
+<div class="import-wizard-dialog">
+  <!-- Header -->
+  <div class="dialog-header">
+    <h2 mat-dialog-title>
+      Import Wizard - {{ getStepTitle() }}
+      <span class="step-indicator">(Step {{ currentStep() }} of {{ totalSteps }})</span>
+    </h2>
+    <button
+      mat-icon-button
+      [disabled]="isImporting()"
+      (click)="close(false)"
+      aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Module Info -->
+  <div class="module-info">
+    <div class="module-name">
+      <mat-icon>folder</mat-icon>
+      <span>{{ data.module.displayName }}</span>
+    </div>
+    <div class="module-path">
+      {{ data.module.domain }}
+      @if (data.module.subdomain) {
+        <span> / {{ data.module.subdomain }}</span>
+      }
+    </div>
+  </div>
+
+  <!-- Progress Stepper -->
+  <div class="stepper-container">
+    <div class="step-indicators">
+      @for (step of [1, 2, 3, 4]; track step) {
+        <div
+          class="step-indicator-item"
+          [class.active]="currentStep() === step"
+          [class.completed]="currentStep() > step">
+          <div class="step-number">{{ step }}</div>
+          <div class="step-label">
+            @switch (step) {
+              @case (1) { <span>Template</span> }
+              @case (2) { <span>Upload</span> }
+              @case (3) { <span>Validate</span> }
+              @case (4) { <span>Import</span> }
+            }
+          </div>
+        </div>
+        @if (step < 4) {
+          <div class="step-connector" [class.completed]="currentStep() > step"></div>
+        }
+      }
+    </div>
+  </div>
+
+  <!-- Content -->
+  <mat-dialog-content>
+    <!-- Step 1: Download Template -->
+    @if (currentStep() === 1) {
+      <div class="step-content step-1">
+        <div class="template-info">
+          <div class="info-card">
+            <mat-icon class="info-icon">description</mat-icon>
+            <h3>Template Information</h3>
+            <p>
+              Download the template file to see the required format and columns.
+              Fill in your data following the template structure before uploading.
+            </p>
+          </div>
+
+          <div class="required-fields">
+            <h4>Required Columns:</h4>
+            <ul>
+              <li>All fields marked as required in the template</li>
+              <li>Column headers must match exactly</li>
+              <li>Data types must be correct (text, number, date, etc.)</li>
+            </ul>
+          </div>
+
+          <div class="download-buttons">
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="downloadTemplate('csv')">
+              <mat-icon>download</mat-icon>
+              Download CSV Template
+            </button>
+
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="downloadTemplate('xlsx')">
+              <mat-icon>download</mat-icon>
+              Download Excel Template
+            </button>
+          </div>
+
+          <div class="info-message">
+            <mat-icon>info</mat-icon>
+            <span>Fill in the template with your data before proceeding to the next step.</span>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Step 2: Upload File -->
+    @if (currentStep() === 2) {
+      <div class="step-content step-2">
+        @if (!selectedFile()) {
+          <div
+            class="drop-zone"
+            [class.drag-over]="isDragging()"
+            (drop)="onFileDrop($event)"
+            (dragover)="onDragOver($event)"
+            (dragleave)="onDragLeave($event)">
+            <mat-icon class="upload-icon">cloud_upload</mat-icon>
+            <h3>Drag & Drop your file here</h3>
+            <p>or</p>
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="fileInput.click()">
+              <mat-icon>folder_open</mat-icon>
+              Browse Files
+            </button>
+            <input
+              #fileInput
+              type="file"
+              accept=".csv,.xlsx,.xls"
+              (change)="onFileSelected($event)"
+              hidden>
+          </div>
+
+          <div class="file-requirements">
+            <h4>File Requirements:</h4>
+            <ul>
+              <li>Format: CSV or Excel (.csv, .xlsx, .xls)</li>
+              <li>Maximum size: 10 MB</li>
+              <li>Maximum rows: 10,000</li>
+              <li>Columns must match the template</li>
+            </ul>
+          </div>
+        } @else {
+          <div class="file-selected">
+            <div class="file-info-card">
+              <mat-icon class="file-icon">insert_drive_file</mat-icon>
+              <div class="file-details">
+                <h4>{{ fileInfo()?.name }}</h4>
+                <div class="file-meta">
+                  <span class="file-size">{{ fileInfo()?.size }} MB</span>
+                  @if (fileInfo()?.isValidSize) {
+                    <span class="status-badge success">
+                      <mat-icon>check_circle</mat-icon>
+                      Size OK
+                    </span>
+                  } @else {
+                    <span class="status-badge error">
+                      <mat-icon>error</mat-icon>
+                      Size exceeds 10 MB
+                    </span>
+                  }
+                  @if (fileInfo()?.isValidType) {
+                    <span class="status-badge success">
+                      <mat-icon>check_circle</mat-icon>
+                      Valid format
+                    </span>
+                  } @else {
+                    <span class="status-badge error">
+                      <mat-icon>error</mat-icon>
+                      Invalid format
+                    </span>
+                  }
+                </div>
+              </div>
+              <button
+                mat-icon-button
+                color="warn"
+                (click)="removeFile()"
+                aria-label="Remove file">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+
+            <div class="upload-actions">
+              <button
+                mat-raised-button
+                (click)="fileInput.click()">
+                <mat-icon>swap_horiz</mat-icon>
+                Choose Different File
+              </button>
+              <input
+                #fileInput
+                type="file"
+                accept=".csv,.xlsx,.xls"
+                (change)="onFileSelected($event)"
+                hidden>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Step 3: Validation Results -->
+    @if (currentStep() === 3) {
+      <div class="step-content step-3">
+        @if (isValidating()) {
+          <div class="loading-state">
+            <mat-icon class="spinning">autorenew</mat-icon>
+            <h3>Validating file...</h3>
+            <p>Please wait while we check your data</p>
+            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+          </div>
+        } @else if (validationResult()) {
+          <div class="validation-results">
+            <!-- Validation Summary -->
+            <div class="validation-summary" [class.success]="validationSummary()?.isValid" [class.warning]="!validationSummary()?.isValid && validationSummary()?.canProceed" [class.error]="!validationSummary()?.canProceed">
+              @if (validationSummary()?.isValid) {
+                <mat-icon class="status-icon">check_circle</mat-icon>
+                <h3>Validation Passed</h3>
+              } @else if (validationSummary()?.canProceed) {
+                <mat-icon class="status-icon">warning</mat-icon>
+                <h3>Validation Completed with Warnings</h3>
+              } @else {
+                <mat-icon class="status-icon">error</mat-icon>
+                <h3>Validation Failed</h3>
+              }
+            </div>
+
+            <!-- Statistics -->
+            <div class="validation-stats">
+              <div class="stat-card">
+                <div class="stat-value">{{ validationSummary()?.totalRows }}</div>
+                <div class="stat-label">Total Rows</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value">{{ validationSummary()?.validRows }}</div>
+                <div class="stat-label">Valid Rows</div>
+              </div>
+              <div class="stat-card error">
+                <div class="stat-value">{{ validationSummary()?.errorCount }}</div>
+                <div class="stat-label">Errors</div>
+              </div>
+              <div class="stat-card warning">
+                <div class="stat-value">{{ validationSummary()?.warningCount }}</div>
+                <div class="stat-label">Warnings</div>
+              </div>
+            </div>
+
+            <!-- Placeholder for child component -->
+            <div class="validation-placeholder">
+              @if (validationResult()!.errors.length > 0) {
+                <div class="error-list">
+                  <h4>Errors ({{ validationResult()!.errors.length }})</h4>
+                  @for (error of validationResult()!.errors; track $index) {
+                    <div class="validation-item error">
+                      <mat-icon>error</mat-icon>
+                      <div class="item-content">
+                        @if (error.row) {
+                          <span class="item-label">Row {{ error.row }}</span>
+                        }
+                        @if (error.field) {
+                          <span class="item-label">Field: {{ error.field }}</span>
+                        }
+                        <p>{{ error.message }}</p>
+                        @if (error.code) {
+                          <small class="error-code">Code: {{ error.code }}</small>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+
+              @if (validationResult()!.warnings.length > 0) {
+                <div class="warning-list">
+                  <h4>Warnings ({{ validationResult()!.warnings.length }})</h4>
+                  @for (warning of validationResult()!.warnings; track $index) {
+                    <div class="validation-item warning">
+                      <mat-icon>warning</mat-icon>
+                      <div class="item-content">
+                        @if (warning.row) {
+                          <span class="item-label">Row {{ warning.row }}</span>
+                        }
+                        @if (warning.field) {
+                          <span class="item-label">Field: {{ warning.field }}</span>
+                        }
+                        <p>{{ warning.message }}</p>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Import Options (only if can proceed) -->
+            @if (validationSummary()?.canProceed) {
+              <div class="import-options">
+                <h4>Import Options</h4>
+                <div class="options-form">
+                  <mat-checkbox
+                    [checked]="importOptions().skipWarnings"
+                    (change)="updateImportOption('skipWarnings', $event.checked)">
+                    Skip warnings and proceed with valid records
+                  </mat-checkbox>
+
+                  <mat-form-field>
+                    <mat-label>Batch Size</mat-label>
+                    <mat-select
+                      [value]="importOptions().batchSize"
+                      (selectionChange)="updateImportOption('batchSize', $event.value)">
+                      @for (size of batchSizeOptions; track size) {
+                        <mat-option [value]="size">{{ size }}</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+
+                  <mat-form-field>
+                    <mat-label>On Conflict</mat-label>
+                    <mat-select
+                      [value]="importOptions().onConflict"
+                      (selectionChange)="updateImportOption('onConflict', $event.value)">
+                      @for (option of onConflictOptions; track option.value) {
+                        <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+              </div>
+            } @else {
+              <div class="error-message">
+                <mat-icon>block</mat-icon>
+                <p>Cannot proceed with import until all errors are fixed.</p>
+                <p>Please correct the errors in your file and upload again.</p>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="validation-prompt">
+            <mat-icon>fact_check</mat-icon>
+            <h3>Ready to validate</h3>
+            <p>Click "Next" to validate your file</p>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Step 4: Confirm & Import -->
+    @if (currentStep() === 4) {
+      <div class="step-content step-4">
+        @if (!isImporting() && !importProgress()?.isComplete && !importProgress()?.isFailed) {
+          <!-- Summary before import -->
+          <div class="import-summary">
+            <h3>Ready to Import</h3>
+
+            <div class="summary-card">
+              <div class="summary-row">
+                <span class="label">Module:</span>
+                <span class="value">{{ importSummary()?.module }}</span>
+              </div>
+              <div class="summary-row">
+                <span class="label">File:</span>
+                <span class="value">{{ importSummary()?.file }}</span>
+              </div>
+              <div class="summary-row">
+                <span class="label">Records to import:</span>
+                <span class="value">{{ importSummary()?.recordsToImport }}</span>
+              </div>
+            </div>
+
+            <div class="import-options-summary">
+              <h4>Import Options:</h4>
+              <ul>
+                <li>Skip warnings: {{ importSummary()?.skipWarnings ? 'Yes' : 'No' }}</li>
+                <li>Batch size: {{ importSummary()?.batchSize }}</li>
+                <li>On conflict: {{ importSummary()?.onConflict }}</li>
+              </ul>
+            </div>
+
+            <div class="warning-message">
+              <mat-icon>info</mat-icon>
+              <div>
+                <p><strong>Important:</strong></p>
+                <p>This action will create {{ importSummary()?.recordsToImport }} new records in the database.</p>
+                <p>This operation can be rolled back later if needed.</p>
+              </div>
+            </div>
+          </div>
+        } @else if (isImporting() || (importProgress() && !importProgress()?.isComplete && !importProgress()?.isFailed)) {
+          <!-- Import in progress -->
+          <div class="import-progress">
+            <mat-icon class="spinning">sync</mat-icon>
+            <h3>Importing {{ data.module.displayName }}...</h3>
+
+            @if (importProgress()) {
+              <div class="progress-details">
+                <div class="progress-text">
+                  Progress: {{ importProgress()!.importedRows }} / {{ importProgress()!.totalRows }} records
+                  ({{ importProgress()!.percentComplete }}%)
+                </div>
+                <mat-progress-bar
+                  mode="determinate"
+                  [value]="importProgress()!.percentComplete">
+                </mat-progress-bar>
+
+                <div class="progress-stats">
+                  <div class="stat">
+                    <span class="label">Elapsed time:</span>
+                    <span class="value">{{ formatTime(importProgress()!.elapsedTime) }}</span>
+                  </div>
+                  <div class="stat">
+                    <span class="label">Estimated remaining:</span>
+                    <span class="value">{{ formatTime(importProgress()!.estimatedRemaining) }}</span>
+                  </div>
+                </div>
+              </div>
+            } @else {
+              <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+            }
+
+            <div class="info-message">
+              <mat-icon>info</mat-icon>
+              <span>Please do not close this window while import is in progress...</span>
+            </div>
+          </div>
+        } @else if (importProgress()?.isComplete) {
+          <!-- Import complete -->
+          <div class="import-complete">
+            <mat-icon class="success-icon">check_circle</mat-icon>
+            <h3>Import Completed Successfully!</h3>
+
+            <div class="result-card">
+              <h4>Import Results</h4>
+              <div class="result-row">
+                <span class="label">Module:</span>
+                <span class="value">{{ data.module.displayName }}</span>
+              </div>
+              <div class="result-row">
+                <span class="label">Job ID:</span>
+                <span class="value">{{ importJob()?.jobId }}</span>
+              </div>
+              <div class="result-row">
+                <span class="label">Total records:</span>
+                <span class="value">{{ importProgress()!.totalRows }}</span>
+              </div>
+              <div class="result-row">
+                <span class="label">Successfully imported:</span>
+                <span class="value">{{ importProgress()!.importedRows }}</span>
+              </div>
+              <div class="result-row">
+                <span class="label">Failed:</span>
+                <span class="value">{{ importProgress()!.errorRows }}</span>
+              </div>
+              <div class="result-row">
+                <span class="label">Duration:</span>
+                <span class="value">{{ formatTime(importProgress()!.elapsedTime) }}</span>
+              </div>
+            </div>
+
+            <div class="next-steps">
+              <h4>Next Steps:</h4>
+              <ul>
+                <li>Verify imported data in {{ data.module.displayName }} module</li>
+                <li>If needed, use Rollback to undo this import</li>
+              </ul>
+            </div>
+          </div>
+        } @else if (importProgress()?.isFailed) {
+          <!-- Import failed -->
+          <div class="import-failed">
+            <mat-icon class="error-icon">error</mat-icon>
+            <h3>Import Failed</h3>
+
+            <div class="error-card">
+              <p>{{ importProgress()!.error || 'An unknown error occurred during import.' }}</p>
+              <p>Please check the error details and try again.</p>
+            </div>
+
+            <div class="failure-actions">
+              <button mat-raised-button color="warn" (click)="previousStep()">
+                <mat-icon>arrow_back</mat-icon>
+                Back to Validation
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </mat-dialog-content>
+
+  <!-- Actions -->
+  <mat-dialog-actions align="end">
+    <div class="actions-container">
+      <!-- Left actions -->
+      <div class="left-actions">
+        @if (currentStep() > 1 && currentStep() < 4 && canNavigate()) {
+          <button mat-button (click)="previousStep()">
+            <mat-icon>arrow_back</mat-icon>
+            Back
+          </button>
+        }
+      </div>
+
+      <!-- Right actions -->
+      <div class="right-actions">
+        @if (currentStep() < 4) {
+          <button mat-button (click)="close(false)" [disabled]="isImporting()">
+            Cancel
+          </button>
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="nextStep()"
+            [disabled]="!canProceedToNextStep() || !canNavigate()">
+            Next
+            <mat-icon>arrow_forward</mat-icon>
+          </button>
+        } @else {
+          @if (!isImporting() && !importProgress()?.isComplete && !importProgress()?.isFailed) {
+            <button mat-button (click)="close(false)">Cancel</button>
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="startImport()">
+              <mat-icon>upload</mat-icon>
+              Start Import
+            </button>
+          } @else if (importProgress()?.isComplete || importProgress()?.isFailed) {
+            <button mat-raised-button color="primary" (click)="close(true)">
+              <mat-icon>check</mat-icon>
+              Close
+            </button>
+          }
+        }
+      </div>
+    </div>
+  </mat-dialog-actions>
+</div>

@@ -1,0 +1,170 @@
+<mat-card class="progress-tracker-card" [ngClass]="cardContainerClass">
+  <!-- Header Section -->
+  <mat-card-header>
+    <div class="header-content">
+      <!-- Job Title and Status -->
+      <div class="header-title-section">
+        <h2 class="header-title">
+          <mat-icon class="status-icon" [ngClass]="statusColorClass">
+            {{ statusIcon }}
+          </mat-icon>
+          {{ moduleName ? moduleName + ' Import' : 'Import Progress' }}
+        </h2>
+        <mat-chip-set aria-label="Import status">
+          <mat-chip
+            [ngClass]="statusColorClass"
+            class="status-chip"
+            disabled
+          >
+            <mat-icon class="chip-icon">{{ statusIcon }}</mat-icon>
+            <span>{{ statusText }}</span>
+          </mat-chip>
+        </mat-chip-set>
+      </div>
+
+      <!-- Job ID -->
+      <div class="header-info">
+        <span class="label">Job ID:</span>
+        <span class="value monospace">{{ importStatus.jobId }}</span>
+      </div>
+    </div>
+  </mat-card-header>
+
+  <!-- Content Section -->
+  <mat-card-content>
+    <!-- Overall Progress Section -->
+    <div class="progress-section">
+      <div class="progress-header">
+        <h3 class="progress-title">Overall Progress</h3>
+        <span class="progress-percent">
+          {{ importStatus.progress.importedRows }} /
+          {{ importStatus.progress.totalRows }} records
+          ({{ percentComplete() }}%)
+        </span>
+      </div>
+
+      <!-- Progress Bar -->
+      <mat-progress-bar
+        *ngIf="!progressBarIndeterminate"
+        [value]="percentComplete()"
+        mode="determinate"
+        [color]="progressBarColor"
+        class="progress-bar"
+      />
+      <mat-progress-bar
+        *ngIf="progressBarIndeterminate"
+        mode="indeterminate"
+        [color]="progressBarColor"
+        class="progress-bar"
+      />
+    </div>
+
+    <!-- Batch Information Section -->
+    <div class="batch-section">
+      <h3 class="section-title">Batch Information</h3>
+      <div class="batch-info">
+        <div class="info-row">
+          <span class="info-label">Current Batch:</span>
+          <span class="info-value">1 of 1</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Batch Progress:</span>
+          <span class="info-value">
+            {{ importStatus.progress.importedRows }} /
+            {{ importStatus.progress.totalRows }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Time Information Section -->
+    <div class="time-section">
+      <h3 class="section-title">Timing Information</h3>
+      <div class="time-info">
+        <div class="info-row">
+          <mat-icon class="time-icon">schedule</mat-icon>
+          <span class="info-label">Started:</span>
+          <span class="info-value">{{ startedTimeFormatted() }}</span>
+        </div>
+
+        <div class="info-row">
+          <mat-icon class="time-icon">access_time</mat-icon>
+          <span class="info-label">Elapsed:</span>
+          <span class="info-value">{{ elapsedTime() }}</span>
+        </div>
+
+        <div class="info-row" *ngIf="!isCompleted && !isFailed && !isCancelled">
+          <mat-icon class="time-icon">timer</mat-icon>
+          <span class="info-label">Remaining:</span>
+          <span class="info-value">{{ estimatedRemaining() }}</span>
+        </div>
+
+        <div class="info-row" *ngIf="isCompleted || isFailed || isCancelled">
+          <mat-icon class="time-icon">done</mat-icon>
+          <span class="info-label">Completed:</span>
+          <span class="info-value">{{ completedTimeFormatted() }}</span>
+        </div>
+
+        <div class="info-row">
+          <mat-icon class="time-icon">speed</mat-icon>
+          <span class="info-label">Speed:</span>
+          <span class="info-value">
+            {{ speed().toFixed(2) }} rec/s
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Message (if failed) -->
+    <div class="error-section" *ngIf="isFailed && importStatus.error">
+      <div class="error-box">
+        <mat-icon class="error-icon">error_outline</mat-icon>
+        <div class="error-content">
+          <h4 class="error-title">Import Failed</h4>
+          <p class="error-message">{{ importStatus.error }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Completion Message (if completed) -->
+    <div class="success-section" *ngIf="isCompleted">
+      <div class="success-box">
+        <mat-icon class="success-icon">check_circle</mat-icon>
+        <div class="success-content">
+          <h4 class="success-title">Import Completed Successfully!</h4>
+          <p class="success-message">
+            {{ importStatus.progress.importedRows }} of
+            {{ importStatus.progress.totalRows }} records were imported
+            successfully.
+          </p>
+        </div>
+      </div>
+    </div>
+  </mat-card-content>
+
+  <!-- Actions Section -->
+  <mat-card-actions>
+    <button
+      mat-stroked-button
+      color="warn"
+      (click)="onCancel()"
+      [disabled]="!showCancelButton"
+      class="action-button cancel-button"
+      [attr.aria-label]="'Cancel ' + (moduleName ?? 'import')"
+    >
+      <mat-icon>close</mat-icon>
+      <span>Cancel Import</span>
+    </button>
+
+    <button
+      mat-stroked-button
+      color="primary"
+      (click)="onViewLogs()"
+      class="action-button logs-button"
+      [attr.aria-label]="'View logs for ' + (moduleName ?? 'import')"
+    >
+      <mat-icon>description</mat-icon>
+      <span>View Logs</span>
+    </button>
+  </mat-card-actions>
+</mat-card>

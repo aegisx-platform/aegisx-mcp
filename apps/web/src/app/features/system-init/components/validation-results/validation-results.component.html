@@ -1,0 +1,230 @@
+<div class="validation-results-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-title-row">
+      <h2 class="header-title">Validation Results</h2>
+      <div [ngClass]="statusClass" class="status-badge">
+        <mat-icon [class.spinning]="!validationPassed">{{
+          statusIcon
+        }}</mat-icon>
+        <span>{{ statusLabel }}</span>
+      </div>
+    </div>
+
+    <div class="header-info">
+      <div class="info-item">
+        <span class="info-label">Session ID:</span>
+        <span class="info-value font-mono">{{
+          validationResult.sessionId || 'N/A'
+        }}</span>
+      </div>
+
+      <div class="info-item" *ngIf="fileName">
+        <span class="info-label">File:</span>
+        <span class="info-value">{{ fileName }}</span>
+      </div>
+
+      <div class="info-item" *ngIf="fileSize">
+        <span class="info-label">Size:</span>
+        <span class="info-value">{{ formattedFileSize }}</span>
+      </div>
+
+      <div class="info-item">
+        <span class="info-label">Validated:</span>
+        <span class="info-value">{{
+          validationResult.expiresAt | date : 'medium'
+        }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary Card Section -->
+  <mat-card class="summary-card" [class.summary-success]="validationPassed">
+    <mat-card-content>
+      <div class="summary-grid">
+        <!-- Total Rows -->
+        <div class="summary-item">
+          <div class="summary-value">{{ summary.totalRows }}</div>
+          <div class="summary-label">Total Rows</div>
+        </div>
+
+        <!-- Valid Rows -->
+        <div class="summary-item">
+          <div class="summary-value valid">{{ summary.validRows }}</div>
+          <div class="summary-label">Valid Rows</div>
+        </div>
+
+        <!-- Errors -->
+        <div class="summary-item">
+          <div class="summary-value error" *ngIf="summary.errorCount > 0">
+            {{ summary.errorCount }}
+          </div>
+          <div class="summary-value valid" *ngIf="summary.errorCount === 0">
+            0
+          </div>
+          <div class="summary-label">Errors</div>
+        </div>
+
+        <!-- Warnings -->
+        <div class="summary-item">
+          <div class="summary-value warning" *ngIf="summary.warningCount > 0">
+            {{ summary.warningCount }}
+          </div>
+          <div class="summary-value valid" *ngIf="summary.warningCount === 0">
+            0
+          </div>
+          <div class="summary-label">Warnings</div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Errors Section -->
+  <mat-accordion *ngIf="hasErrors" class="errors-section">
+    <mat-expansion-panel
+      #errorPanel
+      (opened)="errorPanelExpanded.set(true)"
+      (closed)="errorPanelExpanded.set(false)"
+    >
+      <mat-expansion-panel-header class="error-header">
+        <mat-panel-title>
+          <mat-icon class="section-icon">error</mat-icon>
+          <span class="section-title">Errors</span>
+          <mat-chip class="error-badge">
+            {{ summary.errorCount }}
+          </mat-chip>
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+
+      <div class="error-list">
+        <div
+          *ngFor="
+            let error of validationResult.errors;
+            trackBy: trackByRowField
+          "
+          class="error-item"
+        >
+          <div class="error-header-row">
+            <div class="error-row-info">
+              <span class="row-badge" *ngIf="error.row">Row {{ error.row }}</span>
+              <span class="field-name" *ngIf="error.field">
+                Field: <strong>{{ error.field }}</strong>
+              </span>
+            </div>
+            <mat-chip class="severity-badge error-severity">
+              <mat-icon>error</mat-icon>
+              ERROR
+            </mat-chip>
+          </div>
+
+          <div class="error-content">
+            <div class="error-message">
+              <span class="message-label">Error:</span>
+              <span class="message-text">{{ error.message }}</span>
+            </div>
+
+            <div class="error-code">
+              <span class="code-label">Code:</span>
+              <span class="code-value font-mono">{{ error.code }}</span>
+            </div>
+
+            <div class="error-data" *ngIf="shouldShowData(error.data)">
+              <details class="data-details">
+                <summary class="data-summary">
+                  <span class="summary-text">View Row Data</span>
+                  <mat-icon class="expand-icon">expand_more</mat-icon>
+                </summary>
+                <div class="data-content">
+                  <pre class="data-json">{{ formatDataForDisplay(error.data) }}</pre>
+                </div>
+              </details>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-expansion-panel>
+  </mat-accordion>
+
+  <!-- Warnings Section -->
+  <mat-accordion *ngIf="hasWarnings" class="warnings-section">
+    <mat-expansion-panel
+      #warningPanel
+      (opened)="warningPanelExpanded.set(true)"
+      (closed)="warningPanelExpanded.set(false)"
+    >
+      <mat-expansion-panel-header class="warning-header">
+        <mat-panel-title>
+          <mat-icon class="section-icon">warning</mat-icon>
+          <span class="section-title">Warnings</span>
+          <mat-chip class="warning-badge">
+            {{ summary.warningCount }}
+          </mat-chip>
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+
+      <div class="warning-list">
+        <div
+          *ngFor="
+            let warning of validationResult.warnings;
+            trackBy: trackByRowField
+          "
+          class="warning-item"
+        >
+          <div class="warning-header-row">
+            <div class="warning-row-info">
+              <span class="row-badge" *ngIf="warning.row">
+                Row {{ warning.row }}
+              </span>
+              <span class="field-name" *ngIf="warning.field">
+                Field: <strong>{{ warning.field }}</strong>
+              </span>
+            </div>
+            <mat-chip class="severity-badge warning-severity">
+              <mat-icon>warning</mat-icon>
+              WARNING
+            </mat-chip>
+          </div>
+
+          <div class="warning-content">
+            <div class="warning-message">
+              <span class="message-label">Warning:</span>
+              <span class="message-text">{{ warning.message }}</span>
+            </div>
+
+            <div class="warning-code">
+              <span class="code-label">Code:</span>
+              <span class="code-value font-mono">{{ warning.code }}</span>
+            </div>
+
+            <div class="warning-data" *ngIf="shouldShowData(warning.data)">
+              <details class="data-details">
+                <summary class="data-summary">
+                  <span class="summary-text">View Row Data</span>
+                  <mat-icon class="expand-icon">expand_more</mat-icon>
+                </summary>
+                <div class="data-content">
+                  <pre class="data-json">{{
+                    formatDataForDisplay(warning.data)
+                  }}</pre>
+                </div>
+              </details>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-expansion-panel>
+  </mat-accordion>
+
+  <!-- Actions Section -->
+  <div class="actions-section">
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="onDownloadReport()"
+      class="download-button"
+    >
+      <mat-icon>download</mat-icon>
+      <span>Download Full Report (CSV)</span>
+    </button>
+  </div>
+</div>

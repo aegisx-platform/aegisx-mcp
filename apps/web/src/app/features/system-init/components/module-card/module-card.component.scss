@@ -1,0 +1,475 @@
+// Module Card Component Styles
+// Uses Angular Material + TailwindCSS approach
+
+// CSS Custom Properties (can be overridden by theme)
+:host {
+  --card-min-height: 280px;
+  --card-padding: 16px;
+  --card-border-radius: 8px;
+  --card-shadow-elevation-z2: 0px 3px 1px -2px rgba(0, 0, 0, 0.2),
+    0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12);
+  --card-shadow-elevation-z4: 0px 2px 4px -1px rgba(0, 0, 0, 0.2),
+    0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+
+  // Status Colors
+  --status-not-started-bg: #f5f5f5;
+  --status-not-started-border: #9e9e9e;
+  --status-not-started-text: #616161;
+
+  --status-in-progress-bg: #e3f2fd;
+  --status-in-progress-border: #2196f3;
+  --status-in-progress-text: #1976d2;
+
+  --status-completed-bg: #e8f5e9;
+  --status-completed-border: #4caf50;
+  --status-completed-text: #388e3c;
+
+  --status-failed-bg: #ffebee;
+  --status-failed-border: #f44336;
+  --status-failed-text: #d32f2f;
+}
+
+// Module Card Container
+.module-card-container {
+  display: flex;
+  flex-direction: column;
+  min-height: var(--card-min-height);
+  border-radius: var(--card-border-radius);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--card-shadow-elevation-z2);
+
+  // Hover effect
+  &:hover {
+    box-shadow: var(--card-shadow-elevation-z4);
+    transform: translateY(-2px);
+  }
+}
+
+// Module Card States
+.module-card {
+  // Base styles for all states
+  &-not-started {
+    background-color: var(--status-not-started-bg);
+    border-left: 4px solid var(--status-not-started-border);
+
+    // Card header styling
+    ::ng-deep .card-header {
+      border-bottom: 1px solid var(--status-not-started-border);
+      opacity: 0.85;
+    }
+  }
+
+  &-in-progress {
+    background-color: var(--status-in-progress-bg);
+    border-left: 4px solid var(--status-in-progress-border);
+
+    // Card header styling
+    ::ng-deep .card-header {
+      border-bottom: 1px solid rgba(33, 150, 243, 0.2);
+    }
+  }
+
+  &-completed {
+    background-color: var(--status-completed-bg);
+    border-left: 4px solid var(--status-completed-border);
+
+    // Card header styling
+    ::ng-deep .card-header {
+      border-bottom: 1px solid rgba(76, 175, 80, 0.2);
+    }
+  }
+
+  &-failed {
+    background-color: var(--status-failed-bg);
+    border-left: 4px solid var(--status-failed-border);
+
+    // Card header styling
+    ::ng-deep .card-header {
+      border-bottom: 1px solid rgba(244, 67, 54, 0.2);
+    }
+  }
+}
+
+// Card Header
+::ng-deep .card-header {
+  padding: var(--card-padding);
+  margin: 0;
+  border-radius: var(--card-border-radius) var(--card-border-radius) 0 0;
+  transition: all 0.3s ease;
+
+  .header-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+
+      .module-icon {
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+        color: rgba(0, 0, 0, 0.6);
+      }
+
+      .module-name {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 1.4;
+        color: rgba(0, 0, 0, 0.87);
+        word-break: break-word;
+      }
+    }
+
+    .header-path {
+      font-size: 12px;
+      color: rgba(0, 0, 0, 0.54);
+      font-weight: 400;
+      margin-left: 32px;
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    }
+  }
+}
+
+// Card Content
+::ng-deep .card-content {
+  padding: var(--card-padding);
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .status-section {
+    display: flex;
+    align-items: center;
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1;
+      transition: all 0.3s ease;
+
+      .status-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+        animation: rotate 2s linear infinite;
+
+        // Rotate animation only for in-progress state
+        @keyframes rotate {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+      }
+
+      .status-text {
+        letter-spacing: 0.4px;
+      }
+
+      // Status Badge Colors
+      &-not-started {
+        background-color: rgba(158, 158, 158, 0.12);
+        color: var(--status-not-started-text);
+        border: 1px solid rgba(158, 158, 158, 0.3);
+
+        .status-icon {
+          animation: none;
+        }
+      }
+
+      &-in-progress {
+        background-color: rgba(33, 150, 243, 0.12);
+        color: var(--status-in-progress-text);
+        border: 1px solid rgba(33, 150, 243, 0.3);
+
+        .status-icon {
+          animation: rotate 2s linear infinite;
+        }
+      }
+
+      &-completed {
+        background-color: rgba(76, 175, 80, 0.12);
+        color: var(--status-completed-text);
+        border: 1px solid rgba(76, 175, 80, 0.3);
+
+        .status-icon {
+          animation: none;
+        }
+      }
+
+      &-failed {
+        background-color: rgba(244, 67, 54, 0.12);
+        color: var(--status-failed-text);
+        border: 1px solid rgba(244, 67, 54, 0.3);
+
+        .status-icon {
+          animation: none;
+        }
+      }
+    }
+  }
+
+  .record-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .record-count {
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.7);
+      font-weight: 500;
+      line-height: 1.5;
+    }
+
+    .progress-bar {
+      height: 4px;
+      border-radius: 2px;
+
+      ::ng-deep .mdc-linear-progress__bar-inner {
+        background-color: #2196f3;
+      }
+    }
+  }
+
+  .info-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 13px;
+    color: rgba(0, 0, 0, 0.7);
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      line-height: 1.4;
+
+      .info-label {
+        font-weight: 500;
+        color: rgba(0, 0, 0, 0.6);
+        flex-shrink: 0;
+        white-space: nowrap;
+      }
+
+      .info-value {
+        flex-grow: 1;
+        text-align: right;
+        word-break: break-word;
+        color: rgba(0, 0, 0, 0.87);
+
+        &.error-message {
+          color: #d32f2f;
+          font-weight: 500;
+        }
+      }
+
+      &.error-info {
+        color: #d32f2f;
+
+        .info-label {
+          color: #d32f2f;
+        }
+      }
+    }
+  }
+}
+
+// Card Actions
+::ng-deep .card-actions {
+  padding: var(--card-padding);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: auto;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 16px;
+    transition: all 0.3s ease;
+    min-width: auto;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      margin-right: 2px;
+    }
+
+    span {
+      white-space: nowrap;
+    }
+
+    &:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    &.primary-action-btn {
+      flex: 1;
+      min-width: 140px;
+    }
+
+    &.rollback-btn,
+    &.retry-btn {
+      flex-shrink: 1;
+    }
+  }
+
+  // Actions on Mobile
+  @media (max-width: 480px) {
+    flex-direction: column;
+    gap: 8px;
+
+    button {
+      width: 100%;
+
+      &.primary-action-btn {
+        order: 1;
+      }
+
+      &.rollback-btn {
+        order: 2;
+      }
+
+      &.retry-btn {
+        order: 2;
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .module-card-container {
+    min-height: auto;
+  }
+
+  ::ng-deep .card-header {
+    .header-content {
+      .header-title {
+        .module-name {
+          font-size: 15px;
+        }
+      }
+
+      .header-path {
+        font-size: 11px;
+      }
+    }
+  }
+
+  ::ng-deep .card-content {
+    gap: 10px;
+
+    .status-section {
+      .badge {
+        font-size: 11px;
+        padding: 5px 10px;
+
+        .status-icon {
+          font-size: 14px;
+          width: 14px;
+          height: 14px;
+        }
+      }
+    }
+
+    .record-section {
+      .record-count {
+        font-size: 13px;
+      }
+    }
+
+    .info-section {
+      font-size: 12px;
+
+      .info-row {
+        gap: 4px;
+      }
+    }
+  }
+}
+
+// Accessibility
+@media (prefers-reduced-motion: reduce) {
+  .module-card-container,
+  ::ng-deep .card-header,
+  ::ng-deep .card-content .badge,
+  ::ng-deep .card-actions button {
+    transition: none;
+    animation: none;
+  }
+
+  .module-card-container {
+    &:hover {
+      transform: none;
+    }
+  }
+
+  ::ng-deep .card-actions button {
+    &:hover:not(:disabled) {
+      transform: none;
+    }
+  }
+}
+
+// High Contrast Mode
+@media (prefers-contrast: more) {
+  .module-card-container {
+    border-width: 2px;
+  }
+
+  ::ng-deep .card-header {
+    border-bottom-width: 2px;
+  }
+
+  ::ng-deep .card-actions {
+    border-top-width: 2px;
+  }
+}
+
+// Dark Mode Support (if Material dark theme is applied)
+@media (prefers-color-scheme: dark) {
+  :host {
+    --status-not-started-bg: #424242;
+    --status-not-started-border: #757575;
+    --status-not-started-text: #bdbdbd;
+
+    --status-in-progress-bg: #1a237e;
+    --status-in-progress-border: #42a5f5;
+    --status-in-progress-text: #90caf9;
+
+    --status-completed-bg: #1b5e20;
+    --status-completed-border: #81c784;
+    --status-completed-text: #a5d6a7;
+
+    --status-failed-bg: #5d1f1a;
+    --status-failed-border: #ef5350;
+    --status-failed-text: #ef9a9a;
+  }
+}

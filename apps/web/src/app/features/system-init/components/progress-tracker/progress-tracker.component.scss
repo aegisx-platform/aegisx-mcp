@@ -1,0 +1,503 @@
+// Progress Tracker Component Styles - Optimized
+// Uses Angular Material + TailwindCSS approach
+
+:host {
+  --card-padding: 24px;
+  --card-border-radius: 8px;
+  --card-shadow-z2: 0px 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12);
+  --card-shadow-z4: 0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+  --status-queued-bg: #fff3e0;
+  --status-queued-border: #ff9800;
+  --status-running-bg: #e3f2fd;
+  --status-running-border: #2196f3;
+  --status-completed-bg: #e8f5e9;
+  --status-completed-border: #4caf50;
+  --status-failed-bg: #ffebee;
+  --status-failed-border: #f44336;
+  --status-cancelled-bg: #f5f5f5;
+  --status-cancelled-border: #9e9e9e;
+}
+
+.progress-tracker-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 500px;
+  border-radius: var(--card-border-radius);
+  box-shadow: var(--card-shadow-z2);
+  transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+
+  &:hover {
+    box-shadow: var(--card-shadow-z4);
+  }
+}
+
+// Status States
+.progress-tracker {
+  &-queued {
+    border-left: 4px solid var(--status-queued-border);
+    background-color: var(--status-queued-bg);
+  }
+  &-running {
+    border-left: 4px solid var(--status-running-border);
+    background-color: var(--status-running-bg);
+  }
+  &-completed {
+    border-left: 4px solid var(--status-completed-border);
+    background-color: var(--status-completed-bg);
+  }
+  &-failed {
+    border-left: 4px solid var(--status-failed-border);
+    background-color: var(--status-failed-bg);
+  }
+  &-cancelled {
+    border-left: 4px solid var(--status-cancelled-border);
+    background-color: var(--status-cancelled-bg);
+  }
+}
+
+// Card Header
+mat-card-header {
+  padding: var(--card-padding);
+  margin: 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+  .header-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .header-title-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      .header-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+        font-size: 18px;
+        font-weight: 500;
+        color: rgba(0, 0, 0, 0.87);
+
+        .status-icon {
+          font-size: 28px;
+          width: 28px;
+          height: 28px;
+
+          &.status-running {
+            animation: rotate 2s linear infinite;
+          }
+        }
+      }
+    }
+
+    .header-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+
+      .label {
+        font-weight: 500;
+        color: rgba(0, 0, 0, 0.6);
+        flex-shrink: 0;
+      }
+
+      .value {
+        font-family: monospace;
+        color: rgba(0, 0, 0, 0.87);
+        word-break: break-all;
+        flex-grow: 1;
+      }
+    }
+  }
+}
+
+// Card Content
+mat-card-content {
+  padding: var(--card-padding);
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  overflow-y: auto;
+
+  .progress-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .progress-title {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: rgba(0, 0, 0, 0.87);
+      }
+
+      .progress-percent {
+        font-size: 13px;
+        color: rgba(0, 0, 0, 0.7);
+        font-family: monospace;
+      }
+    }
+
+    .progress-bar {
+      height: 8px;
+      border-radius: 4px;
+    }
+  }
+
+  .batch-section,
+  .time-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .section-title {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: rgba(0, 0, 0, 0.87);
+    }
+
+    .batch-info,
+    .time-info {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 12px;
+      background-color: rgba(0, 0, 0, 0.02);
+      border-radius: 4px;
+    }
+  }
+
+  .info-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: rgba(0, 0, 0, 0.87);
+
+    .time-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      color: rgba(0, 0, 0, 0.54);
+      flex-shrink: 0;
+    }
+
+    .info-label {
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.6);
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .info-value {
+      font-family: monospace;
+      color: rgba(0, 0, 0, 0.87);
+      word-break: break-all;
+      flex-grow: 1;
+      text-align: right;
+    }
+  }
+
+  // Error/Success Boxes
+  .error-section,
+  .success-section {
+    margin-top: 8px;
+
+    .error-box,
+    .success-box {
+      display: flex;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 4px;
+      border-left: 3px solid;
+
+      .error-icon,
+      .success-icon {
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+        flex-shrink: 0;
+      }
+
+      .error-content,
+      .success-content {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        flex-grow: 1;
+
+        h4 {
+          margin: 0;
+          font-size: 13px;
+          font-weight: 600;
+        }
+
+        p {
+          margin: 0;
+          font-size: 12px;
+          line-height: 1.4;
+          word-break: break-word;
+        }
+      }
+    }
+  }
+
+  .error-section {
+    .error-box {
+      background-color: rgba(244, 67, 54, 0.08);
+      border-color: #f44336;
+      border-left-color: #f44336;
+
+      .error-icon,
+      h4 {
+        color: #d32f2f;
+      }
+    }
+  }
+
+  .success-section {
+    .success-box {
+      background-color: rgba(76, 175, 80, 0.08);
+      border-color: #4caf50;
+      border-left-color: #4caf50;
+
+      .success-icon,
+      h4 {
+        color: #388e3c;
+      }
+    }
+  }
+}
+
+// Card Actions
+mat-card-actions {
+  padding: var(--card-padding);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: flex-end;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+
+  .action-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 20px;
+    transition: all 0.3s ease;
+    min-width: auto;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// Animations
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  :host {
+    --card-padding: 16px;
+  }
+
+  mat-card-header .header-content .header-title-section .header-title {
+    font-size: 16px;
+
+    .status-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  mat-card-content {
+    gap: 16px;
+
+    .progress-section .progress-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+
+      .progress-title {
+        font-size: 13px;
+      }
+
+      .progress-percent {
+        font-size: 12px;
+      }
+    }
+
+    .batch-section .section-title,
+    .time-section .section-title {
+      font-size: 13px;
+    }
+
+    .info-row {
+      font-size: 12px;
+
+      .time-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+      }
+    }
+  }
+
+  mat-card-actions {
+    padding: 12px 16px;
+
+    .action-button {
+      font-size: 12px;
+      padding: 6px 16px;
+
+      mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+      }
+    }
+  }
+}
+
+// Accessibility
+@media (prefers-reduced-motion: reduce) {
+  .progress-tracker-card {
+    transition: none;
+  }
+
+  .status-icon.status-running {
+    animation: none;
+  }
+
+  mat-card-actions .action-button {
+    transition: none;
+
+    &:hover:not(:disabled) {
+      transform: none;
+    }
+  }
+}
+
+// High Contrast Mode
+@media (prefers-contrast: more) {
+  .progress-tracker-card {
+    border-width: 2px;
+  }
+
+  mat-card-header {
+    border-bottom-width: 2px;
+  }
+
+  mat-card-actions {
+    border-top-width: 2px;
+  }
+}
+
+// Dark Mode
+@media (prefers-color-scheme: dark) {
+  :host {
+    --status-queued-bg: #332200;
+    --status-running-bg: #0d1b3e;
+    --status-completed-bg: #0d3e1a;
+    --status-failed-bg: #3e0d0d;
+    --status-cancelled-bg: #2a2a2a;
+  }
+
+  .progress-tracker-card {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.87);
+  }
+
+  mat-card-header {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+
+    .header-content .header-title-section .header-title {
+      color: rgba(255, 255, 255, 0.87);
+
+      .status-icon {
+        color: rgba(255, 255, 255, 0.7);
+      }
+    }
+
+    .header-info {
+      .label {
+        color: rgba(255, 255, 255, 0.6);
+      }
+
+      .value {
+        color: rgba(255, 255, 255, 0.87);
+      }
+    }
+  }
+
+  mat-card-content {
+    .progress-section .progress-header {
+      .progress-title {
+        color: rgba(255, 255, 255, 0.87);
+      }
+
+      .progress-percent {
+        color: rgba(255, 255, 255, 0.7);
+      }
+    }
+
+    .batch-section .section-title,
+    .time-section .section-title {
+      color: rgba(255, 255, 255, 0.87);
+    }
+
+    .batch-info,
+    .time-info {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .info-row {
+      color: rgba(255, 255, 255, 0.87);
+
+      .time-icon {
+        color: rgba(255, 255, 255, 0.54);
+      }
+
+      .info-label {
+        color: rgba(255, 255, 255, 0.6);
+      }
+
+      .info-value {
+        color: rgba(255, 255, 255, 0.87);
+      }
+    }
+  }
+
+  mat-card-actions {
+    border-top-color: rgba(255, 255, 255, 0.1);
+  }
+}

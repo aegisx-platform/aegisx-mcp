@@ -1,0 +1,254 @@
+<div class="dashboard-container">
+  <!-- Header Section -->
+  <header class="dashboard-header">
+    <div class="header-content">
+      <div class="header-title">
+        <h1>System Initialization Dashboard</h1>
+        <p class="subtitle">Manage data imports and system setup</p>
+      </div>
+
+      <div class="header-actions">
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="refreshDashboard()"
+          [disabled]="loading()"
+          class="action-btn"
+        >
+          <mat-icon>refresh</mat-icon>
+          <span>Refresh</span>
+        </button>
+
+        <button
+          mat-raised-button
+          color="primary"
+          class="action-btn"
+        >
+          <mat-icon>history</mat-icon>
+          <span>Import History</span>
+        </button>
+
+        <button
+          mat-raised-button
+          color="primary"
+          class="action-btn"
+        >
+          <mat-icon>settings</mat-icon>
+          <span>Settings</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Loading State -->
+  @if (loading() && !dashboard()) {
+    <div class="loading-container">
+      <mat-spinner></mat-spinner>
+      <p>Loading dashboard...</p>
+    </div>
+  } @else if (error()) {
+    <!-- Error State -->
+    <mat-card appearance="outlined" class="error-card">
+      <mat-card-header>
+        <mat-icon class="error-icon">error</mat-icon>
+      </mat-card-header>
+      <mat-card-content>
+        <h3>Failed to Load Dashboard</h3>
+        <p>{{ error() }}</p>
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="refreshDashboard()"
+        >
+          <mat-icon>refresh</mat-icon>
+          Try Again
+        </button>
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    <!-- Overview Cards Section -->
+    <section class="overview-cards-section">
+      <h2 class="section-title">Overview</h2>
+
+      <div class="cards-grid">
+        <!-- Total Modules Card -->
+        <mat-card appearance="outlined" class="overview-card">
+          <mat-card-header>
+            <mat-icon class="card-icon">layers</mat-icon>
+            <mat-card-title>Total Modules</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p class="card-value">{{ totalModules() }}</p>
+            <p class="card-subtitle">modules to import</p>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Completed Card -->
+        <mat-card appearance="outlined" class="overview-card card-success">
+          <mat-card-header>
+            <mat-icon class="card-icon">check_circle</mat-icon>
+            <mat-card-title>Completed</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p class="card-value">{{ completedModules() }}</p>
+            <p class="card-subtitle">modules completed</p>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- In Progress Card -->
+        <mat-card appearance="outlined" class="overview-card card-warning">
+          <mat-card-header>
+            <mat-icon class="card-icon">sync</mat-icon>
+            <mat-card-title>In Progress</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p class="card-value">{{ inProgressModules() }}</p>
+            <p class="card-subtitle">modules importing</p>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Pending Card -->
+        <mat-card appearance="outlined" class="overview-card card-pending">
+          <mat-card-header>
+            <mat-icon class="card-icon">pause_circle</mat-icon>
+            <mat-card-title>Pending</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p class="card-value">{{ pendingModules() }}</p>
+            <p class="card-subtitle">modules pending</p>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Completion Progress -->
+      <div class="completion-progress">
+        <h3>Overall Completion Progress</h3>
+        <div class="progress-bar-container">
+          <div class="progress-bar" [style.width.%]="completionPercentage()"></div>
+        </div>
+        <p class="progress-text">
+          {{ completedModules() }} of {{ totalModules() }} modules completed
+          ({{ completionPercentage() }}%)
+        </p>
+      </div>
+    </section>
+
+    <!-- Filters Section -->
+    <section class="filters-section">
+      <h2 class="section-title">Available Modules</h2>
+
+      <div class="filters-container">
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Domain</mat-label>
+          <mat-select
+            [value]="selectedDomain()"
+            (selectionChange)="onDomainFilterChange($event.value)"
+          >
+            <mat-option value="all">All Domains</mat-option>
+            @for (domain of availableDomains(); track domain) {
+              <mat-option [value]="domain">{{ domain }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Status</mat-label>
+          <mat-select
+            [value]="selectedStatus()"
+            (selectionChange)="onStatusFilterChange($event.value)"
+          >
+            @for (status of availableStatuses(); track status) {
+              <mat-option [value]="status">
+                {{ getStatusLabel(status) }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field search-field">
+          <mat-label>Search modules</mat-label>
+          <input
+            matInput
+            type="text"
+            [value]="searchTerm()"
+            (input)="onSearchChange($any($event.target).value)"
+            placeholder="Module name or code..."
+          />
+          @if (searchTerm()) {
+            <mat-icon matSuffix class="search-icon">search</mat-icon>
+          }
+        </mat-form-field>
+
+        @if (
+          selectedDomain() !== 'all' ||
+          selectedStatus() !== 'all' ||
+          searchTerm()
+        ) {
+          <button
+            mat-stroked-button
+            color="primary"
+            (click)="clearFilters()"
+            class="clear-filters-btn"
+          >
+            <mat-icon>clear</mat-icon>
+            Clear Filters
+          </button>
+        }
+      </div>
+    </section>
+
+    <!-- Modules Grid Section -->
+    <section class="modules-grid-section">
+      @if (hasFilteredModules()) {
+        <div class="modules-grid">
+          @for (module of filteredModules(); track trackByModule($index, module)) {
+            <app-module-card
+              [module]="module"
+              (import)="onModuleImport($event)"
+              (viewDetails)="onModuleViewDetails($event)"
+              (rollback)="onModuleRollback($event)"
+            ></app-module-card>
+          }
+        </div>
+      } @else if (hasModules()) {
+        <!-- No modules match filter -->
+        <div class="empty-state">
+          <mat-icon class="empty-icon">filter_list</mat-icon>
+          <h3>No modules match your filters</h3>
+          <p>Try adjusting your domain, status, or search filters</p>
+          <button mat-raised-button color="primary" (click)="clearFilters()">
+            <mat-icon>clear</mat-icon>
+            Clear Filters
+          </button>
+        </div>
+      } @else {
+        <!-- No modules available -->
+        <div class="empty-state">
+          <mat-icon class="empty-icon">layers_clear</mat-icon>
+          <h3>No modules available</h3>
+          <p>No import modules were discovered. Please contact support.</p>
+          <button mat-raised-button color="primary" (click)="refreshDashboard()">
+            <mat-icon>refresh</mat-icon>
+            Refresh
+          </button>
+        </div>
+      }
+    </section>
+
+    <!-- Recent Imports Section -->
+    @if (recentImports().length > 0) {
+      <section class="recent-imports-section">
+        <h2 class="section-title">Recent Imports</h2>
+
+        <app-import-history-timeline
+          [history]="recentImports()"
+          [maxItems]="5"
+          (viewDetails)="onHistoryViewDetails($event)"
+          (rollback)="onHistoryRollback($event)"
+          (retry)="onHistoryRetry($event)"
+          (loadMore)="onHistoryLoadMore()"
+        ></app-import-history-timeline>
+      </section>
+    }
+  }
+</div>

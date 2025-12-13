@@ -41,7 +41,7 @@ export const PORTAL_APPS: LauncherApp[] = [
   {
     id: 'inventory',
     name: 'Inventory',
-    description: 'Warehouse and stock management',
+    description: 'ระบบบริหารคลังยาและเวชภัณฑ์',
     icon: 'warehouse',
     route: '/inventory',
     color: 'blue',
@@ -149,6 +149,24 @@ export const PORTAL_APPS: LauncherApp[] = [
       viewPermissions: ['monitoring.read', 'admin.*'],
     },
   },
+  {
+    id: 'admin-system-init',
+    name: 'System Initialization',
+    description: 'Initialize and import master data',
+    icon: 'cloud_upload',
+    route: '/system/system-init',
+    color: 'cyan',
+    categoryId: 'admin',
+    status: 'active',
+    enabled: true,
+    featured: true,
+    order: 6,
+    tags: ['initialization', 'import', 'master-data'],
+    permission: {
+      viewRoles: ['admin'],
+      viewPermissions: ['system-init.read', 'admin.*'],
+    },
+  },
 
   // ============================================
   // Tools (under /system/tools)
@@ -232,4 +250,5 @@ export const FEATURED_APPS_LAYOUT = [
   { id: 'inventory', x: 0, y: 0, cols: 2, rows: 1 }, // Large card
   { id: 'admin-users', x: 2, y: 0, cols: 1, rows: 1 },
   { id: 'admin-monitoring', x: 3, y: 0, cols: 1, rows: 1 },
+  { id: 'admin-system-init', x: 0, y: 1, cols: 1, rows: 1 },
 ];

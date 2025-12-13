@@ -22,10 +22,11 @@ import { existsSync } from 'fs';
 export async function up(knex: Knex): Promise<void> {
   console.log('🔄 Importing TMT relationships from Excel files...');
 
-  // Path to the import script
+  // Path to the import script, relative to the project root where the command is run
   const scriptPath = join(
-    __dirname,
-    '../../../../../scripts/import-tmt-relationships.py',
+    process.cwd(),
+    'scripts',
+    'import-tmt-relationships.py',
   );
 
   if (!existsSync(scriptPath)) {

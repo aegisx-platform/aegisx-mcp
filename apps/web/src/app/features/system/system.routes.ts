@@ -111,6 +111,19 @@ export const SYSTEM_ROUTES: Route[] = [
         },
       },
 
+      // System Initialization
+      {
+        path: 'system-init',
+        loadChildren: () =>
+          import('../../features/system-init/system-init.routes').then(
+            (m) => m.SYSTEM_INIT_ROUTES,
+          ),
+        data: {
+          title: 'System Initialization',
+          description: 'Manage system initialization and data imports',
+        },
+      },
+
       // Tools
       {
         path: 'tools',

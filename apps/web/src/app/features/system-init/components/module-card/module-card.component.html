@@ -1,0 +1,136 @@
+<mat-card [ngClass]="cardContainerClass" class="module-card-container">
+  <!-- Card Header with Module Name and Icon -->
+  <mat-card-header class="card-header">
+    <div class="header-content">
+      <div class="header-title">
+        <mat-icon class="module-icon">inventory_2</mat-icon>
+        <h3 class="module-name">{{ module.displayName }}</h3>
+      </div>
+      <div class="header-path">{{ displayPath }}</div>
+    </div>
+  </mat-card-header>
+
+  <!-- Card Content -->
+  <mat-card-content class="card-content">
+    <!-- Status Section -->
+    <div class="status-section">
+      <div [ngClass]="statusBadgeClass" class="badge">
+        <mat-icon class="status-icon">{{ statusIcon }}</mat-icon>
+        <span class="status-text">{{ statusLabel }}</span>
+      </div>
+    </div>
+
+    <!-- Record Count / Progress Section -->
+    <div class="record-section">
+      <div class="record-count">{{ recordCountText }}</div>
+
+      <!-- Progress Bar (In Progress State) -->
+      @if (module.importStatus === 'in_progress') {
+        <mat-progress-bar
+          mode="determinate"
+          [value]="progressPercentage"
+          class="progress-bar"
+        ></mat-progress-bar>
+      }
+    </div>
+
+    <!-- Additional Info Based on Status -->
+    <div class="info-section">
+      @if (module.importStatus === 'not_started') {
+        <div class="info-row">
+          <span class="info-label">Priority:</span>
+          <span class="info-value">{{ module.priority }}</span>
+        </div>
+        @if (module.dependencies && module.dependencies.length > 0) {
+          <div class="info-row">
+            <span class="info-label">Dependencies:</span>
+            <span class="info-value"
+              >{{ module.dependencies.length > 0 ? module.dependencies.join(', ') : 'None' }}</span
+            >
+          </div>
+        }
+        @if (!module.dependencies || module.dependencies.length === 0) {
+          <div class="info-row">
+            <span class="info-label">Dependencies:</span>
+            <span class="info-value">None</span>
+          </div>
+        }
+      }
+
+      @if (module.importStatus === 'in_progress') {
+        <div class="info-row">
+          <span class="info-label">Current Batch:</span>
+          <span class="info-value">Processing...</span>
+        </div>
+      }
+
+      @if (module.importStatus === 'completed' && module.lastImport) {
+        <div class="info-row">
+          <span class="info-label">Imported:</span>
+          <span class="info-value">{{ lastImportDate }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">By:</span>
+          <span class="info-value">{{ module.lastImport.importedBy.name }}</span>
+        </div>
+      }
+
+      @if (module.importStatus === 'failed' && module.error) {
+        <div class="info-row error-info">
+          <span class="info-label">Error:</span>
+          <span class="info-value error-message">{{ module.error }}</span>
+        </div>
+      }
+
+      @if (module.importStatus === 'failed' && module.lastImport) {
+        <div class="info-row">
+          <span class="info-label">Last Attempt:</span>
+          <span class="info-value">{{ lastImportDate }}</span>
+        </div>
+      }
+    </div>
+  </mat-card-content>
+
+  <!-- Card Actions -->
+  <mat-card-actions class="card-actions">
+    <!-- Primary Action Button -->
+    <button
+      mat-stroked-button
+      [color]="module.importStatus === 'in_progress' ? 'accent' : 'primary'"
+      (click)="onPrimaryAction()"
+      class="primary-action-btn"
+      [attr.aria-label]="primaryActionText"
+    >
+      <mat-icon>{{ primaryActionIcon }}</mat-icon>
+      <span>{{ primaryActionText }}</span>
+    </button>
+
+    <!-- Rollback Button (Completed State Only) -->
+    @if (showRollback) {
+      <button
+        mat-stroked-button
+        color="warn"
+        (click)="onRollback()"
+        class="rollback-btn"
+        aria-label="Rollback import"
+      >
+        <mat-icon>undo</mat-icon>
+        <span>Rollback</span>
+      </button>
+    }
+
+    <!-- Retry Button (Failed State) -->
+    @if (module.importStatus === 'failed') {
+      <button
+        mat-stroked-button
+        color="accent"
+        (click)="onImport()"
+        class="retry-btn"
+        aria-label="Retry import"
+      >
+        <mat-icon>refresh</mat-icon>
+        <span>Retry</span>
+      </button>
+    }
+  </mat-card-actions>
+</mat-card>

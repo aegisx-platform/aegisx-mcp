@@ -1,0 +1,219 @@
+<div class="import-history-timeline">
+  <!-- Header -->
+  <div class="timeline-header">
+    <h2 class="timeline-title">Import History</h2>
+    <p class="timeline-subtitle">View recent import operations and their status</p>
+  </div>
+
+  <!-- Filters Section -->
+  <ax-card class="filters-card">
+    <div class="filters-container">
+      <!-- Module Filter -->
+      <div class="filter-group">
+        <label for="module-select" class="filter-label">Module</label>
+        <mat-select
+          id="module-select"
+          [(ngModel)]="selectedModuleFilter"
+          class="filter-select"
+        >
+          <mat-option value="all">All Modules</mat-option>
+          <mat-optgroup label="Available Modules">
+            <mat-option *ngFor="let module of uniqueModules()" [value]="module">
+              {{ module }}
+            </mat-option>
+          </mat-optgroup>
+        </mat-select>
+      </div>
+
+      <!-- Status Filter -->
+      <div class="filter-group">
+        <label for="status-select" class="filter-label">Status</label>
+        <mat-select
+          id="status-select"
+          [(ngModel)]="selectedStatusFilter"
+          class="filter-select"
+        >
+          <mat-option value="all">All Statuses</mat-option>
+          <mat-option value="queued">Queued</mat-option>
+          <mat-option value="running">In Progress</mat-option>
+          <mat-option value="completed">Completed</mat-option>
+          <mat-option value="failed">Failed</mat-option>
+          <mat-option value="cancelled">Cancelled</mat-option>
+        </mat-select>
+      </div>
+
+      <!-- Date Filter -->
+      <div class="filter-group">
+        <label for="date-select" class="filter-label">Date Range</label>
+        <mat-select
+          id="date-select"
+          [(ngModel)]="selectedDateFilter"
+          class="filter-select"
+        >
+          <mat-option value="all">All Time</mat-option>
+          <mat-option value="today">Today</mat-option>
+          <mat-option value="week">Last 7 Days</mat-option>
+          <mat-option value="month">Last 30 Days</mat-option>
+        </mat-select>
+      </div>
+
+      <!-- Clear Filters Button -->
+      <button
+        mat-button
+        *ngIf="isFiltered()"
+        class="clear-filters-btn"
+        (click)="clearFilters()"
+        matTooltip="Clear all filters"
+      >
+        <mat-icon>clear</mat-icon>
+        Clear Filters
+      </button>
+    </div>
+  </ax-card>
+
+  <!-- Empty State -->
+  <div *ngIf="isEmpty()" class="empty-state">
+    <mat-icon class="empty-icon">history</mat-icon>
+    <h3 class="empty-title">No Import History</h3>
+    <p class="empty-message">
+      No imports have been performed yet. Start by importing a module.
+    </p>
+  </div>
+
+  <!-- No Results State -->
+  <div *ngIf="!isEmpty() && visibleHistory().length === 0" class="empty-state">
+    <mat-icon class="empty-icon">search_off</mat-icon>
+    <h3 class="empty-title">No Matching Imports</h3>
+    <p class="empty-message">
+      No imports match your current filters. Try adjusting your filters.
+    </p>
+    <button
+      mat-stroked-button
+      class="reset-btn"
+      (click)="clearFilters()"
+    >
+      Reset Filters
+    </button>
+  </div>
+
+  <!-- Timeline Items -->
+  <div *ngIf="!isEmpty() && visibleHistory().length > 0" class="timeline-items">
+    <ng-container *ngFor="let item of visibleHistory(); trackBy: trackByJobId">
+      <!-- Timeline Item Card -->
+      <ax-card class="timeline-item">
+        <div class="item-container">
+          <!-- Timeline Indicator -->
+          <div class="timeline-indicator">
+            <div [class]="'status-indicator ' + getStatusColorClass(item.status)">
+              <mat-icon class="status-icon">{{ getStatusIcon(item.status) }}</mat-icon>
+            </div>
+            <div class="connecting-line"></div>
+          </div>
+
+          <!-- Item Content -->
+          <div class="item-content">
+            <!-- Header Row with Date and Status -->
+            <div class="item-header">
+              <div class="header-left">
+                <h3 class="item-title">{{ item.module }} Import</h3>
+                <span class="item-timestamp">
+                  {{ formatDate(item.completedAt, true) }}
+                </span>
+                <span class="item-absolute-time">
+                  {{ formatDate(item.completedAt, false) }}
+                </span>
+              </div>
+
+              <!-- Status Badge -->
+              <mat-chip
+                [class]="'status-badge ' + getStatusColorClass(item.status)"
+                disabled
+              >
+                <mat-icon class="badge-icon">{{ getStatusIcon(item.status) }}</mat-icon>
+                <span class="badge-text">{{ getStatusLabel(item.status) }}</span>
+              </mat-chip>
+            </div>
+
+            <!-- Details Row -->
+            <div class="item-details">
+              <!-- Records Info -->
+              <div class="detail-item" *ngIf="item.status === 'completed'">
+                <mat-icon class="detail-icon">check</mat-icon>
+                <span class="detail-text">
+                  {{ item.recordsImported }} record{{ item.recordsImported !== 1 ? 's' : '' }}
+                  imported
+                </span>
+              </div>
+
+              <!-- Error Info -->
+              <div class="detail-item error" *ngIf="item.status === 'failed' && item.error">
+                <mat-icon class="detail-icon">error</mat-icon>
+                <span class="detail-text">{{ getErrorMessage(item) }}</span>
+              </div>
+
+              <!-- User Info -->
+              <div class="detail-item">
+                <mat-icon class="detail-icon">person</mat-icon>
+                <span class="detail-text">By: {{ item.importedBy.name }}</span>
+              </div>
+
+              <!-- Job ID -->
+              <div class="detail-item job-id">
+                <mat-icon class="detail-icon">fingerprint</mat-icon>
+                <span class="detail-text">Job ID: {{ item.jobId }}</span>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="item-actions">
+              <button
+                mat-button
+                class="action-btn"
+                (click)="onViewDetails(item)"
+                matTooltip="View detailed information about this import"
+              >
+                <mat-icon>info</mat-icon>
+                View Details
+              </button>
+
+              <!-- Rollback Button (Completed Only) -->
+              <button
+                mat-button
+                class="action-btn rollback-btn"
+                *ngIf="canRollback(item)"
+                (click)="onRollback(item)"
+                matTooltip="Undo this import operation"
+              >
+                <mat-icon>undo</mat-icon>
+                Rollback
+              </button>
+
+              <!-- Retry Button (Failed Only) -->
+              <button
+                mat-button
+                class="action-btn retry-btn"
+                *ngIf="canRetry(item)"
+                (click)="onRetry(item)"
+                matTooltip="Retry this failed import"
+              >
+                <mat-icon>refresh</mat-icon>
+                Retry
+              </button>
+            </div>
+          </div>
+        </div>
+      </ax-card>
+    </ng-container>
+  </div>
+
+  <!-- Load More Button -->
+  <div *ngIf="hasMoreItems()" class="load-more-container">
+    <button
+      mat-stroked-button
+      class="load-more-btn"
+      (click)="onLoadMore()"
+    >
+      Load More History
+    </button>
+  </div>
+</div>

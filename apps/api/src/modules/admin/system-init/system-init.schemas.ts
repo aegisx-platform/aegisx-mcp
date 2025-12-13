@@ -222,7 +222,7 @@ export const ImportModuleSchema = Type.Object({
     Type.Literal('not_started'),
     Type.Literal('in_progress'),
     Type.Literal('completed'),
-    Type.Literal('error'),
+    Type.Literal('failed'),
   ]),
   recordCount: Type.Integer(),
   lastImportDate: Type.Optional(Type.String({ format: 'date-time' })),
