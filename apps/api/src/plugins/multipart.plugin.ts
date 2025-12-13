@@ -17,7 +17,10 @@ export interface MultipartPluginOptions {
  * Global Multipart Plugin using @aegisx/fastify-multipart
  * Provides clean multipart form support for all modules
  *
- * Enforces file size limits at Fastify level (10MB per file as per IMPORT_CONFIG)
+ * SECURITY: Defense-in-depth file upload protection
+ * - Fastify bodyLimit: 10MB (server.factory.ts) - prevents buffering of oversized requests
+ * - Multipart limits: 10MB per file, 1 file max per request (this plugin)
+ * - These work together: if request exceeds bodyLimit, rejected at HTTP level before any processing
  */
 async function multipartPlugin(
   fastify: FastifyInstance,

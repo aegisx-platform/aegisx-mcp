@@ -44,8 +44,11 @@ export async function createServer(
       return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     },
 
-    // Body parsing limits
-    bodyLimit: 100 * 1024 * 1024, // 100MB
+    // Body parsing limits - DoS protection
+    // Set to 10MB to prevent buffering large files before multipart plugin rejects them.
+    // The multipart plugin provides additional limits (see multipart.plugin.ts).
+    // This protects against Slowloris and request header overflow attacks.
+    bodyLimit: 10 * 1024 * 1024, // 10MB
 
     // Plugin timeout
     pluginTimeout: 30000, // 30 seconds
