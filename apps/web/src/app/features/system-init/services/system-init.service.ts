@@ -16,7 +16,7 @@ import type {
   providedIn: 'root',
 })
 export class SystemInitService {
-  private readonly baseUrl = '/api/admin/system-init';
+  private readonly baseUrl = '/admin/system-init';
 
   constructor(private http: HttpClient) {}
 
