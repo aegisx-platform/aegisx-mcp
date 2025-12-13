@@ -328,11 +328,6 @@ export function createCorePluginGroup(apiPrefix: string): PluginGroup {
         required: true,
       },
       {
-        name: 'user-departments',
-        plugin: userDepartmentsPlugin,
-        required: true,
-      },
-      {
         name: 'rbac',
         plugin: rbacPlugin,
         required: true,
@@ -378,6 +373,12 @@ export function createFeaturePluginGroup(apiPrefix: string): PluginGroup {
       {
         name: 'inventory-domain',
         plugin: inventoryDomainPlugin,
+        required: true,
+      },
+      // User-Departments - depends on inventory-domain (uses DepartmentsRepository)
+      {
+        name: 'user-departments',
+        plugin: userDepartmentsPlugin,
         required: true,
       },
       {
