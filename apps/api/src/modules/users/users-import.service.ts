@@ -514,37 +514,24 @@ export class UsersImportService extends BaseImportService<User> {
   /**
    * Perform rollback of imported users
    * Deletes users and their related records that were inserted by this import job
-   *
-   * Note: Uses timestamp-based rollback. In production, consider using
-   * a more robust approach like storing import batch IDs.
+   * Uses batch_id for precise identification of imported records
    *
    * @protected
-   * @param jobId - Import job ID
-   * @param job - Import job metadata
+   * @param batchId - Batch ID identifying records to rollback
+   * @param knex - Knex instance for database access
+   * @returns Number of users deleted
    */
-  protected async performRollback(jobId: string, job: any): Promise<void> {
+  protected async performRollback(
+    batchId: string,
+    knex: Knex,
+  ): Promise<number> {
     try {
-      const trx = await this.knex.transaction();
+      const trx = await knex.transaction();
 
       try {
-        // Find import history
-        const history = await trx('import_history')
-          .where('job_id', jobId)
-          .first();
-
-        if (!history) {
-          throw new Error(`Import history not found for job ${jobId}`);
-        }
-
-        // Delete users created during this import
-        // Use a time window for safety (2 minutes before start to completion)
-        const twoMinutesAgo = new Date(job.startedAt.getTime() - 2 * 60 * 1000);
-        const completedAt = job.completedAt || new Date();
-
-        // Get user IDs to delete
+        // Get user IDs to delete by batch_id
         const usersToDelete = await trx('users')
-          .where('created_at', '>=', twoMinutesAgo)
-          .where('created_at', '<=', completedAt)
+          .where({ import_batch_id: batchId })
           .select('id');
 
         const userIds = usersToDelete.map((u: any) => u.id);
@@ -557,10 +544,12 @@ export class UsersImportService extends BaseImportService<User> {
           // Delete users
           const deleted = await trx('users').whereIn('id', userIds).delete();
 
-          console.log(`Rolled back ${deleted} users for job ${jobId}`);
+          await trx.commit();
+          return deleted;
         }
 
         await trx.commit();
+        return 0;
       } catch (error) {
         await trx.rollback();
         throw error;

@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import fp from 'fastify-plugin';
+import { IMPORT_CONFIG } from '../config/import.config';
 
 export interface MultipartPluginOptions {
   /** File size limit in bytes */
@@ -15,25 +16,28 @@ export interface MultipartPluginOptions {
 /**
  * Global Multipart Plugin using @aegisx/fastify-multipart
  * Provides clean multipart form support for all modules
+ *
+ * Enforces file size limits at Fastify level (10MB per file as per IMPORT_CONFIG)
  */
 async function multipartPlugin(
   fastify: FastifyInstance,
   opts: MultipartPluginOptions = {},
 ) {
   const options = {
-    maxFileSize: 100 * 1024 * 1024, // 100MB
-    maxFiles: 10,
+    maxFileSize: IMPORT_CONFIG.MAX_FILE_SIZE, // 10MB - Import system limit
+    maxFiles: 1, // Only 1 file per request
     maxFieldSize: 10 * 1024 * 1024, // 10MB
-    maxFields: 20,
+    maxFields: 10, // Max 10 form fields
     ...opts,
   };
   // Register multipart plugin with autoContentTypeParser: false as per docs
   await fastify.register(require('@aegisx/fastify-multipart'), {
     limits: {
-      fileSize: options.maxFileSize, // Configurable file size
-      files: options.maxFiles, // Configurable max files
-      fieldSize: options.maxFieldSize, // Configurable field size
-      fields: options.maxFields, // Configurable max fields
+      fileSize: options.maxFileSize, // 10MB per file
+      files: options.maxFiles, // 1 file per request
+      fieldSize: options.maxFieldSize, // 10MB field size
+      fields: options.maxFields, // 10 form fields max
+      headerPairs: 2000, // Prevent header overflow
     },
     autoContentTypeParser: false, // Disable auto parser for Swagger integration
   });

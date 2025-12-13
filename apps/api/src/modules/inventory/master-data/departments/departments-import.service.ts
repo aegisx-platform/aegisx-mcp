@@ -290,34 +290,25 @@ export class DepartmentsImportService extends BaseImportService<Departments> {
 
   /**
    * Perform rollback of imported departments
-   * Deletes records that were inserted by this import job
+   * Deletes records that were inserted by this import job using batch_id
+   * Precise rollback without risk of deleting records from other imports
    *
    * @protected
-   * @param jobId - Import job ID
-   * @param job - Import job metadata
+   * @param batchId - Batch ID identifying records to rollback
+   * @param knex - Knex instance for database access
+   * @returns Number of departments deleted
    */
-  protected async performRollback(jobId: string, job: any): Promise<void> {
+  protected async performRollback(
+    batchId: string,
+    knex: Knex,
+  ): Promise<number> {
     try {
-      // Find departments imported by this job
-      const history = await this.knex('import_history')
-        .where('job_id', jobId)
-        .first();
-
-      if (!history) {
-        throw new Error(`Import history not found for job ${jobId}`);
-      }
-
-      // Delete departments created during this import
-      // In a production system, you might store batch IDs or use timestamps
-      // For now, we'll use a simplified approach with date range
-      const twoMinutesAgo = new Date(job.startedAt.getTime() - 2 * 60 * 1000);
-
-      const deleted = await this.knex('inventory.departments')
-        .where('created_at', '>=', twoMinutesAgo)
-        .where('created_at', '<=', job.completedAt || new Date())
+      // Delete departments by batch_id - precise and safe
+      const deleted = await knex('inventory.departments')
+        .where({ import_batch_id: batchId })
         .delete();
 
-      console.log(`Rolled back ${deleted} departments for job ${jobId}`);
+      return deleted;
     } catch (error) {
       throw new Error(
         `Rollback failed: ${error instanceof Error ? error.message : String(error)}`,

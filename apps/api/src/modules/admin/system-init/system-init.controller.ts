@@ -6,6 +6,7 @@
 
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { SystemInitService } from './system-init.service';
+import { ImportContext } from '../../../core/import';
 import {
   AvailableModulesQuery,
   ImportOrderQuery,
@@ -205,6 +206,7 @@ export class SystemInitController {
    * POST /module/:moduleName/validate
    * Upload and validate CSV/Excel file
    * Uses multipart/form-data
+   * Enforces file size limits (10MB max)
    */
   async validateFile(
     request: FastifyRequest<{
@@ -237,8 +239,26 @@ export class SystemInitController {
       const buffer = await data.toBuffer();
       const fileName = data.filename;
 
+      // Additional check (defense in depth) - MAX_FILE_SIZE is 10MB
+      const MAX_SIZE = 10 * 1024 * 1024;
+      if (buffer.length > MAX_SIZE) {
+        return reply.code(413).send({
+          statusCode: 413,
+          error: 'Payload Too Large',
+          message: `File size exceeds maximum allowed size of ${(MAX_SIZE / (1024 * 1024)).toFixed(0)}MB`,
+        });
+      }
+
       // Determine file type
       const fileType = fileName.endsWith('.xlsx') ? 'excel' : 'csv';
+
+      // Create context from authenticated user
+      const context: ImportContext = {
+        userId: request.user.id,
+        userName: request.user.email,
+        ipAddress: request.ip,
+        userAgent: request.headers['user-agent'] as string,
+      };
 
       // Validate file
       const result = await this.deps.systemInitService.validateFile(
@@ -246,6 +266,7 @@ export class SystemInitController {
         buffer,
         fileName,
         fileType,
+        context,
       );
 
       return {
@@ -259,6 +280,15 @@ export class SystemInitController {
       };
     } catch (error: any) {
       request.log.error(error, 'Failed to validate file');
+
+      // Check if error is due to file size exceeded
+      if (error.message?.includes('exceeded')) {
+        return reply.code(413).send({
+          statusCode: 413,
+          error: 'Payload Too Large',
+          message: 'File size exceeds maximum allowed size',
+        });
+      }
 
       const statusCode = error.message.includes('not found') ? 404 : 400;
       return reply.code(statusCode).send({
@@ -307,11 +337,20 @@ export class SystemInitController {
         } as ErrorResponse);
       }
 
+      // Create context from authenticated user
+      const context: ImportContext = {
+        userId: request.user.id,
+        userName: request.user.email,
+        ipAddress: request.ip,
+        userAgent: request.headers['user-agent'] as string,
+      };
+
       // Execute import
       const result = await this.deps.systemInitService.executeImport(
         moduleName,
         sessionId,
         options,
+        context,
       );
 
       return {
@@ -406,9 +445,18 @@ export class SystemInitController {
     try {
       const { moduleName, jobId } = request.params;
 
+      // Create context from authenticated user
+      const context: ImportContext = {
+        userId: request.user.id,
+        userName: request.user.email,
+        ipAddress: request.ip,
+        userAgent: request.headers['user-agent'] as string,
+      };
+
       const result = await this.deps.systemInitService.rollbackImport(
         moduleName,
         jobId,
+        context,
       );
 
       return {

@@ -35,3 +35,9 @@ export { default as importDiscoveryPlugin } from './plugin/import-discovery.plug
 
 // Export base service
 export { BaseImportService } from './base/base-import.service';
+
+// Export repositories
+export * from './repositories';
+
+// Export jobs
+export * from './jobs';

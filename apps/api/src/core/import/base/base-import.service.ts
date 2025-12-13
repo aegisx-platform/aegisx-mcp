@@ -27,6 +27,7 @@ import Papa from 'papaparse';
 import {
   IImportService,
   ImportServiceMetadata,
+  ImportContext,
   TemplateColumn,
   ValidationError,
   ValidationWarning,
@@ -36,59 +37,15 @@ import {
   ImportJobStatus,
   ImportHistoryRecord,
 } from '../types/import-service.types';
-
-/**
- * Import session stored in database/cache
- * Tracks file validation state during multi-step import workflow
- */
-interface ImportSession {
-  sessionId: string;
-  moduleName: string;
-  fileName: string;
-  fileType: 'csv' | 'excel';
-  fileSize: number;
-  uploadedAt: Date;
-  expiresAt: Date;
-  validatedData: any[];
-  validationResult: {
-    isValid: boolean;
-    errors: ValidationError[];
-    warnings: ValidationWarning[];
-    stats: {
-      totalRows: number;
-      validRows: number;
-      errorRows: number;
-    };
-  };
-  canProceed: boolean;
-  createdBy: string;
-}
-
-/**
- * Import job tracking
- * Stores execution progress and metadata
- */
-interface ImportJob {
-  jobId: string;
-  sessionId: string;
-  moduleName: string;
-  status: ImportJobStatus;
-  totalRows: number;
-  importedRows: number;
-  errorRows: number;
-  warningCount: number;
-  startedAt: Date;
-  completedAt?: Date;
-  durationMs?: number;
-  errorMessage?: string;
-  errorDetails?: Record<string, any>;
-  canRollback: boolean;
-  importedBy: string;
-  fileName: string;
-  fileSize: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { IMPORT_CONFIG } from '../../../config/import.config';
+import {
+  ImportSessionRepository,
+  ImportSession,
+} from '../repositories/import-session.repository';
+import {
+  ImportHistoryRepository,
+  ImportHistory,
+} from '../repositories/import-history.repository';
 
 /**
  * Abstract Base Import Service
@@ -106,22 +63,25 @@ export abstract class BaseImportService<
   protected moduleName!: string;
 
   /**
-   * In-memory session storage (can be replaced with database/Redis)
-   * @private
+   * Import session repository (database-backed)
+   * @protected
    */
-  private sessions: Map<string, ImportSession> = new Map();
+  protected importSessionRepository: ImportSessionRepository;
 
   /**
-   * In-memory job storage (can be replaced with database/Redis)
-   * @private
+   * Import history repository (database-backed)
+   * @protected
    */
-  private jobs: Map<string, ImportJob> = new Map();
+  protected importHistoryRepository: ImportHistoryRepository;
 
   /**
    * Constructor
    * @param knex - Knex database instance
    */
-  constructor(protected knex: Knex) {}
+  constructor(protected knex: Knex) {
+    this.importSessionRepository = new ImportSessionRepository(knex);
+    this.importHistoryRepository = new ImportHistoryRepository(knex);
+  }
 
   /**
    * Get service metadata
@@ -297,24 +257,80 @@ export abstract class BaseImportService<
   }
 
   /**
+   * Format bytes to human-readable string
+   * @private
+   */
+  private formatBytes(bytes: number): string {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+  }
+
+  /**
    * Validate uploaded file and create session
    * Session-based workflow allows review before import
    * @param buffer - File buffer
    * @param fileName - Original filename
    * @param fileType - 'csv' or 'excel'
+   * @param context - Authenticated user context
    * @returns Validation result with session ID
    */
   async validateFile(
     buffer: Buffer,
     fileName: string,
     fileType: 'csv' | 'excel',
+    context: ImportContext,
   ): Promise<ValidationResult> {
     const metadata = this.getMetadata();
     const sessionId = uuidv4();
 
     try {
+      // CHECK FILE SIZE (First layer of protection)
+      if (buffer.length > IMPORT_CONFIG.MAX_FILE_SIZE) {
+        const errors: ValidationError[] = [
+          {
+            row: 0,
+            field: 'file',
+            message: `File size ${this.formatBytes(buffer.length)} exceeds maximum allowed size of ${this.formatBytes(IMPORT_CONFIG.MAX_FILE_SIZE)}`,
+            severity: 'ERROR',
+            code: 'FILE_TOO_LARGE',
+          },
+        ];
+
+        return {
+          sessionId: null,
+          isValid: false,
+          errors,
+          warnings: [],
+          stats: { totalRows: 0, validRows: 0, errorRows: 0 },
+          canProceed: false,
+        };
+      }
+
       // Parse file
       const rows = await this.parseFile(buffer, fileType);
+
+      // CHECK ROW COUNT (Second layer of protection)
+      if (rows.length > IMPORT_CONFIG.MAX_ROWS) {
+        const errors: ValidationError[] = [
+          {
+            row: 0,
+            field: 'file',
+            message: `File contains ${rows.length} rows, exceeding maximum of ${IMPORT_CONFIG.MAX_ROWS} rows`,
+            severity: 'ERROR',
+            code: 'TOO_MANY_ROWS',
+          },
+        ];
+
+        return {
+          sessionId: null,
+          isValid: false,
+          errors,
+          warnings: [],
+          stats: { totalRows: rows.length, validRows: 0, errorRows: 0 },
+          canProceed: false,
+        };
+      }
 
       // Accumulate validation errors
       const errors: ValidationError[] = [];
@@ -342,20 +358,14 @@ export abstract class BaseImportService<
       const isValid = errors.length === 0;
       const canProceed = isValid;
 
-      // Create session
-      const expiresAt = new Date();
-      expiresAt.setMinutes(expiresAt.getMinutes() + 30); // 30-minute expiry
-
-      const session: ImportSession = {
-        sessionId,
-        moduleName: metadata.module,
-        fileName,
-        fileType,
-        fileSize: buffer.length,
-        uploadedAt: new Date(),
-        expiresAt,
-        validatedData: rows,
-        validationResult: {
+      // Create session in database
+      const session = await this.importSessionRepository.createSession({
+        module_name: metadata.module,
+        file_name: fileName,
+        file_size_bytes: buffer.length,
+        file_type: fileType,
+        validated_data: rows,
+        validation_result: {
           isValid,
           errors,
           warnings,
@@ -365,23 +375,21 @@ export abstract class BaseImportService<
             errorRows: rows.length - validRowCount,
           },
         },
-        canProceed,
-        createdBy: 'system', // Will be set by caller
-      };
-
-      // Store session
-      this.sessions.set(sessionId, session);
-
-      // Schedule cleanup
-      setTimeout(() => this.sessions.delete(sessionId), 30 * 60 * 1000);
+        can_proceed: canProceed,
+        created_by: context.userId,
+      });
 
       return {
-        sessionId,
+        sessionId: session.session_id,
         isValid,
         errors,
         warnings,
-        stats: session.validationResult.stats,
-        expiresAt,
+        stats: {
+          totalRows: rows.length,
+          validRows: validRowCount,
+          errorRows: rows.length - validRowCount,
+        },
+        expiresAt: session.expires_at,
         canProceed,
       };
     } catch (error) {
@@ -487,60 +495,60 @@ export abstract class BaseImportService<
    * Starts background import job with transaction support
    * @param sessionId - Validation session ID
    * @param options - Import options (skipWarnings, batchSize, onConflict)
+   * @param context - Authenticated user context
    * @returns Job ID and status
    */
   async importData(
     sessionId: string,
     options: ImportOptions,
+    context: ImportContext,
   ): Promise<{
     jobId: string;
     status: 'queued' | 'running';
   }> {
-    const session = this.sessions.get(sessionId);
+    // Get session from database
+    const session =
+      await this.importSessionRepository.getValidSession(sessionId);
     if (!session) {
       throw new Error('Validation session not found or expired');
     }
 
-    if (!session.canProceed && !options.skipWarnings) {
+    if (!session.can_proceed && !options.skipWarnings) {
       throw new Error('Cannot proceed with import due to validation errors');
     }
 
     const metadata = this.getMetadata();
     const jobId = uuidv4();
 
-    // Create job record
-    const job: ImportJob = {
-      jobId,
-      sessionId,
-      moduleName: metadata.module,
+    // Create job record in database with user context
+    await this.importHistoryRepository.create({
+      job_id: jobId,
+      session_id: sessionId,
+      module_name: metadata.module,
       status: ImportJobStatus.PENDING,
-      totalRows: session.validationResult.stats.totalRows,
-      importedRows: 0,
-      errorRows: 0,
-      warningCount: session.validationResult.warnings.length,
-      startedAt: new Date(),
-      canRollback: metadata.supportsRollback,
-      importedBy: session.createdBy,
-      fileName: session.fileName,
-      fileSize: session.fileSize,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    this.jobs.set(jobId, job);
-
-    // Store job in database
-    await this.storeImportHistory(job);
+      total_rows: session.validation_result.stats.totalRows,
+      imported_rows: 0,
+      error_rows: 0,
+      warning_count: session.validation_result.warnings.length,
+      started_at: new Date(),
+      can_rollback: metadata.supportsRollback,
+      imported_by: context.userId,
+      imported_by_name: context.userName,
+      ip_address: context.ipAddress,
+      user_agent: context.userAgent,
+      file_name: session.file_name,
+      file_size_bytes: session.file_size_bytes,
+    });
 
     // Start background import (non-blocking)
     setImmediate(() => {
-      this.executeImportJob(jobId, session, options).catch((error) => {
+      this.executeImportJob(jobId, session, options).catch(async (error) => {
         console.error(`Import job ${jobId} failed:`, error);
-        job.status = ImportJobStatus.FAILED;
-        job.errorMessage =
-          error instanceof Error ? error.message : String(error);
-        job.completedAt = new Date();
-        job.updatedAt = new Date();
+        await this.importHistoryRepository.updateByJobId(jobId, {
+          status: ImportJobStatus.FAILED,
+          error_message: error instanceof Error ? error.message : String(error),
+          completed_at: new Date(),
+        });
       });
     });
 
@@ -552,6 +560,7 @@ export abstract class BaseImportService<
 
   /**
    * Execute import job with transaction support
+   * Generates unique batch ID for all imported records
    * @private
    */
   private async executeImportJob(
@@ -559,18 +568,19 @@ export abstract class BaseImportService<
     session: ImportSession,
     options: ImportOptions,
   ): Promise<void> {
-    const job = this.jobs.get(jobId);
-    if (!job) return;
-
+    const { randomUUID } = await import('crypto');
+    const batchId = randomUUID(); // Generate unique batch ID for this import job
     const batchSize = options.batchSize || 100;
     const trx = await this.knex.transaction();
 
     try {
-      job.status = ImportJobStatus.RUNNING;
-      job.updatedAt = new Date();
-      await this.updateImportHistory(job);
+      // Update status to running and store batch_id
+      await this.importHistoryRepository.updateByJobId(jobId, {
+        status: ImportJobStatus.RUNNING,
+        batch_id: batchId,
+      });
 
-      const rows = session.validatedData;
+      const rows = session.validated_data;
       let successCount = 0;
       let errorCount = 0;
 
@@ -579,13 +589,23 @@ export abstract class BaseImportService<
         const batch = rows.slice(i, i + batchSize);
 
         try {
+          // Add batch_id to each record before insertion
+          const batchWithId = batch.map((record) => ({
+            ...record,
+            import_batch_id: batchId,
+          }));
+
           // Allow child class to implement batch insertion
-          const inserted = await this.insertBatch(batch, trx, options);
+          const inserted = await this.insertBatch(batchWithId, trx, options);
           successCount += inserted.length;
-          job.importedRows += inserted.length;
+
+          // Update progress in database
+          await this.importHistoryRepository.updateByJobId(jobId, {
+            imported_rows: successCount,
+            error_rows: errorCount,
+          });
         } catch (error) {
           errorCount += batch.length;
-          job.errorRows += batch.length;
           console.error(`Batch ${i / batchSize} failed:`, error);
 
           // Handle conflict resolution
@@ -596,29 +616,52 @@ export abstract class BaseImportService<
             continue;
           }
           // For 'update', let child class handle it
-        }
 
-        job.updatedAt = new Date();
-        await this.updateImportHistory(job);
+          // Update error count
+          await this.importHistoryRepository.updateByJobId(jobId, {
+            error_rows: errorCount,
+          });
+        }
       }
 
       // Commit transaction
       await trx.commit();
 
-      job.status = ImportJobStatus.COMPLETED;
-      job.completedAt = new Date();
-      job.durationMs = job.completedAt.getTime() - job.startedAt.getTime();
-      job.updatedAt = new Date();
-      await this.updateImportHistory(job);
+      // Get job to calculate duration
+      const job = await this.importHistoryRepository.findByJobId(jobId);
+      const completedAt = new Date();
+      const durationMs = job?.started_at
+        ? completedAt.getTime() - job.started_at.getTime()
+        : null;
+
+      // Mark as completed
+      await this.importHistoryRepository.updateByJobId(jobId, {
+        status: ImportJobStatus.COMPLETED,
+        imported_rows: successCount,
+        error_rows: errorCount,
+        completed_at: completedAt,
+        duration_ms: durationMs,
+      });
+
+      // Delete session after successful import
+      await this.importSessionRepository.deleteSession(session.session_id);
     } catch (error) {
       await trx.rollback();
 
-      job.status = ImportJobStatus.FAILED;
-      job.errorMessage = error instanceof Error ? error.message : String(error);
-      job.completedAt = new Date();
-      job.durationMs = job.completedAt.getTime() - job.startedAt.getTime();
-      job.updatedAt = new Date();
-      await this.updateImportHistory(job);
+      // Get job to calculate duration
+      const job = await this.importHistoryRepository.findByJobId(jobId);
+      const completedAt = new Date();
+      const durationMs = job?.started_at
+        ? completedAt.getTime() - job.started_at.getTime()
+        : null;
+
+      // Mark as failed
+      await this.importHistoryRepository.updateByJobId(jobId, {
+        status: ImportJobStatus.FAILED,
+        error_message: error instanceof Error ? error.message : String(error),
+        completed_at: completedAt,
+        duration_ms: durationMs,
+      });
 
       throw error;
     }
@@ -644,27 +687,31 @@ export abstract class BaseImportService<
    * @returns Current job status
    */
   async getImportStatus(jobId: string): Promise<ImportStatus> {
-    const job = this.jobs.get(jobId);
+    const job = await this.importHistoryRepository.findByJobId(jobId);
     if (!job) {
       throw new Error('Import job not found');
     }
 
+    const totalRows = job.total_rows || 0;
+    const importedRows = job.imported_rows || 0;
+
     return {
       jobId,
-      status: job.status,
+      status: job.status as ImportJobStatus,
       progress: {
-        totalRows: job.totalRows,
-        importedRows: job.importedRows,
-        errorRows: job.errorRows,
-        currentRow: job.importedRows,
-        percentComplete: Math.round((job.importedRows / job.totalRows) * 100),
+        totalRows,
+        importedRows,
+        errorRows: job.error_rows || 0,
+        currentRow: importedRows,
+        percentComplete:
+          totalRows > 0 ? Math.round((importedRows / totalRows) * 100) : 0,
       },
-      startedAt: job.startedAt,
+      startedAt: job.started_at || undefined,
       estimatedCompletion:
-        job.status === ImportJobStatus.RUNNING
-          ? this.estimateCompletion(job)
-          : job.completedAt,
-      error: job.errorMessage,
+        job.status === ImportJobStatus.RUNNING && job.started_at
+          ? this.estimateCompletionFromJob(job)
+          : job.completed_at || undefined,
+      error: job.error_message || undefined,
     };
   }
 
@@ -672,12 +719,15 @@ export abstract class BaseImportService<
    * Estimate completion time based on current progress
    * @private
    */
-  private estimateCompletion(job: ImportJob): Date | undefined {
-    if (job.importedRows === 0) return undefined;
+  private estimateCompletionFromJob(job: ImportHistory): Date | undefined {
+    const importedRows = job.imported_rows || 0;
+    const totalRows = job.total_rows || 0;
 
-    const elapsed = Date.now() - job.startedAt.getTime();
-    const rowsPerMs = job.importedRows / elapsed;
-    const remainingRows = job.totalRows - job.importedRows;
+    if (importedRows === 0 || !job.started_at) return undefined;
+
+    const elapsed = Date.now() - job.started_at.getTime();
+    const rowsPerMs = importedRows / elapsed;
+    const remainingRows = totalRows - importedRows;
     const remainingMs = remainingRows / rowsPerMs;
 
     return new Date(Date.now() + remainingMs);
@@ -689,30 +739,35 @@ export abstract class BaseImportService<
    * @returns true if rollback is supported and job is completed
    */
   async canRollback(jobId: string): Promise<boolean> {
-    const job = this.jobs.get(jobId);
+    const job = await this.importHistoryRepository.findByJobId(jobId);
     if (!job) return false;
 
     const metadata = this.getMetadata();
     return (
       metadata.supportsRollback &&
       job.status === ImportJobStatus.COMPLETED &&
-      !job.canRollback === false
+      job.can_rollback &&
+      !job.rolled_back_at
     );
   }
 
   /**
    * Rollback import job
-   * Deletes records inserted by the job
+   * Deletes records inserted by the job using batch_id for precision
    * @param jobId - Job ID
+   * @param context - Authenticated user context
    */
-  async rollback(jobId: string): Promise<void> {
-    const job = this.jobs.get(jobId);
+  async rollback(jobId: string, context: ImportContext): Promise<void> {
+    const job = await this.importHistoryRepository.findByJobId(jobId);
     if (!job) {
       throw new Error('Import job not found');
     }
 
-    if (job.status !== ImportJobStatus.COMPLETED) {
-      throw new Error('Can only rollback completed imports');
+    if (
+      job.status !== ImportJobStatus.COMPLETED &&
+      job.status !== ImportJobStatus.FAILED
+    ) {
+      throw new Error('Can only rollback completed or failed imports');
     }
 
     const metadata = this.getMetadata();
@@ -720,14 +775,34 @@ export abstract class BaseImportService<
       throw new Error('Rollback is not supported for this module');
     }
 
-    try {
-      // Call child class rollback implementation
-      await this.performRollback(jobId, job);
+    if (!job.can_rollback) {
+      throw new Error('This import cannot be rolled back');
+    }
 
-      // Mark as rolled back
-      job.status = ImportJobStatus.ROLLED_BACK;
-      job.updatedAt = new Date();
-      await this.updateImportHistory(job);
+    if (job.rolled_back_at) {
+      throw new Error('This import has already been rolled back');
+    }
+
+    // Check if batch_id exists for precise rollback
+    if (!job.batch_id) {
+      throw new Error(
+        'Import job does not have batch ID. Cannot rollback safely. Please contact support.',
+      );
+    }
+
+    try {
+      // Call child class rollback implementation with batch_id
+      const deletedCount = await this.performRollback(job.batch_id, this.knex);
+
+      console.log(
+        `Rolled back ${deletedCount} records from batch ${job.batch_id}`,
+      );
+
+      // Mark as rolled back with user context
+      await this.importHistoryRepository.markAsRolledBack(
+        jobId,
+        context.userId,
+      );
     } catch (error) {
       throw new Error(
         `Rollback failed: ${error instanceof Error ? error.message : String(error)}`,
@@ -737,12 +812,16 @@ export abstract class BaseImportService<
 
   /**
    * Perform rollback - must be implemented by child class
+   * Uses batch_id to delete only records from this specific import job
    * @protected
+   * @param batchId - Batch ID identifying records to rollback
+   * @param knex - Knex instance for database access
+   * @returns Number of records deleted
    */
   protected async performRollback(
-    jobId: string,
-    job: ImportJob,
-  ): Promise<void> {
+    batchId: string,
+    knex: Knex,
+  ): Promise<number> {
     // Default implementation - must be overridden by child class
     throw new Error('performRollback() must be implemented by child class');
   }
@@ -756,75 +835,25 @@ export abstract class BaseImportService<
     const metadata = this.getMetadata();
 
     try {
-      const records = await this.knex('import_history')
-        .where('module_name', metadata.module)
-        .orderBy('created_at', 'desc')
-        .limit(limit);
+      const records = await this.importHistoryRepository.getImportsByModule(
+        metadata.module,
+        limit,
+      );
 
       return records.map((record) => ({
         jobId: record.job_id,
         moduleName: record.module_name,
         status: record.status as ImportJobStatus,
         recordsImported: record.imported_rows,
-        completedAt: new Date(record.completed_at),
+        completedAt: record.completed_at || new Date(),
         importedBy: {
           id: record.imported_by,
-          name: 'Unknown', // Would need join to users table
+          name: record.imported_by_name || 'Unknown',
         },
       }));
     } catch (error) {
       console.error('Failed to retrieve import history:', error);
       return [];
-    }
-  }
-
-  /**
-   * Store import job in database
-   * @private
-   */
-  private async storeImportHistory(job: ImportJob): Promise<void> {
-    try {
-      await this.knex('import_history').insert({
-        job_id: job.jobId,
-        session_id: job.sessionId,
-        module_name: job.moduleName,
-        status: job.status,
-        total_rows: job.totalRows,
-        imported_rows: job.importedRows,
-        error_rows: job.errorRows,
-        warning_count: job.warningCount,
-        started_at: job.startedAt,
-        can_rollback: job.canRollback,
-        imported_by: job.importedBy,
-        file_name: job.fileName,
-        file_size_bytes: job.fileSize,
-        created_at: job.createdAt,
-        updated_at: job.updatedAt,
-      });
-    } catch (error) {
-      console.error('Failed to store import history:', error);
-      // Don't throw - allow import to continue
-    }
-  }
-
-  /**
-   * Update import job in database
-   * @private
-   */
-  private async updateImportHistory(job: ImportJob): Promise<void> {
-    try {
-      await this.knex('import_history').where('job_id', job.jobId).update({
-        status: job.status,
-        imported_rows: job.importedRows,
-        error_rows: job.errorRows,
-        completed_at: job.completedAt,
-        duration_ms: job.durationMs,
-        error_message: job.errorMessage,
-        updated_at: job.updatedAt,
-      });
-    } catch (error) {
-      console.error('Failed to update import history:', error);
-      // Don't throw - allow import to continue
     }
   }
 }

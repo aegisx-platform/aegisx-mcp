@@ -6,7 +6,7 @@
 
 import { FastifyInstance } from 'fastify';
 import { Knex } from 'knex';
-import { ImportDiscoveryService } from '../../../core/import';
+import { ImportDiscoveryService, ImportContext } from '../../../core/import';
 import {
   ImportModule,
   ImportOrderItem,
@@ -185,6 +185,7 @@ export class SystemInitService {
     buffer: Buffer,
     fileName: string,
     fileType: 'csv' | 'excel',
+    context: ImportContext,
   ): Promise<ValidateResponse['data']> {
     const service = this.discovery.getService(moduleName);
 
@@ -192,8 +193,13 @@ export class SystemInitService {
       throw new Error(`Module '${moduleName}' not found`);
     }
 
-    // Delegate to service validation
-    const result = await service.validateFile(buffer, fileName, fileType);
+    // Delegate to service validation with context
+    const result = await service.validateFile(
+      buffer,
+      fileName,
+      fileType,
+      context,
+    );
 
     return {
       sessionId: result.sessionId,
@@ -217,6 +223,7 @@ export class SystemInitService {
       batchSize?: number;
       onConflict?: 'skip' | 'update' | 'error';
     },
+    context?: ImportContext,
   ): Promise<ImportResponse['data']> {
     const service = this.discovery.getService(moduleName);
 
@@ -224,8 +231,12 @@ export class SystemInitService {
       throw new Error(`Module '${moduleName}' not found`);
     }
 
-    // Delegate to service
-    const result = await service.importData(sessionId, options || {});
+    if (!context) {
+      throw new Error('User context is required for import execution');
+    }
+
+    // Delegate to service with context
+    const result = await service.importData(sessionId, options || {}, context);
 
     return {
       jobId: result.jobId,
@@ -270,11 +281,16 @@ export class SystemInitService {
   async rollbackImport(
     moduleName: string,
     jobId: string,
+    context?: ImportContext,
   ): Promise<RollbackResponse['data']> {
     const service = this.discovery.getService(moduleName);
 
     if (!service) {
       throw new Error(`Module '${moduleName}' not found`);
+    }
+
+    if (!context) {
+      throw new Error('User context is required for rollback');
     }
 
     // Check if rollback is supported
@@ -289,8 +305,8 @@ export class SystemInitService {
       throw new Error(`Job '${jobId}' cannot be rolled back`);
     }
 
-    // Execute rollback
-    await service.rollback(jobId);
+    // Execute rollback with context
+    await service.rollback(jobId, context);
 
     // Get job details for response
     const status = await service.getImportStatus(jobId);

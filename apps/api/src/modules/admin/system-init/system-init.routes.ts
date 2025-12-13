@@ -121,13 +121,21 @@ export async function systemInitRoutes(fastify: FastifyInstance) {
         tags: ['System Initialization'],
         summary: 'Validate import file',
         description:
-          'Upload and validate CSV/Excel file for a module (multipart/form-data)',
+          'Upload and validate CSV/Excel file for a module (multipart/form-data). File size limited to 10MB.',
         params: ModuleValidateParamSchema,
         consumes: ['multipart/form-data'],
         response: {
           200: ValidateResponseSchema,
           400: ErrorResponseSchema,
           404: ErrorResponseSchema,
+          413: {
+            type: 'object',
+            properties: {
+              statusCode: { type: 'integer', const: 413 },
+              error: { type: 'string', const: 'Payload Too Large' },
+              message: { type: 'string' },
+            },
+          },
           500: ErrorResponseSchema,
         },
       },

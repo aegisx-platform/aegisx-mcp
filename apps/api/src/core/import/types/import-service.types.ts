@@ -5,6 +5,24 @@
  */
 
 /**
+ * Context information about the authenticated user performing an import operation
+ * Used to track who performed each import for complete audit trails
+ */
+export interface ImportContext {
+  /** User ID from authentication token */
+  userId: string;
+
+  /** User's display name (optional) */
+  userName?: string;
+
+  /** Client IP address (optional) */
+  ipAddress?: string;
+
+  /** User-Agent header (optional) */
+  userAgent?: string;
+}
+
+/**
  * Severity level for import validation messages
  */
 export enum ImportValidationSeverity {
@@ -267,6 +285,7 @@ export interface IImportService<
     buffer: Buffer,
     fileName: string,
     fileType: 'csv' | 'excel',
+    context: ImportContext,
   ): Promise<ValidationResult>;
 
   /**
@@ -280,6 +299,7 @@ export interface IImportService<
   importData(
     sessionId: string,
     options: ImportOptions,
+    context: ImportContext,
   ): Promise<{
     jobId: string;
     status: 'queued' | 'running';
@@ -298,7 +318,7 @@ export interface IImportService<
   /**
    * Rollback a completed import job
    */
-  rollback(jobId: string): Promise<void>;
+  rollback(jobId: string, context: ImportContext): Promise<void>;
 
   /**
    * Get import history for this module
