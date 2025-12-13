@@ -23,6 +23,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { forkJoin, interval } from 'rxjs';
 import { finalize, exhaustMap } from 'rxjs/operators';
 import { debounceTime } from 'rxjs/operators';
+import { AxKpiCardComponent } from '@aegisx/ui';
 
 import { SystemInitService, ImportProgressService } from '../../services';
 import type {
@@ -64,6 +65,7 @@ import { ImportWizardDialog } from '../../components/import-wizard/import-wizard
     MatDialogModule,
     MatSnackBarModule,
     MatTabsModule,
+    AxKpiCardComponent,
     ModuleCardComponent,
     ImportHistoryTimelineComponent,
   ],

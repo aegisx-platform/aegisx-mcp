@@ -159,7 +159,7 @@
     color: var(--ax-text-default, #1a1a1a);
   }
 
-  .cards-grid {
+  .overview-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 1rem;
@@ -171,90 +171,6 @@
 
     @media (max-width: 480px) {
       grid-template-columns: 1fr;
-    }
-  }
-
-  .overview-card {
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s ease;
-    background: var(--ax-surface-default, #ffffff);
-
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: var(--ax-primary, #1976d2);
-      transition: all 0.3s ease;
-    }
-
-    &:hover {
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    &.card-success {
-      &::before {
-        background: #4caf50;
-      }
-    }
-
-    &.card-warning {
-      &::before {
-        background: #ff9800;
-      }
-    }
-
-    &.card-pending {
-      &::before {
-        background: #f44336;
-      }
-    }
-
-    mat-card-header {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 1rem;
-      padding: 0;
-      background: none;
-      border: none;
-
-      .card-icon {
-        font-size: 1.5rem;
-        width: 1.5rem;
-        height: 1.5rem;
-        color: var(--ax-text-muted, #999999);
-      }
-
-      mat-card-title {
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: var(--ax-text-subtle, #666666);
-        margin: 0;
-      }
-    }
-
-    mat-card-content {
-      padding: 0;
-
-      .card-value {
-        margin: 0 0 0.25rem 0;
-        font-size: 2rem;
-        font-weight: 600;
-        color: var(--ax-text-default, #1a1a1a);
-        line-height: 1.2;
-      }
-
-      .card-subtitle {
-        margin: 0;
-        font-size: 0.75rem;
-        color: var(--ax-text-subtle, #666666);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
     }
   }
 }
