@@ -16,8 +16,8 @@
 
 .dashboard-header {
   margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid var(--ax-border-default, #e0e0e0);
+  padding-bottom: var(--ax-spacing-lg);
+  border-bottom: 1px solid var(--ax-border-default);
 
   .header-content {
     display: flex;
@@ -35,8 +35,8 @@
     h1 {
       margin: 0 0 0.25rem 0;
       font-size: 1.75rem;
-      font-weight: 600;
-      color: var(--ax-text-default, #1a1a1a);
+      font-weight: var(--ax-font-semibold);
+      color: var(--ax-text-primary);
 
       @media (max-width: 768px) {
         font-size: 1.5rem;
@@ -45,8 +45,8 @@
 
     .subtitle {
       margin: 0;
-      font-size: 0.875rem;
-      color: var(--ax-text-subtle, #666666);
+      font-size: var(--ax-text-sm);
+      color: var(--ax-text-subtle);
     }
   }
 
@@ -98,11 +98,11 @@
   align-items: center;
   justify-content: center;
   min-height: 400px;
-  gap: 1rem;
+  gap: var(--ax-spacing-md);
 
   p {
-    font-size: 0.875rem;
-    color: var(--ax-text-subtle, #666666);
+    font-size: var(--ax-text-sm);
+    color: var(--ax-text-subtle);
     margin: 0;
   }
 }
@@ -153,10 +153,10 @@
   margin-bottom: 2rem;
 
   .section-title {
-    margin: 0 0 1.5rem 0;
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--ax-text-default, #1a1a1a);
+    margin: 0 0 var(--ax-spacing-lg) 0;
+    font-size: var(--ax-text-lg);
+    font-weight: var(--ax-font-semibold);
+    color: var(--ax-text-primary);
   }
 
   .overview-grid {
@@ -180,39 +180,40 @@
 // ============================================================================
 
 .completion-progress {
-  background: var(--ax-surface-default, #ffffff);
-  border: 1px solid var(--ax-border-default, #e0e0e0);
-  border-radius: 4px;
-  padding: 1.5rem;
-  margin-top: 1.5rem;
+  background: var(--ax-background-default);
+  border: 1px solid var(--ax-border-default);
+  border-radius: var(--ax-radius-lg);
+  padding: var(--ax-spacing-lg);
+  margin-top: var(--ax-spacing-lg);
+  box-shadow: var(--ax-shadow-sm);
 
   h3 {
-    margin: 0 0 1rem 0;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--ax-text-default, #1a1a1a);
+    margin: 0 0 var(--ax-spacing-md) 0;
+    font-size: var(--ax-text-sm);
+    font-weight: var(--ax-font-semibold);
+    color: var(--ax-text-secondary);
   }
 
   .progress-bar-container {
     width: 100%;
     height: 8px;
-    background: var(--ax-border-default, #e0e0e0);
-    border-radius: 4px;
+    background: var(--ax-border-default);
+    border-radius: var(--ax-radius-sm);
     overflow: hidden;
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--ax-spacing-sm);
 
     .progress-bar {
       height: 100%;
-      background: linear-gradient(90deg, #4caf50, #45a049);
-      transition: width 0.3s ease;
-      border-radius: 4px;
+      background: var(--ax-success-default);
+      transition: width var(--ax-transition-base);
+      border-radius: var(--ax-radius-sm);
     }
   }
 
   .progress-text {
     margin: 0;
-    font-size: 0.75rem;
-    color: var(--ax-text-subtle, #666666);
+    font-size: var(--ax-text-xs);
+    color: var(--ax-text-subtle);
   }
 }
 
@@ -224,10 +225,10 @@
   margin-bottom: 2rem;
 
   .section-title {
-    margin: 0 0 1.5rem 0;
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--ax-text-default, #1a1a1a);
+    margin: 0 0 var(--ax-spacing-lg) 0;
+    font-size: var(--ax-text-lg);
+    font-weight: var(--ax-font-semibold);
+    color: var(--ax-text-primary);
   }
 
   .filters-container {
@@ -235,10 +236,11 @@
     gap: 1rem;
     align-items: flex-end;
     flex-wrap: wrap;
-    background: var(--ax-surface-default, #ffffff);
-    border: 1px solid var(--ax-border-default, #e0e0e0);
-    border-radius: 4px;
-    padding: 1.5rem;
+    background: var(--ax-background-default);
+    border: 1px solid var(--ax-border-default);
+    border-radius: var(--ax-radius-lg);
+    padding: var(--ax-spacing-lg);
+    box-shadow: var(--ax-shadow-sm);
 
     @media (max-width: 768px) {
       flex-direction: column;
@@ -315,35 +317,35 @@
     justify-content: center;
     min-height: 300px;
     gap: 1rem;
-    background: var(--ax-surface-default, #ffffff);
-    border: 2px dashed var(--ax-border-default, #e0e0e0);
-    border-radius: 8px;
-    padding: 2rem;
+    background: var(--ax-background-default);
+    border: 2px dashed var(--ax-border-default);
+    border-radius: var(--ax-radius-lg);
+    padding: var(--ax-spacing-xl);
     text-align: center;
 
     .empty-icon {
       font-size: 3rem;
       width: 3rem;
       height: 3rem;
-      color: var(--ax-text-subtle, #666666);
-      margin-bottom: 0.5rem;
+      color: var(--ax-text-subtle);
+      margin-bottom: var(--ax-spacing-sm);
     }
 
     h3 {
-      margin: 0 0 0.5rem 0;
-      font-size: 1.125rem;
-      font-weight: 500;
-      color: var(--ax-text-default, #1a1a1a);
+      margin: 0 0 var(--ax-spacing-sm) 0;
+      font-size: var(--ax-text-lg);
+      font-weight: var(--ax-font-medium);
+      color: var(--ax-text-primary);
     }
 
     p {
-      margin: 0 0 1rem 0;
-      color: var(--ax-text-subtle, #666666);
+      margin: 0 0 var(--ax-spacing-md) 0;
+      color: var(--ax-text-subtle);
       max-width: 400px;
     }
 
     button {
-      margin-top: 0.5rem;
+      margin-top: var(--ax-spacing-sm);
     }
   }
 }
@@ -356,10 +358,10 @@
   margin-top: 3rem;
 
   .section-title {
-    margin: 0 0 1.5rem 0;
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--ax-text-default, #1a1a1a);
+    margin: 0 0 var(--ax-spacing-lg) 0;
+    font-size: var(--ax-text-lg);
+    font-weight: var(--ax-font-semibold);
+    color: var(--ax-text-primary);
   }
 }
 
@@ -435,19 +437,7 @@
 }
 
 // ============================================================================
-// Dark Mode Support (CSS Variables)
+// Dark Mode Support
+// Note: AegisX design tokens (--ax-*) automatically handle dark mode
+// through the theme system. No manual overrides needed.
 // ============================================================================
-
-@media (prefers-color-scheme: dark) {
-  .error-card {
-    background-color: rgba(255, 152, 0, 0.1);
-    border-color: #ff9800;
-  }
-
-  .completion-progress,
-  .filters-section .filters-container,
-  .modules-grid-section .empty-state {
-    background: var(--ax-surface-elevated, #1e1e1e);
-    border-color: var(--ax-border-default, #424242);
-  }
-}
