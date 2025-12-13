@@ -36,6 +36,7 @@ import authPlugin from '../core/auth/auth.plugin';
 import authStrategiesPlugin from '../core/auth/strategies/auth.strategies';
 import { errorLogsPlugin } from '../core/error-logs';
 import { fileAuditPlugin } from '../core/audit-system/file-audit';
+import importDiscoveryPlugin from '../core/import/plugin/import-discovery.plugin';
 import { loginAttemptsPlugin } from '../core/audit-system/login-attempts';
 import { monitoringPlugin as monitoringModulePlugin } from '../core/monitoring';
 import permissionCachePlugin from '../core/rbac/permission-cache.plugin';
@@ -347,6 +348,11 @@ export function createCorePluginGroup(apiPrefix: string): PluginGroup {
         name: 'login-attempts',
         plugin: loginAttemptsPlugin,
         required: true,
+      },
+      {
+        name: 'import-discovery',
+        plugin: importDiscoveryPlugin,
+        required: false, // Optional - system can run without import discovery
       },
     ],
   };
