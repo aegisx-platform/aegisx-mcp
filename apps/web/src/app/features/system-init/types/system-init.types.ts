@@ -1,3 +1,30 @@
+/**
+ * Standard API response wrapper from backend
+ */
+export interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  meta: {
+    requestId: string;
+    timestamp: string;
+    version: string;
+  };
+}
+
+export interface ApiErrorResponse {
+  success: false;
+  error: {
+    code: string;
+    message: string;
+    statusCode?: number;
+  };
+  meta: {
+    requestId: string;
+    timestamp: string;
+    version: string;
+  };
+}
+
 // ===== IMPORT MODULE TYPES =====
 
 export interface ImportModule {
@@ -10,6 +37,11 @@ export interface ImportModule {
   priority: number;
   importStatus: ImportModuleStatus;
   recordCount: number;
+  tags: string[];
+  supportsRollback: boolean;
+  version: string;
+  description?: string;
+  lastImportDate?: string;
   lastImport?: {
     jobId: string;
     completedAt: string;
@@ -50,12 +82,15 @@ export interface DashboardResponse {
     pendingModules: number;
     totalRecordsImported: number;
   };
-  modulesByDomain: Record<string, {
-    total: number;
-    completed: number;
-  }>;
+  modulesByDomain: Record<
+    string,
+    {
+      total: number;
+      completed: number;
+    }
+  >;
   recentImports: ImportHistoryItem[];
-  nextRecommended: string[];
+  nextRecommended: Array<{ module: string; reason: string }>;
 }
 
 // ===== IMPORT HISTORY TYPES =====
@@ -144,6 +179,15 @@ export interface ImportStatus {
 }
 
 // ===== HEALTH CHECK TYPES =====
+
+/**
+ * Health status response from /health-status endpoint
+ */
+export interface HealthStatusData {
+  isHealthy: boolean;
+  validationErrors: string[];
+  circularDependencies: Array<{ path: string[] }>;
+}
 
 export interface HealthResponse {
   status: 'healthy' | 'unhealthy';

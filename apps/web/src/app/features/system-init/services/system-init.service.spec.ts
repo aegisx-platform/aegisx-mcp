@@ -5,6 +5,7 @@ import {
 } from '@angular/common/http/testing';
 import { SystemInitService } from './system-init.service';
 import type {
+  ApiResponse,
   AvailableModulesResponse,
   ImportOrderResponse,
   DashboardResponse,
@@ -12,7 +13,7 @@ import type {
   ImportOptions,
   ImportJobResponse,
   ImportStatus,
-  HealthResponse,
+  HealthStatusData,
 } from '../types/system-init.types';
 
 describe('SystemInitService', () => {
@@ -58,7 +59,7 @@ describe('SystemInitService', () => {
   // ===== GET AVAILABLE MODULES =====
 
   describe('getAvailableModules()', () => {
-    const mockResponse: AvailableModulesResponse = {
+    const mockData: AvailableModulesResponse = {
       modules: [
         {
           module: 'departments',
@@ -69,6 +70,9 @@ describe('SystemInitService', () => {
           priority: 1,
           importStatus: 'not_started',
           recordCount: 0,
+          tags: [],
+          supportsRollback: false,
+          version: '1.0.0',
         },
         {
           module: 'locations',
@@ -79,6 +83,9 @@ describe('SystemInitService', () => {
           priority: 2,
           importStatus: 'completed',
           recordCount: 50,
+          tags: [],
+          supportsRollback: true,
+          version: '1.0.0',
           lastImport: {
             jobId: 'job-123',
             completedAt: '2025-01-01T10:00:00Z',
@@ -94,6 +101,16 @@ describe('SystemInitService', () => {
       pendingModules: 1,
     };
 
+    const mockResponse: ApiResponse<AvailableModulesResponse> = {
+      success: true,
+      data: mockData,
+      meta: {
+        requestId: 'req-1',
+        timestamp: '2025-01-10T10:00:00Z',
+        version: '1.0.0',
+      },
+    };
+
     it('should make GET request to correct endpoint', () => {
       service.getAvailableModules().subscribe();
 
@@ -104,7 +121,7 @@ describe('SystemInitService', () => {
 
     it('should return typed response', (done) => {
       service.getAvailableModules().subscribe((response) => {
-        expect(response).toEqual(mockResponse);
+        expect(response).toEqual(mockData);
         expect(response.modules.length).toBe(2);
         expect(response.totalModules).toBe(2);
         expect(response.completedModules).toBe(1);
@@ -115,11 +132,21 @@ describe('SystemInitService', () => {
     });
 
     it('should handle empty modules array', (done) => {
-      const emptyResponse: AvailableModulesResponse = {
+      const emptyData: AvailableModulesResponse = {
         modules: [],
         totalModules: 0,
         completedModules: 0,
         pendingModules: 0,
+      };
+
+      const emptyResponse: ApiResponse<AvailableModulesResponse> = {
+        success: true,
+        data: emptyData,
+        meta: {
+          requestId: 'req-2',
+          timestamp: '2025-01-10T10:00:00Z',
+          version: '1.0.0',
+        },
       };
 
       service.getAvailableModules().subscribe((response) => {
@@ -143,7 +170,10 @@ describe('SystemInitService', () => {
 
       httpMock
         .expectOne(`${baseUrl}/available-modules`)
-        .flush({ message: 'Internal Server Error' }, { status: 500, statusText: 'Internal Server Error' });
+        .flush(
+          { message: 'Internal Server Error' },
+          { status: 500, statusText: 'Internal Server Error' },
+        );
     });
 
     it('should handle HTTP 404 error', (done) => {
@@ -161,19 +191,33 @@ describe('SystemInitService', () => {
     });
 
     it('should handle malformed response gracefully', (done) => {
-      const malformedResponse = { /* missing required fields */ } as any;
+      const malformedResponse: ApiResponse<any> = {
+        success: true,
+        data: {
+          /* missing required fields */
+        },
+        meta: {
+          requestId: 'req-3',
+          timestamp: '2025-01-10T10:00:00Z',
+          version: '1.0.0',
+        },
+      };
 
       service.getAvailableModules().subscribe((response) => {
         expect(response).toBeDefined();
         done();
       });
 
-      httpMock.expectOne(`${baseUrl}/available-modules`).flush(malformedResponse);
+      httpMock
+        .expectOne(`${baseUrl}/available-modules`)
+        .flush(malformedResponse);
     });
 
     it('should include module dependencies', (done) => {
       service.getAvailableModules().subscribe((response) => {
-        const modulesWithDeps = response.modules.filter((m) => m.dependencies.length > 0);
+        const modulesWithDeps = response.modules.filter(
+          (m) => m.dependencies.length > 0,
+        );
         expect(modulesWithDeps[0].dependencies).toContain('departments');
         done();
       });
@@ -196,7 +240,7 @@ describe('SystemInitService', () => {
   // ===== GET IMPORT ORDER =====
 
   describe('getImportOrder()', () => {
-    const mockResponse: ImportOrderResponse = {
+    const mockData: ImportOrderResponse = {
       order: [
         { module: 'departments', reason: 'No dependencies' },
         {
@@ -210,6 +254,16 @@ describe('SystemInitService', () => {
       ],
     };
 
+    const mockResponse: ApiResponse<ImportOrderResponse> = {
+      success: true,
+      data: mockData,
+      meta: {
+        requestId: 'req-4',
+        timestamp: '2025-01-10T10:00:00Z',
+        version: '1.0.0',
+      },
+    };
+
     it('should make GET request to correct endpoint', () => {
       service.getImportOrder().subscribe();
 
@@ -220,7 +274,7 @@ describe('SystemInitService', () => {
 
     it('should return typed response with order array', (done) => {
       service.getImportOrder().subscribe((response) => {
-        expect(response).toEqual(mockResponse);
+        expect(response).toEqual(mockData);
         expect(response.order).toHaveLength(3);
         expect(response.order[0].module).toBe('departments');
         done();
@@ -239,7 +293,16 @@ describe('SystemInitService', () => {
     });
 
     it('should handle empty order array', (done) => {
-      const emptyResponse: ImportOrderResponse = { order: [] };
+      const emptyData: ImportOrderResponse = { order: [] };
+      const emptyResponse: ApiResponse<ImportOrderResponse> = {
+        success: true,
+        data: emptyData,
+        meta: {
+          requestId: 'req-5',
+          timestamp: '2025-01-10T10:00:00Z',
+          version: '1.0.0',
+        },
+      };
 
       service.getImportOrder().subscribe((response) => {
         expect(response.order).toEqual([]);
@@ -267,7 +330,7 @@ describe('SystemInitService', () => {
   // ===== GET DASHBOARD =====
 
   describe('getDashboard()', () => {
-    const mockResponse: DashboardResponse = {
+    const mockData: DashboardResponse = {
       overview: {
         totalModules: 5,
         completedModules: 2,
@@ -289,7 +352,20 @@ describe('SystemInitService', () => {
           importedBy: { id: 'user-1', name: 'John Admin' },
         },
       ],
-      nextRecommended: ['budget_types', 'locations'],
+      nextRecommended: [
+        { module: 'budget_types', reason: 'No dependencies' },
+        { module: 'locations', reason: 'Depends on departments' },
+      ],
+    };
+
+    const mockResponse: ApiResponse<DashboardResponse> = {
+      success: true,
+      data: mockData,
+      meta: {
+        requestId: 'req-6',
+        timestamp: '2025-01-10T10:00:00Z',
+        version: '1.0.0',
+      },
     };
 
     it('should make GET request to correct endpoint', () => {
@@ -302,7 +378,7 @@ describe('SystemInitService', () => {
 
     it('should return typed dashboard response', (done) => {
       service.getDashboard().subscribe((response) => {
-        expect(response).toEqual(mockResponse);
+        expect(response).toEqual(mockData);
         expect(response.overview.totalModules).toBe(5);
         expect(response.overview.totalRecordsImported).toBe(1500);
         done();
@@ -347,8 +423,13 @@ describe('SystemInitService', () => {
 
     it('should include next recommended modules', (done) => {
       service.getDashboard().subscribe((response) => {
-        expect(response.nextRecommended).toContain('budget_types');
-        expect(response.nextRecommended).toContain('locations');
+        expect(response.nextRecommended).toHaveLength(2);
+        expect(response.nextRecommended[0].module).toBe('budget_types');
+        expect(response.nextRecommended[0].reason).toBe('No dependencies');
+        expect(response.nextRecommended[1].module).toBe('locations');
+        expect(response.nextRecommended[1].reason).toBe(
+          'Depends on departments',
+        );
         done();
       });
 
@@ -377,7 +458,7 @@ describe('SystemInitService', () => {
       service.downloadTemplate('departments', 'csv').subscribe();
 
       const req = httpMock.expectOne(
-        `${baseUrl}/module/departments/template?format=csv`
+        `${baseUrl}/module/departments/template?format=csv`,
       );
       expect(req.request.method).toBe('GET');
       expect(req.request.params.get('format')).toBe('csv');
@@ -390,7 +471,7 @@ describe('SystemInitService', () => {
       service.downloadTemplate('locations', 'xlsx').subscribe();
 
       const req = httpMock.expectOne(
-        `${baseUrl}/module/locations/template?format=xlsx`
+        `${baseUrl}/module/locations/template?format=xlsx`,
       );
       expect(req.request.method).toBe('GET');
       expect(req.request.params.get('format')).toBe('xlsx');
@@ -433,7 +514,7 @@ describe('SystemInitService', () => {
       service.downloadTemplate('custom_module', 'csv').subscribe();
 
       const req = httpMock.expectOne(
-        `${baseUrl}/module/custom_module/template?format=csv`
+        `${baseUrl}/module/custom_module/template?format=csv`,
       );
       expect(req.request.url).toContain('custom_module');
       done();
@@ -512,9 +593,7 @@ describe('SystemInitService', () => {
     it('should make POST request with FormData', (done) => {
       service.validateFile('departments', mockFile).subscribe();
 
-      const req = httpMock.expectOne(
-        `${baseUrl}/module/departments/validate`
-      );
+      const req = httpMock.expectOne(`${baseUrl}/module/departments/validate`);
       expect(req.request.method).toBe('POST');
       expect(req.request.body instanceof FormData).toBe(true);
       done();
@@ -542,7 +621,9 @@ describe('SystemInitService', () => {
         done();
       });
 
-      httpMock.expectOne(`${baseUrl}/module/departments/validate`).flush(mockValidationResult);
+      httpMock
+        .expectOne(`${baseUrl}/module/departments/validate`)
+        .flush(mockValidationResult);
     });
 
     it('should handle validation errors', (done) => {
@@ -576,7 +657,9 @@ describe('SystemInitService', () => {
         done();
       });
 
-      httpMock.expectOne(`${baseUrl}/module/departments/validate`).flush(errorResult);
+      httpMock
+        .expectOne(`${baseUrl}/module/departments/validate`)
+        .flush(errorResult);
     });
 
     it('should handle validation warnings', (done) => {
@@ -609,7 +692,9 @@ describe('SystemInitService', () => {
         done();
       });
 
-      httpMock.expectOne(`${baseUrl}/module/departments/validate`).flush(warningResult);
+      httpMock
+        .expectOne(`${baseUrl}/module/departments/validate`)
+        .flush(warningResult);
     });
 
     it('should preserve file statistics in response', (done) => {
@@ -620,7 +705,9 @@ describe('SystemInitService', () => {
         done();
       });
 
-      httpMock.expectOne(`${baseUrl}/module/departments/validate`).flush(mockValidationResult);
+      httpMock
+        .expectOne(`${baseUrl}/module/departments/validate`)
+        .flush(mockValidationResult);
     });
 
     it('should handle large files', (done) => {
@@ -634,7 +721,9 @@ describe('SystemInitService', () => {
         done();
       });
 
-      httpMock.expectOne(`${baseUrl}/module/departments/validate`).flush(mockValidationResult);
+      httpMock
+        .expectOne(`${baseUrl}/module/departments/validate`)
+        .flush(mockValidationResult);
     });
 
     it('should handle HTTP 422 validation failure', (done) => {
@@ -693,7 +782,9 @@ describe('SystemInitService', () => {
     };
 
     it('should make POST request to correct endpoint', () => {
-      service.importData('departments', 'session-123', importOptions).subscribe();
+      service
+        .importData('departments', 'session-123', importOptions)
+        .subscribe();
 
       const req = httpMock.expectOne(`${baseUrl}/module/departments/import`);
       expect(req.request.method).toBe('POST');
@@ -701,7 +792,9 @@ describe('SystemInitService', () => {
     });
 
     it('should send sessionId in request body', (done) => {
-      service.importData('departments', 'session-789', importOptions).subscribe();
+      service
+        .importData('departments', 'session-789', importOptions)
+        .subscribe();
 
       const req = httpMock.expectOne(`${baseUrl}/module/departments/import`);
       const body = req.request.body as any;
@@ -728,14 +821,18 @@ describe('SystemInitService', () => {
     });
 
     it('should return ImportJobResponse with jobId', (done) => {
-      service.importData('departments', 'session-123', importOptions).subscribe((response) => {
-        expect(response).toEqual(mockResponse);
-        expect(response.jobId).toBe('job-456');
-        expect(response.status).toBe('queued');
-        done();
-      });
+      service
+        .importData('departments', 'session-123', importOptions)
+        .subscribe((response) => {
+          expect(response).toEqual(mockResponse);
+          expect(response.jobId).toBe('job-456');
+          expect(response.status).toBe('queued');
+          done();
+        });
 
-      httpMock.expectOne(`${baseUrl}/module/departments/import`).flush(mockResponse);
+      httpMock
+        .expectOne(`${baseUrl}/module/departments/import`)
+        .flush(mockResponse);
     });
 
     it('should handle skip warnings option', (done) => {
@@ -745,7 +842,9 @@ describe('SystemInitService', () => {
         onConflict: 'update',
       };
 
-      service.importData('budget_types', 'session-456', skipWarningsOptions).subscribe();
+      service
+        .importData('budget_types', 'session-456', skipWarningsOptions)
+        .subscribe();
 
       const req = httpMock.expectOne(`${baseUrl}/module/budget_types/import`);
       const body = req.request.body as any;
@@ -764,7 +863,9 @@ describe('SystemInitService', () => {
         onConflict: 'error',
       };
 
-      service.importData('departments', 'session-123', errorConflictOptions).subscribe();
+      service
+        .importData('departments', 'session-123', errorConflictOptions)
+        .subscribe();
 
       const req = httpMock.expectOne(`${baseUrl}/module/departments/import`);
       const body = req.request.body as any;
@@ -782,36 +883,47 @@ describe('SystemInitService', () => {
         message: 'Import job is processing',
       };
 
-      service.importData('departments', 'session-123', importOptions).subscribe((response) => {
-        expect(response.status).toBe('running');
-        done();
-      });
-
-      httpMock.expectOne(`${baseUrl}/module/departments/import`).flush(runningResponse);
-    });
-
-    it('should handle HTTP 400 for invalid session', (done) => {
-      service.importData('departments', 'invalid-session', importOptions).subscribe({
-        next: () => fail('should have failed'),
-        error: (error) => {
-          expect(error.status).toBe(400);
+      service
+        .importData('departments', 'session-123', importOptions)
+        .subscribe((response) => {
+          expect(response.status).toBe('running');
           done();
-        },
-      });
+        });
 
       httpMock
         .expectOne(`${baseUrl}/module/departments/import`)
-        .flush({ message: 'Invalid session' }, { status: 400, statusText: 'Bad Request' });
+        .flush(runningResponse);
+    });
+
+    it('should handle HTTP 400 for invalid session', (done) => {
+      service
+        .importData('departments', 'invalid-session', importOptions)
+        .subscribe({
+          next: () => fail('should have failed'),
+          error: (error) => {
+            expect(error.status).toBe(400);
+            done();
+          },
+        });
+
+      httpMock
+        .expectOne(`${baseUrl}/module/departments/import`)
+        .flush(
+          { message: 'Invalid session' },
+          { status: 400, statusText: 'Bad Request' },
+        );
     });
 
     it('should handle HTTP 409 conflict', (done) => {
-      service.importData('departments', 'session-123', importOptions).subscribe({
-        next: () => fail('should have failed'),
-        error: (error) => {
-          expect(error.status).toBe(409);
-          done();
-        },
-      });
+      service
+        .importData('departments', 'session-123', importOptions)
+        .subscribe({
+          next: () => fail('should have failed'),
+          error: (error) => {
+            expect(error.status).toBe(409);
+            done();
+          },
+        });
 
       httpMock
         .expectOne(`${baseUrl}/module/departments/import`)
@@ -819,13 +931,15 @@ describe('SystemInitService', () => {
     });
 
     it('should handle module not found error', (done) => {
-      service.importData('nonexistent', 'session-123', importOptions).subscribe({
-        next: () => fail('should have failed'),
-        error: (error) => {
-          expect(error.status).toBe(404);
-          done();
-        },
-      });
+      service
+        .importData('nonexistent', 'session-123', importOptions)
+        .subscribe({
+          next: () => fail('should have failed'),
+          error: (error) => {
+            expect(error.status).toBe(404);
+            done();
+          },
+        });
 
       httpMock
         .expectOne(`${baseUrl}/module/nonexistent/import`)
@@ -855,7 +969,7 @@ describe('SystemInitService', () => {
       service.getImportStatus('departments', 'job-456').subscribe();
 
       const req = httpMock.expectOne(
-        `${baseUrl}/module/departments/status/job-456`
+        `${baseUrl}/module/departments/status/job-456`,
       );
       expect(req.request.method).toBe('GET');
       req.flush(mockStatus);
@@ -865,7 +979,7 @@ describe('SystemInitService', () => {
       service.getImportStatus('locations', 'job-123').subscribe();
 
       const req = httpMock.expectOne(
-        `${baseUrl}/module/locations/status/job-123`
+        `${baseUrl}/module/locations/status/job-123`,
       );
       expect(req.request.url).toContain('locations');
       done();
@@ -877,7 +991,7 @@ describe('SystemInitService', () => {
       service.getImportStatus('departments', 'job-999').subscribe();
 
       const req = httpMock.expectOne(
-        `${baseUrl}/module/departments/status/job-999`
+        `${baseUrl}/module/departments/status/job-999`,
       );
       expect(req.request.url).toContain('job-999');
       done();
@@ -894,7 +1008,9 @@ describe('SystemInitService', () => {
         done();
       });
 
-      httpMock.expectOne(`${baseUrl}/module/departments/status/job-456`).flush(mockStatus);
+      httpMock
+        .expectOne(`${baseUrl}/module/departments/status/job-456`)
+        .flush(mockStatus);
     });
 
     it('should return completed status', (done) => {
@@ -920,7 +1036,9 @@ describe('SystemInitService', () => {
         done();
       });
 
-      httpMock.expectOne(`${baseUrl}/module/departments/status/job-456`).flush(completedStatus);
+      httpMock
+        .expectOne(`${baseUrl}/module/departments/status/job-456`)
+        .flush(completedStatus);
     });
 
     it('should return failed status with error message', (done) => {
@@ -945,7 +1063,9 @@ describe('SystemInitService', () => {
         done();
       });
 
-      httpMock.expectOne(`${baseUrl}/module/departments/status/job-456`).flush(failedStatus);
+      httpMock
+        .expectOne(`${baseUrl}/module/departments/status/job-456`)
+        .flush(failedStatus);
     });
 
     it('should return queued status', (done) => {
@@ -970,7 +1090,9 @@ describe('SystemInitService', () => {
         done();
       });
 
-      httpMock.expectOne(`${baseUrl}/module/departments/status/job-456`).flush(queuedStatus);
+      httpMock
+        .expectOne(`${baseUrl}/module/departments/status/job-456`)
+        .flush(queuedStatus);
     });
 
     it('should handle HTTP 404 for non-existent job', (done) => {
@@ -1009,7 +1131,7 @@ describe('SystemInitService', () => {
       service.rollbackImport('departments', 'job-456').subscribe();
 
       const req = httpMock.expectOne(
-        `${baseUrl}/module/departments/rollback/job-456`
+        `${baseUrl}/module/departments/rollback/job-456`,
       );
       expect(req.request.method).toBe('DELETE');
       req.flush(null);
@@ -1019,7 +1141,7 @@ describe('SystemInitService', () => {
       service.rollbackImport('locations', 'job-123').subscribe();
 
       const req = httpMock.expectOne(
-        `${baseUrl}/module/locations/rollback/job-123`
+        `${baseUrl}/module/locations/rollback/job-123`,
       );
       expect(req.request.url).toContain('locations');
       done();
@@ -1031,7 +1153,7 @@ describe('SystemInitService', () => {
       service.rollbackImport('departments', 'job-999').subscribe();
 
       const req = httpMock.expectOne(
-        `${baseUrl}/module/departments/rollback/job-999`
+        `${baseUrl}/module/departments/rollback/job-999`,
       );
       expect(req.request.url).toContain('job-999');
       done();
@@ -1045,7 +1167,9 @@ describe('SystemInitService', () => {
         done();
       });
 
-      httpMock.expectOne(`${baseUrl}/module/departments/rollback/job-456`).flush(null);
+      httpMock
+        .expectOne(`${baseUrl}/module/departments/rollback/job-456`)
+        .flush(null);
     });
 
     it('should complete successfully without response data', (done) => {
@@ -1061,7 +1185,9 @@ describe('SystemInitService', () => {
         },
       });
 
-      httpMock.expectOne(`${baseUrl}/module/departments/rollback/job-456`).flush(null);
+      httpMock
+        .expectOne(`${baseUrl}/module/departments/rollback/job-456`)
+        .flush(null);
     });
 
     it('should handle HTTP 404 for non-existent job', (done) => {
@@ -1121,106 +1247,118 @@ describe('SystemInitService', () => {
     });
   });
 
-  // ===== GET HEALTH =====
+  // ===== GET HEALTH STATUS =====
 
-  describe('getHealth()', () => {
-    const mockHealth: HealthResponse = {
-      status: 'healthy',
-      discoveredServices: 3,
-      lastDiscoveryTime: '2025-01-10T10:00:00Z',
-      services: [
-        { module: 'departments', status: 'active' },
-        { module: 'locations', status: 'active' },
-        { module: 'budget_types', status: 'inactive' },
-      ],
+  describe('getHealthStatus()', () => {
+    const mockHealthStatusData: HealthStatusData = {
+      isHealthy: true,
+      validationErrors: [],
+      circularDependencies: [],
     };
 
-    it('should make GET request to health endpoint', () => {
-      service.getHealth().subscribe();
+    const mockHealthResponse: ApiResponse<HealthStatusData> = {
+      success: true,
+      data: mockHealthStatusData,
+      meta: {
+        requestId: 'req-123',
+        timestamp: '2025-01-10T10:00:00Z',
+        version: '1.0.0',
+      },
+    };
 
-      const req = httpMock.expectOne(`${baseUrl}/health`);
+    it('should make GET request to health-status endpoint', () => {
+      service.getHealthStatus().subscribe();
+
+      const req = httpMock.expectOne(`${baseUrl}/health-status`);
       expect(req.request.method).toBe('GET');
-      req.flush(mockHealth);
+      req.flush(mockHealthResponse);
     });
 
-    it('should return HealthResponse with healthy status', (done) => {
-      service.getHealth().subscribe((health) => {
-        expect(health).toEqual(mockHealth);
-        expect(health.status).toBe('healthy');
-        expect(health.discoveredServices).toBe(3);
+    it('should unwrap and return HealthStatusData', (done) => {
+      service.getHealthStatus().subscribe((health) => {
+        expect(health).toEqual(mockHealthStatusData);
+        expect(health.isHealthy).toBe(true);
+        expect(health.validationErrors).toEqual([]);
         done();
       });
 
-      httpMock.expectOne(`${baseUrl}/health`).flush(mockHealth);
+      httpMock.expectOne(`${baseUrl}/health-status`).flush(mockHealthResponse);
     });
 
-    it('should include discovered services list', (done) => {
-      service.getHealth().subscribe((health) => {
-        expect(health.services).toHaveLength(3);
-        expect(health.services[0].module).toBe('departments');
-        expect(health.services[0].status).toBe('active');
+    it('should return healthy status with no errors', (done) => {
+      service.getHealthStatus().subscribe((health) => {
+        expect(health.isHealthy).toBe(true);
+        expect(health.validationErrors).toHaveLength(0);
+        expect(health.circularDependencies).toHaveLength(0);
         done();
       });
 
-      httpMock.expectOne(`${baseUrl}/health`).flush(mockHealth);
+      httpMock.expectOne(`${baseUrl}/health-status`).flush(mockHealthResponse);
     });
 
-    it('should return unhealthy status when services are down', (done) => {
-      const unhealthyResponse: HealthResponse = {
-        status: 'unhealthy',
-        discoveredServices: 2,
-        lastDiscoveryTime: '2025-01-10T10:00:00Z',
-        services: [
-          { module: 'departments', status: 'inactive' },
-          { module: 'locations', status: 'inactive' },
-        ],
+    it('should return unhealthy status with validation errors', (done) => {
+      const unhealthyResponse: ApiResponse<HealthStatusData> = {
+        success: true,
+        data: {
+          isHealthy: false,
+          validationErrors: [
+            'Department must have a name',
+            'Location code is required',
+          ],
+          circularDependencies: [],
+        },
+        meta: {
+          requestId: 'req-124',
+          timestamp: '2025-01-10T10:00:00Z',
+          version: '1.0.0',
+        },
       };
 
-      service.getHealth().subscribe((health) => {
-        expect(health.status).toBe('unhealthy');
-        expect(health.services.every((s) => s.status === 'inactive')).toBe(true);
+      service.getHealthStatus().subscribe((health) => {
+        expect(health.isHealthy).toBe(false);
+        expect(health.validationErrors).toHaveLength(2);
+        expect(health.validationErrors[0]).toBe('Department must have a name');
         done();
       });
 
-      httpMock.expectOne(`${baseUrl}/health`).flush(unhealthyResponse);
+      httpMock.expectOne(`${baseUrl}/health-status`).flush(unhealthyResponse);
     });
 
-    it('should include last discovery time', (done) => {
-      service.getHealth().subscribe((health) => {
-        expect(health.lastDiscoveryTime).toBe('2025-01-10T10:00:00Z');
-        done();
-      });
-
-      httpMock.expectOne(`${baseUrl}/health`).flush(mockHealth);
-    });
-
-    it('should handle mixed service statuses', (done) => {
-      const mixedHealth: HealthResponse = {
-        status: 'healthy',
-        discoveredServices: 4,
-        lastDiscoveryTime: '2025-01-10T10:00:00Z',
-        services: [
-          { module: 'departments', status: 'active' },
-          { module: 'locations', status: 'active' },
-          { module: 'budget_types', status: 'inactive' },
-          { module: 'budget_allocations', status: 'active' },
-        ],
+    it('should report circular dependencies', (done) => {
+      const circularDepsResponse: ApiResponse<HealthStatusData> = {
+        success: true,
+        data: {
+          isHealthy: false,
+          validationErrors: [],
+          circularDependencies: [
+            { path: ['departments', 'locations', 'departments'] },
+            { path: ['budgets', 'allocations', 'budgets'] },
+          ],
+        },
+        meta: {
+          requestId: 'req-125',
+          timestamp: '2025-01-10T10:00:00Z',
+          version: '1.0.0',
+        },
       };
 
-      service.getHealth().subscribe((health) => {
-        const activeServices = health.services.filter((s) => s.status === 'active');
-        const inactiveServices = health.services.filter((s) => s.status === 'inactive');
-
-        expect(activeServices).toHaveLength(3);
-        expect(inactiveServices).toHaveLength(1);
+      service.getHealthStatus().subscribe((health) => {
+        expect(health.circularDependencies).toHaveLength(2);
+        expect(health.circularDependencies[0].path).toEqual([
+          'departments',
+          'locations',
+          'departments',
+        ]);
         done();
       });
 
-      httpMock.expectOne(`${baseUrl}/health`).flush(mixedHealth);
+      httpMock
+        .expectOne(`${baseUrl}/health-status`)
+        .flush(circularDepsResponse);
     });
 
     it('should handle HTTP 503 service unavailable', (done) => {
-      service.getHealth().subscribe({
+      service.getHealthStatus().subscribe({
         next: () => fail('should have failed'),
         error: (error) => {
           expect(error.status).toBe(503);
@@ -1229,12 +1367,12 @@ describe('SystemInitService', () => {
       });
 
       httpMock
-        .expectOne(`${baseUrl}/health`)
+        .expectOne(`${baseUrl}/health-status`)
         .flush(null, { status: 503, statusText: 'Service Unavailable' });
     });
 
     it('should handle HTTP 500 server error', (done) => {
-      service.getHealth().subscribe({
+      service.getHealthStatus().subscribe({
         next: () => fail('should have failed'),
         error: (error) => {
           expect(error.status).toBe(500);
@@ -1243,7 +1381,7 @@ describe('SystemInitService', () => {
       });
 
       httpMock
-        .expectOne(`${baseUrl}/health`)
+        .expectOne(`${baseUrl}/health-status`)
         .flush(null, { status: 500, statusText: 'Internal Server Error' });
     });
   });
@@ -1252,27 +1390,42 @@ describe('SystemInitService', () => {
 
   describe('Multiple Requests in Sequence', () => {
     it('should handle multiple sequential HTTP calls', (done) => {
-      const mockModules: AvailableModulesResponse = {
-        modules: [],
-        totalModules: 0,
-        completedModules: 0,
-        pendingModules: 0,
+      const mockModules: ApiResponse<AvailableModulesResponse> = {
+        success: true,
+        data: {
+          modules: [],
+          totalModules: 0,
+          completedModules: 0,
+          pendingModules: 0,
+        },
+        meta: {
+          requestId: 'req-1',
+          timestamp: '2025-01-10T10:00:00Z',
+          version: '1.0.0',
+        },
       };
 
-      const mockHealth: HealthResponse = {
-        status: 'healthy',
-        discoveredServices: 0,
-        lastDiscoveryTime: '2025-01-10T10:00:00Z',
-        services: [],
+      const mockHealth: ApiResponse<HealthStatusData> = {
+        success: true,
+        data: {
+          isHealthy: true,
+          validationErrors: [],
+          circularDependencies: [],
+        },
+        meta: {
+          requestId: 'req-2',
+          timestamp: '2025-01-10T10:00:00Z',
+          version: '1.0.0',
+        },
       };
 
       service.getAvailableModules().subscribe(() => {
-        service.getHealth().subscribe((health) => {
-          expect(health.status).toBe('healthy');
+        service.getHealthStatus().subscribe((health) => {
+          expect(health.isHealthy).toBe(true);
           done();
         });
 
-        httpMock.expectOne(`${baseUrl}/health`).flush(mockHealth);
+        httpMock.expectOne(`${baseUrl}/health-status`).flush(mockHealth);
       });
 
       httpMock.expectOne(`${baseUrl}/available-modules`).flush(mockModules);
@@ -1293,9 +1446,7 @@ describe('SystemInitService', () => {
       service.getAvailableModules().subscribe();
       service.getImportOrder().subscribe();
 
-      const requests = httpMock.match((req) =>
-        req.url.includes(`${baseUrl}`)
-      );
+      const requests = httpMock.match((req) => req.url.includes(`${baseUrl}`));
 
       expect(requests).toHaveLength(2);
       requests[0].flush(mockModules);
@@ -1315,7 +1466,9 @@ describe('SystemInitService', () => {
         },
       });
 
-      httpMock.expectOne(`${baseUrl}/available-modules`).error(new ErrorEvent('Network error'));
+      httpMock
+        .expectOne(`${baseUrl}/available-modules`)
+        .error(new ErrorEvent('Network error'));
     });
 
     it('should handle timeout errors', (done) => {
@@ -1327,7 +1480,9 @@ describe('SystemInitService', () => {
         },
       });
 
-      httpMock.expectOne(`${baseUrl}/available-modules`).error(new ErrorEvent('Timeout'));
+      httpMock
+        .expectOne(`${baseUrl}/available-modules`)
+        .error(new ErrorEvent('Timeout'));
     });
 
     it('should handle JSON parsing errors', (done) => {
@@ -1340,10 +1495,7 @@ describe('SystemInitService', () => {
       });
 
       const req = httpMock.expectOne(`${baseUrl}/available-modules`);
-      req.flush(
-        'invalid json',
-        { status: 200, statusText: 'OK' }
-      );
+      req.flush('invalid json', { status: 200, statusText: 'OK' });
     });
   });
 });

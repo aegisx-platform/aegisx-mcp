@@ -22,6 +22,9 @@ export const NOT_STARTED_MODULE: ImportModule = {
   priority: 2,
   importStatus: 'not_started',
   recordCount: 0,
+  tags: [],
+  supportsRollback: false,
+  version: '1.0.0',
 };
 
 /**
@@ -38,6 +41,9 @@ export const IN_PROGRESS_MODULE: ModuleCardData = {
   priority: 1,
   importStatus: 'in_progress',
   recordCount: 0,
+  tags: [],
+  supportsRollback: false,
+  version: '1.0.0',
   progress: {
     totalRows: 100,
     importedRows: 45,
@@ -59,6 +65,9 @@ export const COMPLETED_MODULE: ImportModule = {
   priority: 1,
   importStatus: 'completed',
   recordCount: 50,
+  tags: [],
+  supportsRollback: true,
+  version: '1.0.0',
   lastImport: {
     jobId: 'job-uuid-xxx',
     completedAt: '2025-12-13T11:00:05Z',
@@ -83,6 +92,9 @@ export const FAILED_MODULE: ModuleCardData = {
   priority: 3,
   importStatus: 'failed',
   recordCount: 0,
+  tags: [],
+  supportsRollback: false,
+  version: '1.0.0',
   error: 'Duplicate codes found in rows: 5, 12, 25',
   lastImport: {
     jobId: 'job-uuid-zzz',
@@ -107,6 +119,9 @@ export const USERS_MODULE: ImportModule = {
   priority: 1,
   importStatus: 'completed',
   recordCount: 10,
+  tags: [],
+  supportsRollback: true,
+  version: '1.0.0',
   lastImport: {
     jobId: 'job-uuid-yyy',
     completedAt: '2025-12-13T11:05:00Z',
@@ -130,6 +145,9 @@ export const BUDGET_TYPES_MODULE: ImportModule = {
   priority: 1,
   importStatus: 'completed',
   recordCount: 12,
+  tags: [],
+  supportsRollback: true,
+  version: '1.0.0',
   lastImport: {
     jobId: 'job-uuid-111',
     completedAt: '2025-12-13T10:30:00Z',
@@ -168,6 +186,9 @@ export const MOCK_DASHBOARD_MODULES: (ImportModule | ModuleCardData)[] = [
     priority: 1,
     importStatus: 'completed',
     recordCount: 50,
+    tags: [],
+    supportsRollback: true,
+    version: '1.0.0',
     lastImport: {
       jobId: 'job-001',
       completedAt: new Date('2025-12-13T10:00:00Z').toISOString(),
@@ -187,6 +208,9 @@ export const MOCK_DASHBOARD_MODULES: (ImportModule | ModuleCardData)[] = [
     priority: 2,
     importStatus: 'completed',
     recordCount: 15,
+    tags: [],
+    supportsRollback: true,
+    version: '1.0.0',
     lastImport: {
       jobId: 'job-002',
       completedAt: new Date('2025-12-13T10:15:00Z').toISOString(),
@@ -206,6 +230,9 @@ export const MOCK_DASHBOARD_MODULES: (ImportModule | ModuleCardData)[] = [
     priority: 3,
     importStatus: 'completed',
     recordCount: 320,
+    tags: [],
+    supportsRollback: true,
+    version: '1.0.0',
     lastImport: {
       jobId: 'job-003',
       completedAt: new Date('2025-12-13T10:30:00Z').toISOString(),
@@ -225,6 +252,9 @@ export const MOCK_DASHBOARD_MODULES: (ImportModule | ModuleCardData)[] = [
     priority: 4,
     importStatus: 'in_progress',
     recordCount: 0,
+    tags: [],
+    supportsRollback: false,
+    version: '1.0.0',
     progress: {
       totalRows: 250,
       importedRows: 125,
@@ -241,6 +271,9 @@ export const MOCK_DASHBOARD_MODULES: (ImportModule | ModuleCardData)[] = [
     priority: 5,
     importStatus: 'not_started',
     recordCount: 0,
+    tags: [],
+    supportsRollback: false,
+    version: '1.0.0',
   },
 
   // Core Domain
@@ -253,6 +286,9 @@ export const MOCK_DASHBOARD_MODULES: (ImportModule | ModuleCardData)[] = [
     priority: 1,
     importStatus: 'completed',
     recordCount: 25,
+    tags: [],
+    supportsRollback: true,
+    version: '1.0.0',
     lastImport: {
       jobId: 'job-101',
       completedAt: new Date('2025-12-13T09:00:00Z').toISOString(),
@@ -271,6 +307,9 @@ export const MOCK_DASHBOARD_MODULES: (ImportModule | ModuleCardData)[] = [
     priority: 2,
     importStatus: 'completed',
     recordCount: 8,
+    tags: [],
+    supportsRollback: true,
+    version: '1.0.0',
     lastImport: {
       jobId: 'job-102',
       completedAt: new Date('2025-12-13T09:15:00Z').toISOString(),
@@ -291,6 +330,9 @@ export const MOCK_DASHBOARD_MODULES: (ImportModule | ModuleCardData)[] = [
     priority: 1,
     importStatus: 'completed',
     recordCount: 12,
+    tags: [],
+    supportsRollback: true,
+    version: '1.0.0',
     lastImport: {
       jobId: 'job-201',
       completedAt: new Date('2025-12-13T09:30:00Z').toISOString(),
@@ -309,6 +351,9 @@ export const MOCK_DASHBOARD_MODULES: (ImportModule | ModuleCardData)[] = [
     priority: 2,
     importStatus: 'not_started',
     recordCount: 0,
+    tags: [],
+    supportsRollback: false,
+    version: '1.0.0',
   },
   {
     module: 'budget_expenses',
@@ -319,6 +364,9 @@ export const MOCK_DASHBOARD_MODULES: (ImportModule | ModuleCardData)[] = [
     priority: 3,
     importStatus: 'failed',
     recordCount: 0,
+    tags: [],
+    supportsRollback: false,
+    version: '1.0.0',
     error: 'Invalid budget_type references in rows: 10, 25, 30',
     lastImport: {
       jobId: 'job-202',
@@ -340,6 +388,9 @@ export const MOCK_DASHBOARD_MODULES: (ImportModule | ModuleCardData)[] = [
     priority: 1,
     importStatus: 'not_started',
     recordCount: 0,
+    tags: [],
+    supportsRollback: false,
+    version: '1.0.0',
   },
   {
     module: 'purchase_orders',
@@ -350,6 +401,9 @@ export const MOCK_DASHBOARD_MODULES: (ImportModule | ModuleCardData)[] = [
     priority: 2,
     importStatus: 'not_started',
     recordCount: 0,
+    tags: [],
+    supportsRollback: false,
+    version: '1.0.0',
   },
 ];
 

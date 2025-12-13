@@ -1,7 +1,18 @@
-import { Component, Inject, signal, computed, ChangeDetectionStrategy, OnDestroy } from '@angular/core';
+import {
+  Component,
+  Inject,
+  signal,
+  computed,
+  ChangeDetectionStrategy,
+  OnDestroy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import {
+  MatDialogRef,
+  MAT_DIALOG_DATA,
+  MatDialogModule,
+} from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -12,12 +23,14 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatStepperModule } from '@angular/material/stepper';
 import { firstValueFrom } from 'rxjs';
 import { SystemInitService, ImportProgressService } from '../../services';
+import { ValidationResultsComponent } from '../validation-results/validation-results.component';
+import { ProgressTrackerComponent } from '../progress-tracker/progress-tracker.component';
 import type {
   ImportModule,
   ValidationResult,
   ImportOptions,
   ImportJobResponse,
-  ImportStatus
+  ImportStatus,
 } from '../../types/system-init.types';
 
 export interface ImportWizardData {
@@ -44,11 +57,13 @@ export interface ImportWizardResult {
     MatSelectModule,
     MatFormFieldModule,
     MatSnackBarModule,
-    MatStepperModule
+    MatStepperModule,
+    ValidationResultsComponent,
+    ProgressTrackerComponent,
   ],
   templateUrl: './import-wizard.dialog.html',
   styleUrls: ['./import-wizard.dialog.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ImportWizardDialog implements OnDestroy {
   // Wizard state
@@ -59,6 +74,8 @@ export class ImportWizardDialog implements OnDestroy {
   selectedFile = signal<File | null>(null);
   uploadProgress = signal(0);
   isDragging = signal(false);
+  fileError = signal<string | null>(null);
+  isDownloading = signal(false);
 
   // Validation state
   validationResult = signal<ValidationResult | null>(null);
@@ -69,7 +86,7 @@ export class ImportWizardDialog implements OnDestroy {
   importOptions = signal<ImportOptions>({
     skipWarnings: false,
     batchSize: 100,
-    onConflict: 'skip'
+    onConflict: 'skip',
   });
 
   // Import job state
@@ -84,9 +101,10 @@ export class ImportWizardDialog implements OnDestroy {
         return true; // Can always proceed from template download
       case 2:
         return this.selectedFile() !== null;
-      case 3:
+      case 3: {
         const result = this.validationResult();
         return result !== null && (result.isValid || result.canProceed);
+      }
       case 4:
         return false; // Final step, no next
       default:
@@ -102,16 +120,17 @@ export class ImportWizardDialog implements OnDestroy {
 
     const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
     const isValidSize = file.size <= 10 * 1024 * 1024; // 10 MB
-    const isValidType = file.name.endsWith('.csv') ||
-                       file.name.endsWith('.xlsx') ||
-                       file.name.endsWith('.xls');
+    const isValidType =
+      file.name.endsWith('.csv') ||
+      file.name.endsWith('.xlsx') ||
+      file.name.endsWith('.xls');
 
     return {
       name: file.name,
       size: sizeInMB,
       isValidSize,
       isValidType,
-      isValid: isValidSize && isValidType
+      isValid: isValidSize && isValidType,
     };
   });
 
@@ -126,7 +145,7 @@ export class ImportWizardDialog implements OnDestroy {
       validRows: result.stats.validRows,
       errorRows: result.stats.errorRows,
       errorCount: result.errors.length,
-      warningCount: result.warnings.length
+      warningCount: result.warnings.length,
     };
   });
 
@@ -142,30 +161,7 @@ export class ImportWizardDialog implements OnDestroy {
       recordsToImport: result.stats.validRows,
       skipWarnings: options.skipWarnings,
       batchSize: options.batchSize,
-      onConflict: options.onConflict
-    };
-  });
-
-  importProgress = computed(() => {
-    const status = this.importStatus();
-    if (!status) return null;
-
-    const { progress } = status;
-    const elapsedTime = status.startedAt
-      ? Math.floor((new Date().getTime() - new Date(status.startedAt).getTime()) / 1000)
-      : 0;
-
-    const estimatedRemaining = progress.percentComplete > 0
-      ? Math.floor((elapsedTime / progress.percentComplete) * (100 - progress.percentComplete))
-      : 0;
-
-    return {
-      ...progress,
-      elapsedTime,
-      estimatedRemaining,
-      isComplete: status.status === 'completed',
-      isFailed: status.status === 'failed',
-      error: status.error
+      onConflict: options.onConflict,
     };
   });
 
@@ -176,7 +172,7 @@ export class ImportWizardDialog implements OnDestroy {
   readonly onConflictOptions = [
     { value: 'skip', label: 'Skip (ignore existing records)' },
     { value: 'update', label: 'Update (overwrite existing records)' },
-    { value: 'error', label: 'Error (fail if duplicate found)' }
+    { value: 'error', label: 'Error (fail if duplicate found)' },
   ];
 
   constructor(
@@ -184,23 +180,31 @@ export class ImportWizardDialog implements OnDestroy {
     @Inject(MAT_DIALOG_DATA) public data: ImportWizardData,
     private systemInitService: SystemInitService,
     private importProgressService: ImportProgressService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
   ) {}
 
   ngOnDestroy() {
     // Clean up progress tracking
     const job = this.importJob();
     if (job) {
-      this.importProgressService.cancelTracking(this.data.module.module, job.jobId);
+      this.importProgressService.cancelTracking(
+        this.data.module.module,
+        job.jobId,
+      );
     }
   }
 
   // ===== STEP 1: Download Template =====
 
   async downloadTemplate(format: 'csv' | 'xlsx') {
+    this.isDownloading.set(true);
+
     try {
       const blob = await firstValueFrom(
-        this.systemInitService.downloadTemplate(this.data.module.module, format)
+        this.systemInitService.downloadTemplate(
+          this.data.module.module,
+          format,
+        ),
       );
 
       const url = window.URL.createObjectURL(blob);
@@ -210,14 +214,18 @@ export class ImportWizardDialog implements OnDestroy {
       link.click();
       window.URL.revokeObjectURL(url);
 
-      this.snackBar.open('Template downloaded successfully', 'Close', { duration: 3000 });
+      this.snackBar.open('Template downloaded successfully', 'Close', {
+        duration: 3000,
+      });
     } catch (err: any) {
       console.error('Failed to download template:', err);
       this.snackBar.open(
         err.error?.message || 'Failed to download template',
         'Close',
-        { duration: 5000 }
+        { duration: 5000 },
       );
+    } finally {
+      this.isDownloading.set(false);
     }
   }
 
@@ -255,13 +263,15 @@ export class ImportWizardDialog implements OnDestroy {
   private handleFileSelection(file: File) {
     // Validate file type
     const validExtensions = ['.csv', '.xlsx', '.xls'];
-    const hasValidExtension = validExtensions.some(ext => file.name.toLowerCase().endsWith(ext));
+    const hasValidExtension = validExtensions.some((ext) =>
+      file.name.toLowerCase().endsWith(ext),
+    );
 
     if (!hasValidExtension) {
       this.snackBar.open(
         'Invalid file type. Please upload CSV or Excel file.',
         'Close',
-        { duration: 5000 }
+        { duration: 5000 },
       );
       return;
     }
@@ -269,16 +279,16 @@ export class ImportWizardDialog implements OnDestroy {
     // Validate file size (10 MB)
     const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
-      this.snackBar.open(
-        'File size exceeds 10 MB limit.',
-        'Close',
-        { duration: 5000 }
-      );
+      this.snackBar.open('File size exceeds 10 MB limit.', 'Close', {
+        duration: 5000,
+      });
       return;
     }
 
     this.selectedFile.set(file);
-    this.snackBar.open('File selected successfully', 'Close', { duration: 2000 });
+    this.snackBar.open('File selected successfully', 'Close', {
+      duration: 2000,
+    });
   }
 
   removeFile() {
@@ -297,7 +307,7 @@ export class ImportWizardDialog implements OnDestroy {
 
     try {
       const result = await firstValueFrom(
-        this.systemInitService.validateFile(this.data.module.module, file)
+        this.systemInitService.validateFile(this.data.module.module, file),
       );
 
       this.validationResult.set(result);
@@ -306,34 +316,30 @@ export class ImportWizardDialog implements OnDestroy {
       if (result.isValid) {
         this.snackBar.open('Validation passed!', 'Close', { duration: 3000 });
       } else if (result.canProceed) {
-        this.snackBar.open(
-          'Validation completed with warnings',
-          'Close',
-          { duration: 3000 }
-        );
+        this.snackBar.open('Validation completed with warnings', 'Close', {
+          duration: 3000,
+        });
       } else {
         this.snackBar.open(
           'Validation failed. Please fix errors and try again.',
           'Close',
-          { duration: 5000 }
+          { duration: 5000 },
         );
       }
     } catch (err: any) {
       console.error('Validation error:', err);
-      this.snackBar.open(
-        err.error?.message || 'Validation failed',
-        'Close',
-        { duration: 5000 }
-      );
+      this.snackBar.open(err.error?.message || 'Validation failed', 'Close', {
+        duration: 5000,
+      });
     } finally {
       this.isValidating.set(false);
     }
   }
 
   updateImportOption(key: keyof ImportOptions, value: any) {
-    this.importOptions.update(opts => ({
+    this.importOptions.update((opts) => ({
       ...opts,
-      [key]: value
+      [key]: value,
     }));
   }
 
@@ -342,7 +348,9 @@ export class ImportWizardDialog implements OnDestroy {
   async startImport() {
     const sessionId = this.sessionId();
     if (!sessionId) {
-      this.snackBar.open('No validation session found', 'Close', { duration: 5000 });
+      this.snackBar.open('No validation session found', 'Close', {
+        duration: 5000,
+      });
       return;
     }
 
@@ -354,13 +362,15 @@ export class ImportWizardDialog implements OnDestroy {
         this.systemInitService.importData(
           this.data.module.module,
           sessionId,
-          this.importOptions()
-        )
+          this.importOptions(),
+        ),
       );
 
       this.importJob.set(jobResponse);
 
-      this.snackBar.open('Import started successfully', 'Close', { duration: 3000 });
+      this.snackBar.open('Import started successfully', 'Close', {
+        duration: 3000,
+      });
 
       // Track progress
       this.importProgressService
@@ -370,37 +380,33 @@ export class ImportWizardDialog implements OnDestroy {
             this.importStatus.set(status);
 
             if (status.status === 'completed') {
-              this.snackBar.open(
-                'Import completed successfully!',
-                'Close',
-                { duration: 5000 }
-              );
+              this.snackBar.open('Import completed successfully!', 'Close', {
+                duration: 5000,
+              });
               this.isImporting.set(false);
             } else if (status.status === 'failed') {
               this.snackBar.open(
                 `Import failed: ${status.error || 'Unknown error'}`,
                 'Close',
-                { duration: 5000 }
+                { duration: 5000 },
               );
               this.isImporting.set(false);
             }
           },
           error: (err) => {
             console.error('Failed to track import progress:', err);
-            this.snackBar.open(
-              'Failed to track import progress',
-              'Close',
-              { duration: 5000 }
-            );
+            this.snackBar.open('Failed to track import progress', 'Close', {
+              duration: 5000,
+            });
             this.isImporting.set(false);
-          }
+          },
         });
     } catch (err: any) {
       console.error('Failed to start import:', err);
       this.snackBar.open(
         err.error?.message || 'Failed to start import',
         'Close',
-        { duration: 5000 }
+        { duration: 5000 },
       );
       this.isImporting.set(false);
     }
@@ -417,7 +423,7 @@ export class ImportWizardDialog implements OnDestroy {
     }
 
     if (this.currentStep() < this.totalSteps) {
-      this.currentStep.update(s => s + 1);
+      this.currentStep.update((s) => s + 1);
     }
   }
 
@@ -425,7 +431,7 @@ export class ImportWizardDialog implements OnDestroy {
     if (!this.canNavigate()) return;
 
     if (this.currentStep() > 1) {
-      this.currentStep.update(s => s - 1);
+      this.currentStep.update((s) => s - 1);
     }
   }
 
@@ -433,14 +439,14 @@ export class ImportWizardDialog implements OnDestroy {
     // Check if import is in progress
     if (this.isImporting()) {
       const confirmed = confirm(
-        'Import is in progress. Are you sure you want to close? This will not cancel the import.'
+        'Import is in progress. Are you sure you want to close? This will not cancel the import.',
       );
       if (!confirmed) return;
     }
 
     const result: ImportWizardResult = {
       success,
-      jobId: this.importJob()?.jobId
+      jobId: this.importJob()?.jobId,
     };
     this.dialogRef.close(result);
   }
@@ -449,26 +455,16 @@ export class ImportWizardDialog implements OnDestroy {
 
   getStepTitle(): string {
     switch (this.currentStep()) {
-      case 1: return 'Download Template';
-      case 2: return 'Upload File';
-      case 3: return 'Validation Results';
-      case 4: return 'Confirm & Import';
-      default: return '';
+      case 1:
+        return 'Download Template';
+      case 2:
+        return 'Upload File';
+      case 3:
+        return 'Validation Results';
+      case 4:
+        return 'Confirm & Import';
+      default:
+        return '';
     }
-  }
-
-  formatBytes(bytes: number): string {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
-  }
-
-  formatTime(seconds: number): string {
-    if (seconds < 60) return `${seconds} seconds`;
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}m ${remainingSeconds}s`;
   }
 }

@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import type {
+  ApiResponse,
   AvailableModulesResponse,
   ImportOrderResponse,
   DashboardResponse,
@@ -9,7 +11,7 @@ import type {
   ImportOptions,
   ImportJobResponse,
   ImportStatus,
-  HealthResponse,
+  HealthStatusData,
 } from '../types/system-init.types';
 
 @Injectable({
@@ -22,17 +24,23 @@ export class SystemInitService {
 
   // Dashboard APIs
   getAvailableModules(): Observable<AvailableModulesResponse> {
-    return this.http.get<AvailableModulesResponse>(
-      `${this.baseUrl}/available-modules`,
-    );
+    return this.http
+      .get<
+        ApiResponse<AvailableModulesResponse>
+      >(`${this.baseUrl}/available-modules`)
+      .pipe(map((response) => response.data));
   }
 
   getImportOrder(): Observable<ImportOrderResponse> {
-    return this.http.get<ImportOrderResponse>(`${this.baseUrl}/import-order`);
+    return this.http
+      .get<ApiResponse<ImportOrderResponse>>(`${this.baseUrl}/import-order`)
+      .pipe(map((response) => response.data));
   }
 
   getDashboard(): Observable<DashboardResponse> {
-    return this.http.get<DashboardResponse>(`${this.baseUrl}/dashboard`);
+    return this.http
+      .get<ApiResponse<DashboardResponse>>(`${this.baseUrl}/dashboard`)
+      .pipe(map((response) => response.data));
   }
 
   // Module-specific APIs
@@ -50,10 +58,11 @@ export class SystemInitService {
     const formData = new FormData();
     formData.append('file', file);
 
-    return this.http.post<ValidationResult>(
-      `${this.baseUrl}/module/${moduleName}/validate`,
-      formData,
-    );
+    return this.http
+      .post<
+        ApiResponse<ValidationResult>
+      >(`${this.baseUrl}/module/${moduleName}/validate`, formData)
+      .pipe(map((response) => response.data));
   }
 
   importData(
@@ -61,25 +70,32 @@ export class SystemInitService {
     sessionId: string,
     options: ImportOptions,
   ): Observable<ImportJobResponse> {
-    return this.http.post<ImportJobResponse>(
-      `${this.baseUrl}/module/${moduleName}/import`,
-      { sessionId, options },
-    );
+    return this.http
+      .post<
+        ApiResponse<ImportJobResponse>
+      >(`${this.baseUrl}/module/${moduleName}/import`, { sessionId, options })
+      .pipe(map((response) => response.data));
   }
 
   getImportStatus(moduleName: string, jobId: string): Observable<ImportStatus> {
-    return this.http.get<ImportStatus>(
-      `${this.baseUrl}/module/${moduleName}/status/${jobId}`,
-    );
+    return this.http
+      .get<
+        ApiResponse<ImportStatus>
+      >(`${this.baseUrl}/module/${moduleName}/status/${jobId}`)
+      .pipe(map((response) => response.data));
   }
 
   rollbackImport(moduleName: string, jobId: string): Observable<void> {
-    return this.http.delete<void>(
-      `${this.baseUrl}/module/${moduleName}/rollback/${jobId}`,
-    );
+    return this.http
+      .delete<
+        ApiResponse<void>
+      >(`${this.baseUrl}/module/${moduleName}/rollback/${jobId}`)
+      .pipe(map((response) => response.data));
   }
 
-  getHealth(): Observable<HealthResponse> {
-    return this.http.get<HealthResponse>(`${this.baseUrl}/health-status`);
+  getHealthStatus(): Observable<HealthStatusData> {
+    return this.http
+      .get<ApiResponse<HealthStatusData>>(`${this.baseUrl}/health-status`)
+      .pipe(map((response) => response.data));
   }
 }

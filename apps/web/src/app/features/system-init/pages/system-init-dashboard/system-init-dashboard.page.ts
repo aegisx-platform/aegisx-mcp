@@ -29,9 +29,11 @@ import type {
   ImportModule,
   DashboardResponse,
   ImportModuleStatus,
+  ImportHistoryItem,
 } from '../../types/system-init.types';
 import { ModuleCardComponent } from '../../components/module-card/module-card.component';
 import { ImportHistoryTimelineComponent } from '../../components/import-history-timeline/import-history-timeline.component';
+import { ImportWizardDialog } from '../../components/import-wizard/import-wizard.dialog';
 
 /**
  * System Initialization Dashboard Page
@@ -89,7 +91,7 @@ export class SystemInitDashboardPage implements OnInit {
 
   // Computed signals for filtering
   availableDomains = computed(() => {
-    const domains = new Set(this.modules().map(m => m.domain));
+    const domains = new Set(this.modules().map((m) => m.domain));
     return Array.from(domains).sort();
   });
 
@@ -109,22 +111,22 @@ export class SystemInitDashboardPage implements OnInit {
 
     // Filter by domain
     if (this.selectedDomain() !== 'all') {
-      result = result.filter(m => m.domain === this.selectedDomain());
+      result = result.filter((m) => m.domain === this.selectedDomain());
     }
 
     // Filter by status
     if (this.selectedStatus() !== 'all') {
-      result = result.filter(m => m.importStatus === this.selectedStatus());
+      result = result.filter((m) => m.importStatus === this.selectedStatus());
     }
 
     // Filter by search term
     const term = this.searchTerm().toLowerCase();
     if (term) {
       result = result.filter(
-        m =>
+        (m) =>
           m.displayName.toLowerCase().includes(term) ||
           m.module.toLowerCase().includes(term) ||
-          (m.displayNameThai && m.displayNameThai.includes(term))
+          (m.displayNameThai && m.displayNameThai.includes(term)),
       );
     }
 
@@ -134,16 +136,16 @@ export class SystemInitDashboardPage implements OnInit {
   // Computed statistics
   totalModules = computed(() => this.dashboard()?.overview.totalModules ?? 0);
   completedModules = computed(
-    () => this.dashboard()?.overview.completedModules ?? 0
+    () => this.dashboard()?.overview.completedModules ?? 0,
   );
   inProgressModules = computed(
-    () => this.dashboard()?.overview.inProgressModules ?? 0
+    () => this.dashboard()?.overview.inProgressModules ?? 0,
   );
   pendingModules = computed(
-    () => this.dashboard()?.overview.pendingModules ?? 0
+    () => this.dashboard()?.overview.pendingModules ?? 0,
   );
   totalRecordsImported = computed(
-    () => this.dashboard()?.overview.totalRecordsImported ?? 0
+    () => this.dashboard()?.overview.totalRecordsImported ?? 0,
   );
 
   completionPercentage = computed(() => {
@@ -181,7 +183,7 @@ export class SystemInitDashboardPage implements OnInit {
           this.dashboard.set(dashboard);
           this.error.set(null);
         },
-        error: err => {
+        error: (err) => {
           const errorMessage =
             err.error?.message ||
             err.message ||
@@ -204,8 +206,8 @@ export class SystemInitDashboardPage implements OnInit {
           forkJoin({
             modules: this.systemInitService.getAvailableModules(),
             dashboard: this.systemInitService.getDashboard(),
-          })
-        )
+          }),
+        ),
       )
       .subscribe({
         next: ({ modules, dashboard }) => {
@@ -213,10 +215,10 @@ export class SystemInitDashboardPage implements OnInit {
           this.dashboard.set(dashboard);
           this.error.set(null);
         },
-        error: err => {
+        error: (err) => {
           console.error('Auto-refresh failed:', err);
           // Don't show error snackbar for auto-refresh to avoid spamming
-        }
+        },
       });
   }
 
@@ -261,13 +263,21 @@ export class SystemInitDashboardPage implements OnInit {
    * Open import wizard dialog for a module
    */
   openImportWizard(module: ImportModule) {
-    // TODO: Implement import wizard dialog
-    // For now, just show a message that it's coming
-    this.snackBar.open(
-      `Import wizard for ${module.displayName} coming soon`,
-      'Close',
-      { duration: 3000 }
-    );
+    const dialogRef = this.dialog.open(ImportWizardDialog, {
+      width: '800px',
+      maxHeight: '90vh',
+      data: { module },
+      disableClose: true,
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result?.success) {
+        this.loadDashboard();
+        this.snackBar.open('Import completed successfully', 'Close', {
+          duration: 5000,
+        });
+      }
+    });
   }
 
   /**
@@ -284,7 +294,7 @@ export class SystemInitDashboardPage implements OnInit {
     this.snackBar.open(
       `View details for ${module.displayName} coming soon`,
       'Close',
-      { duration: 3000 }
+      { duration: 3000 },
     );
   }
 
@@ -293,47 +303,75 @@ export class SystemInitDashboardPage implements OnInit {
    */
   onModuleRollback(module: ImportModule) {
     if (!module.lastImport) {
-      this.snackBar.open(
-        'No import job found to rollback',
-        'Close',
-        { duration: 3000 }
-      );
+      this.snackBar.open('No import job found to rollback', 'Close', {
+        duration: 3000,
+      });
       return;
     }
 
     const confirmRollback = window.confirm(
-      `Are you sure you want to rollback the import for ${module.displayName}? This action cannot be undone.`
+      `Are you sure you want to rollback the import for ${module.displayName}? This will delete ${module.recordCount} records and cannot be undone.`,
     );
 
     if (confirmRollback) {
-      this.snackBar.open(
-        `Rollback for ${module.displayName} coming soon`,
-        'Close',
-        { duration: 3000 }
-      );
+      this.systemInitService
+        .rollbackImport(module.module, module.lastImport.jobId)
+        .subscribe({
+          next: () => {
+            this.snackBar.open(
+              `Rollback for ${module.displayName} completed successfully`,
+              'Close',
+              { duration: 5000 },
+            );
+            this.loadDashboard();
+          },
+          error: (err) => {
+            this.snackBar.open(
+              err.error?.message || 'Rollback failed',
+              'Close',
+              { duration: 5000 },
+            );
+          },
+        });
     }
   }
 
   /**
    * Handle import history view details
    */
-  onHistoryViewDetails(item: any) {
-    this.snackBar.open('View import details coming soon', 'Close', {
-      duration: 3000,
-    });
+  onHistoryViewDetails(item: ImportHistoryItem) {
+    const details = `Job: ${item.jobId}\nModule: ${item.module}\nStatus: ${item.status}\nRecords: ${item.recordsImported}\nBy: ${item.importedBy.name}`;
+    this.snackBar.open(details, 'Close', { duration: 10000 });
   }
 
   /**
    * Handle import history rollback
    */
-  onHistoryRollback(item: any) {
+  onHistoryRollback(item: ImportHistoryItem) {
+    if (item.status !== 'completed') {
+      this.snackBar.open('Can only rollback completed imports', 'Close', {
+        duration: 3000,
+      });
+      return;
+    }
+
     const confirmRollback = window.confirm(
-      `Are you sure you want to rollback this import? This action cannot be undone.`
+      `Are you sure you want to rollback this import? This action cannot be undone.`,
     );
 
     if (confirmRollback) {
-      this.snackBar.open('Rollback import coming soon', 'Close', {
-        duration: 3000,
+      this.systemInitService.rollbackImport(item.module, item.jobId).subscribe({
+        next: () => {
+          this.snackBar.open('Rollback completed successfully', 'Close', {
+            duration: 5000,
+          });
+          this.loadDashboard();
+        },
+        error: (err) => {
+          this.snackBar.open(err.error?.message || 'Rollback failed', 'Close', {
+            duration: 5000,
+          });
+        },
       });
     }
   }
@@ -341,17 +379,20 @@ export class SystemInitDashboardPage implements OnInit {
   /**
    * Handle import history retry
    */
-  onHistoryRetry(item: any) {
-    this.snackBar.open('Retry import coming soon', 'Close', {
-      duration: 3000,
-    });
+  onHistoryRetry(item: ImportHistoryItem) {
+    const module = this.modules().find((m) => m.module === item.module);
+    if (module) {
+      this.openImportWizard(module);
+    } else {
+      this.snackBar.open('Module not found', 'Close', { duration: 3000 });
+    }
   }
 
   /**
    * Handle import history load more
    */
   onHistoryLoadMore() {
-    this.snackBar.open('Load more imports coming soon', 'Close', {
+    this.snackBar.open('Showing all available history', 'Close', {
       duration: 3000,
     });
   }
@@ -360,7 +401,7 @@ export class SystemInitDashboardPage implements OnInit {
    * Get status count for statistics
    */
   getStatusCount(status: ImportModuleStatus): number {
-    return this.modules().filter(m => m.importStatus === status).length;
+    return this.modules().filter((m) => m.importStatus === status).length;
   }
 
   /**

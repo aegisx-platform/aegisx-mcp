@@ -1,4 +1,9 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  TestBed,
+  fakeAsync,
+  tick,
+} from '@angular/core/testing';
 import {
   HttpClientTestingModule,
   HttpTestingController,
@@ -12,7 +17,10 @@ import type {
   DashboardResponse,
   AvailableModulesResponse,
 } from '../../types/system-init.types';
-import { ImportWizardDialog, ImportWizardResult } from '../../components/import-wizard/import-wizard.dialog';
+import {
+  ImportWizardDialog,
+  ImportWizardResult,
+} from '../../components/import-wizard/import-wizard.dialog';
 import { of, throwError } from 'rxjs';
 
 /**
@@ -29,6 +37,10 @@ const MOCK_MODULES: ImportModule[] = [
     priority: 1,
     importStatus: 'not_started',
     recordCount: 100,
+    tags: ['master-data', 'essential'],
+    supportsRollback: true,
+    version: '1.0.0',
+    description: 'Drug generics master data',
   },
   {
     module: 'locations',
@@ -40,6 +52,10 @@ const MOCK_MODULES: ImportModule[] = [
     priority: 2,
     importStatus: 'completed',
     recordCount: 50,
+    tags: ['master-data', 'locations'],
+    supportsRollback: true,
+    version: '1.0.0',
+    lastImportDate: '2025-12-13T10:00:00Z',
     lastImport: {
       jobId: 'job-1',
       completedAt: '2025-12-13T10:00:00Z',
@@ -59,6 +75,9 @@ const MOCK_MODULES: ImportModule[] = [
     priority: 3,
     importStatus: 'in_progress',
     recordCount: 200,
+    tags: ['operations', 'finance'],
+    supportsRollback: true,
+    version: '1.0.0',
   },
   {
     module: 'purchases',
@@ -69,6 +88,9 @@ const MOCK_MODULES: ImportModule[] = [
     priority: 4,
     importStatus: 'failed',
     recordCount: 75,
+    tags: ['procurement', 'operations'],
+    supportsRollback: false,
+    version: '1.0.0',
   },
 ];
 
@@ -98,7 +120,10 @@ const MOCK_DASHBOARD: DashboardResponse = {
       },
     },
   ],
-  nextRecommended: ['locations', 'budgets'],
+  nextRecommended: [
+    { module: 'locations', reason: 'Depends on departments' },
+    { module: 'budgets', reason: 'No dependencies' },
+  ],
 };
 
 describe('SystemInitDashboardPage', () => {
@@ -157,12 +182,19 @@ describe('SystemInitDashboardPage', () => {
 
   describe('Page Initialization - Data Loading', () => {
     it('should call getAvailableModules and getDashboard on ngOnInit', fakeAsync(() => {
-      const spy1 = jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
-        of({ modules: MOCK_MODULES, totalModules: 4, completedModules: 1, pendingModules: 2 })
-      );
-      const spy2 = jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(
-        of(MOCK_DASHBOARD)
-      );
+      const spy1 = jest
+        .spyOn(systemInitService, 'getAvailableModules')
+        .mockReturnValue(
+          of({
+            modules: MOCK_MODULES,
+            totalModules: 4,
+            completedModules: 1,
+            pendingModules: 2,
+          }),
+        );
+      const spy2 = jest
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -179,8 +211,12 @@ describe('SystemInitDashboardPage', () => {
         pendingModules: 2,
       };
 
-      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(of(response));
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+      jest
+        .spyOn(systemInitService, 'getAvailableModules')
+        .mockReturnValue(of(response));
+      jest
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -189,17 +225,17 @@ describe('SystemInitDashboardPage', () => {
     }));
 
     it('should load dashboard data from API response', fakeAsync(() => {
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        of({
+          modules: MOCK_MODULES,
+          totalModules: 4,
+          completedModules: 1,
+          pendingModules: 2,
+        }),
+      );
       jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          of({
-            modules: MOCK_MODULES,
-            totalModules: 4,
-            completedModules: 1,
-            pendingModules: 2,
-          })
-        );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -208,17 +244,17 @@ describe('SystemInitDashboardPage', () => {
     }));
 
     it('should set loading to false after data loads', fakeAsync(() => {
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        of({
+          modules: MOCK_MODULES,
+          totalModules: 4,
+          completedModules: 1,
+          pendingModules: 2,
+        }),
+      );
       jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          of({
-            modules: MOCK_MODULES,
-            totalModules: 4,
-            completedModules: 1,
-            pendingModules: 2,
-          })
-        );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -230,17 +266,17 @@ describe('SystemInitDashboardPage', () => {
       // First set an error
       component.error.set('Previous error');
 
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        of({
+          modules: MOCK_MODULES,
+          totalModules: 4,
+          completedModules: 1,
+          pendingModules: 2,
+        }),
+      );
       jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          of({
-            modules: MOCK_MODULES,
-            totalModules: 4,
-            completedModules: 1,
-            pendingModules: 2,
-          })
-        );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -251,17 +287,17 @@ describe('SystemInitDashboardPage', () => {
 
   describe('Modules Display and Grid', () => {
     beforeEach(fakeAsync(() => {
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        of({
+          modules: MOCK_MODULES,
+          totalModules: 4,
+          completedModules: 1,
+          pendingModules: 2,
+        }),
+      );
       jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          of({
-            modules: MOCK_MODULES,
-            totalModules: 4,
-            completedModules: 1,
-            pendingModules: 2,
-          })
-        );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -297,17 +333,17 @@ describe('SystemInitDashboardPage', () => {
 
   describe('Overview Cards - Statistics', () => {
     beforeEach(fakeAsync(() => {
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        of({
+          modules: MOCK_MODULES,
+          totalModules: 4,
+          completedModules: 1,
+          pendingModules: 2,
+        }),
+      );
       jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          of({
-            modules: MOCK_MODULES,
-            totalModules: 4,
-            completedModules: 1,
-            pendingModules: 2,
-          })
-        );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -366,17 +402,17 @@ describe('SystemInitDashboardPage', () => {
 
   describe('Domain Filter - filteredModules Computed Signal', () => {
     beforeEach(fakeAsync(() => {
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        of({
+          modules: MOCK_MODULES,
+          totalModules: 4,
+          completedModules: 1,
+          pendingModules: 2,
+        }),
+      );
       jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          of({
-            modules: MOCK_MODULES,
-            totalModules: 4,
-            completedModules: 1,
-            pendingModules: 2,
-          })
-        );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -392,7 +428,7 @@ describe('SystemInitDashboardPage', () => {
       const filtered = component.filteredModules();
 
       expect(filtered.length).toBe(2);
-      expect(filtered.every(m => m.domain === 'inventory')).toBe(true);
+      expect(filtered.every((m) => m.domain === 'inventory')).toBe(true);
     });
 
     it('should return empty array when filtering by domain with no modules', () => {
@@ -487,17 +523,17 @@ describe('SystemInitDashboardPage', () => {
 
   describe('Auto-Refresh - exhaustMap Behavior', () => {
     it('should start auto-refresh on ngOnInit', fakeAsync(() => {
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        of({
+          modules: MOCK_MODULES,
+          totalModules: 4,
+          completedModules: 1,
+          pendingModules: 2,
+        }),
+      );
       jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          of({
-            modules: MOCK_MODULES,
-            totalModules: 4,
-            completedModules: 1,
-            pendingModules: 2,
-          })
-        );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -511,63 +547,69 @@ describe('SystemInitDashboardPage', () => {
     }));
 
     it('should refresh data every 30 seconds', fakeAsync(() => {
-      jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          of({
-            modules: MOCK_MODULES,
-            totalModules: 4,
-            completedModules: 1,
-            pendingModules: 2,
-          })
-        );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
-
-      fixture.detectChanges();
-      tick(); // Initial load
-
-      const initialCallCount = (systemInitService.getAvailableModules as jest.Mock)
-        .mock.calls.length;
-
-      // First refresh at 30 seconds
-      tick(30000);
-      expect((systemInitService.getAvailableModules as jest.Mock).mock.calls.length).toBe(
-        initialCallCount + 1
-      );
-
-      // Second refresh at 60 seconds total
-      tick(30000);
-      expect((systemInitService.getAvailableModules as jest.Mock).mock.calls.length).toBe(
-        initialCallCount + 2
-      );
-
-      // Third refresh at 90 seconds total
-      tick(30000);
-      expect((systemInitService.getAvailableModules as jest.Mock).mock.calls.length).toBe(
-        initialCallCount + 3
-      );
-    }));
-
-    it('should use exhaustMap to ignore emissions while request is pending', fakeAsync(() => {
-      let callCount = 0;
-      jest.spyOn(systemInitService, 'getAvailableModules').mockImplementation(() => {
-        callCount++;
-        return of({
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        of({
           modules: MOCK_MODULES,
           totalModules: 4,
           completedModules: 1,
           pendingModules: 2,
+        }),
+      );
+      jest
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
+
+      fixture.detectChanges();
+      tick(); // Initial load
+
+      const initialCallCount = (
+        systemInitService.getAvailableModules as jest.Mock
+      ).mock.calls.length;
+
+      // First refresh at 30 seconds
+      tick(30000);
+      expect(
+        (systemInitService.getAvailableModules as jest.Mock).mock.calls.length,
+      ).toBe(initialCallCount + 1);
+
+      // Second refresh at 60 seconds total
+      tick(30000);
+      expect(
+        (systemInitService.getAvailableModules as jest.Mock).mock.calls.length,
+      ).toBe(initialCallCount + 2);
+
+      // Third refresh at 90 seconds total
+      tick(30000);
+      expect(
+        (systemInitService.getAvailableModules as jest.Mock).mock.calls.length,
+      ).toBe(initialCallCount + 3);
+    }));
+
+    it('should use exhaustMap to ignore emissions while request is pending', fakeAsync(() => {
+      let callCount = 0;
+      jest
+        .spyOn(systemInitService, 'getAvailableModules')
+        .mockImplementation(() => {
+          callCount++;
+          return of({
+            modules: MOCK_MODULES,
+            totalModules: 4,
+            completedModules: 1,
+            pendingModules: 2,
+          });
         });
-      });
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+      jest
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick(); // Initial load
 
       // At 30s, auto-refresh fires
       tick(30000);
-      const callCountAfterRefresh = (systemInitService.getAvailableModules as jest.Mock)
-        .mock.calls.length;
+      const callCountAfterRefresh = (
+        systemInitService.getAvailableModules as jest.Mock
+      ).mock.calls.length;
 
       // With exhaustMap, if we try to emit while a request is pending,
       // it should be ignored. We verify by checking call count hasn't increased
@@ -605,10 +647,14 @@ describe('SystemInitDashboardPage', () => {
       ];
 
       let callCount = 0;
-      jest.spyOn(systemInitService, 'getAvailableModules').mockImplementation(() => {
-        return of(responses[Math.min(callCount++, 1)]);
-      });
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+      jest
+        .spyOn(systemInitService, 'getAvailableModules')
+        .mockImplementation(() => {
+          return of(responses[Math.min(callCount++, 1)]);
+        });
+      jest
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -622,17 +668,17 @@ describe('SystemInitDashboardPage', () => {
     }));
 
     it('should not show error snackbar on auto-refresh failure', fakeAsync(() => {
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        of({
+          modules: MOCK_MODULES,
+          totalModules: 4,
+          completedModules: 1,
+          pendingModules: 2,
+        }),
+      );
       jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          of({
-            modules: MOCK_MODULES,
-            totalModules: 4,
-            completedModules: 1,
-            pendingModules: 2,
-          })
-        );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -652,17 +698,17 @@ describe('SystemInitDashboardPage', () => {
     }));
 
     it('should clear error state on successful auto-refresh', fakeAsync(() => {
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        of({
+          modules: MOCK_MODULES,
+          totalModules: 4,
+          completedModules: 1,
+          pendingModules: 2,
+        }),
+      );
       jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          of({
-            modules: MOCK_MODULES,
-            totalModules: 4,
-            completedModules: 1,
-            pendingModules: 2,
-          })
-        );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -684,9 +730,11 @@ describe('SystemInitDashboardPage', () => {
         throwError(() => ({
           error: { message: errorMessage },
           message: 'Http error',
-        }))
+        })),
       );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+      jest
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -699,9 +747,11 @@ describe('SystemInitDashboardPage', () => {
       jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
         throwError(() => ({
           error: { message: errorMessage },
-        }))
+        })),
       );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+      jest
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -714,9 +764,11 @@ describe('SystemInitDashboardPage', () => {
       jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
         throwError(() => ({
           message: errorMessage,
-        }))
+        })),
       );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+      jest
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -728,12 +780,16 @@ describe('SystemInitDashboardPage', () => {
       jest
         .spyOn(systemInitService, 'getAvailableModules')
         .mockReturnValue(throwError(() => ({})));
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+      jest
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
 
-      expect(component.error()).toBe('Failed to load system initialization dashboard');
+      expect(component.error()).toBe(
+        'Failed to load system initialization dashboard',
+      );
     }));
 
     it('should set error state and handle error display', fakeAsync(() => {
@@ -741,9 +797,11 @@ describe('SystemInitDashboardPage', () => {
       jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
         throwError(() => ({
           error: { message: errorMessage },
-        }))
+        })),
       );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+      jest
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -752,14 +810,14 @@ describe('SystemInitDashboardPage', () => {
     }));
 
     it('should set loading to false even on error', fakeAsync(() => {
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        throwError(() => ({
+          error: { message: 'Error' },
+        })),
+      );
       jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          throwError(() => ({
-            error: { message: 'Error' },
-          }))
-        );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -768,17 +826,17 @@ describe('SystemInitDashboardPage', () => {
     }));
 
     it('should preserve modules data on API error', fakeAsync(() => {
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        of({
+          modules: MOCK_MODULES,
+          totalModules: 4,
+          completedModules: 1,
+          pendingModules: 2,
+        }),
+      );
       jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          of({
-            modules: MOCK_MODULES,
-            totalModules: 4,
-            completedModules: 1,
-            pendingModules: 2,
-          })
-        );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -786,13 +844,11 @@ describe('SystemInitDashboardPage', () => {
       const loadedModules = component.modules();
 
       // Now make service fail on refresh
-      jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          throwError(() => ({
-            error: { message: 'Error' },
-          }))
-        );
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        throwError(() => ({
+          error: { message: 'Error' },
+        })),
+      );
 
       component['loadDashboard']();
       tick();
@@ -804,17 +860,17 @@ describe('SystemInitDashboardPage', () => {
 
   describe('Module Card Interactions', () => {
     beforeEach(fakeAsync(() => {
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        of({
+          modules: MOCK_MODULES,
+          totalModules: 4,
+          completedModules: 1,
+          pendingModules: 2,
+        }),
+      );
       jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          of({
-            modules: MOCK_MODULES,
-            totalModules: 4,
-            completedModules: 1,
-            pendingModules: 2,
-          })
-        );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -842,7 +898,7 @@ describe('SystemInitDashboardPage', () => {
       component.onModuleRollback(module);
 
       expect(confirmSpy).toHaveBeenCalledWith(
-        expect.stringContaining(module.displayName)
+        expect.stringContaining(module.displayName),
       );
 
       confirmSpy.mockRestore();
@@ -869,17 +925,17 @@ describe('SystemInitDashboardPage', () => {
 
   describe('Import History Interactions', () => {
     beforeEach(fakeAsync(() => {
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        of({
+          modules: MOCK_MODULES,
+          totalModules: 4,
+          completedModules: 1,
+          pendingModules: 2,
+        }),
+      );
       jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          of({
-            modules: MOCK_MODULES,
-            totalModules: 4,
-            completedModules: 1,
-            pendingModules: 2,
-          })
-        );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -936,17 +992,17 @@ describe('SystemInitDashboardPage', () => {
     }));
 
     it('should set loading to false after data arrives', fakeAsync(() => {
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        of({
+          modules: MOCK_MODULES,
+          totalModules: 4,
+          completedModules: 1,
+          pendingModules: 2,
+        }),
+      );
       jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          of({
-            modules: MOCK_MODULES,
-            totalModules: 4,
-            completedModules: 1,
-            pendingModules: 2,
-          })
-        );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -955,17 +1011,17 @@ describe('SystemInitDashboardPage', () => {
     }));
 
     it('should set loading false via finalize operator', fakeAsync(() => {
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        of({
+          modules: MOCK_MODULES,
+          totalModules: 4,
+          completedModules: 1,
+          pendingModules: 2,
+        }),
+      );
       jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          of({
-            modules: MOCK_MODULES,
-            totalModules: 4,
-            completedModules: 1,
-            pendingModules: 2,
-          })
-        );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -974,16 +1030,14 @@ describe('SystemInitDashboardPage', () => {
     }));
 
     it('should set loading false even if getDashboard fails', fakeAsync(() => {
-      jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          of({
-            modules: MOCK_MODULES,
-            totalModules: 4,
-            completedModules: 1,
-            pendingModules: 2,
-          })
-        );
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        of({
+          modules: MOCK_MODULES,
+          totalModules: 4,
+          completedModules: 1,
+          pendingModules: 2,
+        }),
+      );
       jest
         .spyOn(systemInitService, 'getDashboard')
         .mockReturnValue(throwError(() => new Error('Error')));
@@ -997,17 +1051,17 @@ describe('SystemInitDashboardPage', () => {
 
   describe('Manual Refresh Button', () => {
     beforeEach(fakeAsync(() => {
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        of({
+          modules: MOCK_MODULES,
+          totalModules: 4,
+          completedModules: 1,
+          pendingModules: 2,
+        }),
+      );
       jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          of({
-            modules: MOCK_MODULES,
-            totalModules: 4,
-            completedModules: 1,
-            pendingModules: 2,
-          })
-        );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -1029,8 +1083,17 @@ describe('SystemInitDashboardPage', () => {
     it('should set loading state during manual refresh', fakeAsync(() => {
       jest
         .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(of({ modules: [], totalModules: 0, completedModules: 0, pendingModules: 0 }));
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+        .mockReturnValue(
+          of({
+            modules: [],
+            totalModules: 0,
+            completedModules: 0,
+            pendingModules: 0,
+          }),
+        );
+      jest
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       // First verify loading becomes false after initial load
       expect(component.loading()).toBe(false);
@@ -1044,21 +1107,19 @@ describe('SystemInitDashboardPage', () => {
     }));
 
     it('should update modules on refresh', fakeAsync(() => {
-      const updatedModules: ImportModule[] = [
-        ...MOCK_MODULES.slice(0, 2),
-      ];
+      const updatedModules: ImportModule[] = [...MOCK_MODULES.slice(0, 2)];
 
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        of({
+          modules: updatedModules,
+          totalModules: 2,
+          completedModules: 1,
+          pendingModules: 1,
+        }),
+      );
       jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          of({
-            modules: updatedModules,
-            totalModules: 2,
-            completedModules: 1,
-            pendingModules: 1,
-          })
-        );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       component.refreshDashboard();
       tick();
@@ -1077,23 +1138,23 @@ describe('SystemInitDashboardPage', () => {
 
   describe('Proper Cleanup on Destroy', () => {
     it('should use takeUntilDestroyed in auto-refresh stream', fakeAsync(() => {
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        of({
+          modules: MOCK_MODULES,
+          totalModules: 4,
+          completedModules: 1,
+          pendingModules: 2,
+        }),
+      );
       jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          of({
-            modules: MOCK_MODULES,
-            totalModules: 4,
-            completedModules: 1,
-            pendingModules: 2,
-          })
-        );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
 
-      const initialCalls = (systemInitService.getAvailableModules as jest.Mock).mock
-        .calls.length;
+      const initialCalls = (systemInitService.getAvailableModules as jest.Mock)
+        .mock.calls.length;
 
       // Destroy the component
       fixture.destroy();
@@ -1102,23 +1163,23 @@ describe('SystemInitDashboardPage', () => {
       tick(30000);
 
       // No new calls should be made after destroy
-      expect((systemInitService.getAvailableModules as jest.Mock).mock.calls.length).toBe(
-        initialCalls
-      );
+      expect(
+        (systemInitService.getAvailableModules as jest.Mock).mock.calls.length,
+      ).toBe(initialCalls);
     }));
 
     it('should clean up subscriptions on component destroy', fakeAsync(() => {
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        of({
+          modules: MOCK_MODULES,
+          totalModules: 4,
+          completedModules: 1,
+          pendingModules: 2,
+        }),
+      );
       jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          of({
-            modules: MOCK_MODULES,
-            totalModules: 4,
-            completedModules: 1,
-            pendingModules: 2,
-          })
-        );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -1132,17 +1193,17 @@ describe('SystemInitDashboardPage', () => {
 
   describe('Filter Management', () => {
     beforeEach(fakeAsync(() => {
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        of({
+          modules: MOCK_MODULES,
+          totalModules: 4,
+          completedModules: 1,
+          pendingModules: 2,
+        }),
+      );
       jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          of({
-            modules: MOCK_MODULES,
-            totalModules: 4,
-            completedModules: 1,
-            pendingModules: 2,
-          })
-        );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -1195,17 +1256,17 @@ describe('SystemInitDashboardPage', () => {
 
   describe('Utility Methods', () => {
     beforeEach(fakeAsync(() => {
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        of({
+          modules: MOCK_MODULES,
+          totalModules: 4,
+          completedModules: 1,
+          pendingModules: 2,
+        }),
+      );
       jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          of({
-            modules: MOCK_MODULES,
-            totalModules: 4,
-            completedModules: 1,
-            pendingModules: 2,
-          })
-        );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -1246,40 +1307,54 @@ describe('SystemInitDashboardPage', () => {
 
   describe('Accessibility - ARIA Labels and Screen Reader Support', () => {
     beforeEach(fakeAsync(() => {
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        of({
+          modules: MOCK_MODULES,
+          totalModules: 4,
+          completedModules: 1,
+          pendingModules: 2,
+        }),
+      );
       jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          of({
-            modules: MOCK_MODULES,
-            totalModules: 4,
-            completedModules: 1,
-            pendingModules: 2,
-          })
-        );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
     }));
 
     it('should have aria-label on filter inputs', () => {
-      const inputs = fixture.nativeElement.querySelectorAll('input, select, mat-select');
+      const inputs = fixture.nativeElement.querySelectorAll(
+        'input, select, mat-select',
+      );
       expect(inputs.length).toBeGreaterThanOrEqual(0);
     });
 
     it('should have aria-label on domain filter', () => {
-      const domainFilter = fixture.nativeElement.querySelector('[aria-label*="domain"], [aria-label*="Domain"]');
-      expect(domainFilter || fixture.nativeElement.textContent.includes('Domain')).toBeTruthy();
+      const domainFilter = fixture.nativeElement.querySelector(
+        '[aria-label*="domain"], [aria-label*="Domain"]',
+      );
+      expect(
+        domainFilter || fixture.nativeElement.textContent.includes('Domain'),
+      ).toBeTruthy();
     });
 
     it('should have aria-label on status filter', () => {
-      const statusFilter = fixture.nativeElement.querySelector('[aria-label*="status"], [aria-label*="Status"]');
-      expect(statusFilter || fixture.nativeElement.textContent.includes('Status')).toBeTruthy();
+      const statusFilter = fixture.nativeElement.querySelector(
+        '[aria-label*="status"], [aria-label*="Status"]',
+      );
+      expect(
+        statusFilter || fixture.nativeElement.textContent.includes('Status'),
+      ).toBeTruthy();
     });
 
     it('should have aria-label on search input', () => {
-      const searchInput = fixture.nativeElement.querySelector('input[type="text"], [aria-label*="search"], [aria-label*="Search"]');
-      expect(searchInput || fixture.nativeElement.textContent.includes('Search')).toBeTruthy();
+      const searchInput = fixture.nativeElement.querySelector(
+        'input[type="text"], [aria-label*="search"], [aria-label*="Search"]',
+      );
+      expect(
+        searchInput || fixture.nativeElement.textContent.includes('Search'),
+      ).toBeTruthy();
     });
 
     it('should have role="region" on main sections', () => {
@@ -1288,22 +1363,32 @@ describe('SystemInitDashboardPage', () => {
     });
 
     it('should have role="region" for overview cards section', () => {
-      const overviewSection = fixture.nativeElement.querySelector('.overview-cards, [role="region"]');
-      expect(overviewSection || fixture.nativeElement.textContent.includes('Total')).toBeTruthy();
+      const overviewSection = fixture.nativeElement.querySelector(
+        '.overview-cards, [role="region"]',
+      );
+      expect(
+        overviewSection || fixture.nativeElement.textContent.includes('Total'),
+      ).toBeTruthy();
     });
 
     it('should have role="region" for module grid section', () => {
-      const gridSection = fixture.nativeElement.querySelector('.modules-grid, [role="region"]');
+      const gridSection = fixture.nativeElement.querySelector(
+        '.modules-grid, [role="region"]',
+      );
       expect(gridSection || fixture.nativeElement.textContent).toBeTruthy();
     });
 
     it('should have aria-live="polite" on status updates', () => {
-      const liveRegions = fixture.nativeElement.querySelectorAll('[aria-live="polite"]');
+      const liveRegions = fixture.nativeElement.querySelectorAll(
+        '[aria-live="polite"]',
+      );
       expect(liveRegions.length).toBeGreaterThanOrEqual(0);
     });
 
     it('should have aria-label on module import buttons', () => {
-      const buttons = fixture.nativeElement.querySelectorAll('button[aria-label], button');
+      const buttons = fixture.nativeElement.querySelectorAll(
+        'button[aria-label], button',
+      );
       expect(buttons.length).toBeGreaterThan(0);
     });
 
@@ -1313,13 +1398,19 @@ describe('SystemInitDashboardPage', () => {
     });
 
     it('should have aria-label on module rollback button', () => {
-      const rollbackButtons = fixture.nativeElement.querySelectorAll('button[aria-label*="rollback"], button[aria-label*="Rollback"]');
+      const rollbackButtons = fixture.nativeElement.querySelectorAll(
+        'button[aria-label*="rollback"], button[aria-label*="Rollback"]',
+      );
       expect(rollbackButtons.length).toBeGreaterThanOrEqual(0);
     });
 
     it('should have aria-label on refresh button', () => {
-      const refreshButton = fixture.nativeElement.querySelector('button[aria-label*="refresh"], button[aria-label*="Refresh"]');
-      expect(refreshButton || fixture.nativeElement.textContent.includes('Refresh')).toBeTruthy();
+      const refreshButton = fixture.nativeElement.querySelector(
+        'button[aria-label*="refresh"], button[aria-label*="Refresh"]',
+      );
+      expect(
+        refreshButton || fixture.nativeElement.textContent.includes('Refresh'),
+      ).toBeTruthy();
     });
 
     it('should have proper heading hierarchy', () => {
@@ -1348,44 +1439,53 @@ describe('SystemInitDashboardPage', () => {
     }));
 
     it('should have accessible status badges with aria-label', () => {
-      const badges = fixture.nativeElement.querySelectorAll('mat-chip, .badge, .status');
+      const badges = fixture.nativeElement.querySelectorAll(
+        'mat-chip, .badge, .status',
+      );
       expect(badges.length).toBeGreaterThanOrEqual(0);
     });
 
     it('should have role="button" on interactive elements', () => {
-      const buttons = fixture.nativeElement.querySelectorAll('button, [role="button"]');
+      const buttons = fixture.nativeElement.querySelectorAll(
+        'button, [role="button"]',
+      );
       expect(buttons.length).toBeGreaterThan(0);
     });
 
     it('should have clear labeling for filter selects', () => {
-      const selects = fixture.nativeElement.querySelectorAll('select, mat-select');
+      const selects =
+        fixture.nativeElement.querySelectorAll('select, mat-select');
       expect(selects.length).toBeGreaterThanOrEqual(0);
     });
 
     it('should have aria-describedby for form fields', () => {
-      const formFields = fixture.nativeElement.querySelectorAll('mat-form-field, .form-field');
+      const formFields = fixture.nativeElement.querySelectorAll(
+        'mat-form-field, .form-field',
+      );
       expect(formFields.length).toBeGreaterThanOrEqual(0);
     });
 
     it('should provide text alternatives for icons', () => {
-      const icons = fixture.nativeElement.querySelectorAll('mat-icon, i.material-icons');
+      const icons = fixture.nativeElement.querySelectorAll(
+        'mat-icon, i.material-icons',
+      );
       expect(icons.length).toBeGreaterThanOrEqual(0);
     });
   });
 
   describe('Computed Signal Dependencies', () => {
     beforeEach(fakeAsync(() => {
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        of({
+          modules: MOCK_MODULES,
+          totalModules: 4,
+          completedModules: 1,
+          pendingModules: 2,
+        }),
+      );
       jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          of({
-            modules: MOCK_MODULES,
-            totalModules: 4,
-            completedModules: 1,
-            pendingModules: 2,
-          })
-        );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -1459,17 +1559,17 @@ describe('SystemInitDashboardPage', () => {
 
   describe('MatDialog - Import Wizard Dialog', () => {
     beforeEach(fakeAsync(() => {
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        of({
+          modules: MOCK_MODULES,
+          totalModules: 4,
+          completedModules: 1,
+          pendingModules: 2,
+        }),
+      );
       jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          of({
-            modules: MOCK_MODULES,
-            totalModules: 4,
-            completedModules: 1,
-            pendingModules: 2,
-          })
-        );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -1553,7 +1653,7 @@ describe('SystemInitDashboardPage', () => {
           ImportWizardDialog,
           expect.objectContaining({
             data: { module },
-          })
+          }),
         );
       });
 
@@ -1572,7 +1672,7 @@ describe('SystemInitDashboardPage', () => {
           ImportWizardDialog,
           expect.objectContaining({
             data: expect.objectContaining({ module }),
-          })
+          }),
         );
       });
 
@@ -1596,12 +1696,16 @@ describe('SystemInitDashboardPage', () => {
 
       it('should handle dialog result observable after import wizard completes', () => {
         const mockDialogRef: Partial<MatDialogRef<ImportWizardDialog>> = {
-          afterClosed: jest.fn().mockReturnValue(
-            of({ success: true, jobId: 'job-123' } as ImportWizardResult)
-          ),
+          afterClosed: jest
+            .fn()
+            .mockReturnValue(
+              of({ success: true, jobId: 'job-123' } as ImportWizardResult),
+            ),
         };
 
-        jest.spyOn(dialog, 'open').mockReturnValue(mockDialogRef as MatDialogRef<ImportWizardDialog>);
+        jest
+          .spyOn(dialog, 'open')
+          .mockReturnValue(mockDialogRef as MatDialogRef<ImportWizardDialog>);
 
         const dialogRef = dialog.open(ImportWizardDialog, {
           data: { module: MOCK_MODULES[0] },
@@ -1618,12 +1722,16 @@ describe('SystemInitDashboardPage', () => {
       it('should handle successful import wizard completion', (done) => {
         const module = MOCK_MODULES[0];
         const mockDialogRef: Partial<MatDialogRef<ImportWizardDialog>> = {
-          afterClosed: jest.fn().mockReturnValue(
-            of({ success: true, jobId: 'job-456' } as ImportWizardResult)
-          ),
+          afterClosed: jest
+            .fn()
+            .mockReturnValue(
+              of({ success: true, jobId: 'job-456' } as ImportWizardResult),
+            ),
         };
 
-        jest.spyOn(dialog, 'open').mockReturnValue(mockDialogRef as MatDialogRef<ImportWizardDialog>);
+        jest
+          .spyOn(dialog, 'open')
+          .mockReturnValue(mockDialogRef as MatDialogRef<ImportWizardDialog>);
 
         const dialogRef = dialog.open(ImportWizardDialog, {
           data: { module },
@@ -1642,7 +1750,9 @@ describe('SystemInitDashboardPage', () => {
           afterClosed: jest.fn().mockReturnValue(of(undefined)),
         };
 
-        jest.spyOn(dialog, 'open').mockReturnValue(mockDialogRef as MatDialogRef<ImportWizardDialog>);
+        jest
+          .spyOn(dialog, 'open')
+          .mockReturnValue(mockDialogRef as MatDialogRef<ImportWizardDialog>);
 
         const dialogRef = dialog.open(ImportWizardDialog, {
           data: { module: MOCK_MODULES[0] },
@@ -1665,7 +1775,9 @@ describe('SystemInitDashboardPage', () => {
         const config = dialogSpy.mock.calls[0][1];
         expect(config.data.module.lastImport).toBeDefined();
         expect(config.data.module.lastImport.jobId).toBe('job-1');
-        expect(config.data.module.lastImport.importedBy.name).toBe('Admin User');
+        expect(config.data.module.lastImport.importedBy.name).toBe(
+          'Admin User',
+        );
       });
 
       it('should support multiple dialog opens for different modules', () => {
@@ -1689,12 +1801,16 @@ describe('SystemInitDashboardPage', () => {
 
         // When implementation adds dialog, successful result should trigger refresh
         const mockDialogRef: Partial<MatDialogRef<ImportWizardDialog>> = {
-          afterClosed: jest.fn().mockReturnValue(
-            of({ success: true, jobId: 'job-789' } as ImportWizardResult)
-          ),
+          afterClosed: jest
+            .fn()
+            .mockReturnValue(
+              of({ success: true, jobId: 'job-789' } as ImportWizardResult),
+            ),
         };
 
-        jest.spyOn(dialog, 'open').mockReturnValue(mockDialogRef as MatDialogRef<ImportWizardDialog>);
+        jest
+          .spyOn(dialog, 'open')
+          .mockReturnValue(mockDialogRef as MatDialogRef<ImportWizardDialog>);
 
         const dialogRef = dialog.open(ImportWizardDialog, {
           data: { module },
@@ -1714,17 +1830,17 @@ describe('SystemInitDashboardPage', () => {
 
   describe('Edge Cases and Boundary Conditions', () => {
     it('should handle empty modules list', fakeAsync(() => {
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        of({
+          modules: [],
+          totalModules: 0,
+          completedModules: 0,
+          pendingModules: 0,
+        }),
+      );
       jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          of({
-            modules: [],
-            totalModules: 0,
-            completedModules: 0,
-            pendingModules: 0,
-          })
-        );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -1744,22 +1860,22 @@ describe('SystemInitDashboardPage', () => {
     });
 
     it('should handle modules with all same domain', fakeAsync(() => {
-      const sameDomainModules = MOCK_MODULES.map(m => ({
+      const sameDomainModules = MOCK_MODULES.map((m) => ({
         ...m,
         domain: 'inventory',
       }));
 
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        of({
+          modules: sameDomainModules,
+          totalModules: 4,
+          completedModules: 1,
+          pendingModules: 2,
+        }),
+      );
       jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          of({
-            modules: sameDomainModules,
-            totalModules: 4,
-            completedModules: 1,
-            pendingModules: 2,
-          })
-        );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -1770,17 +1886,17 @@ describe('SystemInitDashboardPage', () => {
     }));
 
     it('should handle search with no results', fakeAsync(() => {
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        of({
+          modules: MOCK_MODULES,
+          totalModules: 4,
+          completedModules: 1,
+          pendingModules: 2,
+        }),
+      );
       jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          of({
-            modules: MOCK_MODULES,
-            totalModules: 4,
-            completedModules: 1,
-            pendingModules: 2,
-          })
-        );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -1790,17 +1906,17 @@ describe('SystemInitDashboardPage', () => {
     }));
 
     it('should handle special characters in search term', fakeAsync(() => {
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        of({
+          modules: MOCK_MODULES,
+          totalModules: 4,
+          completedModules: 1,
+          pendingModules: 2,
+        }),
+      );
       jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          of({
-            modules: MOCK_MODULES,
-            totalModules: 4,
-            completedModules: 1,
-            pendingModules: 2,
-          })
-        );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -1817,17 +1933,17 @@ describe('SystemInitDashboardPage', () => {
         priority: i,
       }));
 
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        of({
+          modules: largeModuleList,
+          totalModules: 1000,
+          completedModules: 500,
+          pendingModules: 500,
+        }),
+      );
       jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          of({
-            modules: largeModuleList,
-            totalModules: 1000,
-            completedModules: 500,
-            pendingModules: 500,
-          })
-        );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -1839,17 +1955,17 @@ describe('SystemInitDashboardPage', () => {
 
   describe('Keyboard Navigation - Accessibility (a11y)', () => {
     beforeEach(fakeAsync(() => {
+      jest.spyOn(systemInitService, 'getAvailableModules').mockReturnValue(
+        of({
+          modules: MOCK_MODULES,
+          totalModules: 4,
+          completedModules: 1,
+          pendingModules: 2,
+        }),
+      );
       jest
-        .spyOn(systemInitService, 'getAvailableModules')
-        .mockReturnValue(
-          of({
-            modules: MOCK_MODULES,
-            totalModules: 4,
-            completedModules: 1,
-            pendingModules: 2,
-          })
-        );
-      jest.spyOn(systemInitService, 'getDashboard').mockReturnValue(of(MOCK_DASHBOARD));
+        .spyOn(systemInitService, 'getDashboard')
+        .mockReturnValue(of(MOCK_DASHBOARD));
 
       fixture.detectChanges();
       tick();
@@ -1905,7 +2021,9 @@ describe('SystemInitDashboardPage', () => {
         document.dispatchEvent(event);
 
         expect(component.selectedDomain()).toBe('inventory');
-        expect(component.filteredModules().every(m => m.domain === 'inventory')).toBe(true);
+        expect(
+          component.filteredModules().every((m) => m.domain === 'inventory'),
+        ).toBe(true);
       });
 
       it('should apply status filter when Enter pressed', () => {
@@ -1915,7 +2033,11 @@ describe('SystemInitDashboardPage', () => {
         document.dispatchEvent(event);
 
         expect(component.selectedStatus()).toBe('completed');
-        expect(component.filteredModules().every(m => m.importStatus === 'completed')).toBe(true);
+        expect(
+          component
+            .filteredModules()
+            .every((m) => m.importStatus === 'completed'),
+        ).toBe(true);
       });
 
       it('should apply search filter when Enter pressed in search field', () => {
@@ -1926,7 +2048,9 @@ describe('SystemInitDashboardPage', () => {
 
         expect(component.searchTerm()).toBe('drug');
         expect(
-          component.filteredModules().some(m => m.displayName.toLowerCase().includes('drug'))
+          component
+            .filteredModules()
+            .some((m) => m.displayName.toLowerCase().includes('drug')),
         ).toBe(true);
       });
 
@@ -2054,7 +2178,9 @@ describe('SystemInitDashboardPage', () => {
       it('should reflect keyboard input in computed filteredModules', () => {
         component.searchTerm.set('drug');
         let filtered = component.filteredModules();
-        expect(filtered.some(m => m.displayName.toLowerCase().includes('drug'))).toBe(true);
+        expect(
+          filtered.some((m) => m.displayName.toLowerCase().includes('drug')),
+        ).toBe(true);
 
         component.searchTerm.set('locations');
         filtered = component.filteredModules();

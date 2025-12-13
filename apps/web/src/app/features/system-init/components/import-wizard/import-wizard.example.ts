@@ -6,7 +6,11 @@
 
 import { Component, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { ImportWizardDialog, ImportWizardData, ImportWizardResult } from './import-wizard.dialog';
+import {
+  ImportWizardDialog,
+  ImportWizardData,
+  ImportWizardResult,
+} from './import-wizard.dialog';
 import type { ImportModule } from '../../types/system-init.types';
 
 @Component({
@@ -15,7 +19,7 @@ import type { ImportModule } from '../../types/system-init.types';
     <button mat-raised-button color="primary" (click)="openImportWizard()">
       Open Import Wizard
     </button>
-  `
+  `,
 })
 export class ExampleUsageComponent {
   private dialog = inject(MatDialog);
@@ -30,21 +34,25 @@ export class ExampleUsageComponent {
     dependencies: [],
     priority: 1,
     importStatus: 'not_started',
-    recordCount: 0
+    recordCount: 0,
+    tags: [],
+    supportsRollback: false,
+    version: '1.0.0',
   };
 
   openImportWizard() {
-    const dialogRef = this.dialog.open<ImportWizardDialog, ImportWizardData, ImportWizardResult>(
+    const dialogRef = this.dialog.open<
       ImportWizardDialog,
-      {
-        width: '800px',
-        maxHeight: '90vh',
-        data: { module: this.exampleModule },
-        disableClose: true // Prevent accidental close during import
-      }
-    );
+      ImportWizardData,
+      ImportWizardResult
+    >(ImportWizardDialog, {
+      width: '800px',
+      maxHeight: '90vh',
+      data: { module: this.exampleModule },
+      disableClose: true, // Prevent accidental close during import
+    });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result) => {
       if (result?.success) {
         console.log('Import completed successfully!', result.jobId);
         // Refresh data, show success message, etc.
