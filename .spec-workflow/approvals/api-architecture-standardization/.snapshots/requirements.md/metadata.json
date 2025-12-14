@@ -1,0 +1,22 @@
+{
+  "filePath": ".spec-workflow/specs/api-architecture-standardization/requirements.md",
+  "currentVersion": 2,
+  "snapshots": [
+    {
+      "version": 1,
+      "filename": "snapshot-001.json",
+      "timestamp": "2025-12-14T08:16:22.299Z",
+      "trigger": "initial",
+      "approvalId": "approval_1765700182287_3b8bck5kb",
+      "approvalTitle": "Requirements Document - API Architecture Standardization"
+    },
+    {
+      "version": 2,
+      "filename": "snapshot-002.json",
+      "timestamp": "2025-12-14T08:18:13.334Z",
+      "trigger": "approved",
+      "approvalId": "approval_1765700182287_3b8bck5kb",
+      "approvalTitle": "Requirements Document - API Architecture Standardization"
+    }
+  ]
+}

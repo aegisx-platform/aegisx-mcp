@@ -1,0 +1,14 @@
+{
+  "filePath": ".spec-workflow/specs/core-departments/design.md",
+  "currentVersion": 1,
+  "snapshots": [
+    {
+      "version": 1,
+      "filename": "snapshot-001.json",
+      "timestamp": "2025-12-14T05:55:58.260Z",
+      "trigger": "initial",
+      "approvalId": "approval_1765691758242_3dxttfe42",
+      "approvalTitle": "Design: Core Departments"
+    }
+  ]
+}

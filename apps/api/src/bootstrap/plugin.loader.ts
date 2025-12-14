@@ -55,9 +55,8 @@ import settingsPlugin from '../core/settings/settings.plugin';
 import userProfilePlugin from '../core/user-profile/user-profile.plugin';
 
 // Platform layer modules (migrated to layers/platform/)
-// TODO: Tasks 3.1 and 3.2 - Uncomment when departments and settings migrations are complete
-// import platformDepartmentsPlugin from '../layers/platform/departments';
-// import platformSettingsPlugin from '../layers/platform/settings';
+import platformDepartmentsPlugin from '../layers/platform/departments';
+import { settingsPlugin as platformSettingsPlugin } from '../layers/platform/settings';
 import { navigationPlugin as platformNavigationPlugin } from '../layers/platform/navigation';
 
 // Business feature modules (ready for HIS, Inventory, etc.)
@@ -274,6 +273,11 @@ export function createPluginGroups(
       description: 'Application-specific plugins',
       plugins: [
         {
+          name: 'websocket',
+          plugin: websocketPlugin,
+          required: true,
+        },
+        {
           name: 'auth-strategies',
           plugin: authStrategiesPlugin,
           required: true,
@@ -488,17 +492,16 @@ export function createPlatformLayerGroup(): PluginGroup {
     plugins: [
       // Platform layer plugins loaded from apps/api/src/layers/platform/
       // Phase 3 migrations: departments (3.1), settings (3.2), navigation (3.3)
-      // TODO: Tasks 3.1 and 3.2 - Uncomment when departments and settings migrations are complete
-      // {
-      //   name: 'platform-departments',
-      //   plugin: platformDepartmentsPlugin,
-      //   required: true,
-      // },
-      // {
-      //   name: 'platform-settings',
-      //   plugin: platformSettingsPlugin,
-      //   required: true,
-      // },
+      {
+        name: 'platform-departments',
+        plugin: platformDepartmentsPlugin,
+        required: true,
+      },
+      {
+        name: 'platform-settings',
+        plugin: platformSettingsPlugin,
+        required: true,
+      },
       {
         name: 'platform-navigation',
         plugin: platformNavigationPlugin,

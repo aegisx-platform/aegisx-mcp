@@ -1,0 +1,22 @@
+{
+  "filePath": ".spec-workflow/specs/api-architecture-standardization/design.md",
+  "currentVersion": 2,
+  "snapshots": [
+    {
+      "version": 1,
+      "filename": "snapshot-001.json",
+      "timestamp": "2025-12-14T08:22:41.577Z",
+      "trigger": "initial",
+      "approvalId": "approval_1765700561567_2i12x4q43",
+      "approvalTitle": "Design Document - API Architecture Standardization"
+    },
+    {
+      "version": 2,
+      "filename": "snapshot-002.json",
+      "timestamp": "2025-12-14T08:23:10.749Z",
+      "trigger": "approved",
+      "approvalId": "approval_1765700561567_2i12x4q43",
+      "approvalTitle": "Design Document - API Architecture Standardization"
+    }
+  ]
+}

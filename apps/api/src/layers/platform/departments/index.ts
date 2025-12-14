@@ -36,6 +36,13 @@ export default async function platformDepartmentsPlugin(
   // Create service with repository
   const departmentsService = new DepartmentsService(departmentsRepository);
 
+  // Verify event service is available (should be decorated by websocket plugin)
+  if (!(fastify as any).eventService) {
+    throw new Error(
+      'EventService not available - websocket plugin must load first',
+    );
+  }
+
   // Create controller with service and event service for real-time updates
   const departmentsController = new DepartmentsController(
     departmentsService,
