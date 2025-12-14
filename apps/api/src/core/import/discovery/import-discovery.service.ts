@@ -139,20 +139,19 @@ export class ImportDiscoveryService {
    */
   private scanForImportServices(): string[] {
     const files: string[] = [];
-    const basePath = path.join(process.cwd(), 'apps/api/src/modules');
+    // Scan both modules and core directories for import services
+    const basePaths = [
+      path.join(process.cwd(), 'apps/api/src/modules'),
+      path.join(process.cwd(), 'apps/api/src/core'),
+    ];
 
     try {
-      // Check if modules directory exists
-      if (!fs.existsSync(basePath)) {
-        this.logger.warn(
-          '[ImportDiscovery] Modules directory not found:',
-          basePath,
-        );
-        return [];
+      // Scan each base path for import service files
+      for (const basePath of basePaths) {
+        if (fs.existsSync(basePath)) {
+          this.scanDirectory(basePath, files);
+        }
       }
-
-      // Recursively scan for import service files
-      this.scanDirectory(basePath, files);
 
       // Filter and normalize paths
       return files
@@ -231,7 +230,6 @@ export class ImportDiscoveryService {
 
         // Dynamic import to trigger decorators
         try {
-           
           require(pathToImport);
         } catch {
           // If require fails, try import (for ESM modules)
