@@ -205,7 +205,7 @@
   - _Requirements: 1, 3, 8_
   - _Prompt: Implement the task for spec api-architecture-standardization, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Backend Developer with document processing expertise | Task: Migrate pdf-export and import modules to Platform layer, testing document generation and import flows | Restrictions: Must verify PDF generation quality, test import validation, check error handling | Success: Modules migrated successfully, PDF generation works, import flows functional | Instructions: 1) Mark in-progress, 2) Log with artifacts (sample PDFs, import tests), 3) Mark complete_
 
-- [ ] 3.9. Test Batch 2 migrations in staging
+- [x] 3.9. Test Batch 2 migrations in staging
   - Run comprehensive integration tests
   - Test critical user flows (authentication, authorization, file operations)
   - Monitor performance and error rates
