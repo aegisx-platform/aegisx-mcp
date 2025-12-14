@@ -11,6 +11,8 @@
     "dev": "./scripts/load-env.sh nx run-many --target=serve --projects=api,web --parallel",
     "dev:all": "./scripts/load-env.sh nx run-many --target=serve --projects=api,web,admin --parallel",
     "dev:api": "./scripts/load-env.sh sh -c 'PORT=$API_PORT nx serve api'",
+    "dev:api:clean": "lsof -ti:${API_PORT:-3383} | xargs kill -9 2>/dev/null || true && pnpm run dev:api",
+    "kill:api": "lsof -ti:${API_PORT:-3383} | xargs kill -9 2>/dev/null || true",
     "dev:web": "./scripts/load-env.sh nx serve web --port='${WEB_PORT:-4200}'",
     "dev:admin": "./scripts/load-env.sh nx serve admin --port='${ADMIN_PORT:-4201}'",
     "build": "nx run-many --target=build --all",
