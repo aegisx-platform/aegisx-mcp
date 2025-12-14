@@ -59,6 +59,7 @@ import platformDepartmentsPlugin from '../layers/platform/departments';
 import { settingsPlugin as platformSettingsPlugin } from '../layers/platform/settings';
 import { navigationPlugin as platformNavigationPlugin } from '../layers/platform/navigation';
 import platformUsersPlugin from '../layers/platform/users';
+import { platformRbacPlugin } from '../layers/platform/rbac';
 
 // Business feature modules (ready for HIS, Inventory, etc.)
 import websocketPlugin from '../shared/websocket/websocket.plugin';
@@ -512,6 +513,11 @@ export function createPlatformLayerGroup(): PluginGroup {
       {
         name: 'platform-users',
         plugin: platformUsersPlugin,
+        required: true,
+      },
+      {
+        name: 'platform-rbac',
+        plugin: platformRbacPlugin,
         required: true,
       },
     ],

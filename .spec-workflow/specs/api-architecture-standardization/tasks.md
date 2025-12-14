@@ -179,7 +179,7 @@
   - _Requirements: 1, 3, 8_
   - _Prompt: Implement the task for spec api-architecture-standardization, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Senior Backend Developer with high-impact migration expertise | Task: Migrate critical users module to Platform layer, removing fp() wrapper and updating all references with extra caution due to module's importance | Restrictions: Extra testing required, verify all dependent modules, monitor closely in production | Success: Users module migrated safely, all references updated, comprehensive tests pass | Instructions: 1) Mark in-progress, 2) Log with artifacts (impact analysis, test results), 3) Mark complete_
 
-- [ ] 3.6. Migrate rbac module to Platform layer
+- [x] 3.6. Migrate rbac module to Platform layer
   - Copy: `apps/api/src/core/rbac/` → `apps/api/src/layers/platform/rbac/`
   - Remove fp() wrapper from rbac.plugin.ts
   - Keep permission-cache.plugin.ts as-is (infrastructure)
