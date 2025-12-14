@@ -75,10 +75,17 @@ export abstract class BaseImportService<
   protected importHistoryRepository: ImportHistoryRepository;
 
   /**
+   * Knex database instance
+   * @protected
+   */
+  protected knex: Knex;
+
+  /**
    * Constructor
    * @param knex - Knex database instance
    */
-  constructor(protected knex: Knex) {
+  constructor(knex: Knex) {
+    this.knex = knex;
     this.importSessionRepository = new ImportSessionRepository(knex);
     this.importHistoryRepository = new ImportHistoryRepository(knex);
   }
@@ -202,7 +209,8 @@ export abstract class BaseImportService<
     });
 
     // Write to buffer
-    return workbook.xlsx.writeBuffer() as Promise<Buffer>;
+    const buffer = await workbook.xlsx.writeBuffer();
+    return buffer as Buffer;
   }
 
   /**
@@ -462,13 +470,23 @@ export abstract class BaseImportService<
         Papa.parse(csvContent, {
           header: false,
           skipEmptyLines: true,
+          comments: '#', // Skip lines starting with #
           complete: (results) => {
             const rows: any[] = [];
-            const headerRow = results.data[0] as string[];
 
-            // Process data rows
+            // Process data rows (skip header row at index 0)
             for (let i = 1; i < results.data.length; i++) {
               const rowData = results.data[i] as any[];
+
+              // Skip empty rows or rows with only empty values
+              if (
+                !rowData ||
+                rowData.length === 0 ||
+                rowData.every((v) => !v || String(v).trim() === '')
+              ) {
+                continue;
+              }
+
               const obj: Record<string, any> = {};
 
               columns.forEach((col, index) => {
@@ -519,6 +537,7 @@ export abstract class BaseImportService<
 
     const metadata = this.getMetadata();
     const jobId = uuidv4();
+    const batchId = uuidv4(); // Generate batch_id upfront for NOT NULL constraint
 
     // Create job record in database with user context
     await this.importHistoryRepository.create({
@@ -538,18 +557,22 @@ export abstract class BaseImportService<
       user_agent: context.userAgent,
       file_name: session.file_name,
       file_size_bytes: session.file_size_bytes,
+      batch_id: batchId, // Include batch_id in initial insert
     });
 
     // Start background import (non-blocking)
     setImmediate(() => {
-      this.executeImportJob(jobId, session, options).catch(async (error) => {
-        console.error(`Import job ${jobId} failed:`, error);
-        await this.importHistoryRepository.updateByJobId(jobId, {
-          status: ImportJobStatus.FAILED,
-          error_message: error instanceof Error ? error.message : String(error),
-          completed_at: new Date(),
-        });
-      });
+      this.executeImportJob(jobId, batchId, session, options).catch(
+        async (error) => {
+          console.error(`Import job ${jobId} failed:`, error);
+          await this.importHistoryRepository.updateByJobId(jobId, {
+            status: ImportJobStatus.FAILED,
+            error_message:
+              error instanceof Error ? error.message : String(error),
+            completed_at: new Date(),
+          });
+        },
+      );
     });
 
     return {
@@ -560,24 +583,22 @@ export abstract class BaseImportService<
 
   /**
    * Execute import job with transaction support
-   * Generates unique batch ID for all imported records
+   * Uses pre-generated batch ID for all imported records
    * @private
    */
   private async executeImportJob(
     jobId: string,
+    batchId: string,
     session: ImportSession,
     options: ImportOptions,
   ): Promise<void> {
-    const { randomUUID } = await import('crypto');
-    const batchId = randomUUID(); // Generate unique batch ID for this import job
     const batchSize = options.batchSize || 100;
     const trx = await this.knex.transaction();
 
     try {
-      // Update status to running and store batch_id
+      // Update status to running
       await this.importHistoryRepository.updateByJobId(jobId, {
         status: ImportJobStatus.RUNNING,
-        batch_id: batchId,
       });
 
       const rows = session.validated_data;

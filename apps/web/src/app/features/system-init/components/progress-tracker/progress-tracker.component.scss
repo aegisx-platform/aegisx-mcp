@@ -4,8 +4,12 @@
 :host {
   --card-padding: 24px;
   --card-border-radius: 8px;
-  --card-shadow-z2: 0px 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12);
-  --card-shadow-z4: 0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+  --card-shadow-z2:
+    0px 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14),
+    0px 1px 5px 0px rgba(0, 0, 0, 0.12);
+  --card-shadow-z4:
+    0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14),
+    0px 1px 10px 0px rgba(0, 0, 0, 0.12);
   --status-queued-bg: #fff3e0;
   --status-queued-border: #ff9800;
   --status-running-bg: #e3f2fd;
@@ -96,20 +100,26 @@ mat-card-header {
     .header-info {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 13px;
+      gap: 12px;
+      font-size: 12px;
+      padding: 8px 0;
+      margin-top: 4px;
 
       .label {
-        font-weight: 500;
-        color: rgba(0, 0, 0, 0.6);
+        font-weight: 600;
+        color: rgba(0, 0, 0, 0.54);
         flex-shrink: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
       }
 
       .value {
-        font-family: monospace;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
         color: rgba(0, 0, 0, 0.87);
         word-break: break-all;
         flex-grow: 1;
+        font-size: 11px;
+        font-weight: 500;
       }
     }
   }
@@ -133,18 +143,23 @@ mat-card-content {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 12px;
 
       .progress-title {
         margin: 0;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 600;
-        color: rgba(0, 0, 0, 0.87);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: rgba(0, 0, 0, 0.6);
       }
 
       .progress-percent {
-        font-size: 13px;
+        font-size: 12px;
         color: rgba(0, 0, 0, 0.7);
-        font-family: monospace;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        font-weight: 500;
+        white-space: nowrap;
       }
     }
 
@@ -158,23 +173,27 @@ mat-card-content {
   .time-section {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 12px;
 
     .section-title {
       margin: 0;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
-      color: rgba(0, 0, 0, 0.87);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: rgba(0, 0, 0, 0.6);
+      padding: 0 0 8px 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     }
 
     .batch-info,
     .time-info {
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      padding: 12px;
-      background-color: rgba(0, 0, 0, 0.02);
-      border-radius: 4px;
+      gap: 10px;
+      padding: 0;
+      background-color: transparent;
+      border-radius: 0;
     }
   }
 
@@ -184,20 +203,29 @@ mat-card-content {
     gap: 12px;
     font-size: 13px;
     color: rgba(0, 0, 0, 0.87);
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+
+    &:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
 
     .time-icon {
       font-size: 18px;
       width: 18px;
       height: 18px;
-      color: rgba(0, 0, 0, 0.54);
+      color: rgba(0, 0, 0, 0.4);
       flex-shrink: 0;
     }
 
     .info-label {
       font-weight: 500;
-      color: rgba(0, 0, 0, 0.6);
+      color: rgba(0, 0, 0, 0.54);
       flex-shrink: 0;
       white-space: nowrap;
+      font-size: 12px;
+      letter-spacing: 0.3px;
     }
 
     .info-value {
@@ -206,6 +234,7 @@ mat-card-content {
       word-break: break-all;
       flex-grow: 1;
       text-align: right;
+      font-weight: 500;
     }
   }
 
@@ -319,8 +348,12 @@ mat-card-actions {
 
 // Animations
 @keyframes rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 // Responsive Design
@@ -450,7 +483,7 @@ mat-card-actions {
 
     .header-info {
       .label {
-        color: rgba(255, 255, 255, 0.6);
+        color: rgba(255, 255, 255, 0.54);
       }
 
       .value {
@@ -462,33 +495,35 @@ mat-card-actions {
   mat-card-content {
     .progress-section .progress-header {
       .progress-title {
-        color: rgba(255, 255, 255, 0.87);
+        color: rgba(255, 255, 255, 0.7);
       }
 
       .progress-percent {
-        color: rgba(255, 255, 255, 0.7);
+        color: rgba(255, 255, 255, 0.6);
       }
     }
 
     .batch-section .section-title,
     .time-section .section-title {
-      color: rgba(255, 255, 255, 0.87);
+      color: rgba(255, 255, 255, 0.7);
+      border-bottom-color: rgba(255, 255, 255, 0.08);
     }
 
     .batch-info,
     .time-info {
-      background-color: rgba(255, 255, 255, 0.05);
+      background-color: transparent;
     }
 
     .info-row {
       color: rgba(255, 255, 255, 0.87);
+      border-bottom-color: rgba(255, 255, 255, 0.04);
 
       .time-icon {
-        color: rgba(255, 255, 255, 0.54);
+        color: rgba(255, 255, 255, 0.4);
       }
 
       .info-label {
-        color: rgba(255, 255, 255, 0.6);
+        color: rgba(255, 255, 255, 0.54);
       }
 
       .info-value {

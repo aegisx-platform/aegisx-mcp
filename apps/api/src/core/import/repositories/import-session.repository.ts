@@ -92,8 +92,9 @@ export class ImportSessionRepository extends BaseRepository<ImportSession> {
       file_name: data.file_name,
       file_size_bytes: data.file_size_bytes || null,
       file_type: data.file_type || null,
-      validated_data: data.validated_data,
-      validation_result: data.validation_result,
+      // JSON/JSONB columns require serialized strings in PostgreSQL
+      validated_data: JSON.stringify(data.validated_data),
+      validation_result: JSON.stringify(data.validation_result),
       can_proceed: data.can_proceed,
       created_at: now,
       expires_at: expiresAt,

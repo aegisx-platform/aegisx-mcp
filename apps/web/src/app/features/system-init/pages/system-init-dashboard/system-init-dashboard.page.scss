@@ -157,6 +157,8 @@
     font-size: var(--ax-text-lg);
     font-weight: var(--ax-font-semibold);
     color: var(--ax-text-primary);
+    background: none !important;
+    background-color: transparent !important;
   }
 
   .overview-grid {
@@ -229,6 +231,8 @@
     font-size: var(--ax-text-lg);
     font-weight: var(--ax-font-semibold);
     color: var(--ax-text-primary);
+    background: none !important;
+    background-color: transparent !important;
   }
 
   .filters-container {
@@ -362,6 +366,8 @@
     font-size: var(--ax-text-lg);
     font-weight: var(--ax-font-semibold);
     color: var(--ax-text-primary);
+    background: none !important;
+    background-color: transparent !important;
   }
 }
 

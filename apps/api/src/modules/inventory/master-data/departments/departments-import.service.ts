@@ -55,7 +55,7 @@ export class DepartmentsImportService extends BaseImportService<Departments> {
    * Constructor
    * @param knex - Knex database instance
    */
-  constructor(protected knex: Knex) {
+  constructor(knex: Knex) {
     super(knex);
     this.repository = new DepartmentsRepository(knex);
     this.moduleName = 'departments';
@@ -188,8 +188,12 @@ export class DepartmentsImportService extends BaseImportService<Departments> {
       }
     }
 
-    // 3. Validate hospital_id if provided
-    if (row.hospital_id !== undefined && row.hospital_id !== null) {
+    // 3. Validate hospital_id if provided (optional - skip if hospitals table doesn't exist)
+    if (
+      row.hospital_id !== undefined &&
+      row.hospital_id !== null &&
+      row.hospital_id !== ''
+    ) {
       const hospitalId = parseInt(row.hospital_id, 10);
 
       if (isNaN(hospitalId)) {
@@ -201,19 +205,27 @@ export class DepartmentsImportService extends BaseImportService<Departments> {
           code: 'INVALID_TYPE',
         });
       } else {
-        // Check if hospital exists
-        const hospital = await this.knex('public.hospitals')
-          .where('id', hospitalId)
-          .first();
+        // Check if hospitals table exists before validating
+        try {
+          const tableExists = await this.knex.schema.hasTable('hospitals');
+          if (tableExists) {
+            const hospital = await this.knex('hospitals')
+              .where('id', hospitalId)
+              .first();
 
-        if (!hospital) {
-          errors.push({
-            row: rowNumber,
-            field: 'hospital_id',
-            message: `Hospital with ID ${hospitalId} does not exist`,
-            severity: 'ERROR',
-            code: 'INVALID_REFERENCE',
-          });
+            if (!hospital) {
+              errors.push({
+                row: rowNumber,
+                field: 'hospital_id',
+                message: `Hospital with ID ${hospitalId} does not exist`,
+                severity: 'ERROR',
+                code: 'INVALID_REFERENCE',
+              });
+            }
+          }
+          // If table doesn't exist, skip validation (hospital_id is optional)
+        } catch {
+          // If error checking table, skip validation
         }
       }
     }
@@ -270,6 +282,11 @@ export class DepartmentsImportService extends BaseImportService<Departments> {
       try {
         // Transform row data to database format
         const dbData = this.transformRowToDb(row);
+
+        // Include import_batch_id from the row (added by parent class)
+        if (row.import_batch_id) {
+          dbData.import_batch_id = row.import_batch_id;
+        }
 
         // Insert into database
         const [inserted] = await trx('inventory.departments')

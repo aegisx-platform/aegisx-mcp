@@ -19,12 +19,24 @@
           <span>Refresh</span>
         </button>
 
-        <button mat-raised-button color="primary" class="action-btn">
+        <button
+          mat-raised-button
+          color="primary"
+          class="action-btn"
+          [disabled]="true"
+          matTooltip="Coming Soon"
+        >
           <mat-icon>history</mat-icon>
           <span>Import History</span>
         </button>
 
-        <button mat-raised-button color="primary" class="action-btn">
+        <button
+          mat-raised-button
+          color="primary"
+          class="action-btn"
+          [disabled]="true"
+          matTooltip="Coming Soon"
+        >
           <mat-icon>settings</mat-icon>
           <span>Settings</span>
         </button>
@@ -71,13 +83,13 @@
       >
       </ax-kpi-card>
 
-      <!-- Completed Card -->
+      <!-- Pending Card -->
       <ax-kpi-card
         variant="accent"
-        label="Completed"
-        [value]="completedModules()"
-        subtitle="MODULES COMPLETED"
-        accentColor="success"
+        label="Pending"
+        [value]="pendingModules()"
+        subtitle="MODULES PENDING"
+        accentColor="error"
         accentPosition="top"
         [hoverable]="true"
       >
@@ -95,13 +107,13 @@
       >
       </ax-kpi-card>
 
-      <!-- Pending Card -->
+      <!-- Completed Card -->
       <ax-kpi-card
         variant="accent"
-        label="Pending"
-        [value]="pendingModules()"
-        subtitle="MODULES PENDING"
-        accentColor="error"
+        label="Completed"
+        [value]="completedModules()"
+        subtitle="MODULES COMPLETED"
+        accentColor="success"
         accentPosition="top"
         [hoverable]="true"
       >

@@ -24,9 +24,11 @@ import { TestProductsRepository } from '../repositories/test-products.repository
  * TestProducts Import Service Configuration
  */
 export class TestProductsImportService extends BaseImportService<TestProducts> {
+  private testProductsRepository: TestProductsRepository;
+
   constructor(
     knex: Knex,
-    private testProductsRepository: TestProductsRepository,
+    testProductsRepository: TestProductsRepository,
     eventService?: any, // EventService for WebSocket progress updates
   ) {
     super(
@@ -35,6 +37,7 @@ export class TestProductsImportService extends BaseImportService<TestProducts> {
       'testProducts',
       eventService, // Pass eventService to BaseImportService for progress events
     );
+    this.testProductsRepository = testProductsRepository;
   }
 
   /**

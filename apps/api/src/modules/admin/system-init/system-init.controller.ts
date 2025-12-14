@@ -217,10 +217,10 @@ export class SystemInitController {
     try {
       const { moduleName } = request.params;
 
-      // Parse multipart form data
-      const data = await request.file();
+      // Use @aegisx/fastify-multipart clean API
+      const { files } = await request.parseMultipart();
 
-      if (!data) {
+      if (!files || files.length === 0) {
         return reply.code(400).send({
           success: false,
           error: {
@@ -235,9 +235,11 @@ export class SystemInitController {
         } as ErrorResponse);
       }
 
-      // Convert stream to buffer
-      const buffer = await data.toBuffer();
-      const fileName = data.filename;
+      const file = files[0];
+
+      // Convert file to buffer
+      const buffer = await file.toBuffer();
+      const fileName = file.filename;
 
       // Additional check (defense in depth) - MAX_FILE_SIZE is 10MB
       const MAX_SIZE = 10 * 1024 * 1024;

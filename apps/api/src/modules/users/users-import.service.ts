@@ -62,7 +62,7 @@ export class UsersImportService extends BaseImportService<User> {
    * Constructor
    * @param knex - Knex database instance
    */
-  constructor(protected knex: Knex) {
+  constructor(knex: Knex) {
     super(knex);
     this.usersRepository = new UsersRepository(knex);
     this.userDepartmentsRepository = new UserDepartmentsRepository(knex);

@@ -118,7 +118,16 @@ export class ImportWizardDialog implements OnDestroy {
     const file = this.selectedFile();
     if (!file) return null;
 
-    const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+    // Dynamic unit selection (B, KB, MB, GB)
+    const units = ['B', 'KB', 'MB', 'GB'];
+    let size = file.size;
+    let unitIndex = 0;
+    while (size >= 1024 && unitIndex < units.length - 1) {
+      size /= 1024;
+      unitIndex++;
+    }
+    const formattedSize = `${size.toFixed(2)} ${units[unitIndex]}`;
+
     const isValidSize = file.size <= 10 * 1024 * 1024; // 10 MB
     const isValidType =
       file.name.endsWith('.csv') ||
@@ -127,7 +136,7 @@ export class ImportWizardDialog implements OnDestroy {
 
     return {
       name: file.name,
-      size: sizeInMB,
+      size: formattedSize,
       isValidSize,
       isValidType,
       isValid: isValidSize && isValidType,
@@ -414,12 +423,14 @@ export class ImportWizardDialog implements OnDestroy {
 
   // ===== Navigation =====
 
-  nextStep() {
+  async nextStep() {
     if (!this.canProceedToNextStep() || !this.canNavigate()) return;
 
     // Auto-validate when moving from step 2 to step 3
     if (this.currentStep() === 2 && !this.validationResult()) {
-      this.validateFile();
+      await this.validateFile();
+      // Only proceed if validation allows it
+      if (!this.canProceedToNextStep()) return;
     }
 
     if (this.currentStep() < this.totalSteps) {

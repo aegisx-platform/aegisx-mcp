@@ -124,9 +124,11 @@ export async function systemInitRoutes(fastify: FastifyInstance) {
           'Upload and validate CSV/Excel file for a module (multipart/form-data). File size limited to 10MB.',
         params: ModuleValidateParamSchema,
         consumes: ['multipart/form-data'],
+        security: [{ bearerAuth: [] }],
         response: {
           200: ValidateResponseSchema,
           400: ErrorResponseSchema,
+          401: ErrorResponseSchema,
           404: ErrorResponseSchema,
           413: {
             type: 'object',
@@ -139,6 +141,7 @@ export async function systemInitRoutes(fastify: FastifyInstance) {
           500: ErrorResponseSchema,
         },
       },
+      preValidation: [fastify.authenticate],
     },
     (request, reply) => controller.validateFile(request, reply),
   );
@@ -157,13 +160,16 @@ export async function systemInitRoutes(fastify: FastifyInstance) {
           'Start import from validated session (requires valid sessionId from validation)',
         params: ModuleValidateParamSchema,
         body: ImportDataRequestSchema,
+        security: [{ bearerAuth: [] }],
         response: {
           200: ImportResponseSchema,
           400: ErrorResponseSchema,
+          401: ErrorResponseSchema,
           404: ErrorResponseSchema,
           500: ErrorResponseSchema,
         },
       },
+      preValidation: [fastify.authenticate],
     },
     (request, reply) => controller.executeImport(request, reply),
   );
@@ -200,13 +206,16 @@ export async function systemInitRoutes(fastify: FastifyInstance) {
         summary: 'Rollback import job',
         description: 'Rollback a completed import job (if supported by module)',
         params: RollbackParamSchema,
+        security: [{ bearerAuth: [] }],
         response: {
           200: RollbackResponseSchema,
           400: ErrorResponseSchema,
+          401: ErrorResponseSchema,
           404: ErrorResponseSchema,
           500: ErrorResponseSchema,
         },
       },
+      preValidation: [fastify.authenticate],
     },
     (request, reply) => controller.rollbackImport(request, reply),
   );
