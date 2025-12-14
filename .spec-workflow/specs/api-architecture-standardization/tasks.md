@@ -111,7 +111,7 @@
   - _Requirements: 5_
   - _Prompt: Implement the task for spec api-architecture-standardization, first run spec-workflow-guide to get the workflow guide then implement the task: Role: QA Engineer with integration testing expertise | Task: Create comprehensive integration tests for route aliasing, testing HTTP 307 redirects, method/body preservation, and metrics logging | Restrictions: Must test all HTTP methods, verify redirect behavior, ensure tests are repeatable | Success: All tests pass, route aliasing behavior verified, edge cases covered | Instructions: 1) Mark in-progress, 2) Log with artifacts (test suite, test coverage), 3) Mark complete_
 
-- [ ] 2.7. Deploy to staging with feature flags disabled
+- [x] 2.7. Deploy to staging with feature flags disabled
   - Deploy changes to staging environment
   - Verify no behavior changes with flags disabled
   - Run smoke tests to ensure existing functionality works
@@ -119,7 +119,7 @@
   - _Requirements: 8_
   - _Prompt: Implement the task for spec api-architecture-standardization, first run spec-workflow-guide to get the workflow guide then implement the task: Role: DevOps Engineer with deployment and testing expertise | Task: Deploy setup phase changes to staging with both feature flags disabled, verifying zero impact on existing functionality through smoke tests | Restrictions: Must not affect production, verify rollback capability, monitor for errors | Success: Deployment succeeds, no functionality changes observed, smoke tests pass | Instructions: 1) Mark in-progress, 2) Log with artifacts (deployment logs, test results), 3) Mark complete_
 
-- [ ] 2.8. Enable new routes in staging and test
+- [x] 2.8. Enable new routes in staging and test
   - Set `ENABLE_NEW_ROUTES=true` in staging
   - Test that route aliasing works correctly
   - Verify old routes redirect to new routes
