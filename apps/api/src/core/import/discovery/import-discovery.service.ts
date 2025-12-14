@@ -209,38 +209,31 @@ export class ImportDiscoveryService {
 
   /**
    * Dynamically import service files to trigger decorator registration
-   * Uses require() to load files and execute decorators
+   * Uses require() to load compiled JS files from dist/
    */
   private async dynamicImportServices(filePaths: string[]): Promise<void> {
     const importPromises = filePaths.map(async (filePath) => {
       try {
-        // Get absolute path
-        const absolutePath = path.resolve(process.cwd(), filePath);
+        // Compute the correct dist path
+        // Source: apps/api/src/core/departments/departments-import.service.ts
+        // Dist:   dist/apps/api/apps/api/src/core/departments/departments-import.service.js
+        const distPath = this.getDistPath(filePath);
 
-        // Check if compiled version exists (in dist/)
-        const distPath = absolutePath.replace('/src/', '/dist/');
-        const pathToImport = this.getValidPath(absolutePath, distPath);
-
-        if (!pathToImport) {
+        if (!distPath) {
           this.logger.warn(
-            `[ImportDiscovery] Could not find loadable path for ${filePath}`,
+            `[ImportDiscovery] Could not find compiled file for ${filePath}`,
           );
           return;
         }
 
         // Dynamic import to trigger decorators
         try {
-          require(pathToImport);
-        } catch {
-          // If require fails, try import (for ESM modules)
-          try {
-            await import(pathToImport);
-          } catch (importError) {
-            this.logger.warn(
-              `[ImportDiscovery] Failed to import ${filePath}:`,
-              importError,
-            );
-          }
+          require(distPath);
+        } catch (requireError) {
+          this.logger.warn(
+            `[ImportDiscovery] Failed to import ${filePath}:`,
+            requireError,
+          );
         }
       } catch (error) {
         this.logger.warn(
@@ -254,26 +247,31 @@ export class ImportDiscoveryService {
   }
 
   /**
-   * Check which path is valid (src or dist)
+   * Get the compiled dist path for a source file
+   * Maps: apps/api/src/... → dist/apps/api/apps/api/src/...
    */
-  private getValidPath(srcPath: string, distPath: string): string | null {
-    // Try to access dist path first (preferred if available)
-    try {
-      const distJsPath = distPath.replace('.ts', '.js');
-      if (fs.existsSync(distJsPath)) {
-        return distJsPath;
-      }
-    } catch {
-      // Continue to next check
+  private getDistPath(srcFilePath: string): string | null {
+    const projectRoot = process.cwd();
+
+    // Convert .ts to .js
+    const jsFilePath = srcFilePath.replace(/\.ts$/, '.js');
+
+    // The NX build output structure: dist/apps/api/{relative-path}
+    const distPath = path.join(projectRoot, 'dist/apps/api', jsFilePath);
+
+    if (fs.existsSync(distPath)) {
+      return distPath;
     }
 
-    // Fallback to src path
-    try {
-      if (fs.existsSync(srcPath)) {
-        return srcPath;
-      }
-    } catch {
-      // Continue
+    // Fallback: try without the apps/api prefix in dist
+    const altDistPath = path.join(
+      projectRoot,
+      'dist/apps/api',
+      jsFilePath.replace(/^apps\/api\//, ''),
+    );
+
+    if (fs.existsSync(altDistPath)) {
+      return altDistPath;
     }
 
     return null;
