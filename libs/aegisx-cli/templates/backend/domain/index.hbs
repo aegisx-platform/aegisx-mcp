@@ -1,5 +1,5 @@
-import fp from 'fastify-plugin';
-import { FastifyInstance, FastifyPluginOptions } from 'fastify';
+{{#if useFpWrapper}}import fp from 'fastify-plugin';
+{{/if}}import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { {{ModuleName}}Controller } from './{{toKebabCase currentRoute.camelName}}.controller';
 import { {{ModuleName}}Service } from './{{toKebabCase currentRoute.camelName}}.service';
 import { {{ModuleName}}Repository } from './{{toKebabCase currentRoute.camelName}}.repository';
@@ -11,104 +11,144 @@ import { {{ModuleName}}ImportService } from './{{toKebabCase currentRoute.camelN
 {{#if (or (eq package 'enterprise') (eq package 'full'))}}
 import { ExportService } from '{{servicesPath}}/export.service';
 {{/if}}
-
-// Note: FastifyInstance eventService type is declared in websocket.plugin.ts
+import * as {{moduleName}}Schemas from './{{toKebabCase currentRoute.camelName}}.schemas';
 
 /**
- * {{ModuleName}} Domain Plugin
+ * {{ModuleName}} {{#if (eq layer 'core')}}Core Infrastructure{{else if (eq layer 'platform')}}Platform{{else}}Domain{{/if}} Plugin
  *
+{{#if (eq moduleType 'infrastructure')}} * Infrastructure plugin that provides system-wide services and decorates Fastify instance.
+{{else if (eq moduleType 'aggregator')}} * Aggregator plugin that registers and coordinates multiple child plugins.
+{{else}} * Leaf module plugin with routes and controllers following the repository-service-controller pattern.
+{{/if}} *
+ * Features:
+ * - Standard CRUD operations (Create, Read, Update, Delete)
+{{#if withImport}} * - Excel/CSV import with template download
+{{/if}}{{#if withEvents}} * - Real-time WebSocket events for all operations
+{{/if}}{{#if (or (eq package 'enterprise') (eq package 'full'))}} * - Export functionality (Excel/CSV/PDF)
+{{/if}} *
  * Following Fastify best practices:
  * - Service instantiation with proper dependency injection
- * - Encapsulation through plugin scoping
- * - Lifecycle management with hooks
- * - Schema registration through Fastify's schema registry
- */
-export default fp(
-  async function {{moduleName}}DomainPlugin(
-    fastify: FastifyInstance,
-    options: FastifyPluginOptions
-  ) {
-    // Register schemas using Fastify's built-in schema registry
-    if (fastify.hasDecorator('schemaRegistry')) {
-      (fastify as any).schemaRegistry.registerModuleSchemas(
-        '{{moduleName}}',
-        {} // schemas will be imported automatically
-      );
-    }
-
-    // Service instantiation following Fastify DI pattern
-    // Dependencies are accessed from Fastify instance decorators
-    const {{moduleName}}Repository = new {{ModuleName}}Repository((fastify as any).knex);
-    const {{moduleName}}Service = new {{ModuleName}}Service(
-      {{moduleName}}Repository{{#if withEvents}},
-      (fastify as any).eventService{{/if}}
+{{#if useFpWrapper}} * - Plugin encapsulation with fp() wrapper for {{#if (eq moduleType 'infrastructure')}}infrastructure services{{else}}child plugin aggregation{{/if}}
+{{else}} * - Encapsulation through plugin scoping (plain async function, no fp wrapper)
+{{/if}} * - Lifecycle management with hooks
+ * - Schema registration through centralized schema registry
+{{#if useFpWrapper}} * - Explicit dependency declaration for plugin load order
+{{/if}} *
+{{#if (eq moduleType 'leaf')}} * Note: This is a leaf module plugin (routes + controllers only), so it uses
+ * a plain async function without fp() wrapper, following the plugin pattern specification.
+{{else if (eq moduleType 'aggregator')}} * Note: This is an aggregator plugin that registers child plugins, so it uses
+ * the fp() wrapper to ensure proper plugin encapsulation and load order.
+{{else}} * Note: This is an infrastructure plugin that decorates Fastify instance, so it uses
+ * the fp() wrapper to ensure the decoration is available to all child plugins.
+{{/if}} */
+{{#if useFpWrapper}}export default fp(
+  async function {{moduleName}}{{#if (eq layer 'platform')}}Platform{{else if (eq layer 'domains')}}Domain{{else}}{{/if}}Plugin(
+{{else}}export default async function {{moduleName}}{{#if (eq layer 'platform')}}Platform{{else if (eq layer 'domains')}}Domain{{else}}{{/if}}Plugin(
+{{/if}}  fastify: FastifyInstance,
+  options: FastifyPluginOptions{{#if useFpWrapper}},{{else}}{{/if}}
+{{#if useFpWrapper}}) {
+{{else}}) {
+{{/if}}  // Register module schemas using the schema registry
+  if ((fastify as any).schemaRegistry) {
+    (fastify as any).schemaRegistry.registerModuleSchemas(
+      '{{moduleName}}',
+      {{moduleName}}Schemas
     );
-    {{#if (or (eq package 'enterprise') (eq package 'full'))}}
-    const exportService = new ExportService();
-    {{/if}}
-    {{#if withImport}}
-    const {{moduleName}}ImportService = new {{ModuleName}}ImportService(
-      (fastify as any).knex,
-      {{moduleName}}Repository,
-      (fastify as any).eventService // Pass eventService for import progress events
-    );
-    {{/if}}
+  }
 
-    // Controller instantiation with proper dependencies
-    const {{moduleName}}Controller = new {{ModuleName}}Controller(
-      {{moduleName}}Service{{#if (or (eq package 'enterprise') (eq package 'full'))}},
-      exportService{{/if}}{{#if withImport}},
-      {{moduleName}}ImportService{{/if}}{{#if withEvents}},
-      (fastify as any).eventService{{/if}}
-    );
+  // Service instantiation following Fastify DI pattern
+  // Dependencies are accessed from Fastify instance decorators
+  const {{moduleName}}Repository = new {{ModuleName}}Repository((fastify as any).knex);
+  const {{moduleName}}Service = new {{ModuleName}}Service(
+    {{moduleName}}Repository{{#if withEvents}},
+    (fastify as any).eventService{{/if}}
+  );
+  {{#if (or (eq package 'enterprise') (eq package 'full'))}}
+  const exportService = new ExportService();
+  {{/if}}
+  {{#if withImport}}
+  const {{moduleName}}ImportService = new {{ModuleName}}ImportService(
+    (fastify as any).knex,
+    {{moduleName}}Repository,
+    (fastify as any).eventService // Pass eventService for import progress events
+  );
+  {{/if}}
 
-    // Optional: Decorate Fastify instance with service for cross-plugin access
-    // fastify.decorate('{{moduleName}}Service', {{moduleName}}Service);
+  // Controller instantiation with proper dependencies
+  const {{moduleName}}Controller = new {{ModuleName}}Controller(
+    {{moduleName}}Service{{#if (or (eq package 'enterprise') (eq package 'full'))}},
+    exportService{{/if}}{{#if withImport}},
+    {{moduleName}}ImportService{{/if}}{{#if withEvents}},
+    (fastify as any).eventService{{/if}}
+  );
 
-    {{#if withImport}}
-    // ⚠️ IMPORTANT: Register import routes FIRST (before main routes)
-    // Import routes have static paths like /export, /import/template
-    // They must be registered before dynamic routes like /:id
-    // Otherwise /:id will match everything including /export
-    await fastify.register({{currentRoute.camelName}}ImportRoutes, {
-      controller: {{moduleName}}Controller,
-      prefix: options.prefix || '{{#if domain}}{{fullRoutePath}}{{else}}/{{toKebabCase tableName}}{{/if}}'
-    });
-    {{/if}}
+{{#if (eq moduleType 'infrastructure')}}  // Decorate Fastify instance with service for cross-plugin access
+  // This makes the service available to all other plugins
+  fastify.decorate('{{moduleName}}Service', {{moduleName}}Service);
 
-    // Register main CRUD routes (includes dynamic /:id route)
-    await fastify.register({{currentRoute.camelName}}Routes, {
-      controller: {{moduleName}}Controller,
-      prefix: options.prefix || '{{#if domain}}{{fullRoutePath}}{{else}}/{{toKebabCase tableName}}{{/if}}'
-    });
+{{/if}}  {{#if withImport}}
+  // ⚠️ IMPORTANT: Register import routes FIRST (before main routes)
+  // Import routes have static paths like /export, /import/template
+  // They must be registered before dynamic routes like /:id
+  // Otherwise /:id will match everything including /export
+  await fastify.register({{currentRoute.camelName}}ImportRoutes, {
+    controller: {{moduleName}}Controller,
+    prefix: options.prefix || '{{urlPrefix}}'
+  });
+  {{/if}}
 
-    // Lifecycle hooks for monitoring
-    fastify.addHook('onReady', async () => {
-      fastify.log.info(`{{ModuleName}} domain module registered successfully`);
-    });
+  // Register main CRUD routes{{#if withImport}} (includes dynamic /:id route){{/if}}
+  await fastify.register({{currentRoute.camelName}}Routes, {
+    controller: {{moduleName}}Controller,
+    prefix: options.prefix || '{{urlPrefix}}'
+  });
 
-    {{#if withEvents}}
-    // Cleanup event listeners on close
-    fastify.addHook('onClose', async () => {
-      fastify.log.info(`Cleaning up {{ModuleName}} domain module resources`);
-      // Add any cleanup logic here
-    });
-    {{/if}}
-  },
+  // Lifecycle hooks for monitoring
+  fastify.addHook('onReady', async () => {
+    fastify.log.info(`{{#if (eq layer 'core')}}Core{{else if (eq layer 'platform')}}Platform{{else}}{{capitalize domain}}{{/if}} {{moduleName}} module registered successfully`);
+  });
+
+  {{#if withEvents}}
+  // Cleanup event listeners on close
+  fastify.addHook('onClose', async () => {
+    fastify.log.info(`Cleaning up {{ModuleName}} module resources`);
+    // Add any cleanup logic here
+  });
+  {{/if}}
+{{#if useFpWrapper}}},
   {
-    name: '{{moduleName}}-domain-plugin',
-    dependencies: ['knex-plugin'{{#if withEvents}}, 'websocket-plugin'{{/if}}]
+    name: '{{#if (eq layer 'platform')}}platform-{{moduleName}}{{else if (eq layer 'domains')}}{{domain}}-{{moduleName}}{{else}}{{moduleName}}{{/if}}-plugin',
+    dependencies: ['knex-plugin'{{#if withEvents}}, 'websocket-plugin'{{/if}}{{#if (eq layer 'core')}}, 'response-handler-plugin', 'schemas-plugin'{{/if}}]
   }
 );
+{{else}}}
+{{/if}}
 
-// Re-exports for external consumers
+{{#if (eq moduleType 'infrastructure')}}
+// TypeScript declaration for Fastify instance decoration
+declare module 'fastify' {
+  interface FastifyInstance {
+    {{moduleName}}Service: {{ModuleName}}Service;
+  }
+}
+
+{{/if}}// ===== RE-EXPORTS FOR EXTERNAL CONSUMERS =====
+
+// Schemas - All TypeBox schema definitions
 export * from './{{toKebabCase currentRoute.camelName}}.schemas';
+
+// Types - All TypeScript interfaces and types
 export * from './{{toKebabCase currentRoute.camelName}}.types';
+
+// Classes - Core service classes
 export { {{ModuleName}}Repository } from './{{toKebabCase currentRoute.camelName}}.repository';
 export { {{ModuleName}}Service } from './{{toKebabCase currentRoute.camelName}}.service';
 export { {{ModuleName}}Controller } from './{{toKebabCase currentRoute.camelName}}.controller';
 
-// Re-export commonly used types for external use
+// Routes - Export routes for custom mounting
+export { {{currentRoute.camelName}}Routes } from './{{toKebabCase currentRoute.camelName}}.route';
+
+// Convenient re-export of commonly used schema types
 export type {
   {{ModuleName}},
   Create{{ModuleName}},
