@@ -320,7 +320,7 @@
   - _Completed: 2025-12-14_
   - _Prompt: Implement the task for spec api-architecture-standardization, first run spec-workflow-guide to get the workflow guide then implement the task: Role: DevOps Engineer with monitoring infrastructure expertise | Task: Migrate monitoring module to Core layer maintaining fp() wrapper (correct for infrastructure), verifying metrics collection continues | Restrictions: Must not lose metrics, verify Prometheus integration, test alerting | Success: Monitoring migrated to Core, metrics collection works, dashboards functional | Instructions: 1) Mark in-progress, 2) Log with artifacts (metrics samples), 3) Mark complete_
 
-- [ ] 6.2. Migrate auth and audit modules to Core layer
+- [-] 6.2. Migrate auth and audit modules to Core layer
   - Move: `apps/api/src/core/auth/` → `apps/api/src/layers/core/auth/`
   - Move: `apps/api/src/core/audit-system/` → `apps/api/src/layers/core/audit/`
   - Keep fp() wrappers (infrastructure plugins)

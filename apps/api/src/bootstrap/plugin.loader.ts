@@ -33,13 +33,13 @@ import staticFilesPlugin from '../plugins/static-files.plugin';
 import swaggerPlugin from '../plugins/swagger.plugin';
 
 // Core infrastructure modules
-import authPlugin from '../core/auth/auth.plugin';
-import authStrategiesPlugin from '../core/auth/strategies/auth.strategies';
+import authPlugin from '../layers/core/auth/auth.plugin';
+import authStrategiesPlugin from '../layers/core/auth/strategies/auth.strategies';
 import departmentsPlugin from '../core/departments';
 import { errorLogsPlugin } from '../core/error-logs';
-import { fileAuditPlugin } from '../core/audit-system/file-audit';
+import { fileAuditPlugin } from '../layers/core/audit/file-audit';
 import importDiscoveryPlugin from '../core/import/plugin/import-discovery.plugin';
-import { loginAttemptsPlugin } from '../core/audit-system/login-attempts';
+import { loginAttemptsPlugin } from '../layers/core/audit/login-attempts';
 import { monitoringPlugin as monitoringModulePlugin } from '../layers/core/monitoring';
 import permissionCachePlugin from '../core/rbac/permission-cache.plugin';
 import rbacPlugin from '../core/rbac/rbac.plugin';
