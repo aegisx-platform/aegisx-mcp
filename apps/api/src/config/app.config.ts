@@ -9,6 +9,7 @@ export interface AppConfig {
   api: ApiConfig;
   logging: LoggingConfig;
   performance: PerformanceConfig;
+  features: FeaturesConfig;
 }
 
 export interface ServerConfig {
@@ -40,11 +41,23 @@ export interface PerformanceConfig {
   metricsPrefix: string;
 }
 
+export interface FeaturesConfig {
+  enableNewRoutes: boolean;
+  enableOldRoutes: boolean;
+}
+
 /**
  * Load and validate application configuration
  */
 export function loadAppConfig(): AppConfig {
   const nodeEnv = process.env.NODE_ENV || 'development';
+
+  // Load feature flags with sensible defaults (both true during migration phase)
+  const enableNewRoutes = process.env.ENABLE_NEW_ROUTES !== 'false';
+  const enableOldRoutes = process.env.ENABLE_OLD_ROUTES !== 'false';
+
+  // Validate feature flags - prevent invalid states (both cannot be false)
+  validateFeatureFlags(enableNewRoutes, enableOldRoutes);
 
   return {
     server: {
@@ -77,7 +90,34 @@ export function loadAppConfig(): AppConfig {
         process.env.ENABLE_RESOURCE_MONITORING !== 'false',
       metricsPrefix: process.env.METRICS_PREFIX || 'aegisx_api_',
     },
+
+    features: {
+      enableNewRoutes,
+      enableOldRoutes,
+    },
   };
+}
+
+/**
+ * Validate feature flag configuration
+ *
+ * Rules:
+ * - At least one route set must be enabled (cannot have both false)
+ * - During migration: both true (serving both old and new routes)
+ * - Post-migration: only new routes enabled
+ *
+ * @throws Error if configuration is invalid
+ */
+function validateFeatureFlags(
+  enableNewRoutes: boolean,
+  enableOldRoutes: boolean,
+): void {
+  if (!enableNewRoutes && !enableOldRoutes) {
+    throw new Error(
+      'Invalid feature flag configuration: At least one of ENABLE_NEW_ROUTES or ENABLE_OLD_ROUTES must be true. ' +
+        'Both routes cannot be disabled simultaneously as this would prevent all API access.',
+    );
+  }
 }
 
 /**
@@ -90,5 +130,7 @@ export function getConfigSummary(config: AppConfig) {
     apiPrefix: config.api.prefix,
     loggingLevel: config.logging.level,
     monitoringEnabled: config.performance.enableMonitoring,
+    featuresNewRoutesEnabled: config.features.enableNewRoutes,
+    featuresOldRoutesEnabled: config.features.enableOldRoutes,
   };
 }

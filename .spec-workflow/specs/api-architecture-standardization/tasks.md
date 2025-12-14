@@ -58,7 +58,7 @@
 
 ## Phase 2: Setup Structure & Route Aliasing (Week 3)
 
-- [ ] 2.1. Create layer directory structure
+- [x] 2.1. Create layer directory structure
   - Directories: `apps/api/src/layers/{core,platform,domains}/`
   - Create `.gitkeep` files to track empty directories
   - Update `.gitignore` if needed
@@ -66,7 +66,7 @@
   - _Requirements: 1_
   - _Prompt: Implement the task for spec api-architecture-standardization, first run spec-workflow-guide to get the workflow guide then implement the task: Role: DevOps Engineer with project structure expertise | Task: Create the three-layer directory structure (core, platform, domains) in apps/api/src/layers/ following the architecture specification | Restrictions: Do not move any existing code yet, just create directories, ensure Git tracks empty directories | Success: Directory structure exists at apps/api/src/layers/, .gitkeep files in place, structure matches specification | Instructions: 1) Mark in-progress, 2) Log with artifacts (directory tree, .gitkeep files), 3) Mark complete_
 
-- [ ] 2.2. Implement route aliasing plugin
+- [x] 2.2. Implement route aliasing plugin
   - File: `apps/api/src/config/route-aliases.ts` (NEW)
   - Implement routeAliasPlugin with HTTP 307 redirects
   - Add alias mapping for all current routes
@@ -75,7 +75,7 @@
   - _Requirements: 5_
   - _Prompt: Implement the task for spec api-architecture-standardization, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Fastify Developer with expertise in routing and HTTP redirects | Task: Create route aliasing plugin following design.md Component 2, implementing HTTP 307 redirects for backward compatibility with metrics logging | Restrictions: Must use HTTP 307 (preserve method & body), handle all URL variations, log metrics without performance impact | Success: Plugin correctly redirects old routes to new routes, HTTP method and body preserved, metrics tracked | Instructions: 1) Mark in-progress, 2) Log with artifacts (plugin code, redirect mappings, test results), 3) Mark complete_
 
-- [ ] 2.3. Add feature flags to configuration
+- [x] 2.3. Add feature flags to configuration
   - File: `apps/api/src/config/default.ts`
   - Add `features.enableNewRoutes` and `features.enableOldRoutes`
   - Read from environment variables with sensible defaults
@@ -84,7 +84,7 @@
   - _Requirements: 5, 8_
   - _Prompt: Implement the task for spec api-architecture-standardization, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Configuration Engineer with Node.js environment management expertise | Task: Add feature flags to app configuration, reading from environment variables (ENABLE_NEW_ROUTES, ENABLE_OLD_ROUTES) with validation to prevent invalid states | Restrictions: Must validate flags (not both false), provide clear defaults, maintain config schema compatibility | Success: Feature flags work correctly, validation prevents invalid configurations, environment variables read properly | Instructions: 1) Mark in-progress, 2) Log with artifacts (config schema, validation logic), 3) Mark complete_
 
-- [ ] 2.4. Create layer-based plugin groups in plugin loader
+- [x] 2.4. Create layer-based plugin groups in plugin loader
   - File: `apps/api/src/bootstrap/plugin.loader.ts`
   - Implement `createCoreLayerGroup()`, `createPlatformLayerGroup()`, `createDomainsLayerGroup()`
   - Keep existing functions for backward compatibility
@@ -93,7 +93,7 @@
   - _Requirements: 1, 8_
   - _Prompt: Implement the task for spec api-architecture-standardization, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Backend Architect with Fastify plugin system expertise | Task: Create layer-based plugin group functions in plugin loader following design.md Component 1, maintaining backward compatibility and adding feature flag support | Restrictions: Must not break existing plugin loading, maintain loading order, handle errors gracefully | Success: New layer groups work correctly, backward compatibility maintained, feature flags control loading | Instructions: 1) Mark in-progress, 2) Log with artifacts (function signatures, loading flow), 3) Mark complete_
 
-- [ ] 2.5. Register route aliasing plugin in loader
+- [x] 2.5. Register route aliasing plugin in loader
   - File: `apps/api/src/bootstrap/plugin.loader.ts`
   - Register `routeAliasPlugin` early in loading sequence
   - Add after logging, before feature routes
@@ -102,7 +102,7 @@
   - _Requirements: 5_
   - _Prompt: Implement the task for spec api-architecture-standardization, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Backend Developer with plugin lifecycle expertise | Task: Register route aliasing plugin in correct position (after logging, before routes) with conditional loading based on enableNewRoutes flag | Restrictions: Must maintain plugin dependency order, preserve existing functionality, handle plugin failures gracefully | Success: Route aliasing registers at correct time, conditional loading works, no impact when disabled | Instructions: 1) Mark in-progress, 2) Log with artifacts (registration code, load order), 3) Mark complete_
 
-- [ ] 2.6. Create comprehensive tests for route aliasing
+- [x] 2.6. Create comprehensive tests for route aliasing
   - File: `apps/api/src/__tests__/integration/route-aliasing.test.ts` (NEW)
   - Test HTTP 307 redirects for all mapped routes
   - Test method and body preservation

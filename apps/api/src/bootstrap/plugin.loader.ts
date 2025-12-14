@@ -26,6 +26,7 @@ import pluginMonitoring from '../plugins/monitoring.plugin';
 import multipartPlugin from '../plugins/multipart.plugin';
 import pdfExportPlugin from '../core/pdf-export';
 import redisPlugin from '../plugins/redis.plugin';
+import { routeAliasPlugin } from '../config/route-aliases';
 import responseHandlerPlugin from '../plugins/response-handler.plugin';
 import schemasPlugin from '../plugins/schemas.plugin';
 import staticFilesPlugin from '../plugins/static-files.plugin';
@@ -100,6 +101,15 @@ export function createPluginGroups(
             logDirectory: appConfig.logging.directory,
           },
           required: true,
+        },
+        {
+          name: 'route-alias',
+          plugin: routeAliasPlugin,
+          required: false,
+          // Note: This plugin is conditionally loaded based on enableNewRoutes flag
+          // It will skip registration if new routes are not enabled
+          // Dependencies: Must load after logging-plugin for fastify.log availability
+          // Must load before feature routes to establish alias mappings
         },
         {
           name: 'global-error-hooks',
@@ -441,6 +451,59 @@ export function createFeaturePluginGroup(apiPrefix: string): PluginGroup {
 }
 
 /**
+ * Create Core Layer plugin group
+ *
+ * Core layer contains infrastructure plugins (auth, monitoring, audit, security)
+ * These plugins provide foundational capabilities used by all other layers
+ */
+export function createCoreLayerGroup(): PluginGroup {
+  return {
+    name: 'core-layer',
+    description:
+      'Core infrastructure layer (auth, monitoring, audit, security)',
+    plugins: [
+      // Core layer plugins will be loaded from apps/api/src/layers/core/
+      // Currently empty - plugins will be migrated here in Phase 4-6
+    ],
+  };
+}
+
+/**
+ * Create Platform Layer plugin group
+ *
+ * Platform layer contains shared service plugins (users, rbac, files, settings, departments)
+ * These plugins are used by multiple business domains
+ */
+export function createPlatformLayerGroup(): PluginGroup {
+  return {
+    name: 'platform-layer',
+    description:
+      'Platform shared services layer (users, rbac, files, settings)',
+    plugins: [
+      // Platform layer plugins will be loaded from apps/api/src/layers/platform/
+      // Currently empty - plugins will be migrated here in Phase 3
+    ],
+  };
+}
+
+/**
+ * Create Domains Layer plugin group
+ *
+ * Domains layer contains business domain plugins (inventory, admin, hr, finance)
+ * Each domain is isolated and does not depend on other domains
+ */
+export function createDomainsLayerGroup(): PluginGroup {
+  return {
+    name: 'domains-layer',
+    description: 'Business domains layer (inventory, admin, hr, finance)',
+    plugins: [
+      // Domains layer plugins will be loaded from apps/api/src/layers/domains/
+      // Currently empty - plugins will be migrated here in Phase 6
+    ],
+  };
+}
+
+/**
  * Load a plugin group
  */
 export async function loadPluginGroup(
@@ -587,28 +650,68 @@ export async function loadAllPlugins(
     await loadPluginGroup(fastify, group, undefined, quiet);
   }
 
-  // Load core infrastructure and business features
-  const coreGroup = createCorePluginGroup(appConfig.api.prefix);
-  const featureGroup = createFeaturePluginGroup(appConfig.api.prefix);
+  // Feature flags control which plugin groups to load
+  const { enableNewRoutes, enableOldRoutes } = appConfig.features;
 
-  // Combine plugins in proper dependency order
-  const allApiPlugins: PluginGroup = {
-    name: 'api-modules',
-    description: 'All API modules (core + features)',
-    plugins: [
-      ...coreGroup.plugins, // Core first (users, auth, rbac, etc.)
-      ...featureGroup.plugins, // Features second (settings, attachments, etc.)
-    ],
-  };
+  if (!quiet && enableNewRoutes) {
+    console.log('   🔄 New layer-based routes enabled');
+  }
+  if (!quiet && enableOldRoutes) {
+    console.log('   🔄 Legacy routes enabled');
+  }
 
-  // Load all API plugins without prefix wrapper
-  // Each plugin has its own route prefix (/auth, /users, /settings, etc.)
-  await loadPluginGroup(fastify, allApiPlugins, undefined, quiet);
+  // Load new layer-based architecture (if enabled)
+  if (enableNewRoutes) {
+    const coreLayerGroup = createCoreLayerGroup();
+    const platformLayerGroup = createPlatformLayerGroup();
+    const domainsLayerGroup = createDomainsLayerGroup();
+
+    // Load in layer dependency order: Core → Platform → Domains
+    await loadPluginGroup(fastify, coreLayerGroup, undefined, quiet);
+    await loadPluginGroup(fastify, platformLayerGroup, undefined, quiet);
+    await loadPluginGroup(fastify, domainsLayerGroup, undefined, quiet);
+  }
+
+  // Load old plugin architecture (if enabled - backward compatibility)
+  if (enableOldRoutes) {
+    const coreGroup = createCorePluginGroup(appConfig.api.prefix);
+    const featureGroup = createFeaturePluginGroup(appConfig.api.prefix);
+
+    // Combine plugins in proper dependency order
+    const allApiPlugins: PluginGroup = {
+      name: 'api-modules',
+      description: 'All API modules (core + features)',
+      plugins: [
+        ...coreGroup.plugins, // Core first (users, auth, rbac, etc.)
+        ...featureGroup.plugins, // Features second (settings, attachments, etc.)
+      ],
+    };
+
+    // Load all API plugins without prefix wrapper
+    // Each plugin has its own route prefix (/auth, /users, /settings, etc.)
+    await loadPluginGroup(fastify, allApiPlugins, undefined, quiet);
+  }
 
   const totalDuration = Date.now() - startTime;
-  const totalPlugins =
-    pluginGroups.reduce((sum, g) => sum + g.plugins.length, 0) +
-    allApiPlugins.plugins.length;
+
+  // Calculate total plugins loaded based on which routes are enabled
+  let totalPlugins = pluginGroups.reduce((sum, g) => sum + g.plugins.length, 0);
+
+  if (enableNewRoutes) {
+    const coreLayerGroup = createCoreLayerGroup();
+    const platformLayerGroup = createPlatformLayerGroup();
+    const domainsLayerGroup = createDomainsLayerGroup();
+    totalPlugins +=
+      coreLayerGroup.plugins.length +
+      platformLayerGroup.plugins.length +
+      domainsLayerGroup.plugins.length;
+  }
+
+  if (enableOldRoutes) {
+    const coreGroup = createCorePluginGroup(appConfig.api.prefix);
+    const featureGroup = createFeaturePluginGroup(appConfig.api.prefix);
+    totalPlugins += coreGroup.plugins.length + featureGroup.plugins.length;
+  }
 
   if (!quiet) {
     console.log(
