@@ -330,13 +330,14 @@
   - _Completed: 2025-12-14_
   - _Prompt: Implement the task for spec api-architecture-standardization, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Security Engineer with authentication infrastructure expertise | Task: Migrate critical auth and audit modules to Core layer, maintaining infrastructure patterns and testing all authentication flows | Restrictions: Must not break authentication, verify JWT handling, test audit logging | Success: Auth and audit migrated safely, authentication works, audit logs captured | Instructions: 1) Mark in-progress, 2) Log with artifacts (security tests, audit samples), 3) Mark complete_
 
-- [ ] 6.3. Migrate inventory and admin domains
+- [x] 6.3. Migrate inventory and admin domains
   - Move: `apps/api/src/modules/inventory/` → `apps/api/src/layers/domains/inventory/`
   - Move: `apps/api/src/modules/admin/` → `apps/api/src/layers/domains/admin/`
   - Keep domain aggregator fp() wrappers
   - Update all internal imports
   - _Leverage: Existing domain structure, migration checklists from Phase 4_
   - _Requirements: 1, 3, 8_
+  - _Completed: 2025-12-14_
   - _Prompt: Implement the task for spec api-architecture-standardization, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Full-stack Developer with domain architecture expertise | Task: Migrate inventory and admin domains to Domains layer, maintaining aggregator patterns and updating all internal module references | Restrictions: Must preserve domain structure, test all endpoints, verify frontend integration | Success: Domains migrated successfully, all endpoints work, frontend connects correctly | Instructions: 1) Mark in-progress, 2) Log with artifacts (endpoint tests, integration tests), 3) Mark complete_
 
 - [ ] 6.4. Test high-risk migrations in staging
