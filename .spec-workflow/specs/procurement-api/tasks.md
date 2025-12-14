@@ -1,0 +1,193 @@
+# Tasks Document - Procurement API
+
+## Overview
+
+This implementation adds workflow orchestration to existing procurement CRUD modules. We'll create workflow services, integration services, extend routes, and add comprehensive testing.
+
+**Total Tasks:** 15 atomic tasks
+
+---
+
+- [ ] 1. Implement PurchaseRequestWorkflowService
+  - File: apps/api/src/modules/inventory/procurement/purchaseRequests/purchase-requests-workflow.service.ts
+  - File: apps/api/src/modules/inventory/procurement/purchaseRequests/purchase-requests.types.ts
+  - Create workflow service for PR submission, approval, and rejection with budget integration
+  - Implement methods: submit(), approve(), reject()
+  - Use Prisma transactions for atomic operations
+  - Purpose: Orchestrate PR workflow with budget validation and reservation
+  - _Leverage: apps/api/src/modules/inventory/procurement/purchaseRequests/purchase-requests.service.ts, apps/api/src/shared/services/base.service.ts, apps/api/src/database/prisma.client.ts_
+  - _Requirements: REQ-1, REQ-2_
+  - _Prompt: Role: Backend Developer specializing in workflow orchestration and transaction management | Task: Create PurchaseRequestWorkflowService following requirements REQ-1 and REQ-2. Implement submit(prId, userId) to validate DRAFT status, check budget availability, reserve budget with 30-day expiration, update status to SUBMITTED. Implement approve(prId, approverId) to validate SUBMITTED status, update to APPROVED, keep reservation. Implement reject(prId, rejecterId, reason) to validate SUBMITTED status, update to REJECTED, release reservation. All operations must use prisma.$transaction() for atomicity | Restrictions: Do NOT implement BudgetIntegrationService yet (use interface), do NOT modify existing PurchaseRequestsService CRUD methods, do NOT bypass Prisma transactions, must throw typed errors (BudgetError, ValidationError, ForbiddenError) | Success: All three workflow methods implemented with proper TypeScript types, Prisma transactions ensure atomicity, proper error handling with custom error classes, budget integration service interface defined, service exports proper interface for dependency injection_
+
+- [ ] 2. Implement PurchaseOrderWorkflowService
+  - File: apps/api/src/modules/inventory/procurement/purchaseOrders/purchase-orders-workflow.service.ts
+  - File: apps/api/src/modules/inventory/procurement/purchaseOrders/purchase-orders.types.ts
+  - Create workflow service for PO approval, sending, and cancellation with budget commitment
+  - Implement methods: approve(), send(), cancel()
+  - Validate approval documents for high-value POs (> 100,000)
+  - Update linked PR status when PO is sent or cancelled
+  - Purpose: Orchestrate PO workflow with budget commitment and PR synchronization
+  - _Leverage: apps/api/src/modules/inventory/procurement/purchaseOrders/purchase-orders.service.ts, apps/api/src/modules/inventory/procurement/purchaseRequests/purchase-requests.service.ts, Task 1 patterns_
+  - _Requirements: REQ-3, REQ-4, REQ-5_
+  - _Prompt: Role: Backend Developer with expertise in workflow state machines and financial integrations | Task: Create PurchaseOrderWorkflowService following requirements REQ-3, REQ-4, and REQ-5. Implement approve(poId, approverId) to validate PENDING/DRAFT status, check grand_total > 100000 requires approval_documents, update to APPROVED. Implement send(poId, userId) to validate APPROVED status, commit budget, release PR reservation, update PR to CONVERTED, update PO to SENT. Implement cancel(poId, userId, reason) to validate not COMPLETED/CANCELLED, check for receipts (block if exists), release budget commitment, update PR back to APPROVED, update PO to CANCELLED. Use prisma.$transaction() for all operations | Restrictions: Do NOT modify existing PurchaseOrdersService or PurchaseRequestsService, do NOT skip approval document validation for high-value POs, must validate receipts before cancellation, must properly release budget commitments/reservations | Success: All three workflow methods implemented correctly, approval document validation works for high-value POs, budget integration properly commits and releases funds, PR status updates correctly on PO actions, receipt validation prevents invalid cancellations, Prisma transactions ensure data consistency_
+
+- [ ] 3. Implement ReceiptWorkflowService
+  - File: apps/api/src/modules/inventory/procurement/receipts/receipts-workflow.service.ts
+  - File: apps/api/src/modules/inventory/procurement/receipts/receipts.types.ts
+  - Create workflow service for receipt posting with inventory integration
+  - Implement methods: post(), validateForPosting()
+  - Validate minimum 3 inspectors before posting
+  - Integrate with InventoryIntegrationService for lot creation and stock updates
+  - Update PO status to PARTIAL or COMPLETED based on received quantities
+  - Purpose: Orchestrate receipt posting workflow with inventory updates
+  - _Leverage: apps/api/src/modules/inventory/procurement/receipts/receipts.service.ts, apps/api/src/modules/inventory/procurement/purchaseOrders/purchase-orders.service.ts, apps/api/src/modules/inventory/procurement/receiptInspectors/receipt-inspectors.service.ts_
+  - _Requirements: REQ-6, REQ-7, REQ-8_
+  - _Prompt: Role: Backend Developer specializing in inventory management and complex transaction workflows | Task: Create ReceiptWorkflowService following requirements REQ-6, REQ-7, and REQ-8. Implement validateForPosting(receiptId) to query receipt_inspectors count (minimum 3), check receipt status DRAFT/INSPECTING not POSTED, validate all items have lot_number and expiry_date, return ValidationError array. Implement post(receiptId, userId) to call validateForPosting first, use prisma.$transaction to call InventoryIntegrationService.createLots, updateStock, createTransactions, check if all PO items fully received, update PO status to COMPLETED or PARTIAL, update receipt status to POSTED with posted_by and posted_at | Restrictions: Do NOT skip inspector validation (minimum 3 required), do NOT skip lot information validation, must use InventoryIntegrationService for all inventory operations, must NOT update inventory directly, all operations must be in single Prisma transaction | Success: Validation method returns all errors before posting, inspector count validation enforced (minimum 3), lot creation stock updates and transactions execute atomically, PO status updates correctly (PARTIAL vs COMPLETED), receipt can only be posted once, all inventory operations succeed or entire transaction rolls back_
+
+- [ ] 4. Implement BudgetIntegrationService and HttpClientService
+  - File: apps/api/src/modules/inventory/procurement/shared/budget-integration.service.ts
+  - File: apps/api/src/modules/inventory/procurement/shared/procurement.types.ts
+  - File: apps/api/src/shared/services/http-client.service.ts
+  - Create HttpClientService for reusable HTTP operations with timeout and retry
+  - Create BudgetIntegrationService with methods: checkAvailability(), reserve(), commit(), releaseReservation(), releaseCommitment()
+  - Implement exponential backoff retry (3 attempts: 1s, 2s, 4s delays)
+  - 5-second timeout for all Budget API calls
+  - Purpose: External Budget API integration with resilient HTTP client
+  - _Leverage: Axios or native fetch for HTTP calls, Environment variables for Budget API URL configuration_
+  - _Requirements: REQ-11_
+  - _Prompt: Role: Integration Engineer with expertise in HTTP clients retry logic and external API integration | Task: Create BudgetIntegrationService and HttpClientService for Budget API integration following requirement REQ-11. Part 1 HttpClientService: Create reusable HTTP client with post and get methods, timeout support (default 5000ms), retry logic with exponential backoff, error handling with typed errors. Part 2 BudgetIntegrationService: Implement five methods - checkAvailability(params) POST to BUDGET_API_URL/check-availability with params fiscal_year budget_type_id department_id amount quarter returns available allocation_id remaining, reserve(params) POST to /reserve with params allocation_id pr_id amount quarter expires_days returns reservation_id expires_date, commit(params) POST to /commit with params allocation_id po_id amount quarter returns commitment_id, releaseReservation(reservationId) POST to /release-reservation, releaseCommitment(commitmentId) POST to /release-commitment. All calls: timeout 5s retry 3 times (1s 2s 4s). Define TypeScript interfaces in procurement.types.ts for all request/response types | Restrictions: Do NOT make direct axios calls without retry logic, must implement exponential backoff (1s 2s 4s), must timeout after 5 seconds, must throw BudgetAPIError on API failures, must throw TimeoutError on timeout, do NOT log sensitive budget data | Success: HttpClientService implements retry with exponential backoff, all Budget API methods properly call endpoints, timeout enforced at 5 seconds, errors are properly typed and thrown, TypeScript interfaces defined for all request/response types, service can be injected via dependency injection_
+
+- [ ] 5. Implement InventoryIntegrationService
+  - File: apps/api/src/modules/inventory/procurement/shared/inventory-integration.service.ts
+  - Create service for inventory updates, lot creation, and transaction logging
+  - Implement methods: createLots(), updateStock(), createTransactions()
+  - All methods accept Prisma transaction context for atomicity
+  - Query receipt_items with drug relationships
+  - Use Prisma upsert for inventory updates
+  - Purpose: Inventory system integration for receipt posting
+  - _Leverage: Prisma transaction context (tx parameter), Existing database schema: drug_lots inventory inventory_transactions_
+  - _Requirements: REQ-8_
+  - _Prompt: Role: Backend Developer with expertise in inventory management and database transactions | Task: Create InventoryIntegrationService following requirement REQ-8. Implement three methods that work within Prisma transaction context. createLots(receipt tx) query receipt_items with generic.drugs relationship, for each item with quantity_accepted > 0 create drug_lot record with lot_number drug_id from item.generic.drugs[0].id location_id quantity and quantity_remaining from quantity_accepted unit_cost from unit_price manufacture_date expiry_date received_date receipt_id, return array of created lots. updateStock(receipt tx) query receipt_items with drugs, for each item with quantity_accepted > 0 upsert inventory record where drug_id_location_id create with drug_id location_id quantity_on_hand unit_cost last_updated or update increment quantity_on_hand and last_updated. createTransactions(receipt tx) query receipt_items with drugs, for each item with quantity_accepted > 0 create inventory_transaction with drug_id location_id transaction_type RECEIVE quantity unit_cost reference_type RECEIPT reference_id transaction_date performed_by | Restrictions: All methods MUST accept Prisma transaction context (tx parameter), do NOT make database calls outside transaction context, do NOT skip lot creation for any accepted quantity, must handle case where generic has no trade drugs (throw error), use Prisma upsert for inventory (handles create/update) | Success: All methods work correctly within Prisma transaction, lots created for all accepted items, inventory properly upserted (creates new or increments existing), transactions logged for audit trail, handles edge cases (no drugs zero quantity), code is clean and well-commented_
+
+- [ ] 6. Implement ContractPricingService
+  - File: apps/api/src/modules/inventory/procurement/shared/contract-pricing.service.ts
+  - Create service for contract price lookup with Redis caching
+  - Implement methods: getContractPrice(), getContractPricesForPO(), clearCache()
+  - Implement Redis caching with 1-hour TTL
+  - Query active contracts by vendor and date range
+  - Return null if no contract found (use estimated prices)
+  - Purpose: Contract price lookup optimization with caching
+  - _Leverage: apps/api/src/modules/inventory/procurement/contracts/contracts.service.ts, Redis client for caching, Prisma for contract queries_
+  - _Requirements: REQ-10_
+  - _Prompt: Role: Backend Developer with expertise in caching strategies and performance optimization | Task: Create ContractPricingService following requirement REQ-10. Implement three methods with Redis caching. getContractPrice(vendorId genericId) check Redis cache first key contract:price:vendorId:genericId, if cached return parsed value, if not cached query contract_items table join with contracts where vendor_id status ACTIVE start_date <= NOW end_date >= NOW generic_id, if found get agreed_unit_price cache result in Redis with 3600s TTL return price or null. getContractPricesForPO(vendorId genericIds) loop through genericIds call getContractPrice for each build Map<genericId price> only include if price not null return Map. clearCache(vendorId) delete all Redis keys matching pattern contract:price:vendorId:\*, used when contract updated/expired | Restrictions: Must check cache before database query, cache TTL must be 1 hour (3600 seconds), do NOT cache null values (if no contract query DB each time), do NOT expose internal Prisma models in return types, handle Redis connection errors gracefully (fallback to DB) | Success: Cache reduces database load for repeated queries, cache miss properly queries database and caches result, contract price lookup returns null for missing contracts, batch lookup method efficient for PO creation, cache clearing works for vendor updates, Redis errors do not crash application_
+
+- [ ] 7. Extend Purchase Requests Routes and Schemas
+  - File: apps/api/src/modules/inventory/procurement/purchaseRequests/purchase-requests.routes.ts
+  - File: apps/api/src/modules/inventory/procurement/purchaseRequests/purchase-requests.schemas.ts
+  - File: apps/api/src/modules/inventory/procurement/purchaseRequests/purchase-requests.controller.ts
+  - Add workflow endpoints to existing PR routes
+  - Add three new routes: POST /:id/submit, POST /:id/approve, POST /:id/reject
+  - Create TypeBox schemas: SubmitPRBodySchema, ApprovePRBodySchema, RejectPRBodySchema
+  - Add controller methods that call PurchaseRequestWorkflowService
+  - Add proper authentication and permission checks
+  - Purpose: Expose PR workflow operations via REST API
+  - _Leverage: Existing route patterns from purchase-requests.routes.ts, Existing schema patterns from purchase-requests.schemas.ts, Fastify preValidation hooks for auth_
+  - _Requirements: REQ-1, REQ-2_
+  - _Prompt: Role: API Developer with expertise in Fastify routing TypeBox validation and RESTful design | Task: Extend Purchase Requests routes and schemas in 3 files following requirements REQ-1 and REQ-2. Part 1 Schemas: Create three TypeBox schemas - SubmitPRBodySchema (no body needed), ApprovePRBodySchema (no body needed), RejectPRBodySchema with rejection_reason Type.String minLength 10 maxLength 500. Part 2 Controller: Add three methods to PurchaseRequestsController - submit(request reply) get prId from params.id userId from user.id call prWorkflowService.submit return reply.success, approve(request reply) get prId approverId call prWorkflowService.approve return reply.success, reject(request reply) get prId rejecterId rejection_reason call prWorkflowService.reject return reply.success. Part 3 Routes: Add three routes - POST /purchase-requests/:id/submit with tags Core: Procurement - PR Workflow params IdParamSchema body SubmitPRBodySchema preValidation authenticate verifyPermission procurement:pr:submit handler controller.submit.bind, POST /:id/approve with permission procurement:pr:approve, POST /:id/reject with permission procurement:pr:approve and body RejectPRBodySchema | Restrictions: Do NOT modify existing CRUD routes, must use existing IdParamSchema for :id validation, must include proper Swagger tags for documentation, must bind controller methods correctly, permission checks must use existing verifyPermission decorator | Success: All three workflow endpoints added and functional, TypeBox schemas properly validate request bodies, controller methods call workflow service correctly, authentication and authorization enforced, Swagger documentation generated correctly, error responses follow existing patterns_
+
+- [ ] 8. Extend Purchase Orders Routes and Schemas
+  - File: apps/api/src/modules/inventory/procurement/purchaseOrders/purchase-orders.routes.ts
+  - File: apps/api/src/modules/inventory/procurement/purchaseOrders/purchase-orders.schemas.ts
+  - File: apps/api/src/modules/inventory/procurement/purchaseOrders/purchase-orders.controller.ts
+  - Add workflow endpoints to existing PO routes
+  - Add three new routes: POST /:id/approve, POST /:id/send, POST /:id/cancel
+  - Create TypeBox schemas for each operation
+  - Add controller methods that call PurchaseOrderWorkflowService
+  - Purpose: Expose PO workflow operations via REST API
+  - _Leverage: Task 7 patterns (similar structure), Existing PO route patterns_
+  - _Requirements: REQ-4, REQ-5_
+  - _Prompt: Role: API Developer with expertise in workflow REST endpoints and schema validation | Task: Extend Purchase Orders routes and schemas in 3 files following requirements REQ-4 and REQ-5 (similar to Task 7 but for POs). Part 1 Schemas: Create three TypeBox schemas - ApprovePOBodySchema (no body needed), SendPOBodySchema (no body needed), CancelPOBodySchema with cancellation_reason Type.String minLength 10 maxLength 500. Part 2 Controller: Add three methods - approve(request reply) call poWorkflowService.approve return reply.success, send(request reply) call poWorkflowService.send return reply.success, cancel(request reply) get cancellation_reason from body call poWorkflowService.cancel return reply.success. Part 3 Routes: Add three routes - POST /purchase-orders/:id/approve with permission procurement:po:approve tags Core: Procurement - PO Workflow, POST /:id/send with permission procurement:po:send, POST /:id/cancel with permission procurement:po:cancel and body CancelPOBodySchema | Restrictions: Follow exact same pattern as Task 7, do NOT modify existing PO CRUD routes, must validate cancellation_reason length, must use existing authentication/permission hooks | Success: Three workflow endpoints functional, schemas validate properly, controller calls workflow service, permissions enforced correctly, Swagger docs generated_
+
+- [ ] 9. Extend Receipts Routes and Schemas
+  - File: apps/api/src/modules/inventory/procurement/receipts/receipts.routes.ts
+  - File: apps/api/src/modules/inventory/procurement/receipts/receipts.schemas.ts
+  - File: apps/api/src/modules/inventory/procurement/receipts/receipts.controller.ts
+  - Add receipt posting endpoint to existing receipt routes
+  - Add one new route: POST /:id/post
+  - Create TypeBox schema for posting
+  - Add controller method that calls ReceiptWorkflowService.post()
+  - Purpose: Expose receipt posting operation via REST API
+  - _Leverage: Task 7 and 8 patterns, Existing receipt route patterns_
+  - _Requirements: REQ-8_
+  - _Prompt: Role: API Developer with expertise in inventory integration endpoints | Task: Extend Receipts routes and schemas in 3 files following requirement REQ-8. Part 1 Schema: Create one TypeBox schema - PostReceiptBodySchema (no body needed operation on :id). Part 2 Controller: Add one method - post(request reply) get receiptId from params userId from request.user.id call receiptWorkflowService.post return reply.success with message Receipt posted to inventory successfully. Part 3 Routes: Add one route - POST /receipts/:id/post with permission procurement:receipt:post tags Core: Procurement - Receipt Workflow preValidation authenticate verifyPermission | Restrictions: Follow same pattern as Tasks 7 and 8, do NOT modify existing receipt CRUD routes, must check permission before posting | Success: Post endpoint functional, permission enforced, inventory updated on successful post, proper error handling_
+
+- [ ] 10. Register Workflow Services in Fastify DI
+  - File: apps/api/src/modules/inventory/procurement/index.ts
+  - File: apps/api/src/modules/inventory/procurement/procurement.plugin.ts
+  - Register all workflow and integration services as Fastify decorators for dependency injection
+  - Register services in correct order: HttpClient → Budget → Inventory → Contract → PR → PO → Receipt
+  - Ensure proper initialization order (integration services before workflow services)
+  - Extend Fastify TypeScript types for all decorators
+  - Purpose: Enable dependency injection for all procurement services
+  - _Leverage: Existing Fastify plugin patterns in procurement module, Existing service registration patterns_
+  - _Requirements: All REQ (system integration)_
+  - _Prompt: Role: DevOps Engineer with expertise in dependency injection and Fastify plugin architecture | Task: Register all workflow and integration services as Fastify decorators for dependency injection. Services to Register in order: 1 HttpClientService (shared), 2 BudgetIntegrationService (needs HttpClient), 3 InventoryIntegrationService (needs Prisma), 4 ContractPricingService (needs Prisma Redis), 5 PurchaseRequestWorkflowService (needs PRService BudgetIntegration), 6 PurchaseOrderWorkflowService (needs POService PRService BudgetIntegration), 7 ReceiptWorkflowService (needs ReceiptService POService InventoryIntegration). Registration Pattern: const httpClient = new HttpClientService(config); fastify.decorate('httpClient', httpClient); const budgetIntegration = new BudgetIntegrationService(httpClient, logger); fastify.decorate('budgetIntegration', budgetIntegration); ... similar for all services. Extend Fastify types: declare module 'fastify' interface FastifyInstance with budgetIntegration InventoryIntegrationService contractPricing ContractPricingService prWorkflowService PurchaseRequestWorkflowService poWorkflowService PurchaseOrderWorkflowService receiptWorkflowService ReceiptWorkflowService | Restrictions: Must register in correct order (dependencies first), do NOT create circular dependencies, must extend Fastify types for TypeScript, services must be singletons (created once) | Success: All services registered correctly, TypeScript types extended properly, services can be injected in controllers, no circular dependency errors, plugin loads without errors_
+
+- [ ] 11. Add Database Performance Indexes
+  - File: apps/api/src/database/migrations-inventory/[timestamp]\_add_procurement_workflow_indexes.sql
+  - Create migration file with index creation SQL
+  - Add indexes for frequently queried columns
+  - Test query performance before/after
+  - Purpose: Optimize workflow query performance
+  - _Leverage: Existing migration patterns, PostgreSQL index syntax_
+  - _Requirements: Performance NFR_
+  - _Prompt: Role: Database Administrator with expertise in PostgreSQL performance optimization | Task: Create database migration to add performance indexes for procurement workflow queries. Indexes to Create: 1 Purchase Requests - CREATE INDEX idx_purchase_requests_status_dept ON purchase_requests(status, department_id), CREATE INDEX idx_purchase_requests_fiscal_year ON purchase_requests(fiscal_year), CREATE INDEX idx_purchase_requests_approved_at ON purchase_requests(approved_at DESC). 2 Purchase Orders - CREATE INDEX idx_purchase_orders_status_date ON purchase_orders(status, po_date), CREATE INDEX idx_purchase_orders_vendor ON purchase_orders(vendor_id), CREATE INDEX idx_purchase_orders_pr_id ON purchase_orders(pr_id). 3 Receipts - CREATE INDEX idx_receipts_status_date ON receipts(status, receipt_date), CREATE INDEX idx_receipts_po_id ON receipts(po_id). 4 Receipt Items - CREATE INDEX idx_receipt_items_lot ON receipt_items(lot_number), CREATE INDEX idx_receipt_items_expiry ON receipt_items(expiry_date). 5 Contract Pricing - CREATE INDEX idx_contract_items_vendor_generic ON contract_items(contract_id, generic_id), CREATE INDEX idx_contracts_vendor_status_dates ON contracts(vendor_id, status, start_date, end_date). 6 Receipt Inspectors - CREATE INDEX idx_receipt_inspectors_receipt_id ON receipt_inspectors(receipt_id) | Restrictions: Use IF NOT EXISTS to prevent errors on re-run, include EXPLAIN ANALYZE examples in comments, do NOT drop existing indexes, test migration rollback (down.sql) | Success: All indexes created successfully, query performance improved (test with EXPLAIN ANALYZE), migration can be rolled back cleanly, no duplicate indexes created_
+
+- [ ] 12. Unit Tests for Workflow Services
+  - File: apps/api/src/modules/inventory/procurement/purchaseRequests/purchase-requests-workflow.service.spec.ts
+  - File: apps/api/src/modules/inventory/procurement/purchaseOrders/purchase-orders-workflow.service.spec.ts
+  - File: apps/api/src/modules/inventory/procurement/receipts/receipts-workflow.service.spec.ts
+  - Unit test all workflow service methods with mocked dependencies
+  - Test successful operations and error scenarios
+  - Mock all external dependencies (Budget API, services, Prisma)
+  - Achieve 80%+ code coverage for workflow services
+  - Purpose: Ensure workflow service reliability and correctness
+  - _Leverage: Jest testing framework, Existing test patterns_
+  - _Requirements: All workflow REQs_
+  - _Prompt: Role: QA Engineer with expertise in unit testing Jest and mocking strategies | Task: Create comprehensive unit tests for all three workflow services (PR PO Receipt) with 80%+ coverage target. For each service file create test suite structure with describe blocks for each method, beforeEach to setup mocks and service instance. Test Coverage Requirements: PurchaseRequestWorkflowService submit approve reject - test successful submission with budget reservation, submission with insufficient budget (should throw), submission with invalid status (should throw), successful approval, approval without permission (should throw), successful rejection with budget release. PurchaseOrderWorkflowService approve send cancel - test approval with/without documents, send with budget commitment, cancel with/without receipts. ReceiptWorkflowService post validateForPosting - test validation with < 3 inspectors, successful posting with inventory updates, posting failure rollback | Restrictions: Must mock ALL external dependencies, do NOT test framework code (Prisma Fastify), must test both success and failure paths, use Jest expect assertions, mock Prisma transactions properly | Success: 80%+ code coverage for workflow services, all methods tested with success and failure scenarios, mocks properly configured, tests run in isolation (no test interdependence), clear test descriptions_
+
+- [ ] 13. Unit Tests for Integration Services
+  - File: apps/api/src/modules/inventory/procurement/shared/budget-integration.service.spec.ts
+  - File: apps/api/src/modules/inventory/procurement/shared/inventory-integration.service.spec.ts
+  - File: apps/api/src/modules/inventory/procurement/shared/contract-pricing.service.spec.ts
+  - Unit test integration services with mocked HTTP/database calls
+  - Test retry logic, timeout, caching behavior
+  - Mock HttpClient, Prisma, Redis
+  - Achieve 80%+ code coverage
+  - Purpose: Ensure integration service reliability
+  - _Leverage: Jest testing framework, Mocking libraries_
+  - _Requirements: Integration REQs_
+  - _Prompt: Role: QA Engineer with expertise in testing HTTP clients caching and database integration | Task: Create unit tests for all three integration services with proper mocking. Test Coverage: 1 BudgetIntegrationService - test checkAvailability with successful response, checkAvailability with timeout and retries, reserve successful reservation, commit successful commitment, error mapping (TimeoutError BudgetAPIError). 2 InventoryIntegrationService - test createLots creates correct records, updateStock upserts inventory, createTransactions logs properly, all methods work within transaction context. 3 ContractPricingService - test getContractPrice with cache hit, getContractPrice with cache miss, getContractPricesForPO batch lookup, clearCache removes vendor keys. Mocking Strategy: Mock HttpClient for Budget API calls, mock Prisma for database queries, mock Redis for caching | Restrictions: Must properly mock all external dependencies, test error scenarios, ensure isolation between tests | Success: All integration services tested, mocks properly configured, error scenarios covered, 80%+ coverage_
+
+- [ ] 14. Integration Tests for Workflow Endpoints
+  - File: apps/api/src/modules/inventory/procurement/purchaseRequests/purchase-requests.integration.spec.ts
+  - File: apps/api/src/modules/inventory/procurement/purchaseOrders/purchase-orders.integration.spec.ts
+  - File: apps/api/src/modules/inventory/procurement/receipts/receipts.integration.spec.ts
+  - Integration tests hitting real database with mocked Budget API
+  - Test all workflow endpoints with Fastify inject()
+  - Verify HTTP status, response body, and database state changes
+  - Purpose: Validate end-to-end workflow endpoint behavior
+  - _Leverage: Fastify inject method, Test database, nock for HTTP mocking_
+  - _Requirements: All workflow REQs_
+  - _Prompt: Role: QA Engineer with expertise in API integration testing and Fastify inject | Task: Create integration tests for all workflow endpoints using Fastify inject method with test database. Test Structure: Setup create test data (PRs POs Receipts) in test DB, Mock Budget API responses with nock or similar, Execute call endpoints using app.inject, Verify check HTTP status response body database state, Teardown clean test data. Test Scenarios: 1 PR Workflow - POST /purchase-requests/:id/submit success, POST /:id/submit insufficient budget, POST /:id/approve success, POST /:id/reject success. 2 PO Workflow - POST /purchase-orders/:id/approve success, POST /:id/send success, POST /:id/cancel success, POST /:id/cancel with receipts (should fail). 3 Receipt Workflow - POST /receipts/:id/post success, POST /:id/post insufficient inspectors (should fail) | Restrictions: Must use test database not production, must clean up test data after each test, must mock Budget API properly | Success: All endpoints tested with real DB, database state verified after operations, Budget API properly mocked, tests clean up after themselves_
+
+- [ ] 15. E2E Test - Complete Procurement Cycle
+  - File: apps/api/src/modules/inventory/procurement/procurement.e2e.spec.ts
+  - E2E test covering full cycle: PR → Approve → PO → Send → Receipt → Post
+  - Verify complete workflow from creation to inventory update
+  - Mock Budget API for all calls
+  - Validate all state transitions and integrations
+  - Purpose: Validate complete procurement workflow end-to-end
+  - _Leverage: Fastify inject, Test database, nock for API mocking_
+  - _Requirements: All REQs_
+  - _Prompt: Role: QA Engineer with expertise in end-to-end testing and full-stack workflow validation | Task: Create one comprehensive E2E test that covers the complete procurement cycle from PR creation to inventory update. Test Flow: 1 Create PR in DRAFT status, 2 Submit PR (reserves budget), 3 Approve PR, 4 Create PO from PR, 5 Approve PO, 6 Send PO (commits budget), 7 Create Receipt, 8 Add 3 inspectors, 9 Post Receipt (updates inventory), 10 Verify PR status CONVERTED, PO status COMPLETED, Receipt status POSTED, Inventory quantity_on_hand increased, Drug lots created, Inventory transactions logged. Mock Budget API for all calls | Restrictions: Must test complete cycle not partial, must verify all state transitions, must validate inventory updates, must clean up test data | Success: Complete cycle executes successfully, all state transitions correct, inventory properly updated, budget properly managed, test is reliable and repeatable_

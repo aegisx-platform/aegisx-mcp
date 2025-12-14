@@ -1,0 +1,224 @@
+# Tasks Document - Procurement UI
+
+## Overview
+
+This implementation creates a complete Angular frontend for procurement workflow management. Tasks are organized by module generation, workflow components, integration features, and testing.
+
+**Total Tasks:** 18 atomic tasks
+
+---
+
+- [ ] 1. Generate Purchase Requests Module with CRUD Generator
+  - File: apps/web/src/app/features/inventory/modules/purchase-requests/ (entire module directory)
+  - Use CRUD generator to create base module structure with list, create, edit, view components
+  - Generate service with Signal-based state management
+  - Generate TypeScript types and interfaces
+  - Generate routes configuration
+  - Purpose: Create foundation for PR module using existing CRUD generator patterns
+  - _Leverage: Existing CRUD generator scripts, Contracts module as reference pattern_
+  - _Requirements: REQ-1, REQ-2_
+  - _Prompt: Implement the task for spec procurement-ui, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Frontend Developer with expertise in Angular CLI and code generation | Task: Use the project's CRUD generator to create the Purchase Requests module following requirements REQ-1 and REQ-2. Run the CRUD generator command for purchase_requests table targeting the frontend. The generator should create: PurchaseRequestsListComponent with ax-table and filters, PurchaseRequestsCreateDialogComponent with reactive form, PurchaseRequestsEditDialogComponent, PurchaseRequestsViewDialogComponent, PurchaseRequestsFormComponent with drug autocomplete, PurchaseRequestsService with Signals (following ContractService pattern), purchase-requests.types.ts with TypeScript interfaces, purchase-requests.routes.ts with lazy loading. After generation, verify all components use AegisX-UI components (ax-table, ax-form, ax-dialog, ax-badge) and Angular Material | Restrictions: Do NOT manually create files if generator can create them, do NOT use NgRx (use Signals), must follow existing ContractService signal pattern, must use AegisX-UI components | Success: Module generated successfully with all CRUD components, service uses Signals for state management, components use AegisX-UI and Angular Material, routes configured with lazy loading, TypeScript types defined for all models_
+
+- [ ] 2. Generate Purchase Orders Module with CRUD Generator
+  - File: apps/web/src/app/features/inventory/modules/purchase-orders/ (entire module directory)
+  - Use CRUD generator to create PO module with all standard components
+  - Generate service, types, and routes
+  - Add vendor selection and PR reference fields
+  - Purpose: Create foundation for PO module
+  - _Leverage: CRUD generator, Task 1 patterns_
+  - _Requirements: REQ-5_
+  - _Prompt: Implement the task for spec procurement-ui, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Frontend Developer with expertise in Angular module generation | Task: Use CRUD generator to create Purchase Orders module following requirement REQ-5. Generate complete module structure similar to Task 1 but for purchase_orders table. Include vendor selection dropdown (ax-autocomplete), PR reference display, and PO date fields. Ensure status badges display DRAFT, PENDING, APPROVED, SENT, PARTIAL, COMPLETED, CANCELLED with appropriate colors (gray, yellow, blue, green, orange, purple, red) | Restrictions: Follow exact same pattern as Task 1, do NOT deviate from generator output, must include vendor and PR relationships | Success: PO module generated with all CRUD components, vendor selection working, PR reference displayed, status badges show correct colors, service uses Signals_
+
+- [ ] 3. Generate Receipts Module with CRUD Generator
+  - File: apps/web/src/app/features/inventory/modules/receipts/ (entire module directory)
+  - Use CRUD generator to create Receipt module
+  - Add PO selection, location selection, and receipt date fields
+  - Generate inspector assignment component placeholder
+  - Purpose: Create foundation for Receipt module
+  - _Leverage: CRUD generator, Task 1 and 2 patterns_
+  - _Requirements: REQ-8_
+  - _Prompt: Implement the task for spec procurement-ui, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Frontend Developer with expertise in Angular forms and data binding | Task: Use CRUD generator to create Receipts module following requirement REQ-8. Generate module for receipts table with PO selection (ax-autocomplete showing SENT/PARTIAL POs only), location dropdown, receipt date picker. Include placeholder section for inspector committee (will be enhanced in Task 11). Add lot information fields to item table (lot_number, manufacture_date, expiry_date) with validation | Restrictions: Must filter PO dropdown to show only SENT or PARTIAL status, must validate lot fields are required, date fields must use Material datepicker | Success: Receipt module generated, PO selection filters correctly, location dropdown working, lot information fields present with validation, status badges for DRAFT INSPECTING ACCEPTED POSTED_
+
+- [ ] 4. Generate Supporting Modules (Inspectors, Approval Docs, Payment Docs)
+  - File: apps/web/src/app/features/inventory/modules/receipt-inspectors/ (directory)
+  - File: apps/web/src/app/features/inventory/modules/approval-documents/ (directory)
+  - File: apps/web/src/app/features/inventory/modules/payment-documents/ (directory)
+  - Use CRUD generator to create three supporting modules
+  - Generate basic CRUD for each
+  - Purpose: Create foundation for supporting modules
+  - _Leverage: CRUD generator, previous tasks patterns_
+  - _Requirements: REQ-9, REQ-11, REQ-12_
+  - _Prompt: Implement the task for spec procurement-ui, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Frontend Developer with expertise in multi-module generation | Task: Use CRUD generator to create three supporting modules following requirements REQ-9, REQ-11, and REQ-12. Generate: 1) receipt-inspectors module with employee selection, 2) approval-documents module with file upload (will enhance in Task 12), 3) payment-documents module with receipt reference and amount fields. Each should have standard CRUD components and Signal-based service | Restrictions: Keep modules simple (basic CRUD only), file upload will be enhanced later, do NOT add complex logic yet | Success: Three modules generated successfully, all have list/create/edit/view components, services use Signals, basic fields present in forms_
+
+- [ ] 5. Implement Purchase Request Workflow Component
+  - File: apps/web/src/app/features/inventory/modules/purchase-requests/components/purchase-requests-workflow.component.ts (create)
+  - File: apps/web/src/app/features/inventory/modules/purchase-requests/services/purchase-requests.service.ts (extend)
+  - Create workflow component with Submit, Approve, Reject buttons
+  - Add workflow methods to service (submit, approve, reject)
+  - Implement confirmation dialogs for each action
+  - Add permission-based button visibility
+  - Purpose: Enable PR workflow operations from UI
+  - _Leverage: PurchaseRequestsService from Task 1, ax-button, ax-dialog components_
+  - _Requirements: REQ-3, REQ-4_
+  - _Prompt: Implement the task for spec procurement-ui, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Angular Developer with expertise in workflow UI and permissions | Task: Create PurchaseRequestsWorkflowComponent following requirements REQ-3 and REQ-4. Component should accept @Input purchaseRequest and @Output onAction. Display conditional buttons based on PR status and user permissions: IF status=DRAFT show Submit button (permission: procurement:pr:submit), IF status=SUBMITTED show Approve and Reject buttons (permission: procurement:pr:approve). Implement submit() to call service.submit(prId) which calls POST /api/purchase-requests/:id/submit. Implement approve() to show confirmation dialog then call service.approve(prId) which calls POST /api/purchase-requests/:id/approve. Implement reject() to show dialog with reason input (min 10 chars) then call service.reject(prId, reason) which calls POST /api/purchase-requests/:id/reject. Add methods to PurchaseRequestsService: submit(id), approve(id), reject(id, reason) that update signals on success | Restrictions: Must check permissions before showing buttons, must show confirmation dialogs (ax-dialog) before destructive actions, must handle budget insufficient error from submit (catch 400, show ax-alert), must update service signals after successful actions | Success: Workflow buttons display correctly based on status and permissions, submit checks budget and reserves on success, approve updates status to APPROVED, reject shows reason dialog and releases budget, all actions update UI via signals, error messages display in Thai/English_
+
+- [ ] 6. Implement Purchase Order Workflow Component
+  - File: apps/web/src/app/features/inventory/modules/purchase-orders/components/purchase-orders-workflow.component.ts (create)
+  - File: apps/web/src/app/features/inventory/modules/purchase-orders/services/purchase-orders.service.ts (extend)
+  - Create workflow component with Approve, Send, Cancel buttons
+  - Add workflow methods to service
+  - Implement approval document validation for PO > 100K
+  - Add budget commitment confirmation for Send action
+  - Purpose: Enable PO workflow operations from UI
+  - _Leverage: PurchaseOrdersService from Task 2, ApprovalDocumentsService from Task 4_
+  - _Requirements: REQ-6, REQ-7_
+  - _Prompt: Implement the task for spec procurement-ui, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Angular Developer with expertise in multi-step workflows and validation | Task: Create PurchaseOrdersWorkflowComponent following requirements REQ-6 and REQ-7. Component accepts @Input purchaseOrder and @Output onAction. Display conditional buttons: IF status=DRAFT/PENDING show Approve button (permission: procurement:po:approve), IF status=APPROVED show Send button (permission: procurement:po:send), IF status != COMPLETED/CANCELLED show Cancel button (permission: procurement:po:cancel). Implement approve(): IF grand_total > 100000 validate approval_document_id exists (call ApprovalDocumentsService.getByPoId), if missing show error Cannot approve PO > 100000 without approval document and disable button, else show confirmation and call service.approve(poId) POST /api/purchase-orders/:id/approve. Implement send(): show dialog Budget will be committed. PR will be converted. Continue?, call service.send(poId) POST /api/purchase-orders/:id/send. Implement cancel(): validate no receipts exist (call ReceiptsService.getByPoId), if receipts exist show error Cannot cancel PO with receipts, else show reason dialog (min 10 chars) and call service.cancel(poId, reason) POST /api/purchase-orders/:id/cancel | Restrictions: Must validate approval document before approve for PO > 100K, must check for receipts before cancel, must show budget commitment warning before send, must update signals after actions | Success: Approve validates documents for high-value POs, send commits budget and converts PR, cancel validates no receipts and releases budget, all actions update UI correctly_
+
+- [ ] 7. Implement Receipt Workflow Component
+  - File: apps/web/src/app/features/inventory/modules/receipts/components/receipts-workflow.component.ts (create)
+  - File: apps/web/src/app/features/inventory/modules/receipts/services/receipts.service.ts (extend)
+  - Create workflow component with Post to Inventory button
+  - Add validation for minimum 3 inspectors and lot information
+  - Implement post workflow method in service
+  - Display inventory impact summary after posting
+  - Purpose: Enable receipt posting to inventory
+  - _Leverage: ReceiptsService from Task 3, ReceiptInspectorsService from Task 4_
+  - _Requirements: REQ-10_
+  - _Prompt: Implement the task for spec procurement-ui, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Angular Developer with expertise in complex validation and inventory integration | Task: Create ReceiptsWorkflowComponent following requirement REQ-10. Component accepts @Input receipt and @Output onAction. Display Post to Inventory button only IF receipt has >= 3 inspectors AND all items have lot_number and expiry_date (permission: procurement:receipt:post). Implement validate() method: call ReceiptInspectorsService.getByReceiptId(receiptId), count must be >= 3 or show error Minimum 3 inspectors required, check all receipt.items have lot_number and expiry_date or show error Missing lot information for items, return array of validation errors. Implement post(): call validate() first, if errors exist show ax-alert list with all errors and prevent posting, if valid show confirmation This will create drug lots and update inventory. Continue?, call service.post(receiptId) POST /api/receipts/:id/post. On success show inventory impact summary: X lots created, Y units added to stock. Mark receipt as read-only (disable all form fields) | Restrictions: Must validate minimum 3 inspectors, must validate all lot information present, must NOT allow posting if validation fails, must show comprehensive error list, must display inventory impact after success, must lock form after posting | Success: Post button only enabled when valid (>= 3 inspectors + lot info), validation shows all errors before posting, posting creates lots and updates inventory, PO status updates to COMPLETED/PARTIAL correctly, receipt becomes read-only after posting_
+
+- [ ] 8. Implement Budget Integration Service
+  - File: apps/web/src/app/shared/business/services/budget.service.ts (create)
+  - Create service to call external Budget API
+  - Implement checkAvailability method
+  - Add signal-based state for budget availability
+  - Display budget widget on PR form
+  - Purpose: Integrate with Budget Management API for availability checking
+  - _Leverage: HttpClient, environment.budgetApiUrl configuration_
+  - _Requirements: REQ-15_
+  - _Prompt: Implement the task for spec procurement-ui, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Integration Developer with expertise in external API integration and Angular services | Task: Create BudgetService in apps/web/src/app/shared/business/services/budget.service.ts following requirement REQ-15. Service should have method checkAvailability(params: BudgetCheckParams) that calls external Budget API GET {budgetApiUrl}/check-availability with query params fiscal_year, budget_type_id, department_id, amount, quarter. Returns Observable<BudgetAvailability> with fields: available (boolean), allocation_id (number), remaining (number). Create budgetAvailabilitySignal to store result. In PurchaseRequestsFormComponent, add budget check: WHEN user selects fiscal_year and budget_type onChange call budgetService.checkAvailability(), display result in ax-card widget with icon: IF available >= total show green checkmark Budget available: ฿X remaining, IF available < total show red warning Insufficient budget: ฿X available, ฿Y needed, shortage ฿Z. Recalculate on PR items change. Disable Submit button if insufficient | Restrictions: Must call external Budget API (not Procurement API), must handle API errors gracefully (show error message, allow retry), must recalculate when PR total changes, must disable submit if insufficient budget | Success: Budget service calls external API correctly, availability widget displays on PR form, green checkmark when sufficient, red warning when insufficient, submit button disabled when insufficient, budget updates when items change_
+
+- [ ] 9. Implement WebSocket Service for Real-Time Updates
+  - File: apps/web/src/app/shared/services/websocket.service.ts (create)
+  - File: apps/web/src/app/features/inventory/modules/purchase-requests/components/purchase-requests-view.dialog.ts (enhance)
+  - Create WebSocket service for real-time event subscriptions
+  - Integrate with PR, PO, Receipt detail views
+  - Display notifications when documents updated by other users
+  - Handle connection/disconnection gracefully
+  - Purpose: Enable real-time collaboration and status updates
+  - _Leverage: WebSocket browser API, RxJS Subject for event streaming_
+  - _Requirements: REQ-14_
+  - _Prompt: Implement the task for spec procurement-ui, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Full-stack Developer with expertise in WebSocket and real-time communication | Task: Create WebSocketService following requirement REQ-14. Service should have methods: connect(url), disconnect(), subscribe(channel), emit(event, data). Use WebSocket browser API to connect to backend WebSocket server. Implement event streaming with RxJS Subject. Create typed events: PurchaseRequestUpdated, PurchaseOrderUpdated, ReceiptUpdated. In PurchaseRequestsViewDialogComponent ngOnInit: call wsService.subscribe('purchase-requests:' + prId) and listen for events. WHEN PR status changes (event received) update UI without refresh: update status badge, refresh action buttons based on new status, show ax-toast notification Document updated by [user]. In ngOnDestroy: unsubscribe from channel. Handle disconnection: IF connection lost show ax-toast warning Real-time updates disconnected. Reconnecting..., implement reconnect with exponential backoff (1s, 2s, 4s, 8s max). Implement similar subscriptions for PO and Receipt detail views | Restrictions: Must unsubscribe when component destroyed (prevent memory leaks), must handle connection errors gracefully, must reconnect automatically, must NOT refresh entire page (update signals only), must show user who made changes | Success: WebSocket connects successfully on app init, components subscribe to relevant channels, status updates appear in real-time without refresh, notifications show who made changes, disconnection triggers reconnect, no memory leaks on navigation_
+
+- [ ] 10. Implement Excel/CSV Import Dialog Component
+  - File: apps/web/src/app/features/inventory/modules/purchase-requests/components/excel-import.dialog.ts (create)
+  - File: apps/web/src/app/shared/services/import.service.ts (create)
+  - Create import dialog with file upload and preview
+  - Implement Excel/CSV parsing
+  - Add validation and error display
+  - Provide template download
+  - Purpose: Enable bulk PR item import from Excel/CSV files
+  - _Leverage: FileManagerService from shared services, SheetJS or PapaParse library_
+  - _Requirements: REQ-13_
+  - _Prompt: Implement the task for spec procurement-ui, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Frontend Developer with expertise in file parsing and data validation | Task: Create ExcelImportDialogComponent and ImportService following requirement REQ-13. ImportService should have methods: parseExcel(file: File): Observable<any[]> using SheetJS library, validateData(data: any[], template: ImportTemplate): ValidationResult checking headers match template (columns: drug_code, quantity, unit_price, required_date), downloadTemplate(name: string) that generates Excel file with headers. ExcelImportDialogComponent: display Import from Excel button on PR form, open dialog with 3 steps: 1) Upload - file picker (accept .xlsx .csv), download template link, 2) Preview - display parsed data in ax-table, show validation errors (invalid drug codes, negative quantities, missing fields) in ax-alert, 3) Confirm - Import button enabled only if no errors. On confirm: emit items array to parent component which adds to PR form. Validate: drug_code exists in drugs table (call DrugsService.getByCode), quantity > 0, unit_price > 0, required_date valid date format | Restrictions: Must validate headers match template exactly, must check drug codes exist, must validate all numeric fields > 0, must show row-level errors (Row 5: Drug code XYZ not found), must NOT import if any errors exist, must display preview before import | Success: Import dialog opens correctly, template download works, Excel/CSV files parse successfully, validation catches all errors (missing drugs, negative values, invalid dates), preview shows parsed data in table, errors display with row numbers, import adds valid items to PR form, invalid imports rejected with clear error messages_
+
+- [ ] 11. Implement Receipt Inspector Multi-Select Component Enhancement
+  - File: apps/web/src/app/features/inventory/modules/receipts/components/receipt-inspectors-select.component.ts (create)
+  - File: apps/web/src/app/shared/services/employees.service.ts (create if not exists)
+  - Create enhanced multi-select component for inspector assignment
+  - Validate minimum 3 inspectors
+  - Display selected count badge
+  - Lock inspectors after receipt posted
+  - Purpose: Enable proper inspector committee management with validation
+  - _Leverage: ax-multi-select component, EmployeesService for employee list_
+  - _Requirements: REQ-9_
+  - _Prompt: Implement the task for spec procurement-ui, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Angular Developer with expertise in multi-select components and validation | Task: Create ReceiptInspectorsSelectComponent following requirement REQ-9. Component accepts @Input receiptId @Input selectedInspectors @Input disabled @Output onInspectorsChange. Use ax-multi-select component. In ngOnInit: call EmployeesService.getList() to load all employees, if receiptId exists call ReceiptInspectorsService.getByReceiptId(receiptId) to load selected. Display selected count badge (X inspectors selected). Implement validation: IF selected.length < 3 show yellow warning icon with tooltip Minimum 3 inspectors required for posting, IF selected.length >= 3 show green checkmark. Emit onInspectorsChange when selection changes. IF disabled=true (receipt.status=POSTED) make component read-only, show selected inspectors as chips, hide dropdown. Create EmployeesService if not exists: getList() calls GET /api/employees returns Employee[] with id, full_name, department_name | Restrictions: Must validate minimum 3 inspectors, must show visual indicator (warning/checkmark), must become read-only after posting, must emit changes to parent, must load employees from API | Success: Multi-select loads employees correctly, allows selection of multiple inspectors, shows count badge, displays warning when < 3 inspectors, shows checkmark when >= 3, becomes read-only after receipt posted, emits changes to parent component, validation prevents posting with < 3 inspectors_
+
+- [ ] 12. Implement Approval Documents Upload Component Enhancement
+  - File: apps/web/src/app/features/inventory/modules/approval-documents/components/approval-documents-upload.component.ts (create)
+  - Enhance basic upload with file validation and preview
+  - Add file size and type validation
+  - Display thumbnail and metadata after upload
+  - Integrate with PO form (show for grand_total > 100K)
+  - Purpose: Enable compliant approval document management for high-value POs
+  - _Leverage: UploadService from shared services, ApprovalDocumentsService from Task 4_
+  - _Requirements: REQ-11_
+  - _Prompt: Implement the task for spec procurement-ui, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Frontend Developer with expertise in file upload and validation | Task: Create ApprovalDocumentsUploadComponent following requirement REQ-11. Component accepts @Input poId @Input existingDocuments @Output onUploadComplete. Display in PurchaseOrdersFormComponent IF grand_total > 100000 show ax-alert warning Approval document required for PO > 100,000 and render ApprovalDocumentsUploadComponent. Component shows: IF no document uploaded show Upload Document button (ax-button) with file picker (accept: .pdf, image/\*), IF document exists show thumbnail (images) or PDF icon with metadata (filename, size, upload date), show Remove button. Implement upload: validate file size <= 10MB and type (PDF or image), if invalid show error, call uploadService.upload(file) which returns Observable<{url, key}>, then call approvalDocumentsService.create({po_id: poId, document_url: url, document_key: key, uploaded_by: currentUserId}) POST /api/approval-documents. On success emit onUploadComplete and update existingDocuments. In PurchaseOrdersWorkflowComponent: IF grand_total > 100000 AND no approval document disable Approve button, show tooltip Upload approval document required | Restrictions: Must validate file size <= 10MB, must validate file type (PDF or images only), must show upload progress, must display thumbnail for images and icon for PDFs, must integrate with PO workflow (disable approve if missing), must call UploadService for S3 upload | Success: Upload component displays when PO > 100K, file picker accepts PDF and images only, validates file size, shows upload progress, displays thumbnail/icon after upload, stores document metadata in database, approve button disabled until document uploaded, remove button deletes document_
+
+- [ ] 13. Implement Reusable Items Table Component
+  - File: apps/web/src/app/features/inventory/modules/shared/components/procurement-items-table.component.ts (create)
+  - Create generic items table for PR, PO, Receipt
+  - Support different modes (editable vs read-only)
+  - Add drug autocomplete and quantity/price calculations
+  - Include lot information fields for receipts
+  - Purpose: Reduce code duplication across PR/PO/Receipt forms
+  - _Leverage: ax-table, ax-autocomplete, DrugsService_
+  - _Requirements: REQ-2, REQ-5, REQ-8_
+  - _Prompt: Implement the task for spec procurement-ui, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Angular Developer with expertise in reusable components and reactive forms | Task: Create ProcurementItemsTableComponent following requirements REQ-2, REQ-5, and REQ-8. Component is generic and accepts @Input items @Input mode ('pr' | 'po' | 'receipt') @Input editable @Output onItemsChange. Display ax-table with columns based on mode: PR mode (drug, quantity, estimated_price, subtotal, actions), PO mode (drug, quantity, unit_price, subtotal, contract_price, actions), Receipt mode (drug, quantity_ordered, quantity_received, quantity_accepted, lot_number, manufacture_date, expiry_date, unit_price, subtotal, actions). Implement drug selection: use ax-autocomplete to search drugs GET /api/drugs?search=term, display generic_name (trade_name) in results, on select populate drug_id and generic_id. Implement calculations: subtotal = quantity \* unit_price, update when quantity or price changes, emit onItemsChange. For Receipt mode: add lot_number input (required), manufacture_date and expiry_date datepickers (required), validate quantity_accepted <= quantity_ordered. IF editable=true show Add Item, Remove, Edit buttons, IF editable=false show read-only table. Use FormArray for items management | Restrictions: Must support all three modes (PR, PO, Receipt), must calculate subtotals automatically, must validate lot information for receipts, must emit changes to parent via onItemsChange, must use ax-autocomplete for drug search, must validate quantity_accepted <= quantity_ordered in receipt mode | Success: Component works for PR, PO, and Receipt forms, drug autocomplete searches correctly, calculations update automatically, lot information fields display in receipt mode with validation, add/remove items works, read-only mode displays data correctly, changes emit to parent_
+
+- [ ] 14. Implement Inventory Status Display Component
+  - File: apps/web/src/app/features/inventory/modules/receipts/components/inventory-status.component.ts (create)
+  - File: apps/web/src/app/shared/services/inventory.service.ts (create if not exists)
+  - Create component to display current inventory levels
+  - Show stock quantity with color-coded alerts
+  - Display tooltip with stock details
+  - Integrate with receipt form items table
+  - Purpose: Provide inventory visibility during receipt creation
+  - _Leverage: InventoryService for stock queries_
+  - _Requirements: REQ-16_
+  - _Prompt: Implement the task for spec procurement-ui, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Angular Developer with expertise in data display and tooltips | Task: Create InventoryStatusComponent following requirement REQ-16. Component accepts @Input drugId @Input locationId. In ngOnInit: call inventoryService.getStock(drugId, locationId) GET /api/inventory?drug_id={drugId}&location_id={locationId} returns {quantity_on_hand, minimum_level, last_updated}. Display status: IF quantity_on_hand = 0 show red alert icon with tooltip Out of stock, IF quantity_on_hand < minimum_level show yellow warning icon with tooltip Low stock: X units (min: Y), IF quantity_on_hand >= minimum_level show green checkmark with tooltip In stock: X units. After receipt posted: refetch inventory and show updated value with New stock: X units badge. Create InventoryService if not exists with getStock(drugId, locationId) method. Integrate with ReceiptsFormComponent: add InventoryStatusComponent next to each drug in items table, pass drugId and receipt.location_id | Restrictions: Must call inventory API for real-time data, must display color-coded icons (red=out, yellow=low, green=ok), must show tooltip with details on hover, must update after receipt posted, must handle API errors gracefully (show - if unavailable) | Success: Inventory status displays next to each drug in receipt form, icons show correct colors based on stock levels, tooltips display stock details, status updates after receipt posted showing new stock level, API errors handled gracefully_
+
+- [ ] 15. Unit Tests for All Services
+  - File: apps/web/src/app/features/inventory/modules/purchase-requests/services/purchase-requests.service.spec.ts (create)
+  - File: apps/web/src/app/features/inventory/modules/purchase-orders/services/purchase-orders.service.spec.ts (create)
+  - File: apps/web/src/app/features/inventory/modules/receipts/services/receipts.service.spec.ts (create)
+  - File: apps/web/src/app/shared/business/services/budget.service.spec.ts (create)
+  - File: apps/web/src/app/shared/services/websocket.service.spec.ts (create)
+  - File: apps/web/src/app/shared/services/import.service.spec.ts (create)
+  - Write comprehensive unit tests for all services
+  - Test HTTP calls with HttpClientTestingModule
+  - Test signal state management
+  - Test error handling scenarios
+  - Purpose: Ensure service reliability and correctness with 80%+ coverage
+  - _Leverage: Jasmine/Karma testing framework, HttpClientTestingModule, existing test patterns_
+  - _Requirements: All service-related requirements_
+  - _Prompt: Implement the task for spec procurement-ui, first run spec-workflow-guide to get the workflow guide then implement the task: Role: QA Engineer with expertise in Angular unit testing and Jasmine framework | Task: Create comprehensive unit tests for all services with 80%+ coverage target. For each service file create .spec.ts with describe blocks for each method. Use HttpClientTestingModule to mock HTTP calls. Test structure: PurchaseRequestsService - test loadList returns data and updates signal, test create calls POST /api/purchase-requests, test submit calls POST /api/purchase-requests/:id/submit and updates status signal, test approve calls approve endpoint, test reject with reason, test error handling sets errorSignal. PurchaseOrdersService - test approve validates approval document for PO > 100K, test send commits budget, test cancel checks receipts. ReceiptsService - test post validates inspectors and lot info, test inventory integration. BudgetService - test checkAvailability calls external API, test error handling for API failures. WebSocketService - test connect establishes connection, test subscribe creates channel subscription, test disconnect cleans up, test reconnect on connection loss. ImportService - test parseExcel parses XLSX file, test validateData catches errors, test downloadTemplate generates file. Mock all HTTP calls with HttpTestingController, verify correct endpoints called, verify request bodies, verify signal updates | Restrictions: Must use HttpClientTestingModule for HTTP mocking, must test signal updates, must test both success and error scenarios, must verify HTTP request details (method, URL, body), must clean up after each test (HttpTestingController.verify), 80%+ code coverage required | Success: All services have unit tests, HTTP calls mocked correctly, signals tested for updates, error scenarios covered, 80%+ coverage achieved, tests run independently, all tests pass_
+
+- [ ] 16. Unit Tests for All Components
+  - File: apps/web/src/app/features/inventory/modules/purchase-requests/components/\*.spec.ts (create for each component)
+  - File: apps/web/src/app/features/inventory/modules/purchase-orders/components/\*.spec.ts (create)
+  - File: apps/web/src/app/features/inventory/modules/receipts/components/\*.spec.ts (create)
+  - Write unit tests for all components
+  - Test rendering with mock data
+  - Test user interactions (button clicks, form inputs)
+  - Test component outputs and event emissions
+  - Purpose: Ensure component reliability with 80%+ coverage
+  - _Leverage: ComponentFixture, DebugElement, existing component test patterns_
+  - _Requirements: All component-related requirements_
+  - _Prompt: Implement the task for spec procurement-ui, first run spec-workflow-guide to get the workflow guide then implement the task: Role: QA Engineer with expertise in Angular component testing | Task: Create comprehensive unit tests for all components with 80%+ coverage. For each component create .spec.ts file. Test structure: PurchaseRequestsListComponent - test renders table with data, test filters update query, test create button opens dialog, test row click navigates to detail. PurchaseRequestsFormComponent - test form initialization with initialData, test drug autocomplete search, test quantity/price calculations, test validation (required fields), test save emits correct data, test cancel emits event. PurchaseRequestsWorkflowComponent - test submit button shown for DRAFT, test approve/reject shown for SUBMITTED, test permission-based visibility, test button clicks call service methods, test confirmation dialogs open. Similar tests for PO and Receipt components. ExcelImportDialogComponent - test file upload triggers parsing, test validation errors display, test preview shows parsed data, test import emits items. ReceiptInspectorsSelectComponent - test loads employees, test selection updates, test validation warning for < 3, test read-only when posted. Use TestBed.configureTestingModule to configure, create ComponentFixture, spy on service methods, use fixture.debugElement to query elements, trigger events with .click() and .dispatchEvent(), verify @Output emissions with jasmine spies | Restrictions: Must test component rendering, must test user interactions, must mock all service dependencies, must test @Input/@Output, must test conditional rendering (ngIf), must verify method calls with spies, 80%+ coverage required | Success: All components have unit tests, rendering tested with mock data, user interactions trigger correct behavior, service methods called correctly, outputs emit expected data, conditional logic tested, 80%+ coverage achieved_
+
+- [ ] 17. Integration Tests for API Calls and Workflows
+  - File: apps/web/src/app/features/inventory/modules/purchase-requests/integration/purchase-requests.integration.spec.ts (create)
+  - File: apps/web/src/app/features/inventory/modules/purchase-orders/integration/purchase-orders.integration.spec.ts (create)
+  - File: apps/web/src/app/features/inventory/modules/receipts/integration/receipts.integration.spec.ts (create)
+  - Write integration tests hitting real API endpoints (test environment)
+  - Test complete workflows (create → submit → approve)
+  - Test error scenarios (budget insufficient, validation failures)
+  - Verify signal state updates after API calls
+  - Purpose: Validate frontend-backend integration
+  - _Leverage: Angular TestBed with real HttpClient, test API environment_
+  - _Requirements: All workflow requirements_
+  - _Prompt: Implement the task for spec procurement-ui, first run spec-workflow-guide to get the workflow guide then implement the task: Role: QA Engineer with expertise in integration testing and API validation | Task: Create integration tests for all workflows using real HTTP calls to test environment API. Setup: configure TestBed with real HttpClient (not mocked), set API base URL to test environment. Test scenarios: PR Workflow - test create PR calls POST /api/purchase-requests returns PR with DRAFT status, test submit PR calls POST /:id/submit returns SUBMITTED status and signal updates, test submit with insufficient budget returns 400 error, test approve PR calls POST /:id/approve returns APPROVED status, test reject PR with reason calls POST /:id/reject returns REJECTED. PO Workflow - test approve PO > 100K without document returns 400 error, test approve with document succeeds, test send PO commits budget and converts PR, test cancel PO with receipts returns 400 error, test cancel without receipts succeeds. Receipt Workflow - test post receipt with < 3 inspectors returns 400 error, test post with valid data creates lots and updates inventory, test posted receipt status POSTED. Budget Integration - test checkAvailability calls Budget API returns availability data. WebSocket - test subscribe receives real-time events. Import - test parseExcel with valid file returns items, test with invalid file returns errors. Verify: HTTP response status codes, response body structure, signal state updates, error messages in Thai/English | Restrictions: Must use real HTTP calls (not mocked), must test against test environment API, must verify response status and body, must verify signal updates, must test error scenarios, must clean up test data after tests | Success: All workflows tested with real API, status codes verified, response bodies validated, signals update correctly, error scenarios handled, test data cleaned up, all integration tests pass_
+
+- [ ] 18. E2E Tests for Complete Procurement Workflows
+  - File: e2e/procurement/pr-workflow.e2e-spec.ts (create)
+  - File: e2e/procurement/po-workflow.e2e-spec.ts (create)
+  - File: e2e/procurement/receipt-workflow.e2e-spec.ts (create)
+  - File: e2e/procurement/excel-import.e2e-spec.ts (create)
+  - Write E2E tests using Playwright or Cypress
+  - Test complete user journeys from UI to database
+  - Verify real-time updates via WebSocket
+  - Test Excel import flow
+  - Purpose: Validate complete system behavior from user perspective
+  - _Leverage: Playwright/Cypress framework, test database_
+  - _Requirements: All requirements_
+  - _Prompt: Implement the task for spec procurement-ui, first run spec-workflow-guide to get the workflow guide then implement the task: Role: QA Automation Engineer with expertise in E2E testing and Playwright/Cypress | Task: Create comprehensive E2E tests covering complete procurement workflows. Setup: use Playwright or Cypress, configure test database, create test users with proper permissions. Test Scenario 1 Complete PR Workflow: navigate to Purchase Requests page, click Create PR button, fill form with fiscal year, budget type, department, add 3 items using drug autocomplete, verify budget check shows available, click Submit, verify status badge changes to SUBMITTED, login as manager, navigate to PR, click Approve, verify status APPROVED, verify WebSocket updates status in real-time. Test Scenario 2 PO Creation and Sending: create PO from approved PR, verify items pre-filled, upload approval document (PO > 100K), click Approve, verify document validated, click Send, verify budget committed dialog, confirm, verify PO status SENT and PR status CONVERTED. Test Scenario 3 Receipt Posting: create receipt from sent PO, add 3 inspectors using multi-select, enter lot information for all items, verify inventory status displays, click Post, verify lots created and inventory updated, verify PO status COMPLETED. Test Scenario 4 Excel Import: navigate to Create PR, click Import from Excel, download template, upload filled Excel with 50 items, verify preview shows all items, click Import, verify items added to form, submit PR successfully. Test Scenario 5 Real-time Updates: open PR detail in two browser windows, in window 1 approve PR, verify window 2 receives WebSocket event and updates status without refresh, verify notification shows who approved. Verify: UI elements present, forms submit correctly, validations prevent invalid submissions, status updates correctly, database records created, real-time updates work | Restrictions: Must test complete user journeys (not partial), must verify UI updates correctly, must test WebSocket real-time updates, must test Excel import with real file, must clean up test data, must use page object pattern for maintainability | Success: All E2E tests pass, complete workflows validated, real-time updates work, Excel import successful, validations prevent errors, test data cleaned up, tests are reliable and maintainable_
