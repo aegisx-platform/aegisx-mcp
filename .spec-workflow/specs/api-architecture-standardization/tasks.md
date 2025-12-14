@@ -320,13 +320,14 @@
   - _Completed: 2025-12-14_
   - _Prompt: Implement the task for spec api-architecture-standardization, first run spec-workflow-guide to get the workflow guide then implement the task: Role: DevOps Engineer with monitoring infrastructure expertise | Task: Migrate monitoring module to Core layer maintaining fp() wrapper (correct for infrastructure), verifying metrics collection continues | Restrictions: Must not lose metrics, verify Prometheus integration, test alerting | Success: Monitoring migrated to Core, metrics collection works, dashboards functional | Instructions: 1) Mark in-progress, 2) Log with artifacts (metrics samples), 3) Mark complete_
 
-- [-] 6.2. Migrate auth and audit modules to Core layer
+- [x] 6.2. Migrate auth and audit modules to Core layer
   - Move: `apps/api/src/core/auth/` → `apps/api/src/layers/core/auth/`
   - Move: `apps/api/src/core/audit-system/` → `apps/api/src/layers/core/audit/`
   - Keep fp() wrappers (infrastructure plugins)
   - Test authentication flows extensively
   - _Leverage: Pattern from 6.1, proven migration patterns from Phase 3_
   - _Requirements: 1, 3, 8_
+  - _Completed: 2025-12-14_
   - _Prompt: Implement the task for spec api-architecture-standardization, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Security Engineer with authentication infrastructure expertise | Task: Migrate critical auth and audit modules to Core layer, maintaining infrastructure patterns and testing all authentication flows | Restrictions: Must not break authentication, verify JWT handling, test audit logging | Success: Auth and audit migrated safely, authentication works, audit logs captured | Instructions: 1) Mark in-progress, 2) Log with artifacts (security tests, audit samples), 3) Mark complete_
 
 - [ ] 6.3. Migrate inventory and admin domains
