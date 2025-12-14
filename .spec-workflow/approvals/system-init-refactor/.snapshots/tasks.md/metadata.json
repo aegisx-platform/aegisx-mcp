@@ -1,0 +1,14 @@
+{
+  "filePath": ".spec-workflow/specs/system-init-refactor/tasks.md",
+  "currentVersion": 1,
+  "snapshots": [
+    {
+      "version": 1,
+      "filename": "snapshot-001.json",
+      "timestamp": "2025-12-13T13:47:20.742Z",
+      "trigger": "initial",
+      "approvalId": "approval_1765633640733_bh0evepla",
+      "approvalTitle": "Tasks: System Initialization Refactor"
+    }
+  ]
+}
