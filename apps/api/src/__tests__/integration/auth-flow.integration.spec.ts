@@ -1029,7 +1029,7 @@ describe('Authentication Flow Integration Tests', () => {
 
         // Verify attempts are logged in database
         // Note: This requires direct database access
-        const app = requestHelper.app;
+        const app = requestHelper.getApp();
         const attempts = await app
           .knex('login_attempts')
           .where('user_id', userId)
@@ -1096,7 +1096,7 @@ describe('Authentication Flow Integration Tests', () => {
 
         // Give admin the auth:unlock permission
         // First, create the permission if it doesn't exist
-        const app = requestHelper.app;
+        const app = requestHelper.getApp();
         await app
           .knex('permissions')
           .insert({
@@ -1194,7 +1194,7 @@ describe('Authentication Flow Integration Tests', () => {
         const userId = registerResponse.body.data?.user?.id;
 
         // Verify token was created in database
-        const app = requestHelper.app;
+        const app = requestHelper.getApp();
         const verification = await app
           .knex('email_verifications')
           .where('user_id', userId)
@@ -1223,7 +1223,7 @@ describe('Authentication Flow Integration Tests', () => {
         const userId = registerResponse.body.data?.user?.id;
 
         // Get verification token from database
-        const app = requestHelper.app;
+        const app = requestHelper.getApp();
         const verification = await app
           .knex('email_verifications')
           .where('user_id', userId)
@@ -1281,7 +1281,7 @@ describe('Authentication Flow Integration Tests', () => {
         const userId = registerResponse.body.data?.user?.id;
 
         // Get verification token
-        const app = requestHelper.app;
+        const app = requestHelper.getApp();
         const verification = await app
           .knex('email_verifications')
           .where('user_id', userId)
@@ -1321,7 +1321,7 @@ describe('Authentication Flow Integration Tests', () => {
         const userId = registerResponse.body.data?.user?.id;
 
         // Get old token
-        const app = requestHelper.app;
+        const app = requestHelper.getApp();
         const oldVerification = await app
           .knex('email_verifications')
           .where('user_id', userId)
@@ -1364,7 +1364,7 @@ describe('Authentication Flow Integration Tests', () => {
         const userId = registerResponse.body.data?.user?.id;
 
         // Get token and verify
-        const app = requestHelper.app;
+        const app = requestHelper.getApp();
         const verification = await app
           .knex('email_verifications')
           .where('user_id', userId)
@@ -1403,7 +1403,7 @@ describe('Authentication Flow Integration Tests', () => {
         const userId = registerResponse.body.data?.user?.id;
 
         // Get token and manually expire it
-        const app = requestHelper.app;
+        const app = requestHelper.getApp();
         const verification = await app
           .knex('email_verifications')
           .where('user_id', userId)

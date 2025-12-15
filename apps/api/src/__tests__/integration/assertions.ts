@@ -1,5 +1,4 @@
 import supertest from 'supertest';
-import { expect } from '@jest/globals';
 
 export interface ApiResponse<T = any> {
   success: boolean;

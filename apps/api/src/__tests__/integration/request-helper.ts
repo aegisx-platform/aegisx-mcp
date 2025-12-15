@@ -22,6 +22,13 @@ export class RequestHelper {
   }
 
   /**
+   * Get the Fastify app instance
+   */
+  getApp(): FastifyInstance {
+    return this.app;
+  }
+
+  /**
    * Make a GET request
    */
   async get(

@@ -15,9 +15,9 @@ import jwtAuthPlugin from '../plugins/jwt-auth.plugin';
 import schemaEnforcementPlugin from '../plugins/schema-enforcement.plugin';
 import authStrategiesPlugin from '../layers/core/auth/strategies/auth.strategies';
 import authPlugin from '../layers/core/auth/auth.plugin';
-import navigationPlugin from '../core/navigation/navigation.plugin';
+import navigationPlugin from '../layers/platform/navigation/navigation.plugin';
 import userProfilePlugin from '../core/user-profile/user-profile.plugin';
-import settingsPlugin from '../core/settings/settings.plugin';
+import settingsPlugin from '../layers/platform/settings/settings.plugin';
 import swaggerPlugin from '../plugins/swagger.plugin';
 
 /**

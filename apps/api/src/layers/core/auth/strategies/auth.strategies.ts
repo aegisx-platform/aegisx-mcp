@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import fp from 'fastify-plugin';
-import '../../../types/fastify.d';
-import '../../../types/jwt.types';
+import '../../../../types/fastify.d';
+import '../../../../types/jwt.types';
 
 async function authStrategiesPlugin(fastify: FastifyInstance) {
   // Strategy 1: JWT Authentication
