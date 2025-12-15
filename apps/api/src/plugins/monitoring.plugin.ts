@@ -7,9 +7,9 @@ import {
   Histogram,
   Gauge,
 } from 'prom-client';
-import { createErrorQueueService } from '../core/monitoring/services/error-queue.service';
+import { createErrorQueueService } from '../layers/core/monitoring/services/error-queue.service';
 
-import { ErrorQueueService } from '../core/monitoring/services/error-queue.service';
+import { ErrorQueueService } from '../layers/core/monitoring/services/error-queue.service';
 
 declare module 'fastify' {
   interface FastifyInstance {

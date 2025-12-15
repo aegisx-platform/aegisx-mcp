@@ -16,7 +16,7 @@ import schemaEnforcementPlugin from '../plugins/schema-enforcement.plugin';
 import authStrategiesPlugin from '../layers/core/auth/strategies/auth.strategies';
 import authPlugin from '../layers/core/auth/auth.plugin';
 import navigationPlugin from '../layers/platform/navigation/navigation.plugin';
-import userProfilePlugin from '../core/user-profile/user-profile.plugin';
+// TODO: user-profile module was not migrated to layers/ - needs to be recreated or tests updated
 import settingsPlugin from '../layers/platform/settings/settings.plugin';
 import swaggerPlugin from '../plugins/swagger.plugin';
 
@@ -94,7 +94,8 @@ export async function build(
   // 12. Feature modules
   await app.register(authPlugin);
   await app.register(navigationPlugin);
-  await app.register(userProfilePlugin);
+  // TODO: user-profile module was not migrated - comment out until recreated
+  // await app.register(userProfilePlugin);
   await app.register(settingsPlugin);
 
   // Health check
