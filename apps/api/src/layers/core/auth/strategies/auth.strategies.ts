@@ -203,7 +203,12 @@ async function authStrategiesPlugin(fastify: FastifyInstance) {
 
 export default fp(authStrategiesPlugin, {
   name: 'auth-strategies-plugin',
-  dependencies: ['@fastify/jwt', '@fastify/auth', 'knex-plugin'],
+  dependencies: [
+    '@fastify/jwt',
+    '@fastify/auth',
+    'knex-plugin',
+    'permission-cache-plugin',
+  ],
 });
 
 // TypeScript declarations

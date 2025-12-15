@@ -33,6 +33,7 @@ import swaggerPlugin from '../plugins/swagger.plugin';
 
 // Core infrastructure modules (kept from layers/)
 import authPlugin from '../layers/core/auth/auth.plugin';
+import permissionCachePlugin from '../layers/core/auth/permission-cache.plugin';
 import authStrategiesPlugin from '../layers/core/auth/strategies/auth.strategies';
 import { fileAuditPlugin } from '../layers/core/audit/file-audit';
 import { loginAttemptsPlugin } from '../layers/core/audit/login-attempts';
@@ -255,16 +256,15 @@ export function createPluginGroups(
           required: true,
         },
         {
+          name: 'permission-cache',
+          plugin: permissionCachePlugin,
+          required: true,
+        },
+        {
           name: 'auth-strategies',
           plugin: authStrategiesPlugin,
           required: true,
         },
-        // DISABLED: Old core plugin removed - Permission caching now handled in platformRbacPlugin
-        // {
-        //   name: 'permission-cache',
-        //   plugin: permissionCachePlugin,
-        //   required: true,
-        // },
         // DISABLED: Activity logging plugin depends on deleted user-profile module
         // {
         //   name: 'activity-logging',
@@ -316,11 +316,13 @@ export function createCorePluginGroup(apiPrefix: string): PluginGroup {
       // },
       // NOTE: websocket plugin is loaded in "application" group, not here
       // to avoid duplicate registration when both old and new routes are enabled
-      {
-        name: 'auth',
-        plugin: authPlugin,
-        required: true,
-      },
+      // DISABLED: authPlugin now loaded in createCoreLayerGroup (NEW layer-based architecture)
+      // to avoid duplicate "authService" decorator error when both enableNewRoutes and enableOldRoutes are true
+      // {
+      //   name: 'auth',
+      //   plugin: authPlugin,
+      //   required: true,
+      // },
       // OLD CORE USERS PLUGIN REMOVED - Now using layer-based plugin in createPlatformPluginGroup
       // {
       //   name: 'users',
@@ -339,27 +341,29 @@ export function createCorePluginGroup(apiPrefix: string): PluginGroup {
       //   plugin: platformRbacPlugin,
       //   required: true,
       // },
-      {
-        name: 'monitoring-module',
-        plugin: monitoringModulePlugin,
-        required: true,
-      },
+      // DISABLED: These plugins now loaded in createCoreLayerGroup (NEW layer-based architecture)
+      // to avoid duplicate route errors when both enableNewRoutes and enableOldRoutes are true
+      // {
+      //   name: 'monitoring-module',
+      //   plugin: monitoringModulePlugin,
+      //   required: true,
+      // },
       // DISABLED: Old core error-logs plugin removed - Error logging now handled in monitoringModulePlugin
       // {
       //   name: 'error-logs',
       //   plugin: errorLogsPlugin,
       //   required: true,
       // },
-      {
-        name: 'file-audit',
-        plugin: fileAuditPlugin,
-        required: true,
-      },
-      {
-        name: 'login-attempts',
-        plugin: loginAttemptsPlugin,
-        required: true,
-      },
+      // {
+      //   name: 'file-audit',
+      //   plugin: fileAuditPlugin,
+      //   required: true,
+      // },
+      // {
+      //   name: 'login-attempts',
+      //   plugin: loginAttemptsPlugin,
+      //   required: true,
+      // },
       // DISABLED: Duplicate registration - Now only in createPlatformLayerGroup
       // {
       //   name: 'import-discovery-plugin',
@@ -420,11 +424,13 @@ export function createFeaturePluginGroup(apiPrefix: string): PluginGroup {
       //   plugin: apiKeysPlugin,
       //   required: true,
       // },
-      {
-        name: 'navigation',
-        plugin: platformNavigationPlugin,
-        required: true,
-      },
+      // DISABLED: navigation plugin now loaded in createPlatformLayerGroup (NEW layer-based architecture)
+      // to avoid duplicate route errors when both enableNewRoutes and enableOldRoutes are true
+      // {
+      //   name: 'navigation',
+      //   plugin: platformNavigationPlugin,
+      //   required: true,
+      // },
       // {
       //   name: 'user-profile',
       //   plugin: userProfilePlugin,
