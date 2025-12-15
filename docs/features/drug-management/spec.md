@@ -755,9 +755,9 @@ GET /api/inventory/tmt/concepts?level=TPU&q=paracetamol
 
 ### Related Documentation
 
-- [TMT Lookup Feature](../tmt-lookup/SPEC.md)
+- [TMT Lookup Feature](../tmt-lookup/spec.md)
 - [Inventory App](../inventory-app/README.md)
-- [API Calling Standard](../../../development/API_CALLING_STANDARD.md)
+- [API Calling Standard](../../../development/api-calling-standard.md)
 
 ---
 

@@ -81,7 +81,7 @@ inventory.drug_focus_lists
 
 ## 📚 Documentation
 
-- [Technical Specification](./SPEC.md) - Architecture, database schema, relationships
+- [Technical Specification](./spec.md) - Architecture, database schema, relationships
 - [API Contracts](./API.md) - Endpoint specifications
 - [UI Mockup](./UI-MOCKUP.md) - Interface design and UX flows
 

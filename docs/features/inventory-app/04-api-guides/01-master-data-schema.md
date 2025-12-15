@@ -839,6 +839,6 @@ ORDER BY bt.type_code, bc.category_code;
 
 - [README.md](README.md) - System overview
 - [WORKFLOWS.md](WORKFLOWS.md) - Business workflows
-- [../../DATABASE_STRUCTURE.md](../../DATABASE_STRUCTURE.md) - Complete 52-table schema
+- [../../database-structure.md](../../database-structure.md) - Complete 52-table schema
 
 **Last Updated:** 2025-01-28 | **Version:** 2.6.0

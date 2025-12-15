@@ -1041,7 +1041,7 @@ pnpm run dev:api
 - Mark as "Not Spam" if found
 - Add sender to contacts
 
-**See Also:** [Email Verification Implementation](./EMAIL_VERIFICATION_implementation.md) for detailed SMTP troubleshooting.
+**See Also:** [Email Verification Implementation](./email-verification-implementation.md) for detailed SMTP troubleshooting.
 
 ---
 
@@ -1638,9 +1638,9 @@ async verifyResetToken(token: string): Promise<ResetResult & { userId?: string }
 
 ## 📚 Related Documentation
 
-- **[Login Implementation](./LOGIN_implementation.md)** - Login flow and authentication
-- **[Registration Implementation](./REGISTRATION_implementation.md)** - User registration and auto-login
-- **[Email Verification Implementation](./EMAIL_VERIFICATION_implementation.md)** - Email verification and SMTP setup
+- **[Login Implementation](./login-implementation.md)** - Login flow and authentication
+- **[Registration Implementation](./registration-implementation.md)** - User registration and auto-login
+- **[Email Verification Implementation](./email-verification-implementation.md)** - Email verification and SMTP setup
 - **[Authentication Flow](../README.md)** - Complete auth system overview
 - **[SMTP Setup Guide](../../getting-started/SMTP_SETUP_GUIDE.md)** - Configure SMTP for emails
 
@@ -1670,7 +1670,7 @@ A: No. After successful password reset, the token is marked as `used = true` and
 
 **Q: What if the user doesn't receive the email?**
 
-A: Common causes: (1) SMTP not configured, (2) Email in spam folder, (3) Email service error. See [Troubleshooting Guide](#troubleshooting-guide) and [Email Verification Implementation](./EMAIL_VERIFICATION_implementation.md) for SMTP setup.
+A: Common causes: (1) SMTP not configured, (2) Email in spam folder, (3) Email service error. See [Troubleshooting Guide](#troubleshooting-guide) and [Email Verification Implementation](./email-verification-implementation.md) for SMTP setup.
 
 **Q: How do I know if SMTP is working?**
 

@@ -18,7 +18,7 @@
 
 ### For Backend Developers
 
-- [AUTO_DISCOVERY_IMPORT_SYSTEM.md](./AUTO_DISCOVERY_IMPORT_SYSTEM.md) - Architecture & design
+- [AUTO_DISCOVERY_IMPORT_SYSTEM.md](./auto-discovery-import-system.md) - Architecture & design
 - [IMPORT_DISCOVERY_SERVICE_implementation.md](./IMPORT_DISCOVERY_SERVICE_implementation.md) - Service implementation
 - [BATCH_TRACKING_MIGRATION.md](./BATCH_TRACKING_MIGRATION.md) - Database schema
 
@@ -404,7 +404,7 @@ git commit -m "feat(system-init): add [module] import"
 
 ## Related Features
 
-- **User Departments Management** - [USER_DEPARTMENTS_SERVICE.md](./USER_DEPARTMENTS_SERVICE.md)
+- **User Departments Management** - [USER_DEPARTMENTS_SERVICE.md](./user-departments-service.md)
 - **Import History Tracking** - [IMPORT_HISTORY_TIMELINE_COMPONENT.md](./IMPORT_HISTORY_TIMELINE_COMPONENT.md)
 - **Department Management** - [DEPARTMENT_MANAGEMENT_DESIGN.md](./DEPARTMENT_MANAGEMENT_DESIGN.md)
 

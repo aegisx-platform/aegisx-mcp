@@ -289,7 +289,7 @@ fastify.register(import('../modules/inventory/inventory.routes'), {
 
 ## Next Phase
 
-After completing Phase 3, proceed to [Phase 4: Frontend](./PHASE_4_FRONTEND.md)
+After completing Phase 3, proceed to [Phase 4: Frontend](./phase-4_FRONTEND.md)
 
 ---
 

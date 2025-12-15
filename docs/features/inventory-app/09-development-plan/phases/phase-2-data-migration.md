@@ -224,7 +224,7 @@ pnpm run db:seed:inventory --specific=001_master_data.ts
 
 ## Next Phase
 
-After completing Phase 2, proceed to [Phase 3: Backend APIs](./PHASE_3_BACKEND.md)
+After completing Phase 2, proceed to [Phase 3: Backend APIs](./phase-3_BACKEND.md)
 
 ---
 

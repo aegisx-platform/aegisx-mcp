@@ -31,7 +31,7 @@
 
 **Reference Examples:**
 
-- [LOGIN_implementation.md](../authentication/implementations/LOGIN_implementation.md)
+- [LOGIN_implementation.md](../authentication/implementations/login-implementation.md)
 - [ARCHITECTURE.md](../authentication/ARCHITECTURE.md)
 
 ---
@@ -283,7 +283,7 @@ cspell [FILE].md
 **Excellent Examples in This Project:**
 
 - [Authentication Feature Docs](../authentication/) - Complete feature documentation set
-- [LOGIN_implementation.md](../authentication/implementations/LOGIN_implementation.md) - Detailed implementation guide
+- [LOGIN_implementation.md](../authentication/implementations/login-implementation.md) - Detailed implementation guide
 
 **External Resources:**
 

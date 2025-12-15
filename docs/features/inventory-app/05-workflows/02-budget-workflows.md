@@ -1318,7 +1318,7 @@ SELECT update_budget_plan_purchase(
 
 - [README.md](README.md) - System overview
 - [SCHEMA.md](SCHEMA.md) - Database schema
-- [../../END_TO_END_WORKFLOWS.md](../../END_TO_END_WORKFLOWS.md) - Cross-system workflows
+- [../../end-to-end-workflows.md](../../end-to-end-workflows.md) - Cross-system workflows
 
 **Last Updated:** 2025-01-28 | **Version:** 2.6.0
 
@@ -1371,6 +1371,6 @@ sequenceDiagram
 
 - [README.md](README.md) - System overview
 - [SCHEMA.md](SCHEMA.md) - Database schema
-- [../../END_TO_END_WORKFLOWS.md](../../END_TO_END_WORKFLOWS.md) - Cross-system workflows
+- [../../end-to-end-workflows.md](../../end-to-end-workflows.md) - Cross-system workflows
 
 **Last Updated:** 2025-01-28 | **Version:** 2.6.0

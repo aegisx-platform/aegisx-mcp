@@ -574,7 +574,7 @@ npm start
 - `README.md` - Project overview
 - `SYSTEM_SETUP_GUIDE.md` - Detailed system setup
 - `PROJECT_STATUS.md` - Current project status
-- `docs/migration/PHASE_*_SUMMARY.md` - Phase summaries
+- `docs/migration/phase-*_SUMMARY.md` - Phase summaries
 - `CLAUDE.md` - AI assistant guide
 
 ---

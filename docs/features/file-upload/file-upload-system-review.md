@@ -37,7 +37,7 @@ A production-ready core upload system with:
 - Frontend loops and uploads files individually (3-5 concurrent)
 - Same pattern as AWS S3, MinIO, Google Cloud Storage
 - Better progress tracking, error handling, and retry logic
-- See: [MULTIPLE_UPLOAD_ANALYSIS.md](./MULTIPLE_UPLOAD_ANALYSIS.md)
+- See: [MULTIPLE_UPLOAD_ANALYSIS.md](./multiple-upload-analysis.md)
 
 ---
 

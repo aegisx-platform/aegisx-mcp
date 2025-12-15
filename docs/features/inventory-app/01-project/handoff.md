@@ -279,7 +279,7 @@ Export views ready: `export_druglist`, `export_purchase_plan`, etc.
 If confused, read these files:
 
 1. `CLAUDE.md` - Detailed instructions
-2. `docs/flows/DATA_FLOW_COMPLETE_GUIDE.md` - All business flows
+2. `docs/flows/data-flow-complete-guide.md` - All business flows
 3. `docs/systems/*/API_development_GUIDE.md` - API specs per system
 
 ---

@@ -159,7 +159,7 @@
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-**Implementation Details:** [REGISTRATION_implementation.md](./REGISTRATION_implementation.md)
+**Implementation Details:** [REGISTRATION_implementation.md](./registration-implementation.md)
 
 ---
 
@@ -209,7 +209,7 @@
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-**Implementation Details:** [LOGIN_implementation.md](./LOGIN_implementation.md)
+**Implementation Details:** [LOGIN_implementation.md](./login-implementation.md)
 
 ---
 
@@ -265,7 +265,7 @@
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-**Implementation Details:** [EMAIL_VERIFICATION_implementation.md](./EMAIL_VERIFICATION_implementation.md)
+**Implementation Details:** [EMAIL_VERIFICATION_implementation.md](./email-verification-implementation.md)
 
 ---
 
@@ -553,21 +553,21 @@ CREATE INDEX idx_refresh_tokens_expires_at ON refresh_tokens(expires_at);
 
 ### Core Authentication
 
-1. **[User Registration](./REGISTRATION_implementation.md)**
+1. **[User Registration](./registration-implementation.md)**
    - Account creation flow
    - Input validation
    - Password hashing
    - Auto-login after registration
    - Email verification trigger
 
-2. **[User Login](./LOGIN_implementation.md)**
+2. **[User Login](./login-implementation.md)**
    - Credential verification
    - JWT token generation
    - Session management
    - Rate limiting integration
    - Account lockout handling
 
-3. **[Email Verification](./EMAIL_VERIFICATION_implementation.md)** ✅ Complete
+3. **[Email Verification](./email-verification-implementation.md)** ✅ Complete
    - Token generation
    - Email sending (SMTP)
    - Token validation
@@ -632,15 +632,15 @@ CREATE INDEX idx_refresh_tokens_expires_at ON refresh_tokens(expires_at);
 
 **By Use Case:**
 
-- New user? → [Registration](./REGISTRATION_implementation.md) → [Email Verification](./EMAIL_VERIFICATION_implementation.md)
-- Existing user? → [Login](./LOGIN_implementation.md)
+- New user? → [Registration](./registration-implementation.md) → [Email Verification](./email-verification-implementation.md)
+- Existing user? → [Login](./login-implementation.md)
 - Forgot password? → [Password Reset](./password-reset-implementation.md)
 - Session expired? → [Refresh Token](./REFRESH_TOKEN_implementation.md)
 
 **By Technology:**
 
-- JWT implementation → [Login](./LOGIN_implementation.md) + [Refresh Token](./REFRESH_TOKEN_implementation.md)
-- Email functionality → [Email Verification](./EMAIL_VERIFICATION_implementation.md) + [Password Reset](./password-reset-implementation.md)
+- JWT implementation → [Login](./login-implementation.md) + [Refresh Token](./REFRESH_TOKEN_implementation.md)
+- Email functionality → [Email Verification](./email-verification-implementation.md) + [Password Reset](./password-reset-implementation.md)
 - Security → [Rate Limiting](./RATE_LIMITING_implementation.md) + [Account Lockout](./account-lockout_implementation.md)
 
 ---

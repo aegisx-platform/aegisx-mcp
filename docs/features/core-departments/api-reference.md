@@ -1020,4 +1020,4 @@ curl "http://localhost:3000/api/departments?sort=dept_code:asc,dept_name:asc"
 
 ---
 
-For bulk import operations, see [SYSTEM_INIT_INTEGRATION.md](./SYSTEM_INIT_INTEGRATION.md).
+For bulk import operations, see [SYSTEM_INIT_INTEGRATION.md](./system-init-integration.md).

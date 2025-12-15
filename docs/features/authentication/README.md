@@ -60,9 +60,9 @@ http://localhost:4200/reset-password
 **📁 [implementations/](./implementations/)** - Comprehensive technical documentation for each feature
 
 - **[Overview](./implementations/README.md)** - Complete system architecture, all flows, diagrams
-- **[Login](./implementations/LOGIN_implementation.md)** - JWT tokens, account lockout, rate limiting
-- **[Registration](./implementations/REGISTRATION_implementation.md)** - Auto-login, validation, email verification
-- **[Email Verification](./implementations/EMAIL_VERIFICATION_implementation.md)** - Token generation, SMTP, resend
+- **[Login](./implementations/login-implementation.md)** - JWT tokens, account lockout, rate limiting
+- **[Registration](./implementations/registration-implementation.md)** - Auto-login, validation, email verification
+- **[Email Verification](./implementations/email-verification-implementation.md)** - Token generation, SMTP, resend
 - **[Password Reset](./implementations/password-reset-implementation.md)** - 2-step flow, token expiration
 - **[Refresh Token](./implementations/REFRESH_TOKEN_implementation.md)** - Token rotation, HTTP interceptor
 - **[Rate Limiting](./implementations/RATE_LIMITING_implementation.md)** - Redis-based, per-endpoint limits

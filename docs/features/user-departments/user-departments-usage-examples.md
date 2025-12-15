@@ -558,5 +558,5 @@ export class BudgetWorkflowService {
 ## Related Documentation
 
 - [DEPARTMENT_MANAGEMENT_DESIGN.md](./DEPARTMENT_MANAGEMENT_DESIGN.md) - Design specification
-- [USER_DEPARTMENTS_SERVICE.md](./USER_DEPARTMENTS_SERVICE.md) - API documentation
+- [USER_DEPARTMENTS_SERVICE.md](./user-departments-service.md) - API documentation
 - Service Tests: `apps/api/src/core/users/__tests__/user-departments.service.test.ts`

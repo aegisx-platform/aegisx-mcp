@@ -148,7 +148,7 @@ DRAFT → SUBMITTED → DEPT_APPROVED → FINANCE_APPROVED
 - [Budget Management Workflows](../05-workflows/02-budget-WORKFLOWS.md)
 - [Budget Schema](../04-api-guides/02-budget-SCHEMA.md)
 - [Budget API Guide](../04-api-guides/02-budget-API.md)
-- [System Architecture](../../../SYSTEM_ARCHITECTURE.md)
+- [System Architecture](../../../system-architecture.md)
 
 ---
 

@@ -347,7 +347,7 @@ All TypeScript types properly declared, no compilation errors specific to this m
 ## Related Documentation
 
 - [Department Management Design](./DEPARTMENT_MANAGEMENT_DESIGN.md) - Full design specification
-- [API Calling Standard](../../../development/API_CALLING_STANDARD.md) - URL patterns
+- [API Calling Standard](../../../development/api-calling-standard.md) - URL patterns
 - [Universal Full-Stack Standard](../../../development/universal-fullstack-standard.md) - Development patterns
 
 ## Code Metrics

@@ -769,7 +769,7 @@ export class UserDepartmentsService {
 
 ### Related Documents
 
-- [Auto-Discovery Import System](./AUTO_DISCOVERY_IMPORT_SYSTEM.md)
+- [Auto-Discovery Import System](./auto-discovery-import-system.md)
 - [Budget Request Submission Spec](../budget-request-submission-v2/implementation-PLAN.md)
 - [Universal Full-Stack Standard](../../../development/universal-fullstack-standard.md)
 

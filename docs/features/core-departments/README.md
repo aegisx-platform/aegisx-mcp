@@ -306,7 +306,7 @@ Depending on your role, start with:
 
 ### For Bulk Import Operations
 
-→ Read **[SYSTEM_INIT_INTEGRATION.md](./SYSTEM_INIT_INTEGRATION.md)** for import procedures
+→ Read **[SYSTEM_INIT_INTEGRATION.md](./system-init-integration.md)** for import procedures
 
 ### For Troubleshooting
 

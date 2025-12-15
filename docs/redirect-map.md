@@ -164,7 +164,7 @@ plugins:
 | Old Path                                       | New Path                                              |
 | ---------------------------------------------- | ----------------------------------------------------- |
 | `/development/feature-development-standard.md` | `/guides/development/feature-development-standard.md` |
-| `/development/API_CALLING_STANDARD.md`         | `/guides/development/api-calling-standard.md`         |
+| `/development/api-calling-standard.md`         | `/guides/development/api-calling-standard.md`         |
 | `/development/qa-checklist.md`                 | `/guides/development/qa-checklist.md`                 |
 | `/development/universal-fullstack-standard.md` | `/guides/development/universal-fullstack-standard.md` |
 

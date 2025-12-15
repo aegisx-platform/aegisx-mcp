@@ -10,7 +10,7 @@ TMT Lookup Components เป็นชุด Angular components ที่ออ�
 
 | Document                       | Description                                  |
 | ------------------------------ | -------------------------------------------- |
-| [SPEC.md](./SPEC.md)           | Technical specification และ component design |
+| [SPEC.md](./spec.md)           | Technical specification และ component design |
 | [API.md](./API.md)             | Backend API endpoints specification          |
 | [UI-MOCKUP.md](./UI-MOCKUP.md) | UI mockups และ visual design                 |
 

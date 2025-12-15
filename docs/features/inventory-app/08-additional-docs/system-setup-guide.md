@@ -326,17 +326,17 @@ npm run db:studio
 
 ### Essential Reading
 
-1. **[QUICK_START_GUIDE.md](./docs/flows/QUICK_START_GUIDE.md)** - Quick setup guide
-2. **[DATA_FLOW_COMPLETE_GUIDE.md](./docs/flows/DATA_FLOW_COMPLETE_GUIDE.md)** - Complete system flows
-3. **[MYSQL_IMPORT_GUIDE.md](./docs/MYSQL_IMPORT_GUIDE.md)** - MySQL import instructions
-4. **[SCRIPT_CLEANUP_GUIDE.md](./docs/SCRIPT_CLEANUP_GUIDE.md)** - Scripts organization
+1. **[QUICK_START_GUIDE.md](./docs/flows/quick-start-guide.md)** - Quick setup guide
+2. **[DATA_FLOW_COMPLETE_GUIDE.md](./docs/flows/data-flow-complete-guide.md)** - Complete system flows
+3. **[MYSQL_IMPORT_GUIDE.md](./docs/mysql-import-guide.md)** - MySQL import instructions
+4. **[SCRIPT_CLEANUP_GUIDE.md](./docs/script-cleanup-guide.md)** - Scripts organization
 
 ### Flow Documentation
 
-1. **[FLOW_01_Master_Data_Setup.md](./docs/flows/FLOW_01_Master_Data_Setup.md)** - Master data
-2. **[FLOW_02_Budget_Management.md](./docs/flows/FLOW_02_Budget_Management.md)** - Budget system
-3. **[FLOW_03_Procurement_Part1_PR.md](./docs/flows/FLOW_03_Procurement_Part1_PR.md)** - Purchase requests
-4. **[FLOW_08_Frontend_Purchase_Request.md](./docs/flows/FLOW_08_Frontend_Purchase_Request.md)** - Frontend guide
+1. **[FLOW_01_Master_Data_Setup.md](./docs/flows/flow-01_Master_Data_Setup.md)** - Master data
+2. **[FLOW_02_Budget_Management.md](./docs/flows/flow-02_Budget_Management.md)** - Budget system
+3. **[FLOW_03_Procurement_Part1_PR.md](./docs/flows/flow-03_Procurement_Part1_PR.md)** - Purchase requests
+4. **[FLOW_08_Frontend_Purchase_Request.md](./docs/flows/flow-08_Frontend_Purchase_Request.md)** - Frontend guide
 
 ### Technical Documentation
 

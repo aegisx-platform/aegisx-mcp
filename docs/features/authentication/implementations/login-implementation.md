@@ -1404,7 +1404,7 @@ curl -X POST http://localhost:3333/api/auth/refresh \
 
 ## 📚 Related Documentation
 
-- **[Email Verification Implementation](./EMAIL_VERIFICATION_implementation.md)** - Email verification flow
+- **[Email Verification Implementation](./email-verification-implementation.md)** - Email verification flow
 - **[Password Reset Implementation](./password-reset-implementation.md)** - Password reset flow
 - **[RBAC Implementation](../../rbac/implementation.md)** - Role-based access control
 - **[Authentication Flow](../README.md)** - Complete auth system overview

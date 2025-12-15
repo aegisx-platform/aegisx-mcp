@@ -163,7 +163,7 @@ WHERE table_schema = 'public';
 
 ## Next Phase
 
-After completing Phase 0, proceed to [Phase 1: Database Migrations](./PHASE_1_DATABASE.md)
+After completing Phase 0, proceed to [Phase 1: Database Migrations](./phase-1_DATABASE.md)
 
 ---
 

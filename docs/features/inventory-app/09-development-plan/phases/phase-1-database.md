@@ -255,7 +255,7 @@ pnpm run db:migrate:inventory:status
 
 ## Next Phase
 
-After completing Phase 1, proceed to [Phase 2: Data Migration](./PHASE_2_DATA_MIGRATION.md)
+After completing Phase 1, proceed to [Phase 2: Data Migration](./phase-2_DATA_MIGRATION.md)
 
 ---
 

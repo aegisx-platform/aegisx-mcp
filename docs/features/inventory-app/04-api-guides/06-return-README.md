@@ -513,9 +513,9 @@ console.log(`Found ${history.length} returns from Nursing Department`);
 
 ### Global Documentation
 
-- **[SYSTEM_ARCHITECTURE.md](../../SYSTEM_ARCHITECTURE.md)** - Overview of all 8 systems
-- **[DATABASE_STRUCTURE.md](../../DATABASE_STRUCTURE.md)** - Complete database schema (44 tables)
-- **[END_TO_END_WORKFLOWS.md](../../END_TO_END_WORKFLOWS.md)** - Cross-system workflows
+- **[SYSTEM_ARCHITECTURE.md](../../system-architecture.md)** - Overview of all 8 systems
+- **[DATABASE_STRUCTURE.md](../../database-structure.md)** - Complete database schema (44 tables)
+- **[END_TO_END_WORKFLOWS.md](../../end-to-end-workflows.md)** - Cross-system workflows
 
 ### Per-System Documentation
 
