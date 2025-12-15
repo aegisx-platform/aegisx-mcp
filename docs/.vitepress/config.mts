@@ -21,7 +21,7 @@ export default defineConfig({
       { text: 'Guides', link: '/guides/development/feature-development-standard' },
       { text: 'Reference', link: '/reference/api/api-response-standard' },
       { text: 'Architecture', link: '/architecture/architecture-overview' },
-      { text: 'Features', link: '/features/FEATURE_DOCUMENTATION_STANDARD' },
+      { text: 'Features', link: '/features/' },
       { text: 'Development', link: '/development/claude-detailed-rules' },
       { text: 'Infrastructure', link: '/infrastructure/CI-CD-SETUP' },
       { text: 'Testing', link: '/testing/avatar-testing-guide' },
@@ -295,7 +295,7 @@ export default defineConfig({
           items: [
             {
               text: 'Feature Documentation Standard',
-              link: '/features/FEATURE_DOCUMENTATION_STANDARD',
+              link: '/features/feature-documentation-standard',
             },
             {
               text: 'Feature Templates',
@@ -654,7 +654,7 @@ export default defineConfig({
 
   // Ignore patterns
   srcExclude: [
-    '**/README.md',
+    // NOTE: Do NOT exclude **/README.md globally - it excludes features/README.md!
     // '**/features/**', // Re-enabled with Handlebars handling in markdown config
     '**/features/advanced/**', // Temporarily exclude - has extensive Handlebars examples
     '**/features/pdf-templates/**', // Temporarily exclude - has Handlebars syntax

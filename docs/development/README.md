@@ -280,7 +280,7 @@ Reference for common CLI commands.
 
 ### Features
 
-- [Feature Documentation Standard](../features/FEATURE_DOCUMENTATION_STANDARD.md)
+- [Feature Documentation Standard](../features/feature-documentation-standard.md)
 - [Resource Registry](../features/RESOURCE_REGISTRY.md)
 - [Feature Status Dashboard](../features/README.md)
 

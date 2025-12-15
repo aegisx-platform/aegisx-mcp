@@ -15,22 +15,22 @@
 
 ### 🚨 MANDATORY: 8-File Documentation System
 
-**ALL features MUST follow the [Feature Documentation Standard](./FEATURE_DOCUMENTATION_STANDARD.md).**
+**ALL features MUST follow the [Feature Documentation Standard](./feature-documentation-standard.md).**
 
 Every feature requires exactly 8 documentation files:
 
-| File | Purpose | Audience | Status |
-|------|---------|----------|--------|
-| **[README.md](./templates/README.md)** | Feature overview & quick start | Everyone | ✅ Template available |
-| **[USER_GUIDE.md](./templates/USER_GUIDE.md)** | Complete end-user manual | End Users | ✅ Template available |
-| **[DEVELOPER_GUIDE.md](./templates/DEVELOPER_GUIDE.md)** | Technical implementation guide | Developers | ✅ Template available |
-| **[API_REFERENCE.md](./templates/API_REFERENCE.md)** | Complete API documentation | Developers, API Consumers | ✅ Template available |
-| **[ARCHITECTURE.md](./templates/ARCHITECTURE.md)** | System design & decisions | Architects, Senior Devs | ✅ Template available |
-| **[DEPLOYMENT_GUIDE.md](./templates/DEPLOYMENT_GUIDE.md)** | Production deployment | DevOps, SysAdmins | ✅ Template available |
-| **[TROUBLESHOOTING.md](./templates/TROUBLESHOOTING.md)** | Debugging & problem resolution | Support, DevOps, Developers | ✅ Template available |
-| **[DOCUMENTATION_INDEX.md](./templates/DOCUMENTATION_INDEX.md)** | Navigation & learning guide | Everyone | ✅ Template available |
+| File                                                             | Purpose                        | Audience                    | Status                |
+| ---------------------------------------------------------------- | ------------------------------ | --------------------------- | --------------------- |
+| **[README.md](./templates/readme.md)**                           | Feature overview & quick start | Everyone                    | ✅ Template available |
+| **[USER_GUIDE.md](./templates/user-guide.md)**                   | Complete end-user manual       | End Users                   | ✅ Template available |
+| **[DEVELOPER_GUIDE.md](./templates/developer-guide.md)**         | Technical implementation guide | Developers                  | ✅ Template available |
+| **[API_REFERENCE.md](./templates/api-reference.md)**             | Complete API documentation     | Developers, API Consumers   | ✅ Template available |
+| **[ARCHITECTURE.md](./templates/architecture.md)**               | System design & decisions      | Architects, Senior Devs     | ✅ Template available |
+| **[DEPLOYMENT_GUIDE.md](./templates/deployment-guide.md)**       | Production deployment          | DevOps, SysAdmins           | ✅ Template available |
+| **[TROUBLESHOOTING.md](./templates/troubleshooting.md)**         | Debugging & problem resolution | Support, DevOps, Developers | ✅ Template available |
+| **[DOCUMENTATION_INDEX.md](./templates/documentation-index.md)** | Navigation & learning guide    | Everyone                    | ✅ Template available |
 
-**📖 Read the complete standard:** [FEATURE_DOCUMENTATION_STANDARD.md](./FEATURE_DOCUMENTATION_STANDARD.md)
+**📖 Read the complete standard:** [feature-documentation-standard.md](./feature-documentation-standard.md)
 
 **🎯 Gold Standard Example:** [activity-tracking/](./activity-tracking/) - Study this for reference
 
@@ -39,6 +39,7 @@ Every feature requires exactly 8 documentation files:
 ### Documentation Quality Requirements
 
 **Before merging any feature:**
+
 - ✅ All 8 documentation files present and complete
 - ✅ All code examples tested and working
 - ✅ All screenshots current (< 3 months old)
@@ -170,7 +171,7 @@ cp docs/features/templates/*.md docs/features/[feature-name]/
 # 4. Customize documentation from templates
 # Replace [Feature Name] and [feature-name] placeholders
 # Fill in each of the 8 files following the standard
-# See: docs/features/FEATURE_DOCUMENTATION_STANDARD.md
+# See: docs/features/feature-documentation-standard.md
 
 # 5. Update this dashboard
 # Add your feature to "Active Features" table
@@ -233,7 +234,7 @@ grep -r "path:" apps/web/src/app/
 
 ### 4. **Completion Phase**
 
-- [ ] **Verify all 8 documentation files complete** (see [standard](./FEATURE_DOCUMENTATION_STANDARD.md))
+- [ ] **Verify all 8 documentation files complete** (see [standard](./feature-documentation-standard.md))
 - [ ] Run documentation quality checklist
 - [ ] Create PR following PR template (include documentation review)
 - [ ] Complete code review AND documentation review
@@ -308,7 +309,7 @@ Every Friday afternoon:
 
 ### Essential Reading
 
-- [Feature Documentation Standard](./FEATURE_DOCUMENTATION_STANDARD.md) - **MANDATORY** (Read this first!)
+- [Feature Documentation Standard](./feature-documentation-standard.md) - **MANDATORY** (Read this first!)
 - [Feature Development Standard](../development/feature-development-standard.md) - **MANDATORY**
 - [Multi-Feature Workflow](../development/multi-feature-workflow.md) - **MANDATORY**
 - [Resource Registry](./RESOURCE_REGISTRY.md) - **CHECK FIRST**
