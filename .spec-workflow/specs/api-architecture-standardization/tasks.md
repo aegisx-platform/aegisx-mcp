@@ -452,7 +452,9 @@
   - _Requirements: 5, 9_
   - _Prompt: Implement the task for spec api-architecture-standardization, first run spec-workflow-guide to get the workflow guide then implement the task: Role: API Developer with deprecation strategy expertise | Task: Add deprecation headers (X-API-Deprecated, X-API-Sunset) to all route aliases, warning clients of upcoming changes | Restrictions: Must set reasonable sunset date, provide migration guide URL, log usage | Success: Deprecation headers added, sunset date communicated, usage logged | Instructions: 1) Mark in-progress, 2) Log with artifacts (header implementation), 3) Mark complete_
 
-- [ ] 8.4. Monitor and track old route usage
+- [x] 8.4. Monitor and track old route usage
+  - _Completed: 2025-12-15_
+  - _Note: Created comprehensive monitoring and tracking guide for deprecated route usage. Guide includes: Log analysis queries (extract usage by client/route/IP), Prometheus dashboard configuration (5 panels: usage over time, migration progress, percentage, top routes, completion estimate), Grafana dashboard JSON template, client identification strategies (User-Agent, IP mapping, API keys, custom headers), prioritization matrix (CRITICAL/HIGH/MEDIUM/LOW based on req/day), outreach email templates (4 templates for different priority levels), outreach workflow (segment, match contacts, send emails, track responses), migration support procedures (self-service, async, hands-on), progress tracking metrics (usage trend, client status, migration velocity), client status codes (NOT_CONTACTED through MIGRATED), automated tracking scripts (daily reports, migration verification), troubleshooting procedures, and complete templates/tools. Success criteria: Dashboard operational, clients identified, outreach conducted, migration tracked. Target: <5% deprecated usage by sunset date._
   - Create dashboard showing old vs new route usage
   - Identify clients still using old routes
   - Reach out to heavy users with migration guide
