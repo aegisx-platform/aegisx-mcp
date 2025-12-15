@@ -1,0 +1,14 @@
+{
+  "filePath": ".spec-workflow/specs/department-management-ui/tasks.md",
+  "currentVersion": 1,
+  "snapshots": [
+    {
+      "version": 1,
+      "filename": "snapshot-001.json",
+      "timestamp": "2025-12-15T19:23:51.741Z",
+      "trigger": "initial",
+      "approvalId": "approval_1765826631686_wuv3q6j4g",
+      "approvalTitle": "Tasks Document - 20 Implementation Tasks Across 4 Phases"
+    }
+  ]
+}
