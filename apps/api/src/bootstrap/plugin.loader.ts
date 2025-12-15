@@ -467,8 +467,32 @@ export function createCoreLayerGroup(): PluginGroup {
     description:
       'Core infrastructure layer (auth, monitoring, audit, security)',
     plugins: [
-      // Core layer plugins will be loaded from apps/api/src/layers/core/
-      // Currently empty - plugins will be migrated here in Phase 4-6
+      // Auth module - authentication and authorization
+      {
+        name: 'core-auth',
+        plugin: authPlugin,
+        required: true,
+      },
+      // NOTE: auth-strategies is already loaded in "application" plugin group (old architecture)
+      // Don't duplicate it here to avoid "decorator already added" error
+
+      // Monitoring module - system monitoring
+      {
+        name: 'core-monitoring',
+        plugin: monitoringModulePlugin,
+        required: true,
+      },
+      // Audit modules - audit logging
+      {
+        name: 'core-file-audit',
+        plugin: fileAuditPlugin,
+        required: true,
+      },
+      {
+        name: 'core-login-attempts',
+        plugin: loginAttemptsPlugin,
+        required: true,
+      },
     ],
   };
 }
