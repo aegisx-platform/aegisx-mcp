@@ -21,7 +21,7 @@ export default defineConfig({
       { text: 'Guides', link: '/guides/development/feature-development-standard' },
       { text: 'Reference', link: '/reference/api/api-response-standard' },
       { text: 'Architecture', link: '/architecture/architecture-overview' },
-      { text: 'Features', link: '/features/' },
+      { text: 'Features', link: '/features/index' },
       { text: 'Development', link: '/development/claude-detailed-rules' },
       { text: 'Infrastructure', link: '/infrastructure/CI-CD-SETUP' },
       { text: 'Testing', link: '/testing/avatar-testing-guide' },
