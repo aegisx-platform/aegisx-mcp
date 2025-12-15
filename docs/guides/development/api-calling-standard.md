@@ -139,6 +139,191 @@ export class BooksService {
 }
 ```
 
+## 🏛️ Layer-Based Routing (Platform vs Domain)
+
+AegisX uses a **two-layer routing architecture** to separate shared platform resources from domain-specific business logic.
+
+### Architecture Overview
+
+```
+Backend API Structure:
+├── Platform Layer (/v1/platform/*)
+│   ├── departments     ← Shared across all domains
+│   ├── users           ← User management (shared)
+│   ├── rbac/*          ← Role-based access control (shared)
+│   └── settings        ← System settings (shared)
+│
+└── Domain Layer (/{domain}/*)
+    ├── inventory/master-data/*    ← Inventory-specific master data
+    ├── inventory/operations/*     ← Inventory operations
+    ├── inventory/budget/*         ← Budget management
+    └── hr/*                       ← HR domain (future)
+```
+
+### Routing Decision Matrix
+
+| Resource Type | Characteristics               | Correct Layer  | Endpoint Pattern                                    |
+| ------------- | ----------------------------- | -------------- | --------------------------------------------------- |
+| **Platform**  | Shared across all domains     | Platform Layer | `/v1/platform/{resource}`                           |
+|               | Organization structure        |                | Example: `/v1/platform/departments`                 |
+|               | User management               |                | Example: `/v1/platform/users`                       |
+|               | RBAC resources                |                | Example: `/v1/platform/rbac/roles`                  |
+| **Domain**    | Business-specific             | Domain Layer   | `/{domain}/{section}/{resource}`                    |
+|               | Unique to one domain          |                | Example: `/inventory/master-data/drugs`             |
+|               | Not shared with other domains |                | Example: `/inventory/operations/budget-allocations` |
+
+### Platform Layer Examples
+
+**✅ CORRECT: Platform resources use `/v1/platform/*`**
+
+```typescript
+// Departments Service (shared resource)
+@Injectable({ providedIn: 'root' })
+export class DepartmentService {
+  private http = inject(HttpClient);
+  private baseUrl = '/v1/platform/departments'; // ✅ Platform Layer
+
+  getAll(): Observable<Department[]> {
+    return this.http.get<Department[]>(this.baseUrl);
+  }
+}
+
+// Users Service (shared resource)
+@Injectable({ providedIn: 'root' })
+export class UserService {
+  private http = inject(HttpClient);
+  private baseUrl = '/v1/platform/users'; // ✅ Platform Layer
+
+  getAll(): Observable<User[]> {
+    return this.http.get<User[]>(this.baseUrl);
+  }
+}
+
+// RBAC Service (shared resource)
+@Injectable({ providedIn: 'root' })
+export class RbacService {
+  private http = inject(HttpClient);
+  private baseUrl = '/v1/platform/rbac'; // ✅ Platform Layer
+
+  getRoles(): Observable<Role[]> {
+    return this.http.get<Role[]>(`${this.baseUrl}/roles`);
+  }
+}
+```
+
+### Domain Layer Examples
+
+**✅ CORRECT: Domain-specific resources use `/{domain}/*`**
+
+```typescript
+// Drugs Service (inventory-specific)
+@Injectable({ providedIn: 'root' })
+export class DrugsService {
+  private http = inject(HttpClient);
+  private baseUrl = '/inventory/master-data/drugs'; // ✅ Domain Layer
+
+  getAll(): Observable<Drug[]> {
+    return this.http.get<Drug[]>(this.baseUrl);
+  }
+}
+
+// Budget Allocations Service (inventory operations)
+@Injectable({ providedIn: 'root' })
+export class BudgetAllocationsService {
+  private http = inject(HttpClient);
+  private baseUrl = '/inventory/operations/budget-allocations'; // ✅ Domain Layer
+
+  getAll(): Observable<BudgetAllocation[]> {
+    return this.http.get<BudgetAllocation[]>(this.baseUrl);
+  }
+}
+
+// Budget Requests Service (inventory subdomain)
+@Injectable({ providedIn: 'root' })
+export class BudgetRequestsService {
+  private http = inject(HttpClient);
+  private baseUrl = '/inventory/budget/budget-requests'; // ✅ Domain Layer
+
+  getAll(): Observable<BudgetRequest[]> {
+    return this.http.get<BudgetRequest[]>(this.baseUrl);
+  }
+}
+```
+
+### Common Mistakes
+
+**❌ WRONG: Using Domain Layer for shared resources**
+
+```typescript
+// departments should be Platform Layer (shared resource)
+@Injectable({ providedIn: 'root' })
+export class DepartmentService {
+  private baseUrl = '/inventory/master-data/departments'; // ❌ WRONG!
+  // This returns 404 because departments is a platform resource
+}
+```
+
+**✅ CORRECT: Use Platform Layer for shared resources**
+
+```typescript
+@Injectable({ providedIn: 'root' })
+export class DepartmentService {
+  private baseUrl = '/v1/platform/departments'; // ✅ CORRECT!
+}
+```
+
+### How to Choose the Correct Layer
+
+**Ask these questions:**
+
+1. **Is this resource shared across multiple domains?**
+   - Yes → Platform Layer (`/v1/platform/*`)
+   - No → Domain Layer (`/{domain}/*`)
+
+2. **Is this organizational structure or system configuration?**
+   - Yes → Platform Layer (departments, users, roles, settings)
+   - No → Domain Layer (drugs, budgets, inventory)
+
+3. **Does this resource belong to a specific business domain?**
+   - Yes → Domain Layer (`/inventory/*`, `/hr/*`)
+   - No → Platform Layer
+
+**Examples:**
+
+| Resource           | Shared? | System Config? | Domain-Specific?   | Correct Layer                                      |
+| ------------------ | ------- | -------------- | ------------------ | -------------------------------------------------- |
+| Departments        | ✅ Yes  | ✅ Yes         | ❌ No              | Platform: `/v1/platform/departments`               |
+| Users              | ✅ Yes  | ✅ Yes         | ❌ No              | Platform: `/v1/platform/users`                     |
+| Roles              | ✅ Yes  | ✅ Yes         | ❌ No              | Platform: `/v1/platform/rbac/roles`                |
+| Drugs              | ❌ No   | ❌ No          | ✅ Yes (Inventory) | Domain: `/inventory/master-data/drugs`             |
+| Budgets            | ❌ No   | ❌ No          | ✅ Yes (Inventory) | Domain: `/inventory/master-data/budgets`           |
+| Budget Allocations | ❌ No   | ❌ No          | ✅ Yes (Inventory) | Domain: `/inventory/operations/budget-allocations` |
+
+### Integration Example: Components Using Services
+
+**Budget Requests Form using Platform departments:**
+
+```typescript
+@Component({
+  selector: 'app-budget-requests-form',
+  // ...
+})
+export class BudgetRequestFormComponent implements OnInit {
+  private departmentService = inject(DepartmentService); // Platform Layer service
+
+  departments = signal<Department[]>([]);
+
+  async ngOnInit() {
+    // Load departments from Platform Layer
+    await this.departmentService.loadDepartmentList({ limit: 100 });
+    const departmentsList = this.departmentService.departmentsList();
+    this.departments.set(departmentsList);
+  }
+}
+```
+
+**Key Takeaway:** Components should use services (not direct HTTP calls), and services should use the correct layer based on the resource type.
+
 ## 📚 Reference: Swagger/OpenAPI Documentation
 
 **Development:** `http://127.0.0.1:3333/documentation`
