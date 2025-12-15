@@ -1,13 +1,14 @@
-// @ts-nocheck
+/* eslint-disable */
 // DISABLED: This plugin depends on deleted user-profile module
 import { FastifyRequest, FastifyReply, FastifyInstance } from 'fastify';
+// @ts-ignore - Module deleted during migration
 import { UserActivityService } from '../../core/user-profile/user-activity.service';
-import { 
-  ActivityLogConfig, 
+import {
+  ActivityLogConfig,
   ActivityLogPluginConfig,
   getActionForRequest,
   getSeverityFromStatus,
-  generateDescription
+  generateDescription,
 } from './activity-config';
 
 /**
@@ -32,7 +33,7 @@ export class ActivityMiddleware {
   constructor(
     private fastify: FastifyInstance,
     private userActivityService: UserActivityService,
-    private pluginConfig: ActivityLogPluginConfig
+    private pluginConfig: ActivityLogPluginConfig,
   ) {
     // Set up batch processing if enabled
     if (pluginConfig.enableBatching) {
@@ -43,7 +44,10 @@ export class ActivityMiddleware {
   /**
    * Pre-handler hook to set up activity logging context
    */
-  async preHandler(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+  async preHandler(
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ): Promise<void> {
     // Attach activity logging context to request
     (request as any).activityContext = {
       startTime: Date.now(),
@@ -72,9 +76,12 @@ export class ActivityMiddleware {
   /**
    * Response hook to log the activity
    */
-  async onResponse(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+  async onResponse(
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ): Promise<void> {
     const context = (request as any).activityContext;
-    
+
     // Skip if not marked for logging
     if (!context?.shouldLog) {
       return;
@@ -90,14 +97,17 @@ export class ActivityMiddleware {
       }
 
       // Skip successful GET requests if configured
-      if (config.skipSuccessfulGets && 
-          request.method === 'GET' && 
-          reply.statusCode < 300) {
+      if (
+        config.skipSuccessfulGets &&
+        request.method === 'GET' &&
+        reply.statusCode < 300
+      ) {
         return;
       }
 
       // Check minimum severity level
-      const severity = config.severity || getSeverityFromStatus(reply.statusCode);
+      const severity =
+        config.severity || getSeverityFromStatus(reply.statusCode);
       if (!this.shouldLogSeverity(severity)) {
         return;
       }
@@ -112,7 +122,11 @@ export class ActivityMiddleware {
   /**
    * Error hook to log API errors
    */
-  async onError(request: FastifyRequest, reply: FastifyReply, error: Error): Promise<void> {
+  async onError(
+    request: FastifyRequest,
+    reply: FastifyReply,
+    error: Error,
+  ): Promise<void> {
     if (!this.pluginConfig.autoLogErrors || !this.pluginConfig.enabled) {
       return;
     }
@@ -136,21 +150,22 @@ export class ActivityMiddleware {
     request: FastifyRequest,
     reply: FastifyReply,
     userId: string,
-    config: ActivityLogConfig
+    config: ActivityLogConfig,
   ): Promise<void> {
     // Determine action
-    const action = config.action || getActionForRequest(request.method, request.url);
-    
+    const action =
+      config.action || getActionForRequest(request.method, request.url);
+
     // Determine severity
     const severity = config.severity || getSeverityFromStatus(reply.statusCode);
-    
+
     // Generate description
     const description = generateDescription(
       config.description,
       request.method,
       request.url,
       reply.statusCode,
-      request.headers['user-agent'] as string
+      request.headers['user-agent'] as string,
     );
 
     // Build metadata
@@ -168,15 +183,14 @@ export class ActivityMiddleware {
     // Log activity (async or sync based on config)
     if (config.async !== false && !this.pluginConfig.enableBatching) {
       // Async logging - don't wait
-      this.userActivityService.logActivity(
-        userId,
-        action as any,
-        description,
-        request,
-        { severity, metadata }
-      ).catch((error: any) => {
-        this.fastify.log.error({ error }, 'Async activity logging failed');
-      });
+      this.userActivityService
+        .logActivity(userId, action as any, description, request, {
+          severity,
+          metadata,
+        })
+        .catch((error: any) => {
+          this.fastify.log.error({ error }, 'Async activity logging failed');
+        });
     } else if (this.pluginConfig.enableBatching) {
       // Add to batch queue
       this.addToBatch(activityData);
@@ -187,7 +201,7 @@ export class ActivityMiddleware {
         action as any,
         description,
         request,
-        { severity, metadata }
+        { severity, metadata },
       );
     }
   }
@@ -198,7 +212,7 @@ export class ActivityMiddleware {
   private async buildMetadata(
     request: FastifyRequest,
     reply: FastifyReply,
-    config: ActivityLogConfig
+    config: ActivityLogConfig,
   ): Promise<Record<string, any>> {
     const metadata: Record<string, any> = {
       ...config.metadata,
@@ -215,8 +229,11 @@ export class ActivityMiddleware {
         params: request.params,
         body: request.body,
       });
-      
-      if (this.getDataSize(requestData) <= (this.pluginConfig.maxDataSize || 10240)) {
+
+      if (
+        this.getDataSize(requestData) <=
+        (this.pluginConfig.maxDataSize || 10240)
+      ) {
         metadata.request_data = requestData;
       }
     }
@@ -237,7 +254,8 @@ export class ActivityMiddleware {
    */
   private getRouteConfig(request: FastifyRequest): ActivityLogConfig | null {
     // Check if route has activity logging configuration
-    const routeSchema = (request as any).routeSchema || (request as any).routeOptions?.schema;
+    const routeSchema =
+      (request as any).routeSchema || (request as any).routeOptions?.schema;
     if (routeSchema?.activityLog) {
       return {
         ...this.pluginConfig.defaultConfig,
@@ -337,7 +355,7 @@ export class ActivityMiddleware {
    */
   private initializeBatchProcessing(): void {
     const interval = this.pluginConfig.batchInterval || 5000;
-    
+
     this.batchTimer = setInterval(() => {
       if (this.batchQueue.length > 0) {
         this.processBatch();
@@ -358,17 +376,17 @@ export class ActivityMiddleware {
     }
 
     const batch = this.batchQueue.splice(0);
-    
+
     try {
       // Process activities in parallel but limit concurrency
-      const promises = batch.map(activity => 
+      const promises = batch.map((activity) =>
         this.userActivityService.logActivity(
           activity.userId,
           activity.action as any,
           activity.description,
           activity.request,
-          { severity: activity.severity, metadata: activity.metadata }
-        )
+          { severity: activity.severity, metadata: activity.metadata },
+        ),
       );
 
       await Promise.all(promises);

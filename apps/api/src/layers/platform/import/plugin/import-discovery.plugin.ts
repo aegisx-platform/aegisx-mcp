@@ -19,6 +19,7 @@
  */
 
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
+import fp from 'fastify-plugin';
 
 import {
   ImportDiscoveryService,
@@ -43,7 +44,7 @@ import {
  * 5. Decorate fastify instance with 'importDiscovery'
  * 6. Handle startup errors gracefully
  */
-export default async function platformImportDiscoveryPlugin(
+async function platformImportDiscoveryPluginImpl(
   fastify: FastifyInstance,
   options: FastifyPluginOptions,
 ) {
@@ -144,3 +145,9 @@ export default async function platformImportDiscoveryPlugin(
  * Note: TypeScript declaration for fastify.importDiscovery is in core/import
  * to avoid duplicate declarations during migration period
  */
+
+// Export with fastify-plugin wrapper to make decorations globally accessible
+export default fp(platformImportDiscoveryPluginImpl, {
+  name: 'platform-import-discovery-plugin',
+  dependencies: ['knex-plugin'],
+});

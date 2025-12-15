@@ -333,11 +333,12 @@ export function createCorePluginGroup(apiPrefix: string): PluginGroup {
       //   plugin: departmentsPlugin,
       //   required: true,
       // },
-      {
-        name: 'rbac',
-        plugin: platformRbacPlugin,
-        required: true,
-      },
+      // DISABLED: Duplicate registration - Now only in createPlatformLayerGroup
+      // {
+      //   name: 'rbac',
+      //   plugin: platformRbacPlugin,
+      //   required: true,
+      // },
       {
         name: 'monitoring-module',
         plugin: monitoringModulePlugin,
@@ -359,11 +360,12 @@ export function createCorePluginGroup(apiPrefix: string): PluginGroup {
         plugin: loginAttemptsPlugin,
         required: true,
       },
-      {
-        name: 'import-discovery-plugin',
-        plugin: platformImportDiscoveryPlugin,
-        required: false, // Optional - system can run without import discovery
-      },
+      // DISABLED: Duplicate registration - Now only in createPlatformLayerGroup
+      // {
+      //   name: 'import-discovery-plugin',
+      //   plugin: platformImportDiscoveryPlugin,
+      //   required: false, // Optional - system can run without import discovery
+      // },
     ],
   };
 }
@@ -386,18 +388,18 @@ export function createFeaturePluginGroup(apiPrefix: string): PluginGroup {
       //   plugin: testAuthPlugin,
       //   required: true,
       // },
-      // Admin Module - system initialization and admin features
-      {
-        name: 'admin',
-        plugin: adminPlugin,
-        required: true,
-      },
-      // Inventory Domain - aggregates all inventory modules (includes drugs via master-data)
-      {
-        name: 'inventory-domain',
-        plugin: inventoryDomainPlugin,
-        required: true,
-      },
+      // DISABLED: Admin Module - Now registered in createDomainsLayerGroup
+      // {
+      //   name: 'admin',
+      //   plugin: adminPlugin,
+      //   required: true,
+      // },
+      // DISABLED: Inventory Domain - Now registered in createDomainsLayerGroup
+      // {
+      //   name: 'inventory-domain',
+      //   plugin: inventoryDomainPlugin,
+      //   required: true,
+      // },
       // User-Departments - depends on inventory-domain (uses DepartmentsRepository)
       // DISABLED: Plugin not imported
       // {
