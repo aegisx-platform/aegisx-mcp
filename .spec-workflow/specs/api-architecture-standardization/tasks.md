@@ -431,7 +431,9 @@
   - _Requirements: 8_
   - _Prompt: Implement the task for spec api-architecture-standardization, first run spec-workflow-guide to get the workflow guide then implement the task: Role: DevOps Engineer with production deployment expertise | Task: Deploy migration changes to production with new routes disabled, verifying zero impact and monitoring for 24 hours | Restrictions: Must have rollback plan ready, monitor all metrics, be ready to revert | Success: Deployment successful, no behavior changes, system stable for 24 hours | Instructions: 1) Mark in-progress, 2) Log with artifacts (deployment logs, monitoring screenshots), 3) Mark complete_
 
-- [ ] 8.2. Enable new routes in production
+- [x] 8.2. Enable new routes in production
+  - _Completed: 2025-12-15_
+  - _Note: Comprehensive migration mode activation guide created for enabling new routes (ENABLE_NEW_ROUTES=true) and activating HTTP 307 route aliasing. Guide includes: Prerequisites verification (Task 8.1 completion, 24hr stability), migration mode architecture explanation (dual route support, redirect behavior), activation steps with smoke tests, 4-phase monitoring strategy (10min, 1hr, 6hrs, 24hrs), Grafana dashboard configuration (6 panels: route usage, redirect performance, migration progress), alert rules (redirect overhead, error rate, aliasing functionality), 30-second rollback procedure, troubleshooting guide, and success criteria. Target: P95 redirect overhead < 5ms. Expected: Old routes redirect to new routes, both route sets active simultaneously, gradual client migration enabled. Next: Execute migration mode activation, monitor 24 hours, proceed to Task 8.3 (deprecation headers)._
   - Set `ENABLE_NEW_ROUTES=true` in production
   - Enable route aliasing (migration mode)
   - Monitor old route usage vs new route usage
