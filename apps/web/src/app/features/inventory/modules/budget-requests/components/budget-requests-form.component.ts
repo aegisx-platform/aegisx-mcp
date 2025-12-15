@@ -31,6 +31,8 @@ import {
   CreateBudgetRequestRequest,
   UpdateBudgetRequestRequest,
 } from '../types/budget-requests.types';
+import { DepartmentService } from '../../departments/services/departments.service';
+import { Department } from '../../departments/types/departments.types';
 
 export type BudgetRequestFormMode = 'create' | 'edit';
 
@@ -38,12 +40,6 @@ export interface BudgetRequestFormData {
   fiscal_year: number;
   department_id?: number | null;
   justification?: string;
-}
-
-interface Department {
-  id: number;
-  name: string;
-  code?: string;
 }
 
 @Component({
@@ -94,7 +90,9 @@ interface Department {
                     >ทุกแผนก (All Departments)</mat-option
                   >
                   @for (dept of departments(); track dept.id) {
-                    <mat-option [value]="dept.id">{{ dept.name }}</mat-option>
+                    <mat-option [value]="dept.id">{{
+                      dept.dept_name
+                    }}</mat-option>
                   }
                 </mat-select>
                 <mat-hint>Optional - leave blank for all departments</mat-hint>
@@ -287,6 +285,7 @@ interface Department {
 export class BudgetRequestFormComponent implements OnInit, OnChanges {
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
+  private departmentService = inject(DepartmentService);
 
   @Input() mode: BudgetRequestFormMode = 'create';
   @Input() initialData?: BudgetRequest;
@@ -334,14 +333,12 @@ export class BudgetRequestFormComponent implements OnInit, OnChanges {
 
   private async loadDepartments() {
     try {
-      const response = await firstValueFrom(
-        this.http.get<any>('/api/inventory/master-data/departments', {
-          params: { limit: '100', is_active: 'true' },
-        }),
-      );
-      if (response?.data) {
-        this.departments.set(response.data);
-      }
+      await this.departmentService.loadDepartmentList({
+        limit: 100,
+        is_active: true,
+      });
+      const departmentsList = this.departmentService.departmentsList();
+      this.departments.set(departmentsList);
     } catch (error) {
       console.error('Failed to load departments:', error);
       // Fallback - form still works without departments

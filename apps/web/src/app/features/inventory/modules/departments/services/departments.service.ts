@@ -23,7 +23,7 @@ import {
 })
 export class DepartmentService {
   private http = inject(HttpClient);
-  private baseUrl = '/inventory/master-data/departments';
+  private baseUrl = '/v1/platform/departments';
 
   // ===== SIGNALS FOR STATE MANAGEMENT =====
 
