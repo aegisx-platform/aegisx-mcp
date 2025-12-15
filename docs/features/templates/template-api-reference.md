@@ -1,6 +1,6 @@
 ---
-title: [Feature Name] API Reference
-description: API endpoints, request/response schemas, and authentication for [Feature Name]
+title: '[Feature Name] API Reference'
+description: 'API endpoints, request/response schemas, and authentication for [Feature Name]'
 category: features
 tags: [api, backend, reference]
 order: 2

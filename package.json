@@ -103,9 +103,9 @@
     "db:seed:inventory": "node --loader ts-node/esm ./node_modules/knex/bin/cli.js seed:run --knexfile knexfile-inventory.ts",
     "inventory:setup": "pnpm run db:migrate:inventory && pnpm run db:seed:inventory",
     "inventory:import-tmt": "node --loader ts-node/esm apps/api/src/database/scripts/inventory-import-tmt.ts",
-    "docs:dev": "vitepress dev docs-site",
-    "docs:build": "vitepress build docs-site",
-    "docs:preview": "vitepress preview docs-site"
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "private": true,
   "dependencies": {

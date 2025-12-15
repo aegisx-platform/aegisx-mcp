@@ -159,7 +159,7 @@
   - _Requirements: Reliability (backward compatibility)_
   - _Prompt: Implement the task for spec docs-restructure, first run spec-workflow-guide to get the workflow guide then implement the task: Role: DevOps Engineer with expertise in web redirects and backward compatibility | Task: Create redirect map following reliability requirements, using file-mapping.json to generate old → new URL mappings and adding deprecation notices to archived files | Restrictions: Ensure redirects work with chosen static site generator, provide clear deprecation messages, document redirect configuration | \_Leverage: file-mapping.json_ | _Requirements: Reliability NFR_ | Success: Redirect map created and tested, deprecation notices added, redirect strategy documented | Instructions: Before starting, mark this task as in-progress ([-]) in tasks.md. After completion, use log-implementation tool to record redirect configuration created, then mark as complete ([x])\_
 
-- [-] 4.4. Update root README.md as master index
+- [x] 4.4. Update root README.md as master index
   - File: docs/README.md
   - Update with final navigation structure
   - Add quick links for common tasks
@@ -172,7 +172,7 @@
 
 ## Phase 5: Web Documentation Setup
 
-- [ ] 5.1. Choose and install static site generator (VitePress recommended)
+- [-] 5.1. Choose and install static site generator (VitePress recommended)
   - File: package.json (add VitePress dependency)
   - Research and compare VitePress vs Docusaurus vs MkDocs
   - Install VitePress (or chosen generator)
