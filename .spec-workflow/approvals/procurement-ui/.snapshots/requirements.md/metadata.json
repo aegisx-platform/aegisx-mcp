@@ -1,0 +1,22 @@
+{
+  "filePath": ".spec-workflow/specs/procurement-ui/requirements.md",
+  "currentVersion": 2,
+  "snapshots": [
+    {
+      "version": 1,
+      "filename": "snapshot-001.json",
+      "timestamp": "2025-12-14T13:47:07.925Z",
+      "trigger": "initial",
+      "approvalId": "approval_1765720027910_kbv34w1e5",
+      "approvalTitle": "Procurement UI - Requirements Document"
+    },
+    {
+      "version": 2,
+      "filename": "snapshot-002.json",
+      "timestamp": "2025-12-14T13:48:35.250Z",
+      "trigger": "approved",
+      "approvalId": "approval_1765720027910_kbv34w1e5",
+      "approvalTitle": "Procurement UI - Requirements Document"
+    }
+  ]
+}

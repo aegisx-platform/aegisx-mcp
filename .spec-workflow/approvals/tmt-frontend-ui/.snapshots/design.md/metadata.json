@@ -1,0 +1,22 @@
+{
+  "filePath": ".spec-workflow/specs/tmt-frontend-ui/design.md",
+  "currentVersion": 2,
+  "snapshots": [
+    {
+      "version": 1,
+      "filename": "snapshot-001.json",
+      "timestamp": "2025-12-14T15:49:10.357Z",
+      "trigger": "initial",
+      "approvalId": "approval_1765727350339_3uelngxix",
+      "approvalTitle": "TMT Frontend UI - Design Document"
+    },
+    {
+      "version": 2,
+      "filename": "snapshot-002.json",
+      "timestamp": "2025-12-14T15:50:20.255Z",
+      "trigger": "approved",
+      "approvalId": "approval_1765727350339_3uelngxix",
+      "approvalTitle": "TMT Frontend UI - Design Document"
+    }
+  ]
+}

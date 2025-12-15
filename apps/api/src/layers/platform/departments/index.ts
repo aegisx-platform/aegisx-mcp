@@ -3,6 +3,7 @@ import { DepartmentsController } from './departments.controller';
 import { DepartmentsService } from './departments.service';
 import { DepartmentsRepository } from './departments.repository';
 import { departmentsRoutes } from './departments.routes';
+import * as departmentsSchemas from './departments.schemas';
 
 /**
  * Platform Departments Plugin
@@ -28,6 +29,11 @@ export default async function platformDepartmentsPlugin(
   fastify: FastifyInstance,
   options: FastifyPluginOptions,
 ) {
+  // Register module schemas using the schema registry
+  if ((fastify as any).schemaRegistry) {
+    (fastify as any).schemaRegistry.registerModuleSchemas('departments', departmentsSchemas);
+  }
+
   // Create repository with Knex connection
   const departmentsRepository = new DepartmentsRepository(
     (fastify as any).knex,
@@ -52,7 +58,7 @@ export default async function platformDepartmentsPlugin(
   // Register routes under the specified prefix or /api/v1/platform/departments
   await fastify.register(departmentsRoutes, {
     controller: departmentsController,
-    prefix: options.prefix || '/api/v1/platform/departments',
+    prefix: options.prefix || '/v1/platform/departments',
   });
 
   // Lifecycle hooks for monitoring

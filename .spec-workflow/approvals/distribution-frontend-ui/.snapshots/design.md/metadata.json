@@ -1,0 +1,22 @@
+{
+  "filePath": ".spec-workflow/specs/distribution-frontend-ui/design.md",
+  "currentVersion": 2,
+  "snapshots": [
+    {
+      "version": 1,
+      "filename": "snapshot-001.json",
+      "timestamp": "2025-12-14T14:19:21.851Z",
+      "trigger": "initial",
+      "approvalId": "approval_1765721961844_aatsyavcy",
+      "approvalTitle": "Design Document - Distribution Frontend UI"
+    },
+    {
+      "version": 2,
+      "filename": "snapshot-002.json",
+      "timestamp": "2025-12-14T14:20:11.464Z",
+      "trigger": "approved",
+      "approvalId": "approval_1765721961844_aatsyavcy",
+      "approvalTitle": "Design Document - Distribution Frontend UI"
+    }
+  ]
+}

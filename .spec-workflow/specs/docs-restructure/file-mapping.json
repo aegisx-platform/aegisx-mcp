@@ -1,0 +1,504 @@
+{
+  "version": "1.0",
+  "metadata": {
+    "created": "2025-12-14",
+    "description": "File migration mapping for docs/ restructure",
+    "totalFiles": 476,
+    "categories": {
+      "move": "Files to migrate to new structure",
+      "archive": "Files to archive by quarter",
+      "rename": "Files to rename (UPPERCASE → lowercase-with-dashes)",
+      "keep": "Files already in correct location"
+    }
+  },
+  "migrations": [
+    {
+      "comment": "=== CLI Documentation → reference/cli/aegisx-cli/ ===",
+      "from": "docs/aegisx-cli/README.md",
+      "to": "docs/reference/cli/aegisx-cli/README.md",
+      "action": "move",
+      "frontmatter": {
+        "title": "AegisX CLI",
+        "description": "CRUD generator and CLI tools for AegisX Platform",
+        "category": "reference",
+        "tags": ["cli", "crud", "generator"]
+      }
+    },
+    {
+      "from": "docs/aegisx-cli/COMPLETE_WORKFLOW.md",
+      "to": "docs/reference/cli/aegisx-cli/complete-workflow.md",
+      "action": "move",
+      "rename": "UPPERCASE → lowercase",
+      "frontmatter": {
+        "title": "Complete Workflow",
+        "description": "End-to-end workflow for CRUD generation",
+        "category": "reference",
+        "tags": ["cli", "workflow", "crud"]
+      }
+    },
+    {
+      "from": "docs/aegisx-cli/GIT_WORKFLOW.md",
+      "to": "docs/reference/cli/aegisx-cli/git-workflow.md",
+      "action": "move",
+      "rename": "UPPERCASE → lowercase",
+      "frontmatter": {
+        "title": "Git Workflow",
+        "description": "Git workflow for AegisX CLI development",
+        "category": "reference",
+        "tags": ["cli", "git", "workflow"]
+      }
+    },
+    {
+      "from": "docs/aegisx-cli/TESTING_GUIDE.md",
+      "to": "docs/reference/cli/aegisx-cli/testing-guide.md",
+      "action": "move",
+      "rename": "UPPERCASE → lowercase",
+      "frontmatter": {
+        "title": "Testing Guide",
+        "description": "Testing guide for AegisX CLI",
+        "category": "reference",
+        "tags": ["cli", "testing"]
+      }
+    },
+    {
+      "from": "docs/aegisx-cli/WEBSOCKET_IMPLEMENTATION_SPEC.md",
+      "to": "docs/reference/cli/aegisx-cli/websocket-implementation-spec.md",
+      "action": "move",
+      "rename": "UPPERCASE → lowercase",
+      "frontmatter": {
+        "title": "WebSocket Implementation Spec",
+        "description": "WebSocket implementation specification for CRUD generator",
+        "category": "reference",
+        "tags": ["cli", "websocket", "specification"]
+      }
+    },
+    {
+      "comment": "=== UI Documentation → reference/ui/ ===",
+      "from": "docs/AEGISX_UI_STANDARDS.md",
+      "to": "docs/reference/ui/aegisx-ui-standards.md",
+      "action": "move",
+      "rename": "UPPERCASE → lowercase",
+      "frontmatter": {
+        "title": "AegisX UI Standards",
+        "description": "UI component standards and guidelines",
+        "category": "reference",
+        "tags": ["ui", "standards", "components"]
+      }
+    },
+    {
+      "from": "docs/ui/THEME_SYSTEM_STANDARD.md",
+      "to": "docs/reference/ui/theme-system-standard.md",
+      "action": "move",
+      "rename": "UPPERCASE → lowercase",
+      "frontmatter": {
+        "title": "Theme System Standard",
+        "description": "Theme system architecture and standards",
+        "category": "reference",
+        "tags": ["ui", "theme", "design-system"]
+      }
+    },
+    {
+      "from": "docs/ui/TOKEN_REFERENCE.md",
+      "to": "docs/reference/ui/token-reference.md",
+      "action": "move",
+      "rename": "UPPERCASE → lowercase",
+      "frontmatter": {
+        "title": "Token Reference",
+        "description": "Design token reference for AegisX UI",
+        "category": "reference",
+        "tags": ["ui", "tokens", "design-system"]
+      }
+    },
+    {
+      "comment": "=== API Documentation → reference/api/ ===",
+      "from": "docs/api/api-response-standard.md",
+      "to": "docs/reference/api/api-response-standard.md",
+      "action": "move",
+      "frontmatter": {
+        "title": "API Response Standard",
+        "description": "Standard response format for all API endpoints",
+        "category": "reference",
+        "tags": ["api", "standards", "backend"]
+      }
+    },
+    {
+      "from": "docs/api/typebox-schema-standard.md",
+      "to": "docs/reference/api/typebox-schema-standard.md",
+      "action": "move",
+      "frontmatter": {
+        "title": "TypeBox Schema Standard",
+        "description": "TypeBox schema definition standards for type-safe APIs",
+        "category": "reference",
+        "tags": ["api", "typebox", "validation", "backend"]
+      }
+    },
+    {
+      "from": "docs/api/bulk-operations-api-design.md",
+      "to": "docs/reference/api/bulk-operations-api-design.md",
+      "action": "move",
+      "frontmatter": {
+        "title": "Bulk Operations API Design",
+        "description": "API design patterns for bulk operations",
+        "category": "reference",
+        "tags": ["api", "bulk-operations", "design-patterns"]
+      }
+    },
+    {
+      "from": "docs/api/file-upload-guide.md",
+      "to": "docs/reference/api/file-upload-guide.md",
+      "action": "move",
+      "frontmatter": {
+        "title": "File Upload Guide",
+        "description": "File upload API reference and implementation guide",
+        "category": "reference",
+        "tags": ["api", "file-upload", "backend"]
+      }
+    },
+    {
+      "comment": "=== Development Guides → guides/development/ ===",
+      "from": "docs/development/feature-development-standard.md",
+      "to": "docs/guides/development/feature-development-standard.md",
+      "action": "move",
+      "frontmatter": {
+        "title": "Feature Development Standard",
+        "description": "Standard workflow for developing new features in the AegisX Platform",
+        "category": "guides",
+        "tags": ["development", "workflow", "standards"]
+      }
+    },
+    {
+      "from": "docs/development/API_CALLING_STANDARD.md",
+      "to": "docs/guides/development/api-calling-standard.md",
+      "action": "move",
+      "rename": "UPPERCASE → lowercase",
+      "frontmatter": {
+        "title": "API Calling Standard",
+        "description": "Correct URL patterns and API calling conventions",
+        "category": "guides",
+        "tags": ["development", "api", "standards"]
+      }
+    },
+    {
+      "from": "docs/development/qa-checklist.md",
+      "to": "docs/guides/development/qa-checklist.md",
+      "action": "move",
+      "frontmatter": {
+        "title": "QA Checklist",
+        "description": "Quality assurance checklist before deployment",
+        "category": "guides",
+        "tags": ["development", "qa", "testing"]
+      }
+    },
+    {
+      "from": "docs/development/universal-fullstack-standard.md",
+      "to": "docs/guides/development/universal-fullstack-standard.md",
+      "action": "move",
+      "frontmatter": {
+        "title": "Universal Full-Stack Standard",
+        "description": "Database-first development workflow for full-stack features",
+        "category": "guides",
+        "tags": ["development", "full-stack", "workflow"]
+      }
+    },
+    {
+      "comment": "=== Infrastructure Guides → guides/infrastructure/ ===",
+      "from": "docs/infrastructure/multi-instance-setup.md",
+      "to": "docs/guides/infrastructure/multi-instance-setup.md",
+      "action": "move",
+      "frontmatter": {
+        "title": "Multi-Instance Setup",
+        "description": "Setup guide for running multiple AegisX instances in parallel",
+        "category": "guides",
+        "tags": ["infrastructure", "deployment", "docker"]
+      }
+    },
+    {
+      "from": "docs/infrastructure/git-subtree-guide.md",
+      "to": "docs/guides/infrastructure/git-subtree-guide.md",
+      "action": "move",
+      "frontmatter": {
+        "title": "Git Subtree Guide",
+        "description": "Managing shared libraries with git subtree",
+        "category": "guides",
+        "tags": ["infrastructure", "git", "libraries"]
+      }
+    },
+    {
+      "from": "docs/infrastructure/GIT-FLOW-RELEASE-GUIDE.md",
+      "to": "docs/guides/infrastructure/version-management/git-flow-release-guide.md",
+      "action": "move",
+      "rename": "UPPERCASE → lowercase",
+      "frontmatter": {
+        "title": "Git Flow Release Guide",
+        "description": "Git flow branching strategy and release management",
+        "category": "guides",
+        "tags": ["infrastructure", "git", "release"]
+      }
+    },
+    {
+      "from": "docs/QUICK-START-CICD.md",
+      "to": "docs/guides/infrastructure/ci-cd/quick-start.md",
+      "action": "move",
+      "rename": "UPPERCASE → lowercase",
+      "frontmatter": {
+        "title": "CI/CD Quick Start",
+        "description": "Quick start guide for CI/CD pipeline setup",
+        "category": "guides",
+        "tags": ["infrastructure", "ci-cd", "deployment"]
+      }
+    },
+    {
+      "from": "docs/SIMPLE-CICD-GUIDE.md",
+      "to": "docs/guides/infrastructure/ci-cd/simple-guide.md",
+      "action": "move",
+      "rename": "UPPERCASE → lowercase",
+      "frontmatter": {
+        "title": "Simple CI/CD Guide",
+        "description": "Simplified CI/CD setup guide for beginners",
+        "category": "guides",
+        "tags": ["infrastructure", "ci-cd", "deployment"]
+      }
+    },
+    {
+      "comment": "=== Database Guides → guides/database/ ===",
+      "from": "docs/DATABASE_MIGRATION_GUIDE.md",
+      "to": "docs/guides/database/migration-guide.md",
+      "action": "move",
+      "rename": "UPPERCASE → lowercase",
+      "frontmatter": {
+        "title": "Database Migration Guide",
+        "description": "Guide for creating and running database migrations",
+        "category": "guides",
+        "tags": ["database", "migration", "postgresql"]
+      }
+    },
+    {
+      "from": "docs/SCHEMA_MIGRATION_GUIDE.md",
+      "to": "docs/guides/database/schema-migration-guide.md",
+      "action": "move",
+      "rename": "UPPERCASE → lowercase",
+      "frontmatter": {
+        "title": "Schema Migration Guide",
+        "description": "Database schema design and migration patterns",
+        "category": "guides",
+        "tags": ["database", "schema", "design"]
+      }
+    },
+    {
+      "comment": "=== Testing Guides → guides/testing/ ===",
+      "from": "docs/testing/testing-strategy.md",
+      "to": "docs/guides/testing/testing-strategy.md",
+      "action": "move",
+      "frontmatter": {
+        "title": "Testing Strategy",
+        "description": "Overall testing strategy for unit, integration, and E2E tests",
+        "category": "guides",
+        "tags": ["testing", "strategy"]
+      }
+    },
+    {
+      "from": "docs/testing/api-testing.md",
+      "to": "docs/guides/testing/api-testing.md",
+      "action": "move",
+      "frontmatter": {
+        "title": "API Testing",
+        "description": "Backend API testing patterns and tools",
+        "category": "guides",
+        "tags": ["testing", "api", "backend"]
+      }
+    },
+    {
+      "from": "docs/testing/integration-tests.md",
+      "to": "docs/guides/testing/integration-tests.md",
+      "action": "move",
+      "frontmatter": {
+        "title": "Integration Tests",
+        "description": "Full-stack integration testing guide",
+        "category": "guides",
+        "tags": ["testing", "integration"]
+      }
+    },
+    {
+      "comment": "=== Architecture Docs → architecture/ (already in correct location, just rename) ===",
+      "from": "docs/architecture/DOMAIN_ARCHITECTURE_GUIDE.md",
+      "to": "docs/architecture/domain-architecture-guide.md",
+      "action": "move",
+      "rename": "UPPERCASE → lowercase",
+      "frontmatter": {
+        "title": "Domain Architecture Guide",
+        "description": "Domain-driven design principles and domain classification guide",
+        "category": "architecture",
+        "tags": ["architecture", "domain-driven-design", "backend"]
+      }
+    },
+    {
+      "from": "docs/architecture/QUICK_DOMAIN_REFERENCE.md",
+      "to": "docs/architecture/quick-domain-reference.md",
+      "action": "move",
+      "rename": "UPPERCASE → lowercase",
+      "frontmatter": {
+        "title": "Quick Domain Reference",
+        "description": "Quick reference for domain classification decisions",
+        "category": "architecture",
+        "tags": ["architecture", "domain", "reference"]
+      }
+    },
+    {
+      "comment": "=== Analysis Docs → analysis/ ===",
+      "from": "docs/PLATFORM_GAP_ANALYSIS.md",
+      "to": "docs/analysis/platform/platform-gap-analysis.md",
+      "action": "move",
+      "rename": "UPPERCASE → lowercase",
+      "frontmatter": {
+        "title": "Platform Gap Analysis",
+        "description": "Analysis of missing features and capabilities",
+        "category": "analysis",
+        "tags": ["analysis", "planning"]
+      }
+    },
+    {
+      "from": "docs/fuse-integration-summary.md",
+      "to": "docs/analysis/platform/fuse-integration-summary.md",
+      "action": "move",
+      "frontmatter": {
+        "title": "Fuse Integration Summary",
+        "description": "Summary of Fuse UI framework integration evaluation",
+        "category": "analysis",
+        "tags": ["analysis", "ui", "integration"]
+      }
+    },
+    {
+      "from": "docs/analysis/KNEX_TO_DRIZZLE_MIGRATION.md",
+      "to": "docs/analysis/migration/knex-to-drizzle-migration.md",
+      "action": "move",
+      "rename": "UPPERCASE → lowercase",
+      "frontmatter": {
+        "title": "Knex to Drizzle Migration",
+        "description": "ORM migration analysis from Knex to Drizzle",
+        "category": "analysis",
+        "tags": ["analysis", "migration", "database"]
+      }
+    },
+    {
+      "from": "docs/analysis/FILES_TO_MIGRATE.md",
+      "to": "docs/analysis/migration/files-to-migrate.md",
+      "action": "move",
+      "rename": "UPPERCASE → lowercase",
+      "frontmatter": {
+        "title": "Files to Migrate",
+        "description": "Inventory of files requiring migration",
+        "category": "analysis",
+        "tags": ["analysis", "migration"]
+      }
+    },
+    {
+      "comment": "=== Reports → reports/ ===",
+      "from": "docs/reports/API_ENDPOINT_AUDIT_REPORT.md",
+      "to": "docs/reports/api-endpoint-audit-report.md",
+      "action": "move",
+      "rename": "UPPERCASE → lowercase",
+      "frontmatter": {
+        "title": "API Endpoint Audit Report",
+        "description": "Comprehensive audit of all API endpoints",
+        "category": "reports",
+        "tags": ["reports", "audit", "api"]
+      }
+    },
+    {
+      "from": "docs/reports/UI-TEST-REPORT.md",
+      "to": "docs/reports/ui-test-report.md",
+      "action": "move",
+      "rename": "UPPERCASE → lowercase",
+      "frontmatter": {
+        "title": "UI Test Report",
+        "description": "Frontend UI testing results and findings",
+        "category": "reports",
+        "tags": ["reports", "testing", "ui"]
+      }
+    },
+    {
+      "comment": "=== Session Notes → archive/2025-Q1/ ===",
+      "from": "docs/sessions/daily/*.md",
+      "to": "docs/archive/2025-Q1/sessions-archive.md",
+      "action": "archive",
+      "note": "Consolidate all Q1 2025 session notes into single archive file",
+      "frontmatter": {
+        "title": "Sessions Archive 2025 Q1",
+        "description": "Consolidated development session notes for Q1 2025",
+        "category": "reports",
+        "tags": ["archive", "sessions"],
+        "status": "archived"
+      }
+    },
+    {
+      "from": "docs/sessions/ARCHIVE_2024_Q4.md",
+      "to": "docs/archive/2024-Q4/sessions-archive.md",
+      "action": "move",
+      "frontmatter": {
+        "title": "Sessions Archive 2024 Q4",
+        "description": "Consolidated development session notes for Q4 2024",
+        "category": "reports",
+        "tags": ["archive", "sessions"],
+        "status": "archived"
+      }
+    },
+    {
+      "comment": "=== Investigation Docs → archive/2024-Q4/investigations/ ===",
+      "from": "docs/investigation-material-card-styling.md",
+      "to": "docs/archive/2024-Q4/investigations/material-card-styling.md",
+      "action": "archive",
+      "frontmatter": {
+        "title": "Material Card Styling Investigation",
+        "description": "Investigation of Material card component styling issues",
+        "category": "reports",
+        "tags": ["archive", "investigation", "ui"],
+        "status": "archived",
+        "archivedDate": "2024-12-31"
+      }
+    },
+    {
+      "comment": "=== Specifications → specs/ (keep but move to specifications/) ===",
+      "from": "docs/specifications/BREADCRUMB_ENHANCEMENT_SPEC.md",
+      "to": "docs/archive/2024-Q4/specifications/breadcrumb-enhancement-spec.md",
+      "action": "archive",
+      "rename": "UPPERCASE → lowercase",
+      "frontmatter": {
+        "title": "Breadcrumb Enhancement Specification",
+        "description": "Specification for breadcrumb component enhancements",
+        "category": "reports",
+        "tags": ["archive", "specification", "ui"],
+        "status": "archived"
+      }
+    },
+    {
+      "comment": "=== Feature Documentation (already mostly correct, keep in place) ===",
+      "note": "Most feature docs in docs/features/* are already well-organized. Will validate frontmatter and fix any UPPERCASE names."
+    }
+  ],
+  "patterns": {
+    "renaming": {
+      "description": "Convert UPPERCASE.md to lowercase-with-dashes.md",
+      "examples": [
+        "AEGISX_UI_STANDARDS.md → aegisx-ui-standards.md",
+        "API_REFERENCE.md → api-reference.md",
+        "QUICK_START_GUIDE.md → quick-start-guide.md"
+      ]
+    },
+    "categorization": {
+      "guides": "Task-oriented how-to documentation",
+      "reference": "Information-oriented technical reference",
+      "architecture": "Understanding-oriented design docs",
+      "features": "Feature-specific documentation",
+      "analysis": "Technical analysis and research",
+      "reports": "Audit reports and reviews",
+      "archive": "Historical and outdated documentation"
+    }
+  },
+  "statistics": {
+    "totalMigrations": "~450 files (excludes already correct locations)",
+    "archiveCount": "~26 files",
+    "renameCount": "~120 files (UPPERCASE → lowercase)",
+    "moveCount": "~430 files",
+    "estimatedDuration": "2-3 hours for complete migration"
+  }
+}

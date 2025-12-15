@@ -30,11 +30,11 @@ export async function navigationPlugin(
   // Register navigation routes with platform layer prefix
   // Pass navigationService as option to avoid type conflicts with old module
   await fastify.register(navigationRoutes, {
-    prefix: '/api/v1/platform/navigation',
+    prefix: '/v1/platform/navigation',
     navigationService,
   });
   await fastify.register(navigationItemsRoutes, {
-    prefix: '/api/v1/platform/navigation',
+    prefix: '/v1/platform/navigation',
     navigationService,
   }); // Navigation items CRUD routes
 

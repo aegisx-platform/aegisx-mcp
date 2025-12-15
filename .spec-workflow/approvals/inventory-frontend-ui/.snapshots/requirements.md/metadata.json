@@ -1,0 +1,22 @@
+{
+  "filePath": ".spec-workflow/specs/inventory-frontend-ui/requirements.md",
+  "currentVersion": 2,
+  "snapshots": [
+    {
+      "version": 1,
+      "filename": "snapshot-001.json",
+      "timestamp": "2025-12-14T13:42:01.268Z",
+      "trigger": "initial",
+      "approvalId": "approval_1765719721258_ykyc2q13a",
+      "approvalTitle": "Requirements Document - Inventory Frontend UI (12 functional requirements)"
+    },
+    {
+      "version": 2,
+      "filename": "snapshot-002.json",
+      "timestamp": "2025-12-14T13:42:51.505Z",
+      "trigger": "approved",
+      "approvalId": "approval_1765719721258_ykyc2q13a",
+      "approvalTitle": "Requirements Document - Inventory Frontend UI (12 functional requirements)"
+    }
+  ]
+}

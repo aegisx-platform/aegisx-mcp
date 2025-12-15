@@ -124,3 +124,4 @@ test-websocket.html
 *.zip
 *.sql.gz
 *.sql
+docs/.vitepress/cache/

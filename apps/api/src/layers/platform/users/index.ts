@@ -3,6 +3,7 @@ import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { UsersRepository } from './users.repository';
 import { usersRoutes } from './users.routes';
+import { usersSchemas } from './users.schemas';
 
 /**
  * Platform Users Plugin
@@ -29,6 +30,11 @@ export default async function platformUsersPlugin(
   fastify: FastifyInstance,
   options: FastifyPluginOptions,
 ) {
+  // Register module schemas using the schema registry
+  if ((fastify as any).schemaRegistry) {
+    (fastify as any).schemaRegistry.registerModuleSchemas('users', usersSchemas);
+  }
+
   // Create repository with Knex connection
   const usersRepository = new UsersRepository((fastify as any).knex);
 
@@ -51,7 +57,7 @@ export default async function platformUsersPlugin(
   // Register routes under the specified prefix or /api/v1/platform/users
   await fastify.register(usersRoutes, {
     controller: usersController,
-    prefix: options.prefix || '/api/v1/platform/users',
+    prefix: options.prefix || '/v1/platform/users',
   });
 
   // Decorate fastify instance with service for other plugins

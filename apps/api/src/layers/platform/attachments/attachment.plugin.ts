@@ -1,5 +1,6 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { attachmentRoutes } from './attachment.routes';
+import * as attachmentSchemas from './attachment.schemas';
 
 /**
  * Platform Attachment Plugin
@@ -27,9 +28,14 @@ export default async function platformAttachmentPlugin(
   fastify: FastifyInstance,
   options: FastifyPluginOptions,
 ) {
+  // Register module schemas using the schema registry
+  if ((fastify as any).schemaRegistry) {
+    (fastify as any).schemaRegistry.registerModuleSchemas('attachments', attachmentSchemas);
+  }
+
   // Register routes under the specified prefix or /api/v1/platform/attachments
   await fastify.register(attachmentRoutes, {
-    prefix: options.prefix || '/api/v1/platform/attachments',
+    prefix: options.prefix || '/v1/platform/attachments',
   });
 
   // Lifecycle hooks for monitoring

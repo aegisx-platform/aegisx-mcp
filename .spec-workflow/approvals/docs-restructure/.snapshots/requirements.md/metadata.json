@@ -1,0 +1,22 @@
+{
+  "filePath": ".spec-workflow/specs/docs-restructure/requirements.md",
+  "currentVersion": 2,
+  "snapshots": [
+    {
+      "version": 1,
+      "filename": "snapshot-001.json",
+      "timestamp": "2025-12-14T15:30:44.997Z",
+      "trigger": "initial",
+      "approvalId": "approval_1765726244984_pzdpgs9b5",
+      "approvalTitle": "Requirements: Documentation Restructuring"
+    },
+    {
+      "version": 2,
+      "filename": "snapshot-002.json",
+      "timestamp": "2025-12-14T15:30:53.407Z",
+      "trigger": "approved",
+      "approvalId": "approval_1765726244984_pzdpgs9b5",
+      "approvalTitle": "Requirements: Documentation Restructuring"
+    }
+  ]
+}

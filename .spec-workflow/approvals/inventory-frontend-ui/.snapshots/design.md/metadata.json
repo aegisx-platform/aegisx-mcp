@@ -1,0 +1,22 @@
+{
+  "filePath": ".spec-workflow/specs/inventory-frontend-ui/design.md",
+  "currentVersion": 2,
+  "snapshots": [
+    {
+      "version": 1,
+      "filename": "snapshot-001.json",
+      "timestamp": "2025-12-14T13:45:51.566Z",
+      "trigger": "initial",
+      "approvalId": "approval_1765719951555_s13ekzqts",
+      "approvalTitle": "Design Document - Inventory Frontend UI (Angular 17+ with Signals architecture)"
+    },
+    {
+      "version": 2,
+      "filename": "snapshot-002.json",
+      "timestamp": "2025-12-14T13:46:22.840Z",
+      "trigger": "approved",
+      "approvalId": "approval_1765719951555_s13ekzqts",
+      "approvalTitle": "Design Document - Inventory Frontend UI (Angular 17+ with Signals architecture)"
+    }
+  ]
+}

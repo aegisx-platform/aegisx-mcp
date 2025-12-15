@@ -16,7 +16,7 @@ export default async function platformPdfExportPlugin(
   options: FastifyPluginOptions,
 ) {
   // Register all PDF-related routes with prefix
-  const prefix = options.prefix || '/api/v1/platform/pdf';
+  const prefix = options.prefix || '/v1/platform/pdf';
 
   await fastify.register(pdfPreviewRoutes, { prefix: `${prefix}/preview` });
   await fastify.register(pdfTemplateRoutes, { prefix: `${prefix}/templates` });

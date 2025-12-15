@@ -51,7 +51,7 @@ export default async function platformUsersPlugin(
   // Register routes under the specified prefix or /api/v1/platform/users
   await fastify.register(usersRoutes, {
     controller: usersController,
-    prefix: options.prefix || '/api/v1/platform/users',
+    prefix: options.prefix || '/v1/platform/users',
   });
 
   // Decorate fastify instance with service for other plugins

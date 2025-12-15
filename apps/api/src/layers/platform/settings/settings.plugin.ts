@@ -73,7 +73,7 @@ export default async function platformSettingsPlugin(
 
   // Register settings routes with platform layer prefix
   await fastify.register(settingsRoutes, {
-    prefix: '/api/v1/platform/settings',
+    prefix: '/v1/platform/settings',
   });
 
   fastify.log.info('Platform settings module registered successfully');

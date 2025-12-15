@@ -1,0 +1,22 @@
+{
+  "filePath": ".spec-workflow/specs/distribution-backend-api/requirements.md",
+  "currentVersion": 2,
+  "snapshots": [
+    {
+      "version": 1,
+      "filename": "snapshot-001.json",
+      "timestamp": "2025-12-14T13:50:23.858Z",
+      "trigger": "initial",
+      "approvalId": "approval_1765720223841_34hjwfst2",
+      "approvalTitle": "Requirements Document - Distribution Backend API"
+    },
+    {
+      "version": 2,
+      "filename": "snapshot-002.json",
+      "timestamp": "2025-12-14T13:53:04.459Z",
+      "trigger": "approved",
+      "approvalId": "approval_1765720223841_34hjwfst2",
+      "approvalTitle": "Requirements Document - Distribution Backend API"
+    }
+  ]
+}

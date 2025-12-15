@@ -5,6 +5,7 @@ import { FileUploadRepository } from './file-upload.repository';
 import { FileUploadService } from './file-upload.service';
 import { FileUploadController } from './file-upload.controller';
 import { fileUploadRoutes } from './file-upload.routes';
+import * as fileUploadSchemas from './file-upload.schemas';
 
 /**
  * Platform File Upload Plugin
@@ -32,6 +33,11 @@ export default async function platformFileUploadPlugin(
   fastify: FastifyInstance,
   options: FastifyPluginOptions,
 ) {
+  // Register module schemas using the schema registry
+  if ((fastify as any).schemaRegistry) {
+    (fastify as any).schemaRegistry.registerModuleSchemas('file-upload', fileUploadSchemas);
+  }
+
   // Multipart support is provided by user-profile plugin
   // We can use the existing multipart configuration
 
@@ -72,7 +78,7 @@ export default async function platformFileUploadPlugin(
   // Register routes under the specified prefix or /api/v1/platform/files
   await fastify.register(fileUploadRoutes, {
     controller,
-    prefix: options.prefix || '/api/v1/platform/files',
+    prefix: options.prefix || '/v1/platform/files',
   });
 
   // Note: We don't decorate fastify with service here to avoid type conflicts

@@ -1,0 +1,22 @@
+{
+  "filePath": ".spec-workflow/specs/tmt-backend-api/requirements.md",
+  "currentVersion": 2,
+  "snapshots": [
+    {
+      "version": 1,
+      "filename": "snapshot-001.json",
+      "timestamp": "2025-12-14T15:23:27.565Z",
+      "trigger": "initial",
+      "approvalId": "approval_1765725807545_nm2qmj4b0",
+      "approvalTitle": "Requirements Document - TMT Backend API"
+    },
+    {
+      "version": 2,
+      "filename": "snapshot-002.json",
+      "timestamp": "2025-12-14T15:23:43.914Z",
+      "trigger": "approved",
+      "approvalId": "approval_1765725807545_nm2qmj4b0",
+      "approvalTitle": "Requirements Document - TMT Backend API"
+    }
+  ]
+}

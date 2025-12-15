@@ -1,0 +1,22 @@
+{
+  "filePath": ".spec-workflow/specs/tmt-frontend-ui/requirements.md",
+  "currentVersion": 2,
+  "snapshots": [
+    {
+      "version": 1,
+      "filename": "snapshot-001.json",
+      "timestamp": "2025-12-14T15:41:52.192Z",
+      "trigger": "initial",
+      "approvalId": "approval_1765726912133_74xu98uic",
+      "approvalTitle": "TMT Frontend UI - Requirements Document"
+    },
+    {
+      "version": 2,
+      "filename": "snapshot-002.json",
+      "timestamp": "2025-12-14T15:43:50.311Z",
+      "trigger": "approved",
+      "approvalId": "approval_1765726912133_74xu98uic",
+      "approvalTitle": "TMT Frontend UI - Requirements Document"
+    }
+  ]
+}
