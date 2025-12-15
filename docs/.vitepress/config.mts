@@ -21,6 +21,9 @@ export default defineConfig({
       { text: 'Guides', link: '/guides/development/feature-development-standard' },
       { text: 'Reference', link: '/reference/api/api-response-standard' },
       { text: 'Architecture', link: '/architecture/concepts/module-isolation' },
+      { text: 'Development', link: '/development/claude-detailed-rules' },
+      { text: 'Infrastructure', link: '/infrastructure/CI-CD-SETUP' },
+      { text: 'Testing', link: '/testing/avatar-testing-guide' },
     ],
 
     // Sidebar navigation - will be configured in task 5.2
@@ -176,6 +179,82 @@ export default defineConfig({
             {
               text: 'Quick Domain Reference',
               link: '/architecture/domains/quick-domain-reference',
+            },
+          ],
+        },
+      ],
+
+      '/development/': [
+        {
+          text: 'Advanced Development',
+          items: [
+            {
+              text: 'Claude Detailed Rules',
+              link: '/development/claude-detailed-rules',
+            },
+            {
+              text: 'Advanced Validation Patterns',
+              link: '/development/advanced-validation-patterns',
+            },
+            {
+              text: 'Audit Compliance Framework',
+              link: '/development/audit-compliance-framework',
+            },
+            {
+              text: 'Feature Tracking',
+              link: '/development/feature-tracking',
+            },
+            {
+              text: 'Docs System Guide',
+              link: '/development/docs-system-guide',
+            },
+          ],
+        },
+      ],
+
+      '/infrastructure/': [
+        {
+          text: 'CI/CD & Deployment',
+          items: [
+            {
+              text: 'CI/CD Setup',
+              link: '/infrastructure/CI-CD-SETUP',
+            },
+            {
+              text: 'GitHub Pages Deployment',
+              link: '/infrastructure/GITHUB-PAGES-DEPLOYMENT',
+            },
+            {
+              text: 'Automated Versioning Guide',
+              link: '/infrastructure/AUTOMATED-VERSIONING-GUIDE',
+            },
+            {
+              text: 'Multi-Instance Docker Workflow',
+              link: '/infrastructure/multi-instance-docker-workflow',
+            },
+            {
+              text: 'Runtime Configuration',
+              link: '/infrastructure/runtime-config',
+            },
+          ],
+        },
+      ],
+
+      '/testing/': [
+        {
+          text: 'Testing Strategies',
+          items: [
+            {
+              text: 'Avatar Testing Guide',
+              link: '/testing/avatar-testing-guide',
+            },
+            {
+              text: 'Manual Test Commands',
+              link: '/testing/manual-test-commands',
+            },
+            {
+              text: 'Monitoring',
+              link: '/testing/MONITORING',
             },
           ],
         },
