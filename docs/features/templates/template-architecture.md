@@ -1,6 +1,6 @@
 ---
-title: [Feature Name] Architecture
-description: Technical architecture, design decisions, and patterns for [Feature Name]
+title: '[Feature Name] Architecture'
+description: 'Technical architecture, design decisions, and patterns for [Feature Name]'
 category: features
 tags: [architecture, design-patterns]
 order: 3

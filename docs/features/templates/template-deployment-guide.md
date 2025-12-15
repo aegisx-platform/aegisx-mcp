@@ -1,6 +1,6 @@
 ---
-title: [Feature Name] Deployment Guide
-description: Deployment instructions, configuration, and production considerations for [Feature Name]
+title: '[Feature Name] Deployment Guide'
+description: 'Deployment instructions, configuration, and production considerations for [Feature Name]'
 category: features
 tags: [deployment, production, devops]
 order: 7

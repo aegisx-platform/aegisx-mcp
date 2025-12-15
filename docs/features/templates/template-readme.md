@@ -1,6 +1,6 @@
 ---
-title: [Feature Name]
-description: [Brief 1-2 sentence description of what this feature does]
+title: '[Feature Name]'
+description: '[Brief 1-2 sentence description of what this feature does]'
 category: features
 tags: [tag1, tag2, tag3] # Choose from controlled vocabulary
 order: 1

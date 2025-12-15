@@ -1,6 +1,6 @@
 ---
-title: [Feature Name] Developer Guide
-description: Implementation guide for developers working with [Feature Name]
+title: '[Feature Name] Developer Guide'
+description: 'Implementation guide for developers working with [Feature Name]'
 category: features
 tags: [development, guide, implementation]
 order: 4

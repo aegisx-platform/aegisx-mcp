@@ -1,6 +1,6 @@
 ---
-title: [Feature Name] Troubleshooting
-description: Common issues, error messages, and solutions for [Feature Name]
+title: '[Feature Name] Troubleshooting'
+description: 'Common issues, error messages, and solutions for [Feature Name]'
 category: features
 tags: [troubleshooting, debugging, support]
 order: 6
