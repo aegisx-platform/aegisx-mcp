@@ -6,7 +6,7 @@
 
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { SystemInitService } from './system-init.service';
-import { ImportContext } from '../../../../core/import';
+import { ImportContext } from '../../../platform/import';
 import {
   AvailableModulesQuery,
   ImportOrderQuery,

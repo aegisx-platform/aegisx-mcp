@@ -1,14 +1,12 @@
-import { ActivityAction } from '../../core/user-profile/user-activity.schemas';
-
 /**
  * Configuration options for activity logging on specific routes
  */
 export interface ActivityLogConfig {
   /** Enable/disable activity logging for this route */
   enabled: boolean;
-  
+
   /** Custom action name (overrides auto-detection) */
-  action?: ActivityAction | string;
+  action?: string;
   
   /** Custom description template with placeholders like {method}, {url}, {status} */
   description?: string;

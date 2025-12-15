@@ -22,10 +22,11 @@ export async function navigationPlugin(
   // Initialize navigation service
   const navigationService = new NavigationService(fastify);
 
-  // NOTE: During migration, do NOT decorate fastify instance to avoid type conflicts
-  // The old core/navigation module still decorates fastify.navigationService
-  // This decoration will be enabled after old module is removed (Phase 8)
-  // fastify.decorate('navigationService', navigationService);
+  // Decorate fastify instance with navigation service
+  // (Enabled after old core/navigation module was removed in Phase 8)
+  if (!fastify.hasDecorator('navigationService')) {
+    fastify.decorate('navigationService', navigationService);
+  }
 
   // Register navigation routes with platform layer prefix
   // Pass navigationService as option to avoid type conflicts with old module

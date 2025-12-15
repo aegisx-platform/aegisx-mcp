@@ -81,8 +81,11 @@ export default async function platformFileUploadPlugin(
     prefix: options.prefix || '/v1/platform/files',
   });
 
-  // Note: We don't decorate fastify with service here to avoid type conflicts
-  // The core file-upload plugin already decorates with fileUploadService
+  // Decorate fastify instance with file upload service
+  // (Enabled after old core/file-upload module was removed)
+  if (!fastify.hasDecorator('fileUploadService')) {
+    fastify.decorate('fileUploadService', service);
+  }
 
   // Lifecycle hooks for monitoring
   fastify.addHook('onReady', async () => {

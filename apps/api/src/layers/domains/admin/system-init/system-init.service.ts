@@ -6,7 +6,7 @@
 
 import { FastifyInstance } from 'fastify';
 import { Knex } from 'knex';
-import { ImportDiscoveryService, ImportContext } from '../../../../core/import';
+import { ImportDiscoveryService, ImportContext } from '../../../platform/import';
 import {
   ImportModule,
   ImportOrderItem,

@@ -15,7 +15,8 @@ import fastifyHelmet from '@fastify/helmet';
 import fastifyJwt from '@fastify/jwt';
 import fastifyRateLimit from '@fastify/rate-limit';
 
-import { activityLoggingPlugin } from '../plugins/activity-logging';
+// DISABLED: Activity logging plugin depends on deleted user-profile module
+// import { activityLoggingPlugin } from '../plugins/activity-logging';
 import errorHandlerPlugin from '../plugins/error-handler.plugin';
 import globalErrorHooksPlugin from '../plugins/global-error-hooks.plugin';
 import healthCheckPlugin from '../plugins/health-check.plugin';
@@ -258,29 +259,31 @@ export function createPluginGroups(
           plugin: authStrategiesPlugin,
           required: true,
         },
-        {
-          name: 'permission-cache',
-          plugin: permissionCachePlugin,
-          required: true,
-        },
-        {
-          name: 'activity-logging',
-          plugin: activityLoggingPlugin,
-          options: {
-            config: {
-              enabled: process.env.ACTIVITY_LOGGING_ENABLED !== 'false',
-              autoLogErrors: true,
-              enableBatching: appConfig.server.isProduction,
-              batchSize: 20,
-              batchInterval: 5000,
-              defaultConfig: {
-                async: true,
-                skipSuccessfulGets: true,
-              },
-            },
-          },
-          required: false,
-        },
+        // DISABLED: Old core plugin removed - Permission caching now handled in platformRbacPlugin
+        // {
+        //   name: 'permission-cache',
+        //   plugin: permissionCachePlugin,
+        //   required: true,
+        // },
+        // DISABLED: Activity logging plugin depends on deleted user-profile module
+        // {
+        //   name: 'activity-logging',
+        //   plugin: activityLoggingPlugin,
+        //   options: {
+        //     config: {
+        //       enabled: process.env.ACTIVITY_LOGGING_ENABLED !== 'false',
+        //       autoLogErrors: true,
+        //       enableBatching: appConfig.server.isProduction,
+        //       batchSize: 20,
+        //       batchInterval: 5000,
+        //       defaultConfig: {
+        //         async: true,
+        //         skipSuccessfulGets: true,
+        //       },
+        //     },
+        //   },
+        //   required: false,
+        // },
         {
           name: 'swagger',
           plugin: swaggerPlugin,
@@ -305,11 +308,12 @@ export function createCorePluginGroup(apiPrefix: string): PluginGroup {
     description:
       'Core infrastructure modules (auth, users, rbac, monitoring, error-logs, login-attempts)',
     plugins: [
-      {
-        name: 'system',
-        plugin: systemPlugin,
-        required: true,
-      },
+      // DISABLED: Old core system plugin removed
+      // {
+      //   name: 'system',
+      //   plugin: systemPlugin,
+      //   required: true,
+      // },
       // NOTE: websocket plugin is loaded in "application" group, not here
       // to avoid duplicate registration when both old and new routes are enabled
       {
@@ -317,19 +321,21 @@ export function createCorePluginGroup(apiPrefix: string): PluginGroup {
         plugin: authPlugin,
         required: true,
       },
-      {
-        name: 'users',
-        plugin: usersPlugin,
-        required: true,
-      },
-      {
-        name: 'departments',
-        plugin: departmentsPlugin,
-        required: true,
-      },
+      // OLD CORE USERS PLUGIN REMOVED - Now using layer-based plugin in createPlatformPluginGroup
+      // {
+      //   name: 'users',
+      //   plugin: usersPlugin,
+      //   required: true,
+      // },
+      // DISABLED: Old core departments plugin removed - Now using platformDepartmentsPlugin in createPlatformPluginGroup
+      // {
+      //   name: 'departments',
+      //   plugin: departmentsPlugin,
+      //   required: true,
+      // },
       {
         name: 'rbac',
-        plugin: rbacPlugin,
+        plugin: platformRbacPlugin,
         required: true,
       },
       {
@@ -337,11 +343,12 @@ export function createCorePluginGroup(apiPrefix: string): PluginGroup {
         plugin: monitoringModulePlugin,
         required: true,
       },
-      {
-        name: 'error-logs',
-        plugin: errorLogsPlugin,
-        required: true,
-      },
+      // DISABLED: Old core error-logs plugin removed - Error logging now handled in monitoringModulePlugin
+      // {
+      //   name: 'error-logs',
+      //   plugin: errorLogsPlugin,
+      //   required: true,
+      // },
       {
         name: 'file-audit',
         plugin: fileAuditPlugin,
@@ -354,7 +361,7 @@ export function createCorePluginGroup(apiPrefix: string): PluginGroup {
       },
       {
         name: 'import-discovery-plugin',
-        plugin: importDiscoveryPlugin,
+        plugin: platformImportDiscoveryPlugin,
         required: false, // Optional - system can run without import discovery
       },
     ],
@@ -392,52 +399,55 @@ export function createFeaturePluginGroup(apiPrefix: string): PluginGroup {
         required: true,
       },
       // User-Departments - depends on inventory-domain (uses DepartmentsRepository)
-      {
-        name: 'user-departments',
-        plugin: userDepartmentsPlugin,
-        required: true,
-      },
-      {
-        name: 'test-products',
-        plugin: testProductsPlugin,
-        required: true,
-      },
+      // DISABLED: Plugin not imported
+      // {
+      //   name: 'user-departments',
+      //   plugin: userDepartmentsPlugin,
+      //   required: true,
+      // },
+      // DISABLED: Plugin not imported
+      // {
+      //   name: 'test-products',
+      //   plugin: testProductsPlugin,
+      //   required: true,
+      // },
       // Core platform plugins (used by business features)
-      {
-        name: 'api-keys',
-        plugin: apiKeysPlugin,
-        required: true,
-      },
+      // OLD CORE PLUGINS REMOVED - Now using layer-based plugins loaded in createPlatformPluginGroup
+      // {
+      //   name: 'api-keys',
+      //   plugin: apiKeysPlugin,
+      //   required: true,
+      // },
       {
         name: 'navigation',
-        plugin: navigationPlugin,
+        plugin: platformNavigationPlugin,
         required: true,
       },
-      {
-        name: 'user-profile',
-        plugin: userProfilePlugin,
-        required: true,
-      },
-      {
-        name: 'settings',
-        plugin: settingsPlugin,
-        required: true,
-      },
-      {
-        name: 'file-upload',
-        plugin: fileUploadPlugin,
-        required: true,
-      },
-      {
-        name: 'attachments',
-        plugin: attachmentPlugin,
-        required: true,
-      },
-      {
-        name: 'pdf-export',
-        plugin: pdfExportPlugin,
-        required: true,
-      },
+      // {
+      //   name: 'user-profile',
+      //   plugin: userProfilePlugin,
+      //   required: true,
+      // },
+      // {
+      //   name: 'settings',
+      //   plugin: settingsPlugin,
+      //   required: true,
+      // },
+      // {
+      //   name: 'file-upload',
+      //   plugin: fileUploadPlugin,
+      //   required: true,
+      // },
+      // {
+      //   name: 'attachments',
+      //   plugin: attachmentPlugin,
+      //   required: true,
+      // },
+      // {
+      //   name: 'pdf-export',
+      //   plugin: pdfExportPlugin,
+      //   required: true,
+      // },
       // Business feature plugins will be added here by CRUD generator
     ],
   };

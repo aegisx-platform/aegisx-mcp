@@ -5,6 +5,10 @@ import { JWTPayload } from './jwt.types';
 import { ErrorQueueService } from '../layers/core/monitoring/services/error-queue.service';
 import { PermissionCacheService } from '../layers/platform/rbac/services/permission-cache.service';
 import { ImportDiscoveryService } from '../layers/platform/import/discovery/import-discovery.service';
+import { SettingsService } from '../layers/platform/settings/settings.service';
+import { SettingsCacheService } from '../layers/platform/settings/settings-cache.service';
+import { NavigationService } from '../layers/platform/navigation/services/navigation.service';
+import { FileUploadService } from '../layers/platform/file-upload/file-upload.service';
 import type { RateLimitPluginOptions } from '@fastify/rate-limit';
 
 declare module 'fastify' {
@@ -14,6 +18,10 @@ declare module 'fastify' {
     errorQueue?: ErrorQueueService;
     permissionCache: PermissionCacheService;
     importDiscovery?: ImportDiscoveryService;
+    settingsService?: SettingsService;
+    settingsCacheService?: SettingsCacheService;
+    navigationService?: NavigationService;
+    fileUploadService?: FileUploadService;
   }
 
   interface FastifyContextConfig {
