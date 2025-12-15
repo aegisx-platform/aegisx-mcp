@@ -345,6 +345,17 @@ export default withMermaid(
     build: {
       chunkSizeWarningLimit: 1000,
     },
+    optimizeDeps: {
+      exclude: ['dayjs', 'exceljs'],
+    },
+    ssr: {
+      noExternal: ['dayjs'],
+    },
+    resolve: {
+      alias: {
+        dayjs: 'dayjs/esm',
+      },
+    },
   },
 
   // Mermaid configuration
