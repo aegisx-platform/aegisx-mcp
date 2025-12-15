@@ -5,6 +5,7 @@ This guide explains how to migrate from JSON Schema to TypeBox for better type s
 ## Overview
 
 We've implemented a centralized schema system using TypeBox that provides:
+
 - **Compile-time type inference**: TypeScript types are automatically generated from schemas
 - **Better IDE support**: Full autocomplete and type checking
 - **Improved performance**: More efficient schema compilation
@@ -28,6 +29,7 @@ schemas/
 ### 1. Base Schema Usage
 
 **Old approach:**
+
 ```typescript
 // Each module defined its own response schemas
 const apiErrorSchema = {
@@ -38,14 +40,15 @@ const apiErrorSchema = {
       type: 'object',
       properties: {
         code: { type: 'string' },
-        message: { type: 'string' }
-      }
-    }
-  }
+        message: { type: 'string' },
+      },
+    },
+  },
 };
 ```
 
 **New approach:**
+
 ```typescript
 import { Type } from '@sinclair/typebox';
 import { ApiSuccessResponseSchema, StandardRouteResponses } from '../../schemas/base.schemas';
@@ -60,15 +63,16 @@ export const UserRouteSchemas = {
     response: {
       200: UserResponseSchema,
       ...StandardRouteResponses[404],
-      ...StandardRouteResponses[500]
-    }
-  }
+      ...StandardRouteResponses[500],
+    },
+  },
 };
 ```
 
 ### 2. TypeBox Schema Definition
 
 **Old JSON Schema:**
+
 ```typescript
 const userSchema = {
   type: 'object',
@@ -76,13 +80,14 @@ const userSchema = {
     id: { type: 'string', format: 'uuid' },
     email: { type: 'string', format: 'email' },
     name: { type: 'string' },
-    isActive: { type: 'boolean' }
+    isActive: { type: 'boolean' },
   },
-  required: ['id', 'email', 'name']
+  required: ['id', 'email', 'name'],
 };
 ```
 
 **New TypeBox Schema:**
+
 ```typescript
 import { Type, Static } from '@sinclair/typebox';
 
@@ -90,7 +95,7 @@ const UserSchema = Type.Object({
   id: Type.String({ format: 'uuid' }),
   email: Type.String({ format: 'email' }),
   name: Type.String(),
-  isActive: Type.Boolean({ default: true })
+  isActive: Type.Boolean({ default: true }),
 });
 
 // Automatic TypeScript type generation
@@ -100,12 +105,14 @@ type User = Static<typeof UserSchema>;
 ### 3. Module Schema Registration
 
 **Old approach:**
+
 ```typescript
 // In module plugin
-Object.values(moduleSchemas).forEach(schema => fastify.addSchema(schema));
+Object.values(moduleSchemas).forEach((schema) => fastify.addSchema(schema));
 ```
 
 **New approach:**
+
 ```typescript
 // In module plugin
 server.schemaRegistry.registerModuleSchemas('moduleName', ModuleSchemas);
@@ -114,6 +121,7 @@ server.schemaRegistry.registerModuleSchemas('moduleName', ModuleSchemas);
 ### 4. Route Schema References
 
 **Old approach:**
+
 ```typescript
 response: {
   200: { $ref: 'userResponse#' },
@@ -123,6 +131,7 @@ response: {
 ```
 
 **New approach:**
+
 ```typescript
 import { SchemaRefs, StandardRouteResponses } from '../../schemas/registry';
 
@@ -168,7 +177,7 @@ async createUser(request: FastifyRequest<{ Body: CreateUserRequest }>): Promise<
 const BaseUserSchema = Type.Object({
   id: Type.String({ format: 'uuid' }),
   email: Type.String({ format: 'email' }),
-  name: Type.String()
+  name: Type.String(),
 });
 
 // Extended schemas

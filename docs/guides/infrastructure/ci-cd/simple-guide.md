@@ -13,6 +13,7 @@
 ### 1. ไม่ต้อง Setup อะไรเลย!
 
 GitHub Actions พร้อมใช้งานทันที เพราะ:
+
 - ✅ `GITHUB_TOKEN` - มีให้อัตโนมัติ
 - ✅ GitHub Container Registry - ใช้ได้เลย
 - ✅ Workflows - Setup ไว้แล้ว
@@ -20,6 +21,7 @@ GitHub Actions พร้อมใช้งานทันที เพราะ:
 ### 2. เริ่มใช้งาน
 
 #### Development Flow:
+
 ```bash
 # 1. สร้าง feature branch
 git checkout -b feature/awesome-feature
@@ -36,6 +38,7 @@ git push origin feature/awesome-feature
 **ผลลัพธ์**: GitHub Actions จะ run tests อัตโนมัติ ✅
 
 #### Release Flow:
+
 ```bash
 # 1. Merge to develop (ถ้ามี)
 git checkout develop
@@ -49,7 +52,8 @@ git merge develop  # หรือ merge จาก feature
 git push
 ```
 
-**ผลลัพธ์**: 
+**ผลลัพธ์**:
+
 - ✅ Auto bump version (1.0.0 → 1.1.0)
 - ✅ Auto update CHANGELOG.md
 - ✅ Auto create GitHub Release
@@ -59,6 +63,7 @@ git push
 ## 📦 Docker Images
 
 Images จะอยู่ที่:
+
 ```
 ghcr.io/[your-username]/aegisx-starter/api:latest
 ghcr.io/[your-username]/aegisx-starter/web:latest
@@ -66,6 +71,7 @@ ghcr.io/[your-username]/aegisx-starter/admin:latest
 ```
 
 Pull images:
+
 ```bash
 docker pull ghcr.io/[your-username]/aegisx-starter/api:latest
 ```
@@ -90,6 +96,7 @@ docker run -d \
 ```
 
 หรือใช้ docker-compose:
+
 ```yaml
 # docker-compose.yml on server
 version: '3.8'
@@ -101,21 +108,22 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - REDIS_URL=redis://redis:6379
     ports:
-      - "3333:3333"
+      - '3333:3333'
 ```
 
 ## 📝 Commit Message Format
 
-| Type | Version Change | Example |
-|------|----------------|---------|
-| `feat` | Minor (1.0.0 → 1.1.0) | `feat: add payment API` |
-| `fix` | Patch (1.0.0 → 1.0.1) | `fix: resolve login bug` |
-| `feat!` | Major (1.0.0 → 2.0.0) | `feat!: change API structure` |
-| `docs`, `style`, `chore` | No version change | `docs: update readme` |
+| Type                     | Version Change        | Example                       |
+| ------------------------ | --------------------- | ----------------------------- |
+| `feat`                   | Minor (1.0.0 → 1.1.0) | `feat: add payment API`       |
+| `fix`                    | Patch (1.0.0 → 1.0.1) | `fix: resolve login bug`      |
+| `feat!`                  | Major (1.0.0 → 2.0.0) | `feat!: change API structure` |
+| `docs`, `style`, `chore` | No version change     | `docs: update readme`         |
 
 ## 🎉 That's It!
 
 ไม่ต้อง setup อะไรเพิ่ม:
+
 - ✅ Push = Test
 - ✅ Merge to main = Release
 - ✅ Docker images ready
