@@ -21,6 +21,10 @@ import {
   DeleteAccountDialogComponent,
   DeleteAccountResult,
 } from '../components/delete-account-dialog.component';
+import { DepartmentService } from '../../../features/system/modules/departments/services/departments.service';
+import { buildDepartmentPath } from '../../../features/system/modules/departments/utils/department-hierarchy.utils';
+import { Department } from '../../../features/system/modules/departments/types/departments.types';
+import { MatChipsModule } from '@angular/material/chips';
 
 @Component({
   selector: 'ax-user-profile',
@@ -35,6 +39,7 @@ import {
     MatTooltipModule,
     MatDividerModule,
     MatCardModule,
+    MatChipsModule,
     AxAlertComponent,
     ProfileInfoComponent,
     ProfileSecurityComponent,
@@ -84,8 +89,52 @@ import {
 
       <!-- Main Content -->
       @else {
+        <!-- Department Section -->
+        @if (userProfile()?.department_id) {
+          @if (isLoadingDepartment()) {
+            <mat-card appearance="outlined" class="department-card">
+              <mat-card-content>
+                <div class="department-loading">
+                  <mat-spinner diameter="24"></mat-spinner>
+                  <span class="loading-text">Loading department...</span>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          } @else if (userDepartment()) {
+            <mat-card appearance="outlined" class="department-card">
+              <mat-card-header>
+                <mat-icon class="department-icon">account_tree</mat-icon>
+                <mat-card-title>Department</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="department-details">
+                  <div class="department-name">{{ userDepartment()?.dept_name }}</div>
+                  <div class="department-code">{{ userDepartment()?.dept_code }}</div>
+                  @if (departmentPath()) {
+                    <div class="department-path">{{ departmentPath() }}</div>
+                  }
+                  @if (userDepartment()?.is_active === false) {
+                    <mat-chip-set>
+                      <mat-chip class="inactive-chip">Inactive Department</mat-chip>
+                    </mat-chip-set>
+                  }
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+        } @else {
+          <mat-card appearance="outlined" class="department-card">
+            <mat-card-content>
+              <div class="no-department">
+                <mat-icon class="no-department-icon">info_outline</mat-icon>
+                <span>No department assigned</span>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+
         <!-- Profile Tabs -->
-        <mat-card appearance="outlined">
+        <mat-card appearance="outlined" class="tabs-card">
           <mat-tab-group
             [(selectedIndex)]="selectedTabIndex"
             animationDuration="200ms"
@@ -244,7 +293,71 @@ import {
         margin-left: var(--ax-spacing-sm);
       }
 
+      /* ===== DEPARTMENT SECTION ===== */
+      .department-card {
+        margin-bottom: var(--ax-spacing-lg);
+      }
+
+      .department-icon {
+        margin-right: var(--ax-spacing-sm);
+        color: var(--mat-sys-primary);
+      }
+
+      .department-loading {
+        display: flex;
+        align-items: center;
+        gap: var(--ax-spacing-md);
+        padding: var(--ax-spacing-md) 0;
+      }
+
+      .department-details {
+        display: flex;
+        flex-direction: column;
+        gap: var(--ax-spacing-xs);
+      }
+
+      .department-name {
+        font-size: var(--ax-text-lg);
+        font-weight: var(--ax-font-semibold);
+        color: var(--mat-sys-on-surface);
+      }
+
+      .department-code {
+        font-size: var(--ax-text-sm);
+        color: var(--mat-sys-on-surface-variant);
+        font-family: monospace;
+      }
+
+      .department-path {
+        font-size: var(--ax-text-xs);
+        color: var(--mat-sys-on-surface-variant);
+        opacity: 0.8;
+        margin-top: var(--ax-spacing-sm);
+      }
+
+      .inactive-chip {
+        margin-top: var(--ax-spacing-sm);
+        background-color: var(--ax-error-subtle) !important;
+        color: var(--ax-error-emphasis) !important;
+      }
+
+      .no-department {
+        display: flex;
+        align-items: center;
+        gap: var(--ax-spacing-sm);
+        color: var(--mat-sys-on-surface-variant);
+        padding: var(--ax-spacing-md) 0;
+      }
+
+      .no-department-icon {
+        color: var(--mat-sys-on-surface-variant);
+      }
+
       /* ===== TABS ===== */
+      .tabs-card {
+        min-height: 600px;
+      }
+
       .profile-tabs {
         min-height: 600px;
       }
@@ -334,6 +447,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   private userService = inject(UserService);
   private authService = inject(AuthService);
   private dialog = inject(MatDialog);
+  private departmentService = inject(DepartmentService);
   private destroy$ = new Subject<void>();
 
   selectedTabIndex = 0;
@@ -343,6 +457,11 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   error = signal<string | null>(null);
   errorMessage = signal<string | null>(null);
   userProfile = signal<any>(null);
+
+  // Department signals
+  userDepartment = signal<Department | null>(null);
+  departmentPath = signal<string>('');
+  isLoadingDepartment = signal(false);
 
   ngOnInit(): void {
     this.loadProfile();
@@ -364,12 +483,44 @@ export class UserProfileComponent implements OnInit, OnDestroy {
         next: (profile) => {
           this.userProfile.set(profile);
           this.isLoading.set(false);
+
+          // Load department if user has department_id
+          if (profile?.department_id) {
+            this.loadDepartment(profile.department_id);
+          }
         },
         error: (error) => {
           this.error.set(error.message || 'Failed to load profile');
           this.isLoading.set(false);
         },
       });
+  }
+
+  private async loadDepartment(departmentId: number): Promise<void> {
+    this.isLoadingDepartment.set(true);
+
+    try {
+      // Fetch department details
+      const department = await this.departmentService.loadDepartmentById(
+        departmentId,
+      );
+
+      if (department) {
+        this.userDepartment.set(department);
+
+        // Build hierarchy path
+        const path = await buildDepartmentPath(
+          departmentId,
+          this.departmentService,
+        );
+        this.departmentPath.set(path);
+      }
+    } catch (error) {
+      console.error('Failed to load department:', error);
+      // Don't show error to user - department is non-critical info
+    } finally {
+      this.isLoadingDepartment.set(false);
+    }
   }
 
   onProfileInfoChange(updatedProfile: any): void {

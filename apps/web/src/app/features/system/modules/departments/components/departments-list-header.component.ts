@@ -24,6 +24,14 @@ import { AxKpiCardComponent } from '@aegisx/ui';
       <div class="flex items-center gap-2">
         <button
           mat-stroked-button
+          (click)="hierarchyClicked.emit()"
+          [disabled]="loading || hasError"
+        >
+          <mat-icon>account_tree</mat-icon>
+          View Hierarchy
+        </button>
+        <button
+          mat-stroked-button
           color="primary"
           (click)="importClicked.emit()"
           [disabled]="loading || hasError"
@@ -96,6 +104,7 @@ export class DepartmentsListHeaderComponent {
 
   @Output() createClicked = new EventEmitter<void>();
   @Output() importClicked = new EventEmitter<void>();
+  @Output() hierarchyClicked = new EventEmitter<void>();
 
   getPercentage(count: number): number {
     return this.stats.total > 0

@@ -1,0 +1,47 @@
+/**
+ * Department Selector Styles
+ * ===================================
+ * Styling for the department selector component
+ */
+
+// Ensure full width for responsive design
+:host {
+  display: block;
+  width: 100%;
+}
+
+// Mat form field should take full width
+mat-form-field {
+  width: 100%;
+}
+
+// Loading spinner positioning and sizing
+.department-selector-spinner {
+  margin-right: 8px;
+
+  ::ng-deep circle {
+    stroke: var(--mat-primary-color, #1976d2);
+  }
+}
+
+// Hierarchical option styling
+mat-option {
+  // Ensure indented text is clearly visible
+  font-family: monospace, sans-serif;
+
+  // Add subtle hover effect
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+
+  // Disabled state
+  &.mat-option-disabled {
+    opacity: 0.5;
+  }
+}
+
+// Mat-select panel customization
+::ng-deep .mat-select-panel {
+  // Add max height for scrollable dropdown
+  max-height: 400px;
+}

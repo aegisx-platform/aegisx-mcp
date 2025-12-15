@@ -298,6 +298,48 @@ export class DepartmentService {
     }
   }
 
+  /**
+   * Load all departments for hierarchy view (no pagination)
+   */
+  async loadDepartmentHierarchy(): Promise<Department[]> {
+    try {
+      const response = await this.http
+        .get<PaginatedResponse<Department>>(this.baseUrl, {
+          params: new HttpParams().set('limit', '1000'), // Get all departments
+        })
+        .toPromise();
+
+      if (response && response.data) {
+        return response.data;
+      }
+      return [];
+    } catch (error: any) {
+      console.error('Failed to load department hierarchy:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get departments dropdown for parent selection
+   */
+  async getDepartmentsForDropdown(): Promise<Department[]> {
+    try {
+      const response = await this.http
+        .get<PaginatedResponse<Department>>(this.baseUrl, {
+          params: new HttpParams().set('limit', '1000').set('is_active', 'true'),
+        })
+        .toPromise();
+
+      if (response && response.data) {
+        return response.data;
+      }
+      return [];
+    } catch (error: any) {
+      console.error('Failed to load departments dropdown:', error);
+      return [];
+    }
+  }
+
   // ===== EXPORT OPERATIONS =====
 
   /**

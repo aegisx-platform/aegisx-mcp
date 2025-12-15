@@ -31,8 +31,8 @@ import {
   CreateBudgetRequestRequest,
   UpdateBudgetRequestRequest,
 } from '../types/budget-requests.types';
-import { DepartmentService } from '../../departments/services/departments.service';
-import { Department } from '../../departments/types/departments.types';
+import { DepartmentService } from '../../../../system/modules/departments/services/departments.service';
+import { Department } from '../../../../system/modules/departments/types/departments.types';
 
 export type BudgetRequestFormMode = 'create' | 'edit';
 

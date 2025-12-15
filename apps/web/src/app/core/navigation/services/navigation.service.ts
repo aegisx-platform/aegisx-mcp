@@ -2,7 +2,6 @@ import { AxNavigationItem } from '@aegisx/ui';
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, catchError, map, of } from 'rxjs';
-import { environment } from '../../../../environments/environment';
 import { AuthService } from '../../auth/services/auth.service';
 
 interface ApiNavigationItem {
@@ -202,29 +201,6 @@ export class NavigationService {
       icon: 'folder',
       link: '/file-upload',
     },
-    // Dev Tools (only in development)
-    ...(environment.production
-      ? []
-      : [
-          {
-            id: 'dev-tools',
-            title: 'Dev Tools',
-            type: 'group' as const,
-            children: [
-              {
-                id: 'dev',
-                title: 'Development Tools',
-                type: 'item' as const,
-                icon: 'science',
-                link: '/dev',
-                badge: {
-                  content: 'Dev',
-                  type: 'warn' as const,
-                },
-              },
-            ],
-          },
-        ]),
   ];
 
   // Signals for reactive state

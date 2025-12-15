@@ -67,6 +67,12 @@ const systemNavigation: AxNavigationItem[] = [
     type: 'collapsible',
     children: [
       {
+        id: 'departments',
+        title: 'Departments',
+        icon: 'account_tree',
+        link: '/system/departments',
+      },
+      {
         id: 'settings',
         title: 'Settings',
         icon: 'settings',

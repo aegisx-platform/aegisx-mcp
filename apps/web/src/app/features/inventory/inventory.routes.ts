@@ -214,19 +214,7 @@ export const INVENTORY_ROUTES: Route[] = [
               requiredPermissions: ['hospitals.read', 'admin.*'],
             },
           },
-          // Departments (Generated CRUD)
-          {
-            path: 'departments',
-            loadChildren: () =>
-              import('./modules/departments/departments.routes').then(
-                (m) => m.departmentsRoutes,
-              ),
-            data: {
-              title: 'Departments',
-              description: 'Departments Management System',
-              requiredPermissions: ['departments.read', 'admin.*'],
-            },
-          },
+          // Departments moved to System feature (/system/departments)
           // Companies (Generated CRUD)
           {
             path: 'companies',

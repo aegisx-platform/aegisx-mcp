@@ -23,6 +23,7 @@ import {
   AssignRolesToUserRequest,
   RemoveRoleFromUserRequest,
 } from '../services/user.service';
+import { DepartmentSelectorComponent } from '../../../features/system/modules/departments/components/department-selector/department-selector.component';
 
 interface DialogData {
   mode: 'create' | 'edit';
@@ -43,6 +44,7 @@ interface DialogData {
     MatIconModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
+    DepartmentSelectorComponent,
   ],
   template: `
     <h2 mat-dialog-title class="ax-header ax-header-info">
@@ -167,19 +169,6 @@ interface DialogData {
             </mat-form-field>
           }
 
-          <!-- Roles (Multi-select) -->
-          <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Roles</mat-label>
-            <mat-select formControlName="roleIds" multiple>
-              @for (role of roles(); track role.id) {
-                <mat-option [value]="role.id">{{ role.name }}</mat-option>
-              }
-            </mat-select>
-            <mat-error *ngIf="userForm.get('roleIds')?.hasError('required')">
-              At least one role is required
-            </mat-error>
-          </mat-form-field>
-
           <!-- Status -->
           <mat-form-field appearance="outline" class="form-field">
             <mat-label>Status</mat-label>
@@ -191,6 +180,26 @@ interface DialogData {
             </mat-select>
             <mat-error *ngIf="userForm.get('status')?.hasError('required')">
               Status is required
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Department (Optional) -->
+          <app-department-selector
+            formControlName="department_id"
+            label="Department (Optional)"
+            [required]="false"
+          />
+
+          <!-- Roles (Multi-select) -->
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Roles</mat-label>
+            <mat-select formControlName="roleIds" multiple>
+              @for (role of roles(); track role.id) {
+                <mat-option [value]="role.id">{{ role.name }}</mat-option>
+              }
+            </mat-select>
+            <mat-error *ngIf="userForm.get('roleIds')?.hasError('required')">
+              At least one role is required
             </mat-error>
           </mat-form-field>
         </div>
@@ -285,6 +294,7 @@ export class UserFormDialogComponent implements OnInit {
         ? [Validators.required, Validators.minLength(8)]
         : [],
     ],
+    department_id: [null as number | null, []],
     roleIds: [{ value: [] as string[], disabled: false }, Validators.required],
     status: ['active', Validators.required],
   });
@@ -303,6 +313,7 @@ export class UserFormDialogComponent implements OnInit {
         email: this.data.user.email,
         username: this.data.user.username,
         status: this.data.user.status,
+        department_id: this.data.user.department_id || null,
       });
 
       // Disable fields that shouldn't be edited
@@ -393,6 +404,7 @@ export class UserFormDialogComponent implements OnInit {
           password: formValue.password!,
           roleId: normalizedRoleIds[0]!, // First role as primary
           status: formValue.status! as any,
+          department_id: formValue.department_id || null,
         };
 
         const newUser = await this.userService.createUser(createData);
@@ -419,6 +431,7 @@ export class UserFormDialogComponent implements OnInit {
           lastName: formValue.lastName!,
           roleId: normalizedRoleIds[0]!, // First role as primary
           status: formValue.status! as any,
+          department_id: formValue.department_id || null,
         };
 
         await this.userService.updateUser(this.data.user!.id, updateData);

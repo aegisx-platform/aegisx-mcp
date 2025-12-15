@@ -485,6 +485,14 @@ import { UserService, UserStatus } from '../services/user.service';
                 </td>
               </ng-container>
 
+              <!-- Department Column -->
+              <ng-container matColumnDef="department">
+                <th mat-header-cell *matHeaderCellDef>Department</th>
+                <td mat-cell *matCellDef="let user">
+                  {{ user.department?.dept_name || '-' }}
+                </td>
+              </ng-container>
+
               <!-- Role Column -->
               <ng-container matColumnDef="role">
                 <th mat-header-cell *matHeaderCellDef>Role(s)</th>
@@ -1208,6 +1216,7 @@ export class UserListComponent implements OnInit {
   displayedColumns: string[] = [
     'select',
     'user',
+    'department',
     'role',
     'status',
     'lastLogin',

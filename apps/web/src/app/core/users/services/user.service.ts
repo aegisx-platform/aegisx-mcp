@@ -23,6 +23,8 @@ export interface User {
   // Multi-role support (required, not optional)
   roles: UserRole[]; // Full role details with metadata
   primaryRole?: UserRole; // Explicitly marked primary role
+  // Department assignment (REQ-2)
+  department_id?: number | null;
   createdAt: string;
   updatedAt: string;
   lastLoginAt?: string;
@@ -58,6 +60,7 @@ export interface CreateUserRequest {
   password: string;
   roleId: string;
   status?: UserStatus;
+  department_id?: number | null;
 }
 
 export interface UpdateUserRequest {
@@ -65,6 +68,7 @@ export interface UpdateUserRequest {
   lastName?: string;
   status?: UserStatus;
   roleId?: string;
+  department_id?: number | null;
 }
 
 interface GetUsersParams {
@@ -180,6 +184,8 @@ export interface UserProfile {
   createdAt: string;
   updatedAt: string;
   preferences?: UserPreferences;
+  // Department assignment (REQ-3)
+  department_id?: number | null;
 }
 
 export interface UpdateProfileRequest {

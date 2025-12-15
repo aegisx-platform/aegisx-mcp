@@ -6,7 +6,6 @@ import {
 } from '@angular/common/http';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { map, catchError, tap, finalize } from 'rxjs/operators';
-import { SettingsDemoService } from '../../../dev-tools/services/settings-demo.service';
 import {
   GroupedSettings,
   GroupedSettingsResponse,
@@ -30,11 +29,7 @@ import {
 })
 export class SettingsService {
   private http: HttpClient = inject(HttpClient);
-  private demoService: SettingsDemoService = inject(SettingsDemoService);
   private readonly baseUrl = '/settings';
-
-  // Set to true to use demo service instead of real API
-  private readonly useDemoMode = false;
 
   // Signal-based state management
   private _state = signal<SettingsState>({
@@ -63,21 +58,6 @@ export class SettingsService {
   getGroupedSettings(query?: GetSettingsQuery): Observable<GroupedSettings[]> {
     this.setLoading(true);
     this.clearError();
-
-    if (this.useDemoMode) {
-      return this.demoService.getGroupedSettings().pipe(
-        tap((groupedSettings) => {
-          this.updateState({
-            groupedSettings,
-            loading: false,
-          });
-          // Cache original values for optimistic updates
-          this.cacheOriginalValues(groupedSettings);
-        }),
-        catchError((error) => this.handleError(error)),
-        finalize(() => this.setLoading(false)),
-      );
-    }
 
     let params = new HttpParams();
     if (query) {
@@ -175,17 +155,6 @@ export class SettingsService {
     errors?: Array<{ key: string; error: string }>;
   }> {
     this.setSaving(true);
-
-    if (this.useDemoMode) {
-      return this.demoService.bulkUpdateSettings(updates).pipe(
-        tap(() => {
-          this.clearPendingChanges();
-          this.setHasUnsavedChanges(false);
-        }),
-        catchError((error) => this.handleError(error)),
-        finalize(() => this.setSaving(false)),
-      );
-    }
 
     return this.http
       .post<BulkUpdateResponse>(`${this.baseUrl}/bulk-update`, updates)

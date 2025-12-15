@@ -53,11 +53,8 @@ import {
 // TODO: Add export button with custom export service if needed
 import { DepartmentService } from '../services/departments.service';
 import { Department, ListDepartmentQuery } from '../types/departments.types';
-import { DepartmentCreateDialogComponent } from './departments-create.dialog';
-import {
-  DepartmentEditDialogComponent,
-  DepartmentEditDialogData,
-} from './departments-edit.dialog';
+import { DepartmentFormDialogComponent } from './department-form-dialog/department-form-dialog.component';
+import { DepartmentHierarchyViewComponent } from './department-hierarchy-view/department-hierarchy-view.component';
 import {
   DepartmentViewDialogComponent,
   DepartmentViewDialogData,
@@ -532,12 +529,19 @@ export class DepartmentsListComponent {
 
   // CRUD Operations
   openCreateDialog() {
-    const dialogRef = this.dialog.open(DepartmentCreateDialogComponent, {
-      width: '600px',
+    const dialogRef = this.dialog.open(DepartmentFormDialogComponent, {
+      width: '700px',
+      data: {
+        mode: 'create',
+        department: null,
+      },
     });
 
-    dialogRef.afterClosed().subscribe((result: boolean) => {
+    dialogRef.afterClosed().subscribe((result) => {
       if (result) {
+        this.snackBar.open('Department created successfully', 'Close', {
+          duration: 3000,
+        });
         this.reloadTrigger.update((n) => n + 1);
       }
     });
@@ -559,6 +563,13 @@ export class DepartmentsListComponent {
     });
   }
 
+  openHierarchyView() {
+    const dialogRef = this.dialog.open(DepartmentHierarchyViewComponent, {
+      width: '900px',
+      height: '80vh',
+    });
+  }
+
   onViewDepartment(department: Department) {
     const dialogRef = this.dialog.open(DepartmentViewDialogComponent, {
       width: '600px',
@@ -573,9 +584,12 @@ export class DepartmentsListComponent {
   }
 
   onEditDepartment(department: Department) {
-    const dialogRef = this.dialog.open(DepartmentEditDialogComponent, {
-      width: '600px',
-      data: { departments: department } as DepartmentEditDialogData,
+    const dialogRef = this.dialog.open(DepartmentFormDialogComponent, {
+      width: '700px',
+      data: {
+        mode: 'edit',
+        department: department,
+      },
     });
 
     dialogRef.afterClosed().subscribe((result: boolean) => {

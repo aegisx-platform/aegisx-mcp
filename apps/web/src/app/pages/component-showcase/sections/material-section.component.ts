@@ -17,8 +17,6 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { FormsModule } from '@angular/forms';
 
-// Import the existing material demo component
-import { MaterialDemoComponent } from '../../../dev-tools/pages/material-demo/material-demo.component';
 import {
   ShowcaseDataService,
   ComponentExample,
@@ -47,7 +45,6 @@ interface MaterialSection {
     MatExpansionModule,
     MatProgressBarModule,
     MatButtonToggleModule,
-    MaterialDemoComponent,
   ],
   template: `
     <div class="material-section">
@@ -80,11 +77,6 @@ interface MaterialSection {
               classes (.form-xs, .form-compact, .form-standard, .form-lg) and
               comprehensive examples of every Material component.
             </p>
-          </div>
-
-          <!-- Embedded Material Demo Component -->
-          <div class="material-demo-embedded">
-            <app-material-demo></app-material-demo>
           </div>
         </div>
 
@@ -179,13 +171,6 @@ interface MaterialSection {
           <button mat-raised-button color="primary" (click)="clearSearch()">
             Browse All Components
           </button>
-        </div>
-      </div>
-
-      <!-- Original Material Demo -->
-      <div *ngIf="viewMode() === 'original'" class="original-view">
-        <div class="original-demo-wrapper">
-          <app-material-demo></app-material-demo>
         </div>
       </div>
 

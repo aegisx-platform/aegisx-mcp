@@ -1,0 +1,46 @@
+<!--
+  Department Selector Template
+  ===================================
+  Material Design dropdown with hierarchical department display
+
+  Features:
+  - Hierarchical indentation for visual hierarchy
+  - Loading spinner during data fetch
+  - Nullable selection with "-- None --" option
+  - Full width responsive design
+  - Supports required validation
+  - Disabled state support
+-->
+
+<mat-form-field [appearance]="appearance" class="w-full">
+  <mat-label>{{ label }}</mat-label>
+
+  <mat-select
+    [formControl]="selectControl"
+    [placeholder]="placeholder"
+    [required]="required"
+    [disabled]="disabled()">
+
+    <!-- Nullable option - allows empty selection (REQ-2 AC 5) -->
+    <mat-option [value]="null">-- None --</mat-option>
+
+    <!-- Hierarchical department options (REQ-2 AC 2, 4) -->
+    <mat-option
+      *ngFor="let dept of hierarchicalOptions()"
+      [value]="dept.id"
+      [title]="dept.hierarchyPath">
+      {{ dept.displayName }}
+    </mat-option>
+  </mat-select>
+
+  <!-- Loading spinner suffix -->
+  <mat-spinner
+    *ngIf="isLoading()"
+    matSuffix
+    diameter="20"
+    class="department-selector-spinner">
+  </mat-spinner>
+
+  <!-- Hint text (optional) -->
+  <mat-hint *ngIf="!required">Optional - leave empty if not applicable</mat-hint>
+</mat-form-field>

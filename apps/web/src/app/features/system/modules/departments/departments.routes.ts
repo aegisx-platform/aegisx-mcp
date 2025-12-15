@@ -8,5 +8,9 @@ export const departmentsRoutes: Routes = [
         (m) => m.DepartmentsListComponent,
       ),
     title: 'Departments',
+    data: {
+      title: 'Department Management',
+      description: 'Manage departments and organizational hierarchy',
+    },
   },
 ];

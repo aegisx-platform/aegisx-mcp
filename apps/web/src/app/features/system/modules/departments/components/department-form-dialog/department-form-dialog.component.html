@@ -1,0 +1,148 @@
+<!-- Dialog Header -->
+<h2 mat-dialog-title class="dialog-header">
+  <div class="header-content">
+    <mat-icon class="header-icon">
+      {{ isEditMode() ? 'edit' : 'add_circle' }}
+    </mat-icon>
+    <div class="header-text">
+      <div class="title">{{ dialogTitle() }}</div>
+      <div class="subtitle">
+        {{ isEditMode() ? 'Update department information' : 'Create a new department' }}
+      </div>
+    </div>
+  </div>
+  <button
+    type="button"
+    mat-icon-button
+    [mat-dialog-close]="false"
+    aria-label="Close dialog"
+    class="close-button"
+  >
+    <mat-icon>close</mat-icon>
+  </button>
+</h2>
+
+<!-- Dialog Content -->
+<mat-dialog-content class="dialog-content">
+  <form [formGroup]="form" class="department-form">
+    <!-- Department Code Field -->
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>Department Code</mat-label>
+      <input
+        matInput
+        formControlName="dept_code"
+        placeholder="e.g., IT_DEPT, HR_001"
+        [readonly]="isEditMode()"
+        autocomplete="off"
+      />
+      <mat-icon matPrefix>badge</mat-icon>
+      <mat-hint *ngIf="!isEditMode()">
+        Uppercase letters, numbers, underscores, and hyphens only
+      </mat-hint>
+      <mat-error *ngIf="getDeptCodeError()">
+        {{ getDeptCodeError() }}
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Department Name Field -->
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>Department Name</mat-label>
+      <input
+        matInput
+        formControlName="dept_name"
+        placeholder="e.g., Information Technology"
+        autocomplete="off"
+      />
+      <mat-icon matPrefix>business</mat-icon>
+      <mat-hint>2-200 characters</mat-hint>
+      <mat-error *ngIf="getDeptNameError()">
+        {{ getDeptNameError() }}
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Parent Department Dropdown -->
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>Parent Department</mat-label>
+      <mat-select formControlName="parent_id" placeholder="Select parent department (optional)">
+        <mat-option [value]="null">
+          <em>No Parent (Root Department)</em>
+        </mat-option>
+        <mat-option
+          *ngFor="let option of parentOptions()"
+          [value]="option.id"
+          [disabled]="option.disabled"
+        >
+          <span class="option-text">{{ option.displayName }}</span>
+          <span *ngIf="option.hierarchyPath && option.level > 0" class="option-path">
+            ({{ option.hierarchyPath }})
+          </span>
+        </mat-option>
+      </mat-select>
+      <mat-icon matPrefix>account_tree</mat-icon>
+      <mat-hint *ngIf="!isEditMode()">
+        Select parent department or leave empty for root department
+      </mat-hint>
+      <mat-hint *ngIf="isEditMode()">
+        Cannot select current department or its descendants
+      </mat-hint>
+      <mat-error *ngIf="getParentIdError()">
+        {{ getParentIdError() }}
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Active Status Toggle -->
+    <div class="toggle-field">
+      <mat-slide-toggle
+        formControlName="is_active"
+        color="primary"
+        class="status-toggle"
+      >
+        <div class="toggle-label">
+          <mat-icon class="toggle-icon">
+            {{ form.get('is_active')?.value ? 'check_circle' : 'cancel' }}
+          </mat-icon>
+          <span class="toggle-text">
+            {{ form.get('is_active')?.value ? 'Active' : 'Inactive' }}
+          </span>
+        </div>
+      </mat-slide-toggle>
+      <div class="toggle-hint">
+        {{ form.get('is_active')?.value
+          ? 'Department is active and visible in the system'
+          : 'Department is inactive and hidden from most views'
+        }}
+      </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div *ngIf="loading()" class="loading-overlay">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p class="loading-text">{{ isEditMode() ? 'Updating...' : 'Creating...' }}</p>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<!-- Dialog Actions -->
+<mat-dialog-actions class="dialog-actions">
+  <button
+    mat-stroked-button
+    type="button"
+    (click)="cancel()"
+    [disabled]="loading()"
+  >
+    Cancel
+  </button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    (click)="save()"
+    [disabled]="form.invalid || loading()"
+  >
+    <mat-icon *ngIf="!loading()">
+      {{ isEditMode() ? 'save' : 'add' }}
+    </mat-icon>
+    <mat-spinner *ngIf="loading()" diameter="20"></mat-spinner>
+    {{ submitButtonText() }}
+  </button>
+</mat-dialog-actions>

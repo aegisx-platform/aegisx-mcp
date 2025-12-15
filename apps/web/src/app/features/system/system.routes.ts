@@ -1,6 +1,5 @@
 import { Route } from '@angular/router';
 import { AuthGuard } from '../../core/auth';
-import { environment } from '../../../environments/environment';
 
 /**
  * System Routes
@@ -124,6 +123,19 @@ export const SYSTEM_ROUTES: Route[] = [
         },
       },
 
+      // Departments
+      {
+        path: 'departments',
+        loadChildren: () =>
+          import('./modules/departments/departments.routes').then(
+            (m) => m.departmentsRoutes,
+          ),
+        data: {
+          title: 'Departments',
+          description: 'Manage departments and organizational hierarchy',
+        },
+      },
+
       // Tools
       {
         path: 'tools',
@@ -214,23 +226,6 @@ export const SYSTEM_ROUTES: Route[] = [
           },
         ],
       },
-
-      // Dev Tools (only in development)
-      ...(environment.production
-        ? []
-        : [
-            {
-              path: 'dev',
-              loadChildren: () =>
-                import('../../dev-tools/dev-tools.routes').then(
-                  (m) => m.DEV_TOOLS_ROUTES,
-                ),
-              data: {
-                title: 'Dev Tools',
-                description: 'Development & Testing Tools',
-              },
-            },
-          ]),
 
       // Test Products (Generated CRUD)
       {
