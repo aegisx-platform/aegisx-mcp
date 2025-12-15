@@ -21,6 +21,7 @@ export default defineConfig({
       { text: 'Guides', link: '/guides/development/feature-development-standard' },
       { text: 'Reference', link: '/reference/api/api-response-standard' },
       { text: 'Architecture', link: '/architecture/architecture-overview' },
+      { text: 'Features', link: '/features/FEATURE_DOCUMENTATION_STANDARD' },
       { text: 'Development', link: '/development/claude-detailed-rules' },
       { text: 'Infrastructure', link: '/infrastructure/CI-CD-SETUP' },
       { text: 'Testing', link: '/testing/avatar-testing-guide' },
@@ -287,6 +288,60 @@ export default defineConfig({
           ],
         },
       ],
+
+      '/features/': [
+        {
+          text: 'Feature Documentation',
+          items: [
+            {
+              text: 'Feature Documentation Standard',
+              link: '/features/FEATURE_DOCUMENTATION_STANDARD',
+            },
+          ],
+        },
+        {
+          text: 'Core Features',
+          items: [
+            {
+              text: 'Authentication',
+              link: '/features/authentication/README',
+            },
+            {
+              text: 'User Management',
+              link: '/features/user-management/README',
+            },
+            {
+              text: 'RBAC',
+              link: '/features/rbac/README',
+            },
+            {
+              text: 'Audit System',
+              link: '/features/audit/README',
+            },
+          ],
+        },
+        {
+          text: 'Advanced Features',
+          items: [
+            {
+              text: 'PDF Export',
+              link: '/features/pdf-export/README',
+            },
+            {
+              text: 'File Upload',
+              link: '/features/file-upload/README',
+            },
+            {
+              text: 'Bulk Import',
+              link: '/features/bulk-import/README',
+            },
+            {
+              text: 'WebSocket',
+              link: '/features/websocket/README',
+            },
+          ],
+        },
+      ],
     },
 
     // Social links
@@ -331,6 +386,28 @@ export default defineConfig({
     theme: {
       light: 'github-light',
       dark: 'github-dark',
+    },
+    // Custom config to handle Handlebars syntax
+    config: (md) => {
+      // Store original fence renderer
+      const defaultFence = md.renderer.rules.fence!;
+
+      // Override fence renderer to escape Handlebars in code blocks
+      md.renderer.rules.fence = (tokens, idx, options, env, self) => {
+        const token = tokens[idx];
+        const content = token.content;
+
+        // If content has Handlebars syntax, wrap with v-pre
+        if (content.includes('{{') || content.includes('}}')) {
+          // Escape the content to prevent Vue compilation
+          token.content = content;
+          // Add v-pre attribute to the rendered HTML
+          const rendered = defaultFence(tokens, idx, options, env, self);
+          return `<div v-pre>${rendered}</div>`;
+        }
+
+        return defaultFence(tokens, idx, options, env, self);
+      };
     },
   },
 
@@ -448,7 +525,7 @@ export default defineConfig({
   // Ignore patterns
   srcExclude: [
     '**/README.md',
-    '**/features/**',
+    // '**/features/**', // Re-enabled with Handlebars handling in markdown config
     '**/styling/**',
     '**/reference/cli/aegisx-cli/**',
     '**/archive/**', // Exclude archived content
