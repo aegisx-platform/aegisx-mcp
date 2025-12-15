@@ -60,13 +60,13 @@ http://localhost:4200/reset-password
 **📁 [implementations/](./implementations/)** - Comprehensive technical documentation for each feature
 
 - **[Overview](./implementations/README.md)** - Complete system architecture, all flows, diagrams
-- **[Login](./implementations/LOGIN_IMPLEMENTATION.md)** - JWT tokens, account lockout, rate limiting
-- **[Registration](./implementations/REGISTRATION_IMPLEMENTATION.md)** - Auto-login, validation, email verification
-- **[Email Verification](./implementations/EMAIL_VERIFICATION_IMPLEMENTATION.md)** - Token generation, SMTP, resend
-- **[Password Reset](./implementations/PASSWORD_RESET_IMPLEMENTATION.md)** - 2-step flow, token expiration
-- **[Refresh Token](./implementations/REFRESH_TOKEN_IMPLEMENTATION.md)** - Token rotation, HTTP interceptor
-- **[Rate Limiting](./implementations/RATE_LIMITING_IMPLEMENTATION.md)** - Redis-based, per-endpoint limits
-- **[Account Lockout](./implementations/ACCOUNT_LOCKOUT_IMPLEMENTATION.md)** - Dual storage, auto-unlock
+- **[Login](./implementations/LOGIN_implementation.md)** - JWT tokens, account lockout, rate limiting
+- **[Registration](./implementations/REGISTRATION_implementation.md)** - Auto-login, validation, email verification
+- **[Email Verification](./implementations/EMAIL_VERIFICATION_implementation.md)** - Token generation, SMTP, resend
+- **[Password Reset](./implementations/password-reset-implementation.md)** - 2-step flow, token expiration
+- **[Refresh Token](./implementations/REFRESH_TOKEN_implementation.md)** - Token rotation, HTTP interceptor
+- **[Rate Limiting](./implementations/RATE_LIMITING_implementation.md)** - Redis-based, per-endpoint limits
+- **[Account Lockout](./implementations/account-lockout_implementation.md)** - Dual storage, auto-unlock
 
 **~9,000 lines** of detailed technical documentation with code references, troubleshooting, and testing guides.
 

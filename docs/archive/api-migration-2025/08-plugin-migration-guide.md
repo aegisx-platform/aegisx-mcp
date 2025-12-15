@@ -1161,8 +1161,8 @@ curl http://localhost:3383/api/v1/platform/your-module
 
 ### Testing Resources
 
-- [BATCH_2_TEST_RESULTS.md](../../../.spec-workflow/specs/api-architecture-standardization/BATCH_2_TEST_RESULTS.md) - Comprehensive test results
-- [SMOKE_TEST_PROCEDURES.md](./SMOKE_TEST_PROCEDURES.md) - Post-migration testing procedures
+- [BATCH_2_test-results.md](../../../.spec-workflow/specs/api-architecture-standardization/BATCH_2_test-results.md) - Comprehensive test results
+- [smoke-test-procedures.md](./smoke-test-procedures.md) - Post-migration testing procedures
 
 ---
 

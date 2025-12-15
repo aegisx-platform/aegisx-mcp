@@ -37,7 +37,7 @@
 | -------------------------------------------------- | --------------------------------------------- |
 | [API-ENDPOINTS.md](./API-ENDPOINTS.md)             | รายการ API Endpoints ทั้งหมด (New + Existing) |
 | [DATABASE-CHANGES.md](./DATABASE-CHANGES.md)       | การเปลี่ยนแปลง Database Schema (ถ้ามี)        |
-| [IMPLEMENTATION-PLAN.md](./IMPLEMENTATION-PLAN.md) | แผนการพัฒนาแบบ Step-by-Step                   |
+| [implementation-PLAN.md](./implementation-PLAN.md) | แผนการพัฒนาแบบ Step-by-Step                   |
 
 ---
 
@@ -131,7 +131,7 @@ DRAFT → SUBMITTED → DEPT_APPROVED → FINANCE_APPROVED
 
 ### สำหรับ Project Manager
 
-1. อ่าน [IMPLEMENTATION-PLAN.md](./IMPLEMENTATION-PLAN.md) - Timeline และ tasks
+1. อ่าน [implementation-PLAN.md](./implementation-PLAN.md) - Timeline และ tasks
 
 ---
 

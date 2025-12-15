@@ -1669,9 +1669,9 @@ All platform modules follow standard URL pattern:
 
 ### Testing and Deployment
 
-- [Deployment Checklist](./DEPLOYMENT_CHECKLIST.md) - Pre-deployment verification
-- [Smoke Test Procedures](./SMOKE_TEST_PROCEDURES.md) - Post-deployment testing
-- [Test Results](./TEST_RESULTS.md) - Historical test results
+- [Deployment Checklist](./deployment-checklist.md) - Pre-deployment verification
+- [Smoke Test Procedures](./smoke-test-procedures.md) - Post-deployment testing
+- [Test Results](./test-results.md) - Historical test results
 
 ### Implementation References
 
@@ -1687,7 +1687,7 @@ All platform modules follow standard URL pattern:
   - task-3-8: pdf-export + import-discovery migration
 
 - **Batch 2 Test Results:**
-  - [BATCH_2_TEST_RESULTS.md](../../../.spec-workflow/specs/api-architecture-standardization/BATCH_2_TEST_RESULTS.md)
+  - [BATCH_2_test-results.md](../../../.spec-workflow/specs/api-architecture-standardization/BATCH_2_test-results.md)
 
 ---
 

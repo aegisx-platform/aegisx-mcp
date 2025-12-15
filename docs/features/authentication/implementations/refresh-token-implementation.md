@@ -1492,11 +1492,11 @@ HAVING COUNT(*) > 3;
 
 ## 📚 Related Documentation
 
-- **[Login Implementation](./LOGIN_IMPLEMENTATION.md)** - Initial token generation
+- **[Login Implementation](./LOGIN_implementation.md)** - Initial token generation
 - **[Session Management](../../session-management/)** - Session tracking and cleanup
 - **[JWT Authentication](../guides/JWT_AUTHENTICATION.md)** - Access token details
-- **[RBAC Implementation](../../rbac/IMPLEMENTATION.md)** - Permission loading
-- **[Password Reset Implementation](./PASSWORD_RESET_IMPLEMENTATION.md)** - Session invalidation on password change
+- **[RBAC Implementation](../../rbac/implementation.md)** - Permission loading
+- **[Password Reset Implementation](./password-reset-implementation.md)** - Session invalidation on password change
 
 ---
 

@@ -29,7 +29,7 @@ Expected: Home / Inventory / Budget / Budget Reservations
 **Location:** `budget-reservations-list.component.ts` (line 126-134)
 
 ```typescript
-// CURRENT IMPLEMENTATION (INCORRECT)
+// CURRENT implementation (INCORRECT)
 breadcrumbItems: BreadcrumbItem[] = [
   {
     label: 'Home',

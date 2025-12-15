@@ -94,8 +94,8 @@ test(scope): description     # Tests
 ## 📚 Resources
 
 - [Documentation](./docs/README.md)
-- [Template Development Guide](./docs/TEMPLATE_DEVELOPMENT_GUIDE.md)
-- [Migration Guide](./docs/MIGRATION_GUIDE.md)
+- [Template Development Guide](./docs/TEMPLATE_development_GUIDE.md)
+- [Migration Guide](./docs/migration-guide.md)
 
 ## 💬 Questions?
 

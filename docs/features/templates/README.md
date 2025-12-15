@@ -4,7 +4,7 @@
 
 ## 📚 Available Templates
 
-### 1. FEATURE_IMPLEMENTATION_TEMPLATE.md
+### 1. FEATURE_implementation_TEMPLATE.md
 
 **Purpose:** Comprehensive technical documentation for feature implementations
 
@@ -31,7 +31,7 @@
 
 **Reference Examples:**
 
-- [LOGIN_IMPLEMENTATION.md](../authentication/implementations/LOGIN_IMPLEMENTATION.md)
+- [LOGIN_implementation.md](../authentication/implementations/LOGIN_implementation.md)
 - [ARCHITECTURE.md](../authentication/ARCHITECTURE.md)
 
 ---
@@ -42,8 +42,8 @@
 
 ```bash
 # Copy template to your feature directory
-cp docs/features/templates/FEATURE_IMPLEMENTATION_TEMPLATE.md \
-   docs/features/[your-feature]/[FEATURE_NAME]_IMPLEMENTATION.md
+cp docs/features/templates/FEATURE_implementation_TEMPLATE.md \
+   docs/features/[your-feature]/[FEATURE_NAME]_implementation.md
 ```
 
 ### Step 2: Replace Placeholders
@@ -109,15 +109,15 @@ Before committing, verify:
 ### File Naming Convention
 
 ```
-[FEATURE_NAME]_IMPLEMENTATION.md
+[FEATURE_NAME]_implementation.md
 ```
 
 Examples:
 
-- `LOGIN_IMPLEMENTATION.md`
-- `PASSWORD_RESET_IMPLEMENTATION.md`
-- `USER_PROFILE_IMPLEMENTATION.md`
-- `REAL_TIME_SYNC_IMPLEMENTATION.md`
+- `LOGIN_implementation.md`
+- `password-reset-implementation.md`
+- `USER_PROFILE_implementation.md`
+- `REAL_TIME_SYNC_implementation.md`
 
 ### Directory Structure
 
@@ -132,8 +132,8 @@ docs/features/[feature-name]/
 ├── TROUBLESHOOTING.md                  # Troubleshooting guide
 ├── DOCUMENTATION_INDEX.md              # Navigation guide
 └── implementations/
-    ├── [FEATURE_1]_IMPLEMENTATION.md   # Detailed implementation
-    └── [FEATURE_2]_IMPLEMENTATION.md   # Detailed implementation
+    ├── [FEATURE_1]_implementation.md   # Detailed implementation
+    └── [FEATURE_2]_implementation.md   # Detailed implementation
 ```
 
 ### ASCII Diagram Guidelines
@@ -283,7 +283,7 @@ cspell [FILE].md
 **Excellent Examples in This Project:**
 
 - [Authentication Feature Docs](../authentication/) - Complete feature documentation set
-- [LOGIN_IMPLEMENTATION.md](../authentication/implementations/LOGIN_IMPLEMENTATION.md) - Detailed implementation guide
+- [LOGIN_implementation.md](../authentication/implementations/LOGIN_implementation.md) - Detailed implementation guide
 
 **External Resources:**
 

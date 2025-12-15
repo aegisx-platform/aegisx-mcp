@@ -987,7 +987,7 @@ psql aegisx_db -c "SELECT token, email, verified, expires_at FROM email_verifica
 
 **Solution:**
 
-See **[Email Verification Implementation](./EMAIL_VERIFICATION_IMPLEMENTATION.md)** for SMTP troubleshooting.
+See **[Email Verification Implementation](./EMAIL_VERIFICATION_implementation.md)** for SMTP troubleshooting.
 
 **Important:** Email verification is optional. User can access application without verifying email.
 
@@ -1632,10 +1632,10 @@ LIMIT 1;
 
 ## 📚 Related Documentation
 
-- **[Login Implementation](./LOGIN_IMPLEMENTATION.md)** - Login flow and auto-login
-- **[Email Verification Implementation](./EMAIL_VERIFICATION_IMPLEMENTATION.md)** - Email verification details
-- **[Password Reset Implementation](./PASSWORD_RESET_IMPLEMENTATION.md)** - Password reset flow
-- **[RBAC Implementation](../../rbac/IMPLEMENTATION.md)** - Role-based access control
+- **[Login Implementation](./LOGIN_implementation.md)** - Login flow and auto-login
+- **[Email Verification Implementation](./EMAIL_VERIFICATION_implementation.md)** - Email verification details
+- **[Password Reset Implementation](./password-reset-implementation.md)** - Password reset flow
+- **[RBAC Implementation](../../rbac/implementation.md)** - Role-based access control
 - **[Authentication Flow](../README.md)** - Complete auth system overview
 
 ---

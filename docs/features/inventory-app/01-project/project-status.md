@@ -118,7 +118,7 @@ npm run dev
 1. Create new repository for API
 2. Copy `prisma/schema.prisma`
 3. Implement authentication (JWT)
-4. Build REST APIs following `docs/systems/*/API_DEVELOPMENT_GUIDE.md`
+4. Build REST APIs following `docs/systems/*/API_development_GUIDE.md`
 
 ### For Frontend Development (New Repo)
 

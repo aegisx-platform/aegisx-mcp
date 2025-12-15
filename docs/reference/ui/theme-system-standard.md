@@ -312,4 +312,4 @@ Use Tailwind classes directly in templates for one-off styling.
 
 - [Token Reference](./TOKEN_REFERENCE.md) - Complete catalog of all tokens
 - [Component Styling Guide](./COMPONENT_STYLING_GUIDE.md) - Detailed component patterns
-- [Migration Guide](./MIGRATION_GUIDE.md) - How to migrate existing components
+- [Migration Guide](./migration-guide.md) - How to migrate existing components

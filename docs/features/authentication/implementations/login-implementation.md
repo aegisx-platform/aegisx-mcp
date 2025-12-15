@@ -1404,11 +1404,11 @@ curl -X POST http://localhost:3333/api/auth/refresh \
 
 ## 📚 Related Documentation
 
-- **[Email Verification Implementation](./EMAIL_VERIFICATION_IMPLEMENTATION.md)** - Email verification flow
-- **[Password Reset Implementation](./PASSWORD_RESET_IMPLEMENTATION.md)** - Password reset flow
-- **[RBAC Implementation](../../rbac/IMPLEMENTATION.md)** - Role-based access control
+- **[Email Verification Implementation](./EMAIL_VERIFICATION_implementation.md)** - Email verification flow
+- **[Password Reset Implementation](./password-reset-implementation.md)** - Password reset flow
+- **[RBAC Implementation](../../rbac/implementation.md)** - Role-based access control
 - **[Authentication Flow](../README.md)** - Complete auth system overview
-- **[Account Lockout Guide](../guides/ACCOUNT_LOCKOUT.md)** - Brute force protection details
+- **[Account Lockout Guide](../guides/account-lockout.md)** - Brute force protection details
 
 ---
 
@@ -1442,7 +1442,7 @@ A: Yes, the system allows login but you can implement checks in your application
 A: In development mode, the login page shows quick-login buttons for admin, manager, and demo accounts.
 
 **Q: What if I forget my password?**
-A: Use the "Forgot password?" link on the login page. See [Password Reset Implementation](./PASSWORD_RESET_IMPLEMENTATION.md).
+A: Use the "Forgot password?" link on the login page. See [Password Reset Implementation](./password-reset-implementation.md).
 
 **Q: Can I revoke a refresh token?**
 A: Yes, delete the token from the `sessions` table or call the logout endpoint.

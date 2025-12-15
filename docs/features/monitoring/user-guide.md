@@ -20,7 +20,8 @@ The Activity Tracking System provides you with complete visibility into your acc
 
 ## Dashboard Overview
 
-![Activity Dashboard Overview](./images/activity-dashboard-overview.png)
+<!-- TODO: Add dashboard overview image -->
+<!-- ![Activity Dashboard Overview](./images/activity-dashboard-overview.png) -->
 
 ### Main Sections
 

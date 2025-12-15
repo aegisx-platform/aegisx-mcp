@@ -140,7 +140,7 @@ plugins:
 | `/aegisx-cli/COMPLETE_WORKFLOW.md`             | `/reference/cli/aegisx-cli/complete-workflow.md`             |
 | `/aegisx-cli/GIT_WORKFLOW.md`                  | `/reference/cli/aegisx-cli/git-workflow.md`                  |
 | `/aegisx-cli/TESTING_GUIDE.md`                 | `/reference/cli/aegisx-cli/testing-guide.md`                 |
-| `/aegisx-cli/WEBSOCKET_IMPLEMENTATION_SPEC.md` | `/reference/cli/aegisx-cli/websocket-implementation-spec.md` |
+| `/aegisx-cli/WEBSOCKET_implementation_SPEC.md` | `/reference/cli/aegisx-cli/websocket-implementation-spec.md` |
 
 ### 2. UI Standards (3 redirects)
 

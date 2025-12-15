@@ -176,8 +176,8 @@ When building the backend, follow this order:
 
 ### API Specs Location
 
-- `docs/systems/01-master-data/API_DEVELOPMENT_GUIDE.md`
-- `docs/systems/02-budget-management/API_DEVELOPMENT_GUIDE.md`
+- `docs/systems/01-master-data/API_development_GUIDE.md`
+- `docs/systems/02-budget-management/API_development_GUIDE.md`
 - ... (all 8 systems have API guides)
 
 ---
@@ -280,7 +280,7 @@ If confused, read these files:
 
 1. `CLAUDE.md` - Detailed instructions
 2. `docs/flows/DATA_FLOW_COMPLETE_GUIDE.md` - All business flows
-3. `docs/systems/*/API_DEVELOPMENT_GUIDE.md` - API specs per system
+3. `docs/systems/*/API_development_GUIDE.md` - API specs per system
 
 ---
 

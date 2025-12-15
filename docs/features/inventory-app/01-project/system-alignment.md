@@ -72,7 +72,7 @@ drug_units → drug_generics (saleUnitId)
 - ✅ `docs/systems/01-master-data/README.md`
 - ✅ `docs/systems/01-master-data/SCHEMA.md`
 - ✅ `docs/systems/01-master-data/WORKFLOWS.md`
-- ✅ `docs/systems/01-master-data/API_DEVELOPMENT_GUIDE.md`
+- ✅ `docs/systems/01-master-data/API_development_GUIDE.md`
 - ✅ `docs/systems/01-master-data/api/README.md`
 - ✅ `docs/systems/01-master-data/mock-ui/MASTER_DATA_UI_MOCKUPS.md`
 
@@ -128,7 +128,7 @@ SELECT * FROM check_drug_in_budget_plan(fiscal_year, dept_id, generic_id, qty, q
 - ✅ `docs/systems/02-budget-management/README.md`
 - ✅ `docs/systems/02-budget-management/SCHEMA.md`
 - ✅ `docs/systems/02-budget-management/WORKFLOWS.md`
-- ✅ `docs/systems/02-budget-management/API_DEVELOPMENT_GUIDE.md`
+- ✅ `docs/systems/02-budget-management/API_development_GUIDE.md`
 - ✅ `docs/systems/02-budget-management/api/README.md`
 - ✅ `docs/systems/02-budget-management/mock-ui/BUDGET_UI_MOCKUPS.md`
 
@@ -176,7 +176,7 @@ Receipt: PENDING → INSPECTED → POSTED → REJECTED
 - ✅ `docs/systems/03-procurement/SCHEMA.md`
 - ✅ `docs/systems/03-procurement/WORKFLOWS.md`
 - ✅ `docs/systems/03-procurement/STATE_DIAGRAMS.md`
-- ✅ `docs/systems/03-procurement/API_DEVELOPMENT_GUIDE.md`
+- ✅ `docs/systems/03-procurement/API_development_GUIDE.md`
 - ✅ `docs/systems/03-procurement/api/README.md`
 - ✅ `docs/systems/03-procurement/mock-ui/PROCUREMENT_UI_MOCKUPS.md`
 
@@ -238,7 +238,7 @@ SELECT * FROM expiring_drugs;
 - ✅ `docs/systems/04-inventory/README.md`
 - ✅ `docs/systems/04-inventory/SCHEMA.md`
 - ✅ `docs/systems/04-inventory/WORKFLOWS.md`
-- ✅ `docs/systems/04-inventory/API_DEVELOPMENT_GUIDE.md`
+- ✅ `docs/systems/04-inventory/API_development_GUIDE.md`
 - ✅ `docs/systems/04-inventory/api/README.md`
 - ✅ `docs/systems/04-inventory/mock-ui/INVENTORY_UI_MOCKUPS.md`
 
@@ -273,7 +273,7 @@ Distribution: DRAFT → APPROVED → PICKING → DISPENSED → CANCELLED
 - ✅ `docs/systems/05-distribution/README.md`
 - ✅ `docs/systems/05-distribution/SCHEMA.md`
 - ✅ `docs/systems/05-distribution/WORKFLOWS.md`
-- ✅ `docs/systems/05-distribution/API_DEVELOPMENT_GUIDE.md`
+- ✅ `docs/systems/05-distribution/API_development_GUIDE.md`
 - ✅ `docs/systems/05-distribution/api/README.md`
 - ✅ `docs/systems/05-distribution/mock-ui/DISTRIBUTION_UI_MOCKUPS.md`
 
@@ -318,7 +318,7 @@ Distribution: DRAFT → APPROVED → PICKING → DISPENSED → CANCELLED
 - ✅ `docs/systems/06-drug-return/README.md`
 - ✅ `docs/systems/06-drug-return/SCHEMA.md`
 - ✅ `docs/systems/06-drug-return/WORKFLOWS.md`
-- ✅ `docs/systems/06-drug-return/API_DEVELOPMENT_GUIDE.md`
+- ✅ `docs/systems/06-drug-return/API_development_GUIDE.md`
 - ✅ `docs/systems/06-drug-return/api/README.md`
 - ✅ `docs/systems/06-drug-return/mock-ui/DRUG_RETURN_UI_MOCKUPS.md`
 
@@ -367,7 +367,7 @@ VTM (Virtual Therapeutic Moiety)
 - ✅ `docs/systems/07-tmt-integration/README.md`
 - ✅ `docs/systems/07-tmt-integration/SCHEMA.md`
 - ✅ `docs/systems/07-tmt-integration/WORKFLOWS.md`
-- ✅ `docs/systems/07-tmt-integration/API_DEVELOPMENT_GUIDE.md`
+- ✅ `docs/systems/07-tmt-integration/API_development_GUIDE.md`
 - ✅ `docs/systems/07-tmt-integration/api/README.md`
 - ✅ `docs/systems/07-tmt-integration/mock-ui/TMT_UI_MOCKUPS.md`
 
@@ -401,7 +401,7 @@ VTM (Virtual Therapeutic Moiety)
 - ✅ `docs/systems/08-hpp-system/README.md`
 - ✅ `docs/systems/08-hpp-system/SCHEMA.md`
 - ✅ `docs/systems/08-hpp-system/WORKFLOWS.md`
-- ✅ `docs/systems/08-hpp-system/API_DEVELOPMENT_GUIDE.md`
+- ✅ `docs/systems/08-hpp-system/API_development_GUIDE.md`
 - ✅ `docs/systems/08-hpp-system/api/README.md`
 - ✅ `docs/systems/08-hpp-system/mock-ui/HPP_UI_MOCKUPS.md`
 

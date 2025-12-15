@@ -144,7 +144,7 @@ Created 4 comprehensive documents (4,300+ lines total):
    - **Key Decision**: Use single file API pattern (no dedicated multiple endpoint)
    - Performance comparison and benefits analysis
 
-3. **IMPLEMENTATION_CHECKLIST.md** (1,100+ lines)
+3. **implementation_CHECKLIST.md** (1,100+ lines)
    - Complete step-by-step implementation guide
    - Phase 1: Backend Core (Week 1) - Storage adapters, API cleanup
    - Phase 2: Frontend Widget (Week 2) - Unified upload component

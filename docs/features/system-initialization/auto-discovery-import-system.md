@@ -1207,7 +1207,7 @@ export class ImportWizardDialog {
 ### Related Documents
 
 - [Department Management Design](./DEPARTMENT_MANAGEMENT_DESIGN.md)
-- [Budget Request Submission Spec](../budget-request-submission-v2/IMPLEMENTATION-PLAN.md)
+- [Budget Request Submission Spec](../budget-request-submission-v2/implementation-PLAN.md)
 - [Universal Full-Stack Standard](../../../development/universal-fullstack-standard.md)
 
 ### Code Locations

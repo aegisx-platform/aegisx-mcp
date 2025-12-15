@@ -546,7 +546,7 @@ users
 │                                                                  │
 │  PURPOSE: Control which menu items are visible to users         │
 │                                                                  │
-│  IMPLEMENTATION:                                                 │
+│  implementation:                                                 │
 │  1. Backend filters navigation items by user permissions        │
 │  2. Only returns items user has permission to see               │
 │  3. Frontend renders filtered menu items                        │
@@ -577,7 +577,7 @@ users
 │                                                                  │
 │  PURPOSE: Enforce actual access to routes                       │
 │                                                                  │
-│  IMPLEMENTATION:                                                 │
+│  implementation:                                                 │
 │  1. Route guard checks user permissions on navigation           │
 │  2. Blocks access if user lacks required permissions            │
 │  3. Works even if user bypasses UI (direct URL, bookmark)       │

@@ -596,12 +596,33 @@ export default defineConfig({
     /git-flow-release-guide/,
     // Architecture concepts (check if path exists)
     /\/architecture\/concepts\/module-isolation/,
+    // Old SCREAMING_SNAKE_CASE filenames (renamed to kebab-case)
+    /USER_GUIDE/,
+    /DEVELOPER_GUIDE/,
+    /API_REFERENCE/,
+    /\/ARCHITECTURE/,
+    /DEPLOYMENT_GUIDE/,
+    /TROUBLESHOOTING/,
+    /DOCUMENTATION_INDEX/,
+    /API_CONTRACTS/,
+    /\/FEATURE\.md/,
+    /\/PROGRESS\.md/,
+    /\/TASKS\.md/,
+    /\/PATTERNS/,
+    /\/GIT_WORKFLOW/,
+    /\/NPM_PUBLISHING/,
+    /CI-CD-SETUP/,
+    /COMPREHENSIVE_TEST/,
+    /FRONTEND_GENERATOR/,
+    /SPEC-SESSION/,
   ],
 
   // Ignore patterns
   srcExclude: [
     '**/README.md',
     // '**/features/**', // Re-enabled with Handlebars handling in markdown config
+    '**/features/advanced/**', // Temporarily exclude - has extensive Handlebars examples
+    '**/features/pdf-templates/**', // Temporarily exclude - has Handlebars syntax
     '**/styling/**',
     '**/reference/cli/aegisx-cli/**',
     '**/archive/**', // Exclude archived content

@@ -159,7 +159,7 @@
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-**Implementation Details:** [REGISTRATION_IMPLEMENTATION.md](./REGISTRATION_IMPLEMENTATION.md)
+**Implementation Details:** [REGISTRATION_implementation.md](./REGISTRATION_implementation.md)
 
 ---
 
@@ -209,7 +209,7 @@
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-**Implementation Details:** [LOGIN_IMPLEMENTATION.md](./LOGIN_IMPLEMENTATION.md)
+**Implementation Details:** [LOGIN_implementation.md](./LOGIN_implementation.md)
 
 ---
 
@@ -265,7 +265,7 @@
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-**Implementation Details:** [EMAIL_VERIFICATION_IMPLEMENTATION.md](./EMAIL_VERIFICATION_IMPLEMENTATION.md)
+**Implementation Details:** [EMAIL_VERIFICATION_implementation.md](./EMAIL_VERIFICATION_implementation.md)
 
 ---
 
@@ -334,7 +334,7 @@
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-**Implementation Details:** [PASSWORD_RESET_IMPLEMENTATION.md](./PASSWORD_RESET_IMPLEMENTATION.md)
+**Implementation Details:** [password-reset-implementation.md](./password-reset-implementation.md)
 
 ---
 
@@ -380,7 +380,7 @@
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-**Implementation Details:** [REFRESH_TOKEN_IMPLEMENTATION.md](./REFRESH_TOKEN_IMPLEMENTATION.md)
+**Implementation Details:** [REFRESH_TOKEN_implementation.md](./REFRESH_TOKEN_implementation.md)
 
 ---
 
@@ -417,7 +417,7 @@ rate_limit:login:192.168.1.1:user@example.com
 └─ first_attempt: 2025-11-02T10:30:00Z
 ```
 
-**Implementation Details:** [RATE_LIMITING_IMPLEMENTATION.md](./RATE_LIMITING_IMPLEMENTATION.md)
+**Implementation Details:** [RATE_LIMITING_implementation.md](./RATE_LIMITING_implementation.md)
 
 ---
 
@@ -448,7 +448,7 @@ Login Attempt → Password Check → Failed?
             Return 423 Locked
 ```
 
-**Implementation Details:** [ACCOUNT_LOCKOUT_IMPLEMENTATION.md](./ACCOUNT_LOCKOUT_IMPLEMENTATION.md)
+**Implementation Details:** [account-lockout_implementation.md](./account-lockout_implementation.md)
 
 ---
 
@@ -553,35 +553,35 @@ CREATE INDEX idx_refresh_tokens_expires_at ON refresh_tokens(expires_at);
 
 ### Core Authentication
 
-1. **[User Registration](./REGISTRATION_IMPLEMENTATION.md)**
+1. **[User Registration](./REGISTRATION_implementation.md)**
    - Account creation flow
    - Input validation
    - Password hashing
    - Auto-login after registration
    - Email verification trigger
 
-2. **[User Login](./LOGIN_IMPLEMENTATION.md)**
+2. **[User Login](./LOGIN_implementation.md)**
    - Credential verification
    - JWT token generation
    - Session management
    - Rate limiting integration
    - Account lockout handling
 
-3. **[Email Verification](./EMAIL_VERIFICATION_IMPLEMENTATION.md)** ✅ Complete
+3. **[Email Verification](./EMAIL_VERIFICATION_implementation.md)** ✅ Complete
    - Token generation
    - Email sending (SMTP)
    - Token validation
    - Resend functionality
    - UI feedback
 
-4. **[Password Reset](./PASSWORD_RESET_IMPLEMENTATION.md)**
+4. **[Password Reset](./password-reset-implementation.md)**
    - Reset request flow
    - Token generation & expiration
    - Email sending
    - Password update
    - Session invalidation
 
-5. **[Refresh Token](./REFRESH_TOKEN_IMPLEMENTATION.md)**
+5. **[Refresh Token](./REFRESH_TOKEN_implementation.md)**
    - Token rotation strategy
    - Automatic refresh
    - HTTP interceptor
@@ -589,13 +589,13 @@ CREATE INDEX idx_refresh_tokens_expires_at ON refresh_tokens(expires_at);
 
 ### Security Features
 
-6. **[Rate Limiting](./RATE_LIMITING_IMPLEMENTATION.md)**
+6. **[Rate Limiting](./RATE_LIMITING_implementation.md)**
    - Redis-based implementation
    - Per-endpoint configuration
    - IP + Email tracking
    - Intelligent limits
 
-7. **[Account Lockout](./ACCOUNT_LOCKOUT_IMPLEMENTATION.md)**
+7. **[Account Lockout](./account-lockout_implementation.md)**
    - Failed attempt tracking
    - Automatic locking
    - Unlock mechanism
@@ -632,16 +632,16 @@ CREATE INDEX idx_refresh_tokens_expires_at ON refresh_tokens(expires_at);
 
 **By Use Case:**
 
-- New user? → [Registration](./REGISTRATION_IMPLEMENTATION.md) → [Email Verification](./EMAIL_VERIFICATION_IMPLEMENTATION.md)
-- Existing user? → [Login](./LOGIN_IMPLEMENTATION.md)
-- Forgot password? → [Password Reset](./PASSWORD_RESET_IMPLEMENTATION.md)
-- Session expired? → [Refresh Token](./REFRESH_TOKEN_IMPLEMENTATION.md)
+- New user? → [Registration](./REGISTRATION_implementation.md) → [Email Verification](./EMAIL_VERIFICATION_implementation.md)
+- Existing user? → [Login](./LOGIN_implementation.md)
+- Forgot password? → [Password Reset](./password-reset-implementation.md)
+- Session expired? → [Refresh Token](./REFRESH_TOKEN_implementation.md)
 
 **By Technology:**
 
-- JWT implementation → [Login](./LOGIN_IMPLEMENTATION.md) + [Refresh Token](./REFRESH_TOKEN_IMPLEMENTATION.md)
-- Email functionality → [Email Verification](./EMAIL_VERIFICATION_IMPLEMENTATION.md) + [Password Reset](./PASSWORD_RESET_IMPLEMENTATION.md)
-- Security → [Rate Limiting](./RATE_LIMITING_IMPLEMENTATION.md) + [Account Lockout](./ACCOUNT_LOCKOUT_IMPLEMENTATION.md)
+- JWT implementation → [Login](./LOGIN_implementation.md) + [Refresh Token](./REFRESH_TOKEN_implementation.md)
+- Email functionality → [Email Verification](./EMAIL_VERIFICATION_implementation.md) + [Password Reset](./password-reset-implementation.md)
+- Security → [Rate Limiting](./RATE_LIMITING_implementation.md) + [Account Lockout](./account-lockout_implementation.md)
 
 ---
 

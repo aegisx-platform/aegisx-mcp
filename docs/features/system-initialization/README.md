@@ -19,7 +19,7 @@
 ### For Backend Developers
 
 - [AUTO_DISCOVERY_IMPORT_SYSTEM.md](./AUTO_DISCOVERY_IMPORT_SYSTEM.md) - Architecture & design
-- [IMPORT_DISCOVERY_SERVICE_IMPLEMENTATION.md](./IMPORT_DISCOVERY_SERVICE_IMPLEMENTATION.md) - Service implementation
+- [IMPORT_DISCOVERY_SERVICE_implementation.md](./IMPORT_DISCOVERY_SERVICE_implementation.md) - Service implementation
 - [BATCH_TRACKING_MIGRATION.md](./BATCH_TRACKING_MIGRATION.md) - Database schema
 
 ### For Adding New Modules
@@ -40,8 +40,8 @@
 
 ### For Understanding the Implementation
 
-- [IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md) - What was implemented
-- [IMPLEMENTATION_COMPLETE.md](./IMPLEMENTATION_COMPLETE.md) - Completion status
+- [implementation_SUMMARY.md](./implementation_SUMMARY.md) - What was implemented
+- [implementation_COMPLETE.md](./implementation_COMPLETE.md) - Completion status
 - [CRITICAL_FIXES_SUMMARY.md](./CRITICAL_FIXES_SUMMARY.md) - Critical fixes applied
 
 ### For Advanced Topics
@@ -113,7 +113,7 @@ Service          (Generic Base Class)
 
 ### Level 3: Implementation Details
 
-- **IMPORT_DISCOVERY_SERVICE_IMPLEMENTATION.md**
+- **IMPORT_DISCOVERY_SERVICE_implementation.md**
   - Service implementation details
   - File scanning mechanism
   - Registry management

@@ -9,9 +9,9 @@
 | Document                             | Description                             |
 | ------------------------------------ | --------------------------------------- |
 | **[README.md](./README.md)**         | Overview & Quick Start (คุณอยู่ที่นี่)  |
-| [COMPONENTS.md](./COMPONENTS.md)     | UI Components Reference (42 components) |
+| [components.md](./components.md)     | UI Components Reference (42 components) |
 | [PATTERNS.md](./PATTERNS.md)         | Development Patterns (10 patterns)      |
-| [DEVELOPMENT.md](./DEVELOPMENT.md)   | Development Guide                       |
+| [development.md](./development.md)   | Development Guide                       |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Application Architecture                |
 
 ---

@@ -203,7 +203,7 @@ apps/admin/src/
 // routes/docs/components-aegisx.routes.ts
 import { Route } from '@angular/router';
 
-export const COMPONENTS_AEGISX_ROUTES: Route[] = [
+export const components_AEGISX_ROUTES: Route[] = [
   {
     path: 'overview',
     loadComponent: () => import('../../pages/docs/components/aegisx/overview/overview.component').then((m) => m.ComponentsOverviewComponent),
@@ -516,6 +516,6 @@ export class AppStore {
 ## Related Documentation
 
 - [README.md](./README.md) - Overview & Quick Start
-- [COMPONENTS.md](./COMPONENTS.md) - UI Components Reference
-- [DEVELOPMENT.md](./DEVELOPMENT.md) - Development Guide
+- [components.md](./components.md) - UI Components Reference
+- [development.md](./development.md) - Development Guide
 - [PATTERNS.md](./PATTERNS.md) - Development Patterns

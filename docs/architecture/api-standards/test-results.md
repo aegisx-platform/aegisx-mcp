@@ -336,18 +336,18 @@ Verified:
 
 ### Documentation Files Created
 
-1. **DEPLOYMENT_CHECKLIST.md** ✅
-   - Location: `docs/architecture/api-standards/DEPLOYMENT_CHECKLIST.md`
+1. **deployment-checklist.md** ✅
+   - Location: `docs/architecture/api-standards/deployment-checklist.md`
    - Contains: Staging deployment procedures
    - Status: Complete and verified
 
-2. **SMOKE_TEST_PROCEDURES.md** ✅
-   - Location: `docs/architecture/api-standards/SMOKE_TEST_PROCEDURES.md`
+2. **smoke-test-procedures.md** ✅
+   - Location: `docs/architecture/api-standards/smoke-test-procedures.md`
    - Contains: 12 smoke test procedures with steps
    - Status: Complete and verified
 
-3. **TEST_RESULTS.md** (this document) ✅
-   - Location: `docs/architecture/api-standards/TEST_RESULTS.md`
+3. **test-results.md** (this document) ✅
+   - Location: `docs/architecture/api-standards/test-results.md`
    - Contains: Comprehensive test results
    - Status: Complete and verified
 
@@ -546,7 +546,7 @@ When staging is available:
 
 ## References
 
-- [Deployment Checklist](./DEPLOYMENT_CHECKLIST.md)
-- [Smoke Test Procedures](./SMOKE_TEST_PROCEDURES.md)
+- [Deployment Checklist](./deployment-checklist.md)
+- [Smoke Test Procedures](./smoke-test-procedures.md)
 - [Design Document](.spec-workflow/specs/api-architecture-standardization/design.md)
 - [Migration Guide](./06-migration-guide.md)

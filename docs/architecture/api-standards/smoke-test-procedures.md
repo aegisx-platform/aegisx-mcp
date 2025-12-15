@@ -818,6 +818,6 @@ TEST_EMAIL="admin@example.com" TEST_PASSWORD="password" bash scripts/smoke-test.
 
 ## Related Documentation
 
-- [Deployment Checklist](./DEPLOYMENT_CHECKLIST.md)
+- [Deployment Checklist](./deployment-checklist.md)
 - [Migration Guide](./06-migration-guide.md)
 - [Architecture Specification](./02-architecture-specification.md)
