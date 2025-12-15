@@ -141,29 +141,3 @@ export default fp(importDiscoveryPlugin, {
     'logging-plugin', // For performance monitoring
   ],
 });
-
-/**
- * TypeScript declaration for fastify instance decoration
- * Allows type-safe access to importDiscovery service
- */
-declare module 'fastify' {
-  interface FastifyInstance {
-    /**
-     * Import Discovery Service
-     *
-     * Provides access to:
-     * - getAllServices(): RegisteredImportService[]
-     * - getService(moduleName: string): IImportService | null
-     * - getImportOrder(): string[]
-     * - getImportOrderWithReasons(): Array<{ module: string; reason: string }>
-     * - getServicesByDomain(domain: string): RegisteredImportService[]
-     * - getServicesByTag(tag: string): RegisteredImportService[]
-     * - getServicesByPriority(): RegisteredImportService[]
-     * - getDependencyGraph(): DependencyGraph
-     * - getValidationErrors(): string[]
-     * - getCircularDependencies(): CircularDependencyError[]
-     * - isHealthy(): boolean
-     */
-    importDiscovery: ImportDiscoveryService;
-  }
-}

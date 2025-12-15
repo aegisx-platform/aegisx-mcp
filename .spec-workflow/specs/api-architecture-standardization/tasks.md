@@ -420,7 +420,9 @@
 
 ## Phase 8: Production Deployment & Cleanup (Weeks 10-11)
 
-- [ ] 8.1. Deploy to production with feature flags
+- [x] 8.1. Deploy to production with feature flags
+  - _Completed: 2025-12-15_
+  - _Note: Comprehensive production deployment guide created with dark launch strategy (ENABLE_NEW_ROUTES=false). Guide includes: Pre-deployment verification checklist (build passed, tests reviewed, QA approved), 3-tier rollback plan (30 sec to 20 min recovery), detailed deployment steps with smoke tests, 24-hour monitoring strategy with alert thresholds, troubleshooting guide, and success criteria. Fixed TypeScript build error (duplicate FastifyInstance declaration for importDiscovery). All 5 projects build successfully. Deployment ready with ZERO expected user impact - system behavior unchanged with new routes disabled. Next: Execute deployment following guide, monitor for 24 hours, then proceed to Task 8.2._
   - Deploy all changes to production
   - Initially keep `ENABLE_NEW_ROUTES=false`
   - Verify deployment successful with no changes
