@@ -27,7 +27,7 @@ pnpm run dev:api
 
 **NEVER modify**: `.env.local`, `docker-compose.instance.yml`, `proxy.conf.js`
 
-See [docs/infrastructure/multi-instance-setup.md](./docs/infrastructure/multi-instance-setup.md)
+See [docs/guides/infrastructure/multi-instance-setup.md](./docs/guides/infrastructure/multi-instance-setup.md)
 
 ### 3. Git Rules (MANDATORY)
 
@@ -51,7 +51,7 @@ See [docs/infrastructure/multi-instance-setup.md](./docs/infrastructure/multi-in
 - `libs/aegisx-mcp` → GitHub: aegisx-platform/aegisx-mcp
 - Commit to monorepo first, then use `sync-to-repo.sh`
 
-See [docs/infrastructure/git-subtree-guide.md](./docs/infrastructure/git-subtree-guide.md)
+See [docs/guides/infrastructure/git-subtree-guide.md](./docs/guides/infrastructure/git-subtree-guide.md)
 
 ### 4. Standard Development Policy
 
@@ -93,7 +93,7 @@ Before implementing frontend:
 3. Test API endpoints
 4. Then implement frontend
 
-See [docs/development/API_CALLING_STANDARD.md](./docs/development/API_CALLING_STANDARD.md)
+See [docs/guides/development/api-calling-standard.md](./docs/guides/development/api-calling-standard.md)
 
 ### 9. Domain Architecture (CRITICAL)
 
@@ -112,9 +112,8 @@ bash /tmp/check_domain.sh TABLE_NAME
 
 **Documentation:**
 
-- [Domain Architecture Guide](./docs/architecture/DOMAIN_ARCHITECTURE_GUIDE.md) - คู่มือฉบับเต็ม
-- [Quick Domain Reference](./docs/architecture/QUICK_DOMAIN_REFERENCE.md) - อ้างอิงด่วน
-- [Architecture README](./docs/architecture/README.md) - ภาพรวม + เครื่องมือ
+- [Domain Architecture Guide](./docs/architecture/domain-architecture-guide.md) - คู่มือฉบับเต็ม
+- [Quick Domain Reference](./docs/architecture/quick-domain-reference.md) - อ้างอิงด่วน
 
 **Common Mistake:**
 
@@ -164,33 +163,60 @@ See [libs/aegisx-cli/docs/QUICK_REFERENCE.md](./libs/aegisx-cli/docs/QUICK_REFER
 
 ---
 
-## Documentation Links
+## Documentation Structure
 
-### Start Here
+### Web Documentation
 
-- [Getting Started](./docs/getting-started/getting-started.md) - Git workflow & rules
-- [PROJECT_STATUS.md](./PROJECT_STATUS.md) - Session recovery & current progress
-- [README.md](./README.md) - Tech stack, quick start
+**View Online:** https://aegisx-platform.github.io/aegisx-starter-1/ (after deployment)
+**Local Preview:** `pnpm run docs:dev` → http://localhost:5173
 
-### Development
+Our documentation follows the **Diátaxis Framework** organized in 4 main sections:
 
-- [Feature Development Standard](./docs/development/feature-development-standard.md) - Feature lifecycle
-- [API Calling Standard](./docs/development/API_CALLING_STANDARD.md) - Correct URL patterns
-- [QA Checklist](./docs/development/qa-checklist.md) - Quality assurance steps
-- [Universal Full-Stack Standard](./docs/development/universal-fullstack-standard.md) - Database-first workflow
-- [Claude Detailed Rules](./docs/development/claude-detailed-rules.md) - Verbose examples
+1. **Getting Started** - Installation, setup, onboarding
+2. **Guides** - How-to guides, workflows, best practices
+3. **Reference** - API docs, CLI commands, standards
+4. **Architecture** - System design, patterns, concepts
 
-### Infrastructure
+### Quick Links
 
-- [Multi-Instance Setup](./docs/infrastructure/multi-instance-setup.md) - Parallel development
-- [Git Subtree Guide](./docs/infrastructure/git-subtree-guide.md) - Shared library management
-- [Git Flow & Release](./docs/infrastructure/git-flow-release-guide.md) - Branch strategy
+#### Getting Started
 
-### CRUD Generator
+- [Getting Started Guide](./docs/getting-started/getting-started.md) - Git workflow & project setup
+- [Project Setup](./docs/getting-started/project-setup.md) - Environment configuration
+- [Contributing to Docs](./docs/getting-started/contributing.md) - Documentation standards
 
-- [CRUD Generator Overview](./libs/aegisx-cli/docs/) - Automatic API generation
+#### Development Guides
+
+- [Feature Development Standard](./docs/guides/development/feature-development-standard.md) - Complete feature lifecycle
+- [API Calling Standard](./docs/guides/development/api-calling-standard.md) - Correct API patterns
+- [QA Checklist](./docs/guides/development/qa-checklist.md) - Quality assurance steps
+- [Universal Full-Stack Standard](./docs/guides/development/universal-fullstack-standard.md) - Database-first workflow
+- [Claude Detailed Rules](./docs/development/claude-detailed-rules.md) - Verbose development rules
+
+#### Infrastructure Guides
+
+- [Multi-Instance Setup](./docs/guides/infrastructure/multi-instance-setup.md) - Parallel development setup
+- [Git Subtree Guide](./docs/guides/infrastructure/git-subtree-guide.md) - Shared library management
+- [Git Flow & Release](./docs/guides/infrastructure/version-management/git-flow-release-guide.md) - Branch strategy & releases
+
+#### API Reference
+
+- [API Response Standard](./docs/reference/api/api-response-standard.md) - Standard API response format
+- [TypeBox Schema Standard](./docs/reference/api/typebox-schema-standard.md) - Schema validation patterns
+- [Bulk Operations API](./docs/reference/api/bulk-operations-api-design.md) - Bulk operations design
+- [File Upload Guide](./docs/reference/api/file-upload-guide.md) - File upload implementation
+
+#### Architecture
+
+- [Domain Architecture Guide](./docs/architecture/domain-architecture-guide.md) - คู่มือฉบับเต็ม (Thai)
+- [Quick Domain Reference](./docs/architecture/quick-domain-reference.md) - อ้างอิงด่วน (Thai)
+- [Frontend Architecture](./docs/architecture/frontend-architecture.md) - Angular architecture patterns
+- [Backend Architecture](./docs/architecture/backend-architecture.md) - Fastify architecture patterns
+
+#### CRUD Generator
+
 - [Quick Reference](./libs/aegisx-cli/docs/QUICK_REFERENCE.md) - Commands & examples
 
 ---
 
-_For complete documentation, see `docs/` directory._
+**For complete documentation, browse the [docs/](./docs/) directory or run `pnpm run docs:dev` for interactive web docs.**

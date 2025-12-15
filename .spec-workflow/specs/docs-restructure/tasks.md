@@ -243,7 +243,7 @@
   - _Requirements: 4 (Clear Information Architecture), 6 (Documentation Index and Navigation)_
   - _Prompt: Implement the task for spec docs-restructure, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Technical Writer with expertise in information architecture and user experience | Task: Review navigation completeness following requirements 4 and 6, verifying section indexes, categorization, frontmatter coverage (90%+ target), and testing user journeys from design.md | Restrictions: Must achieve 90%+ frontmatter coverage, ensure all user journeys work smoothly, verify categorization accuracy | \_Leverage: Section indexes, metadata-schema.md, design.md_ | _Requirements: 4, 6_ | Success: All section indexes complete, 90%+ frontmatter coverage achieved, all user journeys tested successfully, navigation is intuitive | Instructions: Before starting, mark this task as in-progress ([-]) in tasks.md. After completion, use log-implementation tool to record review results with metrics, then mark as complete ([x])\_
 
-- [ ] 6.4. Update contribution guide and CLAUDE.md
+- [x] 6.4. Update contribution guide and CLAUDE.md
   - Files: docs/getting-started/contributing.md, CLAUDE.md
   - Document new documentation structure and standards
   - Update CLAUDE.md to reference new docs/ structure
