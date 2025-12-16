@@ -143,6 +143,7 @@ export class ImportDiscoveryService {
     const basePaths = [
       path.join(process.cwd(), 'apps/api/src/modules'),
       path.join(process.cwd(), 'apps/api/src/core'),
+      path.join(process.cwd(), 'apps/api/src/layers'),
     ];
 
     try {
