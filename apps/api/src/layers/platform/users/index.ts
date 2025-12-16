@@ -2,6 +2,7 @@ import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { UsersRepository } from './users.repository';
+import { DepartmentsRepository } from '../departments/departments.repository';
 import { usersRoutes } from './users.routes';
 import { usersSchemas } from './users.schemas';
 
@@ -32,14 +33,20 @@ export default async function platformUsersPlugin(
 ) {
   // Register module schemas using the schema registry
   if ((fastify as any).schemaRegistry) {
-    (fastify as any).schemaRegistry.registerModuleSchemas('users', usersSchemas);
+    (fastify as any).schemaRegistry.registerModuleSchemas(
+      'users',
+      usersSchemas,
+    );
   }
 
-  // Create repository with Knex connection
+  // Create repositories with Knex connection
   const usersRepository = new UsersRepository((fastify as any).knex);
+  const departmentsRepository = new DepartmentsRepository(
+    (fastify as any).knex,
+  );
 
-  // Create service with repository
-  const usersService = new UsersService(usersRepository);
+  // Create service with repositories for department validation
+  const usersService = new UsersService(usersRepository, departmentsRepository);
 
   // Verify event service is available (should be decorated by websocket plugin)
   if (!(fastify as any).eventService) {

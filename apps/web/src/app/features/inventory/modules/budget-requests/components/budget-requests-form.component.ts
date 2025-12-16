@@ -33,6 +33,7 @@ import {
 } from '../types/budget-requests.types';
 import { DepartmentService } from '../../../../system/modules/departments/services/departments.service';
 import { Department } from '../../../../system/modules/departments/types/departments.types';
+import { AuthService } from '../../../../../core/auth/services/auth.service';
 
 export type BudgetRequestFormMode = 'create' | 'edit';
 
@@ -97,6 +98,20 @@ export interface BudgetRequestFormData {
                 </mat-select>
                 <mat-hint>Optional - leave blank for all departments</mat-hint>
               </mat-form-field>
+
+              <!-- User Guidance for Missing Department -->
+              @if (!currentUser()?.department_id) {
+                <div class="warning-message span-2">
+                  <mat-icon class="warning-icon">info</mat-icon>
+                  <div class="warning-content">
+                    <p class="warning-title">Department Not Assigned</p>
+                    <p class="warning-text">
+                      You are not assigned to a department. Please select one
+                      manually or contact your administrator.
+                    </p>
+                  </div>
+                </div>
+              }
 
               <!-- justification Field -->
               <mat-form-field appearance="outline" class="full-width span-2">
@@ -266,6 +281,43 @@ export interface BudgetRequestFormData {
         color: #d32f2f;
       }
 
+      .warning-message {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        border-radius: 4px;
+        padding: 12px;
+        margin-top: 8px;
+      }
+
+      .warning-icon {
+        color: #ffc107;
+        flex-shrink: 0;
+        font-size: 20px;
+        height: 20px;
+        width: 20px;
+      }
+
+      .warning-content {
+        flex: 1;
+      }
+
+      .warning-title {
+        margin: 0 0 4px 0;
+        font-size: 13px;
+        font-weight: 600;
+        color: #856404;
+      }
+
+      .warning-text {
+        margin: 0;
+        font-size: 12px;
+        color: #856404;
+        line-height: 1.4;
+      }
+
       @media (max-width: 768px) {
         .form-grid {
           grid-template-columns: 1fr;
@@ -286,6 +338,7 @@ export class BudgetRequestFormComponent implements OnInit, OnChanges {
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
   private departmentService = inject(DepartmentService);
+  private authService = inject(AuthService);
 
   @Input() mode: BudgetRequestFormMode = 'create';
   @Input() initialData?: BudgetRequest;
@@ -302,6 +355,9 @@ export class BudgetRequestFormComponent implements OnInit, OnChanges {
   // Departments loaded from API
   departments = signal<Department[]>([]);
 
+  // Expose currentUser from AuthService for template access
+  currentUser = this.authService.currentUser;
+
   budgetRequestsForm: FormGroup = this.fb.group({
     fiscal_year: [null, [Validators.required]],
     department_id: [null],
@@ -311,6 +367,16 @@ export class BudgetRequestFormComponent implements OnInit, OnChanges {
   ngOnInit() {
     this.initFiscalYearOptions();
     this.loadDepartments();
+
+    // Auto-fill department from logged-in user if available and in create mode
+    if (this.mode === 'create') {
+      const user = this.authService.currentUser();
+      if (user?.department_id) {
+        this.budgetRequestsForm.patchValue({
+          department_id: user.department_id,
+        });
+      }
+    }
 
     if (this.mode === 'edit' && this.initialData) {
       this.populateForm(this.initialData);

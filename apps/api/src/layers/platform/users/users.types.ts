@@ -14,6 +14,7 @@ export interface User {
   avatar?: string | null;
   bio?: string | null;
   isEmailVerified?: boolean;
+  department_id?: number | null;
 }
 
 // Role assignment details for multi-role support
@@ -46,6 +47,7 @@ export interface UserCreateData {
   roleId?: string; // Optional - can be provided directly
   role?: string; // Optional - role name to be converted to roleId
   status?: 'active' | 'inactive' | 'suspended' | 'pending';
+  department_id?: number | null;
 }
 
 export interface UserUpdateData {
@@ -55,6 +57,7 @@ export interface UserUpdateData {
   lastName?: string;
   roleId?: string;
   status?: 'active' | 'inactive' | 'suspended' | 'pending';
+  department_id?: number | null;
 }
 
 export interface UserListOptions {

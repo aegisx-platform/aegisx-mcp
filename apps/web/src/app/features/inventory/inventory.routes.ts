@@ -49,6 +49,16 @@ export const INVENTORY_ROUTES: Route[] = [
       {
         path: 'master-data',
         children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./pages/master-data/master-data.page').then(
+                (m) => m.MasterDataPage,
+              ),
+            data: {
+              title: 'Master Data',
+            },
+          },
           // === MASTER-DATA ROUTES START ===
           // Contract Items (Generated CRUD)
           {

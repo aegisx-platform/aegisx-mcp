@@ -9,9 +9,48 @@ import {
   BulkOperationResult,
 } from './users.types';
 import { AppError } from '../../../core/errors/app-error';
+import { DepartmentsRepository } from '../departments/departments.repository';
 
 export class UsersService {
-  constructor(private usersRepository: UsersRepository) {}
+  constructor(
+    private usersRepository: UsersRepository,
+    private departmentsRepository: DepartmentsRepository,
+  ) {}
+
+  /**
+   * Helper method to validate department_id when provided
+   * Validates department exists and warns if inactive
+   * @throws AppError if department_id is invalid (not found)
+   */
+  private async validateDepartmentId(
+    departmentId: number | null | undefined,
+  ): Promise<void> {
+    // Allow null or undefined - represents unassigned user
+    if (departmentId === null || departmentId === undefined) {
+      return;
+    }
+
+    // Validate department exists
+    const department = await this.departmentsRepository.findById(departmentId);
+
+    if (!department) {
+      throw new AppError(
+        `Department with ID ${departmentId} does not exist`,
+        400,
+        'DEPARTMENT_NOT_FOUND',
+      );
+    }
+
+    // Warn if department is inactive but allow the assignment
+    // This is a soft validation - we log but don't block
+    if (!department.is_active) {
+      // In production, this should use a proper logger
+      // For now, we allow the assignment but could log a warning
+      console.warn(
+        `Warning: Assigning user to inactive department ${departmentId} (${department.dept_name})`,
+      );
+    }
+  }
 
   /**
    * Helper method to populate user roles array for a single user
@@ -97,6 +136,9 @@ export class UsersService {
     if (existingUsernameUser) {
       throw new AppError('Username already exists', 409, 'USERNAME_EXISTS');
     }
+
+    // Validate department_id if provided
+    await this.validateDepartmentId(data.department_id);
 
     // Determine roleId - either from roleId field or by converting role name
     let roleId = data.roleId;
@@ -184,6 +226,11 @@ export class UsersService {
       if (usernameUser) {
         throw new AppError('Username already exists', 409, 'USERNAME_EXISTS');
       }
+    }
+
+    // Validate department_id if provided (checking explicitly as it could be null or a number)
+    if ('department_id' in data) {
+      await this.validateDepartmentId(data.department_id);
     }
 
     // Update user

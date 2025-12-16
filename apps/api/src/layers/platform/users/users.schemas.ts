@@ -92,6 +92,7 @@ const CreateUserRequestSchema = Type.Object({
       Type.Literal('pending'),
     ]),
   ),
+  department_id: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
 });
 
 // Create user response - Using standard success response
@@ -112,6 +113,7 @@ const UpdateUserRequestSchema = Type.Object({
       Type.Literal('pending'),
     ]),
   ),
+  department_id: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
 });
 
 // Update user response - Using standard success response

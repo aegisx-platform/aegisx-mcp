@@ -13,6 +13,7 @@ export interface User {
   permissions?: string[];
   avatar?: string;
   bio?: string;
+  department_id?: number | null; // Department assignment for auto-population and context
 }
 
 export interface LoginRequest {
@@ -234,6 +235,7 @@ export class AuthService {
               permissions: profile.role?.permissions || [],
               avatar: profile.avatar,
               bio: profile.bio,
+              department_id: profile.department_id || null, // Store department context from profile
             };
             console.log('✅ [AuthService] Profile loaded successfully');
             console.log(
@@ -259,6 +261,7 @@ export class AuthService {
               roles:
                 payload.roles || (payload.role ? [payload.role] : ['user']), // Multi-role support
               permissions: payload.permissions || [],
+              department_id: payload.department_id || null, // Fallback to token's department context
             };
             this._currentUser.set(user);
             this._isAuthenticated.set(true);

@@ -11,6 +11,7 @@ export interface User {
   status: 'active' | 'inactive' | 'suspended' | 'pending';
   role?: string; // Deprecated: Use roles[] for multi-role support
   roles?: string[]; // Multi-role support
+  department_id?: number | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -25,6 +26,7 @@ export interface DBUser {
   status: 'active' | 'inactive' | 'suspended' | 'pending';
   role?: string; // Deprecated: Use roles[] for multi-role support
   roles?: string[]; // Multi-role support
+  department_id?: number | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -47,6 +49,7 @@ export class AuthRepository {
     const user = await this.knex('users')
       .select('users.*')
       .where('users.email', email)
+      .whereNull('users.deleted_at') // Exclude deleted users
       .first();
 
     if (!user) return null;
@@ -76,10 +79,12 @@ export class AuthRepository {
         'users.first_name',
         'users.last_name',
         'users.status',
+        'users.department_id',
         'users.created_at',
         'users.updated_at',
       )
       .where('users.id', id)
+      .whereNull('users.deleted_at') // Exclude deleted users
       .first();
 
     if (!user) return null;
@@ -270,6 +275,7 @@ export class AuthRepository {
       status: dbUser.status,
       role: dbUser.role || 'user',
       roles: dbUser.roles || ['user'], // Include roles array for multi-role support
+      department_id: dbUser.department_id ?? null,
       createdAt: dbUser.created_at,
       updatedAt: dbUser.updated_at,
     };

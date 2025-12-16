@@ -11,8 +11,7 @@ import {
 } from './budget-requests.types';
 import { BudgetRequestsAuditService } from './budget-requests-audit.service';
 import { BudgetRequestItemsRepository } from '../budgetRequestItems/budget-request-items.repository';
-// TODO: Re-enable when user-departments is migrated to layers/platform/users/
-// import { UserDepartmentsRepository } from '../../../../../platform/users/user-departments.repository';
+import { UsersRepository } from '../../../../platform/users/users.repository';
 import type { Knex } from 'knex';
 
 /**
@@ -31,8 +30,7 @@ export class BudgetRequestsService extends BaseService<
 > {
   private auditService: BudgetRequestsAuditService;
   private budgetRequestItemsRepository: BudgetRequestItemsRepository;
-  // TODO: Re-enable when user-departments is migrated
-  // private userDepartmentsRepository: UserDepartmentsRepository;
+  private usersRepository: UsersRepository;
 
   constructor(
     private budgetRequestsRepository: BudgetRequestsRepository,
@@ -42,8 +40,7 @@ export class BudgetRequestsService extends BaseService<
     super(budgetRequestsRepository);
     this.auditService = new BudgetRequestsAuditService(db, logger);
     this.budgetRequestItemsRepository = new BudgetRequestItemsRepository(db);
-    // TODO: Re-enable when user-departments is migrated
-    // this.userDepartmentsRepository = new UserDepartmentsRepository(db);
+    this.usersRepository = new UsersRepository(db);
   }
 
   /**
@@ -96,47 +93,43 @@ export class BudgetRequestsService extends BaseService<
       data.request_number ||
       (await this.generateRequestNumber(data.fiscal_year));
 
-    // Auto-populate department_id from user's primary department if not provided
-    const departmentId = data.department_id;
+    // Auto-populate department_id from user if not provided
+    let departmentId = data.department_id;
 
-    // TODO: Re-enable when user-departments is migrated
-    // If department_id is 0 or null, try to get from user's primary department
-    /*
+    // If department_id is not provided (null or 0), try to get from user's department
     if ((!departmentId || departmentId === 0) && userId) {
-      const primaryDepartment =
-        await this.userDepartmentsRepository.getPrimaryDepartment(userId);
+      const user = await this.usersRepository.findById(userId);
 
-      if (!primaryDepartment) {
+      if (!user) {
         const error = new Error(
-          'User has no active department assignment. Please contact your administrator to assign you to a department before creating budget requests.',
+          'User not found. Cannot auto-populate department.',
+        ) as any;
+        error.statusCode = 404;
+        error.code = 'USER_NOT_FOUND';
+        throw error;
+      }
+
+      if (!user.department_id) {
+        const error = new Error(
+          'USER_NO_DEPARTMENT: You are not assigned to a department. ' +
+            'Please contact your administrator to assign you to a department before creating budget requests, ' +
+            'or select a department manually.',
         ) as any;
         error.statusCode = 400;
         error.code = 'USER_NO_DEPARTMENT';
         throw error;
       }
 
-      // Check if user has permission to create requests in their primary department
-      const canCreate = primaryDepartment.canCreateRequests;
-      if (!canCreate) {
-        const error = new Error(
-          `You do not have permission to create budget requests in your department. Please contact your administrator.`,
-        ) as any;
-        error.statusCode = 403;
-        error.code = 'USER_NO_CREATE_PERMISSION';
-        throw error;
-      }
-
-      departmentId = primaryDepartment.departmentId;
+      departmentId = user.department_id;
       this.logger.info(
         {
           userId,
           departmentId,
-          primaryDepartment: primaryDepartment.departmentId,
+          userDepartment: user.department_id,
         },
-        'Auto-populated department_id from user primary department',
+        'Auto-populated department_id from user profile',
       );
     }
-    */
 
     // Build create data with defaults
     // Handle department_id: 0 → null (TypeBox may coerce null to 0 for Integer type)
@@ -624,9 +617,10 @@ export class BudgetRequestsService extends BaseService<
         // Validate required fields
         if (!request.department_id) {
           const error = new Error(
-            'Budget request must have a department_id to create allocations. ' +
-              'The user who created this request may not have been assigned to a department. ' +
-              'Please assign the user to a department or update the budget request with a valid department_id.',
+            'BUDGET_REQUEST_NO_DEPARTMENT: Cannot approve budget request without a department assignment. ' +
+              'This budget request was created without a department. ' +
+              'Please update the budget request with a valid department_id before approval, ' +
+              'or ensure the requesting user is assigned to a department.',
           ) as any;
           error.statusCode = 400;
           error.code = 'BUDGET_REQUEST_NO_DEPARTMENT';
