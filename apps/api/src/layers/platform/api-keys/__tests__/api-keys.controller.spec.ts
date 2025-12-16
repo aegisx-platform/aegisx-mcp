@@ -1,5 +1,7 @@
 import { ApiKeysController } from '../api-keys.controller';
 import { ApiKeysService } from '../services/api-keys.service';
+// Load FastifyReply type extensions
+import type {} from '../../../../plugins/response-handler.plugin';
 
 // Mock ApiKeysService
 const mockService = {
@@ -28,6 +30,10 @@ const mockRequest = {
 const mockReply = {
   code: jest.fn().mockReturnThis(),
   send: jest.fn().mockReturnThis(),
+  success: jest.fn().mockReturnThis(),
+  error: jest.fn().mockReturnThis(),
+  notFound: jest.fn().mockReturnThis(),
+  badRequest: jest.fn().mockReturnThis(),
 } as any;
 
 describe('ApiKeysController', () => {

@@ -1,5 +1,7 @@
 import { ActivityLogsController } from '../activity-logs.controller';
 import { ActivityLogsService } from '../activity-logs.service';
+// Load FastifyReply type extensions
+import type {} from '../../../../../plugins/response-handler.plugin';
 
 // Mock ActivityLogsService
 const mockService = {
@@ -31,6 +33,10 @@ const mockReply = {
   code: jest.fn().mockReturnThis(),
   send: jest.fn().mockReturnThis(),
   header: jest.fn().mockReturnThis(),
+  success: jest.fn().mockReturnThis(),
+  error: jest.fn().mockReturnThis(),
+  notFound: jest.fn().mockReturnThis(),
+  badRequest: jest.fn().mockReturnThis(),
 } as any;
 
 describe('ActivityLogsController', () => {
@@ -44,24 +50,42 @@ describe('ActivityLogsController', () => {
   describe('findAll', () => {
     it('should return paginated activity logs', async () => {
       const mockLogs = [{ id: '1', description: 'Created user' }];
-      mockService.findAll.mockResolvedValue(mockLogs);
+      const mockResult = {
+        data: mockLogs,
+        page: 1,
+        limit: 10,
+        total: 1,
+        totalPages: 1,
+      };
+      mockService.findAll.mockResolvedValue(mockResult);
 
       mockRequest.query = { page: 1, limit: 10 };
 
       await controller.findAll(mockRequest, mockReply);
 
       expect(mockService.findAll).toHaveBeenCalled();
-      expect(mockReply.code).toHaveBeenCalledWith(200);
       expect(mockReply.send).toHaveBeenCalledWith(
         expect.objectContaining({
           success: true,
           data: mockLogs,
+          pagination: expect.objectContaining({
+            page: 1,
+            limit: 10,
+            total: 1,
+          }),
         }),
       );
     });
 
     it('should handle filters in query', async () => {
-      mockService.findAll.mockResolvedValue([]);
+      const mockResult = {
+        data: [],
+        page: 1,
+        limit: 10,
+        total: 0,
+        totalPages: 0,
+      };
+      mockService.findAll.mockResolvedValue(mockResult);
 
       mockRequest.query = {
         page: 1,
@@ -85,10 +109,14 @@ describe('ActivityLogsController', () => {
 
       mockRequest.query = { page: 1, limit: 10 };
 
-      await expect(controller.findAll(mockRequest, mockReply)).rejects.toThrow(
-        'Database error',
-      );
+      await controller.findAll(mockRequest, mockReply);
+
       expect(mockRequest.log.error).toHaveBeenCalled();
+      expect(mockReply.error).toHaveBeenCalledWith(
+        'FETCH_ERROR',
+        'Failed to fetch activity logs',
+        500,
+      );
     });
   });
 
@@ -102,31 +130,17 @@ describe('ActivityLogsController', () => {
       await controller.findById(mockRequest, mockReply);
 
       expect(mockService.findById).toHaveBeenCalledWith('1');
-      expect(mockReply.code).toHaveBeenCalledWith(200);
-      expect(mockReply.send).toHaveBeenCalledWith(
-        expect.objectContaining({
-          success: true,
-          data: mockLog,
-        }),
-      );
+      expect(mockReply.success).toHaveBeenCalledWith(mockLog);
     });
 
     it('should return 404 if activity log not found', async () => {
-      mockService.findById.mockResolvedValue(null);
+      mockService.findById.mockRejectedValue(new Error('ERROR_NOT_FOUND'));
 
       mockRequest.params = { id: 'nonexistent' };
 
       await controller.findById(mockRequest, mockReply);
 
-      expect(mockReply.code).toHaveBeenCalledWith(404);
-      expect(mockReply.send).toHaveBeenCalledWith(
-        expect.objectContaining({
-          success: false,
-          error: expect.objectContaining({
-            message: expect.stringContaining('not found'),
-          }),
-        }),
-      );
+      expect(mockReply.notFound).toHaveBeenCalledWith('Activity log not found');
     });
   });
 
@@ -139,10 +153,8 @@ describe('ActivityLogsController', () => {
       await controller.delete(mockRequest, mockReply);
 
       expect(mockService.delete).toHaveBeenCalledWith('1');
-      expect(mockReply.code).toHaveBeenCalledWith(200);
-      expect(mockReply.send).toHaveBeenCalledWith(
+      expect(mockReply.success).toHaveBeenCalledWith(
         expect.objectContaining({
-          success: true,
           message: expect.stringContaining('deleted'),
         }),
       );
@@ -163,13 +175,7 @@ describe('ActivityLogsController', () => {
       await controller.getStats(mockRequest, mockReply);
 
       expect(mockService.getStats).toHaveBeenCalledWith(7);
-      expect(mockReply.code).toHaveBeenCalledWith(200);
-      expect(mockReply.send).toHaveBeenCalledWith(
-        expect.objectContaining({
-          success: true,
-          data: mockStats,
-        }),
-      );
+      expect(mockReply.success).toHaveBeenCalledWith(mockStats);
     });
   });
 
