@@ -60,19 +60,6 @@ export const rbacRoutes: Routes = [
     },
   },
   {
-    path: 'navigation',
-    loadComponent: () =>
-      import(
-        './pages/navigation-management/navigation-management.component'
-      ).then((m) => m.NavigationManagementComponent),
-    canActivate: [AuthGuard, PermissionGuard],
-    data: {
-      title: 'Navigation Management',
-      description: 'Manage application navigation items and menu structure',
-      permissions: ['navigation:read', '*:*'],
-    },
-  },
-  {
     path: '**',
     redirectTo: '/rbac/dashboard',
   },

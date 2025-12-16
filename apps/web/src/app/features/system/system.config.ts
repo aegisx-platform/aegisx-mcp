@@ -106,46 +106,6 @@ const systemNavigation: AxNavigationItem[] = [
         icon: 'folder',
         link: '/system/tools/file-upload',
       },
-      {
-        id: 'theme-showcase',
-        title: 'Theme Showcase',
-        icon: 'palette',
-        link: '/system/tools/theme-showcase',
-      },
-    ],
-  },
-
-  // Components (Development)
-  {
-    id: 'components',
-    title: 'Components',
-    icon: 'widgets',
-    type: 'collapsible',
-    children: [
-      {
-        id: 'buttons',
-        title: 'Buttons',
-        icon: 'smart_button',
-        link: '/system/components/buttons',
-      },
-      {
-        id: 'cards',
-        title: 'Cards',
-        icon: 'web_asset',
-        link: '/system/components/cards',
-      },
-      {
-        id: 'forms',
-        title: 'Forms',
-        icon: 'list_alt',
-        link: '/system/components/forms',
-      },
-      {
-        id: 'tables',
-        title: 'Tables',
-        icon: 'table_chart',
-        link: '/system/components/tables',
-      },
     ],
   },
 ];

@@ -49,16 +49,6 @@ export const INVENTORY_ROUTES: Route[] = [
       {
         path: 'master-data',
         children: [
-          {
-            path: '',
-            loadComponent: () =>
-              import('./pages/master-data/master-data.page').then(
-                (m) => m.MasterDataPage,
-              ),
-            data: {
-              title: 'Master Data',
-            },
-          },
           // === MASTER-DATA ROUTES START ===
           // Contract Items (Generated CRUD)
           {
@@ -274,9 +264,9 @@ export const INVENTORY_ROUTES: Route[] = [
           {
             path: 'budget-request-items',
             loadChildren: () =>
-              import('./modules/budget-request-items/budget-request-items.routes').then(
-                (m) => m.budgetRequestItemsRoutes,
-              ),
+              import(
+                './modules/budget-request-items/budget-request-items.routes'
+              ).then((m) => m.budgetRequestItemsRoutes),
             data: {
               title: 'Budget Request Items',
               description: 'Budget Request Items Management System',
@@ -287,9 +277,9 @@ export const INVENTORY_ROUTES: Route[] = [
           {
             path: 'budget-request-comments',
             loadChildren: () =>
-              import('./modules/budget-request-comments/budget-request-comments.routes').then(
-                (m) => m.budgetRequestCommentsRoutes,
-              ),
+              import(
+                './modules/budget-request-comments/budget-request-comments.routes'
+              ).then((m) => m.budgetRequestCommentsRoutes),
             data: {
               title: 'Budget Request Comments',
               description: 'Budget Request Comments Management System',

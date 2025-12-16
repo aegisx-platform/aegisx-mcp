@@ -30,16 +30,6 @@ export const MODULE_ITEMS: LauncherApp[] = [
     status: 'active',
     enabled: true,
   },
-  {
-    id: 'master-data',
-    name: 'Master Data',
-    description: 'Master Data modules',
-    icon: 'folder',
-    route: '/inventory/master-data',
-    color: 'blue',
-    status: 'active',
-    enabled: true,
-  },
   // CRUD modules will be auto-registered here by the generator
   // === AUTO-GENERATED ENTRIES END ===
 ];

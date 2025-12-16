@@ -181,7 +181,7 @@ export class NavigationService {
           title: 'Settings',
           type: 'item',
           icon: 'tune',
-          link: '/settings',
+          link: '/system/settings',
           permissions: ['settings:view', '*:*'],
         },
         {
@@ -189,7 +189,7 @@ export class NavigationService {
           title: 'PDF Templates',
           type: 'item',
           icon: 'description',
-          link: '/pdf-templates',
+          link: '/system/tools/pdf-templates',
         },
       ],
     },
@@ -199,7 +199,7 @@ export class NavigationService {
       title: 'Files',
       type: 'item',
       icon: 'folder',
-      link: '/file-upload',
+      link: '/system/tools/file-upload',
     },
   ];
 
