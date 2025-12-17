@@ -1,8 +1,8 @@
+import type { Knex } from 'knex';
 import {
   UserDepartmentsRepository,
   UserDepartment,
 } from './user-departments.repository';
-import { UsersRepository } from './users.repository';
 import { DepartmentsRepository } from '../departments/departments.repository';
 import { AppError } from '../../../shared/errors/app-error';
 
@@ -12,14 +12,17 @@ import { AppError } from '../../../shared/errors/app-error';
  * Business logic for managing user-department relationships.
  * Provides high-level operations with proper validation, error handling, and business rules.
  *
- * Week 2 Service Layer Implementation
- * Implements 6 core methods from the design specification
+ * Focuses on single responsibility: department membership management only.
+ * Permissions are managed through RBAC system (RbacService).
+ *
+ * Phase 5 Update: Removed permission-related methods and simplified validation logic
+ * to use direct Knex queries instead of repository joins.
  */
 export class UserDepartmentsService {
   constructor(
     private userDepartmentsRepository: UserDepartmentsRepository,
-    private usersRepository: UsersRepository,
     private departmentsRepository: DepartmentsRepository,
+    private knex: Knex,
   ) {}
 
   /**
@@ -53,9 +56,12 @@ export class UserDepartmentsService {
       notes?: string | null;
     } = {},
   ): Promise<UserDepartment> {
-    // Validate: User exists
-    const user = await this.usersRepository.findById(userId);
-    if (!user) {
+    // Validate: User exists (simple existence check without joins)
+    const userExists = await this.knex('users')
+      .where('id', userId)
+      .whereNull('deleted_at')
+      .first();
+    if (!userExists) {
       throw new AppError(`User ${userId} not found`, 404, 'USER_NOT_FOUND');
     }
 
@@ -131,9 +137,12 @@ export class UserDepartmentsService {
    * @throws AppError if user or assignment not found
    */
   async removeUser(userId: string, departmentId: number): Promise<void> {
-    // Validate: User exists
-    const user = await this.usersRepository.findById(userId);
-    if (!user) {
+    // Validate: User exists (simple existence check without joins)
+    const userExists = await this.knex('users')
+      .where('id', userId)
+      .whereNull('deleted_at')
+      .first();
+    if (!userExists) {
       throw new AppError(`User ${userId} not found`, 404, 'USER_NOT_FOUND');
     }
 
@@ -186,9 +195,12 @@ export class UserDepartmentsService {
    * @throws AppError if user not found
    */
   async getUserDepartments(userId: string): Promise<UserDepartment[]> {
-    // Validate: User exists
-    const user = await this.usersRepository.findById(userId);
-    if (!user) {
+    // Validate: User exists (simple existence check without joins)
+    const userExists = await this.knex('users')
+      .where('id', userId)
+      .whereNull('deleted_at')
+      .first();
+    if (!userExists) {
       throw new AppError(`User ${userId} not found`, 404, 'USER_NOT_FOUND');
     }
 
@@ -228,34 +240,51 @@ export class UserDepartmentsService {
       );
     }
 
-    // Get all assignments for the department
-    const assignments =
-      await this.userDepartmentsRepository.findByDepartmentId(departmentId);
+    // Get all assignments with user details using a single join query
+    const results = await this.knex('user_departments')
+      .select(
+        'user_departments.id',
+        'user_departments.user_id',
+        'user_departments.department_id',
+        'user_departments.hospital_id',
+        'user_departments.is_primary',
+        'user_departments.assigned_role',
+        'user_departments.valid_from',
+        'user_departments.valid_until',
+        'user_departments.assigned_by',
+        'user_departments.assigned_at',
+        'user_departments.notes',
+        'user_departments.created_at',
+        'user_departments.updated_at',
+        'users.email as user_email',
+        'users.first_name as user_first_name',
+        'users.last_name as user_last_name',
+      )
+      .innerJoin('users', 'user_departments.user_id', 'users.id')
+      .where('user_departments.department_id', departmentId)
+      .whereNull('users.deleted_at')
+      .orderBy('user_departments.is_primary', 'desc')
+      .orderBy('user_departments.created_at', 'asc');
 
-    // Enrich each assignment with user details
-    const enrichedAssignments = await Promise.all(
-      assignments.map(async (assignment) => {
-        const userDetails = await this.usersRepository.findById(
-          assignment.userId,
-        );
-        if (!userDetails) {
-          throw new AppError(
-            `User ${assignment.userId} referenced in assignment not found`,
-            500,
-            'USER_DATA_INCONSISTENCY',
-          );
-        }
-
-        return {
-          ...assignment,
-          userEmail: userDetails.email,
-          userFirstName: userDetails.firstName,
-          userLastName: userDetails.lastName,
-        };
-      }),
-    );
-
-    return enrichedAssignments;
+    // Transform database rows to typed objects
+    return results.map((row) => ({
+      id: row.id,
+      userId: row.user_id,
+      departmentId: row.department_id,
+      hospitalId: row.hospital_id,
+      isPrimary: row.is_primary,
+      assignedRole: row.assigned_role,
+      validFrom: row.valid_from,
+      validUntil: row.valid_until,
+      assignedBy: row.assigned_by,
+      assignedAt: row.assigned_at,
+      notes: row.notes,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      userEmail: row.user_email,
+      userFirstName: row.user_first_name,
+      userLastName: row.user_last_name,
+    }));
   }
 
   /**
@@ -277,9 +306,12 @@ export class UserDepartmentsService {
     userId: string,
     departmentId: number,
   ): Promise<UserDepartment> {
-    // Validate: User exists
-    const user = await this.usersRepository.findById(userId);
-    if (!user) {
+    // Validate: User exists (simple existence check without joins)
+    const userExists = await this.knex('users')
+      .where('id', userId)
+      .whereNull('deleted_at')
+      .first();
+    if (!userExists) {
       throw new AppError(`User ${userId} not found`, 404, 'USER_NOT_FOUND');
     }
 
@@ -355,9 +387,12 @@ export class UserDepartmentsService {
   ): Promise<
     (UserDepartment & { departmentCode: string; departmentName: string }) | null
   > {
-    // Validate: User exists
-    const user = await this.usersRepository.findById(userId);
-    if (!user) {
+    // Validate: User exists (simple existence check without joins)
+    const userExists = await this.knex('users')
+      .where('id', userId)
+      .whereNull('deleted_at')
+      .first();
+    if (!userExists) {
       throw new AppError(`User ${userId} not found`, 404, 'USER_NOT_FOUND');
     }
 

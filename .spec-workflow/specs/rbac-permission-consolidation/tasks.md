@@ -139,7 +139,7 @@
 
 ## Phase 5: Backend Service Updates
 
-- [ ] 12. Update UserDepartmentsService - remove permission methods
+- [x] 12. Update UserDepartmentsService - remove permission methods
   - File: `apps/api/src/layers/platform/users/user-departments.service.ts`
   - Remove methods: `updateDepartmentPermissions()`, `checkDepartmentPermission()`, `getAllPermissionsForDepartment()` if they exist
   - Remove any business logic related to permission flags
@@ -148,7 +148,7 @@
   - _Requirements: 3, 5_
   - _Prompt: Role: Backend Developer with expertise in service layer architecture | Task: Refactor UserDepartmentsService following requirements 3, 5 and Component 3 design. Remove any methods that manage or check permission flags. If methods like updateDepartmentPermissions, checkDepartmentPermission, or getAllPermissionsForDepartment exist, delete them entirely. Remove permission-related business logic. | Restrictions: Must not remove organizational methods (assign, remove, query), must maintain validation logic for department membership, keep error handling intact | Success: All permission management removed from service, only organizational membership methods remain, service focuses on single responsibility_
 
-- [ ] 13. Update UserDepartmentsService - simplify validation logic
+- [x] 13. Update UserDepartmentsService - simplify validation logic
   - File: `apps/api/src/layers/platform/users/user-departments.service.ts` (continue from Task 12)
   - Replace `usersRepository.findById()` calls with simple existence checks
   - Update `assignUserToDepartment()` method per Component 3 example
@@ -159,7 +159,7 @@
   - _Requirements: 3, 5_
   - _Prompt: Role: Backend Developer with expertise in service refactoring and error handling | Task: Simplify UserDepartmentsService validation following Component 3 example design. Replace complex findById() calls that JOIN roles with simple existence checks using this.knex('users').where('id', userId).whereNull('deleted_at').first(). Update assignUserToDepartment, getUserDepartments, getUserPrimaryDepartment to: (1) Remove permission parameters from signatures, (2) Use simple validation without role joins, (3) Remove permission-related logic. Keep error handling (throw AppError on validation failures). | Restrictions: Must maintain user/department existence validation, must not remove audit trail logic, preserve transaction handling where exists | Success: findById() no longer called with role joins, simple validation works, Knex binding error resolved, methods work without permission parameters, error handling preserved_
 
-- [ ] 14. Update UserDepartmentsService return types
+- [x] 14. Update UserDepartmentsService return types
   - File: `apps/api/src/layers/platform/users/user-departments.service.ts` (continue from Task 13)
   - Update method return types to remove permission properties
   - Update interface definitions if declared in service file

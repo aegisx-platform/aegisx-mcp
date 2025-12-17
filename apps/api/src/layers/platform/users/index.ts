@@ -3,8 +3,13 @@ import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { UsersRepository } from './users.repository';
 import { DepartmentsRepository } from '../departments/departments.repository';
+import { UserDepartmentsRepository } from './user-departments.repository';
+import { UserDepartmentsService } from './user-departments.service';
+import { UserDepartmentsController } from './user-departments.controller';
 import { usersRoutes } from './users.routes';
+import { userDepartmentsRoutes } from './user-departments.routes';
 import { usersSchemas } from './users.schemas';
+import { userDepartmentsSchemas } from './user-departments.schemas';
 
 /**
  * Platform Users Plugin
@@ -37,6 +42,10 @@ export default async function platformUsersPlugin(
       'users',
       usersSchemas,
     );
+    (fastify as any).schemaRegistry.registerModuleSchemas(
+      'user-departments',
+      userDepartmentsSchemas,
+    );
   }
 
   // Create repositories with Knex connection
@@ -44,9 +53,17 @@ export default async function platformUsersPlugin(
   const departmentsRepository = new DepartmentsRepository(
     (fastify as any).knex,
   );
+  const userDepartmentsRepository = new UserDepartmentsRepository(
+    (fastify as any).knex,
+  );
 
-  // Create service with repositories for department validation
+  // Create services with repositories
   const usersService = new UsersService(usersRepository, departmentsRepository);
+  const userDepartmentsService = new UserDepartmentsService(
+    userDepartmentsRepository,
+    departmentsRepository,
+    (fastify as any).knex,
+  );
 
   // Verify event service is available (should be decorated by websocket plugin)
   if (!(fastify as any).eventService) {
@@ -55,20 +72,31 @@ export default async function platformUsersPlugin(
     );
   }
 
-  // Create controller with service and event service for real-time updates
+  // Create controllers
   const usersController = new UsersController(
     usersService,
     (fastify as any).eventService,
   );
+  const userDepartmentsController = new UserDepartmentsController(
+    userDepartmentsService,
+  );
 
-  // Register routes under the specified prefix or /api/v1/platform/users
+  // Register routes under the specified prefix or /api/v1/platform
+  const basePrefix = options.prefix || '/v1/platform';
+
   await fastify.register(usersRoutes, {
     controller: usersController,
-    prefix: options.prefix || '/v1/platform/users',
+    prefix: `${basePrefix}/users`,
   });
 
-  // Decorate fastify instance with service for other plugins
+  await fastify.register(userDepartmentsRoutes, {
+    controller: userDepartmentsController,
+    prefix: basePrefix,
+  });
+
+  // Decorate fastify instance with services for other plugins
   fastify.decorate('usersService', usersService);
+  fastify.decorate('userDepartmentsService', userDepartmentsService);
 
   // Lifecycle hooks for monitoring
   fastify.addHook('onReady', async () => {
