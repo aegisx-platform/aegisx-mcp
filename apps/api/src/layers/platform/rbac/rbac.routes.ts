@@ -41,30 +41,6 @@ export async function rbacRoutes(
   const { controller } = options;
   const typedFastify = fastify.withTypeProvider<TypeBoxTypeProvider>();
 
-  // ===== DEBUG TEST ENDPOINT (NO AUTH, NO SCHEMA) =====
-  fastify.get('/rbac/roles-test', async (request, reply) => {
-    try {
-      console.log('[DEBUG] Test endpoint - START');
-      const result = await controller['rbacService'].getRoles({
-        page: 1,
-        limit: 20,
-        order: 'asc',
-        include_user_count: true,
-      });
-      console.log('[DEBUG] Test endpoint - Got', result.roles.length, 'roles');
-      console.log('[DEBUG] Test endpoint - Sending full data...');
-      reply.send({
-        success: true,
-        data: result.roles,
-        pagination: result.pagination,
-      });
-      console.log('[DEBUG] Test endpoint - SENT');
-    } catch (error) {
-      console.log('[DEBUG] Test endpoint - ERROR:', error);
-      reply.send({ success: false, error: String(error) });
-    }
-  });
-
   // ===== ROLE ROUTES =====
 
   // List roles
