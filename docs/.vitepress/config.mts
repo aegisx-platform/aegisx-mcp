@@ -52,6 +52,10 @@ export default defineConfig({
               link: '/guides/development/feature-development-standard',
             },
             {
+              text: 'Claude Skills Team Guide',
+              link: '/guides/development/claude-skills-team-guide',
+            },
+            {
               text: 'API Calling Standard',
               link: '/guides/development/api-calling-standard',
             },

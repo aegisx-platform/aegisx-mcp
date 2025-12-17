@@ -1,0 +1,313 @@
+/**
+ * [FEATURE_TITLE] List Component
+ * ===================================
+ * Displays paginated list of [FEATURE_NAME] items with search, filters, and actions
+ *
+ * Features:
+ * - Searchable data table with sorting
+ * - Filter by status (Active/Inactive)
+ * - Pagination controls (10, 25, 50, 100 items per page)
+ * - Create, Edit, Delete actions
+ * - Bulk selection and operations
+ * - Loading and error states
+ * - Empty state when no data
+ *
+ * Usage:
+ * - Route: /[feature]
+ * - Imports: Material, AegisX UI, child components
+ * - Dependencies: [FEATURE_TITLE]Service, MatDialog
+ */
+
+import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+
+// Material imports
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatSortModule, Sort } from '@angular/material/sort';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatCardModule } from '@angular/material/card';
+import { MatDialog } from '@angular/material/dialog';
+
+// AegisX UI imports
+import {
+  BreadcrumbComponent,
+  BreadcrumbItem,
+  AxCardComponent,
+  AxEmptyStateComponent,
+  AxErrorStateComponent,
+  BadgeComponent,
+} from '@aegisx/ui';
+
+// Service and types
+import { [FEATURE_TITLE]Service } from '../services/[feature].service';
+import type {
+  [ENTITY_NAME],
+  List[ENTITY_NAME]Query,
+} from '../types/[feature].types';
+
+// Dialog component
+import { [ENTITY_NAME]FormDialogComponent } from './[feature]-form-dialog/[feature]-form-dialog.component';
+
+/**
+ * List component selector and metadata
+ */
+@Component({
+  selector: 'app-[feature]-list',
+  standalone: true,
+  imports: [
+    // Angular
+    CommonModule,
+    RouterModule,
+    FormsModule,
+    // Material
+    MatButtonModule,
+    MatIconModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatSortModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatProgressSpinnerModule,
+    MatCheckboxModule,
+    MatTooltipModule,
+    MatCardModule,
+    // AegisX UI
+    BreadcrumbComponent,
+    AxCardComponent,
+    AxEmptyStateComponent,
+    AxErrorStateComponent,
+    BadgeComponent,
+  ],
+  templateUrl: './${feature}-list.component.html',
+  styleUrls: ['./${feature}-list.component.scss'],
+})
+export class [FEATURE_TITLE_CAPITALIZE]ListComponent implements OnInit {
+  // ============================================================================
+  // Dependencies
+  // ============================================================================
+
+  protected service = inject([FEATURE_TITLE]Service);
+  private dialog = inject(MatDialog);
+
+  // ============================================================================
+  // Template State
+  // ============================================================================
+
+  // Search and filter state
+  searchTerm = '';
+  statusFilter: boolean | string = '';
+  sortBy = 'created_at';
+  sortOrder: 'asc' | 'desc' = 'desc';
+
+  // Table configuration
+  displayedColumns = ['id', 'name', 'status', 'createdAt', 'actions'];
+  dataSource = new MatTableDataSource<[ENTITY_NAME]>();
+  pageSize = 25;
+
+  // Breadcrumb items
+  breadcrumbs: BreadcrumbItem[] = [
+    { label: 'Dashboard', url: '/dashboard' },
+    { label: '[FEATURE_TITLE]', active: true },
+  ];
+
+  // ============================================================================
+  // Component Lifecycle
+  // ============================================================================
+
+  /**
+   * Component initialization
+   * Load initial data on component mount
+   */
+  ngOnInit(): void {
+    this.loadData();
+  }
+
+  // ============================================================================
+  // Data Loading
+  // ============================================================================
+
+  /**
+   * Load data from service
+   * Fetches items based on current filters and pagination
+   */
+  private loadData(): void {
+    const query: List[ENTITY_NAME]Query = {
+      page: 1,
+      limit: this.pageSize,
+      search: this.searchTerm || undefined,
+      isActive: this.statusFilter === '' ? undefined : this.statusFilter === true,
+      sortBy: this.sortBy,
+      sortOrder: this.sortOrder,
+    };
+
+    this.service.loadItems(query).subscribe({
+      next: () => {
+        // Update table data source with items from service
+        this.dataSource.data = this.service.items();
+      },
+      error: (error) => {
+        console.error('[FEATURE_TITLE] load failed:', error);
+        // Error state is handled by service and template
+      },
+    });
+  }
+
+  // ============================================================================
+  // Search and Filter Handlers
+  // ============================================================================
+
+  /**
+   * Handle search input change
+   * @param term - Search term entered by user
+   */
+  onSearch(term: string): void {
+    this.searchTerm = term;
+    this.loadData();
+  }
+
+  /**
+   * Handle status filter change
+   * @param event - MatSelect change event
+   */
+  onStatusFilterChange(): void {
+    this.loadData();
+  }
+
+  /**
+   * Handle sort change
+   * @param event - MatSort change event
+   */
+  onSortChange(event: Sort): void {
+    this.sortBy = event.active;
+    this.sortOrder = (event.direction || 'desc') as 'asc' | 'desc';
+    this.loadData();
+  }
+
+  /**
+   * Handle pagination change
+   * @param event - MatPaginator page event
+   */
+  onPageChange(event: PageEvent): void {
+    this.pageSize = event.pageSize;
+    this.loadData();
+  }
+
+  /**
+   * Reset all filters to default
+   */
+  resetFilters(): void {
+    this.searchTerm = '';
+    this.statusFilter = '';
+    this.sortBy = 'created_at';
+    this.sortOrder = 'desc';
+    this.pageSize = 25;
+    this.loadData();
+  }
+
+  /**
+   * Check if any filters are active
+   * @returns true if any filter differs from default
+   */
+  hasActiveFilters(): boolean {
+    return this.searchTerm !== '' || this.statusFilter !== '';
+  }
+
+  // ============================================================================
+  // Dialog Handlers
+  // ============================================================================
+
+  /**
+   * Open create dialog
+   * Launches dialog to create new [ENTITY_NAME]
+   */
+  openCreate(): void {
+    this.dialog
+      .open([ENTITY_NAME]FormDialogComponent, {
+        width: '600px',
+        maxWidth: '90vw',
+        data: { mode: 'create' },
+      })
+      .afterClosed()
+      .subscribe((result) => {
+        // Refresh table after successful create
+        if (result) {
+          this.loadData();
+        }
+      });
+  }
+
+  /**
+   * Open edit dialog
+   * @param item - Item to edit
+   */
+  openEdit(item: [ENTITY_NAME]): void {
+    this.dialog
+      .open([ENTITY_NAME]FormDialogComponent, {
+        width: '600px',
+        maxWidth: '90vw',
+        data: { mode: 'edit', item },
+      })
+      .afterClosed()
+      .subscribe((result) => {
+        if (result) {
+          this.loadData();
+        }
+      });
+  }
+
+  /**
+   * Open delete confirmation and delete item
+   * @param item - Item to delete
+   */
+  openDelete(item: [ENTITY_NAME]): void {
+    const confirmDelete = confirm(
+      `Are you sure you want to delete "${item.name}"?`
+    );
+
+    if (confirmDelete) {
+      this.service.delete(item.id).subscribe({
+        next: () => {
+          console.log('[ENTITY_NAME] deleted successfully');
+          this.loadData();
+        },
+        error: (error) => {
+          console.error('Delete failed:', error);
+          // Error message shown via service.error() signal
+        },
+      });
+    }
+  }
+
+  // ============================================================================
+  // Helper Methods
+  // ============================================================================
+
+  /**
+   * Format date for display
+   * @param date - ISO date string
+   * @returns Formatted date string
+   */
+  formatDate(date: string): string {
+    return new Date(date).toLocaleDateString();
+  }
+
+  /**
+   * Get badge color for status
+   * @param isActive - Active status
+   * @returns Color name for ax-badge
+   */
+  getStatusColor(isActive: boolean): string {
+    return isActive ? 'success' : 'error';
+  }
+}

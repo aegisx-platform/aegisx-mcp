@@ -1,0 +1,395 @@
+/**
+ * [FEATURE_TITLE] Form Dialog Component
+ * ===================================
+ * Modal dialog for creating and editing [FEATURE_NAME] items
+ *
+ * Features:
+ * - Create/Edit mode support
+ * - Reactive form with validation
+ * - Real-time validation feedback
+ * - Loading state during submit
+ * - Error handling and display
+ * - Close button and cancel functionality
+ * - MANDATORY dialog structure (header/content/actions)
+ *
+ * Usage:
+ * ```typescript
+ * this.dialog.open([ENTITY_NAME]FormDialogComponent, {
+ *   data: { mode: 'create' }  // or { mode: 'edit', item: existingItem }
+ * });
+ * ```
+ */
+
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
+
+// Material imports
+import {
+  MatDialogModule,
+  MatDialogRef,
+  MAT_DIALOG_DATA,
+} from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
+// Service and types
+import { [FEATURE_TITLE]Service } from '../../services/[feature].service';
+import type {
+  [ENTITY_NAME],
+  Create[ENTITY_NAME]Dto,
+  Update[ENTITY_NAME]Dto,
+} from '../../types/[feature].types';
+
+/**
+ * Dialog data passed from parent component
+ */
+interface DialogData {
+  mode: 'create' | 'edit';
+  item?: [ENTITY_NAME];
+}
+
+/**
+ * Form dialog component
+ * IMPORTANT: This component uses MANDATORY dialog structure:
+ * - Header: title + close button
+ * - Content: form fields
+ * - Actions: cancel + save buttons
+ */
+@Component({
+  selector: 'app-[feature]-form-dialog',
+  standalone: true,
+  imports: [
+    // Angular
+    CommonModule,
+    ReactiveFormsModule,
+    // Material Dialog
+    MatDialogModule,
+    MatButtonModule,
+    MatIconModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatSlideToggleModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+  ],
+  template: `
+    <div class="[feature]-dialog">
+      <!-- ========================================
+           MANDATORY STRUCTURE: Header
+           ======================================== -->
+      <div
+        mat-dialog-title
+        class="flex items-center justify-between pb-4 border-b"
+      >
+        <!-- Title with icon -->
+        <div class="flex items-center gap-3">
+          <mat-icon class="!text-2xl" [color]="data.mode === 'create' ? 'accent' : 'primary'">
+            {{ data.mode === 'create' ? 'add_circle' : 'edit' }}
+          </mat-icon>
+          <h2 class="text-xl font-semibold m-0">
+            {{ data.mode === 'create' ? 'Create [ENTITY_NAME]' : 'Edit [ENTITY_NAME]' }}
+          </h2>
+        </div>
+
+        <!-- Close button -->
+        <button
+          mat-icon-button
+          mat-dialog-close
+          type="button"
+          aria-label="Close dialog"
+          [title]="'Close'"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <!-- ========================================
+           MANDATORY STRUCTURE: Content
+           ======================================== -->
+      <mat-dialog-content class="py-6 min-h-96">
+        <form [formGroup]="form" class="space-y-4">
+          <!-- Name field -->
+          <mat-form-field class="w-full">
+            <mat-label>Name</mat-label>
+            <input
+              matInput
+              formControlName="name"
+              placeholder="Enter name"
+              type="text"
+              [disabled]="loading()"
+            />
+            @if (form.get('name')?.hasError('required') && form.get('name')?.touched) {
+              <mat-error>Name is required</mat-error>
+            }
+            @if (form.get('name')?.hasError('minlength') && form.get('name')?.touched) {
+              <mat-error>Minimum 3 characters required</mat-error>
+            }
+            @if (form.get('name')?.hasError('maxlength')) {
+              <mat-error>Maximum 100 characters allowed</mat-error>
+            }
+          </mat-form-field>
+
+          <!-- Description field -->
+          <mat-form-field class="w-full">
+            <mat-label>Description</mat-label>
+            <textarea
+              matInput
+              formControlName="description"
+              placeholder="Enter description"
+              rows="3"
+              [disabled]="loading()"
+            ></textarea>
+            @if (form.get('description')?.hasError('maxlength')) {
+              <mat-error>Maximum 500 characters allowed</mat-error>
+            }
+          </mat-form-field>
+
+          <!-- Active toggle -->
+          <div class="flex items-center gap-2 py-2">
+            <mat-slide-toggle
+              formControlName="isActive"
+              [disabled]="loading()"
+            ></mat-slide-toggle>
+            <label class="text-sm">Active</label>
+          </div>
+
+          <!-- Additional custom fields go here -->
+          <!-- Example:
+          <mat-form-field class="w-full">
+            <mat-label>Category</mat-label>
+            <mat-select formControlName="categoryId" [disabled]="loading()">
+              <mat-select-trigger>{{ getCategoryName(form.get('categoryId')?.value) }}</mat-select-trigger>
+              @for (cat of categories(); track cat.id) {
+                <mat-option [value]="cat.id">{{ cat.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          -->
+        </form>
+
+        <!-- Error message display -->
+        @if (errorMessage()) {
+          <div class="mt-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+            <mat-icon class="inline mr-2" color="warn">error</mat-icon>
+            {{ errorMessage() }}
+          </div>
+        }
+      </mat-dialog-content>
+
+      <!-- ========================================
+           MANDATORY STRUCTURE: Actions
+           ======================================== -->
+      <mat-dialog-actions class="flex justify-end gap-2 pt-4 border-t">
+        <!-- Cancel button -->
+        <button
+          mat-button
+          mat-dialog-close
+          type="button"
+          [disabled]="loading()"
+        >
+          Cancel
+        </button>
+
+        <!-- Save button -->
+        <button
+          mat-raised-button
+          color="primary"
+          type="button"
+          (click)="onSave()"
+          [disabled]="!form.valid || loading()"
+        >
+          @if (loading()) {
+            <mat-spinner diameter="20" class="mr-2"></mat-spinner>
+            Saving...
+          } @else {
+            <mat-icon>save</mat-icon>
+            Save
+          }
+        </button>
+      </mat-dialog-actions>
+    </div>
+  `,
+  styles: [
+    `
+      :host {
+        display: block;
+      }
+
+      .${feature}-dialog {
+        min-width: 400px;
+        max-width: 600px;
+      }
+
+      mat-form-field {
+        width: 100%;
+        margin-bottom: 1rem;
+      }
+
+      mat-dialog-content {
+        max-height: 70vh;
+        overflow-y: auto;
+      }
+
+      .space-y-4 > * + * {
+        margin-top: 1rem;
+      }
+    `,
+  ],
+})
+export class [ENTITY_NAME]FormDialogComponent implements OnInit {
+  // ============================================================================
+  // Dependencies
+  // ============================================================================
+
+  private dialogRef = inject(MatDialogRef<[ENTITY_NAME]FormDialogComponent>);
+  protected data = inject<DialogData>(MAT_DIALOG_DATA);
+  private service = inject([FEATURE_TITLE]Service);
+  private fb = inject(FormBuilder);
+
+  // ============================================================================
+  // Form and State
+  // ============================================================================
+
+  form!: FormGroup;
+  loading = signal(false);
+  errorMessage = signal<string | null>(null);
+
+  // ============================================================================
+  // Component Lifecycle
+  // ============================================================================
+
+  /**
+   * Component initialization
+   * Setup form with validators and initial values
+   */
+  ngOnInit(): void {
+    this.initializeForm();
+  }
+
+  // ============================================================================
+  // Form Initialization
+  // ============================================================================
+
+  /**
+   * Initialize reactive form with validators
+   * Populate with existing data in edit mode
+   */
+  private initializeForm(): void {
+    this.form = this.fb.group({
+      // Name field - required, 3-100 chars
+      name: [
+        this.data.item?.name || '',
+        [
+          Validators.required,
+          Validators.minLength(3),
+          Validators.maxLength(100),
+        ],
+      ],
+
+      // Description field - optional, max 500 chars
+      description: [
+        this.data.item?.description || '',
+        [Validators.maxLength(500)],
+      ],
+
+      // Active toggle - default true
+      isActive: [this.data.item?.isActive ?? true],
+
+      // Add more fields as needed:
+      // category: [this.data.item?.categoryId || '', Validators.required],
+      // priority: [this.data.item?.priority || 'medium'],
+    });
+  }
+
+  // ============================================================================
+  // Form Submission
+  // ============================================================================
+
+  /**
+   * Handle form submission
+   * Validate, prepare data, and call service
+   */
+  onSave(): void {
+    // Validate form
+    if (this.form.invalid) {
+      this.errorMessage.set('Please fix validation errors');
+      return;
+    }
+
+    this.loading.set(true);
+    this.errorMessage.set(null);
+
+    const formValue = this.form.getRawValue();
+
+    // Call appropriate service method
+    const operation =
+      this.data.mode === 'create'
+        ? this.service.create(formValue as Create[ENTITY_NAME]Dto)
+        : this.service.update(
+            this.data.item!.id,
+            formValue as Update[ENTITY_NAME]Dto
+          );
+
+    operation.subscribe({
+      next: (result) => {
+        this.loading.set(false);
+        // Close dialog with result
+        this.dialogRef.close(result);
+      },
+      error: (error) => {
+        this.loading.set(false);
+
+        // Extract error message from backend response or use generic message
+        const message =
+          error.error?.message ||
+          (this.data.mode === 'create' ? 'Failed to create item' : 'Failed to update item');
+
+        this.errorMessage.set(message);
+
+        // Log error for debugging
+        console.error('Operation failed:', error);
+      },
+    });
+  }
+
+  // ============================================================================
+  // Helper Methods
+  // ============================================================================
+
+  /**
+   * Mark all fields as touched to show validation errors
+   * Called if user tries to submit invalid form
+   */
+  private markFormGroupTouched(formGroup: FormGroup): void {
+    Object.keys(formGroup.controls).forEach((key) => {
+      const control = formGroup.get(key);
+      control?.markAsTouched();
+
+      if (control instanceof FormGroup) {
+        this.markFormGroupTouched(control);
+      }
+    });
+  }
+
+  /**
+   * Reset form to initial state
+   * Useful for additional cancel confirmations if needed
+   */
+  resetForm(): void {
+    this.initializeForm();
+    this.errorMessage.set(null);
+  }
+}

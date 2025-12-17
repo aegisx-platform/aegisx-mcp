@@ -1,0 +1,224 @@
+<!-- [FEATURE_TITLE] List Component Template -->
+<!-- Displays paginated list of [FEATURE_NAME] with search, filters, and actions -->
+
+<div class="p-6 space-y-6">
+  <!-- ========================================
+       Breadcrumb Navigation
+       ======================================== -->
+  <ax-breadcrumb [items]="breadcrumbs"></ax-breadcrumb>
+
+  <!-- ========================================
+       Page Header with Title and Create Button
+       ======================================== -->
+  <div class="flex justify-between items-center gap-4">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">[FEATURE_TITLE]</h1>
+      <p class="text-gray-600 mt-1">Manage your [feature] items</p>
+    </div>
+
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="openCreate()"
+      [disabled]="service.loading()"
+    >
+      <mat-icon>add</mat-icon>
+      Add [ENTITY_NAME]
+    </button>
+  </div>
+
+  <!-- ========================================
+       Search and Filter Bar
+       ======================================== -->
+  <ax-card class="bg-white">
+    <div class="space-y-4">
+      <!-- Filters Row -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Search Input -->
+        <mat-form-field class="w-full">
+          <mat-label>Search</mat-label>
+          <input
+            matInput
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="onSearch($event)"
+            placeholder="Search by name..."
+            type="text"
+            [disabled]="service.loading()"
+          />
+          @if (searchTerm) {
+          <button
+            matSuffix
+            mat-icon-button
+            (click)="searchTerm = ''; onSearch('')"
+            type="button"
+            aria-label="Clear search"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+          }
+        </mat-form-field>
+
+        <!-- Status Filter Dropdown -->
+        <mat-form-field class="w-full">
+          <mat-label>Status</mat-label>
+          <mat-select
+            [(value)]="statusFilter"
+            (selectionChange)="onStatusFilterChange()"
+            [disabled]="service.loading()"
+          >
+            <mat-option value="">All Status</mat-option>
+            <mat-option [value]="true">Active</mat-option>
+            <mat-option [value]="false">Inactive</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Reset Filters Button -->
+        <div class="flex items-end">
+          <button
+            mat-stroked-button
+            (click)="resetFilters()"
+            [disabled]="!hasActiveFilters() || service.loading()"
+            class="w-full"
+          >
+            <mat-icon>clear</mat-icon>
+            Reset Filters
+          </button>
+        </div>
+      </div>
+
+      <!-- Active Filters Display -->
+      @if (hasActiveFilters()) {
+      <div
+        class="text-sm text-gray-600 bg-blue-50 p-3 rounded border border-blue-200"
+      >
+        <strong>Active Filters:</strong>
+        @if (searchTerm) {
+        <span class="ml-2">Search: "{{ searchTerm }}"</span>
+        } @if (statusFilter !== '') {
+        <span class="ml-2">
+          Status: {{ statusFilter === true ? 'Active' : 'Inactive' }}
+        </span>
+        }
+      </div>
+      }
+    </div>
+  </ax-card>
+
+  <!-- ========================================
+       Main Content: Table or Empty/Error State
+       ======================================== -->
+  <ax-card title="[FEATURE_TITLE] List" [loading]="service.loading()">
+    <!-- Loading State -->
+    @if (service.loading()) {
+    <div class="flex justify-center items-center p-12">
+      <mat-spinner [diameter]="48"></mat-spinner>
+    </div>
+    } @else if (service.items().length === 0) {
+    <!-- Empty State -->
+    <ax-empty-state
+      title="No [feature] found"
+      description="Try adjusting your filters or create your first [feature]."
+      [icon]="'inbox'"
+    ></ax-empty-state>
+    } @else {
+    <!-- Data Table -->
+    <div class="overflow-x-auto">
+      <table
+        mat-table
+        [dataSource]="dataSource"
+        matSort
+        (matSortChange)="onSortChange($event)"
+        class="w-full"
+      >
+        <!-- ID Column -->
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+          <td mat-cell *matCellDef="let element" class="text-gray-600">
+            {{ element.id }}
+          </td>
+        </ng-container>
+
+        <!-- Name Column -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+          <td mat-cell *matCellDef="let element" class="font-medium">
+            {{ element.name }}
+          </td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+          <td mat-cell *matCellDef="let element">
+            <ax-badge [color]="getStatusColor(element.isActive)">
+              {{ element.isActive ? 'Active' : 'Inactive' }}
+            </ax-badge>
+          </td>
+        </ng-container>
+
+        <!-- Created Date Column -->
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Created</th>
+          <td mat-cell *matCellDef="let element" class="text-gray-600">
+            {{ formatDate(element.createdAt) }}
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let element" class="text-right">
+            <button
+              mat-icon-button
+              (click)="openEdit(element)"
+              matTooltip="Edit"
+              color="primary"
+              [disabled]="service.loading()"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              (click)="openDelete(element)"
+              matTooltip="Delete"
+              color="warn"
+              [disabled]="service.loading()"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <!-- Table Header Row -->
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+
+        <!-- Table Data Rows -->
+        <tr
+          mat-row
+          *matRowDef="let row; columns: displayedColumns"
+          class="hover:bg-gray-50 cursor-pointer"
+        ></tr>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <mat-paginator
+      [pageSizeOptions]="[10, 25, 50, 100]"
+      [pageSize]="pageSize"
+      [length]="service.totalCount()"
+      (page)="onPageChange($event)"
+      showFirstLastButtons
+    ></mat-paginator>
+    }
+  </ax-card>
+
+  <!-- ========================================
+       Error State (if API call failed)
+       ======================================== -->
+  @if (service.error()) {
+  <ax-error-state
+    title="Failed to load [feature]"
+    [description]="service.error() || 'An unexpected error occurred. Please try again.'"
+  ></ax-error-state>
+  }
+</div>

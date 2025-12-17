@@ -1,0 +1,462 @@
+/**
+ * [FEATURE_TITLE] Service
+ * ===================================
+ * Manages data state and API communication for [FEATURE_NAME]
+ *
+ * State Management:
+ * - Items: Collection of [FEATURE_NAME] entities
+ * - Loading: Request state indicator
+ * - Error: Error message storage
+ * - Filters: Query parameters for API requests
+ *
+ * Usage in Component:
+ * ```typescript
+ * private service = inject([FEATURE_TITLE]Service);
+ *
+ * ngOnInit(): void {
+ *   this.service.loadItems().subscribe();
+ * }
+ *
+ * onDelete(id: string): void {
+ *   this.service.delete(id).subscribe();
+ * }
+ * ```
+ */
+
+import { Injectable, inject, signal, computed } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { tap, catchError, finalize } from 'rxjs/operators';
+
+// Import types
+import type {
+  [ENTITY_NAME],
+  Create[ENTITY_NAME]Dto,
+  Update[ENTITY_NAME]Dto,
+  List[ENTITY_NAME]Query,
+  [ENTITY_NAME]State,
+} from '../types/[feature].types';
+
+/**
+ * Initial state configuration
+ */
+const INITIAL_STATE: [ENTITY_NAME]State = {
+  items: [],
+  loading: false,
+  error: null,
+  pagination: {
+    page: 1,
+    limit: 25,
+    total: 0,
+    totalPages: 0,
+  },
+};
+
+@Injectable({ providedIn: 'root' })
+export class [FEATURE_TITLE]Service {
+  // ============================================================================
+  // Private Dependencies
+  // ============================================================================
+
+  private http = inject(HttpClient);
+  private readonly baseUrl = '/api/v1/[feature]';
+
+  // ============================================================================
+  // Private State Signals
+  // ============================================================================
+
+  /**
+   * Complete state signal
+   * Updated through dedicated methods to maintain consistency
+   */
+  private readonly _state = signal<[ENTITY_NAME]State>(INITIAL_STATE);
+
+  // ============================================================================
+  // Public Read-Only Signals (Computed)
+  // ============================================================================
+
+  /**
+   * Items collection
+   * All [FEATURE_NAME] items currently loaded
+   */
+  readonly items = computed(() => this._state().items);
+
+  /**
+   * Loading state
+   * True while API request is in progress
+   */
+  readonly loading = computed(() => this._state().loading);
+
+  /**
+   * Error message
+   * Contains error message if operation failed, null otherwise
+   */
+  readonly error = computed(() => this._state().error);
+
+  /**
+   * Pagination information
+   * Current page, limit, total items, total pages
+   */
+  readonly pagination = computed(() => this._state().pagination);
+
+  /**
+   * Total count
+   * Derived from pagination
+   */
+  readonly totalCount = computed(() => this._state().pagination.total);
+
+  /**
+   * Active items
+   * Filtered collection of active [FEATURE_NAME]
+   */
+  readonly activeItems = computed(() =>
+    this.items().filter((item) => item.isActive)
+  );
+
+  /**
+   * Empty state indicator
+   * True when no items are loaded
+   */
+  readonly isEmpty = computed(() => this.items().length === 0);
+
+  // ============================================================================
+  // Constructor
+  // ============================================================================
+
+  constructor() {
+    // Service initialization
+  }
+
+  // ============================================================================
+  // CRUD Operations
+  // ============================================================================
+
+  /**
+   * Load items from API
+   * Fetches paginated list with optional filters
+   *
+   * @param query - Optional filter and pagination parameters
+   * @returns Observable<[ENTITY_NAME][]> - Array of items
+   *
+   * @example
+   * ```typescript
+   * service.loadItems().subscribe({
+   *   next: (items) => console.log('Loaded', items.length, 'items'),
+   *   error: (err) => console.error('Failed to load', err),
+   * });
+   * ```
+   */
+  loadItems(query?: List[ENTITY_NAME]Query): Observable<[ENTITY_NAME][]> {
+    this._state.update((s) => ({ ...s, loading: true, error: null }));
+
+    let params = new HttpParams();
+    if (query) {
+      if (query.page) params = params.set('page', query.page.toString());
+      if (query.limit) params = params.set('limit', query.limit.toString());
+      if (query.search) params = params.set('search', query.search);
+      if (query.isActive !== undefined)
+        params = params.set('isActive', query.isActive.toString());
+      if (query.sortBy) params = params.set('sortBy', query.sortBy);
+      if (query.sortOrder)
+        params = params.set('sortOrder', query.sortOrder);
+    }
+
+    return this.http
+      .get<ApiResponse<[ENTITY_NAME][]>>(this.baseUrl, { params })
+      .pipe(
+        tap((response) => {
+          this._state.update((s) => ({
+            ...s,
+            items: response.data,
+            pagination: response.pagination || s.pagination,
+            loading: false,
+          }));
+        }),
+        catchError((error) => {
+          const errorMsg =
+            error.error?.message || 'Failed to load [FEATURE_NAME]';
+          this._state.update((s) => ({
+            ...s,
+            loading: false,
+            error: errorMsg,
+          }));
+          return throwError(() => error);
+        })
+      );
+  }
+
+  /**
+   * Get single item by ID
+   * Fetches detailed view of specific [ENTITY_NAME]
+   *
+   * @param id - Item ID
+   * @returns Observable<[ENTITY_NAME]> - Single item
+   *
+   * @example
+   * ```typescript
+   * service.getById('123').subscribe(item => {
+   *   console.log('Item:', item);
+   * });
+   * ```
+   */
+  getById(id: string): Observable<[ENTITY_NAME]> {
+    this._state.update((s) => ({ ...s, loading: true, error: null }));
+
+    return this.http
+      .get<ApiResponse<[ENTITY_NAME]>>(`${this.baseUrl}/${id}`)
+      .pipe(
+        tap((response) => {
+          this._state.update((s) => ({ ...s, loading: false }));
+        }),
+        catchError((error) => {
+          const errorMsg = error.error?.message || 'Failed to fetch item';
+          this._state.update((s) => ({
+            ...s,
+            loading: false,
+            error: errorMsg,
+          }));
+          return throwError(() => error);
+        })
+      );
+  }
+
+  /**
+   * Create new [ENTITY_NAME]
+   * Sends POST request with new item data
+   *
+   * @param data - New item data
+   * @returns Observable<[ENTITY_NAME]> - Created item
+   *
+   * @example
+   * ```typescript
+   * const newItem: Create[ENTITY_NAME]Dto = {
+   *   name: 'New Item',
+   *   description: 'Description',
+   * };
+   * service.create(newItem).subscribe(created => {
+   *   console.log('Created:', created);
+   * });
+   * ```
+   */
+  create(data: Create[ENTITY_NAME]Dto): Observable<[ENTITY_NAME]> {
+    return this.http
+      .post<ApiResponse<[ENTITY_NAME]>>(this.baseUrl, data)
+      .pipe(
+        tap((response) => {
+          // Add to items collection
+          this._state.update((s) => ({
+            ...s,
+            items: [...s.items, response.data],
+            pagination: {
+              ...s.pagination,
+              total: s.pagination.total + 1,
+            },
+          }));
+        }),
+        catchError((error) => {
+          const errorMsg = error.error?.message || 'Failed to create item';
+          this._state.update((s) => ({
+            ...s,
+            error: errorMsg,
+          }));
+          return throwError(() => error);
+        })
+      );
+  }
+
+  /**
+   * Update existing [ENTITY_NAME]
+   * Sends PUT request with updated data
+   *
+   * @param id - Item ID
+   * @param data - Updated item data
+   * @returns Observable<[ENTITY_NAME]> - Updated item
+   *
+   * @example
+   * ```typescript
+   * const updates: Update[ENTITY_NAME]Dto = { name: 'Updated Name' };
+   * service.update('123', updates).subscribe(updated => {
+   *   console.log('Updated:', updated);
+   * });
+   * ```
+   */
+  update(
+    id: string,
+    data: Update[ENTITY_NAME]Dto
+  ): Observable<[ENTITY_NAME]> {
+    return this.http
+      .put<ApiResponse<[ENTITY_NAME]>>(`${this.baseUrl}/${id}`, data)
+      .pipe(
+        tap((response) => {
+          // Update in items collection
+          this._state.update((s) => ({
+            ...s,
+            items: s.items.map((item) =>
+              item.id === id ? response.data : item
+            ),
+          }));
+        }),
+        catchError((error) => {
+          const errorMsg = error.error?.message || 'Failed to update item';
+          this._state.update((s) => ({
+            ...s,
+            error: errorMsg,
+          }));
+          return throwError(() => error);
+        })
+      );
+  }
+
+  /**
+   * Delete [ENTITY_NAME]
+   * Sends DELETE request to remove item
+   *
+   * @param id - Item ID
+   * @returns Observable<void>
+   *
+   * @example
+   * ```typescript
+   * service.delete('123').subscribe({
+   *   next: () => console.log('Deleted'),
+   *   error: (err) => console.error('Delete failed', err),
+   * });
+   * ```
+   */
+  delete(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`).pipe(
+      tap(() => {
+        // Remove from items collection
+        this._state.update((s) => ({
+          ...s,
+          items: s.items.filter((item) => item.id !== id),
+          pagination: {
+            ...s.pagination,
+            total: Math.max(0, s.pagination.total - 1),
+          },
+        }));
+      }),
+      catchError((error) => {
+        const errorMsg = error.error?.message || 'Failed to delete item';
+        this._state.update((s) => ({
+          ...s,
+          error: errorMsg,
+        }));
+        return throwError(() => error);
+      })
+    );
+  }
+
+  // ============================================================================
+  // Bulk Operations
+  // ============================================================================
+
+  /**
+   * Delete multiple items
+   * Sends DELETE request for array of IDs
+   *
+   * @param ids - Array of item IDs
+   * @returns Observable<void>
+   *
+   * @example
+   * ```typescript
+   * service.bulkDelete(['1', '2', '3']).subscribe();
+   * ```
+   */
+  bulkDelete(ids: string[]): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/bulk-delete`, { ids }).pipe(
+      tap(() => {
+        // Remove deleted items from collection
+        this._state.update((s) => ({
+          ...s,
+          items: s.items.filter((item) => !ids.includes(item.id)),
+          pagination: {
+            ...s.pagination,
+            total: Math.max(0, s.pagination.total - ids.length),
+          },
+        }));
+      }),
+      catchError((error) => {
+        const errorMsg =
+          error.error?.message || 'Failed to delete items';
+        this._state.update((s) => ({
+          ...s,
+          error: errorMsg,
+        }));
+        return throwError(() => error);
+      })
+    );
+  }
+
+  // ============================================================================
+  // State Management Methods
+  // ============================================================================
+
+  /**
+   * Clear error message
+   * Resets error state to null
+   *
+   * @example
+   * ```typescript
+   * service.clearError();
+   * ```
+   */
+  clearError(): void {
+    this._state.update((s) => ({ ...s, error: null }));
+  }
+
+  /**
+   * Reset to initial state
+   * Clears all data and filters
+   *
+   * @example
+   * ```typescript
+   * service.reset();
+   * ```
+   */
+  reset(): void {
+    this._state.set({ ...INITIAL_STATE });
+  }
+
+  /**
+   * Update pagination
+   * Sets current page and limit
+   *
+   * @param page - Page number (1-indexed)
+   * @param limit - Items per page
+   *
+   * @example
+   * ```typescript
+   * service.setPagination(2, 50);
+   * ```
+   */
+  setPagination(page: number, limit: number): void {
+    this._state.update((s) => ({
+      ...s,
+      pagination: {
+        ...s.pagination,
+        page,
+        limit,
+      },
+    }));
+  }
+}
+
+// ============================================================================
+// Type Definitions (use separate file in production)
+// ============================================================================
+
+/**
+ * API Response wrapper
+ * Standard format for all API responses
+ */
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  message: string;
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
