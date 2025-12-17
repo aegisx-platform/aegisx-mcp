@@ -62,7 +62,7 @@
   - _Requirements: 4_
   - _Prompt: Role: Database Engineer with expertise in RBAC schema and seed data | Task: Create seed script to add missing RBAC permissions identified in Task 2 following requirement 4 mapping. For each missing permission: (1) Insert into permissions table with proper resource:action format, (2) Create role_permissions associations for appropriate roles, (3) Ensure idempotency (skip if exists). Use Knex transactions. | Restrictions: Must check existence before inserting (ON CONFLICT DO NOTHING or similar), must assign to correct roles per mapping table, maintain consistent naming conventions | Success: All required RBAC permissions exist in database, properly assigned to roles, seed script is idempotent_
 
-- [ ] 6. Test permission mapping in development environment
+- [x] 6. Test permission mapping in development environment
   - Environment: Local development database
   - Run audit script (Task 3) to capture current state
   - Run mapping script (Task 4) to assign RBAC permissions
@@ -77,7 +77,7 @@
 
 ## Phase 3: Database Schema Changes
 
-- [ ] 7. Create database migration to remove permission columns
+- [x] 7. Create database migration to remove permission columns
   - File: `apps/api/src/database/migrations/[timestamp]_remove_user_departments_permissions.ts`
   - Implement `up()` method to drop 5 permission columns from `user_departments` table
   - Implement `down()` method to restore columns with default values
