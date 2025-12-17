@@ -169,7 +169,7 @@
   - _Requirements: 5, 6_
   - _Prompt: Role: TypeScript Developer with expertise in type systems | Task: Update UserDepartmentsService method return types following requirements 5, 6. For each method that returns department data: (1) Remove permission properties from return type definitions, (2) Update JSDoc comments to reflect changes, (3) Ensure type consistency with repository layer. Methods: getUserDepartments, getUserPrimaryDepartment, assignUserToDepartment. If service declares interfaces, update those too. | Restrictions: Must maintain type safety, ensure consistency with repository types, do not use 'any' type | Success: All return types updated without permission properties, TypeScript compiles without errors, type safety maintained, consistency with repository layer_
 
-- [ ] 15. Create unit tests for updated UserDepartmentsService
+- [x] 15. Create unit tests for updated UserDepartmentsService
   - File: `apps/api/src/layers/platform/users/user-departments.service.spec.ts`
   - Update tests to remove permission-related scenarios
   - Add tests per Component 3 design examples
