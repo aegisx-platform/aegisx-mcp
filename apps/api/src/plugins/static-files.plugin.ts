@@ -7,13 +7,14 @@ async function staticFilesPlugin(
   fastify: FastifyInstance,
   _options: FastifyPluginOptions,
 ) {
-  // Get API prefix from serverInfo to avoid duplication
-  const apiPrefix = (fastify as any).serverInfo?.apiPrefix ?? '/api';
+  // NOTE: No need to use apiPrefix here because this plugin is already
+  // registered under the API prefix in bootstrap/index.ts
+  // Routes are relative to the plugin's registration prefix
 
   // Serve avatar files
   fastify.route({
     method: 'GET',
-    url: `${apiPrefix}/uploads/avatars/:filename`,
+    url: '/uploads/avatars/:filename',
     schema: {
       description: 'Serve avatar image files',
       tags: ['Files'],
@@ -98,7 +99,7 @@ async function staticFilesPlugin(
   // Serve general assets (logos, images, etc.)
   fastify.route({
     method: 'GET',
-    url: `${apiPrefix}/assets/:type/:filename`,
+    url: '/assets/:type/:filename',
     schema: {
       description: 'Serve asset files (logos, images)',
       tags: ['Files'],
