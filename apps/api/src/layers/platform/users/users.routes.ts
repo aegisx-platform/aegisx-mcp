@@ -125,7 +125,7 @@ export async function usersRoutes(
 
   // Change user password (admin only)
   typedFastify.put(
-    '/users/:id/password',
+    '/:id/password',
     {
       preValidation: [
         fastify.authenticate,
@@ -134,7 +134,7 @@ export async function usersRoutes(
       schema: {
         description: 'Change a user password',
         tags: ['Users'],
-        summary: 'Reset user password',
+        summary: 'Reset user password (admin only)',
         security: [{ bearerAuth: [] }],
         params: SchemaRefs.UuidParam,
         body: SchemaRefs.module('users', 'change-user-password-request'),
@@ -203,31 +203,9 @@ export async function usersRoutes(
     controller.listRoles.bind(controller),
   );
 
-  // Change current user password (self)
-  typedFastify.post(
-    '/profile/password',
-    {
-      preValidation: [fastify.authenticate],
-      schema: {
-        description: 'Change current user password',
-        tags: ['User Profile', 'Users'],
-        summary: 'Change user password with current password verification',
-        security: [{ bearerAuth: [] }],
-        body: SchemaRefs.module('users', 'self-password-change-request'),
-        response: {
-          200: SchemaRefs.module('users', 'success-message-response'),
-          400: SchemaRefs.ValidationError,
-          401: SchemaRefs.Unauthorized,
-          422: SchemaRefs.ValidationError,
-          500: SchemaRefs.ServerError,
-        },
-      },
-    },
-    controller.changeSelfPassword.bind(controller),
-  );
-
   // ===== PROFILE ROUTES =====
-  // NOTE: Profile routes moved to user-profile module
+  // NOTE: All profile routes (including password change) moved to user-profile module
+  // Use /api/v1/platform/profile/password for user self-service password changes
 
   // ===== MULTI-ROLE MANAGEMENT =====
 
