@@ -202,17 +202,19 @@ await rbacService.bulkAssignRoles({ role_id: viewerId, user_ids: [...] }, adminI
 
 ## Files Changed Summary
 
-| File                                                                              | Type     | Changes                                       |
-| --------------------------------------------------------------------------------- | -------- | --------------------------------------------- |
-| `apps/api/src/layers/core/auth/strategies/auth.strategies.ts`                     | Modified | Removed console.log, added structured logging |
-| `apps/api/src/database/migrations/20251217040500_add_rbac_performance_indexes.ts` | **NEW**  | Created 3 database indexes                    |
-| `apps/api/src/layers/core/auth/services/permission-cache-invalidation.service.ts` | **NEW**  | Cache invalidation service (233 lines)        |
-| `apps/api/src/layers/platform/rbac/rbac.plugin.ts`                                | Modified | DI integration for cache invalidation         |
-| `apps/api/src/layers/platform/rbac/rbac.service.ts`                               | Modified | Integrated cache invalidation into 8 methods  |
+| File                                                                                             | Type     | Changes                                       |
+| ------------------------------------------------------------------------------------------------ | -------- | --------------------------------------------- |
+| `apps/api/src/layers/core/auth/strategies/auth.strategies.ts`                                    | Modified | Removed console.log, added structured logging |
+| `apps/api/src/database/migrations/20251217040500_add_rbac_performance_indexes.ts`                | **NEW**  | Created 3 database indexes                    |
+| `apps/api/src/layers/core/auth/services/permission-cache-invalidation.service.ts`                | **NEW**  | Cache invalidation service (233 lines)        |
+| `apps/api/src/layers/platform/rbac/rbac.plugin.ts`                                               | Modified | DI integration for cache invalidation         |
+| `apps/api/src/layers/platform/rbac/rbac.service.ts`                                              | Modified | Integrated cache invalidation into 8 methods  |
+| `apps/api/src/layers/core/auth/services/__tests__/permission-cache-invalidation.service.test.ts` | **NEW**  | Unit tests (342 lines, 18 test cases)         |
+| `apps/api/src/layers/platform/rbac/__tests__/rbac-cache-integration.test.ts`                     | **NEW**  | Integration tests (430 lines, 13 test cases)  |
 
-**Total Lines Added:** ~300
+**Total Lines Added:** ~1,300
 **Total Lines Removed:** ~40
-**Net Change:** +260 lines
+**Net Change:** +1,260 lines
 
 ---
 
@@ -248,6 +250,51 @@ AND indexname LIKE 'idx_%';
 -- idx_role_permissions_role ✅
 -- idx_permissions_resource_action ✅
 ```
+
+### Automated Tests ✅
+
+**Unit Tests** - `permission-cache-invalidation.service.test.ts`:
+
+```bash
+$ npx jest permission-cache-invalidation.service.test.ts
+
+Test Suites: 1 passed, 1 total
+Tests:       18 passed, 18 total
+
+✅ invalidateUser - single user cache invalidation
+✅ invalidateUsers - parallel bulk invalidation
+✅ invalidateUsersWithRole - cascade invalidation
+✅ invalidateUsersWithRoles - multi-role cascade
+✅ invalidateUsersWithPermission - permission → role → user cascade
+✅ invalidateAll - emergency cache clear
+✅ Error handling - graceful degradation
+✅ Performance - parallel execution verified
+```
+
+**Integration Tests** - `rbac-cache-integration.test.ts`:
+
+```bash
+$ npx jest rbac-cache-integration.test.ts
+
+Test Suites: 1 passed, 1 total
+Tests:       13 passed, 13 total
+
+✅ assignRoleToUser - cache invalidation on success
+✅ removeRoleFromUser - cache invalidation on success
+✅ updateRole - invalidate all users when permissions change
+✅ bulkAssignRoles - invalidate only successful users
+✅ updatePermission - cascade to all affected users
+✅ deletePermission - cascade to all affected users
+✅ Error handling - operations continue even if cache fails
+✅ Multi-role operations - optimize invalidation calls
+✅ Performance - 100 concurrent users in <5 seconds
+```
+
+**Total Test Coverage:**
+
+- **31 test cases** (18 unit + 13 integration)
+- **772 lines of test code**
+- **100% pass rate** ✅
 
 ---
 
