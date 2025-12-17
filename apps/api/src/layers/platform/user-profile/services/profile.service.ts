@@ -52,13 +52,11 @@ export class ProfileService {
    * Update user profile
    *
    * Updates user profile with validation of required fields.
-   * Validates department_id if provided.
    *
    * @param userId - User ID (UUID)
    * @param data - Partial profile data to update
    * @returns Updated profile object
    * @throws Error with code 'PROFILE_NOT_FOUND' (404) if user not found
-   * @throws Error with code 'INVALID_DEPARTMENT' (400) if department is invalid
    */
   async updateProfile(
     userId: string,
@@ -71,19 +69,6 @@ export class ProfileService {
       (error as any).statusCode = 404;
       (error as any).code = 'PROFILE_NOT_FOUND';
       throw error;
-    }
-
-    // Validate department if provided and not null
-    if (data.departmentId !== undefined && data.departmentId !== null) {
-      const isValidDepartment = await this.validateDepartment(
-        data.departmentId,
-      );
-      if (!isValidDepartment) {
-        const error = new Error('Invalid department ID');
-        (error as any).statusCode = 400;
-        (error as any).code = 'INVALID_DEPARTMENT';
-        throw error;
-      }
     }
 
     // Update profile
@@ -167,33 +152,5 @@ export class ProfileService {
         changedAt: new Date().toISOString(),
       },
     };
-  }
-
-  /**
-   * Validate department exists
-   *
-   * Checks if a department with the given ID exists and is active in the departments table.
-   *
-   * @param departmentId - Department ID to validate
-   * @returns true if department exists and is active, false otherwise
-   */
-  async validateDepartment(departmentId: string): Promise<boolean> {
-    try {
-      const department = await this.knex('departments')
-        .select('id', 'is_active')
-        .where('id', departmentId)
-        .first();
-
-      if (!department) {
-        return false;
-      }
-
-      // Check if department is active
-      return department.is_active === true;
-    } catch (error) {
-      // If error querying departments table, log and return false
-      console.error('Error validating department:', error);
-      return false;
-    }
   }
 }

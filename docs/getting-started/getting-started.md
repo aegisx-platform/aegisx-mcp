@@ -1,8 +1,91 @@
-# 🚀 Getting Started - อ่านก่อนเริ่มงาน
+# 🚀 Getting Started
 
-> **⚡ เอกสารนี้สำคัญ!** อ่านให้ครบก่อนเริ่ม coding เพื่อให้ทำงานกับทีมได้อย่างราบรื่น
+> **Complete installation guide and first steps** for AegisX Platform development.
 
-## 📋 สิ่งที่ต้องรู้ก่อนเริ่ม
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+- **Node.js:** 22+ (required)
+- **pnpm:** 10+ (package manager)
+- **PostgreSQL:** 15+ (database)
+- **Redis:** 7+ (optional, for caching)
+- **Git:** Latest version
+
+### Verify Your Environment
+
+```bash
+node --version    # Should be 22+
+pnpm --version    # Should be 10+
+psql --version    # Should be 15+
+redis-cli --version  # Should be 7+
+```
+
+## Installation
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/aegisx-platform/aegisx-starter-1.git
+cd aegisx-starter-1
+```
+
+### 2. Install Dependencies
+
+```bash
+# Install all dependencies
+pnpm install
+```
+
+### 3. Set Up Environment
+
+```bash
+# Copy environment template
+cp .env.example .env.local
+
+# Edit .env.local with your database credentials
+# Required variables:
+# - DB_HOST=localhost
+# - DB_PORT=5432
+# - DB_USER=your_username
+# - DB_PASSWORD=your_password
+# - DB_NAME=aegisx_dev
+# - JWT_SECRET=your_secret_key
+```
+
+### 4. Database Setup
+
+```bash
+# Run migrations
+pnpm run db:migrate
+
+# Seed database with demo data
+pnpm run db:seed
+```
+
+### 5. Start Development Servers
+
+```bash
+# Start all services (API + Web + Docs)
+pnpm run dev
+```
+
+After running `pnpm run dev`, the following servers will start:
+
+- **API Server:** http://localhost:3383
+- **Web App:** http://localhost:4249
+- **Documentation:** http://localhost:5173
+
+### Default Credentials
+
+```
+Email: admin@aegisx.local
+Password: Admin123!@#
+```
+
+---
+
+## 📋 Development Guidelines
 
 ### 1️⃣ **Git Workflow ที่เราใช้**
 

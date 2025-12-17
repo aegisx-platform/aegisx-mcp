@@ -216,9 +216,11 @@ export class AuthService {
   private loadUserProfile(): void {
     const token = this._accessToken();
     if (token) {
-      console.log('🔄 [AuthService] Loading full profile from /api/profile...');
+      console.log(
+        '🔄 [AuthService] Loading full profile from /api/v1/platform/profile...',
+      );
       // Load full profile from API
-      this.http.get<any>('/profile').subscribe({
+      this.http.get<any>('/v1/platform/profile').subscribe({
         next: (response) => {
           this._isLoading.set(false);
           if (response.success && response.data) {

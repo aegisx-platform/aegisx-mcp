@@ -23,6 +23,34 @@ export const ThemeSchema = Type.Union(
 export type Theme = 'light' | 'dark' | 'auto';
 
 /**
+ * Primary Department Schema
+ *
+ * Represents user's primary department information
+ */
+export const PrimaryDepartmentSchema = Type.Object(
+  {
+    id: Type.Number({
+      description: 'Department ID',
+    }),
+    code: Type.String({
+      description: 'Department code',
+    }),
+    name: Type.String({
+      description: 'Department name',
+    }),
+    isPrimary: Type.Boolean({
+      description: 'Primary department flag',
+    }),
+  },
+  {
+    $id: 'PrimaryDepartment',
+    description: "User's primary department",
+  },
+);
+
+export type PrimaryDepartment = Static<typeof PrimaryDepartmentSchema>;
+
+/**
  * Language Enum - User interface language preference
  */
 export const LanguageSchema = Type.Union(
@@ -83,18 +111,13 @@ export const ProfileSchema = Type.Object(
       maxLength: 100,
       description: 'User last name',
     }),
-    departmentId: Type.Optional(
-      Type.String({
-        format: 'uuid',
-        description: 'Department identifier',
-      }),
-    ),
     avatarUrl: Type.Optional(
       Type.String({
         format: 'uri',
         description: 'User avatar URL',
       }),
     ),
+    primaryDepartment: Type.Optional(PrimaryDepartmentSchema),
     theme: ThemeSchema,
     language: LanguageSchema,
     notifications: Type.Boolean({
@@ -138,20 +161,6 @@ export const UpdateProfileSchema = Type.Object(
         maxLength: 100,
         description: 'User last name',
       }),
-    ),
-    departmentId: Type.Optional(
-      Type.Union(
-        [
-          Type.String({
-            format: 'uuid',
-            description: 'Department identifier',
-          }),
-          Type.Null(),
-        ],
-        {
-          description: 'Department identifier or null to remove',
-        },
-      ),
     ),
     avatarUrl: Type.Optional(
       Type.Union(

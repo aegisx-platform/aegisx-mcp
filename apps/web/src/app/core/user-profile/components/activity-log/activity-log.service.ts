@@ -16,7 +16,7 @@ import {
 })
 export class ActivityLogService {
   private http = inject(HttpClient);
-  private baseUrl = '/profile/activity';
+  private baseUrl = '/v1/platform/profile/activity';
   private adminBaseUrl = '/activity-logs';
 
   // Track if we're in admin mode (viewing specific user)

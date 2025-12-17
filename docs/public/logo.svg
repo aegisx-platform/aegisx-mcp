@@ -1,0 +1,7 @@
+<svg width="512" height="140" viewBox="0 0 512 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- AEGIS text in black -->
+  <text x="10" y="110" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="110" font-weight="900" letter-spacing="-2" fill="#000000">AEGIS</text>
+
+  <!-- X text in green with emerald-500 color -->
+  <text x="415" y="110" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="110" font-weight="900" fill="#10B981">X</text>
+</svg>

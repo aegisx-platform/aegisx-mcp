@@ -14,6 +14,7 @@ export class ProfileRepository {
    *
    * Retrieves a user's profile information from the users table,
    * excluding sensitive data like password_hash.
+   * Also fetches primary department information if available.
    *
    * @param userId - User ID (UUID)
    * @returns Profile object or null if user not found
@@ -21,25 +22,46 @@ export class ProfileRepository {
   async getProfile(userId: string): Promise<Profile | null> {
     const user = await this.knex('users')
       .select(
-        'id',
-        'email',
-        'first_name',
-        'last_name',
-        'department_id',
-        'avatar_url',
-        'theme',
-        'language',
-        'notifications',
-        'created_at',
-        'updated_at',
+        'users.id',
+        'users.email',
+        'users.first_name',
+        'users.last_name',
+        'users.avatar_url',
+        'users.created_at',
+        'users.updated_at',
+        'up.scheme as theme',
+        'up.language',
+        'up.notifications_email as notifications',
       )
-      .where('id', userId)
-      .whereNull('deleted_at') // Exclude soft-deleted users
+      .leftJoin('user_preferences as up', 'users.id', 'up.user_id')
+      .where('users.id', userId)
+      .whereNull('users.deleted_at') // Exclude soft-deleted users
       .first();
 
     if (!user) return null;
 
-    return this.mapToProfile(user);
+    // Fetch primary department if exists
+    const knex = this.knex;
+    const primaryDepartment = await this.knex('user_departments as ud')
+      .select(
+        'ud.department_id as id',
+        'd.dept_code as code',
+        'd.dept_name as name',
+        'ud.is_primary as isPrimary',
+      )
+      .join('departments as d', 'ud.department_id', 'd.id')
+      .where('ud.user_id', userId)
+      .where('ud.is_primary', true)
+      .where(function () {
+        this.whereNull('ud.valid_until').orWhere(
+          'ud.valid_until',
+          '>',
+          knex.fn.now(),
+        );
+      })
+      .first();
+
+    return this.mapToProfile(user, primaryDepartment);
   }
 
   /**
@@ -56,44 +78,102 @@ export class ProfileRepository {
     userId: string,
     data: Partial<UpdateProfile>,
   ): Promise<Profile | null> {
-    // Build update object with snake_case column names
-    const updateData: any = {};
+    // Build update object for users table with snake_case column names
+    const userUpdateData: any = {};
 
-    if (data.firstName !== undefined) updateData.first_name = data.firstName;
-    if (data.lastName !== undefined) updateData.last_name = data.lastName;
-    if (data.departmentId !== undefined)
-      updateData.department_id = data.departmentId;
-    if (data.avatarUrl !== undefined) updateData.avatar_url = data.avatarUrl;
-    if (data.theme !== undefined) updateData.theme = data.theme;
-    if (data.language !== undefined) updateData.language = data.language;
+    if (data.firstName !== undefined)
+      userUpdateData.first_name = data.firstName;
+    if (data.lastName !== undefined) userUpdateData.last_name = data.lastName;
+    if (data.avatarUrl !== undefined)
+      userUpdateData.avatar_url = data.avatarUrl;
+
+    // Update users table if there are changes
+    if (Object.keys(userUpdateData).length > 0) {
+      userUpdateData.updated_at = this.knex.fn.now();
+
+      await this.knex('users')
+        .where('id', userId)
+        .whereNull('deleted_at')
+        .update(userUpdateData);
+    }
+
+    // Build update object for user_preferences table
+    const preferencesUpdateData: any = {};
+
+    if (data.theme !== undefined) preferencesUpdateData.scheme = data.theme;
+    if (data.language !== undefined)
+      preferencesUpdateData.language = data.language;
     if (data.notifications !== undefined)
-      updateData.notifications = data.notifications;
+      preferencesUpdateData.notifications_email = data.notifications;
 
-    // Add updated_at timestamp
-    updateData.updated_at = this.knex.fn.now();
+    // Update user_preferences if there are changes
+    if (Object.keys(preferencesUpdateData).length > 0) {
+      preferencesUpdateData.updated_at = this.knex.fn.now();
 
-    // Update and return
-    const [user] = await this.knex('users')
-      .where('id', userId)
-      .whereNull('deleted_at') // Only update non-deleted users
-      .update(updateData)
-      .returning([
-        'id',
-        'email',
-        'first_name',
-        'last_name',
-        'department_id',
-        'avatar_url',
-        'theme',
-        'language',
-        'notifications',
-        'created_at',
-        'updated_at',
-      ]);
+      // Upsert preferences - insert if not exists, update if exists
+      await this.knex.raw(
+        `
+        INSERT INTO user_preferences (user_id, scheme, language, notifications_email, updated_at)
+        VALUES (?, ?, ?, ?, NOW())
+        ON CONFLICT (user_id)
+        DO UPDATE SET
+          scheme = COALESCE(EXCLUDED.scheme, user_preferences.scheme),
+          language = COALESCE(EXCLUDED.language, user_preferences.language),
+          notifications_email = COALESCE(EXCLUDED.notifications_email, user_preferences.notifications_email),
+          updated_at = NOW()
+      `,
+        [
+          userId,
+          preferencesUpdateData.scheme || null,
+          preferencesUpdateData.language || null,
+          preferencesUpdateData.notifications_email ?? null,
+        ],
+      );
+    }
+
+    // Fetch and return the updated profile
+    const user = await this.knex('users')
+      .select(
+        'users.id',
+        'users.email',
+        'users.first_name',
+        'users.last_name',
+        'users.avatar_url',
+        'users.created_at',
+        'users.updated_at',
+        'up.scheme as theme',
+        'up.language',
+        'up.notifications_email as notifications',
+      )
+      .leftJoin('user_preferences as up', 'users.id', 'up.user_id')
+      .where('users.id', userId)
+      .whereNull('users.deleted_at')
+      .first();
 
     if (!user) return null;
 
-    return this.mapToProfile(user);
+    // Fetch primary department if exists
+    const knex = this.knex;
+    const primaryDepartment = await this.knex('user_departments as ud')
+      .select(
+        'ud.department_id as id',
+        'd.dept_code as code',
+        'd.dept_name as name',
+        'ud.is_primary as isPrimary',
+      )
+      .join('departments as d', 'ud.department_id', 'd.id')
+      .where('ud.user_id', userId)
+      .where('ud.is_primary', true)
+      .where(function () {
+        this.whereNull('ud.valid_until').orWhere(
+          'ud.valid_until',
+          '>',
+          knex.fn.now(),
+        );
+      })
+      .first();
+
+    return this.mapToProfile(user, primaryDepartment);
   }
 
   /**
@@ -146,20 +226,28 @@ export class ProfileRepository {
    * Converts snake_case database columns to camelCase API fields
    * and formats timestamps as ISO strings.
    *
-   * @param row - Raw database row
+   * @param row - Raw database row from users table
+   * @param primaryDepartment - Optional primary department data
    * @returns Profile object
    */
-  private mapToProfile(row: any): Profile {
+  private mapToProfile(row: any, primaryDepartment?: any): Profile {
     return {
       id: row.id,
       email: row.email,
       firstName: row.first_name,
       lastName: row.last_name,
-      departmentId: row.department_id || undefined,
       avatarUrl: row.avatar_url || undefined,
       theme: row.theme || 'auto',
       language: row.language || 'en',
       notifications: row.notifications ?? true,
+      primaryDepartment: primaryDepartment
+        ? {
+            id: primaryDepartment.id,
+            code: primaryDepartment.code,
+            name: primaryDepartment.name,
+            isPrimary: primaryDepartment.isPrimary,
+          }
+        : undefined,
       createdAt: new Date(row.created_at).toISOString(),
       updatedAt: new Date(row.updated_at).toISOString(),
     };

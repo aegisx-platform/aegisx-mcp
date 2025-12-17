@@ -1,0 +1,5 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Simple AEGISX favicon - just the X in a circle -->
+  <circle cx="32" cy="32" r="30" fill="#10B981"/>
+  <text x="32" y="48" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="40" font-weight="900" fill="#FFFFFF" text-anchor="middle">X</text>
+</svg>

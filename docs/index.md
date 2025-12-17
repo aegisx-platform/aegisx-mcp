@@ -10,7 +10,7 @@ hero:
     alt: AegisX Platform
   actions:
     - theme: brand
-      text: Get Started
+      text: Get Started →
       link: /getting-started/getting-started
     - theme: alt
       text: View on GitHub
@@ -19,158 +19,164 @@ hero:
 features:
   - icon: 🚀
     title: Modern Tech Stack
-    details: Built with Angular 19+ Signals, Fastify 4+, PostgreSQL 15+, and Nx monorepo for optimal developer experience and performance.
-
-  - icon: 🏗️
-    title: Enterprise Architecture
-    details: Production-ready architecture with RBAC, audit logging, file uploads, API response standards, and comprehensive error handling.
+    details: Angular 19+ Signals · Fastify 4+ · PostgreSQL 15+ with Nx monorepo
+    link: /architecture/architecture-overview
+    linkText: Learn more →
 
   - icon: 🛠️
     title: CRUD Generator
-    details: Automatic CRUD API generation with TypeBox validation, bulk operations, Excel/CSV import, and WebSocket events support.
+    details: Auto-generate TypeBox-validated APIs with bulk ops & real-time events
+    link: /reference/cli/aegisx-cli/README
+    linkText: View docs →
 
   - icon: 🎨
-    title: UI Library
-    details: Enterprise Angular UI library with Angular Material + TailwindCSS, theme system, and 50+ production-ready components.
-
-  - icon: 🧪
-    title: Testing Suite
-    details: Comprehensive testing with Jest unit tests, Playwright E2E, visual regression, accessibility, and performance testing.
-
-  - icon: 📦
-    title: Full Documentation
-    details: 489+ markdown documents organized in 5-layer architecture with API specs, guides, architecture patterns, and feature specifications.
+    title: UI Component Library
+    details: 50+ production-ready components with Material + TailwindCSS theming
+    link: /reference/ui/aegisx-ui-standards
+    linkText: Explore components →
 
   - icon: 🔐
-    title: Security First
-    details: JWT authentication, role-based access control, password hashing, account lockout, email verification, and audit trails.
+    title: Enterprise Security
+    details: JWT auth · RBAC · Audit trails · Password policies · Account lockout
+    link: /features/authentication/README
+    linkText: Security features →
 
-  - icon: 🚢
-    title: CI/CD Ready
-    details: GitHub Actions workflows for automated testing, building, Docker deployment, and GitHub Pages documentation publishing.
+  - icon: 🧪
+    title: Full Testing Suite
+    details: Jest · Playwright E2E · Visual regression · Accessibility testing
+    link: /guides/testing/testing-strategy
+    linkText: Testing guide →
 
-  - icon: 📊
-    title: Monitoring Stack
-    details: Built-in system monitoring with CPU/memory metrics, database pool stats, Redis cache analytics, and real-time alerts.
+  - icon: 📚
+    title: 489+ Documentation Pages
+    details: Complete guides, API specs, architecture patterns & feature docs
+    link: /getting-started/contributing
+    linkText: Browse docs →
 ---
 
-## Quick Start
+## Why AegisX Platform?
 
-### Prerequisites
+AegisX is a **production-ready enterprise framework** that eliminates months of boilerplate setup. Built on proven patterns from real-world healthcare and government systems, it provides:
 
-- **Node.js:** 22+ (required)
-- **pnpm:** 10+ (package manager)
-- **PostgreSQL:** 15+ (database)
-- **Redis:** 7+ (optional, for caching)
+- **Type-safe from DB to UI** - TypeBox schemas ensure runtime validation matches TypeScript types
+- **API-First Development** - Generate complete CRUD APIs with migrations, validations, and tests in seconds
+- **Multi-tenant Ready** - Department isolation, RBAC, and audit logging built-in
+- **Developer Experience** - Hot reload, Nx caching, MCP integration, and comprehensive docs
 
-### Installation
+## Quick Links
 
-```bash
-# Clone the repository
-git clone https://github.com/aegisx-platform/aegisx-starter-1.git
-cd aegisx-starter-1
+<div class="quick-links-grid">
 
-# Install dependencies
-pnpm install
+### 🎯 For Developers
 
-# Set up environment
-cp .env.example .env.local
-# Edit .env.local with your database credentials
+- [Getting Started Guide](/getting-started/getting-started) - Installation & first steps
+- [Feature Development](/guides/development/feature-development-standard) - Complete workflow
+- [API Standards](/reference/api/api-response-standard) - REST API conventions
+- [CRUD Generator](/reference/cli/aegisx-cli/README) - Auto-generate boilerplate
 
-# Run database migrations
-pnpm run db:migrate
+### 🏗️ For Architects
 
-# Seed database with demo data
-pnpm run db:seed
+- [Architecture Overview](/architecture/architecture-overview) - System design
+- [Domain Architecture](/architecture/domain-architecture-guide) - Multi-domain patterns
+- [Frontend Patterns](/architecture/frontend-architecture) - Angular best practices
+- [Backend Patterns](/architecture/backend-architecture) - Fastify architecture
 
-# Start development servers
-pnpm run dev
-```
+### 🚀 For DevOps
 
-### Development Servers
+- [Multi-Instance Setup](/guides/infrastructure/multi-instance-setup) - Parallel dev environments
+- [CI/CD Quick Start](/guides/infrastructure/ci-cd/quick-start) - GitHub Actions
+- [Docker Guide](/infrastructure/monorepo-docker-guide) - Container deployment
+- [Git Flow](/guides/infrastructure/version-management/git-flow-release-guide) - Release strategy
 
-After running `pnpm run dev`, the following servers will start:
+### 🧪 For QA Engineers
 
-- **API Server:** http://localhost:3383
-- **Web App:** http://localhost:4249
-- **Documentation:** http://localhost:5173 (this site)
+- [Testing Strategy](/guides/testing/testing-strategy) - Test architecture
+- [API Testing](/guides/testing/api-testing) - Backend testing
+- [E2E Testing](/guides/testing/integration-tests) - Playwright tests
+- [QA Checklist](/guides/development/qa-checklist) - Quality gates
 
-### Default Credentials
-
-```
-Email: admin@aegisx.local
-Password: Admin123!@#
-```
-
-## Documentation Structure
-
-This documentation follows the **Diátaxis Framework** with a 5-layer information architecture:
-
-| Section                                                    | Description                                |
-| ---------------------------------------------------------- | ------------------------------------------ |
-| [Getting Started](/getting-started/getting-started)        | Installation, setup, first steps           |
-| [Guides](/guides/development/feature-development-standard) | How-to guides, workflows, best practices   |
-| [Reference](/reference/api/api-response-standard)          | API docs, CLI commands, standards          |
-| [Architecture](/architecture/concepts/module-isolation)    | System design, patterns, concepts          |
-| [Features](/features/)                                     | Feature specifications and API contracts   |
-| [Analysis](/analysis/platform/fuse-integration-summary)    | Technical analysis and research            |
-| [Reports](/reports/ui-test-report)                         | Testing reports and audits                 |
-| [Archive](/archive/2024-Q4/)                               | Historical documentation and session notes |
+</div>
 
 ## Technology Stack
 
-| Layer               | Technology                     | Version |
-| ------------------- | ------------------------------ | ------- |
-| **Frontend**        | Angular + Signals              | 19+     |
-| **UI Library**      | Angular Material + TailwindCSS | Latest  |
-| **Backend**         | Fastify + TypeBox              | 4+      |
-| **Database**        | PostgreSQL + Knex.js           | 15+     |
-| **Testing**         | Jest + Playwright              | Latest  |
-| **Monorepo**        | Nx Workspace                   | Latest  |
-| **Package Manager** | pnpm                           | 10+     |
-| **Runtime**         | Node.js                        | 22+     |
+| Layer          | Technology                     | Version |
+| -------------- | ------------------------------ | ------- |
+| **Frontend**   | Angular + Signals              | 19+     |
+| **UI Library** | Angular Material + TailwindCSS | Latest  |
+| **Backend**    | Fastify + TypeBox              | 4+      |
+| **Database**   | PostgreSQL + Knex.js           | 15+     |
+| **Testing**    | Jest + Playwright              | Latest  |
+| **Monorepo**   | Nx Workspace                   | Latest  |
 
-## Key Features
+## What You Get Out of the Box
 
 ### 🔐 Authentication & Authorization
 
-- JWT-based authentication with refresh tokens
+- JWT with refresh tokens
 - Role-based access control (RBAC)
-- Password reset and email verification
-- Account lockout after failed attempts
-- Audit logging for all authentication events
+- Password reset & email verification
+- Account lockout & audit logging
 
 ### 🛠️ Developer Tools
 
-- **CRUD Generator:** Automatic API generation with full TypeScript support
-- **MCP Integration:** Nx and Playwright Model Context Protocol servers
-- **Hot Reload:** Fast development with Nx build cache
-- **Type Safety:** TypeBox schemas for runtime validation
-- **Database Migrations:** Knex.js for schema versioning
+- **CRUD Generator** - Generate APIs in seconds
+- **MCP Integration** - Nx & Playwright context servers
+- **Hot Reload** - Fast development with Nx cache
+- **Type Safety** - TypeBox runtime validation
 
 ### 📊 Platform Features
 
-- File upload and attachment management
-- PDF export with custom templates
-- Excel/CSV import for bulk operations
+- File upload & attachment system
+- PDF export with templates
+- Excel/CSV bulk import
 - WebSocket real-time updates
 - System monitoring dashboard
-- Redis caching layer
-- Department management
-- User profile system
-- Navigation menu builder
-- Settings management
-
-## Community & Support
-
-- **GitHub Repository:** [aegisx-platform/aegisx-starter-1](https://github.com/aegisx-platform/aegisx-starter-1)
-- **Issues:** [Report bugs or request features](https://github.com/aegisx-platform/aegisx-starter-1/issues)
-- **Documentation:** You're reading it! 📖
-
-## License
-
-This project is released under the [MIT License](https://github.com/aegisx-platform/aegisx-starter-1/blob/main/LICENSE).
+- Department & user management
 
 ---
 
-**Ready to start?** Head over to the [Getting Started Guide](/getting-started/getting-started) to begin your journey with AegisX Platform.
+<div style="text-align: center; margin: 3rem 0;">
+
+**Ready to build?** Start with the [Getting Started Guide](/getting-started/getting-started) or explore [example features](/features/).
+
+[Get Started →](/getting-started/getting-started){.get-started-button}
+
+</div>
+
+<style>
+.quick-links-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+.quick-links-grid h3 {
+  margin-top: 0;
+  color: var(--vp-c-brand-1);
+}
+
+.quick-links-grid ul {
+  list-style: none;
+  padding: 0;
+}
+
+.quick-links-grid li {
+  margin: 0.5rem 0;
+}
+
+.get-started-button {
+  display: inline-block;
+  padding: 0.75rem 2rem;
+  background: var(--vp-c-brand-1);
+  color: white;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.get-started-button:hover {
+  background: var(--vp-c-brand-2);
+}
+</style>

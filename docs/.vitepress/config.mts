@@ -17,13 +17,77 @@ export default defineConfig({
     // Navigation
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Getting Started', link: '/getting-started/getting-started' },
-      { text: 'Guides', link: '/guides/development/feature-development-standard' },
-      { text: 'Reference', link: '/reference/api/api-response-standard' },
-      { text: 'Architecture', link: '/architecture/architecture-overview' },
-      { text: 'Features', link: '/features/index' },
-      { text: 'Development', link: '/guides/development/claude-detailed-rules' },
-      { text: 'Infrastructure', link: '/guides/infrastructure/ci-cd-setup' },
+      { text: 'Docs', link: '/getting-started/getting-started' },
+      {
+        text: 'Guides',
+        items: [
+          {
+            text: 'Development',
+            items: [
+              { text: 'Feature Development', link: '/guides/development/feature-development-standard' },
+              { text: 'API Standards', link: '/guides/development/api-calling-standard' },
+              { text: 'QA Checklist', link: '/guides/development/qa-checklist' },
+              { text: 'Full-Stack Workflow', link: '/guides/development/universal-fullstack-standard' },
+            ],
+          },
+          {
+            text: 'Infrastructure',
+            items: [
+              { text: 'Multi-Instance Setup', link: '/guides/infrastructure/multi-instance-setup' },
+              { text: 'Git Flow & Release', link: '/guides/infrastructure/version-management/git-flow-release-guide' },
+              { text: 'CI/CD Quick Start', link: '/guides/infrastructure/ci-cd/quick-start' },
+              { text: 'Domain Migrations', link: '/guides/infrastructure/domain-separated-migrations' },
+            ],
+          },
+          {
+            text: 'Testing',
+            items: [
+              { text: 'Testing Strategy', link: '/guides/testing/testing-strategy' },
+              { text: 'API Testing', link: '/guides/testing/api-testing' },
+              { text: 'Integration Tests', link: '/guides/testing/integration-tests' },
+            ],
+          },
+        ],
+      },
+      {
+        text: 'Reference',
+        items: [
+          {
+            text: 'API',
+            items: [
+              { text: 'API Response Standard', link: '/reference/api/api-response-standard' },
+              { text: 'TypeBox Schemas', link: '/reference/api/typebox-schema-standard' },
+              { text: 'Bulk Operations', link: '/reference/api/bulk-operations-api-design' },
+              { text: 'File Upload', link: '/reference/api/file-upload-guide' },
+            ],
+          },
+          {
+            text: 'CLI',
+            items: [
+              { text: 'AegisX CLI', link: '/reference/cli/aegisx-cli/README' },
+              { text: 'Complete Workflow', link: '/reference/cli/aegisx-cli/complete-workflow' },
+              { text: 'Git Workflow', link: '/reference/cli/aegisx-cli/git-workflow' },
+            ],
+          },
+          {
+            text: 'UI',
+            items: [
+              { text: 'UI Standards', link: '/reference/ui/aegisx-ui-standards' },
+              { text: 'Theme System', link: '/reference/ui/theme-system-standard' },
+              { text: 'Design Tokens', link: '/reference/ui/token-reference' },
+            ],
+          },
+        ],
+      },
+      {
+        text: 'Architecture',
+        items: [
+          { text: 'Overview', link: '/architecture/architecture-overview' },
+          { text: 'Domain Architecture', link: '/architecture/domain-architecture-guide' },
+          { text: 'Frontend Patterns', link: '/architecture/frontend-architecture' },
+          { text: 'Backend Patterns', link: '/architecture/backend-architecture' },
+        ],
+      },
     ],
 
     // Sidebar navigation - will be configured in task 5.2
@@ -555,7 +619,8 @@ export default defineConfig({
 
   // Head tags
   head: [
-    ['link', { rel: 'icon', href: '/favicon.ico' }],
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
+    ['link', { rel: 'alternate icon', href: '/favicon.ico' }],
     [
       'meta',
       {

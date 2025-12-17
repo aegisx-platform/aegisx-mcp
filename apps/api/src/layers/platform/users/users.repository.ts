@@ -116,11 +116,23 @@ export class UsersRepository {
 
   async findById(id: string): Promise<UserWithRole | null> {
     const user = await this.knex('users')
-      .select('users.*', 'roles.name as role', 'roles.id as roleId')
-      .leftJoin('user_roles', 'users.id', 'user_roles.user_id')
-      .leftJoin('roles', 'user_roles.role_id', 'roles.id')
-      .where('users.id', id)
-      .whereNull('users.deleted_at') // Exclude deleted users
+      .select(
+        'users.id',
+        'users.email',
+        'users.username',
+        'users.first_name',
+        'users.last_name',
+        'users.status',
+        'users.avatar_url',
+        'users.created_at',
+        'users.updated_at',
+        'roles.name as role',
+        'roles.id as roleId',
+      )
+      .leftJoin('user_roles', 'users.id', '=', 'user_roles.user_id')
+      .leftJoin('roles', 'user_roles.role_id', '=', 'roles.id')
+      .where('users.id', '=', id)
+      .whereNull('users.deleted_at')
       .first();
 
     return user ? this.mapToUserWithRole(user) : null;

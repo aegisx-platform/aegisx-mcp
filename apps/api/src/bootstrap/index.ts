@@ -2,11 +2,13 @@
  * Bootstrap Index
  *
  * Main entry point for server bootstrapping with comprehensive error handling
+ * Uses Pino for structured logging + visual display for development
  */
 
 import * as dotenv from 'dotenv';
 import * as dotenvExpand from 'dotenv-expand';
 import 'reflect-metadata'; // Required for tsyringe
+import type pino from 'pino';
 
 // Configuration imports
 import { loadAppConfig, type AppConfig } from '../config/app.config';
@@ -24,6 +26,7 @@ import {
   validateSecurityConfig,
   type SecurityConfig,
 } from '../config/security.config';
+import { createPinoLogger } from '../config/logger.config';
 
 // Bootstrap imports
 import { WelcomeResponseSchema } from '../shared/schemas/welcome.schemas';
@@ -34,25 +37,11 @@ import {
   startServer,
   type ServerInfo,
 } from './server.factory';
-
-/**
- * Bootstrap logging utilities
- */
-function logStep(icon: string, message: string): void {
-  console.log(`${icon} ${message}...`);
-}
-
-function logStepComplete(message: string, duration?: number): void {
-  const timeStr = duration ? ` (${duration}ms)` : '';
-  console.log(`   ✅ ${message}${timeStr}`);
-}
-
-function logDetails(title: string, details: Record<string, any>): void {
-  console.log(`   📋 ${title}:`);
-  Object.entries(details).forEach(([key, value]) => {
-    console.log(`      ${key}: ${value}`);
-  });
-}
+import {
+  displayStartupBanner,
+  displayStartupSummary,
+  displayPerformanceMetrics,
+} from './startup-display';
 
 export interface BootstrapResult {
   server: ServerInfo;
@@ -77,35 +66,35 @@ export async function bootstrap(): Promise<BootstrapResult> {
   const bootstrapStartTime = Date.now();
 
   try {
-    // Display AegisX logo
-    console.log('');
-    console.log('     █████╗ ███████╗ ██████╗ ██╗███████╗██╗  ██╗');
-    console.log('    ██╔══██╗██╔════╝██╔════╝ ██║██╔════╝╚██╗██╔╝');
-    console.log('    ███████║█████╗  ██║  ███╗██║███████╗ ╚███╔╝ ');
-    console.log('    ██╔══██║██╔══╝  ██║   ██║██║╚════██║ ██╔██╗ ');
-    console.log('    ██║  ██║███████╗╚██████╔╝██║███████║██╔╝ ██╗');
-    console.log('    ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝╚══════╝╚═╝  ╚═╝');
-    console.log('');
-    console.log('    🛡️  Enterprise-Ready Full Stack Application  🛡️');
-    console.log('');
-    console.log('🚀 AegisX Platform API - Starting Bootstrap Process');
-    console.log('================================================');
-    console.log('');
+    // 1. Display banner (development only, before logger)
+    displayStartupBanner();
 
-    // 1. Load environment variables (.env.local overrides .env)
-    logStep('🔧', 'Loading environment configuration');
+    // 2. Create Pino logger (after banner, before structured logs)
+    const logger = createPinoLogger();
+
+    logger.info({ phase: 'bootstrap' }, 'Bootstrap starting');
+
+    // 3. Load environment variables (.env.local overrides .env)
+    logger.info({ phase: 'environment' }, 'Loading environment configuration');
+
     dotenv.config(); // Load .env first (defaults)
     dotenv.config({ path: '.env.local', override: true }); // Load .env.local (overrides)
     const env = { parsed: process.env };
     dotenvExpand.expand(env);
 
-    // 2. Validate environment
+    // 4. Validate environment
     const envStartTime = Date.now();
     validateEnvironmentOrThrow();
     const envInfo = getEnvironmentInfo();
     const envTime = Date.now() - envStartTime;
 
-    logStepComplete('Environment loaded & validated', envTime);
+    logger.info(
+      {
+        phase: 'environment',
+        duration: envTime,
+      },
+      'Environment loaded & validated',
+    );
 
     // 3. Load configurations
     logStep('⚙️', 'Loading application configurations');

@@ -872,7 +872,9 @@ export class UserService {
 
     try {
       const response = await this.http
-        .post<ApiResponse<{ message: string }>>(`/profile/password`, data)
+        .post<
+          ApiResponse<{ message: string }>
+        >(`/v1/platform/profile/password`, data)
         .toPromise();
 
       if (response?.success) {
@@ -894,7 +896,7 @@ export class UserService {
   // ===== PROFILE METHODS =====
 
   getProfile() {
-    return this.http.get<ApiResponse<UserProfile>>(`/profile`).pipe(
+    return this.http.get<ApiResponse<UserProfile>>(`/v1/platform/profile`).pipe(
       map((response) => {
         if (response.success && response.data) {
           return response.data;
@@ -905,14 +907,16 @@ export class UserService {
   }
 
   updateProfile(data: UpdateProfileRequest) {
-    return this.http.put<ApiResponse<UserProfile>>(`/profile`, data).pipe(
-      map((response) => {
-        if (response.success && response.data) {
-          return response.data;
-        }
-        throw new Error(response.error || 'Failed to update profile');
-      }),
-    );
+    return this.http
+      .put<ApiResponse<UserProfile>>(`/v1/platform/profile`, data)
+      .pipe(
+        map((response) => {
+          if (response.success && response.data) {
+            return response.data;
+          }
+          throw new Error(response.error || 'Failed to update profile');
+        }),
+      );
   }
 
   // ===== AVATAR METHODS =====
@@ -921,9 +925,14 @@ export class UserService {
     formData: FormData,
     progressCallback?: (progress: number) => void,
   ): Observable<ApiResponse<AvatarUploadResponse>> {
-    const req = new HttpRequest('POST', `/profile/avatar`, formData, {
-      reportProgress: true,
-    });
+    const req = new HttpRequest(
+      'POST',
+      `/v1/platform/profile/avatar`,
+      formData,
+      {
+        reportProgress: true,
+      },
+    );
 
     return this.http.request<ApiResponse<AvatarUploadResponse>>(req).pipe(
       map((event) => {
@@ -963,7 +972,7 @@ export class UserService {
 
   deleteAvatar(): Observable<ApiResponse<{ message: string }>> {
     return this.http
-      .delete<ApiResponse<{ message: string }>>(`/profile/avatar`)
+      .delete<ApiResponse<{ message: string }>>(`/v1/platform/profile/avatar`)
       .pipe(
         map((response) => {
           if (response.success) {
@@ -978,7 +987,7 @@ export class UserService {
 
   getPreferences() {
     return this.http
-      .get<ApiResponse<UserPreferences>>(`/profile/preferences`)
+      .get<ApiResponse<UserPreferences>>(`/v1/platform/profile/preferences`)
       .pipe(
         map((response) => {
           if (response.success && response.data) {
@@ -991,7 +1000,9 @@ export class UserService {
 
   updatePreferences(data: Partial<UserPreferences>) {
     return this.http
-      .put<ApiResponse<UserPreferences>>(`/profile/preferences`, data)
+      .put<
+        ApiResponse<UserPreferences>
+      >(`/v1/platform/profile/preferences`, data)
       .pipe(
         map((response) => {
           if (response.success && response.data) {
@@ -1011,7 +1022,7 @@ export class UserService {
 
     try {
       const response = await this.http
-        .delete<DeleteAccountResponse>(`/profile/delete`, {
+        .delete<DeleteAccountResponse>(`/v1/platform/profile/delete`, {
           body: data,
         })
         .toPromise();
