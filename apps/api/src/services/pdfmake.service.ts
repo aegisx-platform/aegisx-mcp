@@ -68,6 +68,7 @@ export class PDFMakeService {
   private readonly previewDir: string;
   private fontManager: FontManagerService;
   private fontsInitialized: boolean = false;
+  private static loggingInitialized = false;
 
   constructor() {
     this.templates = new Map();
@@ -88,19 +89,28 @@ export class PDFMakeService {
       // Fonts will be provided to PdfPrinter when creating documents
 
       this.fontsInitialized = true;
-      console.log('PDFMake fonts initialized successfully');
 
-      // Log font status for debugging
-      const fontStatus = this.fontManager.getFontStatus();
-      console.log('Font Status:', {
-        loaded: fontStatus.loaded,
-        thaiFontsAvailable: fontStatus.thaiFontsAvailable,
-      });
+      // Only log once (avoid duplicate logs from multiple service instances)
+      if (!PDFMakeService.loggingInitialized) {
+        PDFMakeService.loggingInitialized = true;
+
+        // Log font status for debugging (only once)
+        const fontStatus = this.fontManager.getFontStatus();
+        console.log('PDFMake fonts initialized successfully');
+        console.log('Font Status:', {
+          loaded: fontStatus.loaded,
+          thaiFontsAvailable: fontStatus.thaiFontsAvailable,
+        });
+      }
     } catch (error) {
-      console.warn(
-        'Font initialization failed, using defaults:',
-        error.message,
-      );
+      // Only log warnings once
+      if (!PDFMakeService.loggingInitialized) {
+        console.warn(
+          'Font initialization failed, using defaults:',
+          error.message,
+        );
+        PDFMakeService.loggingInitialized = true;
+      }
       this.fontsInitialized = true; // Continue with default fonts
     }
   }
@@ -493,7 +503,6 @@ export class PDFMakeService {
       // Capture variables in closure for footer function
       const capturedMetadata = metadata;
       const capturedShowSummary = showSummary;
-      const self = this;
 
       const originalFooter = templateConfig.footer;
       docDefinition.footer = (
@@ -507,7 +516,7 @@ export class PDFMakeService {
           // Create export date text for footer
           const exportDateText =
             capturedMetadata && capturedShowSummary
-              ? self.createExportDateText(capturedMetadata)
+              ? this.createExportDateText(capturedMetadata)
               : '';
 
           // Return footer with columns layout

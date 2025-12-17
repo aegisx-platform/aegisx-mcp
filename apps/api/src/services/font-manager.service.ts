@@ -19,6 +19,7 @@ export class FontManagerService {
   private loadedFonts: Set<string> = new Set();
   private fontFiles: Map<string, Buffer> = new Map();
   private initialized: boolean = false;
+  private static loggingInitialized = false;
 
   constructor() {
     this.fontConfiguration = getFontConfiguration();
@@ -36,9 +37,18 @@ export class FontManagerService {
     try {
       await this.loadFontFiles();
       this.initialized = true;
-      console.log('✅ Font Manager initialized');
+
+      // Only log once (avoid duplicate logs from multiple service instances)
+      if (!FontManagerService.loggingInitialized) {
+        FontManagerService.loggingInitialized = true;
+        console.log('✅ Font Manager initialized');
+      }
     } catch (error) {
-      console.warn('Font Manager initialization warning:', error.message);
+      // Only log warnings once
+      if (!FontManagerService.loggingInitialized) {
+        console.warn('Font Manager initialization warning:', error.message);
+        FontManagerService.loggingInitialized = true;
+      }
       // Continue with default fonts if custom fonts fail to load
       this.initialized = true;
     }
