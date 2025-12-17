@@ -100,10 +100,13 @@ project/
 
 - ✅ `docs/` - เอกสารสาธารณะทั้งหมด
 - ✅ `.claude/skills/` - Claude skills
+- ✅ `.project/completion-reports/` - รายงานเสร็จงาน (เพื่อติดตามความคืบหน้า)
 
 **ไม่ควร commit:**
 
-- ❌ `.project/` - เอกสารภายใน (อยู่ใน .gitignore)
+- ❌ `.project/meeting-notes/` - บันทึกประชุม (ภายใน)
+- ❌ `.project/session-logs/` - บันทึกการทำงาน (ภายใน)
+- ❌ `.project/planning/` - เอกสารวางแผน (ภายใน)
 - ❌ ไฟล์ชั่วคราว (`*.tmp.md`, `*.draft.md`)
 
 ## การใช้งาน
@@ -442,8 +445,11 @@ git commit -m "add docs"                 # Vague message
 
 **A:**
 
-- ใน `docs/` → ✅ Commit
-- ใน `.project/` → ❌ Don't commit (already in .gitignore)
+- ใน `docs/` → ✅ Commit (เอกสารสาธารณะ)
+- ใน `.project/completion-reports/` → ✅ Commit (ติดตามความคืบหน้า)
+- ใน `.project/meeting-notes/` → ❌ Don't commit (ภายใน)
+- ใน `.project/session-logs/` → ❌ Don't commit (ภายใน)
+- ใน `.project/planning/` → ❌ Don't commit (ภายใน)
 - ใน `.claude/skills/` → ✅ Commit
 
 ## Benefits
@@ -481,7 +487,7 @@ git commit -m "add docs"                 # Vague message
 
 | ประเภทเอกสาร      | ที่เก็บ                        | Commit? |
 | ----------------- | ------------------------------ | ------- |
-| Completion Report | `.project/completion-reports/` | ❌      |
+| Completion Report | `.project/completion-reports/` | ✅      |
 | Session Log       | `.project/session-logs/`       | ❌      |
 | Meeting Notes     | `.project/meeting-notes/`      | ❌      |
 | Planning Docs     | `.project/planning/`           | ❌      |

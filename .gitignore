@@ -82,6 +82,8 @@ docker-compose.instance.yml
 
 # Internal project documentation (managed by documentation-standards skill)
 .project/
+# Exception: Commit completion reports for progress tracking
+!.project/completion-reports/
 
 # Logs
 *.log

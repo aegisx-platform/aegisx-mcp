@@ -93,16 +93,16 @@ project-root/
 
 **Directory Usage:**
 
-| Type of Document       | Location                       | Example                                            |
-| ---------------------- | ------------------------------ | -------------------------------------------------- |
-| **Public Guides**      | `docs/guides/`                 | `docs/guides/development/testing-guide.md`         |
-| **API Reference**      | `docs/reference/api/`          | `docs/reference/api/authentication-api.md`         |
-| **Architecture**       | `docs/architecture/`           | `docs/architecture/frontend-patterns.md`           |
-| **Features**           | `docs/features/`               | `docs/features/user-auth/README.md`                |
-| **Completion Reports** | `.project/completion-reports/` | `.project/completion-reports/auth-feature.md`      |
-| **Meeting Notes**      | `.project/meeting-notes/`      | `.project/meeting-notes/2025-01-17-planning.md`    |
-| **Session Logs**       | `.project/session-logs/`       | `.project/session-logs/2025-01-17-backend-work.md` |
-| **Planning Docs**      | `.project/planning/`           | `.project/planning/inventory-system-plan.md`       |
+| Type of Document       | Location                       | Example                                                             |
+| ---------------------- | ------------------------------ | ------------------------------------------------------------------- |
+| **Public Guides**      | `docs/guides/`                 | `docs/guides/development/testing-guide.md`                          |
+| **API Reference**      | `docs/reference/api/`          | `docs/reference/api/authentication-api.md`                          |
+| **Architecture**       | `docs/architecture/`           | `docs/architecture/frontend-patterns.md`                            |
+| **Features**           | `docs/features/`               | `docs/features/user-auth/README.md`                                 |
+| **Completion Reports** | `.project/completion-reports/` | `.project/completion-reports/auth-feature.md` (COMMIT for tracking) |
+| **Meeting Notes**      | `.project/meeting-notes/`      | `.project/meeting-notes/2025-01-17-planning.md`                     |
+| **Session Logs**       | `.project/session-logs/`       | `.project/session-logs/2025-01-17-backend-work.md`                  |
+| **Planning Docs**      | `.project/planning/`           | `.project/planning/inventory-system-plan.md`                        |
 
 ### 3. Special Cases (Exceptions)
 
@@ -137,7 +137,7 @@ Frontend_Implementation_Done.md
 1. Create directory: `.project/completion-reports/` (if not exists)
 2. Create file with kebab-case: `[feature-name]-completion.md`
 3. Write content following template (see below)
-4. Never commit to git (add to .gitignore)
+4. Commit to git for progress tracking
 
 #### When Creating Public Documentation
 
@@ -340,6 +340,8 @@ Additional observations or reminders.
 ```gitignore
 # Internal project documentation (not for public docs)
 .project/
+# Exception: Commit completion reports for progress tracking
+!.project/completion-reports/
 
 # Temporary documentation
 *.tmp.md
@@ -349,9 +351,10 @@ Additional observations or reminders.
 
 **Files to commit:**
 
-- All files in `docs/` (public documentation)
-- All files in `.claude/skills/` (Claude skills)
-- NOT files in `.project/` (internal use only)
+- ✅ All files in `docs/` (public documentation)
+- ✅ All files in `.claude/skills/` (Claude skills)
+- ✅ All files in `.project/completion-reports/` (progress tracking)
+- ❌ Other files in `.project/` (meeting notes, session logs, planning - internal use only)
 
 ### 7. Automatic Enforcement
 
@@ -673,12 +676,12 @@ echo "✅ Root directory clean"
 
 ### Quick Reference
 
-| Task              | Correct Path                               | Incorrect Path    |
-| ----------------- | ------------------------------------------ | ----------------- |
-| Completion report | `.project/completion-reports/feature.md`   | `FEATURE_DONE.md` |
-| Session log       | `.project/session-logs/2025-01-17-work.md` | `Session_Log.md`  |
-| Public guide      | `docs/guides/development/guide-name.md`    | `Guide_Name.md`   |
-| Feature docs      | `docs/features/feature-name/README.md`     | `docs/FEATURE.md` |
+| Task              | Correct Path                               | Commit? | Incorrect Path    |
+| ----------------- | ------------------------------------------ | ------- | ----------------- |
+| Completion report | `.project/completion-reports/feature.md`   | ✅      | `FEATURE_DONE.md` |
+| Session log       | `.project/session-logs/2025-01-17-work.md` | ❌      | `Session_Log.md`  |
+| Public guide      | `docs/guides/development/guide-name.md`    | ✅      | `Guide_Name.md`   |
+| Feature docs      | `docs/features/feature-name/README.md`     | ✅      | `docs/FEATURE.md` |
 
 ---
 
