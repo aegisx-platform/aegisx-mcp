@@ -113,13 +113,15 @@ export const ValidationErrorResponseSchema = Type.Object({
   error: Type.Object({
     code: Type.Literal('VALIDATION_ERROR'),
     message: Type.String(),
-    details: Type.Array(
-      Type.Object({
-        field: Type.String(),
-        message: Type.String(),
-        code: Type.String(),
-        value: Type.Optional(Type.Any()),
-      }),
+    details: Type.Optional(
+      Type.Array(
+        Type.Object({
+          field: Type.String(),
+          message: Type.String(),
+          code: Type.String(),
+          value: Type.Optional(Type.Any()),
+        }),
+      ),
     ),
     statusCode: Type.Literal(400),
   }),

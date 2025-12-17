@@ -37,27 +37,44 @@ export const BudgetRequestsSchema = Type.Object({
 export const CreateBudgetRequestsSchema = Type.Object({
   request_number: Type.Optional(Type.String()),
   fiscal_year: Type.Integer(),
-  department_id: Type.Optional(Type.Integer()),
+  department_id: Type.Optional(Type.Union([Type.Integer(), Type.Null()])),
   status: Type.Optional(Type.Any()),
   total_requested_amount: Type.Optional(Type.Number()),
-  justification: Type.Optional(Type.String()),
-  submitted_by: Type.Optional(Type.String({ format: 'uuid' })),
-  submitted_at: Type.Optional(Type.String({ format: 'date-time' })),
-  dept_reviewed_by: Type.Optional(Type.String({ format: 'uuid' })),
-  dept_reviewed_at: Type.Optional(Type.String({ format: 'date-time' })),
-  dept_comments: Type.Optional(Type.String()),
-  finance_reviewed_by: Type.Optional(Type.String({ format: 'uuid' })),
-  finance_reviewed_at: Type.Optional(Type.String({ format: 'date-time' })),
-  finance_comments: Type.Optional(Type.String()),
-  rejection_reason: Type.Optional(Type.String()),
-  deleted_at: Type.Optional(Type.String({ format: 'date-time' })),
+  justification: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  submitted_by: Type.Optional(
+    Type.Union([Type.String({ format: 'uuid' }), Type.Null()]),
+  ),
+  submitted_at: Type.Optional(
+    Type.Union([Type.String({ format: 'date-time' }), Type.Null()]),
+  ),
+  dept_reviewed_by: Type.Optional(
+    Type.Union([Type.String({ format: 'uuid' }), Type.Null()]),
+  ),
+  dept_reviewed_at: Type.Optional(
+    Type.Union([Type.String({ format: 'date-time' }), Type.Null()]),
+  ),
+  dept_comments: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  finance_reviewed_by: Type.Optional(
+    Type.Union([Type.String({ format: 'uuid' }), Type.Null()]),
+  ),
+  finance_reviewed_at: Type.Optional(
+    Type.Union([Type.String({ format: 'date-time' }), Type.Null()]),
+  ),
+  finance_comments: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  rejection_reason: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  deleted_at: Type.Optional(
+    Type.Union([Type.String({ format: 'date-time' }), Type.Null()]),
+  ),
   is_active: Type.Optional(Type.Boolean()),
   // created_by is auto-filled from JWT token
   created_by: Type.Optional(
-    Type.String({
-      format: 'uuid',
-      description: 'User who created this record (auto-filled from JWT)',
-    }),
+    Type.Union([
+      Type.String({
+        format: 'uuid',
+        description: 'User who created this record (auto-filled from JWT)',
+      }),
+      Type.Null(),
+    ]),
   ),
 });
 
