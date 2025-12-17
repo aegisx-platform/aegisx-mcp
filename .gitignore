@@ -76,6 +76,7 @@ Thumbs.db
 # Multi-instance development files
 docker-compose.override.yml
 docker-compose.instance.yml
+.mcp.json
 
 # Playwright MCP generated files
 .playwright-mcp/
