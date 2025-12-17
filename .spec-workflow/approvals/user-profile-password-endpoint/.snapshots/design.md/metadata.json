@@ -1,0 +1,14 @@
+{
+  "filePath": ".spec-workflow/specs/user-profile-password-endpoint/design.md",
+  "currentVersion": 1,
+  "snapshots": [
+    {
+      "version": 1,
+      "filename": "snapshot-001.json",
+      "timestamp": "2025-12-16T16:00:06.008Z",
+      "trigger": "initial",
+      "approvalId": "approval_1765900805963_gazw8g88g",
+      "approvalTitle": "Design document for user-profile-password-endpoint"
+    }
+  ]
+}

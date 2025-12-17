@@ -1,0 +1,14 @@
+{
+  "filePath": ".spec-workflow/specs/user-profile-password-endpoint/tasks.md",
+  "currentVersion": 1,
+  "snapshots": [
+    {
+      "version": 1,
+      "filename": "snapshot-001.json",
+      "timestamp": "2025-12-16T16:04:44.279Z",
+      "trigger": "initial",
+      "approvalId": "approval_1765901084246_bi91x40nr",
+      "approvalTitle": "Tasks document for user-profile-password-endpoint"
+    }
+  ]
+}
