@@ -115,7 +115,7 @@ export class BudgetRequestsService extends BaseService<
             'Please contact your administrator to assign you to a department before creating budget requests, ' +
             'or select a department manually.',
         ) as any;
-        error.statusCode = 400;
+        error.statusCode = 422;
         error.code = 'USER_NO_DEPARTMENT';
         throw error;
       }
