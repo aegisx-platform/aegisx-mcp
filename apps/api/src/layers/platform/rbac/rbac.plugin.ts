@@ -4,6 +4,7 @@ import { RbacService } from './rbac.service';
 import { RbacRepository } from './rbac.repository';
 import { rbacRoutes } from './rbac.routes';
 import * as rbacSchemas from './rbac.schemas';
+import { PermissionCacheInvalidationService } from '../../core/auth/services/permission-cache-invalidation.service';
 
 /**
  * Platform RBAC Plugin
@@ -44,9 +45,24 @@ export default async function platformRbacPlugin(
     );
   }
 
+  // Get permission cache from global decorators
+  const permissionCache = (fastify as any).permissionCache;
+  if (!permissionCache) {
+    throw new Error(
+      'Permission cache not found. Make sure permission-cache plugin is registered first.',
+    );
+  }
+
+  // Create cache invalidation service
+  const cacheInvalidation = new PermissionCacheInvalidationService(
+    permissionCache,
+    db,
+    fastify,
+  );
+
   // Create repository, service, and controller instances
   const rbacRepository = new RbacRepository(db);
-  const rbacService = new RbacService(rbacRepository);
+  const rbacService = new RbacService(rbacRepository, cacheInvalidation);
   const rbacController = new RbacController(rbacService);
 
   // Register routes under the specified prefix or /v1/platform

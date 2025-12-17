@@ -22,23 +22,20 @@ import {
   RoleAssignmentHistoryQuery,
 } from './rbac.schemas';
 import { PaginationMeta } from '../../../shared/pagination.utils';
+import { PermissionCacheInvalidationService } from '../../core/auth/services/permission-cache-invalidation.service';
 
 export class RbacService {
-  constructor(private rbacRepository: RbacRepository) {}
+  constructor(
+    private rbacRepository: RbacRepository,
+    private cacheInvalidation?: PermissionCacheInvalidationService,
+  ) {}
 
   // ===== ROLE SERVICES =====
 
   async getRoles(
     query: RoleQuery,
   ): Promise<{ roles: Role[]; pagination: PaginationMeta }> {
-    console.log('[DEBUG] Service getRoles - Before repository call');
-    const result = await this.rbacRepository.getRoles(query);
-    console.log(
-      '[DEBUG] Service getRoles - After repository, got',
-      result.roles.length,
-      'roles',
-    );
-    return result;
+    return await this.rbacRepository.getRoles(query);
   }
 
   async getRoleById(
@@ -175,6 +172,11 @@ export class RbacService {
     );
     if (!updatedRole) {
       throw new Error('Failed to update role');
+    }
+
+    // If permissions were updated, invalidate cache for all users with this role
+    if (this.cacheInvalidation && data.permission_ids !== undefined) {
+      await this.cacheInvalidation.invalidateUsersWithRole(id);
     }
 
     return updatedRole;
@@ -318,6 +320,11 @@ export class RbacService {
       throw new Error('Failed to update permission');
     }
 
+    // Invalidate cache for all users with this permission
+    if (this.cacheInvalidation) {
+      await this.cacheInvalidation.invalidateUsersWithPermission(id);
+    }
+
     return updatedPermission;
   }
 
@@ -330,6 +337,11 @@ export class RbacService {
     const deleted = await this.rbacRepository.deletePermission(id);
     if (!deleted) {
       throw new Error('Failed to delete permission');
+    }
+
+    // Invalidate cache for all users with this permission
+    if (this.cacheInvalidation) {
+      await this.cacheInvalidation.invalidateUsersWithPermission(id);
     }
   }
 
@@ -385,7 +397,18 @@ export class RbacService {
       }
     }
 
-    return await this.rbacRepository.assignRoleToUser(userId, data, assignedBy);
+    const result = await this.rbacRepository.assignRoleToUser(
+      userId,
+      data,
+      assignedBy,
+    );
+
+    // Invalidate permission cache for this user
+    if (this.cacheInvalidation) {
+      await this.cacheInvalidation.invalidateUser(userId);
+    }
+
+    return result;
   }
 
   async removeRoleFromUser(userId: string, roleId: string): Promise<void> {
@@ -408,6 +431,11 @@ export class RbacService {
     );
     if (!removed) {
       throw new Error('Failed to remove role from user');
+    }
+
+    // Invalidate permission cache for this user
+    if (this.cacheInvalidation) {
+      await this.cacheInvalidation.invalidateUser(userId);
     }
   }
 
@@ -489,6 +517,7 @@ export class RbacService {
     };
 
     // Assign roles to each user
+    const successfulUserIds: string[] = [];
     for (const userId of data.user_ids) {
       try {
         await this.rbacRepository.assignRoleToUser(
@@ -500,6 +529,7 @@ export class RbacService {
           assignedBy,
         );
         results.success_count++;
+        successfulUserIds.push(userId);
       } catch (error) {
         results.error_count++;
         results.errors.push({
@@ -507,6 +537,11 @@ export class RbacService {
           error: error instanceof Error ? error.message : 'Unknown error',
         });
       }
+    }
+
+    // Invalidate permission cache for all successfully assigned users
+    if (this.cacheInvalidation && successfulUserIds.length > 0) {
+      await this.cacheInvalidation.invalidateUsers(successfulUserIds);
     }
 
     return results;
@@ -569,6 +604,11 @@ export class RbacService {
       }
     }
 
+    // Invalidate permission cache for this user
+    if (this.cacheInvalidation) {
+      await this.cacheInvalidation.invalidateUser(userId);
+    }
+
     return assignedRoles;
   }
 
@@ -623,6 +663,11 @@ export class RbacService {
         assignedBy,
       );
       assignedRoles.push(userRole);
+    }
+
+    // Invalidate permission cache for this user
+    if (this.cacheInvalidation) {
+      await this.cacheInvalidation.invalidateUser(userId);
     }
 
     return assignedRoles;
