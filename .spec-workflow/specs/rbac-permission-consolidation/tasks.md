@@ -184,7 +184,7 @@
 
 ## Phase 6: Schema and API Contract Updates
 
-- [ ] 16. Update TypeBox schemas - remove permission fields from responses
+- [x] 16. Update TypeBox schemas - remove permission fields from responses
   - File: `apps/api/src/layers/platform/users/user-departments.schemas.ts`
   - Update `DepartmentDetailSchema` to remove 5 permission fields
   - Update response schemas to reflect changes
@@ -194,7 +194,7 @@
   - _Requirements: 6_
   - _Prompt: Role: API Developer with expertise in TypeBox and OpenAPI schemas | Task: Update user-departments schemas following requirement 6 and Component 4 design. In DepartmentDetailSchema, remove Type definitions for: can_create_requests, can_edit_requests, can_submit_requests, can_approve_requests, can_view_reports. Update UserDepartmentsResponseSchema and PrimaryDepartmentResponseSchema if they reference these fields. Preserve all organizational fields (id, userId, departmentId, departmentCode, departmentName, isPrimary, assignedRole, validFrom, validUntil, assignedAt). | Restrictions: Must not remove organizational fields, maintain Type.Object structure, keep schema IDs and descriptions, ensure backwards compatibility for other fields | Success: All permission fields removed from schemas, organizational fields preserved, schemas validate correctly, TypeScript types generated properly_
 
-- [ ] 17. Update TypeBox schemas - remove permission fields from requests
+- [x] 17. Update TypeBox schemas - remove permission fields from requests
   - File: `apps/api/src/layers/platform/users/user-departments.schemas.ts` (continue from Task 16)
   - Update `AssignDepartmentRequestSchema` to remove permission parameters
   - Update any other request schemas that include permission fields
@@ -203,7 +203,7 @@
   - _Requirements: 6_
   - _Prompt: Role: API Developer with expertise in request validation | Task: Update request schemas following Component 4 design. In AssignDepartmentRequestSchema, remove: canCreateRequests, canEditRequests, canSubmitRequests, canApproveRequests, canViewReports Type definitions. Keep: departmentId (required), isPrimary (optional), assignedRole (optional), validFrom (optional), validUntil (optional). Update any other request schemas that include permission fields. Ensure validation rules match updated structure. | Restrictions: Must maintain required field validation, preserve optional field handling, keep Type.Optional for nullable fields | Success: Request schemas updated without permission fields, validation works correctly, API rejects old permission fields if sent_
 
-- [ ] 18. Update API documentation (Swagger/OpenAPI)
+- [x] 18. Update API documentation (Swagger/OpenAPI)
   - Files: Schema files, route documentation
   - Update inline schema documentation to reflect changes
   - Add deprecation notices if old endpoints existed
