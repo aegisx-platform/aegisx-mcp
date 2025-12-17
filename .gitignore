@@ -80,6 +80,9 @@ docker-compose.instance.yml
 # Playwright MCP generated files
 .playwright-mcp/
 
+# Internal project documentation (managed by documentation-standards skill)
+.project/
+
 # Logs
 *.log
 api.log
