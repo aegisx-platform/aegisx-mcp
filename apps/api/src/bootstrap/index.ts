@@ -8,7 +8,7 @@
 import * as dotenv from 'dotenv';
 import * as dotenvExpand from 'dotenv-expand';
 import 'reflect-metadata'; // Required for tsyringe
-import type pino from 'pino';
+import type { Logger } from 'pino';
 
 // Configuration imports
 import { loadAppConfig, type AppConfig } from '../config/app.config';
@@ -52,6 +52,7 @@ export interface BootstrapResult {
   };
   startupMetrics: {
     totalTime: number;
+    envTime: number;
     configLoadTime: number;
     serverCreateTime: number;
     pluginLoadTime: number;
@@ -65,12 +66,15 @@ export interface BootstrapResult {
 export async function bootstrap(): Promise<BootstrapResult> {
   const bootstrapStartTime = Date.now();
 
+  // Store logger reference for error handling
+  let logger: Logger | undefined;
+
   try {
     // 1. Display banner (development only, before logger)
     displayStartupBanner();
 
     // 2. Create Pino logger (after banner, before structured logs)
-    const logger = createPinoLogger();
+    logger = createPinoLogger();
 
     logger.info({ phase: 'bootstrap' }, 'Bootstrap starting');
 
@@ -96,8 +100,8 @@ export async function bootstrap(): Promise<BootstrapResult> {
       'Environment loaded & validated',
     );
 
-    // 3. Load configurations
-    logStep('⚙️', 'Loading application configurations');
+    // 5. Load configurations
+    logger.info({ phase: 'config' }, 'Loading application configurations');
     const configStartTime = Date.now();
 
     const appConfig = loadAppConfig();
@@ -109,45 +113,54 @@ export async function bootstrap(): Promise<BootstrapResult> {
     const databaseErrors = validateDatabaseConfig(databaseConfig);
 
     if (securityErrors.length > 0 || databaseErrors.length > 0) {
-      console.error('\n❌ Configuration validation failed:');
-      [...securityErrors, ...databaseErrors].forEach((error) => {
-        console.error(`   ${error}`);
-      });
+      logger.error(
+        {
+          phase: 'config',
+          securityErrors,
+          databaseErrors,
+        },
+        'Configuration validation failed',
+      );
       throw new Error('Invalid configuration');
     }
 
     const configLoadTime = Date.now() - configStartTime;
-    logStepComplete('Configurations loaded & validated', configLoadTime);
-
-    if (appConfig.server.isDevelopment) {
-      logDetails('Configuration Summary', {
+    logger.info(
+      {
+        phase: 'config',
+        duration: configLoadTime,
         server: `${appConfig.server.host}:${appConfig.server.port}`,
         environment: appConfig.server.environment,
-        apiPrefix: appConfig.api.prefix
-          ? `"${appConfig.api.prefix}"`
-          : '(none - routes at root level)',
-        cors: Array.isArray(securityConfig.cors.origin)
-          ? `${securityConfig.cors.origin.length} origins`
+        apiPrefix: appConfig.api.prefix || 'none',
+        corsOrigins: Array.isArray(securityConfig.cors.origin)
+          ? securityConfig.cors.origin.length
           : 'configured',
-        rateLimit: `${securityConfig.rateLimit.max}/min`,
-        database: `PostgreSQL + Redis`,
-      });
-    }
+        rateLimit: securityConfig.rateLimit.max,
+      },
+      'Configurations loaded & validated',
+    );
 
-    // 4. Create server
-    logStep('🏗️', 'Creating Fastify server');
+    // 6. Create server
+    logger.info({ phase: 'server' }, 'Creating Fastify server');
     const serverCreateStartTime = Date.now();
 
     const serverInfo = await createServer({
       config: appConfig,
-      enableLogger: false, // Reduce noise
+      enableLogger: false, // Using our Pino logger instead
+      logger, // Pass our logger to Fastify
     });
 
     const serverCreateTime = Date.now() - serverCreateStartTime;
-    logStepComplete('Fastify server created', serverCreateTime);
+    logger.info(
+      {
+        phase: 'server',
+        duration: serverCreateTime,
+      },
+      'Fastify server created',
+    );
 
-    // 5. Load plugins
-    logStep('🔌', 'Loading application plugins');
+    // 7. Load plugins
+    logger.info({ phase: 'plugins' }, 'Loading application plugins');
     const pluginLoadStartTime = Date.now();
 
     // Wrap all plugins with API prefix if configured
@@ -159,7 +172,7 @@ export async function bootstrap(): Promise<BootstrapResult> {
             appConfig,
             securityConfig,
             databaseConfig,
-            !appConfig.server.isDevelopment,
+            logger,
           );
         },
         { prefix: appConfig.api.prefix },
@@ -171,14 +184,20 @@ export async function bootstrap(): Promise<BootstrapResult> {
         appConfig,
         securityConfig,
         databaseConfig,
-        !appConfig.server.isDevelopment,
+        logger,
       );
     }
 
     const pluginLoadTime = Date.now() - pluginLoadStartTime;
-    logStepComplete('All plugins loaded successfully', pluginLoadTime);
+    logger.info(
+      {
+        phase: 'plugins',
+        duration: pluginLoadTime,
+      },
+      'All plugins loaded',
+    );
 
-    // 5.5. Register welcome route at root level with proper TypeBox schema
+    // 7.5. Register welcome route at root level with proper TypeBox schema
     const typedFastify =
       serverInfo.instance.withTypeProvider<
         import('@fastify/type-provider-typebox').TypeBoxTypeProvider
@@ -251,16 +270,24 @@ export async function bootstrap(): Promise<BootstrapResult> {
       },
     });
 
-    // 6. Start server
-    logStep('🚀', 'Starting HTTP server');
+    // 8. Start server
+    logger.info({ phase: 'server' }, 'Starting HTTP server');
     const serverStartStartTime = Date.now();
 
     await startServer(serverInfo, appConfig);
 
     const serverStartTime = Date.now() - serverStartStartTime;
-    logStepComplete('HTTP server started', serverStartTime);
+    logger.info(
+      {
+        phase: 'server',
+        duration: serverStartTime,
+        host: appConfig.server.host,
+        port: appConfig.server.port,
+      },
+      'HTTP server started',
+    );
 
-    // 7. Setup graceful shutdown
+    // 9. Setup graceful shutdown
     setupGracefulShutdown(serverInfo);
 
     // Calculate total time
@@ -268,47 +295,55 @@ export async function bootstrap(): Promise<BootstrapResult> {
 
     const startupMetrics = {
       totalTime,
+      envTime,
       configLoadTime,
       serverCreateTime,
       pluginLoadTime,
       serverStartTime,
     };
 
-    // Show final startup summary
-    console.log('');
-    console.log('🎉 AegisX Platform Ready!');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log(
-      `📍 Server: http://${appConfig.server.host}:${appConfig.server.port}`,
+    // 10. Visual summary (development only)
+    displayStartupSummary({
+      host: appConfig.server.host,
+      port: appConfig.server.port,
+      environment: appConfig.server.environment,
+      apiPrefix: appConfig.api.prefix,
+      totalTime,
+      nodeVersion: process.version,
+      processId: process.pid,
+      swaggerUrl: !appConfig.server.isProduction
+        ? `http://localhost:${appConfig.server.port}/documentation`
+        : undefined,
+    });
+
+    // 11. Performance metrics (development only)
+    displayPerformanceMetrics({
+      envTime,
+      configLoadTime,
+      serverCreateTime,
+      pluginLoadTime,
+      serverStartTime,
+      totalTime,
+    });
+
+    // 12. Structured log for analytics (all environments)
+    logger.info(
+      {
+        phase: 'bootstrap',
+        status: 'completed',
+        totalDuration: totalTime,
+        server: `http://${appConfig.server.host}:${appConfig.server.port}`,
+        environment: appConfig.server.environment,
+        metrics: {
+          envTime,
+          configLoadTime,
+          serverCreateTime,
+          pluginLoadTime,
+          serverStartTime,
+        },
+      },
+      'Bootstrap completed',
     );
-    console.log(
-      `🔗 API Prefix: ${appConfig.api.prefix ? `"${appConfig.api.prefix}"` : '(none - routes at root level)'}`,
-    );
-    console.log(`🌍 Environment: ${appConfig.server.environment}`);
-    console.log(`📊 Startup Time: ${totalTime}ms`);
-    console.log(`📦 Node Version: ${process.version}`);
-    console.log(`🔧 Process ID: ${process.pid}`);
-
-    if (!appConfig.server.isProduction) {
-      console.log(
-        `📚 Swagger UI: http://localhost:${appConfig.server.port}/documentation`,
-      );
-    }
-
-    if (appConfig.server.isDevelopment) {
-      console.log('');
-      console.log('📊 Performance Metrics:');
-      console.log(`   Environment: ${envTime}ms`);
-      console.log(`   Config Load: ${configLoadTime}ms`);
-      console.log(`   Server Create: ${serverCreateTime}ms`);
-      console.log(`   Plugin Load: ${pluginLoadTime}ms`);
-      console.log(`   Server Start: ${serverStartTime}ms`);
-      console.log(`   ⏱️ Total: ${totalTime}ms`);
-    }
-
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('✅ Ready to accept connections!');
-    console.log('');
 
     return {
       server: serverInfo,
@@ -320,7 +355,7 @@ export async function bootstrap(): Promise<BootstrapResult> {
       startupMetrics,
     };
   } catch (error) {
-    await handleBootstrapError(error, Date.now() - bootstrapStartTime);
+    await handleBootstrapError(error, Date.now() - bootstrapStartTime, logger);
     throw error;
   }
 }
@@ -331,12 +366,8 @@ export async function bootstrap(): Promise<BootstrapResult> {
 async function handleBootstrapError(
   error: any,
   elapsedTime: number,
+  logger?: Logger,
 ): Promise<void> {
-  console.log('');
-  console.error('💥 BOOTSTRAP FAILED');
-  console.error('==================');
-  console.error('');
-
   const errorInfo = {
     message: error.message || 'Unknown error',
     stack: error.stack,
@@ -348,6 +379,24 @@ async function handleBootstrapError(
     timestamp: new Date().toISOString(),
   };
 
+  // Log via Pino if available
+  if (logger) {
+    logger.error(
+      {
+        phase: 'bootstrap',
+        status: 'failed',
+        elapsedTime,
+        error: errorInfo,
+      },
+      'Bootstrap failed',
+    );
+  }
+
+  // Also output to console for visibility
+  console.log('');
+  console.error('💥 BOOTSTRAP FAILED');
+  console.error('==================');
+  console.error('');
   console.error('Error Details:');
   console.error(JSON.stringify(errorInfo, null, 2));
   console.error('');

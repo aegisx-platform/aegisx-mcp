@@ -5,6 +5,7 @@
  */
 
 import type { FastifyInstance } from 'fastify';
+import type { Logger } from 'pino';
 import type { AppConfig, DatabaseConfig, SecurityConfig } from '../config';
 
 // Import plugins
@@ -624,14 +625,17 @@ export function createDomainsLayerGroup(): PluginGroup {
 export async function loadPluginGroup(
   fastify: FastifyInstance,
   group: PluginGroup,
+  logger: Logger,
   options?: { prefix?: string },
-  quiet = false,
 ): Promise<void> {
-  if (!quiet) {
-    console.log(
-      `   📦 Loading ${group.name} (${group.plugins.length} plugins)...`,
-    );
-  }
+  logger.info(
+    {
+      phase: 'plugins',
+      group: group.name,
+      count: group.plugins.length,
+    },
+    `Loading ${group.name}`,
+  );
 
   const startTime = Date.now();
   const results: {
@@ -669,17 +673,29 @@ export async function loadPluginGroup(
             });
 
             if (pluginReg.required) {
-              console.error(
-                `  ❌ ${pluginReg.name} FAILED (${duration}ms):`,
-                errorMsg,
+              logger.error(
+                {
+                  phase: 'plugins',
+                  group: group.name,
+                  plugin: pluginReg.name,
+                  duration,
+                  error: errorMsg,
+                },
+                `Required plugin ${pluginReg.name} failed to load`,
               );
               throw new Error(
                 `Required plugin ${pluginReg.name} failed to load: ${errorMsg}`,
               );
             } else {
-              console.warn(
-                `  ⚠️ ${pluginReg.name} OPTIONAL FAILED (${duration}ms):`,
-                errorMsg,
+              logger.warn(
+                {
+                  phase: 'plugins',
+                  group: group.name,
+                  plugin: pluginReg.name,
+                  duration,
+                  error: errorMsg,
+                },
+                `Optional plugin ${pluginReg.name} failed to load`,
               );
             }
           }
@@ -711,17 +727,29 @@ export async function loadPluginGroup(
         });
 
         if (pluginReg.required) {
-          console.error(
-            `  ❌ ${pluginReg.name} FAILED (${duration}ms):`,
-            errorMsg,
+          logger.error(
+            {
+              phase: 'plugins',
+              group: group.name,
+              plugin: pluginReg.name,
+              duration,
+              error: errorMsg,
+            },
+            `Required plugin ${pluginReg.name} failed to load`,
           );
           throw new Error(
             `Required plugin ${pluginReg.name} failed to load: ${errorMsg}`,
           );
         } else {
-          console.warn(
-            `  ⚠️ ${pluginReg.name} OPTIONAL FAILED (${duration}ms):`,
-            errorMsg,
+          logger.warn(
+            {
+              phase: 'plugins',
+              group: group.name,
+              plugin: pluginReg.name,
+              duration,
+              error: errorMsg,
+            },
+            `Optional plugin ${pluginReg.name} failed to load`,
           );
         }
       }
@@ -730,13 +758,19 @@ export async function loadPluginGroup(
 
   const totalDuration = Date.now() - startTime;
   const successCount = results.filter((r) => r.success).length;
+  const failedCount = results.length - successCount;
 
-  if (!quiet) {
-    const status = successCount === results.length ? '✅' : '⚠️';
-    console.log(
-      `      ${status} ${group.name} completed - ${successCount}/${results.length} plugins (${totalDuration}ms)`,
-    );
-  }
+  logger.info(
+    {
+      phase: 'plugins',
+      group: group.name,
+      total: results.length,
+      success: successCount,
+      failed: failedCount,
+      duration: totalDuration,
+    },
+    `${group.name} completed`,
+  );
 }
 
 /**
@@ -750,7 +784,7 @@ export async function loadAllPlugins(
   appConfig: AppConfig,
   securityConfig: SecurityConfig,
   databaseConfig: DatabaseConfig,
-  quiet = false,
+  logger: Logger,
 ): Promise<void> {
   const startTime = Date.now();
 
@@ -762,17 +796,23 @@ export async function loadAllPlugins(
   );
 
   for (const group of pluginGroups) {
-    await loadPluginGroup(fastify, group, undefined, quiet);
+    await loadPluginGroup(fastify, group, logger);
   }
 
   // Feature flags control which plugin groups to load
   const { enableNewRoutes, enableOldRoutes } = appConfig.features;
 
-  if (!quiet && enableNewRoutes) {
-    console.log('   🔄 New layer-based routes enabled');
+  if (enableNewRoutes) {
+    logger.info(
+      { phase: 'plugins', feature: 'layer-based' },
+      'New layer-based routes enabled',
+    );
   }
-  if (!quiet && enableOldRoutes) {
-    console.log('   🔄 Legacy routes enabled');
+  if (enableOldRoutes) {
+    logger.info(
+      { phase: 'plugins', feature: 'legacy' },
+      'Legacy routes enabled',
+    );
   }
 
   // Load new layer-based architecture (if enabled)
@@ -782,9 +822,9 @@ export async function loadAllPlugins(
     const domainsLayerGroup = createDomainsLayerGroup();
 
     // Load in layer dependency order: Core → Platform → Domains
-    await loadPluginGroup(fastify, coreLayerGroup, undefined, quiet);
-    await loadPluginGroup(fastify, platformLayerGroup, undefined, quiet);
-    await loadPluginGroup(fastify, domainsLayerGroup, undefined, quiet);
+    await loadPluginGroup(fastify, coreLayerGroup, logger);
+    await loadPluginGroup(fastify, platformLayerGroup, logger);
+    await loadPluginGroup(fastify, domainsLayerGroup, logger);
   }
 
   // Load old plugin architecture (if enabled - backward compatibility)
@@ -804,7 +844,7 @@ export async function loadAllPlugins(
 
     // Load all API plugins without prefix wrapper
     // Each plugin has its own route prefix (/auth, /users, /settings, etc.)
-    await loadPluginGroup(fastify, allApiPlugins, undefined, quiet);
+    await loadPluginGroup(fastify, allApiPlugins, logger);
   }
 
   const totalDuration = Date.now() - startTime;
@@ -828,9 +868,12 @@ export async function loadAllPlugins(
     totalPlugins += coreGroup.plugins.length + featureGroup.plugins.length;
   }
 
-  if (!quiet) {
-    console.log(
-      `   ✅ Plugin loading completed - ${totalPlugins} plugins loaded successfully (${totalDuration}ms)`,
-    );
-  }
+  logger.info(
+    {
+      phase: 'plugins',
+      total: totalPlugins,
+      duration: totalDuration,
+    },
+    'All plugins loaded',
+  );
 }

@@ -25,31 +25,39 @@ export interface EmailOptions {
 export class EmailService {
   private transporter: Transporter | null = null;
   private readonly isDevelopment: boolean;
+  private static initialized = false;
 
   constructor(private readonly fastify: FastifyInstance) {
     this.isDevelopment =
       process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
 
-    // Debug: Check what environment variables are loaded
-    console.log('[EMAIL_SERVICE] Environment check:', {
-      SMTP_USER: process.env.SMTP_USER ? '✅ SET' : '❌ MISSING',
-      SMTP_PASSWORD: process.env.SMTP_PASSWORD ? '✅ SET' : '❌ MISSING',
-      SMTP_HOST: process.env.SMTP_HOST || 'NOT SET',
-      SMTP_PORT: process.env.SMTP_PORT || 'NOT SET',
-    });
+    // Only log initialization once (avoid duplicate logs)
+    if (!EmailService.initialized) {
+      EmailService.initialized = true;
 
-    // Initialize SMTP transporter if credentials are provided
-    if (this.shouldUseSMTP()) {
-      console.log('[EMAIL_SERVICE] SMTP credentials found, initializing...');
+      // Check SMTP configuration
+      const hasSmtp = this.shouldUseSMTP();
+
       this.fastify.log.info(
-        'SMTP credentials found, initializing email service...',
+        {
+          smtp: hasSmtp ? 'configured' : 'not-configured',
+          host: process.env.SMTP_HOST || 'smtp.gmail.com',
+          port: process.env.SMTP_PORT || '587',
+        },
+        hasSmtp
+          ? 'Email service initializing with SMTP'
+          : 'Email service using console logging (no SMTP credentials)',
       );
-      this.initializeTransporter();
+
+      // Initialize SMTP transporter if credentials are provided
+      if (hasSmtp) {
+        this.initializeTransporter();
+      }
     } else {
-      console.log('[EMAIL_SERVICE] No SMTP credentials, using console logging');
-      this.fastify.log.warn(
-        'SMTP credentials not found, emails will be logged to console only',
-      );
+      // Subsequent instances still need to initialize transporter if SMTP is configured
+      if (this.shouldUseSMTP()) {
+        this.initializeTransporter();
+      }
     }
   }
 
@@ -102,35 +110,34 @@ export class EmailService {
       from = process.env.FROM_EMAIL || 'noreply@aegisx.local',
     } = options;
 
-    console.log('[EMAIL_SERVICE] sendEmail called:', {
-      to,
-      subject,
-      hasTransporter: !!this.transporter,
-      isDevelopment: this.isDevelopment,
-    });
+    this.fastify.log.debug(
+      {
+        to: Array.isArray(to) ? to.join(', ') : to,
+        subject,
+        hasTransporter: !!this.transporter,
+      },
+      'Sending email',
+    );
 
     // In development/test without SMTP, just log to console
     if (this.isDevelopment && !this.transporter) {
-      console.log(
-        '[EMAIL_SERVICE] Development mode without SMTP - logging to console',
-      );
       this.logEmailToConsole({ to, subject, text, html, from });
       return true;
     }
 
     // If SMTP is not configured, log warning and return
     if (!this.transporter) {
-      console.log('[EMAIL_SERVICE] No transporter configured - email not sent');
-      this.fastify.log.warn({
-        msg: 'Email service not configured. Email not sent.',
-        to,
-        subject,
-      });
+      this.fastify.log.warn(
+        {
+          to: Array.isArray(to) ? to.join(', ') : to,
+          subject,
+        },
+        'Email service not configured, email not sent',
+      );
       return false;
     }
 
     try {
-      console.log('[EMAIL_SERVICE] Attempting to send email via SMTP...');
       const info = await this.transporter.sendMail({
         from,
         to: Array.isArray(to) ? to.join(', ') : to,
@@ -139,26 +146,25 @@ export class EmailService {
         html,
       });
 
-      console.log('[EMAIL_SERVICE] Email sent successfully!', {
-        messageId: info.messageId,
-        to,
-      });
-      this.fastify.log.info({
-        msg: 'Email sent successfully',
-        messageId: info.messageId,
-        to,
-        subject,
-      });
+      this.fastify.log.info(
+        {
+          messageId: info.messageId,
+          to: Array.isArray(to) ? to.join(', ') : to,
+          subject,
+        },
+        'Email sent successfully',
+      );
 
       return true;
     } catch (error) {
-      console.error('[EMAIL_SERVICE] Failed to send email:', error);
-      this.fastify.log.error({
-        msg: 'Failed to send email',
-        error,
-        to,
-        subject,
-      });
+      this.fastify.log.error(
+        {
+          error,
+          to: Array.isArray(to) ? to.join(', ') : to,
+          subject,
+        },
+        'Failed to send email',
+      );
       return false;
     }
   }

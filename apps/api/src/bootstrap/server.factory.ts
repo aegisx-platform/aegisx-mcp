@@ -8,11 +8,13 @@ import Fastify, {
   type FastifyInstance,
   type FastifyServerOptions,
 } from 'fastify';
+import type { Logger } from 'pino';
 import type { AppConfig } from '../config/app.config';
 
 export interface ServerCreationOptions {
   config: AppConfig;
   enableLogger?: boolean;
+  logger?: Logger;
   customOptions?: Partial<FastifyServerOptions>;
 }
 
@@ -29,15 +31,19 @@ export interface ServerInfo {
 export async function createServer(
   options: ServerCreationOptions,
 ): Promise<ServerInfo> {
-  const { config, enableLogger = true, customOptions = {} } = options;
+  const { config, enableLogger = true, logger, customOptions = {} } = options;
 
-  console.log('🏗️ Creating Fastify server instance...');
   const startTime = Date.now();
+
+  // Determine logger configuration for Fastify
+  // If a Pino logger is provided, we disable Fastify's logger since we'll use our own for HTTP logs
+  // If no logger is provided, use enableLogger flag
+  const fastifyLoggerConfig = logger ? false : enableLogger;
 
   // Build Fastify options
   const fastifyOptions: FastifyServerOptions = {
-    // Disable default Fastify logger - we'll use Winston instead
-    logger: enableLogger,
+    // Disable Fastify's logger when using external Pino logger
+    logger: fastifyLoggerConfig,
 
     // Request ID generation
     genReqId: (request) => {
@@ -80,6 +86,12 @@ export async function createServer(
 
   // Create Fastify instance
   const fastify = Fastify(fastifyOptions);
+
+  // If external logger provided, attach it to Fastify instance
+  if (logger) {
+    // Replace Fastify's logger with our Pino logger
+    (fastify as any).log = logger;
+  }
 
   // Add server info to instance
   fastify.decorate('serverInfo', {
