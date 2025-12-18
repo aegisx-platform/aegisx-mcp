@@ -8,8 +8,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-
-export type AlertVariant = 'success' | 'error' | 'warning' | 'info' | 'default';
+import { AlertVariant } from './alert.types';
 
 @Component({
   selector: 'ax-alert',
@@ -20,8 +19,8 @@ export type AlertVariant = 'success' | 'error' | 'warning' | 'info' | 'default';
 })
 export class AxAlertComponent implements OnInit, OnDestroy {
   @Input() variant: AlertVariant = 'default';
-  @Input() title = '';
-  @Input() closeable = false;
+  @Input() title: string = '';
+  @Input() closeable: boolean = false;
   @Input() duration?: number; // Auto-hide after duration (milliseconds)
   @Output() closed = new EventEmitter<void>();
 

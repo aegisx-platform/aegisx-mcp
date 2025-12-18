@@ -39,10 +39,20 @@ import {
   ColorShade,
   ExportFormat,
   SemanticColorName,
-  ThemePreset,
   ThemeSection,
 } from './theme-builder.types';
 import type { M3ColorScheme } from './m3-color.util';
+import {
+  BackgroundKey,
+  TextKey,
+  BorderKey,
+  FontSizeKey,
+  FontWeightKey,
+  LineHeightKey,
+  SpacingKey,
+  RadiusKey,
+  ShadowKey,
+} from '../../services/theme/ax-theme.types';
 
 @Component({
   selector: 'ax-theme-builder',
@@ -2059,31 +2069,31 @@ export class AxThemeBuilderComponent {
   onBackgroundHexInput(key: string, event: Event): void {
     const input = event.target as HTMLInputElement;
     if (this.isValidHex(input.value)) {
-      this.themeService.updateBackground(key as any, input.value);
+      this.themeService.updateBackground(key as BackgroundKey, input.value);
     }
   }
 
   onTextChange(key: string, event: Event): void {
     const input = event.target as HTMLInputElement;
-    this.themeService.updateText(key as any, input.value);
+    this.themeService.updateText(key as TextKey, input.value);
   }
 
   onTextHexInput(key: string, event: Event): void {
     const input = event.target as HTMLInputElement;
     if (this.isValidHex(input.value)) {
-      this.themeService.updateText(key as any, input.value);
+      this.themeService.updateText(key as TextKey, input.value);
     }
   }
 
   onBorderChange(key: string, event: Event): void {
     const input = event.target as HTMLInputElement;
-    this.themeService.updateBorder(key as any, input.value);
+    this.themeService.updateBorder(key as BorderKey, input.value);
   }
 
   onBorderHexInput(key: string, event: Event): void {
     const input = event.target as HTMLInputElement;
     if (this.isValidHex(input.value)) {
-      this.themeService.updateBorder(key as any, input.value);
+      this.themeService.updateBorder(key as BorderKey, input.value);
     }
   }
 
@@ -2094,35 +2104,38 @@ export class AxThemeBuilderComponent {
 
   onFontSizeChange(size: string, event: Event): void {
     const input = event.target as HTMLInputElement;
-    this.themeService.updateFontSize(size as any, input.value);
+    this.themeService.updateFontSize(size as FontSizeKey, input.value);
   }
 
   onFontWeightChange(weight: string, event: Event): void {
     const input = event.target as HTMLInputElement;
     this.themeService.updateFontWeight(
-      weight as any,
+      weight as FontWeightKey,
       parseInt(input.value, 10),
     );
   }
 
   onLineHeightChange(lh: string, event: Event): void {
     const input = event.target as HTMLInputElement;
-    this.themeService.updateLineHeight(lh as any, parseFloat(input.value));
+    this.themeService.updateLineHeight(
+      lh as LineHeightKey,
+      parseFloat(input.value),
+    );
   }
 
   onSpacingChange(key: string, event: Event): void {
     const input = event.target as HTMLInputElement;
-    this.themeService.updateSpacing(key as any, input.value);
+    this.themeService.updateSpacing(key as SpacingKey, input.value);
   }
 
   onRadiusChange(key: string, event: Event): void {
     const input = event.target as HTMLInputElement;
-    this.themeService.updateRadius(key as any, input.value);
+    this.themeService.updateRadius(key as RadiusKey, input.value);
   }
 
   onShadowChange(key: string, event: Event): void {
     const input = event.target as HTMLInputElement;
-    this.themeService.updateShadow(key as any, input.value);
+    this.themeService.updateShadow(key as ShadowKey, input.value);
   }
 
   exportTheme(format: ExportFormat): void {

@@ -5,7 +5,31 @@
  */
 
 /**
- * Command item that can be executed from the palette
+ * Command item that can be executed from the palette.
+ *
+ * Represents an actionable item in the command palette that users can search for and execute.
+ * Commands can navigate to routes, trigger callbacks, or open external URLs.
+ *
+ * @example
+ * ```typescript
+ * const navigateCommand: CommandItem = {
+ *   id: 'nav-dashboard',
+ *   label: 'Go to Dashboard',
+ *   description: 'Navigate to the main dashboard',
+ *   icon: 'dashboard',
+ *   shortcut: '⌘D',
+ *   category: 'Navigation',
+ *   routerLink: '/dashboard'
+ * };
+ *
+ * const actionCommand: CommandItem = {
+ *   id: 'create-user',
+ *   label: 'Create New User',
+ *   icon: 'person_add',
+ *   category: 'Actions',
+ *   action: () => openCreateUserDialog()
+ * };
+ * ```
  */
 export interface CommandItem {
   /** Unique identifier for the command */
@@ -66,7 +90,24 @@ export interface CommandGroup {
 }
 
 /**
- * Command palette configuration
+ * Command palette configuration options.
+ *
+ * Configures the behavior and appearance of the command palette.
+ *
+ * @example
+ * ```typescript
+ * const config: CommandPaletteConfig = {
+ *   placeholder: 'Search commands...',
+ *   emptyMessage: 'No commands found',
+ *   maxRecentCommands: 5,
+ *   showRecent: true,
+ *   showShortcuts: true,
+ *   hotkey: 'k',
+ *   useMetaKey: true,
+ *   searchDebounce: 150,
+ *   maxHeight: '400px'
+ * };
+ * ```
  */
 export interface CommandPaletteConfig {
   /** Placeholder text in search input */

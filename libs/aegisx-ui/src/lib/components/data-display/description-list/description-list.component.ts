@@ -1,9 +1,10 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-export type DescriptionListLayout = 'horizontal' | 'vertical' | 'grid';
-export type DescriptionListColumns = 1 | 2 | 3;
-export type DescriptionListSize = 'sm' | 'md' | 'lg';
+import {
+  DescriptionListLayout,
+  DescriptionListColumns,
+  DescriptionListSize,
+} from './description-list.types';
 
 /**
  * Description List Component
@@ -52,13 +53,13 @@ export class AxDescriptionListComponent {
   @Input() size: DescriptionListSize = 'md';
 
   /** Whether to show dividers between fields */
-  @Input() divider = false;
+  @Input() divider: boolean = false;
 
   /** Gap between items (CSS value) */
   @Input() gap?: string;
 
   /** Optional CSS class for the container */
-  @Input() class = '';
+  @Input() class: string = '';
 
   /**
    * Get container CSS classes

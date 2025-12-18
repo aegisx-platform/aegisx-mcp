@@ -13,25 +13,14 @@ import {
   inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-export type NavbarVariant = 'default' | 'transparent' | 'solid' | 'bordered';
-export type NavbarPosition = 'fixed' | 'sticky' | 'static';
-export type NavbarHeight = 'sm' | 'md' | 'lg';
-export type NavbarTheme = 'light' | 'dark' | 'auto';
-export type NavbarColor =
-  | 'default'
-  | 'primary'
-  | 'charcoal'
-  | 'slate'
-  | 'slate-dark'
-  | 'ocean'
-  | 'ocean-dark'
-  | 'royal'
-  | 'royal-dark'
-  | 'forest'
-  | 'amber';
-
-export type NavbarNavAlign = 'start' | 'center' | 'end';
+import {
+  NavbarVariant,
+  NavbarPosition,
+  NavbarHeight,
+  NavbarTheme,
+  NavbarColor,
+  NavbarNavAlign,
+} from './navbar.types';
 
 /**
  * AX Navbar Component

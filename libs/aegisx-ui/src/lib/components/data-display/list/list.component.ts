@@ -1,15 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-export interface ListItem {
-  title: string;
-  description?: string;
-  icon?: string;
-  meta?: string;
-  disabled?: boolean;
-}
-
-export type ListSize = 'sm' | 'md' | 'lg';
+import { ListItem, ListSize } from './list.types';
 
 @Component({
   selector: 'ax-list',
@@ -21,9 +12,9 @@ export type ListSize = 'sm' | 'md' | 'lg';
 export class AxListComponent {
   @Input() items: ListItem[] = [];
   @Input() size: ListSize = 'md';
-  @Input() bordered = false;
-  @Input() hoverable = false;
-  @Input() divided = true;
+  @Input() bordered: boolean = false;
+  @Input() hoverable: boolean = false;
+  @Input() divided: boolean = true;
 
   get listClasses(): string {
     const classes = ['ax-list'];

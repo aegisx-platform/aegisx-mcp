@@ -32,7 +32,7 @@ export class LoadingBarService {
   private stateSubject = new BehaviorSubject<LoadingBarState>(
     this.defaultState,
   );
-  private progressInterval: any;
+  private progressInterval: ReturnType<typeof setInterval> | null = null;
 
   /**
    * Observable stream of loading bar state

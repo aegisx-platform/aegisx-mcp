@@ -2,14 +2,7 @@ import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-
-export interface BreadcrumbItem {
-  label: string;
-  url?: string;
-  icon?: string;
-}
-
-export type BreadcrumbSize = 'sm' | 'md' | 'lg';
+import { BreadcrumbItem, BreadcrumbSize } from './breadcrumb.types';
 
 @Component({
   selector: 'ax-breadcrumb',
@@ -22,7 +15,7 @@ export class AxBreadcrumbComponent {
   private router = inject(Router);
 
   @Input() items: BreadcrumbItem[] = [];
-  @Input() separator = '/';
+  @Input() separator: string = '/';
   @Input() separatorIcon?: string; // Material icon name for separator (e.g., 'chevron_right')
   @Input() size: BreadcrumbSize = 'md'; // Breadcrumb size (font size)
   @Output() itemClick = new EventEmitter<BreadcrumbItem>(); // Optional event for custom handling

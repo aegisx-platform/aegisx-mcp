@@ -273,28 +273,28 @@ export class AxLoadingButtonComponent {
   @Input() color: ButtonColor = 'primary';
 
   /** Loading state */
-  @Input() loading = false;
+  @Input() loading: boolean = false;
 
   /** Text to show during loading */
-  @Input() loadingText = 'Loading...';
+  @Input() loadingText: string = 'Loading...';
 
   /** Disabled state */
-  @Input() disabled = false;
+  @Input() disabled: boolean = false;
 
   /** Whether to disable button when loading */
-  @Input() disableWhenLoading = true;
+  @Input() disableWhenLoading: boolean = true;
 
   /** Button type attribute */
   @Input() type: 'button' | 'submit' | 'reset' = 'button';
 
   /** Icon name (Material icon) */
-  @Input() icon = '';
+  @Input() icon: string = '';
 
   /** Icon position */
   @Input() iconPosition: 'start' | 'end' = 'end';
 
   /** Full width button */
-  @Input() fullWidth = false;
+  @Input() fullWidth: boolean = false;
 
   /** Click event (only fires when not loading) */
   @Output() buttonClick = new EventEmitter<MouseEvent>();

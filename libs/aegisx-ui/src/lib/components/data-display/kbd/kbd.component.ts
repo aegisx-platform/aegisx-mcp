@@ -1,8 +1,6 @@
 import { Component, Input, inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-
-export type KbdVariant = 'default' | 'outline' | 'ghost';
-export type KbdSize = 'sm' | 'md' | 'lg';
+import { KbdVariant, KbdSize } from './kbd.types';
 
 /**
  * Kbd Component
@@ -170,10 +168,10 @@ export class AxKbdComponent {
   @Input() keys: string[] = [];
 
   /** Shortcut string (e.g., 'Ctrl+S', 'Cmd+Shift+P') */
-  @Input() shortcut = '';
+  @Input() shortcut: string = '';
 
   /** Whether to convert Ctrl to Cmd on macOS */
-  @Input() platformAware = true;
+  @Input() platformAware: boolean = true;
 
   /** Key mapping for display */
   private readonly keyMap: Record<string, string> = {

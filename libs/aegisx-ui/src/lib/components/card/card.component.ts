@@ -115,7 +115,7 @@ export class AegisxCardComponent {
   @Input() icon?: string;
   @Input() appearance: 'default' | 'flat' | 'outlined' | 'elevated' = 'default';
   @Input() actionsAlign: 'start' | 'end' = 'end';
-  @Input() hasFooter = false;
+  @Input() hasFooter: boolean = false;
 
   get cardClass(): string {
     return this.appearance !== 'default' ? `ax-card-${this.appearance}` : '';

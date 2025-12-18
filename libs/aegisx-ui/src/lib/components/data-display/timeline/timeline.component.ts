@@ -7,23 +7,13 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-
-export type TimelineLayout = 'vertical' | 'horizontal';
-export type TimelineAlign = 'left' | 'right' | 'alternate';
-export type TimelineMarkerSize = 'sm' | 'md' | 'lg';
-export type TimelineConnectorStyle = 'solid' | 'dashed' | 'dotted';
-
-export interface TimelineItem {
-  title: string;
-  description?: string;
-  timestamp?: string;
-  icon?: string;
-  color?: string;
-  /** Content to display on the opposite side (for alternate layout) */
-  opposite?: string;
-  /** Custom data that can be accessed in templates */
-  data?: unknown;
-}
+import {
+  TimelineLayout,
+  TimelineAlign,
+  TimelineMarkerSize,
+  TimelineConnectorStyle,
+  TimelineItem,
+} from './timeline.types';
 
 @Component({
   selector: 'ax-timeline',

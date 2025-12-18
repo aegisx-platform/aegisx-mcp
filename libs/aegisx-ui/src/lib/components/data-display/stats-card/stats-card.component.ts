@@ -1,8 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-
-export type StatsCardTrend = 'up' | 'down' | 'neutral';
+import { StatsCardTrend } from './stats-card.types';
 
 @Component({
   selector: 'ax-stats-card',
@@ -12,11 +11,11 @@ export type StatsCardTrend = 'up' | 'down' | 'neutral';
   styleUrls: ['./stats-card.component.scss'],
 })
 export class AxStatsCardComponent {
-  @Input() title = '';
-  @Input() value = '';
-  @Input() change = '';
+  @Input() title: string = '';
+  @Input() value: string = '';
+  @Input() change: string = '';
   @Input() trend: StatsCardTrend = 'neutral';
-  @Input() icon = '';
+  @Input() icon: string = '';
 
   get statsClasses(): string {
     const classes = ['ax-stats-card'];

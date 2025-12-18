@@ -1,11 +1,12 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-
-export type BadgeVariant = 'outlined' | 'soft' | 'outlined-strong';
-export type BadgeType = 'success' | 'error' | 'warning' | 'info' | 'neutral';
-export type BadgeSize = 'sm' | 'md' | 'lg';
-export type BadgeRounded = 'none' | 'sm' | 'md' | 'lg' | 'full';
+import {
+  BadgeVariant,
+  BadgeType,
+  BadgeSize,
+  BadgeRounded,
+} from './badge.types';
 
 /**
  * Badge Component
@@ -59,13 +60,13 @@ export class AxBadgeComponent {
   @Input() icon?: string;
 
   /** Show colored dot indicator */
-  @Input() dot = false;
+  @Input() dot: boolean = false;
 
   /** Show colored square indicator */
-  @Input() square = false;
+  @Input() square: boolean = false;
 
   /** Show remove/close button (for tags) */
-  @Input() removable = false;
+  @Input() removable: boolean = false;
 
   /** Optional counter value */
   @Input() counter?: number;

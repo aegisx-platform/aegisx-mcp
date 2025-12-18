@@ -17,28 +17,15 @@ import {
   AbstractControl,
   ValidationErrors,
 } from '@angular/forms';
-
-export type TimeSlotSize = 'sm' | 'md' | 'lg';
-export type TimeSlotLayout = 'grid' | 'list';
-export type TimeSlotMode = 'single' | 'multiple';
-export type TimeSlotFormat = '12h' | '24h';
-export type TimeSlotLocale = 'en' | 'th';
-
-export interface TimeSlot {
-  time: string; // HH:mm format (e.g., "09:00", "14:30")
-  label?: string; // Optional custom label
-  disabled?: boolean;
-  available?: boolean;
-  data?: unknown; // Optional custom data
-}
-
-export interface TimeSlotConfig {
-  startTime?: string; // HH:mm format, default "09:00"
-  endTime?: string; // HH:mm format, default "17:00"
-  interval?: number; // Minutes, default 30
-  excludeTimes?: string[]; // Times to exclude
-  disabledTimes?: string[]; // Times to disable (show but not selectable)
-}
+import type {
+  TimeSlotSize,
+  TimeSlotLayout,
+  TimeSlotMode,
+  TimeSlotFormat,
+  TimeSlotLocale,
+  TimeSlot,
+  TimeSlotConfig,
+} from './time-slots.types';
 
 @Component({
   selector: 'ax-time-slots',

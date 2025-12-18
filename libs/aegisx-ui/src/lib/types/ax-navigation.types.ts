@@ -55,7 +55,7 @@ export interface AxNavigationItem {
   children?: AxNavigationItem[];
 
   /** Badge configuration */
-  badge?: AxNavigationBadge | { content: string; type?: string };
+  badge?: AxNavigationBadge;
 
   /** Hide item - static or dynamic */
   hidden?: boolean | (() => boolean);

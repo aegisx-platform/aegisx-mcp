@@ -183,7 +183,7 @@ export class AxSkeletonComponent {
    * Width of the skeleton (CSS value)
    * @default '100%'
    */
-  @Input() width = '100%';
+  @Input() width: string = '100%';
 
   /**
    * Height of the skeleton (CSS value)
@@ -195,13 +195,13 @@ export class AxSkeletonComponent {
    * Number of lines (for text variant)
    * @default 1
    */
-  @Input() lines = 1;
+  @Input() lines: number = 1;
 
   /**
    * Width of the last line (when lines > 1)
    * @default '60%'
    */
-  @Input() lastLineWidth = '60%';
+  @Input() lastLineWidth: string = '60%';
 
   /**
    * Generate array for ngFor iteration

@@ -157,6 +157,6 @@ export class AxEmptyStateComponent {
   @Input() icon?: string;
   @Input() title?: string;
   @Input() message?: string;
-  @Input() compact = false;
+  @Input() compact: boolean = false;
   @Input() actions: EmptyStateAction[] = [];
 }

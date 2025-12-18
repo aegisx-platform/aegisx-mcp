@@ -62,7 +62,7 @@ export class AxLoadingBarComponent implements OnInit {
   /**
    * Whether the loading bar is visible
    */
-  @Input() visible = false;
+  @Input() visible: boolean = false;
 
   /**
    * Loading mode: 'indeterminate' for unknown duration, 'determinate' for known progress
@@ -72,7 +72,7 @@ export class AxLoadingBarComponent implements OnInit {
   /**
    * Progress value (0-100) for determinate mode
    */
-  @Input() progress = 0;
+  @Input() progress: number = 0;
 
   /**
    * Color variant
@@ -87,17 +87,17 @@ export class AxLoadingBarComponent implements OnInit {
   /**
    * Height of the loading bar in pixels
    */
-  @Input() height = 4;
+  @Input() height: number = 4;
 
   /**
    * Whether to show a subtle glow effect
    */
-  @Input() glow = true;
+  @Input() glow: boolean = true;
 
   /**
    * Animation speed for indeterminate mode (1 = normal, 2 = double speed, 0.5 = half speed)
    */
-  @Input() speed = 1;
+  @Input() speed: number = 1;
 
   get containerClasses(): string {
     return [

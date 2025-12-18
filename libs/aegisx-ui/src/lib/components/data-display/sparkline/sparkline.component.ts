@@ -1,15 +1,6 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-/**
- * Sparkline Variant
- */
-export type SparklineVariant = 'line' | 'area';
-
-/**
- * Sparkline Size
- */
-export type SparklineSize = 'sm' | 'md' | 'lg';
+import { SparklineVariant, SparklineSize } from './sparkline.types';
 
 /**
  * AxSparklineComponent
@@ -33,7 +24,7 @@ export type SparklineSize = 'sm' | 'md' | 'lg';
   templateUrl: './sparkline.component.html',
   styleUrls: ['./sparkline.component.scss'],
 })
-export class AxSparklineComponent implements OnInit {
+export class AxSparklineComponent implements OnInit, OnChanges {
   /** Data points array */
   @Input() data: number[] = [];
 
@@ -65,7 +56,7 @@ export class AxSparklineComponent implements OnInit {
   @Input() customWidth?: string;
 
   /** Show value tooltip on hover */
-  @Input() showValue = true;
+  @Input() showValue: boolean = true;
 
   // SVG properties
   svgWidth = 0;

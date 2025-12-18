@@ -10,9 +10,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-
-export type KnobSize = 'sm' | 'md' | 'lg' | 'xl';
-export type KnobColor = 'primary' | 'accent' | 'success' | 'warning' | 'error';
+import type { KnobSize, KnobColor } from './knob.types';
 
 /**
  * Knob Component

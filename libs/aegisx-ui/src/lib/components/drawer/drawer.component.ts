@@ -13,16 +13,7 @@ import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { animate, style, transition, trigger } from '@angular/animations';
-
-/**
- * Drawer position
- */
-export type DrawerPosition = 'left' | 'right' | 'top' | 'bottom';
-
-/**
- * Drawer size preset
- */
-export type DrawerSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
+import { DrawerPosition, DrawerSize } from './drawer.types';
 
 /**
  * AegisX Drawer/Sheet Component
@@ -438,31 +429,31 @@ export class AxDrawerComponent {
    * Show header section
    * @default true
    */
-  @Input() showHeader = true;
+  @Input() showHeader: boolean = true;
 
   /**
    * Show close button
    * @default true
    */
-  @Input() showCloseButton = true;
+  @Input() showCloseButton: boolean = true;
 
   /**
    * Show backdrop
    * @default true
    */
-  @Input() hasBackdrop = true;
+  @Input() hasBackdrop: boolean = true;
 
   /**
    * Close on backdrop click
    * @default true
    */
-  @Input() closeOnBackdropClick = true;
+  @Input() closeOnBackdropClick: boolean = true;
 
   /**
    * Close on Escape key
    * @default true
    */
-  @Input() closeOnEscape = true;
+  @Input() closeOnEscape: boolean = true;
 
   /**
    * Footer template

@@ -142,10 +142,9 @@ export function isValidISODate(dateString?: string | null): boolean {
  * @param dateTimeFields - Array of field names that contain datetime values
  * @returns Object with converted datetime fields
  */
-export function convertDateTimeFieldsForInput<T extends Record<string, any>>(
-  data: T,
-  dateTimeFields: (keyof T)[],
-): T {
+export function convertDateTimeFieldsForInput<
+  T extends Record<string, unknown>,
+>(data: T, dateTimeFields: (keyof T)[]): T {
   const converted = { ...data };
 
   dateTimeFields.forEach((field) => {
@@ -168,7 +167,7 @@ export function convertDateTimeFieldsForInput<T extends Record<string, any>>(
  * @returns Object with converted datetime fields
  */
 export function convertDateTimeFieldsForSubmission<
-  T extends Record<string, any>,
+  T extends Record<string, unknown>,
 >(data: T, dateTimeFields: (keyof T)[]): T {
   const converted = { ...data };
 
@@ -252,7 +251,7 @@ export function formatDateForSubmission(
  * @param dateFields - Array of field names that contain date values
  * @returns Object with converted date fields
  */
-export function convertDateFieldsForInput<T extends Record<string, any>>(
+export function convertDateFieldsForInput<T extends Record<string, unknown>>(
   data: T,
   dateFields: (keyof T)[],
 ): T {
@@ -277,10 +276,9 @@ export function convertDateFieldsForInput<T extends Record<string, any>>(
  * @param dateFields - Array of field names that contain date input values
  * @returns Object with converted date fields
  */
-export function convertDateFieldsForSubmission<T extends Record<string, any>>(
-  data: T,
-  dateFields: (keyof T)[],
-): T {
+export function convertDateFieldsForSubmission<
+  T extends Record<string, unknown>,
+>(data: T, dateFields: (keyof T)[]): T {
   const converted = { ...data };
 
   dateFields.forEach((field) => {

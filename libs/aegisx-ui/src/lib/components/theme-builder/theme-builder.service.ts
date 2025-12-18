@@ -9,6 +9,17 @@ import {
   ExportFormat,
   ThemePreset,
 } from './theme-builder.types';
+import {
+  BackgroundKey,
+  TextKey,
+  BorderKey,
+  FontSizeKey,
+  FontWeightKey,
+  LineHeightKey,
+  SpacingKey,
+  RadiusKey,
+  ShadowKey,
+} from '../../services/theme/ax-theme.types';
 
 /**
  * Default light theme configuration
@@ -834,10 +845,7 @@ export class ThemeBuilderService {
   /**
    * Update background colors
    */
-  updateBackground(
-    key: keyof ThemeBuilderConfig['background'],
-    value: string,
-  ): void {
+  updateBackground(key: BackgroundKey, value: string): void {
     this._currentTheme.update((theme) => ({
       ...theme,
       background: { ...theme.background, [key]: value },
@@ -848,7 +856,7 @@ export class ThemeBuilderService {
   /**
    * Update text colors
    */
-  updateText(key: keyof ThemeBuilderConfig['text'], value: string): void {
+  updateText(key: TextKey, value: string): void {
     this._currentTheme.update((theme) => ({
       ...theme,
       text: { ...theme.text, [key]: value },
@@ -859,7 +867,7 @@ export class ThemeBuilderService {
   /**
    * Update border colors
    */
-  updateBorder(key: keyof ThemeBuilderConfig['border'], value: string): void {
+  updateBorder(key: BorderKey, value: string): void {
     this._currentTheme.update((theme) => ({
       ...theme,
       border: { ...theme.border, [key]: value },
@@ -888,10 +896,7 @@ export class ThemeBuilderService {
   /**
    * Update font size
    */
-  updateFontSize(
-    key: keyof ThemeBuilderConfig['typography']['fontSize'],
-    value: string,
-  ): void {
+  updateFontSize(key: FontSizeKey, value: string): void {
     this._currentTheme.update((theme) => ({
       ...theme,
       typography: {
@@ -905,10 +910,7 @@ export class ThemeBuilderService {
   /**
    * Update font weight
    */
-  updateFontWeight(
-    key: keyof ThemeBuilderConfig['typography']['fontWeight'],
-    value: number,
-  ): void {
+  updateFontWeight(key: FontWeightKey, value: number): void {
     this._currentTheme.update((theme) => ({
       ...theme,
       typography: {
@@ -922,10 +924,7 @@ export class ThemeBuilderService {
   /**
    * Update line height
    */
-  updateLineHeight(
-    key: keyof ThemeBuilderConfig['typography']['lineHeight'],
-    value: number,
-  ): void {
+  updateLineHeight(key: LineHeightKey, value: number): void {
     this._currentTheme.update((theme) => ({
       ...theme,
       typography: {
@@ -939,7 +938,7 @@ export class ThemeBuilderService {
   /**
    * Update spacing
    */
-  updateSpacing(key: keyof ThemeBuilderConfig['spacing'], value: string): void {
+  updateSpacing(key: SpacingKey, value: string): void {
     this._currentTheme.update((theme) => ({
       ...theme,
       spacing: { ...theme.spacing, [key]: value },
@@ -950,7 +949,7 @@ export class ThemeBuilderService {
   /**
    * Update radius
    */
-  updateRadius(key: keyof ThemeBuilderConfig['radius'], value: string): void {
+  updateRadius(key: RadiusKey, value: string): void {
     this._currentTheme.update((theme) => ({
       ...theme,
       radius: { ...theme.radius, [key]: value },
@@ -961,7 +960,7 @@ export class ThemeBuilderService {
   /**
    * Update shadow
    */
-  updateShadow(key: keyof ThemeBuilderConfig['shadows'], value: string): void {
+  updateShadow(key: ShadowKey, value: string): void {
     this._currentTheme.update((theme) => ({
       ...theme,
       shadows: { ...theme.shadows, [key]: value },

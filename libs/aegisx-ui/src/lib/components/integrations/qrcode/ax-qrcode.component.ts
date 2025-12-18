@@ -6,7 +6,6 @@ import {
   ViewChild,
   ElementRef,
   ChangeDetectionStrategy,
-  signal,
   computed,
   inject,
   PLATFORM_ID,
@@ -172,7 +171,7 @@ export class AxQrCodeComponent {
   @ViewChild('qrcodeContainer') qrcodeContainer!: ElementRef<HTMLDivElement>;
 
   // Core Data Inputs
-  @Input() data = '';
+  @Input() data: string = '';
 
   // Preset Templates
   @Input() vCard: VCardData | null = null;
@@ -183,17 +182,17 @@ export class AxQrCodeComponent {
   @Input() url: string | null = null;
 
   // Size Settings
-  @Input() size = 200;
+  @Input() size: number = 200;
   @Input() sizePreset: QRCodeSizePreset = 'medium';
 
   // QR Code Settings
   @Input() errorCorrectionLevel: QRCodeErrorCorrectionLevel = 'M';
   @Input() elementType: QRCodeElementType = 'canvas';
-  @Input() margin = 4;
+  @Input() margin: number = 4;
 
   // Styling
-  @Input() colorDark = '#000000';
-  @Input() colorLight = '#ffffff';
+  @Input() colorDark: string = '#000000';
+  @Input() colorLight: string = '#ffffff';
 
   // Center Image/Logo
   @Input() imageSrc: string | undefined;
@@ -201,9 +200,9 @@ export class AxQrCodeComponent {
   @Input() imageWidth: number | undefined;
 
   // Features
-  @Input() showDownload = false;
-  @Input() showCopy = false;
-  @Input() downloadFileName = 'qrcode';
+  @Input() showDownload: boolean = false;
+  @Input() showCopy: boolean = false;
+  @Input() downloadFileName: string = 'qrcode';
 
   // Events
   @Output() downloaded = new EventEmitter<QRCodeDownloadFormat>();

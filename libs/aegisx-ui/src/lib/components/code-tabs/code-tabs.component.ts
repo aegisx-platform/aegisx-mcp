@@ -330,7 +330,7 @@ export class AxCodeTabsComponent implements AfterViewInit, OnChanges {
   @ViewChildren('codeBlock') codeBlocks!: QueryList<ElementRef>;
 
   @Input() tabs: CodeTab[] = [];
-  @Input() showLineNumbers = false;
+  @Input() showLineNumbers: boolean = false;
 
   activeTabIndex = 0;
 

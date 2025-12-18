@@ -207,19 +207,19 @@ export class AxCalendarComponent implements OnInit {
   @Input() initialDate?: Date | string;
 
   /** Allow dragging and resizing events */
-  @Input() editable = false;
+  @Input() editable: boolean = false;
 
   /** Allow selecting dates to create events */
-  @Input() selectable = false;
+  @Input() selectable: boolean = false;
 
   /** Show week numbers */
-  @Input() weekNumbers = false;
+  @Input() weekNumbers: boolean = false;
 
   /** First day of week (0=Sunday, 1=Monday) */
-  @Input() firstDay = 0;
+  @Input() firstDay: number = 0;
 
   /** Locale for date formatting */
-  @Input() locale = 'en';
+  @Input() locale: string = 'en';
 
   /** Height of the calendar ('auto', number in pixels, or parent element) */
   @Input() height: 'auto' | number | string = 'auto';
@@ -248,19 +248,19 @@ export class AxCalendarComponent implements OnInit {
   @Input() businessHours?: CalendarOptions['businessHours'];
 
   /** Slot duration for time grid views */
-  @Input() slotDuration = '00:30:00';
+  @Input() slotDuration: string = '00:30:00';
 
   /** Slot minimum time */
-  @Input() slotMinTime = '00:00:00';
+  @Input() slotMinTime: string = '00:00:00';
 
   /** Slot maximum time */
-  @Input() slotMaxTime = '24:00:00';
+  @Input() slotMaxTime: string = '24:00:00';
 
   /** Allow all-day events */
-  @Input() allDaySlot = true;
+  @Input() allDaySlot: boolean = true;
 
   /** Now indicator in time views */
-  @Input() nowIndicator = true;
+  @Input() nowIndicator: boolean = true;
 
   // =========================================================================
   // Outputs

@@ -10,6 +10,7 @@
  */
 
 export * from './navbar.component';
+export * from './navbar.types';
 export * from './components/navbar-brand.component';
 export * from './components/navbar-nav.component';
 export * from './components/navbar-item.component';

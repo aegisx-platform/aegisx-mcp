@@ -28,18 +28,12 @@ import {
   TimeSlotLocale,
   TimeSlotLayout,
 } from '../time-slots';
-
-export type SchedulerLayout = 'horizontal' | 'vertical' | 'stacked';
-export type SchedulerSize = 'sm' | 'md' | 'lg';
-
-export interface SchedulerValue {
-  date: Date | null;
-  time: string | null;
-}
-
-export interface SchedulerAvailability {
-  [dateString: string]: string[]; // Date string (YYYY-MM-DD) -> available time slots
-}
+import type {
+  SchedulerLayout,
+  SchedulerSize,
+  SchedulerValue,
+  SchedulerAvailability,
+} from './scheduler.types';
 
 @Component({
   selector: 'ax-scheduler',

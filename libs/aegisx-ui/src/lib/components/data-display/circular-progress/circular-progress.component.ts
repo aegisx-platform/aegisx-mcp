@@ -1,15 +1,9 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-/**
- * Circular Progress Variant
- */
-export type CircularProgressVariant = 'ring' | 'donut' | 'gauge';
-
-/**
- * Circular Progress Size
- */
-export type CircularProgressSize = 'sm' | 'md' | 'lg' | 'xl';
+import {
+  CircularProgressVariant,
+  CircularProgressSize,
+} from './circular-progress.types';
 
 /**
  * AxCircularProgressComponent
@@ -34,9 +28,9 @@ export type CircularProgressSize = 'sm' | 'md' | 'lg' | 'xl';
   templateUrl: './circular-progress.component.html',
   styleUrls: ['./circular-progress.component.scss'],
 })
-export class AxCircularProgressComponent implements OnInit {
+export class AxCircularProgressComponent implements OnInit, OnChanges {
   /** Progress value (0-100) */
-  @Input() value = 0;
+  @Input() value: number = 0;
 
   /** Circle variant */
   @Input() variant: CircularProgressVariant = 'ring';
@@ -48,25 +42,25 @@ export class AxCircularProgressComponent implements OnInit {
   @Input() color?: string;
 
   /** Show percentage label in center */
-  @Input() showLabel = true;
+  @Input() showLabel: boolean = true;
 
   /** Custom label text (overrides percentage) */
   @Input() label?: string;
 
   /** Track color (background circle) */
-  @Input() trackColor = 'var(--ax-border-default)';
+  @Input() trackColor: string = 'var(--ax-border-default)';
 
   /** Stroke width (auto-calculated based on size if not provided) */
   @Input() strokeWidth?: number;
 
   /** Automatic color based on value thresholds */
-  @Input() autoColor = false;
+  @Input() autoColor: boolean = false;
 
   /** Success threshold (green above this) */
-  @Input() successThreshold = 80;
+  @Input() successThreshold: number = 80;
 
   /** Warning threshold (yellow below this) */
-  @Input() warningThreshold = 50;
+  @Input() warningThreshold: number = 50;
 
   // SVG properties (calculated)
   svgSize = 0;

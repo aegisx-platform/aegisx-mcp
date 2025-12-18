@@ -13,8 +13,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { OverlayModule } from '@angular/cdk/overlay';
-
-export type PopupEditInputType = 'text' | 'number' | 'textarea';
+import type { PopupEditInputType } from './popup-edit.types';
 
 /**
  * Popup Edit Component

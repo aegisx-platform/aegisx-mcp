@@ -17,15 +17,7 @@ import {
   NG_VALUE_ACCESSOR,
   FormsModule,
 } from '@angular/forms';
-
-export type OtpLength = 4 | 5 | 6 | 7 | 8;
-export type OtpPattern = 'digits' | 'alphanumeric' | 'alpha';
-export type OtpSize = 'sm' | 'md' | 'lg';
-
-export interface OtpSeparatorConfig {
-  position: number;
-  character?: string;
-}
+import type { OtpLength, OtpPattern, OtpSize } from './input-otp.types';
 
 /**
  * AegisX Input OTP Component
@@ -121,25 +113,25 @@ export class AxInputOtpComponent
   @Input() separatorAfter?: number;
 
   /** Separator character */
-  @Input() separatorChar = '-';
+  @Input() separatorChar: string = '-';
 
   /** Disabled state */
-  @Input() disabled = false;
+  @Input() disabled: boolean = false;
 
   /** Readonly state */
-  @Input() readonly = false;
+  @Input() readonly: boolean = false;
 
   /** Error state */
-  @Input() error = false;
+  @Input() error: boolean = false;
 
   /** Auto-focus first input on init */
-  @Input() autoFocus = false;
+  @Input() autoFocus: boolean = false;
 
   /** Auto-submit when complete */
-  @Input() autoSubmit = true;
+  @Input() autoSubmit: boolean = true;
 
   /** Aria label for the group */
-  @Input() ariaLabel = 'One-time password input';
+  @Input() ariaLabel: string = 'One-time password input';
 
   /** Emits the current OTP value */
   @Output() valueChange = new EventEmitter<string>();

@@ -11,7 +11,13 @@ import { Observable } from 'rxjs';
  *   constructor(private http: HttpClient) {}
  *
  *   fetch<T>(endpoint: string, params?: Record<string, unknown>): Observable<T> {
- *     return this.http.get<T>(`/api${endpoint}`, { params: params as any });
+ *     const httpParams = new HttpParams();
+ *     if (params) {
+ *       Object.entries(params).forEach(([key, value]) => {
+ *         httpParams = httpParams.set(key, String(value));
+ *       });
+ *     }
+ *     return this.http.get<T>(`/api${endpoint}`, { params: httpParams });
  *   }
  *
  *   subscribe<T>(channel: string): Observable<T> {
@@ -24,7 +30,7 @@ export interface WidgetDataProvider {
   /**
    * Fetch data from API endpoint
    * @param endpoint - API endpoint path (e.g., '/dashboard/stats')
-   * @param params - Optional query parameters
+   * @param params - Optional query parameters as key-value pairs
    * @returns Observable of response data
    */
   fetch<T>(endpoint: string, params?: Record<string, unknown>): Observable<T>;

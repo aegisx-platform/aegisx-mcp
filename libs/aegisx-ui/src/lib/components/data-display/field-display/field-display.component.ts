@@ -52,7 +52,7 @@ import {
 })
 export class AxFieldDisplayComponent {
   /** Label text for the field */
-  @Input() label = '';
+  @Input() label: string = '';
 
   /** Value to display */
   @Input() value: unknown = null;
@@ -70,28 +70,28 @@ export class AxFieldDisplayComponent {
   @Input() labelWidth?: string;
 
   /** Text to show when value is empty/null/undefined */
-  @Input() emptyText = '—'; // Em dash
+  @Input() emptyText: string = '—'; // Em dash
 
   /** How to display empty values */
   @Input() emptyDisplay: EmptyStateDisplay = 'dash';
 
   /** CSS class for empty state */
-  @Input() emptyClass = 'ax-field-empty';
+  @Input() emptyClass: string = 'ax-field-empty';
 
   /** Format options for the formatter pipe */
   @Input() formatOptions?: FieldFormatOptions;
 
   /** Whether to make email/phone/url clickable */
-  @Input() clickable = true;
+  @Input() clickable: boolean = true;
 
   /** Optional CSS class for the container */
-  @Input() class = '';
+  @Input() class: string = '';
 
   /** Optional CSS class for the label */
-  @Input() labelClass = '';
+  @Input() labelClass: string = '';
 
   /** Optional CSS class for the value */
-  @Input() valueClass = '';
+  @Input() valueClass: string = '';
 
   /**
    * Get container CSS classes

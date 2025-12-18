@@ -1,18 +1,12 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-export type CardVariant = 'default' | 'outlined' | 'elevated';
-export type CardSize = 'sm' | 'md' | 'lg';
-export type CardColor =
-  | 'default'
-  | 'primary'
-  | 'success'
-  | 'warning'
-  | 'error'
-  | 'info'
-  | 'neutral';
-export type CardColorIntensity = 'filled' | 'subtle';
-export type CardBorderWidth = '1' | '2' | '3' | '4';
+import {
+  CardVariant,
+  CardSize,
+  CardColor,
+  CardColorIntensity,
+  CardBorderWidth,
+} from './card.types';
 
 @Component({
   selector: 'ax-card',

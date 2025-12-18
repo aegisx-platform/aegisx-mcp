@@ -1,8 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-export type InnerLoadingSize = 'sm' | 'md' | 'lg';
-export type InnerLoadingColor = 'primary' | 'accent' | 'warn' | 'light';
+import { InnerLoadingSize, InnerLoadingColor } from './inner-loading.types';
 
 /**
  * Inner Loading Component
@@ -81,7 +79,7 @@ export type InnerLoadingColor = 'primary' | 'accent' | 'warn' | 'light';
 })
 export class AxInnerLoadingComponent {
   /** Show/hide the loading overlay */
-  @Input() showing = false;
+  @Input() showing: boolean = false;
 
   /** Loading spinner size */
   @Input() size: InnerLoadingSize = 'md';
@@ -90,11 +88,11 @@ export class AxInnerLoadingComponent {
   @Input() color: InnerLoadingColor = 'primary';
 
   /** Optional label text */
-  @Input() label = '';
+  @Input() label: string = '';
 
   /** Use dark overlay (for light content) */
-  @Input() dark = false;
+  @Input() dark: boolean = false;
 
   /** Custom background color (with opacity) */
-  @Input() backgroundColor = '';
+  @Input() backgroundColor: string = '';
 }

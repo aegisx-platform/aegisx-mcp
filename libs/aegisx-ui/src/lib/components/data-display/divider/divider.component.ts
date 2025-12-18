@@ -1,9 +1,6 @@
 import { Component, Input, HostBinding } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-export type DividerLayout = 'horizontal' | 'vertical';
-export type DividerType = 'solid' | 'dashed' | 'dotted';
-export type DividerAlign = 'left' | 'center' | 'right' | 'top' | 'bottom';
+import { DividerLayout, DividerType, DividerAlign } from './divider.types';
 
 @Component({
   selector: 'ax-divider',

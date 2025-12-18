@@ -1,8 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-export type AvatarShape = 'circle' | 'square';
+import { AvatarSize, AvatarShape } from './avatar.types';
 
 @Component({
   selector: 'ax-avatar',
@@ -12,9 +10,9 @@ export type AvatarShape = 'circle' | 'square';
   styleUrls: ['./avatar.component.scss'],
 })
 export class AxAvatarComponent {
-  @Input() src = '';
-  @Input() alt = '';
-  @Input() name = '';
+  @Input() src: string = '';
+  @Input() alt: string = '';
+  @Input() name: string = '';
   @Input() size: AvatarSize = 'md';
   @Input() shape: AvatarShape = 'circle';
 

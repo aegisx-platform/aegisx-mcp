@@ -352,26 +352,26 @@ export class AxSignaturePadComponent
   @ViewChild('fileInput') fileInputRef!: ElementRef<HTMLInputElement>;
 
   // Feature Toggles
-  @Input() enableDraw = true;
-  @Input() enableUpload = true;
-  @Input() enableUndo = true;
-  @Input() enableRedo = true;
-  @Input() enableClear = true;
-  @Input() enableSave = true;
+  @Input() enableDraw: boolean = true;
+  @Input() enableUpload: boolean = true;
+  @Input() enableUndo: boolean = true;
+  @Input() enableRedo: boolean = true;
+  @Input() enableClear: boolean = true;
+  @Input() enableSave: boolean = true;
 
   // Canvas Settings
-  @Input() width = 400;
-  @Input() height = 200;
-  @Input() penColor = '#000000';
-  @Input() penWidth = 2.5;
-  @Input() backgroundColor = '#ffffff';
+  @Input() width: number = 400;
+  @Input() height: number = 200;
+  @Input() penColor: string = '#000000';
+  @Input() penWidth: number = 2.5;
+  @Input() backgroundColor: string = '#ffffff';
 
   // Upload Settings
-  @Input() acceptUpload = 'image/png,image/jpeg';
-  @Input() maxUploadSize = 2 * 1024 * 1024; // 2MB
+  @Input() acceptUpload: string = 'image/png,image/jpeg';
+  @Input() maxUploadSize: number = 2 * 1024 * 1024; // 2MB
 
   // State
-  @Input() disabled = false;
+  @Input() disabled: boolean = false;
 
   // Outputs
   @Output() signatureChange = new EventEmitter<SignatureData>();

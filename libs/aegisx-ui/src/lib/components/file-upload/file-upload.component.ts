@@ -374,25 +374,25 @@ export class AxFileUploadComponent implements ControlValueAccessor {
   /**
    * Accepted file types (same as HTML input accept)
    */
-  @Input() accept = '*';
+  @Input() accept: string = '*';
 
   /**
    * Allow multiple files
    * @default false
    */
-  @Input() multiple = false;
+  @Input() multiple: boolean = false;
 
   /**
    * Maximum number of files (when multiple=true)
    * @default 10
    */
-  @Input() maxFiles = 10;
+  @Input() maxFiles: number = 10;
 
   /**
    * Maximum file size in bytes
    * @default 10MB
    */
-  @Input() maxSize = 10 * 1024 * 1024;
+  @Input() maxSize: number = 10 * 1024 * 1024;
 
   /**
    * Custom drag text
@@ -412,7 +412,7 @@ export class AxFileUploadComponent implements ControlValueAccessor {
   /**
    * Disabled state
    */
-  @Input() disabled = false;
+  @Input() disabled: boolean = false;
 
   /**
    * Emits when files change

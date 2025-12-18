@@ -1,29 +1,10 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-/**
- * Segment configuration for progress bar
- */
-export interface ProgressSegment {
-  /** Segment label */
-  label: string;
-  /** Segment value */
-  value: number;
-  /** Segment percentage (0-100) */
-  percentage: number;
-  /** Segment color (CSS color or design token) */
-  color: string;
-}
-
-/**
- * Segmented Progress Bar Size
- */
-export type SegmentedProgressSize = 'sm' | 'md' | 'lg';
-
-/**
- * Legend Position
- */
-export type LegendPosition = 'bottom' | 'right' | 'none';
+import {
+  ProgressSegment,
+  SegmentedProgressSize,
+  LegendPosition,
+} from './segmented-progress.types';
 
 /**
  * AxSegmentedProgressComponent

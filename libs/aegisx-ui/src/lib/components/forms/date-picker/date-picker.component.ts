@@ -21,19 +21,15 @@ import {
   AbstractControl,
   ValidationErrors,
 } from '@angular/forms';
-
-export type DatePickerSize = 'sm' | 'md';
-export type DatePickerLocale = 'en' | 'th';
-export type DatePickerCalendar = 'gregorian' | 'buddhist';
-export type DatePickerMonthFormat = 'full' | 'short';
-export type DatePickerDisplayMode = 'input' | 'inline';
-export type DatePickerMode = 'single' | 'range';
-
-/** Date range value for range mode */
-export interface DateRange {
-  start: Date | null;
-  end: Date | null;
-}
+import type {
+  DatePickerSize,
+  DatePickerLocale,
+  DatePickerCalendar,
+  DatePickerMonthFormat,
+  DatePickerDisplayMode,
+  DatePickerMode,
+  DateRange,
+} from './date-picker.types';
 
 interface CalendarDay {
   date: Date;

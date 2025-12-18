@@ -2,7 +2,8 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { AegisxNavigationItem } from '../../types/ax-navigation.types';
+import { AxNavigationItem } from '../../types/ax-navigation.types';
+import { NavigationLayout, NavigationAppearance } from './navigation.types';
 import { expandCollapse } from '../../animations';
 
 @Component({
@@ -154,7 +155,7 @@ import { expandCollapse } from '../../animations';
   ],
 })
 export class AegisxNavigationComponent {
-  @Input() navigation: AegisxNavigationItem[] = [];
-  @Input() layout: 'vertical' | 'horizontal' = 'vertical';
-  @Input() appearance: 'default' | 'compact' | 'dense' = 'default';
+  @Input() navigation: AxNavigationItem[] = [];
+  @Input() layout: NavigationLayout = 'vertical';
+  @Input() appearance: NavigationAppearance = 'default';
 }

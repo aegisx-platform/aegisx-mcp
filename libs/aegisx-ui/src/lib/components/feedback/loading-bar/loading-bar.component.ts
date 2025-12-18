@@ -2,13 +2,7 @@ import { Component, Input, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { LoadingBarService } from './loading-bar.service';
-
-export type LoadingBarVariant =
-  | 'primary'
-  | 'success'
-  | 'error'
-  | 'warning'
-  | 'info';
+import { LoadingBarVariant } from './loading-bar.types';
 
 @Component({
   selector: 'ax-loading-bar',
@@ -19,7 +13,7 @@ export type LoadingBarVariant =
 })
 export class AxLoadingBarComponent implements OnInit {
   @Input() variant: LoadingBarVariant = 'primary';
-  @Input() height = 3;
+  @Input() height: number = 3;
 
   loading$!: Observable<boolean>;
   progress$!: Observable<number>;

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json.schemastore.org/tsd",
+  "directory": "../../../libs/aegisx-ui/src",
+  "compilerOptions": {
+    "strict": true,
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM"],
+    "module": "ES2022",
+    "moduleResolution": "bundler"
+  }
+}

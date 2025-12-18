@@ -236,9 +236,9 @@ export class AxErrorStateComponent {
   @Input() title?: string;
   @Input() message?: string;
   @Input() errorDetails?: string;
-  @Input() compact = false;
+  @Input() compact: boolean = false;
   @Input() type: 'error' | 'warning' | 'info' = 'error';
-  @Input() showDetails = false;
+  @Input() showDetails: boolean = false;
   @Input() actions: ErrorStateAction[] = [];
   @Input() statusCode?: number | null; // HTTP status code for automatic title generation
 

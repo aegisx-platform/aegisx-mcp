@@ -231,8 +231,8 @@ export class AxNavigationComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
 
   // Inputs
-  @Input() showHeader = true;
-  @Input() showFooter = false;
+  @Input() showHeader: boolean = true;
+  @Input() showFooter: boolean = false;
 
   @Input() set items(value: AxNavigationItem[]) {
     this._items.set(value);
