@@ -14,6 +14,20 @@ const EdCategoryEnum = Type.Union([
   Type.Null(),
 ]);
 
+// Budget Control Type Enums
+const ControlTypeEnum = Type.Union([
+  Type.Literal('NONE'), // ไม่ควบคุม - No control
+  Type.Literal('SOFT'), // เตือน + ต้องระบุเหตุผล - Warning with reason required
+  Type.Literal('HARD'), // บล็อคไม่ให้สร้าง PR - Block PR creation
+]);
+
+// Variance Percent Schema (0-100 range)
+const VariancePercentSchema = Type.Integer({
+  minimum: 0,
+  maximum: 100,
+  description: 'Tolerance percentage (0-100)',
+});
+
 // Base BudgetRequestItems Schema
 export const BudgetRequestItemsSchema = Type.Object({
   id: Type.Number(),
@@ -48,6 +62,25 @@ export const BudgetRequestItemsSchema = Type.Object({
   // From JOIN with drug_generics - TMT GPU code
   tmt_gpu_code: Type.Optional(Type.String()),
   working_code: Type.Optional(Type.String()),
+
+  // Budget Control Fields (Item-Level Budget Control)
+  quantity_control_type: Type.Optional(ControlTypeEnum),
+  price_control_type: Type.Optional(ControlTypeEnum),
+  quantity_variance_percent: Type.Optional(VariancePercentSchema),
+  price_variance_percent: Type.Optional(VariancePercentSchema),
+
+  // Purchased Tracking Fields (populated when PO approved)
+  q1_purchased_qty: Type.Optional(Type.Integer({ minimum: 0 })),
+  q2_purchased_qty: Type.Optional(Type.Integer({ minimum: 0 })),
+  q3_purchased_qty: Type.Optional(Type.Integer({ minimum: 0 })),
+  q4_purchased_qty: Type.Optional(Type.Integer({ minimum: 0 })),
+  total_purchased_qty: Type.Optional(Type.Integer({ minimum: 0 })),
+  total_purchased_value: Type.Optional(Type.Number({ minimum: 0 })),
+
+  // Historical Data Fields (3-year history for planning)
+  last_year_qty: Type.Optional(Type.Integer({ minimum: 0 })),
+  two_years_ago_qty: Type.Optional(Type.Integer({ minimum: 0 })),
+  three_years_ago_qty: Type.Optional(Type.Integer({ minimum: 0 })),
 });
 
 // Create Schema (without auto-generated fields)
@@ -76,6 +109,17 @@ export const CreateBudgetRequestItemsSchema = Type.Object({
   budget_type_id: Type.Optional(Type.Integer()),
   budget_category_id: Type.Optional(Type.Integer()),
   historical_usage: Type.Optional(Type.Record(Type.String(), Type.Any())),
+
+  // Budget Control Fields
+  quantity_control_type: Type.Optional(ControlTypeEnum),
+  price_control_type: Type.Optional(ControlTypeEnum),
+  quantity_variance_percent: Type.Optional(VariancePercentSchema),
+  price_variance_percent: Type.Optional(VariancePercentSchema),
+
+  // Historical Data Fields
+  last_year_qty: Type.Optional(Type.Integer({ minimum: 0 })),
+  two_years_ago_qty: Type.Optional(Type.Integer({ minimum: 0 })),
+  three_years_ago_qty: Type.Optional(Type.Integer({ minimum: 0 })),
 });
 
 // Update Schema (partial, without auto-generated fields)
@@ -105,6 +149,17 @@ export const UpdateBudgetRequestItemsSchema = Type.Partial(
     budget_type_id: Type.Optional(Type.Integer()),
     budget_category_id: Type.Optional(Type.Integer()),
     historical_usage: Type.Optional(Type.Record(Type.String(), Type.Any())),
+
+    // Budget Control Fields
+    quantity_control_type: Type.Optional(ControlTypeEnum),
+    price_control_type: Type.Optional(ControlTypeEnum),
+    quantity_variance_percent: Type.Optional(VariancePercentSchema),
+    price_variance_percent: Type.Optional(VariancePercentSchema),
+
+    // Historical Data Fields
+    last_year_qty: Type.Optional(Type.Integer({ minimum: 0 })),
+    two_years_ago_qty: Type.Optional(Type.Integer({ minimum: 0 })),
+    three_years_ago_qty: Type.Optional(Type.Integer({ minimum: 0 })),
   }),
 );
 
@@ -258,6 +313,12 @@ export const BatchUpdateItemSchema = Type.Object({
   avg_usage: Type.Optional(Type.Number()),
   // Current stock - คงเหลือปัจจุบัน (importable and editable)
   current_stock: Type.Optional(Type.Number()),
+
+  // Budget Control Fields (batch updateable)
+  quantity_control_type: Type.Optional(ControlTypeEnum),
+  price_control_type: Type.Optional(ControlTypeEnum),
+  quantity_variance_percent: Type.Optional(VariancePercentSchema),
+  price_variance_percent: Type.Optional(VariancePercentSchema),
 });
 
 export const BatchUpdateBudgetRequestItemsSchema = Type.Object({
