@@ -149,19 +149,19 @@ export class AxStockMovementTimelineComponent
   // =============================================================================
 
   /** Emitted when movement is clicked */
-  onMovementClick = output<MovementRecord>();
+  movementClick = output<MovementRecord>();
 
   /** Emitted on export */
-  onExport = output<ExportEventData>();
+  export = output<ExportEventData>();
 
   /** Emitted when filters change */
-  onFilterChange = output<MovementFilter>();
+  filterChange = output<MovementFilter>();
 
   /** Emitted after movements loaded from API */
-  onMovementsLoad = output<MovementRecord[]>();
+  movementsLoad = output<MovementRecord[]>();
 
   /** Emitted on errors */
-  onError = output<string>();
+  error = output<string>();
 
   // =============================================================================
   // INTERNAL STATE
@@ -350,7 +350,7 @@ export class AxStockMovementTimelineComponent
   private async loadMovements() {
     const productId = this.productId();
     if (!productId) {
-      this.onError.emit('Product ID is required to load movements');
+      this.error.emit('Product ID is required to load movements');
       return;
     }
 
@@ -386,9 +386,9 @@ export class AxStockMovementTimelineComponent
 
       this.internalMovements.set(movements);
       this.currentBalance.set(response.currentBalance);
-      this.onMovementsLoad.emit(movements);
+      this.movementsLoad.emit(movements);
     } catch (error: any) {
-      this.onError.emit(
+      this.error.emit(
         `Failed to load movements: ${error.message || 'Unknown error'}`,
       );
       this.internalMovements.set([]);
@@ -533,7 +533,7 @@ export class AxStockMovementTimelineComponent
   private applyTypeFilter() {
     const types = this.selectedTypes();
     this.filters.update((f) => ({ ...f, types }));
-    this.onFilterChange.emit(this.filters());
+    this.filterChange.emit(this.filters());
   }
 
   /**
@@ -548,14 +548,14 @@ export class AxStockMovementTimelineComponent
         ...f,
         dateRange: { start, end },
       }));
-      this.onFilterChange.emit(this.filters());
+      this.filterChange.emit(this.filters());
     } else {
       // Clear date range filter
       this.filters.update((f) => {
         const { dateRange, ...rest } = f;
         return rest;
       });
-      this.onFilterChange.emit(this.filters());
+      this.filterChange.emit(this.filters());
     }
   }
 
@@ -567,7 +567,7 @@ export class AxStockMovementTimelineComponent
     this.filterDateStart.set(null);
     this.filterDateEnd.set(null);
     this.filters.set({ types: [] });
-    this.onFilterChange.emit(this.filters());
+    this.filterChange.emit(this.filters());
   }
 
   // =============================================================================
@@ -684,7 +684,7 @@ export class AxStockMovementTimelineComponent
     }
 
     this.expandedIds.set(newExpanded);
-    this.onMovementClick.emit(movement);
+    this.movementClick.emit(movement);
   }
 
   /**
@@ -710,7 +710,7 @@ export class AxStockMovementTimelineComponent
    */
   async exportData(format: ExportFormat) {
     const data = this.filteredMovements();
-    this.onExport.emit({ format, data });
+    this.export.emit({ format, data });
 
     if (format === 'excel') {
       await this.exportToExcel(data);
@@ -747,7 +747,7 @@ export class AxStockMovementTimelineComponent
         `movements-${this.productId()}-${Date.now()}.xlsx`,
       );
     } catch (error: any) {
-      this.onError.emit(`Failed to export to Excel: ${error.message}`);
+      this.error.emit(`Failed to export to Excel: ${error.message}`);
     }
   }
 
@@ -809,7 +809,7 @@ export class AxStockMovementTimelineComponent
 
       doc.save(`movements-${this.productId()}-${Date.now()}.pdf`);
     } catch (error: any) {
-      this.onError.emit(`Failed to export to PDF: ${error.message}`);
+      this.error.emit(`Failed to export to PDF: ${error.message}`);
     }
   }
 

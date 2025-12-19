@@ -52,14 +52,18 @@
     "@fullcalendar/list": ">=6.0.0",
     "@fullcalendar/timegrid": ">=6.0.0",
     "@nx/angular": ">=21.0.0",
+    "@zxing/library": ">=0.21.0",
     "angular-gridster2": ">=18.0.0",
     "angularx-qrcode": ">=18.0.0",
+    "chart.js": ">=4.0.0",
+    "chartjs-adapter-date-fns": ">=3.0.0",
+    "jspdf": ">=3.0.0",
     "lodash-es": "^4.17.21",
     "ngx-toastr": ">=17.0.0 <20.0.0",
     "prismjs": ">=1.29.0",
     "rxjs": ">=7.0.0 <8.0.0",
     "signature_pad": ">=5.0.0 <6.0.0",
-    "tsd": "0.33.0"
+    "xlsx": ">=0.18.0"
   },
   "peerDependenciesMeta": {
     "@angular/router": {
@@ -68,46 +72,58 @@
     "@angular/platform-browser": {
       "optional": true
     },
-    "angular-gridster2": {
-      "optional": true
-    },
-    "angularx-qrcode": {
-      "optional": true
-    },
-    "lodash-es": {
-      "optional": true
-    },
-    "@nx/angular": {
-      "optional": true
-    },
-    "ngx-toastr": {
-      "optional": true
-    },
     "@fullcalendar/angular": {
       "optional": true
     },
     "@fullcalendar/core": {
       "optional": true
     },
-    "@fullcalendar/interaction": {
-      "optional": true
-    },
     "@fullcalendar/daygrid": {
       "optional": true
     },
-    "@fullcalendar/timegrid": {
+    "@fullcalendar/interaction": {
       "optional": true
     },
     "@fullcalendar/list": {
       "optional": true
     },
-    "signature_pad": {
+    "@fullcalendar/timegrid": {
+      "optional": true
+    },
+    "@nx/angular": {
+      "optional": true
+    },
+    "@zxing/library": {
+      "optional": true
+    },
+    "angular-gridster2": {
+      "optional": true
+    },
+    "angularx-qrcode": {
+      "optional": true
+    },
+    "chart.js": {
+      "optional": true
+    },
+    "chartjs-adapter-date-fns": {
+      "optional": true
+    },
+    "jspdf": {
+      "optional": true
+    },
+    "lodash-es": {
+      "optional": true
+    },
+    "ngx-toastr": {
       "optional": true
     },
     "prismjs": {
       "optional": true
     },
-    "tsd": {
+    "signature_pad": {
+      "optional": true
+    },
+    "xlsx": {
       "optional": true
     }
   },

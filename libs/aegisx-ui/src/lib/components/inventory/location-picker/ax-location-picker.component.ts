@@ -132,13 +132,13 @@ export class AxLocationPickerComponent implements OnInit, OnDestroy {
   // =============================================================================
 
   /** Emitted when location is selected */
-  onLocationSelect = output<LocationSelection>();
+  locationSelect = output<LocationSelection>();
 
   /** Emitted when favorite is toggled */
-  onFavoriteToggle = output<FavoriteToggleEvent>();
+  favoriteToggle = output<FavoriteToggleEvent>();
 
   /** Emitted when node is expanded/collapsed */
-  onNodeExpand = output<NodeExpandEvent>();
+  nodeExpand = output<NodeExpandEvent>();
 
   // =============================================================================
   // INTERNAL STATE (Signals)
@@ -346,7 +346,7 @@ export class AxLocationPickerComponent implements OnInit, OnDestroy {
     }
     this.expandedNodeIds.set(new Set(expandedIds));
 
-    this.onNodeExpand.emit({
+    this.nodeExpand.emit({
       nodeId: node.id,
       isExpanded: this.treeControl.isExpanded(node),
       timestamp: new Date(),
@@ -401,7 +401,7 @@ export class AxLocationPickerComponent implements OnInit, OnDestroy {
       pathString: path.map((node) => node.code).join(' > '),
     };
 
-    this.onLocationSelect.emit(selection);
+    this.locationSelect.emit(selection);
 
     // Add to recent
     this.addToRecent(location);
@@ -664,7 +664,7 @@ export class AxLocationPickerComponent implements OnInit, OnDestroy {
     this.favoriteLocations.set(favorites);
     this.saveFavoriteLocations();
 
-    this.onFavoriteToggle.emit({
+    this.favoriteToggle.emit({
       locationId: location.id,
       isFavorite: index === -1,
       timestamp: new Date(),

@@ -115,13 +115,13 @@ export class AxBatchSelectorComponent implements OnInit {
   // =============================================================================
 
   /** Emitted when batch selection changes */
-  onSelect = output<BatchSelection>();
+  select = output<BatchSelection>();
 
   /** Emitted when batches are loaded from API */
-  onBatchesLoad = output<BatchInfo[]>();
+  batchesLoad = output<BatchInfo[]>();
 
   /** Emitted on errors */
-  onError = output<string>();
+  error = output<string>();
 
   // =============================================================================
   // INTERNAL STATE
@@ -251,7 +251,7 @@ export class AxBatchSelectorComponent implements OnInit {
   private async loadBatches() {
     const productId = this.productId();
     if (!productId) {
-      this.onError.emit('Product ID is required to load batches');
+      this.error.emit('Product ID is required to load batches');
       return;
     }
 
@@ -270,14 +270,14 @@ export class AxBatchSelectorComponent implements OnInit {
       );
 
       this.internalBatches.set(response.batches);
-      this.onBatchesLoad.emit(response.batches);
+      this.batchesLoad.emit(response.batches);
 
       // Apply strategy from API if provided
       if (response.strategy) {
         this.strategy.set(response.strategy);
       }
     } catch (error: any) {
-      this.onError.emit(
+      this.error.emit(
         `Failed to load batches: ${error.message || 'Unknown error'}`,
       );
       this.internalBatches.set([]);
@@ -360,7 +360,7 @@ export class AxBatchSelectorComponent implements OnInit {
    */
   selectBatch(batch: BatchInfo, quantity?: number) {
     if (!this.canSelectBatch(batch)) {
-      this.onError.emit(
+      this.error.emit(
         `Cannot select batch ${batch.batchNumber}: ${batch.status}`,
       );
       return;
@@ -468,7 +468,7 @@ export class AxBatchSelectorComponent implements OnInit {
       totalQuantity: this.totalSelectedQuantity(),
       strategy: this.strategy(),
     };
-    this.onSelect.emit(selection);
+    this.select.emit(selection);
   }
 
   // =============================================================================

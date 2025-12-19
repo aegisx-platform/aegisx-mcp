@@ -146,27 +146,27 @@ export class AxStockAlertPanelComponent implements OnInit, OnDestroy {
   /**
    * Emitted when an alert is clicked
    */
-  onAlertClick = output<StockAlert>();
+  alertClick = output<StockAlert>();
 
   /**
    * Emitted when an action button is clicked
    */
-  onAlertAction = output<AlertActionEvent>();
+  alertAction = output<AlertActionEvent>();
 
   /**
    * Emitted when an alert is dismissed
    */
-  onAlertDismiss = output<string>();
+  alertDismiss = output<string>();
 
   /**
    * Emitted when an alert is marked as resolved
    */
-  onAlertResolve = output<string>();
+  alertResolve = output<string>();
 
   /**
    * Emitted after alerts are loaded from API
    */
-  onAlertsLoad = output<StockAlert[]>();
+  alertsLoad = output<StockAlert[]>();
 
   // =============================================================================
   // INTERNAL STATE (SIGNALS)
@@ -434,7 +434,7 @@ export class AxStockAlertPanelComponent implements OnInit, OnDestroy {
       this.markAsRead(alert.id);
     }
 
-    this.onAlertClick.emit(alert);
+    this.alertClick.emit(alert);
   }
 
   /**
@@ -445,7 +445,7 @@ export class AxStockAlertPanelComponent implements OnInit, OnDestroy {
       alert,
       action: action as any,
     };
-    this.onAlertAction.emit(event);
+    this.alertAction.emit(event);
   }
 
   /**
@@ -461,7 +461,7 @@ export class AxStockAlertPanelComponent implements OnInit, OnDestroy {
       alerts.filter((a) => a.id !== alertId),
     );
 
-    this.onAlertDismiss.emit(alertId);
+    this.alertDismiss.emit(alertId);
 
     // In a real implementation, you would also call the API to persist the dismissal
     // this.http.post(`/api/inventory/alerts/${alertId}/dismiss`, {}).subscribe();
@@ -480,7 +480,7 @@ export class AxStockAlertPanelComponent implements OnInit, OnDestroy {
       alerts.map((a) => (a.id === alertId ? { ...a, resolved: true } : a)),
     );
 
-    this.onAlertResolve.emit(alertId);
+    this.alertResolve.emit(alertId);
 
     // In a real implementation, you would also call the API
     // this.http.post(`/api/inventory/alerts/${alertId}/resolve`, {}).subscribe();
@@ -624,7 +624,7 @@ export class AxStockAlertPanelComponent implements OnInit, OnDestroy {
         // Mock data
         const mockAlerts: StockAlert[] = this.generateMockAlerts();
         this.internalAlerts.set(mockAlerts);
-        this.onAlertsLoad.emit(mockAlerts);
+        this.alertsLoad.emit(mockAlerts);
         this.isLoading.set(false);
       } catch (err: any) {
         this.error.set(err.message || 'Failed to load alerts');

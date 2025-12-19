@@ -60,7 +60,7 @@ export class AxStockLevelComponent {
   colorScheme = input<StockLevelColorScheme>('traffic-light');
 
   // Output - events emitted to parent component
-  onWarningClick = output<StockLevelWarningEvent>();
+  warningClick = output<StockLevelWarningEvent>();
 
   /**
    * Computed signal: Percentage of stock filled (0-100)
@@ -113,7 +113,7 @@ export class AxStockLevelComponent {
    * Emits event with current stock level and minimum threshold
    */
   handleWarningClick(): void {
-    this.onWarningClick.emit({
+    this.warningClick.emit({
       level: 'low',
       current: this.current(),
       minimum: this.minimum(),

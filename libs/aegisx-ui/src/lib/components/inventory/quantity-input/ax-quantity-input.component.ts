@@ -123,7 +123,7 @@ export class AxQuantityInputComponent implements OnInit, ControlValueAccessor {
   unitChange = output<string>();
 
   /** Emits validation state */
-  onValidation = output<ValidationState>();
+  validation = output<ValidationState>();
 
   // =============================================================================
   // INTERNAL STATE
@@ -336,7 +336,7 @@ export class AxQuantityInputComponent implements OnInit, ControlValueAccessor {
     this.updateInputDisplay();
 
     // Emit validation state
-    this.onValidation.emit({
+    this.validation.emit({
       valid: this.isValid(),
       errors: this.validationErrors(),
     });

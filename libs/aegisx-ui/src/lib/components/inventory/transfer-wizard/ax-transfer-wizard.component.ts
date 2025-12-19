@@ -144,19 +144,19 @@ export class AxTransferWizardComponent implements OnInit, OnDestroy {
   // ============================================================
 
   /** Emitted when transfer is submitted successfully */
-  onComplete = output<StockTransfer>();
+  complete = output<StockTransfer>();
 
   /** Emitted when wizard is cancelled */
-  onCancel = output<void>();
+  cancel = output<void>();
 
   /** Emitted when step changes */
-  onStepChange = output<{ step: number; data: any }>();
+  stepChange = output<{ step: number; data: any }>();
 
   /** Emitted when draft is saved */
-  onDraftSave = output<TransferDraft>();
+  draftSave = output<TransferDraft>();
 
   /** Emitted when draft is loaded */
-  onDraftLoad = output<TransferDraft>();
+  draftLoad = output<TransferDraft>();
 
   // ============================================================
   // VIEW CHILDREN
@@ -451,7 +451,7 @@ export class AxTransferWizardComponent implements OnInit, OnDestroy {
    * Emit step change event
    */
   private emitStepChange(step: number): void {
-    this.onStepChange.emit({
+    this.stepChange.emit({
       step,
       data: this.getStepData(step),
     });
@@ -694,7 +694,7 @@ export class AxTransferWizardComponent implements OnInit, OnDestroy {
       };
 
       // Emit complete event
-      this.onComplete.emit(transfer);
+      this.complete.emit(transfer);
 
       // Mark as complete
       this.isComplete.set(true);
@@ -729,7 +729,7 @@ export class AxTransferWizardComponent implements OnInit, OnDestroy {
         'Are you sure you want to cancel this transfer? Unsaved changes will be lost.',
       )
     ) {
-      this.onCancel.emit();
+      this.cancel.emit();
       this.resetWizard();
     }
   }
@@ -883,7 +883,7 @@ export class AxTransferWizardComponent implements OnInit, OnDestroy {
       localStorage.setItem('ax-transfer-wizard-draft', JSON.stringify(draft));
       this.isDraftSaved.set(true);
       this.lastSavedAt.set(new Date());
-      this.onDraftSave.emit(draft);
+      this.draftSave.emit(draft);
     } catch (error) {
       console.error('Failed to save draft:', error);
     }
@@ -938,7 +938,7 @@ export class AxTransferWizardComponent implements OnInit, OnDestroy {
 
     this.isDraftSaved.set(true);
     this.lastSavedAt.set(draft.updatedAt);
-    this.onDraftLoad.emit(draft);
+    this.draftLoad.emit(draft);
 
     this.snackBar.open('Draft loaded successfully', 'Close', {
       duration: 2000,

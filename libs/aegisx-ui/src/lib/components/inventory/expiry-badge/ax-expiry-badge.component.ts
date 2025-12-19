@@ -103,7 +103,7 @@ export class AxExpiryBadgeComponent {
   /**
    * Click event emitter with expiry information
    */
-  onClick = output<ExpiryInfo>();
+  click = output<ExpiryInfo>();
 
   /**
    * Calculate days until expiry
@@ -256,6 +256,6 @@ export class AxExpiryBadgeComponent {
       status: this.expiryStatus(),
       message: this.badgeText(),
     };
-    this.onClick.emit(info);
+    this.click.emit(info);
   }
 }

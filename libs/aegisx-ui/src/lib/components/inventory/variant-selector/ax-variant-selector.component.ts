@@ -129,10 +129,10 @@ export class AxVariantSelectorComponent {
   // =============================================================================
 
   /** Emitted when variant selection changes */
-  onVariantSelect = output<VariantSelection>();
+  variantSelect = output<VariantSelection>();
 
   /** Emitted when attribute filter is applied */
-  onAttributeFilter = output<AttributeFilterEvent>();
+  attributeFilter = output<AttributeFilterEvent>();
 
   // =============================================================================
   // INTERNAL STATE
@@ -400,7 +400,7 @@ export class AxVariantSelectorComponent {
         }),
       ),
     };
-    this.onVariantSelect.emit(selection);
+    this.variantSelect.emit(selection);
   }
 
   // =============================================================================
@@ -421,7 +421,7 @@ export class AxVariantSelectorComponent {
     }
 
     this.attributeFilters.set(filters);
-    this.onAttributeFilter.emit({ attribute, value });
+    this.attributeFilter.emit({ attribute, value });
   }
 
   /**

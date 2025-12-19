@@ -79,9 +79,9 @@ export class AxBarcodeScannerComponent implements OnInit, OnDestroy {
   placeholder = input<string>('Enter barcode...');
 
   // Outputs
-  onScan = output<ScanResult>();
-  onError = output<ScanError>();
-  onModeChange = output<'camera' | 'manual'>();
+  scan = output<ScanResult>();
+  error = output<ScanError>();
+  modeChange = output<'camera' | 'manual'>();
 
   // Internal state
   protected currentMode = signal<'camera' | 'manual'>('camera');
@@ -142,7 +142,7 @@ export class AxBarcodeScannerComponent implements OnInit, OnDestroy {
       await this.startScanning();
     } catch (error: any) {
       this.hasPermission.set(false);
-      this.onError.emit({
+      this.error.emit({
         type: 'permission-denied',
         message: error.message || 'Camera permission denied',
       });
@@ -158,7 +158,7 @@ export class AxBarcodeScannerComponent implements OnInit, OnDestroy {
     const videoElement = this.videoRef?.nativeElement;
 
     if (!videoElement) {
-      this.onError.emit({
+      this.error.emit({
         type: 'camera-error',
         message: 'Video element not found',
       });
@@ -179,7 +179,7 @@ export class AxBarcodeScannerComponent implements OnInit, OnDestroy {
       );
     } catch (error: any) {
       this.isScanning.set(false);
-      this.onError.emit({
+      this.error.emit({
         type: 'camera-error',
         message: error.message || 'Camera error occurred',
       });
@@ -207,7 +207,7 @@ export class AxBarcodeScannerComponent implements OnInit, OnDestroy {
     this.recentScans.set(scans.slice(0, 10));
 
     // Emit event
-    this.onScan.emit(scanResult);
+    this.scan.emit(scanResult);
 
     // Handle continuous scan
     if (!this.continuousScan()) {
@@ -280,7 +280,7 @@ export class AxBarcodeScannerComponent implements OnInit, OnDestroy {
    */
   switchToManualMode() {
     this.currentMode.set('manual');
-    this.onModeChange.emit('manual');
+    this.modeChange.emit('manual');
   }
 
   /**
@@ -288,14 +288,14 @@ export class AxBarcodeScannerComponent implements OnInit, OnDestroy {
    */
   protected async switchToCameraMode() {
     if (!this.canUseCamera()) {
-      this.onError.emit({
+      this.error.emit({
         type: 'camera-error',
         message: 'Camera not supported on this device',
       });
       return;
     }
     await this.initCameraMode();
-    this.onModeChange.emit('camera');
+    this.modeChange.emit('camera');
   }
 
   /**
@@ -324,7 +324,7 @@ export class AxBarcodeScannerComponent implements OnInit, OnDestroy {
     const scans = [result, ...this.recentScans()];
     this.recentScans.set(scans.slice(0, 10));
 
-    this.onScan.emit(result);
+    this.scan.emit(result);
     this.manualInput.set('');
   }
 
@@ -335,7 +335,7 @@ export class AxBarcodeScannerComponent implements OnInit, OnDestroy {
     const format = this.detectFormat(code);
 
     if (!format) {
-      this.onError.emit({
+      this.error.emit({
         type: 'invalid-format',
         message: 'Unrecognized barcode format',
       });
@@ -343,7 +343,7 @@ export class AxBarcodeScannerComponent implements OnInit, OnDestroy {
     }
 
     if (!this.formats().includes(format)) {
-      this.onError.emit({
+      this.error.emit({
         type: 'invalid-format',
         message: `Format ${format} not allowed`,
       });
@@ -380,7 +380,7 @@ export class AxBarcodeScannerComponent implements OnInit, OnDestroy {
     const capabilities = track.getCapabilities() as any;
 
     if (!capabilities.torch) {
-      this.onError.emit({
+      this.error.emit({
         type: 'camera-error',
         message: 'Flashlight not supported on this device',
       });
