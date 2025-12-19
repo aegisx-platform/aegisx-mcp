@@ -163,12 +163,18 @@ importers:
       bcryptjs:
         specifier: ^3.0.2
         version: 3.0.2
+      canvas:
+        specifier: ^3.2.0
+        version: 3.2.0
       chalk:
         specifier: ^4.1.2
         version: 4.1.2
       chart.js:
         specifier: ^4.5.1
         version: 4.5.1
+      chartjs-adapter-date-fns:
+        specifier: ^3.0.0
+        version: 3.0.0(chart.js@4.5.1)(date-fns@4.1.0)
       chartjs-node-canvas:
         specifier: ^5.0.0
         version: 5.0.0(chart.js@4.5.1)
@@ -184,6 +190,9 @@ importers:
       csv-parser:
         specifier: ^3.2.0
         version: 3.2.0
+      date-fns:
+        specifier: ^4.1.0
+        version: 4.1.0
       dotenv-expand:
         specifier: ^12.0.3
         version: 12.0.3
@@ -10786,6 +10795,15 @@ packages:
       }
     engines: { pnpm: '>=8' }
 
+  chartjs-adapter-date-fns@3.0.0:
+    resolution:
+      {
+        integrity: sha512-Rs3iEB3Q5pJ973J93OBTpnP7qoGwvq3nUnoMdtxO+9aoJof7UFcRbWcIDteXuYd1fgAvct/32T9qaLyLuZVwCg==,
+      }
+    peerDependencies:
+      chart.js: '>=2.8.0'
+      date-fns: '>=2.0.0'
+
   chartjs-node-canvas@5.0.0:
     resolution:
       {
@@ -12072,6 +12090,12 @@ packages:
         integrity: sha512-ZYP5VBHshaDAiVZxjbRVcFJpc+4xGgT0bK3vzy1HLN8jTO975HEbuYzZJcHoQEY5K1a0z8YayJkyVETa08eNTg==,
       }
     engines: { node: '>=18' }
+
+  date-fns@4.1.0:
+    resolution:
+      {
+        integrity: sha512-Ukq0owbQXxa/U3EGtsdVBkR1w7KOQ5gIBqdH2hkvknzZPYvBxb/aa6E8L7tmjFtkwZBu3UXBbjIgPo/Ez4xaNg==,
+      }
 
   date-format@4.0.14:
     resolution:
@@ -31910,6 +31934,11 @@ snapshots:
     dependencies:
       '@kurkle/color': 0.3.4
 
+  chartjs-adapter-date-fns@3.0.0(chart.js@4.5.1)(date-fns@4.1.0):
+    dependencies:
+      chart.js: 4.5.1
+      date-fns: 4.1.0
+
   chartjs-node-canvas@5.0.0(chart.js@4.5.1):
     dependencies:
       canvas: 3.2.0
@@ -32702,6 +32731,8 @@ snapshots:
     dependencies:
       whatwg-mimetype: 4.0.0
       whatwg-url: 14.2.0
+
+  date-fns@4.1.0: {}
 
   date-format@4.0.14: {}
 

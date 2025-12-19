@@ -1,9 +1,47 @@
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
 import { ChartConfiguration, Chart, registerables } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { registerFont } from 'canvas';
+import * as path from 'path';
 
 // Register Chart.js components
 Chart.register(...registerables, ChartDataLabels);
+
+// Register Sarabun font for Thai language support
+// Use __dirname to get the correct path regardless of CWD
+const fontPath = path.join(__dirname, '..', 'assets', 'fonts', 'Sarabun');
+
+// Check if font files exist before registering (for test environments)
+const fs = require('fs');
+if (fs.existsSync(fontPath)) {
+  try {
+    registerFont(path.join(fontPath, 'Sarabun-Regular.ttf'), {
+      family: 'Sarabun',
+      weight: 'normal',
+      style: 'normal',
+    });
+
+    registerFont(path.join(fontPath, 'Sarabun-Bold.ttf'), {
+      family: 'Sarabun',
+      weight: 'bold',
+      style: 'normal',
+    });
+
+    registerFont(path.join(fontPath, 'Sarabun-Italic.ttf'), {
+      family: 'Sarabun',
+      weight: 'normal',
+      style: 'italic',
+    });
+
+    registerFont(path.join(fontPath, 'Sarabun-BoldItalic.ttf'), {
+      family: 'Sarabun',
+      weight: 'bold',
+      style: 'italic',
+    });
+  } catch (error) {
+    console.warn('Warning: Could not register Sarabun fonts:', error.message);
+  }
+}
 
 /**
  * Chart Type Options
@@ -83,6 +121,10 @@ export class ChartService {
       width: width || this.defaultWidth,
       height: height || this.defaultHeight,
       backgroundColour: 'white',
+      chartCallback: (ChartJS) => {
+        // Set Sarabun as the default font for all charts
+        ChartJS.defaults.font.family = 'Sarabun';
+      },
     });
   }
 
