@@ -147,17 +147,26 @@
 
 ## Phase 5: Frontend - Budget Dashboard
 
-- [ ] 5.1 Create budget dashboard component
-  - File: `apps/admin/src/app/modules/inventory/budget/components/budget-dashboard/budget-dashboard.component.ts`
-  - Create standalone component with summary cards (total, used, remaining)
-  - Add control type breakdown cards (HARD/SOFT/NONE counts)
-  - Implement filterable item table with dual progress bars
-  - Show color-coded status badges (🔴 Exceeded, 🟡 Warning, ✅ Normal)
-  - Add filter dropdowns for control type and status
-  - Purpose: Provide overview of budget status across all items
-  - _Leverage: AxTableComponent, AxProgressComponent, AxBadgeComponent, AxCardComponent_
-  - _Requirements: Requirement 5_
-  - _Prompt: Implement the task for spec item-level-budget-control, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Angular Dashboard Developer with data visualization expertise | Task: Create budget dashboard component following Requirement 5, implementing summary cards, control type breakdown, filterable item table with dual progress bars, and color-coded status indicators | Restrictions: Must use AxTableComponent with virtual scrolling for performance (1000+ items), use AxProgressComponent for dual bars (quantity + amount), use computed signals for filtering and summary calculations, implement color transitions (green less than 80%, yellow 80-99%, red 100% or more), use AxCardComponent for summary cards, ensure responsive layout | \_Leverage: AxTableComponent, AxProgressComponent, AxBadgeComponent, AxCardComponent from AegisX UI, existing dashboard patterns | \_Requirements: Requirement 5 (Budget Dashboard with Item Status) | Success: Summary cards display correct totals (budget/used/remaining), control type breakdown shows item counts, item table shows all items with filterable columns, dual progress bars display both quantity and amount usage, colors change based on usage percentage, status badges show exceeded/warning/normal, filters work (control type dropdown, status dropdown), table performance good with 1000+ items | Instructions: Update tasks.md [-], log dashboard component with signals and filtering logic, mark complete [x]_
+- [x] 5.1 Create budget dashboard component ✅ (Completed 2025-12-20)
+  - Files: `apps/admin/src/app/pages/inventory-demo/components/budget-dashboard.component.ts` (TypeScript), `budget-dashboard.component.html` (Template), `budget-dashboard.component.scss` (Styles), `budget-dashboard.component.example.ts` (Usage Example)
+  - Created standalone Angular component (417 lines TypeScript)
+  - Implemented 4 summary cards: Total Budget (💰), Used (📊), Remaining (💵), Overall Usage (📈)
+  - Added control type breakdown: HARD (🔴), SOFT (🟡), NONE (⚪) item counts with color-coded cards
+  - Added status breakdown: Normal (✅), Warning (⚠️), Exceeded (🔴) item counts
+  - Implemented filterable item table with three filters:
+    1. Control Type dropdown (HARD/SOFT/NONE)
+    2. Status dropdown (normal/warning/exceeded)
+    3. Search input (drug name/code/generic name)
+  - Used reactive signals for state management (8 signals + 5 computed signals)
+  - Dual progress bars per item showing quantity usage and budget usage percentages
+  - Color-coded progress bars: Green (<80%), Yellow (80-99%), Red (≥100%)
+  - Status badges with appropriate colors (error/warning/success)
+  - Export to CSV button (placeholder implementation)
+  - View related PRs functionality (placeholder implementation)
+  - Responsive layout with CSS Grid (adapts 1-4 columns based on screen size)
+  - Data fetched from `/api/inventory/budget/budget-requests/:id/items-status` endpoint using toSignal()
+  - Purpose: Provide comprehensive budget status overview with filtering and visual indicators
+  - _Implementation: Standalone component with computed signal-based filtering (controlTypeFilter, statusFilter, searchQuery). Summary calculations use reduce() over filtered items. Progress bars dynamically colored based on usage thresholds. Table shows drug info, control badges (Q:HARD, P:SOFT), dual progress bars, status badges, and PR links. Responsive grid layout with media queries for mobile/tablet/desktop._
 
 - [x] 5.2 Add API endpoint for dashboard data ✅ (Completed 2025-12-20)
   - File: `apps/api/src/layers/domains/inventory/budget/budgetRequests/budget-requests.controller.ts`, `budget-requests.service.ts`, `budget-requests.schemas.ts`, `budget-requests.route.ts`

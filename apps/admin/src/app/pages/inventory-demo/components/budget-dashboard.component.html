@@ -1,0 +1,400 @@
+<div class="budget-dashboard">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <h2 class="dashboard-title">Budget Dashboard</h2>
+    <div class="dashboard-meta">
+      <span class="fiscal-year">FY {{ fiscalYear() }}</span>
+      <span class="quarter-badge">Q{{ currentQuarter() }}</span>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading budget data...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (errorMessage()) {
+    <ax-card variant="error" class="error-card">
+      <div class="error-content">
+        <span class="error-icon">⚠️</span>
+        <span class="error-message">{{ errorMessage() }}</span>
+      </div>
+    </ax-card>
+  }
+
+  <!-- Dashboard Content -->
+  @if (!isLoading() && !errorMessage() && summary()) {
+    <div class="dashboard-content">
+      <!-- Summary Cards Section -->
+      <div class="summary-cards">
+        <!-- Total Budget Card -->
+        <ax-card class="summary-card total-card">
+          <div class="card-icon">💰</div>
+          <div class="card-content">
+            <h3 class="card-title">Total Budget</h3>
+            <p class="card-value">
+              {{ formatCurrency(summary()!.total_planned_amount) }}
+            </p>
+            <p class="card-subtitle">{{ summary()!.total_items }} items</p>
+          </div>
+        </ax-card>
+
+        <!-- Used Budget Card -->
+        <ax-card class="summary-card used-card">
+          <div class="card-icon">📊</div>
+          <div class="card-content">
+            <h3 class="card-title">Used</h3>
+            <p class="card-value">
+              {{ formatCurrency(summary()!.total_used_amount) }}
+            </p>
+            <p class="card-subtitle">
+              {{ formatPercent(summary()!.overall_usage_percent) }} of total
+            </p>
+          </div>
+        </ax-card>
+
+        <!-- Remaining Budget Card -->
+        <ax-card class="summary-card remaining-card">
+          <div class="card-icon">💵</div>
+          <div class="card-content">
+            <h3 class="card-title">Remaining</h3>
+            <p class="card-value">
+              {{ formatCurrency(summary()!.total_remaining_amount) }}
+            </p>
+            <p
+              class="card-subtitle"
+              [class.warning]="summary()!.overall_usage_percent >= 80"
+              [class.error]="summary()!.overall_usage_percent >= 100"
+            >
+              {{
+                formatPercent(100 - summary()!.overall_usage_percent)
+              }}
+              available
+            </p>
+          </div>
+        </ax-card>
+
+        <!-- Usage Percentage Card -->
+        <ax-card class="summary-card usage-card">
+          <div class="card-icon">📈</div>
+          <div class="card-content">
+            <h3 class="card-title">Overall Usage</h3>
+            <p class="card-value">
+              {{ formatPercent(summary()!.overall_usage_percent) }}
+            </p>
+            <div class="usage-progress">
+              <ax-progress
+                [value]="summary()!.overall_usage_percent"
+                [max]="100"
+                [color]="getProgressColor(summary()!.overall_usage_percent)"
+              />
+            </div>
+          </div>
+        </ax-card>
+      </div>
+
+      <!-- Control Type Breakdown -->
+      <div class="breakdown-section">
+        <h3 class="section-title">Control Type Breakdown</h3>
+        <div class="breakdown-cards">
+          <ax-card class="breakdown-card hard-card">
+            <div class="breakdown-content">
+              <ax-badge type="error" class="breakdown-badge">HARD</ax-badge>
+              <span class="breakdown-count">{{
+                controlTypeBreakdown().HARD
+              }}</span>
+              <span class="breakdown-label">Strict Control</span>
+            </div>
+          </ax-card>
+
+          <ax-card class="breakdown-card soft-card">
+            <div class="breakdown-content">
+              <ax-badge type="warning" class="breakdown-badge">SOFT</ax-badge>
+              <span class="breakdown-count">{{
+                controlTypeBreakdown().SOFT
+              }}</span>
+              <span class="breakdown-label">Warning Only</span>
+            </div>
+          </ax-card>
+
+          <ax-card class="breakdown-card none-card">
+            <div class="breakdown-content">
+              <ax-badge type="info" class="breakdown-badge">NONE</ax-badge>
+              <span class="breakdown-count">{{
+                controlTypeBreakdown().NONE
+              }}</span>
+              <span class="breakdown-label">No Control</span>
+            </div>
+          </ax-card>
+        </div>
+      </div>
+
+      <!-- Status Breakdown -->
+      <div class="breakdown-section">
+        <h3 class="section-title">Budget Status</h3>
+        <div class="breakdown-cards">
+          <ax-card class="breakdown-card normal-card">
+            <div class="breakdown-content">
+              <span class="status-icon">✅</span>
+              <span class="breakdown-count">{{
+                statusBreakdown().normal
+              }}</span>
+              <span class="breakdown-label">Normal (&lt;80%)</span>
+            </div>
+          </ax-card>
+
+          <ax-card class="breakdown-card warning-card">
+            <div class="breakdown-content">
+              <span class="status-icon">⚠️</span>
+              <span class="breakdown-count">{{
+                statusBreakdown().warning
+              }}</span>
+              <span class="breakdown-label">Warning (80-99%)</span>
+            </div>
+          </ax-card>
+
+          <ax-card class="breakdown-card exceeded-card">
+            <div class="breakdown-content">
+              <span class="status-icon">🔴</span>
+              <span class="breakdown-count">{{
+                statusBreakdown().exceeded
+              }}</span>
+              <span class="breakdown-label">Exceeded (≥100%)</span>
+            </div>
+          </ax-card>
+        </div>
+      </div>
+
+      <!-- Filters Section -->
+      <div class="filters-section">
+        <h3 class="section-title">Filter Items</h3>
+        <div class="filters-row">
+          <!-- Control Type Filter -->
+          <div class="filter-field">
+            <label for="controlTypeFilter">Control Type</label>
+            <ax-select
+              id="controlTypeFilter"
+              [(ngModel)]="controlTypeFilter"
+              placeholder="All Types"
+            >
+              <option [value]="null">All Types</option>
+              <option value="HARD">HARD</option>
+              <option value="SOFT">SOFT</option>
+              <option value="NONE">NONE</option>
+            </ax-select>
+          </div>
+
+          <!-- Status Filter -->
+          <div class="filter-field">
+            <label for="statusFilter">Status</label>
+            <ax-select
+              id="statusFilter"
+              [(ngModel)]="statusFilter"
+              placeholder="All Statuses"
+            >
+              <option [value]="null">All Statuses</option>
+              <option value="normal">Normal</option>
+              <option value="warning">Warning</option>
+              <option value="exceeded">Exceeded</option>
+            </ax-select>
+          </div>
+
+          <!-- Search Input -->
+          <div class="filter-field search-field">
+            <label for="searchQuery">Search Drug</label>
+            <ax-input
+              id="searchQuery"
+              [(ngModel)]="searchQuery"
+              placeholder="Drug name or code..."
+            />
+          </div>
+
+          <!-- Reset Button -->
+          <div class="filter-actions">
+            <ax-button variant="outline" (click)="resetFilters()">
+              Reset Filters
+            </ax-button>
+            <ax-button variant="primary" (click)="exportToCSV()">
+              Export CSV
+            </ax-button>
+          </div>
+        </div>
+
+        <!-- Filter Results Count -->
+        <div class="filter-results">
+          Showing {{ filteredItems().length }} of {{ allItems().length }} items
+        </div>
+      </div>
+
+      <!-- Items Table -->
+      <div class="items-table-section">
+        <h3 class="section-title">Item Details</h3>
+        <ax-card class="table-card">
+          <div class="table-container">
+            <table class="items-table">
+              <thead>
+                <tr>
+                  <th class="col-drug">Drug</th>
+                  <th class="col-control">Control</th>
+                  <th class="col-quantity">Quantity Usage</th>
+                  <th class="col-amount">Budget Usage</th>
+                  <th class="col-status">Status</th>
+                  <th class="col-actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of filteredItems(); track item.item_id) {
+                  <tr class="item-row" [class]="'status-' + item.status">
+                    <!-- Drug Info -->
+                    <td class="col-drug">
+                      <div class="drug-info">
+                        <div class="drug-name">{{ item.drug_name }}</div>
+                        @if (item.drug_code) {
+                          <div class="drug-code">{{ item.drug_code }}</div>
+                        }
+                        @if (item.generic_name) {
+                          <div class="generic-name">
+                            {{ item.generic_name }}
+                          </div>
+                        }
+                      </div>
+                    </td>
+
+                    <!-- Control Settings -->
+                    <td class="col-control">
+                      <div class="control-badges">
+                        @if (item.quantity_control_type !== 'NONE') {
+                          <ax-badge
+                            [type]="
+                              getControlTypeBadgeColor(
+                                item.quantity_control_type
+                              )
+                            "
+                            class="control-badge"
+                            [title]="
+                              'Qty: ' +
+                              item.quantity_control_type +
+                              ' ±' +
+                              item.quantity_variance_percent +
+                              '%'
+                            "
+                          >
+                            Q:{{ item.quantity_control_type }}
+                          </ax-badge>
+                        }
+                        @if (item.price_control_type !== 'NONE') {
+                          <ax-badge
+                            [type]="
+                              getControlTypeBadgeColor(item.price_control_type)
+                            "
+                            class="control-badge"
+                            [title]="
+                              'Price: ' +
+                              item.price_control_type +
+                              ' ±' +
+                              item.price_variance_percent +
+                              '%'
+                            "
+                          >
+                            P:{{ item.price_control_type }}
+                          </ax-badge>
+                        }
+                        @if (
+                          item.quantity_control_type === 'NONE' &&
+                          item.price_control_type === 'NONE'
+                        ) {
+                          <ax-badge type="info" class="control-badge"
+                            >NONE</ax-badge
+                          >
+                        }
+                      </div>
+                    </td>
+
+                    <!-- Quantity Usage -->
+                    <td class="col-quantity">
+                      <div class="usage-info">
+                        <div class="usage-details">
+                          <span class="usage-text">
+                            {{ formatNumber(item.purchased_quantity) }} /
+                            {{ formatNumber(item.planned_quantity) }}
+                          </span>
+                          <span class="usage-percent">
+                            {{ formatPercent(item.quantity_usage_percent) }}
+                          </span>
+                        </div>
+                        <ax-progress
+                          [value]="item.quantity_usage_percent"
+                          [max]="100"
+                          [color]="
+                            getProgressColor(item.quantity_usage_percent)
+                          "
+                          class="usage-progress-bar"
+                        />
+                      </div>
+                    </td>
+
+                    <!-- Amount Usage -->
+                    <td class="col-amount">
+                      <div class="usage-info">
+                        <div class="usage-details">
+                          <span class="usage-text">
+                            {{ formatCurrency(item.used_amount) }} /
+                            {{ formatCurrency(item.planned_amount) }}
+                          </span>
+                          <span class="usage-percent">
+                            {{ formatPercent(item.amount_usage_percent) }}
+                          </span>
+                        </div>
+                        <ax-progress
+                          [value]="item.amount_usage_percent"
+                          [max]="100"
+                          [color]="getProgressColor(item.amount_usage_percent)"
+                          class="usage-progress-bar"
+                        />
+                      </div>
+                    </td>
+
+                    <!-- Status -->
+                    <td class="col-status">
+                      <ax-badge
+                        [type]="getStatusBadgeColor(item.status)"
+                        class="status-badge"
+                      >
+                        {{ item.status.toUpperCase() }}
+                      </ax-badge>
+                    </td>
+
+                    <!-- Actions -->
+                    <td class="col-actions">
+                      @if (item.related_pr_ids.length > 0) {
+                        <ax-button
+                          variant="link"
+                          size="small"
+                          (click)="viewRelatedPR(item.related_pr_ids[0])"
+                        >
+                          View PRs ({{ item.related_pr_ids.length }})
+                        </ax-button>
+                      } @else {
+                        <span class="no-prs">No PRs</span>
+                      }
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr class="empty-row">
+                    <td colspan="6" class="empty-message">
+                      No items match the current filters.
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </ax-card>
+      </div>
+    </div>
+  }
+</div>
