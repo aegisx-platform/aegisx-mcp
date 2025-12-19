@@ -10,6 +10,16 @@ MCP (Model Context Protocol) server for the AegisX platform. Provides AI assista
 - **Design Tokens** - Reference design tokens for colors, spacing, typography
 - **Development Standards** - Access coding standards and guidelines
 
+## Data Synchronization
+
+The component, command, and pattern data files are **auto-generated** from source libraries:
+
+- `src/data/components.ts` - Generated from aegisx-ui components
+- `src/data/crud-commands.ts` - Generated from aegisx-cli commands
+- `src/data/patterns.ts` - Validated from existing patterns
+
+**⚠️ DO NOT EDIT MANUALLY** - Changes will be overwritten on next sync.
+
 ## Installation
 
 ### NPM (Global)
@@ -123,6 +133,19 @@ Use aegisx_patterns_suggest with task="create API endpoint" to get relevant patt
 
 ## Development
 
+### Sync Data from Source
+
+The sync tool automatically updates data files from source libraries. This runs before each build via the `prebuild` hook.
+
+```bash
+cd libs/aegisx-mcp
+pnpm run sync           # Update data files
+pnpm run sync:dry-run   # Preview changes without writing
+pnpm run sync:verbose   # See detailed progress
+```
+
+**Note:** The sync process extracts component metadata from `libs/aegisx-ui`, command definitions from `libs/aegisx-cli`, and validates existing patterns. Manual edits to generated data files will be overwritten on next sync.
+
 ### Build
 
 ```bash
@@ -130,6 +153,8 @@ cd libs/aegisx-mcp
 pnpm install
 pnpm run build
 ```
+
+The build process automatically runs `pnpm run sync` before compilation to ensure data files are up to date.
 
 ### Test Locally
 

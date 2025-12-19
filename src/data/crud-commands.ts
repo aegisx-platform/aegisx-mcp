@@ -1,4 +1,18 @@
 /**
+ * AUTO-GENERATED FILE
+ * Generated at: 2025-12-19T17:08:22.504Z
+ * Generator: commands-generator@1.0.0
+ * Source files:
+ *   - libs/aegisx-cli/docs/QUICK_REFERENCE.md
+ *   - libs/aegisx-cli/bin/cli.js
+ * DO NOT EDIT MANUALLY - Changes will be overwritten on next sync
+ */
+
+ 
+ 
+ 
+
+/**
  * CRUD Generator Commands Reference
  * Complete documentation of all CRUD generator capabilities
  */
@@ -29,371 +43,417 @@ export interface PackageInfo {
   command: string;
 }
 
+export interface TroubleshootingItem {
+  problem: string;
+  solution: string;
+  example: string;
+}
+
 export const packages: PackageInfo[] = [
   {
     name: 'standard',
-    description: 'Basic CRUD operations with essential features',
+    description: 'Basic CRUD generation',
     features: [
-      'Full CRUD operations (Create, Read, Update, Delete)',
-      'TypeBox schema validation',
-      'Pagination and filtering',
-      'Search functionality',
+      'Basic CRUD operations (Create, Read, Update, Delete)',
+      'List with pagination',
+      'Search and filtering',
       'Soft delete support',
-      'TypeScript types generation',
     ],
     useCases: [
-      'Simple data management modules',
-      'Basic admin panels',
-      'Quick prototypes',
+      'Simple data management',
+      'Prototype development',
+      'Non-critical features',
     ],
-    command: 'pnpm run crud -- TABLE_NAME --force',
+    command: 'pnpm run crud -- TABLE',
   },
   {
     name: 'enterprise',
-    description: 'Standard + Excel/CSV import functionality',
+    description: 'With bulk import (Excel/CSV)',
     features: [
-      'All standard features',
-      'Excel file import (XLSX)',
-      'CSV file import',
-      'Bulk data operations',
-      'Import validation',
-      'Error reporting for imports',
+      'Basic CRUD operations',
+      'Bulk import (Excel/CSV)',
+      'Dropdown API',
+      'Export functionality',
     ],
     useCases: [
-      'Data migration tools',
+      'Data migration scenarios',
       'Bulk data management',
-      'Admin import features',
+      'Standard business features',
     ],
-    command: 'pnpm run crud:import -- TABLE_NAME --force',
+    command: 'pnpm run crud:import -- TABLE',
   },
   {
     name: 'full',
-    description: 'Enterprise + WebSocket events for real-time updates',
+    description: 'Full feature package',
     features: [
-      'All enterprise features',
-      'WebSocket event emission',
-      'Real-time CRUD notifications',
-      'Event-driven architecture support',
-      'Pub/sub integration ready',
+      'Basic CRUD operations',
+      'Bulk operations (import/export)',
+      'Advanced validation',
+      'Uniqueness checks',
+      'Complex search filters',
+      'Real-time events (optional)',
     ],
     useCases: [
-      'Real-time dashboards',
-      'Collaborative applications',
-      'Live data feeds',
+      'Mission-critical enterprise features',
+      'Complex business logic',
+      'Data integrity requirements',
     ],
-    command: 'pnpm run crud:full -- TABLE_NAME --force',
+    command: 'pnpm run crud:full -- TABLE',
   },
 ];
 
 export const commands: CommandInfo[] = [
   {
-    name: 'domain:init',
+    name: 'generate table-name',
     description:
-      'Initialize a new domain with PostgreSQL schema and folder structure',
-    usage: 'pnpm run domain:init -- <domain_name> [options]',
+      'Generate CRUD module (interactive mode if no table specified)',
+    usage: 'generate [table-name]',
     options: [
-      {
-        name: 'force',
-        alias: 'f',
-        type: 'boolean',
-        default: false,
-        description: 'Reinitialize even if domain already exists',
-      },
-      {
-        name: 'dry-run',
-        alias: 'd',
-        type: 'boolean',
-        default: false,
-        description: 'Preview files without creating',
-      },
-    ],
-    examples: [
-      '# Initialize inventory domain',
-      'pnpm run domain:init -- inventory',
-      '',
-      '# Initialize with dry run preview',
-      './bin/cli.js domain:init inventory --dry-run',
-      '',
-      '# Force reinitialize existing domain',
-      './bin/cli.js domain:init inventory --force',
-    ],
-    notes: [
-      'Creates PostgreSQL schema, knexfile, migrations folder, seeds folder',
-      'Run migration after init: npx knex migrate:latest --knexfile knexfile-{domain}.ts',
-      'Domain names are converted: hr_management → hr-management (kebab), hr_management (snake)',
-    ],
-  },
-  {
-    name: 'domain:list',
-    description: 'List all initialized domains in the project',
-    usage: 'pnpm run domain:list',
-    options: [],
-    examples: [
-      '# List all domains',
-      'pnpm run domain:list',
-      '',
-      '# Or using direct CLI',
-      './bin/cli.js domain:list',
-    ],
-    notes: [
-      'Shows domains with their schema names and status',
-      'Checks for knexfile and modules folder existence',
-    ],
-  },
-  {
-    name: 'generate',
-    description: 'Generate CRUD module from database table',
-    usage: 'pnpm run crud -- <table_name> [options]',
-    options: [
-      {
-        name: 'target',
-        alias: 't',
-        type: 'string',
-        default: 'backend',
-        description: 'Generation target',
-        choices: ['backend', 'frontend'],
-      },
-      {
-        name: 'force',
-        alias: 'f',
-        type: 'boolean',
-        default: false,
-        description: 'Overwrite existing files without prompt',
-      },
-      {
-        name: 'dry-run',
-        alias: 'd',
-        type: 'boolean',
-        default: false,
-        description: 'Preview files without creating',
-      },
-      {
-        name: 'package',
-        type: 'string',
-        default: 'standard',
-        description: 'Feature package to use',
-        choices: ['standard', 'enterprise', 'full'],
-      },
       {
         name: 'with-events',
         alias: 'e',
         type: 'boolean',
-        default: false,
-        description: 'Include WebSocket events',
+        description: 'Include real-time events integration',
       },
       {
-        name: 'with-import',
+        name: 'dry-run',
+        alias: 'd',
         type: 'boolean',
-        default: false,
-        description: 'Include bulk import (Excel/CSV)',
+        description: 'Preview files without creating them',
+      },
+      {
+        name: 'force',
+        alias: 'f',
+        type: 'boolean',
+        description: 'Force overwrite existing files without confirmation',
       },
       {
         name: 'app',
         alias: 'a',
         type: 'string',
         default: 'api',
-        description: 'Target app for backend',
-        choices: ['api'],
+        description: 'Target app (api, web, admin)',
       },
       {
-        name: 'flat',
+        name: 'output',
+        alias: 'o',
+        type: 'string',
+        description: 'Custom output directory (overrides --app)',
+      },
+      {
+        name: 'target',
+        alias: 't',
+        type: 'string',
+        default: 'backend',
+        description: 'Generation target (backend, frontend)',
+      },
+      {
+        name: 'config',
+        alias: 'c',
+        type: 'string',
+        description: 'Configuration file path',
+      },
+      {
+        name: 'direct-db',
+        type: 'boolean',
+        description: 'Write roles directly to database (development only)',
+      },
+      {
+        name: 'no-roles',
+        type: 'boolean',
+        description: 'Skip role generation entirely',
+      },
+      {
+        name: 'migration-only',
+        type: 'boolean',
+        description: 'Generate migration file only (no CRUD files)',
+      },
+      {
+        name: 'multiple-roles',
+        type: 'boolean',
+        description:
+          'Generate multiple roles (admin, editor, viewer) instead of single role',
+      },
+      {
+        name: 'package',
+        type: 'string',
+        default: 'standard',
+        description: 'Feature package to generate (standard, enterprise, full)',
+      },
+      {
+        name: 'smart-stats',
         type: 'boolean',
         default: false,
-        description: 'Use flat structure (not domain)',
+        description: 'Enable smart statistics detection based on table fields',
+      },
+      {
+        name: 'no-format',
+        type: 'boolean',
+        default: false,
+        description: 'Skip auto-formatting generated files',
+      },
+      {
+        name: 'with-import',
+        type: 'boolean',
+        default: false,
+        description: 'Include bulk import functionality (Excel/CSV upload)',
+      },
+      {
+        name: 'with-export',
+        type: 'boolean',
+        default: false,
+        description: 'Include export functionality (CSV/Excel/PDF export)',
       },
       {
         name: 'no-register',
         type: 'boolean',
         default: false,
-        description: 'Skip auto-registration',
+        description:
+          'Skip auto-registration in plugin.loader.ts / app.routes.ts',
       },
       {
         name: 'include-audit-fields',
         type: 'boolean',
         default: false,
-        description: 'Include audit fields in forms (created_at, updated_at)',
+        description:
+          'Include audit fields (created_at, updated_at, deleted_at, created_by, updated_by) in forms',
       },
       {
-        name: 'domain',
+        name: 'shell',
         type: 'string',
         description:
-          'Domain path for module organization (e.g., inventory/master-data)',
+          'Target shell for frontend generation (e.g., inventory, system). Output goes to features/{shell}/modules/ and routes are registered in shell routes file',
+      },
+      {
+        name: 'section',
+        type: 'string',
+        description:
+          'Target section within a shell (e.g., master-data). Module will be registered in section config instead of main config',
       },
       {
         name: 'schema',
         alias: 's',
         type: 'string',
         default: 'public',
-        description: 'PostgreSQL schema to read table from',
+        description: 'PostgreSQL schema to read table from (default: public)',
       },
       {
-        name: 'shell',
+        name: 'domain',
         type: 'string',
         description:
-          'Target shell for frontend generation (requires --target frontend)',
+          'Domain path for module organization (e.g., inventory/master-data, queue/tickets)',
       },
       {
-        name: 'section',
+        name: 'layer',
         type: 'string',
-        description: 'Target section within shell (requires --shell)',
+        description:
+          'Architectural layer for the module: core, platform, or domains',
       },
       {
-        name: 'smart-stats',
-        type: 'boolean',
-        default: false,
-        description: 'Enable smart statistics detection for dashboard cards',
-      },
-      {
-        name: 'direct-db',
-        type: 'boolean',
-        default: false,
-        description: 'Write roles directly to database instead of migration',
-      },
-      {
-        name: 'no-roles',
-        type: 'boolean',
-        default: false,
-        description: 'Skip role/permission generation',
-      },
-      {
-        name: 'migration-only',
-        type: 'boolean',
-        default: false,
-        description: 'Generate only the migration file (for role permissions)',
-      },
-      {
-        name: 'multiple-roles',
-        type: 'boolean',
-        default: false,
-        description: 'Generate multiple role levels (admin, manager, viewer)',
+        name: 'type',
+        type: 'string',
+        description:
+          'Module type within domain (e.g., master-data, operations)',
       },
     ],
     examples: [
-      '# Basic backend generation',
-      'pnpm run crud -- products --force',
-      '',
-      '# Backend with import functionality',
-      'pnpm run crud:import -- budgets --force',
-      '',
-      '# Backend with WebSocket events',
-      'pnpm run crud:events -- notifications --force',
-      '',
-      '# Full package (all features)',
-      'pnpm run crud:full -- orders --force',
-      '',
-      '# Generate for specific domain (e.g., inventory)',
-      'pnpm run crud -- drugs --domain inventory/master-data --schema inventory --force',
-      '',
-      '# Generate for HR domain',
-      'pnpm run crud -- employees --domain hr --schema hr --force',
-      '',
-      '# Frontend generation (must generate backend first)',
+      './bin/cli.js generate drugs --target frontend --domain inventory/master-data --force',
+      './bin/cli.js generate TABLE_NAME [OPTIONS]',
+      './libs/aegisx-cli/bin/cli.js generate TABLE_NAME [OPTIONS]',
+      './bin/cli.js generate products --with-import --with-events --force',
       './bin/cli.js generate products --target frontend --force',
-      '',
-      '# Frontend with import dialog',
+      './bin/cli.js generate products --target frontend --with-import --force',
+      './bin/cli.js generate products --dry-run',
+      './bin/cli.js generate products --output ./custom/path --force',
+      './bin/cli.js generate products --target frontend --force',
+      './bin/cli.js generate products --target frontend --app admin --force',
+      './bin/cli.js generate products --target frontend --shell system --force',
+      './bin/cli.js generate products --target frontend --shell inventory --force',
+      './bin/cli.js generate products --target frontend --force',
       './bin/cli.js generate budgets --target frontend --with-import --force',
-      '',
-      '# Dry run to preview',
-      'pnpm run crud -- articles --dry-run',
-      '',
-      '# Frontend generation for specific shell and section',
-      './bin/cli.js generate drugs --target frontend --shell inventory --section master-data --force',
-      '',
-      '# Generate with smart statistics for dashboard',
-      './bin/cli.js generate orders --target frontend --shell sales --smart-stats --force',
-      '',
-      '# Generate backend with multiple roles',
-      'pnpm run crud -- invoices --multiple-roles --force',
-      '',
-      '# Skip role generation',
-      'pnpm run crud -- temp_data --no-roles --force',
+      './bin/cli.js generate notifications --target frontend --with-events --force',
+      './bin/cli.js generate orders --package full --with-import --with-events --force',
+      './bin/cli.js generate orders --target frontend --package full --with-import --with-events --force',
+      './bin/cli.js generate products --target frontend --force',
+      './bin/cli.js generate products --target frontend --app admin --force',
+      'pnpm run crud generate products --force',
+      './bin/cli.js generate products --target backend --target frontend',
+      './bin/cli.js generate products --target frontend --force',
+      './bin/cli.js generate products --target frontend --force',
+      'generate [TABLE]             # Generate CRUD module',
+      'shell <SHELL_NAME>           # Generate App Shell (NEW)',
+      'domain <NAME>                # Generate domain module',
     ],
     notes: [
-      'Always use -- separator before table name when using pnpm scripts',
-      'Generate backend first, then frontend',
-      'Use snake_case for table names (auto-converted to kebab-case)',
-      'For domain generation, initialize domain first: pnpm run domain:init -- <domain>',
-      'Domain auto-detect: prompts to initialize if domain not found',
-      'Use --shell and --section for App Shell integration',
-      'Use --smart-stats to auto-detect statistics fields for dashboard cards',
+      '- Generate backend FIRST, then frontend\n- Default app for `--target backend` is `api`\n- Default app for `--target frontend` is `web`',
+      'DO: Use `./bin/cli.js generate` for advanced options',
+      'DO: Generate **backend FIRST**, then frontend',
+      "DON'T: Generate frontend without backend",
     ],
+  },
+  {
+    name: 'domain',
+    description: 'Generate domain module with organized structure',
+    usage: 'domain',
+    options: [
+      {
+        name: 'with-events',
+        alias: 'e',
+        type: 'boolean',
+        description: 'Include real-time events integration',
+      },
+      {
+        name: 'dry-run',
+        alias: 'd',
+        type: 'boolean',
+        description: 'Preview files without creating them',
+      },
+      {
+        name: 'force',
+        alias: 'f',
+        type: 'boolean',
+        description: 'Force overwrite existing files without confirmation',
+      },
+      {
+        name: 'app',
+        alias: 'a',
+        type: 'string',
+        default: 'api',
+        description: 'Target app (api, web, admin)',
+      },
+      {
+        name: 'output',
+        alias: 'o',
+        type: 'string',
+        description: 'Custom output directory (overrides --app)',
+      },
+      {
+        name: 'target',
+        alias: 't',
+        type: 'string',
+        default: 'backend',
+        description: 'Generation target (backend, frontend)',
+      },
+      {
+        name: 'config',
+        alias: 'c',
+        type: 'string',
+        description: 'Configuration file path',
+      },
+      {
+        name: 'schema',
+        alias: 's',
+        type: 'string',
+        default: 'public',
+        description: 'PostgreSQL schema to read table from (default: public)',
+      },
+    ],
+    examples: [
+      'pnpm run domain:init -- inventory',
+      './bin/cli.js domain:init inventory --dry-run  # Preview',
+      'pnpm run domain:list',
+      'pnpm run crud -- drugs --domain inventory/master-data --schema inventory --force',
+      './bin/cli.js generate drugs --target frontend --domain inventory/master-data --force',
+      '│  └─ inventory/           # Domain folder',
+      '│     ├─ index.ts          # Domain plugin registration',
+      '└─ migrations-inventory/ # Domain-specific migrations',
+      'domain <NAME>                # Generate domain module',
+      'route <DOMAIN/ROUTE>         # Add route to domain',
+    ],
+  },
+  {
+    name: 'route',
+    description: 'Add route to existing domain module',
+    usage: 'route',
+    options: [
+      {
+        name: 'with-events',
+        alias: 'e',
+        type: 'boolean',
+        description: 'Include real-time events integration',
+      },
+      {
+        name: 'dry-run',
+        alias: 'd',
+        type: 'boolean',
+        description: 'Preview files without creating them',
+      },
+      {
+        name: 'force',
+        alias: 'f',
+        type: 'boolean',
+        description: 'Force overwrite existing files without confirmation',
+      },
+      {
+        name: 'app',
+        alias: 'a',
+        type: 'string',
+        default: 'api',
+        description: 'Target app (api, web, admin)',
+      },
+      {
+        name: 'output',
+        alias: 'o',
+        type: 'string',
+        description: 'Custom output directory (overrides --app)',
+      },
+      {
+        name: 'target',
+        alias: 't',
+        type: 'string',
+        default: 'backend',
+        description: 'Generation target (backend, frontend)',
+      },
+    ],
+    examples: ['route <DOMAIN/ROUTE>         # Add route to domain'],
   },
   {
     name: 'list-tables',
-    description: 'List all available database tables',
-    usage: 'pnpm run crud:list',
-    options: [],
-    examples: [
-      '# List all tables',
-      'pnpm run crud:list',
-      '',
-      '# Or using direct CLI',
-      './bin/cli.js list-tables',
+    description: 'List available database tables',
+    usage: 'list-tables',
+    options: [
+      {
+        name: 'schema',
+        alias: 's',
+        type: 'string',
+        default: 'public',
+        description: 'PostgreSQL schema to list tables from (default: public)',
+      },
     ],
-    notes: [
-      'Connects to database configured in .env.local',
-      'Shows table names that can be used with generate command',
-    ],
+    examples: ['list-tables                  # List database tables'],
   },
   {
     name: 'validate',
-    description: 'Validate generated CRUD module',
-    usage: 'pnpm run crud:validate -- <table_name>',
+    description: 'Validate generated module',
+    usage: 'validate',
     options: [],
-    examples: [
-      '# Validate generated module',
-      'pnpm run crud:validate -- products',
-    ],
-    notes: [
-      'Checks for missing files',
-      'Validates schema consistency',
-      'Verifies route registration',
-    ],
+    examples: ['validate <MODULE>            # Validate module'],
   },
   {
-    name: 'templates',
-    description: 'Manage generation templates',
-    usage: './bin/cli.js templates <action>',
-    options: [
-      {
-        name: 'list',
-        type: 'boolean',
-        description: 'List available templates',
-      },
-      {
-        name: 'show',
-        type: 'string',
-        description: 'Show template content',
-      },
-    ],
-    examples: [
-      '# List all templates',
-      './bin/cli.js templates --list',
-      '',
-      '# Show specific template',
-      './bin/cli.js templates --show controller',
-    ],
+    name: 'packages',
+    description: 'Show available feature packages',
+    usage: 'packages',
+    options: [],
+    examples: ['packages                     # Show feature packages'],
   },
   {
-    name: 'shell',
-    description: 'Generate App Shell for organizing frontend features',
-    usage: './bin/cli.js shell <shell-name> [options]',
+    name: 'shell <shell-name>',
+    description: 'Generate App Shell (simple, enterprise, or multi-app)',
+    usage: 'shell <shell-name>',
     options: [
       {
         name: 'type',
         alias: 't',
         type: 'string',
-        default: 'simple',
-        description: 'Shell type',
-        choices: ['simple', 'enterprise', 'multi-app'],
+        default: 'enterprise',
+        description: 'Shell type (simple, enterprise, multi-app)',
       },
       {
         name: 'app',
         alias: 'a',
         type: 'string',
         default: 'web',
-        description: 'Target app',
-        choices: ['web', 'admin'],
+        description: 'Target app (web, admin)',
       },
       {
         name: 'name',
@@ -405,86 +465,110 @@ export const commands: CommandInfo[] = [
         name: 'theme',
         type: 'string',
         default: 'default',
-        description: 'Theme preset',
-        choices: ['default', 'indigo', 'teal', 'rose'],
+        description: 'Theme preset (default, indigo, teal, rose)',
+      },
+      {
+        name: 'order',
+        type: 'string',
+        default: '0',
+        description: 'App order in launcher',
       },
       {
         name: 'with-dashboard',
         type: 'boolean',
-        default: false,
+        default: true,
         description: 'Include dashboard page',
       },
       {
         name: 'with-master-data',
         type: 'boolean',
-        default: false,
-        description: 'Include Master Data page with ax-launcher',
+        default: true,
+        description:
+          'Include Master Data page with ax-launcher for CRUD modules',
       },
       {
         name: 'with-settings',
         type: 'boolean',
-        default: false,
         description: 'Include settings page',
       },
       {
         name: 'with-auth',
         type: 'boolean',
-        default: false,
+        default: true,
         description: 'Include AuthGuard and AuthService',
       },
       {
         name: 'with-theme-switcher',
         type: 'boolean',
-        default: false,
         description: 'Include theme switcher component',
       },
       {
         name: 'force',
         alias: 'f',
         type: 'boolean',
-        default: false,
-        description: 'Force overwrite existing files',
+        description: 'Force overwrite existing files without confirmation',
       },
       {
         name: 'dry-run',
         alias: 'd',
         type: 'boolean',
-        default: false,
-        description: 'Preview files without creating',
+        description: 'Preview files without creating them',
+      },
+      {
+        name: 'no-format',
+        type: 'boolean',
+        description: 'Skip auto-formatting generated files',
       },
     ],
     examples: [
-      '# Generate simple shell',
-      './bin/cli.js shell inventory --app web --force',
-      '',
-      '# Generate enterprise shell with all features',
-      './bin/cli.js shell hr --type enterprise --with-dashboard --with-master-data --force',
-      '',
-      '# Generate shell with theme',
-      './bin/cli.js shell finance --theme indigo --with-settings --force',
-      '',
-      '# Preview shell generation',
-      './bin/cli.js shell crm --dry-run',
-    ],
-    notes: [
-      'Shell types: simple (basic layout), enterprise (with sidebar), multi-app (tenant-aware)',
-      'Use --with-master-data for ax-launcher integration',
-      'Shells organize features into logical groupings',
-      'After creating shell, use section command to add sections',
+      './bin/cli.js shell SHELL_NAME --force',
+      './bin/cli.js generate products --target frontend --shell system --force',
+      './bin/cli.js generate products --target frontend --shell inventory --force',
+      'shell <SHELL_NAME>           # Generate App Shell (NEW)',
+      'shell-types                  # Show available shell types',
+      './bin/cli.js shell reports --force',
+      './bin/cli.js shell auth --type simple --force',
+      './bin/cli.js shell inventory --type multi-app --force',
+      './bin/cli.js shell reports --dry-run',
+      './bin/cli.js shell-types',
+      'apps/web/src/app/features/{shell-name}/',
+      '├── {shell-name}-shell.component.ts',
+      '├── {shell-name}.config.ts',
+      '├── {shell-name}.routes.ts',
+      'apps/web/src/app/features/{shell-name}/',
+      '├── {shell-name}-shell.component.ts',
+      '├── {shell-name}.routes.ts',
+      './bin/cli.js shell reports --force',
+      './bin/cli.js shell auth --type simple --app web --force',
+      './bin/cli.js shell inventory --type multi-app --with-settings --force',
+      './bin/cli.js shell admin-panel --app admin --theme enterprise --force',
+      '// {Shell Name}',
+      "path: '{shell-name}',",
+      "import('./features/{shell-name}/{shell-name}.routes').then((m) => m.{SHELL_NAME}_ROUTES),",
     ],
   },
   {
-    name: 'section',
-    description: 'Generate section within an App Shell',
-    usage: './bin/cli.js section <shell-name> <section-name> [options]',
+    name: 'shell-types',
+    description: 'Show available shell types and their features',
+    usage: 'shell-types',
+    options: [],
+    examples: [
+      'shell-types                  # Show available shell types',
+      './bin/cli.js shell-types',
+    ],
+  },
+  {
+    name: 'section <shell-name> <section-name>',
+    description:
+      'Generate a section within a shell (sub-page with ax-launcher)',
+    usage: 'section <shell-name> <section-name>',
     options: [
       {
         name: 'app',
         alias: 'a',
         type: 'string',
         default: 'web',
-        description: 'Target app',
-        choices: ['web', 'admin'],
+        description: 'Target app (web, admin)',
       },
       {
         name: 'name',
@@ -496,188 +580,181 @@ export const commands: CommandInfo[] = [
         name: 'force',
         alias: 'f',
         type: 'boolean',
-        default: false,
-        description: 'Force overwrite existing files',
+        description: 'Force overwrite existing files without confirmation',
       },
       {
         name: 'dry-run',
         alias: 'd',
         type: 'boolean',
-        default: false,
-        description: 'Preview files without creating',
+        description: 'Preview files without creating them',
+      },
+      {
+        name: 'no-format',
+        type: 'boolean',
+        description: 'Skip auto-formatting generated files',
+      },
+    ],
+    examples: [],
+  },
+  {
+    name: 'templates',
+    description: 'Manage CRUD generator templates',
+    usage: 'templates',
+    options: [],
+    examples: [
+      'templates list [TYPE]        # List templates',
+      'templates set-default        # Set default template',
+      'templates add                # Add custom template',
+      'templates remove             # Remove custom template',
+    ],
+  },
+  {
+    name: 'list type',
+    description: 'List available templates (backend, frontend, or all)',
+    usage: 'list [type]',
+    options: [],
+    examples: [
+      'pnpm run domain:list',
+      'pnpm run crud:list',
+      'pnpm run crud:list',
+      'list-tables                  # List database tables',
+      'templates list [TYPE]        # List templates',
+    ],
+    notes: ['DO: Check `pnpm run crud:list` before generating'],
+  },
+  {
+    name: 'set-default',
+    description: 'Set default template for backend or frontend',
+    usage: 'set-default',
+    options: [],
+    examples: ['templates set-default        # Set default template'],
+  },
+  {
+    name: 'add',
+    description: 'Add a custom template',
+    usage: 'add',
+    options: [],
+    examples: [
+      'route <DOMAIN/ROUTE>         # Add route to domain',
+      'templates add                # Add custom template',
+    ],
+    notes: ['DO: Add `--force` to avoid prompts'],
+  },
+  {
+    name: 'remove',
+    description: 'Remove a custom template',
+    usage: 'remove',
+    options: [],
+    examples: ['templates remove             # Remove custom template'],
+  },
+  {
+    name: 'config',
+    description: 'Manage CRUD generator configuration',
+    usage: 'config',
+    options: [
+      {
+        name: 'force',
+        alias: 'f',
+        type: 'boolean',
+        description: 'Overwrite existing configuration file',
       },
     ],
     examples: [
-      '# Add master-data section to inventory shell',
-      './bin/cli.js section inventory master-data --force',
-      '',
-      '# Add reports section with custom name',
-      './bin/cli.js section hr reports --name "HR Reports" --force',
-      '',
-      '# Preview section generation',
-      './bin/cli.js section finance transactions --dry-run',
-    ],
-    notes: [
-      'Sections organize features within a shell',
-      'Common sections: master-data, transactions, reports, settings',
-      'Section creates routes and navigation entries',
-      'Use generate command with --shell and --section to add CRUD features',
+      'config init                  # Initialize .crudgen.json',
+      'config show                  # Show current config',
+      '├── {shell-name}.config.ts',
     ],
   },
   {
-    name: 'shell-types',
-    description: 'Show available shell types and their features',
-    usage: './bin/cli.js shell-types',
-    options: [],
-    examples: ['# Show all shell types', './bin/cli.js shell-types'],
-    notes: [
-      'Lists: simple, enterprise, multi-app shell types',
-      'Shows features included in each type',
+    name: 'init',
+    description: 'Initialize .crudgen.json configuration file',
+    usage: 'init',
+    options: [
+      {
+        name: 'force',
+        alias: 'f',
+        type: 'boolean',
+        description: 'Overwrite existing configuration file',
+      },
     ],
+    examples: [
+      'pnpm run domain:init -- inventory',
+      './bin/cli.js domain:init inventory --dry-run  # Preview',
+      'config init                  # Initialize .crudgen.json',
+    ],
+  },
+  {
+    name: 'show',
+    description: 'Show current configuration',
+    usage: 'show',
+    options: [],
+    examples: [
+      'shell-types                  # Show available shell types',
+      'packages                     # Show feature packages',
+      'config show                  # Show current config',
+    ],
+  },
+  {
+    name: 'activate <license-key>',
+    description: 'Activate your AegisX CLI license',
+    usage: 'activate <license-key>',
+    options: [],
+    examples: [],
+  },
+  {
+    name: 'domain:init <domain-name>',
+    description: 'List all initialized domains',
+    usage: 'domain:init <domain-name>',
+    options: [
+      {
+        name: 'dry-run',
+        alias: 'd',
+        type: 'boolean',
+        description: 'Preview files without creating them',
+      },
+      {
+        name: 'force',
+        alias: 'f',
+        type: 'boolean',
+        description: 'Force reinitialize if domain already exists',
+      },
+    ],
+    examples: [
+      'pnpm run domain:init -- inventory',
+      './bin/cli.js domain:init inventory --dry-run  # Preview',
+    ],
+  },
+  {
+    name: 'deactivate',
+    description: 'Remove license from this machine',
+    usage: 'deactivate',
+    options: [],
+    examples: [],
+  },
+  {
+    name: 'license',
+    description: 'Show current license status',
+    usage: 'license',
+    options: [],
+    examples: [],
+  },
+  {
+    name: 'trial',
+    description: 'Start a 14-day free trial',
+    usage: 'trial',
+    options: [],
+    examples: [],
   },
 ];
 
-export interface GeneratedFile {
-  path: string;
-  description: string;
-  category: 'backend' | 'frontend' | 'shared';
-}
-
-export const generatedFiles: {
-  backend: GeneratedFile[];
-  frontend: GeneratedFile[];
-} = {
-  backend: [
-    {
-      path: 'modules/{name}/{name}.routes.ts',
-      description: 'Fastify route definitions with schema validation',
-      category: 'backend',
-    },
-    {
-      path: 'modules/{name}/{name}.controller.ts',
-      description: 'Request handlers and business logic',
-      category: 'backend',
-    },
-    {
-      path: 'modules/{name}/{name}.service.ts',
-      description: 'Service layer with repository integration',
-      category: 'backend',
-    },
-    {
-      path: 'modules/{name}/{name}.repository.ts',
-      description: 'Database operations with Knex',
-      category: 'backend',
-    },
-    {
-      path: 'modules/{name}/{name}.schemas.ts',
-      description: 'TypeBox schemas for validation',
-      category: 'backend',
-    },
-    {
-      path: 'modules/{name}/{name}.types.ts',
-      description: 'TypeScript type definitions',
-      category: 'backend',
-    },
-    {
-      path: 'modules/{name}/{name}.import.service.ts',
-      description: 'Excel/CSV import service (with-import only)',
-      category: 'backend',
-    },
-    {
-      path: 'modules/{name}/{name}.events.ts',
-      description: 'WebSocket event definitions (with-events only)',
-      category: 'backend',
-    },
-  ],
-  frontend: [
-    {
-      path: 'features/{name}/{name}.component.ts',
-      description: 'Main feature component',
-      category: 'frontend',
-    },
-    {
-      path: 'features/{name}/{name}.service.ts',
-      description: 'HTTP service for API calls',
-      category: 'frontend',
-    },
-    {
-      path: 'features/{name}/{name}.types.ts',
-      description: 'TypeScript interfaces',
-      category: 'frontend',
-    },
-    {
-      path: 'features/{name}/components/{name}-list.component.ts',
-      description: 'List/table component',
-      category: 'frontend',
-    },
-    {
-      path: 'features/{name}/components/{name}-form.component.ts',
-      description: 'Create/edit form component',
-      category: 'frontend',
-    },
-    {
-      path: 'features/{name}/components/{name}-dialog.component.ts',
-      description: 'Dialog wrapper for form',
-      category: 'frontend',
-    },
-    {
-      path: 'features/{name}/components/{name}-import-dialog.component.ts',
-      description: 'Import dialog (with-import only)',
-      category: 'frontend',
-    },
-    {
-      path: 'features/{name}/{name}.routes.ts',
-      description: 'Angular route definitions',
-      category: 'frontend',
-    },
-  ],
-};
-
-export interface TroubleshootingItem {
-  problem: string;
-  solution: string;
-  example?: string;
-}
-
 export const troubleshooting: TroubleshootingItem[] = [
   {
-    problem: 'Missing double dash separator',
-    solution:
-      'When using pnpm scripts, add -- before table name: pnpm run crud -- TABLE_NAME',
-    example: '❌ pnpm run crud products\n✅ pnpm run crud -- products --force',
+    problem: 'Module not found errors',
+    solution: 'Run pnpm install to ensure all dependencies are available',
+    example: 'pnpm install && pnpm run build',
   },
   {
-    problem: 'Domain not initialized',
-    solution:
-      'Initialize domain first with domain:init command, then generate CRUD',
-    example:
-      'pnpm run domain:init -- inventory\nnpx knex migrate:latest --knexfile knexfile-inventory.ts\npnpm run crud -- drugs --domain inventory --schema inventory --force',
-  },
-  {
-    problem: 'Table not found in schema',
-    solution:
-      'Ensure table exists in the specified PostgreSQL schema. Use --schema flag to specify non-public schemas',
-    example:
-      'pnpm run crud -- drugs --schema inventory --force\n# Or check tables: psql -c "SELECT table_name FROM information_schema.tables WHERE table_schema = \'inventory\'"',
-  },
-  {
-    problem: 'Table not found',
-    solution: 'Run migrations first and check table exists: pnpm run crud:list',
-    example: 'pnpm run db:migrate && pnpm run crud:list',
-  },
-  {
-    problem: 'Cannot connect to database',
-    solution:
-      'Ensure Docker containers are running and .env.local has correct ports',
-    example: 'docker ps && cat .env.local | grep PORT',
-  },
-  {
-    problem: 'Files not being generated',
-    solution: 'Check --dry-run is not set, and use --force to overwrite',
-    example: 'pnpm run crud -- products --force',
-  },
-  {
-    problem: 'TypeScript compilation errors after generation',
+    problem: 'TypeScript compilation errors',
     solution:
       'Ensure all dependencies are installed and restart TypeScript server',
     example: 'pnpm install && pnpm run build',
@@ -700,6 +777,7 @@ export const troubleshooting: TroubleshootingItem[] = [
 /**
  * Get all commands
  */
+
 export function getAllCommands(): CommandInfo[] {
   return commands;
 }
@@ -707,6 +785,7 @@ export function getAllCommands(): CommandInfo[] {
 /**
  * Get command by name
  */
+
 export function getCommand(name: string): CommandInfo | undefined {
   return commands.find((c) => c.name === name);
 }
@@ -714,6 +793,7 @@ export function getCommand(name: string): CommandInfo | undefined {
 /**
  * Get all packages
  */
+
 export function getAllPackages(): PackageInfo[] {
   return packages;
 }
@@ -721,6 +801,7 @@ export function getAllPackages(): PackageInfo[] {
 /**
  * Get troubleshooting tips
  */
+
 export function getTroubleshooting(): TroubleshootingItem[] {
   return troubleshooting;
 }
@@ -728,6 +809,7 @@ export function getTroubleshooting(): TroubleshootingItem[] {
 /**
  * Build command string from options
  */
+
 export function buildCommand(
   tableName: string,
   options: {
@@ -828,3 +910,99 @@ export function buildCommand(
 
   return parts.join(' ');
 }
+
+export interface GeneratedFile {
+  path: string;
+  description: string;
+  category: 'backend' | 'frontend' | 'shared';
+}
+
+export const generatedFiles: {
+  backend: GeneratedFile[];
+  frontend: GeneratedFile[];
+} = {
+  backend: [
+    {
+      path: 'modules/{name}/{name}.routes.ts',
+      description: 'Fastify route definitions with schema validation',
+      category: 'backend',
+    },
+    {
+      path: 'modules/{name}/{name}.controller.ts',
+      description: 'Request handlers and business logic',
+      category: 'backend',
+    },
+    {
+      path: 'modules/{name}/{name}.service.ts',
+      description: 'Service layer with repository integration',
+      category: 'backend',
+    },
+    {
+      path: 'modules/{name}/{name}.repository.ts',
+      description: 'Database operations with Knex',
+      category: 'backend',
+    },
+    {
+      path: 'modules/{name}/{name}.schemas.ts',
+      description: 'TypeBox schemas for validation',
+      category: 'backend',
+    },
+    {
+      path: 'modules/{name}/{name}.types.ts',
+      description: 'TypeScript type definitions',
+      category: 'backend',
+    },
+    {
+      path: 'modules/{name}/{name}.import.service.ts',
+      description: 'Excel/CSV import service (with-import only)',
+      category: 'backend',
+    },
+    {
+      path: 'modules/{name}/{name}.events.ts',
+      description: 'WebSocket event definitions (with-events only)',
+      category: 'backend',
+    },
+  ],
+  frontend: [
+    {
+      path: 'features/{name}/{name}.component.ts',
+      description: 'Main feature component',
+      category: 'frontend',
+    },
+    {
+      path: 'features/{name}/{name}.service.ts',
+      description: 'HTTP service for API calls',
+      category: 'frontend',
+    },
+    {
+      path: 'features/{name}/{name}.types.ts',
+      description: 'TypeScript interfaces',
+      category: 'frontend',
+    },
+    {
+      path: 'features/{name}/components/{name}-list.component.ts',
+      description: 'List/table component',
+      category: 'frontend',
+    },
+    {
+      path: 'features/{name}/components/{name}-form.component.ts',
+      description: 'Create/edit form component',
+      category: 'frontend',
+    },
+    {
+      path: 'features/{name}/components/{name}-dialog.component.ts',
+      description: 'Dialog wrapper for form',
+      category: 'frontend',
+    },
+    {
+      path: 'features/{name}/components/{name}-import-dialog.component.ts',
+      description: 'Import dialog (with-import only)',
+      category: 'frontend',
+    },
+    {
+      path: 'features/{name}/{name}.routes.ts',
+      description: 'Angular route definitions',
+      category: 'frontend',
+    },
+  ],
+};

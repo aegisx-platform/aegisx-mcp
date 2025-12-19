@@ -1,4 +1,17 @@
 /**
+ * AUTO-GENERATED FILE
+ * Generated at: 2025-12-19T17:08:22.509Z
+ * Generator: patterns-generator@1.0.0
+ * Source files:
+ *   - libs/aegisx-mcp/src/data/patterns.ts
+ * DO NOT EDIT MANUALLY - Changes will be overwritten on next sync
+ */
+
+ 
+ 
+ 
+
+/**
  * AegisX Development Patterns
  * Best practices and code patterns for development
  */
@@ -14,7 +27,6 @@ export interface CodePattern {
 }
 
 export const patterns: CodePattern[] = [
-  // ============ BACKEND PATTERNS ============
   {
     name: 'TypeBox Schema Definition',
     category: 'backend',
@@ -23,6 +35,7 @@ export const patterns: CodePattern[] = [
     code: `import { Type, Static } from '@sinclair/typebox';
 
 // Request schemas
+
 export const CreateProductSchema = Type.Object({
   name: Type.String({ minLength: 1, maxLength: 255 }),
   price: Type.Number({ minimum: 0 }),
@@ -38,6 +51,7 @@ export const ProductIdParamSchema = Type.Object({
 });
 
 // Response schema
+
 export const ProductResponseSchema = Type.Object({
   id: Type.String({ format: 'uuid' }),
   name: Type.String(),
@@ -50,9 +64,13 @@ export const ProductResponseSchema = Type.Object({
 });
 
 // TypeScript types
+
 export type CreateProduct = Static<typeof CreateProductSchema>;
+
 export type UpdateProduct = Static<typeof UpdateProductSchema>;
+
 export type ProductIdParam = Static<typeof ProductIdParamSchema>;
+
 export type ProductResponse = Static<typeof ProductResponseSchema>;`,
     notes: [
       'Always export both Schema and Static type',
@@ -288,8 +306,6 @@ export class ProductsService {
     ],
     relatedPatterns: ['Repository with UUID Validation', 'Controller Pattern'],
   },
-
-  // ============ FRONTEND PATTERNS ============
   {
     name: 'Angular Signal-based Component',
     category: 'frontend',
@@ -324,6 +340,7 @@ import { Product } from '../products.types';
     }
   \`,
 })
+
 export class ProductsListComponent {
   private productsService = inject(ProductsService);
 
@@ -377,6 +394,7 @@ import { environment } from '@env/environment';
 import { Product, CreateProduct, UpdateProduct, PaginatedResponse, PaginationQuery } from './products.types';
 
 @Injectable({ providedIn: 'root' })
+
 export class ProductsService {
   private http = inject(HttpClient);
   private baseUrl = \`\${environment.apiUrl}/products\`;
@@ -498,6 +516,7 @@ import { AxDialogService, AxToastService } from '@aegisx/ui';
     </div>
   \`,
 })
+
 export class DashboardComponent {
   private dialog = inject(AxDialogService);
   private toast = inject(AxToastService);
@@ -526,8 +545,6 @@ export class DashboardComponent {
     ],
     relatedPatterns: ['Angular Signal-based Component'],
   },
-
-  // ============ DATABASE PATTERNS ============
   {
     name: 'Knex Migration',
     category: 'database',
@@ -645,8 +662,6 @@ async function findAllWithFilters<T>(
     ],
     relatedPatterns: ['Service Layer Pattern'],
   },
-
-  // ============ TESTING PATTERNS ============
   {
     name: 'API Integration Test',
     category: 'testing',
@@ -775,6 +790,7 @@ describe('Products API', () => {
 /**
  * Get all patterns
  */
+
 export function getAllPatterns(): CodePattern[] {
   return patterns;
 }
@@ -782,6 +798,7 @@ export function getAllPatterns(): CodePattern[] {
 /**
  * Get patterns by category
  */
+
 export function getPatternsByCategory(category: string): CodePattern[] {
   return patterns.filter((p) => p.category === category);
 }
@@ -789,6 +806,7 @@ export function getPatternsByCategory(category: string): CodePattern[] {
 /**
  * Get pattern by name
  */
+
 export function getPatternByName(name: string): CodePattern | undefined {
   return patterns.find((p) => p.name.toLowerCase() === name.toLowerCase());
 }
@@ -796,6 +814,7 @@ export function getPatternByName(name: string): CodePattern | undefined {
 /**
  * Search patterns
  */
+
 export function searchPatterns(query: string): CodePattern[] {
   const q = query.toLowerCase();
   return patterns.filter(
