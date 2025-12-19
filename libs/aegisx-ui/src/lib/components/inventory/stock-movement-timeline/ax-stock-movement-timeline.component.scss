@@ -1,0 +1,623 @@
+// Stock Movement Timeline Component Styles
+// Material Design 3 Implementation
+
+.ax-stock-movement-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem;
+  width: 100%;
+
+  // ============================================================================
+  // HEADER SECTION
+  // ============================================================================
+
+  .timeline-header {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+
+    .timeline-title {
+      font-size: 1.5rem;
+      font-weight: 500;
+      margin: 0;
+      color: rgba(0, 0, 0, 0.87);
+    }
+
+    // Filter Controls
+    .timeline-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: flex-end;
+
+      .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        .filter-label {
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: rgba(0, 0, 0, 0.6);
+        }
+
+        .type-filter-chips {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+
+          mat-chip-option {
+            cursor: pointer;
+            transition: all 0.2s ease;
+
+            &:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            }
+
+            mat-icon {
+              font-size: 1rem;
+              width: 1rem;
+              height: 1rem;
+            }
+          }
+        }
+
+        .filter-field {
+          min-width: 180px;
+        }
+      }
+
+      .clear-filters-btn {
+        height: 40px;
+      }
+    }
+
+    // Export Actions
+    .timeline-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 0.5rem;
+
+      .export-btn {
+        mat-icon {
+          margin-right: 0.5rem;
+        }
+      }
+    }
+  }
+
+  // ============================================================================
+  // CHART SECTION
+  // ============================================================================
+
+  .timeline-chart {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    .chart-title {
+      font-size: 1.125rem;
+      font-weight: 500;
+      margin: 0 0 1rem 0;
+      color: rgba(0, 0, 0, 0.87);
+    }
+
+    .chart-container {
+      position: relative;
+      height: 250px;
+      width: 100%;
+
+      canvas {
+        max-width: 100%;
+        max-height: 100%;
+      }
+    }
+  }
+
+  // ============================================================================
+  // LOADING STATE
+  // ============================================================================
+
+  .timeline-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    gap: 1rem;
+
+    p {
+      margin: 0;
+      font-size: 0.875rem;
+      color: rgba(0, 0, 0, 0.6);
+    }
+  }
+
+  // ============================================================================
+  // EMPTY STATE
+  // ============================================================================
+
+  .timeline-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    gap: 1rem;
+    text-align: center;
+
+    .empty-icon {
+      font-size: 4rem;
+      width: 4rem;
+      height: 4rem;
+      color: rgba(0, 0, 0, 0.38);
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.87);
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.875rem;
+      color: rgba(0, 0, 0, 0.6);
+      max-width: 400px;
+    }
+  }
+
+  // ============================================================================
+  // TIMELINE CONTENT
+  // ============================================================================
+
+  .timeline-content {
+    .timeline-viewport {
+      height: 600px;
+      width: 100%;
+    }
+
+    .movement-group {
+      margin-bottom: 2rem;
+
+      // Group Header
+      .group-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: rgba(0, 0, 0, 0.04);
+        border-radius: 8px;
+        margin-bottom: 1rem;
+
+        .group-date {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+
+          mat-icon {
+            color: rgba(0, 0, 0, 0.6);
+          }
+
+          h3 {
+            margin: 0;
+            font-size: 1.125rem;
+            font-weight: 500;
+            color: rgba(0, 0, 0, 0.87);
+          }
+        }
+
+        .group-total {
+          font-weight: 600;
+          padding: 0.5rem 1rem;
+          border-radius: 16px;
+          font-size: 0.875rem;
+
+          &.total-positive {
+            background: rgba(76, 175, 80, 0.1);
+            color: #2e7d32;
+          }
+
+          &.total-negative {
+            background: rgba(244, 67, 54, 0.1);
+            color: #c62828;
+          }
+        }
+      }
+
+      // Movements List
+      .movements-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+    }
+
+    // ========================================================================
+    // MOVEMENT CARD
+    // ========================================================================
+
+    .movement-card {
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+
+      &:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+      }
+
+      &.movement-card--expanded {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        border-color: rgba(33, 150, 243, 0.5);
+      }
+
+      // Movement Header
+      .movement-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        flex-wrap: wrap;
+
+        .movement-time {
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+          min-width: 100px;
+
+          .time-icon {
+            font-size: 1rem;
+            width: 1rem;
+            height: 1rem;
+            color: rgba(0, 0, 0, 0.6);
+          }
+
+          .time-text {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: rgba(0, 0, 0, 0.87);
+          }
+        }
+
+        .movement-type {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.5rem 1rem;
+          border-radius: 16px;
+          font-weight: 600;
+          font-size: 0.75rem;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+
+          mat-icon {
+            font-size: 1rem;
+            width: 1rem;
+            height: 1rem;
+          }
+
+          &.movement-type--receive {
+            background: rgba(76, 175, 80, 0.1);
+            color: #2e7d32;
+          }
+
+          &.movement-type--issue {
+            background: rgba(244, 67, 54, 0.1);
+            color: #c62828;
+          }
+
+          &.movement-type--transfer-in,
+          &.movement-type--transfer-out {
+            background: rgba(33, 150, 243, 0.1);
+            color: #1565c0;
+          }
+
+          &.movement-type--adjust-in,
+          &.movement-type--adjust-out {
+            background: rgba(255, 152, 0, 0.1);
+            color: #e65100;
+          }
+        }
+
+        .movement-quantity {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          flex: 1;
+          min-width: 250px;
+
+          .quantity-change {
+            font-weight: 600;
+            font-size: 1rem;
+
+            &.quantity-positive {
+              color: #2e7d32;
+            }
+
+            &.quantity-negative {
+              color: #c62828;
+            }
+          }
+
+          .arrow-icon {
+            font-size: 1rem;
+            width: 1rem;
+            height: 1rem;
+            color: rgba(0, 0, 0, 0.38);
+          }
+
+          .balance-after {
+            font-size: 0.875rem;
+            color: rgba(0, 0, 0, 0.6);
+
+            strong {
+              color: rgba(0, 0, 0, 0.87);
+              font-weight: 600;
+            }
+          }
+        }
+
+        .expand-btn {
+          margin-left: auto;
+        }
+      }
+
+      // Movement Metadata
+      .movement-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        padding: 0 1rem 1rem 1rem;
+
+        .meta-item {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-size: 0.875rem;
+          color: rgba(0, 0, 0, 0.6);
+
+          .meta-icon {
+            font-size: 1rem;
+            width: 1rem;
+            height: 1rem;
+            color: rgba(0, 0, 0, 0.54);
+          }
+        }
+      }
+
+      // Expandable Details
+      .movement-details {
+        padding: 1rem;
+        background: rgba(0, 0, 0, 0.02);
+        animation: expandDetails 0.2s ease;
+
+        .details-divider {
+          margin-bottom: 1rem;
+        }
+
+        .details-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 1rem;
+
+          .detail-row {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+
+            &.detail-row--full {
+              grid-column: 1 / -1;
+            }
+
+            label {
+              font-size: 0.75rem;
+              font-weight: 600;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+              color: rgba(0, 0, 0, 0.6);
+            }
+
+            span {
+              font-size: 0.875rem;
+              color: rgba(0, 0, 0, 0.87);
+            }
+
+            .notes-text {
+              margin: 0;
+              padding: 0.75rem;
+              background: white;
+              border-radius: 4px;
+              border-left: 3px solid rgba(33, 150, 243, 0.5);
+              font-style: italic;
+              font-size: 0.875rem;
+              color: rgba(0, 0, 0, 0.87);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// ============================================================================
+// RESPONSIVE DESIGN
+// ============================================================================
+
+@media (max-width: 768px) {
+  .ax-stock-movement-timeline {
+    .timeline-header {
+      .timeline-filters {
+        flex-direction: column;
+        align-items: stretch;
+
+        .filter-group {
+          width: 100%;
+
+          .filter-field {
+            width: 100%;
+          }
+        }
+      }
+    }
+
+    .timeline-content {
+      .movement-card {
+        .movement-header {
+          flex-direction: column;
+          align-items: flex-start;
+
+          .movement-quantity {
+            width: 100%;
+          }
+
+          .expand-btn {
+            align-self: flex-end;
+          }
+        }
+      }
+    }
+  }
+}
+
+// ============================================================================
+// ANIMATIONS
+// ============================================================================
+
+@keyframes expandDetails {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 1000px;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ============================================================================
+// UTILITY CLASSES
+// ============================================================================
+
+// Background color utilities
+.bg-success-50 {
+  background-color: rgba(76, 175, 80, 0.1);
+}
+
+.bg-error-50 {
+  background-color: rgba(244, 67, 54, 0.1);
+}
+
+.bg-blue-50 {
+  background-color: rgba(33, 150, 243, 0.1);
+}
+
+.bg-warning-50 {
+  background-color: rgba(255, 152, 0, 0.1);
+}
+
+// Text color utilities
+.text-success-700 {
+  color: #2e7d32;
+}
+
+.text-error-700 {
+  color: #c62828;
+}
+
+.text-blue-700 {
+  color: #1565c0;
+}
+
+.text-warning-700 {
+  color: #e65100;
+}
+
+// ============================================================================
+// DARK MODE SUPPORT (Optional)
+// ============================================================================
+
+@media (prefers-color-scheme: dark) {
+  .ax-stock-movement-timeline {
+    .timeline-header {
+      border-bottom-color: rgba(255, 255, 255, 0.12);
+
+      .timeline-title {
+        color: rgba(255, 255, 255, 0.87);
+      }
+
+      .timeline-filters .filter-group .filter-label {
+        color: rgba(255, 255, 255, 0.6);
+      }
+    }
+
+    .timeline-chart {
+      background: #1e1e1e;
+
+      .chart-title {
+        color: rgba(255, 255, 255, 0.87);
+      }
+    }
+
+    .timeline-empty {
+      .empty-icon {
+        color: rgba(255, 255, 255, 0.38);
+      }
+
+      h3 {
+        color: rgba(255, 255, 255, 0.87);
+      }
+
+      p {
+        color: rgba(255, 255, 255, 0.6);
+      }
+    }
+
+    .timeline-content {
+      .movement-group {
+        .group-header {
+          background: rgba(255, 255, 255, 0.08);
+
+          .group-date h3 {
+            color: rgba(255, 255, 255, 0.87);
+          }
+        }
+      }
+
+      .movement-card {
+        background: #1e1e1e;
+        border-color: rgba(255, 255, 255, 0.12);
+
+        &.movement-card--expanded {
+          border-color: rgba(33, 150, 243, 0.5);
+        }
+
+        .movement-details {
+          background: rgba(255, 255, 255, 0.04);
+
+          .notes-text {
+            background: #2c2c2c;
+            color: rgba(255, 255, 255, 0.87);
+          }
+        }
+      }
+    }
+  }
+}

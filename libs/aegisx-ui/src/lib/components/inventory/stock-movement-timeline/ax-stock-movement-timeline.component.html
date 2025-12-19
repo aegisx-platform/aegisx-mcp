@@ -1,0 +1,326 @@
+<div class="ax-stock-movement-timeline">
+  <!-- Header Section -->
+  <div class="timeline-header">
+    <h2 class="timeline-title">Stock Movement History</h2>
+
+    <!-- Filter Controls -->
+    @if (showFilters()) {
+      <div class="timeline-filters">
+        <!-- Movement Type Filters -->
+        <div class="filter-group">
+          <label class="filter-label">Filter by Type:</label>
+          <mat-chip-listbox class="type-filter-chips">
+            @for (type of availableTypes(); track type) {
+              <mat-chip-option
+                [selected]="selectedTypes().includes(type)"
+                (click)="toggleTypeFilter(type)"
+                [class]="getMovementConfig(type).cssClass"
+              >
+                <mat-icon>{{ getMovementConfig(type).icon }}</mat-icon>
+                {{ getMovementConfig(type).label }}
+              </mat-chip-option>
+            }
+          </mat-chip-listbox>
+        </div>
+
+        <!-- Date Range Filter -->
+        <div class="filter-group">
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Start Date</mat-label>
+            <input
+              matInput
+              [matDatepicker]="startPicker"
+              [(ngModel)]="filterDateStart"
+              (dateChange)="applyDateFilter()"
+            />
+            <mat-datepicker-toggle
+              matSuffix
+              [for]="startPicker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #startPicker></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>End Date</mat-label>
+            <input
+              matInput
+              [matDatepicker]="endPicker"
+              [(ngModel)]="filterDateEnd"
+              (dateChange)="applyDateFilter()"
+            />
+            <mat-datepicker-toggle
+              matSuffix
+              [for]="endPicker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #endPicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <!-- Group By Selector -->
+        <div class="filter-group">
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Group By</mat-label>
+            <mat-select [(ngModel)]="groupBy">
+              <mat-option value="none">None</mat-option>
+              <mat-option value="day">Day</mat-option>
+              <mat-option value="week">Week</mat-option>
+              <mat-option value="month">Month</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Clear Filters Button -->
+        <button
+          mat-stroked-button
+          color="warn"
+          (click)="clearFilters()"
+          class="clear-filters-btn"
+        >
+          <mat-icon>clear</mat-icon>
+          Clear Filters
+        </button>
+      </div>
+    }
+
+    <!-- Export Controls -->
+    @if (enableExport()) {
+      <div class="timeline-actions">
+        <button mat-button [matMenuTriggerFor]="exportMenu" class="export-btn">
+          <mat-icon>download</mat-icon>
+          Export
+        </button>
+        <mat-menu #exportMenu="matMenu">
+          <button mat-menu-item (click)="exportData('excel')">
+            <mat-icon>table_chart</mat-icon>
+            Export to Excel
+          </button>
+          <button mat-menu-item (click)="exportData('pdf')">
+            <mat-icon>picture_as_pdf</mat-icon>
+            Export to PDF
+          </button>
+        </mat-menu>
+      </div>
+    }
+  </div>
+
+  <!-- Balance Chart Section -->
+  @if (showBalance() && balanceData().length > 0) {
+    <div class="timeline-chart">
+      <h3 class="chart-title">Running Balance</h3>
+      <div class="chart-container">
+        <canvas #chartCanvas></canvas>
+      </div>
+    </div>
+  }
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="timeline-loading">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Loading movements...</p>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!isLoading() && filteredMovements().length === 0) {
+    <div class="timeline-empty">
+      <mat-icon class="empty-icon">inventory_2</mat-icon>
+      <h3>No movements found</h3>
+      <p>There are no stock movements matching your filters.</p>
+      @if (selectedTypes().length > 0 || filterDateStart() || filterDateEnd()) {
+        <button mat-stroked-button color="primary" (click)="clearFilters()">
+          Clear Filters
+        </button>
+      }
+    </div>
+  }
+
+  <!-- Timeline Section -->
+  @if (!isLoading() && filteredMovements().length > 0) {
+    <div class="timeline-content">
+      <!-- Virtual Scrolling for Large Datasets -->
+      <cdk-virtual-scroll-viewport itemSize="120" class="timeline-viewport">
+        @for (
+          group of groupedMovements();
+          track trackByGroupKey($index, group)
+        ) {
+          <div class="movement-group">
+            <!-- Date Group Header -->
+            @if (group.date) {
+              <div class="group-header">
+                <div class="group-date">
+                  <mat-icon>calendar_today</mat-icon>
+                  <h3>{{ getGroupLabel(group) }}</h3>
+                </div>
+                <div
+                  class="group-total"
+                  [class.total-positive]="group.total >= 0"
+                  [class.total-negative]="group.total < 0"
+                >
+                  Total: {{ group.total >= 0 ? '+' : '' }}{{ group.total }}
+                </div>
+              </div>
+            }
+
+            <!-- Movement Cards -->
+            <div class="movements-list">
+              @for (
+                movement of group.movements;
+                track trackByMovementId($index, movement)
+              ) {
+                <mat-card
+                  class="movement-card"
+                  [class.movement-card--expanded]="isExpanded(movement)"
+                  (click)="toggleMovement(movement)"
+                >
+                  <!-- Movement Header -->
+                  <div class="movement-header">
+                    <!-- Time Badge -->
+                    <div class="movement-time">
+                      <mat-icon class="time-icon">schedule</mat-icon>
+                      <span class="time-text">{{
+                        formatTime(movement.timestamp)
+                      }}</span>
+                    </div>
+
+                    <!-- Type Badge -->
+                    <div
+                      class="movement-type"
+                      [ngClass]="[
+                        getMovementConfig(movement.type).cssClass,
+                        getMovementConfig(movement.type).bgClass,
+                        getMovementConfig(movement.type).textClass,
+                      ]"
+                    >
+                      <mat-icon>{{
+                        getMovementConfig(movement.type).icon
+                      }}</mat-icon>
+                      <span class="type-label">{{
+                        getMovementConfig(movement.type).label
+                      }}</span>
+                    </div>
+
+                    <!-- Quantity and Balance -->
+                    <div class="movement-quantity">
+                      <span
+                        class="quantity-change"
+                        [class.quantity-positive]="
+                          getMovementConfig(movement.type).isInbound
+                        "
+                        [class.quantity-negative]="
+                          !getMovementConfig(movement.type).isInbound
+                        "
+                      >
+                        {{ formatQuantityWithSign(movement) }}
+                        {{ movement.unit }}
+                      </span>
+                      <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+                      <span class="balance-after">
+                        Balance: <strong>{{ movement.balanceAfter }}</strong>
+                        {{ movement.unit }}
+                      </span>
+                    </div>
+
+                    <!-- Expand Icon -->
+                    <button
+                      mat-icon-button
+                      class="expand-btn"
+                      (click)="
+                        $event.stopPropagation(); toggleMovement(movement)
+                      "
+                      [matTooltip]="
+                        isExpanded(movement) ? 'Collapse' : 'Expand'
+                      "
+                    >
+                      <mat-icon>{{
+                        isExpanded(movement) ? 'expand_less' : 'expand_more'
+                      }}</mat-icon>
+                    </button>
+                  </div>
+
+                  <!-- Movement Metadata -->
+                  <div class="movement-meta">
+                    <!-- User -->
+                    @if (movement.user) {
+                      <div class="meta-item">
+                        <mat-icon class="meta-icon">person</mat-icon>
+                        <span>{{ movement.user.name }}</span>
+                      </div>
+                    }
+
+                    <!-- Reference Document -->
+                    @if (movement.referenceDocument) {
+                      <div class="meta-item">
+                        <mat-icon class="meta-icon">description</mat-icon>
+                        <span
+                          >{{ movement.referenceDocument.type }}-{{
+                            movement.referenceDocument.number
+                          }}</span
+                        >
+                      </div>
+                    }
+
+                    <!-- Batch Number -->
+                    @if (movement.batchNumber) {
+                      <div class="meta-item">
+                        <mat-icon class="meta-icon">inventory</mat-icon>
+                        <span>Batch: {{ movement.batchNumber }}</span>
+                      </div>
+                    }
+                  </div>
+
+                  <!-- Expandable Details -->
+                  @if (isExpanded(movement)) {
+                    <div class="movement-details">
+                      <mat-divider class="details-divider"></mat-divider>
+
+                      <div class="details-grid">
+                        <!-- Full Timestamp -->
+                        <div class="detail-row">
+                          <label>Date & Time:</label>
+                          <span>{{ movement.timestamp | date: 'full' }}</span>
+                        </div>
+
+                        <!-- Location -->
+                        @if (movement.location) {
+                          <div class="detail-row">
+                            <label>Location:</label>
+                            <span>{{ movement.location }}</span>
+                          </div>
+                        }
+
+                        <!-- Batch Number (Full) -->
+                        @if (movement.batchNumber) {
+                          <div class="detail-row">
+                            <label>Batch Number:</label>
+                            <span>{{ movement.batchNumber }}</span>
+                          </div>
+                        }
+
+                        <!-- User ID -->
+                        @if (movement.user) {
+                          <div class="detail-row">
+                            <label>User ID:</label>
+                            <span>{{ movement.user.id }}</span>
+                          </div>
+                        }
+
+                        <!-- Notes -->
+                        @if (movement.notes) {
+                          <div class="detail-row detail-row--full">
+                            <label>Notes:</label>
+                            <p class="notes-text">{{ movement.notes }}</p>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  }
+                </mat-card>
+              }
+            </div>
+          </div>
+        }
+      </cdk-virtual-scroll-viewport>
+    </div>
+  }
+</div>

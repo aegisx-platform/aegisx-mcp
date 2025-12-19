@@ -1,0 +1,40 @@
+<!--
+  Expiry Badge Component Template
+  ================================================================
+
+  Renders a color-coded badge showing product expiry status with:
+  - Visual status indicator (icon + color coding)
+  - Countdown information
+  - Exact expiry date tooltip
+  - Compact mode for tables (icon-only)
+  - Full WCAG 2.1 AA accessibility support
+-->
+
+<button
+  type="button"
+  class="ax-expiry-badge"
+  [class]="'ax-expiry-badge--status-' + expiryStatus()"
+  [class.ax-expiry-badge--size-sm]="size() === 'sm'"
+  [class.ax-expiry-badge--size-lg]="size() === 'lg'"
+  [class]="'ax-expiry-badge--variant-' + variant()"
+  [class.ax-expiry-badge--compact]="compact()"
+  [matTooltip]="tooltipText()"
+  [matTooltipPosition]="'above'"
+  (click)="handleClick()"
+  [attr.aria-label]="ariaLabel()"
+  [attr.aria-pressed]="false"
+>
+  <!-- Icon display when enabled -->
+  @if (showIcon()) {
+    <mat-icon class="ax-expiry-badge__icon" [attr.aria-hidden]="true">
+      {{ statusIcon() }}
+    </mat-icon>
+  }
+
+  <!-- Text display when not in compact mode -->
+  @if (!compact()) {
+    <span class="ax-expiry-badge__text">
+      {{ badgeText() }}
+    </span>
+  }
+</button>

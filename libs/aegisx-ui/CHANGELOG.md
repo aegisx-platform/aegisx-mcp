@@ -5,6 +5,138 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - 2025-12-19
+
+### Added
+
+- **Inventory Management Components** (10 new components):
+
+  **Priority 1 - Core Components:**
+  - `AxStockLevelComponent`: Visual stock level indicator with color-coded warnings and progress bars
+  - `AxBarcodeScannerComponent`: Camera-based barcode/QR scanner with manual input fallback (powered by @zxing/library)
+  - `AxQuantityInputComponent`: Specialized quantity input with unit conversion and validation
+  - `AxBatchSelectorComponent`: Batch/lot selection with FIFO/FEFO/LIFO strategies and expiry tracking
+
+  **Priority 2 - Extended Components:**
+  - `AxExpiryBadgeComponent`: Compact expiry date badge with countdown and color-coded status
+  - `AxVariantSelectorComponent`: Product variant selection with grid/list/compact layouts and attribute filtering
+  - `AxStockAlertPanelComponent`: Real-time stock alerts dashboard with WebSocket support
+  - `AxStockMovementTimelineComponent`: Movement history visualization with Chart.js and export (PDF/Excel)
+  - `AxTransferWizardComponent`: Multi-step wizard for stock transfers between locations
+  - `AxLocationPickerComponent`: Hierarchical location tree picker with favorites and recent locations
+
+- **Inventory Type Definitions**:
+  - Comprehensive type system in `inventory.types.ts` covering all inventory domain models
+  - 15+ interfaces including `UnitConfig`, `BatchInfo`, `ProductVariant`, `StockAlert`, `LocationNode`, `MovementRecord`
+  - Type-safe inventory strategies: `'fifo' | 'fefo' | 'lifo'`
+  - Complete JSDoc documentation for all types
+
+- **Dependencies**:
+  - `@zxing/library`: Barcode/QR code scanning
+  - `chart.js`: Timeline chart visualization
+  - `jspdf`: PDF export functionality
+  - `xlsx`: Excel export functionality
+
+- **Component Documentation**:
+  - Complete README.md for each component with examples, API reference, and best practices
+  - Type documentation with usage examples
+  - Integration guides and accessibility notes
+
+### Features
+
+- **Stock Level Indicator**:
+  - Traffic light and gradient color schemes
+  - Configurable warning thresholds
+  - Size variants (sm, md, lg)
+  - Full ARIA accessibility
+
+- **Barcode Scanner**:
+  - Multi-format support (QR, EAN-13, EAN-8, Code-128, Code-39, Data Matrix)
+  - Camera permission handling with fallback
+  - Continuous scan mode
+  - Beep sound and flashlight toggle
+  - Recent scans history
+
+- **Quantity Input**:
+  - Unit conversion (pieces, boxes, kg, etc.)
+  - Increment/decrement stepper
+  - Preset multipliers (×10, ×100)
+  - Min/max validation
+  - Decimal places control
+  - Angular Forms integration (ControlValueAccessor)
+
+- **Batch Selector**:
+  - FIFO/FEFO/LIFO inventory strategies
+  - Expiry status tracking (safe, warning, critical, expired)
+  - Multi-batch selection with quantity allocation
+  - Smart batch recommendations
+  - Search and filter capabilities
+  - API integration with loading states
+
+- **Expiry Badge**:
+  - Color-coded expiry status
+  - Countdown display (days/hours)
+  - Compact mode for tables
+  - Customizable thresholds
+  - Multiple sizes and style variants
+
+- **Variant Selector**:
+  - Three layout modes (grid cards, table list, compact selection)
+  - Attribute-based filtering
+  - Stock availability indicators
+  - Single/multi-select with quantities
+  - Image thumbnails and pricing
+  - Quick view modal
+
+- **Stock Alert Panel**:
+  - Real-time WebSocket updates
+  - Alert types: low-stock, out-of-stock, expiring, expired, overstock, reorder
+  - Severity levels: critical, warning, info
+  - Grouping by type, priority, or location
+  - Action buttons (create PO, adjust stock, reorder, dispose)
+  - Sound notifications
+
+- **Stock Movement Timeline**:
+  - Chart.js line chart for balance visualization
+  - Movement types: inbound, outbound, transfer, adjustment, return, damage, expiry
+  - Date range filtering and grouping (day/week/month)
+  - WebSocket real-time updates
+  - PDF and Excel export
+  - Virtual scrolling for performance
+
+- **Transfer Wizard**:
+  - 4-step wizard (product selection → quantity → destination → review)
+  - Multi-product transfers
+  - Quantity validation against available stock
+  - Location picker integration
+  - Review summary before submission
+  - Progress tracking stepper
+
+- **Location Picker**:
+  - Hierarchical tree (warehouse → zone → aisle → shelf → bin)
+  - Tree search and filtering
+  - Recent locations (localStorage)
+  - Favorite locations (localStorage)
+  - Type filtering
+  - Stock count display
+  - Full path calculation
+
+### Technical
+
+- **Signal-Based Architecture**: All components use Angular signals for reactive state management
+- **Standalone Components**: Tree-shakable, no NgModule dependencies
+- **Type Safety**: Complete TypeScript coverage with strict mode compliance
+- **Performance**: Virtual scrolling, lazy loading, optimized rendering
+- **Accessibility**: WCAG 2.1 AA compliance with full keyboard navigation and ARIA support
+- **Responsive Design**: Mobile-first approach with responsive layouts
+
+### Notes
+
+- All inventory components are production-ready with comprehensive testing
+- Full API documentation included in component README files
+- Zero breaking changes to existing components
+- Bundle sizes optimized with lazy loading for heavy dependencies (Chart.js, ZXing)
+
 ## [0.2.0] - 2025-12-18
 
 ### Added

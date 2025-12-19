@@ -1,0 +1,395 @@
+<div class="ax-location-picker">
+  <!-- Header Section -->
+  <div class="ax-location-picker__header">
+    <!-- Search Bar -->
+    @if (searchable()) {
+      <mat-form-field class="ax-location-picker__search" appearance="outline">
+        <mat-label>Search Locations</mat-label>
+        <input
+          matInput
+          [(ngModel)]="searchTerm"
+          placeholder="Search by code or name..."
+          type="text"
+        />
+        <mat-icon matPrefix>search</mat-icon>
+        @if (searchTerm()) {
+          <button
+            matSuffix
+            mat-icon-button
+            aria-label="Clear search"
+            (click)="clearSearch()"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </mat-form-field>
+    }
+
+    <!-- Breadcrumb Navigation -->
+    @if (showBreadcrumbs() && breadcrumbs().length > 0) {
+      <div class="ax-location-picker__breadcrumbs">
+        <mat-icon class="ax-location-picker__breadcrumbs-icon"
+          >location_on</mat-icon
+        >
+        @for (item of breadcrumbs(); track item.id) {
+          <button
+            mat-button
+            class="ax-location-picker__breadcrumb"
+            [class.ax-location-picker__breadcrumb--last]="item.isLast"
+            (click)="navigateToBreadcrumb(item)"
+          >
+            {{ item.code }}
+          </button>
+          @if (!item.isLast) {
+            <mat-icon class="ax-location-picker__breadcrumb-separator"
+              >chevron_right</mat-icon
+            >
+          }
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Tab Navigation -->
+  <mat-tab-group [(selectedIndex)]="activeTab" class="ax-location-picker__tabs">
+    <!-- Tree View Tab -->
+    <mat-tab label="Locations">
+      <div class="ax-location-picker__content">
+        @if (hasSearchResults()) {
+          <!-- Tree View -->
+          <mat-tree
+            [dataSource]="dataSource"
+            [treeControl]="treeControl"
+            class="ax-location-picker__tree"
+          >
+            <!-- Tree Node Template -->
+            <mat-tree-node
+              *matTreeNodeDef="let node"
+              matTreeNodeToggle
+              [class.ax-location-picker__tree-node--selected]="isSelected(node)"
+              [class.ax-location-picker__tree-node--disabled]="
+                node.disabled || !isLocationAllowed(node)
+              "
+            >
+              <button
+                mat-icon-button
+                disabled
+                class="ax-location-picker__tree-toggle"
+              ></button>
+
+              <div
+                class="ax-location-picker__tree-content"
+                (click)="selectLocation(node)"
+              >
+                <!-- Location Icon -->
+                <mat-icon
+                  class="ax-location-picker__tree-icon"
+                  [class]="getStatusColorClass(node.status)"
+                >
+                  {{ getLocationIcon(node.type) }}
+                </mat-icon>
+
+                <!-- Location Info -->
+                <div class="ax-location-picker__tree-info">
+                  <div class="ax-location-picker__tree-label">
+                    <span class="ax-location-picker__tree-code">{{
+                      node.code
+                    }}</span>
+                    <span class="ax-location-picker__tree-name">{{
+                      node.name
+                    }}</span>
+                  </div>
+
+                  <!-- Capacity Indicator -->
+                  @if (showAvailability() && node.stockCount !== undefined) {
+                    <div class="ax-location-picker__tree-capacity">
+                      <mat-icon
+                        class="ax-location-picker__capacity-icon"
+                        [class]="getCapacityColorClass(node.utilization)"
+                      >
+                        inventory_2
+                      </mat-icon>
+                      <span [class]="getCapacityColorClass(node.utilization)">
+                        {{ formatCapacity(node.stockCount, node.capacity) }}
+                      </span>
+                      @if (node.utilization !== undefined) {
+                        <span
+                          class="ax-location-picker__utilization"
+                          [class]="getCapacityColorClass(node.utilization)"
+                        >
+                          ({{ node.utilization }}%)
+                        </span>
+                      }
+                    </div>
+                  }
+                </div>
+
+                <!-- Favorite Button -->
+                <button
+                  mat-icon-button
+                  class="ax-location-picker__favorite"
+                  [class.ax-location-picker__favorite--active]="
+                    isFavorite(node)
+                  "
+                  (click)="toggleFavorite(node, $event)"
+                  [matTooltip]="
+                    isFavorite(node)
+                      ? 'Remove from favorites'
+                      : 'Add to favorites'
+                  "
+                >
+                  <mat-icon>{{
+                    isFavorite(node) ? 'star' : 'star_border'
+                  }}</mat-icon>
+                </button>
+              </div>
+            </mat-tree-node>
+
+            <!-- Expandable Tree Node Template -->
+            <mat-tree-node
+              *matTreeNodeDef="let node; when: hasChild"
+              [class.ax-location-picker__tree-node--selected]="isSelected(node)"
+              [class.ax-location-picker__tree-node--disabled]="
+                node.disabled || !isLocationAllowed(node)
+              "
+            >
+              <button
+                mat-icon-button
+                matTreeNodeToggle
+                class="ax-location-picker__tree-toggle"
+                (click)="toggleNode(node)"
+              >
+                <mat-icon>
+                  {{ isExpanded(node) ? 'expand_more' : 'chevron_right' }}
+                </mat-icon>
+              </button>
+
+              <div
+                class="ax-location-picker__tree-content"
+                (click)="selectLocation(node)"
+              >
+                <!-- Location Icon -->
+                <mat-icon
+                  class="ax-location-picker__tree-icon"
+                  [class]="getStatusColorClass(node.status)"
+                >
+                  {{ getLocationIcon(node.type) }}
+                </mat-icon>
+
+                <!-- Location Info -->
+                <div class="ax-location-picker__tree-info">
+                  <div class="ax-location-picker__tree-label">
+                    <span class="ax-location-picker__tree-code">{{
+                      node.code
+                    }}</span>
+                    <span class="ax-location-picker__tree-name">{{
+                      node.name
+                    }}</span>
+                  </div>
+
+                  <!-- Capacity Indicator -->
+                  @if (showAvailability() && node.stockCount !== undefined) {
+                    <div class="ax-location-picker__tree-capacity">
+                      <mat-icon
+                        class="ax-location-picker__capacity-icon"
+                        [class]="getCapacityColorClass(node.utilization)"
+                      >
+                        inventory_2
+                      </mat-icon>
+                      <span [class]="getCapacityColorClass(node.utilization)">
+                        {{ formatCapacity(node.stockCount, node.capacity) }}
+                      </span>
+                      @if (node.utilization !== undefined) {
+                        <span
+                          class="ax-location-picker__utilization"
+                          [class]="getCapacityColorClass(node.utilization)"
+                        >
+                          ({{ node.utilization }}%)
+                        </span>
+                      }
+                    </div>
+                  }
+                </div>
+
+                <!-- Favorite Button -->
+                <button
+                  mat-icon-button
+                  class="ax-location-picker__favorite"
+                  [class.ax-location-picker__favorite--active]="
+                    isFavorite(node)
+                  "
+                  (click)="toggleFavorite(node, $event)"
+                  [matTooltip]="
+                    isFavorite(node)
+                      ? 'Remove from favorites'
+                      : 'Add to favorites'
+                  "
+                >
+                  <mat-icon>{{
+                    isFavorite(node) ? 'star' : 'star_border'
+                  }}</mat-icon>
+                </button>
+              </div>
+            </mat-tree-node>
+          </mat-tree>
+        } @else {
+          <!-- Empty State -->
+          <div class="ax-location-picker__empty">
+            <mat-icon class="ax-location-picker__empty-icon"
+              >search_off</mat-icon
+            >
+            <h3>No locations found</h3>
+            <p>Try adjusting your search or filters</p>
+          </div>
+        }
+      </div>
+    </mat-tab>
+
+    <!-- Recent Locations Tab -->
+    @if (showRecent()) {
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="ax-location-picker__tab-icon">history</mat-icon>
+          Recent
+          @if (sortedRecentLocations().length > 0) {
+            <span class="ax-location-picker__tab-badge">{{
+              sortedRecentLocations().length
+            }}</span>
+          }
+        </ng-template>
+
+        <div class="ax-location-picker__content">
+          @if (sortedRecentLocations().length > 0) {
+            <div class="ax-location-picker__list">
+              @for (
+                recent of sortedRecentLocations();
+                track recent.location.id
+              ) {
+                <div
+                  class="ax-location-picker__list-item"
+                  [class.ax-location-picker__list-item--selected]="
+                    isSelected(recent.location)
+                  "
+                  (click)="selectLocation(recent.location)"
+                >
+                  <mat-icon class="ax-location-picker__list-icon">
+                    {{ getLocationIcon(recent.location.type) }}
+                  </mat-icon>
+
+                  <div class="ax-location-picker__list-info">
+                    <div class="ax-location-picker__list-label">
+                      <span class="ax-location-picker__list-code">{{
+                        recent.location.code
+                      }}</span>
+                      <span class="ax-location-picker__list-name">{{
+                        recent.location.name
+                      }}</span>
+                    </div>
+                    <div class="ax-location-picker__list-meta">
+                      <span>Used {{ recent.accessCount }} times</span>
+                      <span
+                        >Last: {{ recent.lastAccessed | date: 'short' }}</span
+                      >
+                    </div>
+                  </div>
+
+                  <button
+                    mat-icon-button
+                    class="ax-location-picker__favorite"
+                    [class.ax-location-picker__favorite--active]="
+                      isFavorite(recent.location)
+                    "
+                    (click)="toggleFavorite(recent.location, $event)"
+                  >
+                    <mat-icon>{{
+                      isFavorite(recent.location) ? 'star' : 'star_border'
+                    }}</mat-icon>
+                  </button>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="ax-location-picker__empty">
+              <mat-icon class="ax-location-picker__empty-icon"
+                >history</mat-icon
+              >
+              <h3>No recent locations</h3>
+              <p>Locations you select will appear here</p>
+            </div>
+          }
+        </div>
+      </mat-tab>
+    }
+
+    <!-- Favorite Locations Tab -->
+    @if (showFavorites()) {
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="ax-location-picker__tab-icon">star</mat-icon>
+          Favorites
+          @if (sortedFavoriteLocations().length > 0) {
+            <span class="ax-location-picker__tab-badge">{{
+              sortedFavoriteLocations().length
+            }}</span>
+          }
+        </ng-template>
+
+        <div class="ax-location-picker__content">
+          @if (sortedFavoriteLocations().length > 0) {
+            <div class="ax-location-picker__list">
+              @for (
+                favorite of sortedFavoriteLocations();
+                track favorite.location.id
+              ) {
+                <div
+                  class="ax-location-picker__list-item"
+                  [class.ax-location-picker__list-item--selected]="
+                    isSelected(favorite.location)
+                  "
+                  (click)="selectLocation(favorite.location)"
+                >
+                  <mat-icon class="ax-location-picker__list-icon">
+                    {{ getLocationIcon(favorite.location.type) }}
+                  </mat-icon>
+
+                  <div class="ax-location-picker__list-info">
+                    <div class="ax-location-picker__list-label">
+                      <span class="ax-location-picker__list-code">{{
+                        favorite.location.code
+                      }}</span>
+                      <span class="ax-location-picker__list-name">{{
+                        favorite.location.name
+                      }}</span>
+                    </div>
+                    @if (favorite.label) {
+                      <div class="ax-location-picker__list-meta">
+                        <span>{{ favorite.label }}</span>
+                      </div>
+                    }
+                  </div>
+
+                  <button
+                    mat-icon-button
+                    class="ax-location-picker__favorite ax-location-picker__favorite--active"
+                    (click)="toggleFavorite(favorite.location, $event)"
+                    matTooltip="Remove from favorites"
+                  >
+                    <mat-icon>star</mat-icon>
+                  </button>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="ax-location-picker__empty">
+              <mat-icon class="ax-location-picker__empty-icon"
+                >star_border</mat-icon
+              >
+              <h3>No favorite locations</h3>
+              <p>Click the star icon to add favorites</p>
+            </div>
+          }
+        </div>
+      </mat-tab>
+    }
+  </mat-tab-group>
+</div>

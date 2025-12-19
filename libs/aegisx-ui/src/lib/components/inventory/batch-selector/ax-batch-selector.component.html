@@ -1,0 +1,241 @@
+<div class="ax-batch-selector">
+  <!-- Header Section -->
+  <div class="ax-batch-selector__header">
+    <!-- Search Input -->
+    <mat-form-field class="ax-batch-selector__search" appearance="outline">
+      <mat-icon matPrefix>search</mat-icon>
+      <input
+        matInput
+        placeholder="Search batches..."
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="searchTerm.set($event)"
+        [disabled]="isLoading()"
+      />
+    </mat-form-field>
+
+    <!-- Strategy Selector -->
+    <mat-form-field class="ax-batch-selector__strategy" appearance="outline">
+      <mat-label>Strategy</mat-label>
+      <mat-select [(ngModel)]="strategy" [disabled]="isLoading()">
+        <mat-option value="fifo">FIFO (First In, First Out)</mat-option>
+        <mat-option value="fefo">FEFO (First Expired, First Out)</mat-option>
+        <mat-option value="lifo">LIFO (Last In, First Out)</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="ax-batch-selector__loading">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading batches...</p>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @else if (filteredBatches().length === 0) {
+    <div class="ax-batch-selector__empty">
+      <mat-icon>inventory_2</mat-icon>
+      @if (searchTerm()) {
+        <p>No batches found matching "{{ searchTerm() }}"</p>
+        <button mat-button (click)="searchTerm.set('')">Clear search</button>
+      } @else {
+        <p>No batches available</p>
+      }
+    </div>
+  }
+
+  <!-- Batch List -->
+  @else {
+    <div class="ax-batch-selector__list">
+      @for (batch of filteredBatches(); track batch.batchNumber) {
+        <div
+          class="ax-batch-selector__card"
+          [class.ax-batch-selector__card--recommended]="
+            batch.batchNumber === recommendedBatchId()
+          "
+          [class.ax-batch-selector__card--selected]="isSelected(batch)"
+          [class.ax-batch-selector__card--disabled]="!canSelectBatch(batch)"
+        >
+          <!-- Card Header -->
+          <div class="ax-batch-selector__card-header">
+            <div class="ax-batch-selector__batch-number">
+              @if (batch.batchNumber === recommendedBatchId()) {
+                <mat-icon class="ax-batch-selector__star">star</mat-icon>
+              }
+              <span class="batch-number-text">{{ batch.batchNumber }}</span>
+              @if (batch.lotNumber) {
+                <span class="lot-number-text">({{ batch.lotNumber }})</span>
+              }
+            </div>
+
+            <!-- Selection Control -->
+            <div class="ax-batch-selector__selection-control">
+              @if (canSelectBatch(batch)) {
+                @if (allowMultiple()) {
+                  <mat-checkbox
+                    [checked]="isSelected(batch)"
+                    (change)="toggleBatch(batch)"
+                    color="primary"
+                  >
+                    Select
+                  </mat-checkbox>
+                } @else {
+                  <mat-radio-button
+                    [checked]="isSelected(batch)"
+                    (change)="selectBatch(batch)"
+                    color="primary"
+                  >
+                    Select
+                  </mat-radio-button>
+                }
+              } @else {
+                <span
+                  class="ax-batch-selector__status-badge ax-batch-selector__status-badge--expired"
+                >
+                  {{
+                    batch.status === 'expired'
+                      ? 'EXPIRED'
+                      : batch.status.toUpperCase()
+                  }}
+                </span>
+              }
+            </div>
+          </div>
+
+          <!-- Expiry Information -->
+          @if (showExpiry()) {
+            <div class="ax-batch-selector__expiry">
+              <mat-icon>event</mat-icon>
+              <span class="expiry-label"
+                >Expiry: {{ formatDate(batch.expiryDate) }}</span
+              >
+              <span
+                [class]="
+                  'ax-batch-selector__expiry-badge ' +
+                  getExpiryBadgeClass(batch)
+                "
+              >
+                {{ getExpiryBadgeText(batch) }}
+              </span>
+            </div>
+          }
+
+          <!-- Quantity Information -->
+          <div class="ax-batch-selector__quantity">
+            <mat-icon>inventory</mat-icon>
+            <span
+              >Available: {{ batch.availableQuantity }} {{ batch.unit }}</span
+            >
+          </div>
+
+          <!-- Manufacturing Date -->
+          @if (showManufacturing() && batch.manufacturingDate) {
+            <div class="ax-batch-selector__manufacturing">
+              <mat-icon>precision_manufacturing</mat-icon>
+              <span
+                >Manufactured: {{ formatDate(batch.manufacturingDate) }}</span
+              >
+            </div>
+          }
+
+          <!-- Location -->
+          @if (batch.location) {
+            <div class="ax-batch-selector__location">
+              <mat-icon>location_on</mat-icon>
+              <span>Location: {{ batch.location }}</span>
+            </div>
+          }
+
+          <!-- Quantity Input (only for selected batches in multi-select mode) -->
+          @if (isSelected(batch) && allowMultiple()) {
+            <div class="ax-batch-selector__quantity-input">
+              <label>Quantity to use:</label>
+              <div class="quantity-controls">
+                <button
+                  mat-icon-button
+                  (click)="
+                    updateBatchQuantity(
+                      batch,
+                      Math.max(1, getSelectedQuantity(batch) - 1)
+                    )
+                  "
+                  [disabled]="getSelectedQuantity(batch) <= 1"
+                >
+                  <mat-icon>remove</mat-icon>
+                </button>
+                <input
+                  type="number"
+                  [value]="getSelectedQuantity(batch)"
+                  [min]="1"
+                  [max]="batch.availableQuantity"
+                  (input)="
+                    updateBatchQuantity(batch, +$any($event.target).value)
+                  "
+                />
+                <button
+                  mat-icon-button
+                  (click)="
+                    updateBatchQuantity(
+                      batch,
+                      Math.min(
+                        batch.availableQuantity,
+                        getSelectedQuantity(batch) + 1
+                      )
+                    )
+                  "
+                  [disabled]="
+                    getSelectedQuantity(batch) >= batch.availableQuantity
+                  "
+                >
+                  <mat-icon>add</mat-icon>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Selected Batches Summary (Multi-Select Mode) -->
+  @if (allowMultiple() && selectedBatches().length > 0) {
+    <div class="ax-batch-selector__summary">
+      <div class="ax-batch-selector__summary-header">
+        <h4>Selected Batches</h4>
+        <div class="summary-quantity">
+          <span class="total-label">Total:</span>
+          <span class="total-value">{{ totalSelectedQuantity() }}</span>
+          @if (requestedQuantity()) {
+            <span class="total-requested">/ {{ requestedQuantity() }}</span>
+          }
+        </div>
+      </div>
+
+      <div class="ax-batch-selector__summary-list">
+        @for (selected of selectedBatches(); track selected.batch.batchNumber) {
+          <div class="ax-batch-selector__summary-item">
+            <span class="summary-batch-number">{{
+              selected.batch.batchNumber
+            }}</span>
+            <span class="summary-quantity"
+              >{{ selected.quantity }} {{ selected.batch.unit }}</span
+            >
+            <button
+              mat-icon-button
+              (click)="deselectBatch(selected.batch.batchNumber)"
+              aria-label="Remove batch"
+              color="warn"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        }
+      </div>
+
+      <div class="ax-batch-selector__summary-actions">
+        <button mat-stroked-button (click)="clearSelection()">Clear All</button>
+      </div>
+    </div>
+  }
+</div>

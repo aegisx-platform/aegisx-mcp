@@ -1,0 +1,151 @@
+<div class="ax-barcode-scanner">
+  <!-- Header -->
+  <div class="ax-barcode-scanner__header">
+    <div class="ax-barcode-scanner__mode-indicator">
+      @if (currentMode() === 'camera') {
+        <mat-icon>videocam</mat-icon>
+        <span>Camera Scanning</span>
+      } @else {
+        <mat-icon>keyboard</mat-icon>
+        <span>Manual Entry</span>
+      }
+    </div>
+  </div>
+
+  <!-- Camera Mode -->
+  @if (currentMode() === 'camera') {
+    <div class="ax-barcode-scanner__camera-container">
+      <video
+        #videoElement
+        class="ax-barcode-scanner__video"
+        autoplay
+        playsinline
+      ></video>
+
+      <!-- Scan Frame Overlay -->
+      <div class="ax-barcode-scanner__scan-frame">
+        <div
+          class="ax-barcode-scanner__scan-frame-corner ax-barcode-scanner__scan-frame-corner--tl"
+        ></div>
+        <div
+          class="ax-barcode-scanner__scan-frame-corner ax-barcode-scanner__scan-frame-corner--tr"
+        ></div>
+        <div
+          class="ax-barcode-scanner__scan-frame-corner ax-barcode-scanner__scan-frame-corner--bl"
+        ></div>
+        <div
+          class="ax-barcode-scanner__scan-frame-corner ax-barcode-scanner__scan-frame-corner--br"
+        ></div>
+      </div>
+
+      <!-- Scanning Status -->
+      @if (isScanning()) {
+        <div class="ax-barcode-scanner__scanning-indicator">
+          <div class="ax-barcode-scanner__scan-line"></div>
+        </div>
+      }
+    </div>
+
+    <!-- Camera Controls -->
+    <div class="ax-barcode-scanner__controls">
+      @if (canUseCamera()) {
+        <button
+          mat-icon-button
+          class="ax-barcode-scanner__control-btn"
+          (click)="toggleFlashlight()"
+          [disabled]="!isScanning()"
+          aria-label="Toggle flashlight"
+        >
+          <mat-icon>{{
+            flashlightEnabled() ? 'flash_on' : 'flash_off'
+          }}</mat-icon>
+        </button>
+      }
+
+      <button
+        mat-raised-button
+        color="primary"
+        class="ax-barcode-scanner__mode-switch"
+        (click)="switchToManualMode()"
+      >
+        <mat-icon>keyboard</mat-icon>
+        Manual Input
+      </button>
+    </div>
+  }
+
+  <!-- Manual Mode -->
+  @if (currentMode() === 'manual') {
+    <div class="ax-barcode-scanner__manual-container">
+      <mat-form-field
+        appearance="outline"
+        class="ax-barcode-scanner__input-field"
+      >
+        <mat-label>{{ placeholder() }}</mat-label>
+        <input
+          matInput
+          [value]="manualInput()"
+          (input)="manualInput.set($any($event.target).value)"
+          (keyup.enter)="onManualSubmit()"
+          placeholder="{{ placeholder() }}"
+          aria-label="Barcode input"
+        />
+        <button
+          mat-icon-button
+          matSuffix
+          (click)="onManualSubmit()"
+          [disabled]="!manualInput()"
+          aria-label="Submit barcode"
+        >
+          <mat-icon>search</mat-icon>
+        </button>
+      </mat-form-field>
+
+      @if (canUseCamera()) {
+        <button
+          mat-raised-button
+          color="primary"
+          class="ax-barcode-scanner__mode-switch"
+          (click)="switchToCameraMode()"
+        >
+          <mat-icon>videocam</mat-icon>
+          Use Camera
+        </button>
+      }
+
+      <!-- Format Help Text -->
+      <div class="ax-barcode-scanner__format-help">
+        <mat-icon>info</mat-icon>
+        <span>Supported formats: {{ formats().join(', ').toUpperCase() }}</span>
+      </div>
+    </div>
+  }
+
+  <!-- Recent Scans -->
+  @if (showHistory() && displayedScans().length > 0) {
+    <div class="ax-barcode-scanner__history">
+      <div class="ax-barcode-scanner__history-header">
+        <mat-icon>history</mat-icon>
+        <span>Recent Scans</span>
+      </div>
+
+      <div class="ax-barcode-scanner__history-list">
+        @for (scan of displayedScans(); track scan.timestamp) {
+          <div class="ax-barcode-scanner__history-item">
+            <div class="ax-barcode-scanner__history-item-content">
+              <span class="ax-barcode-scanner__history-code">{{
+                scan.code
+              }}</span>
+              <span class="ax-barcode-scanner__history-format">{{
+                scan.format.toUpperCase()
+              }}</span>
+            </div>
+            <span class="ax-barcode-scanner__history-time">
+              {{ getRelativeTime(scan.timestamp) }}
+            </span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

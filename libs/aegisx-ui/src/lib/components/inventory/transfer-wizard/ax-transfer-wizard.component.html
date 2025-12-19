@@ -1,0 +1,641 @@
+<div class="ax-transfer-wizard">
+  <!-- Header with Progress -->
+  <div class="ax-transfer-wizard__header">
+    <h2 class="ax-transfer-wizard__title">Inventory Transfer Wizard</h2>
+    <p class="ax-transfer-wizard__subtitle">
+      Step {{ currentStep() + 1 }} of {{ totalSteps() }}:
+      {{ getStepLabel(currentStep()) }}
+    </p>
+
+    <!-- Progress Bar -->
+    <mat-progress-bar
+      mode="determinate"
+      [value]="progressPercentage()"
+      class="ax-transfer-wizard__progress"
+    >
+    </mat-progress-bar>
+
+    @if (isDraftSaved() && lastSavedAt()) {
+      <p class="ax-transfer-wizard__draft-status">
+        <mat-icon inline>save</mat-icon>
+        Draft saved at {{ lastSavedAt() | date: 'short' }}
+      </p>
+    }
+  </div>
+
+  <!-- Stepper Content -->
+  <mat-stepper
+    #stepper
+    [linear]="true"
+    [selectedIndex]="currentStep()"
+    orientation="vertical"
+    class="ax-transfer-wizard__stepper"
+  >
+    <!-- ===================================================== -->
+    <!-- STEP 1: SELECT SOURCE LOCATION -->
+    <!-- ===================================================== -->
+    <mat-step
+      [stepControl]="sourceForm"
+      [label]="getStepLabel(0)"
+      [optional]="false"
+    >
+      <ng-template matStepLabel>{{ getStepLabel(0) }}</ng-template>
+
+      <div class="ax-transfer-wizard__step-content">
+        <p class="ax-transfer-wizard__step-description">
+          {{ getStepDescription(0) }}
+        </p>
+
+        <form [formGroup]="sourceForm">
+          <!-- Location Picker for Source -->
+          <ax-location-picker
+            [locations]="availableLocations()"
+            (locationSelected)="onSourceLocationSelect($event)"
+          >
+          </ax-location-picker>
+
+          <!-- Selected Source Location Display -->
+          @if (selectedSourceLocation()) {
+            <mat-card class="ax-transfer-wizard__selection-card">
+              <mat-card-content>
+                <div class="selection-info">
+                  <mat-icon>location_on</mat-icon>
+                  <div class="selection-details">
+                    <strong>{{ selectedSourceLocation()!.name }}</strong>
+                    @if (selectedSourceLocation()!.pathString) {
+                      <p class="selection-path">
+                        {{ selectedSourceLocation()!.pathString }}
+                      </p>
+                    }
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+        </form>
+      </div>
+
+      <div class="ax-transfer-wizard__step-actions">
+        <button mat-button type="button" (click)="cancelWizard()">
+          Cancel
+        </button>
+        <button
+          mat-raised-button
+          color="primary"
+          type="button"
+          [disabled]="!canProceed()"
+          (click)="nextStep()"
+        >
+          Next
+          <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+        </button>
+      </div>
+    </mat-step>
+
+    <!-- ===================================================== -->
+    <!-- STEP 2: SELECT DESTINATION LOCATION -->
+    <!-- ===================================================== -->
+    <mat-step
+      [stepControl]="destinationForm"
+      [label]="getStepLabel(1)"
+      [optional]="false"
+    >
+      <ng-template matStepLabel>{{ getStepLabel(1) }}</ng-template>
+
+      <div class="ax-transfer-wizard__step-content">
+        <p class="ax-transfer-wizard__step-description">
+          {{ getStepDescription(1) }}
+        </p>
+
+        <form [formGroup]="destinationForm">
+          <!-- Location Picker for Destination -->
+          <ax-location-picker
+            [locations]="availableLocations()"
+            (locationSelected)="onDestinationLocationSelect($event)"
+          >
+          </ax-location-picker>
+
+          <!-- Selected Destination Location Display -->
+          @if (selectedDestinationLocation()) {
+            <mat-card class="ax-transfer-wizard__selection-card">
+              <mat-card-content>
+                <div class="selection-info">
+                  <mat-icon>location_on</mat-icon>
+                  <div class="selection-details">
+                    <strong>{{ selectedDestinationLocation()!.name }}</strong>
+                    @if (selectedDestinationLocation()!.pathString) {
+                      <p class="selection-path">
+                        {{ selectedDestinationLocation()!.pathString }}
+                      </p>
+                    }
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+        </form>
+
+        <!-- Transfer Route Visualization -->
+        @if (selectedSourceLocation() && selectedDestinationLocation()) {
+          <div class="ax-transfer-wizard__route">
+            <mat-card>
+              <mat-card-content>
+                <div class="route-visualization">
+                  <div class="route-location">
+                    <mat-icon>location_on</mat-icon>
+                    <span>{{ selectedSourceLocation()!.name }}</span>
+                  </div>
+                  <mat-icon class="route-arrow">arrow_forward</mat-icon>
+                  <div class="route-location">
+                    <mat-icon>place</mat-icon>
+                    <span>{{ selectedDestinationLocation()!.name }}</span>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        }
+      </div>
+
+      <div class="ax-transfer-wizard__step-actions">
+        <button mat-button type="button" (click)="previousStep()">
+          <mat-icon>arrow_back</mat-icon>
+          Back
+        </button>
+        <button mat-button type="button" (click)="cancelWizard()">
+          Cancel
+        </button>
+        <button
+          mat-raised-button
+          color="primary"
+          type="button"
+          [disabled]="!canProceed()"
+          (click)="nextStep()"
+        >
+          Next
+          <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+        </button>
+      </div>
+    </mat-step>
+
+    <!-- ===================================================== -->
+    <!-- STEP 3: SELECT ITEMS -->
+    <!-- ===================================================== -->
+    <mat-step
+      [stepControl]="itemsForm"
+      [label]="getStepLabel(2)"
+      [optional]="false"
+    >
+      <ng-template matStepLabel>{{ getStepLabel(2) }}</ng-template>
+
+      <div class="ax-transfer-wizard__step-content">
+        <p class="ax-transfer-wizard__step-description">
+          {{ getStepDescription(2) }}
+        </p>
+
+        <form [formGroup]="itemsForm">
+          <!-- Product Search Autocomplete -->
+          <mat-form-field
+            appearance="outline"
+            class="ax-transfer-wizard__search"
+          >
+            <mat-label>Search Products</mat-label>
+            <input
+              matInput
+              type="text"
+              placeholder="Enter product name or SKU..."
+              formControlName="productSearch"
+              (input)="onProductSearch($any($event.target).value)"
+              [matAutocomplete]="auto"
+            />
+            <mat-icon matPrefix>search</mat-icon>
+            @if (isSearching()) {
+              <mat-icon matSuffix>
+                <mat-spinner diameter="20"></mat-spinner>
+              </mat-icon>
+            }
+          </mat-form-field>
+
+          <!-- Autocomplete Panel -->
+          <mat-autocomplete #auto="matAutocomplete">
+            @for (product of productSearchResults(); track product.id) {
+              <mat-option (click)="addProduct(product)">
+                <div class="product-option">
+                  <div class="product-info">
+                    <strong>{{ product.name }}</strong>
+                    <span class="product-sku">SKU: {{ product.sku }}</span>
+                  </div>
+                  <div class="product-stock">
+                    <span class="stock-label">Available:</span>
+                    <strong
+                      >{{ product.availableQuantity }}
+                      {{ product.unit }}</strong
+                    >
+                  </div>
+                </div>
+              </mat-option>
+            }
+            @if (
+              productSearchResults().length === 0 &&
+              productSearchTerm() &&
+              !isSearching()
+            ) {
+              <mat-option disabled>No products found</mat-option>
+            }
+          </mat-autocomplete>
+
+          <!-- Selected Items Table -->
+          @if (selectedItems().length > 0) {
+            <div class="ax-transfer-wizard__items-table">
+              <h3>Selected Items ({{ selectedItems().length }})</h3>
+              <table
+                mat-table
+                [dataSource]="selectedItems()"
+                class="mat-elevation-z2"
+              >
+                <!-- Product Column -->
+                <ng-container matColumnDef="product">
+                  <th mat-header-cell *matHeaderCellDef>Product</th>
+                  <td mat-cell *matCellDef="let item">
+                    <div class="product-cell">
+                      <strong>{{ item.productName }}</strong>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <!-- SKU Column -->
+                <ng-container matColumnDef="sku">
+                  <th mat-header-cell *matHeaderCellDef>SKU</th>
+                  <td mat-cell *matCellDef="let item">{{ item.sku }}</td>
+                </ng-container>
+
+                <!-- Available Quantity Column -->
+                <ng-container matColumnDef="available">
+                  <th mat-header-cell *matHeaderCellDef>Available</th>
+                  <td mat-cell *matCellDef="let item">
+                    {{ item.availableQuantity }} {{ item.unit }}
+                  </td>
+                </ng-container>
+
+                <!-- Quantity Column -->
+                <ng-container matColumnDef="quantity">
+                  <th mat-header-cell *matHeaderCellDef>Transfer Qty</th>
+                  <td mat-cell *matCellDef="let item">
+                    @if (item.quantity > 0) {
+                      <span class="quantity-badge"
+                        >{{ item.quantity }} {{ item.unit }}</span
+                      >
+                    } @else {
+                      <span class="quantity-pending"
+                        >Will set in next step</span
+                      >
+                    }
+                  </td>
+                </ng-container>
+
+                <!-- Actions Column -->
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef>Actions</th>
+                  <td mat-cell *matCellDef="let item; let i = index">
+                    <button
+                      mat-icon-button
+                      color="warn"
+                      type="button"
+                      matTooltip="Remove item"
+                      (click)="removeProduct(i)"
+                    >
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr
+                  mat-row
+                  *matRowDef="let row; columns: displayedColumns"
+                ></tr>
+              </table>
+            </div>
+          } @else {
+            <mat-card class="ax-transfer-wizard__empty-state">
+              <mat-card-content>
+                <mat-icon>inventory_2</mat-icon>
+                <p>No items added yet</p>
+                <p class="empty-hint">Search and select products to transfer</p>
+              </mat-card-content>
+            </mat-card>
+          }
+        </form>
+      </div>
+
+      <div class="ax-transfer-wizard__step-actions">
+        <button mat-button type="button" (click)="previousStep()">
+          <mat-icon>arrow_back</mat-icon>
+          Back
+        </button>
+        <button mat-button type="button" (click)="cancelWizard()">
+          Cancel
+        </button>
+        <button
+          mat-raised-button
+          color="primary"
+          type="button"
+          [disabled]="!canProceed()"
+          (click)="nextStep()"
+        >
+          Next
+          <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+        </button>
+      </div>
+    </mat-step>
+
+    <!-- ===================================================== -->
+    <!-- STEP 4: CONFIRM QUANTITIES -->
+    <!-- ===================================================== -->
+    <mat-step
+      [stepControl]="quantitiesForm"
+      [label]="getStepLabel(3)"
+      [optional]="false"
+    >
+      <ng-template matStepLabel>{{ getStepLabel(3) }}</ng-template>
+
+      <div class="ax-transfer-wizard__step-content">
+        <p class="ax-transfer-wizard__step-description">
+          {{ getStepDescription(3) }}
+        </p>
+
+        <form [formGroup]="quantitiesForm">
+          <div
+            formArrayName="quantities"
+            class="ax-transfer-wizard__quantities"
+          >
+            @for (quantityGroup of quantitiesArray.controls; track $index) {
+              <mat-card class="quantity-card">
+                <mat-card-content [formGroupName]="$index">
+                  <div class="quantity-header">
+                    <div class="product-info">
+                      <h3>{{ quantityGroup.get('productName')?.value }}</h3>
+                      <p class="product-sku">
+                        SKU: {{ quantityGroup.get('sku')?.value }}
+                      </p>
+                      <p class="available-stock">
+                        Available:
+                        {{ quantityGroup.get('availableQuantity')?.value }}
+                        {{ quantityGroup.get('unit')?.value }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="quantity-input">
+                    <!-- Quantity Input Component -->
+                    <ax-quantity-input
+                      [value]="quantityGroup.get('quantity')?.value || 0"
+                      [baseUnit]="quantityGroup.get('unit')?.value || 'pieces'"
+                      [availableUnits]="[]"
+                      [min]="allowPartialTransfer() ? 0.01 : 1"
+                      [max]="
+                        quantityGroup.get('availableQuantity')?.value || 999999
+                      "
+                      [showStepper]="true"
+                      [showPresets]="false"
+                      (valueChange)="updateItemQuantity($index, $event)"
+                    >
+                    </ax-quantity-input>
+
+                    @if (quantityGroup.get('quantity')?.errors) {
+                      <mat-error>
+                        @if (
+                          quantityGroup.get('quantity')?.errors?.['required']
+                        ) {
+                          Quantity is required
+                        }
+                        @if (quantityGroup.get('quantity')?.errors?.['min']) {
+                          Quantity must be greater than 0
+                        }
+                        @if (quantityGroup.get('quantity')?.errors?.['max']) {
+                          Quantity exceeds available stock
+                        }
+                      </mat-error>
+                    }
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            }
+          </div>
+        </form>
+      </div>
+
+      <div class="ax-transfer-wizard__step-actions">
+        <button mat-button type="button" (click)="previousStep()">
+          <mat-icon>arrow_back</mat-icon>
+          Back
+        </button>
+        <button mat-button type="button" (click)="cancelWizard()">
+          Cancel
+        </button>
+        <button
+          mat-raised-button
+          color="primary"
+          type="button"
+          [disabled]="!canProceed()"
+          (click)="nextStep()"
+        >
+          Next
+          <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+        </button>
+      </div>
+    </mat-step>
+
+    <!-- ===================================================== -->
+    <!-- STEP 5: REVIEW & SUBMIT -->
+    <!-- ===================================================== -->
+    <mat-step
+      [stepControl]="reviewForm"
+      [label]="getStepLabel(4)"
+      [optional]="false"
+    >
+      <ng-template matStepLabel>{{ getStepLabel(4) }}</ng-template>
+
+      <div class="ax-transfer-wizard__step-content">
+        <p class="ax-transfer-wizard__step-description">
+          {{ getStepDescription(4) }}
+        </p>
+
+        <!-- Transfer Summary -->
+        <div class="ax-transfer-wizard__summary">
+          <!-- Locations Summary -->
+          <mat-card class="summary-card">
+            <mat-card-header>
+              <mat-card-title>Transfer Route</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="route-summary">
+                <div class="location-item">
+                  <mat-icon>location_on</mat-icon>
+                  <div>
+                    <strong>From:</strong>
+                    <p>{{ selectedSourceLocation()?.name }}</p>
+                    @if (selectedSourceLocation()?.pathString) {
+                      <p class="location-path">
+                        {{ selectedSourceLocation()?.pathString }}
+                      </p>
+                    }
+                  </div>
+                </div>
+                <mat-icon class="arrow-down">arrow_downward</mat-icon>
+                <div class="location-item">
+                  <mat-icon>place</mat-icon>
+                  <div>
+                    <strong>To:</strong>
+                    <p>{{ selectedDestinationLocation()?.name }}</p>
+                    @if (selectedDestinationLocation()?.pathString) {
+                      <p class="location-path">
+                        {{ selectedDestinationLocation()?.pathString }}
+                      </p>
+                    }
+                  </div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Items Summary -->
+          <mat-card class="summary-card">
+            <mat-card-header>
+              <mat-card-title
+                >Items to Transfer ({{
+                  selectedItems().length
+                }})</mat-card-title
+              >
+            </mat-card-header>
+            <mat-card-content>
+              <table
+                mat-table
+                [dataSource]="selectedItems()"
+                class="summary-table"
+              >
+                <!-- Product Column -->
+                <ng-container matColumnDef="product">
+                  <th mat-header-cell *matHeaderCellDef>Product</th>
+                  <td mat-cell *matCellDef="let item">
+                    <strong>{{ item.productName }}</strong>
+                  </td>
+                </ng-container>
+
+                <!-- SKU Column -->
+                <ng-container matColumnDef="sku">
+                  <th mat-header-cell *matHeaderCellDef>SKU</th>
+                  <td mat-cell *matCellDef="let item">{{ item.sku }}</td>
+                </ng-container>
+
+                <!-- Quantity Column -->
+                <ng-container matColumnDef="quantity">
+                  <th mat-header-cell *matHeaderCellDef>Quantity</th>
+                  <td mat-cell *matCellDef="let item">
+                    <strong>{{ item.quantity }}</strong>
+                  </td>
+                </ng-container>
+
+                <!-- Unit Column -->
+                <ng-container matColumnDef="unit">
+                  <th mat-header-cell *matHeaderCellDef>Unit</th>
+                  <td mat-cell *matCellDef="let item">{{ item.unit }}</td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="reviewColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: reviewColumns"></tr>
+              </table>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Notes -->
+          <mat-card class="summary-card">
+            <mat-card-header>
+              <mat-card-title>Additional Notes (Optional)</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <form [formGroup]="reviewForm">
+                <mat-form-field appearance="outline" class="notes-field">
+                  <mat-label>Transfer Notes</mat-label>
+                  <textarea
+                    matInput
+                    formControlName="notes"
+                    rows="3"
+                    placeholder="Add any additional notes or instructions for this transfer..."
+                  >
+                  </textarea>
+                  <mat-icon matPrefix>note</mat-icon>
+                </mat-form-field>
+              </form>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Approval Notice -->
+          @if (wizardConfig().requireApproval) {
+            <mat-card class="summary-card approval-notice">
+              <mat-card-content>
+                <div class="approval-info">
+                  <mat-icon color="warn">info</mat-icon>
+                  <div>
+                    <strong>Approval Required</strong>
+                    <p>
+                      This transfer will require manager approval before
+                      execution.
+                    </p>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      </div>
+
+      <div class="ax-transfer-wizard__step-actions">
+        <button mat-button type="button" (click)="previousStep()">
+          <mat-icon>arrow_back</mat-icon>
+          Back
+        </button>
+        <button mat-button type="button" (click)="cancelWizard()">
+          Cancel
+        </button>
+        <button
+          mat-raised-button
+          color="primary"
+          type="button"
+          [disabled]="!canSubmit() || isProcessing()"
+          (click)="submitTransfer()"
+        >
+          @if (isProcessing()) {
+            <mat-spinner
+              diameter="20"
+              style="display: inline-block; margin-right: 8px"
+            ></mat-spinner>
+            Processing...
+          } @else {
+            <mat-icon iconPositionEnd>check</mat-icon>
+            Submit Transfer
+          }
+        </button>
+      </div>
+    </mat-step>
+  </mat-stepper>
+
+  <!-- Success State -->
+  @if (isComplete()) {
+    <mat-card class="ax-transfer-wizard__success">
+      <mat-card-content>
+        <mat-icon color="primary">check_circle</mat-icon>
+        <h2>Transfer Submitted Successfully!</h2>
+        <p>Your transfer request has been submitted and is being processed.</p>
+        @if (wizardConfig().requireApproval) {
+          <p class="approval-message">
+            The transfer is pending manager approval.
+          </p>
+        }
+        <button mat-raised-button color="primary" (click)="resetWizard()">
+          Create Another Transfer
+        </button>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

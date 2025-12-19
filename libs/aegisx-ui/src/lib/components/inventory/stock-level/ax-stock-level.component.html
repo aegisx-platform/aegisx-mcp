@@ -1,0 +1,48 @@
+<div class="ax-stock-level" [class]="'ax-stock-level--' + size()">
+  @if (showLabel()) {
+    <div class="ax-stock-level__label">
+      <span class="ax-stock-level__value">
+        {{ current() }} / {{ maximum() }} {{ unit() }}
+      </span>
+      @if (showPercentage()) {
+        <span class="ax-stock-level__percentage">({{ percentage() }}%)</span>
+      }
+    </div>
+  }
+
+  <div
+    class="ax-stock-level__progress"
+    [matTooltip]="tooltipText()"
+    role="progressbar"
+    [attr.aria-valuenow]="current()"
+    [attr.aria-valuemin]="0"
+    [attr.aria-valuemax]="maximum()"
+    [attr.aria-label]="'Stock level: ' + percentage() + '%'"
+  >
+    <div class="ax-stock-level__progress-bg"></div>
+    <div
+      class="ax-stock-level__progress-fill"
+      [class]="colorClass()"
+      [style.width.%]="percentage()"
+    ></div>
+    <div
+      class="ax-stock-level__threshold"
+      [style.left.%]="(minimum() / maximum()) * 100"
+      [attr.aria-label]="'Minimum threshold at ' + minimum() + ' ' + unit()"
+    >
+      <span class="ax-stock-level__threshold-label">min</span>
+    </div>
+  </div>
+
+  @if (isWarning()) {
+    <ax-badge
+      type="warning"
+      size="sm"
+      content="Low Stock"
+      (click)="handleWarningClick()"
+      tabindex="0"
+      role="button"
+      aria-label="Low stock warning - click for details"
+    />
+  }
+</div>

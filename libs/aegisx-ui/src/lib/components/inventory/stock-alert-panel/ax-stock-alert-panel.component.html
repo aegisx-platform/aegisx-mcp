@@ -1,0 +1,294 @@
+<div class="ax-stock-alert-panel">
+  <mat-card class="alert-panel-card">
+    <!-- Header -->
+    <mat-card-header class="alert-panel-header">
+      <div class="header-content">
+        <div class="header-title">
+          <mat-icon class="header-icon">notifications_active</mat-icon>
+          <mat-card-title>Stock Alerts</mat-card-title>
+          @if (wsConnected()) {
+            <span class="ws-indicator" matTooltip="Real-time updates enabled">
+              <mat-icon class="ws-icon">wifi</mat-icon>
+            </span>
+          }
+        </div>
+
+        <div class="header-actions">
+          <!-- Grouping selector -->
+          <mat-form-field class="group-selector" appearance="outline">
+            <mat-label>Group by</mat-label>
+            <mat-select
+              [value]="groupBy()"
+              (selectionChange)="groupBy = $event.value"
+            >
+              <mat-option value="priority">Priority</mat-option>
+              <mat-option value="type">Type</mat-option>
+              <mat-option value="location">Location</mat-option>
+              <mat-option value="none">None</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Refresh button -->
+          <button
+            mat-icon-button
+            matTooltip="Refresh alerts"
+            (click)="refreshAlerts()"
+            [disabled]="isLoading()"
+          >
+            <mat-icon>refresh</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Alert count badges -->
+      <div class="alert-counts">
+        <mat-chip-set aria-label="Alert counts">
+          <mat-chip class="count-chip critical" highlighted>
+            <mat-icon>error</mat-icon>
+            Critical: {{ alertCounts().critical }}
+          </mat-chip>
+          <mat-chip class="count-chip warning" highlighted>
+            <mat-icon>warning</mat-icon>
+            Warning: {{ alertCounts().warning }}
+          </mat-chip>
+          <mat-chip class="count-chip info" highlighted>
+            <mat-icon>info</mat-icon>
+            Info: {{ alertCounts().info }}
+          </mat-chip>
+        </mat-chip-set>
+      </div>
+    </mat-card-header>
+
+    <!-- Content -->
+    <mat-card-content class="alert-panel-content">
+      <!-- Loading state -->
+      @if (isLoading()) {
+        <div class="loading-state">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Loading alerts...</p>
+        </div>
+      }
+
+      <!-- Error state -->
+      @else if (error()) {
+        <div class="error-state">
+          <mat-icon class="error-icon">error_outline</mat-icon>
+          <p>{{ error() }}</p>
+          <button mat-raised-button color="primary" (click)="refreshAlerts()">
+            Retry
+          </button>
+        </div>
+      }
+
+      <!-- Empty state -->
+      @else if (filteredAlerts().length === 0) {
+        <div class="empty-state">
+          <mat-icon class="empty-icon">check_circle</mat-icon>
+          <h3>All Clear!</h3>
+          <p>No active alerts at this time.</p>
+        </div>
+      }
+
+      <!-- Alert groups -->
+      @else {
+        <div class="alert-groups">
+          @for (group of groupedAlerts(); track group.key) {
+            <div class="alert-group">
+              <!-- Group header -->
+              @if (groupBy() !== 'none') {
+                <div class="group-header">
+                  <h3 class="group-title">{{ group.label }}</h3>
+                  <div class="group-counts">
+                    @if (group.criticalCount > 0) {
+                      <span class="group-count critical">{{
+                        group.criticalCount
+                      }}</span>
+                    }
+                    @if (group.warningCount > 0) {
+                      <span class="group-count warning">{{
+                        group.warningCount
+                      }}</span>
+                    }
+                    @if (group.infoCount > 0) {
+                      <span class="group-count info">{{
+                        group.infoCount
+                      }}</span>
+                    }
+                  </div>
+                </div>
+              }
+
+              <!-- Alert list -->
+              <mat-list class="alert-list">
+                @for (alert of group.alerts; track alert.id) {
+                  <mat-list-item
+                    class="alert-item"
+                    [class]="getSeverityClass(alert.severity)"
+                    [class.unread]="!alert.read"
+                    [class.resolved]="alert.resolved"
+                    (click)="handleAlertClick(alert)"
+                  >
+                    <!-- Severity indicator -->
+                    <div
+                      class="severity-indicator"
+                      [class]="getSeverityClass(alert.severity)"
+                    >
+                      <mat-icon>{{ getSeverityIcon(alert.severity) }}</mat-icon>
+                    </div>
+
+                    <!-- Alert content -->
+                    <div matListItemTitle class="alert-content">
+                      <div class="alert-header">
+                        <div class="alert-type">
+                          <mat-icon class="type-icon">{{
+                            getAlertTypeIcon(alert.type)
+                          }}</mat-icon>
+                          <span class="type-label">{{
+                            alert.type | titlecase
+                          }}</span>
+                        </div>
+                        @if (!alert.read) {
+                          <span class="unread-badge" matTooltip="Unread">
+                            <mat-icon>fiber_manual_record</mat-icon>
+                          </span>
+                        }
+                        @if (alert.resolved) {
+                          <span class="resolved-badge" matTooltip="Resolved">
+                            <mat-icon>check_circle</mat-icon>
+                          </span>
+                        }
+                      </div>
+
+                      <div class="product-info">
+                        <strong>{{ alert.product.name }}</strong>
+                        <span class="product-sku"
+                          >({{ alert.product.sku }})</span
+                        >
+                      </div>
+
+                      <p class="alert-message">{{ alert.message }}</p>
+
+                      <!-- Metadata -->
+                      @if (alert.metadata) {
+                        <div class="alert-metadata">
+                          @if (alert.metadata.currentStock !== undefined) {
+                            <span class="metadata-item">
+                              <mat-icon class="metadata-icon"
+                                >inventory_2</mat-icon
+                              >
+                              Current: {{ alert.metadata.currentStock }}
+                            </span>
+                          }
+                          @if (alert.metadata.minimumStock !== undefined) {
+                            <span class="metadata-item">
+                              <mat-icon class="metadata-icon">warning</mat-icon>
+                              Min: {{ alert.metadata.minimumStock }}
+                            </span>
+                          }
+                          @if (alert.metadata.expiryDate) {
+                            <span class="metadata-item">
+                              <mat-icon class="metadata-icon"
+                                >schedule</mat-icon
+                              >
+                              Expires:
+                              {{ alert.metadata.expiryDate | date: 'short' }}
+                            </span>
+                          }
+                          @if (alert.metadata.batchNumber) {
+                            <span class="metadata-item">
+                              <mat-icon class="metadata-icon">label</mat-icon>
+                              Batch: {{ alert.metadata.batchNumber }}
+                            </span>
+                          }
+                          @if (alert.metadata.locationName) {
+                            <span class="metadata-item">
+                              <mat-icon class="metadata-icon">place</mat-icon>
+                              {{ alert.metadata.locationName }}
+                            </span>
+                          }
+                        </div>
+                      }
+
+                      <!-- Timestamp -->
+                      <div class="alert-timestamp">
+                        <mat-icon class="time-icon">access_time</mat-icon>
+                        {{ alert.createdAt | date: 'short' }}
+                      </div>
+                    </div>
+
+                    <!-- Actions -->
+                    @if (showActions()) {
+                      <div
+                        matListItemMeta
+                        class="alert-actions"
+                        (click)="$event.stopPropagation()"
+                      >
+                        <!-- Action menu -->
+                        <button
+                          mat-icon-button
+                          [matMenuTriggerFor]="actionMenu"
+                          class="action-menu-trigger"
+                          matTooltip="Actions"
+                        >
+                          <mat-icon>more_vert</mat-icon>
+                        </button>
+
+                        <mat-menu #actionMenu="matMenu">
+                          <!-- Suggested actions -->
+                          @for (
+                            action of getSuggestedActions(alert);
+                            track action
+                          ) {
+                            <button
+                              mat-menu-item
+                              (click)="handleAction(alert, action)"
+                            >
+                              <mat-icon>{{ getActionIcon(action) }}</mat-icon>
+                              <span>{{ getActionLabel(action) }}</span>
+                            </button>
+                          }
+
+                          <mat-divider></mat-divider>
+
+                          <!-- Mark as resolved -->
+                          @if (!alert.resolved) {
+                            <button
+                              mat-menu-item
+                              (click)="resolveAlert(alert.id)"
+                            >
+                              <mat-icon>check</mat-icon>
+                              <span>Mark as Resolved</span>
+                            </button>
+                          }
+
+                          <!-- Dismiss -->
+                          <button
+                            mat-menu-item
+                            (click)="dismissAlert(alert.id)"
+                          >
+                            <mat-icon>close</mat-icon>
+                            <span>Dismiss</span>
+                          </button>
+                        </mat-menu>
+                      </div>
+                    }
+                  </mat-list-item>
+                }
+              </mat-list>
+            </div>
+          }
+        </div>
+
+        <!-- View all link -->
+        @if (hasMoreAlerts()) {
+          <div class="view-all-footer">
+            <button mat-stroked-button color="primary">
+              <mat-icon>expand_more</mat-icon>
+              View All Alerts ({{ hiddenAlertsCount() }} more)
+            </button>
+          </div>
+        }
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

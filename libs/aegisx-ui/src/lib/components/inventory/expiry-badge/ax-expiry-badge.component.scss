@@ -1,0 +1,392 @@
+/**
+ * Expiry Badge Component Styles
+ * ================================================================
+ *
+ * Comprehensive styling for all expiry badge variants including:
+ * - Status color coding (safe/green, warning/yellow, critical/red, expired/gray)
+ * - Size variants (sm/md/lg)
+ * - Style variants (outlined, soft, solid)
+ * - Compact mode for tables
+ * - WCAG 2.1 AA compliant contrast ratios
+ * - Responsive and accessible interactions
+ */
+
+// ============================================================================
+// BASE STYLES
+// ============================================================================
+
+.ax-expiry-badge {
+  // Display and layout
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: none;
+  border-radius: 6px;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+
+  // Default size (medium)
+  padding: 0.5rem 0.875rem;
+  height: 24px;
+  font-size: 0.875rem;
+  line-height: 1;
+
+  // Accessibility
+  &:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+
+  // Icon styling
+  mat-icon {
+    font-size: inherit;
+    height: 1.125rem;
+    width: 1.125rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &.ax-expiry-badge__icon {
+      flex-shrink: 0;
+    }
+  }
+
+  // Text styling
+  .ax-expiry-badge__text {
+    display: inline;
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  // Hover state
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  // Active state
+  &:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+
+  // Disabled state
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// ============================================================================
+// SIZE VARIANTS
+// ============================================================================
+
+// Small size (20px)
+.ax-expiry-badge--size-sm {
+  padding: 0.25rem 0.5rem;
+  height: 20px;
+  font-size: 0.75rem;
+
+  mat-icon {
+    height: 1rem;
+    width: 1rem;
+    font-size: 1rem;
+  }
+}
+
+// Medium size (default - 24px)
+// No additional styles needed as base is medium
+
+// Large size (32px)
+.ax-expiry-badge--size-lg {
+  padding: 0.75rem 1.125rem;
+  height: 32px;
+  font-size: 1rem;
+
+  mat-icon {
+    height: 1.375rem;
+    width: 1.375rem;
+    font-size: 1.375rem;
+  }
+}
+
+// ============================================================================
+// STATUS VARIANTS
+// ============================================================================
+
+// Safe status (Green)
+.ax-expiry-badge--status-safe {
+  // Soft variant (default)
+  &.ax-expiry-badge--variant-soft {
+    background-color: #ecf9f2;
+    color: #0d6e3c;
+    border: none;
+
+    &:hover:not(:disabled) {
+      background-color: #d6f4e5;
+    }
+  }
+
+  // Outlined variant
+  &.ax-expiry-badge--variant-outlined {
+    background-color: transparent;
+    color: #0d6e3c;
+    border: 1.5px solid #0d6e3c;
+
+    &:hover:not(:disabled) {
+      background-color: rgba(13, 110, 60, 0.05);
+    }
+  }
+
+  // Solid variant
+  &.ax-expiry-badge--variant-solid {
+    background-color: #0d6e3c;
+    color: #ffffff;
+    border: none;
+
+    &:hover:not(:disabled) {
+      background-color: #0a5630;
+    }
+  }
+}
+
+// Warning status (Yellow)
+.ax-expiry-badge--status-warning {
+  // Soft variant (default)
+  &.ax-expiry-badge--variant-soft {
+    background-color: #fef8d6;
+    color: #7d4e00;
+    border: none;
+
+    &:hover:not(:disabled) {
+      background-color: #feefad;
+    }
+  }
+
+  // Outlined variant
+  &.ax-expiry-badge--variant-outlined {
+    background-color: transparent;
+    color: #7d4e00;
+    border: 1.5px solid #7d4e00;
+
+    &:hover:not(:disabled) {
+      background-color: rgba(125, 78, 0, 0.05);
+    }
+  }
+
+  // Solid variant
+  &.ax-expiry-badge--variant-solid {
+    background-color: #7d4e00;
+    color: #ffffff;
+    border: none;
+
+    &:hover:not(:disabled) {
+      background-color: #5f3b00;
+    }
+  }
+}
+
+// Critical status (Red)
+.ax-expiry-badge--status-critical {
+  // Soft variant (default)
+  &.ax-expiry-badge--variant-soft {
+    background-color: #fde8e5;
+    color: #b42d24;
+    border: none;
+
+    &:hover:not(:disabled) {
+      background-color: #fcccc7;
+    }
+  }
+
+  // Outlined variant
+  &.ax-expiry-badge--variant-outlined {
+    background-color: transparent;
+    color: #b42d24;
+    border: 1.5px solid #b42d24;
+
+    &:hover:not(:disabled) {
+      background-color: rgba(180, 45, 36, 0.05);
+    }
+  }
+
+  // Solid variant
+  &.ax-expiry-badge--variant-solid {
+    background-color: #b42d24;
+    color: #ffffff;
+    border: none;
+
+    &:hover:not(:disabled) {
+      background-color: #8a221b;
+    }
+  }
+}
+
+// Expired status (Gray)
+.ax-expiry-badge--status-expired {
+  // Soft variant (default)
+  &.ax-expiry-badge--variant-soft {
+    background-color: #f1f1f1;
+    color: #525252;
+    border: none;
+
+    &:hover:not(:disabled) {
+      background-color: #e4e4e4;
+    }
+  }
+
+  // Outlined variant
+  &.ax-expiry-badge--variant-outlined {
+    background-color: transparent;
+    color: #525252;
+    border: 1.5px solid #525252;
+
+    &:hover:not(:disabled) {
+      background-color: rgba(82, 82, 82, 0.05);
+    }
+  }
+
+  // Solid variant
+  &.ax-expiry-badge--variant-solid {
+    background-color: #525252;
+    color: #ffffff;
+    border: none;
+
+    &:hover:not(:disabled) {
+      background-color: #333333;
+    }
+  }
+}
+
+// ============================================================================
+// COMPACT MODE
+// ============================================================================
+
+.ax-expiry-badge--compact {
+  padding: 0.25rem;
+  min-width: 24px;
+  min-height: 24px;
+
+  // Icon fills entire button in compact mode
+  mat-icon {
+    margin: 0;
+  }
+
+  // Hide text in compact mode
+  .ax-expiry-badge__text {
+    display: none;
+  }
+
+  // Small size adjustments
+  &.ax-expiry-badge--size-sm {
+    padding: 0.125rem;
+    min-width: 20px;
+    min-height: 20px;
+
+    mat-icon {
+      height: 1rem;
+      width: 1rem;
+      font-size: 1rem;
+    }
+  }
+
+  // Large size adjustments
+  &.ax-expiry-badge--size-lg {
+    padding: 0.375rem;
+    min-width: 32px;
+    min-height: 32px;
+
+    mat-icon {
+      height: 1.375rem;
+      width: 1.375rem;
+      font-size: 1.375rem;
+    }
+  }
+}
+
+// ============================================================================
+// ACCESSIBILITY
+// ============================================================================
+
+// High contrast mode support
+@media (prefers-contrast: more) {
+  .ax-expiry-badge {
+    font-weight: 600;
+    border-width: 2px;
+
+    &--status-safe.ax-expiry-badge--variant-outlined,
+    &--status-warning.ax-expiry-badge--variant-outlined,
+    &--status-critical.ax-expiry-badge--variant-outlined,
+    &--status-expired.ax-expiry-badge--variant-outlined {
+      border-width: 2px;
+    }
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  .ax-expiry-badge {
+    transition: none;
+
+    &:hover:not(:disabled) {
+      transform: none;
+    }
+
+    &:active:not(:disabled) {
+      transform: none;
+    }
+  }
+}
+
+// Dark mode support (if available)
+@media (prefers-color-scheme: dark) {
+  .ax-expiry-badge {
+    // Safe status
+    &--status-safe.ax-expiry-badge--variant-soft {
+      background-color: rgba(13, 110, 60, 0.2);
+      color: #66cc99;
+    }
+
+    &--status-safe.ax-expiry-badge--variant-outlined {
+      border-color: #66cc99;
+      color: #66cc99;
+    }
+
+    // Warning status
+    &--status-warning.ax-expiry-badge--variant-soft {
+      background-color: rgba(255, 192, 61, 0.2);
+      color: #ffc966;
+    }
+
+    &--status-warning.ax-expiry-badge--variant-outlined {
+      border-color: #ffc966;
+      color: #ffc966;
+    }
+
+    // Critical status
+    &--status-critical.ax-expiry-badge--variant-soft {
+      background-color: rgba(244, 67, 54, 0.2);
+      color: #ff6b63;
+    }
+
+    &--status-critical.ax-expiry-badge--variant-outlined {
+      border-color: #ff6b63;
+      color: #ff6b63;
+    }
+
+    // Expired status
+    &--status-expired.ax-expiry-badge--variant-soft {
+      background-color: rgba(120, 120, 120, 0.2);
+      color: #a0a0a0;
+    }
+
+    &--status-expired.ax-expiry-badge--variant-outlined {
+      border-color: #a0a0a0;
+      color: #a0a0a0;
+    }
+  }
+}

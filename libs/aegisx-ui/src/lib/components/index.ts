@@ -71,3 +71,6 @@ export * from './auth';
 
 // Loading Button Component (Material 3 with shimmer effect)
 export * from './loading-button';
+
+// Inventory Components (Stock tracking, batch management, transfers)
+export * from './inventory';

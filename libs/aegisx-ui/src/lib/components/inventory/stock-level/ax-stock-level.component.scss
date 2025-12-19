@@ -1,0 +1,161 @@
+// Stock Level Indicator Component Styles
+// Implements Material Design 3 with traffic-light and gradient color schemes
+
+.ax-stock-level {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  // Label section (current / max + percentage)
+  &__label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  &__value {
+    font-size: var(--font-size-base, 1rem);
+    font-weight: 600;
+    color: var(--text-primary, #1a1a1a);
+  }
+
+  &__percentage {
+    font-size: var(--font-size-xs, 0.75rem);
+    color: var(--text-subtle, #999);
+    font-weight: 500;
+  }
+
+  // Progress bar section
+  &__progress {
+    position: relative;
+    height: 12px;
+    border-radius: 9999px;
+    overflow: hidden;
+    transition: height 0.2s ease;
+    outline: none;
+    focus-visible: outline 2px solid var(--primary-500, #1976d2);
+    focus-visible: outline-offset 2px;
+
+    // Background bar
+    &-bg {
+      position: absolute;
+      inset: 0;
+      background: var(--background-subtle, #f0f0f0);
+    }
+
+    // Fill bar with color/gradient
+    &-fill {
+      position: absolute;
+      inset: 0;
+      transition:
+        width 0.3s ease,
+        background-color 0.3s ease;
+      border-radius: 9999px;
+
+      // Traffic light color scheme classes
+      &.bg-success-500 {
+        background-color: var(--success-500, #4caf50);
+      }
+
+      &.bg-warning-500 {
+        background-color: var(--warning-500, #ff9800);
+      }
+
+      &.bg-error-500 {
+        background-color: var(--error-500, #f44336);
+      }
+
+      // Gradient color scheme class
+      &.bg-gradient-to-r {
+        background: linear-gradient(
+          to right,
+          var(--error-500, #f44336),
+          var(--warning-500, #ff9800),
+          var(--success-500, #4caf50)
+        );
+      }
+    }
+  }
+
+  // Threshold marker (minimum level indicator)
+  &__threshold {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--border-emphasis, #333);
+    pointer-events: none;
+    z-index: 1;
+
+    &-label {
+      position: absolute;
+      top: -1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.625rem;
+      color: var(--text-subtle, #999);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+  }
+
+  // Size variants
+  &--sm {
+    .ax-stock-level__progress {
+      height: 8px;
+    }
+
+    .ax-stock-level__threshold-label {
+      top: -1.25rem;
+    }
+  }
+
+  &--md {
+    // Default size already set above
+  }
+
+  &--lg {
+    .ax-stock-level__progress {
+      height: 16px;
+    }
+
+    .ax-stock-level__threshold-label {
+      top: -1.75rem;
+    }
+
+    .ax-stock-level__value {
+      font-size: var(--font-size-lg, 1.125rem);
+    }
+  }
+
+  // Respect prefers-reduced-motion for accessibility
+  @media (prefers-reduced-motion: reduce) {
+    .ax-stock-level__progress-fill {
+      transition: none;
+    }
+  }
+
+  // Dark mode support
+  @media (prefers-color-scheme: dark) {
+    &__value {
+      color: var(--text-primary-dark, #e0e0e0);
+    }
+
+    &__percentage {
+      color: var(--text-subtle-dark, #999);
+    }
+
+    &__progress-bg {
+      background: var(--background-subtle-dark, #2a2a2a);
+    }
+
+    &__threshold {
+      background: var(--border-emphasis-dark, #666);
+    }
+  }
+
+  // CSS containment for performance optimization
+  contain: layout style paint;
+}

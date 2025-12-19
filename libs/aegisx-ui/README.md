@@ -130,6 +130,56 @@ export class AppComponent {}
 | Loading Bar | `<ax-loading-bar>` | Global progress indicators        |
 | User Menu   | `<ax-user-menu>`   | User profile dropdowns            |
 
+### 📦 Inventory Management Components
+
+Complete inventory management system with 10 specialized components:
+
+| Component         | Selector                       | Description                                      |
+| ----------------- | ------------------------------ | ------------------------------------------------ |
+| Stock Level       | `<ax-stock-level>`             | Visual stock indicator with color-coded alerts   |
+| Barcode Scanner   | `<ax-barcode-scanner>`         | Camera/manual barcode scanner (QR, EAN, Code128) |
+| Quantity Input    | `<ax-quantity-input>`          | Unit conversion input with validation            |
+| Batch Selector    | `<ax-batch-selector>`          | FIFO/FEFO/LIFO batch selection with expiry       |
+| Expiry Badge      | `<ax-expiry-badge>`            | Compact expiry status badge with countdown       |
+| Variant Selector  | `<ax-variant-selector>`        | Product variant selection (size, color, style)   |
+| Stock Alert Panel | `<ax-stock-alert-panel>`       | Real-time alerts dashboard (WebSocket support)   |
+| Movement Timeline | `<ax-stock-movement-timeline>` | Movement history with Chart.js visualization     |
+| Transfer Wizard   | `<ax-transfer-wizard>`         | Multi-step stock transfer workflow               |
+| Location Picker   | `<ax-location-picker>`         | Hierarchical location tree picker                |
+
+**Quick Example:**
+
+```typescript
+import { AxStockLevelComponent, AxBarcodeScannerComponent, AxBatchSelectorComponent } from '@aegisx/ui';
+
+@Component({
+  selector: 'stock-receive',
+  standalone: true,
+  imports: [AxBarcodeScannerComponent, AxBatchSelectorComponent],
+  template: `
+    <!-- Scan product -->
+    <ax-barcode-scanner (onScan)="lookupProduct($event)" />
+
+    <!-- Select batch -->
+    <ax-batch-selector [productId]="selectedProduct.id" strategy="fefo" (onSelect)="allocateBatch($event)" />
+  `,
+})
+export class StockReceiveComponent {}
+```
+
+**Features:**
+
+- 🏷️ Barcode scanning (camera + manual input)
+- 📊 Real-time stock level visualization
+- 🔄 FIFO/FEFO/LIFO inventory strategies
+- 📅 Expiry date tracking and alerts
+- 🗂️ Multi-variant product support
+- 📈 Movement history with export (PDF/Excel)
+- 🔔 WebSocket real-time alerts
+- 🏢 Hierarchical location management
+
+See [CHANGELOG.md](./CHANGELOG.md) for detailed component documentation.
+
 ### 🎯 Developer Experience
 
 - **🔤 TypeScript** - Fully typed with strict mode

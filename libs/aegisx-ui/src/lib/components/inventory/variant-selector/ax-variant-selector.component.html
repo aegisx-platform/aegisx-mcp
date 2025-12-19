@@ -1,0 +1,546 @@
+<div class="ax-variant-selector">
+  <!-- Header Section -->
+  <div class="ax-variant-selector__header">
+    <!-- Title and Layout Switcher -->
+    <div class="ax-variant-selector__header-top">
+      <h3 class="ax-variant-selector__title">Product Variants</h3>
+
+      <!-- Layout Mode Switcher -->
+      <div class="ax-variant-selector__layout-switcher">
+        <button
+          mat-icon-button
+          [class.active]="layout() === 'grid'"
+          (click)="layout.set('grid')"
+          matTooltip="Grid View"
+        >
+          <mat-icon>grid_view</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          [class.active]="layout() === 'list'"
+          (click)="layout.set('list')"
+          matTooltip="List View"
+        >
+          <mat-icon>view_list</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          [class.active]="layout() === 'compact'"
+          (click)="layout.set('compact')"
+          matTooltip="Compact View"
+        >
+          <mat-icon>view_compact</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Search Bar -->
+    @if (enableSearch()) {
+      <mat-form-field class="ax-variant-selector__search" appearance="outline">
+        <mat-label>Search variants...</mat-label>
+        <input
+          matInput
+          [(ngModel)]="searchTerm"
+          placeholder="Search by SKU, name, or attributes"
+        />
+        <button
+          mat-icon-button
+          matSuffix
+          (click)="clearSearch()"
+          *ngIf="searchTerm()"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+        <mat-icon matPrefix>search</mat-icon>
+      </mat-form-field>
+    }
+
+    <!-- Attribute Filters -->
+    @if (showAttributeFilters() && availableAttributes().length > 0) {
+      <div class="ax-variant-selector__filters">
+        @for (attr of availableAttributes(); track attr) {
+          <div class="ax-variant-selector__filter-group">
+            <label class="ax-variant-selector__filter-label">
+              {{ formatAttributeKey(attr) }}:
+            </label>
+            <mat-chip-listbox class="ax-variant-selector__filter-chips">
+              @for (value of attributeValues().get(attr) || []; track value) {
+                <mat-chip-option
+                  [selected]="isAttributeFilterActive(attr, value)"
+                  (click)="applyAttributeFilter(attr, value)"
+                >
+                  {{ value }}
+                </mat-chip-option>
+              }
+            </mat-chip-listbox>
+          </div>
+        }
+
+        @if (attributeFilters().size > 0) {
+          <button
+            mat-stroked-button
+            color="warn"
+            (click)="clearAttributeFilters()"
+            class="ax-variant-selector__clear-filters"
+          >
+            <mat-icon>clear</mat-icon>
+            Clear Filters
+          </button>
+        }
+      </div>
+    }
+
+    <!-- Selection Summary -->
+    @if (hasSelection()) {
+      <div class="ax-variant-selector__selection-summary">
+        <span class="ax-variant-selector__selection-count">
+          {{ selectedCount() }} variant(s) selected
+        </span>
+        @if (allowMultiple()) {
+          <span class="ax-variant-selector__selection-quantity">
+            Total quantity: {{ totalSelectedQuantity() }}
+          </span>
+        }
+        <button mat-button color="warn" (click)="clearSelection()">
+          Clear Selection
+        </button>
+      </div>
+    }
+  </div>
+
+  <!-- Variants Display -->
+  <div class="ax-variant-selector__body">
+    @if (filteredVariants().length === 0) {
+      <!-- Empty State -->
+      <div class="ax-variant-selector__empty">
+        <mat-icon class="ax-variant-selector__empty-icon">inventory_2</mat-icon>
+        <p class="ax-variant-selector__empty-message">
+          No variants found matching your criteria
+        </p>
+        @if (searchTerm() || attributeFilters().size > 0) {
+          <button
+            mat-stroked-button
+            (click)="clearSearch(); clearAttributeFilters()"
+          >
+            Clear All Filters
+          </button>
+        }
+      </div>
+    } @else {
+      <!-- Grid Layout -->
+      @if (layout() === 'grid') {
+        <div class="ax-variant-selector__grid">
+          @for (
+            variant of filteredVariants();
+            track trackByVariantSku($index, variant)
+          ) {
+            <mat-card
+              class="ax-variant-card"
+              [class.ax-variant-card--selected]="isSelected(variant)"
+              [class.ax-variant-card--disabled]="!canSelectVariant(variant)"
+              (click)="toggleVariant(variant)"
+            >
+              <!-- Variant Image -->
+              @if (showImages() && variant.imageUrl) {
+                <img
+                  mat-card-image
+                  [src]="variant.imageUrl"
+                  [alt]="variant.name"
+                  class="ax-variant-card__image"
+                />
+              } @else if (showImages()) {
+                <div class="ax-variant-card__image-placeholder">
+                  <mat-icon>image</mat-icon>
+                </div>
+              }
+
+              <!-- Selection Indicator -->
+              <div class="ax-variant-card__select-indicator">
+                @if (allowMultiple()) {
+                  <mat-checkbox
+                    [checked]="isSelected(variant)"
+                    [disabled]="!canSelectVariant(variant)"
+                    (click)="$event.stopPropagation()"
+                    (change)="toggleVariant(variant)"
+                  ></mat-checkbox>
+                } @else {
+                  <mat-radio-button
+                    [checked]="isSelected(variant)"
+                    [disabled]="!canSelectVariant(variant)"
+                    (click)="$event.stopPropagation()"
+                  ></mat-radio-button>
+                }
+              </div>
+
+              <mat-card-content>
+                <!-- Variant Name & SKU -->
+                <h4 class="ax-variant-card__name">{{ variant.name }}</h4>
+                <p class="ax-variant-card__sku">SKU: {{ variant.sku }}</p>
+
+                <!-- Attributes -->
+                <div class="ax-variant-card__attributes">
+                  {{ getAttributeDisplay(variant) }}
+                </div>
+
+                <!-- Price -->
+                @if (showPrice()) {
+                  <div class="ax-variant-card__price">
+                    {{ formatPrice(variant.price) }}
+                  </div>
+                }
+
+                <!-- Stock Badge -->
+                @if (showStock()) {
+                  <div
+                    class="ax-variant-card__stock-badge"
+                    [ngClass]="getStockBadgeClass(variant)"
+                  >
+                    {{ getStockBadgeText(variant) }}
+                  </div>
+                }
+
+                <!-- Quantity Input (for selected variants in multi-select mode) -->
+                @if (allowMultiple() && isSelected(variant)) {
+                  <mat-form-field
+                    class="ax-variant-card__quantity"
+                    appearance="outline"
+                  >
+                    <mat-label>Quantity</mat-label>
+                    <input
+                      matInput
+                      type="number"
+                      [value]="getSelectedQuantity(variant)"
+                      [max]="variant.stockLevel"
+                      min="1"
+                      (click)="$event.stopPropagation()"
+                      (input)="
+                        updateVariantQuantity(
+                          variant.sku,
+                          +$any($event.target).value
+                        )
+                      "
+                    />
+                  </mat-form-field>
+                }
+              </mat-card-content>
+
+              <mat-card-actions>
+                @if (enableQuickView()) {
+                  <button
+                    mat-button
+                    (click)="$event.stopPropagation(); openQuickView(variant)"
+                  >
+                    <mat-icon>visibility</mat-icon>
+                    Quick View
+                  </button>
+                }
+              </mat-card-actions>
+            </mat-card>
+          }
+        </div>
+      }
+
+      <!-- List Layout -->
+      @if (layout() === 'list') {
+        <table
+          mat-table
+          [dataSource]="filteredVariants()"
+          class="ax-variant-selector__table"
+        >
+          <!-- Selection Column -->
+          <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef>Select</th>
+            <td mat-cell *matCellDef="let variant">
+              @if (allowMultiple()) {
+                <mat-checkbox
+                  [checked]="isSelected(variant)"
+                  [disabled]="!canSelectVariant(variant)"
+                  (change)="toggleVariant(variant)"
+                ></mat-checkbox>
+              } @else {
+                <mat-radio-button
+                  [checked]="isSelected(variant)"
+                  [disabled]="!canSelectVariant(variant)"
+                  (change)="toggleVariant(variant)"
+                ></mat-radio-button>
+              }
+            </td>
+          </ng-container>
+
+          <!-- Image Column -->
+          <ng-container matColumnDef="image">
+            <th mat-header-cell *matHeaderCellDef>Image</th>
+            <td mat-cell *matCellDef="let variant">
+              @if (showImages() && variant.imageUrl) {
+                <img
+                  [src]="variant.imageUrl"
+                  [alt]="variant.name"
+                  class="ax-variant-table__thumbnail"
+                />
+              } @else if (showImages()) {
+                <div class="ax-variant-table__thumbnail-placeholder">
+                  <mat-icon>image</mat-icon>
+                </div>
+              }
+            </td>
+          </ng-container>
+
+          <!-- Name & SKU Column -->
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Name / SKU</th>
+            <td mat-cell *matCellDef="let variant">
+              <div class="ax-variant-table__name-cell">
+                <span class="ax-variant-table__name">{{ variant.name }}</span>
+                <span class="ax-variant-table__sku">{{ variant.sku }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Attributes Column -->
+          <ng-container matColumnDef="attributes">
+            <th mat-header-cell *matHeaderCellDef>Attributes</th>
+            <td mat-cell *matCellDef="let variant">
+              {{ getAttributeDisplay(variant) }}
+            </td>
+          </ng-container>
+
+          <!-- Price Column -->
+          <ng-container matColumnDef="price">
+            <th mat-header-cell *matHeaderCellDef>Price</th>
+            <td mat-cell *matCellDef="let variant">
+              @if (showPrice()) {
+                {{ formatPrice(variant.price) }}
+              }
+            </td>
+          </ng-container>
+
+          <!-- Stock Column -->
+          <ng-container matColumnDef="stock">
+            <th mat-header-cell *matHeaderCellDef>Stock</th>
+            <td mat-cell *matCellDef="let variant">
+              @if (showStock()) {
+                <span
+                  class="ax-variant-table__stock-badge"
+                  [ngClass]="getStockBadgeClass(variant)"
+                >
+                  {{ getStockBadgeText(variant) }}
+                </span>
+              }
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let variant">
+              @if (allowMultiple() && isSelected(variant)) {
+                <mat-form-field
+                  class="ax-variant-table__quantity"
+                  appearance="outline"
+                >
+                  <mat-label>Qty</mat-label>
+                  <input
+                    matInput
+                    type="number"
+                    [value]="getSelectedQuantity(variant)"
+                    [max]="variant.stockLevel"
+                    min="1"
+                    (input)="
+                      updateVariantQuantity(
+                        variant.sku,
+                        +$any($event.target).value
+                      )
+                    "
+                  />
+                </mat-form-field>
+              }
+              @if (enableQuickView()) {
+                <button
+                  mat-icon-button
+                  (click)="openQuickView(variant)"
+                  matTooltip="Quick View"
+                >
+                  <mat-icon>visibility</mat-icon>
+                </button>
+              }
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr
+            mat-row
+            *matRowDef="let row; columns: displayedColumns"
+            [class.ax-variant-table__row--selected]="isSelected(row)"
+            [class.ax-variant-table__row--disabled]="!canSelectVariant(row)"
+          ></tr>
+        </table>
+      }
+
+      <!-- Compact Layout -->
+      @if (layout() === 'compact') {
+        <mat-selection-list class="ax-variant-selector__compact">
+          @for (
+            variant of filteredVariants();
+            track trackByVariantSku($index, variant)
+          ) {
+            <mat-list-option
+              (click)="toggleVariant(variant)"
+              [class.selected]="isSelected(variant)"
+              [class.disabled]="!canSelectVariant(variant)"
+              class="ax-variant-compact"
+            >
+              <div class="ax-variant-compact__content">
+                <!-- Image Thumbnail -->
+                @if (showImages() && variant.imageUrl) {
+                  <img
+                    [src]="variant.imageUrl"
+                    [alt]="variant.name"
+                    class="ax-variant-compact__thumbnail"
+                  />
+                } @else if (showImages()) {
+                  <div class="ax-variant-compact__thumbnail-placeholder">
+                    <mat-icon>image</mat-icon>
+                  </div>
+                }
+
+                <!-- Details -->
+                <div class="ax-variant-compact__details">
+                  <span class="ax-variant-compact__name">{{
+                    variant.name
+                  }}</span>
+                  <span class="ax-variant-compact__attributes">
+                    {{ getAttributeDisplay(variant) }}
+                  </span>
+                  <span class="ax-variant-compact__meta">
+                    @if (showPrice()) {
+                      <span class="ax-variant-compact__price">{{
+                        formatPrice(variant.price)
+                      }}</span>
+                    }
+                    @if (showStock()) {
+                      <span
+                        class="ax-variant-compact__stock"
+                        [ngClass]="getStockBadgeClass(variant)"
+                      >
+                        {{ getStockBadgeText(variant) }}
+                      </span>
+                    }
+                  </span>
+                </div>
+
+                <!-- Actions -->
+                <div class="ax-variant-compact__actions">
+                  @if (allowMultiple() && isSelected(variant)) {
+                    <input
+                      type="number"
+                      class="ax-variant-compact__quantity-input"
+                      [value]="getSelectedQuantity(variant)"
+                      [max]="variant.stockLevel"
+                      min="1"
+                      (click)="$event.stopPropagation()"
+                      (input)="
+                        updateVariantQuantity(
+                          variant.sku,
+                          +$any($event.target).value
+                        )
+                      "
+                    />
+                  }
+                  @if (enableQuickView()) {
+                    <button
+                      mat-icon-button
+                      (click)="$event.stopPropagation(); openQuickView(variant)"
+                      matTooltip="Quick View"
+                    >
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                  }
+                </div>
+              </div>
+            </mat-list-option>
+          }
+        </mat-selection-list>
+      }
+    }
+  </div>
+
+  <!-- Quick View Modal -->
+  @if (quickViewData()) {
+    <div class="ax-variant-quickview-overlay" (click)="closeQuickView()">
+      <div class="ax-variant-quickview" (click)="$event.stopPropagation()">
+        <div class="ax-variant-quickview__header">
+          <h2>Variant Details</h2>
+          <button mat-icon-button (click)="closeQuickView()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        @if (quickViewData()?.variant; as variant) {
+          <div class="ax-variant-quickview__content">
+            @if (showImages() && variant.imageUrl) {
+              <img
+                [src]="variant.imageUrl"
+                [alt]="variant.name"
+                class="ax-variant-quickview__image"
+              />
+            }
+
+            <div class="ax-variant-quickview__details">
+              <h3>{{ variant.name }}</h3>
+              <p class="ax-variant-quickview__sku">SKU: {{ variant.sku }}</p>
+
+              <div class="ax-variant-quickview__attributes">
+                <h4>Attributes</h4>
+                @for (attr of availableAttributes(); track attr) {
+                  @if (variant.attributes[attr]) {
+                    <div class="ax-variant-quickview__attribute">
+                      <strong>{{ formatAttributeKey(attr) }}:</strong>
+                      <span>{{ variant.attributes[attr] }}</span>
+                    </div>
+                  }
+                }
+              </div>
+
+              @if (showPrice()) {
+                <div class="ax-variant-quickview__price">
+                  <h4>Price</h4>
+                  <p>{{ formatPrice(variant.price) }}</p>
+                </div>
+              }
+
+              @if (showStock()) {
+                <div class="ax-variant-quickview__stock">
+                  <h4>Stock Availability</h4>
+                  <span
+                    class="ax-variant-quickview__stock-badge"
+                    [ngClass]="getStockBadgeClass(variant)"
+                  >
+                    {{ getStockBadgeText(variant) }}
+                  </span>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="ax-variant-quickview__actions">
+            @if (canSelectVariant(variant)) {
+              <button
+                mat-raised-button
+                color="primary"
+                (click)="toggleVariant(variant); closeQuickView()"
+              >
+                @if (isSelected(variant)) {
+                  Deselect
+                } @else {
+                  Select Variant
+                }
+              </button>
+            } @else {
+              <button mat-stroked-button disabled>Unavailable</button>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

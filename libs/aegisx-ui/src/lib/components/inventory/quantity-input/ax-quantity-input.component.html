@@ -1,0 +1,108 @@
+<div
+  class="ax-quantity-input"
+  [class.ax-quantity-input--disabled]="disabled()"
+  [class.ax-quantity-input--error]="!isValid() && isTouched()"
+>
+  <div class="ax-quantity-input__controls">
+    <!-- Decrement Button -->
+    @if (showStepper()) {
+      <button
+        type="button"
+        class="ax-quantity-input__stepper ax-quantity-input__stepper--decrement"
+        [disabled]="!canDecrement()"
+        (click)="decrement()"
+        aria-label="Decrease quantity"
+        mat-icon-button
+      >
+        <mat-icon>remove</mat-icon>
+      </button>
+    }
+
+    <!-- Input Field -->
+    <input
+      type="number"
+      class="ax-quantity-input__field"
+      [value]="inputValue()"
+      [min]="convertFromBaseUnit(min(), selectedUnit())"
+      [max]="convertFromBaseUnit(max(), selectedUnit())"
+      [step]="step()"
+      [disabled]="disabled()"
+      [attr.aria-label]="'Quantity in ' + selectedUnit()"
+      (input)="onInputChange($event)"
+      (blur)="onBlur()"
+    />
+
+    <!-- Increment Button -->
+    @if (showStepper()) {
+      <button
+        type="button"
+        class="ax-quantity-input__stepper ax-quantity-input__stepper--increment"
+        [disabled]="!canIncrement()"
+        (click)="increment()"
+        aria-label="Increase quantity"
+        mat-icon-button
+      >
+        <mat-icon>add</mat-icon>
+      </button>
+    }
+
+    <!-- Unit Selector -->
+    <mat-form-field class="ax-quantity-input__unit-select" appearance="outline">
+      <mat-select
+        [value]="selectedUnit()"
+        [disabled]="disabled()"
+        (selectionChange)="onUnitChange($event.value)"
+        aria-label="Select unit"
+      >
+        @for (unit of availableUnits(); track unit.code) {
+          <mat-option [value]="unit.code">
+            {{ unit.label }}
+            @if (unit.symbol) {
+              <span class="unit-symbol">({{ unit.symbol }})</span>
+            }
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <!-- Preset Buttons -->
+  @if (showPresets() && !disabled()) {
+    <div class="ax-quantity-input__presets">
+      <button
+        type="button"
+        class="ax-quantity-input__preset"
+        (click)="multiplyValue(10)"
+        mat-stroked-button
+        aria-label="Multiply by 10"
+      >
+        ×10
+      </button>
+      <button
+        type="button"
+        class="ax-quantity-input__preset"
+        (click)="multiplyValue(100)"
+        mat-stroked-button
+        aria-label="Multiply by 100"
+      >
+        ×100
+      </button>
+    </div>
+  }
+
+  <!-- Conversion Hint -->
+  @if (conversionHint()) {
+    <div class="ax-quantity-input__hint">
+      {{ conversionHint() }}
+    </div>
+  }
+
+  <!-- Validation Errors -->
+  @if (!isValid() && isTouched()) {
+    <div class="ax-quantity-input__errors">
+      @for (error of validationErrors(); track error.type) {
+        <span class="ax-quantity-input__error">{{ error.message }}</span>
+      }
+    </div>
+  }
+</div>
