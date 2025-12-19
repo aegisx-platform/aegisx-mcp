@@ -1,6 +1,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { FontManagerService } from './font-manager.service';
+import {
+  ChartService,
+  ChartType,
+  ChartData,
+  ChartOptions,
+} from './chart.service';
 
 // Use server-side PdfPrinter instead of client-side PdfMake
 const PdfPrinter = require('pdfmake');
@@ -13,6 +19,17 @@ export interface PdfExportField {
   width?: number | 'auto' | '*';
   align?: 'left' | 'center' | 'right';
   bold?: boolean;
+}
+
+export interface PdfChartConfig {
+  type: ChartType;
+  data: ChartData;
+  options?: ChartOptions;
+  position: 'before' | 'after' | 'top' | 'bottom';
+  width?: number;
+  height?: number;
+  alignment?: 'left' | 'center' | 'right';
+  margin?: [number, number, number, number];
 }
 
 export interface PdfExportOptions {
@@ -34,6 +51,7 @@ export interface PdfExportOptions {
   groupBy?: string;
   logo?: string; // Base64 or path
   preview?: boolean; // For server-side preview generation
+  charts?: PdfChartConfig[]; // NEW: Chart support
 }
 
 export interface PdfTemplate {
@@ -67,6 +85,7 @@ export class PDFMakeService {
   private readonly templates: Map<string, PdfTemplate>;
   private readonly previewDir: string;
   private fontManager: FontManagerService;
+  private chartService: ChartService;
   private fontsInitialized: boolean = false;
   private static loggingInitialized = false;
 
@@ -74,6 +93,7 @@ export class PDFMakeService {
     this.templates = new Map();
     this.previewDir = path.join(process.cwd(), 'temp', 'pdf-previews');
     this.fontManager = new FontManagerService();
+    this.chartService = new ChartService(); // Initialize chart service
     this.initializeTemplates();
     this.ensurePreviewDir();
     this.initializeFonts();
@@ -123,7 +143,12 @@ export class PDFMakeService {
       // Ensure fonts are initialized
       await this.waitForFonts();
 
-      const docDefinition = this.createDocumentDefinition(options);
+      // Validate chart configurations
+      if (options.charts && options.charts.length > 0) {
+        this.validateChartConfigs(options.charts);
+      }
+
+      const docDefinition = await this.createDocumentDefinition(options);
 
       return new Promise((resolve, reject) => {
         try {
@@ -381,7 +406,9 @@ export class PDFMakeService {
   /**
    * Create document definition for PDFMake
    */
-  private createDocumentDefinition(options: PdfExportOptions): any {
+  private async createDocumentDefinition(
+    options: PdfExportOptions,
+  ): Promise<any> {
     const {
       data,
       fields,
@@ -395,6 +422,7 @@ export class PDFMakeService {
       showSummary = true,
       groupBy,
       logo,
+      charts = [], // NEW: Chart configurations
     } = options;
 
     // Get template configuration
@@ -410,6 +438,7 @@ export class PDFMakeService {
       usingTemplate: templateConfig.name,
       tableHeaderStyle: templateConfig.styles?.tableHeader,
       tableCellStyle: templateConfig.styles?.tableCell,
+      hasCharts: charts.length > 0,
     });
 
     // Auto-determine orientation based on field count
@@ -430,6 +459,17 @@ export class PDFMakeService {
     // Add title section
     content.push(this.createTitleSection(title, subtitle));
 
+    // Add charts at 'top' or 'before' position
+    const topCharts = charts.filter(
+      (c) => c.position === 'top' || c.position === 'before',
+    );
+    if (topCharts.length > 0) {
+      for (const chartConfig of topCharts) {
+        const chartElement = await this.createChartElement(chartConfig);
+        content.push(chartElement);
+      }
+    }
+
     // Metadata will be added at the bottom of content
 
     // Add data summary if enabled
@@ -442,6 +482,17 @@ export class PDFMakeService {
       content.push(...this.createGroupedTable(data, fields, groupBy));
     } else {
       content.push(this.createDataTable(data, fields));
+    }
+
+    // Add charts at 'bottom' or 'after' position
+    const bottomCharts = charts.filter(
+      (c) => c.position === 'bottom' || c.position === 'after',
+    );
+    if (bottomCharts.length > 0) {
+      for (const chartConfig of bottomCharts) {
+        const chartElement = await this.createChartElement(chartConfig);
+        content.push(chartElement);
+      }
     }
 
     // Metadata will be added to footer only
@@ -1172,6 +1223,70 @@ export class PDFMakeService {
     });
 
     return optimizedStyles;
+  }
+
+  /**
+   * Create chart element for PDF
+   */
+  private async createChartElement(config: PdfChartConfig): Promise<any> {
+    // 1. Generate chart as PNG buffer
+    const chartBuffer = await this.chartService.generateChart(
+      config.type,
+      config.data,
+      config.options || {},
+    );
+
+    // 2. Convert to base64
+    const base64Image = chartBuffer.toString('base64');
+
+    // 3. Create PDFMake image element
+    return {
+      image: `data:image/png;base64,${base64Image}`,
+      width: config.width || 500,
+      height: config.height || 300,
+      alignment: config.alignment || 'center',
+      margin: config.margin || [0, 10, 0, 20],
+    };
+  }
+
+  /**
+   * Validate chart configurations
+   */
+  private validateChartConfigs(charts: PdfChartConfig[]): void {
+    // Limit number of charts
+    if (charts.length > 10) {
+      throw new Error('Maximum 10 charts allowed per PDF');
+    }
+
+    for (const chart of charts) {
+      // Validate chart type
+      if (!['bar', 'line', 'pie', 'doughnut'].includes(chart.type)) {
+        throw new Error(`Invalid chart type: ${chart.type}`);
+      }
+
+      // Validate data structure
+      if (!chart.data.labels || !Array.isArray(chart.data.labels)) {
+        throw new Error('Chart labels must be an array');
+      }
+
+      if (!chart.data.datasets || !Array.isArray(chart.data.datasets)) {
+        throw new Error('Chart datasets must be an array');
+      }
+
+      // Validate dimensions
+      if (chart.width && (chart.width < 100 || chart.width > 2000)) {
+        throw new Error('Chart width must be between 100 and 2000');
+      }
+
+      if (chart.height && (chart.height < 100 || chart.height > 1500)) {
+        throw new Error('Chart height must be between 100 and 1500');
+      }
+
+      // Limit data points
+      if (chart.data.labels.length > 100) {
+        throw new Error('Maximum 100 data points per chart');
+      }
+    }
   }
 
   /**

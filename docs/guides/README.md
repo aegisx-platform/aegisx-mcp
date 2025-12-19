@@ -47,6 +47,12 @@ Unit testing, integration testing, and E2E testing guides.
 - **[API Testing](./testing/api-testing.md)** - Backend API testing patterns
 - **[Integration Tests](./testing/integration-tests.md)** - Full-stack integration testing
 
+### 📊 [Reports & Exports](./reports/README.md)
+
+Guides for generating reports, PDF exports, and data visualization.
+
+- **[PDF Charts Guide](./reports/pdf-charts-guide.md)** - Add visual analytics to PDF reports with charts
+
 ## 🎯 Common Tasks
 
 ### I want to...
@@ -59,6 +65,7 @@ Unit testing, integration testing, and E2E testing guides.
 | Set up local development | [Multi-Instance Setup](./infrastructure/multi-instance-setup.md)                |
 | Write tests              | [Testing Strategy](./testing/testing-strategy.md)                               |
 | Manage git branches      | [Git Flow Guide](./infrastructure/version-management/git-flow-release-guide.md) |
+| Generate PDF with charts | [PDF Charts Guide](./reports/pdf-charts-guide.md)                               |
 
 ## 📖 Guide Format
 
