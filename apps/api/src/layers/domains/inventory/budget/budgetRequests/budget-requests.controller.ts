@@ -1350,4 +1350,37 @@ export class BudgetRequestsController {
       return reply.code(400).error('DELETE_ALL_ITEMS_FAILED', error.message);
     }
   }
+
+  /**
+   * Get budget items status for dashboard
+   * GET /budgetRequests/:id/items-status
+   */
+  async getItemsStatus(
+    request: FastifyRequest<{
+      Params: Static<typeof BudgetRequestsIdParamSchema>;
+    }>,
+    reply: FastifyReply,
+  ) {
+    const { id } = request.params;
+
+    request.log.info(
+      { budgetRequestId: id },
+      'Getting budget items status for dashboard',
+    );
+
+    try {
+      const result = await this.budgetRequestsService.getItemsStatus(id);
+
+      return reply.success(
+        result,
+        'Budget items status retrieved successfully',
+      );
+    } catch (error: any) {
+      request.log.error(
+        { error: error.message, budgetRequestId: id },
+        'Failed to get budget items status',
+      );
+      return reply.code(400).error('GET_ITEMS_STATUS_FAILED', error.message);
+    }
+  }
 }

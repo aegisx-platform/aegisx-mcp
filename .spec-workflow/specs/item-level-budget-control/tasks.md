@@ -159,16 +159,16 @@
   - _Requirements: Requirement 5_
   - _Prompt: Implement the task for spec item-level-budget-control, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Angular Dashboard Developer with data visualization expertise | Task: Create budget dashboard component following Requirement 5, implementing summary cards, control type breakdown, filterable item table with dual progress bars, and color-coded status indicators | Restrictions: Must use AxTableComponent with virtual scrolling for performance (1000+ items), use AxProgressComponent for dual bars (quantity + amount), use computed signals for filtering and summary calculations, implement color transitions (green less than 80%, yellow 80-99%, red 100% or more), use AxCardComponent for summary cards, ensure responsive layout | \_Leverage: AxTableComponent, AxProgressComponent, AxBadgeComponent, AxCardComponent from AegisX UI, existing dashboard patterns | \_Requirements: Requirement 5 (Budget Dashboard with Item Status) | Success: Summary cards display correct totals (budget/used/remaining), control type breakdown shows item counts, item table shows all items with filterable columns, dual progress bars display both quantity and amount usage, colors change based on usage percentage, status badges show exceeded/warning/normal, filters work (control type dropdown, status dropdown), table performance good with 1000+ items | Instructions: Update tasks.md [-], log dashboard component with signals and filtering logic, mark complete [x]_
 
-- [ ] 5.2 Add API endpoint for dashboard data
-  - File: `apps/api/src/layers/domains/inventory/budget/budgetRequests/budget-requests.controller.ts` and `budget-requests.service.ts`
-  - Add GET endpoint: `/api/inventory/budget/budget-requests/:id/items-status`
-  - Return aggregated data: item details, usage percentages, status, related PR IDs
-  - Calculate usage percentages for current quarter
-  - Determine status based on usage (normal less than 80%, warning 80-99%, exceeded 100% or more)
+- [x] 5.2 Add API endpoint for dashboard data ✅ (Completed 2025-12-20)
+  - File: `apps/api/src/layers/domains/inventory/budget/budgetRequests/budget-requests.controller.ts`, `budget-requests.service.ts`, `budget-requests.schemas.ts`, `budget-requests.route.ts`
+  - Added GET endpoint: `/api/inventory/budget/budget-requests/:id/items-status`
+  - Returns aggregated data: item details, usage percentages, status, related PR IDs
+  - Calculates usage percentages for current quarter using getCurrentQuarter()
+  - Determines status based on usage (normal <80%, warning 80-99%, exceeded 100%+)
   - Purpose: Provide dashboard with aggregated budget status data
-  - _Leverage: Existing budget requests controller and service patterns_
+  - _Leverage: Existing budget requests controller and service patterns, getCurrentQuarter() helper_
   - _Requirements: Requirement 5_
-  - _Prompt: Implement the task for spec item-level-budget-control, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Backend API Developer with SQL aggregation expertise | Task: Create dashboard data endpoint following Requirement 5, implementing aggregated query that calculates usage percentages, determines status, and returns item details with related PR IDs | Restrictions: Must use efficient SQL query with JOINs and aggregations, calculate usage as (purchased_qty / planned_qty \* 100), determine status with CASE WHEN (normal/warning/exceeded), include related PR IDs using array aggregation, add TypeBox schema for response validation, follow existing controller/service patterns | \_Leverage: apps/api/src/layers/domains/inventory/budget/budgetRequests/ for controller and service patterns | \_Requirements: Requirement 5 (Budget Dashboard with Item Status) | Success: GET endpoint responds with correct data structure, usage percentages calculated accurately, status correctly categorized (normal/warning/exceeded), related PR IDs included as array, query performance acceptable (under 500ms for 1000 items), response schema validated with TypeBox | Instructions: Update tasks.md [-], log endpoint implementation with SQL query and response schema, mark complete [x]_
+  - _Implementation: Created BudgetItemStatusSchema and BudgetItemsStatusResponseSchema with comprehensive TypeBox validation. Added getItemsStatus() service method with efficient Knex query using CASE statements for quarterly data selection. Calculates usage percentages for both quantity and amount, determines status based on max usage percentage. Returns summary statistics (total/normal/warning/exceeded counts, total amounts, overall usage %). Added controller method with error handling. Registered GET route with authentication and read permission check._
 
 ## Phase 6: Testing and Documentation
 

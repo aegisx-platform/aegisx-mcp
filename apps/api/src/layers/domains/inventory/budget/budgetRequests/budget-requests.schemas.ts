@@ -321,6 +321,103 @@ export const CheckBudgetAvailabilityResponseSchema = Type.Object({
   warnings: Type.Array(Type.String()),
 });
 
+// ===== BUDGET DASHBOARD ENDPOINT SCHEMAS =====
+
+// Item status schema for dashboard
+export const BudgetItemStatusSchema = Type.Object({
+  item_id: Type.Number({
+    description: 'Budget request item ID',
+  }),
+  drug_code: Type.Optional(
+    Type.String({
+      description: 'Drug code/TMT',
+    }),
+  ),
+  drug_name: Type.String({
+    description: 'Drug or item name',
+  }),
+  generic_name: Type.Optional(
+    Type.String({
+      description: 'Generic drug name',
+    }),
+  ),
+  control_type: Type.Union(
+    [Type.Literal('NONE'), Type.Literal('SOFT'), Type.Literal('HARD')],
+    {
+      description: 'Budget control type',
+    },
+  ),
+  quantity_control_type: Type.Union([
+    Type.Literal('NONE'),
+    Type.Literal('SOFT'),
+    Type.Literal('HARD'),
+  ]),
+  price_control_type: Type.Union([
+    Type.Literal('NONE'),
+    Type.Literal('SOFT'),
+    Type.Literal('HARD'),
+  ]),
+  quantity_variance_percent: Type.Number({
+    description: 'Allowed quantity variance percentage',
+  }),
+  price_variance_percent: Type.Number({
+    description: 'Allowed price variance percentage',
+  }),
+  planned_quantity: Type.Number({
+    description: 'Planned quantity for current quarter',
+  }),
+  purchased_quantity: Type.Number({
+    description: 'Already purchased quantity',
+  }),
+  remaining_quantity: Type.Number({
+    description: 'Remaining quantity available',
+  }),
+  quantity_usage_percent: Type.Number({
+    description: 'Percentage of quantity used (0-100+)',
+  }),
+  planned_amount: Type.Number({
+    description: 'Planned budget amount',
+  }),
+  used_amount: Type.Number({
+    description: 'Used budget amount',
+  }),
+  remaining_amount: Type.Number({
+    description: 'Remaining budget amount',
+  }),
+  amount_usage_percent: Type.Number({
+    description: 'Percentage of budget used (0-100+)',
+  }),
+  status: Type.Union(
+    [Type.Literal('normal'), Type.Literal('warning'), Type.Literal('exceeded')],
+    {
+      description:
+        'Budget status: normal (<80%), warning (80-99%), exceeded (100%+)',
+    },
+  ),
+  related_pr_ids: Type.Array(Type.Number(), {
+    description: 'Purchase request IDs that used this budget item',
+  }),
+});
+
+export const BudgetItemsStatusResponseSchema = Type.Object({
+  budget_request_id: Type.Number(),
+  fiscal_year: Type.Number(),
+  current_quarter: Type.Number({
+    description: 'Current quarter (1-4)',
+  }),
+  items: Type.Array(BudgetItemStatusSchema),
+  summary: Type.Object({
+    total_items: Type.Number(),
+    normal_items: Type.Number(),
+    warning_items: Type.Number(),
+    exceeded_items: Type.Number(),
+    total_planned_amount: Type.Number(),
+    total_used_amount: Type.Number(),
+    total_remaining_amount: Type.Number(),
+    overall_usage_percent: Type.Number(),
+  }),
+});
+
 // Export types
 export type BudgetRequests = Static<typeof BudgetRequestsSchema>;
 export type CreateBudgetRequests = Static<typeof CreateBudgetRequestsSchema>;
@@ -331,6 +428,10 @@ export type GetBudgetRequestsQuery = Static<
 >;
 export type ListBudgetRequestsQuery = Static<
   typeof ListBudgetRequestsQuerySchema
+>;
+export type BudgetItemStatus = Static<typeof BudgetItemStatusSchema>;
+export type BudgetItemsStatusResponse = Static<
+  typeof BudgetItemsStatusResponseSchema
 >;
 
 // Partial types for field selection

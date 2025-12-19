@@ -19,6 +19,7 @@ import {
   CheckDrugsInPlanBodySchema,
   CheckDrugsInPlanResponseSchema,
   CheckBudgetAvailabilityResponseSchema,
+  BudgetItemsStatusResponseSchema,
 } from './budget-requests.schemas';
 import {
   ApiErrorResponseSchema,
@@ -890,5 +891,34 @@ export async function budgetRequestsRoutes(
       fastify.verifyPermission('budgetRequests', 'delete'),
     ],
     handler: controller.deleteItem.bind(controller),
+  });
+
+  // Get budget items status for dashboard
+  fastify.get('/:id/items-status', {
+    schema: {
+      tags: ['Inventory: Budget Requests'],
+      summary: 'Get budget items status for dashboard',
+      description:
+        'Get comprehensive status for all items in a budget request including usage percentages, control settings, and status determination (normal/warning/exceeded). Used for budget dashboard visualization.',
+      params: BudgetRequestsIdParamSchema,
+      response: {
+        200: Type.Object({
+          success: Type.Boolean(),
+          data: BudgetItemsStatusResponseSchema,
+          message: Type.String(),
+          meta: ApiMetaSchema,
+        }),
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        404: SchemaRefs.NotFound,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [
+      fastify.authenticate,
+      fastify.verifyPermission('budgetRequests', 'read'),
+    ],
+    handler: controller.getItemsStatus.bind(controller),
   });
 }

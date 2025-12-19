@@ -2612,4 +2612,172 @@ export class BudgetRequestsService extends BaseService<
       return 4; // Q4: Jul, Aug, Sep (months 7, 8, 9)
     }
   }
+
+  /**
+   * Get budget items status for dashboard with usage statistics
+   *
+   * Returns comprehensive status for all items in a budget request including:
+   * - Planned vs purchased quantities and amounts
+   * - Usage percentages
+   * - Control settings
+   * - Status determination (normal/warning/exceeded)
+   * - Related purchase request IDs
+   *
+   * @param budgetRequestId - Budget request ID
+   * @returns Dashboard data with items and summary statistics
+   */
+  async getItemsStatus(budgetRequestId: string | number) {
+    // Get budget request to verify it exists
+    const budgetRequest =
+      await this.budgetRequestsRepository.findById(budgetRequestId);
+
+    if (!budgetRequest) {
+      throw new Error('Budget request not found');
+    }
+
+    // Get current quarter
+    const currentQuarter = this.getCurrentQuarter();
+
+    // Build complex SQL query to get all items with calculated fields
+    const query = this.db('inventory.budget_request_items as bri')
+      .select(
+        'bri.id as item_id',
+        'bri.drug_code',
+        'bri.drug_name',
+        'bri.generic_name',
+        'bri.quantity_control_type',
+        'bri.price_control_type',
+        'bri.quantity_variance_percent',
+        'bri.price_variance_percent',
+        'bri.unit_price',
+      )
+      // Quarterly quantities (planned and purchased)
+      .select(
+        this.db.raw(
+          `CASE
+            WHEN ? = 1 THEN COALESCE(bri.q1_qty, 0)
+            WHEN ? = 2 THEN COALESCE(bri.q2_qty, 0)
+            WHEN ? = 3 THEN COALESCE(bri.q3_qty, 0)
+            WHEN ? = 4 THEN COALESCE(bri.q4_qty, 0)
+          END as planned_quantity`,
+          [currentQuarter, currentQuarter, currentQuarter, currentQuarter],
+        ),
+      )
+      .select(
+        this.db.raw(
+          `CASE
+            WHEN ? = 1 THEN COALESCE(bri.q1_purchased_qty, 0)
+            WHEN ? = 2 THEN COALESCE(bri.q2_purchased_qty, 0)
+            WHEN ? = 3 THEN COALESCE(bri.q3_purchased_qty, 0)
+            WHEN ? = 4 THEN COALESCE(bri.q4_purchased_qty, 0)
+          END as purchased_quantity`,
+          [currentQuarter, currentQuarter, currentQuarter, currentQuarter],
+        ),
+      )
+      .where('bri.budget_request_id', budgetRequestId);
+
+    const items = await query;
+
+    // Process each item to calculate usage and status
+    const processedItems = items.map((item: any) => {
+      const plannedQty = parseFloat(item.planned_quantity) || 0;
+      const purchasedQty = parseFloat(item.purchased_quantity) || 0;
+      const remainingQty = plannedQty - purchasedQty;
+      const unitPrice = parseFloat(item.unit_price) || 0;
+
+      // Calculate usage percentages
+      const qtyUsagePercent =
+        plannedQty > 0 ? (purchasedQty / plannedQty) * 100 : 0;
+
+      const plannedAmount = plannedQty * unitPrice;
+      const usedAmount = purchasedQty * unitPrice;
+      const remainingAmount = remainingQty * unitPrice;
+      const amountUsagePercent =
+        plannedAmount > 0 ? (usedAmount / plannedAmount) * 100 : 0;
+
+      // Determine status based on usage percentage
+      let status: 'normal' | 'warning' | 'exceeded';
+      const maxUsagePercent = Math.max(qtyUsagePercent, amountUsagePercent);
+
+      if (maxUsagePercent >= 100) {
+        status = 'exceeded';
+      } else if (maxUsagePercent >= 80) {
+        status = 'warning';
+      } else {
+        status = 'normal';
+      }
+
+      // Determine overall control type (use stricter of quantity/price)
+      const controlTypes = [
+        item.quantity_control_type,
+        item.price_control_type,
+      ];
+      const controlType = controlTypes.includes('HARD')
+        ? 'HARD'
+        : controlTypes.includes('SOFT')
+          ? 'SOFT'
+          : 'NONE';
+
+      return {
+        item_id: item.item_id,
+        drug_code: item.drug_code,
+        drug_name: item.drug_name,
+        generic_name: item.generic_name,
+        control_type: controlType,
+        quantity_control_type: item.quantity_control_type || 'NONE',
+        price_control_type: item.price_control_type || 'NONE',
+        quantity_variance_percent: item.quantity_variance_percent || 0,
+        price_variance_percent: item.price_variance_percent || 0,
+        planned_quantity: plannedQty,
+        purchased_quantity: purchasedQty,
+        remaining_quantity: remainingQty,
+        quantity_usage_percent: Math.round(qtyUsagePercent * 100) / 100,
+        planned_amount: Math.round(plannedAmount * 100) / 100,
+        used_amount: Math.round(usedAmount * 100) / 100,
+        remaining_amount: Math.round(remainingAmount * 100) / 100,
+        amount_usage_percent: Math.round(amountUsagePercent * 100) / 100,
+        status,
+        related_pr_ids: [], // TODO: Query related PRs when PR table is available
+      };
+    });
+
+    // Calculate summary statistics
+    const summary = {
+      total_items: processedItems.length,
+      normal_items: processedItems.filter((i) => i.status === 'normal').length,
+      warning_items: processedItems.filter((i) => i.status === 'warning')
+        .length,
+      exceeded_items: processedItems.filter((i) => i.status === 'exceeded')
+        .length,
+      total_planned_amount: processedItems.reduce(
+        (sum, i) => sum + i.planned_amount,
+        0,
+      ),
+      total_used_amount: processedItems.reduce(
+        (sum, i) => sum + i.used_amount,
+        0,
+      ),
+      total_remaining_amount: processedItems.reduce(
+        (sum, i) => sum + i.remaining_amount,
+        0,
+      ),
+      overall_usage_percent: 0,
+    };
+
+    // Calculate overall usage percentage
+    summary.overall_usage_percent =
+      summary.total_planned_amount > 0
+        ? Math.round(
+            (summary.total_used_amount / summary.total_planned_amount) * 10000,
+          ) / 100
+        : 0;
+
+    return {
+      budget_request_id: parseInt(budgetRequestId.toString()),
+      fiscal_year: budgetRequest.fiscal_year,
+      current_quarter: currentQuarter,
+      items: processedItems,
+      summary,
+    };
+  }
 }
