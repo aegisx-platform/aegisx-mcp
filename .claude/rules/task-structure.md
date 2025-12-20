@@ -114,6 +114,279 @@ MANDATORY if task requires:
 5. Proceed only if approved
 ```
 
+### Model Selection Strategy (CRITICAL for Cost Optimization)
+
+**🎯 Goals:**
+
+1. ✅ **Correctness First** - Use model capable enough for the task
+2. ✅ **Cost Optimization** - Don't waste tokens on overkill models
+3. ✅ **Automatic Selection** - Claude analyzes and decides automatically
+
+**❌ Anti-Patterns:**
+
+- Using Haiku for everything to save cost (sacrifices quality)
+- Using Opus for simple tasks (wastes money)
+- Making user specify model manually (should be automatic)
+
+#### Model Selection Matrix
+
+**🟢 Haiku (Fast & Cheap) - Use when:**
+
+```
+✅ Criteria:
+- Repetitive, mechanical work
+- Clear pattern to follow
+- No architectural decisions
+- No complex logic
+- Easy to verify (grep/build/test)
+
+Examples:
+- Path/filename updates (change old paths to new)
+- Simple find & replace across files
+- Code formatting (prettier, linter)
+- Adding comments to existing code
+- File organization (move/rename)
+- Simple documentation updates
+- Following clear templates
+```
+
+**🟡 Sonnet (Balanced - Default) - Use when:**
+
+```
+✅ Criteria:
+- Requires understanding context
+- Needs architectural awareness
+- Complex logic or patterns
+- Multiple considerations
+- Trade-off decisions
+
+Examples:
+- Complete documentation rewrites
+- Architecture documentation
+- Complex refactoring
+- Multi-file coordination
+- Business logic implementation
+- API design
+- Code review
+- Context-aware updates
+```
+
+**🔴 Opus (Most Capable) - Use when:**
+
+```
+✅ Criteria:
+- High complexity
+- High risk if wrong
+- Requires deep reasoning
+- No clear pattern exists
+- Critical business impact
+
+Examples:
+- Critical security implementation
+- Complex algorithm design
+- System architecture decisions
+- Performance optimization (deep analysis)
+- Multi-domain integration
+- Debugging complex/mysterious issues
+- Novel problem solving
+```
+
+#### Decision Process
+
+**Step 1: Analyze Each Subtask**
+
+```
+Ask yourself:
+1. Complexity? (Simple/Medium/Complex)
+2. Risk if wrong? (Low/Medium/High)
+3. Creative thinking needed? (No/Some/Yes)
+4. Clear pattern exists? (Yes/Some/No)
+5. Can verify easily? (Yes/Some/No)
+```
+
+**Step 2: Select Model**
+
+```
+Simple + Low Risk + No Creative + Clear Pattern + Easy Verify = Haiku
+
+Medium complexity OR
+Some risk OR
+Some creative OR
+Need context = Sonnet
+
+Complex OR
+High risk OR
+Very creative OR
+No pattern OR
+Critical = Opus
+```
+
+**Step 3: Spawn Automatically**
+
+```
+❌ WRONG: Make user specify
+User: "spawn 5 haiku agents to update docs"
+
+✅ CORRECT: Analyze and auto-spawn
+Claude analyzes subtasks → Identifies 3 simple, 2 complex
+→ Spawns 1 Haiku agent (tasks 1-3) + 1 Sonnet agent (tasks 4-5)
+→ Reports model selection reasoning
+```
+
+#### Practical Examples
+
+**Example 1: Documentation Update (50 files)**
+
+```
+Task: "Update all documentation files with new architecture"
+
+Analysis:
+- 30 files: Simple path updates → Haiku
+- 15 files: Content needs context → Sonnet
+- 5 files: Complex architecture docs → Sonnet
+
+Execution:
+Spawn 2 agents in parallel:
+- Agent 1 (Haiku): 30 simple path updates
+- Agent 2 (Sonnet): 20 content-aware updates
+
+Cost: ~$0.05 (vs $0.20 if all Sonnet, vs $1.00 if all Opus)
+Time: Faster (parallel + right model for job)
+Quality: Same (each task gets appropriate model)
+```
+
+**Example 2: Feature Implementation**
+
+```
+Task: "Implement budget alert notifications"
+
+Subtasks:
+1. Create migration (simple schema) → Haiku
+2. Create TypeBox schema (follow pattern) → Haiku
+3. Create repository (follow pattern) → Haiku
+4. Create service (complex business logic) → Sonnet
+5. Create routes (follow pattern) → Haiku
+6. Create component (complex UI + state) → Sonnet
+7. Write tests (follow pattern) → Haiku
+
+Execution:
+- Do directly (no spawning, small task)
+- Use Haiku for 1,2,3,5,7
+- Use Sonnet for 4,6
+
+Cost: ~$0.03 (vs $0.07 if all Sonnet)
+```
+
+**Example 3: Bug Investigation**
+
+```
+Task: "System randomly slows down, find cause"
+
+Analysis:
+- Unknown complexity initially
+- High risk if wrong
+- Requires deep investigation
+
+Execution:
+- Start with Sonnet (investigation)
+- If Sonnet identifies simple fix → Switch to Haiku for fix
+- If very complex → Escalate to Opus for deep analysis
+
+Cost: Variable, but appropriate for complexity
+```
+
+#### When to Spawn Multiple Agents
+
+**DO Spawn:**
+
+```
+✅ Task has > 5 independent subtasks
+✅ Can parallelize work
+✅ Clear difficulty classification
+✅ Time-sensitive (parallel = faster)
+✅ Mixed complexity (some Haiku, some Sonnet)
+```
+
+**DON'T Spawn:**
+
+```
+❌ < 3 subtasks (overhead not worth it)
+❌ Sequential dependencies (can't parallelize)
+❌ Unclear requirements (ask user first)
+❌ Need user decisions (ask first)
+❌ All same complexity (do directly more efficient)
+```
+
+#### Cost Estimation Template
+
+```
+Before spawning, calculate:
+
+Haiku task: ~$0.001 each
+Sonnet task: ~$0.01 each
+Opus task: ~$0.05 each
+
+Example breakdown:
+- 10 Haiku tasks = $0.01
+- 3 Sonnet tasks = $0.03
+- 1 Opus task = $0.05
+Total: $0.09
+
+vs All Sonnet: 14 × $0.01 = $0.14 (56% more expensive)
+vs All Opus: 14 × $0.05 = $0.70 (678% more expensive!)
+
+Savings: $0.05 (56% cheaper than all Sonnet)
+```
+
+#### Reporting Format
+
+**When spawning agents, report:**
+
+```markdown
+📊 Task Analysis:
+
+- Total subtasks: 8
+- Simple (Haiku): 5 tasks
+- Medium (Sonnet): 2 tasks
+- Complex (Opus): 1 task
+
+🚀 Execution Plan:
+Spawning 3 agents in parallel:
+
+- Agent 1 (Haiku): Tasks 1,2,3,4,5 → Path updates
+- Agent 2 (Sonnet): Tasks 6,7 → Architecture docs
+- Agent 3 (Opus): Task 8 → Security review
+
+💰 Cost Estimate:
+
+- Haiku: $0.005 (5 tasks)
+- Sonnet: $0.020 (2 tasks)
+- Opus: $0.050 (1 task)
+- **Total: $0.075** (vs $0.40 if all Opus → 81% savings)
+
+⏱️ Expected: ~10 minutes (parallel execution)
+```
+
+#### Self-Check Questions
+
+```
+Before selecting model:
+- [ ] Have I analyzed task complexity honestly?
+- [ ] Am I using cheapest model that ENSURES correctness?
+- [ ] Would Haiku actually succeed, or am I cutting corners?
+- [ ] Is Opus really needed, or will Sonnet suffice?
+- [ ] Have I considered verification difficulty?
+- [ ] Can I spawn multiple agents in parallel?
+- [ ] Have I estimated cost savings vs all-Sonnet?
+```
+
+**Remember:**
+
+- **Correctness > Cost** - Never sacrifice quality for savings
+- **Analyze honestly** - Don't assume Haiku can do complex work
+- **Verify appropriately** - Haiku tasks should be easily verifiable
+- **Report transparently** - Show user model choices and reasoning
+
 ### Template
 
 ```markdown
