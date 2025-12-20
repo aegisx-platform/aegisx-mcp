@@ -1,394 +1,257 @@
-# /feature-done - Complete Feature & Create Docs
+# /feature-done - Auto-Generate Feature Documentation
 
-> **🎯 Quick command สำหรับทำ feature เสร็จ (ไม่มี spec)**
+> **🤖 Fully automatic - Claude reads code and generates everything!**
 >
-> **ใช้เมื่อ**: Feature ง่ายๆ (< 3 วัน) ที่ไม่ได้ใช้ spec-workflow
+> **No questions asked. No manual input needed.**
 
 ---
 
 ## 📋 Usage
 
-```
+```bash
 User: /feature-done [feature-name]
 ```
 
-**ตัวอย่าง**:
+**Examples**:
 
-```
+```bash
 User: /feature-done budget-control-settings
+User: /feature-done stock-alerts
 User: /feature-done item-settings-modal
 ```
 
+**That's it!** Claude will automatically:
+
+1. 🔍 Read last commits
+2. 📖 Analyze changed files
+3. 🧠 Read actual code
+4. ✍️ Generate COMPLETION.md
+5. 📊 Update FEATURES.md
+6. 💾 Commit
+
+**Zero questions. Zero manual input.**
+
 ---
 
-## 🎯 What Claude Will Do
+## 🤖 What Claude Auto-Detects
 
-### Step 1: Collect Information
-
-Claude จะถามข้อมูลเหล่านี้:
+### From Git (Automatic)
 
 ```
-1. Feature name (ชื่อ feature)
-2. Category (Inventory/Budget/Auth/System/etc.)
-3. Summary (2-3 ประโยค สรุปว่าทำอะไร)
-4. Backend changes (API/Service/Repository ที่เพิ่ม/แก้)
-5. Frontend changes (Component/Service ที่เพิ่ม/แก้)
-6. Database changes (Migration/Schema ที่เพิ่ม)
-7. Files created (list)
-8. Files modified (list)
-9. Testing status (Manual/API/Build)
+✅ Commit hash (last commit)
+✅ Commit messages (context)
+✅ Files created/modified/deleted
+✅ Lines added/removed
+✅ Commit date & author
 ```
 
-### Step 2: Create COMPLETION.md
+### From Code (Reads & Analyzes)
+
+```
+✅ API endpoints (reads *.route.ts)
+✅ Components (reads *.component.ts)
+✅ Services (reads *.service.ts)
+✅ Database changes (reads migrations)
+✅ Signals usage
+✅ AegisX UI components
+✅ TypeBox schemas
+```
+
+### From File Paths (Intelligence)
+
+```
+✅ Category detection:
+   /inventory/budget/ → Budget Management
+   /inventory/ → Inventory
+   /core/auth/ → Authentication
+   /layers/platform/ → System
+```
+
+### From Build (Testing)
+
+```
+✅ Runs: pnpm run build
+✅ Reports: PASS/FAIL
+```
+
+---
+
+## ⚡ Example Run
+
+```
+User: /feature-done budget-settings
+
+Claude:
+  🔍 Analyzing commits...
+     → bf6c5172 "feat(inventory): add budget control settings"
+
+  📁 Reading files...
+     → Created: 2 files
+     → Modified: 3 files
+
+  🧠 Reading code...
+     → Component: BudgetControlSettingsPanel
+     → Uses: ax-card, ax-form-field, ax-button
+     → Signals: settingsSignal, loadingSignal
+
+  📊 Detecting category...
+     → Path: .../inventory/budget/...
+     → Category: Budget Management ✓
+
+  📝 Generating summary from commits + code...
+     → "Budget control settings panel with variance thresholds"
+
+  🧪 Testing build...
+     → pnpm run build: PASSED ✓
+
+  ✍️ Creating COMPLETION.md... ✓
+  📊 Updating FEATURES.md... ✓
+  💾 Committing... ✓
+
+  ✅ Done! (30 seconds)
+
+  **Budget Control Settings**
+  - Category: Budget Management
+  - Files: 5 (2 created, 3 modified)
+  - Commit: bf6c5172
+  - Build: PASSED
+
+  Docs: docs/features/budget-control-settings/COMPLETION.md
+```
+
+---
+
+## 📝 Generated Documentation
+
+Claude generates **complete COMPLETION.md** automatically:
+
+- ✅ Summary (from commits + code analysis)
+- ✅ Backend details (reads route/service files)
+- ✅ Frontend details (reads components)
+- ✅ Database changes (reads migrations)
+- ✅ Files changed (from git)
+- ✅ Testing status (runs build)
+- ✅ All metadata (commit, date, category)
+
+**No manual filling required!**
+
+---
+
+## 💡 What User Needs to Do
+
+### Before /feature-done
 
 ```bash
-# Claude จะสร้าง
-docs/features/[feature-name]/COMPLETION.md
+# 1. Implement feature
+# 2. Test it works
+# 3. Commit code
+git add [files]
+git commit -m "feat: my feature"
 
-# ใช้ template จาก
-docs/features/COMPLETION_TEMPLATE.md
+# 4. Build must pass
+pnpm run build  # MUST be successful
+
+# Done! Ready for documentation
 ```
 
-### Step 3: Update FEATURES.md
+### Run Command
 
 ```bash
-# Claude จะ update
-docs/features/FEATURES.md
-
-# เพิ่มใน "✅ Completed" section:
-| Feature Name | 2025-12-20 | abc123de | 8 | Summary |
+User: /feature-done my-feature
 ```
 
-### Step 4: Git Commit
+### After (Optional)
 
 ```bash
-# Claude จะ commit
-git add docs/features/[name]/COMPLETION.md
-git add docs/features/FEATURES.md
-git commit -m "docs(features): complete [feature-name]"
-```
+# Review generated docs (optional)
+cat docs/features/my-feature/COMPLETION.md
 
-### Step 5: Show Summary
-
-Claude จะแสดงสรุปให้ user เห็น:
-
-- ✅ COMPLETION.md created
-- ✅ FEATURES.md updated
-- ✅ Committed (with hash)
-- 📊 Summary of what was implemented
-
----
-
-## 🔄 Interactive Workflow
-
-```
-User: /feature-done budget-control-settings
-
-Claude: I'll help you complete the feature documentation.
-
-        Let me gather the information:
-
-        1. Feature name: budget-control-settings
-        2. What category is this?
-           - Inventory
-           - Budget Management
-           - Authentication
-           - System
-           - Other
-
-User: Budget Management
-
-Claude: Great! Now let me collect more details...
-
-        What was implemented? (2-3 sentences summary)
-
-User: Implemented budget control settings panel on detail page with variance thresholds and approval workflows
-
-Claude: Perfect! Now collecting implementation details...
-
-        [Checks git diff and recent commits automatically]
-
-        I found these changes:
-        - Created: 2 files
-        - Modified: 3 files
-        - Commit: bf6c5172
-
-        Does this look correct? (yes/no)
-
-User: yes
-
-Claude: ✅ Creating COMPLETION.md...
-        ✅ Updating FEATURES.md...
-        ✅ Committing changes...
-
-        Done! Feature documented.
-
-        Summary:
-        - Feature: Budget Control Settings
-        - Files: 5 changed (2 created, 3 modified)
-        - Commit: bf6c5172
-        - Documentation: docs/features/budget-control-settings/COMPLETION.md
+# Edit if needed (rare)
+vim docs/features/my-feature/COMPLETION.md
+git commit --amend
 ```
 
 ---
 
-## 📊 Auto-Detection Features
+## ✅ Advantages
 
-Claude จะพยายาม auto-detect ข้อมูลเหล่านี้:
+| Old (Manual)        | New (Automatic)   |
+| ------------------- | ----------------- |
+| User fills template | Claude reads code |
+| 10+ questions       | 0 questions       |
+| 15-30 minutes       | 30 seconds        |
+| Error-prone         | Accurate          |
+| Boring              | Effortless        |
 
-### From Git
+---
+
+## 🎯 Pro Tips
+
+### 1. Write Good Commit Messages
 
 ```bash
-# Last commit hash
-git log -1 --oneline | cut -d' ' -f1
+# ✅ GOOD: Claude generates better summary
+git commit -m "feat(inventory): add stock alert settings with email config"
 
-# Files changed
-git diff HEAD~1 --name-only
-
-# Lines added/removed
-git diff HEAD~1 --stat
+# ❌ OK but less context
+git commit -m "add settings"
 ```
 
-### From File Patterns
+### 2. Ensure Build Passes
 
 ```bash
-# Detect backend changes
-apps/api/src/layers/domains/*/  → Backend
-apps/api/src/database/migrations/ → Database
-
-# Detect frontend changes
-apps/web/src/app/features/*/     → Frontend
-
-# Detect type
-*.route.ts     → API endpoint
-*.service.ts   → Service
-*.repository.ts → Repository
-*.component.ts → Component
-*.migration.ts → Database migration
+# Before /feature-done
+pnpm run build
+# MUST show success
 ```
 
----
-
-## ✅ What You Get
-
-### 1. COMPLETION.md
-
-```markdown
-# Budget Control Settings - Completion Report
-
-**Completed**: 2025-12-20
-**Commit**: bf6c5172
-**Developer**: Claude Sonnet 4.5
-**Category**: Budget Management
-
----
-
-## 📊 Summary
-
-Implemented budget control settings panel on detail page with variance
-thresholds and approval workflows.
-
----
-
-## 🎯 What Was Implemented
-
-### Frontend
-
-- ✅ Component: Budget Control Settings Panel
-  Location: apps/web/src/app/features/inventory/budget/...
-
-### Integration
-
-- ✅ Detail Page Integration
-  Location: apps/web/src/app/features/inventory/budget/detail-page.component.ts
-
----
-
-## 📁 Files Changed
-
-Created (2 files):
-
-- apps/web/.../settings-panel.component.ts
-- apps/web/.../settings-panel.component.html
-
-Modified (3 files):
-
-- apps/web/.../detail-page.component.ts
-- apps/web/.../detail-page.component.html
-- apps/web/.../budget.service.ts
-
----
-
-## 🧪 Testing
-
-- ✅ Manual: Settings panel displays and saves
-- ✅ Build: PASSED
-
----
-
-## 📚 Documentation
-
-- ✅ This COMPLETION.md
-- ✅ FEATURES.md updated
-
----
-
-[... rest of template ...]
-```
-
-### 2. FEATURES.md Updated
-
-```markdown
-## ✅ Completed (Last 30 Days)
-
-| Feature                 | Completed  | Commit   | Files | Summary                        |
-| ----------------------- | ---------- | -------- | ----- | ------------------------------ |
-| Budget Control Settings | 2025-12-20 | bf6c5172 | 5     | Settings panel with thresholds |
-| [previous features...]  | ...        | ...      | ...   | ...                            |
-```
-
----
-
-## 🎯 When to Use This Command
-
-### ✅ Use /feature-done for:
-
-- ✅ Simple features (< 3 วัน, < 10 files)
-- ✅ Features ที่ไม่ใช้ spec-workflow
-- ✅ Bug fixes ที่สำคัญ (> 3 files)
-- ✅ UI enhancements
-- ✅ CRUD modules
-
-### ❌ Don't use for:
-
-- ❌ Features ที่มี spec-workflow อยู่แล้ว
-- ❌ Tiny fixes (1-2 files)
-- ❌ Documentation-only changes
-- ❌ Features ที่ยังทำไม่เสร็จ
-
----
-
-## 🔧 Advanced Usage
-
-### Provide Details Directly
-
-```
-User: /feature-done item-settings-modal --category Inventory --summary "Reactive modal with variance fields"
-```
-
-### Review Before Commit
-
-```
-User: /feature-done budget-settings --dry-run
-```
-
-Claude จะ:
-
-1. สร้าง COMPLETION.md
-2. Update FEATURES.md
-3. แสดงให้ดูก่อน (ไม่ commit)
-4. ถาม: "Ready to commit? (yes/no)"
-
----
-
-## 📝 Alternative: Manual Workflow
-
-ถ้าไม่ใช้ command, ทำ manual ได้:
+### 3. Clean Git State
 
 ```bash
-# 1. Copy template
-cp docs/features/COMPLETION_TEMPLATE.md docs/features/[name]/COMPLETION.md
-
-# 2. แก้ไข COMPLETION.md
-# - ใส่ชื่อ feature
-# - ใส่ commit hash: git log -1 --oneline
-# - ใส่ summary
-# - ใส่ files changed
-# - ใส่ testing status
-
-# 3. Update FEATURES.md
-# - เพิ่มใน "✅ Completed" section
-
-# 4. Commit
-git add docs/features/[name]/COMPLETION.md docs/features/FEATURES.md
-git commit -m "docs(features): complete [feature-name]"
-```
-
----
-
-## 💡 Tips
-
-### 1. Commit Feature Code First
-
-```bash
-# ❌ WRONG: Document before committing code
-/feature-done my-feature
-
-# ✅ CORRECT: Commit code first, then document
-git add [changed-files]
-git commit -m "feat: implement my-feature"
-/feature-done my-feature  # Now Claude can detect commit hash
-```
-
-### 2. Be in Clean Git State
-
-```bash
-# Check before documenting
+# Check status
 git status
 # Should show: "nothing to commit, working tree clean"
 ```
 
-### 3. Summary Should Be Brief
+---
 
+## 🚀 Advanced
+
+### Dry Run (Preview)
+
+```bash
+User: /feature-done my-feature --dry-run
+
+# Claude shows preview, asks for confirmation
 ```
-❌ TOO LONG:
-"Implemented a comprehensive budget control settings panel that allows
-users to configure variance thresholds and approval workflows with
-real-time validation and error handling..."
 
-✅ JUST RIGHT:
-"Budget control settings panel with variance thresholds and approval workflows"
+### Force Category
+
+```bash
+User: /feature-done my-feature --category "Custom Category"
 ```
 
 ---
 
-## 🚀 Future Enhancements
+## ❓ FAQ
 
-- [ ] Auto-detect feature name from recent commits
-- [ ] Generate summary from commit messages
-- [ ] Screenshot capture for UI features
-- [ ] Integration with spec-workflow (auto-link)
-- [ ] Suggest category based on file paths
+### Q: ถ้า Claude detect ผิด?
 
----
+A: แก้ COMPLETION.md ได้เลย (น้อยมาก ที่ผิด)
 
-## 📞 Help
+### Q: ต้องเตรียมอะไรบ้าง?
 
-### Command Not Working?
+A: แค่ commit code + build ผ่าน
 
-```
-# Make sure you're in project root
-pwd
-# Should be: .../aegisx-starter-1
+### Q: เวลานานไหม?
 
-# Check if template exists
-ls docs/features/COMPLETION_TEMPLATE.md
+A: 30-60 วินาที
 
-# Check if FEATURES.md exists
-ls docs/features/FEATURES.md
-```
+### Q: ถ้ามีหลาย commits?
 
-### Want to See Examples?
-
-```
-# See completed features
-cat docs/features/FEATURES.md
-
-# See example COMPLETION.md
-cat docs/features/budget-control-settings/COMPLETION.md
-```
+A: Claude analyze ทั้งหมด ใช้ commit ล่าสุด
 
 ---
 
-**Version**: 1.0.0
-**Last Updated**: 2025-12-20
+**Version**: 2.0.0 (Fully Automatic)
+**Zero Manual Input Required**
