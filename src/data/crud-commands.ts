@@ -1,6 +1,6 @@
 /**
  * AUTO-GENERATED FILE
- * Generated at: 2025-12-20T03:09:59.596Z
+ * Generated at: 2025-12-20T09:59:27.767Z
  * Generator: commands-generator@1.0.0
  * Source files:
  *   - libs/aegisx-cli/docs/QUICK_REFERENCE.md
@@ -8,7 +8,7 @@
  * DO NOT EDIT MANUALLY - Changes will be overwritten on next sync
  */
 
- 
+/* eslint-disable no-useless-escape */
  
  
 
@@ -357,6 +357,9 @@ export const commands: CommandInfo[] = [
       '│  └─ inventory/           # Domain folder',
       '│     ├─ index.ts          # Domain plugin registration',
       '└─ migrations-inventory/ # Domain-specific migrations',
+      '--domain budget/master-data \\',
+      '--domain inventory/master-data \\',
+      '--domain inventory/master-data \\',
       'domain <NAME>                # Generate domain module',
       'route <DOMAIN/ROUTE>         # Add route to domain',
     ],
@@ -681,6 +684,11 @@ export const commands: CommandInfo[] = [
       'pnpm run domain:init -- inventory',
       './bin/cli.js domain:init inventory --dry-run  # Preview',
       'config init                  # Initialize .crudgen.json',
+      'curl http://localhost:3000/api/admin/system-init/health-status',
+      'curl http://localhost:3000/api/admin/system-init/available-modules',
+      'curl http://localhost:3000/api/admin/system-init/import-order',
+      'curl \"http://localhost:3000/api/admin/system-init/module/products/template?format=csv\" \\',
+      'curl \"http://localhost:3000/api/admin/system-init/module/products/template?format=excel\" \\',
     ],
   },
   {
