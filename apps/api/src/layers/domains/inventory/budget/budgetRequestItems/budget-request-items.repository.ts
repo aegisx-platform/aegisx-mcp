@@ -136,6 +136,18 @@ export class BudgetRequestItemsRepository extends BaseRepository<
       ed_category: dbRow.ed_category,
       tmt_gpu_code: dbRow.tmt_gpu_code,
       working_code: dbRow.working_code,
+      // Budget Control Fields
+      quantity_control_type: dbRow.quantity_control_type,
+      price_control_type: dbRow.price_control_type,
+      quantity_variance_percent: dbRow.quantity_variance_percent,
+      price_variance_percent: dbRow.price_variance_percent,
+      // Purchased Tracking Fields
+      q1_purchased_qty: dbRow.q1_purchased_qty,
+      q2_purchased_qty: dbRow.q2_purchased_qty,
+      q3_purchased_qty: dbRow.q3_purchased_qty,
+      q4_purchased_qty: dbRow.q4_purchased_qty,
+      total_purchased_qty: dbRow.total_purchased_qty,
+      total_purchased_value: dbRow.total_purchased_value,
     };
   }
 
@@ -220,6 +232,30 @@ export class BudgetRequestItemsRepository extends BaseRepository<
     if ('historical_usage' in dto && dto.historical_usage !== undefined) {
       transformed.historical_usage = dto.historical_usage;
     }
+
+    // Budget Control Fields
+    if (
+      'quantity_control_type' in dto &&
+      dto.quantity_control_type !== undefined
+    ) {
+      transformed.quantity_control_type = dto.quantity_control_type;
+    }
+    if ('price_control_type' in dto && dto.price_control_type !== undefined) {
+      transformed.price_control_type = dto.price_control_type;
+    }
+    if (
+      'quantity_variance_percent' in dto &&
+      dto.quantity_variance_percent !== undefined
+    ) {
+      transformed.quantity_variance_percent = dto.quantity_variance_percent;
+    }
+    if (
+      'price_variance_percent' in dto &&
+      dto.price_variance_percent !== undefined
+    ) {
+      transformed.price_variance_percent = dto.price_variance_percent;
+    }
+
     // updated_at is handled automatically by database
 
     return transformed;
