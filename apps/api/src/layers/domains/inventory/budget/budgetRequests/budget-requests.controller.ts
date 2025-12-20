@@ -1383,4 +1383,39 @@ export class BudgetRequestsController {
       return reply.code(400).error('GET_ITEMS_STATUS_FAILED', error.message);
     }
   }
+
+  /**
+   * Get budget dashboard data
+   * GET /budgetRequests/:id/dashboard
+   * Shows budget approval status and breakdown by categories (ED drugs, NON-ED drugs, etc.)
+   */
+  async getDashboard(
+    request: FastifyRequest<{
+      Params: Static<typeof BudgetRequestsIdParamSchema>;
+    }>,
+    reply: FastifyReply,
+  ) {
+    const { id } = request.params;
+
+    request.log.info({ budgetRequestId: id }, 'Getting budget dashboard data');
+
+    try {
+      const result = await this.budgetRequestsService.getDashboard(id);
+
+      return reply.success(
+        result,
+        'Budget dashboard data retrieved successfully',
+      );
+    } catch (error: any) {
+      request.log.error(
+        { error: error.message, budgetRequestId: id },
+        'Failed to get budget dashboard data',
+      );
+
+      const statusCode = error.statusCode || 400;
+      const errorCode = error.code || 'GET_DASHBOARD_FAILED';
+
+      return reply.code(statusCode).error(errorCode, error.message);
+    }
+  }
 }

@@ -2791,4 +2791,349 @@ export class BudgetRequestsService extends BaseService<
       summary,
     };
   }
+
+  /**
+   * Get dashboard data for budget request
+   * Shows budget approval status and breakdown by categories (ED drugs, NON-ED drugs, other categories)
+   *
+   * @param budgetRequestId - Budget request ID
+   * @returns Dashboard data with budget breakdown
+   */
+  async getDashboard(budgetRequestId: string | number): Promise<{
+    budget_request: {
+      id: number;
+      request_number: string;
+      fiscal_year: number;
+      status: string;
+      department_id: number | null;
+      total_requested_amount: number;
+      submitted_at: Date | null;
+      dept_reviewed_at: Date | null;
+      finance_reviewed_at: Date | null;
+      created_at: Date;
+    };
+    summary: {
+      total_items: number;
+      total_requested_amount: number;
+      total_requested_qty: number;
+    };
+    by_ed_category: Array<{
+      ed_category: string;
+      ed_category_label: string;
+      item_count: number;
+      total_qty: number;
+      total_amount: number;
+      percentage: number;
+    }>;
+    by_budget_category: Array<{
+      category_code: string;
+      category_name: string;
+      item_count: number;
+      total_amount: number;
+      percentage: number;
+    }>;
+    by_budget_type: Array<{
+      type_code: string;
+      type_name: string;
+      budget_class: string;
+      item_count: number;
+      total_amount: number;
+      percentage: number;
+    }>;
+    quarterly_breakdown: {
+      q1: { qty: number; amount: number };
+      q2: { qty: number; amount: number };
+      q3: { qty: number; amount: number };
+      q4: { qty: number; amount: number };
+    };
+    approval_workflow: {
+      status: string;
+      status_label: string;
+      submitted_by: string | null;
+      submitted_at: Date | null;
+      dept_reviewed_by: string | null;
+      dept_reviewed_at: Date | null;
+      dept_comments: string | null;
+      finance_reviewed_by: string | null;
+      finance_reviewed_at: Date | null;
+      finance_comments: string | null;
+    };
+  }> {
+    // Get budget request
+    const budgetRequest =
+      await this.budgetRequestsRepository.findById(budgetRequestId);
+
+    if (!budgetRequest) {
+      const error = new Error('Budget request not found') as any;
+      error.statusCode = 404;
+      error.code = 'BUDGET_REQUEST_NOT_FOUND';
+      throw error;
+    }
+
+    const knex = this.budgetRequestsRepository.getKnex();
+
+    // Get all items for this budget request with drug_generics join
+    const items = await knex('inventory.budget_request_items as bri')
+      .leftJoin('inventory.drug_generics as dg', 'bri.generic_id', 'dg.id')
+      .leftJoin(
+        'inventory.budget_categories as bc',
+        'bri.budget_category_id',
+        'bc.id',
+      )
+      .leftJoin('inventory.budget_types as bt', 'bri.budget_type_id', 'bt.id')
+      .where('bri.budget_request_id', budgetRequestId)
+      .select(
+        'bri.*',
+        'dg.ed_category',
+        'bc.category_code',
+        'bc.category_name',
+        'bt.type_code',
+        'bt.type_name',
+        'bt.budget_class',
+      );
+
+    // Calculate summary
+    const totalItems = items.length;
+    const totalRequestedQty = items.reduce(
+      (sum, item) => sum + (item.requested_qty || 0),
+      0,
+    );
+    const totalRequestedAmount = items.reduce(
+      (sum, item) => sum + (item.requested_qty || 0) * (item.unit_price || 0),
+      0,
+    );
+
+    // Group by ED category
+    const edCategoryMap = new Map<
+      string,
+      {
+        item_count: number;
+        total_qty: number;
+        total_amount: number;
+      }
+    >();
+
+    items.forEach((item) => {
+      const edCategory = item.ed_category || 'UNKNOWN';
+      const existing = edCategoryMap.get(edCategory) || {
+        item_count: 0,
+        total_qty: 0,
+        total_amount: 0,
+      };
+
+      existing.item_count++;
+      existing.total_qty += item.requested_qty || 0;
+      existing.total_amount +=
+        (item.requested_qty || 0) * (item.unit_price || 0);
+
+      edCategoryMap.set(edCategory, existing);
+    });
+
+    // ED category labels
+    const edCategoryLabels: Record<string, string> = {
+      ED: 'ยาในบัญชียาหลักแห่งชาติ (ED)',
+      NED: 'ยานอกบัญชียาหลักแห่งชาติ (NON-ED)',
+      NDMS: 'ยาที่ไม่ใช่ยา (NDMS)',
+      CM: 'วัสดุการแพทย์ (CM)',
+      LS: 'วิทยาศาสตร์การแพทย์ (LS)',
+      PS: 'เครื่องมือแพทย์ (PS)',
+      UNKNOWN: 'ไม่ระบุ',
+    };
+
+    const byEdCategory = Array.from(edCategoryMap.entries())
+      .map(([category, data]) => ({
+        ed_category: category,
+        ed_category_label: edCategoryLabels[category] || category,
+        item_count: data.item_count,
+        total_qty: Math.round(data.total_qty * 100) / 100,
+        total_amount: Math.round(data.total_amount * 100) / 100,
+        percentage:
+          totalRequestedAmount > 0
+            ? Math.round((data.total_amount / totalRequestedAmount) * 10000) /
+              100
+            : 0,
+      }))
+      .sort((a, b) => b.total_amount - a.total_amount);
+
+    // Group by budget category
+    const budgetCategoryMap = new Map<
+      string,
+      {
+        category_name: string;
+        item_count: number;
+        total_amount: number;
+      }
+    >();
+
+    items.forEach((item) => {
+      const categoryCode = item.category_code || 'UNKNOWN';
+      const categoryName = item.category_name || 'ไม่ระบุ';
+      const existing = budgetCategoryMap.get(categoryCode) || {
+        category_name: categoryName,
+        item_count: 0,
+        total_amount: 0,
+      };
+
+      existing.item_count++;
+      existing.total_amount +=
+        (item.requested_qty || 0) * (item.unit_price || 0);
+
+      budgetCategoryMap.set(categoryCode, existing);
+    });
+
+    const byBudgetCategory = Array.from(budgetCategoryMap.entries())
+      .map(([code, data]) => ({
+        category_code: code,
+        category_name: data.category_name,
+        item_count: data.item_count,
+        total_amount: Math.round(data.total_amount * 100) / 100,
+        percentage:
+          totalRequestedAmount > 0
+            ? Math.round((data.total_amount / totalRequestedAmount) * 10000) /
+              100
+            : 0,
+      }))
+      .sort((a, b) => b.total_amount - a.total_amount);
+
+    // Group by budget type
+    const budgetTypeMap = new Map<
+      string,
+      {
+        type_name: string;
+        budget_class: string;
+        item_count: number;
+        total_amount: number;
+      }
+    >();
+
+    items.forEach((item) => {
+      const typeCode = item.type_code || 'UNKNOWN';
+      const typeName = item.type_name || 'ไม่ระบุ';
+      const budgetClass = item.budget_class || 'UNKNOWN';
+      const existing = budgetTypeMap.get(typeCode) || {
+        type_name: typeName,
+        budget_class: budgetClass,
+        item_count: 0,
+        total_amount: 0,
+      };
+
+      existing.item_count++;
+      existing.total_amount +=
+        (item.requested_qty || 0) * (item.unit_price || 0);
+
+      budgetTypeMap.set(typeCode, existing);
+    });
+
+    const byBudgetType = Array.from(budgetTypeMap.entries())
+      .map(([code, data]) => ({
+        type_code: code,
+        type_name: data.type_name,
+        budget_class: data.budget_class,
+        item_count: data.item_count,
+        total_amount: Math.round(data.total_amount * 100) / 100,
+        percentage:
+          totalRequestedAmount > 0
+            ? Math.round((data.total_amount / totalRequestedAmount) * 10000) /
+              100
+            : 0,
+      }))
+      .sort((a, b) => b.total_amount - a.total_amount);
+
+    // Quarterly breakdown
+    const quarterlyBreakdown = {
+      q1: {
+        qty: items.reduce((sum, item) => sum + (item.q1_qty || 0), 0),
+        amount: items.reduce(
+          (sum, item) => sum + (item.q1_qty || 0) * (item.unit_price || 0),
+          0,
+        ),
+      },
+      q2: {
+        qty: items.reduce((sum, item) => sum + (item.q2_qty || 0), 0),
+        amount: items.reduce(
+          (sum, item) => sum + (item.q2_qty || 0) * (item.unit_price || 0),
+          0,
+        ),
+      },
+      q3: {
+        qty: items.reduce((sum, item) => sum + (item.q3_qty || 0), 0),
+        amount: items.reduce(
+          (sum, item) => sum + (item.q3_qty || 0) * (item.unit_price || 0),
+          0,
+        ),
+      },
+      q4: {
+        qty: items.reduce((sum, item) => sum + (item.q4_qty || 0), 0),
+        amount: items.reduce(
+          (sum, item) => sum + (item.q4_qty || 0) * (item.unit_price || 0),
+          0,
+        ),
+      },
+    };
+
+    // Round quarterly amounts
+    quarterlyBreakdown.q1.qty =
+      Math.round(quarterlyBreakdown.q1.qty * 100) / 100;
+    quarterlyBreakdown.q1.amount =
+      Math.round(quarterlyBreakdown.q1.amount * 100) / 100;
+    quarterlyBreakdown.q2.qty =
+      Math.round(quarterlyBreakdown.q2.qty * 100) / 100;
+    quarterlyBreakdown.q2.amount =
+      Math.round(quarterlyBreakdown.q2.amount * 100) / 100;
+    quarterlyBreakdown.q3.qty =
+      Math.round(quarterlyBreakdown.q3.qty * 100) / 100;
+    quarterlyBreakdown.q3.amount =
+      Math.round(quarterlyBreakdown.q3.amount * 100) / 100;
+    quarterlyBreakdown.q4.qty =
+      Math.round(quarterlyBreakdown.q4.qty * 100) / 100;
+    quarterlyBreakdown.q4.amount =
+      Math.round(quarterlyBreakdown.q4.amount * 100) / 100;
+
+    // Status labels
+    const statusLabels: Record<string, string> = {
+      DRAFT: 'ร่าง',
+      SUBMITTED: 'ส่งอนุมัติ',
+      DEPT_APPROVED: 'อนุมัติแผนก',
+      FINANCE_APPROVED: 'อนุมัติการเงิน',
+      REJECTED: 'ปฏิเสธ',
+      REOPENED: 'เปิดใหม่',
+    };
+
+    return {
+      budget_request: {
+        id: budgetRequest.id,
+        request_number: budgetRequest.request_number,
+        fiscal_year: budgetRequest.fiscal_year,
+        status: budgetRequest.status,
+        department_id: budgetRequest.department_id,
+        total_requested_amount: Math.round(totalRequestedAmount * 100) / 100,
+        submitted_at: budgetRequest.submitted_at,
+        dept_reviewed_at: budgetRequest.dept_reviewed_at,
+        finance_reviewed_at: budgetRequest.finance_reviewed_at,
+        created_at: budgetRequest.created_at,
+      },
+      summary: {
+        total_items: totalItems,
+        total_requested_amount: Math.round(totalRequestedAmount * 100) / 100,
+        total_requested_qty: Math.round(totalRequestedQty * 100) / 100,
+      },
+      by_ed_category: byEdCategory,
+      by_budget_category: byBudgetCategory,
+      by_budget_type: byBudgetType,
+      quarterly_breakdown: quarterlyBreakdown,
+      approval_workflow: {
+        status: budgetRequest.status,
+        status_label:
+          statusLabels[budgetRequest.status] || budgetRequest.status,
+        submitted_by: budgetRequest.submitted_by,
+        submitted_at: budgetRequest.submitted_at,
+        dept_reviewed_by: budgetRequest.dept_reviewed_by,
+        dept_reviewed_at: budgetRequest.dept_reviewed_at,
+        dept_comments: budgetRequest.dept_comments,
+        finance_reviewed_by: budgetRequest.finance_reviewed_by,
+        finance_reviewed_at: budgetRequest.finance_reviewed_at,
+        finance_comments: budgetRequest.finance_comments,
+      },
+    };
+  }
 }

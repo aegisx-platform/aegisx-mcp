@@ -921,4 +921,110 @@ export async function budgetRequestsRoutes(
     ],
     handler: controller.getItemsStatus.bind(controller),
   });
+
+  // Get budget dashboard data
+  fastify.get('/:id/dashboard', {
+    schema: {
+      tags: ['Inventory: Budget Requests'],
+      summary: 'Get budget dashboard data',
+      description:
+        'Get comprehensive dashboard data including budget approval status, total amounts, breakdown by ED category (ED drugs, NON-ED drugs, etc.), breakdown by budget category (DRUG, MED_SUP, etc.), breakdown by budget type (funding sources), quarterly breakdown, and approval workflow status.',
+      params: BudgetRequestsIdParamSchema,
+      response: {
+        200: Type.Object({
+          success: Type.Boolean(),
+          data: Type.Object({
+            budget_request: Type.Object({
+              id: Type.Number(),
+              request_number: Type.String(),
+              fiscal_year: Type.Number(),
+              status: Type.String(),
+              department_id: Type.Union([Type.Number(), Type.Null()]),
+              total_requested_amount: Type.Number(),
+              submitted_at: Type.Union([Type.String(), Type.Null()]),
+              dept_reviewed_at: Type.Union([Type.String(), Type.Null()]),
+              finance_reviewed_at: Type.Union([Type.String(), Type.Null()]),
+              created_at: Type.String(),
+            }),
+            summary: Type.Object({
+              total_items: Type.Number(),
+              total_requested_amount: Type.Number(),
+              total_requested_qty: Type.Number(),
+            }),
+            by_ed_category: Type.Array(
+              Type.Object({
+                ed_category: Type.String(),
+                ed_category_label: Type.String(),
+                item_count: Type.Number(),
+                total_qty: Type.Number(),
+                total_amount: Type.Number(),
+                percentage: Type.Number(),
+              }),
+            ),
+            by_budget_category: Type.Array(
+              Type.Object({
+                category_code: Type.String(),
+                category_name: Type.String(),
+                item_count: Type.Number(),
+                total_amount: Type.Number(),
+                percentage: Type.Number(),
+              }),
+            ),
+            by_budget_type: Type.Array(
+              Type.Object({
+                type_code: Type.String(),
+                type_name: Type.String(),
+                budget_class: Type.String(),
+                item_count: Type.Number(),
+                total_amount: Type.Number(),
+                percentage: Type.Number(),
+              }),
+            ),
+            quarterly_breakdown: Type.Object({
+              q1: Type.Object({
+                qty: Type.Number(),
+                amount: Type.Number(),
+              }),
+              q2: Type.Object({
+                qty: Type.Number(),
+                amount: Type.Number(),
+              }),
+              q3: Type.Object({
+                qty: Type.Number(),
+                amount: Type.Number(),
+              }),
+              q4: Type.Object({
+                qty: Type.Number(),
+                amount: Type.Number(),
+              }),
+            }),
+            approval_workflow: Type.Object({
+              status: Type.String(),
+              status_label: Type.String(),
+              submitted_by: Type.Union([Type.String(), Type.Null()]),
+              submitted_at: Type.Union([Type.String(), Type.Null()]),
+              dept_reviewed_by: Type.Union([Type.String(), Type.Null()]),
+              dept_reviewed_at: Type.Union([Type.String(), Type.Null()]),
+              dept_comments: Type.Union([Type.String(), Type.Null()]),
+              finance_reviewed_by: Type.Union([Type.String(), Type.Null()]),
+              finance_reviewed_at: Type.Union([Type.String(), Type.Null()]),
+              finance_comments: Type.Union([Type.String(), Type.Null()]),
+            }),
+          }),
+          message: Type.String(),
+          meta: ApiMetaSchema,
+        }),
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        404: SchemaRefs.NotFound,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [
+      fastify.authenticate,
+      fastify.verifyPermission('budgetRequests', 'read'),
+    ],
+    handler: controller.getDashboard.bind(controller),
+  });
 }
