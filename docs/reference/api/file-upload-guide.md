@@ -41,7 +41,7 @@ fastify.post('/upload', {
 
 ### 1. Route Configuration
 
-**File:** `apps/api/src/modules/file-upload/file-upload.routes.ts`
+**File:** `apps/api/src/layers/platform/file-upload/file-upload.route.ts`
 
 ```typescript
 // Upload single file
@@ -108,7 +108,7 @@ fastify.post('/upload', {
 
 ### 2. Controller Modifications
 
-**File:** `apps/api/src/modules/file-upload/file-upload.controller.ts`
+**File:** `apps/api/src/layers/platform/file-upload/file-upload.controller.ts`
 
 Add helper methods to safely parse multipart form fields:
 
@@ -312,7 +312,7 @@ Navigate to `/documentation` (default port: 3333) and expand the "File Upload" s
 ## Related Files
 
 - `apps/api/src/plugins/multipart.plugin.ts` - Global multipart configuration
-- `apps/api/src/modules/file-upload/file-upload.routes.ts` - Route definitions
-- `apps/api/src/modules/file-upload/file-upload.controller.ts` - Request handling
-- `apps/api/src/modules/file-upload/file-upload.schemas.ts` - TypeBox schemas
+- `apps/api/src/layers/platform/file-upload/file-upload.route.ts` - Route definitions
+- `apps/api/src/layers/platform/file-upload/file-upload.controller.ts` - Request handling
+- `apps/api/src/layers/platform/file-upload/file-upload.schemas.ts` - TypeBox schemas
 - `apps/web/src/app/shared/components/file-upload/file-upload.service.ts` - Frontend service

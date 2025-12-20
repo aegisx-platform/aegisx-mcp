@@ -7,799 +7,1129 @@ tags: [development, full-stack, workflow]
 
 # Universal Full-Stack Development Standard
 
-> **🚨 MANDATORY**: มาตรฐานสำหรับทุก feature ทุกครั้ง - ไม่มีข้อยกเว้น
+> **MANDATORY**: Standard workflow for all feature development - no exceptions
 
-## 🎯 สำหรับทุกการพัฒนา Feature
+## Overview
 
-**ใช้ได้กับ:** Auth, Users, Settings, Navigation, Dashboard, Reports, Products, Orders, หรือ feature อื่นๆ ทั้งหมด
+This standard follows a **Database-First, Layer-Based** approach using the AegisX Platform's layered architecture. Every feature development MUST follow this workflow to ensure consistency, quality, and maintainability.
 
-## 📋 Phase 1: Database Schema (ฐานข้อมูลก่อน)
+**Key Principles:**
 
-### 1.1 Database Migration & Schema FIRST
+- Database schema is the single source of truth
+- Layer-based routing (Core, Platform, Domains)
+- Plugin pattern for all modules
+- TypeBox schemas for validation
+- API-first development
+- Test backend before frontend
 
-**🚨 MANDATORY: Database schema ต้องเสร็จก่อน API spec**
+---
+
+## Phase 1: Database Schema Design
+
+### 1.1 Determine Domain and Schema
+
+**CRITICAL:** Determine correct domain placement and database schema FIRST.
 
 ```bash
-# 1. สร้าง migration (ถ้าต้องการ table ใหม่)
-npx knex migrate:make create_{MODULE}_table
+# Use Domain Checker before creating any CRUD
+bash /tmp/check_domain.sh {TABLE_NAME}
+```
 
-# 2. เขียน migration
-# database/migrations/xxx_create_{MODULE}_table.ts
+**Domain Classification:**
+
+| Type                  | Location                            | Schema      | Example                                |
+| --------------------- | ----------------------------------- | ----------- | -------------------------------------- |
+| Platform/Shared       | `/v1/platform/{resource}`           | `public`    | users, roles, departments              |
+| Inventory Master-Data | `/inventory/master-data/{resource}` | `inventory` | drugs, budgets, locations              |
+| Inventory Operations  | `/inventory/operations/{resource}`  | `inventory` | budget_allocations, drug_distributions |
+| Inventory Budget      | `/inventory/budget/{resource}`      | `inventory` | budget_requests, budget_plans          |
+
+**References:**
+
+- [Domain Architecture Guide](../../architecture/domain-architecture-guide.md)
+- [Layer-Based Routing](../../architecture/layer-based-routing.md)
+- [Inventory Domain Rules](.claude/rules/inventory-domain.md)
+- [Budget Domain Rules](.claude/rules/budget-domain.md)
+
+### 1.2 Create Migration
+
+**ALWAYS use correct schema prefix for inventory tables.**
+
+```bash
+# Create migration
+npx knex migrate:make create_{table_name}_table
+
+# For domain-specific migrations (inventory)
+npx knex migrate:make create_{table_name}_table --migrations-directory ./apps/api/src/database/migrations/inventory
+```
+
+**Migration Template:**
+
+```typescript
+// apps/api/src/database/migrations/{timestamp}_create_{table_name}_table.ts
+import { Knex } from 'knex';
+
 export async function up(knex: Knex): Promise<void> {
-  return knex.schema.createTable('{MODULE}s', (table) => {
-    table.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));
-    table.string('name').notNullable();
+  // Use correct schema for inventory tables
+  return knex.schema.withSchema('inventory').createTable('{table_name}', (table) => {
+    // Primary key (use auto-increment INTEGER for inventory tables)
+    table.increments('id').primary();
+
+    // Required fields
+    table.string('code', 50).notNullable().unique();
+    table.string('name', 255).notNullable();
     table.text('description');
+
+    // Foreign keys (ALWAYS use correct schema prefix)
+    table.integer('category_id').unsigned().references('id').inTable('inventory.categories');
+    table.integer('location_id').unsigned().references('id').inTable('inventory.locations');
+
+    // Amounts (ALWAYS use DECIMAL for money)
+    table.decimal('unit_price', 15, 2).defaultTo(0);
+    table.decimal('total_amount', 15, 2).notNullable();
+
+    // Status fields
     table.boolean('is_active').defaultTo(true);
+
+    // Audit fields
+    table.integer('created_by').unsigned();
+    table.integer('updated_by').unsigned();
     table.timestamps(true, true);
 
-    // Indexes for performance
+    // Indexes
     table.index(['is_active']);
+    table.index(['code']);
+    table.index(['name']);
     table.index(['created_at']);
   });
 }
 
-# 3. รัน migration
-npx knex migrate:latest
-
-# 4. อัพเดต seeds (ถ้าจำเป็น)
-npx knex seed:make {MODULE}_seed
-
-# 5. รัน seeds
-npx knex seed:run
+export async function down(knex: Knex): Promise<void> {
+  return knex.schema.withSchema('inventory').dropTableIfExists('{table_name}');
+}
 ```
 
-### 1.2 Verify Database Schema
+**Critical Rules:**
+
+- Use `inventory` schema for inventory tables
+- Use `public` schema for platform tables
+- Use `INTEGER` primary keys (not UUID) for inventory
+- Use `DECIMAL(15, 2)` for money fields
+- Always include audit fields (`created_by`, `updated_by`)
+- Add indexes on foreign keys and frequently queried columns
+- Use schema prefix in foreign key references: `inventory.{table}`
+
+**Run Migration:**
 
 ```bash
-# เช็คว่า table ถูกสร้างแล้ว
-psql $DATABASE_URL -c "\d {MODULE}s"
+# Main system migrations (public schema)
+pnpm run db:migrate
 
-# เช็ค columns และ types
-psql $DATABASE_URL -c "\d+ {MODULE}s"
+# Inventory domain migrations
+pnpm run db:migrate:inventory
 
-# ทดสอบ insert/select บน table ใหม่
-psql $DATABASE_URL -c "INSERT INTO {MODULE}s (name, description) VALUES ('test', 'test description')"
-psql $DATABASE_URL -c "SELECT * FROM {MODULE}s LIMIT 1"
+# Check status
+pnpm run db:status:inventory
 ```
 
-## 📋 Phase 2: API Specification (ออกแบบตาม Database)
-
-### 2.1 Read Existing OpenAPI Spec
+**Verify Migration:**
 
 ```bash
-# ดู endpoints ทั้งหมด (default port: 3333)
-curl -s "/documentation/json" | jq '.paths | keys'
+# Check table exists
+psql $DATABASE_URL -c "\dt inventory.*"
 
-# ดู specific module endpoints (เปลี่ยน {MODULE} เป็น auth, users, settings, ฯลฯ)
-curl -s "/documentation/json" | jq '.paths' | grep "/api/{MODULE}"
+# Check table structure
+psql $DATABASE_URL -c "\d+ inventory.{table_name}"
 
-# เปิด Swagger UI (default port: 3333)
-open /documentation
+# Test insert
+psql $DATABASE_URL -c "INSERT INTO inventory.{table_name} (code, name) VALUES ('TEST001', 'Test Item')"
 ```
 
-**📝 API Documentation Notes:**
+---
 
-- **Default Port**: 3333 สำหรับ main repository
-- **Multi-Instance**: แต่ละ feature repo ใช้ port ที่แตกต่างกัน (auto-assigned)
-- **Environment Variables**: ใช้ `${API_URL}/documentation` สำหรับ staging/production
-- **Alternative Access**: `http://localhost:3333/documentation` ถ้าต้องการระบุ port เต็ม
+## Phase 2: Backend Development
 
-### 1.2 Check API Routes File
+### 2.1 Choose Layer and Generate CRUD
+
+**Determine layer placement:**
+
+1. **Platform Layer** (`apps/api/src/layers/platform/`)
+   - Shared across all domains
+   - Examples: users, rbac, departments, settings
+   - Prefix: `/api/v1/platform/{resource}`
+
+2. **Domain Layer** (`apps/api/src/layers/domains/{domain}/`)
+   - Business-specific features
+   - Examples: inventory, admin
+   - Prefix: `/api/{domain}/{section}/{resource}`
+
+**Generate CRUD:**
 
 ```bash
-# อ่าน routes definition (เปลี่ยน {MODULE} ตามที่ทำงาน)
-cat apps/api/src/modules/{MODULE}/{MODULE}.routes.ts
+# Platform Layer
+pnpm run crud -- {table_name} --force
 
-# เช็ค URL pattern: /api/{MODULE}/{ENDPOINT}
-grep -n "url:" apps/api/src/modules/{MODULE}/{MODULE}.routes.ts
+# Inventory Master-Data
+pnpm run crud -- {table_name} --domain inventory/master-data --schema inventory --force
+
+# Inventory Operations
+pnpm run crud -- {table_name} --domain inventory/operations --schema inventory --force
+
+# Inventory Budget
+pnpm run crud -- {table_name} --domain inventory/budget --schema inventory --force
+
+# With features
+pnpm run crud:import -- {table_name} --domain inventory/master-data --schema inventory --force
+pnpm run crud:events -- {table_name} --domain inventory/master-data --schema inventory --force
+pnpm run crud:full -- {table_name} --domain inventory/master-data --schema inventory --force
 ```
 
-### 1.3 Check Schema Definitions
+**Generated Structure:**
 
-```bash
-# อ่าน TypeBox schemas (เปลี่ยน {MODULE})
-cat apps/api/src/modules/{MODULE}/{MODULE}.schemas.ts
+```
+apps/api/src/layers/domains/inventory/master-data/{module}/
+├── {module}.controller.ts     # HTTP request handling
+├── {module}.repository.ts     # Database operations
+├── {module}.route.ts          # Route definitions
+├── {module}.schemas.ts        # TypeBox schemas
+├── {module}.service.ts        # Business logic
+├── {module}.types.ts          # TypeScript types
+└── index.ts                   # Plugin export
 ```
 
-**สำคัญ:** ทุก module ต้องมี pattern เดียวกัน:
+### 2.2 Plugin Pattern
 
-- `apps/api/src/modules/{MODULE}/{MODULE}.routes.ts`
-- `apps/api/src/modules/{MODULE}/{MODULE}.schemas.ts`
-- URL pattern: `/api/{MODULE}/{ACTION}`
-
-## 📋 Phase 3: Backend Verification (ทดสอบ API)
-
-### 3.1 Test Endpoints Work
-
-```bash
-# ทดสอบ GET endpoint
-curl -X GET "http://localhost:3333/api/{MODULE}" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer {TOKEN}" # ถ้าต้องการ auth
-
-# ทดสอบ POST endpoint
-curl -X POST "http://localhost:3333/api/{MODULE}" \
-  -H "Content-Type: application/json" \
-  -d '{"field1":"value1","field2":"value2"}'
-
-# ควรได้ HTTP 200/201 + expected response
-```
-
-### 3.2 Test Error Cases
-
-```bash
-# ทดสอบ validation errors
-curl -X POST "http://localhost:3333/api/{MODULE}" \
-  -H "Content-Type: application/json" \
-  -d '{"invalid":"data"}'
-
-# ควรได้ HTTP 400 + validation errors
-
-# ทดสอบ unauthorized (ถ้าต้องการ auth)
-curl -X GET "http://localhost:3333/api/{MODULE}/protected-endpoint"
-# ควรได้ HTTP 401
-```
-
-## 📋 Phase 4: Frontend Implementation (เขียน Frontend)
-
-### 4.1 Check Environment Configuration
-
-```bash
-# ต้องเป็น port 3333
-grep "apiUrl" apps/web/src/environments/environment.ts
-# ต้องได้: 'http://localhost:3333'
-```
-
-### 4.2 Create TypeScript Interfaces (ตรงกับ API Schema)
+**Module Plugin (index.ts):**
 
 ```typescript
-// ต้องตรงกับ {MODULE}.schemas.ts
-interface {MODULE}Request {
-  // fields ตรงกับ backend schema
-  field1: string;
-  field2: number;
-  field3?: boolean; // optional fields
-}
+// apps/api/src/layers/domains/inventory/master-data/drugs/index.ts
+import fp from 'fastify-plugin';
+import { FastifyInstance, FastifyPluginOptions } from 'fastify';
+import { DrugsController } from './drugs.controller';
+import { DrugsService } from './drugs.service';
+import { DrugsRepository } from './drugs.repository';
+import { drugsRoutes } from './drugs.route';
 
-interface {MODULE}Response {
-  success: boolean;
-  data: {
-    // response structure ตรงกับ backend
-    id: string;
-    ...otherFields;
-  };
-  meta: ApiMeta;
-}
-
-interface {MODULE}ListResponse {
-  success: boolean;
-  data: {MODULE}[];
-  pagination: PaginationMeta;
-  meta: ApiMeta;
-}
-```
-
-### 4.3 Implement Service with Correct URLs
-
-```typescript
-// Pattern สำหรับทุก module
-export class {MODULE}Service {
-  private baseUrl = `${environment.apiUrl}/api/{MODULE}`;
-
-  // GET list
-  getAll(params?: QueryParams) {
-    return this.http.get<{MODULE}ListResponse>(
-      `${this.baseUrl}`, { params }
-    );
-  }
-
-  // GET by ID
-  getById(id: string) {
-    return this.http.get<{MODULE}Response>(
-      `${this.baseUrl}/${id}`
-    );
-  }
-
-  // POST create
-  create(data: {MODULE}Request) {
-    return this.http.post<{MODULE}Response>(
-      `${this.baseUrl}`, data
-    );
-  }
-
-  // PUT update
-  update(id: string, data: Partial<{MODULE}Request>) {
-    return this.http.put<{MODULE}Response>(
-      `${this.baseUrl}/${id}`, data
-    );
-  }
-
-  // DELETE
-  delete(id: string) {
-    return this.http.delete<SuccessResponse>(
-      `${this.baseUrl}/${id}`
-    );
-  }
-}
-```
-
-## 📋 Phase 4: Frontend-Backend Alignment (ตรวจสอบ Sync)
-
-### 4.1 URL Pattern Check
-
-```bash
-# เช็คว่าทุก endpoint มี /api prefix (เปลี่ยน {MODULE})
-grep -n "environment.apiUrl.*{MODULE}" apps/web/src/app/services/{MODULE}.service.ts
-
-# ทุก URL ต้องมี /api/{MODULE}/ ไม่ใช่ /{MODULE}/
-grep -c "/api/{MODULE}" apps/web/src/app/services/{MODULE}.service.ts
-# ต้องได้จำนวน > 0
-```
-
-### 4.2 Schema Consistency Check
-
-```bash
-# เปรียบเทียบ request/response types
-# Backend: {MODULE}.schemas.ts
-# Frontend: {MODULE}.types.ts หรือ {MODULE}.service.ts interfaces
-
-# เช็คว่าฟิลด์ตรงกันไหม
-diff <(grep -A 10 "interface.*Request" apps/web/src/app/types/{MODULE}.types.ts) \
-     <(grep -A 10 "Type.Object" apps/api/src/modules/{MODULE}/{MODULE}.schemas.ts)
-```
-
-### 4.3 Integration Test
-
-```bash
-# รัน frontend และทดสอบจริง
-npx nx serve web
-# เปิด http://localhost:4200
-# ทดสอบ CRUD operations สำหรับ {MODULE}
-```
-
-## 📋 Phase 5: Quality Assurance (ทดสอบคุณภาพ)
-
-### 5.1 Build & Type Check
-
-```bash
-# ต้องผ่านทั้งหมด
-nx run-many --target=build --all
-nx run-many --target=typecheck --all
-```
-
-### 5.2 Linting
-
-```bash
-# ต้องไม่มี errors
-nx run-many --target=lint --all
-```
-
-### 5.3 Testing
-
-```bash
-# Unit tests
-nx run-many --target=test --all
-
-# Integration tests สำหรับ module
-nx test api --testNamePattern="{MODULE}"
-nx test web --testNamePattern="{MODULE}"
-
-# E2E tests (ถ้ามี)
-nx e2e e2e --spec="apps/e2e/src/{MODULE}.spec.ts"
-```
-
-### 5.4 Manual Verification
-
-```bash
-# เริ่มระบบ
-docker-compose up -d postgres
-npx nx serve api --inspect=false
-npx nx serve web
-
-# ทดสอบ CRUD flow:
-# 1. เปิด http://localhost:4200
-# 2. ไปหน้า {MODULE} management
-# 3. ทดสอบ Create, Read, Update, Delete
-# 4. เช็ค error handling
-# 5. เช็ค validation messages
-# 6. เช็ค loading states
-```
-
-## 🚨 Critical Checkpoints
-
-### ❌ Stop Development If:
-
-- API server ไม่รัน (port 3333)
-- OpenAPI spec ไม่มี endpoints ที่ต้องการ
-- curl test endpoints ไม่ผ่าน
-- Environment apiUrl ไม่ถูก port
-- Frontend service URLs ไม่มี `/api` prefix
-- Build หรือ typecheck fail
-- Integration test ไม่ผ่าน
-
-### ✅ Ready to Proceed When:
-
-- API endpoints ทำงานผ่าน curl
-- Frontend environment ถูกต้อง
-- URLs มี /api/{MODULE} prefix ครบ
-- TypeScript interfaces ตรงกับ API schemas
-- Build + lint + test ผ่านทั้งหมด
-- Manual CRUD operations ทำงาน end-to-end
-
-## 🎯 Examples for Common Modules
-
-### Users Module:
-
-```bash
-# API endpoints (default port: 3333)
-curl -s "/documentation/json" | jq '.paths' | grep "/api/users"
-# Frontend service
-apps/web/src/app/services/users.service.ts
-# URL pattern: /api/users, /api/users/{id}
-```
-
-### Settings Module:
-
-```bash
-# API endpoints (default port: 3333)
-curl -s "/documentation/json" | jq '.paths' | grep "/api/settings"
-# Frontend service
-apps/web/src/app/services/settings.service.ts
-# URL pattern: /api/settings, /api/settings/{key}
-```
-
-### Products Module:
-
-```bash
-# API endpoints (default port: 3333)
-curl -s "/documentation/json" | jq '.paths' | grep "/api/products"
-# Frontend service
-apps/web/src/app/services/products.service.ts
-# URL pattern: /api/products, /api/products/{id}
-```
-
-## 💡 Universal Patterns
-
-### 1. **Backend Module Structure:**
-
-#### Simple Module Structure (< 20 endpoints):
-
-```
-apps/api/src/modules/{MODULE}/
-├── {MODULE}.plugin.ts       # Main plugin entry (MANDATORY)
-├── {MODULE}.service.ts      # Business logic
-├── {MODULE}.repository.ts   # Data access with BaseRepository
-├── {MODULE}.schemas.ts      # TypeBox schemas (MANDATORY)
-├── {MODULE}.types.ts        # TypeScript types
-├── {MODULE}.test.ts         # Tests
-└── hooks/                   # Custom hooks
-    ├── validate-{MODULE}.hook.ts
-    └── format-response.hook.ts
-```
-
-#### Complex Module Structure (20+ endpoints):
-
-```
-apps/api/src/modules/{MODULE}/
-├── {MODULE}.plugin.ts       # Main plugin entry - registers all routes
-├── controllers/             # Multiple controllers
-│   ├── {MODULE}.controller.ts         # Basic CRUD operations
-│   ├── {MODULE}-profile.controller.ts # Profile management
-│   ├── {MODULE}-auth.controller.ts    # Authentication endpoints
-│   └── {MODULE}-admin.controller.ts   # Admin-only operations
-├── services/               # Business logic layer
-│   ├── {MODULE}.service.ts
-│   ├── {MODULE}-profile.service.ts
-│   ├── {MODULE}-auth.service.ts
-│   └── {MODULE}-admin.service.ts
-├── repositories/           # Data access layer
-│   ├── {MODULE}.repository.ts
-│   └── {MODULE}-session.repository.ts
-├── schemas/                # JSON schemas (MANDATORY)
-│   ├── {MODULE}.schemas.ts
-│   ├── profile.schemas.ts
-│   ├── auth.schemas.ts
-│   └── admin.schemas.ts
-├── types/                  # TypeScript types
-│   ├── {MODULE}.types.ts
-│   ├── auth.types.ts
-│   └── admin.types.ts
-├── hooks/                  # Custom hooks
-│   ├── validate-{MODULE}.hook.ts
-│   ├── audit-log.hook.ts
-│   └── format-response.hook.ts
-├── tests/                  # Test files
-│   ├── {MODULE}.controller.test.ts
-│   ├── {MODULE}.service.test.ts
-│   ├── {MODULE}.repository.test.ts
-│   └── integration.test.ts
-└── utils/                  # Module-specific utilities
-    ├── password.utils.ts
-    └── validation.utils.ts
-```
-
-#### Plugin-First Architecture (MANDATORY):
-
-```typescript
-// apps/api/src/modules/{MODULE}/{MODULE}.plugin.ts
 export default fp(
-  async function {MODULE}Plugin(fastify: FastifyInstance) {
-    // 1. Register schemas FIRST (MANDATORY)
-    Object.values({MODULE}Schemas).forEach((schema) => {
-      fastify.addSchema(schema);
+  async function drugsDomainPlugin(fastify: FastifyInstance, options: FastifyPluginOptions) {
+    // Service instantiation with proper dependency injection
+    const drugsRepository = new DrugsRepository((fastify as any).knex);
+    const drugsService = new DrugsService(drugsRepository);
+    const drugsController = new DrugsController(drugsService);
+
+    // Register routes
+    await fastify.register(drugsRoutes, {
+      controller: drugsController,
+      prefix: options.prefix || '/inventory/master-data/drugs',
     });
 
-    // 2. Initialize repository
-    const {MODULE}Repository = new {MODULE}Repository(fastify.knex);
-
-    // 3. Initialize service
-    const {MODULE}Service = new {MODULE}Service({MODULE}Repository);
-
-    // 4. Decorate fastify instance
-    fastify.decorate('{MODULE}Service', {MODULE}Service);
-
-    // 5. Register routes with REQUIRED schemas
-    await fastify.register({MODULE}Routes, { prefix: '/api/{MODULE}' });
+    fastify.addHook('onReady', async () => {
+      fastify.log.info(`Drugs domain module registered successfully`);
+    });
   },
   {
-    name: '{MODULE}-plugin',
-    dependencies: ['knex-plugin', 'schema-plugin'], // MANDATORY
+    name: 'drugs-domain-plugin',
+    dependencies: ['knex-plugin'],
+  },
+);
+
+// Re-exports
+export * from './drugs.schemas';
+export * from './drugs.types';
+export { DrugsRepository } from './drugs.repository';
+export { DrugsService } from './drugs.service';
+export { DrugsController } from './drugs.controller';
+```
+
+**Section Aggregator Plugin (master-data/index.ts):**
+
+```typescript
+// apps/api/src/layers/domains/inventory/master-data/index.ts
+import fp from 'fastify-plugin';
+import type { FastifyInstance, FastifyPluginOptions } from 'fastify';
+
+import drugsPlugin from './drugs';
+import locationsPlugin from './locations';
+import budgetsPlugin from './budgets';
+
+export default fp(
+  async function masterDataDomainPlugin(fastify: FastifyInstance, options: FastifyPluginOptions) {
+    const prefix = options.prefix || '/inventory/master-data';
+
+    // Register all domain modules
+    await fastify.register(drugsPlugin, {
+      ...options,
+      prefix: `${prefix}/drugs`,
+    });
+    await fastify.register(locationsPlugin, {
+      ...options,
+      prefix: `${prefix}/locations`,
+    });
+    await fastify.register(budgetsPlugin, {
+      ...options,
+      prefix: `${prefix}/budgets`,
+    });
+
+    fastify.addHook('onReady', async () => {
+      fastify.log.info(`Master-data domain loaded at ${prefix}`);
+    });
+  },
+  {
+    name: 'masterData-domain-plugin',
+    dependencies: ['knex-plugin'],
   },
 );
 ```
 
-#### MANDATORY Schema System:
+### 2.3 TypeBox Schemas
+
+**Schema Definition:**
 
 ```typescript
-// Every route MUST have complete schema definition
-fastify.route({
-  method: 'POST',
-  url: '/',
-  schema: {
-    description: 'Create new {MODULE}',
-    tags: ['{MODULE}'],
-    body: { $ref: 'create{MODULE}Request#' },
-    response: {
-      201: { $ref: '{MODULE}Response#' },
-      400: { $ref: 'validationErrorResponse#' },
-      401: { $ref: 'unauthorizedResponse#' },
-      409: { $ref: 'conflictResponse#' },
+// apps/api/src/layers/domains/inventory/master-data/drugs/drugs.schemas.ts
+import { Type, Static } from '@sinclair/typebox';
+import { ApiSuccessResponseSchema, PaginatedResponseSchema } from '../../../../../schemas/base.schemas';
+
+// Base Entity Schema
+export const DrugsSchema = Type.Object({
+  id: Type.Integer(),
+  drug_code: Type.String({ minLength: 1, maxLength: 50 }),
+  trade_name: Type.String({ minLength: 1, maxLength: 255 }),
+  generic_id: Type.Integer(),
+  manufacturer_id: Type.Integer(),
+  unit_price: Type.Optional(Type.Number({ minimum: 0 })),
+  is_active: Type.Optional(Type.Boolean()),
+  created_at: Type.Optional(Type.String({ format: 'date-time' })),
+  updated_at: Type.Optional(Type.String({ format: 'date-time' })),
+});
+
+// Create Schema (without auto-generated fields)
+export const CreateDrugsSchema = Type.Object({
+  drug_code: Type.String({ minLength: 1, maxLength: 50 }),
+  trade_name: Type.String({ minLength: 1, maxLength: 255 }),
+  generic_id: Type.Integer(),
+  manufacturer_id: Type.Integer(),
+  unit_price: Type.Optional(Type.Number({ minimum: 0 })),
+  is_active: Type.Optional(Type.Boolean()),
+});
+
+// Update Schema (partial)
+export const UpdateDrugsSchema = Type.Partial(CreateDrugsSchema);
+
+// ID Parameter Schema
+export const DrugsIdParamSchema = Type.Object({
+  id: Type.Union([Type.String(), Type.Number()]),
+});
+
+// Query Schema
+export const ListDrugsQuerySchema = Type.Object({
+  page: Type.Optional(Type.Number({ minimum: 1, default: 1 })),
+  limit: Type.Optional(Type.Number({ minimum: 1, maximum: 1000, default: 20 })),
+  sort: Type.Optional(Type.String()),
+  search: Type.Optional(Type.String()),
+  is_active: Type.Optional(Type.Boolean()),
+});
+
+// Response Schemas
+export const DrugsResponseSchema = ApiSuccessResponseSchema(DrugsSchema);
+export const DrugsListResponseSchema = PaginatedResponseSchema(DrugsSchema);
+
+// Export types
+export type Drugs = Static<typeof DrugsSchema>;
+export type CreateDrugs = Static<typeof CreateDrugsSchema>;
+export type UpdateDrugs = Static<typeof UpdateDrugsSchema>;
+```
+
+### 2.4 Routes Definition
+
+**Route Pattern:**
+
+```typescript
+// apps/api/src/layers/domains/inventory/master-data/drugs/drugs.route.ts
+import { FastifyInstance, FastifyPluginOptions } from 'fastify';
+import { DrugsController } from './drugs.controller';
+import { CreateDrugsSchema, UpdateDrugsSchema, DrugsIdParamSchema, ListDrugsQuerySchema, DrugsResponseSchema, DrugsListResponseSchema } from './drugs.schemas';
+import { SchemaRefs } from '../../../../../schemas/registry';
+
+export interface DrugsRoutesOptions extends FastifyPluginOptions {
+  controller: DrugsController;
+}
+
+export async function drugsRoutes(fastify: FastifyInstance, options: DrugsRoutesOptions) {
+  const { controller } = options;
+
+  // Create
+  fastify.post('/', {
+    schema: {
+      tags: ['Inventory: Drugs'],
+      summary: 'Create a new drug',
+      body: CreateDrugsSchema,
+      response: {
+        201: DrugsResponseSchema,
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        409: SchemaRefs.Conflict,
+        500: SchemaRefs.ServerError,
+      },
     },
-  },
-  preHandler: [fastify.auth([fastify.verifyJWT])],
-  handler: async (request, reply) => {
-    const {MODULE} = await fastify.{MODULE}Service.create(request.body);
-    return reply.created({MODULE}, '{MODULE} created successfully');
-  },
-});
+    preValidation: [fastify.authenticate, fastify.verifyPermission('drugs', 'create')],
+    handler: controller.create.bind(controller),
+  });
+
+  // List
+  fastify.get('/', {
+    schema: {
+      tags: ['Inventory: Drugs'],
+      summary: 'List all drugs with pagination',
+      querystring: ListDrugsQuerySchema,
+      response: {
+        200: DrugsListResponseSchema,
+        401: SchemaRefs.Unauthorized,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [fastify.authenticate, fastify.verifyPermission('drugs', 'read')],
+    handler: controller.findMany.bind(controller),
+  });
+
+  // Get by ID
+  fastify.get('/:id', {
+    schema: {
+      tags: ['Inventory: Drugs'],
+      summary: 'Get drug by ID',
+      params: DrugsIdParamSchema,
+      response: {
+        200: DrugsResponseSchema,
+        401: SchemaRefs.Unauthorized,
+        404: SchemaRefs.NotFound,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [fastify.authenticate, fastify.verifyPermission('drugs', 'read')],
+    handler: controller.findOne.bind(controller),
+  });
+
+  // Update
+  fastify.put('/:id', {
+    schema: {
+      tags: ['Inventory: Drugs'],
+      summary: 'Update drug',
+      params: DrugsIdParamSchema,
+      body: UpdateDrugsSchema,
+      response: {
+        200: DrugsResponseSchema,
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        404: SchemaRefs.NotFound,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [fastify.authenticate, fastify.verifyPermission('drugs', 'update')],
+    handler: controller.update.bind(controller),
+  });
+
+  // Delete
+  fastify.delete('/:id', {
+    schema: {
+      tags: ['Inventory: Drugs'],
+      summary: 'Delete drug',
+      params: DrugsIdParamSchema,
+      response: {
+        200: SchemaRefs.OperationResult,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        404: SchemaRefs.NotFound,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [fastify.authenticate, fastify.verifyPermission('drugs', 'delete')],
+    handler: controller.delete.bind(controller),
+  });
+}
 ```
 
-### 2. **Frontend Module Structure:**
+**Critical Rules:**
 
-```
-apps/web/src/app/features/{MODULE}/
-├── services/{MODULE}.service.ts    # API calls
-├── types/{MODULE}.types.ts         # TypeScript interfaces
-├── components/                     # UI components
-└── pages/                         # Route components
-```
+- Use `fastify.authenticate` decorator (NOT function call)
+- Use `fastify.verifyPermission(resource, action)` for authorization
+- Use `SchemaRefs` for error responses
+- Bind controller methods: `controller.create.bind(controller)`
+- Use descriptive tags: `['Inventory: Drugs']`
 
-### 3. **RBAC Authentication Patterns (MANDATORY):**
+### 2.5 Repository Pattern
 
-#### Complex Authentication with @fastify/auth:
+**Repository Implementation:**
 
 ```typescript
-// Simple JWT auth
-fastify.route({
-  method: 'GET',
-  url: '/',
-  preHandler: fastify.auth([fastify.verifyJWT]),
-  handler: async () => {
-    /* list items */
-  },
-});
+// apps/api/src/layers/domains/inventory/master-data/drugs/drugs.repository.ts
+import { Knex } from 'knex';
+import { BaseRepository } from '../../../../core/database/base.repository';
+import { Drugs, CreateDrugs, UpdateDrugs } from './drugs.types';
 
-// JWT + Role authorization
-fastify.route({
-  method: 'POST',
-  url: '/',
-  preHandler: fastify.auth([fastify.verifyJWT, fastify.verifyRole(['admin', 'manager'])]),
-  handler: async () => {
-    /* create item */
-  },
-});
+export class DrugsRepository extends BaseRepository<Drugs> {
+  constructor(db: Knex) {
+    super(db, 'inventory.drugs'); // Note: schema.table
+  }
 
-// JWT + (Admin OR Owner) - OR relationship
-fastify.route({
-  method: 'GET',
-  url: '/:id/profile',
-  preHandler: fastify.auth([fastify.verifyJWT, [fastify.verifyRole(['admin']), fastify.verifyOwnership('id')]], { relation: 'or' }),
-  handler: async () => {
-    /* get profile */
-  },
-});
+  // Custom methods
+  async findByCode(code: string): Promise<Drugs | undefined> {
+    return this.db('inventory.drugs').where({ drug_code: code }).first();
+  }
 
-// Multiple conditions with AND (default)
-fastify.route({
-  method: 'DELETE',
-  url: '/:id',
-  preHandler: fastify.auth([
-    fastify.verifyJWT, // Must be authenticated
-    fastify.verifyRole(['admin']), // Must be admin
-    fastify.verifyBusinessHours, // Must be business hours
-    fastify.verifyUserRateLimit(5), // Max 5 deletes per minute
-  ]),
-  handler: async () => {
-    /* delete item */
-  },
-});
+  async findActive(): Promise<Drugs[]> {
+    return this.db('inventory.drugs').where({ is_active: true }).orderBy('trade_name');
+  }
+}
 ```
 
-#### Repository Pattern with BaseRepository:
+**Critical Rules:**
+
+- ALWAYS use schema prefix: `inventory.drugs` (not just `drugs`)
+- Extend BaseRepository for type-safe operations
+- UUID validation handled automatically by BaseRepository
+- Use schema prefix in all query builders
+
+### 2.6 Test Backend Endpoints
+
+**MANDATORY before frontend development.**
+
+```bash
+# Start API server
+pnpm run dev:api
+
+# Test list endpoint
+curl -X GET "http://localhost:3383/api/inventory/master-data/drugs" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  | jq .
+
+# Test create endpoint
+curl -X POST "http://localhost:3383/api/inventory/master-data/drugs" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "drug_code": "TEST001",
+    "trade_name": "Test Drug",
+    "generic_id": 1,
+    "manufacturer_id": 1
+  }' \
+  | jq .
+
+# Test get by ID
+curl -X GET "http://localhost:3383/api/inventory/master-data/drugs/1" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  | jq .
+
+# Test update
+curl -X PUT "http://localhost:3383/api/inventory/master-data/drugs/1" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "trade_name": "Updated Drug Name"
+  }' \
+  | jq .
+
+# Test delete
+curl -X DELETE "http://localhost:3383/api/inventory/master-data/drugs/1" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  | jq .
+
+# Test validation error (400)
+curl -X POST "http://localhost:3383/api/inventory/master-data/drugs" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"invalid": "data"}' \
+  | jq .
+
+# Test unauthorized (401)
+curl -X GET "http://localhost:3383/api/inventory/master-data/drugs" \
+  | jq .
+
+# Test not found (404)
+curl -X GET "http://localhost:3383/api/inventory/master-data/drugs/999999" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  | jq .
+```
+
+**Checklist:**
+
+- All CRUD operations return expected status codes
+- Validation errors return 400 with details
+- Unauthorized returns 401
+- Not found returns 404
+- Success responses match schema
+- No console errors in server logs
+
+---
+
+## Phase 3: Frontend Development
+
+### 3.1 TypeScript Interfaces
+
+**Create types matching backend schemas:**
 
 ```typescript
-// Every module MUST extend BaseRepository
-class {MODULE}Repository extends BaseRepository<{MODULE}, Create{MODULE}Request, Update{MODULE}Request> {
-  constructor(knex: Knex) {
-    super(
-      knex,
-      '{MODULE}s',
-      ['{MODULE}s.name', '{MODULE}s.description'], // searchFields
+// apps/web/src/app/features/inventory/types/drugs.types.ts
+
+export interface Drug {
+  id: number;
+  drug_code: string;
+  trade_name: string;
+  generic_id: number;
+  manufacturer_id: number;
+  unit_price?: number;
+  is_active?: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CreateDrugRequest {
+  drug_code: string;
+  trade_name: string;
+  generic_id: number;
+  manufacturer_id: number;
+  unit_price?: number;
+  is_active?: boolean;
+}
+
+export interface UpdateDrugRequest {
+  drug_code?: string;
+  trade_name?: string;
+  generic_id?: number;
+  manufacturer_id?: number;
+  unit_price?: number;
+  is_active?: boolean;
+}
+
+export interface DrugResponse {
+  success: boolean;
+  data: Drug;
+  message?: string;
+}
+
+export interface DrugListResponse {
+  success: boolean;
+  data: Drug[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+```
+
+### 3.2 Service with Signals
+
+**Angular service using signals pattern:**
+
+```typescript
+// apps/web/src/app/features/inventory/services/drugs.service.ts
+import { Injectable, signal, computed } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, tap } from 'rxjs';
+import { Drug, CreateDrugRequest, UpdateDrugRequest, DrugResponse, DrugListResponse } from '../types/drugs.types';
+
+@Injectable({ providedIn: 'root' })
+export class DrugsService {
+  private readonly baseUrl = '/api/inventory/master-data/drugs';
+
+  // Signals for state management
+  private drugsSignal = signal<Drug[]>([]);
+  private loadingSignal = signal(false);
+  private errorSignal = signal<string | null>(null);
+
+  // Computed signals
+  drugs = this.drugsSignal.asReadonly();
+  loading = this.loadingSignal.asReadonly();
+  error = this.errorSignal.asReadonly();
+  activeDrugs = computed(() => this.drugsSignal().filter((d) => d.is_active));
+
+  constructor(private http: HttpClient) {}
+
+  list(params?: { page?: number; limit?: number; search?: string; is_active?: boolean }): Observable<DrugListResponse> {
+    let httpParams = new HttpParams();
+    if (params?.page) httpParams = httpParams.set('page', params.page);
+    if (params?.limit) httpParams = httpParams.set('limit', params.limit);
+    if (params?.search) httpParams = httpParams.set('search', params.search);
+    if (params?.is_active !== undefined) httpParams = httpParams.set('is_active', params.is_active);
+
+    this.loadingSignal.set(true);
+    this.errorSignal.set(null);
+
+    return this.http.get<DrugListResponse>(this.baseUrl, { params: httpParams }).pipe(
+      tap({
+        next: (response) => {
+          this.drugsSignal.set(response.data);
+          this.loadingSignal.set(false);
+        },
+        error: (err) => {
+          this.errorSignal.set(err.error?.message || 'Failed to load drugs');
+          this.loadingSignal.set(false);
+        },
+      }),
     );
   }
 
-  // REQUIRED: Transform database row to entity
-  transformToEntity(dbRow: any): {MODULE} {
-    return {
-      id: dbRow.id,
-      name: dbRow.name,
-      description: dbRow.description,
-      isActive: dbRow.is_active,
-      createdAt: dbRow.created_at,
-      updatedAt: dbRow.updated_at,
-    };
+  getById(id: number): Observable<DrugResponse> {
+    return this.http.get<DrugResponse>(`${this.baseUrl}/${id}`);
   }
 
-  // REQUIRED: Transform DTO to database format
-  transformToDb(dto: Create{MODULE}Request | Update{MODULE}Request): any {
-    const transformed: any = {};
-    if ('name' in dto) transformed.name = dto.name;
-    if ('description' in dto) transformed.description = dto.description;
-    if ('isActive' in dto) transformed.is_active = dto.isActive;
-    return transformed;
+  create(data: CreateDrugRequest): Observable<DrugResponse> {
+    return this.http.post<DrugResponse>(this.baseUrl, data);
   }
 
-  // Override for custom filtering
-  protected applyCustomFilters(query: Knex.QueryBuilder, filters: any) {
-    const { status, category } = filters;
-    if (status) query.where('{MODULE}s.is_active', status === 'active');
-    if (category) query.where('{MODULE}s.category', category);
+  update(id: number, data: UpdateDrugRequest): Observable<DrugResponse> {
+    return this.http.put<DrugResponse>(`${this.baseUrl}/${id}`, data);
+  }
+
+  delete(id: number): Observable<{ success: boolean; message: string }> {
+    return this.http.delete<{ success: boolean; message: string }>(`${this.baseUrl}/${id}`);
   }
 }
 ```
 
-### 4. **URL Consistency:**
+### 3.3 Standalone Components
 
-- Backend: `/api/{MODULE}/{action}`
-- Frontend: `${environment.apiUrl}/api/{MODULE}/{action}`
-
-### 5. **Complete Schema System (MANDATORY):**
+**List Component with Signals:**
 
 ```typescript
-// apps/api/src/modules/{MODULE}/{MODULE}.schemas.ts
-export const {MODULE}Schemas = {
-  // Base entity schema
-  {MODULE}: {
-    $id: '{MODULE}',
-    type: 'object',
-    properties: {
-      id: { type: 'string', format: 'uuid', description: 'Unique identifier' },
-      name: { type: 'string', minLength: 1, maxLength: 100, description: 'Name' },
-      description: { type: 'string', minLength: 1, maxLength: 500, description: 'Description' },
-      isActive: { type: 'boolean', description: 'Active status' },
-      createdAt: { type: 'string', format: 'date-time', description: 'Creation timestamp' },
-      updatedAt: { type: 'string', format: 'date-time', description: 'Last update timestamp' },
-    },
-    required: ['id', 'name', 'description', 'isActive', 'createdAt', 'updatedAt'],
-    additionalProperties: false,
-  },
+// apps/web/src/app/features/inventory/components/drug-list/drug-list.component.ts
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { DrugsService } from '../../services/drugs.service';
+import { Drug } from '../../types/drugs.types';
 
-  // Request schemas
-  create{MODULE}Request: {
-    $id: 'create{MODULE}Request',
-    type: 'object',
-    properties: {
-      name: { type: 'string', minLength: 1, maxLength: 100, description: 'Name' },
-      description: { type: 'string', minLength: 1, maxLength: 500, description: 'Description' },
-      isActive: { type: 'boolean', default: true, description: 'Initial active status' },
-    },
-    required: ['name', 'description'],
-    additionalProperties: false,
-  },
+@Component({
+  selector: 'app-drug-list',
+  standalone: true,
+  imports: [CommonModule],
+  templateUrl: './drug-list.component.html',
+})
+export class DrugListComponent implements OnInit {
+  private drugsService = inject(DrugsService);
+  private router = inject(Router);
 
-  update{MODULE}Request: {
-    $id: 'update{MODULE}Request',
-    type: 'object',
-    properties: {
-      name: { type: 'string', minLength: 1, maxLength: 100 },
-      description: { type: 'string', minLength: 1, maxLength: 500 },
-      isActive: { type: 'boolean' },
-    },
-    additionalProperties: false,
-    minProperties: 1,
-  },
+  // Local component state
+  drugs = signal<Drug[]>([]);
+  loading = signal(false);
+  error = signal<string | null>(null);
+  pagination = signal({
+    page: 1,
+    limit: 20,
+    total: 0,
+    totalPages: 0,
+  });
 
-  // Response schemas - ALL REQUIRED
-  {MODULE}Response: {
-    $id: '{MODULE}Response',
-    type: 'object',
-    properties: {
-      success: { type: 'boolean', const: true },
-      data: { $ref: '{MODULE}#' },
-      message: { type: 'string' },
-    },
-    required: ['success', 'data'],
-    additionalProperties: false,
-  },
+  ngOnInit() {
+    this.loadDrugs();
+  }
 
-  paginated{MODULE}Response: {
-    $id: 'paginated{MODULE}Response',
-    type: 'object',
-    properties: {
-      success: { type: 'boolean', const: true },
-      data: { type: 'array', items: { $ref: '{MODULE}#' } },
-      message: { type: 'string' },
-      pagination: { $ref: 'pagination#' },
-    },
-    required: ['success', 'data', 'pagination'],
-    additionalProperties: false,
-  },
-};
+  loadDrugs() {
+    this.loading.set(true);
+    this.error.set(null);
+
+    this.drugsService
+      .list({
+        page: this.pagination().page,
+        limit: this.pagination().limit,
+      })
+      .subscribe({
+        next: (response) => {
+          this.drugs.set(response.data);
+          this.pagination.set(response.pagination);
+          this.loading.set(false);
+        },
+        error: (err) => {
+          this.error.set(err.error?.message || 'Failed to load drugs');
+          this.loading.set(false);
+        },
+      });
+  }
+
+  onPageChange(page: number) {
+    this.pagination.update((p) => ({ ...p, page }));
+    this.loadDrugs();
+  }
+
+  onEdit(drug: Drug) {
+    this.router.navigate(['/inventory/drugs', drug.id, 'edit']);
+  }
+
+  onDelete(drug: Drug) {
+    if (!confirm(`Delete drug "${drug.trade_name}"?`)) return;
+
+    this.drugsService.delete(drug.id).subscribe({
+      next: () => {
+        this.loadDrugs(); // Reload list
+      },
+      error: (err) => {
+        alert(err.error?.message || 'Failed to delete drug');
+      },
+    });
+  }
+}
 ```
 
-### 6. **Response Format:**
+**Form Component with AegisX UI:**
 
 ```typescript
-// Success response
-{
-  success: true,
-  data: T | T[],
-  pagination?: PaginationMeta,
-  meta: ApiMeta
+// apps/web/src/app/features/inventory/components/drug-form/drug-form.component.ts
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { DrugsService } from '../../services/drugs.service';
+
+@Component({
+  selector: 'app-drug-form',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule],
+  templateUrl: './drug-form.component.html',
+})
+export class DrugFormComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private drugsService = inject(DrugsService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+
+  form!: FormGroup;
+  isEditMode = signal(false);
+  drugId = signal<number | null>(null);
+  loading = signal(false);
+  error = signal<string | null>(null);
+
+  ngOnInit() {
+    this.initForm();
+
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.isEditMode.set(true);
+      this.drugId.set(Number(id));
+      this.loadDrug(Number(id));
+    }
+  }
+
+  initForm() {
+    this.form = this.fb.group({
+      drug_code: ['', [Validators.required, Validators.maxLength(50)]],
+      trade_name: ['', [Validators.required, Validators.maxLength(255)]],
+      generic_id: [null, [Validators.required]],
+      manufacturer_id: [null, [Validators.required]],
+      unit_price: [0, [Validators.min(0)]],
+      is_active: [true],
+    });
+  }
+
+  loadDrug(id: number) {
+    this.loading.set(true);
+    this.drugsService.getById(id).subscribe({
+      next: (response) => {
+        this.form.patchValue(response.data);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        this.error.set(err.error?.message || 'Failed to load drug');
+        this.loading.set(false);
+      },
+    });
+  }
+
+  onSubmit() {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    this.loading.set(true);
+    this.error.set(null);
+
+    const operation = this.isEditMode() ? this.drugsService.update(this.drugId()!, this.form.value) : this.drugsService.create(this.form.value);
+
+    operation.subscribe({
+      next: () => {
+        this.router.navigate(['/inventory/drugs']);
+      },
+      error: (err) => {
+        this.error.set(err.error?.message || 'Failed to save drug');
+        this.loading.set(false);
+      },
+    });
+  }
+
+  onCancel() {
+    this.router.navigate(['/inventory/drugs']);
+  }
 }
-
-// Error response
-{
-  success: false,
-  error: {
-    code: string,
-    message: string,
-    details?: any
-  },
-  meta: ApiMeta
-}
 ```
 
-## 🚀 Quick Verification Commands
+---
+
+## Phase 4: Integration & Testing
+
+### 4.1 Build Verification (MANDATORY)
 
 ```bash
-# All-in-one check for any module (default port: 3333)
-curl -s /api/health && \
-grep -q "3333" apps/web/src/environments/environment.ts && \
-grep -q "/api/{MODULE}" apps/web/src/app/services/{MODULE}.service.ts && \
-nx run-many --target=build --all && \
-echo "✅ Ready for {MODULE} development!"
+# Build all projects
+pnpm run build
 
-# Test specific module endpoint (default port: 3333)
-curl -X GET "/api/{MODULE}" \
-  -H "Content-Type: application/json" \
-  | jq '.success'
-# Should return: true
-
-# Multi-instance development notes:
-# - Main repo (aegisx-starter): port 3333 (default)
-# - Feature repos: auto-assigned ports (3334, 3335, etc.)
-# - Use ${API_URL}/documentation for environment-specific access
+# MUST pass before commit
 ```
 
-## ⚡ **Quick Checklist (ป้องกันตกหล่น)**
+**Checklist:**
 
-### 🔥 **Pre-Development (ก่อนเริ่มเขียนโค้ด)**
+- No TypeScript errors
+- No circular dependencies
+- All projects build successfully
+
+### 4.2 End-to-End Testing
+
+**Manual Test Scenarios:**
+
+1. **Create**: Navigate to form, fill data, submit, verify in list
+2. **Read**: Click item in list, verify details page
+3. **Update**: Edit item, submit, verify changes in list
+4. **Delete**: Delete item, confirm, verify removed from list
+5. **Validation**: Try invalid data, verify error messages
+6. **Pagination**: Create 25+ items, test page navigation
+7. **Search**: Enter search term, verify filtered results
+
+**Browser Console Check:**
+
+- No red errors in Console tab
+- All API calls successful in Network tab
+- Proper request/response format
+- Authorization headers present
+
+---
+
+## Phase 5: Pre-Commit Checklist
+
+### 5.1 Quality Checks
 
 ```bash
-# ✅ 1. Database Schema
-./scripts/check-database.sh {MODULE}  # เช็ค table exists
-psql $DATABASE_URL -c "\d+ {MODULE}s"  # ดู columns
+# 1. Build check (MANDATORY)
+pnpm run build
 
-# ✅ 2. API Running
-curl -s http://localhost:3333/api/health  # API must respond 200
+# 2. Type check
+nx run-many --target=typecheck --all
 
-# ✅ 3. OpenAPI Spec (default port: 3333)
-curl -s "/documentation/json" | jq '.paths' | grep "/api/{MODULE}"
+# 3. Lint check
+nx run-many --target=lint --all
 
-# ✅ 4. Environment Check
-grep "3333" apps/web/src/environments/environment.ts  # Must be port 3333
+# 4. Fix linting issues
+nx run-many --target=lint --all --fix
 ```
 
-### 🚀 **During Development (ระหว่างเขียนโค้ด)**
+### 5.2 Git Workflow
+
+**Add Specific Files Only:**
 
 ```bash
-# ✅ 5. Backend Structure
-ls apps/api/src/modules/{MODULE}/{MODULE}.plugin.ts    # Plugin exists?
-ls apps/api/src/modules/{MODULE}/{MODULE}.schemas.ts   # Schemas exists?
+# NEVER use git add -A or git add .
+# ALWAYS add specific files
 
-# ✅ 6. Test API Endpoints
-curl -X GET "http://localhost:3333/api/{MODULE}"  # GET works?
-curl -X POST "http://localhost:3333/api/{MODULE}" -H "Content-Type: application/json" -d '{}'  # POST fails correctly?
-
-# ✅ 7. Frontend Service URLs
-grep -n "/api/{MODULE}" apps/web/src/app/services/{MODULE}.service.ts  # Has /api prefix?
+git add apps/api/src/layers/domains/inventory/master-data/drugs/
+git add apps/web/src/app/features/inventory/components/drug-list/
+git add apps/web/src/app/features/inventory/services/drugs.service.ts
+git add apps/api/src/database/migrations/inventory/*_create_drugs_table.ts
 ```
 
-### ✨ **Pre-Commit (ก่อน commit)**
+**Check Staged Changes:**
 
 ```bash
-# ✅ 8. Build & Types
-nx run-many --target=build --all           # Must pass
-nx run-many --target=typecheck --all       # Must pass
-
-# ✅ 9. Alignment Check
-./scripts/api-alignment-check.sh           # Run comprehensive check
-
-# ✅ 10. Manual Test
-# Open http://localhost:4200 → Test CRUD → All operations work?
+git status
+git diff --staged
 ```
 
-### 🔥 **Additional Critical Checks (เพิ่มเติม)**
+**Commit with Proper Message:**
 
 ```bash
-# ✅ 11. Dependencies & Versions
-yarn install --check-files                 # All packages installed?
-grep -r "localhost:3335" .                 # No hardcoded wrong ports?
+# Correct format: type(scope): subject
+git commit -m "feat(inventory): add drug catalog CRUD
 
-# ✅ 12. Authentication & CORS
-curl -H "Authorization: Bearer invalid-token" http://localhost:3333/api/{MODULE}  # Returns 401?
-curl -X OPTIONS -H "Origin: http://localhost:4200" http://localhost:3333/api/{MODULE}  # CORS OK?
+- Add migration for inventory.drugs table
+- Implement CRUD endpoints with plugin pattern
+- Create Angular service with signals
+- Add list and form components
+- Include TypeBox schemas for validation
 
-# ✅ 13. Database Constraints
-psql $DATABASE_URL -c "SELECT * FROM information_schema.table_constraints WHERE table_name = '{MODULE}s';"
-
-# ✅ 14. Error Handling
-curl -X POST "http://localhost:3333/api/{MODULE}" -d '{"invalid":"data"}'  # Returns 400?
-curl -X GET "http://localhost:3333/api/{MODULE}/999999"                   # Returns 404?
-
-# ✅ 15. Browser Console
-# Open DevTools → Console → No red errors?
-# Network tab → All API calls return expected status codes?
-
-# ✅ 16. Performance Check
-# Page loads < 3 seconds?
-# API responses < 500ms?
+IMPORTANT: Tested end-to-end, all operations working"
 ```
 
-## 🚨 **STOP Development If Any Fails**
+**Forbidden Patterns:**
 
-### ❌ **Critical Failures:**
+- NO `git add -A` or `git add .`
+- NO "Generated with Claude Code"
+- NO "Co-Authored-By: Claude"
+- NO "BREAKING CHANGE:" (triggers v2.x.x release)
+- Use "IMPORTANT:", "MAJOR UPDATE:", or "MIGRATION:" instead
 
-- Database table doesn't exist → **Fix migration first**
-- API server not running → **Start API server**
-- Port mismatch (3335 ≠ 3333) → **Fix environment.ts**
-- Missing `/api` prefix → **Fix service URLs**
-- Build/typecheck fails → **Fix TypeScript errors**
-- Manual CRUD doesn't work → **Debug integration**
-- **Dependencies missing** → **Run yarn install**
-- **Hardcoded wrong ports** → **Fix all localhost:3335 references**
-- **Auth returns 200 for invalid token** → **Fix authentication middleware**
-- **CORS errors in browser** → **Fix CORS configuration**
-- **DB constraints missing** → **Add foreign keys, unique constraints**
-- **No error handling** → **Add proper 400/404/500 responses**
-- **Console errors in browser** → **Fix JavaScript/TypeScript errors**
-- **Slow performance (>3s page load)** → **Optimize queries, add indexes**
+**Push to Branch:**
 
-### ✅ **Ready to Commit When:**
+```bash
+# Push to feature branch (NOT main)
+git push origin feature/inventory-drug-catalog
+```
 
-- All 16 checklist items ✅
-- Manual testing works end-to-end
-- No console errors in browser
-- No TypeScript compilation errors
+---
+
+## URL Structure Reference
+
+### Platform Layer
+
+```
+/api/v1/platform/users              # User management
+/api/v1/platform/rbac/roles         # RBAC roles
+/api/v1/platform/departments        # Departments
+/api/v1/platform/settings           # Settings
+```
+
+### Inventory Domain
+
+```
+# Master-Data (Configuration)
+/api/inventory/master-data/drugs
+/api/inventory/master-data/budgets
+/api/inventory/master-data/locations
+
+# Operations (Transactional)
+/api/inventory/operations/drug-distributions
+/api/inventory/operations/budget-allocations
+
+# Budget (Workflow)
+/api/inventory/budget/budget-requests
+/api/inventory/budget/budget-plans
+```
+
+---
+
+## Common Mistakes
+
+### Wrong: Missing Schema Prefix
+
+```typescript
+// Don't do this
+return this.db('drugs').select('*'); // Missing schema!
+```
+
+### Correct: Always Use Schema Prefix
+
+```typescript
+// Do this
+return this.db('inventory.drugs').select('*');
+```
+
+### Wrong: Wrong Data Type for Money
+
+```typescript
+// Don't do this
+table.float('unit_price'); // Precision issues!
+table.integer('unit_price'); // Can't handle decimals!
+```
+
+### Correct: Use DECIMAL for Money
+
+```typescript
+// Do this
+table.decimal('unit_price', 15, 2);
+```
+
+### Wrong: Function Call for Auth
+
+```typescript
+// Don't do this
+preValidation: [
+  authenticate(), // WRONG!
+  authorize('drugs'), // WRONG!
+];
+```
+
+### Correct: Use Fastify Decorators
+
+```typescript
+// Do this
+preValidation: [
+  fastify.authenticate, // Decorator
+  fastify.verifyPermission('drugs', 'create'), // Permission check
+];
+```
+
+### Wrong: Including /api Prefix in Service
+
+```typescript
+// Don't do this
+private readonly baseUrl = '/api/inventory/master-data/drugs'; // Results in /api/api/...
+```
+
+### Correct: Let Interceptor Add /api
+
+```typescript
+// Do this
+private readonly baseUrl = '/api/inventory/master-data/drugs'; // Correct full path
+```
+
+---
+
+## Quick Reference
+
+### CRUD Generation Commands
+
+```bash
+# Inventory Master-Data
+pnpm run crud -- drugs --domain inventory/master-data --schema inventory --force
+
+# Inventory Operations
+pnpm run crud -- drug_distributions --domain inventory/operations --schema inventory --force
+
+# Inventory Budget
+pnpm run crud -- budget_requests --domain inventory/budget --schema inventory --force
+
+# With features
+pnpm run crud:import -- drugs --domain inventory/master-data --schema inventory --force
+pnpm run crud:full -- drugs --domain inventory/master-data --schema inventory --force
+```
+
+### Testing Commands
+
+```bash
+# Backend
+curl -X GET "http://localhost:3383/api/inventory/master-data/drugs" \
+  -H "Authorization: Bearer TOKEN"
+
+# Build
+pnpm run build
+
+# Database
+pnpm run db:migrate:inventory
+pnpm run db:status:inventory
+psql $DATABASE_URL -c "\dt inventory.*"
+```
+
+### File Locations
+
+```
+Backend:
+apps/api/src/layers/domains/inventory/master-data/drugs/
+apps/api/src/layers/domains/inventory/operations/budget-allocations/
+apps/api/src/database/migrations/inventory/
+
+Frontend:
+apps/web/src/app/features/inventory/components/
+apps/web/src/app/features/inventory/services/
+apps/web/src/app/features/inventory/types/
+```
+
+---
+
+## Related Documentation
+
+- [Layer-Based Routing Architecture](../../architecture/layer-based-routing.md)
+- [Domain Architecture Guide](../../architecture/domain-architecture-guide.md)
+- [Inventory Domain Rules](.claude/rules/inventory-domain.md)
+- [Budget Domain Rules](.claude/rules/budget-domain.md)
+- [API Calling Standard](./api-calling-standard.md)
+- [Feature Development Standard](./feature-development-standard.md)
+- [Git Workflow Rules](.claude/rules/git-workflow.md)

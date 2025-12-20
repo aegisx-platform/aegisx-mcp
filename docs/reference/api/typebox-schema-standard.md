@@ -104,11 +104,19 @@ src/
 ├── schemas/
 │   ├── base.schemas.ts      # Core schemas (DO NOT MODIFY)
 │   └── registry.ts          # Schema registry (DO NOT MODIFY)
-└── modules/
-    └── [module]/
-        ├── [module].schemas.ts  # Module schemas (TypeBox)
-        ├── [module].types.ts    # Exported types
-        └── [module].routes.ts   # Routes using schemas
+└── layers/
+    └── domains/
+        └── [domain]/
+            ├── master-data/
+            │   └── [entity]/
+            │       ├── [entity].schemas.ts  # Entity schemas (TypeBox)
+            │       ├── [entity].types.ts    # Exported types
+            │       └── [entity].route.ts    # Routes using schemas
+            └── operations/
+                └── [entity]/
+                    ├── [entity].schemas.ts
+                    ├── [entity].types.ts
+                    └── [entity].route.ts
 ```
 
 ### Module Schema File Template
@@ -159,6 +167,53 @@ export const userSchemas = {
 };
 ```
 
+## SchemaRefs Pattern
+
+### Centralized Error Responses
+
+Use the `SchemaRefs` pattern to reference standardized error schemas throughout your routes. This ensures consistency and reduces code duplication.
+
+```typescript
+import { SchemaRefs } from '../../../../../schemas/registry';
+
+// Define error responses using centralized schemas
+response: {
+  200: DrugsResponseSchema,
+  400: SchemaRefs.ValidationError,
+  401: SchemaRefs.Unauthorized,
+  403: SchemaRefs.Forbidden,
+  404: SchemaRefs.NotFound,
+  409: SchemaRefs.Conflict,
+  422: SchemaRefs.UnprocessableEntity,
+  500: SchemaRefs.ServerError,
+}
+```
+
+### Available SchemaRefs
+
+The `SchemaRefs` object provides pre-configured error schemas:
+
+- **`SchemaRefs.ValidationError`** - 400: Validation failed on request input
+- **`SchemaRefs.Unauthorized`** - 401: Authentication required
+- **`SchemaRefs.Forbidden`** - 403: Authenticated but not authorized
+- **`SchemaRefs.NotFound`** - 404: Resource does not exist
+- **`SchemaRefs.Conflict`** - 409: Duplicate or conflicting data (e.g., already exists)
+- **`SchemaRefs.UnprocessableEntity`** - 422: Semantic validation failed
+- **`SchemaRefs.ServerError`** - 500: Internal server error
+
+### Module-Specific Schema References
+
+For success responses and module-specific schemas, use the `module()` method:
+
+```typescript
+response: {
+  200: SchemaRefs.module('drugs', 'drug-response'),
+  201: SchemaRefs.module('drugs', 'drug-response'),
+  400: SchemaRefs.ValidationError,
+  404: SchemaRefs.NotFound,
+}
+```
+
 ## Common Patterns
 
 ### 1. Query Parameters
@@ -177,18 +232,19 @@ const UserQuerySchema = Type.Intersect([
 ]);
 ```
 
-### 2. Error Responses
+### 2. Error Responses with SchemaRefs
 
 ```typescript
-// Use predefined error responses
+// Use predefined error responses via SchemaRefs
 response: {
   200: SchemaRefs.module('user', 'user-response'),
-  400: SchemaRefs.ValidationError,  // Validation errors
-  401: SchemaRefs.Unauthorized,     // Auth required
-  403: SchemaRefs.Forbidden,        // No permission
-  404: SchemaRefs.NotFound,         // Resource not found
-  409: SchemaRefs.Conflict,         // Duplicate/conflict
-  500: SchemaRefs.ServerError       // Server errors
+  400: SchemaRefs.ValidationError,      // Validation errors
+  401: SchemaRefs.Unauthorized,         // Auth required
+  403: SchemaRefs.Forbidden,            // No permission
+  404: SchemaRefs.NotFound,             // Resource not found
+  409: SchemaRefs.Conflict,             // Duplicate/conflict
+  422: SchemaRefs.UnprocessableEntity,  // Semantic validation
+  500: SchemaRefs.ServerError           // Server errors
 }
 ```
 

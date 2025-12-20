@@ -45,6 +45,37 @@
 
 ## REST API Integration
 
+### Authentication & Authorization Pattern
+
+```typescript
+// ❌ OLD PATTERN - DEPRECATED (Do not use)
+import { authenticate, authorize } from '@/auth';
+preValidation: [authenticate(), authorize('resource')];
+
+// ✅ NEW PATTERN - Use this
+preValidation: [fastify.authenticate, fastify.verifyPermission('resource', 'action')];
+
+// Example in route handler
+export async function usersRoute(fastify: FastifyInstance) {
+  fastify.get<{ Params: { id: string } }>(
+    '/users/:id',
+    {
+      preValidation: [fastify.authenticate, fastify.verifyPermission('users', 'read')],
+      schema: {
+        tags: ['Users'],
+        response: { 200: UserResponseSchema },
+      },
+    },
+    async (request, reply) => {
+      const user = await usersService.getById(request.params.id);
+      return reply.send(user);
+    },
+  );
+}
+```
+
+See `apps/api/src/core/auth/strategies/auth.strategies.ts` for reference implementation.
+
 ### Client Service Pattern
 
 ```typescript
@@ -372,7 +403,7 @@ export class EventService {
 ### Using EventService in Business Logic
 
 ```typescript
-// apps/api/src/modules/orders/orders.service.ts
+// apps/api/src/layers/domains/orders/orders.service.ts
 @Injectable()
 export class OrdersService {
   constructor(
@@ -966,8 +997,8 @@ async createCharge(amount: number): Promise<PaymentCharge> {
 ### URL Path Versioning
 
 ```typescript
-// apps/api/src/modules/users/users.routes.ts
-export async function usersRoutes(fastify: FastifyInstance, options: FastifyPluginOptions) {
+// apps/api/src/layers/platform/users/users.route.ts
+export async function usersRoute(fastify: FastifyInstance, options: FastifyPluginOptions) {
   // V1 endpoints
   fastify.get('/api/v1/users', {
     schema: {

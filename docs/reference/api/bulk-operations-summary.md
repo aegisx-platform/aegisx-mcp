@@ -13,7 +13,7 @@ A comprehensive Bulk Operations API for User Management with the following compo
 
 ### 2. TypeBox Schemas ✅
 
-**Added to `/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter/apps/api/src/modules/users/users.schemas.ts`:**
+**Added to `/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter/apps/api/src/layers/platform/users/users.schemas.ts`:**
 
 - `BulkUserIdsRequestSchema` - Base schema for user ID arrays
 - `BulkStatusChangeRequestSchema` - For activate/deactivate operations
@@ -23,7 +23,7 @@ A comprehensive Bulk Operations API for User Management with the following compo
 
 ### 3. Route Definitions ✅
 
-**Added to `/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter/apps/api/src/modules/users/users.routes.ts`:**
+**Added to `/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter/apps/api/src/layers/platform/users/users.route.ts`:**
 
 - Full route implementations with proper validation
 - Admin-only authorization
@@ -33,7 +33,7 @@ A comprehensive Bulk Operations API for User Management with the following compo
 
 ### 4. Controller Methods ✅
 
-**Added to `/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter/apps/api/src/modules/users/users.controller.ts`:**
+**Added to `/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter/apps/api/src/layers/platform/users/users.controller.ts`:**
 
 - `bulkActivateUsers()` - Controller method for bulk activation
 - `bulkDeactivateUsers()` - Controller method for bulk deactivation
@@ -122,14 +122,14 @@ All bulk operations return a standardized response:
 
 ## Documentation Created
 
-1. **`/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter/docs/api/bulk-operations-api-design.md`**
+1. **`/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter-1/docs/reference/api/bulk-operations-api-design.md`**
    - Complete API specification
    - Request/response formats
    - Error handling strategy
    - Security considerations
    - Performance recommendations
 
-2. **`/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter/docs/api/bulk-operations-implementation-guide.md`**
+2. **`/Users/sathitseethaphon/projects/aegisx-platform/aegisx-starter-1/docs/reference/api/bulk-operations-implementation-guide.md`**
    - Complete service layer implementation
    - Database optimization strategies
    - Rate limiting implementation

@@ -7,101 +7,212 @@ tags: [development, workflow, standards]
 
 # Feature Development Standard
 
-> **🚨 MANDATORY STANDARD** - This standard MUST be followed for every feature development to ensure quality, maintainability, and prevent conflicts in multi-feature environments.
+> **MANDATORY STANDARD** - This standard MUST be followed for every feature development to ensure quality, maintainability, and architectural consistency.
 
-## 📋 **Feature Development Lifecycle**
+## Overview
 
-### Phase 1: Planning & Documentation (MANDATORY)
+This guide reflects the **current layered architecture** with plugin-based routing, domain-driven design, and database-first development workflow.
 
-Every feature development MUST begin with proper planning and documentation. This phase ensures all stakeholders understand the requirements, technical approach, and success criteria before any code is written.
+**Key Architecture References:**
 
-#### Step 1.1: Database Schema Design
+- [Layer-Based Routing](../../architecture/layer-based-routing.md) - 3-layer structure
+- [Domain Architecture Guide](../../architecture/domain-architecture-guide.md) - Domain classification
+- [Backend Architecture](../../architecture/backend-architecture.md) - Plugin patterns
+
+---
+
+## Feature Development Lifecycle
+
+### Phase 1: Planning & Domain Classification
+
+#### Step 1.1: Determine Layer & Domain Placement
+
+**CRITICAL:** Every feature MUST be correctly classified before development.
+
+**3-Layer Architecture:**
+
+```
+apps/api/src/layers/
+├── core/           # Infrastructure (auth, audit, monitoring)
+├── platform/       # Shared services (users, rbac, departments)
+└── domains/        # Business domains (inventory, hr, etc.)
+```
+
+**Decision Matrix:**
+
+| Question                           | Answer | Layer    | Example Path                |
+| ---------------------------------- | ------ | -------- | --------------------------- |
+| Is this infrastructure/auth?       | Yes    | Core     | `layers/core/auth/`         |
+| Is this shared across all domains? | Yes    | Platform | `layers/platform/users/`    |
+| Is this business-specific?         | Yes    | Domains  | `layers/domains/inventory/` |
+
+**Domain Section Classification (for business domains):**
+
+| Question                        | Answer | Section     | Example                                        |
+| ------------------------------- | ------ | ----------- | ---------------------------------------------- |
+| Is this lookup/reference data?  | Yes    | master-data | `drugs`, `locations`                           |
+| Is this transactional data?     | Yes    | operations  | `drug_distributions`, `inventory_transactions` |
+| Is this specific business area? | Yes    | Custom      | `procurement`, `budget`, `tmt`                 |
+
+**Tools:**
+
+```bash
+# Use Domain Checker before generating CRUD
+bash /tmp/check_domain.sh TABLE_NAME
+```
+
+**Example Classifications:**
+
+```bash
+# Platform Layer (shared services)
+/api/v1/platform/users
+/api/v1/platform/rbac/roles
+/api/v1/platform/departments
+
+# Inventory Domain - Master Data
+/api/inventory/master-data/drugs
+/api/inventory/master-data/budgets
+/api/inventory/master-data/locations
+
+# Inventory Domain - Operations
+/api/inventory/operations/drug-distributions
+/api/inventory/operations/budget-allocations
+/api/inventory/operations/inventory-transactions
+```
+
+**Reference:** See `.claude/rules/inventory-domain.md` for complete examples
+
+**Checklist:**
+
+- [ ] Layer determined (core, platform, or domains)
+- [ ] If domains: section identified (master-data, operations, etc.)
+- [ ] URL pattern defined
+- [ ] Database schema determined (public vs domain schema)
+- [ ] Domain checker script executed
+
+---
+
+#### Step 1.2: Database Schema Design
 
 **Database-first approach is MANDATORY.** The database schema drives the entire feature architecture.
 
-```bash
-# 1. Create migration file
-npx knex migrate:make create_feature_table
+**Schema Selection:**
 
-# 2. Define schema in migration
-# database/migrations/TIMESTAMP_create_feature_table.ts
+- Platform layer: Use `public` schema
+- Domain layer: Use domain-specific schema (e.g., `inventory`)
+
+**Example Migration:**
+
+```typescript
+// apps/api/src/database/migrations/20250120100000_create_drugs.ts
+import { Knex } from 'knex';
+
 export async function up(knex: Knex): Promise<void> {
-  return knex.schema.createTable('features', (table) => {
+  // Use domain schema for domain tables
+  return knex.schema.withSchema('inventory').createTable('drugs', (table) => {
+    // UUID primary key with auto-generation
     table.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));
-    table.string('name', 100).notNullable();
+
+    // Foreign keys to other domain tables
+    table.uuid('drug_generic_id').references('id').inTable('inventory.drug_generics');
+    table.uuid('location_id').references('id').inTable('inventory.locations');
+
+    // Business fields
+    table.string('code', 50).notNullable().unique();
+    table.string('name', 255).notNullable();
     table.text('description');
     table.boolean('is_active').defaultTo(true);
-    table.uuid('created_by').references('id').inTable('users');
-    table.uuid('updated_by').references('id').inTable('users');
+
+    // Audit fields
+    table.uuid('created_by').references('id').inTable('public.users');
+    table.uuid('updated_by').references('id').inTable('public.users');
     table.timestamps(true, true);
 
     // Indexes for performance
+    table.index(['drug_generic_id']);
+    table.index(['location_id']);
     table.index(['is_active']);
-    table.index(['created_at']);
-    table.index(['name']);
+    table.index(['code']);
   });
 }
 
 export async function down(knex: Knex): Promise<void> {
-  return knex.schema.dropTableIfExists('features');
+  return knex.schema.withSchema('inventory').dropTableIfExists('drugs');
 }
+```
 
-# 3. Run migration
-npx knex migrate:latest
+**Run Migration:**
 
-# 4. Verify table created
-psql $DATABASE_URL -c "\d+ features"
+```bash
+# Main system migrations
+pnpm run db:migrate
+
+# Domain-specific migrations (if using domain-separated approach)
+pnpm run db:migrate:inventory
+```
+
+**Verify:**
+
+```bash
+# Check table created
+psql $DATABASE_URL -c "\d+ inventory.drugs"
 ```
 
 **Checklist:**
 
-- [ ] Migration file created with proper naming
-- [ ] UUID primary key with auto-generation
-- [ ] All required fields defined with constraints
-- [ ] Indexes added for frequently queried columns
-- [ ] Foreign keys defined for relationships
-- [ ] Timestamps configured (created_at, updated_at)
-- [ ] Audit fields added (created_by, updated_by)
+- [ ] Correct schema selected (public vs domain)
+- [ ] UUID primary key with `gen_random_uuid()`
+- [ ] Foreign keys use full table names (`schema.table`)
+- [ ] NOT NULL constraints on required fields
+- [ ] Indexes on foreign keys and frequently queried columns
+- [ ] Audit fields (created_by, updated_by, timestamps)
 - [ ] Migration tested (up and down)
 
-**Common Pitfalls:**
+---
 
-- Forgetting to add indexes on foreign keys
-- Missing NOT NULL constraints on required fields
-- Not defining down migration for rollback
-- Using VARCHAR without length limit
+#### Step 1.3: API Contract Definition
 
-#### Step 1.2: API Contract Definition
+Define API endpoints, schemas, and behavior BEFORE implementation.
 
-Define the API endpoints, request/response schemas, and error handling BEFORE implementation.
-
-**Create API Contract Document:**
+**Create Contract Document:**
 
 ```bash
-# Create feature API contract
-touch docs/features/my-feature/API_CONTRACTS.md
+mkdir -p docs/features/inventory-drugs
+touch docs/features/inventory-drugs/API_CONTRACTS.md
 ```
 
-**API Contract Template:**
+**Example Contract:**
 
 ````markdown
-# Feature API Contracts
+# Drugs API Contracts
+
+## Base URL
+
+`/api/inventory/master-data/drugs`
+
+## Authentication
+
+All endpoints require JWT authentication via `fastify.authenticate`
+
+## Authorization
+
+- `read`: All authenticated users
+- `create`, `update`, `delete`: Require `drugs` resource permission
 
 ## Endpoints
 
-### 1. List Features
+### 1. List Drugs
 
-**Endpoint:** `GET /api/features`
-**Authentication:** Required (JWT)
-**Authorization:** All authenticated users
+**GET** `/api/inventory/master-data/drugs`
 
 **Query Parameters:**
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| page | number | No | Page number (default: 1) |
-| limit | number | No | Items per page (default: 20) |
-| search | string | No | Search by name/description |
-| is_active | boolean | No | Filter by active status |
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| page | number | Page number (default: 1) |
+| limit | number | Items per page (default: 20) |
+| search | string | Search by code/name |
+| is_active | boolean | Filter by active status |
+| format | string | Response format: dropdown, minimal |
 
 **Response (200):**
 
@@ -111,11 +222,11 @@ touch docs/features/my-feature/API_CONTRACTS.md
   "data": [
     {
       "id": "uuid",
+      "code": "string",
       "name": "string",
-      "description": "string",
-      "is_active": true,
-      "created_at": "ISO8601",
-      "updated_at": "ISO8601"
+      "drug_generic_id": "uuid",
+      "location_id": "uuid",
+      "is_active": true
     }
   ],
   "pagination": {
@@ -128,735 +239,695 @@ touch docs/features/my-feature/API_CONTRACTS.md
 ```
 ````
 
-### 2. Get Feature by ID
+### 2. Create Drug
 
-**Endpoint:** `GET /api/features/:id`
-...
+**POST** `/api/inventory/master-data/drugs`
+
+**Request Body:**
+
+```json
+{
+  "code": "D001",
+  "name": "Paracetamol 500mg",
+  "drug_generic_id": "uuid",
+  "location_id": "uuid",
+  "is_active": true
+}
+```
+
+**Response (201):**
+
+```json
+{
+  "success": true,
+  "data": {
+    /* drug object */
+  }
+}
+```
+
+**Error Responses:**
+
+- 400: Validation error
+- 401: Unauthorized
+- 403: Forbidden (permission denied)
+- 409: Conflict (duplicate code)
+- 500: Server error
 
 ````
 
 **Checklist:**
 - [ ] All CRUD endpoints documented
 - [ ] Authentication requirements specified
-- [ ] Authorization rules defined
+- [ ] Authorization permissions defined
 - [ ] Request schemas with validation rules
 - [ ] Response schemas with examples
-- [ ] Error responses documented (400, 401, 403, 404, 500)
-- [ ] Query parameters and filters defined
-- [ ] Pagination approach specified
+- [ ] Error responses documented
 
-**Reference:** See [API Calling Standard](./api-calling-standard.md) for URL patterns and conventions.
+**Reference:** See `.claude/rules/api-endpoints.md`
 
-#### Step 1.3: Domain Architecture Decision
+---
 
-**CRITICAL:** Determine correct domain placement using Domain Architecture Guide.
+### Phase 2: Backend Implementation (Plugin Pattern)
+
+#### Step 2.1: Generate CRUD Scaffolding
+
+Use the CRUD generator with correct domain placement.
+
+**Commands:**
 
 ```bash
-# Use Domain Checker before creating any CRUD
-bash /tmp/check_domain.sh features
+# Master-Data Module (lookup/reference data)
+pnpm run crud -- drugs --domain inventory/master-data --schema inventory --force
+
+# Operations Module (transactional data)
+pnpm run crud -- drug_distributions --domain inventory/operations --schema inventory --force
+
+# Platform Module (shared services)
+pnpm run crud -- departments --domain platform --schema public --force
 ````
 
-**Decision Matrix:**
+**Generated Structure:**
 
-| Question                           | Answer | Domain Placement                   |
-| ---------------------------------- | ------ | ---------------------------------- |
-| Is this shared across all domains? | Yes    | `/v1/platform/{resource}`          |
-| Is this organizational structure?  | Yes    | `/v1/platform/{resource}`          |
-| Is this business-specific?         | Yes    | `/{domain}/{section}/{resource}`   |
-| Is this lookup/reference data?     | Yes    | `/{domain}/master-data/{resource}` |
-| Is this transactional data?        | Yes    | `/{domain}/operations/{resource}`  |
+```
+apps/api/src/layers/domains/inventory/master-data/drugs/
+├── drugs.controller.ts    # HTTP request handling
+├── drugs.repository.ts    # Database operations
+├── drugs.route.ts         # Route definitions (NOT .routes.ts!)
+├── drugs.schemas.ts       # TypeBox schemas
+├── drugs.service.ts       # Business logic
+├── drugs.types.ts         # TypeScript types
+└── index.ts               # Plugin export
+```
 
-**Examples:**
+**File Naming Convention:**
 
-- Users, Departments, Roles → Platform (`/v1/platform/`)
-- Drugs, Budget Types → Inventory Master Data (`/inventory/master-data/`)
-- Budget Allocations → Inventory Operations (`/inventory/operations/`)
+- Use `{module}.route.ts` (singular, NOT `.routes.ts`)
+- Use `{module}.controller.ts`
+- Use `index.ts` as plugin export
 
 **Checklist:**
 
-- [ ] Domain placement determined
-- [ ] Section identified (master-data, operations, etc.)
-- [ ] URL pattern defined
-- [ ] Cross-domain dependencies documented
+- [ ] Files generated in correct layer/domain path
+- [ ] File naming follows convention (`.route.ts` not `.routes.ts`)
+- [ ] Schema parameter matches database schema
+- [ ] All 7 files created
 
-**Reference:** See [Domain Architecture Guide](../../architecture/domain-architecture-guide.md)
+---
 
-#### Step 1.4: Create Feature Specification Document
+#### Step 2.2: Module Plugin Pattern
 
-Document requirements, user stories, acceptance criteria, and technical approach.
+Every module MUST be a Fastify plugin with proper dependency injection.
 
-```bash
-# Create feature documentation structure
-mkdir -p docs/features/my-feature
-touch docs/features/my-feature/{OVERVIEW.md,REQUIREMENTS.md,DESIGN.md}
-```
-
-**REQUIREMENTS.md Template:**
-
-```markdown
-# Feature Requirements
-
-## Overview
-
-Brief description of what this feature does and why it's needed.
-
-## User Stories
-
-- As a [role], I want to [action] so that [benefit]
-- As a [role], I want to [action] so that [benefit]
-
-## Functional Requirements
-
-1. The system SHALL allow users to create new features
-2. The system SHALL validate feature names are unique
-3. The system SHALL support soft delete for features
-
-## Non-Functional Requirements
-
-1. API response time < 500ms for list operations
-2. Support up to 10,000 features without performance degradation
-3. 99.9% uptime for feature management
-
-## Success Criteria
-
-- [ ] All user stories completed and tested
-- [ ] All acceptance criteria met
-- [ ] Performance benchmarks achieved
-- [ ] Documentation complete
-```
-
-**Checklist:**
-
-- [ ] Feature overview documented
-- [ ] User stories defined with roles and benefits
-- [ ] Functional requirements specified
-- [ ] Non-functional requirements defined
-- [ ] Success criteria measurable
-- [ ] Dependencies identified
-- [ ] Risks documented
-
-### Phase 2: Backend Implementation
-
-Backend implementation follows the Database-First, API-First approach. All backend code must be completed and tested before frontend development begins.
-
-#### Step 2.1: TypeBox Schema Definition
-
-**MANDATORY:** Every route MUST have TypeBox schemas for validation and OpenAPI documentation.
+**Example: `drugs/index.ts`**
 
 ```typescript
-// apps/api/src/modules/features/schemas/features.schemas.ts
-import { Type, Static } from '@sinclair/typebox';
-
-// Base entity schema
-export const FeatureSchema = Type.Object(
-  {
-    id: Type.String({ format: 'uuid', description: 'Feature ID' }),
-    name: Type.String({ minLength: 1, maxLength: 100, description: 'Feature name' }),
-    description: Type.Optional(Type.String({ maxLength: 500 })),
-    is_active: Type.Boolean({ description: 'Active status' }),
-    created_at: Type.String({ format: 'date-time' }),
-    updated_at: Type.String({ format: 'date-time' }),
-  },
-  { $id: 'Feature', additionalProperties: false },
-);
-
-// Request schemas
-export const CreateFeatureRequestSchema = Type.Object(
-  {
-    name: Type.String({ minLength: 1, maxLength: 100, description: 'Feature name' }),
-    description: Type.Optional(Type.String({ maxLength: 500 })),
-    is_active: Type.Optional(Type.Boolean({ default: true })),
-  },
-  { $id: 'CreateFeatureRequest', additionalProperties: false },
-);
-
-export const UpdateFeatureRequestSchema = Type.Partial(
-  Type.Object({
-    name: Type.String({ minLength: 1, maxLength: 100 }),
-    description: Type.String({ maxLength: 500 }),
-    is_active: Type.Boolean(),
-  }),
-  { $id: 'UpdateFeatureRequest', additionalProperties: false, minProperties: 1 },
-);
-
-// Response schemas
-export const FeatureResponseSchema = Type.Object(
-  {
-    success: Type.Literal(true),
-    data: Type.Ref(FeatureSchema),
-    message: Type.Optional(Type.String()),
-  },
-  { $id: 'FeatureResponse' },
-);
-
-export const PaginatedFeatureResponseSchema = Type.Object(
-  {
-    success: Type.Literal(true),
-    data: Type.Array(Type.Ref(FeatureSchema)),
-    pagination: Type.Object({
-      page: Type.Number(),
-      limit: Type.Number(),
-      total: Type.Number(),
-      totalPages: Type.Number(),
-    }),
-  },
-  { $id: 'PaginatedFeatureResponse' },
-);
-
-// Export types
-export type Feature = Static<typeof FeatureSchema>;
-export type CreateFeatureRequest = Static<typeof CreateFeatureRequestSchema>;
-export type UpdateFeatureRequest = Static<typeof UpdateFeatureRequestSchema>;
-```
-
-**Checklist:**
-
-- [ ] All schemas have unique $id
-- [ ] Entity schema matches database table
-- [ ] Request schemas have proper validation
-- [ ] Response schemas include success field
-- [ ] All schemas exported as types
-- [ ] additionalProperties: false (security)
-- [ ] Field descriptions provided
-
-**Reference:** See [TypeBox Schema Standard](../../reference/api/typebox-schema-standard.md)
-
-#### Step 2.2: Repository Implementation
-
-Extend BaseRepository for type-safe database operations with automatic UUID validation, field selection, and audit tracking.
-
-```typescript
-// apps/api/src/modules/features/repositories/features.repository.ts
-import { Knex } from 'knex';
-import { BaseRepository } from '../../../shared/repositories/base.repository';
-import { Feature, CreateFeatureRequest, UpdateFeatureRequest } from '../schemas/features.schemas';
-
-export class FeaturesRepository extends BaseRepository<Feature, CreateFeatureRequest, UpdateFeatureRequest> {
-  constructor(knex: Knex) {
-    super(
-      knex,
-      'features', // table name
-      ['features.name', 'features.description'], // search fields
-      {
-        createdByField: 'created_by',
-        updatedByField: 'updated_by',
-      },
-    );
-  }
-
-  // Transform database row to entity (camelCase)
-  transformToEntity(dbRow: any): Feature {
-    return {
-      id: dbRow.id,
-      name: dbRow.name,
-      description: dbRow.description,
-      is_active: dbRow.is_active,
-      created_at: dbRow.created_at,
-      updated_at: dbRow.updated_at,
-    };
-  }
-
-  // Transform DTO to database format (snake_case)
-  transformToDb(dto: CreateFeatureRequest | UpdateFeatureRequest): any {
-    const transformed: any = {};
-    if ('name' in dto) transformed.name = dto.name;
-    if ('description' in dto) transformed.description = dto.description;
-    if ('is_active' in dto) transformed.is_active = dto.is_active;
-    return transformed;
-  }
-
-  // Custom filtering
-  protected applyCustomFilters(query: Knex.QueryBuilder, filters: any) {
-    const { is_active } = filters;
-    if (is_active !== undefined) {
-      query.where('features.is_active', is_active);
-    }
-  }
-}
-```
-
-**Checklist:**
-
-- [ ] Extends BaseRepository with correct types
-- [ ] Table name matches migration
-- [ ] Search fields defined for full-text search
-- [ ] transformToEntity converts snake_case to camelCase
-- [ ] transformToDb converts camelCase to snake_case
-- [ ] Audit fields configured (created_by, updated_by)
-- [ ] Custom filters implemented if needed
-
-**Reference:** See [Backend Architecture - Repository Pattern](../../architecture/backend-architecture.md#base-repository-pattern)
-
-#### Step 2.3: Service Layer Implementation
-
-Implement business logic, validation, and orchestration in the service layer.
-
-```typescript
-// apps/api/src/modules/features/services/features.service.ts
-import { FeaturesRepository } from '../repositories/features.repository';
-import { CreateFeatureRequest, UpdateFeatureRequest, Feature } from '../schemas/features.schemas';
-import { ConflictError, NotFoundError } from '../../../shared/errors';
-
-export class FeaturesService {
-  constructor(private repository: FeaturesRepository) {}
-
-  async list(params: any, userId?: string) {
-    return this.repository.list(params, userId);
-  }
-
-  async findById(id: string, userId?: string): Promise<Feature> {
-    const feature = await this.repository.findById(id, userId);
-    if (!feature) {
-      throw new NotFoundError('Feature not found');
-    }
-    return feature;
-  }
-
-  async create(data: CreateFeatureRequest, userId?: string): Promise<Feature> {
-    // Business validation
-    const existing = await this.repository.findOne({ name: data.name });
-    if (existing) {
-      throw new ConflictError('Feature with this name already exists');
-    }
-
-    return this.repository.create(data, userId);
-  }
-
-  async update(id: string, data: UpdateFeatureRequest, userId?: string): Promise<Feature> {
-    // Verify exists
-    await this.findById(id, userId);
-
-    // Business validation
-    if (data.name) {
-      const existing = await this.repository.findOne({ name: data.name });
-      if (existing && existing.id !== id) {
-        throw new ConflictError('Feature with this name already exists');
-      }
-    }
-
-    return this.repository.update(id, data, userId);
-  }
-
-  async delete(id: string, userId?: string): Promise<void> {
-    await this.findById(id, userId); // Verify exists
-    return this.repository.delete(id, userId);
-  }
-}
-```
-
-**Checklist:**
-
-- [ ] All CRUD operations implemented
-- [ ] Business validation logic added
-- [ ] Proper error handling with custom errors
-- [ ] userId passed for audit tracking
-- [ ] NotFoundError thrown when appropriate
-- [ ] ConflictError for uniqueness violations
-
-#### Step 2.4: Controller and Routes Implementation
-
-Define Fastify routes with complete schema validation, authentication, and authorization.
-
-```typescript
-// apps/api/src/modules/features/features.plugin.ts
 import fp from 'fastify-plugin';
-import { FastifyInstance } from 'fastify';
-import { FeaturesRepository } from './repositories/features.repository';
-import { FeaturesService } from './services/features.service';
-import { FeatureSchema, CreateFeatureRequestSchema, UpdateFeatureRequestSchema, FeatureResponseSchema, PaginatedFeatureResponseSchema } from './schemas/features.schemas';
+import { FastifyInstance, FastifyPluginOptions } from 'fastify';
+import { DrugsController } from './drugs.controller';
+import { DrugsService } from './drugs.service';
+import { DrugsRepository } from './drugs.repository';
+import { drugsRoutes } from './drugs.route';
 
+/**
+ * Drugs Domain Plugin
+ *
+ * Following Fastify best practices:
+ * - Service instantiation with proper dependency injection
+ * - Encapsulation through plugin scoping
+ * - Lifecycle management with hooks
+ */
 export default fp(
-  async function featuresPlugin(fastify: FastifyInstance) {
-    // Register schemas
-    fastify.addSchema(FeatureSchema);
-    fastify.addSchema(CreateFeatureRequestSchema);
-    fastify.addSchema(UpdateFeatureRequestSchema);
-    fastify.addSchema(FeatureResponseSchema);
-    fastify.addSchema(PaginatedFeatureResponseSchema);
+  async function drugsDomainPlugin(fastify: FastifyInstance, options: FastifyPluginOptions) {
+    // 1. Service instantiation (dependency injection pattern)
+    const drugsRepository = new DrugsRepository((fastify as any).knex);
+    const drugsService = new DrugsService(drugsRepository);
+    const drugsController = new DrugsController(drugsService);
 
-    // Initialize repository and service
-    const repository = new FeaturesRepository(fastify.knex);
-    const service = new FeaturesService(repository);
-
-    // List features
-    fastify.route({
-      method: 'GET',
-      url: '/api/features',
-      schema: {
-        description: 'List all features with pagination',
-        tags: ['Features'],
-        querystring: {
-          type: 'object',
-          properties: {
-            page: { type: 'number', minimum: 1, default: 1 },
-            limit: { type: 'number', minimum: 1, maximum: 100, default: 20 },
-            search: { type: 'string' },
-            is_active: { type: 'boolean' },
-          },
-        },
-        response: {
-          200: { $ref: 'PaginatedFeatureResponse#' },
-          401: { $ref: 'unauthorizedResponse#' },
-        },
-      },
-      preHandler: fastify.auth([fastify.verifyJWT]),
-      handler: async (request, reply) => {
-        const userId = request.user?.id;
-        const result = await service.list(request.query, userId);
-        return reply.success(result);
-      },
+    // 2. Register routes with controller
+    await fastify.register(drugsRoutes, {
+      controller: drugsController,
+      prefix: options.prefix || '/inventory/master-data/drugs',
     });
 
-    // Get feature by ID
-    fastify.route({
-      method: 'GET',
-      url: '/api/features/:id',
-      schema: {
-        description: 'Get feature by ID',
-        tags: ['Features'],
-        params: {
-          type: 'object',
-          properties: {
-            id: { type: 'string', format: 'uuid' },
-          },
-          required: ['id'],
-        },
-        response: {
-          200: { $ref: 'FeatureResponse#' },
-          401: { $ref: 'unauthorizedResponse#' },
-          404: { $ref: 'notFoundResponse#' },
-        },
-      },
-      preHandler: fastify.auth([fastify.verifyJWT]),
-      handler: async (request, reply) => {
-        const { id } = request.params as { id: string };
-        const userId = request.user?.id;
-        const feature = await service.findById(id, userId);
-        return reply.success(feature);
-      },
-    });
-
-    // Create feature
-    fastify.route({
-      method: 'POST',
-      url: '/api/features',
-      schema: {
-        description: 'Create new feature',
-        tags: ['Features'],
-        body: { $ref: 'CreateFeatureRequest#' },
-        response: {
-          201: { $ref: 'FeatureResponse#' },
-          400: { $ref: 'validationErrorResponse#' },
-          401: { $ref: 'unauthorizedResponse#' },
-          409: { $ref: 'conflictResponse#' },
-        },
-      },
-      preHandler: fastify.auth([fastify.verifyJWT, fastify.verifyRole(['admin', 'manager'])]),
-      handler: async (request, reply) => {
-        const userId = request.user?.id;
-        const feature = await service.create(request.body, userId);
-        return reply.created(feature, 'Feature created successfully');
-      },
-    });
-
-    // Update feature
-    fastify.route({
-      method: 'PUT',
-      url: '/api/features/:id',
-      schema: {
-        description: 'Update feature',
-        tags: ['Features'],
-        params: {
-          type: 'object',
-          properties: {
-            id: { type: 'string', format: 'uuid' },
-          },
-          required: ['id'],
-        },
-        body: { $ref: 'UpdateFeatureRequest#' },
-        response: {
-          200: { $ref: 'FeatureResponse#' },
-          400: { $ref: 'validationErrorResponse#' },
-          401: { $ref: 'unauthorizedResponse#' },
-          404: { $ref: 'notFoundResponse#' },
-          409: { $ref: 'conflictResponse#' },
-        },
-      },
-      preHandler: fastify.auth([fastify.verifyJWT, fastify.verifyRole(['admin', 'manager'])]),
-      handler: async (request, reply) => {
-        const { id } = request.params as { id: string };
-        const userId = request.user?.id;
-        const feature = await service.update(id, request.body, userId);
-        return reply.success(feature, 'Feature updated successfully');
-      },
-    });
-
-    // Delete feature
-    fastify.route({
-      method: 'DELETE',
-      url: '/api/features/:id',
-      schema: {
-        description: 'Delete feature',
-        tags: ['Features'],
-        params: {
-          type: 'object',
-          properties: {
-            id: { type: 'string', format: 'uuid' },
-          },
-          required: ['id'],
-        },
-        response: {
-          200: { $ref: 'successResponse#' },
-          401: { $ref: 'unauthorizedResponse#' },
-          404: { $ref: 'notFoundResponse#' },
-        },
-      },
-      preHandler: fastify.auth([fastify.verifyJWT, fastify.verifyRole(['admin'])]),
-      handler: async (request, reply) => {
-        const { id } = request.params as { id: string };
-        const userId = request.user?.id;
-        await service.delete(id, userId);
-        return reply.success(null, 'Feature deleted successfully');
-      },
+    // 3. Lifecycle hooks for monitoring
+    fastify.addHook('onReady', async () => {
+      fastify.log.info(`Drugs domain module registered successfully`);
     });
   },
   {
-    name: 'features-plugin',
-    dependencies: ['knex-plugin', 'auth-plugin'],
+    name: 'drugs-domain-plugin',
+    dependencies: ['knex-plugin'], // Ensure database is available
+  },
+);
+
+// Re-exports for external consumers
+export * from './drugs.schemas';
+export * from './drugs.types';
+export { DrugsRepository } from './drugs.repository';
+export { DrugsService } from './drugs.service';
+export { DrugsController } from './drugs.controller';
+```
+
+**Pattern Breakdown:**
+
+1. **Dependency Injection**: Access `fastify.knex` from decorated instance
+2. **Service Hierarchy**: Repository → Service → Controller
+3. **Route Registration**: Use `fastify.register()` with controller
+4. **Prefix Handling**: Accept `options.prefix` for flexibility
+5. **Dependencies**: Declare plugin dependencies (`knex-plugin`)
+6. **Lifecycle Hooks**: Use `onReady` for logging
+7. **Re-exports**: Export types and services for external use
+
+**Checklist:**
+
+- [ ] Uses `fastify-plugin` (fp)
+- [ ] Dependency injection via `fastify.knex`
+- [ ] Services instantiated in correct order
+- [ ] Routes registered with controller
+- [ ] Prefix from options (not hardcoded)
+- [ ] Plugin name and dependencies declared
+- [ ] Re-exports for external consumers
+
+---
+
+#### Step 2.3: Route Definition Pattern
+
+Routes are plain functions (NOT plugins) that accept controller as options.
+
+**Example: `drugs/drugs.route.ts`**
+
+```typescript
+import { FastifyInstance, FastifyPluginOptions } from 'fastify';
+import { DrugsController } from './drugs.controller';
+import { CreateDrugsSchema, UpdateDrugsSchema, DrugsIdParamSchema, GetDrugsQuerySchema, ListDrugsQuerySchema, DrugsResponseSchema, DrugsListResponseSchema } from './drugs.schemas';
+import { SchemaRefs } from '../../../../../schemas/registry';
+
+export interface DrugsRoutesOptions extends FastifyPluginOptions {
+  controller: DrugsController;
+}
+
+export async function drugsRoutes(fastify: FastifyInstance, options: DrugsRoutesOptions) {
+  const { controller } = options;
+
+  // Create
+  fastify.post('/', {
+    schema: {
+      tags: ['Inventory: Drugs'],
+      summary: 'Create a new drug',
+      body: CreateDrugsSchema,
+      response: {
+        201: DrugsResponseSchema,
+        400: SchemaRefs.ValidationError,
+        401: SchemaRefs.Unauthorized,
+        403: SchemaRefs.Forbidden,
+        409: SchemaRefs.Conflict,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [fastify.authenticate, fastify.verifyPermission('drugs', 'create')],
+    handler: controller.create.bind(controller),
+  });
+
+  // Get by ID
+  fastify.get('/:id', {
+    schema: {
+      tags: ['Inventory: Drugs'],
+      summary: 'Get drug by ID',
+      params: DrugsIdParamSchema,
+      querystring: GetDrugsQuerySchema,
+      response: {
+        200: DrugsResponseSchema,
+        404: SchemaRefs.NotFound,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [fastify.authenticate, fastify.verifyPermission('drugs', 'read')],
+    handler: controller.findOne.bind(controller),
+  });
+
+  // List all
+  fastify.get('/', {
+    schema: {
+      tags: ['Inventory: Drugs'],
+      summary: 'Get all drugs with pagination',
+      querystring: ListDrugsQuerySchema,
+      response: {
+        200: DrugsListResponseSchema,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [fastify.authenticate, fastify.verifyPermission('drugs', 'read')],
+    handler: controller.findMany.bind(controller),
+  });
+
+  // Update
+  fastify.put('/:id', {
+    schema: {
+      tags: ['Inventory: Drugs'],
+      summary: 'Update drug',
+      params: DrugsIdParamSchema,
+      body: UpdateDrugsSchema,
+      response: {
+        200: DrugsResponseSchema,
+        404: SchemaRefs.NotFound,
+        409: SchemaRefs.Conflict,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [fastify.authenticate, fastify.verifyPermission('drugs', 'update')],
+    handler: controller.update.bind(controller),
+  });
+
+  // Delete
+  fastify.delete('/:id', {
+    schema: {
+      tags: ['Inventory: Drugs'],
+      summary: 'Delete drug',
+      params: DrugsIdParamSchema,
+      response: {
+        200: SchemaRefs.OperationResult,
+        404: SchemaRefs.NotFound,
+        500: SchemaRefs.ServerError,
+      },
+    },
+    preValidation: [fastify.authenticate, fastify.verifyPermission('drugs', 'delete')],
+    handler: controller.delete.bind(controller),
+  });
+}
+```
+
+**Key Points:**
+
+1. **Routes Function**: Plain async function, NOT fp() wrapper
+2. **Options Interface**: Extends FastifyPluginOptions, includes controller
+3. **SchemaRefs**: Use centralized error schemas
+4. **Authentication**: `fastify.authenticate` decorator (NOT function call)
+5. **Authorization**: `fastify.verifyPermission(resource, action)`
+6. **Controller Binding**: `.bind(controller)` for correct `this` context
+7. **Tags**: Consistent naming (e.g., "Inventory: Drugs")
+
+**Checklist:**
+
+- [ ] Plain function (NOT fp() wrapped)
+- [ ] Controller from options
+- [ ] All CRUD routes defined
+- [ ] SchemaRefs for error responses
+- [ ] `fastify.authenticate` (decorator, not call)
+- [ ] `fastify.verifyPermission()` for auth
+- [ ] Controller methods bound with `.bind()`
+- [ ] Consistent tags for OpenAPI
+
+**Reference:** See `.claude/rules/api-endpoints.md` for authentication patterns
+
+---
+
+#### Step 2.4: Domain Aggregator Plugin
+
+Section-level plugin that aggregates all modules in a section.
+
+**Example: `master-data/index.ts`**
+
+```typescript
+import fp from 'fastify-plugin';
+import type { FastifyInstance, FastifyPluginOptions } from 'fastify';
+
+import drugsPlugin from './drugs';
+import locationsPlugin from './locations';
+import budgetsPlugin from './budgets';
+import budgetTypesPlugin from './budgetTypes';
+// ... other imports
+
+/**
+ * Master-data Domain Plugin
+ *
+ * Aggregates all modules within the Master-data domain.
+ * Route prefix: /inventory/master-data
+ */
+export default fp(
+  async function masterDataDomainPlugin(fastify: FastifyInstance, options: FastifyPluginOptions) {
+    const prefix = options.prefix || '/inventory/master-data';
+
+    // Register all domain modules
+    await fastify.register(drugsPlugin, {
+      ...options,
+      prefix: `${prefix}/drugs`,
+    });
+    await fastify.register(locationsPlugin, {
+      ...options,
+      prefix: `${prefix}/locations`,
+    });
+    await fastify.register(budgetsPlugin, {
+      ...options,
+      prefix: `${prefix}/budgets`,
+    });
+    // ... register other modules
+
+    fastify.addHook('onReady', async () => {
+      fastify.log.info(`Master-data domain loaded with 18 modules at ${prefix}`);
+    });
+  },
+  {
+    name: 'masterData-domain-plugin',
+    dependencies: ['knex-plugin'],
   },
 );
 ```
 
+**URL Structure After Registration:**
+
+```
+Domain Plugin (/inventory)
+  └── Section Plugin (/inventory/master-data)
+        ├── Module Plugin (/inventory/master-data/drugs)
+        │     ├── GET  /api/inventory/master-data/drugs
+        │     ├── POST /api/inventory/master-data/drugs
+        │     ├── GET  /api/inventory/master-data/drugs/:id
+        │     ├── PUT  /api/inventory/master-data/drugs/:id
+        │     └── DELETE /api/inventory/master-data/drugs/:id
+        └── Module Plugin (/inventory/master-data/locations)
+              └── ... (same pattern)
+```
+
 **Checklist:**
 
-- [ ] All schemas registered with addSchema
-- [ ] Repository and service initialized
-- [ ] All CRUD routes defined
-- [ ] Complete schema for each route (params, query, body, response)
-- [ ] Authentication with fastify.auth([fastify.verifyJWT])
-- [ ] Authorization with fastify.verifyRole for protected actions
-- [ ] Proper HTTP status codes (200, 201, 400, 401, 404, 409)
-- [ ] userId from request.user passed to service
-- [ ] Descriptive success/error messages
+- [ ] Section prefix from options
+- [ ] All module plugins registered
+- [ ] Module prefixes inherit from section prefix
+- [ ] onReady hook logs loaded modules
+- [ ] Plugin name and dependencies declared
 
-#### Step 2.5: Backend Testing
+---
 
-Test all endpoints with curl before moving to frontend.
+#### Step 2.5: Repository Pattern
+
+Use BaseRepository for standard CRUD with automatic UUID validation.
+
+**Example: `drugs/drugs.repository.ts`**
+
+```typescript
+import { Knex } from 'knex';
+import { BaseRepository } from '../../../../../core/database/base.repository';
+import { Drugs, CreateDrugs, UpdateDrugs } from './drugs.types';
+
+export class DrugsRepository extends BaseRepository<Drugs> {
+  constructor(db: Knex) {
+    // CRITICAL: Always use schema.table format
+    super(db, 'inventory.drugs');
+  }
+
+  // Custom queries beyond CRUD
+  async findByCode(code: string): Promise<Drugs | undefined> {
+    return this.db('inventory.drugs').where({ code }).first();
+  }
+
+  async findActive(): Promise<Drugs[]> {
+    return this.db('inventory.drugs').where({ is_active: true }).orderBy('name');
+  }
+
+  // Complex joins
+  async findWithRelations(id: string): Promise<any> {
+    return this.db('inventory.drugs').where('inventory.drugs.id', id).leftJoin('inventory.drug_generics', 'drugs.drug_generic_id', 'drug_generics.id').leftJoin('inventory.locations', 'drugs.location_id', 'locations.id').select('drugs.*', 'drug_generics.name as generic_name', 'locations.name as location_name').first();
+  }
+}
+```
+
+**CRITICAL Rules:**
+
+1. Always use `schema.table` format: `inventory.drugs`
+2. Extend `BaseRepository<EntityType>`
+3. Pass correct schema.table to super()
+4. Add custom methods for business logic
+5. Use full table names in joins
+
+**Checklist:**
+
+- [ ] Extends BaseRepository
+- [ ] Constructor calls super with schema.table
+- [ ] Custom methods use schema.table format
+- [ ] Complex queries properly typed
+- [ ] Joins use full table names
+
+---
+
+#### Step 2.6: Schema Registry Pattern
+
+Use centralized SchemaRefs for consistent error responses.
+
+**Example: Using SchemaRefs**
+
+```typescript
+import { SchemaRefs } from '../../../../../schemas/registry';
+
+// In route definition
+response: {
+  200: DrugsResponseSchema,
+  400: SchemaRefs.ValidationError,
+  401: SchemaRefs.Unauthorized,
+  403: SchemaRefs.Forbidden,
+  404: SchemaRefs.NotFound,
+  409: SchemaRefs.Conflict,
+  422: SchemaRefs.UnprocessableEntity,
+  500: SchemaRefs.ServerError,
+}
+```
+
+**Available SchemaRefs:**
+
+```typescript
+SchemaRefs.ValidationError; // 400 - Invalid input
+SchemaRefs.Unauthorized; // 401 - Missing/invalid token
+SchemaRefs.Forbidden; // 403 - Insufficient permissions
+SchemaRefs.NotFound; // 404 - Resource not found
+SchemaRefs.Conflict; // 409 - Duplicate/conflict
+SchemaRefs.UnprocessableEntity; // 422 - Business logic error
+SchemaRefs.ServerError; // 500 - Internal error
+SchemaRefs.OperationResult; // 200 - Success with message
+```
+
+**TypeBox Schema Standards:**
+
+```typescript
+import { Type } from '@sinclair/typebox';
+
+// UUID validation REQUIRED
+export const DrugsSchema = Type.Object({
+  id: Type.String({ format: 'uuid' }),
+  drug_generic_id: Type.String({ format: 'uuid' }),
+  location_id: Type.String({ format: 'uuid' }),
+
+  // String validation with limits
+  code: Type.String({ minLength: 1, maxLength: 50 }),
+  name: Type.String({ minLength: 1, maxLength: 255 }),
+
+  // Optional fields
+  description: Type.Optional(Type.String()),
+
+  // Boolean with default
+  is_active: Type.Boolean({ default: true }),
+});
+
+// Create schema (omit id and timestamps)
+export const CreateDrugsSchema = Type.Omit(DrugsSchema, ['id', 'created_at', 'updated_at']);
+
+// Update schema (all fields optional)
+export const UpdateDrugsSchema = Type.Partial(CreateDrugsSchema);
+```
+
+**Checklist:**
+
+- [ ] All UUID fields have `format: 'uuid'`
+- [ ] String fields have minLength and maxLength
+- [ ] SchemaRefs used for all error responses
+- [ ] Create/Update schemas derived from base schema
+- [ ] Optional fields use Type.Optional()
+
+---
+
+#### Step 2.7: Testing Backend
+
+Test all endpoints with curl BEFORE frontend development.
+
+**Setup:**
 
 ```bash
 # Start API server
 pnpm run dev:api
 
-# Test authentication (get token first)
-TOKEN=$(curl -X POST http://localhost:3333/api/auth/login \
+# Get authentication token
+TOKEN=$(curl -X POST http://localhost:3383/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@example.com","password":"password"}' \
   | jq -r '.data.token')
+```
 
-# Test list features
-curl -X GET "http://localhost:3333/api/features?page=1&limit=10" \
-  -H "Authorization: Bearer $TOKEN" \
-  | jq .
+**Test CRUD Operations:**
 
-# Test create feature
-curl -X POST http://localhost:3333/api/features \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Test Feature","description":"Test description"}' \
-  | jq .
+```bash
+# List drugs
+curl -X GET "http://localhost:3383/api/inventory/master-data/drugs?page=1&limit=10" \
+  -H "Authorization: Bearer $TOKEN" | jq .
 
-# Test get by ID
-FEATURE_ID=$(curl -X POST http://localhost:3333/api/features \
+# Create drug
+curl -X POST http://localhost:3383/api/inventory/master-data/drugs \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"name":"Test Feature 2"}' \
-  | jq -r '.data.id')
+  -d '{
+    "code": "D001",
+    "name": "Paracetamol 500mg",
+    "drug_generic_id": "uuid-here",
+    "location_id": "uuid-here",
+    "is_active": true
+  }' | jq .
 
-curl -X GET "http://localhost:3333/api/features/$FEATURE_ID" \
-  -H "Authorization: Bearer $TOKEN" \
-  | jq .
+# Get by ID
+DRUG_ID="uuid-from-create"
+curl -X GET "http://localhost:3383/api/inventory/master-data/drugs/$DRUG_ID" \
+  -H "Authorization: Bearer $TOKEN" | jq .
 
-# Test update
-curl -X PUT "http://localhost:3333/api/features/$FEATURE_ID" \
+# Update
+curl -X PUT "http://localhost:3383/api/inventory/master-data/drugs/$DRUG_ID" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"name":"Updated Feature"}' \
-  | jq .
+  -d '{"name": "Paracetamol 500mg Updated"}' | jq .
 
-# Test delete
-curl -X DELETE "http://localhost:3333/api/features/$FEATURE_ID" \
-  -H "Authorization: Bearer $TOKEN" \
-  | jq .
+# Delete
+curl -X DELETE "http://localhost:3383/api/inventory/master-data/drugs/$DRUG_ID" \
+  -H "Authorization: Bearer $TOKEN" | jq .
+```
 
-# Test error cases
+**Test Error Cases:**
+
+```bash
+# 401 - Unauthorized (no token)
+curl -X GET http://localhost:3383/api/inventory/master-data/drugs | jq .
+
 # 400 - Validation error
-curl -X POST http://localhost:3333/api/features \
+curl -X POST http://localhost:3383/api/inventory/master-data/drugs \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"invalid":"data"}' \
-  | jq .
-
-# 401 - Unauthorized
-curl -X GET http://localhost:3333/api/features \
-  | jq .
+  -d '{"invalid": "data"}' | jq .
 
 # 404 - Not found
-curl -X GET "http://localhost:3333/api/features/00000000-0000-0000-0000-000000000000" \
-  -H "Authorization: Bearer $TOKEN" \
-  | jq .
-
-# Verify OpenAPI documentation
-open http://localhost:3333/documentation
+curl -X GET "http://localhost:3383/api/inventory/master-data/drugs/00000000-0000-0000-0000-000000000000" \
+  -H "Authorization: Bearer $TOKEN" | jq .
 ```
 
 **Checklist:**
 
-- [ ] All CRUD operations work via curl
-- [ ] Authentication required returns 401
-- [ ] Authorization enforced (admin-only routes)
+- [ ] All CRUD operations return correct status codes
+- [ ] Response schemas match API contract
+- [ ] Authentication returns 401 without token
+- [ ] Authorization returns 403 without permission
 - [ ] Validation errors return 400 with details
 - [ ] Not found returns 404
-- [ ] Conflict returns 409 for duplicates
-- [ ] Success responses match schema
-- [ ] OpenAPI documentation updated
+- [ ] Duplicates return 409
 
-**Reference:** See [API Response Standard](../../reference/api/api-response-standard.md)
+---
 
 ### Phase 3: Frontend Implementation
 
-Frontend implementation begins ONLY after backend is fully tested and working. Follow the API-First approach.
+Frontend development begins ONLY after backend is tested and working.
 
-#### Step 3.1: TypeScript Interfaces
+#### Step 3.1: Generate Frontend CRUD
 
-Create TypeScript interfaces matching backend schemas.
-
-```typescript
-// apps/admin/src/app/features/types/features.types.ts
-
-export interface Feature {
-  id: string;
-  name: string;
-  description?: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface CreateFeatureRequest {
-  name: string;
-  description?: string;
-  is_active?: boolean;
-}
-
-export interface UpdateFeatureRequest {
-  name?: string;
-  description?: string;
-  is_active?: boolean;
-}
-
-export interface FeatureResponse {
-  success: boolean;
-  data: Feature;
-  message?: string;
-}
-
-export interface PaginatedFeatureResponse {
-  success: boolean;
-  data: Feature[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-}
+```bash
+# Generate frontend components
+pnpm run crud -- drugs --target frontend --domain inventory/master-data --force
 ```
 
-**Checklist:**
+**Generated Structure:**
 
-- [ ] Interfaces match backend schemas exactly
-- [ ] Optional fields marked with ?
-- [ ] Date fields as strings (ISO8601)
-- [ ] Response wrappers included
+```
+apps/web/src/app/features/inventory/
+└── drugs/
+    ├── drugs-list.component.ts
+    ├── drugs-form.component.ts
+    ├── drugs.service.ts
+    └── drugs.types.ts
+```
 
 #### Step 3.2: Service Implementation
 
-Implement Angular service for API calls following the API Calling Standard.
+**Example: `drugs.service.ts`**
 
 ```typescript
-// apps/admin/src/app/features/services/features.service.ts
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Feature, CreateFeatureRequest, UpdateFeatureRequest, FeatureResponse, PaginatedFeatureResponse } from '../types/features.types';
+import { Drug, CreateDrug, UpdateDrug } from './drugs.types';
 
 @Injectable({ providedIn: 'root' })
-export class FeaturesService {
+export class DrugsService {
   private http = inject(HttpClient);
-  private readonly baseUrl = '/features'; // BaseUrlInterceptor adds /api prefix
+  // CRITICAL: No /api prefix - interceptor adds it
+  private readonly baseUrl = '/inventory/master-data/drugs';
 
-  list(params?: { page?: number; limit?: number; search?: string; is_active?: boolean }): Observable<PaginatedFeatureResponse> {
+  list(params?: any): Observable<any> {
     let httpParams = new HttpParams();
     if (params?.page) httpParams = httpParams.set('page', params.page);
     if (params?.limit) httpParams = httpParams.set('limit', params.limit);
     if (params?.search) httpParams = httpParams.set('search', params.search);
-    if (params?.is_active !== undefined) httpParams = httpParams.set('is_active', params.is_active);
 
-    return this.http.get<PaginatedFeatureResponse>(this.baseUrl, { params: httpParams });
+    return this.http.get<any>(this.baseUrl, { params: httpParams });
   }
 
-  getById(id: string): Observable<FeatureResponse> {
-    return this.http.get<FeatureResponse>(`${this.baseUrl}/${id}`);
+  getById(id: string): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/${id}`);
   }
 
-  create(data: CreateFeatureRequest): Observable<FeatureResponse> {
-    return this.http.post<FeatureResponse>(this.baseUrl, data);
+  create(data: CreateDrug): Observable<any> {
+    return this.http.post<any>(this.baseUrl, data);
   }
 
-  update(id: string, data: UpdateFeatureRequest): Observable<FeatureResponse> {
-    return this.http.put<FeatureResponse>(`${this.baseUrl}/${id}`, data);
+  update(id: string, data: UpdateDrug): Observable<any> {
+    return this.http.put<any>(`${this.baseUrl}/${id}`, data);
   }
 
-  delete(id: string): Observable<{ success: boolean; message: string }> {
-    return this.http.delete<{ success: boolean; message: string }>(`${this.baseUrl}/${id}`);
+  delete(id: string): Observable<any> {
+    return this.http.delete<any>(`${this.baseUrl}/${id}`);
   }
 }
 ```
 
+**CRITICAL: URL Pattern**
+
+- Use relative path WITHOUT `/api` prefix
+- Example: `/inventory/master-data/drugs` (NOT `/api/inventory/master-data/drugs`)
+- BaseUrlInterceptor will add `/api` automatically
+
 **Checklist:**
 
 - [ ] Service uses inject() for HttpClient
-- [ ] baseUrl WITHOUT /api prefix (interceptor adds it)
+- [ ] baseUrl WITHOUT /api prefix
 - [ ] All CRUD methods implemented
 - [ ] Query parameters properly constructed
 - [ ] Return types match backend responses
-- [ ] Service provided in 'root'
 
 **Reference:** See [API Calling Standard](./api-calling-standard.md)
 
-#### Step 3.3: Component Implementation
+---
 
-Create Angular components for UI using signals and modern patterns.
+#### Step 3.3: Component with Signals
+
+Use Angular signals for reactive state management.
+
+**Example: List Component**
 
 ```typescript
-// apps/admin/src/app/features/pages/features-list/features-list.component.ts
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import { FeaturesService } from '../../services/features.service';
-import { Feature } from '../../types/features.types';
+import { DrugsService } from '../drugs.service';
+import { Drug } from '../drugs.types';
 
 @Component({
-  selector: 'app-features-list',
+  selector: 'app-drugs-list',
   standalone: true,
-  imports: [CommonModule],
-  templateUrl: './features-list.component.html',
+  templateUrl: './drugs-list.component.html',
 })
-export class FeaturesListComponent implements OnInit {
-  private featuresService = inject(FeaturesService);
-  private router = inject(Router);
+export class DrugsListComponent implements OnInit {
+  private drugsService = inject(DrugsService);
 
-  features = signal<Feature[]>([]);
+  drugs = signal<Drug[]>([]);
   loading = signal(false);
   error = signal<string | null>(null);
   pagination = signal({
@@ -867,21 +938,21 @@ export class FeaturesListComponent implements OnInit {
   });
 
   ngOnInit() {
-    this.loadFeatures();
+    this.loadDrugs();
   }
 
-  loadFeatures() {
+  loadDrugs() {
     this.loading.set(true);
     this.error.set(null);
 
-    this.featuresService.list({ page: this.pagination().page, limit: this.pagination().limit }).subscribe({
+    this.drugsService.list(this.pagination()).subscribe({
       next: (response) => {
-        this.features.set(response.data);
+        this.drugs.set(response.data);
         this.pagination.set(response.pagination);
         this.loading.set(false);
       },
       error: (err) => {
-        this.error.set(err.error?.message || 'Failed to load features');
+        this.error.set(err.error?.message || 'Failed to load drugs');
         this.loading.set(false);
       },
     });
@@ -889,23 +960,15 @@ export class FeaturesListComponent implements OnInit {
 
   onPageChange(page: number) {
     this.pagination.update((p) => ({ ...p, page }));
-    this.loadFeatures();
+    this.loadDrugs();
   }
 
-  onEdit(feature: Feature) {
-    this.router.navigate(['/features', feature.id, 'edit']);
-  }
+  onDelete(drug: Drug) {
+    if (!confirm(`Delete ${drug.name}?`)) return;
 
-  onDelete(feature: Feature) {
-    if (!confirm(`Delete feature "${feature.name}"?`)) return;
-
-    this.featuresService.delete(feature.id).subscribe({
-      next: () => {
-        this.loadFeatures(); // Reload list
-      },
-      error: (err) => {
-        alert(err.error?.message || 'Failed to delete feature');
-      },
+    this.drugsService.delete(drug.id).subscribe({
+      next: () => this.loadDrugs(),
+      error: (err) => alert(err.error?.message || 'Delete failed'),
     });
   }
 }
@@ -913,666 +976,408 @@ export class FeaturesListComponent implements OnInit {
 
 **Checklist:**
 
-- [ ] Component uses signals for state management
+- [ ] Component uses signals for state
 - [ ] Loading and error states handled
-- [ ] Service injected with inject()
 - [ ] Pagination implemented
-- [ ] Error messages displayed to user
+- [ ] Error messages user-friendly
 - [ ] Confirmation for destructive actions
 
-#### Step 3.4: Form Implementation
-
-Create forms for create/update operations with validation.
-
-```typescript
-// apps/admin/src/app/features/pages/feature-form/feature-form.component.ts
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { FeaturesService } from '../../services/features.service';
-
-@Component({
-  selector: 'app-feature-form',
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './feature-form.component.html',
-})
-export class FeatureFormComponent implements OnInit {
-  private fb = inject(FormBuilder);
-  private featuresService = inject(FeaturesService);
-  private router = inject(Router);
-  private route = inject(ActivatedRoute);
-
-  form!: FormGroup;
-  isEditMode = signal(false);
-  featureId = signal<string | null>(null);
-  loading = signal(false);
-  error = signal<string | null>(null);
-
-  ngOnInit() {
-    this.initForm();
-
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.isEditMode.set(true);
-      this.featureId.set(id);
-      this.loadFeature(id);
-    }
-  }
-
-  initForm() {
-    this.form = this.fb.group({
-      name: ['', [Validators.required, Validators.maxLength(100)]],
-      description: ['', [Validators.maxLength(500)]],
-      is_active: [true],
-    });
-  }
-
-  loadFeature(id: string) {
-    this.loading.set(true);
-    this.featuresService.getById(id).subscribe({
-      next: (response) => {
-        this.form.patchValue(response.data);
-        this.loading.set(false);
-      },
-      error: (err) => {
-        this.error.set(err.error?.message || 'Failed to load feature');
-        this.loading.set(false);
-      },
-    });
-  }
-
-  onSubmit() {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
-
-    this.loading.set(true);
-    this.error.set(null);
-
-    const operation = this.isEditMode() ? this.featuresService.update(this.featureId()!, this.form.value) : this.featuresService.create(this.form.value);
-
-    operation.subscribe({
-      next: () => {
-        this.router.navigate(['/features']);
-      },
-      error: (err) => {
-        this.error.set(err.error?.message || 'Failed to save feature');
-        this.loading.set(false);
-      },
-    });
-  }
-
-  onCancel() {
-    this.router.navigate(['/features']);
-  }
-}
-```
-
-**Checklist:**
-
-- [ ] ReactiveFormsModule imported
-- [ ] Form validation matches backend schema
-- [ ] Edit mode loads existing data
-- [ ] Loading state during save
-- [ ] Error handling with user feedback
-- [ ] Cancel button navigates back
+---
 
 ### Phase 4: Integration & Testing
 
-Comprehensive testing ensures quality and prevents regressions.
+#### Step 4.1: Build Verification (MANDATORY)
 
-#### Step 4.1: Build Verification
-
-**MANDATORY before any commit.**
+**CRITICAL: MUST pass before any commit.**
 
 ```bash
 # Build all projects
 pnpm run build
 
-# Type checking
-nx run-many --target=typecheck --all
-
 # Expected: All successful, no errors
 ```
 
+**If Build Fails:**
+
+1. Read error messages carefully
+2. Fix TypeScript errors
+3. Run `pnpm run build` again
+4. DO NOT commit until build passes
+
 **Checklist:**
 
-- [ ] All projects build successfully
+- [ ] Build completes successfully
 - [ ] No TypeScript errors
 - [ ] No circular dependencies
-- [ ] Build completes in reasonable time
+- [ ] No schema validation errors
 
-#### Step 4.2: Code Quality Checks
+---
+
+#### Step 4.2: Manual Testing
+
+**Test Complete Workflows:**
+
+1. **Create Workflow**
+   - Navigate to feature page
+   - Click "Create" button
+   - Fill form with valid data
+   - Submit
+   - Verify: Item appears in list
+   - Verify: Success message shown
+
+2. **Edit Workflow**
+   - Click edit on existing item
+   - Modify fields
+   - Submit
+   - Verify: Changes reflected
+   - Verify: Success message shown
+
+3. **Delete Workflow**
+   - Click delete on item
+   - Confirm deletion
+   - Verify: Item removed
+   - Verify: Success message shown
+
+4. **Validation**
+   - Try to submit empty form
+   - Verify: Validation errors shown
+   - Try to create duplicate
+   - Verify: Conflict error shown
+
+5. **Pagination**
+   - Create 25+ items
+   - Navigate pages
+   - Verify: Correct items shown
+   - Verify: Page numbers accurate
+
+**Browser Console Check:**
 
 ```bash
-# Lint all projects
-nx run-many --target=lint --all
+# Open Chrome DevTools (F12)
+# Console tab:
+- [ ] No red errors
+- [ ] No unhandled rejections
 
-# Auto-fix lint issues
-nx run-many --target=lint --all --fix
-
-# Expected: No linting errors (warnings OK)
+# Network tab:
+- [ ] All API calls return 200/201
+- [ ] No 404 errors
+- [ ] Correct request/response format
+- [ ] Authorization headers present
 ```
 
 **Checklist:**
 
-- [ ] No linting errors
-- [ ] Code follows style guide
-- [ ] No unused imports
-- [ ] Proper naming conventions
-
-#### Step 4.3: Manual Integration Testing
-
-**Test complete user workflows end-to-end.**
-
-```bash
-# Start development environment
-pnpm run docker:up
-pnpm run dev:api
-pnpm run dev:admin
-```
-
-**Test Scenarios:**
-
-**Scenario 1: Create Feature**
-
-1. Navigate to Features page
-2. Click "Create Feature" button
-3. Fill form with valid data
-4. Submit form
-5. Verify: Feature appears in list
-6. Verify: Success message displayed
-
-**Scenario 2: Edit Feature**
-
-1. Click edit button on existing feature
-2. Modify name and description
-3. Submit form
-4. Verify: Changes reflected in list
-5. Verify: Success message displayed
-
-**Scenario 3: Delete Feature**
-
-1. Click delete button on feature
-2. Confirm deletion
-3. Verify: Feature removed from list
-4. Verify: Success message displayed
-
-**Scenario 4: Validation Errors**
-
-1. Try to create feature with empty name
-2. Verify: Validation error shown
-3. Try to create duplicate feature
-4. Verify: Conflict error shown
-
-**Scenario 5: Pagination**
-
-1. Create 25+ features
-2. Navigate through pages
-3. Verify: Pagination works correctly
-4. Verify: Page numbers accurate
-
-**Scenario 6: Search/Filter**
-
-1. Enter search term
-2. Verify: Filtered results shown
-3. Clear search
-4. Verify: All results shown
-
-**Checklist:**
-
-- [ ] All user workflows work end-to-end
+- [ ] All CRUD workflows work
 - [ ] Form validation works
-- [ ] Error messages are user-friendly
-- [ ] Loading states display correctly
-- [ ] No console errors in browser
-- [ ] Responsive on mobile/tablet/desktop
+- [ ] Error messages display
+- [ ] Loading states work
+- [ ] No console errors
+- [ ] Responsive design tested
 
 **Reference:** See [QA Checklist](./qa-checklist.md)
 
-#### Step 4.4: Browser Console Verification
+---
 
-**Open Chrome DevTools (F12) and verify:**
+### Phase 5: Documentation & Git
 
-```bash
-# Console tab
-- [ ] No red errors
-- [ ] No unhandled promise rejections
-- [ ] No deprecation warnings
+#### Step 5.1: Update Documentation
 
-# Network tab
-- [ ] All API calls successful (200, 201)
-- [ ] No 404 errors
-- [ ] Proper request/response format
-- [ ] Authorization headers present
-
-# Performance tab
-- [ ] Page load < 3 seconds
-- [ ] API responses < 500ms
-- [ ] No memory leaks
-```
-
-### Phase 5: Documentation & Deployment
-
-Complete documentation and prepare for deployment.
-
-#### Step 5.1: API Documentation Update
-
-Verify OpenAPI documentation is accurate.
+Update API contract document with actual implementation details.
 
 ```bash
-# Access Swagger UI
-open http://localhost:3333/documentation
-
-# Verify each endpoint:
-- [ ] All endpoints listed
-- [ ] Request schemas accurate
-- [ ] Response examples correct
-- [ ] Authentication requirements shown
-- [ ] Try it out functionality works
+# Add implementation notes
+docs/features/inventory-drugs/API_CONTRACTS.md
+docs/features/inventory-drugs/IMPLEMENTATION.md
 ```
 
-#### Step 5.2: Feature Documentation
-
-Update feature documentation with implementation details.
-
-```bash
-# Update feature docs
-docs/features/my-feature/
-├── OVERVIEW.md       # Feature description
-├── REQUIREMENTS.md   # Requirements (updated)
-├── DESIGN.md         # Technical design
-└── API_CONTRACTS.md  # API documentation
-```
-
-**Add Implementation Notes:**
+**Example Implementation Notes:**
 
 ```markdown
 # Implementation Notes
 
 ## Database
 
-- Table: `features`
-- Migration: `20250117_create_features_table.ts`
+- Table: `inventory.drugs`
+- Migration: `20250120100000_create_drugs.ts`
+- Schema: inventory (domain-specific)
 
 ## Backend
 
-- Plugin: `apps/api/src/modules/features/features.plugin.ts`
-- Repository: Uses BaseRepository pattern
-- Authentication: JWT required
-- Authorization: Admin/Manager for create/update, Admin for delete
+- Layer: Domains
+- Domain: inventory
+- Section: master-data
+- Path: `layers/domains/inventory/master-data/drugs/`
+- Plugin: `drugs-domain-plugin`
+- Routes: `/api/inventory/master-data/drugs`
 
 ## Frontend
 
-- Service: `apps/admin/src/app/features/services/features.service.ts`
+- Path: `apps/web/src/app/features/inventory/drugs/`
+- Service: `DrugsService`
 - Components: List, Form
-- Routes: `/features`, `/features/new`, `/features/:id/edit`
 
 ## Testing
 
-- Backend: curl scripts in Phase 2.5
-- Frontend: Manual test scenarios in Phase 4.3
-
-## Known Issues
-
-- None
-
-## Future Enhancements
-
-- [ ] Bulk operations
-- [ ] Export to CSV
-- [ ] Advanced filtering
+- Backend: curl scripts in Phase 2.7
+- Frontend: Manual scenarios in Phase 4.2
 ```
 
 **Checklist:**
 
+- [ ] API contracts updated
 - [ ] Implementation details documented
-- [ ] API contracts match implementation
-- [ ] Known issues listed
-- [ ] Future enhancements identified
+- [ ] File paths recorded
+- [ ] Testing approach documented
 
-#### Step 5.3: Update Project Documentation
+---
 
-Link feature documentation from main docs.
+#### Step 5.2: Git Commit
 
-```bash
-# Update docs/README.md or appropriate section
-echo "- [My Feature](./features/my-feature/OVERVIEW.md)" >> docs/features/README.md
-```
-
-#### Step 5.4: Git Commit
-
-**Follow git rules from CLAUDE.md.**
+**Follow git rules from CLAUDE.md and .claude/rules/git-workflow.md**
 
 ```bash
-# Stage specific files only (NEVER git add -A)
-git add apps/api/src/modules/features/
-git add apps/admin/src/app/features/
-git add database/migrations/*_create_features_table.ts
-git add docs/features/my-feature/
-
-# Check staged changes
-git status
-
-# Commit with proper message (NO "Generated with Claude Code")
-git commit -m "feat(features): add feature management CRUD
-
-- Add features table migration with UUID primary key
-- Implement backend with BaseRepository pattern
-- Add TypeBox schemas for validation
-- Create Angular service and components
-- Add comprehensive API documentation
-- Include manual testing scenarios
-
-IMPORTANT: Tested end-to-end, all CRUD operations working"
-
-# Build verification before push
+# MANDATORY: Build MUST pass first
 pnpm run build
 
-# Push to remote
-git push origin feature/feature-management
+# Check what changed
+git status
+
+# Add SPECIFIC files only (NEVER git add -A)
+git add apps/api/src/layers/domains/inventory/master-data/drugs/
+git add apps/web/src/app/features/inventory/drugs/
+git add apps/api/src/database/migrations/20250120100000_create_drugs.ts
+git add docs/features/inventory-drugs/
+
+# Review staged changes
+git diff --staged
+
+# Commit with proper message
+# NO "Generated with Claude Code"
+# NO "BREAKING CHANGE:"
+git commit -m "feat(inventory): add drugs master data CRUD
+
+- Add drugs table migration in inventory schema
+- Implement plugin-based backend module
+- Use SchemaRefs for error responses
+- Add Angular service and components
+- Include API documentation
+
+IMPORTANT: Tested end-to-end, all operations working"
+
+# Verify commit
+git log -1 --stat
+
+# Push to feature branch
+git push origin feature/inventory-drugs
 ```
+
+**CRITICAL Git Rules:**
+
+- ✅ Run `pnpm run build` BEFORE commit
+- ✅ Add specific files only (NEVER `git add -A`)
+- ✅ Write descriptive commit message
+- ❌ NO "Generated with Claude Code" or "Co-Authored-By: Claude"
+- ❌ NO "BREAKING CHANGE:" (triggers v2.x.x)
+- ✅ Use `IMPORTANT:`, `MIGRATION:` instead
 
 **Checklist:**
 
+- [ ] Build passes
 - [ ] Only relevant files staged
 - [ ] Commit message follows convention
-- [ ] NO "Generated with Claude Code" or "Co-Authored-By: Claude"
-- [ ] NO "BREAKING CHANGE:" (forbidden)
-- [ ] Build passes before push
+- [ ] No forbidden phrases
 - [ ] Pushed to feature branch (not main)
 
-## 🔄 **Common Patterns & Best Practices**
+---
 
-### Database-First Development Workflow
+## Common Patterns & Best Practices
+
+### Database-First Workflow
 
 **Why Database-First?**
 
-- Database schema is the single source of truth
-- API contracts derive from database structure
-- Frontend types mirror backend schemas
-- Prevents schema drift and misalignment
+- Database schema is single source of truth
+- API contracts derive from schema
+- Frontend types mirror backend
+- Prevents schema drift
 
 **Workflow:**
 
-1. Design database schema → 2. Run migration → 3. Define API contracts → 4. Implement backend → 5. Test backend → 6. Implement frontend
+1. Design schema → 2. Run migration → 3. Define API contracts → 4. Implement backend → 5. Test API → 6. Implement frontend
 
-### API-First Development Workflow
+### Plugin Pattern Hierarchy
 
-**Why API-First?**
-
-- Backend must be complete before frontend
-- API contracts serve as development contracts
-- Enables parallel frontend/backend development (if contracts are stable)
-- Reduces integration issues
-
-**Workflow:**
-
-1. Define API contracts → 2. Implement backend → 3. Test with curl → 4. Verify OpenAPI docs → 5. Implement frontend
-
-### Repository Pattern Best Practices
-
-**Leverage BaseRepository:**
-
-```typescript
-// DO: Extend BaseRepository for CRUD operations
-class MyRepository extends BaseRepository<MyEntity, CreateDto, UpdateDto> {
-  // Only add custom methods
-  async findByCustomCriteria() {
-    /* ... */
-  }
-}
-
-// DON'T: Reimplement CRUD operations
-class MyRepository {
-  async findAll() {
-    /* Reinventing the wheel */
-  }
-  async create() {
-    /* Unnecessary duplication */
-  }
-}
+```
+Domain Plugin (inventory)
+  └── Section Plugin (master-data)
+        └── Module Plugin (drugs)
+              └── Routes Function (drugsRoutes)
+                    └── Controller Methods
 ```
 
-**Transform Methods:**
+**Key Points:**
+
+- Domain/Section plugins use `fp()`
+- Routes are plain functions (NOT fp() wrapped)
+- Controller passed via options
+- Prefix cascades down hierarchy
+
+### Authentication & Authorization
 
 ```typescript
-// DO: Handle all possible fields
-transformToEntity(dbRow: any): Entity {
-  return {
-    id: dbRow.id,
-    name: dbRow.name,
-    // Handle nullable fields
-    description: dbRow.description ?? undefined,
-    // Transform snake_case to camelCase
-    isActive: dbRow.is_active,
-  };
+// CORRECT: Use decorators
+preValidation: [
+  fastify.authenticate, // Decorator
+  fastify.verifyPermission('drugs', 'create'), // Permission check
+];
+
+// WRONG: Don't call as functions
+preValidation: [
+  authenticate(), // WRONG!
+  authorize('drugs'), // WRONG!
+];
+```
+
+### Repository Best Practices
+
+```typescript
+// CORRECT: Always use schema.table
+constructor(db: Knex) {
+  super(db, 'inventory.drugs'); // schema.table format
 }
 
-// DON'T: Forget nullable fields or transformations
-transformToEntity(dbRow: any): Entity {
-  return dbRow; // Missing transformations
+// CORRECT: Custom queries with schema prefix
+async findByCode(code: string) {
+  return this.db('inventory.drugs') // Full table name
+    .where({ code })
+    .first();
+}
+
+// WRONG: Missing schema
+constructor(db: Knex) {
+  super(db, 'drugs'); // Missing schema!
 }
 ```
 
-### TypeBox Schema Best Practices
+---
 
-**Schema Organization:**
+## Common Pitfalls & Solutions
 
-```typescript
-// DO: Organize schemas by purpose
-export const EntitySchema = Type.Object({ /* ... */ }, { $id: 'Entity' });
-export const CreateRequestSchema = Type.Object({ /* ... */ }, { $id: 'CreateRequest' });
-export const UpdateRequestSchema = Type.Partial(/* ... */, { $id: 'UpdateRequest' });
-export const ResponseSchema = Type.Object({ /* ... */ }, { $id: 'Response' });
+### Pitfall 1: Wrong Domain Placement
 
-// DON'T: Mix schemas without clear $id
-const schema = Type.Object({ /* ... */ }); // Missing $id
-```
+**Problem:** Putting shared services in domain layer or vice versa
+**Impact:** 404 errors, wrong URL structure
+**Solution:** Use Domain Checker script, follow decision matrix
 
-**Validation Rules:**
+### Pitfall 2: Missing Schema Prefix
 
-```typescript
-// DO: Match database constraints
-name: Type.String({ minLength: 1, maxLength: 100 }), // Matches VARCHAR(100) NOT NULL
+**Problem:** Using `drugs` instead of `inventory.drugs`
+**Impact:** Database queries fail
+**Solution:** Always use `schema.table` format
 
-// DO: Use Type.Optional for nullable fields
-description: Type.Optional(Type.String({ maxLength: 500 })),
+### Pitfall 3: Calling Decorators as Functions
 
-// DO: Set additionalProperties: false for security
-Type.Object({ /* ... */ }, { additionalProperties: false })
-```
+**Problem:** `authenticate()` instead of `fastify.authenticate`
+**Impact:** Authentication doesn't work
+**Solution:** Use decorators directly (no parentheses)
 
-### Frontend Service Best Practices
+### Pitfall 4: Double /api Prefix
 
-**URL Patterns:**
+**Problem:** Frontend service uses `/api/inventory/...`
+**Impact:** URLs become `/api/api/inventory/...`
+**Solution:** Use relative URLs without `/api` (interceptor adds it)
 
-```typescript
-// DO: Use relative URLs without /api prefix
-private readonly baseUrl = '/features'; // Interceptor adds /api
+### Pitfall 5: Not Testing Backend First
 
-// DON'T: Include /api prefix in service
-private readonly baseUrl = '/api/features'; // Results in /api/api/features
-```
+**Problem:** Implementing frontend before backend is tested
+**Impact:** Integration issues, wasted time
+**Solution:** Test all endpoints with curl before frontend
 
-**Error Handling:**
+### Pitfall 6: Committing Without Build
 
-```typescript
-// DO: Handle errors gracefully
-this.service.create(data).subscribe({
-  next: (response) => {
-    /* success */
-  },
-  error: (err) => {
-    this.error.set(err.error?.message || 'Operation failed');
-  },
-});
+**Problem:** Pushing code that doesn't build
+**Impact:** CI/CD failures, broken builds
+**Solution:** Run `pnpm run build` before EVERY commit
 
-// DON'T: Ignore errors
-this.service.create(data).subscribe((response) => {
-  /* no error handling */
-});
-```
+### Pitfall 7: Wrong File Naming
 
-### Component State Management
+**Problem:** Using `.routes.ts` instead of `.route.ts`
+**Impact:** Inconsistent naming, harder to find files
+**Solution:** Follow convention: `{module}.route.ts` (singular)
 
-**Use Signals:**
+---
 
-```typescript
-// DO: Use signals for reactive state
-loading = signal(false);
-error = signal<string | null>(null);
-data = signal<MyData[]>([]);
-
-// DON'T: Use plain properties without reactivity
-loading = false; // Not reactive
-```
-
-## 🚨 **Common Pitfalls & Solutions**
-
-### Pitfall 1: Skipping Database Schema Design
-
-**Problem:** Starting with API or frontend without database schema
-**Impact:** Schema changes force API changes, which force frontend changes
-**Solution:** Always start with database migration, verify with psql
-
-### Pitfall 2: Missing /api Prefix or Double Prefix
-
-**Problem:** URLs like `/features` (missing) or `/api/api/features` (double)
-**Impact:** 404 errors, broken API calls
-**Solution:** Use `/features` in service (interceptor adds `/api`), verify in Network tab
-
-### Pitfall 3: Not Testing Backend Before Frontend
-
-**Problem:** Implementing frontend without verifying backend works
-**Impact:** Integration issues, wasted time debugging
-**Solution:** Test all endpoints with curl in Phase 2.5, verify 200/201 responses
-
-### Pitfall 4: Mismatched TypeScript Interfaces
-
-**Problem:** Frontend interfaces don't match backend schemas
-**Impact:** Type errors, runtime errors, data loss
-**Solution:** Copy backend schema structure to frontend types, verify field names and types
-
-### Pitfall 5: Missing Error Handling
-
-**Problem:** No error handling in components/services
-**Impact:** Silent failures, poor user experience
-**Solution:** Always add error: (err) => handler in subscribe, display user-friendly messages
-
-### Pitfall 6: Forgetting Authorization
-
-**Problem:** All endpoints allow all authenticated users
-**Impact:** Security vulnerabilities, unauthorized access
-**Solution:** Add fastify.verifyRole for create/update/delete operations
-
-### Pitfall 7: Not Using BaseRepository Features
-
-**Problem:** Reimplementing search, pagination, filtering manually
-**Impact:** Code duplication, bugs, inconsistency
-**Solution:** Use BaseRepository.list() with query parameters, leverage built-in features
-
-### Pitfall 8: Hardcoded Values
-
-**Problem:** Hardcoded ports, URLs, or configuration
-**Impact:** Multi-instance conflicts, environment issues
-**Solution:** Use environment variables, read from .env.local
-
-### Pitfall 9: Committing Before Build Verification
-
-**Problem:** Pushing code that doesn't build or has type errors
-**Impact:** CI/CD failures, broken builds for team
-**Solution:** Run `pnpm run build` before every commit (mandatory)
-
-### Pitfall 10: Wrong Domain Placement
-
-**Problem:** Putting shared resources in domain layer or vice versa
-**Impact:** 404 errors, architectural confusion
-**Solution:** Use Domain Checker script, follow decision matrix in Phase 1.3
-
-## 🎯 **Quick Reference Checklists**
+## Quick Reference Checklists
 
 ### Pre-Development Checklist
 
-Before writing any code:
-
-- [ ] Database schema designed and migrated
-- [ ] Table verified with psql \d+ command
-- [ ] Domain placement determined (platform vs domain)
+- [ ] Layer determined (core, platform, domains)
+- [ ] Domain/section classified
+- [ ] Database schema designed
+- [ ] Migration created and tested
 - [ ] API contracts documented
-- [ ] Requirements and user stories defined
-- [ ] Dependencies identified
-- [ ] Success criteria defined
+- [ ] URL pattern defined
 
 ### Backend Implementation Checklist
 
-- [ ] TypeBox schemas created with unique $id
-- [ ] Repository extends BaseRepository
-- [ ] transformToEntity and transformToDb implemented
-- [ ] Service layer with business logic
-- [ ] Error handling (NotFoundError, ConflictError)
-- [ ] Fastify plugin with route registration
-- [ ] All schemas registered with addSchema
-- [ ] Authentication with fastify.verifyJWT
-- [ ] Authorization with fastify.verifyRole
+- [ ] CRUD generated with correct domain
+- [ ] Module plugin uses fp()
+- [ ] Routes are plain functions
+- [ ] Repository uses schema.table format
+- [ ] SchemaRefs for error responses
+- [ ] Authentication decorators used
+- [ ] Authorization permissions set
 - [ ] Tested with curl scripts
 
 ### Frontend Implementation Checklist
 
-- [ ] TypeScript interfaces match backend schemas
-- [ ] Service uses relative URLs (no /api prefix)
-- [ ] All CRUD methods implemented
-- [ ] Components use signals for state
-- [ ] Loading and error states handled
+- [ ] Service uses inject()
+- [ ] baseUrl WITHOUT /api prefix
+- [ ] Components use signals
+- [ ] Error handling implemented
+- [ ] Loading states added
 - [ ] Form validation matches backend
-- [ ] Error messages user-friendly
-- [ ] Responsive design tested
 
 ### Integration Testing Checklist
 
-- [ ] Build successful (`pnpm run build`)
-- [ ] Type check passes
-- [ ] Lint passes (no errors)
-- [ ] All CRUD workflows work end-to-end
+- [ ] `pnpm run build` passes
+- [ ] All CRUD workflows work
 - [ ] Form validation works
-- [ ] Pagination works
-- [ ] Search/filtering works
-- [ ] Error handling works
+- [ ] Error messages display
 - [ ] No console errors
-- [ ] Responsive on all devices
-
-### Documentation Checklist
-
-- [ ] API contracts documented
-- [ ] OpenAPI documentation verified
-- [ ] Feature requirements documented
-- [ ] Implementation notes added
-- [ ] Known issues listed
-- [ ] Future enhancements identified
-- [ ] Links from main docs updated
+- [ ] Responsive design tested
 
 ### Git Commit Checklist
 
-- [ ] Only relevant files staged (no git add -A)
+- [ ] Build passes
+- [ ] Specific files staged (no `git add -A`)
 - [ ] Commit message follows convention
 - [ ] NO "Generated with Claude Code"
 - [ ] NO "BREAKING CHANGE:"
-- [ ] Build passes before push
 - [ ] Pushed to feature branch
 
-## 🚨 **Claude Integration**
+---
 
-When Claude is working on features, it MUST:
+## Architecture References
 
-1. **Always check** if feature documentation exists before coding
-2. **Create documentation first** if starting a new feature
-3. **Update progress** after completing each task
-4. **Log session notes** when pausing work
-5. **Follow the task order** defined in TASKS.md
-6. **Check for conflicts** before making changes
-7. **Validate completion** against Definition of Done
+**Must-read before development:**
 
-This standard ensures consistent, trackable, and maintainable feature development across all projects.
+- [Layer-Based Routing](../../architecture/layer-based-routing.md)
+- [Domain Architecture Guide](../../architecture/domain-architecture-guide.md)
+- [Backend Architecture](../../architecture/backend-architecture.md)
+
+**Pattern references:**
+
+- `.claude/rules/inventory-domain.md` - Complete plugin examples
+- `.claude/rules/api-endpoints.md` - Authentication patterns
+- `.claude/rules/git-workflow.md` - Git commit rules
+
+**Standards:**
+
+- [API Calling Standard](./api-calling-standard.md)
+- [API Response Standard](../../reference/api/api-response-standard.md)
+- [TypeBox Schema Standard](../../reference/api/typebox-schema-standard.md)
+
+---
+
+This standard ensures consistent, maintainable, and architecturally-sound feature development across the entire platform.

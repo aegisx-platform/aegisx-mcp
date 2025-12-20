@@ -260,7 +260,7 @@ export class CrudGeneratorService {
     const updateDto = this.generateUpdateDto(tableInfo, updateDtoInterface);
     const responseTypes = this.generateResponseTypes(moduleInfo);
 
-    return `// apps/api/src/modules/${moduleInfo.moduleName}/${moduleInfo.moduleName}.types.ts
+    return `// apps/api/src/layers/domains/${moduleInfo.moduleName}/${moduleInfo.moduleName}.types.ts
 ${baseInterface}
 
 ${createDto}
@@ -357,7 +357,7 @@ export interface ${className}ListQuery {
     const searchFields = this.getSearchableFields(moduleInfo.tableInfo);
     const filterableFields = this.getFilterableFields(moduleInfo.tableInfo);
 
-    return `// apps/api/src/modules/${moduleInfo.moduleName}/${moduleInfo.moduleName}.repository.ts
+    return `// apps/api/src/layers/domains/${moduleInfo.moduleName}/${moduleInfo.moduleName}.repository.ts
 import { FastifyInstance } from 'fastify';
 import { Knex } from 'knex';
 import {
@@ -531,7 +531,7 @@ export class ${repositoryClass} {
       updateDtoInterface
     } = moduleInfo;
 
-    return `// apps/api/src/modules/${moduleInfo.moduleName}/${moduleInfo.moduleName}.service.ts
+    return `// apps/api/src/layers/domains/${moduleInfo.moduleName}/${moduleInfo.moduleName}.service.ts
 import { FastifyInstance } from 'fastify';
 import { ${repositoryClass} } from './${moduleInfo.moduleName}.repository';
 import {
@@ -710,7 +710,7 @@ export class ${serviceClass} {
       updateDtoInterface
     } = moduleInfo;
 
-    return `// apps/api/src/modules/${moduleInfo.moduleName}/${moduleInfo.moduleName}.controller.ts
+    return `// apps/api/src/layers/domains/${moduleInfo.moduleName}/${moduleInfo.moduleName}.controller.ts
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { ${serviceClass} } from './${moduleInfo.moduleName}.service';
 import {
@@ -1046,7 +1046,7 @@ export class ${controllerClass} {
   private async generateValidation(moduleInfo: ModuleInfo): Promise<string> {
     const { validationClass, createDtoInterface, updateDtoInterface } = moduleInfo;
 
-    return `// apps/api/src/modules/${moduleInfo.moduleName}/${moduleInfo.moduleName}.validation.ts
+    return `// apps/api/src/layers/domains/${moduleInfo.moduleName}/${moduleInfo.moduleName}.validation.ts
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 
@@ -1086,7 +1086,7 @@ export const ${moduleInfo.moduleName}Schemas = {
   private async generateTests(moduleInfo: ModuleInfo): Promise<string> {
     const { className, serviceClass, repositoryClass } = moduleInfo;
 
-    return `// apps/api/src/modules/${moduleInfo.moduleName}/__tests__/${moduleInfo.moduleName}.test.ts
+    return `// apps/api/src/layers/domains/${moduleInfo.moduleName}/__tests__/${moduleInfo.moduleName}.test.ts
 import { FastifyInstance } from 'fastify';
 import { buildApp } from '../../../app';
 import { ${className}, Create${className}Dto } from '../${moduleInfo.moduleName}.types';
@@ -1271,7 +1271,7 @@ describe('${className} Module', () => {
   private async generateIndexFile(moduleInfo: ModuleInfo): Promise<string> {
     const { controllerClass, serviceClass, repositoryClass } = moduleInfo;
 
-    return `// apps/api/src/modules/${moduleInfo.moduleName}/index.ts
+    return `// apps/api/src/layers/domains/${moduleInfo.moduleName}/index.ts
 import { FastifyInstance } from 'fastify';
 import { ${controllerClass} } from './${moduleInfo.moduleName}.controller';
 
@@ -1292,7 +1292,7 @@ export default ${moduleInfo.moduleName}Module;`;
 
   // File writing
   private async writeGeneratedFiles(moduleName: string, files: GeneratedFiles): Promise<void> {
-    const moduleDir = path.join(process.cwd(), 'apps', 'api', 'src', 'modules', moduleName);
+    const moduleDir = path.join(process.cwd(), 'apps', 'api', 'src', 'layers', 'domains', moduleName);
 
     // Create module directory
     await fs.mkdir(moduleDir, { recursive: true });
@@ -1309,7 +1309,7 @@ export default ${moduleInfo.moduleName}Module;`;
       fs.writeFile(path.join(moduleDir, 'index.ts'), files.index)
     ]);
 
-    this.fastify.log.info(\`Generated CRUD module for \${moduleName} at \${moduleDir}\`);
+    this.fastify.log.info(\`Generated CRUD module for \${moduleName} at apps/api/src/layers/domains/\${moduleName}\`);
   }
 
   // Utility methods for code generation
@@ -1663,12 +1663,13 @@ program
       });
 
       console.log('✅ Generated files:');
-      console.log(\`   📁 apps/api/src/modules/\${options.module || tableName}/\`);
+      console.log(\`   📁 apps/api/src/layers/domains/\${options.module || tableName}/\`);
       console.log('   📄 types.ts');
       console.log('   📄 repository.ts');
       console.log('   📄 service.ts');
       console.log('   📄 controller.ts');
-      console.log('   📄 validation.ts');
+      console.log('   📄 schemas.ts');
+      console.log('   📄 route.ts');
       console.log('   📄 index.ts');
       console.log('   📄 __tests__/test.ts');
 
@@ -1774,37 +1775,38 @@ program.parse(process.argv);
 
 ## Usage Examples
 
-### Generate CRUD for Users Table
+### Generate CRUD for Drugs Table
 
 ```bash
+# Basic CRUD generation
+pnpm run crud -- drugs --domain inventory/master-data --schema inventory --force
+
+# With import functionality
+pnpm run crud:import -- drugs --domain inventory/master-data --schema inventory --force
+
+# With WebSocket events
+pnpm run crud:events -- drugs --domain inventory/master-data --schema inventory --force
+
+# Full feature set (all of the above)
+pnpm run crud:full -- drugs --domain inventory/master-data --schema inventory --force
+
 # List available tables
-yarn generate:list-tables
+pnpm run crud:list
 
-# Analyze table structure
-yarn generate:analyze users
-
-# Generate full CRUD module
-yarn generate:crud users
-
-# Generate with custom options
-yarn generate:crud products --module product --permissions product.read product.write
-
-# Generate without cache integration
-yarn generate:crud categories --no-cache
-
-# Generate minimal version (no tests, no validation)
-yarn generate:crud tags --no-tests --no-validation
+# For operations domain instead
+pnpm run crud -- transactions --domain inventory/operations --schema inventory --force
 ```
 
 ### Generated File Structure
 
 ```
-apps/api/src/modules/users/
-├── users.types.ts           # TypeScript interfaces
-├── users.repository.ts      # Database operations
-├── users.service.ts         # Business logic
-├── users.controller.ts      # HTTP routes
-├── users.validation.ts      # Zod schemas
+apps/api/src/layers/domains/users/
+├── users.types.ts          # TypeScript interfaces
+├── users.repository.ts     # Database operations
+├── users.service.ts        # Business logic
+├── users.controller.ts     # HTTP routes
+├── users.schemas.ts        # TypeBox schemas
+├── users.route.ts          # Route handlers
 ├── index.ts                # Module exports
 └── __tests__/
     └── users.test.ts       # Complete test suite
@@ -1997,7 +1999,7 @@ export class {{className}}Service {
 ### Generator Controller
 
 ```typescript
-// apps/api/src/modules/generator/generator.controller.ts
+// apps/api/src/layers/domains/generator/generator.controller.ts
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { CrudGeneratorService } from '../../generators/crud-generator.service';
 
@@ -2191,7 +2193,7 @@ export class GeneratorController {
         {
           moduleName,
           filesGenerated: Object.keys(files),
-          location: \`apps/api/src/modules/\${moduleName}/\`
+          location: \`apps/api/src/layers/domains/\${moduleName}/\`
         },
         'CRUD module generated successfully'
       );
@@ -2552,7 +2554,7 @@ DELETE /api/products/:id          # Delete product
 GET    /api/products/statistics   # Get statistics
 
 # Test the generated module
-yarn test apps/api/src/modules/products
+yarn test apps/api/src/layers/domains/products
 ```
 
 แล้วเสร็จครับ! ตอนนี้มี CRUD Generator ที่สามารถ:
