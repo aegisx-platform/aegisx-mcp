@@ -262,12 +262,66 @@ pnpm run crud -- products --force
 
 ### 2. With Import Functionality
 
+#### Generic Import (Module-Specific)
+
+**Use when:** Single module needs import, no centralized dashboard needed
+
 ```bash
 # Step 1: Backend with import service
 pnpm run crud:import -- budgets --force
 
 # Step 2: Frontend with import dialog
 ./bin/cli.js generate budgets --target frontend --with-import --force
+```
+
+**What you get:**
+
+- Module-specific import service
+- Module-specific import routes
+- 5-step import dialog
+- In-memory sessions
+- No auto-discovery
+
+#### System Init Import (Auto-Discovery)
+
+**Use when:** Multiple modules need import, want centralized dashboard, need dependency management
+
+```bash
+# Step 1: Backend with System Init integration
+pnpm run crud:full -- budgets \
+  --domain budget/master-data \
+  --force
+
+# Generated service auto-discovered by System Init
+# Appears in centralized dashboard at /admin/system-init
+```
+
+**What you get:**
+
+- `@ImportService` decorator for auto-discovery
+- Centralized System Init API (no module routes needed)
+- Database-backed sessions
+- Complete import history
+- Batch tracking & rollback support
+- Dependency management
+- Appears in System Init dashboard automatically
+
+**Example with dependencies:**
+
+```bash
+# Import in order: categories → products
+pnpm run crud:full -- categories \
+  --domain inventory/master-data \
+  --schema inventory \
+  --force
+
+pnpm run crud:full -- products \
+  --domain inventory/master-data \
+  --schema inventory \
+  --force
+
+# Products service declares dependency on categories
+# System Init ensures correct import order
 ```
 
 ### 3. Real-Time Feature
@@ -616,13 +670,58 @@ Add route to `app.routes.ts`:
 
 ---
 
+---
+
+## 🔧 System Initialization Commands
+
+### Check System Init Status
+
+```bash
+# Check if System Init is running
+curl http://localhost:3000/api/admin/system-init/health-status
+
+# List all discovered modules
+curl http://localhost:3000/api/admin/system-init/available-modules
+
+# Get recommended import order
+curl http://localhost:3000/api/admin/system-init/import-order
+```
+
+### Download Import Template
+
+```bash
+# CSV format
+curl "http://localhost:3000/api/admin/system-init/module/products/template?format=csv" \
+  --output products-template.csv
+
+# Excel format
+curl "http://localhost:3000/api/admin/system-init/module/products/template?format=excel" \
+  --output products-template.xlsx
+```
+
+### Verify Module Discovery
+
+```bash
+# After generating a module with --with-import
+# Restart API server
+pnpm run dev:api
+
+# Check logs for discovery
+# Expected: "Discovered N modules" or "Registered: products (inventory/master-data)"
+```
+
+---
+
 ## 📖 Complete Guides
 
 - [README.md](./README.md) - Full documentation
+- [IMPORT_GUIDE.md](./IMPORT_GUIDE.md) - Complete import functionality guide
+- [IMPORT_COMPARISON.md](./IMPORT_COMPARISON.md) - Generic vs System Init comparison
+- [SYSTEM_INIT_INTEGRATION.md](./SYSTEM_INIT_INTEGRATION.md) - System Init integration guide
 - [GIT_WORKFLOW.md](./GIT_WORKFLOW.md) - Version release & NPM publishing
 
 ---
 
 **Generator Version**: 2.3.0
-**Last Updated**: December 3, 2025
+**Last Updated**: December 20, 2025
 **Status**: ✅ Production Ready

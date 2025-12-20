@@ -5,14 +5,18 @@
 ## Table of Contents
 
 - [Overview](#overview)
+- [Import Architecture Comparison](#import-architecture-comparison)
 - [What is `--with-import`?](#what-is---with-import)
 - [Import Workflow](#import-workflow)
 - [Backend Implementation](#backend-implementation)
+  - [Generic Import (Module-Specific)](#generic-import-module-specific)
+  - [System Init Import (Auto-Discovery)](#system-init-import-auto-discovery)
 - [Frontend Implementation](#frontend-implementation)
 - [Excel/CSV Format](#excelcsv-format)
 - [Validation & Error Handling](#validation--error-handling)
 - [Session Management](#session-management)
 - [Progress Tracking](#progress-tracking)
+- [Migration Guide](#migration-guide)
 - [Best Practices](#best-practices)
 - [Troubleshooting](#troubleshooting)
 
@@ -21,6 +25,103 @@
 ## Overview
 
 The `--with-import` flag enables **bulk data import from Excel/CSV files** with a complete 5-step workflow: Upload → Review → Configure → Process → Complete.
+
+**Two Architecture Variants:**
+
+1. **Generic Import (Module-Specific)** - Traditional import implementation for individual CRUD modules
+2. **System Init Import (Auto-Discovery)** - Advanced auto-discovery system with centralized dashboard
+
+---
+
+## Import Architecture Comparison
+
+### Quick Decision Guide
+
+**Use Generic Import when:**
+
+- ✅ You need a simple import feature for a single module
+- ✅ You don't need a centralized import dashboard
+- ✅ Import is an occasional feature (not core workflow)
+- ✅ You prefer self-contained module code
+
+**Use System Init Import when:**
+
+- ✅ You have multiple modules with import needs
+- ✅ You want a centralized import dashboard
+- ✅ You need dependency management (import order)
+- ✅ You want auto-discovery of import services
+- ✅ You need batch tracking and rollback support
+- ✅ You want import history and audit trail
+
+### Feature Comparison
+
+| Feature                   | Generic Import           | System Init Import                 |
+| ------------------------- | ------------------------ | ---------------------------------- |
+| **Setup**                 | Per-module configuration | `@ImportService` decorator         |
+| **Discovery**             | Manual registration      | Auto-discovery on server start     |
+| **Dashboard**             | Module-specific UI       | Centralized dashboard              |
+| **Dependency Management** | None                     | Automatic (topological sort)       |
+| **Import History**        | Not included             | Complete audit trail               |
+| **Batch Rollback**        | Not included             | Precise rollback with `batch_id`   |
+| **Session Storage**       | In-memory Map            | Database (`import_sessions` table) |
+| **Progress Tracking**     | Polling/WebSocket        | Polling/WebSocket + Database       |
+| **Best For**              | Simple modules           | Master data, System initialization |
+
+### Architecture Differences
+
+#### Generic Import
+
+```typescript
+// Manual configuration
+export class ProductsImportService extends BaseImportService<Product> {
+  constructor(knex, repository, eventService?) {
+    super(knex, ProductsImportService.createConfig(repository), 'products', eventService);
+  }
+
+  private static createConfig(repository): ImportModuleConfig<Product> {
+    return {
+      moduleName: 'products',
+      fields: [...],
+      maxRows: 10000,
+      // ... configuration
+    };
+  }
+}
+```
+
+#### System Init Import
+
+```typescript
+// Decorator-based auto-discovery
+@ImportService({
+  module: 'products',
+  domain: 'inventory',
+  displayName: 'Products (สินค้า)',
+  dependencies: ['categories', 'suppliers'],
+  priority: 3,
+  tags: ['master-data'],
+  supportsRollback: true,
+})
+export class ProductsImportService extends BaseImportService<Product> {
+  getTemplateColumns(): TemplateColumn[] {
+    /* ... */
+  }
+  async validateRow(row, rowNumber): Promise<ValidationError[]> {
+    /* ... */
+  }
+  protected async insertBatch(batch, trx, options): Promise<Product[]> {
+    /* ... */
+  }
+  protected async performRollback(batchId, knex): Promise<number> {
+    /* ... */
+  }
+}
+```
+
+**Key Differences:**
+
+- **Generic**: Module-specific config, manual setup, isolated import UI
+- **System Init**: Decorator-based metadata, auto-discovery, centralized dashboard with dependency graph
 
 **Key Features**:
 
@@ -185,7 +286,374 @@ User actions:
 
 ## Backend Implementation
 
-### Generated Controller (v2.0.1)
+### Generic Import (Module-Specific)
+
+**Use Case:** Individual CRUD modules with standalone import functionality
+
+**Generated Files:**
+
+- `{{module}}-import.service.ts` - Import service with module configuration
+- `{{module}}-import.routes.ts` - Import endpoints
+- Controller methods added to existing controller
+
+#### Generated Import Service
+
+```typescript
+// Generated: apps/api/src/modules/products/products-import.service.ts
+
+import { Knex } from 'knex';
+import { BaseImportService } from '../../../shared/services/base-import.service';
+import { ImportModuleConfig, ImportFieldConfig } from '../../../shared/services/import-config.interface';
+import { Product, CreateProduct } from '../types/products.types';
+import { ProductsRepository } from '../repositories/products.repository';
+
+export class ProductsImportService extends BaseImportService<Product> {
+  constructor(
+    knex: Knex,
+    private productsRepository: ProductsRepository,
+    eventService?: any,
+  ) {
+    super(knex, ProductsImportService.createConfig(productsRepository), 'products', eventService);
+  }
+
+  private static createConfig(repository: ProductsRepository): ImportModuleConfig<Product> {
+    const fields: ImportFieldConfig[] = [
+      {
+        name: 'code',
+        label: 'Product Code',
+        required: true,
+        type: 'string',
+        maxLength: 20,
+        description: 'Unique product code',
+        defaultExample: 'PRD-001',
+        validators: [ProductsImportService.validateCodeUniqueness(repository)],
+      },
+      {
+        name: 'name',
+        label: 'Product Name',
+        required: true,
+        type: 'string',
+        maxLength: 100,
+        description: 'Product name',
+        defaultExample: 'Sample Product',
+      },
+      // ... more fields
+    ];
+
+    return {
+      moduleName: 'products',
+      displayName: 'Products',
+      fields,
+      maxRows: 10000,
+      allowWarnings: true,
+      sessionExpirationMinutes: 30,
+      batchSize: 100,
+      rowTransformer: ProductsImportService.transformRow,
+    };
+  }
+
+  // Custom validators
+  private static validateCodeUniqueness(repository: ProductsRepository) {
+    return async (value: any, _row: any, _index: number) => {
+      if (!value) return null;
+      const existing = await repository.findByCode(value);
+      if (existing) {
+        return {
+          field: 'code',
+          message: `Product code '${value}' already exists`,
+          severity: 'ERROR' as const,
+          code: 'DUPLICATE_CODE',
+        };
+      }
+      return null;
+    };
+  }
+
+  // Row transformer
+  private static transformRow(row: any): CreateProduct {
+    return {
+      code: row.code?.trim(),
+      name: row.name?.trim(),
+      price: parseFloat(row.price) || 0,
+      // ... transform other fields
+    };
+  }
+}
+```
+
+---
+
+### System Init Import (Auto-Discovery)
+
+**Use Case:** Master data modules that need centralized import management
+
+**Generated Files:**
+
+- `{{module}}-import.service.ts` - Decorated import service
+- Auto-discovered and registered in System Init dashboard
+- No separate routes needed (uses centralized System Init API)
+
+#### Generated Import Service
+
+```typescript
+// Generated: apps/api/src/layers/platform/products/products-import.service.ts
+
+import { Knex } from 'knex';
+import { ImportService, BaseImportService, TemplateColumn, ValidationError, ImportOptions } from '../import';
+import { Product, CreateProduct } from './products.schemas';
+import { ProductsRepository } from './products.repository';
+
+/**
+ * Products Import Service (Auto-Discovery)
+ * Automatically discovered by System Init on server startup
+ */
+@ImportService({
+  module: 'products',
+  domain: 'inventory',
+  subdomain: 'master-data',
+  displayName: 'Products (สินค้า)',
+  description: 'Product master data',
+  dependencies: ['categories', 'suppliers'], // Import after these modules
+  priority: 3, // Import order (1 = first)
+  tags: ['master-data', 'inventory'],
+  supportsRollback: true,
+  version: '1.0.0',
+})
+export class ProductsImportService extends BaseImportService<Product> {
+  private repository: ProductsRepository;
+
+  constructor(knex: Knex) {
+    super(knex);
+    this.repository = new ProductsRepository(knex);
+    this.moduleName = 'products';
+  }
+
+  /**
+   * Get service metadata (required by BaseImportService)
+   */
+  getMetadata() {
+    return {
+      module: 'products',
+      domain: 'inventory',
+      subdomain: 'master-data',
+      displayName: 'Products (สินค้า)',
+      description: 'Product master data',
+      dependencies: ['categories', 'suppliers'],
+      priority: 3,
+      tags: ['master-data', 'inventory'],
+      supportsRollback: true,
+      version: '1.0.0',
+    };
+  }
+
+  /**
+   * Define import template structure
+   * Controls CSV/Excel template generation
+   */
+  getTemplateColumns(): TemplateColumn[] {
+    return [
+      {
+        name: 'code',
+        displayName: 'Product Code',
+        required: true,
+        type: 'string',
+        maxLength: 20,
+        pattern: '^[A-Z0-9_-]+$',
+        description: 'Unique product code (uppercase letters, numbers, hyphens, underscores)',
+        example: 'PRD-001',
+      },
+      {
+        name: 'name',
+        displayName: 'Product Name',
+        required: true,
+        type: 'string',
+        maxLength: 100,
+        description: 'Product name in Thai or English',
+        example: 'Sample Product Name',
+      },
+      {
+        name: 'price',
+        displayName: 'Price',
+        required: true,
+        type: 'number',
+        minValue: 0,
+        description: 'Product price in THB',
+        example: '1500.00',
+      },
+      {
+        name: 'category_code',
+        displayName: 'Category Code',
+        required: true,
+        type: 'string',
+        description: 'Category code (must exist in categories table)',
+        example: 'CAT-001',
+      },
+      // ... more columns
+    ];
+  }
+
+  /**
+   * Validate single row during batch validation
+   * Called for each row in uploaded file
+   */
+  async validateRow(row: any, rowNumber: number): Promise<ValidationError[]> {
+    const errors: ValidationError[] = [];
+
+    // Required field validation
+    if (!row.code || !row.code.trim()) {
+      errors.push({
+        row: rowNumber,
+        field: 'code',
+        message: 'Product code is required',
+        severity: 'ERROR',
+        code: 'REQUIRED_FIELD',
+      });
+    }
+
+    // Format validation
+    if (row.code && !/^[A-Z0-9_-]+$/.test(row.code)) {
+      errors.push({
+        row: rowNumber,
+        field: 'code',
+        message: 'Code must contain only uppercase letters, numbers, hyphens, and underscores',
+        severity: 'ERROR',
+        code: 'INVALID_FORMAT',
+      });
+    }
+
+    // Duplicate check
+    if (row.code) {
+      const existing = await this.knex('products').where('product_code', row.code.trim()).first();
+
+      if (existing) {
+        errors.push({
+          row: rowNumber,
+          field: 'code',
+          message: `Product code '${row.code}' already exists`,
+          severity: 'ERROR',
+          code: 'DUPLICATE_CODE',
+        });
+      }
+    }
+
+    // Foreign key validation
+    if (row.category_code) {
+      const categoryExists = await this.knex('categories').where('category_code', row.category_code.trim()).first();
+
+      if (!categoryExists) {
+        errors.push({
+          row: rowNumber,
+          field: 'category_code',
+          message: `Category '${row.category_code}' does not exist`,
+          severity: 'ERROR',
+          code: 'INVALID_REFERENCE',
+        });
+      }
+    }
+
+    return errors;
+  }
+
+  /**
+   * Insert batch of records into database
+   * Called during import execution with transaction support
+   */
+  protected async insertBatch(batch: any[], trx: Knex.Transaction, options: ImportOptions): Promise<Product[]> {
+    const results: Product[] = [];
+
+    for (const row of batch) {
+      try {
+        // Transform row to database format
+        const dbData = await this.transformRowToDb(row, trx);
+
+        // Include batch_id for rollback support
+        if (row.import_batch_id) {
+          dbData.import_batch_id = row.import_batch_id;
+        }
+
+        // Insert into database
+        const [inserted] = await trx('products').insert(dbData).returning('*');
+
+        results.push(this.transformDbToEntity(inserted));
+      } catch (error) {
+        console.error(`Failed to insert product:`, error);
+        throw error;
+      }
+    }
+
+    return results;
+  }
+
+  /**
+   * Rollback imported records
+   * Uses batch_id for precise rollback
+   */
+  protected async performRollback(batchId: string, knex: Knex): Promise<number> {
+    try {
+      const deleted = await knex('products').where({ import_batch_id: batchId }).delete();
+
+      return deleted;
+    } catch (error) {
+      throw new Error(`Rollback failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  /**
+   * Transform uploaded row to database format
+   */
+  private async transformRowToDb(row: any, trx: Knex.Transaction): Promise<any> {
+    // Lookup category_id from category_code
+    let categoryId: number | null = null;
+    if (row.category_code) {
+      const category = await trx('categories').select('id').where('category_code', row.category_code.trim()).first();
+
+      if (category) {
+        categoryId = category.id;
+      }
+    }
+
+    return {
+      product_code: row.code?.trim(),
+      product_name: row.name?.trim(),
+      price: parseFloat(row.price) || 0,
+      category_id: categoryId,
+      is_active: true,
+      created_at: new Date(),
+      updated_at: new Date(),
+    };
+  }
+
+  /**
+   * Transform database row to entity
+   */
+  private transformDbToEntity(dbRow: any): Product {
+    return {
+      id: dbRow.id,
+      product_code: dbRow.product_code,
+      product_name: dbRow.product_name,
+      price: dbRow.price,
+      category_id: dbRow.category_id,
+      is_active: dbRow.is_active,
+      created_at: dbRow.created_at,
+      updated_at: dbRow.updated_at,
+    };
+  }
+}
+```
+
+**Key Benefits of System Init Import:**
+
+- ✅ Auto-discovered on server start (<100ms for 30+ modules)
+- ✅ Centralized dashboard shows all import modules
+- ✅ Dependency management ensures correct import order
+- ✅ Database-backed sessions (survives server restart)
+- ✅ Complete import history and audit trail
+- ✅ Precise rollback using `batch_id`
+- ✅ No need to manually register routes
+
+---
+
+### Generic Import Controller Integration
 
 ```typescript
 // Generated: apps/api/src/domains/products/products.controller.ts
@@ -912,6 +1380,354 @@ private setupImportProgress(sessionId: string) {
 - Backend WebSocket integration
 - Frontend WebSocket listeners
 - Event emission during processing
+
+---
+
+## Migration Guide
+
+### Migrating from Generic Import to System Init Import
+
+**When to Migrate:**
+
+- You have multiple modules with import functionality
+- You want centralized import dashboard
+- You need dependency management (import order)
+- You want import history and rollback support
+
+**Migration Steps:**
+
+#### Step 1: Add Required Database Tables
+
+```sql
+-- Import sessions table (database-backed sessions)
+CREATE TABLE IF NOT EXISTS import_sessions (
+  session_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  module_name VARCHAR(100) NOT NULL,
+  file_name VARCHAR(255) NOT NULL,
+  file_size_bytes INTEGER NOT NULL,
+  file_type VARCHAR(10) NOT NULL CHECK (file_type IN ('csv', 'excel')),
+  validated_data JSONB NOT NULL,
+  validation_result JSONB NOT NULL,
+  can_proceed BOOLEAN NOT NULL DEFAULT false,
+  created_by UUID,
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_import_sessions_module ON import_sessions(module_name);
+CREATE INDEX idx_import_sessions_expires ON import_sessions(expires_at);
+
+-- Import history table
+CREATE TABLE IF NOT EXISTS import_history (
+  id SERIAL PRIMARY KEY,
+  job_id UUID UNIQUE NOT NULL,
+  session_id UUID,
+  module_name VARCHAR(100) NOT NULL,
+  status VARCHAR(20) NOT NULL CHECK (status IN ('pending', 'running', 'completed', 'failed')),
+  total_rows INTEGER NOT NULL DEFAULT 0,
+  imported_rows INTEGER NOT NULL DEFAULT 0,
+  error_rows INTEGER NOT NULL DEFAULT 0,
+  warning_count INTEGER NOT NULL DEFAULT 0,
+  started_at TIMESTAMP,
+  completed_at TIMESTAMP,
+  duration_ms INTEGER,
+  error_message TEXT,
+  can_rollback BOOLEAN NOT NULL DEFAULT false,
+  imported_by UUID,
+  imported_by_name VARCHAR(255),
+  ip_address VARCHAR(45),
+  user_agent TEXT,
+  file_name VARCHAR(255),
+  file_size_bytes INTEGER,
+  batch_id UUID NOT NULL,
+  rolled_back_at TIMESTAMP,
+  rolled_back_by UUID,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_import_history_job_id ON import_history(job_id);
+CREATE INDEX idx_import_history_module ON import_history(module_name);
+CREATE INDEX idx_import_history_status ON import_history(status);
+CREATE INDEX idx_import_history_batch_id ON import_history(batch_id);
+```
+
+#### Step 2: Add import_batch_id Column to Tables
+
+```sql
+-- Add to each table that supports import
+ALTER TABLE products ADD COLUMN IF NOT EXISTS import_batch_id UUID DEFAULT NULL;
+CREATE INDEX IF NOT EXISTS idx_products_import_batch ON products(import_batch_id);
+
+ALTER TABLE categories ADD COLUMN IF NOT EXISTS import_batch_id UUID DEFAULT NULL;
+CREATE INDEX IF NOT EXISTS idx_categories_import_batch ON categories(import_batch_id);
+
+-- Repeat for other tables...
+```
+
+#### Step 3: Convert Import Service
+
+**Before (Generic Import):**
+
+```typescript
+export class ProductsImportService extends BaseImportService<Product> {
+  constructor(knex: Knex, repository: ProductsRepository, eventService?: any) {
+    super(knex, ProductsImportService.createConfig(repository), 'products', eventService);
+  }
+
+  private static createConfig(repository: ProductsRepository): ImportModuleConfig<Product> {
+    // Config object...
+  }
+}
+```
+
+**After (System Init Import):**
+
+```typescript
+@ImportService({
+  module: 'products',
+  domain: 'inventory',
+  subdomain: 'master-data',
+  displayName: 'Products (สินค้า)',
+  dependencies: ['categories'],
+  priority: 2,
+  tags: ['master-data'],
+  supportsRollback: true,
+  version: '1.0.0',
+})
+export class ProductsImportService extends BaseImportService<Product> {
+  private repository: ProductsRepository;
+
+  constructor(knex: Knex) {
+    super(knex);
+    this.repository = new ProductsRepository(knex);
+    this.moduleName = 'products';
+  }
+
+  getMetadata() {
+    /* ... */
+  }
+  getTemplateColumns(): TemplateColumn[] {
+    /* ... */
+  }
+  async validateRow(row: any, rowNumber: number): Promise<ValidationError[]> {
+    /* ... */
+  }
+  protected async insertBatch(batch: any[], trx: Knex.Transaction, options: ImportOptions): Promise<Product[]> {
+    /* ... */
+  }
+  protected async performRollback(batchId: string, knex: Knex): Promise<number> {
+    /* ... */
+  }
+}
+```
+
+#### Step 4: Update Imports
+
+**Before:**
+
+```typescript
+import { BaseImportService } from '../../../shared/services/base-import.service';
+```
+
+**After:**
+
+```typescript
+import { ImportService, BaseImportService, TemplateColumn, ValidationError, ImportOptions } from '../import'; // or correct path to platform/import
+```
+
+#### Step 5: Implement Required Methods
+
+**getMetadata():**
+
+```typescript
+getMetadata() {
+  return {
+    module: 'products',
+    domain: 'inventory',
+    displayName: 'Products (สินค้า)',
+    dependencies: ['categories'],
+    priority: 2,
+    tags: ['master-data'],
+    supportsRollback: true,
+    version: '1.0.0',
+  };
+}
+```
+
+**getTemplateColumns():**
+Convert field config to template columns:
+
+```typescript
+// Before (Generic)
+const fields: ImportFieldConfig[] = [
+  {
+    name: 'code',
+    label: 'Product Code',
+    required: true,
+    type: 'string',
+    maxLength: 20,
+  }
+];
+
+// After (System Init)
+getTemplateColumns(): TemplateColumn[] {
+  return [
+    {
+      name: 'code',
+      displayName: 'Product Code',
+      required: true,
+      type: 'string',
+      maxLength: 20,
+      pattern: '^[A-Z0-9_-]+$',
+      description: 'Unique product code',
+      example: 'PRD-001',
+    }
+  ];
+}
+```
+
+**validateRow():**
+Convert field validators to row-level validation:
+
+```typescript
+async validateRow(row: any, rowNumber: number): Promise<ValidationError[]> {
+  const errors: ValidationError[] = [];
+
+  // Required fields
+  if (!row.code || !row.code.trim()) {
+    errors.push({
+      row: rowNumber,
+      field: 'code',
+      message: 'Product code is required',
+      severity: 'ERROR',
+      code: 'REQUIRED_FIELD',
+    });
+  }
+
+  // Custom validation
+  if (row.code) {
+    const existing = await this.knex('products')
+      .where('product_code', row.code.trim())
+      .first();
+
+    if (existing) {
+      errors.push({
+        row: rowNumber,
+        field: 'code',
+        message: `Product code '${row.code}' already exists`,
+        severity: 'ERROR',
+        code: 'DUPLICATE_CODE',
+      });
+    }
+  }
+
+  return errors;
+}
+```
+
+**insertBatch():**
+
+```typescript
+protected async insertBatch(
+  batch: any[],
+  trx: Knex.Transaction,
+  options: ImportOptions,
+): Promise<Product[]> {
+  const results: Product[] = [];
+
+  for (const row of batch) {
+    const dbData = {
+      product_code: row.code?.trim(),
+      product_name: row.name?.trim(),
+      price: parseFloat(row.price) || 0,
+      import_batch_id: row.import_batch_id, // IMPORTANT: For rollback
+      created_at: new Date(),
+      updated_at: new Date(),
+    };
+
+    const [inserted] = await trx('products').insert(dbData).returning('*');
+    results.push(inserted);
+  }
+
+  return results;
+}
+```
+
+**performRollback():**
+
+```typescript
+protected async performRollback(batchId: string, knex: Knex): Promise<number> {
+  const deleted = await knex('products')
+    .where({ import_batch_id: batchId })
+    .delete();
+
+  return deleted;
+}
+```
+
+#### Step 6: Remove Old Routes (Optional)
+
+If migrating to System Init, you can remove module-specific import routes since System Init provides centralized endpoints:
+
+```typescript
+// Can remove these routes:
+// - POST /api/products/import/preview
+// - POST /api/products/import/execute
+// - GET /api/products/import/status/:sessionId
+
+// Now use centralized routes:
+// - GET /api/admin/system-init/module/products/template
+// - POST /api/admin/system-init/module/products/validate
+// - POST /api/admin/system-init/module/products/import
+// - GET /api/admin/system-init/module/products/status/:jobId
+// - DELETE /api/admin/system-init/module/products/rollback/:jobId
+```
+
+#### Step 7: Update Frontend (Optional)
+
+**Before (Generic Import Dialog):**
+
+```typescript
+// Module-specific import dialog
+<app-products-import-dialog></app-products-import-dialog>
+```
+
+**After (System Init Dashboard):**
+
+```typescript
+// Access via centralized System Init dashboard
+// Navigate to: /admin/system-init
+// Import modules from dashboard UI
+```
+
+**Or keep module-specific dialog but update API endpoints:**
+
+```typescript
+// Update service to use System Init endpoints
+validateFile(file: File) {
+  return this.http.post(`/api/admin/system-init/module/products/validate`, formData);
+}
+
+executeImport(sessionId: string, options: ImportOptions) {
+  return this.http.post(`/api/admin/system-init/module/products/import`, { sessionId, options });
+}
+```
+
+---
+
+### Comparison: Before & After
+
+| Aspect                | Generic Import      | System Init Import              |
+| --------------------- | ------------------- | ------------------------------- |
+| **Setup**             | Config object       | Decorator metadata              |
+| **BaseImportService** | `@shared/services/` | `@layers/platform/import/base/` |
+| **Discovery**         | Manual              | Automatic on server start       |
+| **Routes**            | Module-specific     | Centralized System Init API     |
+| **Session Storage**   | In-memory Map       | Database (`import_sessions`)    |
+| **History Tracking**  | Not included        | Database (`import_history`)     |
+| **Rollback**          | Not included        | Precise with `batch_id`         |
+| **Dashboard**         | None                | Centralized UI                  |
 
 ---
 
