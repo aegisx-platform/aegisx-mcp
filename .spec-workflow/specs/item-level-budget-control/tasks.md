@@ -148,25 +148,27 @@
 ## Phase 5: Frontend - Budget Dashboard
 
 - [x] 5.1 Create budget dashboard component ✅ (Completed 2025-12-20)
-  - Files: `apps/admin/src/app/pages/inventory-demo/components/budget-dashboard.component.ts` (TypeScript), `budget-dashboard.component.html` (Template), `budget-dashboard.component.scss` (Styles), `budget-dashboard.component.example.ts` (Usage Example)
-  - Created standalone Angular component (417 lines TypeScript)
-  - Implemented 4 summary cards: Total Budget (💰), Used (📊), Remaining (💵), Overall Usage (📈)
-  - Added control type breakdown: HARD (🔴), SOFT (🟡), NONE (⚪) item counts with color-coded cards
-  - Added status breakdown: Normal (✅), Warning (⚠️), Exceeded (🔴) item counts
+  - **CORRECTED LOCATION:** `apps/web/src/app/features/inventory/modules/budget-requests/components/budget-dashboard.component.ts` (NOT apps/admin/inventory-demo)
+  - Files: `budget-dashboard.component.ts` (268 lines TypeScript), `budget-dashboard.component.html` (332 lines), `budget-dashboard.component.scss` (285 lines)
+  - Created standalone Angular component using **Angular Material** (MatCard, MatButton, MatChip, MatProgressBar, MatIcon)
+  - Implemented 4 summary cards: งบประมาณทั้งหมด (Total), ใช้ไปแล้ว (Used), คงเหลือ (Remaining), การใช้งาน (Usage %)
+  - Added control type breakdown: HARD (🔴 ควบคุมเข้มงวด), SOFT (🟡 เตือนเท่านั้น), NONE (⚪ ไม่ควบคุม)
+  - Added status breakdown: ปกติ (Normal <80%), เตือน (Warning 80-99%), เกิน (Exceeded ≥100%)
   - Implemented filterable item table with three filters:
     1. Control Type dropdown (HARD/SOFT/NONE)
     2. Status dropdown (normal/warning/exceeded)
-    3. Search input (drug name/code/generic name)
+    3. Search input (ชื่อยา, รหัส, ชื่อสามัญ)
   - Used reactive signals for state management (8 signals + 5 computed signals)
-  - Dual progress bars per item showing quantity usage and budget usage percentages
-  - Color-coded progress bars: Green (<80%), Yellow (80-99%), Red (≥100%)
-  - Status badges with appropriate colors (error/warning/success)
-  - Export to CSV button (placeholder implementation)
-  - View related PRs functionality (placeholder implementation)
-  - Responsive layout with CSS Grid (adapts 1-4 columns based on screen size)
+  - Dual progress bars per item (ปริมาณ + งบประมาณ) with dynamic color coding
+  - Color-coded MatProgressBar: Green (<80%), Yellow (80-99%), Red (≥100%)
+  - MatChip status indicators with Material color palette (primary/accent/warn)
+  - Export CSV button (placeholder for future implementation)
+  - View related PRs functionality (placeholder for future navigation)
+  - Responsive grid layout (4 columns → 2 columns → 1 column based on screen width)
   - Data fetched from `/api/inventory/budget/budget-requests/:id/items-status` endpoint using toSignal()
-  - Purpose: Provide comprehensive budget status overview with filtering and visual indicators
-  - _Implementation: Standalone component with computed signal-based filtering (controlTypeFilter, statusFilter, searchQuery). Summary calculations use reduce() over filtered items. Progress bars dynamically colored based on usage thresholds. Table shows drug info, control badges (Q:HARD, P:SOFT), dual progress bars, status badges, and PR links. Responsive grid layout with media queries for mobile/tablet/desktop._
+  - **Thai language interface** for production use
+  - Purpose: Provide comprehensive budget status overview for production budget request module
+  - _Implementation: Standalone component with computed signal-based filtering. Uses Material Design components for consistent UI. Progress bars styled with CSS custom properties (--progress-color). Responsive breakpoints at 1024px and 640px. Table rows highlight on hover and color-code by status (exceeded=red bg, warning=yellow bg). Empty state with MatIcon and message._
 
 - [x] 5.2 Add API endpoint for dashboard data ✅ (Completed 2025-12-20)
   - File: `apps/api/src/layers/domains/inventory/budget/budgetRequests/budget-requests.controller.ts`, `budget-requests.service.ts`, `budget-requests.schemas.ts`, `budget-requests.route.ts`
