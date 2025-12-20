@@ -21,12 +21,15 @@ const ControlTypeEnum = Type.Union([
   Type.Literal('HARD'), // บล็อคไม่ให้สร้าง PR - Block PR creation
 ]);
 
-// Variance Percent Schema (0-100 range)
-const VariancePercentSchema = Type.Integer({
-  minimum: 0,
-  maximum: 100,
-  description: 'Tolerance percentage (0-100)',
-});
+// Variance Percent Schema (0-100 range or null)
+const VariancePercentSchema = Type.Union([
+  Type.Integer({
+    minimum: 0,
+    maximum: 100,
+    description: 'Tolerance percentage (0-100)',
+  }),
+  Type.Null(),
+]);
 
 // Base BudgetRequestItems Schema
 export const BudgetRequestItemsSchema = Type.Object({
