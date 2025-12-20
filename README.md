@@ -1,12 +1,17 @@
 # @aegisx/mcp
 
-MCP (Model Context Protocol) server for the AegisX platform. Provides AI assistants with access to AegisX UI components, CRUD generator commands, and development patterns.
+[![npm version](https://badge.fury.io/js/@aegisx%2Fmcp.svg)](https://www.npmjs.com/package/@aegisx/mcp)
+[![Downloads](https://img.shields.io/npm/dm/@aegisx/mcp.svg)](https://www.npmjs.com/package/@aegisx/mcp)
+[![License](https://img.shields.io/npm/l/@aegisx/mcp.svg)](https://github.com/aegisx-platform/aegisx-mcp/blob/main/LICENSE)
+
+MCP (Model Context Protocol) server for the AegisX platform. Provides AI assistants with access to AegisX UI components, CRUD generator commands, development patterns, and API contract discovery.
 
 ## Features
 
-- **UI Components Reference** - Browse and search 68+ AegisX UI components with full API documentation
+- **UI Components Reference** - Browse and search 78+ AegisX UI components with full API documentation
 - **CRUD Generator Commands** - Build and execute CRUD generation commands with all options
 - **Development Patterns** - Access best practices, code templates, and architecture patterns
+- **API Contract Discovery** - List, search, and validate API contracts across your codebase
 - **Design Tokens** - Reference design tokens for colors, spacing, typography
 - **Development Standards** - Access coding standards and guidelines
 
@@ -100,6 +105,31 @@ Use aegisx_crud_build_command with tableName="products" and withImport=true to g
 
 ```
 Use aegisx_patterns_suggest with task="create API endpoint" to get relevant patterns.
+```
+
+### API Contract Tools
+
+| Tool                  | Description                                            |
+| --------------------- | ------------------------------------------------------ |
+| `aegisx_api_list`     | List all API endpoints, optionally filtered by feature |
+| `aegisx_api_search`   | Search endpoints by keyword across paths and methods   |
+| `aegisx_api_get`      | Get detailed contract for a specific endpoint          |
+| `aegisx_api_validate` | Validate implementation matches documented contracts   |
+
+**Examples:**
+
+```
+# List all endpoints
+Use aegisx_api_list to see all documented APIs.
+
+# Search for budget-related APIs
+Use aegisx_api_search with query="budget" to find budget endpoints.
+
+# Get contract details
+Use aegisx_api_get with path="/api/profile" to see the full contract.
+
+# Validate a feature
+Use aegisx_api_validate with feature="user-profile" to check for mismatches.
 ```
 
 ## Available Resources
