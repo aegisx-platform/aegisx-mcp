@@ -441,6 +441,19 @@ export class BudgetRequestItemsController {
     if (schema.historical_usage !== undefined) {
       updateData.historical_usage = schema.historical_usage;
     }
+    // Budget Control Fields
+    if (schema.quantity_control_type !== undefined) {
+      updateData.quantity_control_type = schema.quantity_control_type;
+    }
+    if (schema.price_control_type !== undefined) {
+      updateData.price_control_type = schema.price_control_type;
+    }
+    if (schema.quantity_variance_percent !== undefined) {
+      updateData.quantity_variance_percent = schema.quantity_variance_percent;
+    }
+    if (schema.price_variance_percent !== undefined) {
+      updateData.price_variance_percent = schema.price_variance_percent;
+    }
 
     // Auto-fill updated_by from JWT if table has this field
 

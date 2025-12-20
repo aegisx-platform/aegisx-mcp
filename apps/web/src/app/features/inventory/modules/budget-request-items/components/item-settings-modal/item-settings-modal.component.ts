@@ -5,6 +5,8 @@ import {
   inject,
   Input,
   OnInit,
+  OnChanges,
+  SimpleChanges,
   Output,
   signal,
   computed,
@@ -49,7 +51,7 @@ export interface BudgetControlSettings {
   templateUrl: './item-settings-modal.component.html',
   styleUrl: './item-settings-modal.component.scss',
 })
-export class ItemSettingsModalComponent implements OnInit {
+export class ItemSettingsModalComponent implements OnInit, OnChanges {
   private fb = inject(FormBuilder);
   private budgetRequestItemService = inject(BudgetRequestItemService);
   private snackBar = inject(MatSnackBar);
@@ -100,6 +102,13 @@ export class ItemSettingsModalComponent implements OnInit {
 
   ngOnInit(): void {
     this.initializeForm();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // Reset form when currentSettings input changes
+    if (changes['currentSettings'] && !changes['currentSettings'].firstChange) {
+      this.resetFormWithCurrentSettings();
+    }
   }
 
   private initializeForm(): void {
@@ -172,6 +181,25 @@ export class ItemSettingsModalComponent implements OnInit {
           .get('price_variance_percent')
           ?.updateValueAndValidity();
       });
+  }
+
+  private resetFormWithCurrentSettings(): void {
+    // Reset form values with current settings
+    this.settingsForm.patchValue({
+      quantity_control_type:
+        this.currentSettings.quantity_control_type || 'NONE',
+      price_control_type: this.currentSettings.price_control_type || 'NONE',
+      quantity_variance_percent: this.currentSettings.quantity_variance_percent,
+      price_variance_percent: this.currentSettings.price_variance_percent,
+    });
+
+    // Update signals with new values
+    this.quantityControlType.set(
+      this.currentSettings.quantity_control_type || 'NONE',
+    );
+    this.priceControlType.set(
+      this.currentSettings.price_control_type || 'NONE',
+    );
   }
 
   open(): void {

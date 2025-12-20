@@ -1128,6 +1128,12 @@ export class BudgetRequestsService extends BaseService<
           q3_qty: 0,
           q4_qty: 0,
 
+          // Budget Control - Default to NONE
+          quantity_control_type: 'NONE',
+          price_control_type: 'NONE',
+          quantity_variance_percent: null,
+          price_variance_percent: null,
+
           // Audit
           created_at: new Date(),
           updated_at: new Date(),
@@ -1715,6 +1721,11 @@ export class BudgetRequestsService extends BaseService<
             q2_qty: q2,
             q3_qty: q3,
             q4_qty: q4,
+            // Budget Control - Default to NONE
+            quantity_control_type: 'NONE',
+            price_control_type: 'NONE',
+            quantity_variance_percent: null,
+            price_variance_percent: null,
             updated_at: new Date(),
           };
 
