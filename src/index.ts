@@ -20,6 +20,7 @@ import {
 } from './tools/components.tool.js';
 import { handleCrudTool } from './tools/crud.tool.js';
 import { handlePatternTool } from './tools/patterns.tool.js';
+import { handleApiContractTool } from './tools/api-contracts.tool.js';
 import { registerResources, handleResourceRead } from './resources/index.js';
 
 // Create MCP server
@@ -294,6 +295,94 @@ server.tool(
   },
   async (args) => {
     const result = handlePatternTool('aegisx_patterns_suggest', args);
+    return {
+      content: result.content.map((c) => ({
+        type: 'text' as const,
+        text: c.text,
+      })),
+    };
+  },
+);
+
+// ============ API CONTRACT TOOLS ============
+
+server.tool(
+  'aegisx_api_list',
+  'List all API endpoints or filter by feature. Returns endpoint summary with HTTP method, path, and description.',
+  {
+    feature: z
+      .string()
+      .optional()
+      .describe('Optional feature name to filter endpoints'),
+  },
+  async (args) => {
+    const result = await handleApiContractTool('aegisx_api_list', args);
+    return {
+      content: result.content.map((c) => ({
+        type: 'text' as const,
+        text: c.text,
+      })),
+    };
+  },
+);
+
+server.tool(
+  'aegisx_api_search',
+  'Search API endpoints by keyword. Searches across endpoint paths, methods, descriptions, and feature names.',
+  {
+    query: z
+      .string()
+      .describe(
+        'Search term (e.g., "profile", "GET", "inventory", or feature name)',
+      ),
+  },
+  async (args) => {
+    const result = await handleApiContractTool('aegisx_api_search', args);
+    return {
+      content: result.content.map((c) => ({
+        type: 'text' as const,
+        text: c.text,
+      })),
+    };
+  },
+);
+
+server.tool(
+  'aegisx_api_get',
+  'Get detailed API contract for a specific endpoint including request/response schemas, examples, and error responses.',
+  {
+    path: z
+      .string()
+      .describe('API endpoint path (e.g., "/api/profile", "/api/users/:id")'),
+    method: z
+      .enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'])
+      .optional()
+      .describe(
+        'HTTP method (optional, if multiple endpoints share the same path)',
+      ),
+  },
+  async (args) => {
+    const result = await handleApiContractTool('aegisx_api_get', args);
+    return {
+      content: result.content.map((c) => ({
+        type: 'text' as const,
+        text: c.text,
+      })),
+    };
+  },
+);
+
+server.tool(
+  'aegisx_api_validate',
+  'Validate that API implementation matches contracts. Checks for missing endpoints, parameter mismatches, and schema violations.',
+  {
+    feature: z
+      .string()
+      .optional()
+      .describe('Optional feature name to validate specific feature contracts'),
+  },
+  async (args) => {
+    const result = await handleApiContractTool('aegisx_api_validate', args);
     return {
       content: result.content.map((c) => ({
         type: 'text' as const,

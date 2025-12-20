@@ -6,6 +6,7 @@
 export { handleComponentTool, componentCategories } from './components.tool.js';
 export { handleCrudTool } from './crud.tool.js';
 export { handlePatternTool } from './patterns.tool.js';
+export { handleApiContractTool } from './api-contracts.tool.js';
 
 // Legacy interface for backward compatibility
 export interface ToolDefinition {
