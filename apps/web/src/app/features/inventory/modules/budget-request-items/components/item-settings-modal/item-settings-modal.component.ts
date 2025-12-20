@@ -71,6 +71,10 @@ export class ItemSettingsModalComponent implements OnInit {
 
   settingsForm!: FormGroup;
 
+  // Signals to track form values for reactivity
+  quantityControlType = signal<string>('NONE');
+  priceControlType = signal<string>('NONE');
+
   // Control type options with icons
   controlTypeOptions = [
     { value: 'NONE', label: 'None', icon: '⚪', color: 'text-gray-500' },
@@ -83,14 +87,14 @@ export class ItemSettingsModalComponent implements OnInit {
     { value: 'HARD', label: 'Hard Block', icon: '🔴', color: 'text-red-600' },
   ];
 
-  // Computed signals for conditional rendering
+  // Computed signals for conditional rendering (now reactive!)
   showQuantityVariance = computed(() => {
-    const controlType = this.settingsForm?.get('quantity_control_type')?.value;
+    const controlType = this.quantityControlType();
     return controlType === 'SOFT' || controlType === 'HARD';
   });
 
   showPriceVariance = computed(() => {
-    const controlType = this.settingsForm?.get('price_control_type')?.value;
+    const controlType = this.priceControlType();
     return controlType === 'SOFT' || controlType === 'HARD';
   });
 
@@ -114,10 +118,21 @@ export class ItemSettingsModalComponent implements OnInit {
       ],
     });
 
-    // Subscribe to control type changes to clear variance when NONE is selected
+    // Initialize signals with current form values
+    this.quantityControlType.set(
+      this.settingsForm.get('quantity_control_type')?.value || 'NONE',
+    );
+    this.priceControlType.set(
+      this.settingsForm.get('price_control_type')?.value || 'NONE',
+    );
+
+    // Subscribe to control type changes to update signals and clear variance when NONE
     this.settingsForm
       .get('quantity_control_type')
       ?.valueChanges.subscribe((value) => {
+        // Update signal for reactive computed
+        this.quantityControlType.set(value);
+
         if (value === 'NONE') {
           this.settingsForm.get('quantity_variance_percent')?.setValue(null);
           this.settingsForm.get('quantity_variance_percent')?.clearValidators();
@@ -138,6 +153,9 @@ export class ItemSettingsModalComponent implements OnInit {
     this.settingsForm
       .get('price_control_type')
       ?.valueChanges.subscribe((value) => {
+        // Update signal for reactive computed
+        this.priceControlType.set(value);
+
         if (value === 'NONE') {
           this.settingsForm.get('price_variance_percent')?.setValue(null);
           this.settingsForm.get('price_variance_percent')?.clearValidators();
