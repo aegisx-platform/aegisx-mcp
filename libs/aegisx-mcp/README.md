@@ -12,6 +12,7 @@ MCP (Model Context Protocol) server for the AegisX platform. Provides AI assista
 - **CRUD Generator Commands** - Build and execute CRUD generation commands with all options
 - **Development Patterns** - Access best practices, code templates, and architecture patterns
 - **API Contract Discovery** - List, search, and validate API contracts across your codebase
+- **API Testing & Authentication** - Login, test protected endpoints, decode JWT tokens, and track request history
 - **Design Tokens** - Reference design tokens for colors, spacing, typography
 - **Development Standards** - Access coding standards and guidelines
 
@@ -131,6 +132,46 @@ Use aegisx_api_get with path="/api/profile" to see the full contract.
 # Validate a feature
 Use aegisx_api_validate with feature="user-profile" to check for mismatches.
 ```
+
+### API Testing & Authentication Tools
+
+| Tool                       | Description                                                   |
+| -------------------------- | ------------------------------------------------------------- |
+| `aegisx_auth_login`        | Login to API and store access token (default: localhost:3000) |
+| `aegisx_auth_status`       | Check authentication status and token info                    |
+| `aegisx_auth_decode_jwt`   | Decode JWT token to view header, payload, and expiry details  |
+| `aegisx_auth_logout`       | Logout and clear authentication session                       |
+| `aegisx_api_request`       | Make authenticated HTTP requests (GET/POST/PUT/PATCH/DELETE)  |
+| `aegisx_api_history`       | View request/response history with filtering                  |
+| `aegisx_api_clear_history` | Clear request history                                         |
+
+**Examples:**
+
+```
+# Login to API
+Use aegisx_auth_login with email and password to authenticate and store token.
+
+# Check authentication status
+Use aegisx_auth_status to see current user info and token expiry.
+
+# Decode JWT token
+Use aegisx_auth_decode_jwt to inspect token claims and expiration.
+
+# Test protected endpoint
+Use aegisx_api_request with method="GET" and path="/api/profile" to call authenticated endpoints.
+
+# View request history
+Use aegisx_api_history to see recent API calls with status codes and response times.
+```
+
+**Features:**
+
+- ✅ Automatic token management and storage
+- ✅ Request/response history (last 50 requests)
+- ✅ JWT token decoding and validation
+- ✅ Support for custom headers and query parameters
+- ✅ Configurable base URL (default: http://localhost:3000)
+- ✅ Environment variable support (AEGISX_API_URL)
 
 ## Available Resources
 

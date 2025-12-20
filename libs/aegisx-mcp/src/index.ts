@@ -21,6 +21,7 @@ import {
 import { handleCrudTool } from './tools/crud.tool.js';
 import { handlePatternTool } from './tools/patterns.tool.js';
 import { handleApiContractTool } from './tools/api-contracts.tool.js';
+import { handleApiTestingTool } from './tools/api-testing.tool.js';
 import { registerResources, handleResourceRead } from './resources/index.js';
 
 // Create MCP server
@@ -383,6 +384,157 @@ server.tool(
   },
   async (args) => {
     const result = await handleApiContractTool('aegisx_api_validate', args);
+    return {
+      content: result.content.map((c) => ({
+        type: 'text' as const,
+        text: c.text,
+      })),
+    };
+  },
+);
+
+// ============ API TESTING TOOLS ============
+
+server.tool(
+  'aegisx_auth_login',
+  'Login to AegisX API and store access token for subsequent requests. Default baseUrl is http://localhost:3000',
+  {
+    email: z.string().describe('User email address'),
+    password: z.string().describe('User password'),
+    baseUrl: z
+      .string()
+      .optional()
+      .describe(
+        'API base URL (default: http://localhost:3000, supports AEGISX_API_URL env var)',
+      ),
+  },
+  async (args) => {
+    const result = await handleApiTestingTool('aegisx_auth_login', args);
+    return {
+      content: result.content.map((c) => ({
+        type: 'text' as const,
+        text: c.text,
+      })),
+    };
+  },
+);
+
+server.tool(
+  'aegisx_auth_status',
+  'Check current authentication status including token info and user details',
+  {},
+  async (args) => {
+    const result = await handleApiTestingTool('aegisx_auth_status', args);
+    return {
+      content: result.content.map((c) => ({
+        type: 'text' as const,
+        text: c.text,
+      })),
+    };
+  },
+);
+
+server.tool(
+  'aegisx_auth_decode_jwt',
+  'Decode and display JWT token information including header, payload, and expiry details',
+  {
+    token: z
+      .string()
+      .optional()
+      .describe(
+        'JWT token to decode (optional - uses current logged-in token if not provided)',
+      ),
+  },
+  async (args) => {
+    const result = await handleApiTestingTool('aegisx_auth_decode_jwt', args);
+    return {
+      content: result.content.map((c) => ({
+        type: 'text' as const,
+        text: c.text,
+      })),
+    };
+  },
+);
+
+server.tool(
+  'aegisx_auth_logout',
+  'Logout and clear authentication token and session data',
+  {},
+  async (args) => {
+    const result = await handleApiTestingTool('aegisx_auth_logout', args);
+    return {
+      content: result.content.map((c) => ({
+        type: 'text' as const,
+        text: c.text,
+      })),
+    };
+  },
+);
+
+server.tool(
+  'aegisx_api_request',
+  'Make an authenticated HTTP request to AegisX API endpoints. Automatically includes Authorization header if logged in.',
+  {
+    method: z
+      .enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
+      .describe('HTTP method'),
+    path: z
+      .string()
+      .describe(
+        'API endpoint path (e.g., "/api/profile", "/api/inventory/drugs")',
+      ),
+    body: z
+      .any()
+      .optional()
+      .describe('Request body for POST/PUT/PATCH requests (optional)'),
+    headers: z
+      .record(z.string())
+      .optional()
+      .describe('Additional headers (optional)'),
+    queryParams: z
+      .record(z.string())
+      .optional()
+      .describe('Query parameters as key-value pairs (optional)'),
+  },
+  async (args) => {
+    const result = await handleApiTestingTool('aegisx_api_request', args);
+    return {
+      content: result.content.map((c) => ({
+        type: 'text' as const,
+        text: c.text,
+      })),
+    };
+  },
+);
+
+server.tool(
+  'aegisx_api_history',
+  'View request/response history. Shows last 50 requests with status, timing, and response data.',
+  {
+    limit: z
+      .number()
+      .optional()
+      .describe('Number of recent requests to show (default: 10)'),
+    method: z.string().optional().describe('Filter by HTTP method (optional)'),
+    status: z.number().optional().describe('Filter by status code (optional)'),
+  },
+  async (args) => {
+    const result = await handleApiTestingTool('aegisx_api_history', args);
+    return {
+      content: result.content.map((c) => ({
+        type: 'text' as const,
+        text: c.text,
+      })),
+    };
+  },
+);
+
+server.tool(
+  'aegisx_api_clear_history',
+  'Clear all request/response history',
+  {},
+  async (args) => {
+    const result = await handleApiTestingTool('aegisx_api_clear_history', args);
     return {
       content: result.content.map((c) => ({
         type: 'text' as const,
