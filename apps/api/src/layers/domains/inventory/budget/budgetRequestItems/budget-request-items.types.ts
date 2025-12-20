@@ -72,6 +72,18 @@ export interface BudgetRequestItemsEntity {
   budget_type_id: number | null;
   budget_category_id: number | null;
   historical_usage: Record<string, any> | null;
+  // Budget Control Fields
+  quantity_control_type: 'NONE' | 'SOFT' | 'HARD' | null;
+  price_control_type: 'NONE' | 'SOFT' | 'HARD' | null;
+  quantity_variance_percent: number | null;
+  price_variance_percent: number | null;
+  // Purchased Tracking Fields
+  q1_purchased_qty: number | null;
+  q2_purchased_qty: number | null;
+  q3_purchased_qty: number | null;
+  q4_purchased_qty: number | null;
+  total_purchased_qty: number | null;
+  total_purchased_value: number | null;
 }
 
 // ===== ERROR HANDLING: ERROR CODES =====
