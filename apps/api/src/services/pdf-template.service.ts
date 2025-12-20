@@ -434,7 +434,7 @@ export class PdfTemplateService {
 
         fs.writeFileSync(filePath, pdfBuffer);
 
-        previewUrl = `/api/pdf-preview/${previewId}`;
+        previewUrl = `/api/v1/platform/pdf/preview/${previewId}`;
 
         // Set cleanup after 15 minutes
         setTimeout(

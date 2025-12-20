@@ -20,11 +20,26 @@ export async function up(knex: Knex): Promise<void> {
   // ============================================================================
   // 1. DELETE OLD DEFAULT TEMPLATES
   // ============================================================================
-  await knex('pdf_templates')
-    .whereIn('name', ['simple-report', 'invoice-template'])
-    .del();
+  // First get template IDs
+  const oldTemplates = await knex('pdf_templates')
+    .select('id')
+    .whereIn('name', ['simple-report', 'invoice-template']);
 
-  console.log('   ✅ Deleted old default templates');
+  if (oldTemplates.length > 0) {
+    const oldTemplateIds = oldTemplates.map((t) => t.id);
+
+    // Delete related pdf_renders first
+    await knex('pdf_renders').whereIn('template_id', oldTemplateIds).delete();
+
+    // Now delete templates
+    await knex('pdf_templates')
+      .whereIn('name', ['simple-report', 'invoice-template'])
+      .del();
+
+    console.log('   ✅ Deleted old default templates');
+  } else {
+    console.log('   ⏭️  Old templates already removed');
+  }
 
   // ============================================================================
   // 2. INSERT NEW INVENTORY & BUDGET TEMPLATES

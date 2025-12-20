@@ -29,17 +29,38 @@ export async function seed(knex: Knex): Promise<void> {
   // ============================================================================
   // DELETE OLD TEMPLATES THAT WILL BE REPLACED
   // ============================================================================
-  await knex('pdf_templates')
+  // First get template IDs
+  const oldTemplates = await knex('pdf_templates')
+    .select('id')
     .whereIn('name', [
       'thai-invoice-starter',
       'thai-receipt-starter',
       'thai-quotation-starter',
       'thai-monthly-report-starter',
     ])
-    .andWhere('is_template_starter', true)
-    .del();
+    .andWhere('is_template_starter', true);
 
-  console.log('   ✅ Deleted outdated template starters');
+  if (oldTemplates.length > 0) {
+    const oldTemplateIds = oldTemplates.map((t) => t.id);
+
+    // Delete related pdf_renders first
+    await knex('pdf_renders').whereIn('template_id', oldTemplateIds).delete();
+
+    // Now delete templates
+    await knex('pdf_templates')
+      .whereIn('name', [
+        'thai-invoice-starter',
+        'thai-receipt-starter',
+        'thai-quotation-starter',
+        'thai-monthly-report-starter',
+      ])
+      .andWhere('is_template_starter', true)
+      .del();
+
+    console.log('   ✅ Deleted outdated template starters');
+  } else {
+    console.log('   ⏭️  Templates already removed or not found');
+  }
 
   // ============================================================================
   // INSERT NEW RELEVANT TEMPLATE STARTERS
