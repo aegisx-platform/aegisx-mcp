@@ -39,7 +39,7 @@ export async function seed(knex: Knex): Promise<void> {
       is_default: false,
       is_template_starter: true,
       usage_count: 0,
-      template_data: JSON.stringify({
+      template_data: {
         pageSize: 'A4',
         pageOrientation: 'portrait',
         pageMargins: [40, 60, 40, 60],
@@ -99,8 +99,8 @@ export async function seed(knex: Knex): Promise<void> {
           font: 'Sarabun',
           fontSize: 11,
         },
-      }),
-      sample_data: JSON.stringify({
+      } as any,
+      sample_data: {
         distributionNumber: 'DIST-2025-01-001',
         distributionDate: '20 มกราคม 2568',
         department: { name: 'แผนกอายุรกรรม' },
@@ -108,7 +108,7 @@ export async function seed(knex: Knex): Promise<void> {
           { drugName: 'Paracetamol 500mg', quantity: '100', unit: 'Tabs' },
           { drugName: 'Amoxicillin 500mg', quantity: '50', unit: 'Caps' },
         ],
-      }),
+      } as any,
       created_at: now,
       updated_at: now,
     },
@@ -127,7 +127,7 @@ export async function seed(knex: Knex): Promise<void> {
       is_default: false,
       is_template_starter: true,
       usage_count: 0,
-      template_data: JSON.stringify({
+      template_data: {
         pageSize: 'A4',
         pageOrientation: 'portrait',
         pageMargins: [40, 60, 40, 60],
@@ -171,8 +171,8 @@ export async function seed(knex: Knex): Promise<void> {
           header: { fontSize: 18, bold: true, font: 'Sarabun' },
         },
         defaultStyle: { font: 'Sarabun' },
-      }),
-      sample_data: JSON.stringify({
+      } as any,
+      sample_data: {
         distributionNumber: 'DIST-2025-01-001',
         department: { name: 'แผนกอายุรกรรม' },
         items: [
@@ -183,7 +183,7 @@ export async function seed(knex: Knex): Promise<void> {
             unitCost: '0.50',
           },
         ],
-      }),
+      } as any,
       created_at: now,
       updated_at: now,
     },
@@ -202,7 +202,7 @@ export async function seed(knex: Knex): Promise<void> {
       is_default: false,
       is_template_starter: true,
       usage_count: 0,
-      template_data: JSON.stringify({
+      template_data: {
         pageSize: 'A4',
         pageOrientation: 'portrait',
         pageMargins: [40, 60, 40, 60],
@@ -246,8 +246,8 @@ export async function seed(knex: Knex): Promise<void> {
           header: { fontSize: 18, bold: true, font: 'Sarabun' },
         },
         defaultStyle: { font: 'Sarabun' },
-      }),
-      sample_data: JSON.stringify({
+      } as any,
+      sample_data: {
         returnNumber: 'RET-2025-01-001',
         department: { name: 'แผนกศัลยกรรม' },
         items: [
@@ -258,7 +258,7 @@ export async function seed(knex: Knex): Promise<void> {
             damagedQuantity: '0',
           },
         ],
-      }),
+      } as any,
       created_at: now,
       updated_at: now,
     },
@@ -277,7 +277,7 @@ export async function seed(knex: Knex): Promise<void> {
       is_default: false,
       is_template_starter: true,
       usage_count: 0,
-      template_data: JSON.stringify({
+      template_data: {
         pageSize: 'A4',
         pageOrientation: 'landscape',
         pageMargins: [30, 50, 30, 50],
@@ -311,8 +311,8 @@ export async function seed(knex: Knex): Promise<void> {
           header: { fontSize: 16, bold: true, font: 'Sarabun' },
         },
         defaultStyle: { font: 'Sarabun' },
-      }),
-      sample_data: JSON.stringify({
+      } as any,
+      sample_data: {
         items: [
           {
             drugName: 'Paracetamol 500mg',
@@ -321,7 +321,7 @@ export async function seed(knex: Knex): Promise<void> {
             totalValue: '2,500.00',
           },
         ],
-      }),
+      } as any,
       created_at: now,
       updated_at: now,
     },
@@ -340,7 +340,7 @@ export async function seed(knex: Knex): Promise<void> {
       is_default: false,
       is_template_starter: true,
       usage_count: 0,
-      template_data: JSON.stringify({
+      template_data: {
         pageSize: 'A4',
         pageOrientation: 'portrait',
         pageMargins: [40, 60, 40, 60],
@@ -384,8 +384,8 @@ export async function seed(knex: Knex): Promise<void> {
           header: { fontSize: 18, bold: true, font: 'Sarabun' },
         },
         defaultStyle: { font: 'Sarabun' },
-      }),
-      sample_data: JSON.stringify({
+      } as any,
+      sample_data: {
         receiptNumber: 'REC-2025-01-001',
         supplier: { name: 'บริษัท ยาไทย จำกัด' },
         items: [
@@ -396,7 +396,7 @@ export async function seed(knex: Knex): Promise<void> {
             unitPrice: '0.25',
           },
         ],
-      }),
+      } as any,
       created_at: now,
       updated_at: now,
     },
@@ -415,7 +415,7 @@ export async function seed(knex: Knex): Promise<void> {
       is_default: false,
       is_template_starter: true,
       usage_count: 0,
-      template_data: JSON.stringify({
+      template_data: {
         pageSize: 'A4',
         pageOrientation: 'landscape',
         pageMargins: [30, 50, 30, 50],
@@ -449,8 +449,8 @@ export async function seed(knex: Knex): Promise<void> {
           header: { fontSize: 16, bold: true, font: 'Sarabun' },
         },
         defaultStyle: { font: 'Sarabun' },
-      }),
-      sample_data: JSON.stringify({
+      } as any,
+      sample_data: {
         items: [
           {
             drugName: 'Ceftriaxone 1g',
@@ -459,7 +459,7 @@ export async function seed(knex: Knex): Promise<void> {
             daysRemaining: '70',
           },
         ],
-      }),
+      } as any,
       created_at: now,
       updated_at: now,
     },
