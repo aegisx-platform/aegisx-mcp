@@ -2807,10 +2807,10 @@ export class BudgetRequestsService extends BaseService<
       status: string;
       department_id: number | null;
       total_requested_amount: number;
-      submitted_at: Date | null;
-      dept_reviewed_at: Date | null;
-      finance_reviewed_at: Date | null;
-      created_at: Date;
+      submitted_at: string | null;
+      dept_reviewed_at: string | null;
+      finance_reviewed_at: string | null;
+      created_at: string;
     };
     summary: {
       total_items: number;
@@ -2850,12 +2850,12 @@ export class BudgetRequestsService extends BaseService<
       status: string;
       status_label: string;
       submitted_by: string | null;
-      submitted_at: Date | null;
+      submitted_at: string | null;
       dept_reviewed_by: string | null;
-      dept_reviewed_at: Date | null;
+      dept_reviewed_at: string | null;
       dept_comments: string | null;
       finance_reviewed_by: string | null;
-      finance_reviewed_at: Date | null;
+      finance_reviewed_at: string | null;
       finance_comments: string | null;
     };
   }> {
@@ -2870,7 +2870,7 @@ export class BudgetRequestsService extends BaseService<
       throw error;
     }
 
-    const knex = this.budgetRequestsRepository.getKnex();
+    const knex = this.db;
 
     // Get all items for this budget request with drug_generics join
     const items = await knex('inventory.budget_request_items as bri')
