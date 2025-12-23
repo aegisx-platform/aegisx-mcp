@@ -1,6 +1,6 @@
 /**
  * AUTO-GENERATED FILE
- * Generated at: 2025-12-20T09:59:27.767Z
+ * Generated at: 2025-12-22T01:17:29.246Z
  * Generator: commands-generator@1.0.0
  * Source files:
  *   - libs/aegisx-cli/docs/QUICK_REFERENCE.md
