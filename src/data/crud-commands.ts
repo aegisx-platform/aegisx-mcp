@@ -766,35 +766,57 @@ export function getTroubleshooting(): TroubleshootingItem[] {
 export function buildCommand(
   tableName: string,
   options: {
+    // Target & App
     target?: 'backend' | 'frontend';
-    withImport?: boolean;
-    withEvents?: boolean;
-    force?: boolean;
-    dryRun?: boolean;
-    domain?: string;
-    schema?: string;
+    app?: 'api' | 'web' | 'admin';
+
+    // Shell & Section (Frontend)
     shell?: string;
     section?: string;
+
+    // Feature Options
+    withImport?: boolean;
+    withEvents?: boolean;
+    withExport?: boolean;
+
+    // Frontend Options
     smartStats?: boolean;
-    directDb?: boolean;
-    noRoles?: boolean;
-    migrationOnly?: boolean;
+    includeAuditFields?: boolean;
+
+    // Backend Options
     multipleRoles?: boolean;
+    noRoles?: boolean;
+    directDb?: boolean;
+    migrationOnly?: boolean;
+
+    // General Options
+    noRegister?: boolean;
+    noFormat?: boolean;
+    flat?: boolean;
+    layer?: string;
+    type?: string;
+
+    // Domain & Schema
+    domain?: string;
+    schema?: string;
+
+    // Control
+    force?: boolean;
+    dryRun?: boolean;
   },
 ): string {
   const parts: string[] = [];
 
+  // Base command
+  parts.push('./bin/cli.js generate');
+  parts.push(tableName);
+
+  // Target
   if (options.target === 'frontend') {
-    parts.push('./bin/cli.js generate');
-    parts.push(tableName);
     parts.push('--target frontend');
-  } else {
-    // Backend - always use direct CLI for proper option handling
-    parts.push('./bin/cli.js generate');
-    parts.push(tableName);
   }
 
-  // Domain options (for both backend and frontend)
+  // === Domain & Schema ===
   if (options.domain) {
     parts.push(`--domain ${options.domain}`);
   }
@@ -803,16 +825,11 @@ export function buildCommand(
     parts.push(`--schema ${options.schema}`);
   }
 
-  // Feature options (for both backend and frontend)
-  if (options.withImport) {
-    parts.push('--with-import');
+  // === App & Shell (Frontend) ===
+  if (options.app && options.target === 'frontend') {
+    parts.push(`--app ${options.app}`);
   }
 
-  if (options.withEvents) {
-    parts.push('--with-events');
-  }
-
-  // Shell integration options (for frontend)
   if (options.shell && options.target === 'frontend') {
     parts.push(`--shell ${options.shell}`);
   }
@@ -821,27 +838,67 @@ export function buildCommand(
     parts.push(`--section ${options.section}`);
   }
 
+  // === Feature Options (Both) ===
+  if (options.withImport) {
+    parts.push('--with-import');
+  }
+
+  if (options.withEvents) {
+    parts.push('--with-events');
+  }
+
+  if (options.withExport) {
+    parts.push('--with-export');
+  }
+
+  // === Frontend Options ===
   if (options.smartStats && options.target === 'frontend') {
     parts.push('--smart-stats');
   }
 
-  // Role/permission options (for backend)
-  if (options.directDb && options.target !== 'frontend') {
-    parts.push('--direct-db');
+  if (options.includeAuditFields && options.target === 'frontend') {
+    parts.push('--include-audit-fields');
+  }
+
+  // === Backend Options ===
+  if (options.multipleRoles && options.target !== 'frontend') {
+    parts.push('--multiple-roles');
   }
 
   if (options.noRoles && options.target !== 'frontend') {
     parts.push('--no-roles');
   }
 
+  if (options.directDb && options.target !== 'frontend') {
+    parts.push('--direct-db');
+  }
+
   if (options.migrationOnly && options.target !== 'frontend') {
     parts.push('--migration-only');
   }
 
-  if (options.multipleRoles && options.target !== 'frontend') {
-    parts.push('--multiple-roles');
+  // === General Options (Both) ===
+  if (options.noRegister) {
+    parts.push('--no-register');
   }
 
+  if (options.noFormat) {
+    parts.push('--no-format');
+  }
+
+  if (options.flat) {
+    parts.push('--flat');
+  }
+
+  if (options.layer) {
+    parts.push(`--layer ${options.layer}`);
+  }
+
+  if (options.type) {
+    parts.push(`--type ${options.type}`);
+  }
+
+  // === Control Options ===
   if (options.force) {
     parts.push('--force');
   }

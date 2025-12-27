@@ -27,6 +27,26 @@ export const crudTools: ToolDefinition[] = [
           enum: ['backend', 'frontend'],
           description: 'Generation target (default: backend)',
         },
+
+        // === App & Shell Options (Frontend) ===
+        app: {
+          type: 'string',
+          enum: ['api', 'web', 'admin'],
+          description:
+            'Target app - api (backend default), web (frontend default), admin',
+        },
+        shell: {
+          type: 'string',
+          description:
+            'Target shell for frontend (e.g., "system", "inventory"). Routes registered in shell routes file.',
+        },
+        section: {
+          type: 'string',
+          description:
+            'Section within shell (e.g., "master-data"). Module registered in section config.',
+        },
+
+        // === Feature Options ===
         withImport: {
           type: 'boolean',
           description: 'Include Excel/CSV import functionality',
@@ -35,14 +55,68 @@ export const crudTools: ToolDefinition[] = [
           type: 'boolean',
           description: 'Include WebSocket events for real-time updates',
         },
-        force: {
+        withExport: {
           type: 'boolean',
-          description: 'Overwrite existing files without prompt',
+          description: 'Include export functionality (CSV/Excel/PDF)',
         },
-        dryRun: {
+
+        // === Frontend Options ===
+        smartStats: {
           type: 'boolean',
-          description: 'Preview files without creating them',
+          description: 'Auto-detect statistics fields in table (frontend only)',
         },
+        includeAuditFields: {
+          type: 'boolean',
+          description:
+            'Include audit fields (created_at, updated_at, etc.) in forms (frontend only)',
+        },
+
+        // === Backend Options ===
+        multipleRoles: {
+          type: 'boolean',
+          description:
+            'Generate 3 roles (admin/editor/viewer) instead of single role (backend only)',
+        },
+        noRoles: {
+          type: 'boolean',
+          description: 'Skip role generation entirely (backend only)',
+        },
+        directDb: {
+          type: 'boolean',
+          description:
+            'Write roles directly to database - development only (backend only)',
+        },
+        migrationOnly: {
+          type: 'boolean',
+          description:
+            'Generate migration file only, no CRUD files (backend only)',
+        },
+
+        // === General Options ===
+        noRegister: {
+          type: 'boolean',
+          description:
+            'Skip auto-registration in plugin.loader.ts / app.routes.ts',
+        },
+        noFormat: {
+          type: 'boolean',
+          description: 'Skip auto-formatting generated files with prettier',
+        },
+        flat: {
+          type: 'boolean',
+          description: 'Use flat structure instead of nested folders',
+        },
+        layer: {
+          type: 'string',
+          description: 'Architectural layer: core, platform, or domains',
+        },
+        type: {
+          type: 'string',
+          description:
+            'Module type within domain (e.g., "master-data", "operations")',
+        },
+
+        // === Domain & Schema ===
         domain: {
           type: 'string',
           description:
@@ -52,6 +126,16 @@ export const crudTools: ToolDefinition[] = [
           type: 'string',
           description:
             'PostgreSQL schema to read table from (default: "public")',
+        },
+
+        // === Control Options ===
+        force: {
+          type: 'boolean',
+          description: 'Overwrite existing files without prompt',
+        },
+        dryRun: {
+          type: 'boolean',
+          description: 'Preview files without creating them',
         },
       },
       required: ['tableName'],
@@ -100,6 +184,8 @@ export const crudTools: ToolDefinition[] = [
           type: 'string',
           description: 'Table name for the feature',
         },
+
+        // Feature Options
         withImport: {
           type: 'boolean',
           description: 'Include import functionality',
@@ -108,6 +194,28 @@ export const crudTools: ToolDefinition[] = [
           type: 'boolean',
           description: 'Include real-time events',
         },
+        withExport: {
+          type: 'boolean',
+          description: 'Include export functionality',
+        },
+
+        // App & Shell (Frontend)
+        app: {
+          type: 'string',
+          enum: ['web', 'admin'],
+          description: 'Target frontend app (default: web)',
+        },
+        shell: {
+          type: 'string',
+          description:
+            'Target shell for frontend (e.g., "system", "inventory")',
+        },
+        section: {
+          type: 'string',
+          description: 'Section within shell (e.g., "master-data")',
+        },
+
+        // Domain & Schema
         domain: {
           type: 'string',
           description:
@@ -136,13 +244,43 @@ export function handleCrudTool(
       const domain = args.domain as string | undefined;
       const schema = args.schema as string | undefined;
       const command = buildCommand(tableName, {
+        // Target & App
         target: args.target as 'backend' | 'frontend',
+        app: args.app as 'api' | 'web' | 'admin' | undefined,
+
+        // Shell & Section (Frontend)
+        shell: args.shell as string | undefined,
+        section: args.section as string | undefined,
+
+        // Feature Options
         withImport: args.withImport as boolean,
         withEvents: args.withEvents as boolean,
-        force: args.force as boolean,
-        dryRun: args.dryRun as boolean,
+        withExport: args.withExport as boolean,
+
+        // Frontend Options
+        smartStats: args.smartStats as boolean,
+        includeAuditFields: args.includeAuditFields as boolean,
+
+        // Backend Options
+        multipleRoles: args.multipleRoles as boolean,
+        noRoles: args.noRoles as boolean,
+        directDb: args.directDb as boolean,
+        migrationOnly: args.migrationOnly as boolean,
+
+        // General Options
+        noRegister: args.noRegister as boolean,
+        noFormat: args.noFormat as boolean,
+        flat: args.flat as boolean,
+        layer: args.layer as string | undefined,
+        type: args.type as string | undefined,
+
+        // Domain & Schema
         domain,
         schema,
+
+        // Control
+        force: args.force as boolean,
+        dryRun: args.dryRun as boolean,
       });
 
       const lines: string[] = [];
@@ -286,6 +424,10 @@ export function handleCrudTool(
       const tableName = args.tableName as string;
       const withImport = args.withImport as boolean;
       const withEvents = args.withEvents as boolean;
+      const withExport = args.withExport as boolean;
+      const app = args.app as 'web' | 'admin' | undefined;
+      const shell = args.shell as string | undefined;
+      const section = args.section as string | undefined;
       const domain = args.domain as string | undefined;
       const schema = args.schema as string | undefined;
 
@@ -396,11 +538,23 @@ export function handleCrudTool(
       if (domain) {
         frontendCmd += ` --domain ${domain}`;
       }
+      if (app) {
+        frontendCmd += ` --app ${app}`;
+      }
+      if (shell) {
+        frontendCmd += ` --shell ${shell}`;
+      }
+      if (section) {
+        frontendCmd += ` --section ${section}`;
+      }
       if (withImport) {
         frontendCmd += ' --with-import';
       }
       if (withEvents) {
         frontendCmd += ' --with-events';
+      }
+      if (withExport) {
+        frontendCmd += ' --with-export';
       }
       frontendCmd += ' --force';
       lines.push(frontendCmd);
