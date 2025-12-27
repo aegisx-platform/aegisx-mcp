@@ -9,8 +9,6 @@
  */
 
 /* eslint-disable no-useless-escape */
- 
- 
 
 /**
  * CRUD Generator Commands Reference
@@ -49,58 +47,8 @@ export interface TroubleshootingItem {
   example: string;
 }
 
-export const packages: PackageInfo[] = [
-  {
-    name: 'standard',
-    description: 'Basic CRUD generation',
-    features: [
-      'Basic CRUD operations (Create, Read, Update, Delete)',
-      'List with pagination',
-      'Search and filtering',
-      'Soft delete support',
-    ],
-    useCases: [
-      'Simple data management',
-      'Prototype development',
-      'Non-critical features',
-    ],
-    command: 'pnpm run crud -- TABLE',
-  },
-  {
-    name: 'enterprise',
-    description: 'With bulk import (Excel/CSV)',
-    features: [
-      'Basic CRUD operations',
-      'Bulk import (Excel/CSV)',
-      'Dropdown API',
-      'Export functionality',
-    ],
-    useCases: [
-      'Data migration scenarios',
-      'Bulk data management',
-      'Standard business features',
-    ],
-    command: 'pnpm run crud:import -- TABLE',
-  },
-  {
-    name: 'full',
-    description: 'Full feature package',
-    features: [
-      'Basic CRUD operations',
-      'Bulk operations (import/export)',
-      'Advanced validation',
-      'Uniqueness checks',
-      'Complex search filters',
-      'Real-time events (optional)',
-    ],
-    useCases: [
-      'Mission-critical enterprise features',
-      'Complex business logic',
-      'Data integrity requirements',
-    ],
-    command: 'pnpm run crud:full -- TABLE',
-  },
-];
+// Removed: Package system replaced with option-based system
+// Use --with-import and --with-events flags instead
 
 export const commands: CommandInfo[] = [
   {
@@ -799,12 +747,9 @@ export function getCommand(name: string): CommandInfo | undefined {
 }
 
 /**
- * Get all packages
+ * REMOVED: getAllPackages - Package system replaced with option-based system
+ * Use --with-import and --with-events flags instead
  */
-
-export function getAllPackages(): PackageInfo[] {
-  return packages;
-}
 
 /**
  * Get troubleshooting tips
@@ -822,7 +767,6 @@ export function buildCommand(
   tableName: string,
   options: {
     target?: 'backend' | 'frontend';
-    package?: 'standard' | 'enterprise' | 'full';
     withImport?: boolean;
     withEvents?: boolean;
     force?: boolean;
@@ -845,19 +789,8 @@ export function buildCommand(
     parts.push(tableName);
     parts.push('--target frontend');
   } else {
-    // Backend - use pnpm scripts
-    if (
-      options.package === 'full' ||
-      (options.withImport && options.withEvents)
-    ) {
-      parts.push('pnpm run crud:full --');
-    } else if (options.package === 'enterprise' || options.withImport) {
-      parts.push('pnpm run crud:import --');
-    } else if (options.withEvents) {
-      parts.push('pnpm run crud:events --');
-    } else {
-      parts.push('pnpm run crud --');
-    }
+    // Backend - always use direct CLI for proper option handling
+    parts.push('./bin/cli.js generate');
     parts.push(tableName);
   }
 
@@ -870,11 +803,12 @@ export function buildCommand(
     parts.push(`--schema ${options.schema}`);
   }
 
-  if (options.withImport && options.target === 'frontend') {
+  // Feature options (for both backend and frontend)
+  if (options.withImport) {
     parts.push('--with-import');
   }
 
-  if (options.withEvents && options.target === 'frontend') {
+  if (options.withEvents) {
     parts.push('--with-events');
   }
 

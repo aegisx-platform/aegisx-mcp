@@ -4,7 +4,6 @@
 
 import type { ToolDefinition } from './index.js';
 import {
-  getAllPackages,
   getTroubleshooting,
   buildCommand,
   generatedFiles,
@@ -27,12 +26,6 @@ export const crudTools: ToolDefinition[] = [
           type: 'string',
           enum: ['backend', 'frontend'],
           description: 'Generation target (default: backend)',
-        },
-        package: {
-          type: 'string',
-          enum: ['standard', 'enterprise', 'full'],
-          description:
-            'Feature package: standard (basic CRUD), enterprise (+ import), full (+ events)',
         },
         withImport: {
           type: 'boolean',
@@ -64,21 +57,7 @@ export const crudTools: ToolDefinition[] = [
       required: ['tableName'],
     },
   },
-  {
-    name: 'aegisx_crud_packages',
-    description:
-      'Get information about available CRUD generator packages and their features.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        packageName: {
-          type: 'string',
-          enum: ['standard', 'enterprise', 'full'],
-          description: 'Specific package to get details for (optional)',
-        },
-      },
-    },
-  },
+  // REMOVED: aegisx_crud_packages - Package system replaced with option-based system
   {
     name: 'aegisx_crud_files',
     description: 'Show what files will be generated for a CRUD module.',
@@ -144,37 +123,8 @@ export const crudTools: ToolDefinition[] = [
   },
 ];
 
-interface PackageInfo {
-  name: string;
-  description: string;
-  features: string[];
-  useCases: string[];
-  command: string;
-}
-
-function formatPackage(pkg: PackageInfo): string {
-  const lines: string[] = [];
-  lines.push(
-    `## ${pkg.name.charAt(0).toUpperCase() + pkg.name.slice(1)} Package`,
-  );
-  lines.push(pkg.description);
-  lines.push('');
-  lines.push('**Features:**');
-  for (const feature of pkg.features) {
-    lines.push(`- ${feature}`);
-  }
-  lines.push('');
-  lines.push('**Use Cases:**');
-  for (const useCase of pkg.useCases) {
-    lines.push(`- ${useCase}`);
-  }
-  lines.push('');
-  lines.push('**Command:**');
-  lines.push('```bash');
-  lines.push(pkg.command);
-  lines.push('```');
-  return lines.join('\n');
-}
+// REMOVED: PackageInfo interface and formatPackage function
+// Package system replaced with option-based system
 
 export function handleCrudTool(
   name: string,
@@ -187,7 +137,6 @@ export function handleCrudTool(
       const schema = args.schema as string | undefined;
       const command = buildCommand(tableName, {
         target: args.target as 'backend' | 'frontend',
-        package: args.package as 'standard' | 'enterprise' | 'full',
         withImport: args.withImport as boolean,
         withEvents: args.withEvents as boolean,
         force: args.force as boolean,
@@ -221,9 +170,12 @@ export function handleCrudTool(
       if (args.target === 'frontend') {
         lines.push('> **Note:** Generate backend first before frontend.');
         lines.push('> ```bash');
-        const backendCmd = domain
-          ? `> pnpm run crud -- ${tableName} --domain ${domain}${schema ? ` --schema ${schema}` : ''} --force`
-          : `> pnpm run crud -- ${tableName} --force`;
+        let backendCmd = `> ./bin/cli.js generate ${tableName}`;
+        if (domain) backendCmd += ` --domain ${domain}`;
+        if (schema) backendCmd += ` --schema ${schema}`;
+        if (args.withImport) backendCmd += ' --with-import';
+        if (args.withEvents) backendCmd += ' --with-events';
+        backendCmd += ' --force';
         lines.push(backendCmd);
         lines.push('> ```');
       }
@@ -240,49 +192,7 @@ export function handleCrudTool(
       };
     }
 
-    case 'aegisx_crud_packages': {
-      const packageName = args.packageName as string | undefined;
-      const packages = getAllPackages();
-
-      if (packageName) {
-        const pkg = packages.find((p) => p.name === packageName);
-        if (!pkg) {
-          return {
-            content: [
-              {
-                type: 'text',
-                text: `Package "${packageName}" not found. Available: standard, enterprise, full`,
-              },
-            ],
-          };
-        }
-        return {
-          content: [{ type: 'text', text: formatPackage(pkg) }],
-        };
-      }
-
-      const lines: string[] = [];
-      lines.push('# CRUD Generator Packages');
-      lines.push('');
-      lines.push('| Package | Description | Key Feature |');
-      lines.push('|---------|-------------|-------------|');
-      for (const pkg of packages) {
-        lines.push(
-          `| **${pkg.name}** | ${pkg.description} | ${pkg.features[pkg.features.length - 1] || ''} |`,
-        );
-      }
-      lines.push('');
-      for (const pkg of packages) {
-        lines.push(formatPackage(pkg));
-        lines.push('');
-        lines.push('---');
-        lines.push('');
-      }
-
-      return {
-        content: [{ type: 'text', text: lines.join('\n') }],
-      };
-    }
+    // REMOVED: aegisx_crud_packages handler - Package system replaced with option-based system
 
     case 'aegisx_crud_files': {
       const target = (args.target as string) || 'both';
@@ -430,20 +340,18 @@ export function handleCrudTool(
       lines.push('');
       lines.push('```bash');
 
-      let backendCmd = 'pnpm run crud';
-      if (withImport && withEvents) {
-        backendCmd = 'pnpm run crud:full';
-      } else if (withImport) {
-        backendCmd = 'pnpm run crud:import';
-      } else if (withEvents) {
-        backendCmd = 'pnpm run crud:events';
-      }
-      let backendFullCmd = `${backendCmd} -- ${tableName}`;
+      let backendFullCmd = `./bin/cli.js generate ${tableName}`;
       if (domain) {
         backendFullCmd += ` --domain ${domain}`;
       }
       if (schema) {
         backendFullCmd += ` --schema ${schema}`;
+      }
+      if (withImport) {
+        backendFullCmd += ' --with-import';
+      }
+      if (withEvents) {
+        backendFullCmd += ' --with-events';
       }
       backendFullCmd += ' --force';
       lines.push(backendFullCmd);

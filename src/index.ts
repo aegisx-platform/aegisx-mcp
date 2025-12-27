@@ -107,12 +107,6 @@ server.tool(
       .enum(['backend', 'frontend'])
       .optional()
       .describe('Generation target (default: backend)'),
-    package: z
-      .enum(['standard', 'enterprise', 'full'])
-      .optional()
-      .describe(
-        'Feature package: standard (basic CRUD), enterprise (+ import), full (+ events)',
-      ),
     withImport: z
       .boolean()
       .optional()
@@ -141,25 +135,8 @@ server.tool(
   },
 );
 
-server.tool(
-  'aegisx_crud_packages',
-  'Get information about available CRUD generator packages and their features.',
-  {
-    packageName: z
-      .enum(['standard', 'enterprise', 'full'])
-      .optional()
-      .describe('Specific package to get details for (optional)'),
-  },
-  async (args) => {
-    const result = handleCrudTool('aegisx_crud_packages', args);
-    return {
-      content: result.content.map((c) => ({
-        type: 'text' as const,
-        text: c.text,
-      })),
-    };
-  },
-);
+// REMOVED: aegisx_crud_packages - Package system replaced with option-based system
+// Use --with-import and --with-events flags instead of package parameter
 
 server.tool(
   'aegisx_crud_files',
