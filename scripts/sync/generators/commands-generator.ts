@@ -131,9 +131,8 @@ export async function generateCommandsFile(
       throw new Error('No commands provided for generation');
     }
 
-    if (!packages || packages.length === 0) {
-      throw new Error('No packages provided for generation');
-    }
+    // Package validation removed - package system deprecated
+    // Packages parameter kept for backward compatibility but not required
 
     if (!outputPath) {
       throw new Error('Output path is required');
@@ -498,7 +497,6 @@ function generateTypeScriptCode(
   lines.push('  tableName: string,');
   lines.push('  options: {');
   lines.push("    target?: 'backend' | 'frontend';");
-  lines.push("    package?: 'standard' | 'enterprise' | 'full';");
   lines.push('    withImport?: boolean;');
   lines.push('    withEvents?: boolean;');
   lines.push('    force?: boolean;');
@@ -521,22 +519,20 @@ function generateTypeScriptCode(
   lines.push('    parts.push(tableName);');
   lines.push("    parts.push('--target frontend');");
   lines.push('  } else {');
-  lines.push('    // Backend - use pnpm scripts');
-  lines.push('    if (');
-  lines.push("      options.package === 'full' ||");
-  lines.push('      (options.withImport && options.withEvents)');
-  lines.push('    ) {');
-  lines.push("      parts.push('pnpm run crud:full --');");
   lines.push(
-    "    } else if (options.package === 'enterprise' || options.withImport) {",
+    '    // Backend - always use direct CLI for proper option handling',
   );
-  lines.push("      parts.push('pnpm run crud:import --');");
-  lines.push('    } else if (options.withEvents) {');
-  lines.push("      parts.push('pnpm run crud:events --');");
-  lines.push('    } else {');
-  lines.push("      parts.push('pnpm run crud --');");
-  lines.push('    }');
+  lines.push("    parts.push('./bin/cli.js generate');");
   lines.push('    parts.push(tableName);');
+  lines.push('  }');
+  lines.push('');
+  lines.push('  // Feature options (for both backend and frontend)');
+  lines.push('  if (options.withImport) {');
+  lines.push("    parts.push('--with-import');");
+  lines.push('  }');
+  lines.push('');
+  lines.push('  if (options.withEvents) {');
+  lines.push("    parts.push('--with-events');");
   lines.push('  }');
   lines.push('');
   lines.push('  // Domain options (for both backend and frontend)');
@@ -546,14 +542,6 @@ function generateTypeScriptCode(
   lines.push('');
   lines.push("  if (options.schema && options.schema !== 'public') {");
   lines.push('    parts.push(`--schema ${options.schema}`);');
-  lines.push('  }');
-  lines.push('');
-  lines.push("  if (options.withImport && options.target === 'frontend') {");
-  lines.push("    parts.push('--with-import');");
-  lines.push('  }');
-  lines.push('');
-  lines.push("  if (options.withEvents && options.target === 'frontend') {");
-  lines.push("    parts.push('--with-events');");
   lines.push('  }');
   lines.push('');
   lines.push('  // Shell integration options (for frontend)');

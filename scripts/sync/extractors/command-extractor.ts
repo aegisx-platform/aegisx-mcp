@@ -92,136 +92,16 @@ export async function extractCommands(
 /**
  * Task 10: Extract package information from QUICK_REFERENCE.md
  *
- * Parses the "Package Scripts" section to extract standard, enterprise, and full packages.
+ * NOTE: Package system has been removed in favor of option-based system.
+ * This function now returns an empty array as packages are no longer used.
+ * The buildCommand function uses --with-import and --with-events flags instead.
  *
- * @param content - QUICK_REFERENCE.md file content
- * @returns Array of extracted packages
+ * @param content - QUICK_REFERENCE.md file content (unused)
+ * @returns Empty array (packages are deprecated)
  */
 function extractPackages(content: string): ExtractedPackage[] {
-  const packages: ExtractedPackage[] = [];
-
-  // Look for package scripts section
-  const packageScriptsMatch = content.match(
-    /## 📦 Package Scripts([\s\S]*?)(?=##|$)/,
-  );
-
-  if (!packageScriptsMatch) {
-    console.warn('Package Scripts section not found in QUICK_REFERENCE.md');
-    return packages;
-  }
-
-  const packageSection = packageScriptsMatch[1];
-
-  // Extract table rows
-  const tableRows = packageSection
-    .split('\n')
-    .filter((line) => line.trim().startsWith('|') && !line.includes('---'));
-
-  // Skip header row
-  const dataRows = tableRows.slice(1);
-
-  for (const row of dataRows) {
-    const cells = row
-      .split('|')
-      .map((cell) => cell.trim())
-      .filter((cell) => cell.length > 0);
-
-    if (cells.length >= 3) {
-      const scriptName = cells[0].replace(/`/g, '');
-      const command = cells[1].replace(/`/g, '');
-      const description = cells[2];
-
-      // Determine package type from script name and description
-      let packageName = '';
-      let features: string[] = [];
-      let useCases: string[] = [];
-
-      if (
-        scriptName.includes('crud:full') ||
-        command.includes('--package full')
-      ) {
-        packageName = 'full';
-        features = [
-          'Basic CRUD operations',
-          'Bulk operations (import/export)',
-          'Advanced validation',
-          'Uniqueness checks',
-          'Complex search filters',
-          'Real-time events (optional)',
-        ];
-        useCases = [
-          'Mission-critical enterprise features',
-          'Complex business logic',
-          'Data integrity requirements',
-        ];
-      } else if (
-        scriptName.includes('crud:import') ||
-        command.includes('--with-import')
-      ) {
-        packageName = 'enterprise';
-        features = [
-          'Basic CRUD operations',
-          'Bulk import (Excel/CSV)',
-          'Dropdown API',
-          'Export functionality',
-        ];
-        useCases = [
-          'Data migration scenarios',
-          'Bulk data management',
-          'Standard business features',
-        ];
-      } else if (
-        scriptName.includes('crud:events') ||
-        command.includes('--with-events')
-      ) {
-        // Events is a feature flag, not a package
-        continue;
-      } else if (scriptName === 'pnpm run crud -- TABLE') {
-        packageName = 'standard';
-        features = [
-          'Basic CRUD operations (Create, Read, Update, Delete)',
-          'List with pagination',
-          'Search and filtering',
-          'Soft delete support',
-        ];
-        useCases = [
-          'Simple data management',
-          'Prototype development',
-          'Non-critical features',
-        ];
-      }
-
-      if (packageName) {
-        // Check if package already added
-        const existingPackage = packages.find((p) => p.name === packageName);
-        if (!existingPackage) {
-          packages.push({
-            name: packageName,
-            description: description,
-            features,
-            useCases,
-            command: scriptName,
-          });
-        }
-      }
-    }
-  }
-
-  // Ensure all three packages exist (fallback)
-  const packageNames = ['standard', 'enterprise', 'full'];
-  for (const name of packageNames) {
-    if (!packages.find((p) => p.name === name)) {
-      packages.push({
-        name,
-        description: `${name.charAt(0).toUpperCase() + name.slice(1)} CRUD package`,
-        features: [],
-        useCases: [],
-        command: `pnpm run crud${name !== 'standard' ? ':' + name : ''} -- TABLE`,
-      });
-    }
-  }
-
-  return packages;
+  // Package system removed - using option-based system (--with-import, --with-events)
+  return [];
 }
 
 /**
