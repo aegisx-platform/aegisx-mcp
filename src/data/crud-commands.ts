@@ -769,6 +769,8 @@ export function buildCommand(
     // Target & App
     target?: 'backend' | 'frontend';
     app?: 'api' | 'web' | 'admin';
+    output?: string;
+    config?: string;
 
     // Shell & Section (Frontend)
     shell?: string;
@@ -784,6 +786,7 @@ export function buildCommand(
     includeAuditFields?: boolean;
 
     // Backend Options
+    package?: 'standard' | 'enterprise' | 'full';
     multipleRoles?: boolean;
     noRoles?: boolean;
     directDb?: boolean;
@@ -792,7 +795,6 @@ export function buildCommand(
     // General Options
     noRegister?: boolean;
     noFormat?: boolean;
-    flat?: boolean;
     layer?: string;
     type?: string;
 
@@ -861,6 +863,10 @@ export function buildCommand(
   }
 
   // === Backend Options ===
+  if (options.package && options.target !== 'frontend') {
+    parts.push(`--package ${options.package}`);
+  }
+
   if (options.multipleRoles && options.target !== 'frontend') {
     parts.push('--multiple-roles');
   }
@@ -878,16 +884,20 @@ export function buildCommand(
   }
 
   // === General Options (Both) ===
+  if (options.output) {
+    parts.push(`--output ${options.output}`);
+  }
+
+  if (options.config) {
+    parts.push(`--config ${options.config}`);
+  }
+
   if (options.noRegister) {
     parts.push('--no-register');
   }
 
   if (options.noFormat) {
     parts.push('--no-format');
-  }
-
-  if (options.flat) {
-    parts.push('--flat');
   }
 
   if (options.layer) {

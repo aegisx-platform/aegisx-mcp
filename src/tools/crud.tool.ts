@@ -72,6 +72,12 @@ export const crudTools: ToolDefinition[] = [
         },
 
         // === Backend Options ===
+        package: {
+          type: 'string',
+          enum: ['standard', 'enterprise', 'full'],
+          description:
+            'Feature package to generate - standard (basic CRUD), enterprise (+ bulk ops), full (+ validation)',
+        },
         multipleRoles: {
           type: 'boolean',
           description:
@@ -93,6 +99,14 @@ export const crudTools: ToolDefinition[] = [
         },
 
         // === General Options ===
+        output: {
+          type: 'string',
+          description: 'Custom output directory (overrides --app)',
+        },
+        config: {
+          type: 'string',
+          description: 'Configuration file path',
+        },
         noRegister: {
           type: 'boolean',
           description:
@@ -101,10 +115,6 @@ export const crudTools: ToolDefinition[] = [
         noFormat: {
           type: 'boolean',
           description: 'Skip auto-formatting generated files with prettier',
-        },
-        flat: {
-          type: 'boolean',
-          description: 'Use flat structure instead of nested folders',
         },
         layer: {
           type: 'string',
@@ -247,6 +257,8 @@ export function handleCrudTool(
         // Target & App
         target: args.target as 'backend' | 'frontend',
         app: args.app as 'api' | 'web' | 'admin' | undefined,
+        output: args.output as string | undefined,
+        config: args.config as string | undefined,
 
         // Shell & Section (Frontend)
         shell: args.shell as string | undefined,
@@ -262,6 +274,7 @@ export function handleCrudTool(
         includeAuditFields: args.includeAuditFields as boolean,
 
         // Backend Options
+        package: args.package as 'standard' | 'enterprise' | 'full' | undefined,
         multipleRoles: args.multipleRoles as boolean,
         noRoles: args.noRoles as boolean,
         directDb: args.directDb as boolean,
@@ -270,7 +283,6 @@ export function handleCrudTool(
         // General Options
         noRegister: args.noRegister as boolean,
         noFormat: args.noFormat as boolean,
-        flat: args.flat as boolean,
         layer: args.layer as string | undefined,
         type: args.type as string | undefined,
 
