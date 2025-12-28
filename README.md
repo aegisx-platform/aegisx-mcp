@@ -9,7 +9,7 @@ MCP (Model Context Protocol) server for the AegisX platform. Provides AI assista
 ## Features
 
 - **UI Components Reference** - Browse and search 78+ AegisX UI components with full API documentation
-- **CRUD Generator Commands** - Build and execute CRUD generation commands with all options
+- **CRUD Generator Commands** - Build and execute CRUD generation commands with 23 supported options (100% CLI alignment)
 - **Development Patterns** - Access best practices, code templates, and architecture patterns
 - **API Contract Discovery** - List, search, and validate API contracts across your codebase
 - **API Testing & Authentication** - Login, test protected endpoints, decode JWT tokens, and track request history
