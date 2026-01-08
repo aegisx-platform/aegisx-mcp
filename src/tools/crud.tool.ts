@@ -239,6 +239,124 @@ export const crudTools: ToolDefinition[] = [
       required: ['tableName'],
     },
   },
+
+  // === Shell Generator Tools ===
+  {
+    name: 'aegisx_shell_generate',
+    description:
+      'Generate App Shell (layout component with navigation, routes, and pages). Use this to create a new shell before generating CRUD modules.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        shellName: {
+          type: 'string',
+          description:
+            'Shell name in kebab-case (e.g., "inventory", "system")',
+        },
+        type: {
+          type: 'string',
+          enum: ['simple', 'enterprise', 'multi-app'],
+          description:
+            'Shell type - simple (minimal), enterprise (full nav), multi-app (with sub-app tabs)',
+        },
+        app: {
+          type: 'string',
+          enum: ['web', 'admin'],
+          description: 'Target app (default: web)',
+        },
+        name: {
+          type: 'string',
+          description: 'Display name for the shell (e.g., "Inventory System")',
+        },
+        theme: {
+          type: 'string',
+          enum: ['default', 'indigo', 'teal', 'rose'],
+          description: 'Theme preset',
+        },
+        order: {
+          type: 'number',
+          description: 'App order in launcher (default: 0)',
+        },
+        withDashboard: {
+          type: 'boolean',
+          description: 'Include dashboard page (default: true)',
+        },
+        withMasterData: {
+          type: 'boolean',
+          description:
+            'Include Master Data page with ax-launcher (default: true)',
+        },
+        withSettings: {
+          type: 'boolean',
+          description: 'Include settings page',
+        },
+        withAuth: {
+          type: 'boolean',
+          description: 'Include AuthGuard and AuthService (default: true)',
+        },
+        withThemeSwitcher: {
+          type: 'boolean',
+          description: 'Include theme switcher component',
+        },
+        force: {
+          type: 'boolean',
+          description: 'Force overwrite existing files',
+        },
+        dryRun: {
+          type: 'boolean',
+          description: 'Preview files without creating them',
+        },
+      },
+      required: ['shellName'],
+    },
+  },
+  {
+    name: 'aegisx_shell_types',
+    description:
+      'Show available shell types (simple, enterprise, multi-app) and their features.',
+    inputSchema: {
+      type: 'object',
+      properties: {},
+    },
+  },
+  {
+    name: 'aegisx_section_generate',
+    description:
+      'Generate a section within a shell (sub-page with ax-launcher for grouping CRUD modules). Use this to organize CRUD modules into categories like "master-data", "reports", etc.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        shellName: {
+          type: 'string',
+          description: 'Parent shell name (e.g., "inventory")',
+        },
+        sectionName: {
+          type: 'string',
+          description:
+            'Section name in kebab-case (e.g., "master-data", "reports")',
+        },
+        app: {
+          type: 'string',
+          enum: ['web', 'admin'],
+          description: 'Target app (default: web)',
+        },
+        name: {
+          type: 'string',
+          description:
+            'Display name for the section (e.g., "Master Data Management")',
+        },
+        force: {
+          type: 'boolean',
+          description: 'Force overwrite existing files',
+        },
+        dryRun: {
+          type: 'boolean',
+          description: 'Preview files without creating them',
+        },
+      },
+      required: ['shellName', 'sectionName'],
+    },
+  },
 ];
 
 // REMOVED: PackageInfo interface and formatPackage function
@@ -620,6 +738,220 @@ export function handleCrudTool(
       lines.push('```bash');
       lines.push(`pnpm run crud:validate -- ${tableName}`);
       lines.push('```');
+
+      return {
+        content: [{ type: 'text', text: lines.join('\n') }],
+      };
+    }
+
+    case 'aegisx_shell_generate': {
+      const shellName = args.shellName as string;
+      const shellType = (args.type as string) || 'enterprise';
+      const app = (args.app as string) || 'web';
+
+      const lines: string[] = [];
+      lines.push(`# Generate App Shell: ${shellName}`);
+      lines.push('');
+      lines.push('```bash');
+
+      let cmd = `./bin/cli.js shell ${shellName}`;
+      if (shellType !== 'enterprise') {
+        cmd += ` --type ${shellType}`;
+      }
+      if (app !== 'web') {
+        cmd += ` --app ${app}`;
+      }
+      if (args.name) {
+        cmd += ` --name "${args.name}"`;
+      }
+      if (args.theme && args.theme !== 'default') {
+        cmd += ` --theme ${args.theme}`;
+      }
+      if (args.order) {
+        cmd += ` --order ${args.order}`;
+      }
+      if (args.withSettings) {
+        cmd += ' --with-settings';
+      }
+      if (args.withThemeSwitcher) {
+        cmd += ' --with-theme-switcher';
+      }
+      if (args.force) {
+        cmd += ' --force';
+      }
+      if (args.dryRun) {
+        cmd += ' --dry-run';
+      }
+
+      lines.push(cmd);
+      lines.push('```');
+      lines.push('');
+
+      lines.push('## Generated Files');
+      lines.push('');
+      const shellPath = `apps/${app}/src/app/features/${shellName}`;
+      lines.push(`\`\`\`\n${shellPath}/`);
+      lines.push(`├── ${shellName}-shell.component.ts`);
+      lines.push(`├── ${shellName}.config.ts`);
+      lines.push(`├── ${shellName}.routes.ts`);
+      lines.push(`├── index.ts`);
+      lines.push(`└── pages/`);
+      if (shellType !== 'simple') {
+        lines.push(`    ├── dashboard/dashboard.page.ts`);
+        lines.push(`    ├── master-data/master-data.page.ts`);
+        if (args.withSettings) {
+          lines.push(`    └── settings/settings.page.ts`);
+        }
+      } else {
+        lines.push(`    └── main/main.page.ts`);
+      }
+      lines.push('```');
+      lines.push('');
+
+      lines.push('## Next Steps');
+      lines.push('');
+      lines.push('1. Add route to `app.routes.ts`:');
+      lines.push('```typescript');
+      lines.push(`// ${shellName.charAt(0).toUpperCase() + shellName.slice(1)}`);
+      lines.push(`{`);
+      lines.push(`  path: '${shellName}',`);
+      lines.push(
+        `  loadChildren: () => import('./features/${shellName}/${shellName}.routes').then(m => m.${shellName.toUpperCase().replace(/-/g, '_')}_ROUTES)`,
+      );
+      lines.push(`}`);
+      lines.push('```');
+      lines.push('');
+      lines.push('2. Generate sections if needed:');
+      lines.push(
+        `\`\`\`bash\n./bin/cli.js section ${shellName} master-data --force\n\`\`\``,
+      );
+      lines.push('');
+      lines.push('3. Generate CRUD modules:');
+      lines.push(
+        `\`\`\`bash\n./bin/cli.js generate products --target frontend --shell ${shellName} --force\n\`\`\``,
+      );
+
+      return {
+        content: [{ type: 'text', text: lines.join('\n') }],
+      };
+    }
+
+    case 'aegisx_shell_types': {
+      const lines: string[] = [];
+      lines.push('# Available Shell Types');
+      lines.push('');
+
+      lines.push('## 🟢 SIMPLE');
+      lines.push('Uses `AxEmptyLayoutComponent`');
+      lines.push('');
+      lines.push('**Features:**');
+      lines.push('- Minimal layout without navigation');
+      lines.push('- Suitable for: Auth pages, landing pages, error pages');
+      lines.push('');
+      lines.push('**Example:**');
+      lines.push('```bash');
+      lines.push('./bin/cli.js shell auth --type simple --force');
+      lines.push('```');
+      lines.push('');
+
+      lines.push('## 🟡 ENTERPRISE (default)');
+      lines.push('Uses `AxEnterpriseLayoutComponent`');
+      lines.push('');
+      lines.push('**Features:**');
+      lines.push('- Full navigation sidebar');
+      lines.push('- Header with actions');
+      lines.push('- Footer with version');
+      lines.push('- Dashboard and Master Data pages');
+      lines.push('- Single sub-app navigation');
+      lines.push('');
+      lines.push('**Example:**');
+      lines.push('```bash');
+      lines.push('./bin/cli.js shell inventory --force');
+      lines.push('```');
+      lines.push('');
+
+      lines.push('## 🔴 MULTI-APP');
+      lines.push('Uses `AxEnterpriseLayoutComponent` with sub-app tabs');
+      lines.push('');
+      lines.push('**Features:**');
+      lines.push('- All enterprise features, plus:');
+      lines.push('- Sub-app tabs in header');
+      lines.push('- Suitable for: Large enterprise applications');
+      lines.push('');
+      lines.push('**Example:**');
+      lines.push('```bash');
+      lines.push('./bin/cli.js shell erp --type multi-app --force');
+      lines.push('```');
+
+      return {
+        content: [{ type: 'text', text: lines.join('\n') }],
+      };
+    }
+
+    case 'aegisx_section_generate': {
+      const shellName = args.shellName as string;
+      const sectionName = args.sectionName as string;
+      const app = (args.app as string) || 'web';
+
+      const lines: string[] = [];
+      lines.push(`# Generate Section: ${sectionName} in ${shellName}`);
+      lines.push('');
+      lines.push('```bash');
+
+      let cmd = `./bin/cli.js section ${shellName} ${sectionName}`;
+      if (app !== 'web') {
+        cmd += ` --app ${app}`;
+      }
+      if (args.name) {
+        cmd += ` --name "${args.name}"`;
+      }
+      if (args.force) {
+        cmd += ' --force';
+      }
+      if (args.dryRun) {
+        cmd += ' --dry-run';
+      }
+
+      lines.push(cmd);
+      lines.push('```');
+      lines.push('');
+
+      lines.push('## Generated Files');
+      lines.push('');
+      const sectionPath = `apps/${app}/src/app/features/${shellName}/pages/${sectionName}`;
+      lines.push(`\`\`\`\n${sectionPath}/`);
+      lines.push(`├── ${sectionName}.page.ts`);
+      lines.push(`└── ${sectionName}.config.ts`);
+      lines.push('```');
+      lines.push('');
+
+      lines.push('## What This Does');
+      lines.push('');
+      lines.push(
+        `1. Creates a new page in \`${shellName}\` shell with ax-launcher`,
+      );
+      lines.push(
+        `2. Adds route to \`${shellName}.routes.ts\`: \`/${shellName}/${sectionName}\``,
+      );
+      lines.push(
+        `3. CRUD modules can now be registered to this section using \`--section ${sectionName}\``,
+      );
+      lines.push('');
+
+      lines.push('## Next Steps');
+      lines.push('');
+      lines.push('Generate CRUD modules into this section:');
+      lines.push('```bash');
+      lines.push(
+        `./bin/cli.js generate products --target frontend --shell ${shellName} --section ${sectionName} --force`,
+      );
+      lines.push('```');
+      lines.push('');
+      lines.push('Result:');
+      lines.push(`- Route: \`/${shellName}/${sectionName}/products\``);
+      lines.push(
+        `- Module registered in: \`${sectionPath}/${sectionName}.config.ts\``,
+      );
 
       return {
         content: [{ type: 'text', text: lines.join('\n') }],
