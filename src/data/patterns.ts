@@ -1,15 +1,15 @@
 /**
  * AUTO-GENERATED FILE
- * Generated at: 2026-01-09T06:13:49.689Z
+ * Generated at: 2026-01-09T16:12:21.048Z
  * Generator: patterns-generator@1.0.0
  * Source files:
  *   - libs/aegisx-mcp/src/data/patterns.ts
  * DO NOT EDIT MANUALLY - Changes will be overwritten on next sync
  */
 
-/* eslint-disable no-useless-escape */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
+ 
+ 
 
 /**
  * AegisX Development Patterns
@@ -78,10 +78,7 @@ export type ProductResponse = Static<typeof ProductResponseSchema>;`,
       'Use Type.Optional for nullable fields',
       'Use Type.Partial for update schemas',
     ],
-    relatedPatterns: [
-      'Fastify Route Definition',
-      'Controller Type Safety',
-    ],
+    relatedPatterns: ['Fastify Route Definition', 'Controller Type Safety'],
   },
   {
     name: 'Fastify Route Definition',
@@ -158,10 +155,7 @@ export const productsRoutes: FastifyPluginAsync = async (fastify) => {
       'Use preValidation for auth middleware',
       'Return reply directly in middleware (not throw)',
     ],
-    relatedPatterns: [
-      'TypeBox Schema Definition',
-      'Auth Middleware Pattern',
-    ],
+    relatedPatterns: ['TypeBox Schema Definition', 'Auth Middleware Pattern'],
   },
   {
     name: 'Auth Middleware Pattern',
@@ -209,9 +203,7 @@ fastify.decorate('verifyJWT', async function (
       'Include reply parameter (not _reply)',
       'Throwing errors causes request timeouts',
     ],
-    relatedPatterns: [
-      'Fastify Route Definition',
-    ],
+    relatedPatterns: ['Fastify Route Definition'],
   },
   {
     name: 'Repository with UUID Validation',
@@ -257,9 +249,7 @@ export class ProductsRepository extends BaseRepository<Product, CreateProduct, U
       'GRACEFUL strategy filters out invalid UUIDs',
       'Prevents PostgreSQL casting errors',
     ],
-    relatedPatterns: [
-      'Service Layer Pattern',
-    ],
+    relatedPatterns: ['Service Layer Pattern'],
   },
   {
     name: 'Service Layer Pattern',
@@ -314,10 +304,7 @@ export class ProductsService {
       'Use dependency injection',
       'Add userId for audit fields',
     ],
-    relatedPatterns: [
-      'Repository with UUID Validation',
-      'Controller Pattern',
-    ],
+    relatedPatterns: ['Repository with UUID Validation', 'Controller Pattern'],
   },
   {
     name: 'Angular Signal-based Component',
@@ -393,10 +380,7 @@ export class ProductsListComponent {
       'Use toSignal for RxJS conversion',
       'Use @if/@for control flow',
     ],
-    relatedPatterns: [
-      'Angular HTTP Service',
-      'AegisX UI Integration',
-    ],
+    relatedPatterns: ['Angular HTTP Service', 'AegisX UI Integration'],
   },
   {
     name: 'Angular HTTP Service',
@@ -461,9 +445,7 @@ export class ProductsService {
       'Handle errors consistently',
       'Use HttpParams for query strings',
     ],
-    relatedPatterns: [
-      'Angular Signal-based Component',
-    ],
+    relatedPatterns: ['Angular Signal-based Component'],
   },
   {
     name: 'AegisX UI Integration',
@@ -561,9 +543,7 @@ export class DashboardComponent {
       'Combine with Material components',
       'Use TailwindCSS for layout',
     ],
-    relatedPatterns: [
-      'Angular Signal-based Component',
-    ],
+    relatedPatterns: ['Angular Signal-based Component'],
   },
   {
     name: 'Knex Migration',
@@ -613,9 +593,7 @@ export async function down(knex: Knex): Promise<void> {
       'Add indexes for query performance',
       'Use gen_random_uuid() for PostgreSQL',
     ],
-    relatedPatterns: [
-      'Repository with UUID Validation',
-    ],
+    relatedPatterns: ['Repository with UUID Validation'],
   },
   {
     name: 'Knex Query Optimization',
@@ -682,9 +660,7 @@ async function findAllWithFilters<T>(
       'Clone query before count to avoid mutation',
       'Calculate pagination metadata',
     ],
-    relatedPatterns: [
-      'Service Layer Pattern',
-    ],
+    relatedPatterns: ['Service Layer Pattern'],
   },
   {
     name: 'API Integration Test',
@@ -807,9 +783,7 @@ describe('Products API', () => {
       'Test success, validation errors, and auth',
       'Clean up after tests',
     ],
-    relatedPatterns: [
-      'TypeBox Schema Definition',
-    ],
+    relatedPatterns: ['TypeBox Schema Definition'],
   },
 ];
 
