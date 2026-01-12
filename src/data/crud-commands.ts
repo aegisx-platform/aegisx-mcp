@@ -780,6 +780,7 @@ export function buildCommand(
     withImport?: boolean;
     withEvents?: boolean;
     withExport?: boolean;
+    withHierarchy?: boolean;
 
     // Frontend Options
     smartStats?: boolean;
@@ -851,6 +852,10 @@ export function buildCommand(
 
   if (options.withExport) {
     parts.push('--with-export');
+  }
+
+  if (options.withHierarchy) {
+    parts.push('--with-hierarchy');
   }
 
   // === Frontend Options ===

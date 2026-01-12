@@ -59,6 +59,11 @@ export const crudTools: ToolDefinition[] = [
           type: 'boolean',
           description: 'Include export functionality (CSV/Excel/PDF)',
         },
+        withHierarchy: {
+          type: 'boolean',
+          description:
+            'Include tree/hierarchy support for self-referencing tables (parent_id). Generates tree component, hierarchical selector, and tree endpoints.',
+        },
 
         // === Frontend Options ===
         smartStats: {
@@ -208,6 +213,11 @@ export const crudTools: ToolDefinition[] = [
           type: 'boolean',
           description: 'Include export functionality',
         },
+        withHierarchy: {
+          type: 'boolean',
+          description:
+            'Include tree/hierarchy support for self-referencing tables (parent_id)',
+        },
 
         // App & Shell (Frontend)
         app: {
@@ -250,8 +260,7 @@ export const crudTools: ToolDefinition[] = [
       properties: {
         shellName: {
           type: 'string',
-          description:
-            'Shell name in kebab-case (e.g., "inventory", "system")',
+          description: 'Shell name in kebab-case (e.g., "inventory", "system")',
         },
         type: {
           type: 'string',
@@ -386,6 +395,7 @@ export function handleCrudTool(
         withImport: args.withImport as boolean,
         withEvents: args.withEvents as boolean,
         withExport: args.withExport as boolean,
+        withHierarchy: args.withHierarchy as boolean,
 
         // Frontend Options
         smartStats: args.smartStats as boolean,
@@ -555,6 +565,7 @@ export function handleCrudTool(
       const withImport = args.withImport as boolean;
       const withEvents = args.withEvents as boolean;
       const withExport = args.withExport as boolean;
+      const withHierarchy = args.withHierarchy as boolean;
       const app = args.app as 'web' | 'admin' | undefined;
       const shell = args.shell as string | undefined;
       const section = args.section as string | undefined;
@@ -625,6 +636,9 @@ export function handleCrudTool(
       if (withEvents) {
         backendFullCmd += ' --with-events';
       }
+      if (withHierarchy) {
+        backendFullCmd += ' --with-hierarchy';
+      }
       backendFullCmd += ' --force';
       lines.push(backendFullCmd);
       lines.push('```');
@@ -685,6 +699,9 @@ export function handleCrudTool(
       }
       if (withExport) {
         frontendCmd += ' --with-export';
+      }
+      if (withHierarchy) {
+        frontendCmd += ' --with-hierarchy';
       }
       frontendCmd += ' --force';
       lines.push(frontendCmd);
@@ -812,7 +829,9 @@ export function handleCrudTool(
       lines.push('');
       lines.push('1. Add route to `app.routes.ts`:');
       lines.push('```typescript');
-      lines.push(`// ${shellName.charAt(0).toUpperCase() + shellName.slice(1)}`);
+      lines.push(
+        `// ${shellName.charAt(0).toUpperCase() + shellName.slice(1)}`,
+      );
       lines.push(`{`);
       lines.push(`  path: '${shellName}',`);
       lines.push(
