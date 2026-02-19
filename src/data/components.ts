@@ -1,6 +1,6 @@
 /**
  * AUTO-GENERATED FILE
- * Generated at: 2026-02-16T23:25:04.136Z
+ * Generated at: 2026-02-19T03:30:23.095Z
  * Generator: components-generator@1.0.0
  * Source files:
  *   - libs/aegisx-ui/src/lib/components/
@@ -8,8 +8,6 @@
  */
 
 /* eslint-disable no-useless-escape */
- 
- 
 
 /**
  * AegisX UI Components Registry
