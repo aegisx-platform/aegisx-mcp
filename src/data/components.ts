@@ -1,6 +1,6 @@
 /**
  * AUTO-GENERATED FILE
- * Generated at: 2026-03-01T06:28:38.795Z
+ * Generated at: 2026-03-01T06:35:48.302Z
  * Generator: components-generator@1.0.0
  * Source files:
  *   - libs/aegisx-ui/src/lib/components/
