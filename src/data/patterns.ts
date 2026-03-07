@@ -1,6 +1,6 @@
 /**
  * AUTO-GENERATED FILE
- * Generated at: 2026-03-07T02:19:19.743Z
+ * Generated at: 2026-03-07T07:25:29.896Z
  * Generator: patterns-generator@1.0.0
  * Source files:
  *   - libs/aegisx-mcp/src/data/patterns.ts
