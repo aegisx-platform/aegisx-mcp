@@ -7,10 +7,6 @@
  * DO NOT EDIT MANUALLY - Changes will be overwritten on next sync
  */
 
- 
- 
- 
-
 /**
  * AegisX Development Patterns
  * Best practices and code patterns for development
