@@ -323,18 +323,62 @@ async function handleLogin(args: any): Promise<{ content: any[] }> {
     });
 
     if (result.status !== 200) {
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `❌ Login failed (${result.status} ${result.statusText})\n\nResponse:\n${JSON.stringify(result.body, null, 2)}`,
-          },
-        ],
-      };
+      // Auto-handle MAX_SESSIONS: logout previous MCP session and retry
+      const errorCode = result.body?.error?.code;
+      if (errorCode === 'MAX_SESSIONS_REACHED' && authState.token) {
+        try {
+          // Logout the previous MCP session to free a slot
+          await makeHttpRequest('POST', `${authState.baseUrl}/api/auth/logout`, {
+            headers: { Authorization: `Bearer ${authState.token}` },
+          });
+          authState.token = null;
+
+          // Retry login
+          const retry = await makeHttpRequest('POST', url, {
+            body: { email, password },
+          });
+
+          if (retry.status === 200) {
+            Object.assign(result, retry);
+          } else {
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: `❌ Login failed after releasing MCP session (${retry.status})\n\nResponse:\n${JSON.stringify(retry.body, null, 2)}\n\n💡 ลอง logout จาก browser แล้ว login ใหม่`,
+                },
+              ],
+            };
+          }
+        } catch {
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `❌ Login failed — MAX_SESSIONS_REACHED\n\nไม่สามารถ logout session เก่าได้อัตโนมัติ กรุณา logout จาก browser/tab อื่นก่อน\n\nResponse:\n${JSON.stringify(result.body, null, 2)}`,
+              },
+            ],
+          };
+        }
+      } else {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `❌ Login failed (${result.status} ${result.statusText})\n\nResponse:\n${JSON.stringify(result.body, null, 2)}`,
+            },
+          ],
+        };
+      }
     }
 
-    // Store auth state
-    authState.token = result.body.data?.token || result.body.token || null;
+    // Store auth state — check all possible token field names
+    authState.token =
+      result.body.data?.accessToken ||
+      result.body.data?.token ||
+      result.body.accessToken ||
+      result.body.token ||
+      null;
     authState.user = result.body.data?.user || result.body.user || null;
     authState.loginTime = Date.now();
 
@@ -494,7 +538,7 @@ function handleDecodeJWT(args: any): { content: any[] } {
   }
 }
 
-function handleLogout(): { content: any[] } {
+async function handleLogout(): Promise<{ content: any[] }> {
   if (!authState.token) {
     return {
       content: [
@@ -506,10 +550,19 @@ function handleLogout(): { content: any[] } {
     };
   }
 
+  // Call server logout to release session
+  try {
+    await makeHttpRequest('POST', `${authState.baseUrl}/api/auth/logout`, {
+      headers: { Authorization: `Bearer ${authState.token}` },
+    });
+  } catch {
+    // Ignore errors — clear local state regardless
+  }
+
   authState = {
     token: null,
     user: null,
-    baseUrl: authState.baseUrl, // Keep base URL
+    baseUrl: authState.baseUrl,
     loginTime: null,
   };
 
@@ -517,7 +570,7 @@ function handleLogout(): { content: any[] } {
     content: [
       {
         type: 'text',
-        text: '✅ Logged out successfully\n\nAuthentication token and user session cleared.',
+        text: '✅ Logged out successfully\n\nServer session released and local token cleared.',
       },
     ],
   };
