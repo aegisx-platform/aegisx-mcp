@@ -323,39 +323,72 @@ async function handleLogin(args: any): Promise<{ content: any[] }> {
     });
 
     if (result.status !== 200) {
-      // Auto-handle MAX_SESSIONS: logout previous MCP session and retry
       const errorCode = result.body?.error?.code;
-      if (errorCode === 'MAX_SESSIONS_REACHED' && authState.token) {
-        try {
-          // Logout the previous MCP session to free a slot
-          await makeHttpRequest('POST', `${authState.baseUrl}/api/auth/logout`, {
-            headers: { Authorization: `Bearer ${authState.token}` },
-          });
-          authState.token = null;
 
-          // Retry login
-          const retry = await makeHttpRequest('POST', url, {
-            body: { email, password },
-          });
+      // Auto-handle MAX_SESSIONS: use ticket to revoke oldest session
+      if (errorCode === 'MAX_SESSIONS_REACHED') {
+        const ticket = result.body?.error?.forceLoginTicket;
+        const sessions = result.body?.error?.activeSessions || [];
 
-          if (retry.status === 200) {
-            Object.assign(result, retry);
-          } else {
+        if (ticket && sessions.length > 0) {
+          // Pick the oldest session to revoke (last in the list, sorted by activity desc)
+          const oldestSession = sessions[sessions.length - 1];
+
+          try {
+            const forceResult = await makeHttpRequest(
+              'POST',
+              `${authState.baseUrl}/api/auth/force-login`,
+              {
+                body: {
+                  ticket,
+                  revokeSessionId: oldestSession.id,
+                },
+              },
+            );
+
+            if (forceResult.status === 200) {
+              Object.assign(result, forceResult);
+
+              // Log which session was revoked
+              addToHistory({
+                timestamp: new Date().toISOString(),
+                method: 'POST',
+                url: `${authState.baseUrl}/api/auth/force-login`,
+                status: forceResult.status,
+                statusText: forceResult.statusText,
+                responseTime: forceResult.responseTime,
+                requestBody: {
+                  ticket: '***',
+                  revokeSessionId: oldestSession.id,
+                },
+                responseBody: forceResult.body,
+              });
+            } else {
+              return {
+                content: [
+                  {
+                    type: 'text',
+                    text: `❌ Force login failed (${forceResult.status})\n\nResponse:\n${JSON.stringify(forceResult.body, null, 2)}\n\n💡 ใช้ aegisx sessions <email> --clear เพื่อล้าง session ด้วยมือ`,
+                  },
+                ],
+              };
+            }
+          } catch {
             return {
               content: [
                 {
                   type: 'text',
-                  text: `❌ Login failed after releasing MCP session (${retry.status})\n\nResponse:\n${JSON.stringify(retry.body, null, 2)}\n\n💡 ลอง logout จาก browser แล้ว login ใหม่`,
+                  text: `❌ Force login failed — could not revoke session\n\n💡 ใช้ aegisx sessions <email> --clear เพื่อล้าง session ด้วยมือ\n\nActive sessions:\n${sessions.map((s: any) => `  - ${s.id} (${s.ipAddress || 'unknown IP'})`).join('\n')}`,
                 },
               ],
             };
           }
-        } catch {
+        } else {
           return {
             content: [
               {
                 type: 'text',
-                text: `❌ Login failed — MAX_SESSIONS_REACHED\n\nไม่สามารถ logout session เก่าได้อัตโนมัติ กรุณา logout จาก browser/tab อื่นก่อน\n\nResponse:\n${JSON.stringify(result.body, null, 2)}`,
+                text: `❌ Login failed — MAX_SESSIONS_REACHED\n\nไม่มี ticket สำหรับ force login กรุณา logout จาก browser/tab อื่นก่อน\nหรือใช้ aegisx sessions <email> --clear\n\nResponse:\n${JSON.stringify(result.body, null, 2)}`,
               },
             ],
           };
