@@ -1,6 +1,6 @@
 /**
  * AUTO-GENERATED FILE
- * Generated at: 2026-03-17T00:32:04.109Z
+ * Generated at: 2026-05-08T04:09:18.390Z
  * Generator: components-generator@1.0.0
  * Source files:
  *   - libs/aegisx-ui/src/lib/components/
@@ -8,10 +8,12 @@
  */
 
 /* eslint-disable no-useless-escape */
+ 
+ 
 
 /**
  * AegisX UI Components Registry
- * Complete catalog of all 78+ UI components
+ * Complete catalog of all 98+ UI components
  */
 
 export interface ComponentInput {
@@ -457,44 +459,6 @@ export const components: ComponentInfo[] = [
     usage: ``,
   },
   {
-    name: 'Navigation',
-    selector: 'ax-navigation',
-    category: 'data-display',
-    description: 'Navigation component',
-    inputs: [
-      {
-        name: 'showHeader',
-        type: 'boolean',
-        default: 'true',
-        description: '',
-      },
-      {
-        name: 'showFooter',
-        type: 'boolean',
-        default: 'false',
-        description: '',
-      },
-    ],
-    outputs: [
-      {
-        name: 'stateChange',
-        type: 'EventEmitter',
-        description: '',
-      },
-      {
-        name: 'itemClick',
-        type: 'EventEmitter',
-        description: '',
-      },
-      {
-        name: 'groupToggle',
-        type: 'EventEmitter',
-        description: '',
-      },
-    ],
-    usage: ``,
-  },
-  {
     name: 'Card',
     selector: 'ax-card',
     category: 'data-display',
@@ -563,6 +527,63 @@ export const components: ComponentInfo[] = [
     usage: ``,
   },
   {
+    name: 'Activity List Card',
+    selector: 'ax-activity-list-card',
+    category: 'data-display',
+    description: 'Activity List Card component',
+    inputs: [
+      {
+        name: 'title',
+        type: 'string',
+        default: "''",
+        description: '',
+      },
+      {
+        name: 'items',
+        type: 'readonly ActivityListItem[]',
+        default: '[]',
+        description: '',
+      },
+      {
+        name: 'headerFilterLabel',
+        type: 'string',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'columns',
+        type: 'ActivityListColumns',
+        default:
+          '{\n    amount: true,\n    status: true,\n    date: true,\n    menu: true,\n  }',
+        description: '',
+      },
+      {
+        name: 'flat',
+        type: 'boolean',
+        default: 'false',
+        description: '',
+      },
+    ],
+    outputs: [
+      {
+        name: 'itemClick',
+        type: 'EventEmitter',
+        description: '',
+      },
+      {
+        name: 'itemMenuClick',
+        type: 'EventEmitter',
+        description: '',
+      },
+      {
+        name: 'filterClick',
+        type: 'EventEmitter',
+        description: '',
+      },
+    ],
+    usage: ``,
+  },
+  {
     name: 'Avatar',
     selector: 'ax-avatar',
     category: 'data-display',
@@ -598,6 +619,12 @@ export const components: ComponentInfo[] = [
         default: "'circle'",
         description: '',
       },
+      {
+        name: 'color',
+        type: 'AvatarColor',
+        description: '',
+        required: true,
+      },
     ],
     outputs: [],
     usage: ``,
@@ -629,7 +656,7 @@ export const components: ComponentInfo[] = [
       {
         name: 'rounded',
         type: 'BadgeRounded',
-        default: "'sm'",
+        default: "'full'",
         description: '',
       },
       {
@@ -637,6 +664,18 @@ export const components: ComponentInfo[] = [
         type: 'string',
         description: '',
         required: true,
+      },
+      {
+        name: 'iconPosition',
+        type: 'BadgeIconPosition',
+        default: "'leading'",
+        description: '',
+      },
+      {
+        name: 'iconOnly',
+        type: 'boolean',
+        default: 'false',
+        description: '',
       },
       {
         name: 'dot',
@@ -662,6 +701,12 @@ export const components: ComponentInfo[] = [
         description: '',
         required: true,
       },
+      {
+        name: 'customColor',
+        type: 'string',
+        description: '',
+        required: true,
+      },
     ],
     outputs: [
       {
@@ -670,17 +715,152 @@ export const components: ComponentInfo[] = [
         description: '',
       },
     ],
-    usage: `<ax-badge type="success">Active</ax-badge>
+    usage: `<ax-badge variant="soft" color="success" [dot]="true" rounded="full">Active</ax-badge>
 
-<ax-badge variant="soft" type="success" icon="trending_up">+9.3%</ax-badge>
+<ax-badge icon="arrow_forward" iconPosition="trailing">Next</ax-badge>
 
-<ax-badge variant="soft" type="success" [dot]="true">Online</ax-badge>
+<ax-badge icon="check" [iconOnly]="true" color="success" rounded="full"></ax-badge>
 
-<ax-badge variant="soft" type="info" [removable]="true" (remove)="onRemove()">
-  TypeScript
-</ax-badge>
+<ax-badge color="brand" variant="soft" rounded="full">New feature</ax-badge>`,
+  },
+  {
+    name: 'Bar Chart Area',
+    selector: 'ax-bar-chart-area',
+    category: 'data-display',
+    description: 'Bar Chart Area component',
+    inputs: [
+      {
+        name: 'title',
+        type: 'string',
+        default: "''",
+        description: '',
+      },
+      {
+        name: 'periods',
+        type: 'readonly BarChartPeriod[]',
+        default:
+          "[\n    { id: 'D', label: 'D' },\n    { id: 'W', label: 'W' },\n    { id: 'M', label: 'M' },\n    { id: 'Y', label: 'Y' },\n  ]",
+        description: '',
+      },
+      {
+        name: 'labels',
+        type: 'readonly string[]',
+        default: '[]',
+        description: '',
+      },
+      {
+        name: 'primaryLegend',
+        type: 'string',
+        default: "'Primary'",
+        description: '',
+      },
+      {
+        name: 'secondaryLegend',
+        type: 'string',
+        default: "'Secondary'",
+        description: '',
+      },
+    ],
+    outputs: [
+      {
+        name: 'periodChange',
+        type: 'EventEmitter',
+        description: '',
+      },
+    ],
+    usage: ``,
+  },
+  {
+    name: 'Card Header',
+    selector: 'ax-card-header',
+    category: 'data-display',
+    description: 'Card Header component',
+    inputs: [
+      {
+        name: 'title',
+        type: 'string',
+        default: "''",
+        description: '',
+      },
+      {
+        name: 'description',
+        type: 'string',
+        default: "''",
+        description: '',
+      },
+      {
+        name: 'size',
+        type: 'CardHeaderSize',
+        default: "'md'",
+        description: '',
+      },
+      {
+        name: 'align',
+        type: 'CardHeaderAlign',
+        default: "'start'",
+        description: '',
+      },
+      {
+        name: 'divider',
+        type: 'boolean',
+        default: 'false',
+        description: '',
+      },
+      {
+        name: 'featuredIcon',
+        type: 'string',
+        default: "''",
+        description: '',
+      },
+      {
+        name: 'featuredIconColor',
+        type: 'CardHeaderIconColor',
+        default: "'brand'",
+        description: '',
+      },
+    ],
+    outputs: [],
+    usage: `Basic title + description
+\`\`\`html
+<ax-card-header
+title="Team members"
+description="Manage your team members and their permissions."
+/>
+\`\`\`
 
-<ax-badge variant="outlined" type="error" [counter]="5">Notifications</ax-badge>`,
+Featured icon + actions + divider
+\`\`\`html
+<ax-card-header
+title="Integrations"
+description="Connect your favorite tools to AegisX."
+featuredIcon="extension"
+featuredIconColor="brand"
+[divider]="true"
+>
+<div actions class="flex gap-2">
+<button mat-stroked-button>View docs</button>
+<button mat-flat-button color="primary">Connect</button>
+</div>
+</ax-card-header>
+\`\`\`
+
+Custom leading avatar + inline badge
+\`\`\`html
+<ax-card-header title="Olivia Rhye" description="olivia@untitledui.com">
+<img leading src="/avatar.jpg" class="h-10 w-10 rounded-full" alt="" />
+<ax-badge title-badge color="success">Active</ax-badge>
+</ax-card-header>
+\`\`\`
+
+Header with tabs below (default content slot)
+\`\`\`html
+<ax-card-header title="Billing history" [divider]="true">
+<mat-tab-group>
+<mat-tab label="All"></mat-tab>
+<mat-tab label="Paid"></mat-tab>
+</mat-tab-group>
+</ax-card-header>
+\`\`\``,
   },
   {
     name: 'Card',
@@ -759,6 +939,48 @@ export const components: ComponentInfo[] = [
     usage: ``,
   },
   {
+    name: 'Chip',
+    selector: 'ax-chip',
+    category: 'data-display',
+    description: 'Chip component',
+    inputs: [
+      {
+        name: 'color',
+        type: "'neutral' | 'info' | 'success' | 'warning' | 'error' | 'brand'",
+        default: "'neutral'",
+        description: '',
+      },
+      {
+        name: 'size',
+        type: "'sm' | 'md' | 'lg'",
+        default: "'sm'",
+        description: '',
+      },
+      {
+        name: 'dot',
+        type: 'boolean',
+        default: 'false',
+        description: '',
+      },
+      {
+        name: 'removable',
+        type: 'boolean',
+        default: 'false',
+        description: '',
+      },
+    ],
+    outputs: [
+      {
+        name: 'remove',
+        type: 'EventEmitter',
+        description: '',
+      },
+    ],
+    usage: `<ax-chip>บัญชียาหลัก (E)</ax-chip>
+<ax-chip color="success">2 หน่วยบรรจุ</ax-chip>
+<ax-chip color="error" [removable]="true" (remove)="onRemove()">ยาที่ต้องระวังสูง</ax-chip>`,
+  },
+  {
     name: 'Circular Progress',
     selector: 'ax-circular-progress',
     category: 'data-display',
@@ -784,7 +1006,7 @@ export const components: ComponentInfo[] = [
       },
       {
         name: 'color',
-        type: 'string',
+        type: 'CircularProgressColor | string',
         description: '',
         required: true,
       },
@@ -840,6 +1062,16 @@ export const components: ComponentInfo[] = [
   color="info">
 </ax-circular-progress>
 \`\`\``,
+  },
+  {
+    name: 'Code Tag',
+    selector: 'ax-code-tag',
+    category: 'data-display',
+    description: 'Code Tag component',
+    inputs: [],
+    outputs: [],
+    usage: `<ax-code-tag>drug_generics</ax-code-tag>
+<ax-code-tag>hosxp_db</ax-code-tag>`,
   },
   {
     name: 'Description List',
@@ -1053,6 +1285,85 @@ export const components: ComponentInfo[] = [
   orientation="vertical">
 </ax-field-display>
 \`\`\``,
+  },
+  {
+    name: 'Hero Metric Card',
+    selector: 'ax-hero-metric-card',
+    category: 'data-display',
+    description: 'Hero Metric Card component',
+    inputs: [
+      {
+        name: 'label',
+        type: 'string',
+        default: "''",
+        description: '',
+      },
+      {
+        name: 'value',
+        type: 'string | number',
+        default: "''",
+        description: '',
+      },
+      {
+        name: 'pill',
+        type: 'string',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'ctaLabel',
+        type: 'string',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'stats',
+        type: 'readonly HeroMetricStat[]',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'waveData',
+        type: 'readonly number[]',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'waveLabel',
+        type: 'string',
+        description: '',
+        required: true,
+      },
+    ],
+    outputs: [
+      {
+        name: 'ctaClick',
+        type: 'EventEmitter',
+        description: '',
+      },
+    ],
+    usage: ``,
+  },
+  {
+    name: 'Image Preview',
+    selector: 'ax-image-preview',
+    category: 'data-display',
+    description: 'Image Preview component',
+    inputs: [],
+    outputs: [],
+    usage: `<ax-image-preview
+  [images]="drugImages()"
+  [open]="previewOpen()"
+  (closed)="previewOpen.set(false)"
+/>
+
+<ax-image-preview
+  [images]="images()"
+  [open]="true"
+  [startIndex]="2"
+  pathPrefix="/api/uploads/"
+  (closed)="onClose()"
+/>`,
   },
   {
     name: 'Kbd',
@@ -1297,6 +1608,53 @@ export const components: ComponentInfo[] = [
 </ax-kpi-card>`,
   },
   {
+    name: 'List Item',
+    selector: 'ax-list-item',
+    category: 'data-display',
+    description: 'List Item component',
+    inputs: [
+      {
+        name: 'code',
+        type: 'string',
+        default: "''",
+        description: '',
+      },
+      {
+        name: 'title',
+        type: 'string',
+        default: "''",
+        description: '',
+      },
+      {
+        name: 'active',
+        type: 'boolean',
+        default: 'false',
+        description: '',
+      },
+      {
+        name: 'density',
+        type: 'ListItemDensity',
+        default: "'comfortable'",
+        description: '',
+      },
+    ],
+    outputs: [
+      {
+        name: 'clicked',
+        type: 'EventEmitter',
+        description: '',
+      },
+    ],
+    usage: `<ax-list-item
+  code="R-2026-042"
+  title="ตรวจรับยาอมทรอกซ์"
+  [meta]="['บริษัท XYZ', '฿125,000']"
+  [active]="selected() === item.id"
+  (clicked)="selected.set(item.id)">
+  <ax-badge color="success" variant="soft" slot="trailing">ผ่าน</ax-badge>
+</ax-list-item>`,
+  },
+  {
     name: 'List',
     selector: 'ax-list',
     category: 'data-display',
@@ -1335,6 +1693,139 @@ export const components: ComponentInfo[] = [
     ],
     outputs: [],
     usage: ``,
+  },
+  {
+    name: 'Metadata Grid',
+    selector: 'ax-metadata-grid',
+    category: 'data-display',
+    description: 'Metadata Grid component',
+    inputs: [
+      {
+        name: 'items',
+        type: 'readonly MetadataGridItem[]',
+        default: '[]',
+        description: '',
+      },
+      {
+        name: 'density',
+        type: 'MetadataGridDensity',
+        default: "'comfortable'",
+        description: '',
+      },
+      {
+        name: 'minColWidth',
+        type: 'number',
+        default: '200',
+        description: '',
+      },
+    ],
+    outputs: [],
+    usage: `<ax-metadata-grid
+  [items]="[
+    { label: 'ผู้ขาย', value: item.vendor },
+    { label: 'ยอดรวม', value: item.amount },
+    { label: 'วันที่',  value: item.receivedAt }
+  ]" />`,
+  },
+  {
+    name: 'Mini Area Chart Card',
+    selector: 'ax-mini-area-chart-card',
+    category: 'data-display',
+    description: 'Mini Area Chart Card component',
+    inputs: [
+      {
+        name: 'title',
+        type: 'string',
+        default: "''",
+        description: '',
+      },
+      {
+        name: 'value',
+        type: 'string | number',
+        default: "''",
+        description: '',
+      },
+      {
+        name: 'delta',
+        type: 'MiniAreaDelta',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'xLabels',
+        type: 'readonly string[]',
+        default: '[]',
+        description: '',
+      },
+      {
+        name: 'flat',
+        type: 'boolean',
+        default: 'false',
+        description: '',
+      },
+    ],
+    outputs: [],
+    usage: ``,
+  },
+  {
+    name: 'Info Row',
+    selector: 'ax-info-row',
+    category: 'data-display',
+    description: 'Info Row component',
+    inputs: [
+      {
+        name: 'label',
+        type: 'string',
+        default: "''",
+        description: '',
+      },
+      {
+        name: 'description',
+        type: 'string',
+        default: "''",
+        description: '',
+      },
+    ],
+    outputs: [],
+    usage: ``,
+  },
+  {
+    name: 'Section Card',
+    selector: 'ax-section-card',
+    category: 'data-display',
+    description: 'Section Card component',
+    inputs: [
+      {
+        name: 'title',
+        type: 'string',
+        default: "''",
+        description: '',
+      },
+      {
+        name: 'description',
+        type: 'string',
+        default: "''",
+        description: '',
+      },
+      {
+        name: 'flush',
+        type: 'boolean',
+        default: 'false',
+        description: '',
+      },
+    ],
+    outputs: [],
+    usage: ``,
+  },
+  {
+    name: 'Section Label',
+    selector: 'ax-section-label',
+    category: 'data-display',
+    description: 'Section Label component',
+    inputs: [],
+    outputs: [],
+    usage: `<ax-section-label>Phase Progress</ax-section-label>
+<ax-section-label>Recent Batches</ax-section-label>`,
   },
   {
     name: 'Segmented Progress',
@@ -1393,6 +1884,52 @@ export const components: ComponentInfo[] = [
   size="md">
 </ax-segmented-progress>
 \`\`\``,
+  },
+  {
+    name: 'Select Card',
+    selector: 'ax-select-card',
+    category: 'data-display',
+    description: 'Select Card component',
+    inputs: [
+      {
+        name: 'selected',
+        type: 'boolean',
+        default: 'false',
+        description: '',
+      },
+      {
+        name: 'icon',
+        type: 'string',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'title',
+        type: 'string',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'description',
+        type: 'string',
+        description: '',
+        required: true,
+      },
+    ],
+    outputs: [
+      {
+        name: 'selectedChange',
+        type: 'EventEmitter',
+        description: '',
+      },
+    ],
+    usage: `<ax-select-card
+  [selected]="source === 'excel'"
+  icon="description"
+  title="Excel / CSV"
+  description="อัปโหลดไฟล์ .xlsx, .xls, .csv"
+  (selectedChange)="source = 'excel'">
+</ax-select-card>`,
   },
   {
     name: 'Sparkline',
@@ -1477,6 +2014,318 @@ export const components: ComponentInfo[] = [
 \`\`\``,
   },
   {
+    name: 'Stat Card',
+    selector: 'ax-stat-card',
+    category: 'data-display',
+    description: 'Stat Card component',
+    inputs: [
+      {
+        name: 'icon',
+        type: 'string',
+        default: "''",
+        description: '',
+      },
+      {
+        name: 'color',
+        type: 'StatCardColor',
+        default: "'info'",
+        description: '',
+      },
+      {
+        name: 'variant',
+        type: 'StatCardVariant',
+        default: "'compact'",
+        description: '',
+      },
+      {
+        name: 'value',
+        type: 'string | number | null | undefined',
+        default: "''",
+        description: '',
+      },
+      {
+        name: 'label',
+        type: 'string',
+        default: "''",
+        description: '',
+      },
+      {
+        name: 'subtitle',
+        type: 'string',
+        default: "''",
+        description: '',
+      },
+      {
+        name: 'valueColor',
+        type: 'StatCardValueColor',
+        default: "'neutral'",
+        description: '',
+      },
+      {
+        name: 'iconColor',
+        type: 'StatCardValueColor',
+        default: "'accent'",
+        description: '',
+      },
+      {
+        name: 'active',
+        type: 'boolean',
+        default: 'false',
+        description: '',
+      },
+      {
+        name: 'clickable',
+        type: 'boolean',
+        default: 'true',
+        description: '',
+      },
+      {
+        name: 'progress',
+        type: 'number',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'progressColor',
+        type: 'StatCardColor',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'trendData',
+        type: 'readonly number[]',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'target',
+        type: 'number',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'targetLabel',
+        type: 'string',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'breakdown',
+        type: 'readonly StatCardBreakdownItem[]',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'barData',
+        type: 'readonly number[]',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'barLabels',
+        type: 'readonly string[]',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'status',
+        type: 'StatCardStatus',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'lastUpdated',
+        type: 'string',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'progressLabel',
+        type: 'string',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'segments',
+        type: 'readonly StatCardSegment[]',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'metrics',
+        type: 'readonly StatCardMetric[]',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'meta',
+        type: 'string',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'deltaDirection',
+        type: "'up' | 'down' | 'flat'",
+        description: '',
+        required: true,
+      },
+      {
+        name: 'periods',
+        type: 'readonly StatCardPeriod[]',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'min',
+        type: 'number',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'max',
+        type: 'number',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'thresholds',
+        type: 'readonly StatCardThreshold[]',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'steps',
+        type: 'readonly StatCardStep[]',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'heatmapData',
+        type: 'readonly (readonly number[])[]',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'heatmapColLabels',
+        type: 'readonly string[]',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'heatmapRowLabels',
+        type: 'readonly string[]',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'cells',
+        type: 'readonly StatCardGridCell[]',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'ranking',
+        type: 'readonly StatCardRankItem[]',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'projectedValue',
+        type: 'string | number',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'projectedLabel',
+        type: 'string',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'projectedSubtitle',
+        type: 'string',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'donutSegments',
+        type: 'readonly StatCardDonutSegment[]',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'centerValue',
+        type: 'string | number',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'centerLabel',
+        type: 'string',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'categories',
+        type: 'readonly StatCardCategory[]',
+        description: '',
+        required: true,
+      },
+    ],
+    outputs: [
+      {
+        name: 'clicked',
+        type: 'EventEmitter',
+        description: '',
+      },
+    ],
+    usage: `<ax-stat-card
+  icon="medication"
+  color="info"
+  [value]="1250"
+  label="ทั้งหมด"
+  subtitle="1,250 รายการ">
+</ax-stat-card>
+
+<ax-stat-card
+  icon="check_circle"
+  color="success"
+  [value]="980"
+  label="ใช้งาน"
+  subtitle="78%"
+  [active]="activeFilter() === 'active'"
+  (clicked)="onFilter('active')">
+</ax-stat-card>
+
+<ax-stat-card
+  icon="inventory"
+  color="info"
+  [value]="23450"
+  label="คงคลัง"
+  subtitle="TAB (47%)"
+  [clickable]="false">
+</ax-stat-card>`,
+  },
+  {
+    name: 'Stat Group',
+    selector: 'ax-stat-group',
+    category: 'data-display',
+    description: 'Stat Group component',
+    inputs: [],
+    outputs: [],
+    usage: `<ax-stat-group label="ขาเข้า" icon="call_received">
+  <ax-stat-card variant="hero" ... />
+  <ax-stat-card variant="hero" ... />
+</ax-stat-group>
+
+<ax-stat-group label="ใบเบิก · จ่ายออก" icon="move_to_inbox">
+  <div class="grid grid-cols-2 gap-2">
+    <ax-stat-card ... />
+    <ax-stat-card ... />
+  </div>
+</ax-stat-group>`,
+  },
+  {
     name: 'Stats Card',
     selector: 'ax-stats-card',
     category: 'data-display',
@@ -1515,6 +2364,30 @@ export const components: ComponentInfo[] = [
     ],
     outputs: [],
     usage: ``,
+  },
+  {
+    name: 'Status Badge',
+    selector: 'ax-status-badge',
+    category: 'data-display',
+    description: 'Status Badge component',
+    inputs: [],
+    outputs: [],
+    usage: `<ax-status-badge status="active" />
+
+<ax-status-badge status="active" variant="outlined" />
+
+<ax-status-badge status="pending" variant="soft" />
+
+<ax-status-badge status="inactive" label="ปิดใช้งาน" />`,
+  },
+  {
+    name: 'Step Progress',
+    selector: 'ax-step-progress',
+    category: 'data-display',
+    description: 'Step Progress component',
+    inputs: [],
+    outputs: [],
+    usage: `<ax-step-progress [steps]="items" size="sm" overflow="collapse" [maxVisible]="5" />`,
   },
   {
     name: 'Timeline',
@@ -1886,13 +2759,13 @@ export const components: ComponentInfo[] = [
       {
         name: 'variant',
         type: 'ButtonVariant',
-        default: "'raised'",
+        default: "'flat'",
         description: '',
       },
       {
         name: 'color',
         type: 'ButtonColor',
-        default: "'primary'",
+        default: "''",
         description: '',
       },
       {
@@ -1934,7 +2807,7 @@ export const components: ComponentInfo[] = [
       {
         name: 'iconPosition',
         type: "'start' | 'end'",
-        default: "'end'",
+        default: "'start'",
         description: '',
       },
       {
@@ -1951,35 +2824,57 @@ export const components: ComponentInfo[] = [
         description: '',
       },
     ],
-    usage: `\`\`\`html
-<!-- Basic usage -->
-<ax-loading-button
-  [loading]="isLoading"
-  loadingText="Signing in..."
+    usage: `<ax-loading-button
+  variant="flat"
+  color="primary"
+  icon="save"
+  iconPosition="start"
+  [loading]="saving()"
+  loadingText="กำลังบันทึก..."
   (buttonClick)="onSubmit()"
 >
-  Sign In
-</ax-loading-button>
-
-<!-- With icon -->
-<ax-loading-button
-  [loading]="isLoading"
-  loadingText="Sending..."
-  icon="send"
-  iconPosition="end"
->
-  Send Email
-</ax-loading-button>
-
-<!-- Stroked variant -->
-<ax-loading-button
-  variant="stroked"
-  [loading]="isLoading"
-  loadingText="Resending..."
->
-  Resend Email
-</ax-loading-button>
-\`\`\``,
+  บันทึก
+</ax-loading-button>`,
+  },
+  {
+    name: 'Loading State',
+    selector: 'ax-loading-state',
+    category: 'data-display',
+    description: 'Loading State component',
+    inputs: [
+      {
+        name: 'icon',
+        type: 'string',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'message',
+        type: 'string',
+        default: "'กำลังโหลดข้อมูล...'",
+        description: '',
+      },
+      {
+        name: 'compact',
+        type: 'boolean',
+        default: 'false',
+        description: '',
+      },
+      {
+        name: 'overlay',
+        type: 'boolean',
+        default: 'false',
+        description: '',
+      },
+      {
+        name: 'mode',
+        type: "'indeterminate' | 'query'",
+        default: "'indeterminate'",
+        description: '',
+      },
+    ],
+    outputs: [],
+    usage: ``,
   },
   {
     name: 'Skeleton Card',
@@ -2378,6 +3273,29 @@ dialogRef.afterClosed().subscribe((result) => {
     usage: ``,
   },
   {
+    name: 'Dialog Fullscreen Button',
+    selector: 'ax-dialog-fullscreen-button',
+    category: 'overlays',
+    description: 'Dialog Fullscreen Button component',
+    inputs: [],
+    outputs: [],
+    usage: `\`\`\`html
+<h2 mat-dialog-title class="ax-header ax-header-info">
+  <div class="ax-icon-info"><mat-icon>add_circle</mat-icon></div>
+  <div class="header-text">
+    <div class="ax-title">สร้างใบขอซื้อ</div>
+    <div class="ax-subtitle">บันทึกใบขอซื้อใหม่</div>
+  </div>
+
+  <ax-dialog-fullscreen-button persistKey="pr-dialog-fullscreen" />
+
+  <button mat-icon-button mat-dialog-close>
+    <mat-icon>close</mat-icon>
+  </button>
+</h2>
+\`\`\``,
+  },
+  {
     name: 'Drawer',
     selector: 'ax-drawer',
     category: 'overlays',
@@ -2513,68 +3431,44 @@ dialogRef.afterClosed().subscribe((result) => {
     usage: ``,
   },
   {
+    name: 'Error Banner',
+    selector: 'ax-error-banner',
+    category: 'feedback',
+    description: 'Error Banner component',
+    inputs: [],
+    outputs: [],
+    usage: `\`\`\`html
+<ax-error-banner [code]="504" (retry)="loadData()" />
+
+<ax-error-banner
+  severity="warning"
+  title="บางข้อมูลอาจไม่เป็นปัจจุบัน"
+  description="ระบบไม่สามารถซิงค์ข้อมูลล่าสุดได้"
+  (retry)="syncData()"
+/>
+\`\`\``,
+  },
+  {
     name: 'Error State',
     selector: 'ax-error-state',
     category: 'feedback',
     description: 'Error State component',
-    inputs: [
-      {
-        name: 'icon',
-        type: 'string',
-        description: '',
-        required: true,
-      },
-      {
-        name: 'title',
-        type: 'string',
-        description: '',
-        required: true,
-      },
-      {
-        name: 'message',
-        type: 'string',
-        description: '',
-        required: true,
-      },
-      {
-        name: 'errorDetails',
-        type: 'string',
-        description: '',
-        required: true,
-      },
-      {
-        name: 'compact',
-        type: 'boolean',
-        default: 'false',
-        description: '',
-      },
-      {
-        name: 'type',
-        type: "'error' | 'warning' | 'info'",
-        default: "'error'",
-        description: '',
-      },
-      {
-        name: 'showDetails',
-        type: 'boolean',
-        default: 'false',
-        description: '',
-      },
-      {
-        name: 'actions',
-        type: 'ErrorStateAction[]',
-        default: '[]',
-        description: '',
-      },
-      {
-        name: 'statusCode',
-        type: 'number | null',
-        description: '',
-        required: true,
-      },
-    ],
+    inputs: [],
     outputs: [],
-    usage: ``,
+    usage: `Basic — just pass HTTP code
+\`\`\`html
+<ax-error-state [code]="504" (retry)="loadData()" />
+\`\`\`
+
+Override messages
+\`\`\`html
+<ax-error-state
+[code]="500"
+title="ไม่สามารถบันทึกข้อมูลได้"
+description="ระบบพบปัญหาขณะบันทึกใบสั่งซื้อ"
+(retry)="savePO()"
+/>
+\`\`\``,
   },
   {
     name: 'Alert',
@@ -2695,6 +3589,28 @@ dialogRef.afterClosed().subscribe((result) => {
     usage: ``,
   },
   {
+    name: 'Priority Alert',
+    selector: 'ax-priority-alert',
+    category: 'feedback',
+    description: 'Priority Alert component',
+    inputs: [],
+    outputs: [],
+    usage: `<ax-priority-alert
+  variant="error"
+  icon="priority_high"
+  title="งานเร่งด่วน 3 รายการ"
+  [chips]="[
+    { label: 'ค้างจ่าย 2', color: 'error', link: '/.../backorders' },
+    { label: 'ใบเบิก 1',   color: 'warning', link: '/.../pending' },
+  ]">
+  <button mat-flat-button color="primary" actions>อนุมัติใบเบิก</button>
+</ax-priority-alert>
+
+<ax-priority-alert variant="warning" title="มีใบเบิกรออนุมัติ">
+  <button mat-stroked-button actions>ดู</button>
+</ax-priority-alert>`,
+  },
+  {
     name: 'Splash Screen',
     selector: 'ax-splash-screen',
     category: 'feedback',
@@ -2802,6 +3718,146 @@ dialogRef.afterClosed().subscribe((result) => {
 <!-- With form control -->
 <ax-file-upload formControlName="attachments"></ax-file-upload>
 \`\`\``,
+  },
+  {
+    name: 'Calendar Grid',
+    selector: 'ax-calendar-grid',
+    category: 'forms',
+    description: 'Calendar Grid component',
+    inputs: [
+      {
+        name: 'viewMode',
+        type: "'day' | 'month' | 'year'",
+        default: "'day'",
+        description: '',
+      },
+      {
+        name: 'calendarDays',
+        type: 'CalendarDay[]',
+        default: '[]',
+        description: '',
+      },
+      {
+        name: 'weekDays',
+        type: 'string[]',
+        default: '[]',
+        description: '',
+      },
+      {
+        name: 'months',
+        type: 'string[]',
+        default: '[]',
+        description: '',
+      },
+      {
+        name: 'years',
+        type: 'number[]',
+        default: '[]',
+        description: '',
+      },
+      {
+        name: 'selectedMonth',
+        type: 'number',
+        default: '0',
+        description: '',
+      },
+      {
+        name: 'selectedYear',
+        type: 'number',
+        default: '0',
+        description: '',
+      },
+      {
+        name: 'locale',
+        type: 'DatePickerLocale',
+        default: "'en'",
+        description: '',
+      },
+      {
+        name: 'calendar',
+        type: 'DatePickerCalendar',
+        default: "'gregorian'",
+        description: '',
+      },
+    ],
+    outputs: [
+      {
+        name: 'dateSelect',
+        type: 'EventEmitter',
+        description: '',
+      },
+      {
+        name: 'dateHover',
+        type: 'EventEmitter',
+        description: '',
+      },
+      {
+        name: 'calendarMouseLeave',
+        type: 'EventEmitter',
+        description: '',
+      },
+      {
+        name: 'monthSelect',
+        type: 'EventEmitter',
+        description: '',
+      },
+      {
+        name: 'yearSelect',
+        type: 'EventEmitter',
+        description: '',
+      },
+    ],
+    usage: ``,
+  },
+  {
+    name: 'Calendar Header',
+    selector: 'ax-calendar-header',
+    category: 'forms',
+    description: 'Calendar Header component',
+    inputs: [
+      {
+        name: 'viewMode',
+        type: "'day' | 'month' | 'year'",
+        default: "'day'",
+        description: '',
+      },
+      {
+        name: 'currentMonthYear',
+        type: 'string',
+        default: "''",
+        description: '',
+      },
+      {
+        name: 'yearRangeStart',
+        type: 'number',
+        default: '0',
+        description: '',
+      },
+      {
+        name: 'yearRangeEnd',
+        type: 'number',
+        default: '0',
+        description: '',
+      },
+    ],
+    outputs: [
+      {
+        name: 'prevClick',
+        type: 'EventEmitter',
+        description: '',
+      },
+      {
+        name: 'nextClick',
+        type: 'EventEmitter',
+        description: '',
+      },
+      {
+        name: 'viewModeToggle',
+        type: 'EventEmitter',
+        description: '',
+      },
+    ],
+    usage: ``,
   },
   {
     name: 'Date Picker',
@@ -2945,7 +4001,7 @@ dialogRef.afterClosed().subscribe((result) => {
         description: '',
       },
       {
-        name: 'pattern',
+        name: 'allowedPattern',
         type: 'OtpPattern',
         default: "'digits'",
         description: '',
@@ -2987,6 +4043,12 @@ dialogRef.afterClosed().subscribe((result) => {
         description: '',
       },
       {
+        name: 'mask',
+        type: 'boolean',
+        default: 'false',
+        description: '',
+      },
+      {
         name: 'autoFocus',
         type: 'boolean',
         default: 'false',
@@ -3023,7 +4085,7 @@ dialogRef.afterClosed().subscribe((result) => {
   [(value)]="code"
   [length]="6"
   [separatorAfter]="3"
-  pattern="alphanumeric"
+  allowedPattern="alphanumeric"
   (completed)="onOtpComplete(\$event)"
 />
 
@@ -3243,6 +4305,86 @@ dialogRef.afterClosed().subscribe((result) => {
   (save)="updateDesc(\$event)">
   {{ description }}
 </ax-popup-edit>`,
+  },
+  {
+    name: 'Protected Field',
+    selector: 'ax-protected-field',
+    category: 'forms',
+    description: 'Protected Field component',
+    inputs: [
+      {
+        name: 'label',
+        type: 'string',
+        default: "''",
+        description: '',
+      },
+      {
+        name: 'placeholder',
+        type: 'string',
+        default: "''",
+        description: '',
+      },
+      {
+        name: 'maxlength',
+        type: 'number | null',
+        default: 'null',
+        description: '',
+      },
+      {
+        name: 'required',
+        type: 'boolean',
+        default: 'false',
+        description: '',
+      },
+      {
+        name: 'appearance',
+        type: "'fill' | 'outline'",
+        default: "'outline'",
+        description: '',
+      },
+      {
+        name: 'locked',
+        type: 'boolean',
+        default: 'false',
+        description: '',
+      },
+      {
+        name: 'lockTitle',
+        type: 'string',
+        default: "'ปลดล็อคการแก้ไข'",
+        description: '',
+      },
+      {
+        name: 'lockMessage',
+        type: 'string',
+        default:
+          "'ข้อมูลนี้เป็นข้อมูลสำคัญที่ใช้อ้างอิงในระบบ การแก้ไขอาจส่งผลกระทบ ต้องการแก้ไขหรือไม่?'",
+        description: '',
+      },
+      {
+        name: 'autoLockOnBlur',
+        type: 'boolean',
+        default: 'true',
+        description: '',
+      },
+    ],
+    outputs: [],
+    usage: `<ax-protected-field
+  label="รหัสยา"
+  [formControl]="form.controls.drug_code"
+  [locked]="mode === 'edit'"
+  lockMessage="รหัสยาเป็นข้อมูลสำคัญ"
+></ax-protected-field>
+
+<ax-protected-field
+  label="รหัสบัญชี"
+  [formControl]="form.controls.account_code"
+  [locked]="true"
+  lockTitle="ปลดล็อครหัสบัญชี"
+  lockMessage="การแก้ไขอาจส่งผลกระทบต่อรายงานทางการเงิน"
+  [required]="true"
+  maxlength="20"
+></ax-protected-field>`,
   },
   {
     name: 'Scheduler',
@@ -3562,6 +4704,147 @@ dialogRef.afterClosed().subscribe((result) => {
 \`\`\``,
   },
   {
+    name: 'Form Section',
+    selector: 'ax-form-section',
+    category: 'layout',
+    description: 'Form Section component',
+    inputs: [],
+    outputs: [],
+    usage: `<ax-form-section title="ข้อมูลยา">
+  <mat-form-field>...</mat-form-field>
+</ax-form-section>
+
+<ax-form-section title="ข้อมูลยา" icon="medication" iconClass="text-blue-600" fieldCount="10 ฟิลด์">
+  ...
+</ax-form-section>
+
+<ax-form-section title="หมายเหตุ" [divider]="false" [collapsible]="false">
+  ...
+</ax-form-section>
+
+<ax-form-section title="รายละเอียดเพิ่มเติม" icon="info" [collapsed]="true">
+  ...
+</ax-form-section>`,
+  },
+  {
+    name: 'Master Detail',
+    selector: 'ax-master-detail',
+    category: 'layout',
+    description: 'Master Detail component',
+    inputs: [
+      {
+        name: 'masterWidth',
+        type: 'number',
+        default: '340',
+        description: '',
+      },
+      {
+        name: 'masterPosition',
+        type: 'MasterPosition',
+        default: "'left'",
+        description: '',
+      },
+      {
+        name: 'showDetail',
+        type: 'boolean',
+        default: 'true',
+        description: '',
+      },
+      {
+        name: 'showDivider',
+        type: 'boolean',
+        default: 'true',
+        description: '',
+      },
+    ],
+    outputs: [],
+    usage: `<ax-master-detail [masterWidth]="340">
+  <div master>
+    <!-- Scrollable list -->
+  </div>
+  <div detail>
+    <!-- Detail content -->
+  </div>
+</ax-master-detail>
+
+<ax-master-detail [showDetail]="!!selectedId">
+  <div master>...</div>
+  <div detail>...</div>
+</ax-master-detail>`,
+  },
+  {
+    name: 'Page Header',
+    selector: 'ax-page-header',
+    category: 'layout',
+    description: 'Page Header component',
+    inputs: [
+      {
+        name: 'title',
+        type: 'string',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'subtitle',
+        type: 'string',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'headingLevel',
+        type: '1 | 2 | 3 | 4 | 5 | 6',
+        default: '1',
+        description: '',
+      },
+    ],
+    outputs: [],
+    usage: `<ax-page-header title="Drug Master" subtitle="จัดการข้อมูลยา">
+  <button mat-flat-button color="primary">+ สร้างใหม่</button>
+</ax-page-header>
+
+<ax-page-header title="Sub Section" [headingLevel]="2"></ax-page-header>`,
+  },
+  {
+    name: 'Page Shell',
+    selector: 'ax-page-shell',
+    category: 'layout',
+    description: 'Page Shell component',
+    inputs: [
+      {
+        name: 'breadcrumb',
+        type: 'BreadcrumbItem[]',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'headerBorder',
+        type: 'boolean',
+        default: 'false',
+        description: '',
+      },
+    ],
+    outputs: [],
+    usage: `\`\`\`html
+<ax-page-shell
+  [breadcrumb]="breadcrumbItems"
+  [headerBorder]="true"
+>
+  <!-- Header slot -->
+  <div header>
+    <h1>Page Title</h1>
+    <p>Subtitle</p>
+  </div>
+
+  <!-- Content -->
+  <mat-card>...</mat-card>
+  <mat-card>...</mat-card>
+</ax-page-shell>
+\`\`\`
+
+*Rule:** The first breadcrumb item should be home icon only:
+\`{ label: '', url: '/', icon: 'home' }\``,
+  },
+  {
     name: 'Splitter',
     selector: 'ax-splitter',
     category: 'layout',
@@ -3690,6 +4973,24 @@ dialogRef.afterClosed().subscribe((result) => {
         default: "'md'",
         description: '',
       },
+      {
+        name: 'backgroundColor',
+        type: 'string',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'showBorder',
+        type: 'boolean',
+        default: 'false',
+        description: '',
+      },
+      {
+        name: 'padding',
+        type: 'string',
+        default: "'0.5rem 2rem'",
+        description: '',
+      },
     ],
     outputs: [
       {
@@ -3708,6 +5009,17 @@ dialogRef.afterClosed().subscribe((result) => {
     inputs: [],
     outputs: [],
     usage: ``,
+  },
+  {
+    name: 'Diamond Icon',
+    selector: 'ax-diamond-icon',
+    category: 'navigation',
+    description: 'Diamond Icon component',
+    inputs: [],
+    outputs: [],
+    usage: `\`\`\`html
+<ax-diamond-icon icon="ax:inv-warehouse" bg="#065f46" border="#10b981" iconColor="#6ee7b7" />
+\`\`\``,
   },
   {
     name: 'Navbar Actions',
@@ -4202,6 +5514,44 @@ dialogRef.afterClosed().subscribe((result) => {
     ],
     outputs: [],
     usage: ``,
+  },
+  {
+    name: 'Tab Pills',
+    selector: 'ax-tab-pills',
+    category: 'navigation',
+    description: 'Tab Pills component',
+    inputs: [
+      {
+        name: 'tabs',
+        type: 'TabPill[]',
+        description: '',
+        required: true,
+      },
+      {
+        name: 'activeValue',
+        type: 'string',
+        default: "''",
+        description: '',
+      },
+    ],
+    outputs: [
+      {
+        name: 'tabChange',
+        type: 'EventEmitter',
+        description: '',
+      },
+    ],
+    usage: `<ax-tab-pills
+  [tabs]="[
+    { label: 'ทั้งหมด', value: 'all', count: 12 },
+    { label: 'ร่าง', value: 'draft', count: 3 },
+    { label: 'อนุมัติ', value: 'approved', count: 5 }
+  ]"
+  [activeValue]="'all'"
+  (tabChange)="onTabChange(\$event)">
+</ax-tab-pills>
+
+Note: \`count\` of 0 will render "0" — omit the property to hide the count.`,
   },
 ];
 
