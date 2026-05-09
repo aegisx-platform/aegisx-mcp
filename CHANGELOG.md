@@ -5,6 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.1] - 2026-05-08
+
+### Changed
+
+- **Components registry refreshed** (78 → 98 components). Re-ran
+  `pnpm run sync` to pick up component additions in `@aegisx/ui`
+  source that the registry hadn't caught up to. The auto-generator
+  now correctly reports **98 components** (up from the stale "78+"
+  banner in earlier releases). This affects all MCP tools that
+  consume the registry: `mcp__aegisx__aegisx_components_list`,
+  `mcp__aegisx__aegisx_components_search`,
+  `mcp__aegisx__aegisx_components_get`.
+
+### Removed
+
+- **Vapor inventory components removed from the registry.** The
+  following 10 selectors had been documented in
+  `docs/components/inventory/` and listed in the MCP component
+  registry, but the actual components were never shipped — the
+  inventory feature was cancelled:
+  - `ax-stock-level`, `ax-batch-selector`, `ax-barcode-scanner`,
+    `ax-expiry-badge`, `ax-location-picker`, `ax-quantity-input`,
+    `ax-transfer-wizard`, `ax-variant-selector`,
+    `ax-stock-alert-panel`, `ax-stock-movement-timeline`
+
+  Removing them from the MCP registry prevents AI consumers from
+  hallucinating component usage that won't compile. Companion to
+  `@aegisx/ui` v0.5.5 which removed the same selectors from
+  `docs/components/inventory/` and the README.
+
+### Notes
+
+- No tool / SDK changes. `src/tools/` and `src/index.ts` are
+  unchanged. Existing MCP tools (`aegisx_components_*`,
+  `aegisx_crud_*`, `aegisx_patterns_*`, `aegisx_api_*`,
+  `aegisx_auth_*`) work the same. Patch bump per semver — safe
+  drop-in.
+- TypeScript compile passes (`tsc --noEmit -p tsconfig.json`).
+- `prepublishOnly` hook chain clean (`prebuild` runs `npm run sync`
+  → `build` runs `tsc`).
+- Tarball: 107.4 KB / 56 files.
+
 ## [1.5.0] - 2025-12-20
 
 ### Added
